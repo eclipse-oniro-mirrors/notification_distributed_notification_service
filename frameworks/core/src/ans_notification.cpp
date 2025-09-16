@@ -2593,5 +2593,67 @@ ErrCode AnsNotification::GetDistributedDevicelist(std::vector<std::string> &devi
     }
     return proxy->GetDistributedDevicelist(deviceTypes);
 }
+
+ErrCode AnsNotification::GetUserGrantedEnabledBundles(
+    const NotificationBundleOption& targetBundle, std::vector<sptr<NotificationBundleOption>>& enabledBundles)
+{
+    ANS_LOGD("called");
+    if (targetBundle.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+ 
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(targetBundle));
+    if (bo == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return proxy->GetUserGrantedEnabledBundles(bo, enabledBundles);
+}
+
+ErrCode AnsNotification::GetUserGrantedEnabledBundlesForSelf(std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    ANS_LOGD("called");
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->GetUserGrantedEnabledBundlesForSelf(bundles);
+}
+
+ErrCode AnsNotification::SetUserGrantedBundleState(const NotificationBundleOption& targetBundle,
+    const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled)
+{
+    ANS_LOGD("called");
+    if (targetBundle.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    if (enabledBundles.empty()) {
+        ANS_LOGE("Invalid enabledBundles.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(targetBundle));
+    if (bo == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return proxy->SetUserGrantedBundleState(bo, enabledBundles, enabled);
+}
 }  // namespace Notification
 }  // namespace OHOS

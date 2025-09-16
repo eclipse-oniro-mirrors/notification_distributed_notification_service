@@ -574,6 +574,15 @@ public:
     bool SetLiveViewRebuildFlag(int32_t userId);
     ErrCode InitBundlesInfo(int32_t userId, std::unordered_map<std::string, std::string>& bundlesMap);
     void GetAllLiveViewBundles(std::vector<sptr<NotificationBundleOption>>& bundleOption);
+    ErrCode GetExtensionSubscriptionBundles(
+        const sptr<NotificationBundleOption>& bundleOption, std::vector<sptr<NotificationBundleOption>>& bundles);
+    ErrCode SetExtensionSubscriptionBundles(
+        const sptr<NotificationBundleOption>& bundleOption, const std::vector<sptr<NotificationBundleOption>>& bundles);
+    ErrCode AddExtensionSubscriptionBundles(
+        const sptr<NotificationBundleOption>& bundleOption, const std::vector<sptr<NotificationBundleOption>>& bundles);
+    ErrCode RemoveExtensionSubscriptionBundles(
+        const sptr<NotificationBundleOption>& bundleOption, const std::vector<sptr<NotificationBundleOption>>& bundles);
+
 private:
     bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,
         const sptr<NotificationBundleOption> &bundleOption, NotificationPreferencesInfo::BundleInfo &info) const;

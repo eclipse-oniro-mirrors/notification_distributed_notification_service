@@ -1446,6 +1446,15 @@ public:
         const std::string& value) override;
 
     ErrCode GetLiveViewConfig(const std::vector<std::string>& bundleList) override;
+
+    ErrCode GetUserGrantedEnabledBundles(const sptr<NotificationBundleOption>& targetBundle,
+        std::vector<sptr<NotificationBundleOption>>& enabledBundles) override;
+
+    ErrCode GetUserGrantedEnabledBundlesForSelf(std::vector<sptr<NotificationBundleOption>>& bundles) override;
+
+    ErrCode SetUserGrantedBundleState(const sptr<NotificationBundleOption>& targetBundle,
+        const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled) override;
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.

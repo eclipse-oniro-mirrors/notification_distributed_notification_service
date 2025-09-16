@@ -789,5 +789,23 @@ ErrCode NotificationHelper::GetLiveViewConfig(const std::vector<std::string>& bu
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetLiveViewConfig(bundleList);
 }
+
+ErrCode NotificationHelper::GetUserGrantedEnabledBundles(
+    const NotificationBundleOption& targetBundle, std::vector<sptr<NotificationBundleOption>>& enabledBundles)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedEnabledBundles(targetBundle, enabledBundles);
+}
+
+ErrCode NotificationHelper::GetUserGrantedEnabledBundlesForSelf(std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedEnabledBundlesForSelf(bundles);
+}
+
+ErrCode NotificationHelper::SetUserGrantedBundleState(const NotificationBundleOption& targetBundle,
+    const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetUserGrantedBundleState(
+        targetBundle, enabledBundles, enabled);
+}
 }  // namespace Notification
 }  // namespace OHOS

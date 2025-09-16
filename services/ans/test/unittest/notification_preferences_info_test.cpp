@@ -279,6 +279,178 @@ HWTEST_F(NotificationPreferencesInfoTest, RemoveSlot_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetExtensionSubscriptionBundlesFromJson_0100
+ * @tc.desc: Test SetExtensionSubscriptionBundlesFromJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionBundlesFromJson_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    std::string validJson = R"([{"bundleName":"bundle1","uid":100},{"bundleName":"bundle2","uid":200}])";
+    
+    bool result = bundleInfo.SetExtensionSubscriptionBundlesFromJson(validJson);
+    ASSERT_TRUE(result);
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionBundlesFromJson_0200
+ * @tc.desc: Test SetExtensionSubscriptionBundlesFromJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionBundlesFromJson_0200, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    std::string emptyJson = "";
+    
+    bool result = bundleInfo.SetExtensionSubscriptionBundlesFromJson(emptyJson);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionBundlesFromJson_0300
+ * @tc.desc: Test SetExtensionSubscriptionBundlesFromJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionBundlesFromJson_0300, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    std::string invalidJson = "invalid json";
+    
+    bool result = bundleInfo.SetExtensionSubscriptionBundlesFromJson(invalidJson);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionBundlesFromJson_0400
+ * @tc.desc: Test SetExtensionSubscriptionBundlesFromJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionBundlesFromJson_0400, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    std::string nullJson = "null";
+    
+    bool result = bundleInfo.SetExtensionSubscriptionBundlesFromJson(nullJson);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionBundlesFromJson_0500
+ * @tc.desc: Test SetExtensionSubscriptionBundlesFromJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionBundlesFromJson_0500, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    std::string emptyObjectJson = "{}";
+    
+    bool result = bundleInfo.SetExtensionSubscriptionBundlesFromJson(emptyObjectJson);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionBundlesFromJson_0600
+ * @tc.desc: Test SetExtensionSubscriptionBundlesFromJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionBundlesFromJson_0600, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    std::string discardedJson = R"([{"bundleName": "test", "uid": 100},])";
+    
+    bool result = bundleInfo.SetExtensionSubscriptionBundlesFromJson(discardedJson);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionBundlesFromJson_0700
+ * @tc.desc: Test SetExtensionSubscriptionBundlesFromJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionBundlesFromJson_0700, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    std::string nonArrayJson = R"({"bundleName":"test","uid":100})";
+    
+    bool result = bundleInfo.SetExtensionSubscriptionBundlesFromJson(nonArrayJson);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: RemoveExtensionSubscriptionBundles_0100
+ * @tc.desc: Test RemoveExtensionSubscriptionBundles
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, RemoveExtensionSubscriptionBundles_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    
+    sptr<NotificationBundleOption> bundle1 = new NotificationBundleOption("bundle1", 100);
+    sptr<NotificationBundleOption> bundle2 = new NotificationBundleOption("bundle2", 200);
+    
+    std::vector<sptr<NotificationBundleOption>> bundlesToAdd;
+    bundlesToAdd.push_back(bundle1);
+    bundlesToAdd.push_back(bundle2);
+    bundleInfo.AddExtensionSubscriptionBundles(bundlesToAdd);
+
+    std::vector<sptr<NotificationBundleOption>> bundlesToRemove;
+    bundlesToRemove.push_back(bundle1);
+    bundleInfo.RemoveExtensionSubscriptionBundles(bundlesToRemove);
+
+    std::vector<sptr<NotificationBundleOption>> bundlesAfter;
+    bundleInfo.GetExtensionSubscriptionBundles(bundlesAfter);
+    ASSERT_EQ(bundlesAfter.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveExtensionSubscriptionBundles_0200
+ * @tc.desc: Test RemoveExtensionSubscriptionBundles
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, RemoveExtensionSubscriptionBundles_0200, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    
+    sptr<NotificationBundleOption> bundle1 = new NotificationBundleOption("bundle1", 100);
+    
+    std::vector<sptr<NotificationBundleOption>> bundlesToAdd;
+    bundlesToAdd.push_back(bundle1);
+    bundleInfo.AddExtensionSubscriptionBundles(bundlesToAdd);
+
+    sptr<NotificationBundleOption> nonExistingBundle = new NotificationBundleOption("nonexisting", 999);
+    std::vector<sptr<NotificationBundleOption>> bundlesToRemove;
+    bundlesToRemove.push_back(nonExistingBundle);
+    bundleInfo.RemoveExtensionSubscriptionBundles(bundlesToRemove);
+
+    std::vector<sptr<NotificationBundleOption>> bundlesAfter;
+    bundleInfo.GetExtensionSubscriptionBundles(bundlesAfter);
+    ASSERT_EQ(bundlesAfter.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveExtensionSubscriptionBundles_0300
+ * @tc.desc: Test RemoveExtensionSubscriptionBundles
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, RemoveExtensionSubscriptionBundles_0300, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    
+    sptr<NotificationBundleOption> bundle1 = new NotificationBundleOption("bundle1", 100);
+    
+    std::vector<sptr<NotificationBundleOption>> bundlesToAdd;
+    bundlesToAdd.push_back(bundle1);
+    bundleInfo.AddExtensionSubscriptionBundles(bundlesToAdd);
+
+    std::vector<sptr<NotificationBundleOption>> emptyBundlesToRemove;
+    bundleInfo.RemoveExtensionSubscriptionBundles(emptyBundlesToRemove);
+
+    std::vector<sptr<NotificationBundleOption>> bundlesAfter;
+    bundleInfo.GetExtensionSubscriptionBundles(bundlesAfter);
+    ASSERT_EQ(bundlesAfter.size(), 1);
+}
+
+/**
  * @tc.name: IsExsitBundleInfo_0100
  * @tc.desc: test IsExsitBundleInfo.
  * @tc.type: FUNC

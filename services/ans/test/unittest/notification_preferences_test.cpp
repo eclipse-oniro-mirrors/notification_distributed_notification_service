@@ -1588,6 +1588,131 @@ HWTEST_F(NotificationPreferencesTest, GetDisableNotificationInfo_0200, TestSize.
 }
 
 /**
+ * @tc.name: GetExtensionSubscriptionBundles_001
+ * @tc.desc: Test GetExtensionSubscriptionBundles
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionBundles_001, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    sptr<NotificationBundleOption> nullBundle = nullptr;
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    
+    auto ret = notificationPreferences.GetExtensionSubscriptionBundles(nullBundle, bundles);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    
+    sptr<NotificationBundleOption> emptyBundle = new NotificationBundleOption("", 100);
+    ret = notificationPreferences.GetExtensionSubscriptionBundles(emptyBundle, bundles);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetExtensionSubscriptionBundles_002
+ * @tc.desc: Test GetExtensionSubscriptionBundles
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionBundles_002, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    
+    auto ret = notificationPreferences.GetExtensionSubscriptionBundles(bundleOption, bundles);
+    ASSERT_EQ(ret, ERR_OK);
+    ASSERT_TRUE(bundles.empty()); 
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionBundles_002
+ * @tc.desc: Test SetExtensionSubscriptionBundles when DB is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionBundles_002, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    profiles.clear();
+    notificationPreferences.preferncesDB_ = nullptr;
+    auto ret = notificationPreferences.SetExtensionSubscriptionBundles(bundleOption, bundles);
+    ASSERT_EQ(ret, ERR_ANS_SERVICE_NOT_READY);
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionBundles_003
+ * @tc.desc: Test SetExtensionSubscriptionBundles normal case
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionBundles_003, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
+    
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    bundles.push_back(new NotificationBundleOption("extension.bundle", 101));
+    
+    auto ret = notificationPreferences.SetExtensionSubscriptionBundles(bundleOption, bundles);
+    ASSERT_TRUE(ret == ERR_OK || ret == ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionBundles_004
+ * @tc.desc: Test SetExtensionSubscriptionBundles when DB operation fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionBundles_004, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
+    
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    
+    auto ret = notificationPreferences.SetExtensionSubscriptionBundles(bundleOption, bundles);
+    ASSERT_TRUE(ret == ERR_OK || ret == ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: AddExtensionSubscriptionBundles_002
+ * @tc.desc: Test AddExtensionSubscriptionBundles when DB is null
+ * @tc.type: FUNC
+*/
+HWTEST_F(NotificationPreferencesTest, AddExtensionSubscriptionBundles_002, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    profiles.clear();
+    notificationPreferences.preferncesDB_ = nullptr;
+    
+    auto ret = notificationPreferences.AddExtensionSubscriptionBundles(bundleOption, bundles);
+    ASSERT_EQ(ret, ERR_ANS_SERVICE_NOT_READY);
+}
+
+ /**
+  * @tc.name: RemoveExtensionSubscriptionBundles_002
+  * @tc.desc: Test RemoveExtensionSubscriptionBundles when DB is null
+  * @tc.type: FUNC
+  */
+HWTEST_F(NotificationPreferencesTest, RemoveExtensionSubscriptionBundles_002, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    profiles.clear();
+    notificationPreferences.preferncesDB_ = nullptr;
+    auto ret = notificationPreferences.RemoveExtensionSubscriptionBundles(bundleOption, bundles);
+    ASSERT_EQ(ret, ERR_ANS_SERVICE_NOT_READY);
+}
+
+/**
  * @tc.name: SetSubscriberExistFlag_0100
  * @tc.desc: test SetSubscriberExistFlag.
  * @tc.type: FUNC

@@ -139,6 +139,40 @@ HWTEST_F(NotificationCloneBundleInfoTest, AddSlotInfo_00001, Function | SmallTes
 }
 
 /**
+ * @tc.name: SetExtensionSubscriptionBundles_00001
+ * @tc.desc: Test SetExtensionSubscriptionBundles
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, SetExtensionSubscriptionBundles_00001, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1000);
+    bundles.push_back(bundle);
+    
+    auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    rrc->SetExtensionSubscriptionBundles(bundles);
+    
+    auto result = rrc->GetExtensionSubscriptionBundles();
+    EXPECT_EQ(result.size(), 1);
+    EXPECT_EQ(result[0]->GetBundleName(), "test");
+    EXPECT_EQ(result[0]->GetUid(), 1000);
+}
+
+/**
+ * @tc.name: GetExtensionSubscriptionBundles_00001
+ * @tc.desc: Test GetExtensionSubscriptionBundles
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, GetExtensionSubscriptionBundles_00001, Function | SmallTest | Level1)
+{
+    auto notificationCloneBundleInfo = std::make_shared<NotificationCloneBundleInfo>();
+    auto result = notificationCloneBundleInfo->GetExtensionSubscriptionBundles();
+    EXPECT_EQ(result.size(), 0);
+}
+
+/**
  * @tc.name: ToJson_00001
  * @tc.desc: Test ToJson parameters.
  * @tc.type: FUNC
@@ -156,6 +190,8 @@ HWTEST_F(NotificationCloneBundleInfoTest, ToJson_00001, Function | SmallTest | L
     slotInfo.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
     slotInfo.enable_ = true;
     slotInfo.isForceControl_ = true;
+    auto extensionBundle = new NotificationCloneBundleInfo();
+    extensionBundle->SetBundleName("ExtensionBundle");
     auto rrc = std::make_shared<NotificationCloneBundleInfo>();
     rrc->SetBundleName(bundleName);
     rrc->SetAppIndex(appIndex);
@@ -164,6 +200,8 @@ HWTEST_F(NotificationCloneBundleInfoTest, ToJson_00001, Function | SmallTest | L
     rrc->SetIsShowBadge(isShowBadge);
     rrc->SetEnableNotification(enabledNotification);
     rrc->AddSlotInfo(slotInfo);
+    std::vector<std::shared_ptr<NotificationCloneBundleInfo>> extensionBundles;
+    extensionBundles.push_back(std::make_shared<NotificationCloneBundleInfo>(*extensionBundle));
     nlohmann::json jsonObject;
     EXPECT_EQ(jsonObject.is_null(), true);
     EXPECT_EQ(jsonObject.is_object(), false);
@@ -173,6 +211,13 @@ HWTEST_F(NotificationCloneBundleInfoTest, ToJson_00001, Function | SmallTest | L
     EXPECT_EQ(rrc->GetSlotInfo().size(), 1);
     rrc->FromJson(jsonObject);
     EXPECT_EQ(rrc->GetSlotInfo().size(), 2);
+    EXPECT_EQ(rrc->GetBundleName(), bundleName);
+    EXPECT_EQ(rrc->GetAppIndex(), appIndex);
+    EXPECT_EQ(rrc->GetUid(), uid);
+    EXPECT_EQ(rrc->GetSlotFlags(), slotFlags);
+    EXPECT_EQ(rrc->GetIsShowBadge(), isShowBadge);
+    EXPECT_EQ(rrc->GetEnableNotification(), enabledNotification);
+    delete extensionBundle;
 }
 
 /**
@@ -219,6 +264,49 @@ HWTEST_F(NotificationCloneBundleInfoTest, Dump_00001, Function | SmallTest | Lev
             ", silentReminderEnabled = 0" +
             " }";
     EXPECT_EQ(rrc->Dump(), dumpInfo);
+}
+
+/**
+ * @tc.name: SubscriptionBundlesFromJson_00001
+ * @tc.desc: Test SubscriptionBundlesFromJson with non-empty array.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, SubscriptionBundlesFromJson_00001, Function | SmallTest | Level1)
+{
+    auto bundleInfo = std::make_shared<NotificationCloneBundleInfo>();
+    
+    nlohmann::json jsonObject = {
+        {"extensionSubscriptionBundles", {
+            {{"bundleName", "com.example.app1"}, {"uid", 1001}},
+            {{"bundleName", "com.example.app2"}, {"uid", 1002}}
+        }}
+    };
+
+    bundleInfo->SubscriptionBundlesFromJson(jsonObject);
+    auto result = bundleInfo->GetExtensionSubscriptionBundles();
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0]->GetBundleName(), "com.example.app1");
+    EXPECT_EQ(result[0]->GetUid(), 1001);
+    EXPECT_EQ(result[1]->GetBundleName(), "com.example.app2");
+    EXPECT_EQ(result[1]->GetUid(), 1002);
+}
+
+/**
+ * @tc.name: SubscriptionBundlesFromJson_00002
+ * @tc.desc: Test SubscriptionBundlesFromJson with empty array.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, SubscriptionBundlesFromJson_00002, Function | SmallTest | Level1)
+{
+    auto bundleInfo = std::make_shared<NotificationCloneBundleInfo>();
+    nlohmann::json jsonObject = {
+        {"extensionSubscriptionBundles", nlohmann::json::array()}
+    };
+    
+    bundleInfo->SubscriptionBundlesFromJson(jsonObject);
+    EXPECT_EQ(bundleInfo->GetExtensionSubscriptionBundles().size(), 0);
 }
 }
 }

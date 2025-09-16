@@ -222,6 +222,81 @@ int32_t NotificationPreferencesInfo::BundleInfo::GetBundleUid() const
     return uid_;
 }
 
+void NotificationPreferencesInfo::BundleInfo::GetExtensionSubscriptionBundles(
+    std::vector<sptr<NotificationBundleOption>>& bundles) const
+{
+    bundles.clear();
+    for (const auto& item : extensionSubscriptionBundles_) {
+        bundles.emplace_back(item.second);
+    }
+}
+
+std::string NotificationPreferencesInfo::BundleInfo::GetExtensionSubscriptionBundlesJson() const
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    GetExtensionSubscriptionBundles(bundles);
+    auto jsonObject = nlohmann::json::array();
+    for (const auto& item : bundles) {
+        nlohmann::json jsonNode;
+        item->ToJson(jsonNode);
+        jsonObject.emplace_back(jsonNode);
+    }
+    return jsonObject.dump();
+}
+
+void NotificationPreferencesInfo::BundleInfo::SetExtensionSubscriptionBundles(
+    const std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    extensionSubscriptionBundles_.clear();
+    AddExtensionSubscriptionBundles(bundles);
+}
+
+bool NotificationPreferencesInfo::BundleInfo::SetExtensionSubscriptionBundlesFromJson(const std::string& json)
+{
+    if (json.empty() || !nlohmann::json::accept(json)) {
+        ANS_LOGE("Invalid json string");
+        return false;
+    }
+    nlohmann::json jsonObject = nlohmann::json::parse(json, nullptr, false);
+    if (jsonObject.is_null() || jsonObject.empty()) {
+        ANS_LOGE("Invalid JSON object");
+        return false;
+    }
+    if (jsonObject.is_discarded() || !jsonObject.is_array()) {
+        ANS_LOGE("Parse extension subscription bundle list failed due to data is discarded or not array");
+        return false;
+    }
+
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    for (const auto &item : jsonObject) {
+        bundles.emplace_back(NotificationBundleOption::FromJson(item));
+    }
+    SetExtensionSubscriptionBundles(bundles);
+
+    return true;
+}
+
+void NotificationPreferencesInfo::BundleInfo::AddExtensionSubscriptionBundles(
+    const std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    for (const auto& item : bundles) {
+        std::string bundleKey = item->GetBundleName() + std::to_string(item->GetUid());
+        extensionSubscriptionBundles_.insert_or_assign(bundleKey, item);
+    }
+}
+
+void NotificationPreferencesInfo::BundleInfo::RemoveExtensionSubscriptionBundles(
+    const std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    for (const auto& item : bundles) {
+        std::string bundleKey = item->GetBundleName() + std::to_string(item->GetUid());
+        auto iter = extensionSubscriptionBundles_.find(bundleKey);
+        if (iter != extensionSubscriptionBundles_.end()) {
+            extensionSubscriptionBundles_.erase(iter);
+        }
+    }
+}
+
 void NotificationPreferencesInfo::SetBundleInfo(BundleInfo &info)
 {
     std::string bundleKey = info.GetBundleName().append(std::to_string(info.GetBundleUid()));
@@ -393,6 +468,9 @@ void NotificationPreferencesInfo::GetAllCLoneBundlesInfo(const int32_t &userId,
                 (slot->GetAuthorizedStatus() ==NotificationSlot::AuthorizedStatus::AUTHORIZED);
             cloneBundleInfo.AddSlotInfo(slotInfo);
         }
+        std::vector<sptr<NotificationBundleOption>> bundles;
+        iter->second.GetExtensionSubscriptionBundles(bundles);
+        cloneBundleInfo.SetExtensionSubscriptionBundles(bundles);
         auto silentReminderIter = silentReminderInfos_.find(bundleItem.second);
         if (silentReminderIter != silentReminderInfos_.end()) {
             auto enableStatus = silentReminderIter->second.enableStatus;

@@ -226,6 +226,12 @@ public:
         int32_t GetBundleUid() const;
         void SetSlotEnabled(NotificationConstant::SlotType slotType, bool enabled);
         bool GetSlotEnabled(NotificationConstant::SlotType slotType, bool &enabled) const;
+        void GetExtensionSubscriptionBundles(std::vector<sptr<NotificationBundleOption>>& bundles) const;
+        std::string GetExtensionSubscriptionBundlesJson() const;
+        void SetExtensionSubscriptionBundles(const std::vector<sptr<NotificationBundleOption>>& bundles);
+        bool SetExtensionSubscriptionBundlesFromJson(const std::string& json);
+        void AddExtensionSubscriptionBundles(const std::vector<sptr<NotificationBundleOption>>& bundles);
+        void RemoveExtensionSubscriptionBundles(const std::vector<sptr<NotificationBundleOption>>& bundles);
 
     private:
         std::string bundleName_;
@@ -239,6 +245,7 @@ public:
         bool hasPoppedDialog_ = BUNDLE_POPPED_DIALOG;
         std::map<NotificationConstant::SlotType, sptr<NotificationSlot>> slots_;
         std::map<std::string, uint32_t> slotFlagsMap_;
+        std::map<std::string, sptr<NotificationBundleOption>> extensionSubscriptionBundles_;
     };
 
     /*

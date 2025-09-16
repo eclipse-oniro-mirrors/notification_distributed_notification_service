@@ -1039,6 +1039,45 @@ HWTEST_F(NotificationPreferencesDatabaseTest, IsSmartReminderEnabled_0100, TestS
 }
 
 /**
+ * @tc.name: PutExtensionSubscriptionBundles_0100
+ * @tc.desc: test PutExtensionSubscriptionBundles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutExtensionSubscriptionBundles_0100, TestSize.Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    bundles.push_back(new NotificationBundleOption("bundle1", 1001));
+    bundles.push_back(new NotificationBundleOption("bundle2", 1002));
+    
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("test.bundle.name");
+    bundleInfo.SetBundleUid(1000);
+    bundleInfo.SetExtensionSubscriptionBundles(bundles);
+    
+    bool result = preferncesDB_->PutExtensionSubscriptionBundles(bundleInfo);
+    ASSERT_EQ(result, true);
+}
+
+/**
+ * @tc.name: PutExtensionSubscriptionBundles_0200
+ * @tc.desc: test PutExtensionSubscriptionBundles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutExtensionSubscriptionBundles_0200, TestSize.Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    bundles.push_back(new NotificationBundleOption("bundle1", 1001));
+    bundles.push_back(new NotificationBundleOption("bundle2", 1002));
+    
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("");
+    bundleInfo.SetBundleUid(1000);
+    bundleInfo.SetExtensionSubscriptionBundles(bundles);
+    
+    bool result = preferncesDB_->PutExtensionSubscriptionBundles(bundleInfo);
+    ASSERT_EQ(result, false);
+}
+/**
  * @tc.name      : GetAllNotificationEnabledBundles_00100
  * @tc.number    : GetAllNotificationEnabledBundles
  * @tc.desc      : Check func GetAllNotificationEnabledBundles, return true

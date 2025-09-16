@@ -33,6 +33,7 @@ constexpr const char *BUNDLE_INFO_SLOT_ENABLE = "slotEnable";
 constexpr const char *BUNDLE_INFO_SLOT_CONTROL = "slotControl";
 constexpr const char *BUNDLE_INFO_SILENT_REMINDER = "enabledSilentReminder";
 constexpr const char *BUNDLE_INFO_SLOT_AUTHSTATUS = "slotAuthorized";
+constexpr const char *BUNDLE_INFO_SUBSCRIPTION_BUNDLES = "extensionSubscriptionBundles";
 constexpr int32_t CONST_ENABLE_INT = 1;
 }
 void NotificationCloneBundleInfo::SetBundleName(const std::string &name)
@@ -124,6 +125,17 @@ std::vector<NotificationCloneBundleInfo::SlotInfo> NotificationCloneBundleInfo::
     return slotsInfo_;
 }
 
+void NotificationCloneBundleInfo::SetExtensionSubscriptionBundles(
+    const std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    extensionSubscriptionBundles_ = bundles;
+}
+
+const std::vector<sptr<NotificationBundleOption>>& NotificationCloneBundleInfo::GetExtensionSubscriptionBundles() const
+{
+    return extensionSubscriptionBundles_;
+}
+
 void NotificationCloneBundleInfo::ToJson(nlohmann::json &jsonObject) const
 {
     if (!slotsInfo_.empty()) {
@@ -137,6 +149,16 @@ void NotificationCloneBundleInfo::ToJson(nlohmann::json &jsonObject) const
             jsonNodes.emplace_back(jsonNode);
         }
         jsonObject[BUNDLE_INFO_SLOT_LIST] = jsonNodes;
+    }
+
+    if (!extensionSubscriptionBundles_.empty()) {
+        nlohmann::json jsonNodes = nlohmann::json::array();
+        for (const auto& bundle : extensionSubscriptionBundles_) {
+            nlohmann::json jsonNode;
+            bundle->ToJson(jsonNode);
+            jsonNodes.emplace_back(jsonNode);
+        }
+        jsonObject[BUNDLE_INFO_SUBSCRIPTION_BUNDLES] = jsonNodes;
     }
 
     jsonObject[BUNDLE_INFO_NAME] =  bundleName_;
@@ -172,6 +194,18 @@ void NotificationCloneBundleInfo::SlotsFromJson(const nlohmann::json &jsonObject
             slotInfo.authorizedStatus_ = (auth == CONST_ENABLE_INT);
         }
         slotsInfo_.emplace_back(slotInfo);
+    }
+}
+
+void NotificationCloneBundleInfo::SubscriptionBundlesFromJson(const nlohmann::json &jsonObject)
+{
+    if (!jsonObject.contains(BUNDLE_INFO_SUBSCRIPTION_BUNDLES) ||
+        !jsonObject[BUNDLE_INFO_SUBSCRIPTION_BUNDLES].is_array()) {
+        return;
+    }
+
+    for (auto &bundleJson : jsonObject.at(BUNDLE_INFO_SUBSCRIPTION_BUNDLES)) {
+        extensionSubscriptionBundles_.emplace_back(NotificationBundleOption::FromJson(bundleJson));
     }
 }
 
@@ -215,6 +249,7 @@ void NotificationCloneBundleInfo::FromJson(const nlohmann::json &jsonObject)
         }
     }
     SlotsFromJson(jsonObject);
+    SubscriptionBundlesFromJson(jsonObject);
 }
 std::string NotificationCloneBundleInfo::SlotInfo::Dump() const
 {
