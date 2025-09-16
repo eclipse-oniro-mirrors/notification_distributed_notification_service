@@ -33,6 +33,7 @@ constexpr const char *BUNDLE_INFO_SLOT_ENABLE = "slotEnable";
 constexpr const char *BUNDLE_INFO_SLOT_CONTROL = "slotControl";
 constexpr const char *BUNDLE_INFO_SILENT_REMINDER = "enabledSilentReminder";
 constexpr const char *BUNDLE_INFO_SLOT_AUTHSTATUS = "slotAuthorized";
+constexpr const char *BUNDLE_INFO_SUBSCRIPTION_ENABLED = "enableExtensionSubscription";
 constexpr int32_t CONST_ENABLE_INT = 1;
 }
 void NotificationCloneBundleInfo::SetBundleName(const std::string &name)
@@ -106,6 +107,16 @@ NotificationConstant::SWITCH_STATE NotificationCloneBundleInfo::GetSilentReminde
     return silentReminderEnabled_;
 }
 
+void NotificationCloneBundleInfo::SetEnabledExtensionSubscription(const NotificationConstant::SWITCH_STATE &state)
+{
+    enabledExtensionSubscription_ = state;
+}
+
+NotificationConstant::SWITCH_STATE NotificationCloneBundleInfo::GetEnabledExtensionSubscription() const
+{
+    return enabledExtensionSubscription_;
+}
+
 void NotificationCloneBundleInfo::AddSlotInfo(const SlotInfo &slotInfo)
 {
     for (auto& item : slotsInfo_) {
@@ -145,6 +156,7 @@ void NotificationCloneBundleInfo::ToJson(nlohmann::json &jsonObject) const
     jsonObject[BUNDLE_INFO_SHOW_BADGE] =  isShowBadge_ ? 1 : 0;
     jsonObject[BUNDLE_INFO_ENABLE_NOTIFICATION] =  static_cast<int32_t>(isEnabledNotification_);
     jsonObject[BUNDLE_INFO_SILENT_REMINDER] =  static_cast<int32_t>(silentReminderEnabled_);
+    jsonObject[BUNDLE_INFO_SUBSCRIPTION_ENABLED] =  static_cast<int32_t>(enabledExtensionSubscription_);
 }
 
 void NotificationCloneBundleInfo::SlotsFromJson(const nlohmann::json &jsonObject)
@@ -173,6 +185,16 @@ void NotificationCloneBundleInfo::SlotsFromJson(const nlohmann::json &jsonObject
         }
         slotsInfo_.emplace_back(slotInfo);
     }
+}
+void NotificationCloneBundleInfo::ExtensionSubscriptionFromJson(const nlohmann::json &jsonObject)
+{
+    if (jsonObject.contains(BUNDLE_INFO_SUBSCRIPTION_ENABLED) &&
+        jsonObject[BUNDLE_INFO_SUBSCRIPTION_ENABLED].is_number()) {
+        return;
+    }
+    int32_t enabledExtensionSubscription = jsonObject.at(BUNDLE_INFO_SUBSCRIPTION_ENABLED).get<int32_t>();
+    enabledExtensionSubscription_ =
+        static_cast<NotificationConstant::SWITCH_STATE>(enabledExtensionSubscription == CONST_ENABLE_INT);
 }
 
 void NotificationCloneBundleInfo::FromJson(const nlohmann::json &jsonObject)
@@ -214,7 +236,9 @@ void NotificationCloneBundleInfo::FromJson(const nlohmann::json &jsonObject)
             silentReminderEnabled_ = static_cast<NotificationConstant::SWITCH_STATE>(silentReminderEnabled);
         }
     }
+
     SlotsFromJson(jsonObject);
+    ExtensionSubscriptionFromJson(jsonObject);
 }
 std::string NotificationCloneBundleInfo::SlotInfo::Dump() const
 {

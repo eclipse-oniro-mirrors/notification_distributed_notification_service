@@ -331,5 +331,11 @@ interface OHOS.Notification.IAnsManager {
 
     void GetTargetDeviceBundleList([in] String deviceType, [in] String deviceId, [out] String[] bundleList, [out] String[] labelList);
 
+    void IsUserGranted([out] boolean enabled);
+
+    void GetUserGrantedState([in] sptr<NotificationBundleOption> targetBundle, [out] boolean enabled);
+
+    void SetUserGrantedState([in] sptr<NotificationBundleOption> targetBundle, [in] boolean enabled);
+
     [macrodef NOTIFICATION_SMART_REMINDER_SUPPORTED] void RegisterSwingCallback([in] IRemoteObject swingCallback);
 }

@@ -226,6 +226,8 @@ public:
         int32_t GetBundleUid() const;
         void SetSlotEnabled(NotificationConstant::SlotType slotType, bool enabled);
         bool GetSlotEnabled(NotificationConstant::SlotType slotType, bool &enabled) const;
+        NotificationConstant::SWITCH_STATE GetExtensionSubscriptionEnabled() const;
+        void SetExtensionSubscriptionEnabled(NotificationConstant::SWITCH_STATE state);
 
     private:
         std::string bundleName_;
@@ -239,6 +241,8 @@ public:
         bool hasPoppedDialog_ = BUNDLE_POPPED_DIALOG;
         std::map<NotificationConstant::SlotType, sptr<NotificationSlot>> slots_;
         std::map<std::string, uint32_t> slotFlagsMap_;
+        NotificationConstant::SWITCH_STATE enabledExtensionSubscription_ =
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     };
 
     /*

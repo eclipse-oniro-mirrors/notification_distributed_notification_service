@@ -2593,5 +2593,62 @@ ErrCode AnsNotification::GetDistributedDevicelist(std::vector<std::string> &devi
     }
     return proxy->GetDistributedDevicelist(deviceTypes);
 }
+
+ErrCode AnsNotification::IsUserGranted(bool& enabled)
+{
+    ANS_LOGD("AnsNotification::IsUserGranted called");
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->IsUserGranted(enabled);
+}
+
+ErrCode AnsNotification::GetUserGrantedState(const NotificationBundleOption& targetBundle, bool& enabled)
+{
+    ANS_LOGD("called");
+    if (targetBundle.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(targetBundle));
+    if (bo == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return proxy->GetUserGrantedState(bo, enabled);
+}
+
+ErrCode AnsNotification::SetUserGrantedState(const NotificationBundleOption& targetBundle, bool enabled)
+{
+    ANS_LOGD("called");
+    if (targetBundle.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(targetBundle));
+    if (bo == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return proxy->SetUserGrantedState(bo, enabled);
+}
 }  // namespace Notification
 }  // namespace OHOS

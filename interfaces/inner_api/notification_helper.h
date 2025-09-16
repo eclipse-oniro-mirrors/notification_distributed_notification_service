@@ -1435,6 +1435,29 @@ public:
      * @return Returns set result.
      */
     static ErrCode GetLiveViewConfig(const std::vector<std::string>& bundleList);
+
+    /**
+     * @brief Obtains whether the notification extension subscription is enabled.
+     * @param enabled True if the subscription is enabled.
+     * @return Returns get result.
+     */
+    static ErrCode IsUserGranted(bool& enabled);
+
+    /**
+     * @brief Obtains whether the notification extension subscription is enabled.
+     * @param targetBundle The bundle option to be queried.
+     * @param enabled True if the subscription is enabled.
+     * @return Returns get result.
+     */
+    static ErrCode GetUserGrantedState(const NotificationBundleOption& targetBundle, bool& enabled);
+
+    /**
+     * @brief Set the notification extension subscription state.
+     * @param targetBundle The bundle option to be set.
+     * @param enabled True if the subscription is enabled.
+     * @return Returns set result.
+     */
+    static ErrCode SetUserGrantedState(const NotificationBundleOption& targetBundle, bool enabled);
 };
 }  // namespace Notification
 }  // namespace OHOS

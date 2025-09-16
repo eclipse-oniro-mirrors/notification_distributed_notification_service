@@ -761,6 +761,20 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+    ErrCode IsUserGranted(bool &enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetUserGrantedState(const sptr<NotificationBundleOption> &targetBundle, bool &enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetUserGrantedState(const sptr<NotificationBundleOption> &targetBundle, bool enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 private:
     std::string cmd_;
     std::string bundle_;

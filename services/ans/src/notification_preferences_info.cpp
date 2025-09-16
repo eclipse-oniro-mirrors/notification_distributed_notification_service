@@ -222,6 +222,15 @@ int32_t NotificationPreferencesInfo::BundleInfo::GetBundleUid() const
     return uid_;
 }
 
+NotificationConstant::SWITCH_STATE NotificationPreferencesInfo::BundleInfo::GetExtensionSubscriptionEnabled() const
+{
+    return enabledExtensionSubscription_;
+}
+
+void NotificationPreferencesInfo::BundleInfo::SetExtensionSubscriptionEnabled(NotificationConstant::SWITCH_STATE state)
+{
+    enabledExtensionSubscription_ = state;
+}
 void NotificationPreferencesInfo::SetBundleInfo(BundleInfo &info)
 {
     std::string bundleKey = info.GetBundleName().append(std::to_string(info.GetBundleUid()));
@@ -383,6 +392,7 @@ void NotificationPreferencesInfo::GetAllCLoneBundlesInfo(const int32_t &userId,
         cloneBundleInfo.SetSlotFlags(iter->second.GetSlotFlags());
         cloneBundleInfo.SetIsShowBadge(iter->second.GetIsShowBadge());
         cloneBundleInfo.SetEnableNotification(iter->second.GetEnableNotification());
+        cloneBundleInfo.SetEnabledExtensionSubscription(iter->second.GetExtensionSubscriptionEnabled());
         iter->second.GetAllSlots(slots);
         for (auto& slot : slots) {
             NotificationCloneBundleInfo::SlotInfo slotInfo;

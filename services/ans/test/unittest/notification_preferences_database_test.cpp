@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #define protected public
 #include "notification_preferences_database.h"
 #include "notification_rdb_data_mgr.h"
+#include "notification_preferences.h"
 #undef private
 #undef protected
 #include "mock_os_account_manager.h"
@@ -432,6 +433,48 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyToDisturbeDB_0010
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
     ASSERT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo), false);
+}
+
+/**
+ * @tc.number    : PutBundlePropertyToDisturbeDB_00200
+ * @tc.name      : PutBundlePropertyToDisturbeDB
+ * @tc.desc      : Test PutBundlePropertyToDisturbeDB empty bundle KEY_EXTENSION_SUBSCRIPTION_ENABLED
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyToDisturbeDB_00200, Function | SmallTest | Level1)
+{
+    const std::string newName = "empty_db_bundle";
+    const int32_t newUid  = 7777;
+
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(newName);
+    bundleInfo.SetBundleUid(newUid);
+    bundleInfo.SetExtensionSubscriptionEnabled(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+
+    bool ret = preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo);
+    EXPECT_TRUE(ret);
+
+    NotificationConstant::SWITCH_STATE state {};
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(newName, newUid);
+    EXPECT_EQ(NotificationPreferences::GetInstance()->GetExtensionSubscriptionEnabled(bundle, state), ERR_OK);
+    EXPECT_EQ(state, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+}
+
+/**
+ * @tc.name: PutBundlePropertyToDisturbeDB_00400
+ * @tc.desc: PutBundlePropertyToDisturbeDB
+ * @tc.type: PutBundlePropertyToDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyToDisturbeDB_00400, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+
+    std::string bundleKey = bundleName_ + std::to_string(bundleUid_);
+    ASSERT_TRUE(preferncesDB_->PutBundleToDisturbeDB(bundleKey, bundleInfo));
+
+    bool ret = preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo);
+    EXPECT_FALSE(ret);
 }
 
 /**
@@ -1889,6 +1932,70 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedDevicelist_0300, Tes
     ret = preferncesDB_->GetDistributedDevicelist(deviceTypes);
     ASSERT_EQ(ret, true);
     ASSERT_EQ(deviceTypes, deviceTypes1);
+}
+
+/**
+ * @tc.number    : ParseBundlePropertyFromDisturbeDB_01100
+ * @tc.name      : ParseBundlePropertyFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_01100, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_extensionSubscriptionInfo";
+    entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
+    preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
+    auto state = bundleInfo.GetExtensionSubscriptionEnabled();
+    std::string json = std::to_string(static_cast<int>(state));
+    ASSERT_FALSE(json.empty());
+}
+
+/**
+ * @tc.name: PutExtensionSubscriptionEnabled_0100
+ * @tc.desc: Test PutExtensionSubscriptionEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutExtensionSubscriptionEnabled_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bool ret = preferncesDB_->PutExtensionSubscriptionEnabled(bundleInfo);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: PutExtensionSubscriptionEnabled_0200
+ * @tc.desc: Test PutExtensionSubscriptionEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutExtensionSubscriptionEnabled_0200, TestSize.Level1)
+
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    bool ret = preferncesDB_->PutExtensionSubscriptionEnabled(bundleInfo);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: PutExtensionSubscriptionEnabled_0300
+ * @tc.desc: Test PutExtensionSubscriptionEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutExtensionSubscriptionEnabled_0300, TestSize.Level1)
+{
+    const std::string noExistName = "no_exist_bundle";
+    const int32_t noExistUid = 99999;
+
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(noExistName);
+    bundleInfo.SetBundleUid(noExistUid);
+    bool ret = preferncesDB_->PutExtensionSubscriptionEnabled(bundleInfo);
+    EXPECT_TRUE(ret);
 }
 
 /**

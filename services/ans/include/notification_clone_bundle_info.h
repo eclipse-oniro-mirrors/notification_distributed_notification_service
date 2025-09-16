@@ -61,12 +61,16 @@ public:
     void SetSilentReminderEnabled(const NotificationConstant::SWITCH_STATE &silentReminderEnabled);
     NotificationConstant::SWITCH_STATE GetSilentReminderEnabled() const;
 
+    void SetEnabledExtensionSubscription(const NotificationConstant::SWITCH_STATE &state);
+    NotificationConstant::SWITCH_STATE GetEnabledExtensionSubscription() const;
+
     void AddSlotInfo(const SlotInfo &slotInfo);
     std::vector<SlotInfo> GetSlotInfo() const;
 
     void ToJson(nlohmann::json &jsonObject) const;
     void FromJson(const nlohmann::json &root);
     void SlotsFromJson(const nlohmann::json &jsonObject);
+    void ExtensionSubscriptionFromJson(const nlohmann::json &jsonObject);
     std::string Dump() const;
 
 private:
@@ -78,6 +82,8 @@ private:
     NotificationConstant::SWITCH_STATE isEnabledNotification_ = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     std::vector<SlotInfo> slotsInfo_;
     NotificationConstant::SWITCH_STATE silentReminderEnabled_;
+    NotificationConstant::SWITCH_STATE enabledExtensionSubscription_ =
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
 };
 } // namespace Notification
 } // namespace OHOS
