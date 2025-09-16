@@ -808,16 +808,32 @@ bool UnwarpOperationInfo(ani_env *env, const ani_object obj, StsNotificationOper
     ani_boolean isUndefined = ANI_TRUE;
     std::string actionName;
     std::string userInput;
-    if (GetPropertyString(env, obj, "actionName", isUndefined, actionName) != ANI_OK || isUndefined == ANI_TRUE) {
+    ani_int operationType = 0;
+    ani_int buttonIndex = 0;
+    if (GetPropertyString(env, obj, "actionName", isUndefined, actionName) != ANI_OK) {
         ANS_LOGD("ConvertOperationInfoToNative GetStringOrUndefined actionName fail");
-        return false;
     }
-    outObj.SetActionName(GetResizeStr(actionName, STR_MAX_SIZE));
-    if (GetPropertyString(env, obj, "userInput", isUndefined, userInput) != ANI_OK || isUndefined == ANI_TRUE) {
+    if (GetPropertyString(env, obj, "userInput", isUndefined, userInput) != ANI_OK) {
         ANS_LOGD("ConvertOperationInfoToNative GetStringOrUndefined userInput fail");
-        return false;
     }
-    outObj.SetUserInput(GetResizeStr(userInput, LONG_STR_MAX_SIZE));
+    if (GetPropertyInt(env, obj, "buttonIndex", isUndefined, buttonIndex) != ANI_OK) {
+        ANS_LOGD("GetPropertyInt buttonIndex faild");
+    }
+    if (GetPropertyInt(env, obj, "operationType", isUndefined, operationType) != ANI_OK) {
+        ANS_LOGD("GetPropertyInt operationType faild");
+    }
+        
+    if (operationType == static_cast<int32_t>(OperationType::DISTRIBUTE_OPERATION_REPLY)) {
+        outObj.SetOperationType(OperationType::DISTRIBUTE_OPERATION_REPLY);
+        outObj.SetActionName(GetResizeStr(actionName, STR_MAX_SIZE));
+        outObj.SetUserInput(GetResizeStr(userInput, LONG_STR_MAX_SIZE));
+        outObj.SetBtnIndex(buttonIndex);
+    } else if (operationType < static_cast<int32_t>(OperationType::DISTRIBUTE_OPERATION_FOR_LIVE_VIEW)) {
+        outObj.SetOperationType(OperationType::DISTRIBUTE_OPERATION_JUMP);
+    } else {
+        outObj.SetOperationType(static_cast<OperationType>(operationType));
+    }
+    
     return true;
 }
 
@@ -830,6 +846,10 @@ sptr<StsNotificationOperationInfo> GetOperationInfoForDistributeOperation(
         ANS_LOGD("hashCode is valid");
         return nullptr;
     }
+    if (hashCodeStd.empty()) {
+        ANS_LOGD("hashCode is empty");
+        return nullptr;
+    }
     info->SetHashCode(hashCodeStd);
     noWithOperationInfo = IsUndefine(env, operationInfo);
     if (!noWithOperationInfo) {
@@ -837,9 +857,9 @@ sptr<StsNotificationOperationInfo> GetOperationInfoForDistributeOperation(
             ANS_LOGD("operationInfo is valid");
             return nullptr;
         }
-        ANS_LOGD("OperationInfo %{public}s %{public}s",
-            info->GetActionName().c_str(), info->GetUserInput().c_str());
-        info->SetOperationType(OperationType::DISTRIBUTE_OPERATION_REPLY);
+        ANS_LOGD("OperationInfo %{public}s, %{public}s, %{public}d, %{public}d",
+            info->GetActionName().c_str(), info->GetUserInput().c_str(),
+            info->GetOperationType(), info->GetBtnIndex());
     } else {
         info->SetOperationType(OperationType::DISTRIBUTE_OPERATION_JUMP);
     }

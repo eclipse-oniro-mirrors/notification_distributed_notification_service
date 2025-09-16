@@ -1597,17 +1597,17 @@ export default namespace notificationManager {
         public message: string = '';
     }
 
-    export function on(
-        type: 'checkNotification', callback: (checkInfo: NotificationCheckInfo) => NotificationCheckResult): void
+    export function onCheckNotification(
+        callback: (checkInfo: NotificationCheckInfo) => NotificationCheckResult): void
     {
-        let errCode = nativeOn(type, callback);
+        let errCode = nativeOn('checkNotification', callback);
         if (errCode != 0) {
             const error: BusinessError = {code: errCode, message: "unknown error"};
             throw error;
         }
     }
 
-    export function on(type: 'checkNotification', checkRequest: NotificationCheckRequest,
+    export function onCheckNotification(checkRequest: NotificationCheckRequest,
         callback: (checkInfo: NotificationCheckInfo) => Promise<NotificationCheckResult>): void
     {
         let onFuncCallback: CallbackForCheckInfo =
@@ -1630,23 +1630,22 @@ export default namespace notificationManager {
                 );
                 return result;
             };
-        let errCode = nativeOn(type, onFuncCallback, checkRequest);
+        let errCode = nativeOn('checkNotification', onFuncCallback, checkRequest);
         if (errCode != 0) {
             const error: BusinessError = {code: errCode, message: "unknown error"};
             throw error;
         }
     }
 
-    export function off(
-        type: 'checkNotification',
+    export function offCheckNotification(
         callback?: (checkInfo: NotificationCheckInfo) => NotificationCheckResult
     ): void
     {
         let errCode = -1;
         if (callback === undefined) {
-            errCode = nativeOff(type);
+            errCode = nativeOff('checkNotification');
         } else {
-            errCode = nativeOff(type, callback);
+            errCode = nativeOff('checkNotification', callback);
         }
         if (errCode != 0) {
             const error: BusinessError = {code: errCode, message: "unknown error"};

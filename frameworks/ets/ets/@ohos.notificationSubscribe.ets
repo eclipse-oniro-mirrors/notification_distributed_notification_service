@@ -297,7 +297,7 @@ export default namespace notificationSubscribe {
     }
 
     export function distributeOperation(hashcode: string, operationInfo?: OperationInfo): Promise<void> {
-        if (hashcode == undefined) {
+        if (hashcode == undefined || hashcode.length === 0) {
             throw errorParamInvalid;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
@@ -330,11 +330,15 @@ export default namespace notificationSubscribe {
     export interface OperationInfo {
         actionName?: string;
         userInput?: string;
+        operationType?: int;
+        buttonIndex?: int;
     }
 
     class OperationInfoInner implements OperationInfo {
-        public actionName?: string;
-        public userInput?: string;
+        public actionName?: string | undefined;
+        public userInput?: string | undefined;
+        public operationType?: int | undefined;
+        public buttonIndex?: int | undefined;
     }
 
     export function subscribeSelf(subscriber: NotificationSubscriber): Promise<void> {
