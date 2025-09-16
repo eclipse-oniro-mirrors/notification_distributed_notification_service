@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1360,6 +1360,59 @@ HWTEST_F(NotificationHelperTest, GetDistributedDevicelist_0100, Function | Small
     std::vector<std::string> deviceTypes;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetDistributedDevicelist(deviceTypes);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: NotificationExtensionSubscribe_0100
+ * @tc.desc: Test NotificationExtensionSubscribe.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, NotificationExtensionSubscribe_0100, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    infos.clear();
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.NotificationExtensionSubscribe(infos);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: NotificationExtensionSubscribe_0200
+ * @tc.desc: Test NotificationExtensionSubscribe.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, NotificationExtensionSubscribe_0200, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo());
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.NotificationExtensionSubscribe(infos);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: NotificationExtensionUnsubscribe_0100
+ * @tc.desc: Test NotificationExtensionUnsubscribe.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, NotificationExtensionUnsubscribe_0100, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.NotificationExtensionUnsubscribe();
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: GetSubscribeInfo_0100
+ * @tc.desc: Test GetSubscribeInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, GetSubscribeInfo_0100, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.GetSubscribeInfo(infos);
     EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
 }

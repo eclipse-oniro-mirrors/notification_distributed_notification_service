@@ -21,6 +21,7 @@
 namespace OHOS {
 namespace Notification {
 namespace {
+using ExtensionSubscriptionVectorPtr = std::vector<sptr<NotificationExtensionSubscriptionInfo>>;
 const static std::string KEY_UNDER_LINE = "_";
 } // namespace
 
@@ -222,6 +223,52 @@ int32_t NotificationPreferencesInfo::BundleInfo::GetBundleUid() const
     return uid_;
 }
 
+const ExtensionSubscriptionVectorPtr& NotificationPreferencesInfo::BundleInfo::GetExtensionSubscriptionInfos() const
+{
+    return extensionSubscriptionInfos_;
+}
+
+std::string NotificationPreferencesInfo::BundleInfo::GetExtensionSubscriptionInfosJson() const
+{
+    auto jsonObject = nlohmann::json::array();
+    for (const auto& item : extensionSubscriptionInfos_) {
+        nlohmann::json jsonNode;
+        item->ToJson(jsonNode);
+        jsonObject.emplace_back(jsonNode);
+    }
+    return jsonObject.dump();
+}
+
+void NotificationPreferencesInfo::BundleInfo::SetExtensionSubscriptionInfos(
+    const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos)
+{
+    extensionSubscriptionInfos_ = infos;
+}
+
+bool NotificationPreferencesInfo::BundleInfo::SetExtensionSubscriptionInfosFromJson(const std::string& json)
+{
+    if (json.empty() || !nlohmann::json::accept(json)) {
+        ANS_LOGE("Invalid json string");
+        return false;
+    }
+    nlohmann::json jsonObject = nlohmann::json::parse(json, nullptr, false);
+    if (jsonObject.is_null() || jsonObject.empty()) {
+        ANS_LOGE("Invalid JSON object");
+        return false;
+    }
+    if (jsonObject.is_discarded() || !jsonObject.is_array()) {
+        ANS_LOGE("Parse extension subscription info list failed due to data is discarded or not array");
+        return false;
+    }
+
+    extensionSubscriptionInfos_.clear();
+    for (const auto &item : jsonObject) {
+        extensionSubscriptionInfos_.emplace_back(NotificationExtensionSubscriptionInfo::FromJson(item));
+    }
+
+    return true;
+}
+
 void NotificationPreferencesInfo::SetBundleInfo(BundleInfo &info)
 {
     std::string bundleKey = info.GetBundleName().append(std::to_string(info.GetBundleUid()));
@@ -393,6 +440,7 @@ void NotificationPreferencesInfo::GetAllCLoneBundlesInfo(const int32_t &userId,
                 (slot->GetAuthorizedStatus() ==NotificationSlot::AuthorizedStatus::AUTHORIZED);
             cloneBundleInfo.AddSlotInfo(slotInfo);
         }
+        cloneBundleInfo.SetExtensionSubscriptionInfos(iter->second.GetExtensionSubscriptionInfos());
         auto silentReminderIter = silentReminderInfos_.find(bundleItem.second);
         if (silentReminderIter != silentReminderInfos_.end()) {
             auto enableStatus = silentReminderIter->second.enableStatus;

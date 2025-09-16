@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2024-2024 Huawei Device Co., Ltd.
+* Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace Notification {
-
+using ExtensionSubscriptionVectorPtr = std::vector<sptr<NotificationExtensionSubscriptionInfo>>;
 namespace {
 constexpr const char *BUNDLE_INFO_NAME = "name";
 constexpr const char *BUNDLE_INFO_APP_INDEX = "index";
@@ -33,6 +33,7 @@ constexpr const char *BUNDLE_INFO_SLOT_ENABLE = "slotEnable";
 constexpr const char *BUNDLE_INFO_SLOT_CONTROL = "slotControl";
 constexpr const char *BUNDLE_INFO_SILENT_REMINDER = "enabledSilentReminder";
 constexpr const char *BUNDLE_INFO_SLOT_AUTHSTATUS = "slotAuthorized";
+constexpr const char *BUNDLE_INFO_SUBSCRIPTION_INFO = "extensionSubscriptionInfo";
 constexpr int32_t CONST_ENABLE_INT = 1;
 }
 void NotificationCloneBundleInfo::SetBundleName(const std::string &name)
@@ -124,6 +125,17 @@ std::vector<NotificationCloneBundleInfo::SlotInfo> NotificationCloneBundleInfo::
     return slotsInfo_;
 }
 
+void NotificationCloneBundleInfo::SetExtensionSubscriptionInfos(
+    const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos)
+{
+    extensionSubscriptionInfos_ = infos;
+}
+
+const ExtensionSubscriptionVectorPtr& NotificationCloneBundleInfo::GetExtensionSubscriptionInfos() const
+{
+    return extensionSubscriptionInfos_;
+}
+
 void NotificationCloneBundleInfo::ToJson(nlohmann::json &jsonObject) const
 {
     if (!slotsInfo_.empty()) {
@@ -137,6 +149,16 @@ void NotificationCloneBundleInfo::ToJson(nlohmann::json &jsonObject) const
             jsonNodes.emplace_back(jsonNode);
         }
         jsonObject[BUNDLE_INFO_SLOT_LIST] = jsonNodes;
+    }
+
+    if (!extensionSubscriptionInfos_.empty()) {
+        nlohmann::json jsonNodes = nlohmann::json::array();
+        for (const auto& info : extensionSubscriptionInfos_) {
+            nlohmann::json jsonNode;
+            info->ToJson(jsonNode);
+            jsonNodes.emplace_back(jsonNode);
+        }
+        jsonObject[BUNDLE_INFO_SUBSCRIPTION_INFO] = jsonNodes;
     }
 
     jsonObject[BUNDLE_INFO_NAME] =  bundleName_;
@@ -172,6 +194,17 @@ void NotificationCloneBundleInfo::SlotsFromJson(const nlohmann::json &jsonObject
             slotInfo.authorizedStatus_ = (auth == CONST_ENABLE_INT);
         }
         slotsInfo_.emplace_back(slotInfo);
+    }
+}
+
+void NotificationCloneBundleInfo::SubscriptionInfosFromJson(const nlohmann::json &jsonObject)
+{
+    if (!jsonObject.contains(BUNDLE_INFO_SUBSCRIPTION_INFO) || !jsonObject[BUNDLE_INFO_SUBSCRIPTION_INFO].is_array()) {
+        return;
+    }
+
+    for (auto &infoJson : jsonObject.at(BUNDLE_INFO_SUBSCRIPTION_INFO)) {
+        extensionSubscriptionInfos_.emplace_back(NotificationExtensionSubscriptionInfo::FromJson(infoJson));
     }
 }
 
@@ -215,6 +248,7 @@ void NotificationCloneBundleInfo::FromJson(const nlohmann::json &jsonObject)
         }
     }
     SlotsFromJson(jsonObject);
+    SubscriptionInfosFromJson(jsonObject);
 }
 std::string NotificationCloneBundleInfo::SlotInfo::Dump() const
 {

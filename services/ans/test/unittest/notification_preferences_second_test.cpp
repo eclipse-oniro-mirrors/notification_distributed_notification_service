@@ -192,5 +192,128 @@ HWTEST_F(NotificationPreferencesTest, GetDistributedDevicelist_0800, Function | 
     ASSERT_EQ(ret, ERR_OK);
     ASSERT_EQ(deviceTypes.size(), 1);
 }
+
+/**
+ * @tc.name: GetExtensionSubscriptionInfos_0100
+ * @tc.desc: Test GetExtensionSubscriptionInfos with bundleOption nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionInfos_0100, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    NotificationPreferences notificationPreferences;
+    auto ret = notificationPreferences.GetExtensionSubscriptionInfos(bundleOption, infos);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetExtensionSubscriptionInfos_0200
+ * @tc.desc: Test GetExtensionSubscriptionInfos with bundleName empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionInfos_0200, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("", 1);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    NotificationPreferences notificationPreferences;
+    auto ret = notificationPreferences.GetExtensionSubscriptionInfos(bundleOption, infos);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetExtensionSubscriptionInfos_0300
+ * @tc.desc: Test GetExtensionSubscriptionInfos without dbSet.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionInfos_0300, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 1);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    NotificationPreferences notificationPreferences;
+    auto ret = notificationPreferences.GetExtensionSubscriptionInfos(bundleOption, infos);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_TRUE(infos.empty());
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionInfos_0100
+ * @tc.desc: Test SetExtensionSubscriptionInfos with bundleOption nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionInfos_0100, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    NotificationPreferences notificationPreferences;
+    auto ret = notificationPreferences.SetExtensionSubscriptionInfos(bundleOption, infos);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionInfos_0200
+ * @tc.desc: Test SetExtensionSubscriptionInfos with bundleName empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionInfos_0200, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("", 1);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    NotificationPreferences notificationPreferences;
+    auto ret = notificationPreferences.SetExtensionSubscriptionInfos(bundleOption, infos);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionInfos_0300
+ * @tc.desc: Test SetExtensionSubscriptionInfos.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionInfos_0300, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 1);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    auto type = NotificationConstant::SubscribeType::BLUETOOTH;
+    infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo("addr", type));
+    NotificationPreferences notificationPreferences;
+    auto ret = notificationPreferences.SetExtensionSubscriptionInfos(bundleOption, infos);
+    EXPECT_EQ(ret, ERR_OK);
+
+    infos.clear();
+    ret = notificationPreferences.GetExtensionSubscriptionInfos(bundleOption, infos);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_FALSE(infos.empty());
+    EXPECT_EQ(infos.size(), 1);
+}
+
+/**
+ * @tc.name: ClearExtensionSubscriptionInfos_0100
+ * @tc.desc: Test ClearExtensionSubscriptionInfos.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, ClearExtensionSubscriptionInfos_0100, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 1);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    auto type = NotificationConstant::SubscribeType::BLUETOOTH;
+    infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo("addr", type));
+    NotificationPreferences notificationPreferences;
+    auto ret = notificationPreferences.SetExtensionSubscriptionInfos(bundleOption, infos);
+    EXPECT_EQ(ret, ERR_OK);
+
+    infos.clear();
+    ret = notificationPreferences.GetExtensionSubscriptionInfos(bundleOption, infos);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_FALSE(infos.empty());
+    EXPECT_EQ(infos.size(), 1);
+
+    infos.clear();
+    ret = notificationPreferences.ClearExtensionSubscriptionInfos(bundleOption);
+    EXPECT_EQ(ret, ERR_OK);
+    
+    ret = notificationPreferences.GetExtensionSubscriptionInfos(bundleOption, infos);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_TRUE(infos.empty());
+}
 } // namespace Notification
 } // namespace OHOS

@@ -22,6 +22,7 @@
 #include "ans_dialog_host_client.h"
 #include "ans_subscriber_listener.h"
 #include "ians_manager.h"
+#include "notification_extension_subscription_info.h"
 #include "notification_local_live_view_subscriber.h"
 #include "notification_subscriber.h"
 #include "want_params.h"
@@ -1434,6 +1435,28 @@ public:
      * @return Returns set result.
      */
     ErrCode GetLiveViewConfig(const std::vector<std::string>& bundleList);
+
+    /**
+     * @brief Subscribe the notification when the bluetooth addr is connected.
+     *
+     * @param infos The info to be subscribe.
+     * @return Returns subscribe result.
+     */
+    ErrCode NotificationExtensionSubscribe(const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
+
+    /**
+     * @brief Unsubscribe the notification.
+     *
+     * @return Returns unsubscribe result.
+     */
+    ErrCode NotificationExtensionUnsubscribe();
+
+    /**
+     * @brief Obtains the subscribe info for app.
+     * @param infos The returned subscribe info.
+     * @return Returns get result.
+     */
+    ErrCode GetSubscribeInfo(std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
 
 private:
     /**

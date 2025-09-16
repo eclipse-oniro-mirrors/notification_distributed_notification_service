@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -747,6 +747,38 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00002, Function | SmallTest | Level
     ans.UpdateCloneBundleInfo(cloneBundleInfo);
     SleepForFC();
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("UpdateCloneBundleInfo_00002", 1);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
+    ASSERT_EQ(static_cast<int32_t>(state), 0);
+}
+
+/**
+ * @tc.name: UpdateCloneBundleInfo_00003
+ * @tc.desc: Test UpdateCloneBundleInfo
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00003, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService ans;
+    NotificationCloneBundleInfo cloneBundleInfo;
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    auto type = NotificationConstant::SubscribeType::BLUETOOTH;
+    infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo("addr", type));
+    cloneBundleInfo.SetBundleName("UpdateCloneBundleInfo_00003");
+    cloneBundleInfo.SetUid(1);
+    cloneBundleInfo.SetIsShowBadge(true);
+    cloneBundleInfo.SetEnableNotification(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    cloneBundleInfo.SetSlotFlags(63);
+    cloneBundleInfo.SetExtensionSubscriptionInfos(infos);
+    NotificationCloneBundleInfo::SlotInfo info;
+    info.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    info.enable_ = true;
+    cloneBundleInfo.AddSlotInfo(info);
+    ans.notificationSvrQueue_ = nullptr;
+    ans.UpdateCloneBundleInfo(cloneBundleInfo);
+    SleepForFC();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("UpdateCloneBundleInfo_00003", 1);
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
     ASSERT_EQ(static_cast<int32_t>(state), 0);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -529,6 +529,36 @@ HWTEST_F(AnsLogTest, AnsConvertTest_015, TestSize.Level1)
     inType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_INSTANT_BANNER;
     NotificationNapi::AnsEnumUtil::LiveViewTypesCToJS(inType, outType);
     EXPECT_EQ(outType, NotificationNapi::LiveViewTypes::LIVE_VIEW_INSTANT_BANNER);
+}
+
+/*
+ * @tc.name: AnsConvertTest_016
+ * @tc.desc: test SubscribeTypeJSToC function
+ * @tc.type: FUNC
+ * @tc.require: issueI5UI8T
+ */
+HWTEST_F(AnsLogTest, AnsConvertTest_016, TestSize.Level1)
+{
+    NotificationNapi::SubscribeType inType = NotificationNapi::SubscribeType::BLUETOOTH;
+    NotificationConstant::SubscribeType outType;
+    auto ret = NotificationNapi::AnsEnumUtil::SubscribeTypeJSToC(inType, outType);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(outType, NotificationConstant::SubscribeType::BLUETOOTH);
+}
+
+/*
+ * @tc.name: AnsConvertTest_017
+ * @tc.desc: test SubscribeTypeCToJS function
+ * @tc.type: FUNC
+ * @tc.require: issueI5UI8T
+ */
+HWTEST_F(AnsLogTest, AnsConvertTest_017, TestSize.Level1)
+{
+    NotificationConstant::SubscribeType inType = NotificationConstant::SubscribeType::BLUETOOTH;
+    NotificationNapi::SubscribeType outType;
+    auto ret = NotificationNapi::AnsEnumUtil::SubscribeTypeCToJS(inType, outType);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(outType, NotificationNapi::SubscribeType::BLUETOOTH);
 }
 }
 }

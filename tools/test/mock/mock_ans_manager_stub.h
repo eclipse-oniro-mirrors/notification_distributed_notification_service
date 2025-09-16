@@ -654,6 +654,22 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode NotificationExtensionSubscribe(
+        const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode NotificationExtensionUnsubscribe() override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetSubscribeInfo(std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     ErrCode RegisterSwingCallback(const sptr<IRemoteObject>& swingCallback) override
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -141,6 +141,10 @@ enum class SwitchState {
     USER_MODIFIED_ON,
     SYSTEM_DEFAULT_OFF,
     SYSTEM_DEFAULT_ON
+};
+
+enum class SubscribeType {
+    BLUETOOTH = 0
 };
 
 class AnsEnumUtil {
@@ -297,6 +301,24 @@ public:
      * @return Returns true if success, returns false otherwise
      */
     static bool LiveViewTypesCToJS(const NotificationLocalLiveViewContent::LiveViewTypes &in, LiveViewTypes &out);
+
+    /**
+     * @brief Converts subscribe types from js to native
+     *
+     * @param inType Indicates a js subscribe type object
+     * @param outType Indicates a subscribe type object
+     * @return Returns true if success, returns false otherwise
+     */
+    static bool SubscribeTypeJSToC(const SubscribeType &inType, NotificationConstant::SubscribeType &outType);
+
+    /**
+     * @brief Converts subscribe status type from native to js
+     *
+     * @param inType Indicates a native subscribe status object
+     * @param outType Indicates a js subscribe status object
+     * @return Returns true if success, returns false otherwise
+     */
+    static bool SubscribeTypeCToJS(const NotificationConstant::SubscribeType &inType, SubscribeType &outType);
 };
 }
 }

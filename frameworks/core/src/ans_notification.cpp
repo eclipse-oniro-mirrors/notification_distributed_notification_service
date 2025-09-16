@@ -2593,5 +2593,49 @@ ErrCode AnsNotification::GetDistributedDevicelist(std::vector<std::string> &devi
     }
     return proxy->GetDistributedDevicelist(deviceTypes);
 }
+
+ErrCode AnsNotification::NotificationExtensionSubscribe(
+    const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos)
+{
+    ANS_LOGD("called");
+    if (infos.empty()) {
+        ANS_LOGE("Invalid infos.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->NotificationExtensionSubscribe(infos);
+}
+
+ErrCode AnsNotification::NotificationExtensionUnsubscribe()
+{
+    ANS_LOGD("called");
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->NotificationExtensionUnsubscribe();
+}
+
+ErrCode AnsNotification::GetSubscribeInfo(std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos)
+{
+    ANS_LOGD("called");
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->GetSubscribeInfo(infos);
+}
 }  // namespace Notification
 }  // namespace OHOS
