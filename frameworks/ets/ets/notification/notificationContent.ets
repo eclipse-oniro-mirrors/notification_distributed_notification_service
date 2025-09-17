@@ -16,6 +16,7 @@
 import image from '@ohos.multimedia.image';
 import { Resource } from 'global.resource';
 import type notificationManager from '@ohos.notificationManager';
+import { WantAgent } from '@ohos.app.ability.wantAgent';
 
 type IconType = Resource | image.PixelMap;
 
@@ -108,7 +109,7 @@ export interface NotificationLiveViewContent extends NotificationBasicContent {
 
     status: LiveViewStatus;
 
-    version?: number;
+    version?: int;
 
     extraInfo?: Record<string, Object>;
 
@@ -131,7 +132,7 @@ class NotificationLiveViewContentInner implements NotificationLiveViewContent {
 
     public status: LiveViewStatus = LiveViewStatus.LIVE_VIEW_CREATE;
 
-    public version?: number | undefined;
+    public version?: int | undefined;
 
     public extraInfo?: Record<string, Object> | undefined;
 
@@ -147,6 +148,8 @@ export interface NotificationMultiLineContent extends NotificationBasicContent {
     longTitle: string;
 
     lines: Array<string>;
+
+    lineWantAgents?: Array<WantAgent>;
 }
 
 class NotificationMultiLineContentInner implements NotificationMultiLineContent {
@@ -166,6 +169,8 @@ class NotificationMultiLineContentInner implements NotificationMultiLineContent 
     public longTitle: string = '';
 
     public lines: Array<string> = {};
+
+    public lineWantAgents?: Array<WantAgent> = {};
 }
 
 export interface NotificationPictureContent extends NotificationBasicContent {
@@ -202,7 +207,7 @@ class NotificationPictureContentInner implements NotificationPictureContent {
 
 export interface NotificationSystemLiveViewContent extends NotificationBasicContent {
 
-    typeCode: number;
+    typeCode: int;
 
     capsule?: NotificationCapsule;
 
@@ -239,7 +244,7 @@ class NotificationSystemLiveViewContentInner implements NotificationSystemLiveVi
 
     public picture: image.PixelMap = this.CreatePixelMap();
 
-    public typeCode: number = 0;
+    public typeCode: int = 0;
 
     public capsule?: NotificationCapsule | undefined;
 
@@ -264,7 +269,7 @@ export interface NotificationCapsule {
 
     content?: string;
 
-    time?: number;
+    time?: int;
 
     capsuleButtons?: Array<NotificationIconButton>;
 }
@@ -279,7 +284,7 @@ class NotificationCapsuleInner implements NotificationCapsule {
 
     public content?: string | undefined;
 
-    public time?: number | undefined;
+    public time?: int | undefined;
 
     public capsuleButtons?: Array<NotificationIconButton> | undefined;
 }
@@ -331,7 +336,7 @@ class NotificationButtonInner implements NotificationButton {
 
 export interface NotificationTime {
 
-    initialTime?: number;
+    initialTime?: int;
 
     isCountDown?: boolean;
 
@@ -342,7 +347,7 @@ export interface NotificationTime {
 
 class NotificationTimeInner implements NotificationTime {
 
-    public initialTime?: number | undefined;
+    public initialTime?: int | undefined;
 
     public isCountDown?: boolean | undefined;
 
@@ -353,18 +358,18 @@ class NotificationTimeInner implements NotificationTime {
 
 export interface NotificationProgress {
 
-    maxValue?: number;
+    maxValue?: int;
 
-    currentValue?: number;
+    currentValue?: int;
 
     isPercentage?: boolean;
 }
 
 class NotificationProgressInner implements NotificationProgress {
 
-    public maxValue?: number | undefined;
+    public maxValue?: int | undefined;
 
-    public currentValue?: number | undefined;
+    public currentValue?: int | undefined;
 
     public isPercentage?: boolean | undefined;
 }

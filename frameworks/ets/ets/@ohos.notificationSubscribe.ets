@@ -29,7 +29,7 @@ const rejectInternalError: BusinessError<string> = {code: ERROR_INTERNAL_ERROR, 
 const callbackInternalError: BusinessError = {code: ERROR_INTERNAL_ERROR, data: undefined};
 const successCallbackError: BusinessError = {code: ERROR_OK, data: undefined};
 
-const errorParamInvalid: BusinessError<string> = {code: ERROR_PARAM_INVALID, data: "Invalid parameter"};
+const errorParamInvalid: BusinessError<string> = {code: ERROR_PARAM_INVALID, message: "Invalid parameter"};
 
 function isInvalidParameter(bundle: BundleOption): BusinessError
 {
@@ -52,15 +52,23 @@ function isInvalidParameter(bundle: BundleOption): BusinessError
     return error;
 }
 
+function isInvalidParameter(info?: NotificationSubscribeInfo): boolean
+{
+    if (info != undefined && info?.deviceType != undefined && info?.deviceType?.length === 0) {
+        return false;
+    }
+    return true;
+}
+
 export default namespace notificationSubscribe {
     loadLibraryWithPermissionCheck("notification_subscribe_ani.z", "@ohos.notificationSubscribe")
     export interface NotificationKey {
-        id: number;
+        id: int;
         label?: string;
     }
 
     class NotificationKeyInner implements NotificationKey {
-        id: number = -1;
+        id: int = -1;
         label?: string;
     }
 
@@ -81,7 +89,7 @@ export default namespace notificationSubscribe {
     export native function nativeUnSubscribe(subscriber: NotificationSubscriber): void
     export native function nativeSubscribeSelf(subscriber: NotificationSubscriber): void
     export native function nativeRemoveAllForBundle(bundle?: BundleOption): void;
-    export native function nativeRemoveAllForUserId(userId: number): void;
+    export native function nativeRemoveAllForUserId(userId: int): void;
     export native function nativeRemoveAll(): void;
 
     export function subscribe(subscriber: NotificationSubscriber, callback: AsyncCallback<void>): void {
@@ -106,6 +114,9 @@ export default namespace notificationSubscribe {
         if (subscriber == undefined || info == undefined || callback == undefined) {
             throw errorParamInvalid;
         }
+        if (!isInvalidParameter(info)) {
+            throw errorParamInvalid;
+        }
         let p = taskpool.execute((): void => { notificationSubscribe.nativeSubscribe(subscriber, info) });
         p.then(
             (e: NullishType): void => {
@@ -118,6 +129,9 @@ export default namespace notificationSubscribe {
     }
     export function subscribe(subscriber: NotificationSubscriber, info?: NotificationSubscribeInfo): Promise<void> {
         if (subscriber == undefined) {
+            throw errorParamInvalid;
+        }
+        if (!isInvalidParameter(info)) {
             throw errorParamInvalid;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void =>{
@@ -283,7 +297,7 @@ export default namespace notificationSubscribe {
     }
 
     export function distributeOperation(hashcode: string, operationInfo?: OperationInfo): Promise<void> {
-        if (hashcode == undefined) {
+        if (hashcode == undefined || hashcode.length === 0) {
             throw errorParamInvalid;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
@@ -316,10 +330,117 @@ export default namespace notificationSubscribe {
     export interface OperationInfo {
         actionName?: string;
         userInput?: string;
+        operationType?: int;
+        buttonIndex?: int;
     }
 
     class OperationInfoInner implements OperationInfo {
-        public actionName?: string;
-        public userInput?: string;
+        public actionName?: string | undefined;
+        public userInput?: string | undefined;
+        public operationType?: int | undefined;
+        public buttonIndex?: int | undefined;
+    }
+
+    export function subscribeSelf(subscriber: NotificationSubscriber): Promise<void> {
+        if (subscriber == undefined) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void =>{
+            let p = taskpool.execute((): void => { notificationSubscribe.nativeSubscribeSelf(subscriber)});
+            p.then(
+                (e: NullishType): void => {
+                    resolve(undefined);
+                }, (error: Error): void => {
+                    reject(error);
+                }
+            )
+        });
+        return pPromise;
+    }
+
+    export function removeAll(bundle: BundleOption, callback: AsyncCallback<void>): void {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        if (callback == undefined) {
+            throw errorParamInvalid;
+        }
+        let p = taskpool.execute((): void => {
+            return notificationSubscribe.nativeRemoveAllForBundle(bundle);
+        });
+        p.then(
+            (e: NullishType): void => {
+                callback(null, undefined);
+            }, (error: Object): void => {
+                let err: BusinessError = error as BusinessError;
+                callback(err, undefined);
+            }
+        )
+    }
+
+	export function removeAll(bundle?: BundleOption): Promise<void>
+    {
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => {
+                if (bundle == undefined) {
+                    return notificationSubscribe.nativeRemoveAll();
+                } else {
+                    return notificationSubscribe.nativeRemoveAllForBundle(bundle);
+                }
+            });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function removeAll(callback: AsyncCallback<void>): void {
+        if (callback == undefined) {
+            throw errorParamInvalid;
+        }
+        let p = taskpool.execute((): void => {
+            return notificationSubscribe.nativeRemoveAll();
+        });
+        p.then(
+            (e: NullishType): void => {
+                callback(null, undefined);
+            }, (error: Object): void => {
+                let err: BusinessError = error as BusinessError;
+                callback(err, undefined);
+            }
+        )
+    }
+
+    export function removeAll(userId: int, callback: AsyncCallback<void>): void {
+        if (callback == undefined) {
+            throw errorParamInvalid;
+        }
+        let p = taskpool.execute((): void => {
+            return notificationSubscribe.nativeRemoveAllForUserId(userId);
+        });
+        p.then(
+            (e: NullishType): void => {
+                callback(null, undefined);
+            }, (error: Object): void => {
+                let err: BusinessError = error as BusinessError;
+                callback(err, undefined);
+            }
+        )
+    }    
+
+    export function removeAll(userId: int): Promise<void> {
+    let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+        let p = taskpool.execute((): void => { return notificationSubscribe.nativeRemoveAllForUserId(userId); });
+        p.then((data: NullishType): void => {
+            resolve(undefined);
+        }, (error: Error): void => {
+            reject(error);
+        });
+    });
+        return pPromise;
     }
 }

@@ -25,24 +25,24 @@
 namespace OHOS {
 namespace NotificationSubScribeSts {
 static const char *REMOVE_FOR_BUNDLE_SIGNATURE =
-    "Lnotification/NotificationCommonDef/BundleOption;"
-    "L@ohos/notificationSubscribe/notificationSubscribe/NotificationKey;"
-    "L@ohos/notificationSubscribe/notificationSubscribe/RemoveReason;:V";
+    "C{notification.NotificationCommonDef.BundleOption}"
+    "C{@ohos.notificationSubscribe.notificationSubscribe.NotificationKey}"
+    "C{@ohos.notificationSubscribe.notificationSubscribe.RemoveReason}:";
 static const char *REMOVE_FOR_HASHCODE_SIGNATURE =
-    "Lstd/core/String;L@ohos/notificationSubscribe/notificationSubscribe/RemoveReason;:V";
+    "C{std.core.String}C{@ohos.notificationSubscribe.notificationSubscribe.RemoveReason}:";
 static const char *REMOVE_FOR_HASHCODES_SIGNATURE =
-    "Lescompat/Array;L@ohos/notificationSubscribe/notificationSubscribe/RemoveReason;:V";
+    "C{escompat.Array}C{@ohos.notificationSubscribe.notificationSubscribe.RemoveReason}:";
 static const char *DISTRIBUTE_OPERATION_SIGNATURE =
-    "Lstd/core/String;L@ohos/notificationSubscribe/notificationSubscribe/OperationInfo;:Lstd/core/Promise;";
+    "C{std.core.String}C{@ohos.notificationSubscribe.notificationSubscribe.OperationInfo}:C{std.core.Promise}";
 static const char *SUBSCRIBE_SIGNATURE =
-   "Lnotification/notificationSubscriber/NotificationSubscriber;"
-   "Lnotification/notificationSubscribeInfo/NotificationSubscribeInfo;:V";
+   "C{notification.notificationSubscriber.NotificationSubscriber}"
+   "C{notification.notificationSubscribeInfo.NotificationSubscribeInfo}:";
 static const char *UNSUBSCRIBE_SIGNATURE =
-   "Lnotification/notificationSubscriber/NotificationSubscriber;:V";
+   "C{notification.notificationSubscriber.NotificationSubscriber}:";
 static const char *REMOVEALL_FOR_BUNDLEOPTION_SIGNATURE =
-   "Lnotification/NotificationCommonDef/BundleOption;:V";
-static const char *REMOVEALL_FOR_USERID_STGNATURE = "D:V";
-static const char *REMOVEALL_SIGNATURE = ":V";
+   "C{notification.NotificationCommonDef.BundleOption}:";
+static const char *REMOVEALL_FOR_USERID_STGNATURE = "i:";
+static const char *REMOVEALL_SIGNATURE = ":";
 
 ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object operationInfo)
 {
@@ -69,7 +69,7 @@ ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object 
 
     ani_vm *vm = nullptr;
     if (ANI_OK != env->GetVM(&vm)) {
-        ANS_LOGD("env GetVM faild");
+        ANS_LOGE("env GetVM faild");
         return nullptr;
     }
     callback->SetVm(vm);
@@ -103,10 +103,10 @@ void AniSubscribeSelf(ani_env *env, ani_object obj)
 void AniSubScribeRegistryInit(ani_env *env)
 {
     ANS_LOGD("AniSubScribeRegistryInit call");
-    static const char *npName = "L@ohos/notificationSubscribe/notificationSubscribe;";
+    static const char *npName = "@ohos.notificationSubscribe.notificationSubscribe";
     ani_namespace np;
     if (ANI_OK != env->FindNamespace(npName, &np)) {
-        ANS_LOGD("Not found '%{public}s'", npName);
+        ANS_LOGE("Not found '%{public}s'", npName);
         return;
     }
 
@@ -132,13 +132,13 @@ void AniSubScribeRegistryInit(ani_env *env)
     ANS_LOGD("Start bind native methods to '%{public}s'", npName);
     ani_status status = env->Namespace_BindNativeFunctions(np, methods.data(), methods.size());
     if (ANI_OK != status) {
-        ANS_LOGD("Cannot bind native methods to '%{public}s'. status %{public}d", npName, status);
+        ANS_LOGE("Cannot bind native methods to '%{public}s'. status %{public}d", npName, status);
         return;
     };
     ANS_LOGD("Finish bind native methods to '%{public}s'", npName);
 
     if (env->ResetError() != ANI_OK) {
-        ANS_LOGD("ResetError failed");
+        ANS_LOGE("ResetError failed");
     }
     ANS_LOGD("AniSubScribeRegistryInit end");
 }
@@ -151,7 +151,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     ANS_LOGD("ANI_Constructor enter");
     ani_env *env;
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-        ANS_LOGD("Unsupported ANI_VERSION_1");
+        ANS_LOGE("Unsupported ANI_VERSION_1");
         return ANI_ERROR;
     }
 

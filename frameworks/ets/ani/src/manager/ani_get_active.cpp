@@ -22,17 +22,17 @@
 
 namespace OHOS {
 namespace NotificationManagerSts {
-ani_double AniGetActiveNotificationCount(ani_env *env)
+ani_long AniGetActiveNotificationCount(ani_env *env)
 {
     ANS_LOGD("sts GetActiveNotificationCount call");
     uint64_t num = 0;
     int returncode = OHOS::Notification::NotificationHelper::GetActiveNotificationNums(num);
-    ANS_LOGD("sts GetActiveNotificationCount end, num: %{public}" PRIu64, num);
-    ani_double retNum = static_cast<ani_double>(num);
+    ANS_LOGD("sts GetActiveNotificationCount end, num: %{public}llu", num);
+    ani_long retNum = static_cast<ani_long>(num);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        ANS_LOGE("AniSetNotificationEnableSlotSync error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("AniGetActiveNotificationCount error, errorCode: %{public}d", externalCode);
         return 0;
     }
     return retNum;
@@ -102,7 +102,7 @@ ani_object AniGetActiveNotificationByFilter(ani_env *env, ani_object obj)
     int returncode = Notification::NotificationHelper::GetActiveNotificationByFilter(filter, notificationRequest);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniGetActiveNotificationByFilter -> error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("AniGetActiveNotificationByFilter error, errorCode: %{public}d", externalCode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return nullptr;
     }

@@ -19,7 +19,8 @@
 
 namespace OHOS {
 namespace NotificationSts {
-bool GetKeySToRecode(ani_env *env, const std::shared_ptr<NotificationSortingMap> &sortingMap, ani_object &recordObj)
+bool GetKeySToRecode(ani_env *env,
+    const std::shared_ptr<NotificationSortingMap> &sortingMap, ani_object &recordObj, ani_method &recordSetMethod)
 {
     ani_status status = ANI_ERROR;
     std::vector<std::string> keys = sortingMap->GetKey();
@@ -43,8 +44,7 @@ bool GetKeySToRecode(ani_env *env, const std::shared_ptr<NotificationSortingMap>
             ANS_LOGE("GetAniString faild. key: %{public}s", it.c_str());
             return false;
         }
-        if (ANI_OK != (status = env->Object_CallMethodByName_Void(
-            recordObj, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", keyString, sortingObj))) {
+        if (ANI_OK != (status = env->Object_CallMethod_Void(recordObj, recordSetMethod, keyString, sortingObj))) {
             ANS_LOGE("set key value faild. key: %{public}s status %{public}d", it.c_str(), status);
             return false;
         }
@@ -65,16 +65,21 @@ bool WarpNotificationSortingMap(ani_env *env,
     }
 
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationSortingMap/NotificationSortingMapInner;", cls, outObj)) {
+        "notification.notificationSortingMap.NotificationSortingMapInner", cls, outObj)) {
         ANS_LOGE("CreateClassObjByClassName faild.");
         return false;
     }
 
-    if (!CreateClassObjByClassName(env, "Lescompat/Record;", recordCls, recordObj) || recordObj == nullptr) {
+    if (!CreateClassObjByClassName(env, "escompat.Record", recordCls, recordObj) || recordObj == nullptr) {
         ANS_LOGE("Create recordObj faild.");
         return false;
     }
-    if (!GetKeySToRecode(env, sortingMap, recordObj)) {
+    ani_method recordSetMethod = nullptr;
+    if (ANI_OK != (status = env->Class_FindMethod(recordCls, "$_set", nullptr, &recordSetMethod))) {
+        ANS_LOGE("Find recordObj setMethod faild.");
+        return false;
+    }
+    if (!GetKeySToRecode(env, sortingMap, recordObj, recordSetMethod)) {
         ANS_LOGE("GetKeySToRecode failed.");
         return false;
     }
@@ -86,7 +91,7 @@ bool WarpNotificationSortingMap(ani_env *env,
     if (!keys.empty()) {
         ani_object arrayObj = GetAniStringArrayByVectorString(env, keys);
         if (arrayObj == nullptr) {
-            ANS_LOGE("WarpVectorStringToSts sortedHashCode faild");
+            ANS_LOGE("GetAniStringArrayByVectorString sortedKey faild");
             return false;
         }
         if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "sortedHashCode", arrayObj))) {

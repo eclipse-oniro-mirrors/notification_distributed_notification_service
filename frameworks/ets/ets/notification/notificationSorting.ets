@@ -18,26 +18,26 @@ import { NotificationSlot } from 'notification.notificationSlot';
 export interface NotificationSorting {
     readonly slot: NotificationSlot;
     readonly hashCode: string;
-    readonly ranking: number;
+    readonly ranking: long;
 }
 
 class NotificationSortingInner implements NotificationSorting {
     public readonly slot: NotificationSlot = {
-            notificationType: undefined,
-            notificationLevel: undefined,
-            desc: undefined,
-            badgeFlag: undefined,
-            bypassDnd: undefined,
-            lockscreenVisibility: undefined,
-            vibrationEnabled: undefined,
-            sound: undefined,
-            lightEnabled: undefined,
-            lightColor: undefined,
-            vibrationValues: undefined,
-            enabled: undefined,
-            reminderMode: undefined,
-            authorizedStatus: undefined
-        };
+        notificationType: undefined,
+        notificationLevel: undefined,
+        desc: undefined,
+        badgeFlag: undefined,
+        bypassDnd: undefined,
+        lockscreenVisibility: undefined,
+        vibrationEnabled: undefined,
+        sound: undefined,
+        lightEnabled: undefined,
+        lightColor: undefined,
+        vibrationValues: undefined,
+        enabled: undefined,
+        reminderMode: undefined,
+        authorizedStatus: undefined
+    };
     public readonly hashCode: string = '';
-    public readonly ranking: number = -1;
+    public readonly ranking: long = -1;
 }

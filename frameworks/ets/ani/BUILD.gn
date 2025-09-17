@@ -16,6 +16,7 @@ import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 
 ohos_shared_library("notification_manager_ani") {
+  shlib_type = "ani"
   branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
@@ -49,7 +50,6 @@ ohos_shared_library("notification_manager_ani") {
     "./src/manager/ani_push_callback.cpp",
     "./src/manager/ani_remove_group.cpp",
     "./src/manager/ani_request_enable.cpp",
-    "./src/manager/ani_silent_reminder_enable.cpp",
     "./src/manager/ani_slot.cpp",
     "./src/manager/ani_support_template.cpp",
     "./src/manager/ani_sync_config.cpp",
@@ -85,8 +85,36 @@ ohos_shared_library("notification_manager_ani") {
 
   defines = []
 
+  if (distributed_notification_service_disable_control) {
+    defines += [ "DISABLE_NOTIFICATION_FEATURE_ENABLE" ]
+  }
+
+  if (distributed_notification_service_feature_badge_manager) {
+    defines += [ "ANS_FEATURE_BADGE_MANAGER" ]
+  }
+
   if (distributed_notification_service_feature_local_liveview) {
     defines += [ "ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW" ]
+  }
+
+  if (distributed_notification_service_feature_distributed_db) {
+    defines += [ "ANS_FEATURE_DISTRIBUTED_DB" ]
+  }
+
+  if (distributed_notification_service_feature_disturb_manager) {
+    defines += [ "ANS_FEATURE_DISTURB_MANAGER" ]
+  }
+
+  if (distributed_notification_service_feature_slot_manager) {
+    defines += [ "ANS_FEATURE_SLOT_MANAGER" ]
+  }
+
+  if (distributed_notification_service_feature_additional_config) {
+    defines += [ "ANS_FEATURE_ADDITIONAL_CONFIG" ]
+  }
+
+  if (distributed_notification_service_feature_open_notification_settings) {
+    defines += [ "ANS_FEATURE_OPEN_NOTIFICATION_SETTINGS" ]
   }
 
   external_deps = [
@@ -104,8 +132,8 @@ ohos_shared_library("notification_manager_ani") {
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
-    "image_framework:image_taihe",
     "image_framework:image_native",
+    "image_framework:image_taihe",
     "ipc:ipc_core",
     "napi:ace_napi",
     "resource_management:global_resmgr",
@@ -118,6 +146,7 @@ ohos_shared_library("notification_manager_ani") {
 }
 
 ohos_shared_library("notification_subscribe_ani") {
+  shlib_type = "ani"
   branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
@@ -180,8 +209,8 @@ ohos_shared_library("notification_subscribe_ani") {
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image",
-    "image_framework:image_taihe",
     "image_framework:image_native",
+    "image_framework:image_taihe",
     "ipc:ipc_core",
     "napi:ace_napi",
     "resource_management:global_resmgr",

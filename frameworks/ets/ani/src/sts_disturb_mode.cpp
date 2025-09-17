@@ -29,8 +29,8 @@ bool UnwrapDoNotDisturbProfile(ani_env *env, ani_object param,
         return false;
     }
     ani_boolean isUndefined = ANI_TRUE;
-    ani_double idAni = 0.0;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(param, "id", &idAni)) {
+    ani_long idAni = 0;
+    if (ANI_OK != env->Object_GetPropertyByName_Long(param, "id", &idAni)) {
         ANS_LOGE("UnwrapDoNotDisturbProfile: get id failed");
         return false;
     }
@@ -40,7 +40,8 @@ bool UnwrapDoNotDisturbProfile(ani_env *env, ani_object param,
         ANS_LOGE("UnwrapDoNotDisturbProfile: get name failed");
         return false;
     }
-    profile->SetProfileName(nameStr);
+    std::string profileName = GetResizeStr(nameStr, PROFILE_NAME_SIZE);
+    profile->SetProfileName(profileName);
     ani_ref trustlistRef;
     if (ANI_OK != GetPropertyRef(env, param, "trustlist", isUndefined, trustlistRef) || isUndefined == ANI_TRUE) {
         ANS_LOGE("UnwrapDoNotDisturbProfile: get trustlist failed");
@@ -64,16 +65,15 @@ bool UnwrapArrayDoNotDisturbProfile(ani_env *env, ani_object arrayObj,
         return false;
     }
     ani_status status;
-    ani_double length;
-    status = env->Object_GetPropertyByName_Double(arrayObj, "length", &length);
+    ani_int length;
+    status = env->Object_GetPropertyByName_Int(arrayObj, "length", &length);
     if (status != ANI_OK) {
-        ANS_LOGD("UnwrapArrayDoNotDisturbProfile: status = %{public}d", status);
+        ANS_LOGE("UnwrapArrayDoNotDisturbProfile: status = %{public}d", status);
         return false;
     }
-    for (int i = 0; i < static_cast<int>(length); i++) {
+    for (int32_t i = 0; i < length; i++) {
         ani_ref optionRef;
-        status = env->Object_CallMethodByName_Ref(arrayObj, "$_get",
-            "I:Lstd/core/Object;", &optionRef, (ani_int)i);
+        status = env->Object_CallMethodByName_Ref(arrayObj, "$_get", "i:C{std.core.Object}", &optionRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("UnwrapArrayDoNotDisturbProfile: status : %{public}d, index: %{public}d", status, i);
             return false;
@@ -113,7 +113,7 @@ bool WrapProfileTrustList(ani_env* env, sptr<NotificationDoNotDisturbProfile> pr
             return false;
         }
         if (ANI_OK != (status = env->Object_CallMethodByName_Void(arrayObj, "$_set",
-            "ILstd/core/Object;:V", index, bundleObj))) {
+            "iC{std.core.Object}:", index, bundleObj))) {
             ANS_LOGE("WrapProfileTrustList set object faild. index %{public}d status %{public}d",
                 index, status);
             return false;
@@ -137,13 +137,13 @@ bool WrapDoNotDisturbProfile(ani_env* env, sptr<NotificationDoNotDisturbProfile>
         ANS_LOGE("WrapDoNotDisturbProfile: Invalid input parameters");
         return false;
     }
-    const char* className = "L@ohos/notificationManager/notificationManager/DoNotDisturbProfileInner;";
+    const char* className = "@ohos.notificationManager.notificationManager.DoNotDisturbProfileInner";
     if (!CreateClassObjByClassName(env, className, cls, outObj) || outObj == nullptr) {
         ANS_LOGE("WrapDoNotDisturbProfile: Failed to create profile class object");
         return false;
     }
-    ani_double id = static_cast<double>(profile->GetProfileId());
-    if (ANI_OK != (status = env->Object_SetPropertyByName_Double(outObj, "id", id))) {
+    ani_long id = static_cast<ani_long>(profile->GetProfileId());
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Long(outObj, "id", id))) {
         ANS_LOGE("WrapDoNotDisturbProfile : set reason faild. status %{public}d", status);
         return false;
     }

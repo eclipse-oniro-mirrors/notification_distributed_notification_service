@@ -15,8 +15,8 @@
 
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_PUSH_CALLBACK_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_PUSH_CALLBACK_H
+#include <mutex>
 #include <map>
-#include "ffrt.h"
 #include "ani.h"
 #include "push_callback_stub.h"
 #include "notification_constant.h"
@@ -47,7 +47,7 @@ private:
     static bool WarpFunctionResult(ani_env *env, ani_object funcResult, ResultParam &result);
     ani_vm *vm_ = nullptr;
     std::map<NotificationConstant::SlotType, ani_ref> pushCallBackObjects_;
-    ffrt::mutex mutexlock;
+    std::mutex mutexlock;
 };
 
 } // namespace NotificationManagerSts

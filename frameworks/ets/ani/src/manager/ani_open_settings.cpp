@@ -51,7 +51,7 @@ bool CreateUiExtCallback(ani_env *env, std::shared_ptr<SettingsModalExtensionCal
     std::shared_ptr<OHOS::AbilityRuntime::AbilityContext>& abilityContext, std::string &bundleName)
 {
     if (!uiExtCallback->Init(env, info, StsAsyncCompleteCallbackOpenSettings)) {
-        ANS_LOGE("error");
+        ANS_LOGE("Init error");
         info->errorCode = OHOS::Notification::ERROR_INTERNAL_ERROR;
         StsAsyncCompleteCallbackOpenSettings(env, info);
         return false;
@@ -113,7 +113,6 @@ bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> co
 
     Ace::ModalUIExtensionConfig config;
     config.isProhibitBack = true;
-    config.isWindowModeFollowHost = true;
 
     int32_t sessionId = uiContent->CreateModalUIExtension(want, uiExtensionCallbacks, config);
     ANS_LOGI("Create end, sessionId: %{public}d", sessionId);
@@ -129,7 +128,7 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
 {
     ANS_LOGD("enter");
     if (env == nullptr) {
-        ANS_LOGD("env is null");
+        ANS_LOGE("env is null");
         return;
     }
     ani_status status;
@@ -147,19 +146,19 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
         ANS_LOGD("Resolve. errorCode %{public}d", errorCode);
         ani_object ret = OHOS::AppExecFwk::CreateInt(env, errorCode);
         if (ret == nullptr) {
-            ANS_LOGD("createInt faild");
+            ANS_LOGE("createInt faild");
             NotificationSts::ThrowErrorWithMsg(env, "");
             return;
         }
         if (ANI_OK != (status = env->PromiseResolver_Resolve(info->resolver, static_cast<ani_ref>(ret)))) {
-            ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
+            ANS_LOGE("PromiseResolver_Resolve faild. status %{public}d", status);
             NotificationSts::ThrowErrorWithMsg(env, "");
         }
     } else {
         std::string errMsg = OHOS::NotificationSts::FindAnsErrMsg(errorCode);
-        ANS_LOGD("reject. errorCode %{public}d errMsg %{public}s", errorCode, errMsg.c_str());
+        ANS_LOGE("reject. errorCode %{public}d errMsg %{public}s", errorCode, errMsg.c_str());
         ani_error rejection =
-            static_cast<ani_error>(OHOS::AbilityRuntime::EtsErrorUtil::CreateError(env, errorCode, errMsg));
+            static_cast<ani_error>(OHOS::NotificationSts::CreateError(env, errorCode, errMsg));
         if (ANI_OK != (status = env->PromiseResolver_Reject(info->resolver, rejection))) {
             ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
             NotificationSts::ThrowErrorWithMsg(env, "");
@@ -190,7 +189,7 @@ ani_object AniOpenNotificationSettings(ani_env *env, ani_object content)
     ani_object aniPromise {};
     ani_resolver aniResolver {};
     if (ANI_OK != env->Promise_New(&aniResolver, &aniPromise)) {
-        ANS_LOGD("Promise_New faild");
+        ANS_LOGE("Promise_New faild");
         return nullptr;
     }
     info->resolver = aniResolver;
@@ -226,7 +225,7 @@ bool SettingsModalExtensionCallback::Init(ani_env *env, std::shared_ptr<OpenSett
     }
     ani_status status = ANI_OK;
     if ((status = env->GetVM(&vm_)) != ANI_OK) {
-        ANS_LOGD("GetVM faild. status %{public}d", status);
+        ANS_LOGE("GetVM faild. status %{public}d", status);
         return false;
     }
     info_ = info;
@@ -249,18 +248,22 @@ void SettingsModalExtensionCallback::ProcessStatusChanged(int32_t code, bool isA
     ani_options aniArgs { 0, nullptr };
     if (isAsync) {
         aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env);
+        if (aniResult != ANI_OK) {
+            ANS_LOGE("AttachCurrentThread fail. result: %{public}d.", aniResult);
+            aniResult = vm_->GetEnv(ANI_VERSION_1, &env);
+        }
     } else {
         aniResult = vm_->GetEnv(ANI_VERSION_1, &env);
     }
     if (aniResult != ANI_OK) {
-        ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("AttachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
     if (complete_) {
         complete_(env, info_);
     }
     if (isAsync && (aniResult = vm_->DetachCurrentThread()) != ANI_OK) {
-        ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
 }

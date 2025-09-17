@@ -28,7 +28,7 @@ export interface NotificationFlags {
 
     readonly vibrationEnabled?: NotificationFlagStatus;
 
-    readonly reminderFlags?: number;
+    readonly reminderFlags?: long;
 }
 
 class NotificationFlagsInner implements NotificationFlags {
@@ -37,5 +37,5 @@ class NotificationFlagsInner implements NotificationFlags {
 
     public vibrationEnabled?: NotificationFlagStatus | undefined;
 
-    public reminderFlags?: number | undefined;
+    public reminderFlags?: long | undefined;
 }

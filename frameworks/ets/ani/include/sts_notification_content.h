@@ -74,7 +74,7 @@ ani_object GetAniIconButtonArray(ani_env *env, const std::vector<NotificationIco
 ani_status GetStructuredTextFromAni(ani_env *env, ani_object obj,
     std::shared_ptr<NotificationBasicContent> basicContent);
 
-void UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
+bool UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
     NotificationLocalLiveViewButton &button);
 bool WarpNotificationLocalLiveViewButton(ani_env *env, const NotificationLocalLiveViewButton &button,
     ani_object &buttonObject);

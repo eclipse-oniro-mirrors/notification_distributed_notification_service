@@ -20,9 +20,9 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 void AniSetDoNotDisturbDate(ani_env *env, ani_object date);
-void AniSetDoNotDisturbDateWithId(ani_env *env, ani_object date, ani_double userId);
+void AniSetDoNotDisturbDateWithId(ani_env *env, ani_object date, ani_int userId);
 ani_object AniGetDoNotDisturbDate(ani_env *env);
-ani_object AniGetDoNotDisturbDateWithId(ani_env *env, ani_double userId);
+ani_object AniGetDoNotDisturbDateWithId(ani_env *env, ani_int userId);
 ani_boolean AniIsSupportDoNotDisturbMode(ani_env *env);
 } // namespace NotificationManagerSts
 } // namespace OHOS
