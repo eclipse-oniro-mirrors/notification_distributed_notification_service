@@ -148,7 +148,7 @@ void AdvancedNotificationService::SetIsFromSAToExtendInfo(const sptr<Notificatio
         extendInfo = std::make_shared<AAFwk::WantParams>();
     }
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    extendInfo->SetParam("isFromSA", AAFwk::String::Box(std::to_string(isSubsystem)));
+    extendInfo->SetParam("notification_publish_by_sa", AAFwk::String::Box(std::to_string(isSubsystem)));
     request->SetExtendInfo(extendInfo);
     return;
 }
