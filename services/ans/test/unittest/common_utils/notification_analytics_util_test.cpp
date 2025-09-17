@@ -434,5 +434,21 @@ HWTEST_F(NotificationAnalyticsUtilTest, GetReportSlotMessage_001, Function | Sma
         budleEntryKey, budleEntryValue, reportSlotMessage, userId);
     EXPECT_FALSE(res);
 }
+
+/**
+ * @tc.name: GetReportSlotMessage_002
+ * @tc.desc: Test GetReportSlotMessage_002 when match pattern successfully but not exists in database
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, GetReportSlotMessage_002, Function | SmallTest | Level1)
+{
+    std::string budleEntryKey = "ans_bundle_com.example.test20002000__slot_type_5_enabled";
+    std::string budleEntryValue = "1";
+    ReportSlotMessage reportSlotMessage;
+    int32_t userId = 100;
+    auto res = NotificationAnalyticsUtil::GetReportSlotMessage(
+        budleEntryKey, budleEntryValue, reportSlotMessage, userId);
+    EXPECT_FALSE(res);
+}
 }
 }

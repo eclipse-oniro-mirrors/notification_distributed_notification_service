@@ -23,13 +23,6 @@
 
 namespace OHOS {
 namespace Notification {
-namespace {
-    const static std::string LINE = "_";
-    const static std::string ANS_BUNDLE_BEGIN = "ans_bundle";
-    const static std::string LIVE_VIEW_SLOT_ENABLE_END = "slot_type_5_enabled";
-    const static std::string NAME = "name";
-    const static std::string UID = "uid";
-}
 
 enum EventSceneId {
     SCENE_0 = 0,

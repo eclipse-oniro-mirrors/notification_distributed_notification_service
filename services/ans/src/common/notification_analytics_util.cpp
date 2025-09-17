@@ -15,6 +15,8 @@
 
 #include "notification_analytics_util.h"
 
+#include <regex>
+
 #include "want_params_wrapper.h"
 #include "string_wrapper.h"
 #include "common_event_manager.h"
@@ -37,6 +39,14 @@
 
 namespace OHOS {
 namespace Notification {
+
+const static std::string LINE = "_";
+const static std::string ANS_BUNDLE_BEGIN = "ans_bundle";
+const static std::string LIVE_VIEW_SLOT_ENABLE_END = "slot_type_5_enabled";
+const static std::string SLOT_ENABLE_REG_PATTERN = "^ans_bundle_(.*)_slot_type_5_enabled$";
+const static std::string NAME = "name";
+const static std::string UID = "uid";
+
 constexpr char MESSAGE_DELIMITER = '#';
 constexpr const int32_t SYNC_WATCH_HEADSET = 2;
 constexpr const int32_t PUBLISH_ERROR_EVENT_CODE = 0;
@@ -1640,8 +1650,11 @@ bool NotificationAnalyticsUtil::GetAllSlotMessageCache(const int32_t &userId)
         // enable
         ReportSlotMessage reportSlotMessage;
         std::string budleEntryValue = budleEntry.second;
-        NotificationAnalyticsUtil::GetReportSlotMessage(budleEntryKey,
+        bool isGetMsgSucc = NotificationAnalyticsUtil::GetReportSlotMessage(budleEntryKey,
             budleEntryValue, reportSlotMessage, userId);
+        if (!isGetMsgSucc) {
+            continue;
+        }
         slotEnabledList_.push_back(reportSlotMessage);
     }
     return true;
@@ -1650,14 +1663,14 @@ bool NotificationAnalyticsUtil::GetAllSlotMessageCache(const int32_t &userId)
 bool NotificationAnalyticsUtil::GetReportSlotMessage(std::string& budleEntryKey,
     std::string& budleEntryValue, ReportSlotMessage& reportSlotMessage, const int32_t &userId)
 {
-    // find first
-    size_t firstUnderscore = budleEntryKey.find('_');
-    // find second
-    size_t secondUnderscore = budleEntryKey.find('_', firstUnderscore + 1);
-    // find third
-    size_t thirdUnderscore = budleEntryKey.find('_', secondUnderscore + 1);
-    // get bundle string
-    std::string extracted = budleEntryKey.substr(secondUnderscore + 1, thirdUnderscore - secondUnderscore - 1);
+    std::string extracted;
+    std::regex pattern(SLOT_ENABLE_REG_PATTERN);
+    std::smatch matches;
+    if (std::regex_search(budleEntryKey, matches, pattern) && matches.size() > 1) {
+        extracted = matches[1].str();
+    } else {
+        return false;
+    }
 
     std::unordered_map<std::string, std::string> bundleInfoMap;
     auto res = NotificationPreferences::GetInstance()->GetBatchKvsFromDbContainsKey(
