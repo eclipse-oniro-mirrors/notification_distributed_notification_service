@@ -1805,6 +1805,7 @@ private:
     }
 
     void SetChainIdToExtraInfo(const sptr<NotificationRequest> &request, OHOS::HiviewDFX::HiTraceId traceId);
+    void SetIsFromSAToExtendInfo(const sptr<NotificationRequest> &request);
 
     ErrCode CheckNotificationRequest(const sptr<NotificationRequest> &request);
     ErrCode CheckNotificationRequestLineWantAgents(const std::shared_ptr<NotificationContent> &content,

@@ -58,6 +58,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    SetIsFromSAToExtendInfo(request);
     const auto checkResult = CheckNotificationRequest(request);
     if (checkResult != ERR_OK) {
         return checkResult;
@@ -138,6 +139,18 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     NotificationAnalyticsUtil::ReportAllBundlesSlotEnabled();
     SendPublishHiSysEvent(request, result);
     return result;
+}
+
+void AdvancedNotificationService::SetIsFromSAToExtendInfo(const sptr<NotificationRequest> &request)
+{
+    std::shared_ptr<AAFwk::WantParams> extendInfo = request->GetExtendInfo();
+    if (!extendInfo) {
+        extendInfo = std::make_shared<AAFwk::WantParams>();
+    }
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    extendInfo->SetParam("isFromSA", AAFwk::String::Box(std::to_string(isSubsystem)));
+    request->SetExtendInfo(extendInfo);
+    return;
 }
 
 void AdvancedNotificationService::SetChainIdToExtraInfo
@@ -314,6 +327,7 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
     if (!isSubsystem) {
         return ERR_ANS_NOT_SYSTEM_SERVICE;
     }
+    SetIsFromSAToExtendInfo(request);
 
     int32_t uid = IPCSkeleton::GetCallingUid();
     int32_t userId = SUBSCRIBE_USER_INIT;
