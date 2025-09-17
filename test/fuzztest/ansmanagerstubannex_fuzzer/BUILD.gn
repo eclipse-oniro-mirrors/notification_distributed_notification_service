@@ -44,6 +44,7 @@ ohos_fuzztest("AnsManagerStubAnnexFuzzTest") {
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
+    "ability_runtime:ability_connect_callback_stub",
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
