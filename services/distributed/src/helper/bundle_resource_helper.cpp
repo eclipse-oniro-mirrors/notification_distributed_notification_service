@@ -193,5 +193,24 @@ ErrCode BundleResourceHelper::GetBundleInfoV9(const std::string& bundleName, int
     }
     return ERR_OK;
 }
+
+int32_t BundleResourceHelper::GetAppIndexByUid(const int32_t uid)
+{
+    int32_t appIndex = 0;
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
+    Connect();
+    if (bundleMgr_ == nullptr) {
+        return appIndex;
+    }
+    std::string bundleName;
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    int32_t result = bundleMgr_->GetNameAndIndexForUid(uid, bundleName, appIndex);
+    if (result != ERR_OK) {
+        ANS_LOGW("Get bundle index %{public}d.", uid);
+        return 0;
+    }
+    IPCSkeleton::SetCallingIdentity(identity);
+    return appIndex;
+}
 }
 }
