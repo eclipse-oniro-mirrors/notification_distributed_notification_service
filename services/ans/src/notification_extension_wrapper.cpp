@@ -137,6 +137,11 @@ void ExtensionWrapper::InitExtentionWrapper()
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
+    std::string config = NotificationPreferences::GetInstance()->GetAdditionalConfig(
+        "CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG");
+    if (!config.empty() && syncAdditionConfig_ != nullptr) {
+        syncAdditionConfig_("CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG", config);
+    }
 #endif
 #ifdef ENABLE_ANS_AGGREGATION
     std::string aggregateConfig = NotificationPreferences::GetInstance()->GetAdditionalConfig("AGGREGATE_CONFIG");
@@ -286,19 +291,31 @@ void ExtensionWrapper::HandlePrivilegeMessage(const sptr<NotificationBundleOptio
 bool ExtensionWrapper::GetPrivilegeDialogPopped(const sptr<NotificationBundleOption>& bundleOption,
     const int32_t &userId)
 {
-    return false;
+    if (getPrivilegeDialogPopped_ == nullptr) {
+        ANS_LOGE("GetPrivilegeDialogPopped wrapper symbol failed.");
+        return false;
+    }
+    return getPrivilegeDialogPopped_(bundleOption, userId);
 }
 
 bool ExtensionWrapper::SetDialogOpenSuccessTimeStamp(const sptr<NotificationBundleOption>& bundleOption,
     const int32_t &userId)
 {
-    return true;
+    if (setDialogOpenSuccessTimeStamp_ == nullptr) {
+        ANS_LOGE("SetDialogOpenSuccessTimeStamp wrapper symbol failed.");
+        return false;
+    }
+    return setDialogOpenSuccessTimeStamp_(bundleOption, userId);
 }
 
 bool ExtensionWrapper::SetDialogOpenSuccessTimeInterval(const sptr<NotificationBundleOption>& bundleOption,
     const int32_t &userId)
 {
-    return true;
+    if (setDialogOpenSuccessTimeInterval_ == nullptr) {
+        ANS_LOGE("SetDialogOpenSuccessTimeInterval wrapper symbol failed.");
+        return false;
+    }
+    return setDialogOpenSuccessTimeInterval_(bundleOption, userId);
 }
 #endif
 

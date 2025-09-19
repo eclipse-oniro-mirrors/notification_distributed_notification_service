@@ -304,6 +304,23 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00002, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: SetAdditionConfig_00003
+ * @tc.desc: Test SetAdditionConfig_00003
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00003, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    std::string key = "CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG";
+    std::string value = "";
+
+    auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
  * @tc.name: GetAllLiveViewEnabledBundles_00001
  * @tc.desc: Test GetAllLiveViewEnabledBundles_00001
  * @tc.type: FUNC
