@@ -46,6 +46,7 @@ namespace Notification {
 namespace {
     constexpr char KEY_NAME[] = "AGGREGATE_CONFIG";
     constexpr char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
+    constexpr char SWITCH_LIST_KEY_NAME[] = "CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG";
     constexpr char CALL_UI_BUNDLE[] = "com.ohos.callui";
     constexpr char LIVEVIEW_CONFIG_KEY[] = "APP_LIVEVIEW_CONFIG";
     constexpr uint32_t NOTIFICATION_SETTING_FLAG_BASE = 0x11;
@@ -1392,9 +1393,9 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     }
 
     bool isSyncConfig = (strcmp(key.c_str(), KEY_NAME) == 0 ||
-        strcmp(key.c_str(), CTRL_LIST_KEY_NAME) == 0);
+        strcmp(key.c_str(), CTRL_LIST_KEY_NAME) == 0 || strcmp(key.c_str(), SWITCH_LIST_KEY_NAME) == 0);
     if (isSyncConfig) {
-#ifdef ENABLE_ANS_EXT_WRAPPER
+#if defined(ENABLE_ANS_EXT_WRAPPER) || defined(ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER)
     ErrCode sync_result = EXTENTION_WRAPPER->SyncAdditionConfig(key, value);
     if (sync_result != ERR_OK) {
         ANS_LOGE("Sync addition config result: %{public}d, key: %{public}s, value: %{public}s",
