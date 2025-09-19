@@ -30,9 +30,11 @@ void AniPublish(ani_env *env, ani_object obj)
 {
     ANS_LOGD("AniPublish call");
     std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
-    if (NotificationSts::UnWarpNotificationRequest(env, obj, notificationRequest) != ANI_OK) {
-        ANS_LOGE("UnWarpNotificationRequest failed");
-        NotificationSts::ThrowErrorWithMsg(env, "AniPublish ERROR_INTERNAL_ERROR");
+    int32_t ret = NotificationSts::UnWarpNotificationRequest(env, obj, notificationRequest);
+    if (ret != ERR_OK) {
+        ANS_LOGE("AniPublish UnWarpNotificationRequest failed");
+        int externalCode = NotificationSts::GetExternalCode(ret);
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return;
     }
     int returncode = NotificationHelper::PublishNotification(*notificationRequest);
@@ -43,16 +45,18 @@ void AniPublish(ani_env *env, ani_object obj)
     ANS_LOGD("AniPublish end");
 }
 
-void AniPublishWithId(ani_env *env, ani_object obj, ani_double userId)
+void AniPublishWithId(ani_env *env, ani_object obj, ani_int userId)
 {
     ANS_LOGD("AniPublishWithId start");
     //NotificationRequest request;
     std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
-    if (NotificationSts::UnWarpNotificationRequest(env, obj, notificationRequest) != ANI_OK) {
-        NotificationSts::ThrowErrorWithMsg(env, "AniPublishWithId ERROR_INTERNAL_ERROR");
+    int32_t ret = NotificationSts::UnWarpNotificationRequest(env, obj, notificationRequest);
+    if (ret != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(ret);
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return;
     }
-    notificationRequest->SetOwnerUserId(static_cast<int32_t>(userId));
+    notificationRequest->SetOwnerUserId(userId);
     int returncode = NotificationHelper::PublishNotification(*notificationRequest);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
@@ -62,7 +66,7 @@ void AniPublishWithId(ani_env *env, ani_object obj, ani_double userId)
     ANS_LOGD("AniPublishWithId end");
 }
 
-void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representativeBundle, ani_double userId)
+void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representativeBundle, ani_int userId)
 {
     ANS_LOGD("AniPublishAsBundle enter");
     std::string bundleStr;
@@ -72,13 +76,16 @@ void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representat
     }
 
     std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
-    if (NotificationSts::UnWarpNotificationRequest(env, request, notificationRequest) != ANI_OK) {
+    int32_t ret = NotificationSts::UnWarpNotificationRequest(env, request, notificationRequest);
+    if (ret != ERR_OK) {
         ANS_LOGE("AniPublishAsBundle failed");
-        NotificationSts::ThrowErrorWithMsg(env, "AniPublishAsBundle ERROR_INTERNAL_ERROR");
+        int externalCode = NotificationSts::GetExternalCode(ret);
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return;
     }
-    notificationRequest->SetOwnerUserId(static_cast<int32_t>(userId));
+    notificationRequest->SetOwnerUserId(userId);
     notificationRequest->SetOwnerBundleName(bundleStr);
+    notificationRequest->SetIsAgentNotification(true);
     int returncode =  NotificationHelper::PublishNotification(*notificationRequest);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
@@ -93,8 +100,10 @@ void AniPublishAsBundleWithBundleOption(ani_env *env, ani_object representativeB
 {
     ANS_LOGE("AniPublishAsBundleWithBundleOption enter");
     std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
-    if (NotificationSts::UnWarpNotificationRequest(env, request, notificationRequest) != ANI_OK) {
-        NotificationSts::ThrowErrorWithMsg(env, "AniPublishAsBundleWithBundleOption ERROR_INTERNAL_ERROR");
+    int32_t ret = NotificationSts::UnWarpNotificationRequest(env, request, notificationRequest);
+    if (ret != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(ret);
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return;
     }
 

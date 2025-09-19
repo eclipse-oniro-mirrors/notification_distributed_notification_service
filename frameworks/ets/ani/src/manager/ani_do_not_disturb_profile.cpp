@@ -65,7 +65,7 @@ void AniRemoveDoNotDisturbProfile(ani_env *env, ani_object obj)
     ANS_LOGD("AniRemoveDoNotDisturbProfile end");
 }
 
-ani_object AniGetDoNotDisturbProfile(ani_env *env, ani_double id)
+ani_object AniGetDoNotDisturbProfile(ani_env *env, ani_long id)
 {
     ani_object profile;
     ANS_LOGD("AniGetDoNotDisturbProfile enter");
@@ -78,12 +78,11 @@ ani_object AniGetDoNotDisturbProfile(ani_env *env, ani_double id)
         return nullptr;
     }
 
-    int32_t idTest = static_cast<int32_t>(id);
-    ANS_LOGD("AniGetDoNotDisturbProfile: idTest: %{public}d", idTest);
-    int returncode = Notification::NotificationHelper::GetDoNotDisturbProfile(idTest, doNotDisturbProfile);
+    ANS_LOGD("AniGetDoNotDisturbProfile: idTest: %{public}lld", id);
+    int returncode = Notification::NotificationHelper::GetDoNotDisturbProfile(id, doNotDisturbProfile);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniSetDoNotDisturbDateWithId error, errorCode: %{public}d, returncode: %{public}d",
+        ANS_LOGE("AniGetDoNotDisturbProfile error, errorCode: %{public}d, returncode: %{public}d",
             externalCode, returncode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }

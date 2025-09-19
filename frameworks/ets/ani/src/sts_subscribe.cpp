@@ -36,7 +36,7 @@ ErrCode StsDistributedOperationCallback::OnOperationCallback(const int32_t opera
         return ERR_OK;
     }
     if (etsVm_ == nullptr) {
-        ANS_LOGD("etsVm_ is null");
+        ANS_LOGE("etsVm_ is null");
         return ANI_ERROR;
     }
     ani_env* etsEnv;
@@ -44,13 +44,13 @@ ErrCode StsDistributedOperationCallback::OnOperationCallback(const int32_t opera
     ani_options aniArgs { 0, nullptr };
     aniResult = etsVm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
     if (aniResult != ANI_OK) {
-        ANS_LOGD("StsDistributedOperationCallback AttachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("StsDistributedOperationCallback AttachCurrentThread error. result: %{public}d.", aniResult);
         return aniResult;
     }
     OnStsOperationCallback(etsEnv, operationResult);
     aniResult = etsVm_->DetachCurrentThread();
     if (aniResult != ANI_OK) {
-        ANS_LOGD("StsDistributedOperationCallback DetachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("StsDistributedOperationCallback DetachCurrentThread error. result: %{public}d.", aniResult);
         return aniResult;
     }
     isCall_ = true;
@@ -65,23 +65,23 @@ void StsDistributedOperationCallback::OnStsOperationCallback(ani_env *env, const
         return;
     }
     ani_status status = ANI_OK;
-    int32_t externalErrorCode = (operationResult == ERR_OK) ? operationResult : GetExternalCode(operationResult);
-    ANS_LOGD("operationResult %{public}d, externalCode %{public}d", operationResult, externalErrorCode);
+    int32_t externalErrCode = (operationResult == ERR_OK) ? operationResult : GetExternalCode(operationResult);
+    ANS_LOGD("operationResult %{public}d, externalCode %{public}d", operationResult, externalErrCode);
 
-    if (externalErrorCode == ERR_OK) {
-        ANS_LOGD("OnStsOperationCallback Resolve");
-        ani_object ret = OHOS::AppExecFwk::CreateInt(env, externalErrorCode);
+    if (externalErrCode == ERR_OK) {
+        ANS_LOGD("OnStsOperationCallback resolve");
+        ani_object ret = OHOS::AppExecFwk::CreateInt(env, externalErrCode);
         if (ANI_OK != (status = env->PromiseResolver_Resolve(resolver_, static_cast<ani_ref>(ret)))) {
-            ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
+            ANS_LOGE("PromiseResolver_Resolve faild. status %{public}d", status);
             return;
         }
     } else {
         ANS_LOGD("OnStsOperationCallback reject");
-        std::string errMsg = FindAnsErrMsg(externalErrorCode);
+        std::string errMsg = FindAnsErrMsg(externalErrCode);
         ani_error rejection =
-            static_cast<ani_error>(OHOS::AbilityRuntime::EtsErrorUtil::CreateError(env, externalErrorCode, errMsg));
+            static_cast<ani_error>(OHOS::NotificationSts::CreateError(env, externalErrCode, errMsg));
         if (ANI_OK != (status = env->PromiseResolver_Reject(resolver_, rejection))) {
-            ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
+            ANS_LOGE("PromiseResolver_Resolve faild. status %{public}d", status);
         }
     }
 }
@@ -92,10 +92,6 @@ void StsDistributedOperationCallback::SetVm(ani_vm *vm)
     etsVm_ = vm;
 }
 
-StsSubscriberInstance::StsSubscriberInstance()
-{}
-StsSubscriberInstance::~StsSubscriberInstance()
-{}
 void StsSubscriberInstance::OnCanceled(
     const std::shared_ptr<OHOS::Notification::Notification> &request,
     const std::shared_ptr<NotificationSortingMap> &sortingMap,
@@ -108,7 +104,7 @@ void StsSubscriberInstance::OnCanceled(
     ani_options aniArgs { 0, nullptr };
     aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
     if (aniResult != ANI_OK) {
-        ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("AttachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
     std::vector<ani_ref> vec;
@@ -117,11 +113,11 @@ void StsSubscriberInstance::OnCanceled(
         vec.push_back(obj);
         CallFunction(etsEnv, "onCancel", vec);
     } else {
-        ANS_LOGD("WarpSubscribeCallbackData faild");
+        ANS_LOGE("WarpSubscribeCallbackData faild");
     }
     aniResult = vm_->DetachCurrentThread();
     if (aniResult != ANI_OK) {
-        ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
     ANS_LOGD("done");
@@ -137,7 +133,7 @@ void StsSubscriberInstance::OnConsumed(
     ani_options aniArgs { 0, nullptr };
     aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
     if (aniResult != ANI_OK) {
-        ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("AttachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
     std::vector<ani_ref> vec;
@@ -150,7 +146,7 @@ void StsSubscriberInstance::OnConsumed(
     }
     aniResult = vm_->DetachCurrentThread();
     if (aniResult != ANI_OK) {
-        ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
     ANS_LOGD("done");
@@ -164,7 +160,7 @@ void StsSubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMa
     ani_options aniArgs { 0, nullptr };
     aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
     if (aniResult != ANI_OK) {
-        ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("AttachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
     std::vector<ani_ref> vec;
@@ -177,7 +173,7 @@ void StsSubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMa
     }
     aniResult = vm_->DetachCurrentThread();
     if (aniResult != ANI_OK) {
-        ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
     ANS_LOGD("done");
@@ -217,7 +213,7 @@ void StsSubscriberInstance::OnDisconnected()
     }
     std::vector<ani_ref> vec;
     CallFunction(etsEnv, "onDisconnect", vec);
-    if (!SubscriberInstanceManager::GetInstance()->DelSubscriberInstancesInfo(etsEnv, obj_)) {
+    if (!SubscriberInstanceManager::GetInstance()->DelSubscriberInstancesInfo(etsEnv, ref_)) {
         ANS_LOGD("DelSubscriberInstancesInfo faild");
     } else {
         ANS_LOGD("DelSubscriberInstancesInfo suc..");
@@ -409,7 +405,7 @@ bool StsSubscriberInstance::HasOnBatchCancelCallback()
         ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
         return false;
     }
-    
+
     ani_ref fn_ref;
     aniResult = etsEnv->Object_GetFieldByName_Ref(static_cast<ani_object>(ref_), "onBatchCancel", &fn_ref);
     if (ANI_OK != aniResult) {
@@ -436,7 +432,9 @@ bool StsSubscriberInstance::SetObject(ani_env *env, ani_object obj)
 {
     ANS_LOGD("enter");
     std::lock_guard<std::mutex> l(lock_);
-    if (env == nullptr || obj == nullptr) return false;
+    if (env == nullptr || obj == nullptr) {
+        return false;
+    }
     if (ANI_OK != env->GetVM(&vm_)) {
         ANS_LOGD("GetVM faild");
         return false;
@@ -451,26 +449,46 @@ bool StsSubscriberInstance::SetObject(ani_env *env, ani_object obj)
 bool StsSubscriberInstance::IsInit()
 {
     ANS_LOGD("enter");
-    std::lock_guard<std::mutex> l(lock_);
     return (ref_ != nullptr && vm_ != nullptr);
 }
 bool StsSubscriberInstance::Compare(ani_env *env, ani_object obj)
 {
     ANS_LOGD("enter");
     std::lock_guard<std::mutex> l(lock_);
-    if (!IsInit()) return false;
-    if (obj == nullptr || env == nullptr) return false;
+    if (!IsInit()) {
+        return false;
+    }
+    if (obj == nullptr || env == nullptr) {
+        return false;
+    }
     ani_ref ref;
-    if (env->GlobalReference_Create(obj, &ref) != ANI_OK) return false;
+    if (env->GlobalReference_Create(obj, &ref) != ANI_OK) {
+        return false;
+    }
     ani_boolean result = ANI_FALSE;
     env->Reference_StrictEquals(ref, ref_, &result);
     env->GlobalReference_Delete(ref);
     return (result == ANI_TRUE) ? true : false;
 }
+bool StsSubscriberInstance::Compare(ani_env *env, ani_ref ref)
+{
+    ANS_LOGD("enter");
+    if (!IsInit()) {
+        return false;
+    }
+    if (ref == nullptr || env == nullptr) {
+        return false;
+    }
+    ani_boolean result = ANI_FALSE;
+    env->Reference_StrictEquals(ref, ref_, &result);
+    return (result == ANI_TRUE) ? true : false;
+}
 bool StsSubscriberInstance::CallFunction(ani_env *env, const char *func, std::vector<ani_ref> &parm)
 {
     ANS_LOGD("enter");
-    if (env == nullptr) return false;
+    if (env == nullptr) {
+        return false;
+    }
     ani_ref fn_ref;
     ani_status aniResult = env->Object_GetPropertyByName_Ref(static_cast<ani_object>(ref_), func, &fn_ref);
     if (ANI_OK != aniResult) {
@@ -497,6 +515,7 @@ bool SubscriberInstanceManager::HasNotificationSubscriber(
     ani_env *env, ani_object value, std::shared_ptr<StsSubscriberInstance> &subscriberInfo)
 {
     ANS_LOGD("enter");
+    std::lock_guard<std::mutex> lock(mutex_);
     for (auto &iter : subscriberInstances_) {
         if (iter->Compare(env, value)) {
             subscriberInfo = iter;
@@ -517,17 +536,16 @@ bool SubscriberInstanceManager::AddSubscriberInstancesInfo(
     subscriberInstances_.emplace_back(subscriberInfo);
     return true;
 }
-bool SubscriberInstanceManager::DelSubscriberInstancesInfo(
-    ani_env *env, ani_object obj)
+bool SubscriberInstanceManager::DelSubscriberInstancesInfo(ani_env *env, ani_ref ref)
 {
     ANS_LOGD("enter");
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (obj == nullptr) {
-        ANS_LOGE("obj is null");
+    if (ref == nullptr) {
+        ANS_LOGE("ref is null");
         return false;
     }
+    std::lock_guard<std::mutex> lock(mutex_);
     for (auto it = subscriberInstances_.begin(); it != subscriberInstances_.end(); ++it) {
-        if ((*it)->Compare(env, obj)) {
+        if ((*it)->Compare(env, ref)) {
             DelDeletingSubscriber((*it));
             subscriberInstances_.erase(it);
             return true;
@@ -550,7 +568,9 @@ bool SubscriberInstanceManager::AddDeletingSubscriber(std::shared_ptr<StsSubscri
 {
     ANS_LOGD("enter");
     std::lock_guard<std::mutex> lock(delMutex_);
-    if (subscriber == nullptr) return false;
+    if (subscriber == nullptr) {
+        return false;
+    }
     auto iter = std::find(DeletingSubscriber.begin(), DeletingSubscriber.end(), subscriber);
     if (iter != DeletingSubscriber.end()) {
         return false;
@@ -712,6 +732,26 @@ bool GetDoubleValueByClassName(
     return true;
 }
 
+bool GetIntValueByClassName(
+    ani_env *env, ani_object param, const char *className, const char *name, ani_int &value)
+{
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        ANS_LOGD("FindClass faild. %{public}s", className);
+        return false;
+    }
+    ani_method idGetter;
+    if (ANI_OK != env->Class_FindMethod(cls, name, nullptr, &idGetter)) {
+        ANS_LOGD("Class_FindMethod faild. %{public}s", className);
+        return false;
+    }
+    if (ANI_OK != env->Object_CallMethod_Int(param, idGetter, &value)) {
+        ANS_LOGD("Object_CallMethod_Int faild. %{public}s", className);
+        return false;
+    }
+    return true;
+}
+
 bool UnWarpReasonEnum(ani_env *env, const ani_object enumItem, int32_t &outEnum)
 {
     ani_status status = ANI_ERROR;
@@ -738,17 +778,20 @@ bool IsValidRemoveReason(int32_t reasonType)
 bool UnWarpNotificationKey(ani_env *env, const ani_object obj, NotificationKey &OutObj)
 {
     ani_boolean isUndefined = ANI_TRUE;
-    ani_double idDouble = 0.0;
-    if (!GetDoubleValueByClassName(env, obj,
-        "L@ohos/notificationSubscribe/notificationSubscribe/NotificationKeyInner;", "<get>id", idDouble)) {
-        ANS_LOGD("GetDoubleValueByClassName id fail");
+    ani_int idInt = 0;
+    if (!GetIntValueByClassName(env, obj,
+        "@ohos.notificationSubscribe.notificationSubscribe.NotificationKeyInner", "<get>id", idInt)) {
+        ANS_LOGD("GetIntValueByClassName id fail");
         return false;
     }
-    OutObj.id = static_cast<int32_t>(idDouble);
+    OutObj.id = static_cast<int32_t>(idInt);
     std::string label;
-    if (GetPropertyString(env, obj, "label", isUndefined, label) != ANI_OK || isUndefined == ANI_TRUE) {
+    if (GetPropertyString(env, obj, "label", isUndefined, label) != ANI_OK) {
         ANS_LOGD("UnWarpNotificationKey GetPropertyString label fail");
         return false;
+    }
+    if (isUndefined == ANI_TRUE) {
+        return true;
     }
     OutObj.label = GetResizeStr(label, STR_MAX_SIZE);
     ANS_LOGD("UnWarpNotificationKey id: %{public}d, label: %{public}s", OutObj.id, OutObj.label.c_str());
@@ -760,16 +803,36 @@ bool UnwarpOperationInfo(ani_env *env, const ani_object obj, StsNotificationOper
     ani_boolean isUndefined = ANI_TRUE;
     std::string actionName;
     std::string userInput;
-    if (GetPropertyString(env, obj, "actionName", isUndefined, actionName) != ANI_OK || isUndefined == ANI_TRUE) {
+    ani_int operationType = 0;
+    ani_int buttonIndex = 0;
+    if (GetPropertyString(env, obj, "actionName", isUndefined, actionName) != ANI_OK) {
         ANS_LOGD("ConvertOperationInfoToNative GetStringOrUndefined actionName fail");
-        return false;
     }
-    outObj.SetActionName(GetResizeStr(actionName, STR_MAX_SIZE));
-    if (GetPropertyString(env, obj, "userInput", isUndefined, userInput) != ANI_OK || isUndefined == ANI_TRUE) {
+    if (GetPropertyString(env, obj, "userInput", isUndefined, userInput) != ANI_OK) {
         ANS_LOGD("ConvertOperationInfoToNative GetStringOrUndefined userInput fail");
-        return false;
     }
-    outObj.SetUserInput(GetResizeStr(userInput, LONG_STR_MAX_SIZE));
+    if (GetPropertyInt(env, obj, "buttonIndex", isUndefined, buttonIndex) != ANI_OK) {
+        ANS_LOGD("GetPropertyInt buttonIndex faild");
+    }
+    if (GetPropertyInt(env, obj, "operationType", isUndefined, operationType) != ANI_OK) {
+        ANS_LOGD("GetPropertyInt operationType faild");
+    } else {
+        if (operationType == NotificationConstant::DISTRIBUTE_JUMP_INVALID) {
+            outObj.SetOperationType(OperationType::DISTRIBUTE_OPERATION_REPLY);
+            outObj.SetActionName(GetResizeStr(actionName, STR_MAX_SIZE));
+            outObj.SetUserInput(GetResizeStr(userInput, LONG_STR_MAX_SIZE));
+        } else if (operationType >= NotificationConstant::DISTRIBUTE_JUMP_BY_LIVE_VIEW ||
+            operationType == NotificationConstant::DISTRIBUTE_JUMP_BY_NTF ||
+            operationType == NotificationConstant::DISTRIBUTE_JUMP_BY_BTN) {
+            outObj.SetOperationType(OperationType::DISTRIBUTE_OPERATION_JUMP_BY_TYPE);
+            outObj.SetJumpType(operationType);
+            outObj.SetBtnIndex(buttonIndex);
+        } else {
+            ANS_LOGE("invalid param, operationType: %{public}d", operationType);
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -782,6 +845,10 @@ sptr<StsNotificationOperationInfo> GetOperationInfoForDistributeOperation(
         ANS_LOGD("hashCode is valid");
         return nullptr;
     }
+    if (hashCodeStd.empty()) {
+        ANS_LOGD("hashCode is empty");
+        return nullptr;
+    }
     info->SetHashCode(hashCodeStd);
     noWithOperationInfo = IsUndefine(env, operationInfo);
     if (!noWithOperationInfo) {
@@ -789,9 +856,9 @@ sptr<StsNotificationOperationInfo> GetOperationInfoForDistributeOperation(
             ANS_LOGD("operationInfo is valid");
             return nullptr;
         }
-        ANS_LOGD("OperationInfo %{public}s %{public}s",
-            info->GetActionName().c_str(), info->GetUserInput().c_str());
-        info->SetOperationType(OperationType::DISTRIBUTE_OPERATION_REPLY);
+        ANS_LOGD("OperationInfo %{public}s, %{public}s, %{public}d, %{public}d",
+            info->GetActionName().c_str(), info->GetUserInput().c_str(),
+            info->GetOperationType(), info->GetBtnIndex());
     } else {
         info->SetOperationType(OperationType::DISTRIBUTE_OPERATION_JUMP);
     }

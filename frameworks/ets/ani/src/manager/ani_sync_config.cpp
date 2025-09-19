@@ -23,30 +23,42 @@
 
 namespace OHOS {
 namespace NotificationManagerSts {
-const double RESULT_OK = 0.0;
-const double RESULT_FAILED = 1.0;
+const char KEY_NAME[] = "AGGREGATE_CONFIG";
+const char RING_LIST_KEY_NAME[] = "RING_TRUSTLIST_PKG";
+const char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
+const ani_int RESULT_OK = 0;
+const ani_int RESULT_FAILED = 1;
+const std::string msg = "Parameter verification failed";
 
-ani_double AniSetAdditionalConfig(ani_env *env, ani_string key, ani_string value)
+ani_int AniSetAdditionalConfig(ani_env *env, ani_string key, ani_string value)
 {
     ANS_LOGD("sts setAdditionalConfig call");
     if (env == nullptr || key == nullptr) {
         ANS_LOGE("Invalid env or key is null");
         return RESULT_FAILED;
     }
-    std::string keyStr;
-    if (NotificationSts::GetStringByAniString(env, key, keyStr) != ANI_OK) {
-        std::string msg = "Parameter verification failed";
+    std::string tempKey;
+    if (NotificationSts::GetStringByAniString(env, key, tempKey) != ANI_OK) {
         ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
         OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
         return RESULT_FAILED;
     }
-    std::string valueStr;
-    if (NotificationSts::GetStringByAniString(env, value, valueStr) != ANI_OK) {
-        std::string msg = "Parameter verification failed";
+    std::string keyStr = NotificationSts::GetResizeStr(tempKey, NotificationSts::STR_MAX_SIZE);
+    if (std::strlen(keyStr.c_str()) == 0 ||
+        (strcmp(keyStr.c_str(), KEY_NAME) != 0 && strcmp(keyStr.c_str(), RING_LIST_KEY_NAME) != 0
+        && strcmp(keyStr.c_str(), CTRL_LIST_KEY_NAME) != 0)) {
         ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
         OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
         return RESULT_FAILED;
     }
+
+    std::string tempValue;
+    if (NotificationSts::GetStringByAniString(env, value, tempValue) != ANI_OK) {
+        ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
+        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
+        return RESULT_FAILED;
+    }
+    std::string valueStr = NotificationSts::GetResizeStr(tempValue, NotificationSts::LONG_LONG_STR_MAX_SIZE);
     int returncode = Notification::NotificationHelper::SetAdditionConfig(keyStr, valueStr);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);

@@ -13,16 +13,20 @@
  * limitations under the License.
  */
 
+import type notificationManager from '@ohos.notificationManager';
+
 export interface NotificationSubscribeInfo {
     bundleNames?: Array<string>;
-    userId?: number;
+    userId?: int;
     deviceType?: string;
-    filterLimit?: number;
+    filterLimit?: long;
+    slotTypes?: Array<notificationManager.SlotType>;
 }
 
 class NotificationSubscribeInfoInner implements NotificationSubscribeInfo {
     public bundleNames?: Array<string>;
-    public userId?: number;
+    public userId?: int;
     public deviceType?: string;
-    public filterLimit?: number;
+    public filterLimit?: long;
+    public slotTypes?: Array<notificationManager.SlotType>;
 }

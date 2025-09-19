@@ -166,13 +166,13 @@ void AniRemoveAllForBundle(ani_env *env, ani_object bundle)
     }
 }
 
-void AniRemoveAllForUserId(ani_env *env, ani_double userId)
+void AniRemoveAllForUserId(ani_env *env, ani_int userId)
 {
     ANS_LOGD("AniRemoveAllForUserId enter");
     int ret = NotificationHelper::RemoveNotifications(userId);
     if (ret != ERR_OK) {
         int32_t externalErrorCode = NotificationSts::GetExternalCode(ret);
-        ANS_LOGD("StsRemoveForBundle ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
+        ANS_LOGE("StsRemoveForBundle ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
         std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
         OHOS::NotificationSts::ThrowError(env, externalErrorCode, msg);
     }

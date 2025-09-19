@@ -26,14 +26,14 @@ export interface DistributedOptions {
     isDistributed?: boolean;
     supportDisplayDevices?: Array<string>;
     supportOperateDevices?: Array<string>;
-    readonly remindType?: number;
+    readonly remindType?: int;
 }
 
 class DistributedOptionsInner implements DistributedOptions {
     public isDistributed?: boolean | undefined;
     public supportDisplayDevices?: Array<string> | undefined;
     public supportOperateDevices?: Array<string> | undefined;
-    public readonly remindType?: number | undefined;
+    public readonly remindType?: int | undefined;
 }
 
 export interface NotificationFilter {
@@ -79,26 +79,26 @@ class UnifiedGroupInfoInner implements UnifiedGroupInfo {
 
 export interface NotificationRequest {
     content: NotificationContent;
-    id?: number;
+    id?: int;
     appMessageId?: string;
     notificationSlotType?: notificationManager.SlotType;
     isOngoing?: boolean;
     isUnremovable?: boolean;
     updateOnly?: boolean;
-    deliveryTime?: number;
+    deliveryTime?: long;
     tapDismissed?: boolean;
-    autoDeletedTime?: number;
+    autoDeletedTime?: long;
     wantAgent?: WantAgent;
     extraInfo?: Record<string, Object>;
     extendInfo?: Record<string, Object>;
-    color?: number;
+    color?: long;
     colorEnabled?: boolean;
     isAlertOnce?: boolean;
     isStopwatch?: boolean;
     isCountDown?: boolean;
     isFloatingIcon?: boolean;
     label?: string;
-    badgeIconStyle?: number;
+    badgeIconStyle?: int;
     showDeliveryTime?: boolean;
     actionButtons?: Array<NotificationActionButton>;
     smallIcon?: image.PixelMap;
@@ -106,24 +106,24 @@ export interface NotificationRequest {
     overlayIcon?: image.PixelMap;
     groupName?: string;
     readonly creatorBundleName?: string;
-    readonly creatorUid?: number;
-    readonly creatorPid?: number;
-    readonly creatorUserId?: number;
+    readonly creatorUid?: int;
+    readonly creatorPid?: int;
+    readonly creatorUserId?: int;
     sound?: string;
     classification?: string;
     readonly hashCode?: string;
     isRemoveAllowed?: boolean;
-    readonly source?: number;
+    readonly source?: int;
     template?: NotificationTemplate;
     distributedOption?: DistributedOptions;
     readonly deviceId?: string;
     readonly notificationFlags?: NotificationFlags;
     removalWantAgent?: WantAgent;
-    badgeNumber?: number;
+    badgeNumber?: long;
     representativeBundle?: BundleOption;
     readonly agentBundle?: BundleOption;
     unifiedGroupInfo?: UnifiedGroupInfo;
-    notificationControlFlags?: number;
+    notificationControlFlags?: long;
     readonly appInstanceKey?: string;
     forceDistributed?: boolean;
     notDistributed?: boolean;
@@ -131,26 +131,26 @@ export interface NotificationRequest {
 
 class NotificationRequestInner implements NotificationRequest {
     public content: NotificationContent = {};
-    public id?: number | undefined;
+    public id?: int | undefined;
     public appMessageId?: string | undefined;
     public notificationSlotType?: notificationManager.SlotType | undefined;
     public isOngoing?: boolean | undefined;
     public isUnremovable?: boolean | undefined;
     public updateOnly?: boolean | undefined;
-    public deliveryTime?: number | undefined;
+    public deliveryTime?: long | undefined;
     public tapDismissed?: boolean | undefined;
-    public autoDeletedTime?: number | undefined;
+    public autoDeletedTime?: long | undefined;
     public wantAgent?: WantAgent | undefined;
     public extraInfo?: Record<string, Object> | undefined;
     public extendInfo?: Record<string, Object> | undefined;
-    public color?: number | undefined;
+    public color?: long | undefined;
     public colorEnabled?: boolean | undefined;
     public isAlertOnce?: boolean | undefined;
     public isStopwatch?: boolean | undefined;
     public isCountDown?: boolean | undefined;
     public isFloatingIcon?: boolean | undefined;
     public label?: string | undefined;
-    public badgeIconStyle?: number | undefined;
+    public badgeIconStyle?: int | undefined;
     public showDeliveryTime?: boolean | undefined;
     public actionButtons?: Array<NotificationActionButton> | undefined;
     public smallIcon?: image.PixelMap | undefined;
@@ -158,24 +158,24 @@ class NotificationRequestInner implements NotificationRequest {
     public overlayIcon?: image.PixelMap | undefined;
     public groupName?: string | undefined;
     public readonly creatorBundleName?: string | undefined;
-    public readonly creatorUid?: number | undefined;
-    public readonly creatorPid?: number | undefined;
-    public readonly creatorUserId?: number | undefined;
+    public readonly creatorUid?: int | undefined;
+    public readonly creatorPid?: int | undefined;
+    public readonly creatorUserId?: int | undefined;
     public sound?: string | undefined;
     public classification?: string | undefined;
     public readonly hashCode?: string | undefined;
     public isRemoveAllowed?: boolean | undefined;
-    public readonly source?: number | undefined;
+    public readonly source?: int | undefined;
     public template?: NotificationTemplate | undefined;
     public distributedOption?: DistributedOptions | undefined;
     public readonly deviceId?: string | undefined;
     public readonly notificationFlags?: NotificationFlags | undefined;
     public removalWantAgent?: WantAgent | undefined;
-    public badgeNumber?: number | undefined;
+    public badgeNumber?: long | undefined;
     public representativeBundle?: BundleOption | undefined;
     public readonly agentBundle?: BundleOption | undefined;
     public unifiedGroupInfo?: UnifiedGroupInfo | undefined;
-    public notificationControlFlags?: number | undefined;
+    public notificationControlFlags?: long | undefined;
     public readonly appInstanceKey?: string | undefined;
     public forceDistributed?: boolean | undefined;
     public notDistributed?: boolean | undefined;

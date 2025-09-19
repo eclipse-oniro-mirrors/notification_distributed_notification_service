@@ -15,10 +15,10 @@
  
 export interface BundleOption {
     bundle: string;
-    uid?: number;
+    uid?: int;
 }
 
 class BundleOptionInner implements BundleOption {
     public bundle: string = '';
-    public uid?: number | undefined;
+    public uid?: int | undefined;
 }

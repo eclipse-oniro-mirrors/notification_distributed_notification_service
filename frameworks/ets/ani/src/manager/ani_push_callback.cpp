@@ -37,6 +37,7 @@ int32_t StsPushCallBack::OnCheckNotification(
     const std::string &notificationData, const std::shared_ptr<PushCallBackParam> &pushCallBackParam)
 {
     ANS_LOGD("enter");
+    std::lock_guard<std::mutex> l(mutexlock);
     if (vm_ == nullptr || pushCallBackParam == nullptr) {
         ANS_LOGE("InvalidParam");
         return ERR_INVALID_STATE;
@@ -64,7 +65,6 @@ void StsPushCallBack::SetJsPushCallBackObject(
         ANS_LOGE("GlobalReference_Create pushCallBackObject faild. status %{public}d", status);
         return;
     }
-    std::lock_guard<ffrt::mutex> lock(mutexlock);
     pushCallBackObjects_.insert_or_assign(slotType, pushCheckObject);
 }
 
@@ -105,22 +105,18 @@ int32_t StsPushCallBack::CheckNotification(
     auto checkInfo = std::make_shared<NotificationCheckInfo>();
     checkInfo->ConvertJsonStringToValue(notificationData);
     NotificationConstant::SlotType outSlotType = static_cast<NotificationConstant::SlotType>(checkInfo->GetSlotType());
-    ani_ref callBackObj = nullptr;
-    {
-        std::lock_guard<ffrt::mutex> lock(mutexlock);
-        if (pushCallBackObjects_.find(outSlotType) == pushCallBackObjects_.end()) {
-            ANS_LOGE("pushCallBackObjects is nullptr");
-            return ERR_INVALID_STATE;
-        }
-        callBackObj = pushCallBackObjects_[outSlotType];
+if (pushCallBackObjects_.find(outSlotType) == pushCallBackObjects_.end()) {
+        ANS_LOGE("pushCallBackObjects is nullptr");
+        return ERR_INVALID_STATE;
     }
+
     ani_object checkInfoObj;
     if (!WarpNotificationCheckInfo(env, checkInfo, checkInfoObj) || checkInfoObj == nullptr) {
         ANS_LOGE("WarpNotificationCheckInfo faild");
         return ERR_INVALID_STATE;
     }
     HandleCheckCallback(
-        env, static_cast<ani_fn_object>(callBackObj), checkInfoObj, pushCallBackParam);
+        env, static_cast<ani_fn_object>(pushCallBackObjects_[outSlotType]), checkInfoObj, pushCallBackParam);
     return ERR_OK;
 }
 
@@ -129,10 +125,10 @@ bool StsPushCallBack::WarpFunctionResult(ani_env *env, ani_object obj, ResultPar
     ANS_LOGD("enter");
     if (env == nullptr || obj == nullptr) return false;
     ani_status status = ANI_OK;
-    ani_double code;
+    ani_int code;
     ani_ref msg;
     std::string message = "";
-    if (ANI_OK != (status = env->Object_GetPropertyByName_Double(obj, "code", &code))) {
+    if (ANI_OK != (status = env->Object_GetPropertyByName_Int(obj, "code", &code))) {
         ANS_LOGE("WarpFunctionResult. code faild. status %{public}d", status);
         return false;
     }

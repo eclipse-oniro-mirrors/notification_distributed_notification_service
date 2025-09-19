@@ -27,13 +27,14 @@
 #include "ani_common_want.h"
 #include "sts_bundle_option.h"
 #include "sts_subscribe.h"
+#include "ans_inner_errors.h"
 
 namespace OHOS {
 namespace NotificationSts {
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
-void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOptions distributedOptions)
+void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOptions &distributedOptions)
 {
     ANS_LOGD("UnWarpDistributedOptions start");
     if (env == nullptr || obj == nullptr) {
@@ -71,12 +72,12 @@ void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOption
     } else {
         ANS_LOGD("UnWarpDistributedOptions: supportOperateDevices get failed");
     }
-    // readonly remindType?: number;
-    ani_double remindType = 0.0;
+    // readonly remindType?: int;
+    ani_int remindType = 0;
     isUndefined = ANI_TRUE;
-    if (ANI_OK == GetPropertyDouble(env, obj, "remindType", isUndefined, remindType)
+    if (ANI_OK == GetPropertyInt(env, obj, "remindType", isUndefined, remindType)
         && isUndefined == ANI_FALSE) {
-        distributedOptions.remindType = static_cast<int32_t>(remindType);
+        distributedOptions.remindType = remindType;
     } else {
         ANS_LOGD("UnWarpDistributedOptions: remindType get failed");
     }
@@ -93,7 +94,7 @@ bool WarpNotificationUnifiedGroupInfo(ani_env* env,
     }
     ani_class groupInfoCls = nullptr;
     if ((!CreateClassObjByClassName(env,
-        "Lnotification/notificationRequest/UnifiedGroupInfoInner;", groupInfoCls, groupInfoObject))
+        "notification.notificationRequest.UnifiedGroupInfoInner", groupInfoCls, groupInfoObject))
         || groupInfoCls == nullptr || groupInfoObject == nullptr) {
         ANS_LOGE("WarpNotificationUnifiedGroupInfo: create class failed");
         return false;
@@ -257,182 +258,187 @@ void GetNotificationRequestByNumber(ani_env *env, ani_object obj,
 {
     ANS_LOGD("GetNotificationRequestByNumber start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
-        ANS_LOGD("GetNotificationRequestByNumber failed, has nullptr");
+        ANS_LOGE("GetNotificationRequestByNumber failed, has nullptr");
         return;
     }
-    ani_double mDouble = 0.0;
+    ani_int mInt = 0;
+    ani_long mLong = 0;
     ani_boolean isUndefined = ANI_TRUE;
-    if (ANI_OK == GetPropertyDouble(env, obj, "id", isUndefined, mDouble) && isUndefined == ANI_FALSE) {
-        request->SetNotificationId(static_cast<int32_t>(mDouble));
+    if (ANI_OK == GetPropertyInt(env, obj, "id", isUndefined, mInt) && isUndefined == ANI_FALSE) {
+        request->SetNotificationId(mInt);
     } else {
         request->SetNotificationId(0);
     }
-    if (ANI_OK == GetPropertyDouble(env, obj, "deliveryTime", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyLong(env, obj, "deliveryTime", isUndefined, mLong)
         && isUndefined == ANI_FALSE) {
-        request->SetDeliveryTime(static_cast<int32_t>(mDouble));
+        request->SetDeliveryTime(mLong);
     }
-    if (ANI_OK == GetPropertyDouble(env, obj, "autoDeletedTime", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyLong(env, obj, "autoDeletedTime", isUndefined, mLong)
         && isUndefined == ANI_FALSE) {
-        request->SetAutoDeletedTime(static_cast<int32_t>(mDouble));
+        request->SetAutoDeletedTime(mLong);
     }
-    if (ANI_OK == GetPropertyDouble(env, obj, "color", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyLong(env, obj, "color", isUndefined, mLong)
         && isUndefined == ANI_FALSE) {
-        request->SetColor(static_cast<int32_t>(mDouble));
+        request->SetColor(mLong);
     }
-    if (ANI_OK == GetPropertyDouble(env, obj, "badgeIconStyle", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyInt(env, obj, "badgeIconStyle", isUndefined, mInt)
         && isUndefined == ANI_FALSE) {
-        int32_t style = static_cast<int32_t>(mDouble);
-        request->SetBadgeIconStyle(static_cast<NotificationRequest::BadgeStyle>(style));
+        request->SetBadgeIconStyle(static_cast<NotificationRequest::BadgeStyle>(mInt));
     }
-    if (ANI_OK == GetPropertyDouble(env, obj, "badgeNumber", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyLong(env, obj, "badgeNumber", isUndefined, mLong)
         && isUndefined == ANI_FALSE) {
-        request->SetBadgeNumber(static_cast<int32_t>(mDouble));
+        request->SetBadgeNumber(mLong);
     }
-    if (ANI_OK == GetPropertyDouble(env, obj, "notificationControlFlags", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyLong(env, obj, "notificationControlFlags", isUndefined, mLong)
         && isUndefined == ANI_FALSE) {
-        request->SetNotificationControlFlags(static_cast<int32_t>(mDouble));
+        request->SetNotificationControlFlags(static_cast<uint32_t>(mLong));
     }
     ANS_LOGD("GetNotificationRequestByNumber end");
 }
 
-bool GetNotificationNormalContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+int32_t GetNotificationNormalContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
 {
     ANS_LOGD("GetNotificationNormalContent start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
         ANS_LOGE("GetNotificationNormalContent failed, has nullptr");
-        return false;
+        return ERROR_INTERNAL_ERROR;
     }
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref contentRef = {};
     if (ANI_OK != GetPropertyRef(env, obj, "normal", isUndefined, contentRef)
         || isUndefined == ANI_TRUE || contentRef == nullptr) {
         ANS_LOGE("GetNotificationNormalContent get ref failed");
-        return false;
+        return ERROR_INTERNAL_ERROR;
     }
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     UnWarpNotificationNormalContent(env, static_cast<ani_object>(contentRef), normalContent);
     request->SetContent(std::make_shared<NotificationContent>(normalContent));
     ANS_LOGD("GetNotificationNormalContent end");
-    return true;
+    return ERR_OK;
 }
 
-bool GetNotificationLongTextContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+int32_t GetNotificationLongTextContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
 {
     ANS_LOGD("GetNotificationLongTextContent start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
         ANS_LOGE("GetNotificationLongTextContent failed, has nullptr");
-        return false;
+        return ERROR_INTERNAL_ERROR;
     }
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref contentRef = {};
     if (ANI_OK != GetPropertyRef(env, obj, "longText", isUndefined, contentRef)
         || isUndefined == ANI_TRUE || contentRef == nullptr) {
         ANS_LOGE("GetNotificationLongTextContent get ref failed");
-        return false;
+        return ERROR_INTERNAL_ERROR;
     }
     std::shared_ptr<NotificationLongTextContent> longTextContent
         = std::make_shared<NotificationLongTextContent>();
     UnWarpNotificationLongTextContent(env, static_cast<ani_object>(contentRef), longTextContent);
     request->SetContent(std::make_shared<NotificationContent>(longTextContent));
     ANS_LOGD("GetNotificationLongTextContent end");
-    return true;
+    return ERR_OK;
 }
 
-bool GetNotificationPictureContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+int32_t GetNotificationPictureContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
 {
     ANS_LOGD("GetNotificationPictureContent start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
         ANS_LOGE("GetNotificationPictureContent failed, has nullptr");
-        return false;
+        return ERROR_INTERNAL_ERROR;
     }
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref contentRef = {};
     if (ANI_OK != GetPropertyRef(env, obj, "picture", isUndefined, contentRef)
         || isUndefined == ANI_TRUE || contentRef == nullptr) {
         ANS_LOGE("GetNotificationPictureContent get ref failed");
-        return false;
+        return ERROR_INTERNAL_ERROR;
     }
     std::shared_ptr<NotificationPictureContent> pictureContent
         = std::make_shared<NotificationPictureContent>();
     UnWarpNotificationPictureContent(env, static_cast<ani_object>(contentRef), pictureContent);
     request->SetContent(std::make_shared<NotificationContent>(pictureContent));
     ANS_LOGD("GetNotificationPictureContent end");
-    return true;
+    return ERR_OK;
 }
 
-bool GetNotificationMultiLineContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+int32_t GetNotificationMultiLineContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
 {
     ANS_LOGD("GetNotificationMultiLineContent start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
         ANS_LOGE("GetNotificationMultiLineContent failed, has nullptr");
-        return false;
+        return ERROR_INTERNAL_ERROR;
     }
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref contentRef = {};
     if (ANI_OK != GetPropertyRef(env, obj, "multiLine", isUndefined, contentRef)
         || isUndefined == ANI_TRUE || contentRef == nullptr) {
         ANS_LOGE("GetNotificationMultiLineContent get ref failed");
-        return false;
+        return ERROR_INTERNAL_ERROR;
     }
     std::shared_ptr<NotificationMultiLineContent> multiLineContent
         = std::make_shared<NotificationMultiLineContent>();
     UnWarpNotificationMultiLineContent(env, static_cast<ani_object>(contentRef), multiLineContent);
     request->SetContent(std::make_shared<NotificationContent>(multiLineContent));
     ANS_LOGD("GetNotificationMultiLineContent end");
-    return true;
+    return ERR_OK;
 }
 
-bool GetNotificationLocalLiveViewContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+int32_t GetNotificationLocalLiveViewContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
 {
     ANS_LOGD("GetNotificationLocalLiveViewContent start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
         ANS_LOGE("GetNotificationLocalLiveViewContent failed, has nullptr");
-        return false;
+        return ERROR_INTERNAL_ERROR;
     }
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref contentRef = {};
     if (ANI_OK != GetPropertyRef(env, obj, "systemLiveView", isUndefined, contentRef)
         || isUndefined == ANI_TRUE || contentRef == nullptr) {
         ANS_LOGE("GetNotificationLocalLiveViewContent get ref failed");
-        return false;
+        return ERROR_INTERNAL_ERROR;
     }
     std::shared_ptr<NotificationLocalLiveViewContent> localLiveView
         = std::make_shared<NotificationLocalLiveViewContent>();
-    UnWarpNotificationLocalLiveViewContent(env, static_cast<ani_object>(contentRef), localLiveView);
+    ani_status status = ANI_OK;
+    status = UnWarpNotificationLocalLiveViewContent(env, static_cast<ani_object>(contentRef), localLiveView);
+    if (status != ANI_OK) {
+        ANS_LOGE("UnWarpNotificationLocalLiveViewContent failed, status %{public}d", status);
+        return ERROR_PARAM_INVALID;
+    }
     request->SetContent(std::make_shared<NotificationContent>(localLiveView));
     ANS_LOGD("GetNotificationLocalLiveViewContent end");
-    return true;
+    return ERR_OK;
 }
 
-bool GetNotificationLiveViewContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+int32_t GetNotificationLiveViewContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
 {
     ANS_LOGD("GetNotificationLiveViewContent start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
         ANS_LOGE("GetNotificationLiveViewContent failed, has nullptr");
-        return false;
+        return ERROR_INTERNAL_ERROR;
     }
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref contentRef = {};
     if (ANI_OK != GetPropertyRef(env, obj, "liveView", isUndefined, contentRef)
         || isUndefined == ANI_TRUE || contentRef == nullptr) {
         ANS_LOGE("GetNotificationLiveViewContent get ref failed");
-        return false;
+        return ERROR_INTERNAL_ERROR;
     }
     std::shared_ptr<NotificationLiveViewContent> liveViewContent
         = std::make_shared<NotificationLiveViewContent>();
     UnWarpNotificationLiveViewContent(env, static_cast<ani_object>(contentRef), liveViewContent);
     request->SetContent(std::make_shared<NotificationContent>(liveViewContent));
     ANS_LOGD("GetNotificationLiveViewContent end");
-    return true;
+    return ERR_OK;
 }
 
-bool GetNotificationContent(ani_env *env, ani_object obj, ContentType outType,
+int32_t GetNotificationContent(ani_env *env, ani_object obj, ContentType outType,
     std::shared_ptr<NotificationRequest> &request)
 {
     ANS_LOGD("GetNotificationContentWithType start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
         ANS_LOGE("GetNotificationContent failed, has nullptr");
-        return false;
+        return ERROR_INTERNAL_ERROR;
     }
     ANS_LOGD("GetNotificationContent ContentType = %{public}d", static_cast<int>(outType));
     switch (outType) {
@@ -454,16 +460,16 @@ bool GetNotificationContent(ani_env *env, ani_object obj, ContentType outType,
             ANS_LOGD("ContentType not find. type %{public}d", static_cast<int32_t>(outType));
             break;
     }
-    return true;
+    return ERR_OK;
 }
 
-ani_status GetNotificationContent(ani_env *env, ani_object obj,
+int32_t GetNotificationContent(ani_env *env, ani_object obj,
     std::shared_ptr<NotificationRequest> &request)
 {
     ANS_LOGD("GetNotificationContent start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
         ANS_LOGE("GetNotificationContent failed, has nullptr");
-        return ANI_ERROR;
+        return ERROR_INTERNAL_ERROR;
     }
     ani_status status = ANI_OK;
     ani_boolean isUndefined = ANI_TRUE;
@@ -471,26 +477,27 @@ ani_status GetNotificationContent(ani_env *env, ani_object obj,
     if (ANI_OK != (status = GetPropertyRef(env, obj, "content", isUndefined, notificationContentRef))
         || isUndefined == ANI_TRUE) {
         ANS_LOGE("GetNotificationContent:get contentRef failed. status %{public}d", status);
-        return status;
+        return ERROR_INTERNAL_ERROR;
     }
     ani_ref contentTypeRef;
     if (ANI_OK != (status = GetPropertyRef(env, static_cast<ani_object>(notificationContentRef),
         "notificationContentType", isUndefined, contentTypeRef))
         || isUndefined == ANI_TRUE || contentTypeRef == nullptr) {
         ANS_LOGE("GetNotificationContent:get notificationContentType failed. status %{public}d", status);
-        return status;
+        return ERROR_INTERNAL_ERROR;
     }
     ContentType type;
     if (!ContentTypeEtsToC(env, static_cast<ani_enum_item>(contentTypeRef), type)) {
         ANS_LOGE("GetNotificationContent:ContentTypeEtsToC failed");
-        return ANI_INVALID_ARGS;
+        return ERROR_INTERNAL_ERROR;
     }
-    if (!GetNotificationContent(env, static_cast<ani_object>(notificationContentRef), type, request)) {
+    int32_t ret = GetNotificationContent(env, static_cast<ani_object>(notificationContentRef), type, request);
+    if (ret != ERR_OK) {
         ANS_LOGE("GetNotificationContent:GetNotificationContent failed");
-        return ANI_INVALID_ARGS;
+        return ret;
     }
     ANS_LOGD("GetNotificationContent end");
-    return ANI_OK;
+    return ERR_OK;
 }
 
 void GetNotificationSlotType(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
@@ -528,7 +535,7 @@ void GetNotificationWantAgent(ani_env *env, ani_object obj, std::shared_ptr<Noti
     }
     std::shared_ptr<WantAgent> wantAgent = UnwrapWantAgent(env, static_cast<ani_object>(wantAgentRef));
     if (wantAgent == nullptr) {
-        ANS_LOGD("wantAgent is null");
+        ANS_LOGE("wantAgent is null");
         return;
     }
     request->SetWantAgent(wantAgent);
@@ -560,8 +567,8 @@ void GetNotificationExtendInfo(ani_env *env, ani_object obj, std::shared_ptr<Not
     }
     WantParams wantParams = {};
     UnwrapWantParams(env, extendInfoRef, wantParams);
-    std::shared_ptr<WantParams> extendInfo = std::make_shared<WantParams>(wantParams);
-    request->SetExtendInfo(extendInfo);
+    std::shared_ptr<WantParams> extends = std::make_shared<WantParams>(wantParams);
+    request->SetExtendInfo(extends);
 }
 
 void GetNotificationRemovalWantAgent(ani_env *env, ani_object obj,
@@ -576,7 +583,7 @@ void GetNotificationRemovalWantAgent(ani_env *env, ani_object obj,
     }
     std::shared_ptr<WantAgent> wantAgent = UnwrapWantAgent(env, static_cast<ani_object>(wantAgentRef));
     if (wantAgent == nullptr) {
-        ANS_LOGD("wantAgent is null");
+        ANS_LOGE("wantAgent is null");
         return;
     }
     request->SetRemovalWantAgent(wantAgent);
@@ -602,7 +609,7 @@ void GetNotificationSmallIcon(ani_env *env, ani_object obj, std::shared_ptr<Noti
         ANS_LOGE("GetNotificationSmallIcon: get ref failed");
         return;
     }
-    std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromAni(env, static_cast<ani_object>(smallIconRef));
+    std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(smallIconRef));
     if (pixelMap != nullptr) {
         request->SetLittleIcon(pixelMap);
     }
@@ -617,7 +624,7 @@ void GetNotificationLargeIcon(ani_env *env, ani_object obj, std::shared_ptr<Noti
         ANS_LOGE("GetNotificationLargeIcon: get ref failed");
         return;
     }
-    std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromAni(env, static_cast<ani_object>(largeIconRef));
+    std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(largeIconRef));
     if (pixelMap != nullptr) {
         request->SetBigIcon(pixelMap);
     }
@@ -632,7 +639,7 @@ void GetNotificationOverlayIcon(ani_env *env, ani_object obj, std::shared_ptr<No
         ANS_LOGE("GetNotificationOverlayIcon: get ref failed");
         return;
     }
-    std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromAni(env, static_cast<ani_object>(overlayIconRef));
+    std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(overlayIconRef));
     if (pixelMap != nullptr) {
         request->SetOverlayIcon(pixelMap);
     }
@@ -715,7 +722,7 @@ void GetNotificationBundleOption(ani_env *env, ani_object obj,
     ani_boolean isUndefind = ANI_TRUE;
     status = GetPropertyRef(env, obj, "representativeBundle", isUndefind, optionRef);
     if (status != ANI_OK || isUndefind == ANI_TRUE) {
-        ANS_LOGD("Cannot get the value of representativeBundle. status %{public}d isUndefind %{public}d",
+        ANS_LOGE("Cannot get the value of representativeBundle. status %{public}d isUndefind %{public}d",
             status, isUndefind);
         return;
     }
@@ -725,12 +732,12 @@ void GetNotificationBundleOption(ani_env *env, ani_object obj,
     }
 }
 
-ani_status GetNotificationRequestByCustom(ani_env *env, ani_object obj,
+int32_t GetNotificationRequestByCustom(ani_env *env, ani_object obj,
     std::shared_ptr<OHOS::Notification::NotificationRequest> &notificationRequest)
 {
-    ani_status status = GetNotificationContent(env, obj, notificationRequest);
-    if (status != ANI_OK) {
-        return ANI_INVALID_ARGS;
+    int32_t status = GetNotificationContent(env, obj, notificationRequest);
+    if (status != ERR_OK) {
+        return status;
     }
     GetNotificationSlotType(env, obj, notificationRequest);
     GetNotificationWantAgent(env, obj, notificationRequest);
@@ -748,15 +755,15 @@ ani_status GetNotificationRequestByCustom(ani_env *env, ani_object obj,
     return status;
 }
 
-ani_status UnWarpNotificationRequest(ani_env *env, ani_object obj,
+int32_t UnWarpNotificationRequest(ani_env *env, ani_object obj,
     std::shared_ptr<NotificationRequest> &notificationRequest)
 {
     ANS_LOGD("UnWarpNotificationRequest start");
     if (env == nullptr || obj == nullptr) {
-        ANS_LOGD("UnWarpNotificationRequest has nullptr");
-        return ANI_ERROR;
+        ANS_LOGE("UnWarpNotificationRequest has nullptr");
+        return ERROR_INTERNAL_ERROR;
     }
-    ani_status status = ANI_ERROR;
+    int32_t status = ERR_OK;
     GetNotificationRequestByNumber(env, obj, notificationRequest);
     GetNotificationRequestByString(env, obj, notificationRequest);
     GetNotificationRequestByBoolean(env, obj, notificationRequest);
@@ -857,30 +864,28 @@ bool SetNotificationRequestByNumber(ani_env* env, ani_class cls, const OHOS::Not
         ANS_LOGE("request is nullptr");
         return false;
     }
-    // id?: number
-    SetPropertyOptionalByDouble(env, object, "id", request->GetNotificationId());
+    // id?: int
+    SetPropertyOptionalByInt(env, object, "id", request->GetNotificationId());
     // slotType?: SlotType
     ani_enum_item slotTypeItem {};
     if (SlotTypeCToEts(env, request->GetSlotType(), slotTypeItem)) {
         CallSetter(env, cls, object, "notificationSlotType", slotTypeItem);
     }
-    // deliveryTime?: number
-    SetPropertyOptionalByDouble(env, object, "deliveryTime", request->GetDeliveryTime());
-    // autoDeletedTime?: number
-    SetPropertyOptionalByDouble(env, object, "autoDeletedTime", request->GetAutoDeletedTime());
-    // color ?: number
-    SetPropertyOptionalByDouble(env, object, "color", request->GetColor());
-    // badgeIconStyle ?: number
-    SetPropertyOptionalByDouble(env, object, "badgeIconStyle",
+    // deliveryTime?: long
+    SetPropertyOptionalByLong(env, object, "deliveryTime", request->GetDeliveryTime());
+    // autoDeletedTime?: long
+    SetPropertyOptionalByLong(env, object, "autoDeletedTime", request->GetAutoDeletedTime());
+    // color ?: long
+    SetPropertyOptionalByLong(env, object, "color", request->GetColor());
+    // badgeIconStyle ?: int
+    SetPropertyOptionalByInt(env, object, "badgeIconStyle",
         static_cast<int32_t>(request->GetBadgeIconStyle()));
-    // readonly creatorUid?: number
-    SetPropertyOptionalByDouble(env, object, "creatorUid", request->GetCreatorUid());
-    // readonly creatorPid?: number
-    SetPropertyOptionalByDouble(env, object, "creatorPid", request->GetCreatorPid());
-    // badgeNumber?: number
-    SetPropertyOptionalByDouble(env, object, "badgeNumber", request->GetBadgeNumber());
-    // readonly creatorInstanceKey?: number
-    SetPropertyOptionalByDouble(env, object, "creatorInstanceKey", request->GetCreatorInstanceKey());
+    // readonly creatorUid?: int
+    SetPropertyOptionalByInt(env, object, "creatorUid", request->GetCreatorUid());
+    // readonly creatorPid?: int
+    SetPropertyOptionalByInt(env, object, "creatorPid", request->GetCreatorPid());
+    // badgeNumber?: long
+    SetPropertyOptionalByLong(env, object, "badgeNumber", request->GetBadgeNumber());
     return true;
 }
 
@@ -962,15 +967,15 @@ bool SetNotificationRequestByNotificationContent(ani_env* env, ani_class cls,
     std::shared_ptr<NotificationContent> content = request->GetContent();
     ani_object contentObj;
     if (!SetNotificationContent(env, content, contentObj)) {
-        ANS_LOGD("SetNotificationContent faild");
+        ANS_LOGE("SetNotificationContent faild");
         return false;
     }
     if (contentObj == nullptr) {
-        ANS_LOGD("contentObj is nullptr");
+        ANS_LOGE("contentObj is nullptr");
         return false;
     }
     if (!SetPropertyByRef(env, object, "content", contentObj)) {
-        ANS_LOGD("SetNotificationRequestByNotificationContent. set content faild");
+        ANS_LOGE("SetNotificationRequestByNotificationContent. set content faild");
         return false;
     }
     return true;
@@ -980,7 +985,7 @@ bool SetRequestExtraInfo(ani_env *env, const OHOS::Notification::NotificationReq
 {
     std::shared_ptr<AAFwk::WantParams> additionalData = request->GetAdditionalData();
     if (additionalData == nullptr) {
-        ANS_LOGD("extraInfo is Undefine");
+        ANS_LOGE("extraInfo is Undefine");
         return true;
     }
     ani_ref extraInfo = OHOS::AppExecFwk::WrapWantParams(env, *additionalData);
@@ -994,7 +999,7 @@ bool SetRequestExtendInfo(ani_env *env, const OHOS::Notification::NotificationRe
 {
     std::shared_ptr<AAFwk::WantParams> extendInfoData = request->GetExtendInfo();
     if (extendInfoData == nullptr) {
-        ANS_LOGD("extendInfo is Undefine");
+        ANS_LOGE("extendInfo is Undefine");
         return true;
     }
     ani_ref extendInfo = OHOS::AppExecFwk::WrapWantParams(env, *extendInfoData);
@@ -1008,7 +1013,7 @@ bool SetRequestActionButtons(ani_env *env, const OHOS::Notification::Notificatio
 {
     std::vector<std::shared_ptr<NotificationActionButton>> actionButtons = request->GetActionButtons();
     if (actionButtons.empty()) {
-        ANS_LOGD("actionButtons is Undefine");
+        ANS_LOGE("actionButtons is Undefine");
         return true;
     }
     ani_object actionButtonsArrayObj = GetAniArrayNotificationActionButton(env, actionButtons);
@@ -1023,7 +1028,7 @@ bool SetRequestTemplate(ani_env *env, const OHOS::Notification::NotificationRequ
 {
     std::shared_ptr<NotificationTemplate> templ = request->GetTemplate();
     if (templ == nullptr) {
-        ANS_LOGD("template is Undefine");
+        ANS_LOGE("template is Undefine");
         return true;
     }
     ani_object templateObject = WrapNotificationTemplate(env, templ);
@@ -1038,7 +1043,7 @@ bool SetRequestNotificationFlags(
 {
     std::shared_ptr<NotificationFlags> flags = request->GetFlags();
     if (flags == nullptr) {
-        ANS_LOGD("notificationFlags is Undefine");
+        ANS_LOGE("notificationFlags is Undefine");
         return true;
     }
     ani_object flagsObject = nullptr;
@@ -1057,7 +1062,7 @@ bool SetRequestAgentBundle(ani_env *env, const OHOS::Notification::NotificationR
 {
     std::shared_ptr<NotificationBundleOption> agentBundle = request->GetAgentBundle();
     if (agentBundle == nullptr) {
-        ANS_LOGD("agentBundle is Undefine");
+        ANS_LOGE("agentBundle is Undefine");
         return true;
     }
     ani_object agentBundleObject = nullptr;
@@ -1077,7 +1082,7 @@ bool SetRequestUnifiedGroupInfo(
 {
     std::shared_ptr<NotificationUnifiedGroupInfo> groupInfo = request->GetUnifiedGroupInfo();
     if (groupInfo == nullptr) {
-        ANS_LOGD("unifiedGroupInfo is Undefine");
+        ANS_LOGE("unifiedGroupInfo is Undefine");
         return true;
     }
     ani_object infoObject = nullptr;
@@ -1110,7 +1115,6 @@ bool SetNotificationRequestByCustom(ani_env* env, ani_class cls,
     if (!SetRequestExtendInfo(env, request, object)) {
         ANS_LOGE("set extendInfo faild");
     }
-    
     // actionButtons?: Array<NotificationActionButton>
     if (!SetRequestActionButtons(env, request, object)) {
         ANS_LOGD("set actionButtons faild");
@@ -1143,7 +1147,7 @@ bool WarpNotificationRequest(ani_env *env, const OHOS::Notification::Notificatio
         return false;
     }
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationRequest/NotificationRequestInner;", cls, outAniObj)) {
+        "notification.notificationRequest.NotificationRequestInner", cls, outAniObj)) {
         ANS_LOGE("WarpNotificationRequest: create class failed");
         return false;
     }
@@ -1175,6 +1179,116 @@ bool WarpNotificationRequest(ani_env *env, const OHOS::Notification::Notificatio
     return true;
 }
 
+bool SetNotificationRequestDistributedOptions(ani_env *env,
+    const sptr<NotificationSts> notification, ani_object &object)
+{
+    ANS_LOGD("SetNotificationRequestDistributedOptions call");
+    ani_object optionsObj;
+    ani_class ncCls;
+    if (!CreateClassObjByClassName(env, "notification.notificationRequest.DistributedOptionsInner",
+        ncCls, optionsObj) || optionsObj == nullptr) {
+        ANS_LOGE("create distributedOption class failed");
+        return false;
+    }
+    NotificationDistributedOptions options = notification->GetNotificationRequest().GetNotificationDistributedOptions();
+    // isDistributed?: boolean
+    if (!SetPropertyOptionalByBoolean(env, optionsObj, "isDistributed", options.IsDistributed())) {
+        ANS_LOGD("set isDistributed failed");
+    }
+    // supportDisplayDevices?: Array<string>
+    ani_object displayDevices = GetAniStringArrayByVectorString(env, options.GetDevicesSupportDisplay());
+    if (displayDevices == nullptr || !SetPropertyByRef(env, optionsObj, "supportDisplayDevices", displayDevices)) {
+        ANS_LOGD("set supportDisplayDevices failed");
+    }
+    // supportOperateDevices?: Array<string>
+    ani_object supportOperateDevices = GetAniStringArrayByVectorString(env, options.GetDevicesSupportOperate());
+    if (supportOperateDevices == nullptr ||
+        !SetPropertyByRef(env, optionsObj, "supportOperateDevices", supportOperateDevices)) {
+        ANS_LOGD("set supportOperateDevices failed");
+    }
+    // readonly remindType?: number
+    ani_enum_item remindTypeItem {};
+    if (DeviceRemindTypeCToEts(env, notification->GetRemindType(), remindTypeItem)) {
+        CallSetter(env, ncCls, optionsObj, "remindType", remindTypeItem);
+    }
+    if (!SetPropertyByRef(env, object, "distributedOption", optionsObj)) {
+        ANS_LOGD("set distributedOption faild");
+    }
+    ANS_LOGD("SetNotificationRequestDistributedOptions end");
+    return true;
+}
+
+bool WarpNotificationOther(ani_env *env, ani_class &cls,
+    const sptr<NotificationSts> notification, ani_object &outAniObj)
+{
+    // hashCode?: string
+    if (!SetPropertyOptionalByString(env, outAniObj, "hashCode", notification->GetKey().c_str())) {
+        ANS_LOGD("set hashCode faild");
+    }
+    // isFloatingIcon ?: boolean
+    if (!SetPropertyOptionalByBoolean(env, outAniObj, "isFloatingIcon", notification->IsFloatingIcon())) {
+        ANS_LOGD("set isFloatingIcon faild");
+    }
+    // readonly creatorBundleName?: string
+    if (!SetPropertyOptionalByString(env, outAniObj, "creatorBundleName", notification->GetBundleName().c_str())) {
+        ANS_LOGD("set creatorBundleName faild");
+    }
+    // readonly creatorUid?: number
+    if (!SetPropertyOptionalByInt(env, outAniObj, "creatorUid", notification->GetNotificationRequest().GetOwnerUid())) {
+        ANS_LOGD("set creatorUid faild");
+    }
+    // readonly creatorUserId?: number
+    if (!SetPropertyOptionalByInt(env, outAniObj, "creatorUserId", notification->GetRecvUserId())) {
+        ANS_LOGD("set creatorUserId faild");
+    }
+    // readonly creatorPid?: number
+    if (!SetPropertyOptionalByInt(env, outAniObj, "creatorPid", notification->GetPid())) {
+        ANS_LOGD("set creatorPid faild");
+    }
+    // distributedOption?:DistributedOptions
+    if (!SetNotificationRequestDistributedOptions(env, notification, outAniObj)) {
+        ANS_LOGE("set distributedOption faild");
+        return false;
+    }
+    // readonly isRemoveAllowed?: boolean
+    if (!SetPropertyOptionalByBoolean(env, outAniObj, "isRemoveAllowed", notification->IsRemoveAllowed())) {
+        ANS_LOGD("set isRemoveAllowed faild");
+    }
+    // readonly source?: number
+    ani_enum_item sourceTypeItem {};
+    if (SourceTypeCToEts(env, notification->GetSourceType(), sourceTypeItem)) {
+        CallSetter(env, cls, outAniObj, "source", sourceTypeItem);
+    }
+    // readonly deviceId?: string
+    if (!SetPropertyOptionalByString(env, outAniObj, "deviceId", notification->GetDeviceId().c_str())) {
+        ANS_LOGD("set deviceId faild");
+    }
+    // notificationControlFlags?: number
+    if (!SetPropertyOptionalByLong(env, outAniObj, "notificationControlFlags",
+        static_cast<long>(notification->GetNotificationRequest().GetNotificationControlFlags()))) {
+        ANS_LOGD("set notificationControlFlags faild");
+    }
+    return true;
+}
+
+bool WarpNotification(ani_env *env, const sptr<NotificationSts> notification, ani_class &cls, ani_object &outAniObj)
+{
+    ANS_LOGD("WarpNotification called");
+    if (notification == nullptr) {
+        ANS_LOGE("null notification");
+        return false;
+    }
+    NotificationRequest request = notification->GetNotificationRequest();
+    if (!WarpNotificationRequest(env, &request, cls, outAniObj)) {
+        return false;
+    }
+    if (!WarpNotificationOther(env, cls, notification, outAniObj)) {
+        return false;
+    }
+    ANS_LOGD("WarpNotification end");
+    return true;
+}
+
 ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<NotificationRequest>> requests)
 {
     ani_object arrayObj = newArrayClass(env, requests.size());
@@ -1187,12 +1301,12 @@ ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<Notific
         ani_class requestCls;
         ani_object requestObj;
         if (!WarpNotificationRequest(env, request.GetRefPtr(), requestCls, requestObj) || requestObj == nullptr) {
-            ANS_LOGE("WarpNotificationRequest faild. index %{public}zu", index);
+            ANS_LOGE("WarpNotificationRequest faild. index %{public}d", index);
             return nullptr;
         }
         if (ANI_OK != env->Object_CallMethodByName_Void(
-            arrayObj, "$_set", "ILstd/core/Object;:V", index, requestObj)) {
-            ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}zu", index);
+            arrayObj, "$_set", "iC{std.core.Object}:", index, requestObj)) {
+            ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}d", index);
             return nullptr;
         }
         index ++;
@@ -1214,12 +1328,12 @@ ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vect
         if (!WarpNotificationRequest(
             env, request->GetNotificationRequestPoint().GetRefPtr(), requestCls, requestObj)
             || requestObj == nullptr) {
-                ANS_LOGE("WarpNotificationRequest faild. index %{public}zu", index);
+                ANS_LOGE("WarpNotificationRequest faild. index %{public}d", index);
                 return nullptr;
             }
         if (ANI_OK
-            != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, requestObj)) {
-            ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}zu", index);
+            != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, requestObj)) {
+            ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}d", index);
             return nullptr;
         }
         index ++;

@@ -93,10 +93,10 @@ ani_status GetStsActionButtonByUserInput(ani_env *env, ani_object param,
     if (ANI_OK == GetPropertyRef(env, param, "userInput", isUndefind, userInputRef) && isUndefind == ANI_FALSE) {
         UnwrapNotificationUserInput(env, static_cast<ani_object>(userInputRef), userInput);
     } else {
-        ANS_LOGD("GetStsActionButtonByUserInput : GetPropertyRef userInput failed");
+        ANS_LOGD("GetPropertyRef userInput failed");
     }
     if (userInput == nullptr) {
-        ANS_LOGD("GetStsActionButtonByUserInput : userInput is nullptr");
+        ANS_LOGD("userInput is nullptr");
         userInput = {};
     }
     actionButton.userInput = userInput;
@@ -188,12 +188,12 @@ void SetNotificationActionButtonByOptionalParameter(
     // extras?: Record<string, Object>
     ani_ref extras = WrapWantParams(env, *(actionButton->GetAdditionalData().get()));
     if (!CallSetter(env, iconButtonCls, iconButtonObject, "extras", extras)) {
-        ANS_LOGD("SetActionButtonByOptionalParameter : Set extras failed");
+        ANS_LOGD("Set extras failed");
     }
     // userInput?: NotificationUserInput
     ani_object userInputObject = WarpUserInput(env, actionButton->GetUserInput());
     if (!CallSetter(env, iconButtonCls, iconButtonObject, "userInput", userInputObject)) {
-        ANS_LOGD("SetActionButtonByOptionalParameter : Set userInput failed");
+        ANS_LOGD("Set userInput failed");
     }
     ANS_LOGD("SetActionButtonByOptionalParameter end");
 }
@@ -209,7 +209,7 @@ ani_object WrapNotificationActionButton(ani_env* env,
     ani_object iconButtonObject = nullptr;
     ani_class iconButtonCls = nullptr;
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationActionButton/NotificationActionButtonInner;", iconButtonCls, iconButtonObject)) {
+        "notification.notificationActionButton.NotificationActionButtonInner", iconButtonCls, iconButtonObject)) {
         ANS_LOGE("WrapNotificationActionButton : CreateClassObjByClassName failed");
         return nullptr;
     }
@@ -218,7 +218,7 @@ ani_object WrapNotificationActionButton(ani_env* env,
         return nullptr;
     }
     SetNotificationActionButtonByOptionalParameter(env, iconButtonCls, iconButtonObject, actionButton);
-    ANS_LOGE("WrapNotificationActionButton end");
+    ANS_LOGD("WrapNotificationActionButton end");
     return iconButtonObject;
 }
 
@@ -233,20 +233,20 @@ ani_status GetNotificationActionButtonArray(ani_env *env, ani_object param,
     ani_ref arrayObj = nullptr;
     ani_boolean isUndefined = true;
     ani_status status;
-    ani_double length;
+    ani_int length;
     StsActionButton actionButton;
     if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGE("GetActionButtonArray: GetPropertyRef name = %{public}s, status = %{public}d", name, status);
         return ANI_INVALID_ARGS;
     }
-    if (ANI_OK!= (status = GetPropertyDouble(env, static_cast<ani_object>(arrayObj), "length", isUndefined, length))) {
+    if (ANI_OK != (status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length))) {
         ANS_LOGE("GetActionButtonArray: GetPropertyDouble name = %{public}s, status = %{public}d", name, status);
         return status;
     }
-    for (int i = 0; i < static_cast<int>(length); i++) {
+    for (int32_t i = 0; i < length; i++) {
         ani_ref buttonRef;
         if (ANI_OK != (status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "I:Lstd/core/Object;", &buttonRef, (ani_int)i))) {
+            "$_get", "i:C{std.core.Object}", &buttonRef, i))) {
             ANS_LOGE("GetActionButtonArray: get ref failed, status = %{public}d, index = %{public}d", status, i);
             return status;
         }
@@ -287,7 +287,7 @@ ani_object GetAniArrayNotificationActionButton(ani_env* env,
             ANS_LOGE("GetAniArrayActionButton: item is nullptr");
             return nullptr;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
+        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, item)) {
             ANS_LOGE("GetAniArrayActionButton: Object_CallMethodByName_Void failed");
             return nullptr;
         }

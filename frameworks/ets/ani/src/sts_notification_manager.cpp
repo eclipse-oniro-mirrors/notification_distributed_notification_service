@@ -65,7 +65,7 @@ bool StsSlotTypeUtils::StsToC(const STSSlotType inType, SlotType &outType)
             outType = SlotType::OTHER;
             break;
         default:
-            ANS_LOGE("SlotType %{public}d is an invalid value", inType);
+            ANS_LOGE("STSSlotType %{public}d is an invalid value", inType);
             return false;
     }
     return true;
@@ -130,7 +130,7 @@ bool StsContentTypeUtils::StsToC(const STSContentType inType, ContentType &outTy
             outType = ContentType::LIVE_VIEW;
             break;
         default:
-            ANS_LOGE("ContentType %{public}d is an invalid value", inType);
+            ANS_LOGE("STSContentType %{public}d is an invalid value", inType);
             return false;
     }
     return true;
@@ -212,7 +212,7 @@ bool StsSlotLevelUtils::StsToC(const STSSlotLevel inLevel, SlotLevel &outLevel)
             outLevel = SlotLevel::LEVEL_HIGH;
             break;
         default:
-            ANS_LOGE("SlotLevel %{public}d is an invalid value", inLevel);
+            ANS_LOGE("STSSlotLevel %{public}d is an invalid value", inLevel);
             return false;
     }
     return true;
@@ -286,45 +286,39 @@ bool StsRemindTypeUtils::CToSts(const RemindType inType, STSRemindType &outType)
     return true;
 }
 
-bool StsSwitchStateUtils::StsToC(const STSSwitchState inType, SwitchState &outType)
+bool StsSourceTypeUtils::StsToC(const STSSourceType inType, SourceType &outType)
 {
     switch (inType) {
-        case STSSwitchState::USER_MODIFIED_OFF:
-            outType = SwitchState::USER_MODIFIED_OFF;
+        case STSSourceType::TYPE_NORMAL:
+            outType = SourceType::TYPE_NORMAL;
             break;
-        case STSSwitchState::USER_MODIFIED_ON:
-            outType = SwitchState::USER_MODIFIED_ON;
+        case STSSourceType::TYPE_CONTINUOUS:
+            outType = SourceType::TYPE_CONTINUOUS;
             break;
-        case STSSwitchState::SYSTEM_DEFAULT_OFF:
-            outType = SwitchState::SYSTEM_DEFAULT_OFF;
-            break;
-        case STSSwitchState::SYSTEM_DEFAULT_ON:
-            outType = SwitchState::SYSTEM_DEFAULT_ON;
+        case STSSourceType::TYPE_TIMER:
+            outType = SourceType::TYPE_TIMER;
             break;
         default:
-            ANS_LOGE("STSSwitchState %{public}d is an invalid value", inType);
+            ANS_LOGE("STSSourceType %{public}d is an invalid value", inType);
             return false;
     }
     return true;
 }
 
-bool StsSwitchStateUtils::CToSts(const SwitchState inType, STSSwitchState &outType)
+bool StsSourceTypeUtils::CToSts(const SourceType inType, STSSourceType &outType)
 {
     switch (inType) {
-        case SwitchState::USER_MODIFIED_OFF:
-            outType = STSSwitchState::USER_MODIFIED_OFF;
+        case SourceType::TYPE_NORMAL:
+            outType = STSSourceType::TYPE_NORMAL;
             break;
-        case SwitchState::USER_MODIFIED_ON:
-            outType = STSSwitchState::USER_MODIFIED_ON;
+        case SourceType::TYPE_CONTINUOUS:
+            outType = STSSourceType::TYPE_CONTINUOUS;
             break;
-        case SwitchState::SYSTEM_DEFAULT_OFF:
-            outType = STSSwitchState::SYSTEM_DEFAULT_OFF;
-            break;
-        case SwitchState::SYSTEM_DEFAULT_ON:
-            outType = STSSwitchState::SYSTEM_DEFAULT_ON;
+        case SourceType::TYPE_TIMER:
+            outType = STSSourceType::TYPE_TIMER;
             break;
         default:
-            ANS_LOGE("SwitchState %{public}d is an invalid value", inType);
+            ANS_LOGE("SourceType %{public}d is an invalid value", inType);
             return false;
     }
     return true;
@@ -350,14 +344,14 @@ void StsNotificationLocalLiveViewSubscriber::OnDied()
 void StsNotificationLocalLiveViewSubscriber::OnResponse(int32_t notificationId, sptr<ButtonOption> buttonOption)
 {
     ANS_LOGD("OnResponse call");
-    std::string functionName = "OnResponse";
+    std::string functionName = "onResponse";
     ani_env *env = GetAniEnv();
     if (env == nullptr || stsSubscriber_ == nullptr) {
         ANS_LOGE("null env or stsSubscriber_");
         return;
     }
     ani_status status = ANI_OK;
-    ani_object stsSubscriberObj = reinterpret_cast<ani_object>(stsSubscriber_->aniRef);
+    ani_object stsSubscriberObj = static_cast<ani_object>(stsSubscriber_->aniRef);
     ani_ref funRef;
     ani_boolean isUndefined = ANI_TRUE;
     status = GetPropertyRef(env, stsSubscriberObj, functionName.c_str(), isUndefined, funRef);
@@ -365,7 +359,7 @@ void StsNotificationLocalLiveViewSubscriber::OnResponse(int32_t notificationId, 
         ANS_LOGE("Object_GetField_Ref failed");
         return;
     }
-    ani_object notificationIdAni = CreateDouble(env, notificationId);
+    ani_object notificationIdAni = CreateInt(env, notificationId);
     ani_object buttonOptionObj = WarpNotificationButtonOption(env, buttonOption);
     if (notificationIdAni == nullptr || buttonOptionObj == nullptr) {
         ANS_LOGE("null args");
@@ -379,6 +373,10 @@ void StsNotificationLocalLiveViewSubscriber::OnResponse(int32_t notificationId, 
     if ((status = env->FunctionalObject_Call(onFn, argv.size(), argv.data(), &resutlt)) != ANI_OK) {
         ANS_LOGE("FunctionalObject_Call failed, status: %{public}d", status);
         return;
+    }
+    ani_status aniResult = vm_->DetachCurrentThread();
+    if (aniResult != ANI_OK) {
+        ANS_LOGD("OnResponse DetachCurrentThread error. result: %{public}d.", aniResult);
     }
 }
 
@@ -417,12 +415,18 @@ ani_env* StsNotificationLocalLiveViewSubscriber::GetAniEnv()
         ANS_LOGE("vm_ is nullptr");
         return nullptr;
     }
-    ani_env* aniEnv = nullptr;
-    if (vm_->GetEnv(ANI_VERSION_1, &aniEnv) != ANI_OK) {
-        ANS_LOGE("get env failed");
-        return nullptr;
+    ani_env* env;
+    ani_status aniResult = ANI_ERROR;
+    ani_options aniArgs { 0, nullptr };
+    aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env);
+    if (aniResult != ANI_OK) {
+        ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
+        if (vm_->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {
+            ANS_LOGE("get env failed");
+            return nullptr;
+        }
     }
-    return aniEnv;
+    return env;
 }
 
 bool SlotTypeEtsToC(ani_env *env, ani_enum_item enumItem, SlotType &slotType)
@@ -440,9 +444,8 @@ bool SlotTypeCToEts(ani_env *env, SlotType slotType, ani_enum_item &enumItem)
 {
     ANS_LOGD("SlotTypeCToEts call");
     STSSlotType stsSlotType = STSSlotType::UNKNOWN_TYPE;
-    if (!StsSlotTypeUtils::CToSts(slotType, stsSlotType)
-        || !EnumConvertNativeToAni(
-            env, "L@ohos/notificationManager/notificationManager/SlotType;", stsSlotType, enumItem)) {
+    if (!StsSlotTypeUtils::CToSts(slotType, stsSlotType) ||
+        !EnumConvertNativeToAni(env, "@ohos.notificationManager.notificationManager.SlotType", stsSlotType, enumItem)) {
         ANS_LOGE("SlotTypeCToEts failed");
         return false;
     }
@@ -453,8 +456,7 @@ bool SlotLevelEtsToC(ani_env *env, ani_enum_item enumItem, SlotLevel &slotLevel)
 {
     ANS_LOGD("SlotLevelEtsToC call");
     STSSlotLevel stsSlotLevel = STSSlotLevel::LEVEL_NONE;
-    if (!EnumConvertAniToNative(env, enumItem, stsSlotLevel)
-        || !StsSlotLevelUtils::StsToC(stsSlotLevel, slotLevel)) {
+    if (!EnumConvertAniToNative(env, enumItem, stsSlotLevel) || !StsSlotLevelUtils::StsToC(stsSlotLevel, slotLevel)) {
         ANS_LOGE("SlotLevelEtsToC failed");
         return false;
     }
@@ -465,7 +467,7 @@ bool SlotLevelCToEts(ani_env *env, SlotLevel slotLevel, ani_enum_item &enumItem)
     ANS_LOGD("SlotLevelCToEts call");
     STSSlotLevel stsSlotLevel = STSSlotLevel::LEVEL_NONE;
     if (!StsSlotLevelUtils::CToSts(slotLevel, stsSlotLevel) || !EnumConvertNativeToAni(env,
-        "L@ohos/notificationManager/notificationManager/SlotLevel;", stsSlotLevel, enumItem)) {
+        "@ohos.notificationManager.notificationManager.SlotLevel", stsSlotLevel, enumItem)) {
         ANS_LOGE("SlotLevelCToEts failed");
         return false;
     }
@@ -488,9 +490,8 @@ bool ContentTypeCToEts(ani_env *env, ContentType contentType, ani_enum_item &enu
 {
     ANS_LOGD("ContentTypeCToEts call");
     STSContentType stsContentType = STSContentType::NOTIFICATION_CONTENT_BASIC_TEXT;
-    if (!StsContentTypeUtils::CToSts(contentType, stsContentType)
-        || !EnumConvertNativeToAni(env,
-        "L@ohos/notificationManager/notificationManager/ContentType;", stsContentType, enumItem)) {
+    if (!StsContentTypeUtils::CToSts(contentType, stsContentType) || !EnumConvertNativeToAni(env,
+        "@ohos.notificationManager.notificationManager.ContentType", stsContentType, enumItem)) {
         ANS_LOGE("ContentTypeCToEts failed");
         return false;
     }
@@ -513,40 +514,42 @@ bool DoNotDisturbTypeEtsToC(ani_env *env, ani_enum_item enumItem,
 bool DeviceRemindTypeCToEts(ani_env *env, RemindType remindType, ani_enum_item &enumItem)
 {
     STSRemindType stsRemindType = STSRemindType::IDLE_DONOT_REMIND;
-    StsRemindTypeUtils::CToSts(remindType, stsRemindType);
-    EnumConvertNativeToAni(env,
-        "L@ohos/notificationManager/notificationManager/RemindType;", stsRemindType, enumItem);
+    if (!StsRemindTypeUtils::CToSts(remindType, stsRemindType) || !EnumConvertNativeToAni(env,
+        "@ohos.notificationManager.notificationManager.DeviceRemindType", stsRemindType, enumItem)) {
+        ANS_LOGE("DeviceRemindTypeCToEts failed");
+        return false;
+    }
     return true;
 }
 
 bool DeviceRemindTypeEtsToC(ani_env *env, ani_enum_item enumItem, RemindType &remindType)
 {
     STSRemindType stsRemindType = STSRemindType::IDLE_DONOT_REMIND;
-    if (EnumConvertAniToNative(env, enumItem, stsRemindType)) {
-        StsRemindTypeUtils::StsToC(stsRemindType, remindType);
-        return true;
-    }
-    return false;
-}
-
-bool SwitchStateCToEts(ani_env *env, SwitchState switchState, ani_enum_item &enumItem)
-{
-    STSSwitchState stsSwitchState = STSSwitchState::USER_MODIFIED_OFF;
-    if (!EnumConvertNativeToAni(env,
-        "L@ohos/notificationManager/notificationManager/SwitchState;", stsSwitchState, enumItem)
-        || !StsSwitchStateUtils::CToSts(switchState, stsSwitchState)) {
-        ANS_LOGE("SwitchStateCToEts failed");
+    if (!EnumConvertAniToNative(env, enumItem, stsRemindType)
+        || !StsRemindTypeUtils::StsToC(stsRemindType, remindType)) {
+        ANS_LOGE("DeviceRemindTypeEtsToC failed");
         return false;
     }
     return true;
 }
 
-bool SwitchStateEtsToC(ani_env *env, ani_enum_item enumItem, SwitchState &switchState)
+bool SourceTypeCToEts(ani_env *env, SourceType sourceType, ani_enum_item &enumItem)
 {
-    STSSwitchState stsSwitchState = STSSwitchState::USER_MODIFIED_OFF;
-    if (!EnumConvertAniToNative(env, enumItem, stsSwitchState)
-        || !StsSwitchStateUtils::StsToC(stsSwitchState, switchState)) {
-        ANS_LOGE("SwitchStateEtsToC failed");
+    STSSourceType stsSourceType = STSSourceType::TYPE_NORMAL;
+    if (!StsSourceTypeUtils::CToSts(sourceType, stsSourceType) || !EnumConvertNativeToAni(env,
+        "@ohos.notificationManager.notificationManager.SourceType", stsSourceType, enumItem)) {
+        ANS_LOGE("SourceTypeCToEts failed");
+        return false;
+    }
+    return true;
+}
+
+bool SourceTypeEtsToC(ani_env *env, ani_enum_item enumItem, SourceType &sourceType)
+{
+    STSSourceType stsSourceType = STSSourceType::TYPE_NORMAL;
+    if (!EnumConvertAniToNative(env, enumItem, stsSourceType)
+        || !StsSourceTypeUtils::StsToC(stsSourceType, sourceType)) {
+        ANS_LOGE("SourceTypeEtsToC failed");
         return false;
     }
     return true;
@@ -583,13 +586,13 @@ ani_object WarpNotificationButtonOption(ani_env *env, sptr<ButtonOption> buttonO
     ani_object optObj = nullptr;
     ani_class optCls = nullptr;
     if (!CreateClassObjByClassName(env,
-        "L@ohos/notificationManager/notificationManager/ButtonOptionsInner;", optCls, optObj) || optObj == nullptr) {
-        ANS_LOGE("WarpNotificationButtonOption: create class failed");
+        "@ohos.notificationManager.notificationManager.ButtonOptionsInner", optCls, optObj) || optObj == nullptr) {
+        ANS_LOGE("CreateClassObjByClassName fail");
         return nullptr;
     }
     // title: string;
     if (!SetPropertyOptionalByString(env, optObj, "buttonName", buttonOption->GetButtonName())) {
-        ANS_LOGE("WarpNotificationButtonOption: set buttonName failed");
+        ANS_LOGE("SetPropertyOptionalByString buttonName fail");
         return nullptr;
     }
     ANS_LOGD("WarpNotificationButtonOption end");
@@ -606,19 +609,18 @@ bool WarpNotificationDoNotDisturbDate(
     }
     ani_class cls;
     ani_enum_item stsEnumValue;
-    const char *className = "L@ohos/notificationManager/notificationManager/DoNotDisturbDateInner;";
+    const char *className = "@ohos.notificationManager.notificationManager.DoNotDisturbDateInner";
     if (!CreateClassObjByClassName(env, className, cls, outObj) || outObj == nullptr) {
         ANS_LOGE("WarpNotificationDoNotDisturbDate: create class faild");
         return false;
     }
-    if (!EnumConvertNativeToAni(
-        env, "L@ohos/notificationManager/notificationManager/DoNotDisturbType;",
-            date->GetDoNotDisturbType(), stsEnumValue)) {
+    if (!EnumConvertNativeToAni(env,
+        "@ohos.notificationManager.notificationManager.DoNotDisturbType", date->GetDoNotDisturbType(), stsEnumValue)) {
         ANS_LOGE("EnumConvert_NativeToSts faild");
         return false;
     }
     if (!SetPropertyByRef(env, outObj, "type", stsEnumValue)) {
-        ANS_LOGE("set type faild.");
+        ANS_LOGE("SetPropertyByRef 'type' faild.");
         return false;
     }
     if (!SetDate(env, outObj, "begin", date->GetBeginDate())) {
@@ -645,7 +647,7 @@ bool SetCheckInfoContentType(ani_env *env, ani_object &obj, const std::string &n
         ANS_LOGE("CToSts 'contentType' faild.");
         return false;
     }
-    if (!EnumConvertNativeToAni(env, "L@ohos/notificationManager/notificationManager/ContentType;", stsType, item)) {
+    if (!EnumConvertNativeToAni(env, "@ohos.notificationManager.notificationManager.ContentType", stsType, item)) {
         ANS_LOGE("EnumConvertNativeToAni 'contentType' faild.");
         return false;
     }
@@ -668,7 +670,7 @@ bool SetCheckInfoSlotType(ani_env *env, ani_object &obj, const std::string &name
         ANS_LOGE("CToSts 'slotType' faild.");
         return false;
     }
-    if (!EnumConvertNativeToAni(env, "L@ohos/notificationManager/notificationManager/SlotType;", stsType, item)) {
+    if (!EnumConvertNativeToAni(env, "@ohos.notificationManager.notificationManager.SlotType", stsType, item)) {
         ANS_LOGE("EnumConvertNativeToAni 'slotType' faild.");
         return false;
     }
@@ -683,15 +685,15 @@ bool SetNotificationCheckInfoNumber(
     ani_env *env, const std::shared_ptr<OHOS::Notification::NotificationCheckInfo> &data, ani_object &outObj)
 {
     ani_status status = ANI_OK;
-    // notificationId: number;
-    if (ANI_OK != (status = env->Object_SetPropertyByName_Double(
-        outObj, "notificationId", static_cast<ani_double>(data->GetNotifyId())))) {
+    // notificationId: int;
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Int(
+        outObj, "notificationId", data->GetNotifyId()))) {
             ANS_LOGE("WarpNotificationCheckInfo. set 'notificationId' faild. status %{public}d", status);
             return false;
         }
-    // creatorUserId: number;
-    if (ANI_OK != (status = env->Object_SetPropertyByName_Double(
-        outObj, "creatorUserId", static_cast<ani_double>(data->GetCreatorUserId())))) {
+    // creatorUserId: int;
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Int(
+        outObj, "creatorUserId", data->GetCreatorUserId()))) {
             ANS_LOGE("WarpNotificationCheckInfo. set 'creatorUserId' faild. status %{public}d", status);
             return false;
         }
@@ -770,7 +772,7 @@ bool WarpNotificationCheckInfo(
         return false;
     }
     if (!CreateClassObjByClassName(
-        env, "L@ohos/notificationManager/notificationManager/NotificationCheckInfoInner;", cls, obj)) {
+        env, "@ohos.notificationManager.notificationManager.NotificationCheckInfoInner", cls, obj)) {
             ANS_LOGE("WarpNotificationCheckInfo create faild");
             return false;
         }
@@ -813,25 +815,31 @@ bool UnWarpNotificationDoNotDisturbDate(
     NotificationDoNotDisturbDate& doNotDisturbDate)
 {
     ani_boolean isUndefined = false;
-    ani_double mDouble = 0.0;
+    ani_ref mDate = nullptr;
     if (env == nullptr) {
         ANS_LOGE("UnWarpNotificationDoNotDisturbDate: Invalid input parameters");
         return false;
     }
     GetDoNotDisturbDateByDoNotDisturbType(env, doNotDisturbDateObj, doNotDisturbDate);
 
-    if (ANI_OK == GetPropertyDouble(env, doNotDisturbDateObj, "begin", isUndefined, mDouble)
+    int64_t beginTime = 0;
+    if (ANI_OK == GetPropertyRef(env, doNotDisturbDateObj, "begin", isUndefined, mDate)
         && isUndefined == ANI_FALSE) {
-        doNotDisturbDate.SetBeginDate(static_cast<int32_t>(mDouble));
+        if (mDate == nullptr || !GetDateByObject(env, static_cast<ani_object>(mDate), beginTime)) {
+            ANS_LOGE("get begin time failed");
+            return false;
+        }
     }
-    if (ANI_OK == GetPropertyDouble(env, doNotDisturbDateObj, "end", isUndefined, mDouble)
+    int64_t endTime = 0;
+    if (ANI_OK == GetPropertyRef(env, doNotDisturbDateObj, "end", isUndefined, mDate)
         && isUndefined == ANI_FALSE) {
-        doNotDisturbDate.SetEndDate(static_cast<int32_t>(mDouble));
+        if (mDate == nullptr || !GetDateByObject(env, static_cast<ani_object>(mDate), endTime)) {
+            ANS_LOGE("get end time failed");
+            return false;
+        }
     }
-    if (doNotDisturbDate.GetBeginDate() >= doNotDisturbDate.GetEndDate()) {
-        ANS_LOGE("Invalid time range");
-        return false;
-    }
+    doNotDisturbDate.SetBeginDate(beginTime);
+    doNotDisturbDate.SetEndDate(endTime);
     ANS_LOGD("Successfully parsed DoNotDisturbDate");
     return true;
 }

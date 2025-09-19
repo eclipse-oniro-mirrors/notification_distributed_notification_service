@@ -31,7 +31,7 @@ ani_status UnwrapNotificationTemplate(ani_env *env, ani_object aniObj, Notificat
     }
     ani_status status = ANI_ERROR;
     ani_ref nameRef;
-    if (ANI_OK != (status = env->Object_CallMethodByName_Ref(aniObj, "<get>name", ":Lstd/core/String;", &nameRef))) {
+    if (ANI_OK != (status = env->Object_CallMethodByName_Ref(aniObj, "<get>name", ":C{std.core.String}", &nameRef))) {
         ANS_LOGE("Object_CallMethodByName_Ref faild. status %{public}d", status);
         return status;
     }
@@ -65,7 +65,7 @@ ani_object WrapNotificationTemplate(ani_env* env, const std::shared_ptr<Notifica
     ani_class templateCls = nullptr;
     ani_status status = ANI_OK;
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationTemplate/NotificationTemplateInner;", templateCls, templateObject)) {
+        "notification.notificationTemplate.NotificationTemplateInner", templateCls, templateObject)) {
             ANS_LOGE("Create faild");
             return nullptr;
         }

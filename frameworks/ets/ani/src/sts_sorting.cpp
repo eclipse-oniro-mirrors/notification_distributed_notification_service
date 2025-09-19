@@ -29,11 +29,11 @@ bool WarpNotificationSorting(ani_env *env, Notification::NotificationSorting &so
     ani_string hashCodeObj;
     std::string hashCode;
     if (env == nullptr) {
-        ANS_LOGE("invalid parameter value");
+        ANS_LOGE("env is null");
         return false;
     }
-    if (!CreateClassObjByClassName(env, "Lnotification/notificationSorting/NotificationSortingInner;", cls, obj)) {
-        ANS_LOGE("Create obj faild. NotificationSortingInner");
+    if (!CreateClassObjByClassName(env, "notification.notificationSorting.NotificationSortingInner", cls, obj)) {
+        ANS_LOGE("Create NotificationSortingInner ClassObj faild");
         return false;
     }
     // readonly slot: NotificationSlot
@@ -47,7 +47,7 @@ bool WarpNotificationSorting(ani_env *env, Notification::NotificationSorting &so
     }
     hashCode = sorting.GetGroupKeyOverride();
     if (ANI_OK != GetAniStringByString(env, hashCode, hashCodeObj) || hashCodeObj == nullptr) {
-        ANS_LOGE("GetAniStringByString faild");
+        ANS_LOGE("GetAniStringByString hashCode faild");
         return false;
     }
     // readonly hashCode: string;
@@ -55,9 +55,9 @@ bool WarpNotificationSorting(ani_env *env, Notification::NotificationSorting &so
         ANS_LOGE("set hashCode faild. status %{public}d", status);
         return false;
     }
-    // readonly ranking: number;
-    if (ANI_OK != (status = env->Object_SetPropertyByName_Double(
-        obj, "ranking", static_cast<ani_double>(sorting.GetRanking())))) {
+    // readonly ranking: long;
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Long(
+        obj, "ranking", static_cast<ani_long>(sorting.GetRanking())))) {
         ANS_LOGE("set ranking faild. status %{public}d", status);
         return false;
     }

@@ -26,7 +26,7 @@ namespace OHOS {
 namespace NotificationSts {
 using namespace OHOS::Notification;
 
-int32_t GetExternalCode(uint32_t errCode);
+int32_t GetExternalCode(const uint32_t errCode);
 
 inline std::string FindAnsErrMsg(const int32_t errCode)
 {

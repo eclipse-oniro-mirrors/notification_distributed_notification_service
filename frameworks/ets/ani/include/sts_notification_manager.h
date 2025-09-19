@@ -34,7 +34,7 @@ using ContentType = OHOS::Notification::NotificationContent::Type;
 using ButtonOption = OHOS::Notification::NotificationButtonOption;
 using NotificationDoNotDisturbDate = OHOS::Notification::NotificationDoNotDisturbDate;
 using RemindType = OHOS::Notification::NotificationConstant::RemindType;
-using SwitchState = OHOS::Notification::NotificationConstant::SWITCH_STATE;
+using SourceType = OHOS::Notification::NotificationConstant::SourceType;
 using NotificationConstant = OHOS::Notification::NotificationConstant;
 
 enum STSDoNotDisturbType {
@@ -80,11 +80,10 @@ enum class STSRemindType {
     ACTIVE_REMIND
 };
 
-enum class STSSwitchState {
-    USER_MODIFIED_OFF,
-    USER_MODIFIED_ON,
-    SYSTEM_DEFAULT_OFF,
-    SYSTEM_DEFAULT_ON
+enum class STSSourceType {
+    TYPE_NORMAL,
+    TYPE_CONTINUOUS,
+    TYPE_TIMER
 };
 
 class StsDoNotDisturbTypeUtils {
@@ -117,10 +116,10 @@ static bool StsToC(const STSRemindType inType, RemindType &outType);
 static bool CToSts(const RemindType inType, STSRemindType &outType);
 };
 
-class StsSwitchStateUtils {
+class StsSourceTypeUtils {
 public:
-static bool StsToC(const STSSwitchState inType, SwitchState &outType);
-static bool CToSts(const SwitchState inType, STSSwitchState &outType);
+static bool StsToC(const STSSourceType inType, SourceType &outType);
+static bool CToSts(const SourceType inType, STSSourceType &outType);
 };
 
 class StsNotificationLocalLiveViewSubscriber : public NotificationLocalLiveViewSubscriber {
@@ -185,8 +184,8 @@ bool ContentTypeCToEts(ani_env *env, ContentType contentType, ani_enum_item &enu
 bool DeviceRemindTypeCToEts(ani_env *env, RemindType remindType, ani_enum_item &enumItem);
 bool DeviceRemindTypeEtsToC(ani_env *env, ani_enum_item enumItem, RemindType &remindType);
 
-bool SwitchStateCToEts(ani_env *env, SwitchState switchState, ani_enum_item &enumItem);
-bool SwitchStateEtsToC(ani_env *env, ani_enum_item enumItem, SwitchState &switchState);
+bool SourceTypeCToEts(ani_env *env, SourceType sourceType, ani_enum_item &enumItem);
+bool SourceTypeEtsToC(ani_env *env, ani_enum_item enumItem, SourceType &sourceType);
 
 ani_status UnWarpNotificationButtonOption(ani_env *env, const ani_object buttonOptionObj,
     ButtonOption &buttonOption);

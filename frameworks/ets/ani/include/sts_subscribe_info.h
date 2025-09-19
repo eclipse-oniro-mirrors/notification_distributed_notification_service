@@ -16,11 +16,13 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_STS_SORTING_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_STS_SORTING_H
 #include "ani.h"
+#include "notification_constant.h"
 #include "notification_subscribe_info.h"
 
 namespace OHOS {
 namespace NotificationSts {
 using NotificationSubscribeInfo = OHOS::Notification::NotificationSubscribeInfo;
+using SlotType = OHOS::Notification::NotificationConstant::SlotType;
 
 bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, NotificationSubscribeInfo &info);
 } // namespace NotificationSts

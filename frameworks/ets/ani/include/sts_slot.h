@@ -25,7 +25,7 @@ using SlotType = OHOS::Notification::NotificationConstant::SlotType;
 using SlotLevel = OHOS::Notification::NotificationSlot::NotificationLevel;
 using NotificationSlot = OHOS::Notification::NotificationSlot;
 
-constexpr const char* NOTIFICATION_SOLT_CLASSNAME = "Lnotification/notificationSlot/NotificationSlotInner;";
+constexpr const char* NOTIFICATION_SOLT_CLASSNAME = "notification.notificationSlot.NotificationSlotInner";
 bool SetOptionalFieldSlotType(ani_env *env, const ani_class cls, ani_object &object, const std::string fieldName,
     const SlotType value);
 bool SetOptionalFieldSlotLevel(ani_env *env, const ani_class cls, ani_object &object, const std::string fieldName,
@@ -38,6 +38,7 @@ bool ParseNotificationSlotByBasicType(ani_env *env, ani_object notificationSlotO
 bool UnwrapNotificationSlot(ani_env *env, ani_object notificationSlotObj, NotificationSlot &slot);
 bool UnwrapNotificationSlotArrayByAniObj(ani_env *env, ani_object notificationSlotArrayObj,
     std::vector<NotificationSlot> &slots);
+bool WrapGetNotificationSetting(ani_env *env, uint32_t slotFlags, ani_object &outAniObj);
 } // namespace NotificationSts
 } // OHOS
 #endif

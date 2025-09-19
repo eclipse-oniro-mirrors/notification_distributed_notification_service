@@ -26,16 +26,15 @@ bool WarpNotificationFlags(ani_env* env, const std::shared_ptr<NotificationFlags
         return false;
     }
     ani_class flagsCls = nullptr;
-    if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationFlags/NotificationFlagsInner;", flagsCls, flagsObject) ||
-        flagsObject == nullptr) {
-            ANS_LOGE("Create faild");
-            return false;
-        }
+    if (!CreateClassObjByClassName(env, "notification.notificationFlags.NotificationFlagsInner",
+        flagsCls, flagsObject) || flagsObject == nullptr) {
+        ANS_LOGE("CreateClassObjByClassName faild");
+        return false;
+    }
     // readonly soundEnabled?: NotificationFlagStatus;
     int32_t soundEnabled = static_cast<int32_t>(flags->IsSoundEnabled());
     ani_enum_item enumItem = nullptr;
-    if (!EnumConvertNativeToAni(env, "Lnotification/notificationFlags/NotificationFlagStatus;",
+    if (!EnumConvertNativeToAni(env, "notification.notificationFlags.NotificationFlagStatus",
         soundEnabled, enumItem)) {
             ANS_LOGE("EnumConvertNativeToAni 'soundEnabled' faild");
             return false;
@@ -46,7 +45,7 @@ bool WarpNotificationFlags(ani_env* env, const std::shared_ptr<NotificationFlags
     }
     // readonly vibrationEnabled?: NotificationFlagStatus;
     int32_t vibrationEnabled = static_cast<int32_t>(flags->IsVibrationEnabled());
-    if (!EnumConvertNativeToAni(env, "Lnotification/notificationFlags/NotificationFlagStatus;",
+    if (!EnumConvertNativeToAni(env, "notification.notificationFlags.NotificationFlagStatus",
         vibrationEnabled, enumItem)) {
             ANS_LOGE("EnumConvertNativeToAni 'vibrationEnabled' faild");
             return false;
@@ -55,9 +54,9 @@ bool WarpNotificationFlags(ani_env* env, const std::shared_ptr<NotificationFlags
         ANS_LOGE("WarpNotificationFlags set 'vibrationEnabled' faild");
         return false;
     }
-    // readonly reminderFlags?: number;
+    // readonly reminderFlags?: long;
     uint32_t reminderFlags = flags->GetReminderFlags();
-    if (!SetPropertyOptionalByDouble(env, flagsObject, "reminderFlags", reminderFlags)) {
+    if (!SetPropertyOptionalByLong(env, flagsObject, "reminderFlags", static_cast<int64_t>(reminderFlags))) {
         ANS_LOGD("WarpNotificationFlags set 'reminderFlags' faild");
     }
     return true;

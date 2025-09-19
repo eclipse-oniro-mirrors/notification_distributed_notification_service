@@ -28,14 +28,14 @@ bool UnwrapBundleOption(ani_env *env, ani_object obj, Notification::Notification
     }
     std::string tempStr;
     ani_boolean isUndefined = ANI_TRUE;
-    if (GetPropertyString(env, obj, "bundle", isUndefined, tempStr) !=ANI_OK || isUndefined == ANI_TRUE) {
+    if (GetPropertyString(env, obj, "bundle", isUndefined, tempStr) != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGE("UnwrapBundleOption Get bundle failed");
         return false;
     }
     std::string bundleName = GetResizeStr(tempStr, STR_MAX_SIZE);
     option.SetBundleName(bundleName);
-    ani_double result = 0.0;
-    if (GetPropertyDouble(env, obj, "uid", isUndefined, result) == ANI_OK && isUndefined == ANI_FALSE) {
+    ani_int result = 0;
+    if (GetPropertyInt(env, obj, "uid", isUndefined, result) == ANI_OK && isUndefined == ANI_FALSE) {
         int32_t uid = static_cast<int32_t>(result);
         option.SetUid(uid);
     } else {
@@ -66,7 +66,7 @@ ani_object GetAniArrayBundleOption(ani_env* env,
             ANS_LOGE("GetAniArrayActionButton: item is nullptr");
             return nullptr;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
+        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, item)) {
             ANS_LOGE("GetAniArrayActionButton: Object_CallMethodByName_Void failed");
             return nullptr;
         }
@@ -85,17 +85,17 @@ bool UnwrapArrayBundleOption(ani_env *env,
         return false;
     }
     ani_status status;
-    ani_double length;
-    status = env->Object_GetPropertyByName_Double(static_cast<ani_object>(arrayObj), "length", &length);
+    ani_int length;
+    status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
         ANS_LOGE("UnwrapArrayBundleOption: get length failed, status = %{public}d", status);
         return false;
     }
     Notification::NotificationBundleOption option;
-    for (int32_t i = 0; i < static_cast<int>(length); i++) {
+    for (int32_t i = 0; i < length; i++) {
         ani_ref optionRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "I:Lstd/core/Object;", &optionRef, i);
+            "$_get", "i:C{std.core.Object}", &optionRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("UnwrapArrayBundleOption: get bundleOptionRef failed, status = %{public}d", status);
             return false;
@@ -119,8 +119,7 @@ bool WrapBundleOption(ani_env* env,
         return false;
     }
     ani_class bundleCls = nullptr;
-    if (!CreateClassObjByClassName(env,
-        "Lnotification/NotificationCommonDef/BundleOptionInner;", bundleCls, bundleObject)
+    if (!CreateClassObjByClassName(env, "notification.NotificationCommonDef.BundleOptionInner", bundleCls, bundleObject)
         || bundleCls == nullptr || bundleObject == nullptr) {
         ANS_LOGE("WrapBundleOption: create BundleOption failed");
         return false;
@@ -132,82 +131,10 @@ bool WrapBundleOption(ani_env* env,
         ANS_LOGE("WrapBundleOption: set bundle failed");
         return false;
     }
-    // uid?: number;
-    uint32_t uid = bundleOption->GetUid();
-    SetPropertyOptionalByDouble(env, bundleObject, "uid", uid);
+    // uid?: int;
+    int32_t uid = bundleOption->GetUid();
+    SetPropertyOptionalByInt(env, bundleObject, "uid", uid);
     ANS_LOGD("WrapBundleOption end");
-    return true;
-}
-
-bool UnwrapDistributedBundleOption(ani_env *env, ani_object obj, DistributedBundleOption &distributedOption)
-{
-    ANS_LOGD("UnwrapDistributedBundleOption call");
-    if (env == nullptr || obj == nullptr) {
-        ANS_LOGE("UnwrapDistributedBundleOption failed, has nullptr");
-        return false;
-    }
-    ani_status status = ANI_ERROR;
-    ani_boolean isUndefined = ANI_TRUE;
-    std::string tempStr;
-    status = GetPropertyString(env, obj, "bundleName", isUndefined, tempStr);
-    if (status != ANI_OK || isUndefined == ANI_TRUE) {
-        ANS_LOGE("GetPropertyString 'bundleName' fail. status:%{public}d", status);
-        return false;
-    }
-    std::shared_ptr<BundleOption> optionValue = std::make_shared<BundleOption>();
-    if (optionValue == nullptr) {
-        ANS_LOGE("new BundleOption fail.");
-        return false;
-    }
-    std::string bundleName = GetResizeStr(tempStr, STR_MAX_SIZE);
-    optionValue->SetBundleName(bundleName);
-    ani_double result = 0.0;
-    if ((status = env->Object_GetPropertyByName_Double(obj, "uid", &result)) != ANI_OK) {
-        ANS_LOGE("Object_GetPropertyByName_Double 'uid' fail. status:%{public}d", status);
-        return false;
-    }
-    int32_t uid = static_cast<int32_t>(result);
-    optionValue->SetUid(uid);
-    distributedOption.SetBundle(optionValue);
-    bool enable = true;
-    status = GetPropertyBool(env, obj, "enable", isUndefined, enable);
-    if (status == ANI_OK && isUndefined == ANI_FALSE) {
-        distributedOption.SetEnable(enable);
-    }
-    ANS_LOGD("UnwrapDistributedBundleOption end");
-    return true;
-}
-
-bool UnwrapArrayDistributedBundleOption(ani_env *env, ani_object arrayObj,
-    std::vector<DistributedBundleOption> &options)
-{
-    ANS_LOGD("UnwrapArrayDistributedBundleOption call");
-    if (env == nullptr || arrayObj == nullptr) {
-        ANS_LOGE("UnwrapArrayDistributedBundleOption failed, has nullptr");
-        return false;
-    }
-    ani_status status;
-    ani_double length;
-    if (ANI_OK!= (status = env->Object_GetPropertyByName_Double(static_cast<ani_object>(arrayObj),
-        "length", &length))) {
-        ANS_LOGE("get length failed, status = %{public}d", status);
-        return false;
-    }
-    Notification::DistributedBundleOption option;
-    for (int32_t i = 0; i < static_cast<int>(length); i++) {
-        ani_ref optionRef;
-        status = env->Object_CallMethodByName_Ref(arrayObj, "$_get", "I:Lstd/core/Object;", &optionRef, i);
-        if (status != ANI_OK) {
-            ANS_LOGE("get optionRef failed, status = %{public}d", status);
-            return false;
-        }
-        if (!UnwrapDistributedBundleOption(env, static_cast<ani_object>(optionRef), option)) {
-            ANS_LOGE("get option status = %{public}d, index = %{public}d", status, i);
-            return false;
-        }
-        options.push_back(option);
-    }
-    ANS_LOGD("UnwrapArrayDistributedBundleOption end");
     return true;
 }
 }
