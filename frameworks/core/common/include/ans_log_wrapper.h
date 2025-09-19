@@ -42,35 +42,35 @@ namespace Notification {
 
 #define ANS_LOGF(fmt, ...)            \
     ((void)HILOG_IMPL(LOG_CORE, LOG_FATAL, ANS_LOG_DOMAIN, ANS_LOG_TAG, \
-    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+    "[%{public}s:%{public}d]" fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__))
 #define ANS_LOGE(fmt, ...)            \
     ((void)HILOG_IMPL(LOG_CORE, LOG_ERROR, ANS_LOG_DOMAIN, ANS_LOG_TAG, \
-    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+    "[%{public}s:%{public}d]" fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__))
 #define ANS_LOGW(fmt, ...)            \
     ((void)HILOG_IMPL(LOG_CORE, LOG_WARN, ANS_LOG_DOMAIN, ANS_LOG_TAG, \
-    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+    "[%{public}s:%{public}d]" fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__))
 #define ANS_LOGI(fmt, ...)            \
     ((void)HILOG_IMPL(LOG_CORE, LOG_INFO, ANS_LOG_DOMAIN, ANS_LOG_TAG, \
-    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+    "[%{public}s:%{public}d]" fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__))
 #define ANS_LOGD(fmt, ...)            \
     ((void)HILOG_IMPL(LOG_CORE, LOG_DEBUG, ANS_LOG_DOMAIN, ANS_LOG_TAG, \
-    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+    "[%{public}s:%{public}d]" fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__))
 
 #define ANSR_LOGF(fmt, ...)            \
     ((void)HILOG_IMPL(LOG_CORE, LOG_FATAL, ANS_LOG_DOMAIN, ANS_REMINDER_LOG_TAG, \
-    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+    "[%{public}s:%{public}d]" fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__))
 #define ANSR_LOGE(fmt, ...)            \
     ((void)HILOG_IMPL(LOG_CORE, LOG_ERROR, ANS_LOG_DOMAIN, ANS_REMINDER_LOG_TAG, \
-    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+    "[%{public}s:%{public}d]" fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__))
 #define ANSR_LOGW(fmt, ...)            \
     ((void)HILOG_IMPL(LOG_CORE, LOG_WARN, ANS_LOG_DOMAIN, ANS_REMINDER_LOG_TAG, \
-    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+    "[%{public}s:%{public}d]" fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__))
 #define ANSR_LOGI(fmt, ...)            \
     ((void)HILOG_IMPL(LOG_CORE, LOG_INFO, ANS_LOG_DOMAIN, ANS_REMINDER_LOG_TAG, \
-    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+    "[%{public}s:%{public}d]" fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__))
 #define ANSR_LOGD(fmt, ...)            \
     ((void)HILOG_IMPL(LOG_CORE, LOG_DEBUG, ANS_LOG_DOMAIN, ANS_REMINDER_LOG_TAG, \
-    "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
+    "[%{public}s:%{public}d]" fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__))
 
 #define ANS_PRINT_LIMIT(type, level, intervals, canPrint)                               \
 do {                                                                                    \
@@ -84,8 +84,8 @@ do {                                                                            
         supressed = 0;                                                                  \
         if (supressedCnt != 0) {                                                        \
             ((void)HILOG_IMPL((type), (level), ANS_LOG_DOMAIN, ANS_REMINDER_LOG_TAG,    \
-            "[%{public}s(%{public}s:%{public}d)]log suppressed cnt %{public}u",         \
-            CUR_FILENAME, __FUNCTION__, __LINE__, supressedCnt));                       \
+            "[%{public}s:%{public}d]log suppressed cnt %{public}u",         \
+            __FUNCTION__, __LINE__, supressedCnt));                       \
         }                                                                               \
         (canPrint) = true;                                                              \
     } else {                                                                            \
