@@ -143,6 +143,9 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
 
 void AdvancedNotificationService::SetIsFromSAToExtendInfo(const sptr<NotificationRequest> &request)
 {
+    if (!request) {
+        return;
+    }
     std::shared_ptr<AAFwk::WantParams> extendInfo = request->GetExtendInfo();
     if (!extendInfo) {
         extendInfo = std::make_shared<AAFwk::WantParams>();
