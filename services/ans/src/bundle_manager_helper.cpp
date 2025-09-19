@@ -388,5 +388,20 @@ ErrCode BundleManagerHelper::GetBundleResourceInfo(const std::string &bundleName
     IPCSkeleton::SetCallingIdentity(identity);
     return result;
 }
+
+bool BundleManagerHelper::QueryExtensionInfos(std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos,
+    int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
+    if (bundleMgr_ == nullptr) {
+        ANS_LOGE("QueryExtensionInfos bundle proxy failed.");
+        return false;
+    }
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    bundleMgr_->QueryExtensionAbilityInfos(AppExecFwk::ExtensionAbilityType::STATICSUBSCRIBER,
+        userId, extensionInfos);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return true;
+}
 }  // namespace Notification
 }  // namespace OHOS

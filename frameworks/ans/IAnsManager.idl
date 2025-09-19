@@ -331,5 +331,7 @@ interface OHOS.Notification.IAnsManager {
 
     void GetTargetDeviceBundleList([in] String deviceType, [in] String deviceId, [out] String[] bundleList, [out] String[] labelList);
 
+    void GetAllSubscriptionBundles([out] sptr<NotificationBundleOption>[] bundles);
+    void CanOpenSubscribeSettings();
     [macrodef NOTIFICATION_SMART_REMINDER_SUPPORTED] void RegisterSwingCallback([in] IRemoteObject swingCallback);
 }

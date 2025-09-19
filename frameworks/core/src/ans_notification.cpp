@@ -2593,5 +2593,28 @@ ErrCode AnsNotification::GetDistributedDevicelist(std::vector<std::string> &devi
     }
     return proxy->GetDistributedDevicelist(deviceTypes);
 }
+ErrCode AnsNotification::GetAllSubscriptionBundles(std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    ANS_LOGD("called");
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->GetAllSubscriptionBundles(bundles);
+}
+ErrCode AnsNotification::CanOpenSubscribeSettings()
+{
+    ANS_LOGD("called");
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get Extension Subscribe manager proxy fail");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->CanOpenSubscribeSettings();
+}
+
 }  // namespace Notification
 }  // namespace OHOS

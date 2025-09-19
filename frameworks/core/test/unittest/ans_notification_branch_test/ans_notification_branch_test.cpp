@@ -780,6 +780,16 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ErrCode GetAllSubscriptionBundles(std::vector<sptr<NotificationBundleOption>>& bundles) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode CanOpenSubscribeSettings() override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 };
 
 class AnsNotificationBranchTest : public testing::Test {

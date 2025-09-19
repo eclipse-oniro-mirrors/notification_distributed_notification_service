@@ -1435,6 +1435,20 @@ public:
      */
     ErrCode GetLiveViewConfig(const std::vector<std::string>& bundleList);
 
+    /**
+     * @brief Obtains the list of bundleOption which granted by user.
+     * @param bundles The returned list.
+     * @return Returns get result.
+     */
+    ErrCode GetAllSubscriptionBundles(std::vector<sptr<NotificationBundleOption>>& bundles);
+    
+    /**
+     * @brief Checks whether the current app is allowed to open the subscribe settings UI.
+     *
+     * @return Returns ERR_OK if allowed; otherwise returns the specific error code.
+     */
+    ErrCode CanOpenSubscribeSettings();
+
 private:
     /**
      * @brief Gets Ans Manager proxy.

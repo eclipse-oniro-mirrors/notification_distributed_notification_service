@@ -789,5 +789,14 @@ ErrCode NotificationHelper::GetLiveViewConfig(const std::vector<std::string>& bu
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetLiveViewConfig(bundleList);
 }
+ErrCode NotificationHelper::GetAllSubscriptionBundles(std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetAllSubscriptionBundles(bundles);
+}
+ErrCode NotificationHelper::CanOpenSubscribeSettings()
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->CanOpenSubscribeSettings();
+}
+
 }  // namespace Notification
 }  // namespace OHOS

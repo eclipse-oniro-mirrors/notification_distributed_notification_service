@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -1494,10 +1494,12 @@ ohos_unittest("advanced_notification_service_unit_test") {
     ".",
     "mock/include",
     "/${services_path}/ans/include",
+    "/${services_path}/ans/include/utils/",
   ]
 
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
+    "advanced_notification_service_test/advanced_notification_extension_subscription_test.cpp",
     "advanced_notification_service_test/advanced_notification_distributed_manager_service_test.cpp",
     "advanced_notification_service_test/advanced_notification_service_unit_test.cpp",
     "advanced_notification_service_test/advanced_notification_system_live_view_service_test.cpp",
@@ -1626,6 +1628,7 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/advanced_notification_manager/advanced_notification_cancel.cpp",
     "${services_path}/ans/src/advanced_notification_clone_service.cpp",
     "${services_path}/ans/src/advanced_notification_event_service.cpp",
+    "${services_path}/ans/src/advanced_notification_extension_subscription.cpp",
     "${services_path}/ans/src/advanced_notification_flow_control_service.cpp",
     "${services_path}/ans/src/advanced_notification_inline.cpp",
     "${services_path}/ans/src/advanced_notification_live_view_service.cpp",
