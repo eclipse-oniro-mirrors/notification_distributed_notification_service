@@ -150,9 +150,7 @@ SubscriberInstance::SubscriberInstance()
 {}
 
 SubscriberInstance::~SubscriberInstance()
-{
-    DeleteRef();
-}
+{}
 
 void SubscriberInstance::DeleteRef()
 {
@@ -1486,6 +1484,7 @@ bool DelSubscriberInstancesInfo(const napi_env &env, const std::shared_ptr<Subsc
         if ((*it).subscriber == subscriber) {
             DelDeletingSubscriber((*it).subscriber);
             subscriberInstances_.erase(it);
+            subscriber->DeleteRef();
             return true;
         }
     }
