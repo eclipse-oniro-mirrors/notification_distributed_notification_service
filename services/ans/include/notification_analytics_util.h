@@ -20,6 +20,7 @@
 #include <map>
 #include "notification_request.h"
 #include "badge_number_callback_data.h"
+#include "notification_clone_bundle_info.h"
 
 namespace OHOS {
 namespace Notification {
@@ -230,6 +231,10 @@ public:
     static void ReportLiveViewNumber(const sptr<NotificationRequest>& request, const int32_t reportType);
 
     static void ReportTriggerLiveView(const std::vector<std::string>& bundles);
+
+    static void ReportCustomizeInfo(const nlohmann::json& data, int32_t subCode);
+
+    static void ReportCloneInfo(const NotificationCloneBundleInfo& cloneBundleInfo);
 private:
     static void ReportNotificationEvent(const sptr<NotificationRequest>& request,
         EventFwk::Want want, int32_t eventCode, const std::string& reason);

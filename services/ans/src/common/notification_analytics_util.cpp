@@ -55,6 +55,7 @@ constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
 constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
 constexpr const int32_t BADGE_CHANGE_CODE = 201;
 static int32_t LIVEVIEW_TRIGGER_SUB_CODE = 103;
+constexpr const int32_t CLONE_SUB_CODE = 104;
 
 constexpr const int32_t DEFAULT_ERROR_EVENT_COUNT = 5;
 constexpr const int32_t DEFAULT_ERROR_EVENT_TIME = 60;
@@ -840,6 +841,9 @@ void NotificationAnalyticsUtil::ReportSAPublishSuccessEvent(const sptr<Notificat
     nlohmann::json ansData;
     ansData["ownerUid"] = std::to_string(request->GetOwnerUid());
     ansData["createUid"] = std::to_string(request->GetCreatorUid());
+    ansData["rvUserId"] = std::to_string(request->GetReceiverUserId());
+    ansData["owUserId"] = std::to_string(request->GetOwnerUserId());
+    ansData["crUserId"] = std::to_string(request->GetCreatorUserId());
     ansData["callUid"] = std::to_string(callUid);
     ansData["slotType"] = static_cast<int32_t>(request->GetSlotType());
     ansData["contentType"] = static_cast<int32_t>(request->GetNotificationType());
@@ -1303,7 +1307,7 @@ void NotificationAnalyticsUtil::AggregateBadgeChange()
         reportInfo.eventCode = ANS_CUSTOMIZE_CODE ;
         reportAggList.emplace_back(reportInfo);
     }
-    
+
     if (!g_successReportFlag) {
         ExecuteSuccessCacheList();
     }
@@ -1453,13 +1457,28 @@ void NotificationAnalyticsUtil::ExecuteCacheList()
 
 void NotificationAnalyticsUtil::ReportTriggerLiveView(const std::vector<std::string>& bundles)
 {
-    nlohmann::json ansData;
-    ansData["subCode"] = std::to_string(LIVEVIEW_TRIGGER_SUB_CODE);
     nlohmann::json dataArray = nlohmann::json::array();
     for (auto bundle : bundles) {
         dataArray.push_back(bundle);
     }
-    ansData["data"] = dataArray;
+    ReportCustomizeInfo(dataArray, LIVEVIEW_TRIGGER_SUB_CODE);
+}
+
+void NotificationAnalyticsUtil::ReportCloneInfo(const NotificationCloneBundleInfo& cloneBundleInfo)
+{
+    if (DelayedSingleton<NotificationConfigParse>::GetInstance()->IsReportTrustBundles(
+        cloneBundleInfo.GetBundleName())) {
+        nlohmann::json data;
+        cloneBundleInfo.ToJson(data);
+        ReportCustomizeInfo(data, CLONE_SUB_CODE);
+    }
+}
+
+void NotificationAnalyticsUtil::ReportCustomizeInfo(const nlohmann::json& data, int32_t subCode)
+{
+    nlohmann::json ansData;
+    ansData["subCode"] = std::to_string(subCode);
+    ansData["data"] = data;
     std::string message = ansData.dump(-1, ' ', false,
         nlohmann::json::error_handler_t::replace);
 

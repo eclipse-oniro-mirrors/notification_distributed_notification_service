@@ -1984,6 +1984,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
         }
 
         UpdateCloneBundleInfoFoSilentReminder(cloneBundleInfo, bundle);
+        NotificationAnalyticsUtil::ReportCloneInfo(cloneBundleInfo);
     }));
 }
 

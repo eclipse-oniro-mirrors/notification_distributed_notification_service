@@ -190,6 +190,11 @@ bool NotificationConfigParse::IsReportTrustList(const std::string& bundleName) c
     return true;
 }
 
+bool NotificationConfigParse::IsReportTrustBundles(const std::string& bundleName) const
+{
+    return true;
+}
+
 bool NotificationConfigParse::GetCollaborativeDeleteTypeByDevice(std::map<std::string,
     std::map<std::string, std::unordered_set<std::string>>>& resultMap) const
 {
