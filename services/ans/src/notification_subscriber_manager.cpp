@@ -533,24 +533,36 @@ void NotificationSubscriberManager::NotifyConsumedInner(
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 bool NotificationSubscriberManager::GetIsEnableEffectedRemind()
 {
-    // Ignore the impact of the bundleName and userId for smart reminder switch now.
-    for (auto record : subscriberRecordList_) {
-        if (record->deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) != 0) {
-            return true;
+    bool result = false;
+    ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([this, &result]() {
+        // Ignore the impact of the bundleName and userId for smart reminder switch now.
+        for (auto record : this->subscriberRecordList_) {
+            if (record->deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) != 0) {
+                result = true;
+                break;
+            }
         }
-    }
-    return false;
+    }));
+    notificationSubQueue_->wait(handler);
+    return result;
 }
 
 bool NotificationSubscriberManager::IsDeviceTypeSubscriberd(const std::string deviceType)
 {
-    for (auto record : subscriberRecordList_) {
-        if (record->deviceType.compare(deviceType) == 0) {
-            return true;
+    bool result = false;
+    ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([this, &result, &deviceType]() {
+        for (auto record : this->subscriberRecordList_) {
+            if (record->deviceType.compare(deviceType) == 0) {
+                result = true;
+                break;
+            }
         }
-    }
-    ANS_LOGE("device = %{public}s", deviceType.c_str());
-    return false;
+        if (!result) {
+            ANS_LOGE("device = %{public}s", deviceType.c_str());
+        }
+    }));
+    notificationSubQueue_->wait(handler);
+    return result;
 }
 
 ErrCode NotificationSubscriberManager::IsDeviceTypeAffordConsume(
@@ -558,22 +570,29 @@ ErrCode NotificationSubscriberManager::IsDeviceTypeAffordConsume(
     const sptr<NotificationRequest> &request,
     bool &result)
 {
-    for (auto record : subscriberRecordList_) {
-        if (record->deviceType.compare(deviceType) != 0) {
-            continue;
+    ErrCode errCode = ERR_OK;
+    ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind(
+        [this, &deviceType, &request, &result, &errCode]() {
+        for (auto record : this->subscriberRecordList_) {
+            if (record->deviceType.compare(deviceType) != 0) {
+                continue;
+            }
+            sptr<Notification> notification = new (std::nothrow) Notification(request);
+            if (notification == nullptr) {
+                ANS_LOGE("null notification");
+                errCode = ERR_ANS_NO_MEMORY;
+                break;
+            }
+            if (this->IsSubscribedBysubscriber(record, notification) &&
+                this->ConsumeRecordFilter(record, notification)) {
+                result = true;
+                return;
+            }
         }
-        sptr<Notification> notification = new (std::nothrow) Notification(request);
-        if (notification == nullptr) {
-            ANS_LOGE("null notification");
-            return ERR_ANS_NO_MEMORY;
-        }
-        if (IsSubscribedBysubscriber(record, notification) && ConsumeRecordFilter(record, notification)) {
-            result = true;
-            return ERR_OK;
-        }
-    }
-    result = false;
-    return ERR_OK;
+        result = false;
+    }));
+    notificationSubQueue_->wait(handler);
+    return errCode;
 }
 #endif
 
