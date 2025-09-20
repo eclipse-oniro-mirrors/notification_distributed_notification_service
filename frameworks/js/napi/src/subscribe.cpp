@@ -1481,9 +1481,10 @@ bool DelSubscriberInstancesInfo(const napi_env &env, const std::shared_ptr<Subsc
 
     std::lock_guard<ffrt::mutex> lock(mutex_);
     for (auto it = subscriberInstances_.begin(); it != subscriberInstances_.end(); ++it) {
-        if ((*it).subscriber == subscriber) {
-            DelDeletingSubscriber((*it).subscriber);
+        if (it->subscriber == subscriber) {
+            DelDeletingSubscriber(it->subscriber);
             subscriberInstances_.erase(it);
+            napi_delete_reference(env, it->ref);
             subscriber->DeleteRef();
             return true;
         }
