@@ -46,6 +46,7 @@ public:
         std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const;
     void GetReportTrustListConfig();
     bool IsReportTrustList(const std::string& bundleName) const;
+    bool IsReportTrustBundles(const std::string& bundleName) const;
     uint32_t GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType);
     std::shared_ptr<NotificationAppPrivileges> GetAppPrivileges(const std::string &bundleName) const;
     bool IsLiveViewEnabled(const std::string bundleName) const;
@@ -76,6 +77,7 @@ private:
     std::vector<int32_t> uidList_;
     std::vector<std::string> bundleNameList_;
     std::set<std::string> reporteTrustSet_ {};
+    std::set<std::string> keyTrustBundles_ {};
 
 public:
     constexpr static const char* CFG_KEY_NOTIFICATION_SERVICE = "notificationService";
@@ -94,6 +96,7 @@ public:
     constexpr static const char* CFG_KEY_MIRROR_NOTIFICAITON_ENABLED_STATUS = "mirrorNotificationEnabledStatus";
     constexpr static const char* CFG_KEY_APP_AND_DEVICE_RELATION_MAP = "appAndDeviceRelationMap";
     constexpr static const char* CFG_KEY_DFX_NORMAL_EVENT = "dfxNormalEvent";
+    constexpr static const char* CFG_KEY_BUNDLE_NAME = "dfxKeyBundle";
     #ifdef CONFIG_POLICY_ENABLE
         constexpr static const char* NOTIFICAITON_CONFIG_FILE = "etc/notification/notification_config.json";
     # else

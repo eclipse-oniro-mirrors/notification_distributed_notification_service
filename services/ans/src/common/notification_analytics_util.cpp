@@ -54,6 +54,7 @@ constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
 constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
 constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
 constexpr const int32_t BADGE_CHANGE_CODE = 201;
+constexpr const int32_t CLONE_SUB_CODE = 104;
 
 constexpr const int32_t DEFAULT_ERROR_EVENT_COUNT = 5;
 constexpr const int32_t DEFAULT_ERROR_EVENT_TIME = 60;
@@ -813,6 +814,9 @@ void NotificationAnalyticsUtil::ReportSAPublishSuccessEvent(const sptr<Notificat
     nlohmann::json ansData;
     ansData["ownerUid"] = std::to_string(request->GetOwnerUid());
     ansData["createUid"] = std::to_string(request->GetCreatorUid());
+    ansData["rvUserId"] = std::to_string(request->GetReceiverUserId());
+    ansData["owUserId"] = std::to_string(request->GetOwnerUserId());
+    ansData["crUserId"] = std::to_string(request->GetCreatorUserId());
     ansData["callUid"] = std::to_string(callUid);
     ansData["slotType"] = static_cast<int32_t>(request->GetSlotType());
     ansData["contentType"] = static_cast<int32_t>(request->GetNotificationType());
@@ -1460,6 +1464,33 @@ void NotificationAnalyticsUtil::ReportOperationsDotEvent(HaOperationMessage& ope
     ANS_LOGI("Publish operation event :%{public}s", operationMessage.ToJson().c_str());
     operationMessage.ResetData();
     IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, ANS_CUSTOMIZE_CODE));
+}
+
+void NotificationAnalyticsUtil::ReportCloneInfo(const NotificationCloneBundleInfo& cloneBundleInfo)
+{
+    if (DelayedSingleton<NotificationConfigParse>::GetInstance()->IsReportTrustBundles(
+        cloneBundleInfo.GetBundleName())) {
+        nlohmann::json data;
+        cloneBundleInfo.ToJson(data);
+        ReportCustomizeInfo(data, CLONE_SUB_CODE);
+    }
+}
+
+void NotificationAnalyticsUtil::ReportCustomizeInfo(const nlohmann::json& data, int32_t subCode)
+{
+    nlohmann::json ansData;
+    ansData["subCode"] = std::to_string(subCode);
+    ansData["data"] = data;
+    std::string message = ansData.dump(-1, ' ', false,
+        nlohmann::json::error_handler_t::replace);
+
+    EventFwk::Want want;
+    want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
+    want.SetParam("ansData", message);
+    ReportCache reportCache;
+    reportCache.want = want;
+    reportCache.eventCode = ANS_CUSTOMIZE_CODE;
+    ReportCommonEvent(reportCache);
 }
 
 void NotificationAnalyticsUtil::ReportPublishFailedEvent(const HaMetaMessage& message)

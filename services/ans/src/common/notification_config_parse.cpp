@@ -474,12 +474,26 @@ void NotificationConfigParse::GetReportTrustListConfig()
     for (auto &reportTrust : reportTrustList) {
         reporteTrustSet_.emplace(reportTrust);
     }
+
+    nlohmann::json keyBundles = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_BUNDLE_NAME];
+    if (keyBundles.is_null() || keyBundles.empty() || !keyBundles.is_array()) {
+        ANS_LOGE("Key bundles failed json.");
+        return;
+    }
+    for (auto &bundle : keyBundles) {
+        keyTrustBundles_.emplace(bundle);
+    }
     return;
 }
 
 bool NotificationConfigParse::IsReportTrustList(const std::string& bundleName) const
 {
     return reporteTrustSet_.count(bundleName);
+}
+
+bool NotificationConfigParse::IsReportTrustBundles(const std::string& bundleName) const
+{
+    return keyTrustBundles_.count(bundleName);
 }
 
 bool NotificationConfigParse::GetCollaborativeDeleteTypeByDevice(std::map<std::string,
