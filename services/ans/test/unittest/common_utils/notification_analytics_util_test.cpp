@@ -434,6 +434,7 @@ HWTEST_F(NotificationAnalyticsUtilTest, GetReportSlotMessage_001, Function | Sma
     std::string budleEntryValue = "1";
     ReportSlotMessage reportSlotMessage;
     int32_t userId = 1;
+    NotificationAnalyticsUtil::ReportTriggerLiveView({"com.ohos.test"});
     auto res = NotificationAnalyticsUtil::GetReportSlotMessage(
         budleEntryKey, budleEntryValue, reportSlotMessage, userId);
     EXPECT_FALSE(res);

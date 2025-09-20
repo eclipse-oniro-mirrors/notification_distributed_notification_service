@@ -43,6 +43,7 @@ ohos_fuzztest("NotificationAnalyticsUtilFuzzTest") {
     "ability_base:want",
     "ability_base:zuri",
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "image_framework:image_native",
     "relational_store:native_rdb",
