@@ -1483,9 +1483,9 @@ bool DelSubscriberInstancesInfo(const napi_env &env, const std::shared_ptr<Subsc
     for (auto it = subscriberInstances_.begin(); it != subscriberInstances_.end(); ++it) {
         if (it->subscriber == subscriber) {
             DelDeletingSubscriber(it->subscriber);
-            subscriberInstances_.erase(it);
             napi_delete_reference(env, it->ref);
             subscriber->DeleteRef();
+            subscriberInstances_.erase(it);
             return true;
         }
     }
