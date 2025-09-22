@@ -186,13 +186,7 @@
           "header": {
             "header_base": "//base/notification/distributed_notification_service/frameworks/cj/ffi/include",
             "header_files": [
-              "inner_errors.h",
-              "macro.h",
-              "notification_enable.h",
-              "notification_manager_ffi.h",
-              "notification_manager_impl.h",
-              "notification_manager_log.h",
-              "notification_utils.h"
+
             ]
           },
           "name": "//base/notification/distributed_notification_service/frameworks/cj/ffi:cj_notification_manager_ffi"
