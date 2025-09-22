@@ -14,7 +14,7 @@
  */
 
 import { BundleOption } from 'notification.NotificationCommonDef';
-import { BusinessError, AsyncCallback } from '@ohos.base';
+import { BusinessError, AsyncCallback, RecordData } from '@ohos.base';
 import { NotificationSlot } from 'notification.notificationSlot';
 import { NotificationRequest, NotificationCheckRequest } from 'notification.notificationRequest';
 import UIAbilityContext from 'application.UIAbilityContext';
@@ -1661,7 +1661,7 @@ export default namespace notificationManager {
         contentType: ContentType;
         creatorUserId: int;
         slotType: SlotType;
-        extraInfos?: Record<string, Object>;
+        extraInfos?: Record<string, RecordData>;
     }
 
     class NotificationCheckInfoInner implements NotificationCheckInfo {
@@ -1671,7 +1671,7 @@ export default namespace notificationManager {
         public contentType: ContentType = ContentType.NOTIFICATION_CONTENT_BASIC_TEXT;
         public creatorUserId: int = -1;
         public slotType: SlotType = SlotType.UNKNOWN_TYPE;
-        public extraInfos?: Record<string, Object>;
+        public extraInfos?: Record<string, RecordData>;
     }
 
     export function getAllNotificationEnabledBundles(): Promise<Array<BundleOption>>
