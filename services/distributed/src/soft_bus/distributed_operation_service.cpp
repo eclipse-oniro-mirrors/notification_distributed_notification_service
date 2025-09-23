@@ -328,10 +328,11 @@ int32_t DistributedOperationService::OnOperationResponse(
     const std::shared_ptr<NotificationOperationInfo>& operationInfo, const DistributedDeviceInfo& device)
 {
     std::shared_ptr<NotificationResponseBox> responseBox = std::make_shared<NotificationResponseBox>();
-    ANS_LOGI("dans OnResponse %{public}s", operationInfo->Dump().c_str());
     if (operationInfo == nullptr) {
+        ANS_LOGW("Invalid param");
         return ERR_ANS_INVALID_PARAM;
     }
+    ANS_LOGI("dans OnResponse %{public}s", operationInfo->Dump().c_str());
     auto hashCode = operationInfo->GetHashCode();
     if (hashCode.find(DISTRIBUTED_LABEL) == 0) {
         hashCode.erase(0, DISTRIBUTED_LABEL.length());
