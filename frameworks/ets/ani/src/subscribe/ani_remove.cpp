@@ -111,7 +111,7 @@ void AniRemoveForHashCodes(ani_env *env, ani_object hashCodes, ani_object reason
         return;
     }
     std::vector<std::string> hashCodesStd = {};
-    for (auto hashcode : hashCodesStd) {
+    for (auto hashcode : hashCodesTemp) {
         hashCodesStd.emplace_back(NotificationSts::GetResizeStr(hashcode, NotificationSts::STR_MAX_SIZE));
     }
     if (!NotificationSts::UnWarpReasonEnum(env, reasonEnum, reasonType)) {
