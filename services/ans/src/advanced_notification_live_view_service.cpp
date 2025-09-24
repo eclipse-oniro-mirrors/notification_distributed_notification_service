@@ -702,7 +702,7 @@ void AdvancedNotificationService::UpdateRecordByOwner(
     }
     StartFinishTimerForUpdate(record, process);
     timerId = record->notification->GetFinishTimer();
-    ANS_LOGI("TimerForUpdate,oldTimeId: %{public}llu, newTimeId: %{public}llu",
+    ANS_LOGI("TimerForUpdate,oldTimeId: %{public}" PRIu64 ", newTimeId: %{public}" PRIu64 "",
         oldRecord->notification->GetFinishTimer(), timerId);
     record->notification = new (std::nothrow) Notification(record->request);
     if (record->notification == nullptr) {
