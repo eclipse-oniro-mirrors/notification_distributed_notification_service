@@ -29,6 +29,7 @@ namespace OHOS {
 namespace NotificationSts {
 using NotificationKey = OHOS::Notification::NotificationKey;
 using StsNotificationOperationInfo = OHOS::Notification::NotificationOperationInfo;
+using NotificationConstant = OHOS::Notification::NotificationConstant;
 
 class StsDistributedOperationCallback : public OHOS::Notification::AnsOperationCallbackStub {
 public:
