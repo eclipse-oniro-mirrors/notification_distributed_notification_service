@@ -25,6 +25,7 @@
 #include "notification_analytics_util.h"
 #include "notification_preferences.h"
 #include "aes_gcm_helper.h"
+#include "want_agent_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -150,46 +151,114 @@ bool RdbStoreDataCallBackNotificationStorage::ProcessResultSet(
  
     return true;
 }
+
+static bool UpdateContentByJsonObject(nlohmann::json &jsonObject, const std::string wantAgent)
+{
+    if (jsonObject.find("content") == jsonObject.cend()) {
+        ANS_LOGW("Invalid content json.");
+        return false;
+    }
  
+    auto contentObj = jsonObject.at("content");
+    if (jsonObject.is_null() || !jsonObject.is_object()) {
+        ANS_LOGE("Invalid JSON object");
+        return false;
+    }
+ 
+    auto contentType  = contentObj.at("contentType");
+    if (!contentType.is_number_integer()) {
+        ANS_LOGE("ContentType is not integer");
+        return false;
+    }
+ 
+    if (static_cast<NotificationContent::Type>(contentType.get<int32_t>()) !=
+        NotificationContent::Type::LIVE_VIEW) {
+        ANS_LOGE("ContentType is not live view");
+        return false;
+    }
+ 
+    auto liveviewObj = contentObj.at("content");
+    if (liveviewObj.is_null()) {
+        ANS_LOGE("Cannot convert content from JSON");
+        return false;
+    }
+ 
+    liveviewObj["extensionWantAgent"] = wantAgent;
+    contentObj["content"] = liveviewObj;
+    jsonObject["content"] = contentObj;
+    return true;
+}
+ 
+static bool UpdateRequestByJsonObject(nlohmann::json &jsonObject)
+{
+    if (jsonObject.is_null() || !jsonObject.is_object()) {
+        ANS_LOGE("Invalid JSON object");
+        return false;
+    }
+ 
+    if (!jsonObject.contains("actionButtons") || jsonObject.at("actionButtons").empty() ||
+        !jsonObject.at("actionButtons").is_array()) {
+        ANS_LOGW("Invalid action button json.");
+        return false;
+    }
+    
+    nlohmann::json extentionWantAgent;
+    nlohmann::json buttonJson = nlohmann::json::array();
+    auto buttonArray = jsonObject.at("actionButtons");
+    for (uint32_t i = 0; i < buttonArray.size(); i++) {
+        if (i == 0) {
+            extentionWantAgent = buttonArray[i];
+            continue;
+        }
+        buttonJson.push_back(buttonArray[i]);
+    }
+ 
+    if (extentionWantAgent.find("wantAgent") == extentionWantAgent.cend() ||
+        !extentionWantAgent.at("wantAgent").is_string()) {
+        ANS_LOGW("Invalid want agent json.");
+        return false;
+    }
+    std::string wantString = extentionWantAgent.at("wantAgent").get<std::string>();
+    if (!UpdateContentByJsonObject(jsonObject, wantString)) {
+        return false;
+    }
+    jsonObject["actionButtons"] = buttonJson;
+    return true;
+}
+
 bool RdbStoreDataCallBackNotificationStorage::ProcessRow(
     std::shared_ptr<NativeRdb::AbsSharedResultSet> absSharedResultSet,
     NativeRdb::RdbStore &rdbStore, const std::string &tableName)
 {
+    ANS_LOGD("RdbStoreDataCallBackNotificationStorage::ProcessRow.");
     std::string resultKey;
     if (!GetStringFromResultSet(absSharedResultSet, NOTIFICATION_KEY_INDEX, resultKey)) {
         return false;
     }
- 
+
     std::string resultValue;
     if (!GetStringFromResultSet(absSharedResultSet, NOTIFICATION_VALUE_INDEX, resultValue)) {
         return false;
     }
- 
     std::string input;
     AesGcmHelper::Decrypt(input, resultValue);
     auto jsonObject = nlohmann::json::parse(input);
- 
-    auto *request = NotificationJsonConverter::ConvertFromJson<NotificationRequest>(jsonObject);
-    if (!request) {
-        ANS_LOGE("Parse json string to request failed.");
-        return true;
+    if (UpdateRequestByJsonObject(jsonObject)) {
+        int64_t rowId = -1;
+        NativeRdb::ValuesBucket valuesBucket;
+        valuesBucket.PutString(NOTIFICATION_KEY, resultKey);
+        std::string encryptValue;
+        AesGcmHelper::Encrypt(jsonObject.dump(), encryptValue);
+        valuesBucket.PutString(NOTIFICATION_VALUE, encryptValue);
+        int32_t ret = rdbStore.InsertWithConflictResolution(rowId, tableName, valuesBucket,
+            NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
+        if (ret != NativeRdb::E_OK) {
+            ANS_LOGE("Insert failed with ret: %{public}d", ret);
+        }
+    } else {
+        ANS_LOGE("UpdateRequestJsonObject failed.");
     }
- 
-    auto *bundleOption = NotificationJsonConverter::ConvertFromJson<NotificationBundleOption>(jsonObject);
-    if (!bundleOption) {
-        ANS_LOGE("Parse json string to bundleOption failed.");
-        return true;
-    }
- 
-    ANS_LOGW("before change request: %{public}s.", request->Dump().c_str());
-    if (!UpdateRequest(request)) {
-        return true;
-    }
- 
-    if (!WriteBackToDatabase(request, bundleOption, rdbStore, tableName)) {
-        return false;
-    }
- 
+
     return true;
 }
  
@@ -200,62 +269,6 @@ bool RdbStoreDataCallBackNotificationStorage::GetStringFromResultSet(
     if (ret != NativeRdb::E_OK) {
         return false;
     }
-    return true;
-}
- 
-bool RdbStoreDataCallBackNotificationStorage::WriteBackToDatabase(
-    NotificationRequest *request, NotificationBundleOption *bundleOption,
-    NativeRdb::RdbStore &rdbStore, const std::string &tableName)
-{
-    nlohmann::json jsonOutObject;
-    if (!NotificationJsonConverter::ConvertToJson(request, jsonOutObject) ||
-        !NotificationJsonConverter::ConvertToJson(bundleOption, jsonOutObject)) {
-        ANS_LOGE("Convert to json object failed");
-        return false;
-    }
- 
-    std::string encryptValue;
-    AesGcmHelper::Encrypt(jsonOutObject.dump(), encryptValue);
-    int64_t rowId = -1;
-    NativeRdb::ValuesBucket valuesBucket;
-    valuesBucket.PutString(NOTIFICATION_KEY, request->GetSecureKey());
-    valuesBucket.PutString(NOTIFICATION_VALUE, encryptValue);
-    
-    int32_t ret = rdbStore.InsertWithConflictResolution(rowId, tableName, valuesBucket,
-        NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
-    if (ret != NativeRdb::E_OK) {
-        ANS_LOGE("Insert failed with ret: %{public}d", ret);
-        return false;
-    }
-    ANS_LOGI("Insert success ret is %{public}d", ret);
-    return true;
-}
- 
-bool RdbStoreDataCallBackNotificationStorage::UpdateRequest(NotificationRequest *request)
-{
-    auto actionButtons = request->GetActionButtons();
-    if (actionButtons.empty()) {
-        ANS_LOGE("ActionButtons is empty");
-        return false;
-    }
- 
-    auto firstButton = actionButtons.front();
-    auto firstButtonWantAgent = firstButton->GetWantAgent();
-    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
-        request->GetContent()->GetNotificationContent());
-    if (firstButtonWantAgent) {
-        liveViewContent->SetExtensionWantAgent(firstButtonWantAgent);
-    }
-    auto requestContent = std::make_shared<NotificationContent>(liveViewContent);
-    request->SetContent(requestContent);
- 
-    actionButtons.erase(actionButtons.begin());
-    request->ClearActionButtons();
-    for (auto actionButton : actionButtons) {
-        request->AddActionButton(actionButton);
-    }
- 
-    ANS_LOGW("End request: %{public}s.", request->Dump().c_str());
     return true;
 }
 
