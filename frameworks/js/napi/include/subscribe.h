@@ -200,7 +200,10 @@ private:
     CallbackInfo GetBadgeEnabledCallbackInfo();
     CallbackInfo GetBatchCancelCallbackInfo();
 
+    void CallThreadSafeFunc(void *data);
+
 private:
+    ffrt::mutex tsfnMutex_;
     napi_threadsafe_function tsfn_ = nullptr;
     napi_env env_ = nullptr;
     CallbackInfo canceCallbackInfo_;
