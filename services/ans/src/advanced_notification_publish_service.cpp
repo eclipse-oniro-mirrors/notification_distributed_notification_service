@@ -1064,6 +1064,54 @@ ErrCode AdvancedNotificationService::PublishRemoveDuplicateEvent(const std::shar
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::PublishExtensionServiceStateChange(
+    NotificationConstant::EventCodeType  eventCode,
+    const sptr<NotificationBundleOption> &bundleOption,
+    bool state,
+    const std::vector<sptr<NotificationBundleOption>> &enabledBundles)
+{
+    ANS_LOGD("%{public}s: code=%{public}d, bundle=%{public}s, state=%{public}d",
+             __FUNCTION__, eventCode, bundleOption->GetBundleName().c_str(), state);
+
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Invalid bundle option");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (eventCode < NotificationConstant::USER_GRANTED_STATE ||
+        eventCode > NotificationConstant::EXTENSION_ABILITY_REMOVED) {
+        ANS_LOGE("Invalid event code: %{public}d", eventCode);
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    EventFwk::Want want;
+    want.SetAction("usual.event.notification.EXTENSION_SUBSCRIBE_STATE_CHANGE");
+    want.SetParam("code", eventCode);
+    want.SetParam("bundleName", bundleOption->GetBundleName());
+    want.SetParam("state", state);
+    want.SetParam("uid", bundleOption->GetUid());
+    std::vector<std::string> bundleNames;
+    if (eventCode == NotificationConstant::USER_GRANTED_BUNDLE_STATE) {
+        for (const auto &bundle : enabledBundles) {
+            if (bundle != nullptr) {
+                bundleNames.emplace_back(bundle->GetBundleName());
+            }
+        }
+        want.SetParam("enableBundles", bundleNames);
+    }
+
+    EventFwk::CommonEventData commonData(want);
+    EventFwk::CommonEventPublishInfo publishInfo;
+    bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(commonData, publishInfo);
+    if (!publishResult) {
+        ANS_LOGE("PublishCommonEvent failed for bundle: %{public}s, code: %{public}d",
+            bundleOption->GetBundleName().c_str(), eventCode);
+        return ERR_ANS_TASK_ERR;
+    }
+
+    return ERR_OK;
+}
+
 void AdvancedNotificationService::ClearAllNotificationGroupInfo(std::string localSwitch)
 {
     ANS_LOGD("ClearNotification enter.");

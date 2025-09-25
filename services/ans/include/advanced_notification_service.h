@@ -1454,6 +1454,12 @@ public:
 
     ErrCode GetSubscribeInfo(std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos) override;
 
+    ErrCode IsUserGranted(bool& isEnabled) override;
+
+    ErrCode GetUserGrantedState(const sptr<NotificationBundleOption>& targetBundle, bool& enabled) override;
+
+    ErrCode SetUserGrantedState(const sptr<NotificationBundleOption>& targetBundle, bool enabled) override;
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
@@ -1472,6 +1478,9 @@ public:
     ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationSlot> &slot, const int reason);
     bool PublishSlotChangeCommonEvent(const sptr<NotificationBundleOption> &bundleOption);
+    ErrCode PublishExtensionServiceStateChange(NotificationConstant::EventCodeType eventCode,
+        const sptr<NotificationBundleOption> &bundleOption, bool state,
+        const std::vector<sptr<NotificationBundleOption>> &enabledBundles = {});
 private:
     struct RecentInfo {
         std::list<std::shared_ptr<RecentNotification>> list;
@@ -1830,6 +1839,8 @@ private:
         const sptr<NotificationBundleOption> &bundleOption, const AppExecFwk::BundleInfo &bundleInfo);
     ErrCode DistributeOperationInner(const sptr<NotificationOperationInfo>& operationInfo);
 
+    bool HasExtensionSubscriptionStateChanged(
+        const sptr<NotificationBundleOption> &bundle, bool enabled);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;

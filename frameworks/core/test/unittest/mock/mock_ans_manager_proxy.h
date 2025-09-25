@@ -202,6 +202,9 @@ public:
         ErrCode(const std::vector<sptr<NotificationExtensionSubscriptionInfo>>&));
     MOCK_METHOD0(NotificationExtensionUnsubscribe, ErrCode());
     MOCK_METHOD1(GetSubscribeInfo, ErrCode(std::vector<sptr<NotificationExtensionSubscriptionInfo>>&));
+    MOCK_METHOD1(IsUserGranted, ErrCode(bool &enabled));
+    MOCK_METHOD2(GetUserGrantedState, ErrCode(const sptr<NotificationBundleOption> &targetBundle, bool &enabled));
+    MOCK_METHOD2(SetUserGrantedState, ErrCode(const sptr<NotificationBundleOption> &targetBundle, bool enabled));
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     MOCK_METHOD1(RegisterSwingCallback, ErrCode(const sptr<IRemoteObject>&));
 #endif

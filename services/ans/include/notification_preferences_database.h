@@ -340,6 +340,7 @@ public:
     int32_t SetByteToDb(const std::string &key, const std::vector<uint8_t> &value, const int32_t &userId);
     int32_t GetKvFromDb(const std::string &key, std::string &value, const int32_t &userId);
     bool PutExtensionSubscriptionInfos(const NotificationPreferencesInfo::BundleInfo& bundleInfo);
+    bool PutExtensionSubscriptionEnabled(const NotificationPreferencesInfo::BundleInfo& bundleInfo);
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
     int32_t GetKvFromDb(const std::string &key, std::string &value, const int32_t &userId, int32_t &retCode);
 #endif
@@ -506,6 +507,8 @@ private:
     void ParseSlotAuthHitnCnt(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseSlotReminderMode(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseBundleExtensionSubscriptionInfos(
+        NotificationPreferencesInfo::BundleInfo& bundleInfo, const std::string& value) const;
+    void ParseBundleExtensionSubscriptionEnabled(
         NotificationPreferencesInfo::BundleInfo& bundleInfo, const std::string& value) const;
     bool UpdateCloneToDisturbeDB(const int32_t &userId,
         const std::unordered_map<std::string, std::string> values);

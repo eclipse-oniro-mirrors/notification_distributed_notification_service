@@ -579,6 +579,11 @@ public:
     ErrCode SetExtensionSubscriptionInfos(const sptr<NotificationBundleOption>& bundleOption,
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
     ErrCode ClearExtensionSubscriptionInfos(const sptr<NotificationBundleOption>& bundleOption);
+    ErrCode GetExtensionSubscriptionEnabled(const sptr<NotificationBundleOption> &bundleOption,
+        NotificationConstant::SWITCH_STATE &state);
+    ErrCode SetExtensionSubscriptionEnabled(const sptr<NotificationBundleOption> &bundleOption,
+        NotificationConstant::SWITCH_STATE state);
+
 private:
     bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,
         const sptr<NotificationBundleOption> &bundleOption, NotificationPreferencesInfo::BundleInfo &info) const;

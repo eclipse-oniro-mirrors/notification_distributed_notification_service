@@ -1050,6 +1050,11 @@ ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo:
             bundleInfo.SetSlotFlags(value);
             storeDBResult = preferncesDB_->PutSlotFlags(bundleInfo, value);
             break;
+        case BundleType::BUNDLE_EXTENSION_SUBSCRIPTION_ENABLED_TYPE:
+            state = static_cast<NotificationConstant::SWITCH_STATE>(value);
+            bundleInfo.SetExtensionSubscriptionEnabled(state);
+            storeDBResult = preferncesDB_->PutExtensionSubscriptionEnabled(bundleInfo);
+            break;
         default:
             break;
     }
@@ -1084,6 +1089,9 @@ ErrCode NotificationPreferences::GetBundleProperty(
             case BundleType::BUNDLE_SLOTFLGS_TYPE:
                 value = bundleInfo.GetSlotFlags();
                 ANS_LOGD("Into BUNDLE_SLOTFLGS_TYPE:GetSlotFlags.");
+                break;
+            case BundleType::BUNDLE_EXTENSION_SUBSCRIPTION_ENABLED_TYPE:
+                value = static_cast<int32_t>(bundleInfo.GetExtensionSubscriptionEnabled());
                 break;
             default:
                 result = ERR_ANS_INVALID_PARAM;
@@ -1786,6 +1794,40 @@ ErrCode NotificationPreferences::ClearExtensionSubscriptionInfos(const sptr<Noti
 {
     ANS_LOGD("called");
     return SetExtensionSubscriptionInfos(bundleOption, std::vector<sptr<NotificationExtensionSubscriptionInfo>>());
+}
+
+ErrCode NotificationPreferences::GetExtensionSubscriptionEnabled(
+    const sptr<NotificationBundleOption>& bundleOption, NotificationConstant::SWITCH_STATE& state)
+{
+    ANS_LOGD("called");
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    int32_t val = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    auto result =  GetBundleProperty(bundleOption, BundleType::BUNDLE_EXTENSION_SUBSCRIPTION_ENABLED_TYPE, val);
+    if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+        result = ERR_OK;
+    }
+    state = static_cast<NotificationConstant::SWITCH_STATE>(val);
+    return result;
+}
+
+ErrCode NotificationPreferences::SetExtensionSubscriptionEnabled(
+    const sptr<NotificationBundleOption>& bundleOption, NotificationConstant::SWITCH_STATE state)
+{
+    ANS_LOGD("called");
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    ErrCode result = SetBundleProperty(preferencesInfo, bundleOption,
+        BundleType::BUNDLE_EXTENSION_SUBSCRIPTION_ENABLED_TYPE, static_cast<int32_t>(state));
+    if (result == ERR_OK) {
+        preferencesInfo_ = preferencesInfo;
+    }
+    return result;
 }
 
 ErrCode NotificationPreferences::SetSubscriberExistFlag(const std::string& deviceType, bool existFlag)

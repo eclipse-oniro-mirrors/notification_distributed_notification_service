@@ -805,5 +805,20 @@ ErrCode NotificationHelper::GetSubscribeInfo(std::vector<sptr<NotificationExtens
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetSubscribeInfo(infos);
 }
+
+ErrCode NotificationHelper::IsUserGranted(bool& enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsUserGranted(enabled);
+}
+
+ErrCode NotificationHelper::GetUserGrantedState(const NotificationBundleOption& targetBundle, bool& enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedState(targetBundle, enabled);
+}
+
+ErrCode NotificationHelper::SetUserGrantedState(const NotificationBundleOption& targetBundle, bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetUserGrantedState(targetBundle, enabled);
+}
 }  // namespace Notification
 }  // namespace OHOS

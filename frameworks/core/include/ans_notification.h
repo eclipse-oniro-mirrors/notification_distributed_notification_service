@@ -1458,6 +1458,29 @@ public:
      */
     ErrCode GetSubscribeInfo(std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
 
+    /**
+     * @brief Obtains whether the notification extension subscription is enabled.
+     * @param enabled True if the subscription is enabled.
+     * @return Returns get result.
+     */
+    ErrCode IsUserGranted(bool& enabled);
+
+    /**
+     * @brief Obtains whether the notification extension subscription is enabled.
+     * @param targetBundle The bundle option to be queried.
+     * @param enabled True if the subscription is enabled.
+     * @return Returns get result.
+     */
+    ErrCode GetUserGrantedState(const NotificationBundleOption& targetBundle, bool& enabled);
+
+    /**
+     * @brief Set the notification extension subscription state.
+     * @param targetBundle The bundle option to be set.
+     * @param enabled True if the subscription is enabled.
+     * @return Returns set result.
+     */
+    ErrCode SetUserGrantedState(const NotificationBundleOption& targetBundle, bool enabled);
+
 private:
     /**
      * @brief Gets Ans Manager proxy.

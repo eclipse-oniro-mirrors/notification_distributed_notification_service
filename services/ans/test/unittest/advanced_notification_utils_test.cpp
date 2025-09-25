@@ -785,6 +785,29 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00003, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: UpdateCloneBundleInfo_00004
+ * @tc.desc: Test UpdateCloneBundleInfo
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00004, Function | SmallTest | Level1)
+{
+    NotificationCloneBundleInfo cloneBundleInfo;
+    cloneBundleInfo.SetBundleName("test");
+    cloneBundleInfo.SetUid(1);
+    cloneBundleInfo.SetIsShowBadge(true);
+    cloneBundleInfo.SetEnabledExtensionSubscription(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    advancedNotificationService_->UpdateCloneBundleInfo(cloneBundleInfo);
+    SleepForFC();
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 1);
+    NotificationConstant::SWITCH_STATE state {};
+    bool isExist = false;
+    ErrCode result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionEnabled(bundleOption, state);
+    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(state, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+}
+
+/**
  * @tc.name: ExecBatchCancel_00001
  * @tc.desc: Test ExecBatchCancel
  * @tc.type: FUNC

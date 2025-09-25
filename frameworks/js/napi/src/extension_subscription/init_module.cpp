@@ -31,6 +31,9 @@ napi_value NotificationSubscribeInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("subscribe", NapiNotificationExtensionSubscribe),
         DECLARE_NAPI_FUNCTION("unsubscribe", NapiNotificationExtensionUnsubscribe),
         DECLARE_NAPI_FUNCTION("getSubscribeInfo", NapiGetSubscribeInfo),
+        DECLARE_NAPI_FUNCTION("isUserGranted", NapiIsUserGranted),
+        DECLARE_NAPI_FUNCTION("getUserGrantedState", NapiGetUserGrantedState),
+        DECLARE_NAPI_FUNCTION("setUserGrantedState", NapiSetUserGrantedState),
     };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));

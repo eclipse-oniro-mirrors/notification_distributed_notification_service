@@ -1988,6 +1988,11 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
         } else {
             ANS_LOGW("Set subscription infos failed.");
         }
+        NotificationConstant::SWITCH_STATE state = cloneBundleInfo.GetEnabledExtensionSubscription();
+        if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionEnabled(bundle, state) == ERR_OK) {
+        } else {
+            ANS_LOGW("Set subscription enabled failed.");
+        }
 
         UpdateCloneBundleInfoFoSilentReminder(cloneBundleInfo, bundle);
         NotificationAnalyticsUtil::ReportCloneInfo(cloneBundleInfo);

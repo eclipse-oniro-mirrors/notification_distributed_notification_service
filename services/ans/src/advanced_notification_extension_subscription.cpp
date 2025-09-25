@@ -33,6 +33,39 @@ namespace {
 constexpr const char* ANS_EXTENSION_SERVICE_MODULE_NAME = "libans_extension_service.z.so";
 }
 
+ErrCode AdvancedNotificationService::IsUserGranted(bool& isEnabled)
+{
+    ANS_LOGD("AdvancedNotificationService::IsUserGranted");
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    sptr<NotificationBundleOption> bundleOption = AdvancedNotificationService::GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Failed to create NotificationBundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode result = ERR_OK;
+    NotificationConstant::SWITCH_STATE state;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionEnabled(bundleOption, state);
+        if (result != ERR_OK) {
+            ANS_LOGE("Failed to insert subscription info into db, ret: %{public}d", result);
+            return;
+        }
+        isEnabled = ((state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) ? true : false);
+    }));
+    notificationSvrQueue_->wait(handler);
+
+    return result;
+}
+
 ErrCode AdvancedNotificationService::NotificationExtensionSubscribe(
     const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos)
 {
@@ -131,6 +164,113 @@ ErrCode AdvancedNotificationService::GetSubscribeInfo(std::vector<sptr<Notificat
         if (result != ERR_OK) {
             ANS_LOGE("Failed to insert subscription info into db, ret: %{public}d", result);
             return;
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+
+    return result;
+}
+
+
+bool AdvancedNotificationService::HasExtensionSubscriptionStateChanged(
+    const sptr<NotificationBundleOption> &bundle, bool enabled)
+{
+    if (bundle == nullptr) {
+        return true;
+    }
+    
+    NotificationConstant::SWITCH_STATE state;
+    ErrCode result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionEnabled(bundle, state);
+    if (result != ERR_OK) {
+        return true;
+    }
+    
+    bool oldEnabled = (state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    
+    if (state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF) {
+        return true;
+    }
+    
+    return (oldEnabled != enabled);
+}
+
+ErrCode AdvancedNotificationService::GetUserGrantedState(
+    const sptr<NotificationBundleOption>& targetBundle, bool& enabled)
+{
+    ANS_LOGD("AdvancedNotificationService::GetUserGrantedState");
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    sptr<NotificationBundleOption> bundle = AdvancedNotificationService::GenerateValidBundleOption(targetBundle);
+    if (bundle == nullptr) {
+        ANS_LOGE("Bundle is null.");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode result = ERR_OK;
+    NotificationConstant::SWITCH_STATE state;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionEnabled(bundle, state);
+        if (result != ERR_OK) {
+            ANS_LOGE("Failed to get user granted state for bundle: %{public}s, ret: %{public}d",
+                targetBundle->GetBundleName().c_str(), result);
+            return;
+        }
+        enabled = ((state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) ? true : false);
+    }));
+    notificationSvrQueue_->wait(handler);
+
+    return result;
+}
+
+ErrCode AdvancedNotificationService::SetUserGrantedState(
+    const sptr<NotificationBundleOption>& targetBundle, bool enabled)
+{
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    sptr<NotificationBundleOption> bundle = AdvancedNotificationService::GenerateValidBundleOption(targetBundle);
+    if (bundle == nullptr) {
+        ANS_LOGE("Bundle is null.");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    ErrCode result = ERR_OK;
+    if (HasExtensionSubscriptionStateChanged(bundle, enabled)) {
+        ANS_LOGI("State change for bundle: %{public}s, update and publish.", bundle->GetBundleName().c_str());
+        AdvancedNotificationService::GetInstance()->
+            PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_STATE, bundle, enabled, {});
+    }
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        NotificationConstant::SWITCH_STATE state = enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON
+            : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+        result = NotificationPreferences::GetInstance()->SetExtensionSubscriptionEnabled(bundle, state);
+        if (result != ERR_OK) {
+            ANS_LOGE("Failed to set user granted state for bundle: %{public}s, ret: %{public}d",
+                bundle->GetBundleName().c_str(), result);
         }
     }));
     notificationSvrQueue_->wait(handler);

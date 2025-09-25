@@ -22,6 +22,13 @@ namespace OHOS {
 namespace Notification {
 class NotificationConstant {
 public:
+    enum EventCodeType {
+        USER_GRANTED_STATE = 1,
+        USER_GRANTED_BUNDLE_STATE = 2,
+        EXTENSION_ABILITY_ADDED = 3,
+        EXTENSION_ABILITY_REMOVED = 4,
+    };
+	
     enum InputEditType {
         EDIT_AUTO,      // Indicates that the system determines whether to allow the user to edit the options before
                         // they are sent to the application.
