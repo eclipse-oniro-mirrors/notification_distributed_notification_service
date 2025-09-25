@@ -1598,6 +1598,22 @@ napi_value Common::SetLockScreenPicture(
     return NapiGetBoolean(env, true);
 }
 
+bool Common::IsExpectedType(const napi_env &env, const napi_value &param, napi_valuetype expectType)
+{
+    napi_valuetype paraType = napi_undefined;
+
+    if (param == nullptr) {
+        ANS_LOGD("param is null");
+        return false;
+    }
+
+    if (napi_typeof(env, param, &paraType) != napi_ok) {
+        return false;
+    }
+
+    return paraType == expectType;
+}
+
 napi_value Common::GetMapObject(const napi_env &env, const napi_value &object,
     std::vector<std::pair<std::string, std::string>> &out)
 {
@@ -1607,41 +1623,44 @@ napi_value Common::GetMapObject(const napi_env &env, const napi_value &object,
     NAPI_CALL(env, napi_get_named_property(env, object, "entries", &entriesFn));
     NAPI_CALL(env, napi_call_function(env, object, entriesFn, 0, nullptr, &iter));
     NAPI_CALL(env, napi_get_named_property(env, iter, "next", &nextFn));
- 
+
     auto toStdString = [&](napi_value v) -> std::string {
         char buf[MAP_TEXT_SIZE] = {0};
         size_t len = 0;
         NAPI_CALL(env, napi_get_value_string_utf8(env, v, buf, MAP_TEXT_SIZE - 1, &len));
         return std::string(buf, len);
     };
- 
+
     bool done = false;
     while (!done) {
         napi_value resultObj;
         NAPI_CALL(env, napi_call_function(env, iter, nextFn, 0, nullptr, &resultObj));
- 
+
         napi_value doneVal;
         NAPI_CALL(env, napi_get_named_property(env, resultObj, "done", &doneVal));
-        
+
         NAPI_CALL(env, napi_get_value_bool(env, doneVal, &done));
         if (done) {
             break;
         }
- 
+
         napi_value pairArr;
         NAPI_CALL(env, napi_get_named_property(env, resultObj, "value", &pairArr));
         napi_value jsKey = nullptr;
         napi_value jsVal = nullptr;
         NAPI_CALL(env, napi_get_element(env, pairArr, 0, &jsKey));
         NAPI_CALL(env, napi_get_element(env, pairArr, 1, &jsVal));
-    
+        if (!IsExpectedType(env, jsKey, napi_string) ||
+            !IsExpectedType(env, jsVal, napi_string)) {
+            return nullptr;
+        }
         out.emplace_back(std::make_pair<std::string, std::string>(
             toStdString(jsKey), toStdString(jsVal)));
     }
- 
+
     return NapiGetNull(env);
 }
- 
+
 napi_value Common::GetStructuredText(
     const napi_env &env, const napi_value &contentResult, std::shared_ptr<NotificationBasicContent> basicContent)
 {
@@ -1650,13 +1669,13 @@ napi_value Common::GetStructuredText(
     bool hasProperty = false;
     napi_value jsStMap = nullptr;
     napi_valuetype jsType = napi_undefined;
- 
+
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "structuredText", &hasProperty));
     if (!hasProperty) {
         ANS_LOGD("Null structuredText");
         return NapiGetNull(env);
     }
- 
+
     NAPI_CALL(env, napi_get_named_property(env, contentResult, "structuredText", &jsStMap));
     NAPI_CALL(env, napi_typeof(env, jsStMap, &jsType));
     if (jsType != napi_object) {
@@ -1665,12 +1684,12 @@ napi_value Common::GetStructuredText(
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
- 
+
     if (GetMapObject(env, jsStMap, structuredTexts) == nullptr) {
         ANS_LOGE("GetMapObject failed.");
-        return NapiGetNull(env);
+        return nullptr;
     }
- 
+
     basicContent->SetStructuredText(structuredTexts);
     return NapiGetNull(env);
 }
@@ -1683,20 +1702,20 @@ napi_value Common::SetStructuredText(
     if (texts.empty()) {
         return NapiGetNull(env);
     }
- 
+
     napi_value jsMap = nullptr;
     NAPI_CALL(env, napi_create_map(env, &jsMap));
  
     for (const auto& [k, v] : texts) {
         napi_value jsKey   = nullptr;
         napi_value jsValue = nullptr;
- 
+
         NAPI_CALL(env, napi_create_string_utf8(env, k.c_str(), k.size(), &jsKey));
         NAPI_CALL(env, napi_create_string_utf8(env, v.c_str(), v.size(), &jsValue));
  
         NAPI_CALL(env, napi_map_set_property(env, jsMap, jsKey, jsValue));
     }
- 
+
     NAPI_CALL(env, napi_set_named_property(env, result, "structuredText", jsMap));
     return NapiGetNull(env);
 }
