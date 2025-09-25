@@ -450,11 +450,6 @@ ErrCode AdvancedNotificationService::GetSlotFlagsAsBundle(const sptr<Notificatio
             result = ERR_OK;
             slotFlags = DEFAULT_SLOT_FLAGS;
         }
-        NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
-        NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundle, enableStatus);
-        if (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
-            slotFlags = SILENT_REMINDER__SLOT_FLAGS;
-        }
     }));
     notificationSvrQueue_->wait(handler);
 
