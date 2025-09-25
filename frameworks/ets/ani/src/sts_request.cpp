@@ -600,6 +600,18 @@ void GetNotificationActionButtons(ani_env *env, ani_object obj, std::shared_ptr<
     }
 }
 
+void PictureScale(std::shared_ptr<Media::PixelMap> pixelMap)
+{
+    int32_t size = pixelMap->GetByteCount();
+    if (size <= MAX_ICON_SIZE) {
+        return;
+    }
+    int32_t width = pixelMap->GetWidth();
+    int32_t height = pixelMap->GetHeight();
+    float Axis = MAX_PIXEL_SIZE / std::max(width, height);
+    pixelMap->scale(Axis, Axis, Media::AntiAliasingOption::HIGH);
+}
+
 void GetNotificationSmallIcon(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
 {
     ani_boolean isUndefined = ANI_TRUE;
@@ -611,6 +623,7 @@ void GetNotificationSmallIcon(ani_env *env, ani_object obj, std::shared_ptr<Noti
     }
     std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(smallIconRef));
     if (pixelMap != nullptr) {
+        PictureScale(pixelMap);
         request->SetLittleIcon(pixelMap);
     }
 }
@@ -626,6 +639,7 @@ void GetNotificationLargeIcon(ani_env *env, ani_object obj, std::shared_ptr<Noti
     }
     std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(largeIconRef));
     if (pixelMap != nullptr) {
+        PictureScale(pixelMap);
         request->SetBigIcon(pixelMap);
     }
 }
@@ -641,6 +655,7 @@ void GetNotificationOverlayIcon(ani_env *env, ani_object obj, std::shared_ptr<No
     }
     std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(overlayIconRef));
     if (pixelMap != nullptr) {
+        PictureScale(pixelMap);
         request->SetOverlayIcon(pixelMap);
     }
 }
