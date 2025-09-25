@@ -37,6 +37,7 @@ napi_value NotificationSubscribeInit(napi_env env, napi_value exports)
 
     return exports;
 }
+
 /*
  * Module export function
  */

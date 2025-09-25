@@ -263,7 +263,13 @@ bool NotificationPreferencesInfo::BundleInfo::SetExtensionSubscriptionInfosFromJ
 
     extensionSubscriptionInfos_.clear();
     for (const auto &item : jsonObject) {
-        extensionSubscriptionInfos_.emplace_back(NotificationExtensionSubscriptionInfo::FromJson(item));
+        auto subscriptionInfo = NotificationExtensionSubscriptionInfo::FromJson(item);
+        if (subscriptionInfo == nullptr) {
+            ANS_LOGE("Failed to parse subscription info from JSON item");
+            extensionSubscriptionInfos_.clear();
+            return false;
+        }
+        extensionSubscriptionInfos_.emplace_back(std::move(subscriptionInfo));
     }
 
     return true;

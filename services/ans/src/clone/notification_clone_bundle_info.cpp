@@ -204,7 +204,13 @@ void NotificationCloneBundleInfo::SubscriptionInfosFromJson(const nlohmann::json
     }
 
     for (auto &infoJson : jsonObject.at(BUNDLE_INFO_SUBSCRIPTION_INFO)) {
-        extensionSubscriptionInfos_.emplace_back(NotificationExtensionSubscriptionInfo::FromJson(infoJson));
+        auto subscriptionInfo = NotificationExtensionSubscriptionInfo::FromJson(infoJson);
+        if (subscriptionInfo == nullptr) {
+            ANS_LOGW("Failed to parse subscription info from JSON, skipping");
+            continue;
+        }
+        
+        extensionSubscriptionInfos_.emplace_back(std::move(subscriptionInfo));
     }
 }
 

@@ -154,10 +154,8 @@ HWTEST_F(NotificationExtensionSubscriptionInfoTest, Unmarshalling_001, Function 
 HWTEST_F(NotificationExtensionSubscriptionInfoTest, FromJson_00001, Function | SmallTest | Level1)
 {
     nlohmann::json jsonObject;
-    auto subscriptionInfo = std::make_shared<NotificationExtensionSubscriptionInfo>();
-    ASSERT_NE(subscriptionInfo, nullptr);
 
-    auto ret = subscriptionInfo->FromJson(jsonObject);
+    sptr<NotificationExtensionSubscriptionInfo> ret = NotificationExtensionSubscriptionInfo::FromJson(jsonObject);
     EXPECT_EQ(ret, nullptr);
 }
 
@@ -170,11 +168,9 @@ HWTEST_F(NotificationExtensionSubscriptionInfoTest, FromJson_00001, Function | S
 HWTEST_F(NotificationExtensionSubscriptionInfoTest, FromJson_00002, Function | SmallTest | Level1)
 {
     nlohmann::json jsonObject = nlohmann::json{"addr", "isHfp", "type"};
-    auto subscriptionInfo = std::make_shared<NotificationExtensionSubscriptionInfo>();
-    ASSERT_NE(subscriptionInfo, nullptr);
 
     EXPECT_FALSE(jsonObject.is_object());
-    auto ret = subscriptionInfo->FromJson(jsonObject);
+    sptr<NotificationExtensionSubscriptionInfo> ret = NotificationExtensionSubscriptionInfo::FromJson(jsonObject);
     EXPECT_EQ(ret, nullptr);
 }
 
@@ -187,11 +183,9 @@ HWTEST_F(NotificationExtensionSubscriptionInfoTest, FromJson_00002, Function | S
 HWTEST_F(NotificationExtensionSubscriptionInfoTest, FromJson_00003, Function | SmallTest | Level1)
 {
     nlohmann::json jsonObject = nlohmann::json{{"addr", "addr1"}, {"isHfp", true}, {"type", 0}};
-    auto subscriptionInfo = std::make_shared<NotificationExtensionSubscriptionInfo>();
-    ASSERT_NE(subscriptionInfo, nullptr);
 
     EXPECT_TRUE(jsonObject.is_object());
-    auto ret = subscriptionInfo->FromJson(jsonObject);
+    sptr<NotificationExtensionSubscriptionInfo> ret = NotificationExtensionSubscriptionInfo::FromJson(jsonObject);
     EXPECT_NE(ret, nullptr);
 }
 
@@ -204,10 +198,11 @@ HWTEST_F(NotificationExtensionSubscriptionInfoTest, FromJson_00003, Function | S
 HWTEST_F(NotificationExtensionSubscriptionInfoTest, ToJson_00001, Function | SmallTest | Level1)
 {
     nlohmann::json jsonObject = nlohmann::json{{"addr", "addr1"}, {"isHfp", true}, {"type", 0}};
-    auto subscriptionInfo = std::make_shared<NotificationExtensionSubscriptionInfo>();
+    sptr<NotificationExtensionSubscriptionInfo> subscriptionInfo =
+        NotificationExtensionSubscriptionInfo::FromJson(jsonObject);
     ASSERT_NE(subscriptionInfo, nullptr);
 
-    auto ret = subscriptionInfo->FromJson(jsonObject);
+    sptr<NotificationExtensionSubscriptionInfo> ret = NotificationExtensionSubscriptionInfo::FromJson(jsonObject);
     EXPECT_NE(ret, nullptr);
     EXPECT_TRUE(subscriptionInfo->ToJson(jsonObject));
 }
