@@ -30,6 +30,7 @@ constexpr int32_t LONG_STR_MAX_SIZE = 1028;
 constexpr int32_t COMMON_TEXT_SIZE = 3074;
 constexpr int32_t SHORT_TEXT_SIZE = 1026;
 constexpr int32_t LONG_LONG_STR_MAX_SIZE = 25600;
+constexpr float MAX_PIXEL_SIZE = 128.0f;
 std::string GetResizeStr(std::string instr, int32_t length);
 
 bool IsUndefine(ani_env *env, const ani_object &obj);
