@@ -447,6 +447,8 @@ ErrCode NotificationPreferences::SetNotificationsEnabledForBundle(
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
     }
+    ANS_LOGI("set ntf auht status %{public}s %{public}d %{public}d %{public}d",
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), state, result);
     return result;
 }
 

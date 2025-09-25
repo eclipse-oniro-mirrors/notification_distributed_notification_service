@@ -570,6 +570,8 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
             // FA model app can publish notification without user confirm
             allowed = CheckApiCompatibility(bundleOption);
             SetDefaultNotificationEnabled(bundleOption, allowed);
+            ANS_LOGI("get ntf auth status %{public}s %{public}d %{public}d %{public}d",
+                bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), allowed, result);
         }
     }
     return result;
