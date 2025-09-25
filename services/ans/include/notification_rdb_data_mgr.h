@@ -61,8 +61,6 @@ public:
  
     bool ProcessTable(NativeRdb::RdbStore &rdbStore, const std::string &tableName);
  
-    bool UpdateRequest(NotificationRequest *request);
- 
     std::shared_ptr<NativeRdb::AbsSharedResultSet> QueryTable(NativeRdb::RdbStore &rdbStore,
         const std::string &tableName);
  
@@ -74,9 +72,7 @@ public:
  
     bool GetStringFromResultSet(std::shared_ptr<NativeRdb::AbsSharedResultSet> absSharedResultSet,
         int columnIndex, std::string &result);
- 
-    bool WriteBackToDatabase(NotificationRequest *request, NotificationBundleOption *bundleOption,
-        NativeRdb::RdbStore &rdbStore, const std::string &tableName);
+    
 private:
     NotificationRdbConfig notificationRdbConfig_;
     bool hasTableInit_ = false;
