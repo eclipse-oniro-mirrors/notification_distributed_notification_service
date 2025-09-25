@@ -789,5 +789,21 @@ ErrCode NotificationHelper::GetLiveViewConfig(const std::vector<std::string>& bu
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetLiveViewConfig(bundleList);
 }
+
+ErrCode NotificationHelper::NotificationExtensionSubscribe(
+    const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->NotificationExtensionSubscribe(infos);
+}
+
+ErrCode NotificationHelper::NotificationExtensionUnsubscribe()
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->NotificationExtensionUnsubscribe();
+}
+
+ErrCode NotificationHelper::GetSubscribeInfo(std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetSubscribeInfo(infos);
+}
 }  // namespace Notification
 }  // namespace OHOS

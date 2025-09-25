@@ -485,5 +485,92 @@ HWTEST_F(NotificationPreferencesInfoTest, GetDisableNotificationInfo_0700, TestS
     EXPECT_FALSE(ret);
     preferencesInfo->userDisableNotificationInfo_.clear();
 }
+
+/**
+ * @tc.name: SetExtensionSubscriptionInfos_0100
+ * @tc.desc: test SetExtensionSubscriptionInfos.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionInfos_0100, TestSize.Level1)
+{
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetExtensionSubscriptionInfos(infos);
+    EXPECT_TRUE(bundleInfo.GetExtensionSubscriptionInfos().empty());
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionInfosFromJson_0100
+ * @tc.desc: test SetExtensionSubscriptionInfosFromJson with json empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionInfosFromJson_0100, TestSize.Level1)
+{
+    std::string json;
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bool ret = bundleInfo.SetExtensionSubscriptionInfosFromJson(json);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionInfosFromJson_0200
+ * @tc.desc: test SetExtensionSubscriptionInfosFromJson with invalid json.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionInfosFromJson_0200, TestSize.Level1)
+{
+    std::string json = "test";
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bool ret = bundleInfo.SetExtensionSubscriptionInfosFromJson(json);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionInfosFromJson_0300
+ * @tc.desc: test SetExtensionSubscriptionInfosFromJson with json overflow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionInfosFromJson_0300, TestSize.Level1)
+{
+    std::string json = "{\"key\": 1e999}";
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bool ret = bundleInfo.SetExtensionSubscriptionInfosFromJson(json);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionInfosFromJson_0400
+ * @tc.desc: test SetExtensionSubscriptionInfosFromJson with json not array.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionInfosFromJson_0400, TestSize.Level1)
+{
+    std::string json = "{\"key\": 999}";
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bool ret = bundleInfo.SetExtensionSubscriptionInfosFromJson(json);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionInfosFromJson_0500
+ * @tc.desc: test SetExtensionSubscriptionInfosFromJson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionInfosFromJson_0500, TestSize.Level1)
+{
+    std::string json = R"([
+        {
+            "addr": "addr1",
+            "isHfp": true,
+            "type": 0
+        }
+    ])";
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bool ret = bundleInfo.SetExtensionSubscriptionInfosFromJson(json);
+    EXPECT_TRUE(ret);
+
+    std::string result = bundleInfo.GetExtensionSubscriptionInfosJson();
+    EXPECT_FALSE(result.empty());
+}
 }
 }

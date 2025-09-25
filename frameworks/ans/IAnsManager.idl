@@ -23,6 +23,7 @@ sequenceable OHOS.Notification.DistributedBundleOption;
 sequenceable OHOS.Notification.NotificationDisable;
 sequenceable OHOS.Notification.NotificationDoNotDisturbDate;
 sequenceable OHOS.Notification.NotificationDoNotDisturbProfile;
+sequenceable OHOS.Notification.NotificationExtensionSubscriptionInfo;
 sequenceable OHOS.Notification.NotificationRequest;
 sequenceable OHOS.Notification.NotificationSlot;
 sequenceable OHOS.Notification.NotificationSubscribeInfo;
@@ -330,6 +331,12 @@ interface OHOS.Notification.IAnsManager {
     void GetMutilDeviceStatus([in] String deviceType, [in] unsigned int status, [out] String deviceId, [out] int userId);
 
     void GetTargetDeviceBundleList([in] String deviceType, [in] String deviceId, [out] String[] bundleList, [out] String[] labelList);
+
+    void NotificationExtensionSubscribe([in] sptr<NotificationExtensionSubscriptionInfo>[] infos);
+
+    void NotificationExtensionUnsubscribe();
+
+    void GetSubscribeInfo([out] sptr<NotificationExtensionSubscriptionInfo>[] infos);
 
     [macrodef NOTIFICATION_SMART_REMINDER_SUPPORTED] void RegisterSwingCallback([in] IRemoteObject swingCallback);
 }

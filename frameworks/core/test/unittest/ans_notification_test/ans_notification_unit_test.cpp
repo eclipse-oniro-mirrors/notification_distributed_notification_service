@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1781,6 +1781,42 @@ HWTEST_F(AnsNotificationUnitTest, GetDistributedDevicelist_0100, Function | Medi
 }
 
 /*
+ * @tc.name: NotificationExtensionSubscribe_0100
+ * @tc.desc: test NotificationExtensionSubscribe.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, NotificationExtensionSubscribe_0100, Function | MediumTest | Level1)
+{
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo());
+    ErrCode ret = ans_->NotificationExtensionSubscribe(infos);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: NotificationExtensionUnsubscribe_0100
+ * @tc.desc: test NotificationExtensionUnsubscribe.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, NotificationExtensionUnsubscribe_0100, Function | MediumTest | Level1)
+{
+    ErrCode ret = ans_->NotificationExtensionUnsubscribe();
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: GetSubscribeInfo_0100
+ * @tc.desc: test GetSubscribeInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetSubscribeInfo_0100, Function | MediumTest | Level1)
+{
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    ErrCode ret = ans_->GetSubscribeInfo(infos);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
  * @tc.name: GetNotificationSettings_0100
  * @tc.desc: test GetNotificationSetting.
  * @tc.type: FUNC
@@ -2344,5 +2380,42 @@ HWTEST_F(AnsNotificationUnitTest, GetDistributedDevicelist_0200, Function | Medi
     ErrCode ret = ans_->GetDistributedDevicelist(deviceTypes);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/*
+ * @tc.name: NotificationExtensionSubscribe_0200
+ * @tc.desc: test NotificationExtensionSubscribe.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, NotificationExtensionSubscribe_0200, Function | MediumTest | Level1)
+{
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo());
+    ErrCode ret = ans_->NotificationExtensionSubscribe(infos);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+* @tc.name: NotificationExtensionUnsubscribe_0200
+* @tc.desc: test NotificationExtensionUnsubscribe.
+* @tc.type: FUNC
+*/
+HWTEST_F(AnsNotificationUnitTest, NotificationExtensionUnsubscribe_0200, Function | MediumTest | Level1)
+{
+    ErrCode ret = ans_->NotificationExtensionUnsubscribe();
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+* @tc.name: GetSubscribeInfo_0200
+* @tc.desc: test GetSubscribeInfo.
+* @tc.type: FUNC
+*/
+HWTEST_F(AnsNotificationUnitTest, GetSubscribeInfo_0200, Function | MediumTest | Level1)
+{
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    ErrCode ret = ans_->GetSubscribeInfo(infos);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
 }  // namespace Notification
 }  // namespace OHOS

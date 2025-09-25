@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -642,6 +642,51 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
     auto show = bundleInfo.GetSlotFlags();
     ASSERT_EQ(show, 1);
+}
+
+/**
+ * @tc.number    : ParseBundlePropertyFromDisturbeDB_01100
+ * @tc.name      : ParseBundlePropertyFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_01100, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_extensionSubscriptionInfo";
+    entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
+    preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
+    auto show = bundleInfo.GetExtensionSubscriptionInfosJson();
+    ASSERT_FALSE(show.empty());
+}
+
+/**
+ * @tc.name: PutExtensionSubscriptionInfos_0100
+ * @tc.desc: test PutExtensionSubscriptionInfos with bundleName empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutExtensionSubscriptionInfos_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bool ret = preferncesDB_->PutExtensionSubscriptionInfos(bundleInfo);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: PutExtensionSubscriptionInfos_0200
+ * @tc.desc: test PutExtensionSubscriptionInfos with invalid Uid
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutExtensionSubscriptionInfos_0200, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    bool ret = preferncesDB_->PutExtensionSubscriptionInfos(bundleInfo);
+    EXPECT_TRUE(ret);
 }
 
 /**

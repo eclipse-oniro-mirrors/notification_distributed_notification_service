@@ -198,6 +198,10 @@ public:
     MOCK_METHOD4(SetCheckConfig, ErrCode(int32_t, const std::string&, const std::string&, const std::string&));
     MOCK_METHOD1(GetLiveViewConfig, ErrCode(const std::vector<std::string>&));
     MOCK_METHOD4(SetDefaultSlotForBundle, ErrCode(const sptr<NotificationBundleOption> &, int32_t, bool, bool));
+    MOCK_METHOD1(NotificationExtensionSubscribe,
+        ErrCode(const std::vector<sptr<NotificationExtensionSubscriptionInfo>>&));
+    MOCK_METHOD0(NotificationExtensionUnsubscribe, ErrCode());
+    MOCK_METHOD1(GetSubscribeInfo, ErrCode(std::vector<sptr<NotificationExtensionSubscriptionInfo>>&));
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     MOCK_METHOD1(RegisterSwingCallback, ErrCode(const sptr<IRemoteObject>&));
 #endif

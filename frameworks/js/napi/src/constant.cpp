@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -366,6 +366,23 @@ napi_value SwitchStateInit(napi_env env, napi_value exports)
     return exports;
 }
 
+napi_value SubscribeTypeInit(napi_env env, napi_value exports)
+{
+    ANS_LOGD("%{public}s, called", __func__);
+
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    
+    SetNamedPropertyByInteger(env, obj, (int32_t)SubscribeType::BLUETOOTH, "BLUETOOTH");
+
+    napi_property_descriptor exportFuncs[] = {
+        DECLARE_NAPI_PROPERTY("SubscribeType", obj),
+    };
+
+    napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);
+    return exports;
+}
+
 napi_value ConstantInit(napi_env env, napi_value exports)
 {
     RemoveReasonInit(env, exports);
@@ -383,6 +400,7 @@ napi_value ConstantInit(napi_env env, napi_value exports)
     NotificationFlagTypeInit(env, exports);
     LiveViewStatusInit(env, exports);
     SwitchStateInit(env, exports);
+    SubscribeTypeInit(env, exports);
     return exports;
 }
 }  // namespace NotificationNapi

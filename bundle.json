@@ -130,6 +130,7 @@
         ],
         "fwk_group": [
           "//base/notification/distributed_notification_service/frameworks/ans:ans_client",
+          "//base/notification/distributed_notification_service/frameworks/js/napi:napi_extension_subscription",
           "//base/notification/distributed_notification_service/frameworks/js/napi:napi_notification",
           "//base/notification/distributed_notification_service/frameworks/js/napi:napi_reminder",
           "//base/notification/distributed_notification_service/interfaces/ndk:ohnotification",

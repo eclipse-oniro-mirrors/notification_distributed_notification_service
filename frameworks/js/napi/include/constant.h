@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@ napi_value DeviceRemindTypeInit(napi_env env, napi_value exports);
 napi_value ConstantInit(napi_env env, napi_value exports);
 napi_value LiveViewStatusInit(napi_env env, napi_value exports);
 napi_value SwitchStateInit(napi_env env, napi_value exports);
+napi_value SubscribeTypeInit(napi_env env, napi_value exports);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "notification_constant.h"
 #include "notification_bundle_option.h"
 #include "notification_do_not_disturb_profile.h"
+#include "notification_extension_subscription_info.h"
 #include "notification_constant.h"
 
 namespace OHOS {
@@ -64,9 +65,13 @@ public:
     void AddSlotInfo(const SlotInfo &slotInfo);
     std::vector<SlotInfo> GetSlotInfo() const;
 
+    void SetExtensionSubscriptionInfos(const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
+    const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& GetExtensionSubscriptionInfos() const;
+
     void ToJson(nlohmann::json &jsonObject) const;
     void FromJson(const nlohmann::json &root);
     void SlotsFromJson(const nlohmann::json &jsonObject);
+    void SubscriptionInfosFromJson(const nlohmann::json &jsonObject);
     std::string Dump() const;
 
 private:
@@ -78,6 +83,7 @@ private:
     NotificationConstant::SWITCH_STATE isEnabledNotification_ = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     std::vector<SlotInfo> slotsInfo_;
     NotificationConstant::SWITCH_STATE silentReminderEnabled_;
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> extensionSubscriptionInfos_;
 };
 } // namespace Notification
 } // namespace OHOS

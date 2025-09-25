@@ -23,6 +23,7 @@
 #include "notification_do_not_disturb_date.h"
 #include "notification_do_not_disturb_profile.h"
 #include "enabled_notification_callback_data.h"
+#include "notification_extension_subscription_info.h"
 #include "notification_request.h"
 #include "notification_slot.h"
 #include "notification_sorting_map.h"
@@ -1435,6 +1436,28 @@ public:
      * @return Returns set result.
      */
     static ErrCode GetLiveViewConfig(const std::vector<std::string>& bundleList);
+
+    /**
+     * @brief Subscribe the notification when the bluetooth addr is connected.
+     *
+     * @param infos The info to be subscribe.
+     * @return Returns subscribe result.
+     */
+    static ErrCode NotificationExtensionSubscribe(
+        const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
+
+    /**
+     * @brief Unsubscribe the notification.
+     * @return Returns unsubscribe result.
+     */
+    static ErrCode NotificationExtensionUnsubscribe();
+
+    /**
+     * @brief Obtains the subscribe info for app.
+     * @param infos The returned subscribe info.
+     * @return Returns get result.
+     */
+    static ErrCode GetSubscribeInfo(std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
 };
 }  // namespace Notification
 }  // namespace OHOS

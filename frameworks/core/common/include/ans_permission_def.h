@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@ constexpr char OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION[] = "ohos.permission
 constexpr char OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER[] = "ohos.permission.NOTIFICATION_AGENT_CONTROLLER";
 constexpr char OHOS_PERMISSION_SEND_NOTIFICATION_CROSS_USER[] = "ohos.permission.SEND_NOTIFICATION_CROSS_USER";
 constexpr char OHOS_PERMISSION_MANAGE_EDM_POLICY[] = "ohos.permission.MANAGE_EDM_POLICY";
+constexpr char OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION[] = "ohos.permission.SUBSCRIBE_NOTIFICATION";
 }  // namespace Notification
 }  // namespace OHOS
 

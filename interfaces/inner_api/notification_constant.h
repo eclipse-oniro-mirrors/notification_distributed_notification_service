@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -185,6 +185,10 @@ public:
          * support the set of distributed abilities.
          */
         SUPPORT
+    };
+
+    enum class SubscribeType {
+        BLUETOOTH = 0
     };
 
     static const int32_t DEFAULT_REASON_DELETE = 0;

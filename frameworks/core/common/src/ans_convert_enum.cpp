@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -512,6 +512,33 @@ bool AnsEnumUtil::LiveViewTypesCToJS(const NotificationLocalLiveViewContent::Liv
             break;
         default:
             ANS_LOGD("LiveViewTypes %{public}d", inType);
+            return false;
+    }
+
+    return true;
+}
+
+bool AnsEnumUtil::SubscribeTypeJSToC(const SubscribeType &inType, NotificationConstant::SubscribeType &outType)
+{
+    switch (inType) {
+        case SubscribeType::BLUETOOTH:
+            outType = NotificationConstant::SubscribeType::BLUETOOTH;
+            break;
+        default:
+            ANS_LOGE("SubscribeType %{public}d", inType);
+            return false;
+    }
+    return true;
+}
+
+bool AnsEnumUtil::SubscribeTypeCToJS(const NotificationConstant::SubscribeType &inType, SubscribeType &outType)
+{
+    switch (inType) {
+        case NotificationConstant::SubscribeType::BLUETOOTH:
+            outType = SubscribeType::BLUETOOTH;
+            break;
+        default:
+            ANS_LOGD("SubscribeType %{public}d", inType);
             return false;
     }
 

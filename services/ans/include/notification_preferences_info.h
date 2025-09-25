@@ -22,6 +22,7 @@
 
 #include "notification_bundle_option.h"
 #include "notification_do_not_disturb_date.h"
+#include "notification_extension_subscription_info.h"
 #include "notification_slot.h"
 #include "preferences_constant.h"
 #include "advanced_notification_service.h"
@@ -226,6 +227,10 @@ public:
         int32_t GetBundleUid() const;
         void SetSlotEnabled(NotificationConstant::SlotType slotType, bool enabled);
         bool GetSlotEnabled(NotificationConstant::SlotType slotType, bool &enabled) const;
+        const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& GetExtensionSubscriptionInfos() const;
+        std::string GetExtensionSubscriptionInfosJson() const;
+        void SetExtensionSubscriptionInfos(const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
+        bool SetExtensionSubscriptionInfosFromJson(const std::string& json);
 
     private:
         std::string bundleName_;
@@ -239,6 +244,7 @@ public:
         bool hasPoppedDialog_ = BUNDLE_POPPED_DIALOG;
         std::map<NotificationConstant::SlotType, sptr<NotificationSlot>> slots_;
         std::map<std::string, uint32_t> slotFlagsMap_;
+        std::vector<sptr<NotificationExtensionSubscriptionInfo>> extensionSubscriptionInfos_;
     };
 
     /*

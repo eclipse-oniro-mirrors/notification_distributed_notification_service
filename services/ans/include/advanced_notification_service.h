@@ -1446,6 +1446,14 @@ public:
         const std::string& value) override;
 
     ErrCode GetLiveViewConfig(const std::vector<std::string>& bundleList) override;
+
+    ErrCode NotificationExtensionSubscribe(
+        const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos) override;
+
+    ErrCode NotificationExtensionUnsubscribe() override;
+
+    ErrCode GetSubscribeInfo(std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos) override;
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.

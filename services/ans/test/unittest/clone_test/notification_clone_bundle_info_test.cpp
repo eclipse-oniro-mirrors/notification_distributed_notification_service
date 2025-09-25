@@ -139,6 +139,77 @@ HWTEST_F(NotificationCloneBundleInfoTest, AddSlotInfo_00001, Function | SmallTes
 }
 
 /**
+ * @tc.name: SetExtensionSubscriptionInfos_00001
+ * @tc.desc: Test SetExtensionSubscriptionInfos parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, SetExtensionSubscriptionInfos_00001, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo());
+    auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    ASSERT_NE(rrc, nullptr);
+    rrc->SetExtensionSubscriptionInfos(infos);
+    EXPECT_EQ(rrc->GetExtensionSubscriptionInfos().size(), 1);
+}
+
+/**
+ * @tc.name: SubscriptionInfosFromJson_00001
+ * @tc.desc: Test SubscriptionInfosFromJson parameters with nullptr.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, SubscriptionInfosFromJson_00001, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject;
+    auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    ASSERT_NE(rrc, nullptr);
+    rrc->SubscriptionInfosFromJson(jsonObject);
+    EXPECT_TRUE(rrc->GetExtensionSubscriptionInfos().empty());
+}
+
+/**
+ * @tc.name: SubscriptionInfosFromJson_00002
+ * @tc.desc: Test SubscriptionInfosFromJson parameters without array.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, SubscriptionInfosFromJson_00002, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        "extensionSubscriptionInfo", "test"
+    };
+    auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    ASSERT_NE(rrc, nullptr);
+    rrc->SubscriptionInfosFromJson(jsonObject);
+    EXPECT_TRUE(rrc->GetExtensionSubscriptionInfos().empty());
+}
+
+/**
+ * @tc.name: SubscriptionInfosFromJson_00003
+ * @tc.desc: Test SubscriptionInfosFromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, SubscriptionInfosFromJson_00003, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"extensionSubscriptionInfo", {
+            {
+                {"addr", "addr1"},
+                {"isHfp", true},
+                {"type", 0}
+            }
+        }}
+    };
+    auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    ASSERT_NE(rrc, nullptr);
+    rrc->SubscriptionInfosFromJson(jsonObject);
+    EXPECT_EQ(rrc->GetExtensionSubscriptionInfos().size(), 1);
+}
+
+/**
  * @tc.name: ToJson_00001
  * @tc.desc: Test ToJson parameters.
  * @tc.type: FUNC
@@ -173,6 +244,40 @@ HWTEST_F(NotificationCloneBundleInfoTest, ToJson_00001, Function | SmallTest | L
     EXPECT_EQ(rrc->GetSlotInfo().size(), 1);
     rrc->FromJson(jsonObject);
     EXPECT_EQ(rrc->GetSlotInfo().size(), 2);
+}
+
+/**
+ * @tc.name: ToJson_00002
+ * @tc.desc: Test ToJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, ToJson_00002, Function | SmallTest | Level1)
+{
+    std::string bundleName = "BundleName";
+    int32_t appIndex = 1;
+    int32_t uid = 1;
+    int32_t slotFlags = 1;
+    bool isShowBadge = true;
+    NotificationConstant::SWITCH_STATE enabledNotification = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    auto type = NotificationConstant::SubscribeType::BLUETOOTH;
+    infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo("addr", type));
+    auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    rrc->SetBundleName(bundleName);
+    rrc->SetAppIndex(appIndex);
+    rrc->SetUid(uid);
+    rrc->SetSlotFlags(slotFlags);
+    rrc->SetIsShowBadge(isShowBadge);
+    rrc->SetEnableNotification(enabledNotification);
+    rrc->SetExtensionSubscriptionInfos(infos);
+    nlohmann::json jsonObject;
+    EXPECT_EQ(jsonObject.is_null(), true);
+    EXPECT_EQ(jsonObject.is_object(), false);
+    rrc->FromJson(jsonObject);
+    rrc->ToJson(jsonObject);
+    EXPECT_EQ(jsonObject.is_object(), true);
+    EXPECT_EQ(rrc->GetExtensionSubscriptionInfos().size(), 1);
 }
 
 /**

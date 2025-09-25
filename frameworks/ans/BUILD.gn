@@ -102,6 +102,7 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/notification_distributed_options.cpp",
     "${frameworks_module_ans_path}/src/notification_do_not_disturb_date.cpp",
     "${frameworks_module_ans_path}/src/notification_do_not_disturb_profile.cpp",
+    "${frameworks_module_ans_path}/src/notification_extension_subscription_info.cpp",
     "${frameworks_module_ans_path}/src/notification_flags.cpp",
     "${frameworks_module_ans_path}/src/notification_helper.cpp",
     "${frameworks_module_ans_path}/src/notification_icon_button.cpp",
