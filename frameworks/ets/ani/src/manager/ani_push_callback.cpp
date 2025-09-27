@@ -105,7 +105,7 @@ int32_t StsPushCallBack::CheckNotification(
     auto checkInfo = std::make_shared<NotificationCheckInfo>();
     checkInfo->ConvertJsonStringToValue(notificationData);
     NotificationConstant::SlotType outSlotType = static_cast<NotificationConstant::SlotType>(checkInfo->GetSlotType());
-if (pushCallBackObjects_.find(outSlotType) == pushCallBackObjects_.end()) {
+    if (pushCallBackObjects_.find(outSlotType) == pushCallBackObjects_.end()) {
         ANS_LOGE("pushCallBackObjects is nullptr");
         return ERR_INVALID_STATE;
     }
