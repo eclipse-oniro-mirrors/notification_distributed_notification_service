@@ -39,8 +39,6 @@ namespace OHOS {
 namespace Notification {
 using namespace std;
 constexpr int32_t CONTROL_BY_SMART_REMINDER = 1 << 15;
-constexpr static const uint32_t FLAG32 = 32;
-constexpr static const char* STATUS_UNUSE = "xxx0";
 
 SmartReminderCenter::SmartReminderCenter()
 {
@@ -361,32 +359,29 @@ void SmartReminderCenter::InitValidDevices(
                 ANS_LOGI("unaffect slot");
                 continue;
             }
-            bool appSwitch = GetAppSwitch(deviceType, request->GetOwnerBundleName(), request->GetOwnerUid());
-            bool smartSwitch = GetSmartSwitch(deviceType);
-            if (deviceType.compare(NotificationConstant::LITEWEARABLE_DEVICE_TYPE) == 0 ||
-                deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) == 0) {
-                    syncDevices.insert(deviceType);
-                    if (appSwitch && smartSwitch) {
-                        smartDevices.insert(deviceType);
-                    }
-            } else {
-                // app-close
-                if (!appSwitch) {
-                    ANS_LOGI("app switch is closed, deveiceType = %{public}s", deviceType.c_str());
-                    continue;
-                }
-
-                ANS_LOGI("smart switch deviceType = %{public}s status = %{public}d", deviceType.c_str(), smartSwitch);
-                // app-open ,smart-open
-                if (smartSwitch) {
-                    syncDevices.insert(deviceType);
-                    smartDevices.insert(deviceType);
-                    request->SetNotificationControlFlags(notificationControlFlags | CONTROL_BY_SMART_REMINDER);
-                    continue;
-                }
-                // app-open, smart-close
-                syncDevices.insert(deviceType);
+            bool distributedSwitch = GetDistributedSwitch(deviceType);
+            if (!distributedSwitch) {
+                ANS_LOGI("distributed switch is closed, deveiceType = %{public}s", deviceType.c_str());
+                continue;
             }
+            bool appSwitch = GetAppSwitch(deviceType, request->GetOwnerBundleName(), request->GetOwnerUid());
+            // app-close
+            if (!appSwitch) {
+                ANS_LOGI("app switch is closed, deveiceType = %{public}s", deviceType.c_str());
+                continue;
+            }
+
+            bool smartSwitch = GetSmartSwitch(deviceType);
+            ANS_LOGI("smart switch deviceType = %{public}s status = %{public}d", deviceType.c_str(), smartSwitch);
+            // app-open ,smart-open
+            if (smartSwitch) {
+                syncDevices.insert(deviceType);
+                smartDevices.insert(deviceType);
+                request->SetNotificationControlFlags(notificationControlFlags | CONTROL_BY_SMART_REMINDER);
+                continue;
+            }
+            // app-open, smart-close
+            syncDevices.insert(deviceType);
         }
     }
     string syncDevicesStr;
@@ -542,24 +537,6 @@ void SmartReminderCenter::HandleReminderMethods(
     if (request->GetClassification() == NotificationConstant::ANS_VOIP) {
         ANS_LOGI("VOIP CALL");
         if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
-            return;
-        }
-    }
-
-    if ((deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) == 0 ||
-        deviceType.compare(NotificationConstant::LITEWEARABLE_DEVICE_TYPE) == 0) &&
-        smartDevices.find(deviceType) == smartDevices.end()) {
-        auto iter = statusMap.find(deviceType);
-        if (iter == statusMap.end()) {
-            ANS_LOGE("get device status failed. deviceType = %{public}s", deviceType.c_str());
-            return;
-        }
-        bitset<DistributedDeviceStatus::STATUS_SIZE> wearableStatus = iter->second;
-        if (CompareStatus(STATUS_UNUSE, wearableStatus)) {
-            auto wearableFlag = std::make_shared<NotificationFlags>(FLAG32);
-            (*notificationFlagsOfDevices)[deviceType] = wearableFlag;
-            ANS_LOGI("default remindFlags, deviceType = %{public}s ,  remindFlags = %{public}d",
-                deviceType.c_str(), wearableFlag->GetReminderFlags());
             return;
         }
     }
