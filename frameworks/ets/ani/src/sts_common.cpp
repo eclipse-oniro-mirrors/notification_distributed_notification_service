@@ -26,11 +26,11 @@ constexpr const char* CLASSNAME_INT = "std.core.Int";
 constexpr const char* CLASSNAME_LONG = "std.core.Long";
 std::string GetResizeStr(std::string instr, int32_t length)
 {
-    if (instr.length() <= length) {
+    if (static_cast<int32_t>(instr.length()) <= length) {
         return instr;
     } else {
         int32_t endPos = 0;
-        for (int32_t i = 0; i < instr.size();) {
+        for (int32_t i = 0; i < static_cast<int32_t>(instr.size());) {
             if ((instr[i] & 0x80) == 0) {          // ASCII字符
                 i += 1;
             } else if ((instr[i] & 0xE0) == 0xC0) { // 2字节字符
@@ -334,7 +334,7 @@ ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *na
         ANS_LOGE("status : %{public}d", status);
         return status;
     }
-    if (maxLen > 0 && length > maxLen) {
+    if (maxLen > 0 && length > static_cast<ani_int>(maxLen)) {
         length = static_cast<ani_int>(maxLen);
     }
     std::string str = "";
