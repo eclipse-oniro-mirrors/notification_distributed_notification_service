@@ -603,7 +603,7 @@ void GetNotificationActionButtons(ani_env *env, ani_object obj, std::shared_ptr<
 void PictureScale(std::shared_ptr<Media::PixelMap> pixelMap)
 {
     int32_t size = pixelMap->GetByteCount();
-    if (size <= MAX_ICON_SIZE) {
+    if (size <= static_cast<int32_t>(MAX_ICON_SIZE)) {
         return;
     }
     int32_t width = pixelMap->GetWidth();
