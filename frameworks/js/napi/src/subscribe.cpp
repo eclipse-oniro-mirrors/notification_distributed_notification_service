@@ -226,7 +226,7 @@ void SubscriberInstance::CallThreadSafeFunc(void* data)
 
 void ThreadSafeOnCancel(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("called");
+    ANS_LOGD("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -297,7 +297,7 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
 
 void ThreadSafeOnBatchCancel(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("called");
+    ANS_LOGD("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -385,7 +385,7 @@ bool SubscriberInstance::HasOnBatchCancelCallback()
 
 void ThreadSafeOnConsumed(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("called");
+    ANS_LOGD("called");
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     auto additionalData = dataWorkerData->request->GetNotificationRequest().GetAdditionalData();
     if (additionalData && additionalData->HasParam("_oh_ans_sys_traceid")) {
@@ -469,7 +469,7 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
 
 void ThreadSafeOnUpdate(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("called");
+    ANS_LOGD("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -527,7 +527,7 @@ void SubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> 
 
 void ThreadSafeOnConnected(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("called");
+    ANS_LOGD("called");
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("null dataWorkerData");
@@ -565,7 +565,7 @@ void SubscriberInstance::OnConnected()
 
 void ThreadSafeOnDisconnected(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("called");
+    ANS_LOGD("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -605,7 +605,7 @@ void SubscriberInstance::OnDisconnected()
 
 void ThreadSafeOnDestroy(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("called");
+    ANS_LOGD("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -644,7 +644,7 @@ void SubscriberInstance::OnDied()
 
 void ThreadSafeOnDoNotDisturbDateChange(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("called");
+    ANS_LOGD("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -705,7 +705,7 @@ void SubscriberInstance::OnDoNotDisturbDateChange(const std::shared_ptr<Notifica
 
 void ThreadSafeOnDoNotDisturbChanged(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("called");
+    ANS_LOGD("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -763,7 +763,7 @@ void SubscriberInstance::onDoNotDisturbChanged(const std::shared_ptr<Notificatio
 
 void ThreadSafeOnEnabledNotificationChanged(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("called");
+    ANS_LOGD("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -822,7 +822,7 @@ void SubscriberInstance::OnEnabledNotificationChanged(
 
 void ThreadSafeOnBadgeChanged(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("called");
+    ANS_LOGD("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -880,7 +880,7 @@ void SubscriberInstance::OnBadgeChanged(
 
 void ThreadSafeOnBadgeEnabledChanged(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("called");
+    ANS_LOGD("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
