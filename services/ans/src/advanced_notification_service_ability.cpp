@@ -76,7 +76,7 @@ void AdvancedNotificationServiceAbility::OnStop()
 
 void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    ANS_LOGD("SubSystemAbilityListener::OnAddSystemAbility enter !");
+    ANS_LOGI("SA %{public}d start", systemAbilityId);
     if (systemAbilityId == DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
         if (AdvancedDatashareObserver::GetInstance().CheckIfSettingsDataReady()) {
             if (isDatashaReready_) {
@@ -111,7 +111,6 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
         }
         notificationService->ResetDistributedEnabled();
     } else if (systemAbilityId == DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID) {
-        ANS_LOGW("DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID");
 #ifdef ALL_SCENARIO_COLLABORATION
         DistributedDeviceManager::GetInstance().RegisterDms(true);
 #endif
@@ -124,16 +123,14 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
 
 void AdvancedNotificationServiceAbility::OnReceiveEvent(const EventFwk::CommonEventData &data)
 {
-    ANS_LOGI("CheckIfSettingsDataReady() ok!");
+    std::string action = data.GetWant().GetAction();
+    ANS_LOGI("receive %{public}s", action.c_str());
     if (isDatashaReready_) {
         return;
     }
-    auto const &want = data.GetWant();
-    std::string action = want.GetAction();
     if (action == "usual.event.DATA_SHARE_READY") {
         AdvancedDatashareHelper::SetIsDataShareReady(true);
         isDatashaReready_ = true;
-        ANS_LOGI("COMMON_EVENT_SERVICE_ID OnReceiveEvent ok!");
 #ifdef ENABLE_ANS_AGGREATION
         EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
 #endif

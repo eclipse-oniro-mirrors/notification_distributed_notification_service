@@ -376,7 +376,7 @@ void NotificationPreferencesInfo::RemoveDoNotDisturbProfiles(
             continue;
         }
         std::string key = MakeDoNotDisturbProfileKey(userId, profile->GetProfileId());
-        ANS_LOGI("RemoveDoNotDisturbProfiles  key: %{public}s.", key.c_str());
+        ANS_LOGI("RemoveDoNotDisturbProfiles key: %{public}s.", key.c_str());
         doNotDisturbProfiles_.erase(key);
     }
 }

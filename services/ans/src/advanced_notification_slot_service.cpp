@@ -541,7 +541,7 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
             if (result != ERR_OK) {
                 return;
             }
-            ANS_LOGI("Set slotflags %{public}d to %{public}s.", slotFlags, bundle->GetBundleName().c_str());
+            ANS_LOGD("Set slotflags %{public}d to %{public}s.", slotFlags, bundle->GetBundleName().c_str());
             result = UpdateSlotReminderModeBySlotFlags(bundle, slotFlags);
         }));
     notificationSvrQueue_->wait(handler);
@@ -569,7 +569,7 @@ ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shar
 
         GenerateSlotReminderMode(slot, bundleOption);
         if (record->request->IsSystemLiveView() || record->isAtomicService) {
-            ANS_LOGI("System live view or atomicService no need add sloty.");
+            ANS_LOGD("System live view or atomicService no need add sloty.");
             result = ERR_OK;
         } else {
             std::vector<sptr<NotificationSlot>> slots;
@@ -639,7 +639,7 @@ void AdvancedNotificationService::GenerateSlotReminderMode(const sptr<Notificati
     uint32_t slotFlags = defaultSlotFlags;
     auto ret = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundle, slotFlags);
     if (ret != ERR_OK) {
-        ANS_LOGE("Failed to get slotflags for bundle, use default slotflags");
+        ANS_LOGD("Failed to get slotflags for bundle, use default slotflags");
     }
 
     auto configSlotReminderMode =
@@ -661,7 +661,7 @@ uint32_t AdvancedNotificationService::GetDefaultSlotFlags(const sptr<Notificatio
     uint32_t notificationControlFlags = request->GetNotificationControlFlags();
     // SA publish own's notification with banner
     if ((notificationControlFlags & NotificationConstant::ReminderFlag::SA_SELF_BANNER_FLAG) != 0) {
-        ANS_LOGI("Creator:%{public}s %{public}d,Owner: %{public}s %{public}d, controlFlags:%{public}d",
+        ANS_LOGI("hasSABanner Creator:%{public}s %{public}d,Owner:%{public}s %{public}d,controlFlags:%{public}d",
             request->GetCreatorBundleName().c_str(), request->GetCreatorUid(), request->GetOwnerBundleName().c_str(),
             request->GetOwnerUid(), request->GetNotificationControlFlags());
     }
@@ -742,7 +742,7 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     } else {
         request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG, false);
     }
-    ANS_LOGI("SetFlags-init,Key = %{public}s flags = %{public}d",
+    ANS_LOGI("SetFlags-init,Key=%{public}s flags=%{public}d",
         request->GetKey().c_str(), request->GetFlags()->GetReminderFlags());
     HandleFlagsWithRequest(request, bundleOption);
 }
@@ -764,9 +764,8 @@ void AdvancedNotificationService::HandleFlagsWithRequest(const sptr<Notification
             request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false, unAffectDevices);
         }
     }
-    ANS_LOGI("SetFlags- HandleFlag Key = %{public}s flags = %{public}d class = %{public}s silent = %{public}d",
-        request->GetKey().c_str(), request->GetFlags()->GetReminderFlags(),
-        request->GetClassification().c_str(), enableStatus);
+    ANS_LOGI("SetFlags- HandleFlag flags = %{public}d class = %{public}s silent = %{public}d",
+        request->GetFlags()->GetReminderFlags(), request->GetClassification().c_str(), enableStatus);
     if (request->GetClassification() == NotificationConstant::ANS_VOIP &&
         request->GetSlotType() == NotificationConstant::LIVE_VIEW) {
         return;
@@ -789,10 +788,10 @@ ErrCode AdvancedNotificationService::GetSlotByType(int32_t slotTypeInt, sptr<Not
     }
     sptr<NotificationSlot> slotFromDb = nullptr;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGI("ffrt enter!");
+        ANS_LOGD("ffrt enter!");
         NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slotFromDb);
         if (slotFromDb != nullptr) {
-            ANS_LOGI("slotFromDb != nullptr");
+            ANS_LOGD("slotFromDb != nullptr");
             slot = new (std::nothrow) NotificationSlot(*slotFromDb);
         }
         NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
@@ -1180,7 +1179,7 @@ void AdvancedNotificationService::TriggerLiveViewSwitchCheck(int32_t userId)
         return;
     }
 
-    ANS_LOGE("Trigger live view start.");
+    ANS_LOGD("Trigger live view start.");
     notificationSvrQueue_->submit_h(std::bind([&, userId]() {
         std::map<std::string, sptr<NotificationBundleOption>> bundleOptions;
         if (BundleManagerHelper::GetInstance()->GetAllBundleInfo(bundleOptions, userId) != ERR_OK) {
@@ -1203,7 +1202,7 @@ void AdvancedNotificationService::TriggerLiveViewSwitchCheck(int32_t userId)
                 checkBundles.push_back(bundleOptions[item.second]);
             }
         }
-        ANS_LOGI("Get data %{public}zu %{public}zu %{public}zu.", bundleOptions.size(), checkBundles.size(),
+        ANS_LOGI("trigger liveview %{public}zu %{public}zu %{public}zu.", bundleOptions.size(), checkBundles.size(),
             bundlesMap.size());
         InvockLiveViewSwitchCheck(checkBundles, userId, 0);
     }),
@@ -1312,7 +1311,7 @@ ErrCode AdvancedNotificationService::GetLiveViewConfig(const std::vector<std::st
             ANS_LOGE("Push check failed %{public}d %{public}zu.", res, bundleList.size());
             NotificationLiveViewUtils::GetInstance().EraseLiveViewCheckData(requestId);
         }
-        ANS_LOGI("Get config %{public}s %{public}zu.", requestId.c_str(), bundleList.size());
+        ANS_LOGI("Get liveViewConfig %{public}s %{public}zu.", requestId.c_str(), bundleList.size());
     }));
     notificationSvrQueue_->wait(handler);
     return result;

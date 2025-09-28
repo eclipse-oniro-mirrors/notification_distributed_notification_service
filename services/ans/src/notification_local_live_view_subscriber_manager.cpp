@@ -155,7 +155,7 @@ void NotificationLocalLiveViewSubscriberManager::OnRemoteDied(const wptr<IRemote
         ANS_LOGD("called");
         std::shared_ptr<LocalLiveViewSubscriberRecord> record = FindSubscriberRecord(object);
         if (record != nullptr) {
-            ANS_LOGI("removed. uid = %{public}d", record->userId);
+            ANS_LOGI("OnRemoteDied, uid=%{public}d", record->userId);
             AdvancedNotificationService::GetInstance()->RemoveSystemLiveViewNotifications(
                 record->bundleName, record->userId);
             buttonRecordList_.remove(record);

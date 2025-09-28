@@ -52,13 +52,13 @@ napi_value NapiDisplayBadge(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiDisplayBadge work excute.");
             AsyncCallbackInfoEnableBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableBadge *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("bundle=%{public}s uid=%{public}d enable=%{public}d",
-                    asynccallbackinfo->params.option.GetBundleName().c_str(),
-                    asynccallbackinfo->params.option.GetUid(),
-                    asynccallbackinfo->params.enable);
+                
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetShowBadgeEnabledForBundle(
                     asynccallbackinfo->params.option, asynccallbackinfo->params.enable);
-                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+                ANS_LOGI("displayBadge bundle=%{public}s uid=%{public}d enable=%{public}d code=%{public}d",
+                    asynccallbackinfo->params.option.GetBundleName().c_str(),
+                    asynccallbackinfo->params.option.GetUid(),
+                    asynccallbackinfo->params.enable, asynccallbackinfo->info.errorCode);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -141,17 +141,18 @@ napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info)
             AsyncCallbackInfoIsDisplayBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoIsDisplayBadge *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasBundleOption) {
-                    ANS_LOGI("bundle=%{public}s uid=%{public}d",
-                        asynccallbackinfo->params.option.GetBundleName().c_str(),
-                        asynccallbackinfo->params.option.GetUid());
                     asynccallbackinfo->info.errorCode = NotificationHelper::GetShowBadgeEnabledForBundle(
                         asynccallbackinfo->params.option, asynccallbackinfo->enabled);
+                    ANS_LOGI("get badgeEnabled bundle:%{public}s,uid:%{public}d,code:%{public}d,enabled:%{public}d",
+                        asynccallbackinfo->params.option.GetBundleName().c_str(),
+                        asynccallbackinfo->params.option.GetUid(),
+                        asynccallbackinfo->info.errorCode, asynccallbackinfo->enabled);
                 } else {
                     asynccallbackinfo->info.errorCode = NotificationHelper::GetShowBadgeEnabled(
                         asynccallbackinfo->enabled);
+                    ANS_LOGI("get badgeEnabled code:%{public}d,enabled:%{public}d",
+                        asynccallbackinfo->info.errorCode, asynccallbackinfo->enabled);
                 }
-                ANS_LOGI("errorCode = %{public}d, enabled = %{public}d",
-                    asynccallbackinfo->info.errorCode, asynccallbackinfo->enabled);
             }
         },
         AsyncCompleteCallbackNapiIsBadgeDisplayed,
@@ -178,7 +179,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < SET_BADGE_NUMBER_MIN_PARA) {
-        ANS_LOGW("Wrong number of arguments.");
+        ANS_LOGD("Wrong number of arguments.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -208,7 +209,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     }
     // case2: setBadgeNumber(badgeNumber)
     if (valuetype != napi_number) {
-        ANS_LOGW("Wrong argument type. Number expected.");
+        ANS_LOGD("Wrong argument type. Number expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -273,7 +274,7 @@ napi_value NapiSetBadgeNumber(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiSetBadgeNumber work excute.");
             AsyncCallbackSetBadgeNumber *asynccallbackinfo = static_cast<AsyncCallbackSetBadgeNumber *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("badgeNumber: %{public}d", asynccallbackinfo->params.badgeNumber);
+                ANS_LOGI("setBadge number:%{public}d", asynccallbackinfo->params.badgeNumber);
                 std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetBadgeNumber(
                     asynccallbackinfo->params.badgeNumber, instanceKey);
@@ -322,7 +323,7 @@ napi_value NapiSetBadgeNumberByBundle(napi_env env, napi_callback_info info)
             ANS_LOGD("Napi set badge number by bundle work execute.");
             AsyncCallbackSetBadgeNumber *asyncCallbackInfo = static_cast<AsyncCallbackSetBadgeNumber *>(data);
             if (asyncCallbackInfo) {
-                ANS_LOGI("bundle=%{public}s uid=%{public}d badge=%{public}d",
+                ANS_LOGI("setBadge bundle=%{public}s uid=%{public}d badge=%{public}d",
                     asyncCallbackInfo->params.option.GetBundleName().c_str(),
                     asyncCallbackInfo->params.option.GetUid(),
                     asyncCallbackInfo->params.badgeNumber);

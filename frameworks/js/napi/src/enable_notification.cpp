@@ -182,7 +182,7 @@ napi_value EnableNotification(napi_env env, napi_callback_info info)
                 std::string deviceId {""};
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
                     asynccallbackinfo->params.option, deviceId, asynccallbackinfo->params.enable);
-                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+                ANS_LOGI("setEnableNotification code=%{public}d", asynccallbackinfo->info.errorCode);
             }
         },
         AsyncCompleteCallbackEnableNotification,
@@ -254,21 +254,25 @@ napi_value IsNotificationEnabled(napi_env env, napi_callback_info info)
             AsyncCallbackInfoIsEnable *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasBundleOption) {
-                    ANS_LOGI("option.bundle : %{public}s option.uid : %{public}d",
-                        asynccallbackinfo->params.option.GetBundleName().c_str(),
-                        asynccallbackinfo->params.option.GetUid());
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
                         asynccallbackinfo->params.option, asynccallbackinfo->allowed);
+                    ANS_LOGI("isNotificationEnabled bundle:%{public}s,uid:%{public}d,"
+                        "code=%{public}d,allowed=%{public}d",
+                        asynccallbackinfo->params.option.GetBundleName().c_str(),
+                        asynccallbackinfo->params.option.GetUid(),
+                        asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
                 } else if (asynccallbackinfo->params.hasUserId) {
-                    ANS_LOGI("userId = %{public}d", asynccallbackinfo->params.userId);
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
                         asynccallbackinfo->params.userId, asynccallbackinfo->allowed);
+                    ANS_LOGI("isNotificationEnabled userId=%{public}d,code=%{public}d,allowed=%{public}d",
+                        asynccallbackinfo->params.userId,
+                        asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
                 } else {
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
                         asynccallbackinfo->allowed);
+                    ANS_LOGI("isNotificationEnabled code=%{public}d,allowed=%{public}d",
+                        asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
                 }
-                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d, allowed = %{public}d",
-                    asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
             }
         },
         AsyncCompleteCallbackIsNotificationEnabled,
@@ -320,7 +324,7 @@ napi_value IsNotificationEnabledSelf(napi_env env, napi_callback_info info)
                     asynccallbackinfo->info.errorCode =
                         NotificationHelper::IsAllowedNotifySelf(asynccallbackinfo->allowed);
                 }
-                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d, allowed = %{public}d",
+                ANS_LOGI("isNotificationEnabledSelf code=%{public}d,allowed=%{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
             }
         },
@@ -397,7 +401,7 @@ napi_value RequestEnableNotification(napi_env env, napi_callback_info info)
         asynccallbackinfo->info.errorCode =
             NotificationHelper::RequestEnableNotification(deviceId, client,
                 asynccallbackinfo->params.callerToken);
-        ANS_LOGI("done, code is %{public}d.", asynccallbackinfo->info.errorCode);
+        ANS_LOGI("request enableNotification code:%{public}d", asynccallbackinfo->info.errorCode);
     };
     auto jsCb = [](napi_env env, napi_status status, void* data) {
         ANS_LOGD("enter");
@@ -408,7 +412,7 @@ napi_value RequestEnableNotification(napi_env env, napi_callback_info info)
         auto* asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable*>(data);
         ErrCode errCode = asynccallbackinfo->info.errorCode;
         if (errCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
-            ANS_LOGE("error, code is %{public}d.", errCode);
+            ANS_LOGE("poped error,code:%{public}d", errCode);
             AnsDialogHostClient::Destroy();
             AsyncCompleteCallbackRequestEnableNotification(env, static_cast<void*>(asynccallbackinfo));
             return;
@@ -418,7 +422,7 @@ napi_value RequestEnableNotification(napi_env env, napi_callback_info info)
         if (!jsCallback->Init(env, asynccallbackinfo, AsyncCompleteCallbackRequestEnableNotification) ||
             !AnsDialogHostClient::SetDialogCallbackInterface(std::move(jsCallback))
         ) {
-            ANS_LOGE("error");
+            ANS_LOGE("set dialogCallbackInterface error");
             asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
             AnsDialogHostClient::Destroy();
             AsyncCompleteCallbackRequestEnableNotification(env, static_cast<void*>(asynccallbackinfo));

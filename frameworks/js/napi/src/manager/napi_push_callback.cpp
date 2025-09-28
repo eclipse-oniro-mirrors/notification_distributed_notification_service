@@ -287,7 +287,7 @@ int32_t JSPushCallBack::ConvertFunctionResult(napi_env env, napi_value funcResul
         return false;
     }
 
-    ANS_LOGI("code:%{public}d, message:%{public}s", code, message.c_str());
+    ANS_LOGI("convertFunctionResult code:%{public}d,message:%{public}s", code, message.c_str());
     return code;
 }
 } // namespace Notification

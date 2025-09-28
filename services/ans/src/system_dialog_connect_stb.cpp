@@ -30,7 +30,7 @@ namespace Notification {
 void SystemDialogConnectStb::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
     const sptr<IRemoteObject> &remoteObject, int32_t resultCode)
 {
-    ANS_LOGI("on ability connected");
+    ANS_LOGD("on ability connected");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;

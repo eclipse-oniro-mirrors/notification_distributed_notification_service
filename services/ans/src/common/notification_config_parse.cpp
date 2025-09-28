@@ -408,7 +408,7 @@ void NotificationConfigParse::GetCollaborationFilter()
 bool NotificationConfigParse::IsInCollaborationFilter(const std::string& bundleName, int32_t uid) const
 {
     if (uidList_.empty() && bundleNameList_.empty()) {
-        ANS_LOGE("empty uidList or bundleNameList");
+        ANS_LOGD("empty uidList or bundleNameList");
         return false;
     }
 

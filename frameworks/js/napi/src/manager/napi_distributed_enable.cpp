@@ -143,7 +143,7 @@ napi_value NapiSetDistributedEnabledByBundle(napi_env env, napi_callback_info in
                 std::string deviceType = asynccallbackinfo->params.deviceType;
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetDistributedEnabledByBundle(
                     asynccallbackinfo->params.option, deviceType, asynccallbackinfo->params.enable);
-                ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+                ANS_LOGI("set distributedEnabled code=%{public}d", asynccallbackinfo->info.errorCode);
             }
         },
         AsyncCompleteCallbackNapiSetDistributedEnabledByBundle,
@@ -279,7 +279,7 @@ napi_value NapiSetDistributedBundleOption(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetDistributedBundleOption(
                     asynccallbackinfo->params.bundles,  asynccallbackinfo->params.deviceType);
-                ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+                ANS_LOGI("set distributedBundleOption code=%{public}d", asynccallbackinfo->info.errorCode);
             }
         },
         AsyncCompleteCallbackNapiSetDistributedBundleOption,
@@ -408,7 +408,7 @@ void AsyncCompleteCallbackNapiIsSmartReminderEnabled(napi_env env, napi_status s
         ANS_LOGE("Invalid async callback data");
         return;
     }
-    ANS_LOGI("IsSmartReminderEnabled napi_create_async_work end");
+    ANS_LOGD("IsSmartReminderEnabled napi_create_async_work end");
     AsyncCallbackSmartReminderEnabled *asynccallbackinfo = static_cast<AsyncCallbackSmartReminderEnabled *>(data);
     if (asynccallbackinfo) {
         napi_value result = nullptr;
@@ -590,7 +590,7 @@ napi_value NapiSetDistributedEnabledBySlot(napi_env env, napi_callback_info info
                     asynccallbackinfo->params.slot,
                     asynccallbackinfo->params.deviceType,
                     asynccallbackinfo->params.enable);
-                ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+                ANS_LOGI("set distributedEnabledBySlot code=%{public}d", asynccallbackinfo->info.errorCode);
             }
         },
         AsyncCompleteCallbackNapiSetDistributedEnabledBySlot,
@@ -609,7 +609,7 @@ void AsyncCompleteCallbackNapiIsDistributedEnabledBySlot(napi_env env, napi_stat
         ANS_LOGE("Invalid async callback data");
         return;
     }
-    ANS_LOGI("IsDistributedEnabledBySlot napi_create_async_work end");
+    ANS_LOGD("IsDistributedEnabledBySlot napi_create_async_work end");
     AsyncCallbackDistributedEnableBySlot *asynccallbackinfo = static_cast<AsyncCallbackDistributedEnableBySlot *>(data);
     if (asynccallbackinfo) {
         napi_value result = nullptr;

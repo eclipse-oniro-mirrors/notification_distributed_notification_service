@@ -634,7 +634,7 @@ void NotificationAnalyticsUtil::ExecuteLiveViewReport()
     {
         std::lock_guard<ffrt::mutex> lockReportLiveView(ReportLiveViewMessageMutex_);
         if (liveViewMessages.empty()) {
-            ANS_LOGI("report end");
+            ANS_LOGD("report end");
             g_reportLiveViewFlag = false;
             return;
         }
@@ -1028,7 +1028,7 @@ std::string NotificationAnalyticsUtil::BuildExtraInfo(const HaMetaMessage& messa
             std::to_string(message.errorCode_) + MESSAGE_DELIMITER +
             std::to_string(now) + " Reason fixed size exceeds limit";
         extraInfo->SetParam("reason", AAFwk::String::Box(basicInfo));
-        ANS_LOGI("%{public}s", basicInfo.c_str());
+        ANS_LOGD("%{public}s", basicInfo.c_str());
     } else {
         reason["detail"] = message.message_.substr(0, leftSpace);
         extraInfo->SetParam("reason",
@@ -1086,7 +1086,7 @@ std::string NotificationAnalyticsUtil::BuildExtraInfoWithReq(const HaMetaMessage
             std::to_string(message.errorCode_) + MESSAGE_DELIMITER +
             std::to_string(now) + " Reason fixed size exceeds limit";
         extraInfo->SetParam("reason", AAFwk::String::Box(basicInfo));
-        ANS_LOGI("%{public}s", basicInfo.c_str());
+        ANS_LOGD("%{public}s", basicInfo.c_str());
     } else {
         reason["detail"] = message.message_.substr(0, leftSpace);
         extraInfo->SetParam("reason",

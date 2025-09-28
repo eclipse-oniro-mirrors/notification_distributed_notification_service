@@ -2840,7 +2840,7 @@ std::string NotificationRequest::GetBaseKey(const std::string &deviceId)
     const char *keySpliter = "_";
 
     if (distributedCollaborate_) {
-        ANS_LOGI("NotificationRequest use collaborate!");
+        ANS_LOGD("NotificationRequest use collaborate!");
         return "ans_distributed" + distributedHashCode_;
     }
 

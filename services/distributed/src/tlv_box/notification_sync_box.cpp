@@ -55,7 +55,7 @@ bool NotificationSyncBox::SetNotificationList(const std::vector<std::string>& no
         listStream << notification << ' ';
     }
     std::string result = listStream.str();
-    ANS_LOGI("SetNotificationList %{public}s", result.c_str());
+    ANS_LOGI("syncBox SetNotificationList %{public}s", result.c_str());
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_HASHCODE, result));
 }
 
@@ -86,7 +86,7 @@ bool NotificationSyncBox::GetNotificationList(std::unordered_set<std::string>& n
         return false;
     }
 
-    ANS_LOGI("SetNotificationList %{public}s", notificationContent.c_str());
+    ANS_LOGI("syncBox GetNotificationList %{public}s", notificationContent.c_str());
     std::istringstream listStream(notificationContent);
     std::string hashCode;
     while (listStream >> hashCode) {

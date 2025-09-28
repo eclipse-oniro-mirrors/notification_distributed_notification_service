@@ -253,7 +253,7 @@ void DistributedPublishService::RemoveAllDistributedNotifications(DistributedDev
         ANS_LOGW("dans OnCanceled serialize failed");
         return;
     }
-    ANS_LOGI("Remove all:%{public}s", StringAnonymous(deviceInfo.deviceId_).c_str());
+    ANS_LOGI("Remove all distributed:%{public}s", StringAnonymous(deviceInfo.deviceId_).c_str());
     std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(removeBox, deviceInfo,
         TransDataType::DATA_TYPE_BYTES, DELETE_ERROR_EVENT_CODE);
     DistributedSendAdapter::GetInstance().SendPackage(packageInfo);

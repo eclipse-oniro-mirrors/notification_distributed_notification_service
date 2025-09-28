@@ -55,7 +55,7 @@ void AsyncCompleteCallbackNapiGetAllActiveNotifications(napi_env env, napi_statu
                 napi_set_element(env, arr, count, notificationResult);
                 count++;
             }
-            ANS_LOGI("count=%{public}d", count);
+            ANS_LOGD("getAllActiveNotifications count=%{public}d", count);
             result = arr;
             if ((count == 0) && (asynccallbackinfo->notifications.size() > 0)) {
                 asynccallbackinfo->info.errorCode = ERROR;
@@ -153,7 +153,7 @@ void AsyncCompleteCallbackNapiGetActiveNotifications(napi_env env, napi_status s
                 napi_set_element(env, arr, count, requestResult);
                 count++;
             }
-            ANS_LOGI("count=%{public}d", count);
+            ANS_LOGD("getActiveNotifications count=%{public}d", count);
             result = arr;
             if ((count == 0) && (asynccallbackinfo->requests.size() > 0)) {
                 asynccallbackinfo->info.errorCode = ERROR;
@@ -278,7 +278,7 @@ napi_value NapiGetActiveNotificationCount(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::GetActiveNotificationNums(asynccallbackinfo->num);
-                ANS_LOGI("count=%{public}" PRIu64 "", asynccallbackinfo->num);
+                ANS_LOGD("getActiveNotificationCount count=%{public}" PRIu64 "", asynccallbackinfo->num);
             }
         },
         AsyncCompleteCallbackNapiGetActiveNotificationCount,
