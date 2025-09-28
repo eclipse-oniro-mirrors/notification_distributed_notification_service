@@ -243,15 +243,15 @@ void SmartReminderCenter::ParseReminderFilterCode(
 bool SmartReminderCenter::IsCollaborationAllowed(const sptr<NotificationRequest>& request) const
 {
     if (!request->IsSystemApp()) {
-        ANS_LOGI("IsSystemApp <%{public}d> allowed to collaborate.", request->IsSystemApp());
+        ANS_LOGD("IsSystemApp <%{public}d> allowed to collaborate.", request->IsSystemApp());
         return true;
     }
     if (request->IsNotDistributed()) {
-        ANS_LOGI("IsNotDistributed <%{public}d> not allowed to collaborate", request->IsNotDistributed());
+        ANS_LOGW("IsNotDistributed <%{public}d> not allowed to collaborate", request->IsNotDistributed());
         return false;
     }
     if (request->IsForceDistributed()) {
-        ANS_LOGI("IsForceDistributed <%{public}d> allowed to collaborate", request->IsForceDistributed());
+        ANS_LOGD("IsForceDistributed <%{public}d> allowed to collaborate", request->IsForceDistributed());
         return true;
     }
     return !DelayedSingleton<NotificationConfigParse>::GetInstance()->IsInCollaborationFilter(
@@ -282,6 +282,7 @@ void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest
         defaultFlag = iter->second;
     }
     if (!IsCollaborationAllowed(request)) {
+        ANS_LOGW("collabration not allowed");
         request->SetDeviceFlags(notificationFlagsOfDevices);
         return;
     }
@@ -321,7 +322,7 @@ void SmartReminderCenter::InitValidDevices(
         bool affordConsume = false;
         NotificationSubscriberManager::GetInstance()->IsDeviceTypeAffordConsume(deviceType, request, affordConsume);
         if (!affordConsume) {
-            ANS_LOGI("deviceType = %{public}s", deviceType.c_str());
+            ANS_LOGD("deviceType = %{public}s", deviceType.c_str());
             continue;
         }
 
@@ -355,7 +356,7 @@ void SmartReminderCenter::InitValidDevices(
             if (NotificationConstant::SlotType::SOCIAL_COMMUNICATION != request->GetSlotType() &&
                 NotificationConstant::SlotType::SERVICE_REMINDER != request->GetSlotType() &&
                 NotificationConstant::SlotType::CUSTOMER_SERVICE != request->GetSlotType()) {
-                ANS_LOGI("unaffect slot");
+                ANS_LOGD("unaffect slot");
                 continue;
             }
             bool appSwitch = GetAppSwitch(deviceType, request->GetOwnerBundleName(), request->GetOwnerUid());

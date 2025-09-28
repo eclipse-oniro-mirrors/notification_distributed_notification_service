@@ -109,12 +109,11 @@ ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
 
 void AdvancedNotificationService::SetCollaborateReminderFlag(const sptr<NotificationRequest> &request)
 {
-    ANS_LOGI("Before %{public}s", request->GetKey().c_str());
     auto flags = std::make_shared<NotificationFlags>();
     flags->SetReminderFlags(request->GetCollaboratedReminderFlag());
     request->SetFlags(flags);
-    ANS_LOGI("SetFlags %{public}d %{public}d", flags->GetReminderFlags(),
-        request->GetCollaboratedReminderFlag());
+    ANS_LOGI("CollaborateReminder %{public}s SetFlags %{public}d %{public}d", request->GetKey().c_str(),
+        flags->GetReminderFlags(), request->GetCollaboratedReminderFlag());
 }
 
 void AdvancedNotificationService::UpdateCollaborateTimerInfo(const std::shared_ptr<NotificationRecord> &record)
@@ -397,7 +396,7 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
     if (!repeat_ret) {
         ANS_LOGE("Query focus mode repeat callers enable fail.");
     }
-    ANS_LOGI("IsNeedSilent: policy: %{public}s, repeat: %{public}s, callerType: %{public}d",
+    ANS_LOGI("IsNeedSilent policy:%{public}s,repeat:%{public}s,callerType:%{public}d",
         policy.c_str(), repeat_call.c_str(), callerType);
     if (repeat_call == FOCUS_MODE_REPEAT_CALLERS_ENABLE && callerType == 0 &&
         atoi(policy.c_str()) != ContactPolicy::ALLOW_EVERYONE && datashareHelper->isRepeatCall(phoneNumber)) {
@@ -423,7 +422,7 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
             isNeedSilent = isAccountVerified ? QueryContactByProfileId(phoneNumber, policy, userId) : 1;
             break;
     }
-    ANS_LOGI("CheckNeedSilent isNeedSilent:%{public}d isAccountVerified:%{public}d", isNeedSilent, isAccountVerified);
+    ANS_LOGI("CheckNeedSilent isNeedSilent:%{public}d,isAccountVerified:%{public}d", isNeedSilent, isAccountVerified);
     return isNeedSilent;
 }
 
@@ -1325,7 +1324,7 @@ ErrCode AdvancedNotificationService::SetHashCodeRule(const uint32_t type)
         return ERR_ANS_PERMISSION_DENIED;
     }
     ErrCode result = NotificationPreferences::GetInstance()->SetHashCodeRule(uid, type);
-    ANS_LOGI("uid = %{public}d type = %{public}d, result = %{public}d", uid, type, result);
+    ANS_LOGI("SetHashCodeRule uid=%{public}d,type=%{public}d,result=%{public}d", uid, type, result);
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
 

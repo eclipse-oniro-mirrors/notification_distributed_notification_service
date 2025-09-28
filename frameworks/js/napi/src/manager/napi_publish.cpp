@@ -96,14 +96,14 @@ napi_value NapiShowNotification(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     ParametersInfoPublish params;
     if (ParseShowOptions(env, info, params) == nullptr) {
-        ANS_LOGW("parse showOptions failed");
+        ANS_LOGD("parse showOptions failed");
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoPublish {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
-        ANS_LOGW("null asynccallbackinfo");
+        ANS_LOGD("null asynccallbackinfo");
         return Common::JSParaError(env, params.callback);
     }
     asynccallbackinfo->request = params.request;
@@ -200,7 +200,7 @@ napi_value NapiPublishAsBundle(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
-            ANS_LOGI("PublishAsBundle napi_create_async_work complete end");
+            ANS_LOGD("PublishAsBundle napi_create_async_work complete end");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);

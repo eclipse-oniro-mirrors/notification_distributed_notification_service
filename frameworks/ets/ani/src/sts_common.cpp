@@ -290,7 +290,7 @@ ani_status GetPropertyNumberArray(ani_env *env, ani_object param, const char *na
 
     status = env->Object_GetPropertyByName_Double(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
-        ANS_LOGI("status : %{public}d", status);
+        ANS_LOGE("status : %{public}d", status);
         return status;
     }
 
@@ -299,14 +299,14 @@ ani_status GetPropertyNumberArray(ani_env *env, ani_object param, const char *na
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
             "$_get", "I:Lstd/core/Object;", &numEntryRef, (ani_int)i);
         if (status != ANI_OK) {
-            ANS_LOGI("status : %{public}d, index: %{public}d", status, i);
+            ANS_LOGE("status : %{public}d, index: %{public}d", status, i);
             return status;
         }
         ani_double doubleValue = 0.0;
         status = env->Object_CallMethodByName_Double(static_cast<ani_object>(numEntryRef), "unboxed",
             ":D", &doubleValue);
         if (status != ANI_OK) {
-            ANS_LOGI("Object_CallMethodByName_Double uid fail, status: %{public}d", status);
+            ANS_LOGE("Object_CallMethodByName_Double uid fail, status: %{public}d", status);
             return status;
         }
         res.push_back(static_cast<int64_t>(doubleValue));

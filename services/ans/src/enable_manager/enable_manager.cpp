@@ -72,7 +72,7 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
 
 ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string& bundleName, int32_t uid)
 {
-    ANS_LOGI("bundleName = %{public}s uid = %{public}d", bundleName.c_str(), uid);
+    ANS_LOGI("requestEnableNotification bundle=%{public}s uid=%{public}d", bundleName.c_str(), uid);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
@@ -105,7 +105,7 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
     const bool innerLake,
     const bool easyAbroad)
 {
-    ANS_LOGI("%{public}s", __FUNCTION__);
+    ANS_LOGD("%{public}s", __FUNCTION__);
     ErrCode result = ERR_OK;
     // To get the permission
     bool allowedNotify = false;
@@ -123,7 +123,7 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERROR_INTERNAL_ERROR;
     }
-    ANS_LOGI("allowedNotify = %{public}d, bundle = %{public}s", allowedNotify,
+    ANS_LOGI("allowedNotify=%{public}d, bundle=%{public}s", allowedNotify,
         bundleOption->GetBundleName().c_str());
     if (allowedNotify) {
         message.ErrorCode(ERR_OK).Append(" Allow success");
@@ -319,7 +319,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundleImpl
         // Remote device
     }
 
-    ANS_LOGI("%{public}s_%{public}d, deviceId: %{public}s, state: %{public}s, "
+    ANS_LOGI("set enable for special bundle %{public}s_%{public}d, deviceId: %{public}s, state: %{public}s, "
         "result: %{public}d", bundleOption->GetBundleName().c_str(),
         bundleOption->GetUid(), StringAnonymous(deviceId).c_str(),
         std::to_string(static_cast<int32_t>(state)).c_str(), result);
@@ -352,7 +352,7 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERROR_INTERNAL_ERROR;
     }
-    ANS_LOGI("allowedNotify = %{public}d, bundle = %{public}s", allowedNotify,
+    ANS_LOGI("allowedNotify=%{public}d, bundle=%{public}s", allowedNotify,
         bundleOption->GetBundleName().c_str());
     if (allowedNotify) {
         message.ErrorCode(ERR_OK).Append(" Allow success");

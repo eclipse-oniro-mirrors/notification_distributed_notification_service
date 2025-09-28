@@ -93,7 +93,7 @@ ErrCode AnsNotification::AddNotificationSlots(const std::vector<NotificationSlot
 
 ErrCode AnsNotification::RemoveNotificationSlot(const NotificationConstant::SlotType &slotType)
 {
-    ANS_LOGI("slotType:%{public}d", slotType);
+    ANS_LOGI("remove slotType:%{public}d", slotType);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -194,7 +194,7 @@ ErrCode AnsNotification::SetNotificationSlotFlagsAsBundle(const NotificationBund
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
     }
-    ANS_LOGI("bundleName:%{public}s, %{public}d", bundleOption.GetBundleName().c_str(), (int)slotFlags);
+    ANS_LOGI("set slotFlags bundleName:%{public}s, %{public}d", bundleOption.GetBundleName().c_str(), (int)slotFlags);
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
@@ -229,7 +229,7 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
     const std::string &instanceKey)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    ANS_LOGI("notificationId:%{public}u", request.GetNotificationId());
+    ANS_LOGI("publish id:%{public}u label:%{public}s", request.GetNotificationId(), label.c_str());
 
     if (request.GetContent() == nullptr || request.GetNotificationType() == NotificationContent::Type::NONE) {
         ANS_LOGE("Refuse to publish the notification without valid content");
@@ -282,7 +282,7 @@ ErrCode AnsNotification::PublishNotificationForIndirectProxy(const NotificationR
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     TraceChainUtil traceChain = TraceChainUtil();
-    ANS_LOGI("notificationId:%{public}u", request.GetNotificationId());
+    ANS_LOGI("publish indirectProxy id:%{public}u", request.GetNotificationId());
 
     if (request.GetContent() == nullptr || request.GetNotificationType() == NotificationContent::Type::NONE) {
         ANS_LOGE("Refuse to publish the notification without valid content");
@@ -338,7 +338,7 @@ ErrCode AnsNotification::CancelNotification(int32_t notificationId, const std::s
 ErrCode AnsNotification::CancelNotification(const std::string &label, int32_t notificationId,
     const std::string &instanceKey)
 {
-    ANS_LOGI("notificationId:%{public}d", notificationId);
+    ANS_LOGI("cancel id:%{public}d label:%{public}s", notificationId, label.c_str());
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
@@ -350,7 +350,7 @@ ErrCode AnsNotification::CancelNotification(const std::string &label, int32_t no
 
 ErrCode AnsNotification::CancelAllNotifications(const std::string &instanceKey)
 {
-    ANS_LOGI("called");
+    ANS_LOGI("cancel all");
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
@@ -363,7 +363,7 @@ ErrCode AnsNotification::CancelAllNotifications(const std::string &instanceKey)
 ErrCode AnsNotification::CancelAsBundle(
     int32_t notificationId, const std::string &representativeBundle, int32_t userId)
 {
-    ANS_LOGI("notificationId:%{public}d", notificationId);
+    ANS_LOGI("cancel id:%{public}d, %{public}s %{public}d", notificationId, representativeBundle.c_str(), userId);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -375,7 +375,7 @@ ErrCode AnsNotification::CancelAsBundle(
 ErrCode AnsNotification::CancelAsBundle(
     const NotificationBundleOption &bundleOption, int32_t notificationId)
 {
-    ANS_LOGI("notificationId:%{public}d", notificationId);
+    ANS_LOGI("cancel id:%{public}d %{public}s", notificationId, bundleOption.GetBundleName().c_str());
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -424,7 +424,7 @@ ErrCode AnsNotification::CanPublishNotificationAsBundle(const std::string &repre
 ErrCode AnsNotification::PublishNotificationAsBundle(
     const std::string &representativeBundle, const NotificationRequest &request)
 {
-    ANS_LOGI("Bundle:%{public}s, notificationId:%{public}u",
+    ANS_LOGI("publish Bundle:%{public}s, id:%{public}u",
         representativeBundle.c_str(), request.GetNotificationId());
     if (representativeBundle.empty()) {
         ANS_LOGE("Refuse to publish the notification whit invalid representativeBundle");
@@ -826,7 +826,7 @@ ErrCode AnsNotification::TriggerLocalLiveView(const NotificationBundleOption &bu
         ANS_LOGE("Invalid button name.");
         return ERR_ANS_INVALID_PARAM;
     }
-    ANS_LOGI("notificationId:%{public}u,bundleName:%{public}s,button:%{public}s",
+    ANS_LOGI("trigger liveview id:%{public}u,bundleName:%{public}s,button:%{public}s",
         notificationId, bundleOption.GetBundleName().c_str(), buttonOption.GetButtonName().c_str());
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
@@ -846,7 +846,7 @@ ErrCode AnsNotification::TriggerLocalLiveView(const NotificationBundleOption &bu
 
 ErrCode AnsNotification::RemoveNotification(const std::string &key, int32_t removeReason)
 {
-    ANS_LOGI("key:%{public}s,removeReason:%{public}d", key.c_str(), removeReason);
+    ANS_LOGI("remove key:%{public}s,reason:%{public}d", key.c_str(), removeReason);
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (key.empty()) {
         ANS_LOGW("Input key is empty.");
@@ -864,7 +864,7 @@ ErrCode AnsNotification::RemoveNotification(const std::string &key, int32_t remo
 ErrCode AnsNotification::RemoveNotification(const NotificationBundleOption &bundleOption,
     const int32_t notificationId, const std::string &label, int32_t removeReason)
 {
-    ANS_LOGI("notificationId:%{public}d,bundle:%{public}s,reason:%{public}d label:%{public}s",
+    ANS_LOGI("remove id:%{public}d,bundle:%{public}s,reason:%{public}d label:%{public}s",
         notificationId, bundleOption.GetBundleName().c_str(), removeReason, label.c_str());
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (bundleOption.GetBundleName().empty()) {
@@ -888,7 +888,7 @@ ErrCode AnsNotification::RemoveNotification(const NotificationBundleOption &bund
 
 ErrCode AnsNotification::RemoveAllNotifications(const NotificationBundleOption &bundleOption)
 {
-    ANS_LOGI("bundleName:%{public}s", bundleOption.GetBundleName().c_str());
+    ANS_LOGI("remove all bundleName:%{public}s", bundleOption.GetBundleName().c_str());
     if (bundleOption.GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
@@ -910,7 +910,7 @@ ErrCode AnsNotification::RemoveAllNotifications(const NotificationBundleOption &
 
 ErrCode AnsNotification::RemoveNotifications(const std::vector<std::string> hashcodes, int32_t removeReason)
 {
-    ANS_LOGI("removeReason:%{public}d", removeReason);
+    ANS_LOGI("remove removeReason:%{public}d", removeReason);
     if (hashcodes.empty()) {
         ANS_LOGE("Hashcodes is empty");
         return ERR_ANS_INVALID_PARAM;
@@ -942,7 +942,7 @@ ErrCode AnsNotification::RemoveDistributedNotifications(const std::vector<std::s
 
 ErrCode AnsNotification::RemoveNotificationsByBundle(const NotificationBundleOption &bundleOption)
 {
-    ANS_LOGI("bundleName:%{public}s", bundleOption.GetBundleName().c_str());
+    ANS_LOGI("remove bundleName:%{public}s", bundleOption.GetBundleName().c_str());
     if (bundleOption.GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
@@ -1223,7 +1223,7 @@ ErrCode AnsNotification::GetShowBadgeEnabled(bool &enabled)
 
 ErrCode AnsNotification::CancelGroup(const std::string &groupName, const std::string &instanceKey)
 {
-    ANS_LOGI("groupName:%{public}s", groupName.c_str());
+    ANS_LOGI("cancel groupName:%{public}s", groupName.c_str());
     if (groupName.empty()) {
         ANS_LOGE("Invalid group name.");
         return ERR_ANS_INVALID_PARAM;
@@ -1240,7 +1240,7 @@ ErrCode AnsNotification::CancelGroup(const std::string &groupName, const std::st
 ErrCode AnsNotification::RemoveGroupByBundle(
     const NotificationBundleOption &bundleOption, const std::string &groupName)
 {
-    ANS_LOGI("bundleName:%{public}s", bundleOption.GetBundleName().c_str());
+    ANS_LOGI("remove group bundleName:%{public}s", bundleOption.GetBundleName().c_str());
     if (bundleOption.GetBundleName().empty() || groupName.empty()) {
         ANS_LOGE("Invalid parameter.");
         return ERR_ANS_INVALID_PARAM;
@@ -1413,7 +1413,7 @@ ErrCode AnsNotification::PublishContinuousTaskNotification(const NotificationReq
 
 ErrCode AnsNotification::CancelContinuousTaskNotification(const std::string &label, int32_t notificationId)
 {
-    ANS_LOGI("notificationId:%{public}d", notificationId);
+    ANS_LOGI("cancel ContinuousTas id:%{public}d", notificationId);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -1917,7 +1917,7 @@ ErrCode AnsNotification::SetBadgeNumberForDhByBundle(
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ANS_LOGI("info:%{public}s %{public}d %{public}d",
+    ANS_LOGI("set badgeNumber bundle:%{public}s %{public}d %{public}d",
         bundleOption.GetBundleName().c_str(), bundleOption.GetUid(), badgeNumber);
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
@@ -2244,7 +2244,7 @@ ErrCode AnsNotification::IsDistributedEnabledBySlot(
 
 ErrCode AnsNotification::CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id)
 {
-    ANS_LOGI("bundleName:%{public}s,id:%{public}d",
+    ANS_LOGI("cancelWithAgent bundleName:%{public}s,id:%{public}d",
         bundleOption.GetBundleName().c_str(), id);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
@@ -2502,7 +2502,7 @@ ErrCode AnsNotification::ReplyDistributeOperation(const std::string& hashCode, c
 ErrCode AnsNotification::GetNotificationRequestByHashCode(
     const std::string& hashCode, sptr<NotificationRequest>& notificationRequest)
 {
-    ANS_LOGI("hashCode:%{public}s", hashCode.c_str());
+    ANS_LOGI("get by hashCode:%{public}s", hashCode.c_str());
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
@@ -2516,7 +2516,7 @@ ErrCode AnsNotification::GetNotificationRequestByHashCode(
 ErrCode AnsNotification::SetHashCodeRule(
     const uint32_t type)
 {
-    ANS_LOGI("type:%{public}d", type);
+    ANS_LOGI("setHashCodeRule type:%{public}d", type);
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();

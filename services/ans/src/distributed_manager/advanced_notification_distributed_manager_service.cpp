@@ -710,7 +710,8 @@ ErrCode AdvancedNotificationService::SetDistributedBundleOption(
     }
 
     std::vector<sptr<DistributedBundleOption>> affectBundleOption;
-    for (auto distributedBundle : bundles) {
+    ANS_LOGD("deviceType: %{public}s",  deviceType.c_str());
+    for (auto &distributedBundle : bundles) {
         std::string bundleName = distributedBundle->GetBundle()->GetBundleName();
         if (bundleName.empty()) {
             ANS_LOGW("unaffet bundle. empty bundle");
@@ -773,7 +774,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
     ANS_LOGD("%{public}s", __FUNCTION__);
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGW("Not system app or SA!");
+        ANS_LOGD("Not system app or SA!");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
@@ -786,6 +787,8 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
         enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON
         : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
 
+    ANS_LOGI("SetDistributedEnabled deviceType:%{public}s,enabled:%{public}s,result:%{public}d",
+        deviceType.c_str(), std::to_string(enabled).c_str(), result);
     if (deviceType == NotificationConstant::LITEWEARABLE_DEVICE_TYPE) {
         return result;
     }
@@ -818,7 +821,7 @@ ErrCode AdvancedNotificationService::IsDistributedEnabled(const std::string &dev
     ANS_LOGD("%{public}s", __FUNCTION__);
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGW("Not system app or SA!");
+        ANS_LOGE("Not system app or SA!");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
@@ -919,7 +922,7 @@ ErrCode AdvancedNotificationService::GetDistributedDevicelist(std::vector<std::s
     ANS_LOGD("%{public}s", __FUNCTION__);
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGW("Not system app or SA!");
+        ANS_LOGE("Not system app or SA!");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 

@@ -47,7 +47,7 @@ DhNotificationCloneBundle::~DhNotificationCloneBundle()
 
 ErrCode DhNotificationCloneBundle::OnBackup(nlohmann::json &jsonObject)
 {
-    ANS_LOGI("called");
+    ANS_LOGI("DhNotificationCloneBundle OnBackup");
     std::vector<NotificationCloneBundleInfo> cloneBundles;
     NotificationPreferences::GetInstance()->GetAllCLoneBundlesInfo(ZERO_USERID, cloneBundles);
 
@@ -68,7 +68,7 @@ ErrCode DhNotificationCloneBundle::OnBackup(nlohmann::json &jsonObject)
 
 void DhNotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
 {
-    ANS_LOGI("called");
+    ANS_LOGI("DhNotificationCloneBundle OnRestore");
     if (jsonObject.is_null() || !jsonObject.is_array()) {
         ANS_LOGI("dh Notification bundle list is null or not array.");
         return;
@@ -92,9 +92,9 @@ void DhNotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
 
     NotificationPreferences::GetInstance()->UpdateBatchCloneBundleInfo(ZERO_USERID, bundlesInfo_);
     for (auto bundle = bundlesInfo_.begin(); bundle != bundlesInfo_.end(); bundle++) {
-        ANS_LOGI("Event dh bundle left %{public}s.", bundle->Dump().c_str());
+        ANS_LOGD("Event dh bundle left %{public}s.", bundle->Dump().c_str());
     }
-    ANS_LOGI("dh Notification bundle list on restore end.");
+    ANS_LOGD("dh Notification bundle list on restore end.");
 }
 
 void DhNotificationCloneBundle::OnRestoreStart(const std::string bundleName, int32_t appIndex,
@@ -117,7 +117,7 @@ void DhNotificationCloneBundle::OnRestoreStart(const std::string bundleName, int
         }
         bundle++;
     }
-    ANS_LOGI("Event dh bundle left %{public}zu.", bundlesInfo_.size());
+    ANS_LOGD("Event dh bundle left %{public}zu.", bundlesInfo_.size());
 }
 
 void DhNotificationCloneBundle::OnUserSwitch(int32_t userId)
@@ -132,7 +132,7 @@ void DhNotificationCloneBundle::OnUserSwitch(int32_t userId)
         bundlesInfo_.clear();
         NotificationPreferences::GetInstance()->GetAllCloneBundleInfo(ZERO_USERID, bundlesInfo_);
         for (auto bundle = bundlesInfo_.begin(); bundle != bundlesInfo_.end(); bundle++) {
-            ANS_LOGI("Event dh bundle OnUserSwitch %{public}s.", bundle->Dump().c_str());
+            ANS_LOGD("Event dh bundle OnUserSwitch %{public}s.", bundle->Dump().c_str());
         }
     }));
 }

@@ -128,11 +128,10 @@ napi_value Publish(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("Publish napi_create_async_work start");
+            ANS_LOGD("Publish napi_create_async_work start");
             AsyncCallbackInfoPublish *asynccallbackinfo = static_cast<AsyncCallbackInfoPublish *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("Publish napi_create_async_work start notificationId = %{public}d, contentType = "
-                        "%{public}d",
+                ANS_LOGI("Publish notificationId=%{public}d, contentType=%{public}d",
                     asynccallbackinfo->request.GetNotificationId(),
                     asynccallbackinfo->request.GetContent()->GetContentType());
 
@@ -141,7 +140,7 @@ napi_value Publish(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("Publish napi_create_async_work complete start");
+            ANS_LOGD("Publish napi_create_async_work complete start");
             AsyncCallbackInfoPublish *asynccallbackinfo = static_cast<AsyncCallbackInfoPublish *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -204,7 +203,7 @@ napi_value GetStringProperty(
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
-    ANS_LOGI("normal::%{public}s = %{public}s", property.c_str(), str);
+    ANS_LOGD("normal::%{public}s = %{public}s", property.c_str(), str);
     result = str;
     return Common::NapiGetNull(env);
 }
@@ -328,7 +327,7 @@ napi_value ShowNotification(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "show", NAPI_AUTO_LENGTH, &resourceName);
 
-    ANS_LOGI("before napi_create_async_work");
+    ANS_LOGD("before napi_create_async_work");
     napi_create_async_work(env,
         nullptr,
         resourceName,
@@ -336,8 +335,7 @@ napi_value ShowNotification(napi_env env, napi_callback_info info)
             ANS_LOGD("ShowNotification work excute.");
             AsyncCallbackInfoPublish *asynccallbackinfo = static_cast<AsyncCallbackInfoPublish *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("Show napi_create_async_work start notificationId = %{public}d, contentType = "
-                        "%{public}d",
+                ANS_LOGI("ShowNotification notificationId=%{public}d,contentType=%{public}d",
                     asynccallbackinfo->request.GetNotificationId(),
                     asynccallbackinfo->request.GetContent()->GetContentType());
 
@@ -356,7 +354,7 @@ napi_value ShowNotification(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
-            ANS_LOGI("Show napi_create_async_work complete end");
+            ANS_LOGD("Show napi_create_async_work complete end");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
@@ -374,7 +372,7 @@ napi_value ParsePublishAsBundleParameters(
     napi_value argv[PUBLISH_AS_BUNDLE_MAX] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
     if (argc < 1) {
-        ANS_LOGW("Wrong number of arguments");
+        ANS_LOGD("Wrong number of arguments");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -489,8 +487,7 @@ napi_value PublishAsBundle(napi_env env, napi_callback_info info)
             ANS_LOGD("PublishAsBundle work excute.");
             AsyncCallbackInfoPublish *asynccallbackinfo = static_cast<AsyncCallbackInfoPublish *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("PublishAsBundle napi_create_async_work start notificationId = %{public}d, contentType = "
-                        "%{public}d",
+                ANS_LOGI("PublishAsBundle notificationId=%{public}d,contentType=%{public}d",
                     asynccallbackinfo->request.GetNotificationId(),
                     asynccallbackinfo->request.GetContent()->GetContentType());
 

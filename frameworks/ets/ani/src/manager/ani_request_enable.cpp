@@ -68,8 +68,7 @@ void RequestEnableExecute(std::shared_ptr<EnableNotificationInfo> &info)
         bool canPop = false;
         std::string bundleName = "";
         ErrCode errCode = NotificationHelper::CanPopEnableNotificationDialog(client, canPop, bundleName);
-        ANS_LOGI("CanPopEnableNotificationDialog  result , errCode = %{public}d , canPop = %{public}d",
-            errCode, canPop);
+        ANS_LOGI("errCode=%{public}d,canPop=%{public}d", errCode, canPop);
         if (canPop == false) {
             info->errorCode = errCode;
             AnsDialogHostClient::Destroy();
@@ -81,7 +80,7 @@ void RequestEnableExecute(std::shared_ptr<EnableNotificationInfo> &info)
         std::string deviceId {""};
         info->errorCode = NotificationHelper::RequestEnableNotification(deviceId, client, info->callerToken);
     }
-    ANS_LOGI("ipcCall done, code is %{public}d.", info->errorCode);
+    ANS_LOGI("request enable, code:%{public}d.", info->errorCode);
 }
 
 void StsAsyncCompleteCallbackRequestEnableNotification(ani_env *env, std::shared_ptr<EnableNotificationInfo> info)

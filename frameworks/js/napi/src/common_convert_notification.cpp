@@ -56,7 +56,7 @@ napi_value Common::SetNotificationByDistributedOptions(
     std::vector<std::string> displayDevices = options.GetDevicesSupportDisplay();
     for (auto vec : displayDevices) {
         napi_value vecValue = nullptr;
-        ANS_LOGI("supportDisplayDevices = %{public}s", vec.c_str());
+        ANS_LOGD("supportDisplayDevices = %{public}s", vec.c_str());
         napi_create_string_utf8(env, vec.c_str(), NAPI_AUTO_LENGTH, &vecValue);
         napi_set_element(env, arrSupportDisplayDevices, count, vecValue);
         count++;
@@ -70,7 +70,7 @@ napi_value Common::SetNotificationByDistributedOptions(
     std::vector<std::string> operateDevices = options.GetDevicesSupportOperate();
     for (auto vec : operateDevices) {
         napi_value vecValue = nullptr;
-        ANS_LOGI("supportOperateDevices  = %{public}s", vec.c_str());
+        ANS_LOGD("supportOperateDevices  = %{public}s", vec.c_str());
         napi_create_string_utf8(env, vec.c_str(), NAPI_AUTO_LENGTH, &vecValue);
         napi_set_element(env, arrSupportOperateDevices, count, vecValue);
         count++;

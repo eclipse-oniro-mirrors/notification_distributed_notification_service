@@ -19,7 +19,7 @@ namespace OHOS {
 namespace NotificationNapi {
 void AsyncCompleteCallbackGetAllActiveNotifications(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("GetAllActiveNotifications napi_create_async_work end");
+    ANS_LOGD("GetAllActiveNotifications napi_create_async_work end");
 
     if (!data) {
         ANS_LOGE("Invalidity async callback data.");
@@ -50,7 +50,7 @@ void AsyncCompleteCallbackGetAllActiveNotifications(napi_env env, napi_status st
                 napi_set_element(env, arr, count, notificationResult);
                 count++;
             }
-            ANS_LOGI("count = %{public}d", count);
+            ANS_LOGD("count = %{public}d", count);
             result = arr;
             if ((count == 0) && (asynccallbackinfo->notifications.size() > 0)) {
                 asynccallbackinfo->info.errorCode = ERROR;
@@ -148,7 +148,7 @@ void AsyncCompleteCallbackGetActiveNotifications(napi_env env, napi_status statu
                 napi_set_element(env, arr, count, requestResult);
                 count++;
             }
-            ANS_LOGI("count = %{public}d", count);
+            ANS_LOGD("count = %{public}d", count);
             result = arr;
             if ((count == 0) && (asynccallbackinfo->requests.size() > 0)) {
                 asynccallbackinfo->info.errorCode = ERROR;
@@ -273,7 +273,7 @@ napi_value GetActiveNotificationCount(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::GetActiveNotificationNums(asynccallbackinfo->num);
-                ANS_LOGI("Get active notification count. count = %{public}" PRIu64 "", asynccallbackinfo->num);
+                ANS_LOGI("Get active notification count,count:%{public}" PRIu64 "", asynccallbackinfo->num);
             }
         },
         AsyncCompleteCallbackGetActiveNotificationCount,

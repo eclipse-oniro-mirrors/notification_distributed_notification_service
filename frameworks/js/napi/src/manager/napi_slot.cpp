@@ -383,7 +383,7 @@ void AsyncCompleteCallbackNapiGetSlots(napi_env env, napi_status status, void *d
                 napi_set_element(env, arr, count, nSlot);
                 count++;
             }
-            ANS_LOGI("count : %{public}zu", count);
+            ANS_LOGD("count : %{public}zu", count);
             result = arr;
             if ((count == 0) && (asynccallbackinfo->slots.size() > 0)) {
                 asynccallbackinfo->info.errorCode = ERROR;
@@ -424,7 +424,7 @@ napi_value NapiGetSlots(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiGetSlots word excute.");
+            ANS_LOGD("NapiGetSlots word excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlots *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationSlots(asynccallbackinfo->slots);

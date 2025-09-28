@@ -183,8 +183,7 @@ napi_value NapiCancelGroup(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiCancelGroup work excute.");
             AsyncCallbackInfoCancelGroup *asynccallbackinfo = static_cast<AsyncCallbackInfoCancelGroup *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("asynccallbackinfo->params.groupName = %{public}s",
-                    asynccallbackinfo->params.groupName.c_str());
+                ANS_LOGI("cancel groupName=%{public}s", asynccallbackinfo->params.groupName.c_str());
                 std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode = NotificationHelper::CancelGroup(
                     asynccallbackinfo->params.groupName, instanceKey);

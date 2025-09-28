@@ -37,7 +37,7 @@ AbilityManagerHelper& AbilityManagerHelper::GetInstance()
 int AbilityManagerHelper::ConnectAbility(const std::string &eventId, const AAFwk::Want &want,
     const std::string& userInputKey, const std::string& userInput)
 {
-    ANS_LOGI("enter, target bundle = %{public}s", want.GetBundle().c_str());
+    ANS_LOGI("ConnectAbility, bundle=%{public}s", want.GetBundle().c_str());
     std::lock_guard<ffrt::mutex> lock(connectionLock_);
     sptr<DistributedOperationConnection> connection =
         new (std::nothrow) DistributedOperationConnection(eventId, userInputKey, userInput);
@@ -49,7 +49,7 @@ int AbilityManagerHelper::ConnectAbility(const std::string &eventId, const AAFwk
     if (result == ERR_OK) {
         operationConnection_[eventId] = connection;
     }
-    ANS_LOGI("Ability manager connect call %{public}d %{public}zu!", result, operationConnection_.size());
+    ANS_LOGD("Ability manager connect call %{public}d %{public}d!", result, (int32_t)(operationConnection_.size()));
     return result;
 }
 
@@ -71,7 +71,7 @@ void AbilityManagerHelper::DisconnectServiceAbility(const std::string &eventId, 
 
         auto ret = AAFwk::AbilityManagerClient::GetInstance()->ReleaseCall(iter->second, element);
         operationConnection_.erase(eventId);
-        ANS_LOGI("Ability manager releas call %{public}d %{public}zu!", ret, operationConnection_.size());
+        ANS_LOGD("Ability manager releas call %{public}d %{public}d!", ret, (int32_t)(operationConnection_.size()));
     };
     operationQueue_->submit(task);
 }

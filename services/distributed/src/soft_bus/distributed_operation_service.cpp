@@ -329,7 +329,7 @@ int32_t DistributedOperationService::OnOperationResponse(
 {
     std::shared_ptr<NotificationResponseBox> responseBox = std::make_shared<NotificationResponseBox>();
     if (operationInfo == nullptr) {
-        ANS_LOGW("Invalid param");
+        ANS_LOGE("Invalid param");
         return ERR_ANS_INVALID_PARAM;
     }
     ANS_LOGI("dans OnResponse %{public}s", operationInfo->Dump().c_str());
@@ -341,7 +341,7 @@ int32_t DistributedOperationService::OnOperationResponse(
     OperationType type = operationInfo->GetOperationType();
     if (type == OperationType::DISTRIBUTE_OPERATION_REPLY) {
         if (!responseBox->SetMessageType(NOTIFICATION_RESPONSE_REPLY_SYNC)) {
-            ANS_LOGW("dans OnResponse SetMessageType failed");
+            ANS_LOGE("dans OnResponse SetMessageType failed");
             return ERR_ANS_TASK_ERR;
         }
         responseBox->SetActionName(operationInfo->GetActionName());
@@ -361,7 +361,7 @@ int32_t DistributedOperationService::OnOperationResponse(
     responseBox->SetOperationEventId(operationInfo->GetEventId());
     responseBox->SetLocalDeviceId(localDevice.deviceId_);
     if (!responseBox->Serialize()) {
-        ANS_LOGW("dans OnResponse serialize failed");
+        ANS_LOGE("dans OnResponse serialize failed");
         return ERR_ANS_TASK_ERR;
     }
 

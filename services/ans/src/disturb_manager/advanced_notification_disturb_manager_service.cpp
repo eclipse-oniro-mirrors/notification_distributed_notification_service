@@ -129,18 +129,18 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDate(const sptr<Notification
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGW("Not system app!");
+        ANS_LOGE("Not system app!");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGW("Check permission denied!");
+        ANS_LOGE("Check permission denied!");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
-        ANS_LOGW("No active user found!");
+        ANS_LOGE("No active user found!");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
 
@@ -254,7 +254,7 @@ ErrCode AdvancedNotificationService::AddDoNotDisturbProfiles(
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
-        ANS_LOGW("No active user found.");
+        ANS_LOGE("No active user found.");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
     ffrt::task_handle handler =
@@ -283,7 +283,7 @@ ErrCode AdvancedNotificationService::RemoveDoNotDisturbProfiles(
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
-        ANS_LOGW("No active user found.");
+        ANS_LOGE("No active user found.");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
     ffrt::task_handle handler =
@@ -307,7 +307,7 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbProfile(int64_t id, sptr<Not
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
-        ANS_LOGW("No active user found.");
+        ANS_LOGE("No active user found.");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
 

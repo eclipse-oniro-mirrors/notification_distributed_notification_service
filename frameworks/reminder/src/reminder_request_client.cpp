@@ -190,7 +190,7 @@ sptr<IReminderAgentService> ReminderRequestClient::GetReminderServiceProxy()
         }
         auto object = samgrProxy->CheckSystemAbility(REMINDER_AGENT_SERVICE_ID);
         if (object != nullptr) {
-            ANS_LOGI("get service succeeded");
+            ANS_LOGD("get service succeeded");
             proxy_ = iface_cast<IReminderAgentService>(object);
             return proxy_;
         }

@@ -49,7 +49,7 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
         return;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
-        ANS_LOGI("Start recover live view from db. userId:%{public}d", userId);
+        ANS_LOGI("Start recover live view. userId:%{public}d", userId);
         std::vector<NotificationRequestDb> requestsdb;
         if (GetBatchNotificationRequestsFromDb(requestsdb, userId) != ERR_OK) {
             ANS_LOGE("Get liveView from db failed.");
@@ -83,8 +83,7 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
             // Turn off ringtone and vibration during recovery process
             record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false);
             record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
-            ANS_LOGI("SetFlags-Recovery, notificationKey = %{public}s flags = %{public}d",
-                record->request->GetKey().c_str(), record->request->GetFlags()->GetReminderFlags());
+            ANS_LOGD("SetFlags-Recovery,flags = %{public}d", record->request->GetFlags()->GetReminderFlags());
             if (AssignToNotificationList(record) != ERR_OK) {
                 ANS_LOGE("Add notification to record list failed.");
                 continue;
@@ -233,7 +232,7 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
         return ERR_OK;
     }
 
-    ANS_LOGI("Enter.");
+    ANS_LOGD("Enter.");
     auto content = std::static_pointer_cast<NotificationLiveViewContent>(
         request->GetContent()->GetNotificationContent());
     if (request->GetOwnerUid() != DEFAULT_UID) {

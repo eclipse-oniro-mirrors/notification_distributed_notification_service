@@ -204,7 +204,7 @@ bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> co
     config.isWindowModeFollowHost = true;
 
     int32_t sessionId = uiContent->CreateModalUIExtension(want, uiExtensionCallbacks, config);
-    ANS_LOGI("Create end, sessionId: %{public}d", sessionId);
+    ANS_LOGI("CreateSettingUIExtension end, sessionId:%{public}d", sessionId);
     if (sessionId == 0) {
         ANS_LOGE("Create component failed, sessionId is 0");
         return false;
@@ -309,7 +309,7 @@ void CreateExtension(AsyncCallbackInfoOpenSettings* asynccallbackinfo)
     } else {
         ANS_LOGD("un stage mode");
     }
-    ANS_LOGI("errorCode: %{public}d", asynccallbackinfo->info.errorCode);
+    ANS_LOGI("createExtension code:%{public}d", asynccallbackinfo->info.errorCode);
 }
 
 SettingsModalExtensionCallback::SettingsModalExtensionCallback()

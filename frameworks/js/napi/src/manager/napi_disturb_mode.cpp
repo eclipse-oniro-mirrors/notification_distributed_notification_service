@@ -54,7 +54,7 @@ napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
                         asynccallbackinfo->params.date);
                 }
 
-                ANS_LOGI("date=%{public}s errorCode=%{public}d, hasUserId=%{public}d",
+                ANS_LOGI("SetDoNotDisturbDate date=%{public}s,code=%{public}d,hasUserId=%{public}d",
                     asynccallbackinfo->params.date.Dump().c_str(), asynccallbackinfo->info.errorCode,
                     asynccallbackinfo->params.hasUserId);
             }
@@ -242,7 +242,7 @@ napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
                         NotificationHelper::GetDoNotDisturbDate(asynccallbackinfo->date);
                 }
 
-                ANS_LOGI("errorCode=%{public}d date=%{public}s, hasUserId=%{public}d",
+                ANS_LOGI("GetDoNotDisturbDate code=%{public}d,date=%{public}s, hasUserId=%{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->date.Dump().c_str(),
                     asynccallbackinfo->params.hasUserId);
             }
@@ -296,7 +296,7 @@ napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::DoesSupportDoNotDisturbMode(asynccallbackinfo->isSupported);
-                ANS_LOGI("errorCode=%{public}d isSupported=%{public}d",
+                ANS_LOGI("supportDoNotDisturbMode code=%{public}d,isSupported=%{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->isSupported);
             }
         },

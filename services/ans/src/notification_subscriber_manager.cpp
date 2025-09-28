@@ -627,7 +627,7 @@ void NotificationSubscriberManager::NotifyCanceledInner(
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
     std::shared_ptr<NotificationLiveViewContent> liveViewContent = nullptr;
 
-    ANS_LOGI("CancelNotification key = %{public}s", notification->GetKey().c_str());
+    ANS_LOGI("CancelNotification key=%{public}s", notification->GetKey().c_str());
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);
         if (IsSubscribedBysubscriber(record, notification)) {

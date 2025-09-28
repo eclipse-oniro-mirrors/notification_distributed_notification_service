@@ -49,7 +49,7 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
     int type = 0;
     NotificationConstant::DoNotDisturbType outType = NotificationConstant::DoNotDisturbType::NONE;
     napi_get_value_int32(env, value, &type);
-    ANS_LOGI("type is: %{public}d", type);
+    ANS_LOGI("get doNodDistrurbDate type:%{public}d", type);
     if (!AnsEnumUtil::DoNotDisturbTypeJSToC(DoNotDisturbType(type), outType)) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
@@ -459,7 +459,7 @@ napi_value GetDoNotDisturbDate(napi_env env, napi_callback_info info)
                         asynccallbackinfo->date);
                 }
 
-                ANS_LOGI("GetDoNotDisturbDate errorCode=%{public}d date=%{public}s, hasUserId=%{public}d",
+                ANS_LOGI("GetDoNotDisturbDate code=%{public}d,date=%{public}s,,hasUserId=%{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->date.Dump().c_str(),
                     asynccallbackinfo->params.hasUserId);
             }
@@ -512,7 +512,7 @@ napi_value SupportDoNotDisturbMode(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::DoesSupportDoNotDisturbMode(asynccallbackinfo->isSupported);
-                ANS_LOGI("errorCode:%{public}d isSupported:%{public}d",
+                ANS_LOGI("support doNotDisturbMode code:%{public}d supported:%{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->isSupported);
             }
         },
