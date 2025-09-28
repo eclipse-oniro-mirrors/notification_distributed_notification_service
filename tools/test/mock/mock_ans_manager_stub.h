@@ -791,6 +791,23 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ErrCode GetUserGrantedEnabledBundlesForSelf(std::vector<sptr<NotificationBundleOption>>& bundles) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetUserGrantedBundleState(const sptr<NotificationBundleOption>& bundleOption,
+        const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetUserGrantedEnabledBundles(const sptr<NotificationBundleOption>& bundleOption,
+        std::vector<sptr<NotificationBundleOption>>& enabledBundles) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 private:
     std::string cmd_;
     std::string bundle_;

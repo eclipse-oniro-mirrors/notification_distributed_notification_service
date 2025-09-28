@@ -126,6 +126,7 @@ ohos_unittest("notification_preferences_database_test") {
     ".",
     "include",
     "/${services_path}/ans/include",
+    "/${services_path}/ans/include/utils/",
     "${services_path}/ans/test/unittest/mock/include",
     "${services_path}/../framworks/core/include",
     "/${services_path}/ans/include/utils/",
@@ -318,6 +319,7 @@ ohos_unittest("notification_service_test") {
     ".",
     "include",
     "/${services_path}/ans/include",
+    "/${services_path}/ans/include/utils",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
   ]
@@ -418,6 +420,7 @@ ohos_unittest("notification_clone_test") {
     ".",
     "include",
     "/${services_path}/ans/include",
+    "/${services_path}/ans/include/utils/",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
   ]
@@ -734,6 +737,7 @@ ohos_unittest("notification_preferences_test") {
     ".",
     "include",
     "/${services_path}/ans/include",
+    "/${services_path}/ans/include/utils/",
     "${services_path}/ans/include/notification_extension",
     "${services_path}/ans/test/unittest/mock/include",
   ]
@@ -1061,6 +1065,7 @@ ohos_unittest("advanced_notification_service_branch_test") {
     ".",
     "include",
     "/${services_path}/ans/include",
+    "/${services_path}/ans/include/utils/",
     "${services_path}/ans/test/unittest/mock/include",
   ]
 

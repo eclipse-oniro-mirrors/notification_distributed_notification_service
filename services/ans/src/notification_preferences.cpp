@@ -1830,6 +1830,125 @@ ErrCode NotificationPreferences::SetExtensionSubscriptionEnabled(
     return result;
 }
 
+ErrCode NotificationPreferences::GetExtensionSubscriptionBundles(
+    const sptr<NotificationBundleOption>& bundleOption, std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    ANS_LOGD("called");
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle option");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode result = ERR_OK;
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
+        bundleInfo.GetExtensionSubscriptionBundles(bundles);
+    } else {
+        ANS_LOGW("Notification bundle does not exsit.");
+        bundles.clear();
+    }
+    return ERR_OK;
+}
+
+ErrCode NotificationPreferences::SetExtensionSubscriptionBundles(
+    const sptr<NotificationBundleOption>& bundleOption, const std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    ANS_LOGD("called");
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle option");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    if (!GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
+        bundleInfo.SetBundleName(bundleOption->GetBundleName());
+        bundleInfo.SetBundleUid(bundleOption->GetUid());
+        NotificationConstant::SWITCH_STATE defaultState = CheckApiCompatibility(bundleOption) ?
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+        bundleInfo.SetEnableNotification(defaultState);
+    }
+    bundleInfo.SetExtensionSubscriptionBundles(bundles);
+    if (preferncesDB_->PutExtensionSubscriptionBundles(bundleInfo)) {
+        preferencesInfo.SetBundleInfo(bundleInfo);
+        preferencesInfo_ = preferencesInfo;
+        return ERR_OK;
+    } else {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+}
+
+ErrCode NotificationPreferences::AddExtensionSubscriptionBundles(
+    const sptr<NotificationBundleOption>& bundleOption, const std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    ANS_LOGD("called");
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle option");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    if (!GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
+        bundleInfo.SetBundleName(bundleOption->GetBundleName());
+        bundleInfo.SetBundleUid(bundleOption->GetUid());
+        NotificationConstant::SWITCH_STATE defaultState = CheckApiCompatibility(bundleOption) ?
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+        bundleInfo.SetEnableNotification(defaultState);
+    }
+    bundleInfo.AddExtensionSubscriptionBundles(bundles);
+    if (preferncesDB_->PutExtensionSubscriptionBundles(bundleInfo)) {
+        preferencesInfo.SetBundleInfo(bundleInfo);
+        preferencesInfo_ = preferencesInfo;
+        return ERR_OK;
+    } else {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+}
+
+ErrCode NotificationPreferences::RemoveExtensionSubscriptionBundles(
+    const sptr<NotificationBundleOption>& bundleOption, const std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    ANS_LOGD("called");
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle option");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    if (!GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
+        bundleInfo.SetBundleName(bundleOption->GetBundleName());
+        bundleInfo.SetBundleUid(bundleOption->GetUid());
+        NotificationConstant::SWITCH_STATE defaultState = CheckApiCompatibility(bundleOption) ?
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+        bundleInfo.SetEnableNotification(defaultState);
+    }
+    bundleInfo.RemoveExtensionSubscriptionBundles(bundles);
+    if (preferncesDB_->PutExtensionSubscriptionBundles(bundleInfo)) {
+        preferencesInfo.SetBundleInfo(bundleInfo);
+        preferencesInfo_ = preferencesInfo;
+        return ERR_OK;
+    } else {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+}
+
 ErrCode NotificationPreferences::SetSubscriberExistFlag(const std::string& deviceType, bool existFlag)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);

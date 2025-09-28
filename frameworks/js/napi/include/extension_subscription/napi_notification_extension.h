@@ -47,6 +47,8 @@ napi_value NapiGetSubscribeInfo(napi_env env, napi_callback_info info);
 napi_value NapiIsUserGranted(napi_env env, napi_callback_info info);
 napi_value NapiGetUserGrantedState(napi_env env, napi_callback_info info);
 napi_value NapiSetUserGrantedState(napi_env env, napi_callback_info info);
+napi_value NapiGetUserGrantedEnabledBundles(napi_env env, napi_callback_info info);
+napi_value NapiSetUserGrantedBundleState(napi_env env, napi_callback_info info);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_NOTIFICATION_EXTENSION_H
