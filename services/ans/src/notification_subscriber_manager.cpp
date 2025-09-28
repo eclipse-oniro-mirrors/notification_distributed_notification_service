@@ -341,7 +341,10 @@ void NotificationSubscriberManager::OnRemoteDied(const wptr<IRemoteObject> &obje
         if (record != nullptr) {
             auto subscriberUid = record->subscriberUid;
             ANS_LOGI("subscriber removed . subscriberUid = %{public}d", record->subscriberUid);
-            subscriberRecordList_.remove(record);
+            {
+                std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
+                subscriberRecordList_.remove(record);
+            }
             if (record->isSubscribeSelf) {
                 AdvancedNotificationService::GetInstance()->RemoveSystemLiveViewNotificationsOfSa(subscriberUid);
             }
@@ -440,7 +443,6 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
             ANS_LOGE("null record");
             return ERR_ANS_NO_MEMORY;
         }
-        subscriberRecordList_.push_back(record);
 
         record->subscriber->AsObject()->AddDeathRecipient(recipient_);
 
@@ -451,6 +453,11 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
     AddRecordInfo(record, subscribeInfo);
     if (onSubscriberAddCallback_ != nullptr) {
         onSubscriberAddCallback_(record);
+    }
+
+    {
+        std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
+        subscriberRecordList_.push_back(record);
     }
 
     if (subscribeInfo->GetDeviceType() == DEVICE_TYPE_WEARABLE ||
@@ -478,8 +485,10 @@ ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
 
     if (!record->subscribedAll && record->bundleList_.empty()) {
         record->subscriber->AsObject()->RemoveDeathRecipient(recipient_);
-
-        subscriberRecordList_.remove(record);
+        {
+            std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
+            subscriberRecordList_.remove(record);
+        }
         record->subscriber->OnDisconnected();
         ANS_LOGI("subscriber is disconnected.");
     }
@@ -534,6 +543,7 @@ void NotificationSubscriberManager::NotifyConsumedInner(
 bool NotificationSubscriberManager::GetIsEnableEffectedRemind()
 {
     // Ignore the impact of the bundleName and userId for smart reminder switch now.
+    std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
     for (auto record : subscriberRecordList_) {
         if (record->deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) != 0) {
             return true;
@@ -544,6 +554,7 @@ bool NotificationSubscriberManager::GetIsEnableEffectedRemind()
 
 bool NotificationSubscriberManager::IsDeviceTypeSubscriberd(const std::string deviceType)
 {
+    std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
     for (auto record : subscriberRecordList_) {
         if (record->deviceType.compare(deviceType) == 0) {
             return true;
@@ -558,10 +569,18 @@ ErrCode NotificationSubscriberManager::IsDeviceTypeAffordConsume(
     const sptr<NotificationRequest> &request,
     bool &result)
 {
-    for (auto record : subscriberRecordList_) {
-        if (record->deviceType.compare(deviceType) != 0) {
-            continue;
+    std::list<std::shared_ptr<SubscriberRecord>> copySubscriberRecordList;
+    {
+        std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
+        for (auto record : subscriberRecordList_) {
+            if (record->deviceType.compare(deviceType) != 0) {
+                continue;
+            }
+            copySubscriberRecordList.push_back(record);
         }
+    }
+
+    for (auto record : copySubscriberRecordList) {
         sptr<Notification> notification = new (std::nothrow) Notification(request);
         if (notification == nullptr) {
             ANS_LOGE("null notification");
@@ -572,6 +591,7 @@ ErrCode NotificationSubscriberManager::IsDeviceTypeAffordConsume(
             return ERR_OK;
         }
     }
+
     result = false;
     return ERR_OK;
 }
