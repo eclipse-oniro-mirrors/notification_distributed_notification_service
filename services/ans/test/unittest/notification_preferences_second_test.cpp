@@ -315,5 +315,79 @@ HWTEST_F(NotificationPreferencesTest, ClearExtensionSubscriptionInfos_0100, Func
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_TRUE(infos.empty());
 }
+
+/**
+ * @tc.name: GetExtensionSubscriptionEnabled_0100
+ * @tc.desc: Test GetExtensionSubscriptionEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionEnabled_0100, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    auto ret = notificationPreferences.GetExtensionSubscriptionEnabled(nullptr, state);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetExtensionSubscriptionEnabled_0200
+ * @tc.desc: Test GetExtensionSubscriptionEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionEnabled_0200, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("", 100);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    auto ret = notificationPreferences.GetExtensionSubscriptionEnabled(bundleOption, state);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionEnabled_0100
+ * @tc.desc: Test SetExtensionSubscriptionEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionEnabled_0100, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    auto ret = notificationPreferences.SetExtensionSubscriptionEnabled(nullptr,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("", 100);
+    auto ret2 = notificationPreferences.SetExtensionSubscriptionEnabled(bundleOption,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    ASSERT_EQ(ret2, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetExtensionSubscriptionEnabled_0200
+ * @tc.desc: Test SetExtensionSubscriptionEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionEnabled_0200, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
+    
+    auto ret1 = notificationPreferences.SetExtensionSubscriptionEnabled(bundleOption,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    ASSERT_EQ(ret1, ERR_OK);
+    
+    NotificationConstant::SWITCH_STATE state;
+    auto getRet = notificationPreferences.GetExtensionSubscriptionEnabled(bundleOption, state);
+    ASSERT_EQ(getRet, ERR_OK);
+    ASSERT_EQ(state, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+
+    auto ret2 = notificationPreferences.SetExtensionSubscriptionEnabled(
+        bundleOption, NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+    ASSERT_EQ(ret2, ERR_OK);
+
+    NotificationConstant::SWITCH_STATE state2;
+    auto getRet2 = notificationPreferences.GetExtensionSubscriptionEnabled(bundleOption, state2);
+    ASSERT_EQ(getRet2, ERR_OK);
+    ASSERT_EQ(state2, NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+}
 } // namespace Notification
 } // namespace OHOS

@@ -312,5 +312,194 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetSubscribeInfo_0400, F
     ASSERT_EQ(ret, (int)ERR_OK);
 }
 
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00001
+ * @tc.name      : IsUserGranted
+ * @tc.desc      : Test IsUserGranted
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, IsUserGranted_00100, Function | SmallTest | Level1)
+{
+    bool isEnabled = false;
+    MockIsVerfyPermisson(false);
+    ErrCode ret = advancedNotificationService_->IsUserGranted(isEnabled);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00002
+ * @tc.name      : GetUserGrantedState
+ * @tc.desc      : Test GetUserGrantedState
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedState_0100, Function | SmallTest | Level1)
+{
+    bool enabled = false;
+    sptr<NotificationBundleOption> targetBundle = new NotificationBundleOption("test.bundle", 1001);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    ErrCode ret = advancedNotificationService_->GetUserGrantedState(targetBundle, enabled);
+    EXPECT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00003
+ * @tc.name      : GetUserGrantedState_NoPermission
+ * @tc.desc      : Test GetUserGrantedState without permission
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedState_0200, Function | SmallTest | Level1)
+{
+    bool enabled = false;
+    sptr<NotificationBundleOption> targetBundle = new NotificationBundleOption("test.bundle", 1001);
+    
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    
+    ErrCode ret = advancedNotificationService_->GetUserGrantedState(targetBundle, enabled);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00004
+ * @tc.name      : GetUserGrantedState_InvalidBundle
+ * @tc.desc      : Test GetUserGrantedState with invalid bundle
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedState_0300, Function | SmallTest | Level1)
+{
+    bool enabled = false;
+    sptr<NotificationBundleOption> targetBundle = nullptr;
+    
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    
+    ErrCode ret = advancedNotificationService_->GetUserGrantedState(targetBundle, enabled);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00005
+ * @tc.name      : GetUserGrantedState_NullQueue
+ * @tc.desc      : Test GetUserGrantedState with null queue
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedState_0400, Function | SmallTest | Level1)
+{
+    bool enabled = false;
+    sptr<NotificationBundleOption> targetBundle = new NotificationBundleOption("test.bundle", 1001);
+    
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    
+    ErrCode ret = advancedNotificationService_->GetUserGrantedState(targetBundle, enabled);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00006
+ * @tc.name      : GetUserGrantedState_Success
+ * @tc.desc      : Test GetUserGrantedState success case
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedState_0500, Function | SmallTest | Level1)
+{
+    bool enabled = false;
+    sptr<NotificationBundleOption> targetBundle = new NotificationBundleOption("test.bundle", 1001);
+    
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    ErrCode ret = advancedNotificationService_->GetUserGrantedState(targetBundle, enabled);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00007
+ * @tc.name      : SetUserGrantedState_NonSystemApp
+ * @tc.desc      : Test SetUserGrantedState for non-system app
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedState_0100, Function | SmallTest | Level1)
+{
+    bool enabled = true;
+    sptr<NotificationBundleOption> targetBundle = new NotificationBundleOption("test.bundle", 1001);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    ErrCode ret = advancedNotificationService_->SetUserGrantedState(targetBundle, enabled);
+    EXPECT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00008
+ * @tc.name      : SetUserGrantedState_NoPermission
+ * @tc.desc      : Test SetUserGrantedState without permission
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedState_0200, Function | SmallTest | Level1)
+{
+    bool enabled = true;
+    sptr<NotificationBundleOption> targetBundle = new NotificationBundleOption("test.bundle", 1001);
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    
+    ErrCode ret = advancedNotificationService_->SetUserGrantedState(targetBundle, enabled);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00009
+ * @tc.name      : SetUserGrantedState_InvalidBundle
+ * @tc.desc      : Test SetUserGrantedState with invalid bundle
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedState_0300, Function | SmallTest | Level1)
+{
+    bool enabled = true;
+    sptr<NotificationBundleOption> targetBundle = nullptr;
+    
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    
+    ErrCode ret = advancedNotificationService_->SetUserGrantedState(targetBundle, enabled);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00010
+ * @tc.name      : SetUserGrantedState_NullQueue
+ * @tc.desc      : Test SetUserGrantedState with null queue
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedState_0400, Function | SmallTest | Level1)
+{
+    bool enabled = true;
+    sptr<NotificationBundleOption> targetBundle = new NotificationBundleOption("test.bundle", 1001);
+    
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    
+    ErrCode ret = advancedNotificationService_->SetUserGrantedState(targetBundle, enabled);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00011
+ * @tc.name      : SetUserGrantedState_Success
+ * @tc.desc      : Test SetUserGrantedState success case
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedState_0500, Function | SmallTest | Level1)
+{
+    bool enabled = true;
+    sptr<NotificationBundleOption> targetBundle = new NotificationBundleOption("test.bundle", 1001);
+    
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    ErrCode ret = advancedNotificationService_->SetUserGrantedState(targetBundle, enabled);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }
 }

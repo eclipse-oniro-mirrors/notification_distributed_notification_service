@@ -234,6 +234,8 @@ const static std::string KEY_SLOT_AUTH_HINT_CNT = "authHintCnt";
 const static std::string KEY_REMINDER_MODE = "reminderMode";
 
 const static std::string KEY_EXTENSION_SUBSCRIPTION_INFO = "extensionSubscriptionInfo";
+const static std::string KEY_EXTENSION_SUBSCRIPTION_ENABLED = "enableExtensionSubscription";
+
 constexpr char RELATIONSHIP_JSON_KEY_SERVICE[] = "service";
 constexpr char RELATIONSHIP_JSON_KEY_APP[] = "app";
 
@@ -732,6 +734,8 @@ bool NotificationPreferencesDatabase::PutBundlePropertyValueToDisturbeDB(
     GenerateEntry(GenerateBundleKey(bundleKey, KEY_BUNDLE_UID), std::to_string(bundleInfo.GetBundleUid()), values);
     GenerateEntry(GenerateBundleKey(bundleKey, KEY_EXTENSION_SUBSCRIPTION_INFO),
         bundleInfo.GetExtensionSubscriptionInfosJson(), values);
+    GenerateEntry(GenerateBundleKey(bundleKey, KEY_EXTENSION_SUBSCRIPTION_ENABLED),
+        std::to_string(static_cast<int32_t>(bundleInfo.GetExtensionSubscriptionEnabled())), values);
     if (!CheckRdbStore()) {
         ANS_LOGE("null RdbStore");
         return false;
@@ -1069,6 +1073,9 @@ int32_t NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
             ANS_LOGD("Into BUNDLE_SLOTFLGS_TYPE:GenerateBundleKey.");
             keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_SLOTFLGS_TYPE);
             break;
+        case BundleType::BUNDLE_EXTENSION_SUBSCRIPTION_ENABLED_TYPE:
+            keyStr = GenerateBundleKey(bundleKey, KEY_EXTENSION_SUBSCRIPTION_ENABLED);
+            break;
         default:
             break;
     }
@@ -1264,6 +1271,9 @@ void NotificationPreferencesDatabase::ParseBundlePropertyFromDisturbeDB(
     }
     if (typeStr.compare(KEY_EXTENSION_SUBSCRIPTION_INFO) == 0) {
         return ParseBundleExtensionSubscriptionInfos(bundleInfo, valueStr);
+    }
+    if (typeStr.compare(KEY_EXTENSION_SUBSCRIPTION_ENABLED) == 0) {
+        return ParseBundleExtensionSubscriptionEnabled(bundleInfo, valueStr);
     }
 }
 
@@ -1657,6 +1667,13 @@ void NotificationPreferencesDatabase::ParseBundleExtensionSubscriptionInfos(
 {
     ANS_LOGD("ParseBundleExtensionSubscriptionInfos bundle infos: %{public}s.", value.c_str());
     bundleInfo.SetExtensionSubscriptionInfosFromJson(value);
+}
+
+void NotificationPreferencesDatabase::ParseBundleExtensionSubscriptionEnabled(
+    NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
+{
+    ANS_LOGD("ParseBundleExtensionSubscriptionEnabled bundle enabled is %{public}s.", value.c_str());
+    bundleInfo.SetExtensionSubscriptionEnabled(static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(value)));
 }
 
 std::string NotificationPreferencesDatabase::GenerateBundleLablel(
@@ -2630,6 +2647,24 @@ bool NotificationPreferencesDatabase::PutExtensionSubscriptionInfos(
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId);
     int32_t result = rdbDataManager_->InsertData(GenerateBundleKey(bundleKey, KEY_EXTENSION_SUBSCRIPTION_INFO),
         bundleInfo.GetExtensionSubscriptionInfosJson(), userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::PutExtensionSubscriptionEnabled(
+    const NotificationPreferencesInfo::BundleInfo& bundleInfo)
+{
+    if (bundleInfo.GetBundleName().empty()) {
+        ANS_LOGE("Bundle name is null.");
+        return false;
+    }
+
+    if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
+        return false;
+    }
+
+    std::string bundleKey = GenerateBundleLablel(bundleInfo);
+    int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_EXTENSION_SUBSCRIPTION_ENABLED_TYPE,
+        static_cast<int32_t>(bundleInfo.GetExtensionSubscriptionEnabled()), bundleInfo.GetBundleUid());
     return (result == NativeRdb::E_OK);
 }
 

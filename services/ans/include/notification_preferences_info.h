@@ -231,6 +231,8 @@ public:
         std::string GetExtensionSubscriptionInfosJson() const;
         void SetExtensionSubscriptionInfos(const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
         bool SetExtensionSubscriptionInfosFromJson(const std::string& json);
+        NotificationConstant::SWITCH_STATE GetExtensionSubscriptionEnabled() const;
+        void SetExtensionSubscriptionEnabled(NotificationConstant::SWITCH_STATE state);
 
     private:
         std::string bundleName_;
@@ -245,6 +247,8 @@ public:
         std::map<NotificationConstant::SlotType, sptr<NotificationSlot>> slots_;
         std::map<std::string, uint32_t> slotFlagsMap_;
         std::vector<sptr<NotificationExtensionSubscriptionInfo>> extensionSubscriptionInfos_;
+        NotificationConstant::SWITCH_STATE enabledExtensionSubscription_ =
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     };
 
     /*
