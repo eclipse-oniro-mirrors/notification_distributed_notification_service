@@ -1503,6 +1503,8 @@ public:
 
     static NotificationRequest *CollaborationFromJson(const std::string& basicInfo);
 
+    static bool ConvertJsonToTemplate(NotificationRequest *target, const nlohmann::json &jsonObject);
+
     bool IsAtomicServiceNotification();
 
     void SetDistributedFlagBit(

@@ -865,6 +865,11 @@ bool NotificationRequest::CollaborationToJson(std::string& data) const
     jsonObject["appInstanceKey"]    = appInstanceKey_;
     jsonObject["notificationControlFlags"] = notificationControlFlags_;
 
+    if (additionalParams_) {
+        AAFwk::WantParamWrapper wWrapper(*additionalParams_);
+        jsonObject["extraInfo"] = wWrapper.ToString();
+    }
+
     if (agentBundle_ != nullptr) {
         nlohmann::json bundleOptionObj;
         if (!NotificationJsonConverter::ConvertToJson(agentBundle_.get(), bundleOptionObj)) {
@@ -872,6 +877,17 @@ bool NotificationRequest::CollaborationToJson(std::string& data) const
             return false;
         }
         jsonObject["agentBundle"] = bundleOptionObj;
+    }
+
+    if (notificationTemplate_ != nullptr) {
+        nlohmann::json templateOptionObj;
+        templateOptionObj["templateName"] = notificationTemplate_->GetTemplateName();
+        auto params = notificationTemplate_->GetTemplateData();
+        if (params != nullptr) {
+            AAFwk::WantParamWrapper wWrapper(*params);
+            templateOptionObj["templateData"] = wWrapper.ToString();
+        }
+        jsonObject["template"] = templateOptionObj;
     }
     data = jsonObject.dump();
     return true;
@@ -896,11 +912,53 @@ NotificationRequest *NotificationRequest::CollaborationFromJson(const std::strin
         return nullptr;
     }
 
+    const auto &jsonEnd = jsonObject.cend();
+    if (jsonObject.find("extraInfo") != jsonEnd && jsonObject.at("extraInfo").is_string()) {
+        auto extraInfoStr = jsonObject.at("extraInfo").get<std::string>();
+        if (!extraInfoStr.empty()) {
+            AAFwk::WantParams params = AAFwk::WantParamWrapper::ParseWantParams(extraInfoStr);
+            pRequest->additionalParams_ = std::make_shared<AAFwk::WantParams>(params);
+        }
+    }
+
     ConvertJsonToNum(pRequest, jsonObject);
     ConvertJsonToString(pRequest, jsonObject);
     ConvertJsonToBool(pRequest, jsonObject);
     ConvertJsonToAgentBundle(pRequest, jsonObject);
+    ConvertJsonToTemplate(pRequest, jsonObject);
     return pRequest;
+}
+
+bool NotificationRequest::ConvertJsonToTemplate(
+    NotificationRequest *target, const nlohmann::json &jsonObject)
+{
+    if (target == nullptr) {
+        ANS_LOGE("null target");
+        return false;
+    }
+    if (jsonObject.find("template") == jsonObject.cend()) {
+        return true;
+    }
+
+    auto templateOptionObj = jsonObject.at("template");
+    std::shared_ptr<NotificationTemplate> templatePtr = std::make_shared<NotificationTemplate>();
+    if (!templateOptionObj.is_null()) {
+        if (templateOptionObj.find("templateName") != templateOptionObj.cend() &&
+            templateOptionObj.at("templateName").is_string()) {
+            templatePtr->SetTemplateName(templateOptionObj.at("templateName").get<std::string>());
+        }
+        if (templateOptionObj.find("templateData") != templateOptionObj.cend() &&
+            templateOptionObj.at("templateData").is_string()) {
+            std::string data = templateOptionObj.at("templateData").get<std::string>();
+            if (!data.empty()) {
+                AAFwk::WantParams params = AAFwk::WantParamWrapper::ParseWantParams(data);
+                templatePtr->SetTemplateData(std::make_shared<AAFwk::WantParams>(params));
+            }
+        }
+        target->notificationTemplate_ = templatePtr;
+    }
+
+    return true;
 }
 
 bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const

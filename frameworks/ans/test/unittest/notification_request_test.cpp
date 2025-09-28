@@ -27,6 +27,7 @@
 #undef private
 #undef protected
 #include "want_agent_helper.h"
+#include "string_wrapper.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -1207,6 +1208,45 @@ HWTEST_F(NotificationRequestTest, SetArchiveDeadLine_0001, Level1)
     NotificationRequest notificationRequest(myNotificationId);
     notificationRequest.SetArchiveDeadLine(archiveDeadLine);
     EXPECT_EQ(notificationRequest.GetArchiveDeadLine(), 1);
+}
+
+/**
+ * @tc.name: NotificationCollaboration_0100
+ * @tc.desc: GetAdditionalData
+ * @tc.type: FUNC
+ * @tc.require: issueI5RW70
+ */
+HWTEST_F(NotificationRequestTest, NotificationCollaboration_0100, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetAutoDeletedTime(100);
+    notificationRequest.SetGroupName("groupName");
+    notificationRequest.SetLabel("label");
+    notificationRequest.SetClassification("sys");
+    notificationRequest.SetRemoveAllowed(false);
+    notificationRequest.SetTapDismissed(true);
+    notificationRequest.SetInProgress(true);
+    notificationRequest.SetAlertOneTime(true);
+    notificationRequest.SetUnremovable(true);
+
+    std::shared_ptr<AAFwk::WantParams> extras = std::make_shared<AAFwk::WantParams>();
+    extras->SetParam("sys_traceid", AAFwk::String::Box("hi"));
+    notificationRequest.SetAdditionalData(extras);
+
+    auto notificationTemplate = std::make_shared<NotificationTemplate>();
+    notificationTemplate->SetTemplateName("name");
+    std::shared_ptr<AAFwk::WantParams> templateParam = std::make_shared<AAFwk::WantParams>();
+    templateParam->SetParam("sys_traceid", AAFwk::String::Box("hi"));
+    notificationTemplate->SetTemplateData(templateParam);
+    notificationRequest.SetTemplate(notificationTemplate);
+
+    std::string basicInfo;
+    auto result = notificationRequest.CollaborationToJson(basicInfo);
+    EXPECT_EQ(result, true);
+
+    sptr<NotificationRequest> point = NotificationRequest::CollaborationFromJson(basicInfo);
+    EXPECT_EQ(point != nullptr, true);
 }
 } // namespace Notification
 } // namespace OHOS

@@ -20,6 +20,7 @@
 #include "access_token_helper.h"
 
 #include "ipc_skeleton.h"
+#include "os_account_manager_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -148,6 +149,12 @@ ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<s
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+        ANS_LOGD("GetActiveUserId is false");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
@@ -156,10 +163,20 @@ ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<s
         ANS_LOGD("called");
         notifications.clear();
         for (auto record : notificationList_) {
-            if (record->notification != nullptr && record->notification->request_ != nullptr &&
-                record->notification->request_->GetSlotType() == slotType) {
-                notifications.push_back(record->notification);
+            if (record->notification == nullptr || record->notification->request_ == nullptr) {
+                continue;
             }
+            if (record->notification->request_->GetSlotType() != slotType) {
+                continue;
+            }
+
+            int32_t receiver = record->notification->request_->GetReceiverUserId();
+            if (receiver == SUBSCRIBE_USER_INIT || (receiver != 0 && receiver != userId)) {
+                ANS_LOGI("Userid %{public}d %{public}d %{public}s.", receiver, userId,
+                    record->notification->GetKey().c_str());
+                continue;
+            }
+            notifications.push_back(record->notification);
         }
     }));
     notificationSvrQueue_->wait(handler);

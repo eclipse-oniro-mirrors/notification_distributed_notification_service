@@ -1416,6 +1416,35 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetAllNotificationsBySlotType_400,
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    advancedNotificationService_->notificationList_.clear();
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(record);
+
+    auto res = advancedNotificationService_->GetAllNotificationsBySlotType(notifications, slotType);
+
+    ASSERT_EQ(res, (int)ERR_OK);
+    ASSERT_EQ(notifications.size(), 0);
+}
+
+/**
+ * @tc.name: GetAllNotificationsBySlotType_500
+ * @tc.desc: test GetAllNotificationsBySlotType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, GetAllNotificationsBySlotType_500, Function | SmallTest | Level1)
+{
+    std::vector<sptr<Notification>> notifications;
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetReceiverUserId(100);
+    advancedNotificationService_->notificationList_.clear();
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     advancedNotificationService_->AddToNotificationList(record);
 
