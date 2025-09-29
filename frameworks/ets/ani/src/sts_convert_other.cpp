@@ -149,7 +149,7 @@ ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param,
         ANS_LOGE("Object_GetPropertyByName_Int fail. status : %{public}d", status);
         return status;
     }
-    if (maxLen > 0 && length > maxLen) {
+    if (maxLen > 0 && length > static_cast<ani_int>(maxLen)) {
         length = static_cast<ani_int>(maxLen);
     }
     for (int32_t i = 0; i < length; i++) {
@@ -219,7 +219,7 @@ ani_status GetResourceArray(ani_env *env, ani_object param, const char *name,
         ANS_LOGE("Object_GetPropertyByName_Int fail. status : %{public}d", status);
         return status;
     }
-    if (length > maxLen) {
+    if (length > static_cast<ani_int>(maxLen)) {
         length = static_cast<ani_int>(maxLen);
     }
     for (int32_t i = 0; i < length; i++) {
