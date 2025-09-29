@@ -119,7 +119,8 @@ bool WrapBundleOption(ani_env* env,
         return false;
     }
     ani_class bundleCls = nullptr;
-    if (!CreateClassObjByClassName(env, "notification.NotificationCommonDef.BundleOptionInner", bundleCls, bundleObject)
+    if (!CreateClassObjByClassName(env, "notification.NotificationCommonDef.BundleOptionInner",
+        bundleCls, bundleObject)
         || bundleCls == nullptr || bundleObject == nullptr) {
         ANS_LOGE("WrapBundleOption: create BundleOption failed");
         return false;

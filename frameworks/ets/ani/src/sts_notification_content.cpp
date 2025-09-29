@@ -333,7 +333,7 @@ ani_status GetIconButtonArray(ani_env *env, ani_object param, const char *name,
         ANS_LOGE("status : %{public}d", status);
         return status;
     }
-    if (length > maxLen) {
+    if (length > static_cast<ani_int>(maxLen)) {
         length = static_cast<ani_int>(maxLen);
     }
     for (int32_t i = 0; i < length; i++) {
