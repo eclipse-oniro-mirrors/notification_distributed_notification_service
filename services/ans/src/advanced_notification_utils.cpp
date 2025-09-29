@@ -565,7 +565,7 @@ void AdvancedNotificationService::RemoveDoNotDisturbProfileTrustList(
 void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleOption> &bundleOption)
 {
     CHECK_BUNDLE_OPTION_IS_INVALID(bundleOption)
-    ANS_LOGI("called, bundleName:%{public}s", bundleOption->GetBundleName().c_str());
+    ANS_LOGI("bundle added, bundleName:%{public}s", bundleOption->GetBundleName().c_str());
     auto bundleInstall = [bundleOption, this]() {
         CHECK_BUNDLE_OPTION_IS_INVALID(bundleOption)
         AppExecFwk::BundleInfo bundleInfo;
@@ -591,7 +591,7 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
 void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBundleOption> &bundleOption)
 {
     CHECK_BUNDLE_OPTION_IS_INVALID(bundleOption)
-    ANS_LOGI("called, bundleName:%{public}s", bundleOption->GetBundleName().c_str());
+    ANS_LOGI("bundle update, bundleName:%{public}s", bundleOption->GetBundleName().c_str());
     AppExecFwk::BundleInfo bundleInfo;
     if (!GetBundleInfoByNotificationBundleOption(bundleOption, bundleInfo)) {
         ANS_LOGE("Failed to get BundleInfo using NotificationBundleOption.");
@@ -623,7 +623,7 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
 
 void AdvancedNotificationService::OnBootSystemCompleted()
 {
-    ANS_LOGI("Called.");
+    ANS_LOGD("Called.");
     InitNotificationEnableList();
     TryStartReminderAgentService();
 }
@@ -1831,8 +1831,7 @@ void AdvancedNotificationService::CloseAlert(const std::shared_ptr<NotificationR
     record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
     record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
     record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
-    ANS_LOGI("SetFlags-CloseAlert, notificationKey = %{public}s flags = %{public}d",
-        record->request->GetKey().c_str(), record->request->GetFlags()->GetReminderFlags());
+    ANS_LOGI("SetFlags-CloseAlert, flags = %{public}d", record->request->GetFlags()->GetReminderFlags());
 }
 
 bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName)
@@ -2067,7 +2066,7 @@ void AdvancedNotificationService::CheckRemovalWantAgent(const sptr<NotificationR
         bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
         bool isSystemApp = AccessTokenHelper::IsSystemApp();
         if (!isSubsystem && !isSystemApp && operationType != OPERATION_TYPE_COMMON_EVENT) {
-            ANS_LOGI("null SetRemovalWantAgent");
+            ANS_LOGI("SetRemovalWantAgent null");
             request->SetRemovalWantAgent(nullptr);
         }
     }

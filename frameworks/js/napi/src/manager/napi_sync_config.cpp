@@ -143,7 +143,7 @@ napi_value NapiSetAdditionConfig(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiSetAdditionConfig work excute.");
+            ANS_LOGD("NapiSetAdditionConfig work excute.");
             AsyncCallbackInfoConfig *asynccallbackinfo = static_cast<AsyncCallbackInfoConfig *>(data);
             if (asynccallbackinfo) {
                     asynccallbackinfo->info.errorCode = NotificationHelper::SetAdditionConfig(

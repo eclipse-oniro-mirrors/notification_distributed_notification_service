@@ -82,7 +82,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     params.status |= (value & (1 << USING_FLAG));
     params.status |= ((value & (1 << OWNER_FLAG)) << 1);
     params.status |= ((value & (1 << DISTURB_MODE_FLAG)) << 1);
-    ANS_LOGI("Arguments %{public}s %{public}d, %{public}d.", str, value, params.status);
+    ANS_LOGD("Arguments %{public}s %{public}d, %{public}d.", str, value, params.status);
     return Common::NapiGetNull(env);
 }
 
@@ -375,7 +375,7 @@ napi_value IsDistributedEnabled(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::IsDistributedEnabled(asynccallbackinfo->enable);
-                ANS_LOGI("IsDistributedEnabled enable = %{public}d", asynccallbackinfo->enable);
+                ANS_LOGI("IsDistributedEnabled enable=%{public}d", asynccallbackinfo->enable);
             }
         },
         AsyncCompleteCallbackIsDistributedEnabled,
@@ -533,7 +533,7 @@ napi_value EnableDistributedSelf(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, params.callback, asynccallbackinfo->info, promise);
 
-    ANS_LOGI("Create enableDistributedSelf string.");
+    ANS_LOGD("Create enableDistributedSelf string.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "enableDistributedSelf", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -547,7 +547,7 @@ napi_value EnableDistributedSelf(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::EnableDistributedSelf(asynccallbackinfo->params.enable);
-                ANS_LOGI("EnableDistributedSelf enable = %{public}d", asynccallbackinfo->params.enable);
+                ANS_LOGI("EnableDistributedSelf enable=%{public}d", asynccallbackinfo->params.enable);
             }
         },
         [](napi_env env, napi_status status, void *data) {

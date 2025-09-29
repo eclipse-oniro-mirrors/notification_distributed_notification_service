@@ -208,7 +208,7 @@ struct AsyncCallbackInfoGetSlotFlagsByBundle {
 
 napi_value ParseParametersByAddSlot(const napi_env &env, const napi_callback_info &info, ParametersInfoAddSlot &paras)
 {
-    ANS_LOGI("ParseParametersByAddSlot enter");
+    ANS_LOGD("ParseParametersByAddSlot enter");
     size_t argc = ADD_SLOT_MAX_PARA;
     napi_value argv[ADD_SLOT_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
@@ -252,13 +252,13 @@ napi_value ParseParametersByAddSlot(const napi_env &env, const napi_callback_inf
         napi_create_reference(env, argv[PARAM1], 1, &paras.callback);
     }
 
-    ANS_LOGI("ParseParametersByAddSlot OUT");
+    ANS_LOGD("ParseParametersByAddSlot OUT");
     return Common::NapiGetNull(env);
 }
 
 napi_value ParseParametersByAddSlots(const napi_env &env, const napi_callback_info &info, ParametersInfoAddSlots &paras)
 {
-    ANS_LOGI("ParseParametersByAddSlots enter");
+    ANS_LOGD("ParseParametersByAddSlots enter");
     size_t argc = ADD_SLOTS_MAX_PARA;
     napi_value argv[ADD_SLOTS_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
@@ -313,14 +313,14 @@ napi_value ParseParametersByAddSlots(const napi_env &env, const napi_callback_in
         }
         napi_create_reference(env, argv[PARAM1], 1, &paras.callback);
     }
-    ANS_LOGI("ParseParametersByAddSlots out");
+    ANS_LOGD("ParseParametersByAddSlots out");
     return Common::NapiGetNull(env);
 }
 
 napi_value ParseParametersSetSlotByBundle(
     const napi_env &env, const napi_callback_info &info, ParametersInfoSetSlotByBundle &params)
 {
-    ANS_LOGI("ParseParametersSetSlotByBundle enter");
+    ANS_LOGD("ParseParametersSetSlotByBundle enter");
 
     size_t argc = SET_SLOT_AS_BUNDLE_MAX_PARA;
     napi_value argv[SET_SLOT_AS_BUNDLE_MAX_PARA] = {nullptr};
@@ -475,7 +475,7 @@ napi_value ParseParametersGetSlotNumByBundle(
 napi_value ParseParametersSetSlotFlagsByBundle(
     const napi_env &env, const napi_callback_info &info, ParametersInfoSetSlotFlagsByBundle &params)
     {
-        ANS_LOGI("ParseParametersSetSlotByBundle enter");
+        ANS_LOGD("ParseParametersSetSlotByBundle enter");
 
         size_t argc = SET_SLOT_AS_BUNDLE_MAX_PARA;
         napi_value argv[SET_SLOT_AS_BUNDLE_MAX_PARA] = {nullptr};
@@ -504,11 +504,11 @@ napi_value ParseParametersSetSlotFlagsByBundle(
         }
 
         // argv[1]:slotFlags
-        ANS_LOGI("ParseParametersSetSlotByBundle enter1");
+        ANS_LOGD("ParseParametersSetSlotByBundle enter1");
         int32_t slotFlags = 0;
         napi_get_value_int32(env, argv[PARAM1], &slotFlags);
         params.slotFlags = slotFlags;
-        ANS_LOGI("enter2");
+        ANS_LOGD("enter2");
 
         // argv[2]:callback
         if (argc >= SET_SLOT_AS_BUNDLE_MAX_PARA) {
@@ -517,11 +517,11 @@ napi_value ParseParametersSetSlotFlagsByBundle(
                 ANS_LOGE("Callback is not function excute promise.");
                 return Common::NapiGetNull(env);
             }
-        ANS_LOGI("ParseParametersSetSlotByBundle enter3");
+        ANS_LOGD("ParseParametersSetSlotByBundle enter3");
             napi_create_reference(env, argv[PARAM2], 1, &params.callback);
         }
 
-        ANS_LOGI("ParseParametersSetSlotByBundle out!");
+        ANS_LOGD("ParseParametersSetSlotByBundle out!");
         return Common::NapiGetNull(env);
     }
 
@@ -647,7 +647,7 @@ napi_value ParseParametersGetSlotByBundle(
     // argv[1]: SlotType
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
     if (valuetype != napi_number) {
-        ANS_LOGW("Wrong argument type. Number expected.");
+        ANS_LOGD("Wrong argument type. Number expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -867,7 +867,7 @@ napi_value SetSlotByBundle(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("SetSlotByBundle napi_create_async_work start");
+            ANS_LOGD("SetSlotByBundle napi_create_async_work start");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoSetSlotByBundle *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::UpdateNotificationSlots(
@@ -875,7 +875,7 @@ napi_value SetSlotByBundle(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("SetSlotByBundle napi_create_async_work end");
+            ANS_LOGD("SetSlotByBundle napi_create_async_work end");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoSetSlotByBundle *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -963,7 +963,7 @@ napi_value GetSlot(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("GetSlot napi_create_async_work start");
+            ANS_LOGD("GetSlot napi_create_async_work start");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoGetSlot *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
@@ -1010,7 +1010,7 @@ napi_value GetSlotNumByBundle(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("GetSlotNumByBundle napi_create_async_work start");
+            ANS_LOGD("GetSlotNumByBundle napi_create_async_work start");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlotNumByBundle *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationSlotNumAsBundle(
@@ -1018,7 +1018,7 @@ napi_value GetSlotNumByBundle(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("GetSlotNumByBundle napi_create_async_work end");
+            ANS_LOGD("GetSlotNumByBundle napi_create_async_work end");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoGetSlotNumByBundle *>(data);
             if (asynccallbackinfo) {
                 napi_value result = nullptr;
@@ -1078,7 +1078,7 @@ void AsyncCompleteCallbackGetSlots(napi_env env, napi_status status, void *data)
                 napi_set_element(env, arr, count, nSlot);
                 count++;
             }
-            ANS_LOGI("getSlots count : %{public}zu", count);
+            ANS_LOGD("getSlots count:%{public}zu", count);
             result = arr;
             if ((count == 0) && (asynccallbackinfo->slots.size() > 0)) {
                 asynccallbackinfo->info.errorCode = ERROR;
@@ -1121,7 +1121,7 @@ napi_value GetSlots(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("GetSlots napi_create_async_work start");
+            ANS_LOGD("GetSlots napi_create_async_work start");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlots *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationSlots(asynccallbackinfo->slots);
@@ -1172,7 +1172,7 @@ void AsyncCompleteCallbackGetSlotsByBundle(napi_env env, napi_status status, voi
                 napi_set_element(env, arr, count, nSlot);
                 count++;
             }
-            ANS_LOGI("GetSlotsByBundle count = %{public}zu", count);
+            ANS_LOGD("GetSlotsByBundle count=%{public}zu", count);
             result = arr;
             if ((count == 0) && (asynccallbackinfo->slots.size() > 0)) {
                 asynccallbackinfo->info.errorCode = ERROR;
@@ -1216,7 +1216,7 @@ napi_value GetSlotsByBundle(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("GetSlotsByBundle napi_create_async_work start");
+            ANS_LOGD("GetSlotsByBundle napi_create_async_work start");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlotsByBundle *>(data);
             if (asynccallbackinfo) {
             asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationSlotsForBundle(
@@ -1262,15 +1262,15 @@ napi_value RemoveSlot(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("removeSlot napi_create_async_work start");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoRemoveSlot *>(data);
+            ANS_LOGD("removeSlot %{public}d", asynccallbackinfo->outType);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::RemoveNotificationSlot(asynccallbackinfo->outType);
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("removeSlot napi_create_async_work end");
+            ANS_LOGD("removeSlot napi_create_async_work end");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoRemoveSlot *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -1322,14 +1322,14 @@ napi_value RemoveAllSlots(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("RemoveAllSlots napi_create_async_work start");
+            ANS_LOGI("RemoveAllSlots");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoRemoveAllSlots *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::RemoveAllSlots();
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("RemoveAllSlots napi_create_async_work end");
+            ANS_LOGD("RemoveAllSlots napi_create_async_work end");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoRemoveAllSlots *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -1383,7 +1383,7 @@ napi_value ParseParametersEnableSlot(
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
     if (argc < SET_ENABLE_SLOT_MIN_PARA) {
-        ANS_LOGW("Wrong number of arguments.");
+        ANS_LOGD("Wrong number of arguments.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -1437,7 +1437,7 @@ napi_value ParseParametersEnableSlot(
         napi_create_reference(env, argv[PARAM3], 1, &params.callback);
         return Common::NapiGetNull(env);
     } else {
-        ANS_LOGI("Callback is not function excute promise.");
+        ANS_LOGD("Callback is not function excute promise.");
         return Common::NapiGetNull(env);
     }
 
@@ -1469,7 +1469,7 @@ napi_value EnableNotificationSlot(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("EnableNotificationSlot napi_create_async_work start");
+            ANS_LOGD("EnableNotificationSlot napi_create_async_work start");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoInfoEnableSlot *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetEnabledForBundleSlot(
@@ -1480,7 +1480,7 @@ napi_value EnableNotificationSlot(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("EnableNotificationSlot napi_create_async_work end");
+            ANS_LOGD("EnableNotificationSlot napi_create_async_work end");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoInfoEnableSlot *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -1518,7 +1518,7 @@ napi_value ParseParametersIsEnableSlot(
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < GET_ENABLE_SLOT_MAX_PARA - 1) {
-        ANS_LOGW("Wrong number of arguments.");
+        ANS_LOGD("Wrong number of arguments.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -1526,7 +1526,7 @@ napi_value ParseParametersIsEnableSlot(
     // argv[0]: bundle
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGW("Wrong argument type. Object expected.");
+        ANS_LOGD("Wrong argument type. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -1541,7 +1541,7 @@ napi_value ParseParametersIsEnableSlot(
     // argv[1]: SlotType
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
     if (valuetype != napi_number) {
-        ANS_LOGW("Wrong argument type. Number expected.");
+        ANS_LOGD("Wrong argument type. Number expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -1590,7 +1590,7 @@ napi_value IsEnableNotificationSlot(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("IsEnableNotificationSlot napi_create_async_work start");
+            ANS_LOGD("IsEnableNotificationSlot napi_create_async_work start");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoInfoIsEnableSlot *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::GetEnabledForBundleSlot(
@@ -1598,7 +1598,7 @@ napi_value IsEnableNotificationSlot(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("IsEnableNotificationSlot napi_create_async_work end");
+            ANS_LOGD("IsEnableNotificationSlot napi_create_async_work end");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoInfoIsEnableSlot *>(data);
             if (asynccallbackinfo) {
                 napi_value result = nullptr;
@@ -1652,7 +1652,7 @@ napi_value GetSlotFlagsByBundle(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("GetSlotFlagsByBundle napi_create_async_work start");
+            ANS_LOGD("GetSlotFlagsByBundle napi_create_async_work start");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlotFlagsByBundle *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationSlotFlagsAsBundle(
@@ -1660,7 +1660,7 @@ napi_value GetSlotFlagsByBundle(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("GetSlotFlagsByBundle napi_create_async_work end");
+            ANS_LOGD("GetSlotFlagsByBundle napi_create_async_work end");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoGetSlotFlagsByBundle *>(data);
             if (asynccallbackinfo) {
                 napi_value result = nullptr;
@@ -1691,11 +1691,11 @@ napi_value GetSlotFlagsByBundle(napi_env env, napi_callback_info info)
 
 napi_value SetSlotFlagsByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("SetSlotFlagsByBundle enter");
+    ANS_LOGD("SetSlotFlagsByBundle enter");
 
     ParametersInfoSetSlotFlagsByBundle params {};
     if (ParseParametersSetSlotFlagsByBundle(env, info, params) == nullptr) {
-        ANS_LOGI("Call ParseParametersSetSlotFlagsByBundle return nullptr");
+        ANS_LOGD("Call ParseParametersSetSlotFlagsByBundle return nullptr");
         return Common::NapiGetUndefined(env);
     }
 
@@ -1717,7 +1717,7 @@ napi_value SetSlotFlagsByBundle(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("SetSlotFlagsByBundle napi_create_async_work start");
+            ANS_LOGD("SetSlotFlagsByBundle napi_create_async_work start");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoSetSlotFlagsByBundle *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetNotificationSlotFlagsAsBundle(
@@ -1725,7 +1725,7 @@ napi_value SetSlotFlagsByBundle(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("SetSlotFlagsByBundle napi_create_async_work end");
+            ANS_LOGD("SetSlotFlagsByBundle napi_create_async_work end");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoSetSlotFlagsByBundle *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -1750,7 +1750,7 @@ napi_value SetSlotFlagsByBundle(napi_env env, napi_callback_info info)
     } else {
         return promise;
     }
-    ANS_LOGI("SetSlotFlagsByBundle out");
+    ANS_LOGD("SetSlotFlagsByBundle out");
 }
 
 }  // namespace NotificationNapi

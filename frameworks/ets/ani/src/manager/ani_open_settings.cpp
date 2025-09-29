@@ -310,7 +310,7 @@ void SettingsModalExtensionCallback::OnError(int32_t code, const std::string& na
  */
 void SettingsModalExtensionCallback::OnRemoteReady(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy)
 {
-    ANS_LOGI("OnRemoteReady");
+    ANS_LOGI("SettingsModalExtensionCallback OnRemoteReady");
     ProcessStatusChanged(0, true);
 }
 
@@ -319,7 +319,7 @@ void SettingsModalExtensionCallback::OnRemoteReady(const std::shared_ptr<Ace::Mo
  */
 void SettingsModalExtensionCallback::OnDestroy()
 {
-    ANS_LOGI("OnDestroy");
+    ANS_LOGI("SettingsModalExtensionCallback OnDestroy");
     isExist.store(false);
 }
 

@@ -113,7 +113,7 @@ int32_t DistributedPreferences::GetSavedBundlesIcon(std::vector<std::string>& bu
     for (auto item : values) {
         std::string bundleName = item.first.substr(prefixLength, item.first.size() - prefixLength);
         bundleNames.push_back(bundleName);
-        ANS_LOGI("Prefernces saved data %{public}s %{public}d.", bundleName.c_str(), (int32_t)(item.second.size()));
+        ANS_LOGD("Prefernces saved data %{public}s %{public}d.", bundleName.c_str(), (int32_t)(item.second.size()));
     }
     return 0;
 }

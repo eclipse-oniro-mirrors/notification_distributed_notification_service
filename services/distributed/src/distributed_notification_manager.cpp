@@ -279,7 +279,7 @@ void DistributedNotificationManager::OnDeviceDisconnected(const std::string &dev
 bool DistributedNotificationManager::PublishCallback(
     const std::string &deviceId, const std::string &bundleName, sptr<NotificationRequest> &request)
 {
-    ANS_LOGI("start");
+    ANS_LOGD("start");
     std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     if (callback_.OnPublish) {
         callback_.OnPublish(deviceId, bundleName, request);
@@ -292,7 +292,7 @@ bool DistributedNotificationManager::PublishCallback(
 bool DistributedNotificationManager::UpdateCallback(
     const std::string &deviceId, const std::string &bundleName, sptr<NotificationRequest> &request)
 {
-    ANS_LOGI("start");
+    ANS_LOGD("start");
     std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     if (callback_.OnUpdate) {
         callback_.OnUpdate(deviceId, bundleName, request);
@@ -305,7 +305,7 @@ bool DistributedNotificationManager::UpdateCallback(
 bool DistributedNotificationManager::DeleteCallback(
     const std::string &deviceId, const std::string &bundleName, const std::string &label, int32_t id)
 {
-    ANS_LOGI("start");
+    ANS_LOGD("start");
     std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     if (callback_.OnDelete) {
         callback_.OnDelete(deviceId, bundleName, label, id);

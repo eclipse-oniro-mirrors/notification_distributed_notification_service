@@ -134,7 +134,7 @@ ErrCode BundleResourceHelper::GetAllInstalledBundles(std::vector<std::pair<std::
         AppExecFwk::BundleResourceInfo resourceInfo;
         result = GetBundleInfo(bundle.applicationInfo.bundleName, resourceInfo);
         if (result != ERR_OK) {
-            ANS_LOGW("Get failed %{public}s %{public}d", bundle.applicationInfo.bundleName.c_str(), result);
+            ANS_LOGW("GetBundleInfo failed %{public}s %{public}d", bundle.applicationInfo.bundleName.c_str(), result);
             continue;
         }
         ANS_LOGD("Get bundle app %{public}s %{public}s", bundle.applicationInfo.bundleName.c_str(),

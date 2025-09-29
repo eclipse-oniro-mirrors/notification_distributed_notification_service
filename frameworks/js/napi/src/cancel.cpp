@@ -315,7 +315,7 @@ napi_value CancelGroup(napi_env env, napi_callback_info info)
             ANS_LOGD("CancelGroup work excute.");
             AsyncCallbackInfoCancelGroup *asynccallbackinfo = static_cast<AsyncCallbackInfoCancelGroup *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("asynccallbackinfo->params.groupName = %{public}s",
+                ANS_LOGD("asynccallbackinfo->params.groupName = %{public}s",
                     asynccallbackinfo->params.groupName.c_str());
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::CancelGroup(asynccallbackinfo->params.groupName);
@@ -358,7 +358,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < 1) {
-        ANS_LOGW("Wrong number of arguments");
+        ANS_LOGD("Wrong number of arguments");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -367,7 +367,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     // argv[0]: id: number / bundleOption
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_number && valuetype != napi_object) {
-        ANS_LOGW("Wrong argument type. Number object expected.");
+        ANS_LOGD("Wrong argument type. Number object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -386,7 +386,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     // argv[1]: representativeBundle: string / id
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
     if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
-        ANS_LOGW("Wrong argument type. String number boolean expected.");
+        ANS_LOGD("Wrong argument type. String number boolean expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number or string or boolean.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;

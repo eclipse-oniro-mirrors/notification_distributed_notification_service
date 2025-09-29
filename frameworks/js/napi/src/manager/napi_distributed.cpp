@@ -27,7 +27,7 @@ void AsyncCompleteCallbackNapiIsDistributedEnabled(napi_env env, napi_status sta
         ANS_LOGE("Invalid async callback data");
         return;
     }
-    ANS_LOGI("IsDistributedEnabled napi_create_async_work end");
+    ANS_LOGD("IsDistributedEnabled napi_create_async_work end");
     AsyncCallbackInfoIsEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnabled *>(data);
     if (asynccallbackinfo) {
         napi_value result = nullptr;
@@ -69,7 +69,8 @@ napi_value DoIsDistributedEnabledWithDeviceType(napi_env env, napi_callback_info
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::IsDistributedEnabled(asynccallbackinfo->deviceType, asynccallbackinfo->enable);
-                ANS_LOGI("IsDistributedEnabled enable = %{public}d", asynccallbackinfo->enable);
+                ANS_LOGI("IsDistributedEnabled device=%{public}s,enable=%{public}d",
+                    asynccallbackinfo->deviceType.c_str(), asynccallbackinfo->enable);
             }
         },
         AsyncCompleteCallbackNapiIsDistributedEnabled, (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
@@ -113,7 +114,7 @@ napi_value NapiIsDistributedEnabled(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::IsDistributedEnabled(asynccallbackinfo->enable);
-                ANS_LOGI("IsDistributedEnabled enable = %{public}d", asynccallbackinfo->enable);
+                ANS_LOGI("IsDistributedEnabled enable=%{public}d", asynccallbackinfo->enable);
             }
         },
         AsyncCompleteCallbackNapiIsDistributedEnabled,
@@ -343,7 +344,7 @@ napi_value NapiEnableDistributedSelf(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::EnableDistributedSelf(asynccallbackinfo->params.enable);
-                ANS_LOGI("enable = %{public}d", asynccallbackinfo->params.enable);
+                ANS_LOGI("isEnableDistributedSelf enable=%{public}d", asynccallbackinfo->params.enable);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -382,7 +383,7 @@ void AsyncCompleteCallbackNapiIsDistributedEnableByBundle(napi_env env, napi_sta
         ANS_LOGE("Invalid async callback data");
         return;
     }
-    ANS_LOGI("IsDistributedEnableByBundle napi_create_async_work end");
+    ANS_LOGD("IsDistributedEnableByBundle napi_create_async_work end");
     AsyncCallbackInfoIsEnabledByBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnabledByBundle *>(data);
     if (asynccallbackinfo) {
         napi_value result = nullptr;
@@ -436,7 +437,8 @@ napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info
                     std::string deviceType = asynccallbackinfo->params.deviceType;
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsDistributedEnabledByBundle(
                         asynccallbackinfo->params.option, deviceType, asynccallbackinfo->enable);
-                    ANS_LOGI("has deviceType errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+                    ANS_LOGI("isDistributedEnableByType has deviceType code=%{public}d",
+                        asynccallbackinfo->info.errorCode);
                 } else {
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsDistributedEnableByBundle(
                         asynccallbackinfo->params.option, asynccallbackinfo->enable);
@@ -465,7 +467,7 @@ void AsyncCompleteCallbackNapiGetDeviceRemindType(napi_env env, napi_status stat
         ANS_LOGE("Invalid async callback data");
         return;
     }
-    ANS_LOGI("GetDeviceRemindType napi_create_async_work end");
+    ANS_LOGD("GetDeviceRemindType napi_create_async_work end");
     AsyncCallbackInfoGetRemindType *asynccallbackinfo = static_cast<AsyncCallbackInfoGetRemindType *>(data);
     if (asynccallbackinfo) {
         napi_value result = nullptr;
@@ -700,7 +702,7 @@ napi_value NapiSetTargetDeviceStatus(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("NapiSetTargetDeviceStatus work excute.");
+            ANS_LOGI("NapiSetTargetDeviceStatus start");
             AsynDeviceStatusConfig *asynccallbackinfo = static_cast<AsynDeviceStatusConfig *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetTargetDeviceStatus(
@@ -746,13 +748,15 @@ void AsyncCompleteCallbackNapiGetDistributedDeviceList(napi_env env, napi_status
             napi_value arr = nullptr;
             napi_create_array(env, &arr);
             size_t count = 0;
+            std::string deviceTypes = "";
             for (auto vec : asynccallbackinfo->deviceList) {
                 napi_value vecValue = nullptr;
-                ANS_LOGI("deviceType = %{public}s", vec.c_str());
                 napi_create_string_utf8(env, vec.c_str(), NAPI_AUTO_LENGTH, &vecValue);
                 napi_set_element(env, arr, count, vecValue);
+                deviceTypes.append(vec).append(",");
                 count++;
             }
+            ANS_LOGI("GetDistributedDevices %{public}s", deviceTypes.c_str());
             result = arr;
         }
         Common::CreateReturnValue(env, asynccallbackinfo->info, result);

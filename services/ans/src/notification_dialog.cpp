@@ -64,7 +64,7 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
             }
         }
     }
-    ANS_LOGI("called");
+    ANS_LOGD("called");
     
     AAFwk::Want want;
     

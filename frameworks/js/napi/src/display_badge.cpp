@@ -157,13 +157,12 @@ napi_value DisplayBadge(napi_env env, napi_callback_info info)
             ANS_LOGD("DisplayBadge work excute.");
             AsyncCallbackInfoEnableBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableBadge *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("option.bundle : %{public}s option.uid : %{public}d enable = %{public}d",
-                    asynccallbackinfo->params.option.GetBundleName().c_str(),
-                    asynccallbackinfo->params.option.GetUid(),
-                    asynccallbackinfo->params.enable);
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetShowBadgeEnabledForBundle(
                     asynccallbackinfo->params.option, asynccallbackinfo->params.enable);
-                ANS_LOGI("errorCode : %{public}d", asynccallbackinfo->info.errorCode);
+                ANS_LOGI("displayBadge bundle:%{public}s,uid:%{public}d,enable:%{public}d,code:%{public}d",
+                    asynccallbackinfo->params.option.GetBundleName().c_str(),
+                    asynccallbackinfo->params.option.GetUid(),
+                    asynccallbackinfo->params.enable, asynccallbackinfo->info.errorCode);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -246,17 +245,18 @@ napi_value IsBadgeDisplayed(napi_env env, napi_callback_info info)
             AsyncCallbackInfoIsDisplayBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoIsDisplayBadge *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasBundleOption) {
-                    ANS_LOGI("option.bundle : %{public}s option.uid : %{public}d",
-                        asynccallbackinfo->params.option.GetBundleName().c_str(),
-                        asynccallbackinfo->params.option.GetUid());
                     asynccallbackinfo->info.errorCode = NotificationHelper::GetShowBadgeEnabledForBundle(
                         asynccallbackinfo->params.option, asynccallbackinfo->enabled);
+                    ANS_LOGI("get badgeEnabled bundle:%{public}s,uid:%{public}d,code:%{public}d,enabled:%{public}d",
+                        asynccallbackinfo->params.option.GetBundleName().c_str(),
+                        asynccallbackinfo->params.option.GetUid(),
+                        asynccallbackinfo->info.errorCode, asynccallbackinfo->enabled);
                 } else {
                     asynccallbackinfo->info.errorCode = NotificationHelper::GetShowBadgeEnabled(
                         asynccallbackinfo->enabled);
+                    ANS_LOGI("get badgeEnabled code:%{public}d,enabled:%{public}d",
+                        asynccallbackinfo->info.errorCode, asynccallbackinfo->enabled);
                 }
-                ANS_LOGI("errorCode : %{public}d, enabled : %{public}d",
-                    asynccallbackinfo->info.errorCode, asynccallbackinfo->enabled);
             }
         },
         AsyncCompleteCallbackIsBadgeDisplayed,

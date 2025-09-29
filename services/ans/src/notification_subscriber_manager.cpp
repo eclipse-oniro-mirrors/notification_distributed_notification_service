@@ -651,7 +651,7 @@ void NotificationSubscriberManager::NotifyCanceledInner(
         HaOperationMessage(liveView).SyncDelete(notification->GetKey());
     }
 
-    ANS_LOGI("CancelNotification key = %{public}s", notification->GetKey().c_str());
+    ANS_LOGI("CancelNotification key=%{public}s", notification->GetKey().c_str());
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);
         if (IsSubscribedBysubscriber(record, notification)) {

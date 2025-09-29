@@ -113,8 +113,7 @@ void LocalLiveViewSubscriberInstance::OnResponse(int32_t notificationId, sptr<No
         return;
     }
 
-    ANS_LOGI("id = %{public}d", notificationId);
-    ANS_LOGI("button = %{public}s", buttonOption->GetButtonName().c_str());
+    ANS_LOGI("button response id=%{public}d button=%{public}s", notificationId, buttonOption->GetButtonName().c_str());
 
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(responseCallbackInfo_.env, &loop);

@@ -128,7 +128,7 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribe *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->subscriberInfo.hasSubscribeInfo) {
-                    ANS_LOGI("Subscribe with NotificationSubscribeInfo");
+                    ANS_LOGD("Subscribe with NotificationSubscribeInfo");
                     sptr<OHOS::Notification::NotificationSubscribeInfo> subscribeInfo =
                         new (std::nothrow) OHOS::Notification::NotificationSubscribeInfo();
                     if (subscribeInfo == nullptr) {
