@@ -738,12 +738,12 @@ HWTEST_F(ReminderStoreTest, ReminderStoreTest_001, Function | SmallTest | Level1
 }
 
 /**
- * @tc.name: Update_00002
+ * @tc.name: Update_00200
  * @tc.desc: Test Update parameters.
  * @tc.type: FUNC
  * @tc.require: issueI5VB6V
  */
-HWTEST_F(ReminderStoreTest, Update_00002, Function | SmallTest | Level1)
+HWTEST_F(ReminderStoreTest, Update_00200, Function | SmallTest | Level1)
 {
     sptr<ReminderRequest> alarm = new ReminderRequestAlarm(10);
     ReminderStore reminderStore;
