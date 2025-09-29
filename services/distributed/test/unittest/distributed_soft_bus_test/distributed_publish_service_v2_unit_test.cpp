@@ -21,6 +21,7 @@
 #undef private
 #undef protected
 #include "mock_request_box.h"
+#include "mock_invoke_counting.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -56,6 +57,21 @@ HWTEST_F(DistributedPublishServiceV2Test, SetNotificationButtons_0100, Function 
     std::vector<std::string> buttonsTitle;
     mockRequest->GetActionButtonsTitle(buttonsTitle);
     EXPECT_EQ(buttonsTitle.size(), 2);
+}
+
+/**
+ * @tc.name: RemoveAllDistributedNotifications_0100
+ * @tc.desc: Test RemoveAllDistributedNotifications success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedPublishServiceV2Test, RemoveAllDistributedNotifications_0100, Function | SmallTest | Level1)
+{
+    MockInvokeCounting::GetInstance().MockReSetCount();
+    DistributedDeviceInfo device;
+    device.deviceId_ = "deviceId_";
+    DistributedPublishService::GetInstance().RemoveAllDistributedNotifications(device,
+        NotificationConstant::DistributedDeleteType::DEVICE_ID, NotificationConstant::DISTRIBUTED_RELEASE_DELETE);
+    EXPECT_EQ(1, MockInvokeCounting::GetInstance().MockGetCount());
 }
 }
 }

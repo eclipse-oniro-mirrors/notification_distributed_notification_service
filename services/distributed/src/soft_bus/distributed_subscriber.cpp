@@ -56,9 +56,7 @@ void DistribuedSubscriber::OnCanceled(const std::shared_ptr<Notification> &reque
     ANS_LOGI("Subscriber on canceled %{public}d %{public}s %{public}d %{public}s.",
         peerDevice_.deviceType_, StringAnonymous(peerDevice_.deviceId_).c_str(), localDevice_.deviceType_,
         StringAnonymous(localDevice_.deviceId_).c_str());
-    if (deleteReason == NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE ||
-        deleteReason == NotificationConstant::DISTRIBUTED_ENABLE_CLOSE_DELETE ||
-        deleteReason == NotificationConstant::DISTRIBUTED_RELEASE_DELETE) {
+    if (IsDistributedRemoveReason(deleteReason)) {
         ANS_LOGD("is cross device deletion");
         return;
     }
@@ -130,9 +128,7 @@ void DistribuedSubscriber::OnBatchCanceled(const std::vector<std::shared_ptr<Not
     ANS_LOGI("Subscriber on batch canceled %{public}d %{public}s %{public}d %{public}s.",
         peerDevice_.deviceType_, StringAnonymous(peerDevice_.deviceId_).c_str(), localDevice_.deviceType_,
         StringAnonymous(localDevice_.deviceId_).c_str());
-    if (deleteReason == NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE ||
-        deleteReason == NotificationConstant::DISTRIBUTED_ENABLE_CLOSE_DELETE ||
-        deleteReason == NotificationConstant::DISTRIBUTED_RELEASE_DELETE) {
+    if (IsDistributedRemoveReason(deleteReason)) {
         ANS_LOGD("is cross device deletion");
         return;
     }
@@ -145,6 +141,16 @@ void DistribuedSubscriber::OnBatchCanceled(const std::vector<std::shared_ptr<Not
     if (!notifications.empty()) {
         DistributedService::GetInstance().OnBatchCanceled(notifications, peerDevice_);
     }
+}
+
+bool DistribuedSubscriber::IsDistributedRemoveReason(const int32_t deleteReason)
+{
+    if (deleteReason == NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE ||
+        deleteReason == NotificationConstant::DISTRIBUTED_RELEASE_DELETE) {
+        return true;
+    }
+    return (deleteReason == NotificationConstant::DISTRIBUTED_ENABLE_CLOSE_DELETE ||
+        deleteReason == NotificationConstant::DISTRIBUTED_MASTER_ENABLE_CLOSE_DELETE);
 }
 
 ErrCode DistribuedSubscriber::OnOperationResponse(const std::shared_ptr<NotificationOperationInfo> &operationInfo)

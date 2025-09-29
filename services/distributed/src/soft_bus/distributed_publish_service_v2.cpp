@@ -238,7 +238,8 @@ void DistributedPublishService::OnRemoveNotifications(const DistributedDeviceInf
 }
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
-void DistributedPublishService::RemoveAllDistributedNotifications(DistributedDeviceInfo& deviceInfo)
+void DistributedPublishService::RemoveAllDistributedNotifications(const DistributedDeviceInfo& deviceInfo,
+    const int32_t operationType, const int32_t operationReason, const int32_t slotTypeInt)
 {
     std::shared_ptr<RemoveAllDistributedNotificationsBox> removeBox =
         std::make_shared<RemoveAllDistributedNotificationsBox>();
@@ -248,6 +249,9 @@ void DistributedPublishService::RemoveAllDistributedNotifications(DistributedDev
     }
     auto local = DistributedDeviceService::GetInstance().GetLocalDevice();
     removeBox->SetLocalDeviceId(local.deviceId_);
+    removeBox->SetSlotType(slotTypeInt);
+    removeBox->SetOperationType(operationType);
+    removeBox->SetOperationReason(operationReason);
 
     if (!removeBox->Serialize()) {
         ANS_LOGW("dans OnCanceled serialize failed");
@@ -473,7 +477,6 @@ void DistributedPublishService::SyncNotifictionList(const DistributedDeviceInfo&
 void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Notification> request,
     const DistributedDeviceInfo& peerDevice, bool isSyncNotification)
 {
-    std::shared_ptr<NotificationRequestBox> requestBox = std::make_shared<NotificationRequestBox>();
     if (request == nullptr || request->GetNotificationRequestPoint() == nullptr) {
         return;
     }
@@ -481,6 +484,25 @@ void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Not
     auto requestPoint = request->GetNotificationRequestPoint();
     ANS_LOGI("Dans OnConsumed Notification key = %{public}s, notificationFlag = %{public}s", request->GetKey().c_str(),
         requestPoint->GetFlags() == nullptr ? "null" : requestPoint->GetFlags()->Dump().c_str());
+    if (IsInterceptNotification(peerDevice, requestPoint)) {
+        return;
+    }
+    std::shared_ptr<NotificationRequestBox> requestBox = std::make_shared<NotificationRequestBox>();
+    if (!MakeRequestBox(isSyncNotification, peerDevice, request, requestPoint, requestBox)) {
+        return;
+    }
+    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(requestBox, peerDevice,
+            TransDataType::DATA_TYPE_BYTES, PUBLISH_ERROR_EVENT_CODE);
+    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
+}
+
+bool DistributedPublishService::MakeRequestBox(
+    bool isSyncNotification,
+    const DistributedDeviceInfo& peerDevice,
+    const std::shared_ptr<Notification> request,
+    const sptr<NotificationRequest> requestPoint,
+    std::shared_ptr<NotificationRequestBox>& requestBox)
+{
     auto local = DistributedDeviceService::GetInstance().GetLocalDevice();
     requestBox->SetDeviceId(local.deviceId_);
     requestBox->SetAutoDeleteTime(requestPoint->GetAutoDeletedTime());
@@ -507,7 +529,7 @@ void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Not
         requestBox->SetCommonLiveView(buffer);
     }
     if (!SetNotificationExtendInfo(requestPoint, peerDevice.deviceType_, isSyncNotification, requestBox)) {
-        return;
+        return false;
     }
     SetNotificationButtons(requestPoint, peerDevice.deviceType_, requestPoint->GetSlotType(), requestBox);
     SetNotificationContent(request->GetNotificationRequestPoint()->GetContent(),
@@ -516,11 +538,25 @@ void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Not
         ANS_LOGW("Dans OnConsumed serialize failed.");
         AnalyticsUtil::GetInstance().SendHaReport(PUBLISH_ERROR_EVENT_CODE, -1, BRANCH3_ID,
             "serialization failed");
-        return;
+        return false;
     }
-    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(requestBox, peerDevice,
-            TransDataType::DATA_TYPE_BYTES, PUBLISH_ERROR_EVENT_CODE);
-    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
+    return true;
+}
+
+bool DistributedPublishService::IsInterceptNotification(
+    const DistributedDeviceInfo &peerDevice, sptr<NotificationRequest> requestPoint)
+{
+    bool queryRes = false;
+    bool result = false;
+    // master use current to be switch key for expand later
+    if (requestPoint->IsCommonLiveView()) {
+        result = NotificationHelper::IsDistributedEnabledBySlot(
+            NotificationConstant::SlotType::LIVE_VIEW, NotificationConstant::CURRENT_DEVICE_TYPE, queryRes);
+    } else {
+        result = NotificationHelper::IsDistributedEnabled(NotificationConstant::CURRENT_DEVICE_TYPE, queryRes);
+    }
+    ANS_LOGI("Distributed query result: %{public}d, enable: %{public}d.", result, queryRes);
+    return (result != ERR_OK || !queryRes);
 }
 
 void DistributedPublishService::SetNotificationContent(const std::shared_ptr<NotificationContent> &content,
@@ -754,17 +790,26 @@ void DistributedPublishService::RemoveAllDistributedNotifications(const std::sha
 {
     RemoveAllDistributedNotificationsBox removeBox = RemoveAllDistributedNotificationsBox(boxMessage);
     std::string deviceId;
+    int32_t slotTypeInt;
+    int32_t operationType;
+    int32_t operationReason;
     removeBox.GetLocalDeviceId(deviceId);
+    removeBox.GetSlotType(slotTypeInt);
+    removeBox.GetOperationType(operationType);
+    removeBox.GetOperationReason(operationReason);
     DistributedDeviceInfo device;
     if (!DistributedDeviceService::GetInstance().GetDeviceInfo(deviceId, device)) {
         ANS_LOGW("Dans bundle get device info failed %{public}s.", StringAnonymous(deviceId).c_str());
         return;
     }
+    ANS_LOGI("deviceId: %{public}s, slotType: %{public}d, \
+        operationType: %{public}d, operationReason: %{public}d.",
+        StringAnonymous(deviceId).c_str(), slotTypeInt, operationType, operationReason);
     std::vector<std::string> hashcodes;
     IN_PROCESS_CALL(NotificationHelper::RemoveDistributedNotifications(hashcodes,
-        NotificationConstant::SlotType::SOCIAL_COMMUNICATION,
-        NotificationConstant::DistributedDeleteType::DEVICE_ID,
-        NotificationConstant::DISTRIBUTED_RELEASE_DELETE,
+        static_cast<NotificationConstant::SlotType>(slotTypeInt),
+        static_cast<NotificationConstant::DistributedDeleteType>(operationType),
+        operationReason,
         device.udid_));
 }
 

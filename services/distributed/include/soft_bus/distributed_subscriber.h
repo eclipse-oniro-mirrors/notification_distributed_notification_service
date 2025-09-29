@@ -56,6 +56,9 @@ public:
     }
 
 private:
+    bool IsDistributedRemoveReason(const int32_t deleteReason);
+
+private:
     DistributedDeviceInfo localDevice_;
     DistributedDeviceInfo peerDevice_;
 };
