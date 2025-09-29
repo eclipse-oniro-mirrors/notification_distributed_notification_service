@@ -817,9 +817,8 @@ HWTEST_F(ReminderStoreTest, CreateTable_001_BaseTableFail, Function | SmallTest 
         rdbStore->ExecuteSql(conflictingSql);
     }
     NativeRdb::RdbHelper::ClearCache();
-    NativeRdb::RdbHelper::DeleteRdbStore(dbConfig); // Delete the db file but keep the conflicting table in memory cache if any.
-                                                    // A more robust way is to corrupt the file or use a mock.
-                                                    // Let's try re-creating with a conflicting view.
+    NativeRdb::RdbHelper::DeleteRdbStore(dbConfig);
+
     {
         ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
         auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 9, rdbDataCallBack, errCode);
