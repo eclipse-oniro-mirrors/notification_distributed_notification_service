@@ -662,12 +662,15 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
     NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
-    NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
-    if (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF ||
-        enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF) {
-        ANS_LOGI("xds-test");
-        EXTENTION_WRAPPER->HandlePrivilegeMessage(bundleOption, request, isAgentController);
+    ErrCode queryResult = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
+    if (queryResult != ERR_OK) {
+        return queryResult;
     }
+    bool isSilent = enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
+        enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    EXTENTION_WRAPPER->HandlePrivilegeMessage(bundleOption, request, isAgentController, isSilent);
+    ANS_LOGI("SetFlags- HandlePrivilege Key = %{public}s flags = %{public}d",
+        request->GetKey().c_str(), request->GetFlags()->GetReminderFlags());
 #endif
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1);
 #ifdef ENABLE_ANS_ADDITIONAL_CONTROL
