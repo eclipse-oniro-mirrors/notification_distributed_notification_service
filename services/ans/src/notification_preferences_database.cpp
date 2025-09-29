@@ -2705,7 +2705,8 @@ bool NotificationPreferencesDatabase::IsDistributedEnabledBySlot(
         switch (status) {
             case NativeRdb::E_EMPTY_VALUES_BUCKET: {
                 result = true;
-                enabled = true;
+                // master use current to be switch key for expand later; default false here
+                enabled = deviceType != NotificationConstant::CURRENT_DEVICE_TYPE;
                 break;
             }
             case NativeRdb::E_OK: {

@@ -49,5 +49,53 @@ bool RemoveAllDistributedNotificationsBox::GetLocalDeviceId(std::string& deviceI
     }
     return box_->GetStringValue(LOCAL_DEVICE_ID, deviceId);
 }
+
+bool RemoveAllDistributedNotificationsBox::SetSlotType(const int32_t slotTypeInt)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(REMOVE_SLOT_TYPE, slotTypeInt));
+}
+
+bool RemoveAllDistributedNotificationsBox::GetSlotType(int32_t &slotTypeInt) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt32Value(REMOVE_SLOT_TYPE, slotTypeInt);
+}
+
+bool RemoveAllDistributedNotificationsBox::SetOperationType(const int32_t operationType)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(OPERATION_TYPE, operationType));
+}
+
+bool RemoveAllDistributedNotificationsBox::GetOperationType(int32_t &operationType) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt32Value(OPERATION_TYPE, operationType);
+}
+
+bool RemoveAllDistributedNotificationsBox::SetOperationReason(const int32_t operationReason)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(OPERATION_REASON, operationReason));
+}
+
+bool RemoveAllDistributedNotificationsBox::GetOperationReason(int32_t &operationReason) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt32Value(OPERATION_REASON, operationReason);
+}
 }
 }

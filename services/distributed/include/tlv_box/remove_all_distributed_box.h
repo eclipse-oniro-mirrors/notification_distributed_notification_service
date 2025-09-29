@@ -30,6 +30,12 @@ public:
     RemoveAllDistributedNotificationsBox(std::shared_ptr<TlvBox> box);
     bool SetLocalDeviceId(const std::string &deviceId);
     bool GetLocalDeviceId(std::string &deviceId) const;
+    bool SetSlotType(const int32_t slotTypeInt);
+    bool GetSlotType(int32_t &slotTypeInt) const;
+    bool SetOperationType(const int32_t operationType);
+    bool GetOperationType(int32_t &operationType) const;
+    bool SetOperationReason(const int32_t operationReason);
+    bool GetOperationReason(int32_t &operationReason) const;
 };
 }  // namespace Notification
 }  // namespace OHOS

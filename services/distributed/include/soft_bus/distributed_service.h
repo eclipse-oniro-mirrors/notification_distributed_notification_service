@@ -70,6 +70,10 @@ private:
     void HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessage);
     bool OnConsumedSetFlags(const std::shared_ptr<Notification> &request,
         const DistributedDeviceInfo& peerDevice);
+    void HandleMatchByType(const int32_t matchType, const DistributedDeviceInfo& device, const int32_t peerUserId);
+#ifdef DISTRIBUTED_FEATURE_MASTER
+    void HandleSwitchChange(const bool notificationEnable, const bool liveViewEnable);
+#endif
 
 private:
     std::shared_ptr<ffrt::queue> serviceQueue_ = nullptr;

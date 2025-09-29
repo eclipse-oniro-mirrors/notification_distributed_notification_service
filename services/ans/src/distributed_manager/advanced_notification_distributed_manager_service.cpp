@@ -115,7 +115,8 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
         DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
     }
 
-    if (result == ERR_OK && !enabled) {
+    // master use current to be switch key for expand later; dont remove on master.
+    if (result == ERR_OK && !enabled && deviceType != NotificationConstant::CURRENT_DEVICE_TYPE) {
         RemoveDistributedNotifications(slotType,
             NotificationConstant::DISTRIBUTED_ENABLE_CLOSE_DELETE,
             NotificationConstant::DistributedDeleteType::SLOT);
@@ -124,7 +125,8 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
     ANS_LOGI("SetDistributedEnabledBySlot %{public}d, deviceType: %{public}s, enabled: %{public}s, "
         "SetDistributedEnabledBySlot result: %{public}d",
         slotType, deviceType.c_str(), std::to_string(enabled).c_str(), result);
-    message.ErrorCode(result);
+    message.ErrorCode(result).Append("st:" + std::to_string(slotTypeInt) +
+        ", device:" + deviceType + ", en:" + std::to_string(enabled));
     NotificationAnalyticsUtil::ReportModifyEvent(message);
 
     return result;
@@ -784,14 +786,19 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<Not
 ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &deviceType, const bool enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_22);
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("Not system app or SA!");
+        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append("Not SystemApp");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("no permission");
+        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append("No permission");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -801,6 +808,9 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
 
     ANS_LOGI("SetDistributedEnabled deviceType:%{public}s,enabled:%{public}s,result:%{public}d",
         deviceType.c_str(), std::to_string(enabled).c_str(), result);
+
+    message.ErrorCode(result).Append("device:" + deviceType + ", en:" + std::to_string(enabled));
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     if (deviceType == NotificationConstant::LITEWEARABLE_DEVICE_TYPE) {
         return result;
     }
@@ -819,7 +829,8 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
         DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
     }
 
-    if (result == ERR_OK && !enabled) {
+    // master use current to be switch key for expand later; dont remove on master.
+    if (result == ERR_OK && !enabled && deviceType != NotificationConstant::CURRENT_DEVICE_TYPE) {
         RemoveDistributedNotifications(NotificationConstant::SlotType::LIVE_VIEW,
             NotificationConstant::DISTRIBUTED_ENABLE_CLOSE_DELETE,
             NotificationConstant::DistributedDeleteType::EXCLUDE_ONE_SLOT);

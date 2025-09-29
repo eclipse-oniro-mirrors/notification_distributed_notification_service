@@ -1130,6 +1130,7 @@ ohos_unittest("distributed_soft_bus_test") {
     "/${services_path}/distributed/src/tlv_box/bundle_icon_box.cpp",
     "/${services_path}/distributed/src/base/distributed_local_config.cpp",
     "mock/mock_request_box.cpp",
+    "mock/mock_distributed_send_adapter.cpp",
     "distributed_soft_bus_test/distributed_operation_service_unit_test.cpp",
     "distributed_soft_bus_test/distributed_publish_service_v2_unit_test.cpp",
     "distributed_soft_bus_test/distributed_unlock_listener_oper_service_unit_test.cpp",

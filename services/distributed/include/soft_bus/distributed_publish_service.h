@@ -43,7 +43,9 @@ public:
         std::string hashCodes, std::string slotTypes);
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
-    void RemoveAllDistributedNotifications(DistributedDeviceInfo& deviceInfo);
+    void RemoveAllDistributedNotifications(
+        const DistributedDeviceInfo& deviceInfo, const int32_t operationType, const int32_t operationReason,
+        const int32_t slotTypeInt = static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE));
     void SyncLiveViewNotification(const DistributedDeviceInfo peerDevice, bool isForce);
     void SyncLiveViewList(const DistributedDeviceInfo device, const std::vector<sptr<Notification>>& notifications);
     void SyncLiveViewContent(const DistributedDeviceInfo device, const std::vector<sptr<Notification>>& notifications);
@@ -66,6 +68,10 @@ private:
         std::shared_ptr<NotificationRequestBox>& requestBox, AAFwk::WantParams& wantParam);
     bool FillNotSyncRequestExtendInfo(const sptr<NotificationRequest> notificationRequest, int32_t deviceType,
         std::shared_ptr<NotificationRequestBox>& requestBox, AAFwk::WantParams& wantParam);
+    bool IsInterceptNotification(const DistributedDeviceInfo &peerDevice, sptr<NotificationRequest> requestPoint);
+    bool MakeRequestBox(
+        bool isSyncNotification, const DistributedDeviceInfo& peerDevice, const std::shared_ptr<Notification> request,
+        const sptr<NotificationRequest> requestPoint, std::shared_ptr<NotificationRequestBox>& requestBox);
 #else
     void PublishNotification(const std::shared_ptr<TlvBox>& boxMessage);
     void PublishSynchronousLiveView(const std::shared_ptr<TlvBox>& boxMessage);

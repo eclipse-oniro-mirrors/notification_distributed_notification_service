@@ -211,6 +211,35 @@ void DistributedService::HandleStatusChange(const DeviceStatueChangeInfo& change
         DistributedClient::GetInstance().ReleaseDevice(device.deviceId_, device.deviceType_, false);
         DistributedDeviceService::GetInstance().ResetDeviceInfo(device.deviceId_, DeviceState::STATE_OFFLINE);
     }
+    if (changeInfo.changeType == DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE) {
+        HandleSwitchChange(changeInfo.enableChange, changeInfo.liveViewChange);
+    }
+}
+
+void DistributedService::HandleSwitchChange(const bool notificationEnable, const bool liveViewEnable)
+{
+    for (const auto& peer : DistributedDeviceService::GetInstance().GetDeviceList()) {
+        if (peer.second.peerState_ != DeviceState::STATE_ONLINE) {
+            continue;
+        }
+        ANS_LOGI(
+            "Remove from Device %{public}u %{public}s, notificationEnable: %{public}d, liveViewEnable: %{public}d.",
+            peer.second.deviceType_, StringAnonymous(peer.second.deviceId_).c_str(),
+            notificationEnable, liveViewEnable);
+        DistributedDeviceInfo deviceInfo = peer.second;
+        if (!notificationEnable) {
+            DistributedPublishService::GetInstance().RemoveAllDistributedNotifications(deviceInfo,
+                NotificationConstant::DistributedDeleteType::EXCLUDE_ONE_SLOT,
+                NotificationConstant::DISTRIBUTED_MASTER_ENABLE_CLOSE_DELETE,
+                NotificationConstant::SlotType::LIVE_VIEW);
+        }
+        if (!liveViewEnable) {
+            DistributedPublishService::GetInstance().RemoveAllDistributedNotifications(deviceInfo,
+                NotificationConstant::DistributedDeleteType::SLOT,
+                NotificationConstant::DISTRIBUTED_MASTER_ENABLE_CLOSE_DELETE,
+                NotificationConstant::SlotType::LIVE_VIEW);
+        }
+    }
 }
 
 #else
@@ -471,7 +500,15 @@ void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessa
     if (!DistributedDeviceService::GetInstance().GetDeviceInfo(peerDevice.deviceId_, device)) {
         return;
     }
+    int32_t peerUserId = 100;
+    matchBox.GetDeviceUserId(peerUserId);
+    HandleMatchByType(matchType, device, peerUserId);
+}
+
 #ifdef DISTRIBUTED_FEATURE_MASTER
+void DistributedService::HandleMatchByType(
+    const int32_t matchType, const DistributedDeviceInfo& device, const int32_t peerUserId)
+{
     if (matchType == MatchType::MATCH_SYN) {
         DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_ACK);
         DistributedPublishService::GetInstance().SyncLiveViewNotification(device, true);
@@ -479,9 +516,15 @@ void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessa
         DistributedSubscribeService::GetInstance().SubscribeNotification(device);
         DistributedPublishService::GetInstance().SyncLiveViewNotification(device, false);
     }
+}
+
 #else
+void DistributedService::HandleMatchByType(
+    const int32_t matchType, const DistributedDeviceInfo& device, const int32_t peerUserId)
+{
     if (DistributedDeviceService::GetInstance().IsLocalPadOrPC()) {
         if (matchType == MatchType::MATCH_SYN) {
+            bool isAuth;
             DistributedSubscribeService::GetInstance().SubscribeNotification(device);
             DistributedDeviceService::GetInstance().InitCurrentDeviceStatus();
             DistributedBundleService::GetInstance().SyncInstalledBundles(device, true);
@@ -490,6 +533,23 @@ void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessa
                 DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->SubscribeAllConnect(true);
                 DistributedDeviceService::GetInstance().SetSubscribeAllConnect(true);
             }
+            if (NotificationHelper::GetDistributedAuthStatus(
+                DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_),
+                device.deviceId_, peerUserId, isAuth) == ERR_OK && !isAuth) {
+                // AuthStatus followed phone And turn on distributed switch
+                NotificationHelper::SetDistributedEnabled(
+                    DistributedDeviceService::DeviceTypeToTypeString(
+                        DistributedDeviceService::GetInstance().GetLocalDevice().deviceType_), true);
+                NotificationHelper::SetDistributedEnabledBySlot(
+                    NotificationConstant::SlotType::LIVE_VIEW,
+                    DistributedDeviceService::DeviceTypeToTypeString(
+                        DistributedDeviceService::GetInstance().GetLocalDevice().deviceType_),
+                    DistributedDeviceService::GetInstance().GetLocalDevice().deviceType_ ==
+                    DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD);
+            }
+            NotificationHelper::SetDistributedAuthStatus(
+                DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_),
+                device.udid_, peerUserId, true);
             return;
         }
     }
@@ -500,8 +560,8 @@ void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessa
         DistributedDeviceService::GetInstance().InitCurrentDeviceStatus();
         DistributedSubscribeService::GetInstance().SubscribeNotification(device);
     }
-#endif
 }
+#endif
 
 void DistributedService::OnHandleMsg(std::shared_ptr<TlvBox>& box)
 {

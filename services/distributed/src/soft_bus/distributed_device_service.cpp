@@ -24,6 +24,7 @@
 #include "distributed_observer_service.h"
 #include "distributed_service.h"
 #include "distributed_send_adapter.h"
+#include "distributed_subscribe_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -332,6 +333,7 @@ void DistributedDeviceService::SyncDeviceMatch(const DistributedDeviceInfo peerD
     matchBox->SetVersion(CURRENT_VERSION);
     matchBox->SetMatchType(type);
     matchBox->SetLocalDeviceId(localDevice_.deviceId_);
+    matchBox->SetDeviceUserId(DistributedSubscribeService::GetCurrentActiveUserId());
     matchBox->SetLocalDeviceType(localDevice_.deviceType_);
     if (type == MatchType::MATCH_ACK) {
         matchBox->SetPeerDeviceId(peerDevice.deviceId_);

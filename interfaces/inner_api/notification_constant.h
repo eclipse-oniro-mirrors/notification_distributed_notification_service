@@ -381,6 +381,11 @@ public:
     static const int32_t DISTRIBUTED_RELEASE_DELETE = 36;
 
     /**
+     * Indicates that a notification is deleted because master device's distributed enable close removed.
+     */
+    static const int32_t DISTRIBUTED_MASTER_ENABLE_CLOSE_DELETE = 37;
+
+    /**
      * Indicates that a notification is deleted for other reasons.
      */
     static const int32_t APP_CANCEL_REASON_OTHER = 100;
