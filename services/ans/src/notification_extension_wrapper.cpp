@@ -279,13 +279,13 @@ bool ExtensionWrapper::IsPrivilegeMessage(const sptr<NotificationRequest> &reque
 }
 
 void ExtensionWrapper::HandlePrivilegeMessage(const sptr<NotificationBundleOption>& bundleOption,
-    const sptr<NotificationRequest> &request, bool isAgentController)
+    const sptr<NotificationRequest> &request, bool isAgentController, bool isSilent)
 {
     if (handlePrivilegeMessage_ == nullptr) {
         ANS_LOGE("HandlePrivilegeMessage wrapper symbol failed");
         return;
     }
-    return handlePrivilegeMessage_(bundleOption, request, isAgentController);
+    return handlePrivilegeMessage_(bundleOption, request, isAgentController, isSilent);
 }
 
 bool ExtensionWrapper::GetPrivilegeDialogPopped(const sptr<NotificationBundleOption>& bundleOption,
