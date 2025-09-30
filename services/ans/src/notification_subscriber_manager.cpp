@@ -444,6 +444,10 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
             return ERR_ANS_NO_MEMORY;
         }
 
+        {
+            std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
+            subscriberRecordList_.push_back(record);
+        }
         record->subscriber->AsObject()->AddDeathRecipient(recipient_);
 
         record->subscriber->OnConnected();
@@ -453,11 +457,6 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
     AddRecordInfo(record, subscribeInfo);
     if (onSubscriberAddCallback_ != nullptr) {
         onSubscriberAddCallback_(record);
-    }
-
-    {
-        std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
-        subscriberRecordList_.push_back(record);
     }
 
     if (subscribeInfo->GetDeviceType() == DEVICE_TYPE_WEARABLE ||
