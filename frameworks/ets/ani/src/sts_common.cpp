@@ -823,8 +823,8 @@ bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
     }
     ani_class cls;
     ani_status status;
-    if (ANI_OK != (status = env->FindClass("escompat.Date", &cls))) {
-        ANS_LOGD("error. not find class name 'escompat.Date'. status %{public}d", status);
+    if (ANI_OK != (status = env->FindClass("std.core.Date", &cls))) {
+        ANS_LOGD("error. not find class name 'std.core.Date'. status %{public}d", status);
         return false;
     }
     ani_method ctor;

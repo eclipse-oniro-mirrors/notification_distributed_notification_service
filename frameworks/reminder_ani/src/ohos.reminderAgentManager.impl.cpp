@@ -45,7 +45,7 @@ static bool UnWarpDate(uintptr_t date, ani_double& outValue)
         ANSR_LOGE("Env is nullptr.");
         return false;
     }
-    static const char* className = "escompat.Date";
+    static const char* className = "std.core.Date";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         ANSR_LOGE("Failed to find class %{public}s.", className);
@@ -113,8 +113,8 @@ static bool WarpDate(int64_t time, ani_object &outObj)
     }
     ani_class cls;
     ani_status status;
-    if (ANI_OK != (status = env->FindClass("escompat.Date", &cls))) {
-        ANSR_LOGE("Failed to find class escompat.Date.");
+    if (ANI_OK != (status = env->FindClass("std.core.Date", &cls))) {
+        ANSR_LOGE("Failed to find class std.core.Date.");
         return false;
     }
     ani_method ctor;
