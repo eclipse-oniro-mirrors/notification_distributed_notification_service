@@ -211,6 +211,7 @@ private:
         ErrCode (IAnsSubscriber::*func)(Args...), Args&& ... args);
 
 private:
+    ffrt::mutex subscriberRecordListMutex_;
     std::list<std::shared_ptr<SubscriberRecord>> subscriberRecordList_ {};
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ {};
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ {};
