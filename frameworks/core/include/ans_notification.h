@@ -1481,6 +1481,23 @@ public:
      */
     ErrCode SetUserGrantedState(const NotificationBundleOption& targetBundle, bool enabled);
 
+    /**
+     * @brief Obtains reminder info of application list.
+     *
+     * @param bundles Indicates the bundles bundleOption.
+     * @param reminderInfo Indicates the bundles reminderInfo.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetReminderInfoByBundles(
+        const std::vector<NotificationBundleOption> &bundles, std::vector<NotificationReminderInfo> &reminderInfo);
+
+    /**
+     * @brief Set reminder info for application list.
+     *
+     * @param reminderInfo Indicates the bundles reminderInfo.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetReminderInfoByBundles(const std::vector<NotificationReminderInfo> &reminderInfo);
 private:
     /**
      * @brief Gets Ans Manager proxy.

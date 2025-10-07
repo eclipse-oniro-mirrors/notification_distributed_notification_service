@@ -974,5 +974,103 @@ HWTEST_F(AnsSlotServiceTest, PublishSlotChangeCommonEvent_00001, Function | Smal
     auto ret = advancedNotificationService_->PublishSlotChangeCommonEvent(nullptr);
     ASSERT_FALSE(ret);
 }
+
+/**
+ * @tc.name: GetReminderInfoByBundles_0100
+ * @tc.desc: Test GetReminderInfoByBundles
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, GetReminderInfoByBundles_0100, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    std::vector<NotificationReminderInfo> reminders;
+    std::vector<sptr<NotificationReminderInfo>> reminderInfo;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    bundles.emplace_back(bundle);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    auto ret = advancedNotificationService_->GetReminderInfoByBundles(bundles, reminders);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+
+    ret = advancedNotificationService_->SetReminderInfoByBundles(reminderInfo);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: GetReminderInfoByBundles_0200
+ * @tc.desc: Test GetReminderInfoByBundles
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, GetReminderInfoByBundles_0200, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    std::vector<NotificationReminderInfo> reminders;
+    std::vector<sptr<NotificationReminderInfo>> reminderInfo;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    bundles.emplace_back(bundle);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+
+    auto ret = advancedNotificationService_->GetReminderInfoByBundles(bundles, reminders);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+
+    ret = advancedNotificationService_->SetReminderInfoByBundles(reminderInfo);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: GetReminderInfoByBundles_0300
+ * @tc.desc: Test GetReminderInfoByBundles
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, GetReminderInfoByBundles_0300, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    std::vector<NotificationReminderInfo> reminders;
+    std::vector<sptr<NotificationReminderInfo>> reminderInfo;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    bundles.emplace_back(bundle);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+
+    auto ret = advancedNotificationService_->GetReminderInfoByBundles(bundles, reminders);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    ret = advancedNotificationService_->SetReminderInfoByBundles(reminderInfo);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetReminderInfoByBundles_0400
+ * @tc.desc: Test GetReminderInfoByBundles
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, GetReminderInfoByBundles_0400, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    std::vector<NotificationReminderInfo> reminders;
+    std::vector<sptr<NotificationReminderInfo>> reminderInfo;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    bundles.emplace_back(bundle);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    auto ret = advancedNotificationService_->GetReminderInfoByBundles(bundles, reminders);
+    ASSERT_EQ(ret, (int)ERR_OK);
+
+    ret = advancedNotificationService_->SetReminderInfoByBundles(reminderInfo);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

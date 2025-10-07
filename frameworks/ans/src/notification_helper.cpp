@@ -820,5 +820,16 @@ ErrCode NotificationHelper::SetUserGrantedState(const NotificationBundleOption& 
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetUserGrantedState(targetBundle, enabled);
 }
+
+ErrCode NotificationHelper::GetReminderInfoByBundles(
+    const std::vector<NotificationBundleOption> &bundles, std::vector<NotificationReminderInfo> &reminderInfo)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetReminderInfoByBundles(bundles, reminderInfo);
+}
+
+ErrCode NotificationHelper::SetReminderInfoByBundles(const std::vector<NotificationReminderInfo> &reminderInfo)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetReminderInfoByBundles(reminderInfo);
+}
 }  // namespace Notification
 }  // namespace OHOS

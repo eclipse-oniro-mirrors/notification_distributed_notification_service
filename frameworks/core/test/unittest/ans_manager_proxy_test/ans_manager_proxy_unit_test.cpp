@@ -7251,5 +7251,47 @@ HWTEST_F(AnsManagerProxyUnitTest, DisableNotificationFeature_0100, Function | Me
     EXPECT_EQ(res, ERR_OK);
 }
 
+/*
+ * @tc.name: GetReminderInfoByBundles_0100
+ * @tc.desc: test GetReminderInfoByBundles function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(AnsManagerProxyUnitTest, GetReminderInfoByBundles_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, GetReminderInfoByBundles_0100, TestSize.Level1";
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    std::vector<NotificationReminderInfo> reminders;
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption();
+    bundles.emplace_back(bundle);
+    int32_t result = proxy->GetReminderInfoByBundles(bundles, reminders);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
+}
+
+/*
+ * @tc.name: GetReminderInfoByBundles_0100
+ * @tc.desc: test GetReminderInfoByBundles function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(AnsManagerProxyUnitTest, SetReminderInfoByBundles_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, SetReminderInfoByBundles_0100, TestSize.Level1";
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    std::vector<sptr<NotificationReminderInfo>> reminders;
+    int32_t result = proxy->SetReminderInfoByBundles(reminders);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
+}
 }  // namespace Notification
 }  // namespace OHOS

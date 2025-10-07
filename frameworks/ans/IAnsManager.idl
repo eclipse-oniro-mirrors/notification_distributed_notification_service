@@ -19,6 +19,7 @@ interface OHOS.Notification.IAnsSubscriber;
 interface OHOS.Notification.IAnsOperationCallback;
 
 sequenceable OHOS.Notification.NotificationBundleOption;
+sequenceable OHOS.Notification.NotificationReminderInfo;
 sequenceable OHOS.Notification.DistributedBundleOption;
 sequenceable OHOS.Notification.NotificationDisable;
 sequenceable OHOS.Notification.NotificationDoNotDisturbDate;
@@ -343,6 +344,10 @@ interface OHOS.Notification.IAnsManager {
     void GetUserGrantedState([in] sptr<NotificationBundleOption> targetBundle, [out] boolean enabled);
 
     void SetUserGrantedState([in] sptr<NotificationBundleOption> targetBundle, [in] boolean enabled);
+
+    void GetReminderInfoByBundles([in] sptr<NotificationBundleOption>[] bundleOption, [out] NotificationReminderInfo[] reminderInfo);
+
+    void SetReminderInfoByBundles([in] sptr<NotificationReminderInfo>[] reminderInfo);
 
     [macrodef NOTIFICATION_SMART_REMINDER_SUPPORTED] void RegisterSwingCallback([in] IRemoteObject swingCallback);
 }

@@ -24,6 +24,7 @@
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "notification_button_option.h"
+#include "notification_reminder_info.h"
 #include "notification_local_live_view_subscriber.h"
 #include "system_ability_definition.h"
 #include "unique_fd.h"
@@ -2693,6 +2694,48 @@ ErrCode AnsNotification::SetUserGrantedState(const NotificationBundleOption& tar
         return ERR_ANS_INVALID_PARAM;
     }
     return proxy->SetUserGrantedState(bo, enabled);
+}
+
+ErrCode AnsNotification::GetReminderInfoByBundles(
+    const std::vector<NotificationBundleOption> &bundles, std::vector<NotificationReminderInfo> &reminderInfo)
+{
+    if (bundles.empty()) {
+        ANS_LOGE("Bundles is null.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    std::vector<sptr<NotificationBundleOption>> bundlesSptr;
+    bundlesSptr.reserve(bundles.size());
+    for (const auto &it : bundles) {
+        bundlesSptr.emplace_back(new (std::nothrow) NotificationBundleOption(it));
+    }
+    return proxy->GetReminderInfoByBundles(bundlesSptr, reminderInfo);
+}
+
+ErrCode AnsNotification::SetReminderInfoByBundles(const std::vector<NotificationReminderInfo> &reminderInfo)
+{
+    if (reminderInfo.empty()) {
+        ANS_LOGE("ReminderInfo is null.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    std::vector<sptr<NotificationReminderInfo>> reminderInfoSptr;
+    reminderInfoSptr.reserve(reminderInfo.size());
+    for (const auto &it : reminderInfo) {
+        reminderInfoSptr.emplace_back(new (std::nothrow) NotificationReminderInfo(it));
+    }
+    return proxy->SetReminderInfoByBundles(reminderInfoSptr);
 }
 }  // namespace Notification
 }  // namespace OHOS
