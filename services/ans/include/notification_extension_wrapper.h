@@ -54,7 +54,7 @@ public:
     typedef bool (*SET_DIALOG_OPENSUCCESS_TIMEINTERVAL)(const sptr<NotificationBundleOption>& bundleOption,
         const int32_t &userId);
     typedef void (*HANDLE_PRIVILEGE_MESSAGE)(const sptr<NotificationBundleOption>& bundleOption,
-        const sptr<NotificationRequest> &request, bool isAgentController);
+        const sptr<NotificationRequest> &request, bool isAgentController, bool isSilent);
 #endif
 
     ErrCode SyncAdditionConfig(const std::string& key, const std::string& value);
@@ -76,7 +76,7 @@ public:
     bool SetDialogOpenSuccessTimeStamp(const sptr<NotificationBundleOption>& bundleOption, const int32_t &userId);
     bool SetDialogOpenSuccessTimeInterval(const sptr<NotificationBundleOption>& bundleOption, const int32_t &userId);
     void HandlePrivilegeMessage(const sptr<NotificationBundleOption>& bundleOption,
-        const sptr<NotificationRequest> &request, bool isAgentController);
+        const sptr<NotificationRequest> &request, bool isAgentController, bool isSilent);
 #endif
 
 private:
