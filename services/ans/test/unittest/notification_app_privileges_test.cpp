@@ -14,6 +14,7 @@
  */
 #include <gtest/gtest.h>
 
+#define private public
 #include "notification_app_privileges.h"
 
 using namespace testing::ext;

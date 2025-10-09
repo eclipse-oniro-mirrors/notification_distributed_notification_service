@@ -2292,8 +2292,6 @@ bool NotificationPreferencesDatabase::GetDistributedAuthStatus(
         ANS_LOGE("Current user acquisition failed");
         return false;
     }
-    ANS_LOGD("%{public}s, deviceType: %{public}s, deviceId: %{public}s, targetUserId: %{public}d",
-        __FUNCTION__, deviceType.c_str(), StringAnonymous(deviceId).c_str(), targetUserId);
     std::string key = GenerateBundleLablel(deviceType, deviceId, targetUserId);
     bool result = false;
     isAuth = false;
@@ -2313,6 +2311,8 @@ bool NotificationPreferencesDatabase::GetDistributedAuthStatus(
                 break;
         }
     });
+    ANS_LOGI("%{public}s, deviceType: %{public}s, deviceId: %{public}s, %{public}d %{public}d %{public}d",
+        __FUNCTION__, deviceType.c_str(), StringAnonymous(deviceId).c_str(), targetUserId, userId, isAuth);
     return result;
 }
 
@@ -2381,8 +2381,8 @@ bool NotificationPreferencesDatabase::SetDistributedAuthStatus(
         ANS_LOGE("Current user acquisition failed");
         return false;
     }
-    ANS_LOGD("%{public}s, deviceType: %{public}s, deviceId: %{public}s, targetUserId: %{public}d",
-        __FUNCTION__, deviceType.c_str(), StringAnonymous(deviceId).c_str(), targetUserId);
+    ANS_LOGI("%{public}s, deviceType: %{public}s, deviceId: %{public}s, %{public}d %{public}d %{public}d",
+        __FUNCTION__, deviceType.c_str(), StringAnonymous(deviceId).c_str(), targetUserId, userId, isAuth);
     std::string key = GenerateBundleLablel(deviceType, deviceId, targetUserId);
     int32_t result = PutDataToDB(key, static_cast<int32_t>(isAuth), userId);
     ANS_LOGD("key: %{public}s, result: %{public}d", key.c_str(), result);
@@ -2391,7 +2391,7 @@ bool NotificationPreferencesDatabase::SetDistributedAuthStatus(
 
 bool NotificationPreferencesDatabase::PutDistributedDevicelist(const std::string &deviceTypes, const int32_t &userId)
 {
-    ANS_LOGD("%{public}s, deviceTypes: %{public}s, userId: %{public}d", __FUNCTION__, deviceTypes.c_str(), userId);
+    ANS_LOGI("%{public}s, deviceTypes: %{public}s, userId: %{public}d", __FUNCTION__, deviceTypes.c_str(), userId);
     if (!CheckRdbStore()) {
         ANS_LOGE("null RdbStore");
         return false;
@@ -2425,6 +2425,7 @@ bool NotificationPreferencesDatabase::GetDistributedDevicelist(std::string &devi
                 break;
         }
     });
+    ANS_LOGI("Device list %{public}d %{public}s", userId, deviceTypes.c_str());
     return result;
 }
 
