@@ -14,7 +14,8 @@
  */
 
 #include "bundle_manager_helper.h"
-
+#include "access_token_helper.h"
+#include "ans_permission_def.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "os_account_manager.h"
@@ -383,7 +384,8 @@ ErrCode BundleManagerHelper::GetBundleResourceInfo(const std::string &bundleName
     }
 
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    int32_t flag = static_cast<int32_t>(AppExecFwk::ResourceFlag::GET_RESOURCE_INFO_ALL);
+    int32_t flag = static_cast<int32_t>(AppExecFwk::ResourceFlag::GET_RESOURCE_INFO_ALL) |
+        static_cast<int32_t>(AppExecFwk::ResourceFlag::GET_RESOURCE_INFO_WITH_LABEL);
     result = bundleResourceProxy->GetBundleResourceInfo(bundleName, flag, bundleResourceInfo, appIndex);
     IPCSkeleton::SetCallingIdentity(identity);
     return result;
@@ -399,7 +401,7 @@ bool BundleManagerHelper::QueryExtensionInfos(std::vector<AppExecFwk::ExtensionA
         return false;
     }
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    bundleMgr_->QueryExtensionAbilityInfos(AppExecFwk::ExtensionAbilityType::STATICSUBSCRIBER,
+    bundleMgr_->QueryExtensionAbilityInfos(AppExecFwk::ExtensionAbilityType::NOTIFICATION_SUBSCRIBER,
         userId, extensionInfos);
     IPCSkeleton::SetCallingIdentity(identity);
     return true;
@@ -419,12 +421,21 @@ bool BundleManagerHelper::CheckBundleImplExtensionAbility(const std::string &bun
     }
     for (const auto& hapmodule : bundleInfo.hapModuleInfos) {
         for (const auto& extInfo : hapmodule.extensionInfos) {
-            if (extInfo.type == AppExecFwk::ExtensionAbilityType::STATICSUBSCRIBER) {
+            if ((extInfo.type == AppExecFwk::ExtensionAbilityType::NOTIFICATION_SUBSCRIBER) &&
+                AccessTokenHelper::VerifyCallerPermission(
+                    bundleInfo.applicationInfo.accessTokenId, OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
                 return true;
             }
         }
     }
     return false;
+}
+
+std::string BundleManagerHelper::GetBundleLabel(const std::string& bundleName)
+{
+    AppExecFwk::BundleResourceInfo bundleResourceInfo = {};
+    int32_t result = GetBundleResourceInfo(bundleName, bundleResourceInfo, 0);
+    return bundleResourceInfo.label;
 }
 }  // namespace Notification
 }  // namespace OHOS

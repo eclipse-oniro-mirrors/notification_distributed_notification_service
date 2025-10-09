@@ -26,6 +26,7 @@ ohos_unittest("ans_unit_test") {
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
     "${services_path}/../framworks/core/include",
+    "/${services_path}/ans/include/utils",
   ]
 
   defines = []
@@ -98,6 +99,7 @@ ohos_unittest("ans_unit_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (device_usage) {
@@ -188,6 +190,7 @@ ohos_unittest("notification_preferences_database_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (device_usage) {
@@ -219,6 +222,7 @@ ohos_unittest("notification_subscriber_manager_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "${services_path}/../frameworks/core/test/unittest/mock",
     "${services_path}/../framworks/core/include",
+    "/${services_path}/ans/include/utils",
   ]
 
   defines = []
@@ -283,6 +287,7 @@ ohos_unittest("notification_subscriber_manager_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (device_usage) {
@@ -384,6 +389,7 @@ ohos_unittest("notification_service_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (device_usage) {
@@ -486,6 +492,7 @@ ohos_unittest("notification_clone_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (device_usage) {
@@ -518,6 +525,7 @@ ohos_unittest("notification_publish_service_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
+    "/${services_path}/ans/include/utils",
   ]
 
   defines = []
@@ -581,6 +589,7 @@ ohos_unittest("notification_publish_service_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (device_usage) {
@@ -677,6 +686,7 @@ ohos_unittest("notification_service_publish_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (device_usage) {
@@ -725,6 +735,7 @@ ohos_unittest("notification_preferences_second_test") {
     "hitrace:hitrace_meter",
     "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
+    "bluetooth:btframework",
   ]
 
   subsystem_name = "${subsystem_name}"
@@ -803,6 +814,7 @@ ohos_unittest("notification_preferences_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (device_usage) {
@@ -870,6 +882,7 @@ ohos_unittest("access_token_helper_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -924,6 +937,7 @@ ohos_unittest("bundle_manager_helper_branch_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -980,6 +994,7 @@ ohos_unittest("notification_dialog_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -997,6 +1012,7 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
+    "/${services_path}/ans/include/utils",
   ]
 
   defines = []
@@ -1049,6 +1065,7 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1123,6 +1140,7 @@ ohos_unittest("advanced_notification_service_branch_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1140,6 +1158,7 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
+    "/${services_path}/ans/include/utils",
   ]
 
   sources = [
@@ -1184,6 +1203,7 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1234,6 +1254,7 @@ ohos_unittest("push_callback_stub_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1290,6 +1311,7 @@ ohos_unittest("notification_rdb_data_mgr_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1345,6 +1367,7 @@ ohos_unittest("notification_config_parse_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1394,6 +1417,7 @@ ohos_unittest("os_account_manager_helper_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1552,6 +1576,7 @@ ohos_unittest("advanced_notification_service_unit_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   subsystem_name = "${subsystem_name}"
@@ -1748,6 +1773,7 @@ ohos_unittest("notification_extension_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   subsystem_name = "${subsystem_name}"

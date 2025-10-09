@@ -347,6 +347,9 @@ void SmartReminderCenter::InitValidDevices(
                 ANS_LOGI("liveView smart switch is closed, deviceType = %{public}s", deviceType.c_str());
                 continue;
             }
+            if (NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE == deviceType) {
+                continue;
+            }
             if (!CheckHealthWhiteList(request, deviceType)) {
                 continue;
             }
@@ -358,6 +361,11 @@ void SmartReminderCenter::InitValidDevices(
                 NotificationConstant::SlotType::SERVICE_REMINDER != request->GetSlotType() &&
                 NotificationConstant::SlotType::CUSTOMER_SERVICE != request->GetSlotType()) {
                 ANS_LOGD("unaffect slot");
+                continue;
+            }
+            if (deviceType.compare(NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE) == 0 &&
+                !BundleManagerHelper::GetInstance()->GetBundleNameByUid(request->GetOwnerUid()).empty()) {
+                syncDevices.insert(deviceType);
                 continue;
             }
             bool distributedSwitch = GetDistributedSwitch(deviceType);

@@ -747,6 +747,16 @@ std::string NotificationRequest::GetAppInstanceKey() const
     return appInstanceKey_;
 }
 
+void NotificationRequest::SetAppName(const std::string &appName)
+{
+    appName_ = appName;
+}
+
+std::string NotificationRequest::GetAppName() const
+{
+    return appName_;
+}
+
 void NotificationRequest::SetOwnerUserId(int32_t userId)
 {
     ownerUserId_ = userId;

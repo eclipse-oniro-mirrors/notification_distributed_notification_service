@@ -1525,6 +1525,19 @@ public:
      */
     static ErrCode SetUserGrantedBundleState(const NotificationBundleOption& targetBundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled);
+
+    /**
+     * @brief Obtains the list of bundleOption which granted by user.
+     * @param bundles The returned list.
+     * @return Returns get result.
+     */
+    static ErrCode GetAllSubscriptionBundles(std::vector<sptr<NotificationBundleOption>>& bundles);
+    /**
+     * @brief Checks whether the current app is allowed to open the subscribe settings UI.
+     *
+     * @return Returns ERR_OK if allowed; otherwise returns the specific error code.
+     */
+    static ErrCode CanOpenSubscribeSettings();
 };
 }  // namespace Notification
 }  // namespace OHOS

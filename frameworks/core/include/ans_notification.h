@@ -1506,7 +1506,22 @@ public:
      */
     ErrCode SetUserGrantedBundleState(const NotificationBundleOption& targetBundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled);
+    
+    /**
+     * @brief Obtains all bundles that are available for notification extension subscription.
+     *
+     * @param bundles Indicates the returned list of bundle options.
+     * @return Returns ERR_OK on success; otherwise returns a specific error code.
+     */
+    ErrCode GetAllSubscriptionBundles(std::vector<sptr<NotificationBundleOption>>& bundles);
 
+    /**
+     * @brief Checks whether the current app is allowed to open the subscribe settings UI.
+     *
+     * @return Returns ERR_OK if allowed; otherwise returns the specific error code.
+     */
+    ErrCode CanOpenSubscribeSettings();
+    
     /**
      * @brief Obtains reminder info of application list.
      *

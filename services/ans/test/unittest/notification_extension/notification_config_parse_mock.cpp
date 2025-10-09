@@ -200,6 +200,12 @@ bool NotificationConfigParse::GetCollaborativeDeleteTypeByDevice(std::map<std::s
 {
     return true;
 }
+
+bool NotificationConfigParse::GetNotificationExtensionEnabledBundlesWriteList(
+    std::vector<std::string>& bundles) const
+{
+    return true;
+}
 } // namespace Notification
 } // namespace OHOS
 

@@ -355,5 +355,9 @@ interface OHOS.Notification.IAnsManager {
 
     void SetUserGrantedBundleState([in] sptr<NotificationBundleOption> targetBundle, [in] sptr<NotificationBundleOption>[] enabledBundles, [in] boolean enabled);
 
+    void GetAllSubscriptionBundles([out] sptr<NotificationBundleOption>[] bundles);
+    
+    void CanOpenSubscribeSettings();
+
     [macrodef NOTIFICATION_SMART_REMINDER_SUPPORTED] void RegisterSwingCallback([in] IRemoteObject swingCallback);
 }
