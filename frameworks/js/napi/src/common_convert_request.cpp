@@ -908,7 +908,7 @@ napi_value Common::GetNotificationSupportDisplayDevices(
             char str[STR_MAX_SIZE] = {0};
             NAPI_CALL(env, napi_get_value_string_utf8(env, line, str, STR_MAX_SIZE - 1, &strLen));
             devices.emplace_back(str);
-            ANS_LOGI("supportDisplayDevices = %{public}s", str);
+            ANS_LOGD("supportDisplayDevices = %{public}s", str);
         }
         request.SetDevicesSupportDisplay(devices);
     }
@@ -953,7 +953,7 @@ napi_value Common::GetNotificationSupportOperateDevices(
             char str[STR_MAX_SIZE] = {0};
             NAPI_CALL(env, napi_get_value_string_utf8(env, line, str, STR_MAX_SIZE - 1, &strLen));
             devices.emplace_back(str);
-            ANS_LOGI("supportOperateDevices = %{public}s", str);
+            ANS_LOGD("supportOperateDevices = %{public}s", str);
         }
         request.SetDevicesSupportOperate(devices);
     }
@@ -983,7 +983,7 @@ napi_value Common::GetNotificationId(const napi_env &env, const napi_value &valu
         napi_get_value_int32(env, result, &notificationId);
         request.SetNotificationId(notificationId);
     } else {
-        ANS_LOGI("default notificationId = 0");
+        ANS_LOGW("set default id");
         request.SetNotificationId(0);
     }
 
@@ -1017,7 +1017,7 @@ napi_value Common::GetNotificationSlotType(const napi_env &env, const napi_value
             return nullptr;
         }
         request.SetSlotType(outType);
-        ANS_LOGI("notificationSlotType = %{public}d", slotType);
+        ANS_LOGD("notificationSlotType=%{public}d", outType);
         return NapiGetNull(env);
     }
 
@@ -1038,9 +1038,9 @@ napi_value Common::GetNotificationSlotType(const napi_env &env, const napi_value
             return nullptr;
         }
         request.SetSlotType(outType);
-        ANS_LOGI("slotType = %{public}d", slotType);
+        ANS_LOGI("slotType=%{public}d", outType);
     } else {
-        ANS_LOGI("default slotType = OTHER");
+        ANS_LOGW("set default slotType");
         request.SetSlotType(NotificationConstant::OTHER);
     }
 

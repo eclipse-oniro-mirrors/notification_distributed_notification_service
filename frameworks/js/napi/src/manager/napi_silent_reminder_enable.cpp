@@ -121,7 +121,7 @@ napi_value NapiSetSilentReminderEnabled(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetSilentReminderEnabled(
                     asynccallbackinfo->params.option, asynccallbackinfo->params.enabled);
-                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+                ANS_LOGI("SetSilentReminder errorCode=%{public}d", asynccallbackinfo->info.errorCode);
             }
         },
         AsyncCompleteCallbackNapiSetSilentReminderEnabled,
@@ -140,7 +140,7 @@ void AsyncCompleteCallbackNapiIsSilentReminderEnabled(napi_env env, napi_status 
         ANS_LOGE("Invalid async callback data");
         return;
     }
-    ANS_LOGI("IsSmartReminderEnabled napi_create_async_work end");
+    ANS_LOGD("IsSmartReminderEnabled napi_create_async_work end");
     AsyncCallbackSilentReminderEnable *asynccallbackinfo = static_cast<AsyncCallbackSilentReminderEnable *>(data);
     if (asynccallbackinfo) {
         napi_value result = nullptr;
@@ -191,7 +191,7 @@ napi_value NapiIsSilentReminderEnabled(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsSilentReminderEnabled(
                         asynccallbackinfo->params.option, asynccallbackinfo->params.enableStatus);
-                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d, enableStatus = %{public}d",
+                ANS_LOGI("isSmartReminder code=%{public}d,status=%{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->params.enableStatus);
             }
         },

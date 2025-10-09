@@ -142,7 +142,7 @@ napi_value ParseTriggerParameters(const napi_env &env, const napi_callback_info 
         return nullptr;
     }
     napi_get_value_int32(env, argv[PARAM1], &notificationId);
-    ANS_LOGI("notificationId = %{public}d", notificationId);
+    ANS_LOGI("trigger notificationId=%{public}d", notificationId);
     asynccallbackinfo->notificationId = notificationId;
 
     // argv[2]:buttonOption

@@ -91,8 +91,8 @@ std::string ShellCommand::GetUnknownOptionMsg(std::string &unknownOption) const
 
 std::string ShellCommand::GetMessageFromCode(const int32_t code) const
 {
-    ANS_LOGI("[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
-    ANS_LOGI("code = %{public}d", code);
+    ANS_LOGD("[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
+    ANS_LOGD("code = %{public}d", code);
     std::string result = "";
     if (messageMap_.find(code) != messageMap_.end()) {
         std::string message = messageMap_.at(code);
@@ -100,7 +100,7 @@ std::string ShellCommand::GetMessageFromCode(const int32_t code) const
             result.append(message + "\n");
         }
     }
-    ANS_LOGI("result = %{public}s", result.c_str());
+    ANS_LOGD("result = %{public}s", result.c_str());
     return result;
 }
 }  // namespace Notification

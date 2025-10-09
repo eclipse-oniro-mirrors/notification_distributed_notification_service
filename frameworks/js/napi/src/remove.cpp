@@ -365,7 +365,7 @@ napi_value RemoveAll(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("RemoveAll napi_create_async_work start");
+            ANS_LOGD("RemoveAll napi_create_async_work start");
             AsyncCallbackInfoRemove *asynccallbackinfo = static_cast<AsyncCallbackInfoRemove *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.bundleAndKeyInfo.has_value()) {
@@ -381,7 +381,7 @@ napi_value RemoveAll(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("RemoveAll napi_create_async_work end");
+            ANS_LOGD("RemoveAll napi_create_async_work end");
             AsyncCallbackInfoRemove *asynccallbackinfo = static_cast<AsyncCallbackInfoRemove *>(data);
             if (asynccallbackinfo) {
                 Common::ReturnCallbackPromise(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -453,11 +453,11 @@ napi_value RemoveGroupByBundle(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGI("RemoveGroupByBundle napi_create_async_work start");
+            ANS_LOGD("RemoveGroupByBundle napi_create_async_work start");
             AsyncCallbackInfoRemoveGroupByBundle *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoRemoveGroupByBundle *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("option.bundle = %{public}s, option.uid = %{public}d, groupName = %{public}s",
+                ANS_LOGI("removeGroup bundle=%{public}s,uid=%{public}d,groupName=%{public}s",
                     asynccallbackinfo->params.option.GetBundleName().c_str(),
                     asynccallbackinfo->params.option.GetUid(),
                     asynccallbackinfo->params.groupName.c_str());

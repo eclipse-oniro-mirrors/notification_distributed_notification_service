@@ -91,7 +91,7 @@ bool AdvancedDatashareObserver::CheckIfSettingsDataReady()
     }
     std::pair<int, std::shared_ptr<DataShare::DataShareHelper>> ret =
         DataShare::DataShareHelper::Create(remoteObj, SETTING_URI_PROXY, SETTINGS_DATA_EXT_URI);
-    ANS_LOGI("create data_share helper, ret=%{public}d", ret.first);
+    ANS_LOGD("create data_share helper, ret=%{public}d", ret.first);
     if (ret.first == E_OK) {
         ANS_LOGI("create data_share helper success");
         auto helper = ret.second;
@@ -102,10 +102,11 @@ bool AdvancedDatashareObserver::CheckIfSettingsDataReady()
         isDataShareReady_ = true;
         return true;
     } else if (ret.first == E_DATA_SHARE_NOT_READY) {
+        ANS_LOGW("create data_share helper falied");
         isDataShareReady_ = false;
         return false;
     }
-    ANS_LOGI("data_share unknown.");
+    ANS_LOGD("data_share unknown.");
     return true;
 }
 

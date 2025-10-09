@@ -138,7 +138,7 @@ napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
             AsyncCallbackInfoRemoveGroupByBundle *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoRemoveGroupByBundle *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("option.bundle:%{public}s, option.uid:%{public}d, groupName:%{public}s",
+                ANS_LOGI("removeGroup bundle:%{public}s,uid:%{public}d,groupName:%{public}s",
                     asynccallbackinfo->params.option.GetBundleName().c_str(),
                     asynccallbackinfo->params.option.GetUid(),
                     asynccallbackinfo->params.groupName.c_str());

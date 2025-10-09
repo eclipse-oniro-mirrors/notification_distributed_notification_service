@@ -183,7 +183,7 @@ ErrCode NotificationPreferences::RemoveNotificationAllSlots(const sptr<Notificat
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
         message.ErrorCode(result).Append(" Remove all slot successful.");
-        ANS_LOGI("%{public}s_%{public}d, Remove successful.",
+        ANS_LOGD("%{public}s_%{public}d, Remove all successful.",
             bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
     }
     NotificationAnalyticsUtil::ReportModifyEvent(message);
@@ -683,7 +683,7 @@ ErrCode NotificationPreferences::UpdateDoNotDisturbProfiles(int32_t userId, int6
 void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
     const NotificationCloneBundleInfo& cloneBundleInfo)
 {
-    ANS_LOGI("Event bundle update %{public}s.", cloneBundleInfo.Dump().c_str());
+    ANS_LOGD("Event bundle update %{public}s.", cloneBundleInfo.Dump().c_str());
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     if (bundleOption == nullptr) {
@@ -1751,7 +1751,7 @@ uint32_t NotificationPreferences::GetHashCodeRule(const int32_t uid)
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     uint32_t result = 0;
     result = preferncesDB_->GetHashCodeRule(uid);
-    ANS_LOGI("uid = %{public}d result = %{public}d", uid, result);
+    ANS_LOGD("uid = %{public}d result = %{public}d", uid, result);
     return result;
 }
 

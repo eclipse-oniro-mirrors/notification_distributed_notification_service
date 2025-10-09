@@ -480,8 +480,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
         return ERR_ANS_INVALID_BUNDLE;
     }
     SetClassificationWithVoip(request);
-    ANS_LOGI(
-        "bundleName=%{public}s, uid=%{public}d", (bundleOption->GetBundleName()).c_str(), bundleOption->GetUid());
+    ANS_LOGI("prepareNotificationInfo bundleName=%{public}s,uid=%{public}d",
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
 
     SetRequestBySlotType(request, bundleOption);
     return ERR_OK;
@@ -656,7 +656,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    ANS_LOGI("called");
+    ANS_LOGD("called");
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
@@ -823,14 +823,14 @@ void AdvancedNotificationService::ReportDoNotDisturbModeChanged(const int32_t &u
     auto it = doNotDisturbEnableRecord_.find(userId);
     if (it != doNotDisturbEnableRecord_.end()) {
         if (it->second != enable) {
-            ANS_LOGI("%{public}s", info.c_str());
+            ANS_LOGD("%{public}s", info.c_str());
             message.Message(info);
             NotificationAnalyticsUtil::ReportModifyEvent(message);
             doNotDisturbEnableRecord_.insert_or_assign(userId, enable);
         }
     } else {
         if (enable == DO_NOT_DISTURB_MODE) {
-            ANS_LOGI("%{public}s", info.c_str());
+            ANS_LOGD("%{public}s", info.c_str());
             message.Message(info);
             NotificationAnalyticsUtil::ReportModifyEvent(message);
         }
@@ -864,7 +864,7 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
         record->request->SetNotificationControlFlags(notificationControlFlags | CONTROL_BY_DO_NOT_DISTURB_MODE);
     }
     std::string bundleName = record->bundleOption->GetBundleName();
-    ANS_LOGI("The disturbMode is on, userId:%{public}d, bundle:%{public}s, profileId:%{public}s",
+    ANS_LOGI("The disturbMode is on,userId:%{public}d,bundle:%{public}s,profileId:%{public}s",
         userId, bundleName.c_str(), profileId.c_str());
     if (record->request->IsCommonLiveView() || record->request->GetClassification() == ANS_VERIFICATION_CODE) {
         std::string intelligentExperience;
@@ -925,8 +925,7 @@ void AdvancedNotificationService::DoNotDisturbUpdataReminderFlags(const std::sha
     record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
     record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
     record->notification->SetEnableVibration(false);
-    ANS_LOGI("SetFlags-DoNotDisturb, notificationKey = %{public}s flags = %{public}d",
-        record->request->GetKey().c_str(), record->request->GetFlags()->GetReminderFlags());
+    ANS_LOGI("SetFlags-DoNotDisturb, flags=%{public}d", record->request->GetFlags()->GetReminderFlags());
 }
 
 ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<NotificationRecord> &record)
@@ -1090,8 +1089,7 @@ void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::sh
         (notificationControlFlags & NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG) != 0) {
         record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG, false);
     }
-    ANS_LOGI("SetFlags-control, notificationKey = %{public}s flags = %{public}d",
-        record->request->GetKey().c_str(), record->request->GetFlags()->GetReminderFlags());
+    ANS_LOGI("SetFlags-control,flags=%{public}d", record->request->GetFlags()->GetReminderFlags());
 }
 
 ErrCode AdvancedNotificationService::CheckPublishPreparedNotification(
@@ -1617,17 +1615,17 @@ ErrCode AdvancedNotificationService::RegisterPushCallbackTokenCheck()
 {
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGW("Not system app or SA!");
+        ANS_LOGE("Not system app or SA!");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
-        ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER approval!");
+        ANS_LOGE("Not have OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER approval!");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
+        ANS_LOGE("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
         return ERR_ANS_PERMISSION_DENIED;
     }
     return ERR_OK;
@@ -1642,13 +1640,13 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
         return result;
     }
     if (pushCallback == nullptr) {
-        ANS_LOGW("pushCallback is null.");
+        ANS_LOGE("pushCallback is null.");
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_INVALID_VALUE));
         return ERR_INVALID_VALUE;
     }
 
     if (notificationCheckRequest == nullptr) {
-        ANS_LOGW("notificationCheckRequest is null.");
+        ANS_LOGE("notificationCheckRequest is null.");
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_INVALID_VALUE).BranchId(BRANCH_18));
         return ERR_INVALID_VALUE;
     }
@@ -1687,17 +1685,17 @@ ErrCode AdvancedNotificationService::UnregisterPushCallback()
 {
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_13);
     if (!AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGW("Not system app!");
+        ANS_LOGE("Not system app!");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
-        ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER Permission!");
+        ANS_LOGE("Not have OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER Permission!");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
+        ANS_LOGE("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1727,21 +1725,21 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
         auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content->GetNotificationContent());
         auto status = liveViewContent->GetLiveViewStatus();
         if (status != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE) {
-            ANS_LOGI("Status of common live view is not create, no need to check.");
+            ANS_LOGD("Status of common live view is not create, no need to check.");
             return false;
         }
 
-        ANS_LOGI("Common live view requires push check.");
+        ANS_LOGD("Common live view requires push check.");
         return true;
     }
 
     if (pushCallBacks_.find(slotType) == pushCallBacks_.end()) {
-        ANS_LOGI("PushCallback unregistered");
+        ANS_LOGD("PushCallback unregistered");
         return false;
     }
 
     if (contentType == checkRequests_[slotType]->GetContentType()) {
-        ANS_LOGI("Need push check.");
+        ANS_LOGD("Need push check.");
         return true;
     }
     return false;
@@ -2048,11 +2046,11 @@ ErrCode AdvancedNotificationService::RegisterSwingCallback(const sptr<IRemoteObj
 {
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem) {
-        ANS_LOGW("Not SA!");
+        ANS_LOGE("Not SA!");
         return ERR_ANS_NON_SYSTEM_APP;
     }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
+        ANS_LOGE("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
         return ERR_ANS_PERMISSION_DENIED;
     }
     return ReminderSwingDecisionCenter::GetInstance().RegisterSwingCallback(swingCallback);

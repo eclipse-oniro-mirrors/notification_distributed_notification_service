@@ -46,7 +46,7 @@ NotificationCloneBundle::~NotificationCloneBundle()
 
 ErrCode NotificationCloneBundle::OnBackup(nlohmann::json &jsonObject)
 {
-    ANS_LOGI("called");
+    ANS_LOGI("NotificationCloneBundle OnBackup");
     int32_t userId = NotificationCloneUtil::GetActiveUserId();
     std::vector<NotificationCloneBundleInfo> cloneBundles;
     NotificationPreferences::GetInstance()->GetAllCLoneBundlesInfo(userId, cloneBundles);
@@ -68,7 +68,7 @@ ErrCode NotificationCloneBundle::OnBackup(nlohmann::json &jsonObject)
 
 void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
 {
-    ANS_LOGI("called");
+    ANS_LOGI("NotificationCloneBundle OnRestore");
     if (jsonObject.is_null() || !jsonObject.is_array()) {
         ANS_LOGI("Notification disturb profile list is null or not array.");
         return;
@@ -105,7 +105,7 @@ void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
 
     NotificationPreferences::GetInstance()->UpdateBatchCloneBundleInfo(userId, bundlesInfo_);
     for (auto bundle = bundlesInfo_.begin(); bundle != bundlesInfo_.end(); bundle++) {
-        ANS_LOGI("Event bundle left %{public}s.", bundle->Dump().c_str());
+        ANS_LOGD("Event bundle left %{public}s.", bundle->Dump().c_str());
     }
     ANS_LOGD("end");
 }
@@ -130,7 +130,7 @@ void NotificationCloneBundle::OnRestoreStart(const std::string bundleName, int32
         }
         bundle++;
     }
-    ANS_LOGI("Event bundle left %{public}zu.", bundlesInfo_.size());
+    ANS_LOGD("Event bundle left %{public}zu.", bundlesInfo_.size());
 }
 
 void NotificationCloneBundle::OnUserSwitch(int32_t userId)
@@ -145,7 +145,7 @@ void NotificationCloneBundle::OnUserSwitch(int32_t userId)
         bundlesInfo_.clear();
         NotificationPreferences::GetInstance()->GetAllCloneBundleInfo(userId, bundlesInfo_);
         for (auto bundle = bundlesInfo_.begin(); bundle != bundlesInfo_.end(); bundle++) {
-            ANS_LOGI("Event bundle OnUserSwitch %{public}s.", bundle->Dump().c_str());
+            ANS_LOGD("Event bundle OnUserSwitch %{public}s.", bundle->Dump().c_str());
         }
     }));
 }

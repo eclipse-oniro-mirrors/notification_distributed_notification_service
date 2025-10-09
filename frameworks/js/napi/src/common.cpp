@@ -481,7 +481,7 @@ napi_value Common::GetNotificationUserInputByInputKey(
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
-    ANS_LOGI("NotificationUserInput::inputKey = %{public}s", str);
+    ANS_LOGD("NotificationUserInput::inputKey = %{public}s", str);
     userInput = NotificationUserInput::Create(str);
     if (!userInput) {
         ANS_LOGE("Failed to create NotificationUserInput by inputKey=%{public}s", str);
@@ -519,7 +519,7 @@ napi_value Common::GetNotificationUserInputByTag(
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
     userInput->SetTag(str);
-    ANS_LOGI("NotificationUserInput::tag = %{public}s", str);
+    ANS_LOGD("NotificationUserInput::tag = %{public}s", str);
 
     return NapiGetNull(env);
 }
@@ -646,7 +646,7 @@ napi_value Common::GetNotificationUserInputByPermitFreeFormInput(
             return nullptr;
         }
         napi_get_value_bool(env, value, &permitFreeFormInput);
-        ANS_LOGI("permitFreeFormInput is: %{public}d", permitFreeFormInput);
+        ANS_LOGD("permitFreeFormInput is: %{public}d", permitFreeFormInput);
         userInput->SetPermitFreeFormInput(permitFreeFormInput);
     }
 
@@ -846,7 +846,7 @@ napi_value Common::GetNotificationSlotByString(const napi_env &env, const napi_v
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, nobj, str, STR_MAX_SIZE - 1, &strLen));
         desc = str;
-        ANS_LOGI("desc is: %{public}s", desc.c_str());
+        ANS_LOGD("desc is: %{public}s", desc.c_str());
         slot.SetDescription(desc);
     }
 
@@ -865,7 +865,7 @@ napi_value Common::GetNotificationSlotByString(const napi_env &env, const napi_v
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, nobj, str, STR_MAX_SIZE - 1, &strLen));
         sound = str;
-        ANS_LOGI("sound is: %{public}s", sound.c_str());
+        ANS_LOGD("sound is: %{public}s", sound.c_str());
         slot.SetSound(Uri(sound));
     }
 
@@ -892,7 +892,7 @@ napi_value Common::GetNotificationSlotByBool(const napi_env &env, const napi_val
             return nullptr;
         }
         napi_get_value_bool(env, nobj, &badgeFlag);
-        ANS_LOGI("badgeFlag is: %{public}d", badgeFlag);
+        ANS_LOGD("badgeFlag is: %{public}d", badgeFlag);
         slot.EnableBadge(badgeFlag);
     }
 
@@ -909,7 +909,7 @@ napi_value Common::GetNotificationSlotByBool(const napi_env &env, const napi_val
             return nullptr;
         }
         napi_get_value_bool(env, nobj, &bypassDnd);
-        ANS_LOGI("bypassDnd is: %{public}d", bypassDnd);
+        ANS_LOGD("bypassDnd is: %{public}d", bypassDnd);
         slot.EnableBypassDnd(bypassDnd);
     }
 
@@ -926,7 +926,7 @@ napi_value Common::GetNotificationSlotByBool(const napi_env &env, const napi_val
             return nullptr;
         }
         napi_get_value_bool(env, nobj, &lightEnabled);
-        ANS_LOGI("lightEnabled is: %{public}d", lightEnabled);
+        ANS_LOGD("lightEnabled is: %{public}d", lightEnabled);
         slot.SetEnableLight(lightEnabled);
     }
 
@@ -954,7 +954,7 @@ napi_value Common::GetNotificationSlotByNumber(const napi_env &env, const napi_v
             return nullptr;
         }
         napi_get_value_int32(env, nobj, &inLevel);
-        ANS_LOGI("level is: %{public}d", inLevel);
+        ANS_LOGD("level is: %{public}d", inLevel);
 
         NotificationSlot::NotificationLevel outLevel {NotificationSlot::NotificationLevel::LEVEL_NONE};
         if (!AnsEnumUtil::SlotLevelJSToC(SlotLevel(inLevel), outLevel)) {
@@ -976,7 +976,7 @@ napi_value Common::GetNotificationSlotByNumber(const napi_env &env, const napi_v
             return nullptr;
         }
         napi_get_value_int32(env, nobj, &lockscreenVisibility);
-        ANS_LOGI("lockscreenVisibility is: %{public}d", lockscreenVisibility);
+        ANS_LOGD("lockscreenVisibility is: %{public}d", lockscreenVisibility);
         slot.SetLockscreenVisibleness(NotificationConstant::VisiblenessType(lockscreenVisibility));
     }
 
@@ -993,7 +993,7 @@ napi_value Common::GetNotificationSlotByNumber(const napi_env &env, const napi_v
             return nullptr;
         }
         napi_get_value_int32(env, nobj, &lightColor);
-        ANS_LOGI("lightColor is: %{public}d", lightColor);
+        ANS_LOGD("lightColor is: %{public}d", lightColor);
         slot.SetLedLightColor(lightColor);
     }
     return NapiGetNull(env);

@@ -986,7 +986,7 @@ napi_value Common::GetMessageUserByString(const napi_env &env, const napi_value 
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, nameResult, str, STR_MAX_SIZE - 1, &strLen));
     messageUser.SetName(str);
-    ANS_LOGI("MessageUser::name = %{public}s", str);
+    ANS_LOGD("MessageUser::name = %{public}s", str);
 
     // key: string
     NAPI_CALL(env, napi_has_named_property(env, result, "key", &hasProperty));
@@ -1005,7 +1005,7 @@ napi_value Common::GetMessageUserByString(const napi_env &env, const napi_value 
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, keyResult, str, STR_MAX_SIZE - 1, &strLen));
     messageUser.SetKey(str);
-    ANS_LOGI("MessageUser::key = %{public}s", str);
+    ANS_LOGD("MessageUser::key = %{public}s", str);
 
     // uri: string
     NAPI_CALL(env, napi_has_named_property(env, result, "uri", &hasProperty));
@@ -1073,7 +1073,7 @@ napi_value Common::GetMessageUserByBool(const napi_env &env, const napi_value &r
     bool important = false;
     napi_get_value_bool(env, importantResult, &important);
     messageUser.SetUserAsImportant(important);
-    ANS_LOGI("MessageUser::isUserImportant = %{public}d", important);
+    ANS_LOGD("MessageUser::isUserImportant = %{public}d", important);
 
     return NapiGetNull(env);
 }
@@ -1164,7 +1164,7 @@ napi_value Common::GetNotificationConversationalContentGroup(
     bool conversationGroup = false;
     napi_get_value_bool(env, conversationalContentResult, &conversationGroup);
     conversationalContent->SetConversationGroup(conversationGroup);
-    ANS_LOGI("conversationalText::conversationGroup = %{public}d", conversationGroup);
+    ANS_LOGD("conversationalText::conversationGroup = %{public}d", conversationGroup);
 
     return NapiGetNull(env);
 }
@@ -1257,7 +1257,7 @@ napi_value Common::GetConversationalMessageBasicInfo(const napi_env &env, const 
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, textResult, commonStr, COMMON_TEXT_SIZE - 1, &strLen));
     text = commonStr;
-    ANS_LOGI("conversationalMessage::text = %{public}s", commonStr);
+    ANS_LOGD("conversationalMessage::text = %{public}s", commonStr);
 
     // timestamp: number
     NAPI_CALL(env, napi_has_named_property(env, conversationalMessage, "timestamp", &hasProperty));
@@ -1273,7 +1273,7 @@ napi_value Common::GetConversationalMessageBasicInfo(const napi_env &env, const 
         return nullptr;
     }
     napi_get_value_int64(env, timestampResult, &timestamp);
-    ANS_LOGI("conversationalMessage::timestamp = %{public}" PRId64, timestamp);
+    ANS_LOGD("conversationalMessage::timestamp = %{public}" PRId64, timestamp);
 
     // sender: MessageUser
     NAPI_CALL(env, napi_has_named_property(env, conversationalMessage, "sender", &hasProperty));
@@ -1328,7 +1328,7 @@ napi_value Common::GetConversationalMessageOtherInfo(const napi_env &env, const 
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, mimeTypeResult, str, STR_MAX_SIZE - 1, &strLen));
     mimeType = str;
-    ANS_LOGI("conversationalMessage::mimeType = %{public}s", str);
+    ANS_LOGD("conversationalMessage::mimeType = %{public}s", str);
 
     // uri?: string
     NAPI_CALL(env, napi_has_named_property(env, conversationalMessage, "uri", &hasProperty));
@@ -1481,7 +1481,7 @@ napi_value Common::GetNotificationMultiLineContentLines(const napi_env &env, con
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, line, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
         multiLineContent->AddSingleLine(shortStr);
-        ANS_LOGI("multiLine: lines : addSingleLine = %{public}s", shortStr);
+        ANS_LOGD("multiLine: lines : addSingleLine = %{public}s", shortStr);
     }
 
     return NapiGetNull(env);

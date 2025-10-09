@@ -115,7 +115,7 @@ void ModalExtensionCallback::OnReceive(const AAFwk::WantParams& receive)
  */
 void ModalExtensionCallback::OnRelease(int32_t releaseCode)
 {
-    ANS_LOGI("OnRelease");
+    ANS_LOGD("OnRelease");
     ReleaseOrErrorHandle(releaseCode);
 }
 

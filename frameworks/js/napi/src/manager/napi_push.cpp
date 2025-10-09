@@ -70,7 +70,7 @@ napi_value NapiPush::OnRegisterPushCallback(napi_env env, const napi_callback_in
     napi_value argv[ARGC_THREE] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, NULL));
     if (argc == ARGC_TWO) {
-        ANS_LOGI("Old function param, don't need register.");
+        ANS_LOGE("Old function param, don't need register.");
         return undefined;
     }
     if (argc < ARGC_THREE) {

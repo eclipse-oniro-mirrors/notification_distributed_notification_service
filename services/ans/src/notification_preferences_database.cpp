@@ -657,7 +657,7 @@ void NotificationPreferencesDatabase::GetValueFromDisturbeDB(
     std::string value;
     int32_t result = rdbDataManager_->QueryData(key, value, userId);
     if (result == NativeRdb::E_ERROR) {
-        ANS_LOGE("Get value failed, use default value. error code is %{public}d", result);
+        ANS_LOGE("Get %{public}s failed,code is %{public}d", key.c_str(), result);
         return;
     }
     callback(value);
@@ -2647,7 +2647,7 @@ bool NotificationPreferencesDatabase::UpdateBundleSlotToDisturbeDB(int32_t userI
         return false;
     }
     if (slots.empty()) {
-        ANS_LOGI("Slot is empty.");
+        ANS_LOGW("Slot is empty.");
         return true;
     }
 
@@ -2859,7 +2859,7 @@ bool NotificationPreferencesDatabase::GetDisableNotificationInfo(NotificationDis
     std::string value;
     int32_t result = rdbDataManager_->QueryData(KEY_DISABLE_NOTIFICATION, value, ZERO_USER_ID);
     if (result != NativeRdb::E_OK) {
-        ANS_LOGE("query data failed");
+        ANS_LOGE("query disableNotificationInfo failed");
         return false;
     }
     notificationDisable.FromJson(value);
@@ -2876,7 +2876,7 @@ bool NotificationPreferencesDatabase::GetUserDisableNotificationInfo(
     std::string value;
     int32_t result = rdbDataManager_->QueryData(KEY_DISABLE_NOTIFICATION, value, userId);
     if (result != NativeRdb::E_OK) {
-        ANS_LOGE("query data failed");
+        ANS_LOGE("query userDisableNotificationInfo failed");
         return false;
     }
     notificationDisable.FromJson(value);
@@ -2892,7 +2892,7 @@ void NotificationPreferencesDatabase::GetDisableNotificationInfo(NotificationPre
     std::string value;
     int32_t result = rdbDataManager_->QueryData(KEY_DISABLE_NOTIFICATION, value, ZERO_USER_ID);
     if (result != NativeRdb::E_OK) {
-        ANS_LOGE("query data failed");
+        ANS_LOGE("query disableNotificationInfo failed");
         return;
     }
     info.AddDisableNotificationInfo(value);
@@ -3008,7 +3008,7 @@ bool NotificationPreferencesDatabase::SetHashCodeRule(const int32_t uid, const u
     ANS_LOGD("%{public}s, %{public}d,", __FUNCTION__, type);
     int32_t userId = SUBSCRIBE_USER_INIT;
     OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
-    ANS_LOGI("userId = %{public}d", userId);
+    ANS_LOGD("userId = %{public}d", userId);
     if (userId == SUBSCRIBE_USER_INIT) {
         ANS_LOGE("Current user acquisition failed");
         return false;
@@ -3120,7 +3120,7 @@ bool NotificationPreferencesDatabase::GetBundleRemoveFlag(const sptr<Notificatio
         }
     });
 
-    ANS_LOGI("Get current remove flag %{public}s,%{public}s,%{public}d", key.c_str(), result.c_str(), existFlag);
+    ANS_LOGD("Get current remove flag %{public}s,%{public}s,%{public}d", key.c_str(), result.c_str(), existFlag);
     if (!existFlag || result == KEY_REMOVED_FLAG) {
         return false;
     }

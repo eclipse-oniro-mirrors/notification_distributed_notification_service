@@ -507,7 +507,7 @@ int32_t NotificationDataMgr::DeleteData(const std::string tableName, const std::
         RestoreForMasterSlaver();
     }
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGW("Delete operation failed from %{public}s, result: %{public}d, key=%{public}s.",
+        ANS_LOGD("Delete operation failed from %{public}s, result: %{public}d, key=%{public}s.",
             tableName.c_str(), ret, key.c_str());
         message.ErrorCode(ret).Message("Delete operation failed.");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
@@ -545,7 +545,7 @@ int32_t NotificationDataMgr::DeleteBatchData(const std::vector<std::string> &key
                     RestoreForMasterSlaver();
                 }
                 if (ret != NativeRdb::E_OK) {
-                    ANS_LOGW("Delete operation failed from %{public}s, result: %{public}d.",
+                    ANS_LOGD("Delete operation failed from %{public}s, result: %{public}d.",
                         tableName.c_str(), ret);
                     return NativeRdb::E_ERROR;
                 }
@@ -590,10 +590,10 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
         RestoreForMasterSlaver();
     }
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGW("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
+        ANS_LOGD("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
             tableName.c_str(), key.c_str());
             if (ret != NativeRdb::E_ROW_OUT_RANGE) {
-                ANS_LOGW("GoToFirstRow failed, rdb error is %{public}d.", ret);
+                ANS_LOGD("GoToFirstRow failed, rdb error is %{public}d.", ret);
                 message.ErrorCode(ret).Message("GoToFirstRow failed.");
                 NotificationAnalyticsUtil::ReportModifyEvent(message);
             }
@@ -649,10 +649,10 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
         RestoreForMasterSlaver();
     }
     if (ret != NativeRdb::E_OK) {
-        ANS_LOGW("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
+        ANS_LOGD("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
             tableName.c_str(), key.c_str());
         if (ret != NativeRdb::E_ROW_OUT_RANGE) {
-            ANS_LOGW("GoToFirstRow failed, rdb error is %{public}d.", ret);
+            ANS_LOGD("GoToFirstRow failed, rdb error is %{public}d.", ret);
             message.ErrorCode(ret).Message("GoToFirstRow failed.");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
         }
