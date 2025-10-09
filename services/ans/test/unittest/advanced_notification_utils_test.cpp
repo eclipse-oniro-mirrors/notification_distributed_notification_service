@@ -712,6 +712,11 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00001, Function | SmallTest | Level
     cloneBundleInfo.SetIsShowBadge(true);
     cloneBundleInfo.SetEnableNotification(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     cloneBundleInfo.SetSlotFlags(63);
+    std::vector<sptr<NotificationBundleOption>> extensionBundles = {
+        new NotificationBundleOption("extension.bundle1", 0),
+        new NotificationBundleOption("extension.bundle2", 0)
+    };
+    cloneBundleInfo.SetExtensionSubscriptionBundles(extensionBundles);
     NotificationCloneBundleInfo::SlotInfo info;
     info.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
     info.enable_ = true;
@@ -722,6 +727,12 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00001, Function | SmallTest | Level
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
     ASSERT_EQ(static_cast<int32_t>(state), 1);
+    std::vector<sptr<NotificationBundleOption>> resultBundles;
+    NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundle, resultBundles);
+    ASSERT_EQ(resultBundles.size(), extensionBundles.size());
+    for (size_t i = 0; i < extensionBundles.size(); ++i) {
+        ASSERT_EQ(resultBundles[i]->GetBundleName(), extensionBundles[i]->GetBundleName());
+    }
 }
 
 /**
@@ -739,6 +750,10 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00002, Function | SmallTest | Level
     cloneBundleInfo.SetIsShowBadge(true);
     cloneBundleInfo.SetEnableNotification(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     cloneBundleInfo.SetSlotFlags(63);
+    std::vector<sptr<NotificationBundleOption>> extensionBundles = {
+        new NotificationBundleOption("extension.bundle3", 0)
+    };
+    cloneBundleInfo.SetExtensionSubscriptionBundles(extensionBundles);
     NotificationCloneBundleInfo::SlotInfo info;
     info.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
     info.enable_ = true;
@@ -750,6 +765,9 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00002, Function | SmallTest | Level
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
     ASSERT_EQ(static_cast<int32_t>(state), 0);
+    std::vector<sptr<NotificationBundleOption>> resultBundles;
+    NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundle, resultBundles);
+    ASSERT_TRUE(resultBundles.empty());
 }
 
 /**

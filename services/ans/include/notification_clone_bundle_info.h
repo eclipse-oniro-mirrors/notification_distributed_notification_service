@@ -71,11 +71,15 @@ public:
     void SetExtensionSubscriptionInfos(const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
     const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& GetExtensionSubscriptionInfos() const;
 
+    void SetExtensionSubscriptionBundles(const std::vector<sptr<NotificationBundleOption>>& bundles);
+    const std::vector<sptr<NotificationBundleOption>>& GetExtensionSubscriptionBundles() const;
+
     void ToJson(nlohmann::json &jsonObject) const;
     void FromJson(const nlohmann::json &root);
     void SlotsFromJson(const nlohmann::json &jsonObject);
     void SubscriptionInfosFromJson(const nlohmann::json &jsonObject);
     void ExtensionSubscriptionFromJson(const nlohmann::json &jsonObject);
+    void SubscriptionBundlesFromJson(const nlohmann::json &jsonObject);
     std::string Dump() const;
 
 private:
@@ -90,6 +94,7 @@ private:
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> extensionSubscriptionInfos_;
     NotificationConstant::SWITCH_STATE enabledExtensionSubscription_ =
         NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    std::vector<sptr<NotificationBundleOption>> extensionSubscriptionBundles_;
 };
 } // namespace Notification
 } // namespace OHOS

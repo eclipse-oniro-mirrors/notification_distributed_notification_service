@@ -1478,6 +1478,14 @@ public:
 
     ErrCode SetUserGrantedState(const sptr<NotificationBundleOption>& targetBundle, bool enabled) override;
 
+    ErrCode GetUserGrantedEnabledBundles(const sptr<NotificationBundleOption>& targetBundle,
+        std::vector<sptr<NotificationBundleOption>>& enabledBundles) override;
+
+    ErrCode GetUserGrantedEnabledBundlesForSelf(std::vector<sptr<NotificationBundleOption>>& bundles) override;
+
+    ErrCode SetUserGrantedBundleState(const sptr<NotificationBundleOption>& targetBundle,
+        const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled) override;
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
@@ -1857,8 +1865,11 @@ private:
         const sptr<NotificationBundleOption> &bundleOption, const AppExecFwk::BundleInfo &bundleInfo);
     ErrCode DistributeOperationInner(const sptr<NotificationOperationInfo>& operationInfo);
 
-    bool HasExtensionSubscriptionStateChanged(
-        const sptr<NotificationBundleOption> &bundle, bool enabled);
+    bool HasExtensionSubscriptionStateChanged(const sptr<NotificationBundleOption> &bundle, bool enabled);
+    bool HasGrantedBundleStateChanged(const sptr<NotificationBundleOption>& bundle,
+        const std::vector<sptr<NotificationBundleOption>>& enabledBundles);
+    bool HasExtensionSubscriptionInfosChanged(const sptr<NotificationBundleOption> &bundle,
+        const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
     ErrCode PreReminderInfoCheck();
 private:
     static sptr<AdvancedNotificationService> instance_;

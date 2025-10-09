@@ -49,6 +49,8 @@ static const std::unordered_map<int32_t, std::string> ANS_ERROR_CODE_MESSAGE_MAP
     {ERROR_REJECTED_WITH_DISABLE_NOTIFICATION,
         "The application is not allowed to send notifications due to permission settings"},
     {ERROR_DISTRIBUTED_OPERATION_TIMEOUT, "Distributed operation timeout"},
+    {ERROR_BUNDLE_INVALID, "The specified bundle is invalid"},
+    {ERROR_NOT_IMPL_EXTENSIONABILITY, "App Not Implement NotificationSubscriberExtensionAbility"},
 };
 
 static std::vector<std::pair<uint32_t, int32_t>> errorsConvert = {

@@ -583,6 +583,14 @@ public:
         NotificationConstant::SWITCH_STATE &state);
     ErrCode SetExtensionSubscriptionEnabled(const sptr<NotificationBundleOption> &bundleOption,
         NotificationConstant::SWITCH_STATE state);
+    ErrCode GetExtensionSubscriptionBundles(
+        const sptr<NotificationBundleOption>& bundleOption, std::vector<sptr<NotificationBundleOption>>& bundles);
+    ErrCode SetExtensionSubscriptionBundles(
+        const sptr<NotificationBundleOption>& bundleOption, const std::vector<sptr<NotificationBundleOption>>& bundles);
+    ErrCode AddExtensionSubscriptionBundles(
+        const sptr<NotificationBundleOption>& bundleOption, const std::vector<sptr<NotificationBundleOption>>& bundles);
+    ErrCode RemoveExtensionSubscriptionBundles(
+        const sptr<NotificationBundleOption>& bundleOption, const std::vector<sptr<NotificationBundleOption>>& bundles);
 
 private:
     bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,

@@ -461,6 +461,41 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetExtensionSubscribeManagerProxy(sptr<NotificationBundleOption>& proxy)
+    {
+        proxy = nullptr;
+        return ERR_OK;
+    }
+
+    ErrCode GetSubscribeInfo(
+        std::vector<sptr<NotificationBundleOption>>& subscriptionInfos)
+    {
+        return ERR_OK;
+    }
+
+    ErrCode GetAllSubscriptionBundles(std::vector<sptr<NotificationBundleOption>>& bundles)
+    {
+        return ERR_OK;
+    }
+
+    ErrCode GetUserGrantedEnabledBundles(const sptr<NotificationBundleOption>& bundleOption,
+        std::vector<sptr<NotificationBundleOption>>& enabledBundles)
+    {
+        enabledBundles.clear();
+        return ERR_OK;
+    }
+
+    ErrCode GetUserGrantedEnabledBundlesForSelf(std::vector<sptr<NotificationBundleOption>>& bundles)
+    {
+        return ERR_OK;
+    }
+
+    ErrCode SetUserGrantedBundleState(const sptr<NotificationBundleOption>& bundleOption,
+        const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled)
+    {
+        return ERR_OK;
+    }
+
     ErrCode GetDeviceRemindType(int32_t& remindTypeInt) override
     {
         return ERR_ANS_INVALID_PARAM;

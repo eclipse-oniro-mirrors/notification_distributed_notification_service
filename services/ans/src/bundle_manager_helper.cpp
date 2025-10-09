@@ -388,5 +388,43 @@ ErrCode BundleManagerHelper::GetBundleResourceInfo(const std::string &bundleName
     IPCSkeleton::SetCallingIdentity(identity);
     return result;
 }
+
+bool BundleManagerHelper::QueryExtensionInfos(std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos,
+    int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
+    Connect();
+    if (bundleMgr_ == nullptr) {
+        ANS_LOGE("QueryExtensionInfos bundle proxy failed.");
+        return false;
+    }
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    bundleMgr_->QueryExtensionAbilityInfos(AppExecFwk::ExtensionAbilityType::STATICSUBSCRIBER,
+        userId, extensionInfos);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return true;
+}
+
+bool BundleManagerHelper::CheckBundleImplExtensionAbility(const std::string &bundleName, int32_t userId)
+{
+    auto flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION)
+        | static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE)
+        | static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY)
+        | static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY);
+
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
+        ANS_LOGE("GetBundleInfoV9 error, bundleName = %{public}s uid = %{public}d", bundleInfo.name.c_str(),
+            bundleInfo.uid);
+    }
+    for (const auto& hapmodule : bundleInfo.hapModuleInfos) {
+        for (const auto& extInfo : hapmodule.extensionInfos) {
+            if (extInfo.type == AppExecFwk::ExtensionAbilityType::STATICSUBSCRIBER) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 }  // namespace Notification
 }  // namespace OHOS

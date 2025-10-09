@@ -98,6 +98,8 @@ enum ErrorCode : uint32_t {
     ERR_ANS_OPERATION_TIMEOUT,
     ERR_ANS_LOCAL_SUBSCRIBE_CHECK_FAILED,
     ERR_ANS_CHECK_WEAK_NETWORK,
+    ERR_ANS_INVALID_BUNDLE_OPTION,
+    ERR_ANS_NOT_IMPL_EXTENSIONABILITY,
 };
 
 enum ReminderErrorCode : uint32_t {
@@ -159,6 +161,9 @@ const int32_t ERROR_NO_PROFILE_TEMPLATE          = 1600019;    // The do-not-dis
 const int32_t ERROR_REJECTED_WITH_DISABLE_NOTIFICATION =
     1600020; // The application is not allowed to send notifications due to permission settings.
 const int32_t ERROR_DISTRIBUTED_OPERATION_TIMEOUT          = 1600021;    // Distributed operation timeout.
+const int32_t ERROR_BUNDLE_INVALID               = 1600022;    // The specified bundle is invalid.
+const int32_t ERROR_NOT_IMPL_EXTENSIONABILITY    =
+    1600023;    // App Not Implement NotificationSubscriberExtensionAbility.
 const int32_t ERROR_NETWORK_UNREACHABLE          = 2300007;    // Network unreachable.
 const int32_t ERROR_BUNDLE_NOT_FOUND             = 17700001;   // The specified bundle name was not found.
 
