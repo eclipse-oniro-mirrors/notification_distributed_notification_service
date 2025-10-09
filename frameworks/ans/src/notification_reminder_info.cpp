@@ -138,6 +138,10 @@ bool NotificationReminderInfo::Marshalling(Parcel &parcel) const
 bool NotificationReminderInfo::ReadFromParcel(Parcel &parcel)
 {
     auto pBundle = parcel.ReadParcelable<NotificationBundleOption>();
+    if (pBundle == nullptr) {
+        ANS_LOGE("null BundleOption");
+        return false;
+    }
     bundle_ = *pBundle;
     delete pBundle;
     pBundle = nullptr;

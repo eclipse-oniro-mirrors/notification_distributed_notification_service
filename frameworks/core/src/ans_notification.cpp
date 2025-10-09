@@ -2703,6 +2703,7 @@ ErrCode AnsNotification::GetReminderInfoByBundles(
         ANS_LOGE("Bundles is null.");
         return ERR_ANS_INVALID_PARAM;
     }
+
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("Fail to GetAnsManagerProxy.");

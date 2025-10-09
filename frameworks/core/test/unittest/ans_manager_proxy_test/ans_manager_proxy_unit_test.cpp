@@ -7275,8 +7275,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetReminderInfoByBundles_0100, Function | Medi
 }
 
 /*
- * @tc.name: GetReminderInfoByBundles_0100
- * @tc.desc: test GetReminderInfoByBundles function
+ * @tc.name: SetReminderInfoByBundles_0100
+ * @tc.desc: test SetReminderInfoByBundles function
  * @tc.type: FUNC
  * @tc.require: #I5XO2O
  */

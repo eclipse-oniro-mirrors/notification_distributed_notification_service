@@ -126,16 +126,24 @@ void AdvancedNotificationService::TryStartReminderAgentService()
 
 ErrCode AdvancedNotificationService::PreReminderInfoCheck()
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_26, EventBranchId::BRANCH_0);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("IsSystemApp is false");
+        message.Message("Not systemApp.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NON_SYSTEM_APP));
         return ERR_ANS_NON_SYSTEM_APP;
     }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied.");
+        message.Message("Permission denied.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_1));
         return ERR_ANS_PERMISSION_DENIED;
     }
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
+        message.Message("Serial queue is invalid.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_2));
         return ERR_ANS_INVALID_PARAM;
     }
     return ERR_OK;
@@ -150,6 +158,7 @@ ErrCode AdvancedNotificationService::GetReminderInfoByBundles(
         return result;
     }
     bool allOk = true;
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_26, EventBranchId::BRANCH_3);
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         for (const auto &bundle : bundles) {
@@ -173,6 +182,9 @@ ErrCode AdvancedNotificationService::GetReminderInfoByBundles(
                 allOk = false;
                 ANS_LOGE("%{public}s_%{public}d, get reminderflags failed.",
                     validBundle->GetBundleName().c_str(), validBundle->GetUid());
+                message.Message(validBundle->GetBundleName() + "_" + std::to_string(validBundle->GetUid()) +
+                    " get reminderflags failed.");
+                NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result));
                 continue;
             }
 
@@ -184,6 +196,9 @@ ErrCode AdvancedNotificationService::GetReminderInfoByBundles(
                 allOk = false;
                 ANS_LOGE("%{public}s_%{public}d, get silentreminderenable failed.",
                     validBundle->GetBundleName().c_str(), validBundle->GetUid());
+                message.Message(bundle->GetBundleName() + "_" + std::to_string(bundle->GetUid()) +
+                    " get silentreminderenable failed.");
+                NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_4));
                 continue;
             }
             reminder.SetBundleOption(*validBundle);
@@ -194,7 +209,11 @@ ErrCode AdvancedNotificationService::GetReminderInfoByBundles(
     }));
 
     notificationSvrQueue_->wait(handler);
-    return allOk ? ERR_OK : ERR_ANS_INVALID_PARAM;
+    ANS_LOGI("GetReminderInfoByBundles end");
+    result = allOk ? ERR_OK : ERR_ANS_INVALID_PARAM;
+    NotificationAnalyticsUtil::ReportModifyEvent(
+        message.ErrorCode(result).Message("GetReminderInfoByBundles end.").BranchId(BRANCH_5));
+    return result;
 }
 
 ErrCode AdvancedNotificationService::SetReminderInfoByBundles(
@@ -206,6 +225,7 @@ ErrCode AdvancedNotificationService::SetReminderInfoByBundles(
         return result;
     }
     bool allOk = true;
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_26, EventBranchId::BRANCH_6);
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         for (const auto &reminder : reminderInfo) {
@@ -225,6 +245,9 @@ ErrCode AdvancedNotificationService::SetReminderInfoByBundles(
                 allOk = false;
                 ANS_LOGE("%{public}s_%{public}d, set reminderflags failed.",
                     validBundle->GetBundleName().c_str(), validBundle->GetUid());
+                message.Message(validBundle->GetBundleName() + "_" + std::to_string(validBundle->GetUid()) +
+                    " set reminderflags failed.");
+                NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result));
                 continue;
             }
             result = UpdateSlotReminderModeBySlotFlags(validBundle, flags);
@@ -232,6 +255,9 @@ ErrCode AdvancedNotificationService::SetReminderInfoByBundles(
                 allOk = false;
                 ANS_LOGE("%{public}s_%{public}d, update slot reminder mode failed.",
                     validBundle->GetBundleName().c_str(), validBundle->GetUid());
+                message.Message(validBundle->GetBundleName() + "_" + std::to_string(validBundle->GetUid()) +
+                    " update slot reminder mode failed.");
+                NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_7));
                 continue;
             }
 
@@ -242,14 +268,20 @@ ErrCode AdvancedNotificationService::SetReminderInfoByBundles(
                 allOk = false;
                 ANS_LOGE("%{public}s_%{public}d, set silentreminderenable failed.",
                     validBundle->GetBundleName().c_str(), validBundle->GetUid());
+                message.Message(validBundle->GetBundleName() + "_" + std::to_string(validBundle->GetUid()) +
+                    " set silentreminderenable failed.");
+                NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_8));
                 continue;
             }
         }
     }));
 
     notificationSvrQueue_->wait(handler);
-    return allOk ? ERR_OK : ERR_ANS_INVALID_PARAM;
+    ANS_LOGI("SetReminderInfoByBundles end");
+    result = allOk ? ERR_OK : ERR_ANS_INVALID_PARAM;
+    NotificationAnalyticsUtil::ReportModifyEvent(
+        message.ErrorCode(result).Message("SetReminderInfoByBundles end.").BranchId(BRANCH_9));
+    return result;
 }
-
 }  // namespace Notification
 }  // namespace OHOS
