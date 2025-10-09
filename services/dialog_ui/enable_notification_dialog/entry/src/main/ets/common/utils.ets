@@ -17,8 +17,12 @@ import Constants from './constant';
 import { MeasureOptions } from '@ohos.measure';
 import { MeasureUtils } from '@ohos.arkui.UIContext';
 import common from '@ohos.app.ability.common';
+import uiextension from '@ohos.arkui.uiExtension';
+import window from '@ohos.window';
+import display from '@ohos.display';
 
 const TAG = 'NotificationDialog_Service ';
+const DEFAULT_DISPLAY_ID: number = 0;
 
 /**
  * Omit display when application name is too long
@@ -84,40 +88,69 @@ export function getLimitFontSize(fontSizeScale: number, sourceFontSize: number):
   return `${sourceFontSize * fontSizeScale}vp`;
 }
 
-/**
-   * 
-   * @param windowRect windowRect
-   * @param display display
-   * @returns true need removeWindow
-   */
-  export function shouldMoveWindow(windowRect: window.Rect, display: display.Display): boolean {
-    try {
-      if (windowRect === undefined) {
-        console.error(TAG, `windowRect is null`);
-        return false;
-      }
-      console.info(TAG, `displayW=${display.width}, displayH=${display.height}.` );
-
-      if (windowRect.width >= display.width && windowRect.height >= display.height) {
-        console.info(TAG, `windowRect >= display, no need move.`);
-        return false;
-      }
-      let windowCenterX = windowRect.left + windowRect.width / 2;
-      let windowCenterY = windowRect.top + windowRect.height / 2;
-      let minX = windowRect.width / 2;
-      let maxX = display.width - windowRect.width / 2;
-      let minY = windowRect.height / 2;
-      let maxY = display.height - windowRect.height / 2 - Constants.PC_DOCK_HEIGHT;
-
-      console.info(TAG, `windowCenterX=${windowCenterX}, windowCenterY=${windowCenterY}`);
-      console.info(TAG, `x range=[${minX}, ${maxX}], y range=[${minY}, ${maxY}]`);
-      let isXOk: boolean = windowCenterX >= minX && windowCenterX <= maxX;
-      let isYOk: boolean = windowCenterY >= minY && windowCenterY <= maxY;
-      let shouldMove = !(isXOk && isYOk);
-      console.info(TAG, `shouldMoveWindow, shouldMove=${shouldMove}`);
-      return shouldMove;
-    } catch (err) {
-      console.error(TAG, `check shouldMoveWindow failed, code=${err?.code}, msg=${err?.message}.`);
+export function shouldMoveToDisplayCenter(comW: number, comH: number,
+  windowPoxy: uiExtension.WindowProxy,
+  win: window.Window, dis: display.Display): boolean {
+  try {
+    if (windowPoxy === undefined) {
+      console.error(TAG, `windowPoxy is null`);
       return false;
     }
+    let windowRect = windowPoxy.properties?.uiExtensionHostWindowProxyRect;
+    if (windowRect === undefined) {
+      console.error(TAG, `windowRect is null`);
+      return false;
+    }
+    if (win === undefined) {
+      console.error(TAG, `window is null`);
+      return false;
+    }
+    if (dis === undefined) {
+      console.error(TAG, `display is null`);
+      return false;
+    }
+    
+    console.info(TAG, `display W=${dis.width}, H=${dis.height} avaliableH=${dis.availableHeight}`);
+    console.info(TAG, `compoment W=${comW}, H=${comH}`);
+    console.info(TAG, `windowRect L=${windowRect.left} T=${windowRect.top} W=${windowRect.width} H=${windowRect.height}`);
+
+    let leftMargin = (windowRect.width - comW) /2;
+    let topMargin = (windowRect.height - comH) /2;
+    let leftTopXPos = windowRect.left + leftMargin;
+    let leftTopYPos = windowRect.top + topMargin;
+    let rightBottomXPos = leftTopXPos + comW;
+    let rightBottomYPos = leftTopYPos + comH;
+    console.info(TAG, `comPos info LTX=${leftTopXPos} LTY=${leftTopYPos} RBX=${rightBottomXPos} RBY=${rightBottomYPos}`);
+
+    if (leftTopXPos < 0 || rightBottomXPos > dis.width || leftTopYPos < 0) {
+      return true;
+    }
+
+    let displayId = win.getWindowProperties().displayId;
+    let foldStatus = display.getFoldStatus();
+    let disPlayValidHeight = 0;
+    let chargeCrossAxis = false;
+    if (foldStatus === display.FoldStatus.FOLD_STATUS_EXPANDED) {
+      disPlayValidHeight = dis.height - Constants.PC_DOCK_HEIGHT; 
+    } else {
+      disPlayValidHeight = (dis.availableHeight !== undefined && dis.availableHeight <= dis.height) ?
+        dis.availableHeight : dis.height;
+      if (displayId === DEFAULT_DISPLAY_ID) {
+        chargeCrossAxis = true;
+      }
+    }
+
+    if (chargeCrossAxis) {
+      if (disPlayValidHeight > leftTopYPos && disPlayValidHeight < rightBottomYPos) {
+          return true;
+        }
+    } else {
+      if (rightBottomYPos > disPlayValidHeight) {
+          return true;
+      }
+    }
+  } catch (err) {
+    console.error(TAG, `shouldMoveToDisplayCenter failed, code=${err?.code}, msg=${err?.message}.`);
   }
+  return false;
+}

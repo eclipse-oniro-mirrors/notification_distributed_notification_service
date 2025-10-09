@@ -21,7 +21,9 @@ import {
   calContainerWidth,
   getFontSizeScale,
   sourceToVp,
-  getLimitFontSize } from '../common/utils';
+  getLimitFontSize,
+  shouldMoveToDisplayCenter
+} from '../common/utils';
 import Constants from '../common/constant';
 import fs from '@ohos.file.fs';
 import configPolicy from '@ohos.configPolicy';
@@ -35,6 +37,9 @@ import uiextension from '@ohos.arkui.uiExtension';
 import DisplayUtils from '../common/displayUtils';
 
 const TAG = 'NotificationDialog_Service ';
+const MASK_COLOR = '#33000000';
+const TRANSPARANT_COLOR = '#00000000';
+const EMPTY_PAGE_PATH = 'emptyPage';
 
 const permission: Record<string, Resource> = {
   'label': $r('app.string.group_label_notification'),
@@ -64,18 +69,18 @@ let storage = LocalStorage.getShared();
 @Component
 struct NotificationDialogPage {
   @StorageLink('isUpdate') isUpdate: number = 0;
-  @StorageLink('showInDisplayCenter') showInDisplayCenter: boolean = false;
+  @StorageLink('uecRectChangeNum') uecRectChangeNum: number = 0;
 
   privacyDialogController: CustomDialogController = new CustomDialogController({
     builder: PermissionDialog({ 
       isUpdate : $isUpdate,
-      showInDisplayCenter : $showInDisplayCenter
+      uecRectChangeNum : $uecRectChangeNum
     }),
     autoCancel: false,
     alignment: DialogAlignment.Center,
     customStyle: true,
     cornerRadius: Constants.PC_RDIUS_16,
-    maskColor: this.showInDisplayCenter ? '#00000000' : $r('sys.color.ohos_id_color_mask_thin'),
+    maskColor: $r('sys.color.ohos_id_color_mask_thin'),
     onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
       console.info(TAG, `dialog onWillDismiss reason= : ${JSON.stringify(dismissDialogAction.reason)}`);
     }
@@ -95,10 +100,13 @@ struct NotificationDialogPage {
 struct PermissionDialog {
   @State appName: string = '';
   @State naviHeight: number = 0;
+  @State contentComW: number = 0;
+  @State contentComH: number = 0;
+  @State showInDisplayCenter: boolean = false;
   @State isBottomPopover: boolean = false;
   @StorageLink('clicked') clicked: boolean = false;
-  @StorageLink('showInDisplayCenter') showInDisplayCenter: boolean = false;
   @Link @Watch('updateOnPageShow') isUpdate: number;
+  @Link @Watch('updateOnPageShow') uecRectChangeNum: number;
   dialog?: EnableNotificationDialog;
   session?: UIExtensionContentSession;
   controller?: CustomDialogController;
@@ -198,19 +206,14 @@ struct PermissionDialog {
                 })
               }
             }
-            .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-              if (this.showInDisplayCenter) {
-                console.error(TAG, `content onSizeChange : ${newValue.height}`);
-                let width = vp2px(newValue.width as number);
-                let height = vp2px(newValue.height as number);
-                let display = DisplayUtils.getCurWindowDisplay(this.dialog?.subWindow);
-                height = height > display.height * 0.9 ? display.height * 0.9 : height;
-                this.dialog?.subWindow?.resize(width, height);
-                this.dialog?.subWindow?.moveWindowTo(display.width / 2 - width/2, display.height / 2 - height/2);
-              }
-            })
           }
           .constraintSize({ maxHeight: this.showInDisplayCenter ? '100%' : '90%'})
+          .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+            console.info(TAG, `content onSizeChange`);
+            this.contentComW = vp2px(newValue.width as number);
+            this.contentComH = vp2px(newValue.height as number);
+            this.updateContentCompoment();
+          })
         }
         .borderRadius(Constants.PC_RDIUS_16)
         .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
@@ -231,9 +234,7 @@ struct PermissionDialog {
     this.dialog = storage.get('dialog') as EnableNotificationDialog;
     this.session = storage.get('session') as UIExtensionContentSession;
     this.updateAvoidWindow();
-    if (this.showInDisplayCenter) {
-      this.updateSubWindowSize();
-    }
+    this.registerFoldStatusChange();
     try {
       await this.updateStatus();
       await this.dialog?.dialogOpenEvent();
@@ -252,6 +253,9 @@ struct PermissionDialog {
   async updateOnPageShow(): Promise<void> {
     if (this.isUpdate > 0) {
       await this.updateStatus();
+    }
+    if (this.uecRectChangeNum > 0) {
+      await this.updateContentCompoment();
     }
   }
 
@@ -294,16 +298,50 @@ struct PermissionDialog {
     }
   }
   
-  updateSubWindowSize(): void {
+  async updateContentCompoment(): Promise<void> {
+    console.info(TAG, `updateContentCompoment`);
+    if (this.contentComW <= 0 || this.contentComH <= 0) {
+      return;
+    }
     try {
-      this.dialog?.extensionWindow.on('rectChange', uiextension.RectChangeReason.HOST_WINDOW_RECT_CHANGE, (data):void => {
-        let windowRect = this.dialog?.extensionWindow.properties?.uiExtensionHostWindowProxyRect;
-        console.info(TAG, `windowRectChange event, size = ${windowRect?.left}-${windowRect?.top}-${windowRect?.width}-${windowRect?.height}`);
-        this.dialog?.subWindow?.moveWindowTo(windowRect?.left, windowRect?.top);
-        this.dialog?.subWindow?.resize(windowRect?.width, windowRect?.height);
-      });
+      let display = DisplayUtils.getCurWindowDisplay(this.dialog?.subWindow);
+      let tempResult = shouldMoveToDisplayCenter(this.contentComW, this.contentComH,
+        this.dialog?.extensionWindow, this.dialog?.subWindow, display);
+      console.info(TAG, `shouldMoveToDisplayCenter = ${tempResult}`);
+      if (tempResult === this.showInDisplayCenter) {
+        return;
+      }
+      this.showInDisplayCenter = tempResult;
+      
+      if (this.showInDisplayCenter) {
+        await this.dialog?.subWindow?.setFollowParentWindowLayoutEnabled(false);
+        this.session?.loadContent(EMPTY_PAGE_PATH, storage);
+        this.session?.setWindowBackgroundColor(MASK_COLOR);
+        this.dialog?.subWindow?.resize(this.contentComW, this.contentComH);
+        this.dialog?.subWindow?.moveWindowTo((display.width - this.contentComW) / 2,
+         (display.height - this.contentComH) / 2);
+      } else {
+        await this.dialog?.subWindow?.setFollowParentWindowLayoutEnabled(true);
+        this.session?.setWindowBackgroundColor(TRANSPARANT_COLOR);
+      }
     } catch (err) {
-      console.error(TAG, `updateSubWindowSize error. Cause: ${err?.code}`);
+      console.error(TAG, `updateContentCompoment fail. code=${err?.code} msg=${err?.message}`);
+    }
+  }
+
+  async registerFoldStatusChange(): Promise<void> {
+    let callback: Callback<display.FoldStatus> = async (data: display.FoldStatus) => {
+      try {
+        console.info(TAG, `foldStatusChange`);
+        this.updateContentCompoment();
+      } catch (err) {
+        console.error(TAG, `Failed to touch foldStatusChange callback. code=${err?.code} msg=${err?.message}`);
+      }
+    };
+    try {
+      display.on('foldStatusChange', callback);
+    } catch (err) {
+      console.error(TAG, `Failed to register foldStatusChange event. code=${err?.code} msg=${err?.message}`);
     }
   }
 
