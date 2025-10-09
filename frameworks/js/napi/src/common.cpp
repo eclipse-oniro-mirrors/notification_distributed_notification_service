@@ -1103,6 +1103,60 @@ napi_value Common::GetBundleOption(const napi_env &env, const napi_value &value,
     return NapiGetNull(env);
 }
 
+napi_value Common::GetReminderInfo(const napi_env &env, const napi_value &value, NotificationReminderInfo &info)
+{
+    ANS_LOGD("GetReminderInfo");
+    bool hasProperty {false};
+    napi_valuetype valuetype = napi_undefined;
+    napi_value result = nullptr;
+    NotificationBundleOption option;
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "bundle", &hasProperty));
+    if (!hasProperty) {
+        ANS_LOGE("Property bundle expected.");
+        return nullptr;
+    }
+    NAPI_CALL(env, napi_get_named_property(env, value, "bundle", &result));
+    NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+    if (valuetype != napi_object) {
+        ANS_LOGE("Wrong argument type. Object expected.");
+        std::string msg = "Incorrect parameter types. The type of bundle must be object.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    if (!GetBundleOption(env, result, option)) {
+        return nullptr;
+    }
+    info.SetBundleOption(option);
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "reminderFlags", &hasProperty));
+    if (hasProperty) {
+        int32_t reminderFlags = 0;
+        NAPI_CALL(env, napi_get_named_property(env, value, "reminderFlags", &result));
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_get_value_int32(env, result, &reminderFlags));
+        info.SetReminderFlags(reminderFlags);
+    }
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "silentReminderEnabled", &hasProperty));
+    if (hasProperty) {
+        bool silentReminderEnabled = false;
+        NAPI_CALL(env, napi_get_named_property(env, value, "silentReminderEnabled", &result));
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_boolean) {
+            ANS_LOGE("Wrong argument type. Boolean expected.");
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_get_value_bool(env, result, &silentReminderEnabled));
+        info.SetSilentReminderEnabled(silentReminderEnabled);
+    }
+    return NapiGetNull(env);
+}
+
 napi_value Common::GetButtonOption(const napi_env &env, const napi_value &value, NotificationButtonOption &option)
 {
     ANS_LOGD("called");

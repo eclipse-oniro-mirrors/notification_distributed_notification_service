@@ -810,6 +810,17 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ErrCode GetReminderInfoByBundles(const std::vector<sptr<NotificationBundleOption>> &bundles,
+        std::vector<NotificationReminderInfo> &reminderInfo) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetReminderInfoByBundles(const std::vector<sptr<NotificationReminderInfo>> &reminderInfo) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 };
 
 class AnsNotificationBranchTest : public testing::Test {

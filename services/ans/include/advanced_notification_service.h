@@ -1112,6 +1112,24 @@ public:
     ErrCode IsSilentReminderEnabled(const sptr<NotificationBundleOption> &bundleOption, int32_t &enableStatus) override;
 
     /**
+     * @brief Obtains reminder info of application list.
+     *
+     * @param bundles Indicates the bundles bundleOption.
+     * @param reminderInfo Indicates the bundles reminderInfo.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetReminderInfoByBundles(const std::vector<sptr<NotificationBundleOption>> &bundles,
+        std::vector<NotificationReminderInfo> &reminderInfo) override;
+
+    /**
+     * @brief Set reminder info for application list.
+     *
+     * @param reminderInfo Indicates the bundles reminderInfo.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetReminderInfoByBundles(const std::vector<sptr<NotificationReminderInfo>> &reminderInfo) override;
+
+    /**
      * @brief configuring Whether to Synchronize Common Notifications to Target Devices.
      *
      * @param deviceType Target device type.
@@ -1841,6 +1859,7 @@ private:
 
     bool HasExtensionSubscriptionStateChanged(
         const sptr<NotificationBundleOption> &bundle, bool enabled);
+    ErrCode PreReminderInfoCheck();
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;

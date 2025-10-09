@@ -123,5 +123,133 @@ void AdvancedNotificationService::TryStartReminderAgentService()
     ANS_LOGI("Reminder db exist, start reminder service");
     ReminderHelper::StartReminderAgentService();
 }
+
+ErrCode AdvancedNotificationService::PreReminderInfoCheck()
+{
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission denied.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetReminderInfoByBundles(
+    const std::vector<sptr<NotificationBundleOption>> &bundles, std::vector<NotificationReminderInfo> &reminderInfo)
+{
+    ANS_LOGD("GetReminderInfoByBundles");
+    ErrCode result = PreReminderInfoCheck();
+    if (result != ERR_OK) {
+        return result;
+    }
+    bool allOk = true;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        for (const auto &bundle : bundles) {
+            uint32_t flags = DEFAULT_SLOT_FLAGS;
+            NotificationConstant::SWITCH_STATE enableStatus;
+            bool silentReminderEnabled = false;
+            NotificationReminderInfo reminder;
+            // 1、GenerateValidBundleOption
+            sptr<NotificationBundleOption> validBundle = GenerateValidBundleOption(bundle);
+            if (validBundle == nullptr) {
+                continue;
+            }
+
+            // 2、GetNotificationSlotFlagsForBundle
+            result = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(validBundle, flags);
+            if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+                result = ERR_OK;
+                flags = DEFAULT_SLOT_FLAGS;
+            }
+            if (result != ERR_OK) {
+                allOk = false;
+                ANS_LOGE("%{public}s_%{public}d, get reminderflags failed.",
+                    validBundle->GetBundleName().c_str(), validBundle->GetUid());
+                continue;
+            }
+
+            //3、IsSilentReminderEnabled
+            result = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(validBundle, enableStatus);
+            silentReminderEnabled = ((enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) ||
+                (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON));
+            if (result != ERR_OK) {
+                allOk = false;
+                ANS_LOGE("%{public}s_%{public}d, get silentreminderenable failed.",
+                    validBundle->GetBundleName().c_str(), validBundle->GetUid());
+                continue;
+            }
+            reminder.SetBundleOption(*validBundle);
+            reminder.SetReminderFlags(flags);
+            reminder.SetSilentReminderEnabled(silentReminderEnabled);
+            reminderInfo.emplace_back(reminder);
+        }
+    }));
+
+    notificationSvrQueue_->wait(handler);
+    return allOk ? ERR_OK : ERR_ANS_INVALID_PARAM;
+}
+
+ErrCode AdvancedNotificationService::SetReminderInfoByBundles(
+    const std::vector<sptr<NotificationReminderInfo>> &reminderInfo)
+{
+    ANS_LOGD("SetReminderInfoByBundles");
+    ErrCode result = PreReminderInfoCheck();
+    if (result != ERR_OK) {
+        return result;
+    }
+    bool allOk = true;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        for (const auto &reminder : reminderInfo) {
+            sptr< NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
+                reminder->GetBundleOption());
+            uint32_t flags = reminder->GetReminderFlags();
+            bool silentReminderEnabled = reminder->GetSilentReminderEnabled();
+            // 1、GenerateValidBundleOption
+            sptr<NotificationBundleOption> validBundle = GenerateValidBundleOption(bundle);
+            if (validBundle == nullptr) {
+                continue;
+            }
+
+            // 2、SetNotificationSlotFlagsForBundle
+            result = NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(validBundle, flags);
+            if (result != ERR_OK) {
+                allOk = false;
+                ANS_LOGE("%{public}s_%{public}d, set reminderflags failed.",
+                    validBundle->GetBundleName().c_str(), validBundle->GetUid());
+                continue;
+            }
+            result = UpdateSlotReminderModeBySlotFlags(validBundle, flags);
+            if (result != ERR_OK) {
+                allOk = false;
+                ANS_LOGE("%{public}s_%{public}d, update slot reminder mode failed.",
+                    validBundle->GetBundleName().c_str(), validBundle->GetUid());
+                continue;
+            }
+
+            //3、SetSilentReminderEnabled
+            result = NotificationPreferences::GetInstance()->SetSilentReminderEnabled(
+                validBundle, silentReminderEnabled);
+            if (result != ERR_OK) {
+                allOk = false;
+                ANS_LOGE("%{public}s_%{public}d, set silentreminderenable failed.",
+                    validBundle->GetBundleName().c_str(), validBundle->GetUid());
+                continue;
+            }
+        }
+    }));
+
+    notificationSvrQueue_->wait(handler);
+    return allOk ? ERR_OK : ERR_ANS_INVALID_PARAM;
+}
+
 }  // namespace Notification
 }  // namespace OHOS

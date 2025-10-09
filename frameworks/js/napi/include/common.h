@@ -1869,6 +1869,16 @@ public:
     static napi_value SetDoNotDisturbProfile(
         const napi_env &env, const NotificationDoNotDisturbProfile &data, napi_value &result);
 
+    /**
+     * @brief Gets a NotificationReminderInfo object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param info Indicates a NotificationReminderInfo object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetReminderInfo(const napi_env &env, const napi_value &value, NotificationReminderInfo &info);
+
     static napi_value SetBundleOption(
         const napi_env &env, const NotificationBundleOption &bundleInfo, napi_value &result);
     static bool IsValidRemoveReason(int32_t reasonType);

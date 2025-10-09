@@ -2417,5 +2417,76 @@ HWTEST_F(AnsNotificationUnitTest, GetSubscribeInfo_0200, Function | MediumTest |
     EXPECT_EQ(ret, ERR_OK);
 }
 
+/*
+ * @tc.name: GetReminderInfoByBundles_0100
+ * @tc.desc: test GetReminderInfoByBundles.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetReminderInfoByBundles_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    std::vector<NotificationReminderInfo> reminders;
+    std::vector<NotificationBundleOption> bundles;
+    ErrCode ret = ans_->GetReminderInfoByBundles(bundles, reminders);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetReminderInfoByBundles_0200
+ * @tc.desc: test GetReminderInfoByBundles.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetReminderInfoByBundles_0200, Function | MediumTest | Level1)
+{
+    std::vector<NotificationReminderInfo> reminders;
+    std::vector<NotificationBundleOption> bundles;
+    NotificationBundleOption bundle;
+    std::string bundleName = "test";
+    bundle.SetBundleName(bundleName);
+    bundles.emplace_back(bundle);
+    ErrCode ret = ans_->GetReminderInfoByBundles(bundles, reminders);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: SetReminderInfoByBundles_0100
+ * @tc.desc: test SetReminderInfoByBundles.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetReminderInfoByBundles_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    std::vector<NotificationReminderInfo> reminders;
+    ErrCode ret = ans_->SetReminderInfoByBundles(reminders);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetReminderInfoByBundles_0200
+ * @tc.desc: test SetReminderInfoByBundles.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetReminderInfoByBundles_0200, Function | MediumTest | Level1)
+{
+    std::vector<NotificationReminderInfo> reminders;
+    NotificationReminderInfo reminder;
+    reminders.emplace_back(reminder);
+    ErrCode ret = ans_->SetReminderInfoByBundles(reminders);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS
