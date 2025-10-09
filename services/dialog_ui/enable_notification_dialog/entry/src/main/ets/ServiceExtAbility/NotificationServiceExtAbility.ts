@@ -27,8 +27,6 @@ import configPolicy from '@ohos.configPolicy';
 import fs from '@ohos.file.fs';
 import Constants from '../common/constant';
 import DisplayUtils from '../common/displayUtils';
-import { shouldMoveWindow} from '../common/utils';
-
 
 const TAG = 'NotificationDialog_Service ';
 
@@ -175,67 +173,20 @@ export class EnableNotificationDialog {
         };
         let subWindow = await extensionWindow.createSubWindowWithOptions('subWindowForHost' + Date(), subWindowOpts);
         this.subWindow = subWindow;
-        let moveToCenter : boolean = false;
         
-        if(isPcDevice) {
-          let hasDisalogRectInfo = false;
-          let waiteTimes = 0;
+        if (isPcDevice) {
           extensionWindow.on('rectChange', uiExtension.RectChangeReason.HOST_WINDOW_RECT_CHANGE, (data):void => {
-            console.info(TAG, `windowRectChange ts event ${data.rect?.left},${data.rect?.top}, ${data.rect?.width}, ${data.rect?.height}`);
-            if(data.rect?.width > 0 && data.rect?.height > 0) {
-              hasDisalogRectInfo = true;
+            let uecRectChangeNum:number = AppStorage.get('uecRectChangeNum');
+            if (uecRectChangeNum === undefined || uecRectChangeNum > UPDATE_BOUNDARY) {
+              AppStorage.setOrCreate('uecRectChangeNum', UPDATE_NUM);
+            } else {
+              AppStorage.setOrCreate('uecRectChangeNum', ++uecRectChangeNum);
             }
           });
-          while(!hasDisalogRectInfo && waiteTimes < 10){
-            waiteTimes ++;
-            await this.sleep(200);
-            let windowRect = extensionWindow.properties?.uiExtensionHostWindowProxyRect;
-            if (windowRect.width > 0 && windowRect.height > 0) {
-              hasDisalogRectInfo = true;
-            }  
-          }
-          if(hasDisalogRectInfo) {
-            // get display
-            let display = DisplayUtils.getCurWindowDisplay(subWindow);
-            if (display == undefined) {
-              throw new Error('Failed to getCurWindowDisplay');
-            }
-            let windowRect = extensionWindow.properties?.uiExtensionHostWindowProxyRect;
-            console.info(TAG, `size : ${windowRect?.left} ${windowRect?.top} ${windowRect?.width}  ${windowRect?.height}`);
-
-            // need moveToCenter
-            moveToCenter = shouldMoveWindow(windowRect,display);
-            console.info(TAG,`moveToCenter = ${moveToCenter}`);
-            if (moveToCenter) {
-              AppStorage.setOrCreate('showInDisplayCenter', true);
-              let widht = Constants.MAX_DIALOG_WIDTH;
-              let height = Constants.PC_INIT_CONTENT_HEIGHT;
-              await subWindow.resize(vp2px(widht), vp2px(height));
-              await subWindow.moveWindowToGlobal(display.width / 2 - vp2px(widht)/2, display.height / 2 - vp2px(height)/2);
-            } else {
-              await subWindow.moveWindowToGlobal(windowRect?.left, windowRect?.top);
-              await subWindow.resize(windowRect?.width, windowRect?.height);
-            }
-
-            hasDisalogRectInfo = false;
-          } else {
-            console.info(TAG,'waite send windwow info fail');
-            throw new Error('Failed to create window');
-          }
-        } else {
-          let windowRect = extensionWindow.properties?.uiExtensionHostWindowProxyRect;
-          console.info(TAG, `size : ${windowRect?.left} ${windowRect?.top} ${windowRect?.width}  ${windowRect?.height}`);
-          if (windowRect.width > 0 && windowRect.height > 0) {
-            console.log(TAG, `valid rect data`);
-            await subWindow.moveWindowToGlobal(windowRect?.left, windowRect?.top);
-            await subWindow.resize(windowRect?.width, windowRect?.height);
-            this.initSubWindowSize = true;
-          }
         }
         try {
-          if (!moveToCenter) {
-            await subWindow.setFollowParentWindowLayoutEnabled(true);
-          }
+          await subWindow.setFollowParentWindowLayoutEnabled(true);
+          this.initSubWindowSize = true;
         } catch (err) {
           console.error(TAG, `setFollowParentWindowLayoutEnabled failed! ${err.code} ${err.message}`);
         }
@@ -246,11 +197,6 @@ export class EnableNotificationDialog {
           console.error(TAG, 'subWindow hideNonSystemFloatingWindows failed!');
         }
 
-        if (moveToCenter) {
-          await session.loadContent(EnableNotificationDialog.EMPTY_PAGE_PATH, this.storage);  
-          await session.setWindowBackgroundColor(EnableNotificationDialog.MASK_COLOR);
-        } 
-        
         await subWindow.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
         await subWindow.showWindow();
       } else {
