@@ -1480,6 +1480,32 @@ public:
      * @return Returns set result.
      */
     ErrCode SetUserGrantedState(const NotificationBundleOption& targetBundle, bool enabled);
+    
+    /**
+     * @brief Obtains the list of bundleOption which subscribed by targetBundle
+     * @param targetBundle The bundle option to be queried.
+     * @param enabledBundles the list of subscribed bundle options.
+     * @return Returns get result.
+     */
+    ErrCode GetUserGrantedEnabledBundles(const NotificationBundleOption& targetBundle,
+        std::vector<sptr<NotificationBundleOption>>& enabledBundles);
+
+    /**
+     * @brief Obtains the list of bundleOption which granted by user.
+     * @param bundles The returned list.
+     * @return Returns get result.
+     */
+    ErrCode GetUserGrantedEnabledBundlesForSelf(std::vector<sptr<NotificationBundleOption>>& bundles);
+
+    /**
+     * @brief Set the bundleOptions of the extensionAbility to be subscribed or unsubscribed.
+     * @param targetBundle The bundle option to be set.
+     * @param enabledBundles The bundle option list to be configured.
+     * @param enabled Set enabled or not.
+     * @return Returns set result.
+     */
+    ErrCode SetUserGrantedBundleState(const NotificationBundleOption& targetBundle,
+        const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled);
 
     /**
      * @brief Obtains reminder info of application list.

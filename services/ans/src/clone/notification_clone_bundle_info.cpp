@@ -35,6 +35,7 @@ constexpr const char *BUNDLE_INFO_SILENT_REMINDER = "enabledSilentReminder";
 constexpr const char *BUNDLE_INFO_SLOT_AUTHSTATUS = "slotAuthorized";
 constexpr const char *BUNDLE_INFO_SUBSCRIPTION_INFO = "extensionSubscriptionInfo";
 constexpr const char *BUNDLE_INFO_SUBSCRIPTION_ENABLED = "enableExtensionSubscription";
+constexpr const char *BUNDLE_INFO_SUBSCRIPTION_BUNDLES = "extensionSubscriptionBundles";
 constexpr int32_t CONST_ENABLE_INT = 1;
 }
 void NotificationCloneBundleInfo::SetBundleName(const std::string &name)
@@ -147,6 +148,17 @@ const ExtensionSubscriptionVectorPtr& NotificationCloneBundleInfo::GetExtensionS
     return extensionSubscriptionInfos_;
 }
 
+void NotificationCloneBundleInfo::SetExtensionSubscriptionBundles(
+    const std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    extensionSubscriptionBundles_ = bundles;
+}
+
+const std::vector<sptr<NotificationBundleOption>>& NotificationCloneBundleInfo::GetExtensionSubscriptionBundles() const
+{
+    return extensionSubscriptionBundles_;
+}
+
 void NotificationCloneBundleInfo::ToJson(nlohmann::json &jsonObject) const
 {
     if (!slotsInfo_.empty()) {
@@ -170,6 +182,16 @@ void NotificationCloneBundleInfo::ToJson(nlohmann::json &jsonObject) const
             jsonNodes.emplace_back(jsonNode);
         }
         jsonObject[BUNDLE_INFO_SUBSCRIPTION_INFO] = jsonNodes;
+    }
+
+    if (!extensionSubscriptionBundles_.empty()) {
+        nlohmann::json jsonNodes = nlohmann::json::array();
+        for (const auto& bundle : extensionSubscriptionBundles_) {
+            nlohmann::json jsonNode;
+            bundle->ToJson(jsonNode);
+            jsonNodes.emplace_back(jsonNode);
+        }
+        jsonObject[BUNDLE_INFO_SUBSCRIPTION_BUNDLES] = jsonNodes;
     }
 
     jsonObject[BUNDLE_INFO_NAME] =  bundleName_;
@@ -231,8 +253,26 @@ void NotificationCloneBundleInfo::SubscriptionInfosFromJson(const nlohmann::json
             ANS_LOGW("Failed to parse subscription info from JSON, skipping");
             continue;
         }
-        
-        extensionSubscriptionInfos_.emplace_back(std::move(subscriptionInfo));
+
+        extensionSubscriptionInfos_.emplace_back(subscriptionInfo);
+    }
+}
+
+void NotificationCloneBundleInfo::SubscriptionBundlesFromJson(const nlohmann::json &jsonObject)
+{
+    if (!jsonObject.contains(BUNDLE_INFO_SUBSCRIPTION_BUNDLES) ||
+        !jsonObject[BUNDLE_INFO_SUBSCRIPTION_BUNDLES].is_array()) {
+        return;
+    }
+    
+    for (auto &bundleJson : jsonObject.at(BUNDLE_INFO_SUBSCRIPTION_BUNDLES)) {
+        auto subscriptionBundleInfo = NotificationBundleOption::FromJson(bundleJson);
+        if (subscriptionBundleInfo == nullptr) {
+            ANS_LOGW("Failed to parse subscription bundles from JSON, skipping");
+            continue;
+        }
+
+        extensionSubscriptionBundles_.emplace_back(subscriptionBundleInfo);
     }
 }
 
@@ -279,6 +319,7 @@ void NotificationCloneBundleInfo::FromJson(const nlohmann::json &jsonObject)
     SlotsFromJson(jsonObject);
     SubscriptionInfosFromJson(jsonObject);
     ExtensionSubscriptionFromJson(jsonObject);
+    SubscriptionBundlesFromJson(jsonObject);
 }
 std::string NotificationCloneBundleInfo::SlotInfo::Dump() const
 {

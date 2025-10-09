@@ -34,6 +34,8 @@ napi_value NotificationSubscribeInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isUserGranted", NapiIsUserGranted),
         DECLARE_NAPI_FUNCTION("getUserGrantedState", NapiGetUserGrantedState),
         DECLARE_NAPI_FUNCTION("setUserGrantedState", NapiSetUserGrantedState),
+        DECLARE_NAPI_FUNCTION("getUserGrantedEnabledBundles", NapiGetUserGrantedEnabledBundles),
+        DECLARE_NAPI_FUNCTION("setUserGrantedBundleState", NapiSetUserGrantedBundleState),
     };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));

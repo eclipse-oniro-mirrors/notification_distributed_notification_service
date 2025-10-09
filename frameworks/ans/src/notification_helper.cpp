@@ -821,6 +821,24 @@ ErrCode NotificationHelper::SetUserGrantedState(const NotificationBundleOption& 
     return DelayedSingleton<AnsNotification>::GetInstance()->SetUserGrantedState(targetBundle, enabled);
 }
 
+ErrCode NotificationHelper::GetUserGrantedEnabledBundles(
+    const NotificationBundleOption& targetBundle, std::vector<sptr<NotificationBundleOption>>& enabledBundles)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedEnabledBundles(targetBundle, enabledBundles);
+}
+
+ErrCode NotificationHelper::GetUserGrantedEnabledBundlesForSelf(std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedEnabledBundlesForSelf(bundles);
+}
+
+ErrCode NotificationHelper::SetUserGrantedBundleState(const NotificationBundleOption& targetBundle,
+    const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetUserGrantedBundleState(
+        targetBundle, enabledBundles, enabled);
+}
+
 ErrCode NotificationHelper::GetReminderInfoByBundles(
     const std::vector<NotificationBundleOption> &bundles, std::vector<NotificationReminderInfo> &reminderInfo)
 {

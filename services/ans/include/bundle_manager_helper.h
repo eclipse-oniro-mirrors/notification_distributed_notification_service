@@ -177,6 +177,18 @@ public:
 
     ErrCode GetAllBundleInfo(std::map<std::string, sptr<NotificationBundleOption>>& bundleOptions,
         int32_t userId);
+    
+    /**
+     * Queries extension information by user.
+     *
+     * @param extensionInfos Indicates the extension information.
+     * @param userId Indicates the ID of user.
+     * @return Returns true if successful; false otherwise.
+     */
+    bool QueryExtensionInfos(
+        std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos, int32_t userId);
+        
+    bool CheckBundleImplExtensionAbility(const std::string &bundleName, int32_t userId);
 private:
     void Connect();
     void Disconnect();
