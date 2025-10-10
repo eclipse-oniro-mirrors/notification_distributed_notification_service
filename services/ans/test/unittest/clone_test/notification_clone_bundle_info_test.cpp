@@ -338,6 +338,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, Dump_00001, Function | SmallTest | Lev
     int32_t uid = 1;
     int32_t slotFlags = 1;
     bool isShowBadge = true;
+    bool hasPoppedDialog = true;
     NotificationConstant::SWITCH_STATE enabledNotification = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
     NotificationCloneBundleInfo::SlotInfo slotInfo;
     slotInfo.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
@@ -349,6 +350,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, Dump_00001, Function | SmallTest | Lev
     rrc->SetUid(uid);
     rrc->SetSlotFlags(slotFlags);
     rrc->SetIsShowBadge(isShowBadge);
+    rrc->SetHasPoppedDialog(hasPoppedDialog);
     rrc->SetEnableNotification(enabledNotification);
     rrc->AddSlotInfo(slotInfo);
     std::string dumpInfo;
@@ -364,6 +366,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, Dump_00001, Function | SmallTest | Lev
             ", uid = " + std::to_string(uid) +
             ", slotFlags = " + std::to_string(slotFlags) +
             ", ShowBadge = " + std::to_string(isShowBadge) +
+            ", popDialog = " + std::to_string(hasPoppedDialog) +
             ", isEnabled = " + std::to_string(static_cast<int32_t>(enabledNotification)) +
             ", slotsInfo = " + slotDump +
             ", silentReminderEnabled = 0" +
