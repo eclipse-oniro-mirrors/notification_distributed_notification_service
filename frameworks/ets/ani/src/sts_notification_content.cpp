@@ -1263,7 +1263,7 @@ bool SetNotificationBasicContent(
         ANS_LOGD("SetNotificationBasicContent: set additionalText failed");
     }
     ani_ref lockScreenPicObj = CreateAniPixelMap(env, basicContent->GetLockScreenPicture());
-    if (lockScreenPicObj == nullptr || !SetPropertyByRef(env, object, "lockScreenPicture", lockScreenPicObj)) {
+    if (lockScreenPicObj == nullptr || !SetPropertyByRef(env, object, "lockscreenPicture", lockScreenPicObj)) {
         ANS_LOGD("SetNotificationBasicContent: set lockScreenPicture failed");
     }
     if (!WrapStructuredText(env, object, basicContent)) {
@@ -1581,10 +1581,6 @@ bool WarpNotificationLiveViewContent(
     if (content == nullptr) {
         ANS_LOGE("SetNotificationLiveViewContent: get LiveViewContent failed");
         return false;
-    }
-    ani_object lockScreenPicObj = CreateAniPixelMap(env, content->GetLockScreenPicture());
-    if (lockScreenPicObj == nullptr || !SetPropertyByRef(env, contentObj, "lockScreenPicture", lockScreenPicObj)) {
-        ANS_LOGD("SetNotificationLiveViewContent: set lockScreenPicture failed");
     }
     ani_enum_item enumItem = nullptr;
     if (!LiveViewStatusCToEts(env, content->GetLiveViewStatus(), enumItem)
