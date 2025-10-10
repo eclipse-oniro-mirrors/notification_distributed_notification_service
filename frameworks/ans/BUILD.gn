@@ -119,6 +119,7 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/notification_progress.cpp",
     "${frameworks_module_ans_path}/src/notification_reminder_info.cpp",
     "${frameworks_module_ans_path}/src/notification_request.cpp",
+    "${frameworks_module_ans_path}/src/notification_ringtone_info.cpp",
     "${frameworks_module_ans_path}/src/notification_slot.cpp",
     "${frameworks_module_ans_path}/src/notification_sorting.cpp",
     "${frameworks_module_ans_path}/src/notification_sorting_map.cpp",

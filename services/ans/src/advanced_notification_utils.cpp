@@ -1602,7 +1602,7 @@ uint64_t AdvancedNotificationService::StartAutoDelete(const std::shared_ptr<Noti
     ANS_LOGD("called");
 
     wptr<AdvancedNotificationService> wThis = this;
-    auto triggerFunc = [wThis, record, reason, deleteTimePoint] {
+    auto triggerFunc = [wThis, record, reason] {
         sptr<AdvancedNotificationService> sThis = wThis.promote();
         if (sThis != nullptr) {
             sThis->TriggerAutoDelete(record->notification->GetKey(), reason);

@@ -341,6 +341,50 @@ void StsNotificationLocalLiveViewSubscriber::OnDisconnected()
 void StsNotificationLocalLiveViewSubscriber::OnDied()
 {}
 
+bool StsRingtoneTypeUtils::StsToC(const STSRingtoneType inType, RingtoneType &outType)
+{
+    switch (inType) {
+        case STSRingtoneType::RINGTONE_TYPE_SYSTEM:
+            outType = RingtoneType::RINGTONE_TYPE_SYSTEM;
+            break;
+        case STSRingtoneType::RINGTONE_TYPE_LOCAL:
+            outType = RingtoneType::RINGTONE_TYPE_LOCAL;
+            break;
+        case STSRingtoneType::RINGTONE_TYPE_ONLINE:
+            outType = RingtoneType::RINGTONE_TYPE_ONLINE;
+            break;
+        case STSRingtoneType::RINGTONE_TYPE_NONE:
+            outType = RingtoneType::RINGTONE_TYPE_NONE;
+            break;
+        default:
+            ANS_LOGE("STSRingtoneType %{public}d is an invalid value", inType);
+            return false;
+    }
+    return true;
+}
+
+bool StsRingtoneTypeUtils::CToSts(const RingtoneType inType, STSRingtoneType &outType)
+{
+    switch (inType) {
+        case RingtoneType::RINGTONE_TYPE_SYSTEM:
+            outType = STSRingtoneType::RINGTONE_TYPE_SYSTEM;
+            break;
+        case RingtoneType::RINGTONE_TYPE_LOCAL:
+            outType = STSRingtoneType::RINGTONE_TYPE_LOCAL;
+            break;
+        case RingtoneType::RINGTONE_TYPE_ONLINE:
+            outType = STSRingtoneType::RINGTONE_TYPE_ONLINE;
+            break;
+        case RingtoneType::RINGTONE_TYPE_NONE:
+            outType = STSRingtoneType::RINGTONE_TYPE_NONE;
+            break;
+        default:
+            ANS_LOGE("RingtoneType %{public}d is an invalid value", inType);
+            return false;
+    }
+    return true;
+}
+
 void StsNotificationLocalLiveViewSubscriber::OnResponse(int32_t notificationId, sptr<ButtonOption> buttonOption)
 {
     ANS_LOGD("OnResponse call");

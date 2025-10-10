@@ -1465,6 +1465,12 @@ public:
 
     ErrCode GetLiveViewConfig(const std::vector<std::string>& bundleList) override;
 
+    ErrCode SetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundle,
+        const sptr<NotificationRingtoneInfo> &ringtoneInfo) override;
+
+    ErrCode GetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundle,
+        sptr<NotificationRingtoneInfo> &ringtoneInfo) override;
+
     ErrCode NotificationExtensionSubscribe(
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos) override;
 

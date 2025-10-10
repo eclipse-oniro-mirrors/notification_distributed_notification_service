@@ -383,6 +383,26 @@ napi_value SubscribeTypeInit(napi_env env, napi_value exports)
     return exports;
 }
 
+napi_value RingtoneTypeInit(napi_env env, napi_value exports)
+{
+    ANS_LOGD("%{public}s, called", __func__);
+
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+
+    SetNamedPropertyByInteger(env, obj, (int32_t)RingtoneType::RINGTONE_TYPE_SYSTEM, "RINGTONE_TYPE_SYSTEM");
+    SetNamedPropertyByInteger(env, obj, (int32_t)RingtoneType::RINGTONE_TYPE_LOCAL, "RINGTONE_TYPE_LOCAL");
+    SetNamedPropertyByInteger(env, obj, (int32_t)RingtoneType::RINGTONE_TYPE_ONLINE, "RINGTONE_TYPE_ONLINE");
+    SetNamedPropertyByInteger(env, obj, (int32_t)RingtoneType::RINGTONE_TYPE_NONE, "RINGTONE_TYPE_NONE");
+
+    napi_property_descriptor exportFuncs[] = {
+        DECLARE_NAPI_PROPERTY("RingtoneType", obj),
+    };
+
+    napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);
+    return exports;
+}
+
 napi_value ConstantInit(napi_env env, napi_value exports)
 {
     RemoveReasonInit(env, exports);
@@ -400,6 +420,7 @@ napi_value ConstantInit(napi_env env, napi_value exports)
     NotificationFlagTypeInit(env, exports);
     LiveViewStatusInit(env, exports);
     SwitchStateInit(env, exports);
+    RingtoneTypeInit(env, exports);
     SubscribeTypeInit(env, exports);
     return exports;
 }

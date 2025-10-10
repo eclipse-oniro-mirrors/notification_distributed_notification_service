@@ -29,6 +29,7 @@
 #include "notification_clone_bundle_info.h"
 #include "notification_disable.h"
 #include "notification_constant.h"
+#include "notification_ringtone_info.h"
 
 namespace OHOS {
 namespace Notification {
@@ -227,6 +228,9 @@ public:
         int32_t GetBundleUid() const;
         void SetSlotEnabled(NotificationConstant::SlotType slotType, bool enabled);
         bool GetSlotEnabled(NotificationConstant::SlotType slotType, bool &enabled) const;
+        void SetRingtoneInfo(const sptr<NotificationRingtoneInfo> &ringtoneInfo);
+        void GetRingtoneInfo(sptr<NotificationRingtoneInfo> &ringtoneInfo) const;
+        void RemoveRingtoneInfo();
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& GetExtensionSubscriptionInfos() const;
         std::string GetExtensionSubscriptionInfosJson() const;
         void SetExtensionSubscriptionInfos(const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
@@ -249,6 +253,7 @@ public:
         NotificationConstant::SWITCH_STATE isEnabledNotification_ =
             NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
         bool hasPoppedDialog_ = BUNDLE_POPPED_DIALOG;
+        sptr<NotificationRingtoneInfo> ringtoneInfo_ = nullptr;
         std::map<NotificationConstant::SlotType, sptr<NotificationSlot>> slots_;
         std::map<std::string, uint32_t> slotFlagsMap_;
         std::vector<sptr<NotificationExtensionSubscriptionInfo>> extensionSubscriptionInfos_;

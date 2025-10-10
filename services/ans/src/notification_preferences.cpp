@@ -32,6 +32,9 @@
 #include "os_account_manager_helper.h"
 #include "notification_analytics_util.h"
 #include "notification_config_parse.h"
+#ifdef PLAYER_FRAMEWORK_ENABLE
+#include "system_sound_manager.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -1431,6 +1434,133 @@ bool NotificationPreferences::GetBundleSoundPermission(bool &allPackage, std::se
         }
     }
     return true;
+}
+
+ErrCode NotificationPreferences::SetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundleOption,
+    const sptr<NotificationRingtoneInfo> &ringtoneInfo)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty() || ringtoneInfo == nullptr) {
+        ANS_LOGE("Invalid parameters");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    if (!GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
+        bundleInfo.SetBundleName(bundleOption->GetBundleName());
+        bundleInfo.SetBundleUid(bundleOption->GetUid());
+        NotificationConstant::SWITCH_STATE defaultState = CheckApiCompatibility(bundleOption) ?
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+        bundleInfo.SetEnableNotification(defaultState);
+    }
+
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGI("Invalid prefernces db.");
+        return ERR_ANS_TASK_ERR;
+    }
+
+    if (!preferncesDB_->SetRingtoneInfoByBundle(bundleInfo, ringtoneInfo)) {
+        ANS_LOGW("Failed set ringtone: %{public}s %{public}d", bundleOption->GetBundleName().c_str(),
+            ringtoneInfo->GetRingtoneType());
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    ANS_LOGI("Set ringtone %{public}s %{public}d", bundleOption->GetBundleName().c_str(),
+        ringtoneInfo->GetRingtoneType());
+    return ERR_OK;
+}
+
+ErrCode NotificationPreferences::GetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundleOption,
+    sptr<NotificationRingtoneInfo> &ringtoneInfo)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("Invalid parameters");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    if (!GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
+        ANS_LOGW("Get info failed %{public}s %{public}d", bundleOption->GetBundleName().c_str(),
+            bundleOption->GetUid());
+        return ERR_ANS_SPECIFIED_BUNDLE_INVALID;
+    }
+
+    sptr<NotificationRingtoneInfo> savedRingtoneInfo = nullptr;
+    bundleInfo.GetRingtoneInfo(savedRingtoneInfo);
+    if (savedRingtoneInfo == nullptr) {
+        savedRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
+        if (!preferncesDB_->GetRingtoneInfoByBundle(bundleInfo, savedRingtoneInfo)) {
+            ANS_LOGW("Get ringtone info from db failed, bundleName: %{public}s uid: %{public}d",
+                bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid());
+            return ERR_ANS_SPECIFIED_BUNDLE_INVALID;
+        }
+        bundleInfo.SetRingtoneInfo(savedRingtoneInfo);
+        preferencesInfo_.SetBundleInfo(bundleInfo);
+    }
+
+    if (savedRingtoneInfo->GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_CUSTOM_BUTT) {
+        ANS_LOGW("Ringtone not found %{public}s", bundleOption->GetBundleName().c_str());
+        return ERR_ANS_NO_CUSTOM_RINGTONE_INFO;
+    }
+    ringtoneInfo = savedRingtoneInfo;
+    ANS_LOGI("Ringtone find : %{public}s %{public}d", bundleOption->GetBundleName().c_str(),
+        ringtoneInfo->GetRingtoneType());
+    return ERR_OK;
+}
+
+void NotificationPreferences::RemoveRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle option");
+        return;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    if (!GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
+        ANS_LOGW("Get info failed %{public}s %{public}d", bundleOption->GetBundleName().c_str(),
+            bundleOption->GetUid());
+        return;
+    }
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("The prefernces db is nullptr.");
+        return;
+    }
+    sptr<NotificationRingtoneInfo> savedRingtoneInfo = nullptr;
+    bundleInfo.GetRingtoneInfo(savedRingtoneInfo);
+    if (savedRingtoneInfo == nullptr) {
+        if (!preferncesDB_->GetRingtoneInfoByBundle(bundleInfo, savedRingtoneInfo)) {
+            return;
+        }
+    }
+    if (savedRingtoneInfo == nullptr) {
+        ANS_LOGE("ringtoneInfo is nullptr.");
+        return;
+    }
+
+#ifdef PLAYER_FRAMEWORK_ENABLE
+    if (savedRingtoneInfo->GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL ||
+        savedRingtoneInfo->GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE) {
+        std::shared_ptr<Media::SystemSoundManager> systemSoundManager =
+            Media::SystemSoundManagerFactory::CreateSystemSoundManager();
+        if (systemSoundManager != nullptr) {
+            int32_t result = systemSoundManager->RemoveCustomizedTone(nullptr, savedRingtoneInfo->GetRingtoneUri());
+            ANS_LOGI("Remove Customized tone, uri: %{public}s, result: %{public}d",
+                savedRingtoneInfo->GetRingtoneUri().c_str(), result);
+        }
+    }
+#endif
+    if (preferncesDB_->RemoveRingtoneInfoByBundle(bundleInfo)) {
+        bundleInfo.RemoveRingtoneInfo();
+        preferencesInfo_.SetBundleInfo(bundleInfo);
+        ANS_LOGI("Remove ringtone info successfully for bundle: %{public}s", bundleInfo.GetBundleName().c_str());
+        return;
+    }
+    ANS_LOGE("Failed to remove ringtone info for bundle: %{public}s", bundleInfo.GetBundleName().c_str());
+    return;
 }
 
 int32_t NotificationPreferences::SetKvToDb(

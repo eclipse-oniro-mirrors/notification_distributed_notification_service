@@ -136,6 +136,13 @@ enum class LiveViewTypes {
     LIVE_VIEW_INSTANT_BANNER
 };
 
+enum class RingtoneType {
+    RINGTONE_TYPE_SYSTEM = 0,
+    RINGTONE_TYPE_LOCAL = 1,
+    RINGTONE_TYPE_ONLINE = 2,
+    RINGTONE_TYPE_NONE = 3,
+};
+
 enum class SwitchState {
     USER_MODIFIED_OFF,
     USER_MODIFIED_ON,

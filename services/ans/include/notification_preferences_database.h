@@ -402,6 +402,11 @@ public:
     bool GetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, int32_t sourceType);
 
+    bool SetRingtoneInfoByBundle(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
+        const sptr<NotificationRingtoneInfo> &ringtoneInfo);
+    bool GetRingtoneInfoByBundle(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
+        sptr<NotificationRingtoneInfo> &ringtoneInfo);
+    bool RemoveRingtoneInfoByBundle(const NotificationPreferencesInfo::BundleInfo &bundleInfo);
     /**
      * @brief ParseBundleFromDistureDB
      * @param info bundle info.

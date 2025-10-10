@@ -198,6 +198,14 @@ public:
         BLUETOOTH = 0
     };
 
+    enum class RingtoneType {
+        RINGTONE_TYPE_SYSTEM = 0,
+        RINGTONE_TYPE_LOCAL = 1,
+        RINGTONE_TYPE_ONLINE = 2,
+        RINGTONE_TYPE_NONE = 3,
+        RINGTONE_CUSTOM_BUTT = 4,
+    };
+
     static const int32_t DEFAULT_REASON_DELETE = 0;
 
     /**
