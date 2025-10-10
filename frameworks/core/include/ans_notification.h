@@ -1480,7 +1480,7 @@ public:
      * @return Returns set result.
      */
     ErrCode SetUserGrantedState(const NotificationBundleOption& targetBundle, bool enabled);
-    
+
     /**
      * @brief Obtains the list of bundleOption which subscribed by targetBundle
      * @param targetBundle The bundle option to be queried.

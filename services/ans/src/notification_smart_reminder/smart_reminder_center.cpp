@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -347,6 +347,9 @@ void SmartReminderCenter::InitValidDevices(
                 ANS_LOGI("liveView smart switch is closed, deviceType = %{public}s", deviceType.c_str());
                 continue;
             }
+            if (NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE == deviceType) {
+                continue;
+            }
             if (!CheckHealthWhiteList(request, deviceType)) {
                 continue;
             }
@@ -358,6 +361,19 @@ void SmartReminderCenter::InitValidDevices(
                 NotificationConstant::SlotType::SERVICE_REMINDER != request->GetSlotType() &&
                 NotificationConstant::SlotType::CUSTOMER_SERVICE != request->GetSlotType()) {
                 ANS_LOGD("unaffect slot");
+                continue;
+            }
+            if (deviceType.compare(NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE) == 0) {
+                ANS_LOGD("3rd-party wearable");
+                if (request->GetClassification() == NotificationConstant::ANS_VOIP) {
+                    ANS_LOGD("skip voip");
+                    continue;
+                }
+                if (BundleManagerHelper::GetInstance()->GetBundleNameByUid(request->GetCreatorUid()).empty()) {
+                    ANS_LOGD("skip SA");
+                    continue;
+                }
+                syncDevices.insert(deviceType);
                 continue;
             }
             bool distributedSwitch = GetDistributedSwitch(deviceType);
