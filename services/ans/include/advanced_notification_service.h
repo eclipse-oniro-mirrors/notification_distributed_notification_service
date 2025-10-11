@@ -1909,8 +1909,8 @@ private:
     std::map<int32_t, std::string> doNotDisturbEnableRecord_;
     bool isCachedAppAndDeviceRelationMap_ = false;
     std::map<std::string, std::string> appAndDeviceRelationMap_;
-    std::set<int32_t> ProxyForUnawareUidSet_;
-    mutable std::shared_mutex ProxyForUnawareUidSetMutex_;
+    std::set<int32_t> proxyForUnawareUidSet_;
+    mutable std::shared_mutex proxyForUnawareUidSetMutex_;
 };
 
 /**
