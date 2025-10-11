@@ -1873,7 +1873,7 @@ private:
     bool HasExtensionSubscriptionInfosChanged(const sptr<NotificationBundleOption> &bundle,
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
     ErrCode PreReminderInfoCheck();
-	bool isProxyForUnaware(const int32_t uid);
+    bool isProxyForUnaware(const int32_t uid);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;
