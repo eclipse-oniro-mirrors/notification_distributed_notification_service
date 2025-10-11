@@ -1532,7 +1532,7 @@ public:
      * @param isPorxy Proxy or Cancel proxy
      * @return Returns request result.
      */
-     ErrCode ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy);
+    ErrCode ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy);
 private:
     /**
      * @brief Gets Ans Manager proxy.
