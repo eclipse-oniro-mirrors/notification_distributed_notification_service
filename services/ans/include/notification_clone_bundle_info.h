@@ -56,6 +56,9 @@ public:
     void SetIsShowBadge(const bool &isShowBadge);
     bool GetIsShowBadge() const;
 
+    void SetHasPoppedDialog(const bool &hasPoppedDialog);
+    bool GetHasPoppedDialog() const;
+
     void SetEnableNotification(const NotificationConstant::SWITCH_STATE &state);
     NotificationConstant::SWITCH_STATE GetEnableNotification() const;
 
@@ -88,6 +91,7 @@ private:
     int32_t uid_ = -1;
     uint32_t slotFlags_ = 0;
     bool isShowBadge_ = false;
+    bool hasPoppedDialog_ = false;
     NotificationConstant::SWITCH_STATE isEnabledNotification_ = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     std::vector<SlotInfo> slotsInfo_;
     NotificationConstant::SWITCH_STATE silentReminderEnabled_;

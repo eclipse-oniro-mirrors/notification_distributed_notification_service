@@ -520,6 +520,7 @@ void NotificationPreferencesInfo::GetAllCLoneBundlesInfo(const int32_t &userId,
         cloneBundleInfo.SetAppIndex(index);
         cloneBundleInfo.SetSlotFlags(iter->second.GetSlotFlags());
         cloneBundleInfo.SetIsShowBadge(iter->second.GetIsShowBadge());
+        cloneBundleInfo.SetHasPoppedDialog(iter->second.GetHasPoppedDialog());
         cloneBundleInfo.SetEnableNotification(iter->second.GetEnableNotification());
         cloneBundleInfo.SetEnabledExtensionSubscription(iter->second.GetExtensionSubscriptionEnabled());
         iter->second.GetAllSlots(slots);
