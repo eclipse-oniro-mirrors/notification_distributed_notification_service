@@ -2185,12 +2185,12 @@ ErrCode AdvancedNotificationService::ProxyForUnaware(const std::vector<int32_t>&
     }
     if (isProxy) {
         for (auto &uid : uidList) {
-            ANS_LOGI("ProxyForUnaware add {public}d", uid);
+            ANS_LOGI("ProxyForUnaware add %{public}d", uid);
             proxyForUnawareUidSet_.insert(uid);
         }
     } else {
         for (auto &uid : uidList) {
-            ANS_LOGI("ProxyForUnaware remove {public}d", uid);
+            ANS_LOGI("ProxyForUnaware remove %{public}d", uid);
             proxyForUnawareUidSet_.erase(uid);
         }
     }
