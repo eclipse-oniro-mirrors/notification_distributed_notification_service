@@ -65,6 +65,10 @@ ErrCode AdvancedNotificationService::CancelAll(const std::string &instanceKey)
         ANS_LOGE("null notifSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
+    if (isProxyForUnaware(bundleOption->GetUid())) {
+        ANS_LOGE("CacelAll proxy uid: %{public}d", bundleOption->GetUid());
+        return ERR_OK;
+    }
     ErrCode result = ExcuteCancelAll(bundleOption, reason);
     return result;
 }

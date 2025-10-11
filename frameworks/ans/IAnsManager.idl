@@ -354,6 +354,7 @@ interface OHOS.Notification.IAnsManager {
     void GetUserGrantedEnabledBundlesForSelf([out] sptr<NotificationBundleOption>[] bundles);
 
     void SetUserGrantedBundleState([in] sptr<NotificationBundleOption> targetBundle, [in] sptr<NotificationBundleOption>[] enabledBundles, [in] boolean enabled);
-
+    
+    void ProxyForUnaware([in] int[] uidList, [in] boolean isProxy);
     [macrodef NOTIFICATION_SMART_REMINDER_SUPPORTED] void RegisterSwingCallback([in] IRemoteObject swingCallback);
 }

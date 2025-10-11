@@ -1485,6 +1485,8 @@ public:
 
     ErrCode SetUserGrantedBundleState(const sptr<NotificationBundleOption>& targetBundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled) override;
+		
+    ErrCode ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy) override;
 
 protected:
     /**
@@ -1871,6 +1873,7 @@ private:
     bool HasExtensionSubscriptionInfosChanged(const sptr<NotificationBundleOption> &bundle,
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
     ErrCode PreReminderInfoCheck();
+	bool isProxyForUnaware(const int32_t uid);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;
@@ -1906,6 +1909,8 @@ private:
     std::map<int32_t, std::string> doNotDisturbEnableRecord_;
     bool isCachedAppAndDeviceRelationMap_ = false;
     std::map<std::string, std::string> appAndDeviceRelationMap_;
+    std::set<int32_t> ProxyForUnawareUidSet_;
+    mutable std::shared_mutex ProxyForUnawareUidSetMutex_;
 };
 
 /**

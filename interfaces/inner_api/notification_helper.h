@@ -1525,6 +1525,15 @@ public:
      */
     static ErrCode SetUserGrantedBundleState(const NotificationBundleOption& targetBundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled);
+
+    /**
+     * @brief Background unaware proxy.
+     *
+     * @param uidList List of uid applications.
+     * @param isProxy Proxy or Cancel proxy
+     * @return Returns request result.
+     */
+    static ErrCode ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy);
 };
 }  // namespace Notification
 }  // namespace OHOS

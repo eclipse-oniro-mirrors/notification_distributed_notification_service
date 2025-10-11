@@ -216,6 +216,7 @@ public:
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     MOCK_METHOD1(RegisterSwingCallback, ErrCode(const sptr<IRemoteObject>&));
 #endif
+    MOCK_METHOD2(ProxyForUnaware, ErrCode(const std::vector<int32_t>&, bool));
 };
 } // namespace Notification
 } // namespace OHOS

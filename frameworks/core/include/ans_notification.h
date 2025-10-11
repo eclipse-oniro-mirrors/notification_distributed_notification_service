@@ -1524,6 +1524,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode SetReminderInfoByBundles(const std::vector<NotificationReminderInfo> &reminderInfo);
+	
+	 /**
+     * @brief Background unaware proxy.
+     *
+     * @param uidList List of uid applications.
+     * @param isPorxy Proxy or Cancel proxy
+     * @return Returns request result.
+     */
+     ErrCode ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy);
 private:
     /**
      * @brief Gets Ans Manager proxy.
