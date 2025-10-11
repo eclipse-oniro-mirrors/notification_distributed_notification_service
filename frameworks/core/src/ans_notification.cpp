@@ -2801,7 +2801,7 @@ ErrCode AnsNotification::SetReminderInfoByBundles(const std::vector<Notification
     return proxy->SetReminderInfoByBundles(reminderInfoSptr);
 }
 
-ErrCode ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy)
+ErrCode AnsNotification::ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy)
 {
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
