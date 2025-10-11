@@ -1,0 +1,169 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@!namespace("@ohos.reminderAgentManager", "reminderAgentManager")
+
+@!sts_inject("""
+static { loadLibrary("reminder_agent_manager_ani.z"); }
+""")
+
+enum ReminderType: i32 {
+    REMINDER_TYPE_TIMER = 0,
+    REMINDER_TYPE_CALENDAR = 1,
+    REMINDER_TYPE_ALARM = 2,
+}
+
+enum ActionButtonType: i32 {
+    ACTION_BUTTON_TYPE_CLOSE = 0,
+    ACTION_BUTTON_TYPE_SNOOZE = 1,
+    ACTION_BUTTON_TYPE_CUSTOM = 2,
+}
+
+union ParamType {
+    string_t: String;
+    double_t: f64;
+    int_t: i32;
+    bool_t: bool;
+}
+
+struct DataShareUpdate {
+    uri: String;
+    equalTo: @record Map<String, ParamType>;
+    value: @sts_type("ValuesBucket") Opaque;
+}
+
+struct WantAgent {
+    pkgName: String;
+    abilityName: String;
+    uri: Optional<String>;
+    parameters: Optional<Opaque>;
+}
+
+struct MaxScreenWantAgent {
+    pkgName: String;
+    abilityName: String;
+}
+
+struct ActionButton {
+    title: String;
+    titleResource: Optional<String>;
+    type: ActionButtonType;
+    wantAgent: Optional<WantAgent>;
+    dataShareUpdate: Optional<DataShareUpdate>;
+}
+
+struct LocalDateTime {
+    year: i32;
+    month: i32;
+    day: i32;
+    hour: i32;
+    minute: i32;
+    second: Optional<i32>;
+}
+
+struct ReminderRequest {
+    reminderType: ReminderType;
+    actionButton: Optional<Array<ActionButton>>;
+    wantAgent: Optional<WantAgent>;
+    maxScreenWantAgent: Optional<MaxScreenWantAgent>;
+    ringDuration: Optional<i64>;
+    snoozeTimes: Optional<i32>;
+    timeInterval: Optional<i64>;
+    title: Optional<String>;
+    titleResourceId: Optional<i32>;
+    content: Optional<String>;
+    contentResourceId: Optional<i32>;
+    expiredContent: Optional<String>;
+    expiredContentResourceId: Optional<i32>;
+    snoozeContent: Optional<String>;
+    snoozeContentResourceId: Optional<i32>;
+    notificationId: Optional<i32>;
+    groupId: Optional<String>;
+    slotType: Optional<@sts_type("notification.SlotType") Opaque>;
+    tapDismissed: Optional<bool>;
+    autoDeletedTime: Optional<i64>;
+    snoozeSlotType: Optional<@sts_type("notification.SlotType") Opaque>;
+    customRingUri: Optional<String>;
+}
+
+struct ReminderRequestCalendar {
+    @extends base: ReminderRequest;
+    dateTime: LocalDateTime;
+    repeatMonths: Optional<Array<i32>>;
+    repeatDays: Optional<Array<i32>>;
+    daysOfWeek: Optional<Array<i32>>;
+    endDateTime: Optional<LocalDateTime>;
+    rruleWantAgent: Optional<WantAgent>;
+}
+
+struct ReminderRequestAlarm {
+    @extends base: ReminderRequest;
+    hour: i32;
+    minute: i32;
+    daysOfWeek: Optional<Array<i32>>;
+}
+
+struct ReminderRequestTimer {
+    @extends base: ReminderRequest;
+    triggerTimeInSeconds: i64;
+}
+
+union ParamReminder {
+    timer: ReminderRequestTimer;
+    alarm: ReminderRequestAlarm;
+    calendar: ReminderRequestCalendar;
+    base: ReminderRequest;
+}
+
+struct ReminderInfo {
+    reminderId: i32;
+    reminderReq: ParamReminder;
+}
+
+@gen_async("publishReminder")
+@gen_promise("publishReminder")
+function PublishReminderSync(reminderReq: ParamReminder): i32;
+
+@gen_async("cancelReminder")
+@gen_promise("cancelReminder")
+function CancelReminderSync(reminderId: i32): void;
+
+@gen_async("getValidReminders")
+@gen_promise("getValidReminders")
+function GetValidRemindersSync(): Array<ParamReminder>;
+
+@gen_async("cancelAllReminders")
+@gen_promise("cancelAllReminders")
+function CancelAllRemindersSync(): void;
+
+@gen_async("addNotificationSlot")
+@gen_promise("addNotificationSlot")
+function AddNotificationSlotSync(slot: @sts_type("NotificationSlot") Opaque): void;
+
+@gen_async("removeNotificationSlot")
+@gen_promise("removeNotificationSlot")
+function RemoveNotificationSlotSync(slotType: @sts_type("notification.SlotType") Opaque): void;
+
+@gen_promise("addExcludeDate")
+function AddExcludeDateSync(reminderId: i32, date: @sts_type("Date") Opaque): void;
+
+@gen_promise("deleteExcludeDates")
+function DeleteExcludeDatesSync(reminderId: i32): void;
+
+@gen_promise("getExcludeDates")
+function GetExcludeDatesSync(reminderId: i32): Array<@sts_type("Date") Opaque>;
+
+@gen_promise("getAllValidReminders")
+function GetAllValidRemindersSync(): Array<ReminderInfo>;
