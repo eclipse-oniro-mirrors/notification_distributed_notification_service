@@ -2179,7 +2179,7 @@ void AdvancedNotificationService::SetClassificationWithVoip(const sptr<Notificat
 ErrCode AdvancedNotificationService::ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy)
 {
     std::unique_lock<std::shared_mutex> lock(ProxyForUnawareUidSetMutex_);
-    if (IPCSkeleton::GetCallingUid != RESOURCE_SCHEDULE_SERVICE_ID) {
+    if (IPCSkeleton::GetCallingUid() != RESOURCE_SCHEDULE_SERVICE_ID) {
         ANS_LOGE("notificationDisable is permission denied");
         return ERR_ANS_PERMISSION_DENIED;
     }
