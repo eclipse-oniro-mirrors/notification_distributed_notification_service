@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+* Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -586,6 +586,44 @@ bool NotificationConfigParse::ParseDeviceSlotType(const nlohmann::json& device,
         peerDeviceTypeMap[peerDeviceType] = std::move(deleteSlotTypes);
     }
     return true;
+}
+
+bool NotificationConfigParse::IsNotificationExtensionLifecycleDestroyTimeConfigured(uint32_t &outDestroyTime) const
+{
+    nlohmann::json root;
+    std::string jsonPoint = "/";
+    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
+    jsonPoint.append("/");
+    jsonPoint.append(CFG_KEY_NOTIFICATION_EXTENSION);
+    jsonPoint.append("/");
+    jsonPoint.append(CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTROY_TIME);
+    
+    if (!GetConfigJson(jsonPoint, root)) {
+        ANS_LOGE("Failed to get extension lifecycle destroy time config.");
+        return false;
+    }
+    
+    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) ||
+        !root[CFG_KEY_NOTIFICATION_SERVICE].contains(CFG_KEY_NOTIFICATION_EXTENSION)) {
+        ANS_LOGE("Notification extension lifecycle destroy time config not found jsonKey");
+        return false;
+    }
+    
+    nlohmann::json service = root[CFG_KEY_NOTIFICATION_SERVICE];
+    nlohmann::json extension = service[CFG_KEY_NOTIFICATION_EXTENSION];
+    if (extension.is_null() || extension.empty()) {
+        ANS_LOGE("Notification extension lifecycle destroy time config is invalid");
+        return false;
+    }
+    
+    if (extension.contains(CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTROY_TIME)) {
+        outDestroyTime = extension[CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTROY_TIME];
+        ANS_LOGI("Notification extension lifecycle destroy time config found and valid");
+        return true;
+    }
+
+    ANS_LOGI("Notification extension lifecycle destroy time config not found");
+    return false;
 }
 } // namespace Notification
 } // namespace OHOS

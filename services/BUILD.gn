@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,5 +21,8 @@ group("ans_service") {
   }
   if (distributed_notification_service_feature_all_scenario_collaboration) {
     deps += [ "distributed:libdans" ]
+  }
+  if (notification_extension_subscription_supported) {
+    deps += [ "distributed:libans_extension_service" ]
   }
 }

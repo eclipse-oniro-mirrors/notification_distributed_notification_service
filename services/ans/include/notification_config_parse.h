@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+* Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -65,6 +65,7 @@ public:
     bool IsInCollaborationFilter(const std::string &bundleName, int32_t uid) const;
     uint32_t GetStartAbilityTimeout();
     bool CheckAppLiveViewCcm();
+    bool IsNotificationExtensionLifecycleDestroyTimeConfigured(uint32_t &outDestroyTime) const;
 
 private:
     bool ParseCollaborativeDeleteTypesDevices(std::map<std::string, std::map<std::string,
@@ -99,6 +100,8 @@ public:
     constexpr static const char* CFG_KEY_APP_AND_DEVICE_RELATION_MAP = "appAndDeviceRelationMap";
     constexpr static const char* CFG_KEY_DFX_NORMAL_EVENT = "dfxNormalEvent";
     constexpr static const char* CFG_KEY_BUNDLE_NAME = "dfxKeyBundle";
+    constexpr static const char* CFG_KEY_NOTIFICATION_EXTENSION = "notificationExtension";
+    constexpr static const char* CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTROY_TIME = "lifecycleDestroyTime";
     #ifdef CONFIG_POLICY_ENABLE
         constexpr static const char* NOTIFICAITON_CONFIG_FILE = "etc/notification/notification_config.json";
     # else
