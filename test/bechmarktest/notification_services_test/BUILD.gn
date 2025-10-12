@@ -23,6 +23,7 @@ ohos_benchmarktest("Benchmark_Notification_Servece_Test") {
     "include",
     "mock/include",
     "${services_path}/ans/include",
+    "${services_path}/ans/include/utils",
   ]
 
   sources = [
@@ -53,6 +54,7 @@ ohos_benchmarktest("Benchmark_Notification_Servece_Test") {
     "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
     "selinux_adapter:librestorecon",
+    "bluetooth:btframework",
   ]
 
   subsystem_name = "${subsystem_name}"

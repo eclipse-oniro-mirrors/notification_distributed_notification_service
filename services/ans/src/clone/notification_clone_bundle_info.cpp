@@ -247,8 +247,8 @@ void NotificationCloneBundleInfo::SlotsFromJson(const nlohmann::json &jsonObject
 }
 void NotificationCloneBundleInfo::ExtensionSubscriptionFromJson(const nlohmann::json &jsonObject)
 {
-    if (jsonObject.contains(BUNDLE_INFO_SUBSCRIPTION_ENABLED) &&
-        jsonObject[BUNDLE_INFO_SUBSCRIPTION_ENABLED].is_number()) {
+    if (!jsonObject.contains(BUNDLE_INFO_SUBSCRIPTION_ENABLED) ||
+        !jsonObject[BUNDLE_INFO_SUBSCRIPTION_ENABLED].is_number()) {
         return;
     }
     int32_t enabledExtensionSubscription = jsonObject.at(BUNDLE_INFO_SUBSCRIPTION_ENABLED).get<int32_t>();

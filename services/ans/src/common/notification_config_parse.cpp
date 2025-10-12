@@ -649,5 +649,86 @@ bool NotificationConfigParse::IsNotificationExtensionLifecycleDestroyTimeConfigu
     ANS_LOGI("Notification extension lifecycle destroy time config not found");
     return false;
 }
+
+bool NotificationConfigParse::IsNotificationExtensionSubscribeSupportHfp(bool &outSupportHfp) const
+{
+    nlohmann::json root;
+    std::string jsonPoint = "/";
+    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
+    jsonPoint.append("/");
+    jsonPoint.append(CFG_KEY_NOTIFICATION_EXTENSION);
+    jsonPoint.append("/");
+    jsonPoint.append(CFG_KEY_SUPPORT_HFP);
+    if (!GetConfigJson(jsonPoint, root)) {
+        ANS_LOGI("Failed to get HFP support config, using default value: false.");
+        outSupportHfp = false;
+        return false;
+    }
+    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) ||
+        !root[CFG_KEY_NOTIFICATION_SERVICE].contains(CFG_KEY_NOTIFICATION_EXTENSION)) {
+        ANS_LOGE("IsNotificationExtensionSubscribeSupportHfp missing notificationExtension jsonKey");
+        outSupportHfp = false;
+        return false;
+    }
+    nlohmann::json service = root[CFG_KEY_NOTIFICATION_SERVICE];
+    nlohmann::json extension = service[CFG_KEY_NOTIFICATION_EXTENSION];
+    if (extension.is_null() || extension.empty()) {
+        ANS_LOGE("IsNotificationExtensionSubscribeSupportHfp invalid notificationExtension json");
+        outSupportHfp = false;
+        return false;
+    }
+    if (extension.contains(CFG_KEY_SUPPORT_HFP)) {
+        outSupportHfp = extension[CFG_KEY_SUPPORT_HFP];
+        return true;
+    }
+
+    ANS_LOGI("HFP support config not found in notificationExtension, using default value: false.");
+    outSupportHfp = false;
+    return false;
+}
+
+bool NotificationConfigParse::GetNotificationExtensionEnabledBundlesWriteList(
+    std::vector<std::string>& bundles) const
+{
+    nlohmann::json root;
+    std::string jsonPoint = "/";
+    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
+    jsonPoint.append("/");
+    jsonPoint.append(CFG_KEY_NOTIFICATION_EXTENSION);
+    jsonPoint.append("/");
+    jsonPoint.append(CFG_KEY_ENABLED_BUNDLES_WRITE_LIST);
+
+    if (!GetConfigJson(jsonPoint, root)) {
+        ANS_LOGE("Failed to get enabledBundlesWriteList config.");
+        return false;
+    }
+
+    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) ||
+        !root[CFG_KEY_NOTIFICATION_SERVICE].contains(CFG_KEY_NOTIFICATION_EXTENSION)) {
+        ANS_LOGE("enabledBundlesWriteList missing notificationExtension jsonKey");
+        return false;
+    }
+
+    nlohmann::json service = root[CFG_KEY_NOTIFICATION_SERVICE];
+    nlohmann::json extension = service[CFG_KEY_NOTIFICATION_EXTENSION];
+    if (extension.is_null() || extension.empty()) {
+        ANS_LOGE("enabledBundlesWriteList invalid notificationExtension json");
+        return false;
+    }
+
+    if (!extension.contains(CFG_KEY_ENABLED_BUNDLES_WRITE_LIST)) {
+        ANS_LOGE("enabledBundlesWriteList key not found in notificationExtension");
+        return false;
+    }
+
+    nlohmann::json list = extension[CFG_KEY_ENABLED_BUNDLES_WRITE_LIST];
+    if (list.is_null() || !list.is_array() || list.empty()) {
+        ANS_LOGE("enabledBundlesWriteList is invalid or empty");
+        return false;
+    }
+
+    bundles = list.get<std::vector<std::string>>();
+    return true;
+}
 } // namespace Notification
 } // namespace OHOS

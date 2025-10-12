@@ -347,7 +347,12 @@ bool NotificationPreferencesInfo::BundleInfo::SetExtensionSubscriptionBundlesFro
 
     std::vector<sptr<NotificationBundleOption>> bundles;
     for (const auto &item : jsonObject) {
-        bundles.emplace_back(NotificationBundleOption::FromJson(item));
+        auto bundleOption = NotificationBundleOption::FromJson(item);
+        if (bundleOption == nullptr) {
+            ANS_LOGE("Failed to parse bundle option from JSON item");
+            return false;
+        }
+        bundles.emplace_back(std::move(bundleOption));
     }
     SetExtensionSubscriptionBundles(bundles);
 

@@ -111,6 +111,7 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         if (bundleOption != nullptr) {
             NotificationLiveViewUtils::GetInstance().NotifyLiveViewEvent(action, bundleOption);
         }
+        AdvancedNotificationService::GetInstance()->HandleBundleUninstall(bundleOption);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
         if (callbacks_.onScreenOn != nullptr) {
@@ -178,10 +179,17 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
 void SystemEventObserver::OnReceiveEventInner(const EventFwk::CommonEventData &data)
 {
     std::string action = data.GetWant().GetAction();
+    sptr<NotificationBundleOption> bundleOption = GetBundleOption(data.GetWant());
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Failed to get bundle option for action: %s", action.c_str());
+        return;
+    }
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) == 0) {
+        AdvancedNotificationService::GetInstance()->HandleBundleInstall(bundleOption);
         return OnBundleAddEventInner(data);
     }
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) == 0) {
+        AdvancedNotificationService::GetInstance()->HandleBundleUpdate(bundleOption);
         return OnBundleUpdateEventInner(data);
     }
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) == 0) {
