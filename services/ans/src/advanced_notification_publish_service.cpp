@@ -21,6 +21,7 @@
 
 #include "accesstoken_kit.h"
 #include "ans_const_define.h"
+#include "ans_convert_enum.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_trace_wrapper.h"
@@ -1064,13 +1065,12 @@ ErrCode AdvancedNotificationService::PublishRemoveDuplicateEvent(const std::shar
 }
 
 ErrCode AdvancedNotificationService::PublishExtensionServiceStateChange(
-    NotificationConstant::EventCodeType  eventCode,
-    const sptr<NotificationBundleOption> &bundleOption,
-    bool state,
+    NotificationConstant::EventCodeType eventCode,
+    const sptr<NotificationBundleOption> &bundleOption, bool state,
     const std::vector<sptr<NotificationBundleOption>> &enabledBundles)
 {
     ANS_LOGD("%{public}s: code=%{public}d, bundle=%{public}s, state=%{public}d",
-             __FUNCTION__, eventCode, bundleOption->GetBundleName().c_str(), state);
+        __FUNCTION__, eventCode, bundleOption->GetBundleName().c_str(), state);
 
     if (bundleOption == nullptr) {
         ANS_LOGE("Invalid bundle option");
@@ -1085,22 +1085,30 @@ ErrCode AdvancedNotificationService::PublishExtensionServiceStateChange(
 
     EventFwk::Want want;
     want.SetAction("usual.event.notification.EXTENSION_SUBSCRIBE_STATE_CHANGE");
-    want.SetParam("code", eventCode);
-    want.SetParam("bundleName", bundleOption->GetBundleName());
     want.SetParam("state", state);
-    want.SetParam("uid", bundleOption->GetUid());
-    std::vector<std::string> bundleNames;
     if (eventCode == NotificationConstant::USER_GRANTED_BUNDLE_STATE) {
+        ANS_LOGI("Publish USER_GRANTED_BUNDLE_STATE event for bundle: %{public}s, state: %{public}d",
+            bundleOption->GetBundleName().c_str(), state);
+        std::vector<std::string> bundleNames;
         for (const auto &bundle : enabledBundles) {
             if (bundle != nullptr) {
                 bundleNames.emplace_back(bundle->GetBundleName());
+                ANS_LOGD("Enabled bundle: %{public}s", bundle->GetBundleName().c_str());
             }
         }
-        want.SetParam("enableBundles", bundleNames);
+        want.SetParam("enabledBundles", bundleNames);
+    } else {
+        ANS_LOGI("Publish event code=%{public}d for bundle: %{public}s, state: %{public}d",
+            eventCode, bundleOption->GetBundleName().c_str(), state);
     }
 
-    EventFwk::CommonEventData commonData(want);
+    EventFwk::CommonEventData commonData;
+    commonData.SetWant(want);
+    commonData.SetCode(static_cast<int32_t>(eventCode));
+    commonData.SetData(bundleOption->GetBundleName());
+
     EventFwk::CommonEventPublishInfo publishInfo;
+    publishInfo.SetBundleName("com.ohos.sceneboard");
     bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(commonData, publishInfo);
     if (!publishResult) {
         ANS_LOGE("PublishCommonEvent failed for bundle: %{public}s, code: %{public}d",

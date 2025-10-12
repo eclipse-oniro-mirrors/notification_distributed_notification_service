@@ -23,7 +23,8 @@ ohos_fuzztest("AnsManagerStubFuzzTest") {
   include_dirs = [
     "${component_path}/test/fuzztest/fuzz_common_base",
     "${services_path}/ans/include",
-    "${core_path}/include"
+    "${core_path}/include",
+    "${services_path}/ans/include/utils",
   ]
   cflags = [
     "-g",
@@ -50,6 +51,7 @@ ohos_fuzztest("AnsManagerStubFuzzTest") {
     "image_framework:image_native",
     "ipc:ipc_single",
     "relational_store:native_rdb",
+    "bluetooth:btframework",
   ]
 
   defines = []

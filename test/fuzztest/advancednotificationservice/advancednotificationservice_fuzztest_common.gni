@@ -25,7 +25,10 @@ template("advancednotificationservice_fuzztest_target") {
     sources = [ "${component_path}/test/fuzztest/fuzz_common_base/mock/mock_notification_func.cpp", ]
     sources += invoker.sources_value
     fuzz_config_file = invoker.fuzz_config_file_value
-    include_dirs = [ "${services_path}/ans/include" ]
+    include_dirs = [ 
+      "${services_path}/ans/include",
+      "${services_path}/ans/include/utils"
+    ]
     cflags = [
       "-fno-math-errno",
       "-fno-unroll-loops",
@@ -82,6 +85,7 @@ template("advancednotificationservice_fuzztest_target") {
       "relational_store:native_rdb",
       "resource_management:global_resmgr",
       "time_service:time_client",
+      "bluetooth:btframework",
     ]
     external_deps += component_external_deps
 

@@ -75,7 +75,7 @@ declare_args() {
   ans_config_policy_enable = true
   screenlock_mgr_enable = true
   telephony_cust = true
-  notification_extension_subscription_supported = true
+  notification_extension_subscription_supported = false
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_device_usage_statistics)) {
