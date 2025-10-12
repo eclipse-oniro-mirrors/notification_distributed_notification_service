@@ -862,5 +862,10 @@ ErrCode NotificationHelper::SetReminderInfoByBundles(const std::vector<Notificat
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetReminderInfoByBundles(reminderInfo);
 }
+
+ErrCode NotificationHelper::ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->ProxyForUnaware(uidList, isProxy);
+}
 }  // namespace Notification
 }  // namespace OHOS

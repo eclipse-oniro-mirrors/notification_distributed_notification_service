@@ -104,6 +104,7 @@ constexpr int32_t CONTROL_BY_DO_NOT_DISTURB_MODE = 1 << 14;
 constexpr int32_t CONTROL_BY_INTELLIGENT_EXPERIENCE = 1 << 31;
 constexpr int32_t FIRST_USERID = 0;
 constexpr int32_t PUSH_CHECK_WEAK_NETWORK = 7788;
+constexpr int32_t RESOURCE_SCHEDULE_SERVICE_ID = 1096;
 
 const std::string DO_NOT_DISTURB_MODE = "1";
 const std::string INTELLIGENT_EXPERIENCE = "1";
@@ -2173,6 +2174,33 @@ void AdvancedNotificationService::SetClassificationWithVoip(const sptr<Notificat
             request->SetClassification(NotificationConstant::ANS_VOIP);
         }
     }
+}
+
+ErrCode AdvancedNotificationService::ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy)
+{
+    std::unique_lock<std::shared_mutex> lock(proxyForUnawareUidSetMutex_);
+    if (IPCSkeleton::GetCallingUid() != RESOURCE_SCHEDULE_SERVICE_ID) {
+        ANS_LOGE("notificationDisable is permission denied");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    if (isProxy) {
+        for (auto &uid : uidList) {
+            ANS_LOGI("ProxyForUnaware add %{public}d", uid);
+            proxyForUnawareUidSet_.insert(uid);
+        }
+    } else {
+        for (auto &uid : uidList) {
+            ANS_LOGI("ProxyForUnaware remove %{public}d", uid);
+            proxyForUnawareUidSet_.erase(uid);
+        }
+    }
+    return ERR_OK;
+}
+
+bool AdvancedNotificationService::isProxyForUnaware(const int32_t uid)
+{
+    std::shared_lock<std::shared_mutex> lock(proxyForUnawareUidSetMutex_);
+    return proxyForUnawareUidSet_.find(uid) != proxyForUnawareUidSet_.end();
 }
 }  // namespace Notification
 }  // namespace OHOS

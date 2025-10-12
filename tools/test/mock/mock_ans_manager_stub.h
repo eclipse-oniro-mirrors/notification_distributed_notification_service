@@ -831,6 +831,11 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+	
+    ErrCode ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 private:
     std::string cmd_;
     std::string bundle_;
