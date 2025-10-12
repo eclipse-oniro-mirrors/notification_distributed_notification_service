@@ -706,5 +706,95 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedBundleStat
     ErrCode ret = advancedNotificationService_->SetUserGrantedBundleState(bundle, extensionBundles, true);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest
+ * @tc.name      : GetAllSubscriptionBundles
+ * @tc.desc      : Test GetAllSubscriptionBundles
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetAllSubscriptionBundles_0100, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    ErrCode ret = advancedNotificationService_->GetAllSubscriptionBundles(bundles);
+    EXPECT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_TRUE(bundles.empty());
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest
+ * @tc.name      : GetAllSubscriptionBundles
+ * @tc.desc      : Test GetAllSubscriptionBundles
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetAllSubscriptionBundles_0200, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    ErrCode ret = advancedNotificationService_->GetAllSubscriptionBundles(bundles);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_TRUE(bundles.empty());
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest
+ * @tc.name      : CanOpenSubscribeSettings
+ * @tc.desc      : Test CanOpenSubscribeSettings
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, CanOpenSubscribeSettings_0100, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(false);
+    ErrCode ret = advancedNotificationService_->CanOpenSubscribeSettings();
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : isExistHfpAddress_0100
+ * @tc.name      : isExistHfpAddress
+ * @tc.desc      : Test isExistHfpAddress case
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, isExistHfpAddress_0100, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> ExtensionBundles;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    ExtensionBundles.push_back(bundleOption);
+    ErrCode ret = advancedNotificationService_->isExistHfpAddress(ExtensionBundles);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.number    : CheckBluetoothConnectionInInfos_0100
+ * @tc.name      : CheckBluetoothConnectionInInfos
+ * @tc.desc      : Test CheckBluetoothConnectionInInfos case
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest,
+    CheckBluetoothConnectionInInfos_0100, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption;
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo());
+    ErrCode ret = advancedNotificationService_->CheckBluetoothConnectionInInfos(bundleOption, infos);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.number    : CheckAndUpdateHfpDeviceStatus_0100
+ * @tc.name      : CheckAndUpdateHfpDeviceStatus
+ * @tc.desc      : Test CheckAndUpdateHfpDeviceStatus case
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest,
+    CheckAndUpdateHfpDeviceStatus_0100, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    sptr<NotificationExtensionSubscriptionInfo> info = new NotificationExtensionSubscriptionInfo();
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    infos.emplace_back(info);
+    std::string bluetoothAddress = "bluetoothAddress";
+    ErrCode ret =
+        advancedNotificationService_->CheckAndUpdateHfpDeviceStatus(bundleOption, info, infos, bluetoothAddress);
+    EXPECT_FALSE(ret);
+}
 }
 }

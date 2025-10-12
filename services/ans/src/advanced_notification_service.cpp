@@ -252,6 +252,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
     if (request->GetOwnerBundleName().empty()) {
         request->SetOwnerBundleName(bundle);
     }
+    request->SetAppName(BundleManagerHelper::GetInstance()->GetBundleLabel(request->GetOwnerBundleName()));
     if (request->GetOwnerUserId() == SUBSCRIBE_USER_INIT) {
         int32_t ownerUserId = SUBSCRIBE_USER_INIT;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), ownerUserId);

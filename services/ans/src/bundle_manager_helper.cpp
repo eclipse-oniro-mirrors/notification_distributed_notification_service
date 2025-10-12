@@ -14,7 +14,8 @@
  */
 
 #include "bundle_manager_helper.h"
-
+#include "access_token_helper.h"
+#include "ans_permission_def.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "os_account_manager.h"
@@ -420,7 +421,9 @@ bool BundleManagerHelper::CheckBundleImplExtensionAbility(const std::string &bun
     }
     for (const auto& hapmodule : bundleInfo.hapModuleInfos) {
         for (const auto& extInfo : hapmodule.extensionInfos) {
-            if (extInfo.type == AppExecFwk::ExtensionAbilityType::STATICSUBSCRIBER) {
+            if ((extInfo.type == AppExecFwk::ExtensionAbilityType::NOTIFICATION_SUBSCRIBER) &&
+                AccessTokenHelper::VerifyCallerPermission(
+                    bundleInfo.applicationInfo.accessTokenId, OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
                 return true;
             }
         }

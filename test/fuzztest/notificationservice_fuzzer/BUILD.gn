@@ -25,6 +25,7 @@ ohos_fuzztest("NotificationServiceFuzzTest") {
     "${component_path}/test/fuzztest/fuzz_common_base",
     "/${services_path}/ans/include",
     "/${services_path}/reminder/include",
+    "/${services_path}/ans/include/utils",
   ]
   cflags = [
     "-g",
@@ -51,6 +52,7 @@ ohos_fuzztest("NotificationServiceFuzzTest") {
     "relational_store:native_rdb",
     "ffrt:libffrt",
     "kv_store:distributeddata_inner",
+    "bluetooth:btframework",
   ]
 }
 

@@ -24,6 +24,7 @@ ohos_fuzztest("AdvancedNotificationServiceFuzzTest") {
   include_dirs = [
     "${services_path}/ans/include",
     "${core_path}/include",
+    "${services_path}/ans/include/utils",
   ]
 
   cflags = [
@@ -87,6 +88,7 @@ ohos_fuzztest("AdvancedNotificationServiceFuzzTest") {
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
   external_deps += component_external_deps
 
