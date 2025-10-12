@@ -59,6 +59,10 @@ ohos_source_set("ans_service_sources") {
 
   defines = []
 
+  if (notification_extension_subscription_supported) {
+    defines += [ "NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED" ]
+  }
+
   sources = [
     "src/access_token_helper.cpp",
     "src/advanced_aggregation_data_roaming_observer.cpp",
@@ -196,6 +200,7 @@ ohos_source_set("ans_service_sources") {
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
   external_deps += component_external_deps
 

@@ -26,6 +26,7 @@ ohos_moduletest("ans_module_test") {
     "${services_path}/ans/test/unittest",
     "${services_path}/ans/test/unittest/mock/include",
     "${services_path}/test/moduletest/mock/include",
+    "${services_path}/ans/include/utils",
   ]
 
   sources = [
@@ -73,6 +74,7 @@ ohos_moduletest("ans_module_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+    "bluetooth:btframework",
   ]
 
   defines = []

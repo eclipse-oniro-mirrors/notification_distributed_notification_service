@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -845,6 +845,16 @@ public:
 
     ErrCode GetShowBadgeEnabledForBundles(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
         std::map<sptr<NotificationBundleOption>, bool> &bundleEnable) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetAllSubscriptionBundles(std::vector<sptr<NotificationBundleOption>>& bundles) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode CanOpenSubscribeSettings() override
     {
         return ERR_ANS_INVALID_PARAM;
     }

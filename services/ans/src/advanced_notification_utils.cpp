@@ -1541,8 +1541,7 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
     if (request->GetOwnerBundleName().empty()) {
         request->SetOwnerBundleName(request->GetCreatorBundleName());
     }
-    ANS_LOGD("creator uid=%{public}d, userId=%{public}d, bundleName=%{public}s ", uid,
-        userId, bundle.c_str());
+    request->SetAppName(BundleManagerHelper::GetInstance()->GetBundleLabel(request->GetOwnerBundleName()));
     return ERR_OK;
 }
 
@@ -2013,6 +2012,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
 
         UpdateCloneBundleInfoFoSilentReminder(cloneBundleInfo, bundle);
         NotificationAnalyticsUtil::ReportCloneInfo(cloneBundleInfo);
+        EnsureExtensionServiceLoadedAndSubscribed(bundle, cloneBundleInfo.GetExtensionSubscriptionBundles());
     }));
 }
 

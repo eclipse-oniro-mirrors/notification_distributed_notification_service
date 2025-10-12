@@ -67,6 +67,8 @@ public:
     bool CheckAppLiveViewCcm();
     bool IsNotificationExtensionLifecycleDestroyTimeConfigured(uint32_t &outDestroyTime) const;
     bool GetCloneExpiredTime(int32_t& days);
+    bool IsNotificationExtensionSubscribeSupportHfp(bool &outSupportHfp) const;
+    bool GetNotificationExtensionEnabledBundlesWriteList(std::vector<std::string>& bundles) const;
 
 private:
     bool ParseCollaborativeDeleteTypesDevices(std::map<std::string, std::map<std::string,
@@ -103,6 +105,9 @@ public:
     constexpr static const char* CFG_KEY_BUNDLE_NAME = "dfxKeyBundle";
     constexpr static const char* CFG_KEY_NOTIFICATION_EXTENSION = "notificationExtension";
     constexpr static const char* CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTROY_TIME = "lifecycleDestroyTime";
+    constexpr static const char* CFG_KEY_SUPPORT_HFP = "supportHfp";
+    constexpr static const char* CFG_KEY_ENABLED_BUNDLES_WRITE_LIST = "enabledBundlesWriteList";
+
     #ifdef CONFIG_POLICY_ENABLE
         constexpr static const char* NOTIFICAITON_CONFIG_FILE = "etc/notification/notification_config.json";
     # else

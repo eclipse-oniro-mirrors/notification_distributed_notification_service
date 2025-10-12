@@ -876,9 +876,20 @@ ErrCode NotificationHelper::SetReminderInfoByBundles(const std::vector<Notificat
     return DelayedSingleton<AnsNotification>::GetInstance()->SetReminderInfoByBundles(reminderInfo);
 }
 
+
 ErrCode NotificationHelper::ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->ProxyForUnaware(uidList, isProxy);
+}
+
+ErrCode NotificationHelper::GetAllSubscriptionBundles(std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetAllSubscriptionBundles(bundles);
+}
+
+ErrCode NotificationHelper::CanOpenSubscribeSettings()
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->CanOpenSubscribeSettings();
 }
 }  // namespace Notification
 }  // namespace OHOS

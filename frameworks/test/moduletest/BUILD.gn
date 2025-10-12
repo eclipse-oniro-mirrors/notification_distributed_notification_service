@@ -49,6 +49,7 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "${core_path}/include",
     "${inner_api_path}",
     "${frameworks_path}/test/moduletest/mock/include",
+    "${component_path}/services/ans/include/utils",
   ]
 
   sources = [
@@ -100,6 +101,7 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "selinux_adapter:librestorecon",
+    "bluetooth:btframework",
   ]
 
   subsystem_name = "${subsystem_name}"
@@ -120,6 +122,7 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "${core_path}/include",
     "${inner_api_path}",
     "${frameworks_path}/test/moduletest/mock/include",
+    "${component_path}/services/ans/include/utils",
   ]
 
   sources = [
@@ -168,6 +171,7 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "selinux_adapter:librestorecon",
+    "bluetooth:btframework",
   ]
 
   subsystem_name = "${subsystem_name}"
@@ -197,6 +201,7 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "${core_path}/include",
     "${inner_api_path}",
     "${frameworks_path}/test/moduletest/mock/include",
+    "${component_path}/services/ans/include/utils",
   ]
 
   sources = [
@@ -242,6 +247,7 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "selinux_adapter:librestorecon",
+    "bluetooth:btframework",
   ]
 
   subsystem_name = "${subsystem_name}"
