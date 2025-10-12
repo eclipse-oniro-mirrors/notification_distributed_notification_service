@@ -4686,5 +4686,44 @@ HWTEST_F(AdvancedNotificationServiceTest, DisableNotificationFeature_00002, Func
     ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
+
+/**
+ * @tc.number    : SetShowBadgeEnabledForBundles_00001
+ * @tc.name      : Test SetShowBadgeEnabledForBundles
+ * @tc.desc      : Test SetShowBadgeEnabledForBundles
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetShowBadgeEnabledForBundles_00001, Function | SmallTest | Level1)
+{
+    std::map<sptr<NotificationBundleOption>, bool> bundleOptions;
+    auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundles(bundleOptions);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.number    : SetShowBadgeEnabledForBundles_00002
+ * @tc.name      : Test SetShowBadgeEnabledForBundles
+ * @tc.desc      : Test SetShowBadgeEnabledForBundles
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetShowBadgeEnabledForBundles_00002, Function | SmallTest | Level1)
+{
+    std::map<sptr<NotificationBundleOption>, bool> bundleOptions;
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundle", 100);
+    bundleOptions[bundleOption] = true;
+    auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundles(bundleOptions);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: GetShowBadgeEnabledForBundles_100
+ * @tc.desc: test GetShowBadgeEnabledForBundles when notificationSvrQueue_ is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetShowBadgeEnabledForBundles_100, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

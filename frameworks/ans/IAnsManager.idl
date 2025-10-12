@@ -139,7 +139,12 @@ interface OHOS.Notification.IAnsManager {
 
     void SetShowBadgeEnabledForBundle([in] sptr<NotificationBundleOption> bundleOption, [in] boolean enabled);
 
+    void SetShowBadgeEnabledForBundles([in] OrderedMap<sptr<NotificationBundleOption>, boolean> bundleOptions);
+
     void GetShowBadgeEnabledForBundle([in] sptr<NotificationBundleOption> bundleOption, [out] boolean enabled);
+
+    void GetShowBadgeEnabledForBundles([in] sptr<NotificationBundleOption>[] bundleOptions,
+        [out] OrderedMap<sptr<NotificationBundleOption>, boolean> badgeEnabled);
 
     void GetShowBadgeEnabled([out] boolean enabled);
 

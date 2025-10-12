@@ -213,6 +213,10 @@ public:
     MOCK_METHOD1(GetUserGrantedEnabledBundlesForSelf, ErrCode(std::vector<sptr<NotificationBundleOption>>& bundles));
     MOCK_METHOD3(SetUserGrantedBundleState, ErrCode(const sptr<NotificationBundleOption>& bundleOption,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled));
+    MOCK_METHOD1(SetShowBadgeEnabledForBundles,
+        ErrCode(const std::map<sptr<NotificationBundleOption>, bool> &bundleOptions));
+    MOCK_METHOD2(GetShowBadgeEnabledForBundles, ErrCode(const std::vector<sptr<NotificationBundleOption>> &bundles,
+        std::map<sptr<NotificationBundleOption>, bool> &bundleEnable));
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     MOCK_METHOD1(RegisterSwingCallback, ErrCode(const sptr<IRemoteObject>&));
 #endif

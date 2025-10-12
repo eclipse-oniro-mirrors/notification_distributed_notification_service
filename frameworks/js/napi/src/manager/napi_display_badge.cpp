@@ -345,5 +345,232 @@ napi_value NapiSetBadgeNumberByBundle(napi_env env, napi_callback_info info)
         return promise;
     }
 }
+
+napi_value ParseParametersForGetBadges(const napi_env& env, const napi_callback_info& info,
+    std::vector<NotificationBundleOption> &bundles)
+{
+    size_t argc = SET_BADGE_NUMBER_MIN_PARA;
+    napi_value argv[SET_BADGE_NUMBER_MIN_PARA] = { nullptr };
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
+
+    if (argc < SET_BADGE_NUMBER_MIN_PARA) {
+        ANS_LOGE("Missing parameter.");
+        std::string msg = "Missing parameter.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    bool isArray = false;
+    NAPI_CALL(env, napi_is_array(env, argv[PARAM0], &isArray));
+    if (!isArray) {
+        ANS_LOGE("Argument 0 must be an array of BundleOption.");
+        std::string msg = "Argument 0 must be an array.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    uint32_t length = 0;
+    NAPI_CALL(env, napi_get_array_length(env, argv[PARAM0], &length));
+    for (uint32_t i = 0; i < length; ++i) {
+        napi_value item = nullptr;
+        NAPI_CALL(env, napi_get_element(env, argv[PARAM0], i, &item));
+        NotificationBundleOption option;
+        if (!Common::GetBundleOption(env, item, option)) {
+            ANS_LOGE("Invalid BundleOption at index %u", i);
+            std::string msg = "Invalid BundleOption in array.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        bundles.push_back(std::move(option));
+    }
+
+    return Common::NapiGetNull(env);
+}
+
+napi_value ParseParametersForSetBadges(const napi_env& env, const napi_callback_info& info,
+    std::vector<std::pair<NotificationBundleOption, bool>> &bundles)
+{
+    size_t argc = SET_BADGE_NUMBER_MIN_PARA;
+    napi_value argv[SET_BADGE_NUMBER_MIN_PARA] = { nullptr };
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
+
+    if (argc < SET_BADGE_NUMBER_MIN_PARA) {
+        ANS_LOGE("Missing parameter.");
+        std::string msg = "Missing parameter.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    napi_value entriesFn = nullptr;
+    napi_value iter = nullptr;
+    napi_value nextFn = nullptr;
+    NAPI_CALL(env, napi_get_named_property(env, argv[PARAM0], "entries", &entriesFn));
+    NAPI_CALL(env, napi_call_function(env, argv[PARAM0], entriesFn, 0, nullptr, &iter));
+    NAPI_CALL(env, napi_get_named_property(env, iter, "next", &nextFn));
+
+    bool done = false;
+    while (!done) {
+        napi_value resultObj;
+        NAPI_CALL(env, napi_call_function(env, iter, nextFn, 0, nullptr, &resultObj));
+
+        napi_value doneVal;
+        NAPI_CALL(env, napi_get_named_property(env, resultObj, "done", &doneVal));
+
+        NAPI_CALL(env, napi_get_value_bool(env, doneVal, &done));
+        if (done) {
+            break;
+        }
+
+        napi_value pairArr;
+        NAPI_CALL(env, napi_get_named_property(env, resultObj, "value", &pairArr));
+        napi_value jsKey = nullptr;
+        napi_value jsVal = nullptr;
+        NAPI_CALL(env, napi_get_element(env, pairArr, 0, &jsKey));
+        NAPI_CALL(env, napi_get_element(env, pairArr, 1, &jsVal));
+        NotificationBundleOption option;
+        if (!Common::GetBundleOption(env, jsKey, option)) {
+            ANS_LOGE("Invalid BundleOption in map.");
+            std::string msg = "Invalid BundleOption in map.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        bool enable = false;
+        NAPI_CALL(env, napi_get_value_bool(env, jsVal, &enable));
+        bundles.push_back(std::make_pair(std::move(option), enable));
+    }
+    return Common::NapiGetNull(env);
+}
+
+napi_value NapiSetBadgeDisplayStatusByBundles(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("called");
+    std::vector<std::pair<NotificationBundleOption, bool>> params;
+    if (ParseParametersForSetBadges(env, info, params) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+
+    AsyncCallbackInfoBatchSetBadge *asynccallbackinfo =
+        new (std::nothrow) AsyncCallbackInfoBatchSetBadge {.env = env, .asyncWork = nullptr, .params = params};
+    if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        return Common::NapiGetUndefined(env);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "setBadgeDisplayStatusByBundles", NAPI_AUTO_LENGTH, &resourceName);
+    // Asynchronous function call
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGD("NapiSetBadgeDisplayStatusByBundles work execute.");
+            AsyncCallbackInfoBatchSetBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoBatchSetBadge *>(data);
+            if (asynccallbackinfo != nullptr) {
+                asynccallbackinfo->info.errorCode = NotificationHelper::SetShowBadgeEnabledForBundles(
+                    asynccallbackinfo->params);
+            }
+        },
+        [](napi_env env, napi_status status, void *data) {
+            ANS_LOGD("NapiDisplayBadge work complete.");
+            AsyncCallbackInfoBatchSetBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoBatchSetBadge *>(data);
+            if (asynccallbackinfo != nullptr) {
+                Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+                napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+                delete asynccallbackinfo;
+                asynccallbackinfo = nullptr;
+                ANS_LOGD("NapiDisplayBadge work complete end.");
+            }
+        },
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    return promise;
+}
+
+void AsyncCompleteCallbackBatchGetBadge(napi_env env, napi_status status, void *data)
+{
+    ANS_LOGD("AsyncCompleteCallbackBatchGetBadge work complete.");
+    AsyncCallbackInfoBatchGetBadge *asyncCallbackInfo = static_cast<AsyncCallbackInfoBatchGetBadge *>(data);
+    if (asyncCallbackInfo) {
+        napi_value resultMap;
+        napi_create_map(env, &resultMap);
+        
+        for (auto itr = asyncCallbackInfo->bundleEnable.begin(); itr != asyncCallbackInfo->bundleEnable.end(); ++itr) {
+            if (itr->first == nullptr) {
+                continue;
+            }
+            napi_value jsKey;
+            napi_create_object(env, &jsKey);
+            napi_value bundleValue;
+            napi_create_string_utf8(env, itr->first->GetBundleName().c_str(), NAPI_AUTO_LENGTH, &bundleValue);
+            napi_set_named_property(env, jsKey, "bundle", bundleValue);
+            napi_value uidValue;
+            napi_create_int32(env, itr->first->GetUid(), &uidValue);
+            napi_set_named_property(env, jsKey, "uid", uidValue);
+            napi_value jsValue;
+            napi_get_boolean(env, itr->second, &jsValue);
+            napi_map_set_property(env, resultMap, jsKey, jsValue);
+        }
+        if (asyncCallbackInfo->bundleEnable.empty()) {
+            ANS_LOGW("No bundleEnable found for the provided bundles.");
+            resultMap  = Common::NapiGetNull(env);
+        }
+
+        Common::CreateReturnValue(env, asyncCallbackInfo->info, resultMap);
+        napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
+        delete asyncCallbackInfo;
+        asyncCallbackInfo = nullptr;
+    }
+}
+
+napi_value NapiGetBadgeDisplayStatusByBundles(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("NapiGetBadgeDisplayStatusByBundles called");
+    std::vector<NotificationBundleOption> params;
+    if (ParseParametersForGetBadges(env, info, params) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+
+    AsyncCallbackInfoBatchGetBadge *asyncCallbackInfo =
+        new (std::nothrow) AsyncCallbackInfoBatchGetBadge{
+            .env = env, .asyncWork = nullptr, .bundles = std::move(params)};
+    if (!asyncCallbackInfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        return Common::NapiGetUndefined(env);
+    }
+
+    napi_value promise;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asyncCallbackInfo->info, promise);
+    asyncCallbackInfo->info.isCallback = false;
+
+    napi_value resourceName;
+    napi_create_string_latin1(env, "getBadgeDisplayStatusByBundles", NAPI_AUTO_LENGTH, &resourceName);
+
+    napi_create_async_work(
+        env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGD("NapiGetBadgeDisplayStatusByBundles work excute.");
+            AsyncCallbackInfoBatchGetBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoBatchGetBadge *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = NotificationHelper::GetShowBadgeEnabledForBundles(
+                    asynccallbackinfo->bundles, asynccallbackinfo->bundleEnable);
+            }
+        },
+        AsyncCompleteCallbackBatchGetBadge,
+        (void *)asyncCallbackInfo,
+        &asyncCallbackInfo->asyncWork);
+
+    napi_queue_async_work_with_qos(env, asyncCallbackInfo->asyncWork, napi_qos_user_initiated);
+
+    return promise;
+}
 }  // namespace NotificationNapi
 }  // namespace OHOS

@@ -537,6 +537,16 @@ public:
     ErrCode SetShowBadgeEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption, bool enabled) override;
 
     /**
+     * @brief Sets whether to allow a specified application to to show badge.
+     *
+     * @param bundleOptions Indicates the bundle name and uid of the application.
+     * @param enabled Specifies whether to allow the given application to show badge.
+     * @return Returns set result.
+     */
+    ErrCode SetShowBadgeEnabledForBundles(
+        const std::map<sptr<NotificationBundleOption>, bool> &bundleOptions) override;
+
+    /**
      * @brief Gets whether the bundle allows the badge to display the status of notifications.
      *
      * @param bundleOption Indicates the NotificationBundleOption object.
@@ -544,6 +554,16 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetShowBadgeEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &enabled) override;
+
+    /**
+     * @brief Obtains the flag that whether to allow applications to show badge.
+     *
+     * @param bundleOptions Indicates the bundle name and uid of the application.
+     * @param bundleEnable Allow applications to show badge.
+     * @return Returns get result.
+     */
+    ErrCode GetShowBadgeEnabledForBundles(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        std::map<sptr<NotificationBundleOption>, bool> &bundleEnable) override;
 
     /**
      * @brief Gets whether allows the badge to display the status of notifications.
