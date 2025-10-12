@@ -2178,7 +2178,7 @@ void AdvancedNotificationService::SetClassificationWithVoip(const sptr<Notificat
 
 ErrCode AdvancedNotificationService::ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy)
 {
-    std::unique_lock<std::shared_mutex> lock(ProxyForUnawareUidSetMutex_);
+    std::unique_lock<std::shared_mutex> lock(proxyForUnawareUidSetMutex_);
     if (IPCSkeleton::GetCallingUid() != RESOURCE_SCHEDULE_SERVICE_ID) {
         ANS_LOGE("notificationDisable is permission denied");
         return ERR_ANS_PERMISSION_DENIED;
@@ -2199,7 +2199,7 @@ ErrCode AdvancedNotificationService::ProxyForUnaware(const std::vector<int32_t>&
 
 bool AdvancedNotificationService::isProxyForUnaware(const int32_t uid)
 {
-    std::shared_mutex<std::shared_mutex> lock(ProxyForUnawareUidSetMutex_);
+    std::shared_mutex<std::shared_mutex> lock(proxyForUnawareUidSetMutex_);
     return proxyForUnawareUidSet_.find(uid) != proxyForUnawareUidSet_.end();
 }
 }  // namespace Notification
