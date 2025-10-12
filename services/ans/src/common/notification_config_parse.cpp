@@ -508,6 +508,30 @@ bool NotificationConfigParse::IsReportTrustBundles(const std::string& bundleName
     return keyTrustBundles_.count(bundleName);
 }
 
+bool NotificationConfigParse::GetCloneExpiredTime(int32_t& days)
+{
+    nlohmann::json root;
+    std::string reportJsonPoint = "/";
+    reportJsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
+    reportJsonPoint.append("/");
+    reportJsonPoint.append(CFG_KEY_CLONE_EXPIRED_TIME);
+    if (!GetConfigJson(reportJsonPoint, root)) {
+        return false;
+    }
+    if (root.find(CFG_KEY_NOTIFICATION_SERVICE) == root.end()) {
+        ANS_LOGE("Failed to get JsonPoint CCM config file");
+        return false;
+    }
+    nlohmann::json jsonItem = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_CLONE_EXPIRED_TIME];
+    if (jsonItem.is_null() || !jsonItem.is_number_integer()) {
+        ANS_LOGE("cloneExpiredTime failed json.");
+        return false;
+    }
+
+    days = jsonItem.get<int32_t>();
+    return true;
+}
+
 bool NotificationConfigParse::GetCollaborativeDeleteTypeByDevice(std::map<std::string,
     std::map<std::string, std::unordered_set<std::string>>>& resultMap) const
 {

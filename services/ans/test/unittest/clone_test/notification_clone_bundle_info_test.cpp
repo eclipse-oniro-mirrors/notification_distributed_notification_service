@@ -353,6 +353,9 @@ HWTEST_F(NotificationCloneBundleInfoTest, Dump_00001, Function | SmallTest | Lev
     rrc->SetHasPoppedDialog(hasPoppedDialog);
     rrc->SetEnableNotification(enabledNotification);
     rrc->AddSlotInfo(slotInfo);
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo(
+        NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL, "title", "fileName", "uri");
+    rrc->AddRingtoneInfo(ringtoneInfo);
     std::string dumpInfo;
     EXPECT_EQ(dumpInfo.size(), 0);
     std::string slotDump = "{";
@@ -361,6 +364,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, Dump_00001, Function | SmallTest | Lev
         slotDump += ",";
     }
     slotDump += "}";
+    std::string ringtoneDump = ringtoneInfo->Dump();
     dumpInfo += "CloneBundle{ name = " + bundleName +
             ", index = " + std::to_string(appIndex) +
             ", uid = " + std::to_string(uid) +
@@ -369,6 +373,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, Dump_00001, Function | SmallTest | Lev
             ", popDialog = " + std::to_string(hasPoppedDialog) +
             ", isEnabled = " + std::to_string(static_cast<int32_t>(enabledNotification)) +
             ", slotsInfo = " + slotDump +
+            ", ringtone = " + ringtoneDump +
             ", silentReminderEnabled = 0" +
             " }";
     EXPECT_EQ(rrc->Dump(), dumpInfo);

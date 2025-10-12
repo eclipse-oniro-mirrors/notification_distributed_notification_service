@@ -125,6 +125,8 @@ public:
      */
     void FromJson(const std::string &jsonObj);
 
+    std::string Dump() const;
+
 private:
     /**
      * Read a NotificationRingtoneInfo object from a Parcel.
@@ -133,7 +135,7 @@ private:
     bool ReadFromParcel(Parcel &parcel);
 
 private:
-    NotificationConstant::RingtoneType ringtoneType_ { NotificationConstant::RingtoneType::RINGTONE_CUSTOM_BUTT };
+    NotificationConstant::RingtoneType ringtoneType_ { NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT };
     std::string ringtoneTitle_ {""};
     std::string ringtoneFileName_ {""};
     std::string ringtoneUri_ {""};

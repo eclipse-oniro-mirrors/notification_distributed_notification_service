@@ -1505,6 +1505,8 @@ protected:
     bool IsAgentRelationship(const std::string &agentBundleName, const std::string &sourceBundleName);
 
 public:
+    void ClearCloneRingToneInfo(NotificationRingtoneInfo ringtoneInfo,
+        std::vector<NotificationRingtoneInfo> cloneRingtoneInfos);
     void TriggerLiveViewSwitchCheck(int32_t userId);
     bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption);
     ErrCode SetDefaultNotificationEnabled(
@@ -1636,6 +1638,7 @@ private:
     void InitDistributeCallBack();
 #endif
 
+    void ClearOverTimeRingToneInfo();
     ErrCode SetDoNotDisturbDateByUser(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
     ErrCode GetDoNotDisturbDateByUser(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date);
     ErrCode GetHasPoppedDialog(const sptr<NotificationBundleOption> bundleOption, bool &hasPopped);

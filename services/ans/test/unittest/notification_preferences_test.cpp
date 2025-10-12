@@ -22,6 +22,7 @@
 #include "notification_preferences.h"
 #include "notification_preferences_database.h"
 #include "advanced_notification_service.h"
+#include "notification_ringtone_info.h"
 #undef private
 #undef protected
 
@@ -2759,6 +2760,69 @@ HWTEST_F(NotificationPreferencesTest, GetUserDisableNotificationInfo_001, Functi
     notificationPreferences.preferncesDB_ = nullptr;
     ret = notificationPreferences.GetUserDisableNotificationInfo(105, disable);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: GetCloneTimeStamp_001
+ * @tc.desc: test GetCloneTimeStamp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetCloneTimeStamp_001, Function | SmallTest | Level1)
+{
+    int64_t time = NotificationPreferences::GetInstance()->GetCloneTimeStamp();
+    ASSERT_EQ(time, 0);
+
+    NotificationPreferences::GetInstance()->SetCloneTimeStamp(100, 123456);
+    time = NotificationPreferences::GetInstance()->GetCloneTimeStamp();
+    ASSERT_EQ(time, 123456);
+
+    NotificationPreferences::GetInstance()->cloneTimestamp = -1;
+    time = NotificationPreferences::GetInstance()->GetCloneTimeStamp();
+    ASSERT_EQ(time, 123456);
+
+    NotificationPreferences::GetInstance()->SetCloneTimeStamp(100, 0);
+}
+
+/**
+ * @tc.name: CloneRingtoneInfo_001
+ * @tc.desc: test CloneRingtoneInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, CloneRingtoneInfo_001, Function | SmallTest | Level1)
+{
+    NotificationCloneBundleInfo bundleInfo;
+    bundleInfo.SetBundleName("ohos.test.demo");
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo(
+        NotificationConstant::RingtoneType::RINGTONE_TYPE_SYSTEM, "title", "fileName", "uri");
+    bundleInfo.AddRingtoneInfo(ringtoneInfo);
+    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, bundleInfo);
+
+    std::vector<NotificationRingtoneInfo> cloneRingtoneInfos;
+    NotificationPreferences::GetInstance()->GetCloneRingtoneInfo(100, bundleInfo, cloneRingtoneInfos);
+    ASSERT_EQ(cloneRingtoneInfos.empty(), true);
+
+    cloneRingtoneInfos.clear();
+    ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    bundleInfo.AddRingtoneInfo(ringtoneInfo);
+    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, bundleInfo);
+    NotificationPreferences::GetInstance()->GetCloneRingtoneInfo(100, bundleInfo, cloneRingtoneInfos);
+    ASSERT_EQ(cloneRingtoneInfos.size(), 1);
+
+    cloneRingtoneInfos.clear();
+    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, bundleInfo);
+    NotificationPreferences::GetInstance()->GetCloneRingtoneInfo(100, bundleInfo, cloneRingtoneInfos);
+    ASSERT_EQ(cloneRingtoneInfos.size(), 1);
+
+    cloneRingtoneInfos.clear();
+    NotificationPreferences::GetInstance()->DeleteAllCloneRingtoneInfo(100);
+    NotificationPreferences::GetInstance()->GetCloneRingtoneInfo(100, bundleInfo, cloneRingtoneInfos);
+    ASSERT_EQ(cloneRingtoneInfos.size(), 0);
+
+    cloneRingtoneInfos.clear();
+    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, bundleInfo);
+    NotificationPreferences::GetInstance()->DeleteCloneRingtoneInfo(100, bundleInfo);
+    NotificationPreferences::GetInstance()->GetCloneRingtoneInfo(100, bundleInfo, cloneRingtoneInfos);
+    ASSERT_EQ(cloneRingtoneInfos.size(), 0);
 }
 }  // namespace Notification
 }  // namespace OHOS

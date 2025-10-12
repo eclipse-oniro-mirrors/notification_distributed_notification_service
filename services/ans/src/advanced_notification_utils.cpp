@@ -1975,6 +1975,15 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
         bundle->SetAppIndex(cloneBundleInfo.GetAppIndex());
         UpdateCloneBundleInfoForEnable(cloneBundleInfo, bundle);
         UpdateCloneBundleInfoFoSlot(cloneBundleInfo, bundle);
+        if (cloneBundleInfo.GetRingtoneInfo() != nullptr) {
+            int64_t curTime = GetCurrentTime();
+            int64_t cloneTime = NotificationPreferences::GetInstance()->GetCloneTimeStamp();
+            if (cloneTime != 0 && cloneTime <= curTime &&
+                (curTime - cloneTime < NotificationConstant::MAX_CLONE_TIME)) {
+                NotificationPreferences::GetInstance()->SetRingtoneInfoByBundle(bundle,
+                    cloneBundleInfo.GetRingtoneInfo());
+            }
+        }
 
         if (NotificationPreferences::GetInstance()->SetShowBadge(bundle, cloneBundleInfo.GetIsShowBadge()) == ERR_OK) {
             HandleBadgeEnabledChanged(bundle, cloneBundleInfo.GetIsShowBadge());
@@ -1992,8 +2001,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
             ANS_LOGW("Set subscription infos failed.");
         }
         NotificationConstant::SWITCH_STATE state = cloneBundleInfo.GetEnabledExtensionSubscription();
-        if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionEnabled(bundle, state) == ERR_OK) {
-        } else {
+        if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionEnabled(bundle, state) != ERR_OK) {
             ANS_LOGW("Set subscription enabled failed.");
         }
         if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionBundles(

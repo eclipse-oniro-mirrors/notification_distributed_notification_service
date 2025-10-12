@@ -576,6 +576,15 @@ public:
      */
     ErrCode GetDistributedDevicelist(std::vector<std::string> &deviceTypes);
 
+    int64_t GetCloneTimeStamp();
+    void SetCloneTimeStamp(const int32_t& userId, const int64_t& timestamp);
+    void UpdateCloneRingtoneInfo(const int32_t& userId, const NotificationCloneBundleInfo& bundleInfo);
+    void DeleteAllCloneRingtoneInfo(const int32_t& userId);
+    void GetAllCloneRingtoneInfo(const int32_t& userId, std::vector<NotificationRingtoneInfo>& cloneRingtoneInfos);
+    void DeleteCloneRingtoneInfo(const int32_t& userId, const NotificationCloneBundleInfo& bundleInfo);
+    void GetCloneRingtoneInfo(const int32_t& userId, const NotificationCloneBundleInfo& bundleInfo,
+        std::vector<NotificationRingtoneInfo>& cloneRingtoneInfos);
+
     ErrCode GetLiveViewConfigVersion(int32_t &version);
     bool SetLiveViewConfigVersion(const int32_t& version);
     ErrCode GetLiveViewRebuildFlag(std::string& flag, int32_t userId);
@@ -623,6 +632,7 @@ private:
     void SetDistributedEnabledForBundle(const NotificationPreferencesInfo::BundleInfo& bundleInfo);
 
 private:
+    int64_t cloneTimestamp = -1;
     static ffrt::mutex instanceMutex_;
     static std::shared_ptr<NotificationPreferences> instance_;
     NotificationPreferencesInfo preferencesInfo_ {};

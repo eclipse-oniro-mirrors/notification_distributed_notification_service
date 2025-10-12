@@ -23,7 +23,12 @@
 #include "ipc_skeleton.h"
 #include "notification_constant.h"
 #include "notification_preferences.h"
+#include "os_account_manager_helper.h"
+#include "system_sound_helper.h"
 
+namespace {
+static const uint64_t DEL_TASK_DELAY = 5 * 1000;
+}
 namespace OHOS {
 namespace Notification {
 ErrCode AdvancedNotificationService::SetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundle,
@@ -42,7 +47,7 @@ ErrCode AdvancedNotificationService::SetRingtoneInfoByBundle(const sptr<Notifica
 
     if (ringtoneInfo == nullptr ||
         ringtoneInfo->GetRingtoneType() < NotificationConstant::RingtoneType::RINGTONE_TYPE_SYSTEM ||
-        ringtoneInfo->GetRingtoneType() >= NotificationConstant::RingtoneType::RINGTONE_CUSTOM_BUTT) {
+        ringtoneInfo->GetRingtoneType() >= NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT) {
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
     }
@@ -88,8 +93,69 @@ ErrCode AdvancedNotificationService::GetRingtoneInfoByBundle(const sptr<Notifica
         return ERR_ANS_SPECIFIED_BUNDLE_INVALID;
     }
 
+    ClearOverTimeRingToneInfo();
     ringtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
     return NotificationPreferences::GetInstance()->GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+}
+
+void AdvancedNotificationService::ClearOverTimeRingToneInfo()
+{
+    int64_t curTime = NotificationAnalyticsUtil::GetCurrentTime();
+    int64_t cloneTime = NotificationPreferences::GetInstance()->GetCloneTimeStamp();
+    if (cloneTime != 0 && cloneTime < curTime && (curTime - cloneTime) >=
+        NotificationConstant::MAX_CLONE_TIME) {
+        if (notificationSvrQueue_ == nullptr) {
+            ANS_LOGE("Invalid ffrt queue.");
+            return;
+        }
+        ANS_LOGI("Start clear overtime ringinfo.");
+        notificationSvrQueue_->submit_h(std::bind([&]() {
+            int32_t userId = -1;
+            if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+                ANS_LOGE("Failed to get active user id!");
+                return;
+            }
+            std::vector<NotificationRingtoneInfo> cloneRingtoneInfos;
+            NotificationPreferences::GetInstance()->GetAllCloneRingtoneInfo(userId, cloneRingtoneInfos);
+            SystemSoundHelper::GetInstance()->RemoveCustomizedTones(cloneRingtoneInfos);
+            NotificationPreferences::GetInstance()->DeleteAllCloneRingtoneInfo(userId);
+            ANS_LOGI("Clear overtime ringinfo %{public}d", userId);
+        }),
+            ffrt::task_attr().name("ringtone").delay(DEL_TASK_DELAY));
+    }
+}
+
+void AdvancedNotificationService::ClearCloneRingToneInfo(NotificationRingtoneInfo ringtoneInfo,
+    std::vector<NotificationRingtoneInfo> cloneRingtoneInfos)
+{
+    if (cloneRingtoneInfos.empty()) {
+        return;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Invalid ffrt queue.");
+        return;
+    }
+
+    ANS_LOGI("Start clear clone ringinfo.");
+    notificationSvrQueue_->submit_h(std::bind([&, ringtoneInfo, cloneRingtoneInfos]() {
+        if (ringtoneInfo.GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT) {
+            SystemSoundHelper::GetInstance()->RemoveCustomizedTones(cloneRingtoneInfos);
+            return;
+        }
+
+        std::vector<NotificationRingtoneInfo> delRingtoneInfos;
+        for (auto& item : cloneRingtoneInfos) {
+            if (ringtoneInfo.GetRingtoneFileName() == item.GetRingtoneFileName() &&
+                ringtoneInfo.GetRingtoneType() == item.GetRingtoneType() &&
+                ringtoneInfo.GetRingtoneUri() == item.GetRingtoneUri() &&
+                ringtoneInfo.GetRingtoneTitle() == item.GetRingtoneTitle()) {
+                continue;
+            }
+            delRingtoneInfos.push_back(item);
+        }
+        SystemSoundHelper::GetInstance()->RemoveCustomizedTones(delRingtoneInfos);
+    }));
 }
 }  // namespace Notification
 }  // namespace OHOS
