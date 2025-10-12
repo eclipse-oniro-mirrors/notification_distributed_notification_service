@@ -28,6 +28,7 @@
 #include "ani_publish.h"
 #include "ani_remove_group.h"
 #include "ani_request_enable.h"
+#include "ani_ringtone_info_by_bundle.h"
 #include "ani_slot.h"
 #include "ani_support_template.h"
 #include "ani_sync_config.h"
@@ -126,6 +127,10 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeGetDeviceRemindType", nullptr, reinterpret_cast<void *>(AniGetDeviceRemindType)},
     ani_native_function {"nativeSetSyncNotificationEnabledWithoutApp", nullptr,
         reinterpret_cast<void *>(AniSetSyncNotificationEnabledWithoutApp)},
+    ani_native_function {"nativeSetRingtoneInfoByBundle", nullptr,
+        reinterpret_cast<void *>(AniSetRingtoneInfoByBundle)},
+    ani_native_function {"nativeGetRingtoneInfoByBundle", nullptr,
+        reinterpret_cast<void *>(AniGetRingtoneInfoByBundle)},
 #else
     ani_native_function {"nativeIsDistributedEnabled", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
     ani_native_function {"nativeIsDistributedEnabledByBundle", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},

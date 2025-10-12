@@ -1437,6 +1437,23 @@ public:
     ErrCode GetLiveViewConfig(const std::vector<std::string>& bundleList);
 
     /**
+     * @brief Set the notification extension subscription state.
+     * @param bundle Indicates the bundle name and uid of the application.
+     * @param ringtoneInfo Custom ringtone information.
+     * @return Returns set result.
+     */
+    ErrCode SetRingtoneInfoByBundle(const NotificationBundleOption& bundle,
+        const NotificationRingtoneInfo &ringtoneInfo);
+
+    /**
+     * @brief Get the notification extension subscription state.
+     * @param bundle Indicates the bundle name and uid of the application.
+     * @param ringtoneInfo Custom ringtone information.
+     * @return Returns get result.
+     */
+    ErrCode GetRingtoneInfoByBundle(const NotificationBundleOption &bundle, NotificationRingtoneInfo &ringtoneInfo);
+
+    /**
      * @brief Subscribe the notification when the bluetooth addr is connected.
      *
      * @param infos The info to be subscribe.
@@ -1480,7 +1497,7 @@ public:
      * @return Returns set result.
      */
     ErrCode SetUserGrantedState(const NotificationBundleOption& targetBundle, bool enabled);
-    
+
     /**
      * @brief Obtains the list of bundleOption which subscribed by targetBundle
      * @param targetBundle The bundle option to be queried.

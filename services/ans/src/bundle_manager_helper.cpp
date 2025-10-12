@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -383,7 +383,8 @@ ErrCode BundleManagerHelper::GetBundleResourceInfo(const std::string &bundleName
     }
 
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    int32_t flag = static_cast<int32_t>(AppExecFwk::ResourceFlag::GET_RESOURCE_INFO_ALL);
+    int32_t flag = static_cast<int32_t>(AppExecFwk::ResourceFlag::GET_RESOURCE_INFO_ALL) |
+        static_cast<int32_t>(AppExecFwk::ResourceFlag::GET_RESOURCE_INFO_WITH_LABEL);
     result = bundleResourceProxy->GetBundleResourceInfo(bundleName, flag, bundleResourceInfo, appIndex);
     IPCSkeleton::SetCallingIdentity(identity);
     return result;
@@ -399,7 +400,7 @@ bool BundleManagerHelper::QueryExtensionInfos(std::vector<AppExecFwk::ExtensionA
         return false;
     }
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    bundleMgr_->QueryExtensionAbilityInfos(AppExecFwk::ExtensionAbilityType::STATICSUBSCRIBER,
+    bundleMgr_->QueryExtensionAbilityInfos(AppExecFwk::ExtensionAbilityType::NOTIFICATION_SUBSCRIBER,
         userId, extensionInfos);
     IPCSkeleton::SetCallingIdentity(identity);
     return true;
@@ -425,6 +426,13 @@ bool BundleManagerHelper::CheckBundleImplExtensionAbility(const std::string &bun
         }
     }
     return false;
+}
+
+std::string BundleManagerHelper::GetBundleLabel(const std::string& bundleName)
+{
+    AppExecFwk::BundleResourceInfo bundleResourceInfo = {};
+    int32_t result = GetBundleResourceInfo(bundleName, bundleResourceInfo, 0);
+    return bundleResourceInfo.label;
 }
 }  // namespace Notification
 }  // namespace OHOS

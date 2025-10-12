@@ -147,6 +147,13 @@ export default namespace notificationManager {
         TYPE_TIMER = 2
     }
 
+    export enum RingtoneType {
+        RINGTONE_TYPE_SYSTEM = 0,
+        RINGTONE_TYPE_LOCAL = 1,
+        RINGTONE_TYPE_ONLINE = 2,
+        RINGTONE_TYPE_NONE = 3
+    }
+
     export native function nativeCancelAll(): void;
     export native function nativeCancelWithId(id: int): void;
     export native function nativeCancelWithIdLabel(id: int, label: string): void;
@@ -240,6 +247,8 @@ export default namespace notificationManager {
     export native function nativeOff(
         type: 'checkNotification', callback?: CallbackForCheckInfo): int;
     export native function nativeGetNotificationSetting(): NotificationSetting;
+    export native function nativeSetRingtoneInfoByBundle(bundle: BundleOption, ringtoneInfo: RingtoneInfo): void;
+    export native function nativeGetRingtoneInfoByBundle(bundle: BundleOption): RingtoneInfo;
 
     function isInvalidParameter(doNotDisturbDate: DoNotDisturbDate): BusinessError
     {
@@ -432,6 +441,17 @@ export default namespace notificationManager {
         }
         return true;
     }
+
+    function isInvalidParameter(ringtoneInfo: RingtoneInfo): BusinessError
+    {
+        let error: BusinessError = successCallbackError
+        if (ringtoneInfo == null) {
+            error = errorParamInvalid
+            return error;
+        }
+        return error;
+    }
+
     function isInvalidTemplate(template?: NotificationTemplate): boolean
     {
         if (template === null) {
@@ -2556,6 +2576,61 @@ export default namespace notificationManager {
                 { return nativeGetNotificationSetting(); });
             p.then((data: NullishType): void => {
                 let ret : NotificationSetting = data as NotificationSetting;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+
+    export interface RingtoneInfo {
+        ringtoneType: RingtoneType;
+        ringtoneTitle?: string;
+        ringtoneFileName?: string;
+        ringtoneUri?: string;
+    }
+
+    class RingtoneInfoInner implements RingtoneInfo {
+        public ringtoneType: RingtoneType = RingtoneType.RINGTONE_TYPE_NONE;
+        public ringtoneTitle?: string;
+        public ringtoneFileName?: string;
+        public ringtoneUri?: string;
+    }
+
+    export function setRingtoneInfoByBundle(bundle: BundleOption, ringtoneInfo: RingtoneInfo): Promise<void> {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        error = isInvalidParameter(ringtoneInfo);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void =>
+                { return nativeSetRingtoneInfoByBundle(bundle, ringtoneInfo); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function getRingtoneInfoByBundle(bundle: BundleOption): Promise<RingtoneInfo> {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        let pPromise = new Promise<RingtoneInfo>(
+            (resolve: ResolveCallback<RingtoneInfo>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): RingtoneInfo =>
+                { return nativeGetRingtoneInfoByBundle(bundle); });
+            p.then((data: NullishType): void => {
+                let ret : RingtoneInfo = data as RingtoneInfo;
                 resolve(ret);
             }, (error: Error): void => {
                 reject(error);

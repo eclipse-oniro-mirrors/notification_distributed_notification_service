@@ -28,7 +28,7 @@ public:
         EXTENSION_ABILITY_ADDED = 3,
         EXTENSION_ABILITY_REMOVED = 4,
     };
-	
+
     enum InputEditType {
         EDIT_AUTO,      // Indicates that the system determines whether to allow the user to edit the options before
                         // they are sent to the application.
@@ -196,6 +196,14 @@ public:
 
     enum class SubscribeType {
         BLUETOOTH = 0
+    };
+
+    enum class RingtoneType {
+        RINGTONE_TYPE_SYSTEM = 0,
+        RINGTONE_TYPE_LOCAL = 1,
+        RINGTONE_TYPE_ONLINE = 2,
+        RINGTONE_TYPE_NONE = 3,
+        RINGTONE_CUSTOM_BUTT = 4,
     };
 
     static const int32_t DEFAULT_REASON_DELETE = 0;
@@ -453,7 +461,9 @@ public:
     constexpr static const char* PAD_DEVICE_TYPE = "tablet";
     constexpr static const char* PC_DEVICE_TYPE = "2in1";
     constexpr static const char* SLAVE_DEVICE_TYPE = "slave";
-    constexpr static const char* DEVICESTYPES[] = {"headset", "liteWearable", "wearable", "2in1", "tablet"};
+    constexpr static const char* THIRD_PARTY_WEARABLE_DEVICE_TYPE = "thirdPartyWearable";
+    constexpr static const char* DEVICESTYPES[] = { "headset", "liteWearable", "wearable", "2in1", "tablet",
+        "thirdPartyWearable" };
     constexpr static const char* ANS_VOIP = "ANS_VOIP";
     constexpr static const char* PC_PAD_VOIP_FLAG = "110101";
     constexpr static const char* HEALTH_BUNDLE_WHITE_LIST  = "HEALTH_BUNDLE_WHITE_LIST";

@@ -1650,6 +1650,7 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/advanced_notification_publish/live_publish_process.cpp",
     "${services_path}/ans/src/advanced_notification_publish_service.cpp",
     "${services_path}/ans/src/advanced_notification_reminder_service.cpp",
+    "${services_path}/ans/src/advanced_notification_ringtone_service.cpp",
     "${services_path}/ans/src/advanced_notification_service.cpp",
     "${services_path}/ans/src/advanced_notification_service_ability.cpp",
     "${services_path}/ans/src/advanced_notification_slot_service.cpp",
@@ -1749,6 +1750,13 @@ ohos_unittest("notification_extension_test") {
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    external_deps += [ "audio_framework:audio_client" ]
+    external_deps += [ "player_framework:system_sound_client" ]
+    defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"

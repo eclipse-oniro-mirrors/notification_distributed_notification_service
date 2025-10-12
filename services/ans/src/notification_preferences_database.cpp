@@ -214,6 +214,11 @@ const static std::string KEY_SLOT_ENABLED = "enabled";
 const static std::string KEY_BUNDLE_SLOTFLGS_TYPE = "bundleReminderFlagsType";
 
 /**
+ * Indicates the ringtone of bundle.
+ */
+const static std::string KEY_BUNDLE_RINGTONE_NOTIFICATION = "bundleRingtoneNotification";
+
+/**
  * Indicates whether the type of slot is flags.
  */
 const static std::string KEY_SLOT_SLOTFLGS_TYPE = "reminderFlagsType";
@@ -3297,6 +3302,80 @@ bool NotificationPreferencesDatabase::GetBundleRemoveFlag(const sptr<Notificatio
 
     ANS_LOGD("Get current remove flag %{public}s,%{public}s,%{public}d", key.c_str(), result.c_str(), existFlag);
     if (!existFlag || result == KEY_REMOVED_FLAG) {
+        return false;
+    }
+    return true;
+}
+
+bool NotificationPreferencesDatabase::SetRingtoneInfoByBundle(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
+    const sptr<NotificationRingtoneInfo> &ringtoneInfo)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleInfo.GetBundleName().empty() || ringtoneInfo == nullptr) {
+        ANS_LOGE("Invalid parameters");
+        return false;
+    }
+
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+
+    std::string bundleKey = GenerateBundleLablel(bundleInfo).append(KEY_BUNDLE_RINGTONE_NOTIFICATION);
+    std::string value = ringtoneInfo->ToJson();
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId);
+    int32_t result = rdbDataManager_->InsertData(bundleKey, value, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::GetRingtoneInfoByBundle(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
+    sptr<NotificationRingtoneInfo> &ringtoneInfo)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleInfo.GetBundleName().empty() || ringtoneInfo == nullptr) {
+        ANS_LOGE("Invalid parameters");
+        return false;
+    }
+
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+
+    std::string bundleKey = GenerateBundleLablel(bundleInfo).append(KEY_BUNDLE_RINGTONE_NOTIFICATION);
+    std::string value;
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId);
+    int32_t result = rdbDataManager_->QueryData(bundleKey, value, userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("query notificationRingtoneInfo failed");
+        return false;
+    }
+    ringtoneInfo->FromJson(value);
+    return true;
+}
+
+bool NotificationPreferencesDatabase::RemoveRingtoneInfoByBundle(
+    const NotificationPreferencesInfo::BundleInfo &bundleInfo)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleInfo.GetBundleName().empty()) {
+        ANS_LOGE("Invalid parameters");
+        return false;
+    }
+
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+
+    std::string bundleKey = GenerateBundleLablel(bundleInfo).append(KEY_BUNDLE_RINGTONE_NOTIFICATION);
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId);
+    int32_t result = rdbDataManager_->DeleteData(bundleKey, userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("delete clone bundle Info failed.");
         return false;
     }
     return true;

@@ -479,6 +479,14 @@ public:
     void UpdateProfilesUtil(std::vector<NotificationBundleOption>& trustList,
         const std::vector<NotificationBundleOption> bundleList);
 
+    ErrCode SetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<NotificationRingtoneInfo> &ringtoneInfo);
+
+    ErrCode GetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        sptr<NotificationRingtoneInfo> &ringtoneInfo);
+
+    void RemoveRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundleOption);
+
     void InitSettingFromDisturbDB(int32_t userId = -1);
     void RemoveSettings(int32_t userId);
     void RemoveAnsBundleDbInfo(const sptr<NotificationBundleOption> &bundleOption);

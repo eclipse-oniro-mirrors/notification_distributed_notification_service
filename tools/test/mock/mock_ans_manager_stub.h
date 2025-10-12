@@ -670,6 +670,18 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode SetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundle,
+        const sptr<NotificationRingtoneInfo> &ringtoneInfo) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundle,
+        sptr<NotificationRingtoneInfo> &ringtoneInfo) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     ErrCode RegisterSwingCallback(const sptr<IRemoteObject>& swingCallback) override
     {

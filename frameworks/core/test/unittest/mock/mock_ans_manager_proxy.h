@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -217,6 +217,10 @@ public:
     MOCK_METHOD1(RegisterSwingCallback, ErrCode(const sptr<IRemoteObject>&));
 #endif
     MOCK_METHOD2(ProxyForUnaware, ErrCode(const std::vector<int32_t>&, bool));
+    MOCK_METHOD2(SetRingtoneInfoByBundle, ErrCode(const sptr<NotificationBundleOption> &bundle,
+        const sptr<NotificationRingtoneInfo> &ringtoneInfo));
+    MOCK_METHOD2(GetRingtoneInfoByBundle, ErrCode(const sptr<NotificationBundleOption> &bundle,
+        sptr<NotificationRingtoneInfo> &ringtoneInfo));
 };
 } // namespace Notification
 } // namespace OHOS

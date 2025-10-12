@@ -856,7 +856,19 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
-	
+    
+    ErrCode SetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundle,
+        const sptr<NotificationRingtoneInfo> &ringtoneInfo) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundle,
+        sptr<NotificationRingtoneInfo> &ringtoneInfo) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy) override
     {
         return ERR_ANS_INVALID_PARAM;

@@ -32,6 +32,7 @@ sequenceable OHOS.Notification.NotificationOperationInfo;
 sequenceable OHOS.Notification.Notification;
 sequenceable OHOS.Notification.NotificationButtonOption;
 sequenceable OHOS.Notification.NotificationCheckRequest;
+sequenceable OHOS.Notification.NotificationRingtoneInfo;
 sequenceable OHOS.IRemoteObject;
 
 interface OHOS.Notification.IAnsManager {
@@ -333,6 +334,10 @@ interface OHOS.Notification.IAnsManager {
 
     void GetTargetDeviceBundleList([in] String deviceType, [in] String deviceId, [out] String[] bundleList, [out] String[] labelList);
 
+    void SetRingtoneInfoByBundle([in] sptr<NotificationBundleOption> bundle, [in] sptr<NotificationRingtoneInfo> ringtoneInfo);
+
+    void GetRingtoneInfoByBundle([in] sptr<NotificationBundleOption> bundle, [out] sptr<NotificationRingtoneInfo> ringtoneInfo);
+    
     void NotificationExtensionSubscribe([in] sptr<NotificationExtensionSubscriptionInfo>[] infos);
 
     void NotificationExtensionUnsubscribe();

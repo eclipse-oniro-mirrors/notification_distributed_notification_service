@@ -32,6 +32,7 @@
 #include "want_params.h"
 #include <memory>
 #include "ians_operation_callback.h"
+#include "notification_ringtone_info.h"
 
 namespace OHOS {
 namespace Notification {
@@ -1430,6 +1431,24 @@ public:
         const std::string& value);
 
     /**
+     * @brief Set the notification extension subscription state.
+     * @param bundle Indicates the bundle name and uid of the application.
+     * @param ringtoneInfo Custom ringtone information.
+     * @return Returns set result.
+     */
+    static ErrCode SetRingtoneInfoByBundle(const NotificationBundleOption &bundle,
+        const NotificationRingtoneInfo &ringtoneInfo);
+
+    /**
+     * @brief Get the notification extension subscription state.
+     * @param bundle Indicates the bundle name and uid of the application.
+     * @param ringtoneInfo Custom ringtone information.
+     * @return Returns get result.
+     */
+    static ErrCode GetRingtoneInfoByBundle(const NotificationBundleOption &bundle,
+        NotificationRingtoneInfo &ringtoneInfo);
+
+    /**
      * @brief get live view config.
      *
      * @param bundleList Indicates bundle name.
@@ -1458,7 +1477,7 @@ public:
      * @return Returns get result.
      */
     static ErrCode GetSubscribeInfo(std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
-    
+
     /**
      * @brief Obtains whether the notification extension subscription is enabled.
      * @param enabled True if the subscription is enabled.

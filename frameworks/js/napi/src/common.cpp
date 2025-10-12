@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "notification_constant.h"
 #include "notification_local_live_view_content.h"
 #include "notification_progress.h"
+#include "notification_ringtone_info.h"
 #include "notification_time.h"
 #include "pixel_map_napi.h"
 #include "napi_common_want_agent.h"
@@ -1715,6 +1716,113 @@ std::string Common::GetAppInstanceKey()
         ANS_LOGE("GetApplicationContext for instacekey fail.");
         return "";
     }
+}
+
+napi_value Common::GetRingtoneInfo(
+    const napi_env &env, const napi_value &value, NotificationRingtoneInfo &ringtoneInfo)
+{
+    ANS_LOGD("called");
+    bool hasProperty {false};
+    napi_valuetype valuetype = napi_undefined;
+    napi_value result = nullptr;
+
+    // ringtoneType?: number
+    int32_t ringtoneType = 0;
+    NAPI_CALL(env, napi_has_named_property(env, value, "ringtoneType", &hasProperty));
+    if (!hasProperty) {
+        ANS_LOGE("Property ringtoneType expected.");
+        return nullptr;
+    }
+    napi_get_named_property(env, value, "ringtoneType", &result);
+    NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+    if (valuetype != napi_number) {
+        ANS_LOGE("Wrong argument type. Number expected.");
+        std::string msg = "Incorrect parameter types. The type of ringtoneType must be number.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    napi_get_value_int32(env, result, &ringtoneType);
+    ringtoneInfo.SetRingtoneType(static_cast<NotificationConstant::RingtoneType>(ringtoneType));
+
+    return GetRingtoneStringInfo(env, value, ringtoneInfo);
+}
+
+napi_value Common::GetRingtoneStringInfo(
+    const napi_env &env, const napi_value &value, NotificationRingtoneInfo &ringtoneInfo)
+{
+    bool hasProperty {false};
+    napi_value result = nullptr;
+    napi_valuetype valuetype = napi_undefined;
+    char ringtoneTitle[STR_MAX_SIZE] = {0};
+    size_t strLen = 0;
+    NAPI_CALL(env, napi_has_named_property(env, value, "ringtoneTitle", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, value, "ringtoneTitle", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_string) {
+            ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of ringtoneTitle must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_get_value_string_utf8(env, result, ringtoneTitle, STR_MAX_SIZE - 1, &strLen));
+        ringtoneInfo.SetRingtoneTitle(ringtoneTitle);
+    }
+    char ringtoneFileName[STR_MAX_SIZE] = {0};
+    strLen = 0;
+    NAPI_CALL(env, napi_has_named_property(env, value, "ringtoneFileName", &hasProperty));
+    if (hasProperty) {
+        NAPI_CALL(env, napi_get_named_property(env, value, "ringtoneFileName", &result));
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_string) {
+            ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of ringtoneFileName must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_get_value_string_utf8(env, result, ringtoneFileName, STR_MAX_SIZE - 1, &strLen));
+        ringtoneInfo.SetRingtoneFileName(ringtoneFileName);
+    }
+    char ringtoneUri[STR_MAX_SIZE] = {0};
+    strLen = 0;
+    NAPI_CALL(env, napi_has_named_property(env, value, "ringtoneUri", &hasProperty));
+    if (hasProperty) {
+        NAPI_CALL(env, napi_get_named_property(env, value, "ringtoneUri", &result));
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_string) {
+            std::string msg = "Incorrect parameter types. The type of ringtoneUri must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_get_value_string_utf8(env, result, ringtoneUri, STR_MAX_SIZE - 1, &strLen));
+        ringtoneInfo.SetRingtoneUri(ringtoneUri);
+    }
+    return NapiGetNull(env);
+}
+
+napi_value Common::SetRingtoneInfo(const napi_env &env, const NotificationRingtoneInfo &ringtoneInfo,
+    napi_value &result)
+{
+    ANS_LOGD("called");
+
+    napi_value value = nullptr;
+    // ringtoneType: RingtoneType
+    napi_create_int32(env, static_cast<int32_t>(ringtoneInfo.GetRingtoneType()), &value);
+    napi_set_named_property(env, result, "ringtoneType", value);
+
+    // ringtoneTitle?: string
+    napi_create_string_utf8(env, ringtoneInfo.GetRingtoneTitle().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "ringtoneTitle", value);
+
+    // ringtoneFileName?: string
+    napi_create_string_utf8(env, ringtoneInfo.GetRingtoneFileName().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "ringtoneFileName", value);
+
+    // ringtoneUri?: string
+    napi_create_string_utf8(env, ringtoneInfo.GetRingtoneUri().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "ringtoneUri", value);
+
+    return NapiGetBoolean(env, true);
 }
 }  // namespace NotificationNapi
 }  // namespace OHOS

@@ -806,6 +806,19 @@ ErrCode NotificationHelper::GetSubscribeInfo(std::vector<sptr<NotificationExtens
     return DelayedSingleton<AnsNotification>::GetInstance()->GetSubscribeInfo(infos);
 }
 
+
+ErrCode NotificationHelper::SetRingtoneInfoByBundle(const NotificationBundleOption &bundle,
+    const NotificationRingtoneInfo &ringtoneInfo)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetRingtoneInfoByBundle(bundle, ringtoneInfo);
+}
+
+ErrCode NotificationHelper::GetRingtoneInfoByBundle(const NotificationBundleOption &bundle,
+    NotificationRingtoneInfo &ringtoneInfo)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetRingtoneInfoByBundle(bundle, ringtoneInfo);
+}
+
 ErrCode NotificationHelper::IsUserGranted(bool& enabled)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->IsUserGranted(enabled);

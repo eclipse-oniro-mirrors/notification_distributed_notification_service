@@ -2585,6 +2585,70 @@ ErrCode AnsNotification::GetAllNotificationsBySlotType(std::vector<sptr<Notifica
     return proxy->GetAllNotificationsBySlotType(notifications, slotType);
 }
 
+ErrCode AnsNotification::SetRingtoneInfoByBundle(const NotificationBundleOption &bundle,
+    const NotificationRingtoneInfo &ringtoneInfo)
+{
+    ANS_LOGD("called");
+    if (bundle.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bundleSptr(new (std::nothrow) NotificationBundleOption(bundle));
+    if (bundleSptr == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<NotificationRingtoneInfo> ringtoneInfoSptr(new (std::nothrow) NotificationRingtoneInfo(ringtoneInfo));
+    if (ringtoneInfoSptr == nullptr) {
+        ANS_LOGE("null ringtoneInfo");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    return proxy->SetRingtoneInfoByBundle(bundleSptr, ringtoneInfoSptr);
+}
+
+ErrCode AnsNotification::GetRingtoneInfoByBundle(const NotificationBundleOption &bundle,
+    NotificationRingtoneInfo &ringtoneInfo)
+{
+    ANS_LOGD("called");
+    if (bundle.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bundleSptr(new (std::nothrow) NotificationBundleOption(bundle));
+    if (bundleSptr == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<NotificationRingtoneInfo> ringtoneInfoSptr(new (std::nothrow) NotificationRingtoneInfo(ringtoneInfo));
+    if (ringtoneInfoSptr == nullptr) {
+        ANS_LOGE("null ringtoneInfo");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    auto errCode = proxy->GetRingtoneInfoByBundle(bundleSptr, ringtoneInfoSptr);
+    if (errCode == ERR_OK) {
+        ringtoneInfo = *ringtoneInfoSptr;
+    }
+    return errCode;
+}
+
 ErrCode AnsNotification::GetDistributedDevicelist(std::vector<std::string> &deviceTypes)
 {
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
