@@ -75,6 +75,8 @@ void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
     }
 
     int32_t userId = NotificationCloneUtil::GetActiveUserId();
+    NotificationPreferences::GetInstance()->SetCloneTimeStamp(userId,
+        NotificationAnalyticsUtil::GetCurrentTime());
     std::unique_lock lock(lock_);
     if (!bundlesInfo_.empty()) {
         NotificationPreferences::GetInstance()->DelBatchCloneBundleInfo(userId, bundlesInfo_);
@@ -105,6 +107,7 @@ void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
 
     NotificationPreferences::GetInstance()->UpdateBatchCloneBundleInfo(userId, bundlesInfo_);
     for (auto bundle = bundlesInfo_.begin(); bundle != bundlesInfo_.end(); bundle++) {
+        NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(userId, *bundle);
         ANS_LOGD("Event bundle left %{public}s.", bundle->Dump().c_str());
     }
     ANS_LOGD("end");
@@ -125,6 +128,13 @@ void NotificationCloneBundle::OnRestoreStart(const std::string bundleName, int32
             bundle->SetUid(uid);
             AdvancedNotificationService::GetInstance()->UpdateCloneBundleInfo(*bundle);
             NotificationPreferences::GetInstance()->DelCloneBundleInfo(userId, *bundle);
+            std::vector<NotificationRingtoneInfo> cloneRingtoneInfos;
+            NotificationPreferences::GetInstance()->GetCloneRingtoneInfo(userId, *bundle, cloneRingtoneInfos);
+            NotificationRingtoneInfo ringtoneInfo;
+            if (bundle->GetRingtoneInfo() != nullptr) {
+                ringtoneInfo = (*bundle->GetRingtoneInfo());
+            }
+            AdvancedNotificationService::GetInstance()->ClearCloneRingToneInfo(ringtoneInfo, cloneRingtoneInfos);
             bundle = bundlesInfo_.erase(bundle);
             break;
         }

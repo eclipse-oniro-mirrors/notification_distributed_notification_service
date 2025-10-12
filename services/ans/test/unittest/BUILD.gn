@@ -1669,6 +1669,7 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/common/notification_analytics_util.cpp",
     "${services_path}/ans/src/common/ans_status.cpp",
     "${services_path}/ans/src/common/notification_app_privileges.cpp",
+    "${services_path}/ans/src/common/system_sound_helper.cpp",
     "${services_path}/ans/src/distributed_device_status.cpp",
     "${services_path}/ans/src/distributed_manager/advanced_notification_distributed_manager_service.cpp",
     "${services_path}/ans/src/disturb_manager/advanced_notification_disturb_manager_service.cpp",

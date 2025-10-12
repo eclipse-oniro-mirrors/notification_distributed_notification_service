@@ -24,6 +24,7 @@
 #include "notification_do_not_disturb_profile.h"
 #include "notification_extension_subscription_info.h"
 #include "notification_constant.h"
+#include "notification_ringtone_info.h"
 
 namespace OHOS {
 namespace Notification {
@@ -77,9 +78,13 @@ public:
     void SetExtensionSubscriptionBundles(const std::vector<sptr<NotificationBundleOption>>& bundles);
     const std::vector<sptr<NotificationBundleOption>>& GetExtensionSubscriptionBundles() const;
 
+    void AddRingtoneInfo(sptr<NotificationRingtoneInfo> ringtoneInfo);
+    sptr<NotificationRingtoneInfo> GetRingtoneInfo() const;
+
     void ToJson(nlohmann::json &jsonObject) const;
     void FromJson(const nlohmann::json &root);
     void SlotsFromJson(const nlohmann::json &jsonObject);
+    void RingtoneFromJson(const nlohmann::json &jsonObject);
     void SubscriptionInfosFromJson(const nlohmann::json &jsonObject);
     void ExtensionSubscriptionFromJson(const nlohmann::json &jsonObject);
     void SubscriptionBundlesFromJson(const nlohmann::json &jsonObject);
@@ -94,6 +99,7 @@ private:
     bool hasPoppedDialog_ = false;
     NotificationConstant::SWITCH_STATE isEnabledNotification_ = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     std::vector<SlotInfo> slotsInfo_;
+    sptr<NotificationRingtoneInfo> ringtoneInfo_ = nullptr;
     NotificationConstant::SWITCH_STATE silentReminderEnabled_;
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> extensionSubscriptionInfos_;
     NotificationConstant::SWITCH_STATE enabledExtensionSubscription_ =

@@ -203,7 +203,7 @@ public:
         RINGTONE_TYPE_LOCAL = 1,
         RINGTONE_TYPE_ONLINE = 2,
         RINGTONE_TYPE_NONE = 3,
-        RINGTONE_CUSTOM_BUTT = 4,
+        RINGTONE_TYPE_BUTT = 4,
     };
 
     static const int32_t DEFAULT_REASON_DELETE = 0;
@@ -441,6 +441,8 @@ public:
     static const int32_t DISTRIBUTE_JUMP_BY_BTN = 1;
 
     static const int32_t DISTRIBUTE_JUMP_BY_LIVE_VIEW = 32;
+
+    static const int64_t MAX_CLONE_TIME = 7 * 24 * HOUR_TO_MS;
 
     // live view max size is 512KB(extra size) + 8KB(base size) = 520KB
     static constexpr uint64_t NOTIFICATION_MAX_LIVE_VIEW_SIZE = 520ULL * 1024ULL;

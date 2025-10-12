@@ -434,6 +434,17 @@ public:
      */
     bool GetDistributedDevicelist(std::string &deviceTypes);
 
+    bool IsRingtoneKey(const std::string &bundleKey, const std::string &key) const;
+    void ParseRingtoneFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo,
+        const std::pair<std::string, std::string> &entry);
+    bool GetCloneTimeStamp(int64_t& timestamp);
+    bool SetCloneTimeStamp(const int32_t &userId, const int64_t& timestamp);
+    bool DelAllCloneRingtoneInfo(const int32_t &userId);
+    bool GetAllCloneRingtoneInfo(const int32_t &userId, std::vector<std::string>& ringInfoJson);
+    bool DelCloneRingtoneInfo(const int32_t &userId, const NotificationCloneBundleInfo& cloneBundleInfo);
+    bool GetCloneRingtoneInfo(const int32_t &userId, const std::string bundle, int32_t index, std::string& data);
+    bool SetCloneRingtoneInfo(const int32_t &userId, const std::string bundle, int32_t index, const std::string& data);
+
     bool GetLiveViewConfigVersion(int32_t& version);
     bool SetLiveViewConfigVersion(const int32_t& version);
     bool GetLiveViewRebuildFlag(std::string& flag, int32_t userId);

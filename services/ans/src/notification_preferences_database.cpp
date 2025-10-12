@@ -270,6 +270,8 @@ const static int32_t DISTRIBUTED_KEY_BUNDLE_INDEX = 1;
 const static int32_t DISTRIBUTED_KEY_UID_INDEX = 2;
 static const char* const LIVE_VIEW_CCM_VERSION = "liveview_ccm_version";
 static const char* const LIVE_VIEW_REBUILD_FLAG = "liveview_rebuild_flag";
+static const char* const CLONE_TIMESTAMP = "clone_time_stamp";
+static const char* const CLONE_RINGTONE_INFO = "clone_ringtone_";
 
 /**
  * Indicates that distributed notification switch.
@@ -1199,6 +1201,8 @@ void NotificationPreferencesDatabase::ParseBundleFromDistureDB(NotificationPrefe
                 ParseSlotFromDisturbeDB(bunldeInfo, bundleKey, bundleEntry, userId);
             } else if (IsSilentReminderKey(GenerateBundleKey(bundleKey), bundleEntry.first)) {
                 ParseSilentReminderFromDisturbeDB(silentReminderInfo, bundleEntry);
+            } else if (IsRingtoneKey(GenerateBundleKey(bundleKey), bundleEntry.first)) {
+                ParseRingtoneFromDisturbeDB(bunldeInfo, bundleEntry);
             } else {
                 ParseBundlePropertyFromDisturbeDB(bunldeInfo, bundleKey, bundleEntry);
             }
@@ -3011,6 +3015,177 @@ bool NotificationPreferencesDatabase::UpdateCloneToDisturbeDB(const int32_t &use
     return (result == NativeRdb::E_OK);
 }
 
+void NotificationPreferencesDatabase::ParseRingtoneFromDisturbeDB(
+    NotificationPreferencesInfo::BundleInfo &bundleInfo,
+    const std::pair<std::string, std::string> &entry)
+{
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
+    ringtoneInfo->FromJson(entry.second);
+    bundleInfo.SetRingtoneInfo(ringtoneInfo);
+}
+
+bool NotificationPreferencesDatabase::IsRingtoneKey(const std::string &bundleKey, const std::string &key) const
+{
+    std::string tempStr = FindLastString(bundleKey, key);
+    size_t pos = tempStr.find_first_of(KEY_UNDER_LINE);
+    if (!tempStr.compare(KEY_BUNDLE_RINGTONE_NOTIFICATION)) {
+        return true;
+    }
+    return false;
+}
+
+bool NotificationPreferencesDatabase::GetCloneRingtoneInfo(const int32_t &userId,
+    const std::string bundle, int32_t index, std::string& data)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+
+    std::string key = CLONE_RINGTONE_INFO + bundle + std::to_string(index);
+    bool result = false;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t& status, std::string& value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                data = value;
+                result = true;
+                break;
+            }
+            default:
+                break;
+        }
+    });
+    return result;
+}
+
+bool NotificationPreferencesDatabase::SetCloneRingtoneInfo(const int32_t &userId,
+    const std::string bundle, int32_t index, const std::string& data)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+
+    std::string key = CLONE_RINGTONE_INFO + bundle + std::to_string(index);
+    int32_t result = rdbDataManager_->InsertData(key, data, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::DelCloneRingtoneInfo(const int32_t &userId,
+    const NotificationCloneBundleInfo& cloneBundleInfo)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+
+    std::string key = CLONE_RINGTONE_INFO + cloneBundleInfo.GetBundleName() +
+        std::to_string(cloneBundleInfo.GetAppIndex());
+    auto result = rdbDataManager_->DeleteData(key, userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("delete bundle Info failed.");
+        return false;
+    }
+
+    return true;
+}
+
+bool NotificationPreferencesDatabase::DelAllCloneRingtoneInfo(const int32_t &userId)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+
+    std::unordered_map<std::string, std::string> values;
+    int32_t result = rdbDataManager_->QueryDataBeginWithKey(CLONE_RINGTONE_INFO, values, userId);
+    if (result == NativeRdb::E_EMPTY_VALUES_BUCKET) {
+        ANS_LOGI("Empty clone info.");
+        return true;
+    }
+    if (result != NativeRdb::E_OK) {
+        return false;
+    }
+    std::vector<std::string> keys;
+    for (auto iter : values) {
+        keys.push_back(iter.first);
+    }
+
+    result = rdbDataManager_->DeleteBatchData(keys, userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("delete bundle Info failed.");
+        return false;
+    }
+
+    return true;
+}
+
+bool NotificationPreferencesDatabase::GetAllCloneRingtoneInfo(const int32_t &userId,
+    std::vector<std::string>& ringInfoJson)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+
+    std::unordered_map<std::string, std::string> values;
+    int32_t result = rdbDataManager_->QueryDataBeginWithKey(CLONE_RINGTONE_INFO, values, userId);
+    if (result == NativeRdb::E_EMPTY_VALUES_BUCKET) {
+        ANS_LOGI("Empty clone info.");
+        return true;
+    }
+    if (result != NativeRdb::E_OK) {
+        return false;
+    }
+    for (auto iter : values) {
+        ringInfoJson.push_back(iter.second);
+    }
+    return true;
+}
+
+bool NotificationPreferencesDatabase::SetCloneTimeStamp(const int32_t &userId, const int64_t& timestamp)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+    int32_t result = rdbDataManager_->InsertData(CLONE_TIMESTAMP, std::to_string(timestamp), userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::GetCloneTimeStamp(int64_t& timestamp)
+{
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGW("Current user acquisition failed");
+        return false;
+    }
+
+    bool result = false;
+    GetValueFromDisturbeDB(CLONE_TIMESTAMP, userId, [&](const int32_t& status, std::string& value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                timestamp = 0;
+                result = true;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                timestamp = StringToInt64(value);
+                result = true;
+                break;
+            }
+            default:
+                break;
+        }
+    });
+    return result;
+}
+
 bool NotificationPreferencesDatabase::SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable)
 {
     if (notificationDisable == nullptr || !CheckRdbStore()) {
@@ -3321,7 +3496,7 @@ bool NotificationPreferencesDatabase::SetRingtoneInfoByBundle(const Notification
         return false;
     }
 
-    std::string bundleKey = GenerateBundleLablel(bundleInfo).append(KEY_BUNDLE_RINGTONE_NOTIFICATION);
+    std::string bundleKey = GenerateBundleKey(GenerateBundleLablel(bundleInfo), KEY_BUNDLE_RINGTONE_NOTIFICATION);
     std::string value = ringtoneInfo->ToJson();
     int32_t userId = -1;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId);
@@ -3343,7 +3518,7 @@ bool NotificationPreferencesDatabase::GetRingtoneInfoByBundle(const Notification
         return false;
     }
 
-    std::string bundleKey = GenerateBundleLablel(bundleInfo).append(KEY_BUNDLE_RINGTONE_NOTIFICATION);
+    std::string bundleKey = GenerateBundleKey(GenerateBundleLablel(bundleInfo), KEY_BUNDLE_RINGTONE_NOTIFICATION);
     std::string value;
     int32_t userId = -1;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId);
@@ -3370,7 +3545,7 @@ bool NotificationPreferencesDatabase::RemoveRingtoneInfoByBundle(
         return false;
     }
 
-    std::string bundleKey = GenerateBundleLablel(bundleInfo).append(KEY_BUNDLE_RINGTONE_NOTIFICATION);
+    std::string bundleKey = GenerateBundleKey(GenerateBundleLablel(bundleInfo), KEY_BUNDLE_RINGTONE_NOTIFICATION);
     int32_t userId = -1;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId);
     int32_t result = rdbDataManager_->DeleteData(bundleKey, userId);

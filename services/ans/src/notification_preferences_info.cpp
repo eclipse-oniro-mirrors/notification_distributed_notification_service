@@ -228,9 +228,9 @@ void NotificationPreferencesInfo::BundleInfo::SetRingtoneInfo(const sptr<Notific
     ringtoneInfo_ = ringtoneInfo;
 }
 
-void NotificationPreferencesInfo::BundleInfo::GetRingtoneInfo(sptr<NotificationRingtoneInfo> &ringtoneInfo) const
+sptr<NotificationRingtoneInfo> NotificationPreferencesInfo::BundleInfo::GetRingtoneInfo() const
 {
-    ringtoneInfo = ringtoneInfo_;
+    return ringtoneInfo_;
 }
 
 void NotificationPreferencesInfo::BundleInfo::RemoveRingtoneInfo()
@@ -537,6 +537,7 @@ void NotificationPreferencesInfo::GetAllCLoneBundlesInfo(const int32_t &userId,
         cloneBundleInfo.SetIsShowBadge(iter->second.GetIsShowBadge());
         cloneBundleInfo.SetHasPoppedDialog(iter->second.GetHasPoppedDialog());
         cloneBundleInfo.SetEnableNotification(iter->second.GetEnableNotification());
+        cloneBundleInfo.AddRingtoneInfo(iter->second.GetRingtoneInfo());
         cloneBundleInfo.SetEnabledExtensionSubscription(iter->second.GetExtensionSubscriptionEnabled());
         iter->second.GetAllSlots(slots);
         for (auto& slot : slots) {

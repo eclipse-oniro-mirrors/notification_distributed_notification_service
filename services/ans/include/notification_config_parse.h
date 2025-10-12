@@ -66,6 +66,7 @@ public:
     uint32_t GetStartAbilityTimeout();
     bool CheckAppLiveViewCcm();
     bool IsNotificationExtensionLifecycleDestroyTimeConfigured(uint32_t &outDestroyTime) const;
+    bool GetCloneExpiredTime(int32_t& days);
 
 private:
     bool ParseCollaborativeDeleteTypesDevices(std::map<std::string, std::map<std::string,
@@ -114,6 +115,7 @@ public:
     constexpr static const char* PEER_DELETE_FILTER_DEVICE = "peerDeleteFilterDevice";
     constexpr static const char* PEER_DEVICE_TYPE = "peerDeviceType";
     constexpr static const char* DELETE_SLOT_TYPE = "deleteSlotTypes";
+    constexpr static const char* CFG_KEY_CLONE_EXPIRED_TIME = "cloneExpiredTime";
 };
 } // namespace Notification
 } // namespace OHOS

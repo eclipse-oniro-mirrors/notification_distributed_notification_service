@@ -229,7 +229,7 @@ public:
         void SetSlotEnabled(NotificationConstant::SlotType slotType, bool enabled);
         bool GetSlotEnabled(NotificationConstant::SlotType slotType, bool &enabled) const;
         void SetRingtoneInfo(const sptr<NotificationRingtoneInfo> &ringtoneInfo);
-        void GetRingtoneInfo(sptr<NotificationRingtoneInfo> &ringtoneInfo) const;
+        sptr<NotificationRingtoneInfo> GetRingtoneInfo() const;
         void RemoveRingtoneInfo();
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& GetExtensionSubscriptionInfos() const;
         std::string GetExtensionSubscriptionInfosJson() const;

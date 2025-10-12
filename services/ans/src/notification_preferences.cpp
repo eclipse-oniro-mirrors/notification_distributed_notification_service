@@ -1456,6 +1456,7 @@ ErrCode NotificationPreferences::SetRingtoneInfoByBundle(const sptr<Notification
         bundleInfo.SetEnableNotification(defaultState);
     }
 
+    bundleInfo.SetRingtoneInfo(ringtoneInfo);
     if (preferncesDB_ == nullptr) {
         ANS_LOGI("Invalid prefernces db.");
         return ERR_ANS_TASK_ERR;
@@ -1466,6 +1467,7 @@ ErrCode NotificationPreferences::SetRingtoneInfoByBundle(const sptr<Notification
             ringtoneInfo->GetRingtoneType());
         return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
+    preferencesInfo_.SetBundleInfo(bundleInfo);
     ANS_LOGI("Set ringtone %{public}s %{public}d", bundleOption->GetBundleName().c_str(),
         ringtoneInfo->GetRingtoneType());
     return ERR_OK;
@@ -1488,8 +1490,7 @@ ErrCode NotificationPreferences::GetRingtoneInfoByBundle(const sptr<Notification
         return ERR_ANS_SPECIFIED_BUNDLE_INVALID;
     }
 
-    sptr<NotificationRingtoneInfo> savedRingtoneInfo = nullptr;
-    bundleInfo.GetRingtoneInfo(savedRingtoneInfo);
+    sptr<NotificationRingtoneInfo> savedRingtoneInfo = bundleInfo.GetRingtoneInfo();
     if (savedRingtoneInfo == nullptr) {
         savedRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
         if (!preferncesDB_->GetRingtoneInfoByBundle(bundleInfo, savedRingtoneInfo)) {
@@ -1501,7 +1502,7 @@ ErrCode NotificationPreferences::GetRingtoneInfoByBundle(const sptr<Notification
         preferencesInfo_.SetBundleInfo(bundleInfo);
     }
 
-    if (savedRingtoneInfo->GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_CUSTOM_BUTT) {
+    if (savedRingtoneInfo->GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT) {
         ANS_LOGW("Ringtone not found %{public}s", bundleOption->GetBundleName().c_str());
         return ERR_ANS_NO_CUSTOM_RINGTONE_INFO;
     }
@@ -1529,8 +1530,7 @@ void NotificationPreferences::RemoveRingtoneInfoByBundle(const sptr<Notification
         ANS_LOGE("The prefernces db is nullptr.");
         return;
     }
-    sptr<NotificationRingtoneInfo> savedRingtoneInfo = nullptr;
-    bundleInfo.GetRingtoneInfo(savedRingtoneInfo);
+    sptr<NotificationRingtoneInfo> savedRingtoneInfo = bundleInfo.GetRingtoneInfo();
     if (savedRingtoneInfo == nullptr) {
         if (!preferncesDB_->GetRingtoneInfoByBundle(bundleInfo, savedRingtoneInfo)) {
             return;
@@ -1561,6 +1561,143 @@ void NotificationPreferences::RemoveRingtoneInfoByBundle(const sptr<Notification
     }
     ANS_LOGE("Failed to remove ringtone info for bundle: %{public}s", bundleInfo.GetBundleName().c_str());
     return;
+}
+
+int64_t NotificationPreferences::GetCloneTimeStamp()
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (cloneTimestamp != -1) {
+        return cloneTimestamp;
+    }
+
+    if (!preferncesDB_->GetCloneTimeStamp(cloneTimestamp)) {
+        ANS_LOGW("Get time stamp failed");
+        return 0;
+    }
+    return cloneTimestamp;
+}
+
+void NotificationPreferences::SetCloneTimeStamp(const int32_t& userId, const int64_t& timestamp)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    cloneTimestamp = timestamp;
+    auto result = preferncesDB_->SetCloneTimeStamp(userId, timestamp);
+    ANS_LOGI("Set time stamp %{public}d %{public}d %{public}" PRId64, userId, result, timestamp);
+}
+
+void NotificationPreferences::GetCloneRingtoneInfo(const int32_t& userId,
+    const NotificationCloneBundleInfo& bundleInfo,
+    std::vector<NotificationRingtoneInfo>& cloneRingtoneInfos)
+{
+    std::string originData;
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (!preferncesDB_->GetCloneRingtoneInfo(userId, bundleInfo.GetBundleName(),
+        bundleInfo.GetAppIndex(), originData)) {
+        ANS_LOGW("Get ring tone %{public}s %{public}d failed", bundleInfo.GetBundleName().c_str(),
+            bundleInfo.GetAppIndex());
+    }
+    if (originData.empty()) {
+        return;
+    }
+
+    nlohmann::json jsonObject = nlohmann::json::parse(originData, nullptr, false);
+    if (jsonObject.is_null() || !jsonObject.is_array()) {
+        ANS_LOGI("ringtone is null or not array.");
+        return;
+    }
+    for (auto &item : jsonObject) {
+        NotificationRingtoneInfo info;
+        info.FromJson(item.get<std::string>());
+        cloneRingtoneInfos.push_back(info);
+    }
+    ANS_LOGI("Get ringtone %{public}zu.", cloneRingtoneInfos.size());
+}
+
+void NotificationPreferences::UpdateCloneRingtoneInfo(const int32_t& userId,
+    const NotificationCloneBundleInfo& bundleInfo)
+{
+    auto cloneRingtone = bundleInfo.GetRingtoneInfo();
+    if (cloneRingtone == nullptr ||
+        (cloneRingtone->GetRingtoneType() != NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL &&
+        cloneRingtone->GetRingtoneType() != NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE)) {
+        return;
+    }
+
+    nlohmann::json jsonNewObject = nlohmann::json::array();
+    std::vector<NotificationRingtoneInfo> cloneRingtoneInfos;
+    GetCloneRingtoneInfo(userId, bundleInfo, cloneRingtoneInfos);
+    for (auto& item : cloneRingtoneInfos) {
+        if (item.GetRingtoneType() == cloneRingtone->GetRingtoneType() &&
+            item.GetRingtoneTitle() == cloneRingtone->GetRingtoneTitle() &&
+            item.GetRingtoneFileName() == cloneRingtone->GetRingtoneFileName() &&
+            item.GetRingtoneUri() == cloneRingtone->GetRingtoneUri()) {
+            ANS_LOGI("Exist info %{public}s %{public}d", bundleInfo.GetBundleName().c_str(),
+                bundleInfo.GetAppIndex());
+            return;
+        }
+        std::string node = item.ToJson();
+        jsonNewObject.push_back(node);
+    }
+
+    std::string ringtoneNode = cloneRingtone->ToJson();
+    jsonNewObject.push_back(ringtoneNode);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    auto result = preferncesDB_->SetCloneRingtoneInfo(userId, bundleInfo.GetBundleName(),
+        bundleInfo.GetAppIndex(), jsonNewObject.dump());
+    ANS_LOGI("Set info %{public}d %{public}d %{public}s %{public}d", userId, result,
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetAppIndex());
+}
+
+void NotificationPreferences::DeleteAllCloneRingtoneInfo(const int32_t& userId)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (!preferncesDB_->DelAllCloneRingtoneInfo(userId)) {
+        ANS_LOGW("Clear ringtone failed %{public}d.", userId);
+        return;
+    }
+
+    if (preferncesDB_->SetCloneTimeStamp(userId, 0)) {
+        cloneTimestamp = 0;
+    }
+    ANS_LOGI("Clear ringtone %{public}d", userId);
+}
+
+void NotificationPreferences::GetAllCloneRingtoneInfo(const int32_t& userId,
+    std::vector<NotificationRingtoneInfo>& cloneRingtoneInfos)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    std::vector<std::string> values;
+    if (!preferncesDB_->GetAllCloneRingtoneInfo(userId, values)) {
+        ANS_LOGW("Clear all ringtone failed %{public}d.", userId);
+        return;
+    }
+    ANS_LOGI("Get all ringtone value %{public}zu", values.size());
+    if (values.empty()) {
+        return;
+    }
+
+    for (auto& ringtonJson : values) {
+        nlohmann::json jsonObject = nlohmann::json::parse(ringtonJson, nullptr, false);
+        if (jsonObject.is_null() || !jsonObject.is_array()) {
+            ANS_LOGI("ringtone is null or not array.");
+            continue;
+        }
+        for (auto &item : jsonObject) {
+            NotificationRingtoneInfo info;
+            info.FromJson(item.get<std::string>());
+            cloneRingtoneInfos.push_back(info);
+        }
+    }
+    ANS_LOGI("Get all ringtone %{public}zu", cloneRingtoneInfos.size());
+}
+
+void NotificationPreferences::DeleteCloneRingtoneInfo(const int32_t& userId,
+    const NotificationCloneBundleInfo& bundleInfo)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    auto result = preferncesDB_->DelCloneRingtoneInfo(userId, bundleInfo);
+    ANS_LOGI("del info %{public}d %{public}d %{public}s %{public}d", userId, result,
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetAppIndex());
 }
 
 int32_t NotificationPreferences::SetKvToDb(

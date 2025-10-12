@@ -158,5 +158,11 @@ void NotificationRingtoneInfo::FromJson(const std::string &jsonObj)
         ringtoneUri_ = jsonObject.at(RINGTONE_INFO_RINGTONE_URI).get<std::string>();
     }
 }
+
+std::string NotificationRingtoneInfo::Dump() const
+{
+    return std::to_string(static_cast<int32_t>(ringtoneType_)) + " " + ringtoneTitle_ + " " + ringtoneFileName_ +
+        " " + ringtoneUri_;
+}
 }  // namespace Notification
 }  // namespace OHOS
