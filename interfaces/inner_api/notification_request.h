@@ -1512,6 +1512,10 @@ public:
         const bool status,
         const std::set<std::string> &unaffectDevice = {});
 
+    void SetAppName(const std::string &appName);
+
+    std::string GetAppName() const;
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).
@@ -1604,6 +1608,7 @@ private:
     uint32_t collaboratedReminderFlag_ {0};
 
     std::string appInstanceKey_ {};
+    std::string appName_ {};
     std::string settingsText_ {};
     std::string creatorBundleName_ {};
     std::string ownerBundleName_ {};

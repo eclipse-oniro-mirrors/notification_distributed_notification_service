@@ -115,3 +115,51 @@ ohos_shared_library("notification_subscriber_ipc") {
   subsystem_name = "notification"
   part_name = "distributed_notification_service"
 }
+
+ohos_source_set("notification_subscriber_extension_common") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
+  include_dirs = [ "${frameworks_module_extension_path}/include" ]
+
+  sources = [
+    "${frameworks_module_extension_path}/src/notification_extension_content.cpp",
+    "${frameworks_module_extension_path}/src/notification_info.cpp",
+    "${frameworks_module_extension_path}/src/notification_subscriber_extension.cpp",
+    "${frameworks_module_extension_path}/src/notification_subscriber_extension_context.cpp",
+    "${frameworks_module_extension_path}/src/notification_subscriber_stub_impl.cpp",
+  ]
+
+  configs = []
+  public_configs = [ "${frameworks_path}/ans:ans_innerkits_config" ]
+
+  deps = [ ":notification_subscriber_ipc" ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:app_context",
+    "ability_runtime:extensionkit_native",
+    "ability_runtime:napi_common",
+    "ability_runtime:runtime",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "ipc:ipc_napi",
+    "napi:ace_napi",
+  ]
+
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}

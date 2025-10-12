@@ -13,8 +13,16 @@
  * limitations under the License.
  */
 
-sequenceable OHOS.Notification.NotificationRequest;
-interface OHOS.Notification.INotificationSubscriber {
-    void OnReceiveMessage([in] sptr<NotificationRequest> notificationRequest);
-    void OnCancelMessages([in] String[] hashCode);
+let ExtensionContext = requireNapi('application.ExtensionContext');
+
+class NotificationSubscriberExtensionContext extends ExtensionContext {
+    constructor(obj) {
+        super(obj);
+    }
+
+    startAbility(want, callback) {
+        return this.__context_impl__.startAbility(want, callback);
+    }
 }
+
+export default NotificationSubscriberExtensionContext;

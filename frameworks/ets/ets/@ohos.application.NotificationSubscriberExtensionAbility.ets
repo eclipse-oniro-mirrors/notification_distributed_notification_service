@@ -13,8 +13,20 @@
  * limitations under the License.
  */
 
-sequenceable OHOS.Notification.NotificationRequest;
-interface OHOS.Notification.INotificationSubscriber {
-    void OnReceiveMessage([in] sptr<NotificationRequest> notificationRequest);
-    void OnCancelMessages([in] String[] hashCode);
+import type NotificationSubscriberExtensionContext from '@ohos.application.NotificationSubscriberExtensionContext';
+import { NotificationInfo } from 'notification.NotificationInfo'
+
+export default class NotificationSubscriberExtensionAbility {
+
+  context: NotificationSubscriberExtensionContext = {};
+
+  onDestroy(): void {}
+
+  onReceiveMessage(notificationInfo: NotificationInfo): void {
+    console.log('onReceiveMessage, notificationInfo:' + notificationInfo.hashCode);
+  }
+
+  onCancelMessages(hashCodes: Array<string>): void {
+    console.log('onCancelMessages, hashCodes:' + hashCodes);
+  }
 }

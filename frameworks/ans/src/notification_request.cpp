@@ -747,6 +747,16 @@ std::string NotificationRequest::GetAppInstanceKey() const
     return appInstanceKey_;
 }
 
+void NotificationRequest::SetAppName(const std::string &appName)
+{
+    appName_ = appName;
+}
+
+std::string NotificationRequest::GetAppName() const
+{
+    return appName_;
+}
+
 void NotificationRequest::SetOwnerUserId(int32_t userId)
 {
     ownerUserId_ = userId;
@@ -863,6 +873,7 @@ bool NotificationRequest::CollaborationToJson(std::string& data) const
     jsonObject["creatorPid"]        = GetCreatorPid();
     jsonObject["creatorInstanceKey"] = creatorInstanceKey_;
     jsonObject["appInstanceKey"]    = appInstanceKey_;
+    jsonObject["appName"]    = appName_;
     jsonObject["notificationControlFlags"] = notificationControlFlags_;
 
     if (additionalParams_) {
@@ -1003,6 +1014,7 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["receiverUserId"]    = receiverUserId_;
     jsonObject["creatorInstanceKey"]    = creatorInstanceKey_;
     jsonObject["appInstanceKey"]    = appInstanceKey_;
+    jsonObject["appName"]    = appName_;
     jsonObject["notificationControlFlags"] = notificationControlFlags_;
     jsonObject["updateDeadLine"]     = updateDeadLine_;
     jsonObject["finishDeadLine"]     = finishDeadLine_;
@@ -1208,6 +1220,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
     // write std::string
     if (!parcel.WriteString(appInstanceKey_)) {
         ANS_LOGE("Failed to write instance key");
+        return false;
+    }
+
+    if (!parcel.WriteString(appName_)) {
+        ANS_LOGE("Failed to write app name");
         return false;
     }
 
@@ -1704,6 +1721,11 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         return false;
     }
 
+    if (!parcel.ReadString(appName_)) {
+        ANS_LOGE("Failed to read App name");
+        return false;
+    }
+
     if (!parcel.ReadString(settingsText_)) {
         ANS_LOGE("Failed to read settings text");
         return false;
@@ -2171,6 +2193,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->receiverUserId_ = other.receiverUserId_;
     this->creatorInstanceKey_ = other.creatorInstanceKey_;
     this->appInstanceKey_ = other.appInstanceKey_;
+    this->appName_ = other.appName_;
     this->isAgent_ = other.isAgent_;
     this->isRemoveAllowed_ = other.isRemoveAllowed_;
     this->forceDistributed_ = other.forceDistributed_;
@@ -2427,6 +2450,10 @@ void NotificationRequest::ConvertJsonToString(NotificationRequest *target, const
 
     if (jsonObject.find("appInstanceKey") != jsonEnd && jsonObject.at("appInstanceKey").is_string()) {
         target->appInstanceKey_ = jsonObject.at("appInstanceKey").get<std::string>();
+    }
+
+    if (jsonObject.find("appName") != jsonEnd && jsonObject.at("appName").is_string()) {
+        target->appName_ = jsonObject.at("appName").get<std::string>();
     }
 
     if (jsonObject.find("creatorBundleName") != jsonEnd && jsonObject.at("creatorBundleName").is_string()) {
