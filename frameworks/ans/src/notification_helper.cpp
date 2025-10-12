@@ -386,9 +386,22 @@ ErrCode NotificationHelper::SetShowBadgeEnabledForBundle(const NotificationBundl
     return DelayedSingleton<AnsNotification>::GetInstance()->SetShowBadgeEnabledForBundle(bundleOption, enabled);
 }
 
+ErrCode NotificationHelper::SetShowBadgeEnabledForBundles(
+    const std::vector<std::pair<NotificationBundleOption, bool>> &params)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetShowBadgeEnabledForBundles(params);
+}
+
 ErrCode NotificationHelper::GetShowBadgeEnabledForBundle(const NotificationBundleOption &bundleOption, bool &enabled)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetShowBadgeEnabledForBundle(bundleOption, enabled);
+}
+
+ErrCode NotificationHelper::GetShowBadgeEnabledForBundles(const std::vector<NotificationBundleOption> &bundleOptions,
+    std::map<sptr<NotificationBundleOption>, bool> &bundleEnable)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetShowBadgeEnabledForBundles(
+        bundleOptions, bundleEnable);
 }
 
 ErrCode NotificationHelper::GetShowBadgeEnabled(bool &enabled)

@@ -836,6 +836,18 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ErrCode SetShowBadgeEnabledForBundles(
+        const std::map<sptr<NotificationBundleOption>, bool> &bundleOptions) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetShowBadgeEnabledForBundles(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        std::map<sptr<NotificationBundleOption>, bool> &bundleEnable) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 private:
     std::string cmd_;
     std::string bundle_;

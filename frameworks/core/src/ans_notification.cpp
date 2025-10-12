@@ -1190,6 +1190,32 @@ ErrCode AnsNotification::SetShowBadgeEnabledForBundle(const NotificationBundleOp
     return proxy->SetShowBadgeEnabledForBundle(bo, enabled);
 }
 
+ErrCode AnsNotification::SetShowBadgeEnabledForBundles(
+    const std::vector<std::pair<NotificationBundleOption, bool>> &bundleOptions)
+{
+    if (bundleOptions.empty()) {
+        ANS_LOGE("The bundleOptions list is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    std::map<sptr<NotificationBundleOption>, bool> sptrBundleOptions;
+    for (const auto &option : bundleOptions) {
+        sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption(option.first);
+        if (bo == nullptr) {
+            ANS_LOGE("null bundleOption");
+            continue;
+        }
+        sptrBundleOptions[bo] = option.second;
+    }
+    return proxy->SetShowBadgeEnabledForBundles(sptrBundleOptions);
+}
+
 ErrCode AnsNotification::GetShowBadgeEnabledForBundle(const NotificationBundleOption &bundleOption, bool &enabled)
 {
     if (bundleOption.GetBundleName().empty()) {
@@ -1209,6 +1235,33 @@ ErrCode AnsNotification::GetShowBadgeEnabledForBundle(const NotificationBundleOp
         return ERR_ANS_INVALID_PARAM;
     }
     return proxy->GetShowBadgeEnabledForBundle(bo, enabled);
+}
+
+ErrCode AnsNotification::GetShowBadgeEnabledForBundles(const std::vector<NotificationBundleOption> &bundleOptions,
+    std::map<sptr<NotificationBundleOption>, bool> &bundleEnable)
+{
+    if (bundleOptions.empty()) {
+        ANS_LOGE("Invalid bundle options.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    std::vector<sptr<NotificationBundleOption>> sptrBundleOptions;
+    sptrBundleOptions.reserve(bundleOptions.size());
+    for (const auto &option : bundleOptions) {
+        sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption(option);
+        if (bo == nullptr) {
+            ANS_LOGE("null bundleOption");
+            continue;
+        }
+        sptrBundleOptions.emplace_back(std::move(bo));
+    }
+    return proxy->GetShowBadgeEnabledForBundles(sptrBundleOptions, bundleEnable);
 }
 
 ErrCode AnsNotification::GetShowBadgeEnabled(bool &enabled)

@@ -38,6 +38,8 @@ napi_value NapiDisplayBadge(napi_env env, napi_callback_info info);
 napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info);
 napi_value NapiSetBadgeNumber(napi_env env, napi_callback_info info);
 napi_value NapiSetBadgeNumberByBundle(napi_env env, napi_callback_info info);
+napi_value NapiSetBadgeDisplayStatusByBundles(napi_env env, napi_callback_info info);
+napi_value NapiGetBadgeDisplayStatusByBundles(napi_env env, napi_callback_info info);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_DISPLAY_BADGE_H

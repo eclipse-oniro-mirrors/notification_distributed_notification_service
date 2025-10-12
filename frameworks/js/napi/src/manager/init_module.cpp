@@ -115,11 +115,15 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isBadgeDisplayed", NapiIsBadgeDisplayed),
         DECLARE_NAPI_FUNCTION("setBadgeNumber", NapiSetBadgeNumber),
         DECLARE_NAPI_FUNCTION("setBadgeNumberByBundle", NapiSetBadgeNumberByBundle),
+        DECLARE_NAPI_FUNCTION("setBadgeDisplayStatusByBundles", NapiSetBadgeDisplayStatusByBundles),
+        DECLARE_NAPI_FUNCTION("getBadgeDisplayStatusByBundles", NapiGetBadgeDisplayStatusByBundles),
 #else
         DECLARE_NAPI_FUNCTION("displayBadge", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("isBadgeDisplayed", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("setBadgeNumber", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("setBadgeNumberByBundle", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("getBadgeDisplayStatusByBundles", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("setBadgeDisplayStatusByBundles", Common::NapiReturnCapErrCb),
 #endif
 
 #ifdef ANS_FEATURE_DISTRIBUTED_DB

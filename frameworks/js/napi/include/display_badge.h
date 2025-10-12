@@ -48,6 +48,21 @@ struct AsyncCallbackInfoIsDisplayBadge {
     bool enabled = false;
 };
 
+struct AsyncCallbackInfoBatchSetBadge {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    std::vector<std::pair<NotificationBundleOption, bool>> params;
+    CallbackPromiseInfo info;
+};
+
+struct AsyncCallbackInfoBatchGetBadge {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    std::vector<NotificationBundleOption> bundles;
+    CallbackPromiseInfo info;
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+};
+
 napi_value DisplayBadge(napi_env env, napi_callback_info info);
 napi_value IsBadgeDisplayed(napi_env env, napi_callback_info info);
 

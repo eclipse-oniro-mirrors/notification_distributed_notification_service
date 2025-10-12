@@ -159,6 +159,7 @@ private:
     int32_t uid_ {};
     int32_t instanceKey_ {};
     int32_t appIndex_ = -1;
+    bool badgeEnabled_ = false;
 };
 }  // namespace Notification
 }  // namespace OHOS
