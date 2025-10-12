@@ -2199,7 +2199,7 @@ ErrCode AdvancedNotificationService::ProxyForUnaware(const std::vector<int32_t>&
 
 bool AdvancedNotificationService::isProxyForUnaware(const int32_t uid)
 {
-    std::shared_mutex<std::shared_mutex> lock(proxyForUnawareUidSetMutex_);
+    std::shared_lock<std::shared_mutex> lock(proxyForUnawareUidSetMutex_);
     return proxyForUnawareUidSet_.find(uid) != proxyForUnawareUidSet_.end();
 }
 }  // namespace Notification
