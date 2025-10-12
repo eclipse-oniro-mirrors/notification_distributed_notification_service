@@ -127,7 +127,7 @@ void DhNotificationCloneBundle::OnUserSwitch(int32_t userId)
         ANS_LOGW("null dhCloneBundleQueue");
         return;
     }
-    dhCloneBundleQueue_->submit_h(std::bind([&, userId]() {
+    dhCloneBundleQueue_->submit_h(std::bind([&]() {
         std::unique_lock lock(lock_);
         bundlesInfo_.clear();
         NotificationPreferences::GetInstance()->GetAllCloneBundleInfo(ZERO_USERID, bundlesInfo_);

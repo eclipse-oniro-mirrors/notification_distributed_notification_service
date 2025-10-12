@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -89,6 +89,7 @@ ohos_shared_library("notificationmanager") {
     "napi_push_callback.cpp",
     "napi_remove_group.cpp",
     "napi_reminder_info.cpp",
+    "napi_ringtone_info_by_bundle.cpp",
     "napi_silent_reminder_enable.cpp",
     "napi_slot.cpp",
     "napi_sync_config.cpp",

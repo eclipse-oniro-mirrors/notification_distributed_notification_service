@@ -223,6 +223,21 @@ int32_t NotificationPreferencesInfo::BundleInfo::GetBundleUid() const
     return uid_;
 }
 
+void NotificationPreferencesInfo::BundleInfo::SetRingtoneInfo(const sptr<NotificationRingtoneInfo> &ringtoneInfo)
+{
+    ringtoneInfo_ = ringtoneInfo;
+}
+
+void NotificationPreferencesInfo::BundleInfo::GetRingtoneInfo(sptr<NotificationRingtoneInfo> &ringtoneInfo) const
+{
+    ringtoneInfo = ringtoneInfo_;
+}
+
+void NotificationPreferencesInfo::BundleInfo::RemoveRingtoneInfo()
+{
+    ringtoneInfo_->ResetRingtone();
+}
+
 const ExtensionSubscriptionVectorPtr& NotificationPreferencesInfo::BundleInfo::GetExtensionSubscriptionInfos() const
 {
     return extensionSubscriptionInfos_;

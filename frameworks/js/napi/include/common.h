@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1908,6 +1908,10 @@ public:
     static napi_value SetObjectUint32Property(const napi_env &env, napi_value& object, const std::string& key,
         uint32_t value);
     static std::string GetAppInstanceKey();
+    static napi_value GetRingtoneInfo(const napi_env &env, const napi_value &value,
+        NotificationRingtoneInfo &ringtoneInfo);
+    static napi_value SetRingtoneInfo(const napi_env &env, const NotificationRingtoneInfo &ringtoneInfo,
+        napi_value &result);
     static void PictureScale(std::shared_ptr<Media::PixelMap> pixelMap);
     static bool IsExpectedType(const napi_env &env, const napi_value &param, napi_valuetype expectType);
     static napi_value GetMapObject(const napi_env &env, const napi_value &object,
@@ -1921,6 +1925,8 @@ private:
     static ffrt::mutex mutex_;
     static const char *GetPropertyNameByContentType(ContentType type);
     static napi_value NapiReturnFalseCbInner(napi_env env, napi_callback_info info, bool newType);
+    static napi_value GetRingtoneStringInfo(const napi_env &env, const napi_value &value,
+        NotificationRingtoneInfo &ringtoneInfo);
 };
 }  // namespace NotificationNapi
 }  // namespace OHOS

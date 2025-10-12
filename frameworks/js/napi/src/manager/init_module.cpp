@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "napi_get_active.h"
 #include "napi_publish.h"
 #include "napi_remove_group.h"
+#include "napi_ringtone_info_by_bundle.h"
 #include "napi_slot.h"
 #include "napi_template.h"
 #include "pixel_map_napi.h"
@@ -104,6 +105,8 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getNotificationSetting", NapiGetNotificationSettings),
         DECLARE_NAPI_FUNCTION("setSilentReminderEnabled", NapiSetSilentReminderEnabled),
         DECLARE_NAPI_FUNCTION("isSilentReminderEnabled", NapiIsSilentReminderEnabled),
+        DECLARE_NAPI_FUNCTION("setRingtoneInfoByBundle", NapiSetRingtoneInfoByBundle),
+        DECLARE_NAPI_FUNCTION("getRingtoneInfoByBundle", NapiGetRingtoneInfoByBundle),
         DECLARE_NAPI_FUNCTION("getReminderInfoByBundles", NapiGetReminderInfoByBundles),
         DECLARE_NAPI_FUNCTION("setReminderInfoByBundles", NapiSetReminderInfoByBundles),
 

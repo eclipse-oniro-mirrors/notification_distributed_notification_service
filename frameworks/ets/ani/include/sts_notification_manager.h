@@ -24,6 +24,7 @@
 #include "notification_button_option.h"
 #include "notification_local_live_view_subscriber.h"
 #include "notification_check_info.h"
+#include "notification_ringtone_info.h"
 
 namespace OHOS {
 namespace NotificationSts {
@@ -36,12 +37,20 @@ using NotificationDoNotDisturbDate = OHOS::Notification::NotificationDoNotDistur
 using RemindType = OHOS::Notification::NotificationConstant::RemindType;
 using SourceType = OHOS::Notification::NotificationConstant::SourceType;
 using NotificationConstant = OHOS::Notification::NotificationConstant;
+using RingtoneType = OHOS::Notification::NotificationConstant::RingtoneType;
 
 enum STSDoNotDisturbType {
     TYPE_NONE = 0,
     TYPE_ONCE = 1,
     TYPE_DAILY = 2,
     TYPE_CLEARLY = 3,
+};
+
+enum class STSRingtoneType {
+    RINGTONE_TYPE_SYSTEM = 0,
+    RINGTONE_TYPE_LOCAL = 1,
+    RINGTONE_TYPE_ONLINE = 2,
+    RINGTONE_TYPE_NONE = 3
 };
 
 enum STSSlotType {
@@ -90,6 +99,12 @@ class StsDoNotDisturbTypeUtils {
 public:
 static bool StsToC(const STSDoNotDisturbType inType,
     OHOS::Notification::NotificationConstant::DoNotDisturbType &outType);
+};
+
+class StsRingtoneTypeUtils {
+public:
+static bool StsToC(const STSRingtoneType inType, RingtoneType &outType);
+static bool CToSts(const RingtoneType inType, STSRingtoneType &outType);
 };
 
 class StsSlotTypeUtils {
