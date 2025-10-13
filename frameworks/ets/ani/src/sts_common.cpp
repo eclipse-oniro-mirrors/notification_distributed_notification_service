@@ -712,7 +712,7 @@ ani_object newArrayClass(ani_env *env, int length)
         return nullptr;
     }
     ani_class arrayCls = nullptr;
-    if (ANI_OK != env->FindClass("Lescompat/Array;", &arrayCls)) {
+    if (ANI_OK != env->FindClass("escompat.Array", &arrayCls)) {
         ANS_LOGE("FindClass Lescompat/Array; Failed");
         return nullptr;
     }
@@ -728,33 +728,6 @@ ani_object newArrayClass(ani_env *env, int length)
     }
     ANS_LOGD("newArrayClass end");
     return arrayObj;
-}
-
-ani_object newRecordClass(ani_env *env)
-{
-    ANS_LOGD("newRecordClass call");
-    if (env == nullptr) {
-        ANS_LOGE("newRecordClass fail, env is nullptr");
-        return nullptr;
-    }
-    ani_status status = ANI_ERROR;
-    ani_class recordCls;
-    if (ANI_OK != (status = env->FindClass("escompat.Record", &recordCls))) {
-        ANS_LOGE("newRecordClass fail, FindClass status = %{public}d", status);
-        return nullptr;
-    }
-    ani_method ctor;
-    if ((status = env->Class_FindMethod(recordCls, "<ctor>", nullptr, &ctor)) != ANI_OK) {
-        ANS_LOGE("newRecordClass fail, Class_FindMethod status = %{public}d", status);
-        return nullptr;
-    }
-    ani_object recordObj = {};
-    if ((status = env->Object_New(recordCls, ctor, &recordObj)) != ANI_OK) {
-        ANS_LOGE("newRecordClass fail, Object_New status = %{public}d", status);
-        return nullptr;
-    }
-    ANS_LOGD("newRecordClass end");
-    return recordObj;
 }
 
 ani_object ConvertArrayLongToAniObj(ani_env *env, const std::vector<std::int64_t> values)
@@ -996,5 +969,46 @@ bool SetPropertyByRef(ani_env *env, ani_object &object, const char *name, ani_re
     return true;
 }
 
+void ParseRecord(ani_env *env, ani_object recordRef, std::map<std::string, ani_ref>& recordResult)
+{
+    if (env == nullptr) {
+        return;
+    }
+    ani_ref keys {};
+    if (env->Object_CallMethodByName_Ref(recordRef, "keys",
+        ":C{escompat.IterableIterator}", &keys) != ANI_OK) {
+        ANS_LOGE("call method keys() failed.");
+        return;
+    }
+    ani_boolean done = ANI_FALSE;
+    while (!done) {
+        ani_ref next {};
+        if (env->Object_CallMethodByName_Ref(static_cast<ani_object>(keys), "next", nullptr, &next) != ANI_OK) {
+            ANS_LOGE("call method next() failed.");
+            break;
+        }
+        if (env->Object_GetFieldByName_Boolean(static_cast<ani_object>(next), "done", &done) != ANI_OK) {
+            ANS_LOGE("get field done failed.");
+            break;
+        }
+        if (done) {
+            break;
+        }
+        ani_ref keyRef {};
+        if (env->Object_GetFieldByName_Ref(static_cast<ani_object>(next), "value", &keyRef) != ANI_OK) {
+            ANS_LOGE("get field value failed.");
+            break;
+        }
+        ani_ref valueRef {};
+        if (env->Object_CallMethodByName_Ref(static_cast<ani_object>(recordRef),
+            "$_get", nullptr, &valueRef, keyRef) != ANI_OK) {
+            ANS_LOGE("call method $_get failed.");
+            break;
+        }
+        std::string keyStr;
+        GetStringByAniString(env, static_cast<ani_string>(keyRef), keyStr);
+        recordResult[keyStr] = valueRef;
+    }
+}
 } // namespace NotificationSts
 } // OHOS

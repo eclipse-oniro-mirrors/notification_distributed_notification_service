@@ -140,21 +140,22 @@ ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param,
         return ANI_ERROR;
     }
     ani_status status = ANI_ERROR;
-    ani_int length;
-    status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(param), "length", &length);
+    ani_size length;
+    ani_array arrayObj = static_cast<ani_array>(param);
+    status = env->Array_GetLength(arrayObj, &length);
     if (status != ANI_OK) {
-        ANS_LOGE("Object_GetPropertyByName_Int fail. status : %{public}d", status);
+        ANS_LOGE("Array_GetLength fail. status : %{public}d", status);
         return status;
     }
-    if (maxLen > 0 && length > static_cast<ani_int>(maxLen)) {
-        length = static_cast<ani_int>(maxLen);
+    uint32_t arraySize = static_cast<uint32_t>(length);
+    if (maxLen > 0 && arraySize > maxLen) {
+        arraySize = maxLen;
     }
-    for (int32_t i = 0; i < length; i++) {
+    for (uint32_t i = 0; i < arraySize; i++) {
         ani_ref pixelMapRef;
-        status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(param),
-            "$_get", "i:C{std.core.Object}", &pixelMapRef, i);
+        status = env->Array_Get(arrayObj, i, &pixelMapRef);
         if (status != ANI_OK) {
-            ANS_LOGE("Object_CallMethodByName_Ref fail. status : %{public}d, index: %{public}d", status, i);
+            ANS_LOGE("Array_Get fail. status : %{public}d, index: %{public}d", status, i);
             pixelMaps.clear();
             return status;
         }
@@ -259,73 +260,6 @@ ani_status GetKeyString(ani_env *env, ani_object obj, int32_t index, ani_string 
     return status;
 }
 
-ani_status GetPixelMapByKeys(ani_env *env, ani_object obj, std::vector<ani_string> keys,
-    std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> &pictureMap)
-{
-    ANS_LOGD("GetPixelMapByKeys call");
-    if (env == nullptr || obj == nullptr) {
-        ANS_LOGE("GetPixelMapByKeys failed, has nullPtr");
-        return ANI_ERROR;
-    }
-    ani_status status = ANI_ERROR;
-    for (auto anikey : keys) {
-        ani_ref picturesArrayRef;
-        if (ANI_OK != (status = env->Object_CallMethodByName_Ref(obj, "$_get", nullptr, &picturesArrayRef, anikey))) {
-            ANS_LOGE("Object_CallMethodByName_Ref fail. status : %{public}d", status);
-            deleteVectorWithArraySpPoints(pictureMap);
-            return status;
-        }
-        std::vector<std::shared_ptr<PixelMap>> pixelMaps = {};
-        if ((status = GetPixelMapArrayByRef(env, picturesArrayRef, pixelMaps)) != ANI_OK) {
-            ANS_LOGE("GetPixelMapArrayByRef fail. status : %{public}d", status);
-            deleteVectorWithSpPoints(pixelMaps);
-            deleteVectorWithArraySpPoints(pictureMap);
-            return status;
-        }
-        std::string str = "";
-        if ((status = GetStringByAniString(env, anikey, str)) != ANI_OK) {
-            ANS_LOGE("GetStringByAniString fail. status : %{public}d", status);
-            deleteVectorWithSpPoints(pixelMaps);
-            deleteVectorWithArraySpPoints(pictureMap);
-            return status;
-        }
-        pictureMap[str] = pixelMaps;
-    }
-    ANS_LOGD("GetPixelMapByKeys end");
-    return status;
-}
-
-ani_status GetPixelMapByRef(
-    ani_env *env, ani_object obj, ani_ref keysStrArrayRef,
-    std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> &pictureMap)
-{
-    ANS_LOGD("GetPixelMapByRef call");
-    if (env == nullptr || obj == nullptr || keysStrArrayRef == nullptr) {
-        ANS_LOGE("GetPixelMapByRef failed, has nullPtr");
-        return ANI_ERROR;
-    }
-    ani_status status = ANI_ERROR;
-    ani_int length;
-    if (ANI_OK !=
-        (status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(keysStrArrayRef), "length", &length))) {
-        ANS_LOGE("Object_GetPropertyByName_Int fail. status = %{public}d", status);
-        return status;
-    }
-    ani_string strAni = {};
-    std::vector<ani_string> keys = {};
-    for (int32_t i = 0; i < length; i++) {
-        if ((status = GetKeyString(env, static_cast<ani_object>(keysStrArrayRef), i, strAni)) != ANI_OK) {
-            ANS_LOGE("GetKeyString fail. status = %{public}d", status);
-            keys.clear();
-            return status;
-        }
-        keys.push_back(strAni);
-    }
-    status = GetPixelMapByKeys(env, obj, keys, pictureMap);
-    ANS_LOGD("GetPixelMapByRef end");
-    return status;
-}
-
 ani_status GetMapOfPictureInfo(ani_env *env, ani_object obj,
     std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> &pictureMap)
 {
@@ -335,32 +269,19 @@ ani_status GetMapOfPictureInfo(ani_env *env, ani_object obj,
         return ANI_ERROR;
     }
     ani_status status = ANI_ERROR;
-    ani_class cls = nullptr;
-    if (ANI_OK != (status = env->FindClass("notification.notificationContent.RecordTools", &cls))) {
-        ANS_LOGE("FindClass fail. status = %{public}d", status);
-        return status;
-    }
-    if (cls == nullptr) {
-        ANS_LOGE("GetMapOfPictureInfo : cls is nullptr");
-        return ANI_INVALID_TYPE;
-    }
-    ani_static_method keysMethod = nullptr;
-    if (ANI_OK != (status = env->Class_FindStaticMethod(cls, "GetKeys", nullptr, &keysMethod))) {
-        ANS_LOGE("GetMapOfPictureInfo : Class_FindStaticMethod status = %{public}d", status);
-        return status;
-    }
-    ani_ref keysStrArrayRef = nullptr;
-    if (ANI_OK != (status = env->Class_CallStaticMethod_Ref(cls, keysMethod, &keysStrArrayRef, obj))) {
-        ANS_LOGE("GetMapOfPictureInfo : Class_CallStaticMethod_Ref status = %{public}d", status);
-        return status;
-    }
-    if (IsUndefine(env, static_cast<ani_object>(keysStrArrayRef))) {
-        ANS_LOGE("GetMapOfPictureInfo : keysStrArrayRef IsUndefined");
-        return ANI_INVALID_ARGS;
-    }
-    if (ANI_OK != (status = GetPixelMapByRef(env, obj, keysStrArrayRef, pictureMap))) {
-        deleteVectorWithArraySpPoints(pictureMap);
-        ANS_LOGE("GetMapOfPictureInfo : GetPixelMapByRef status = %{public}d", status);
+    std::map<std::string, ani_ref> recordResult;
+
+    ParseRecord(env, obj, recordResult);
+    for (auto iter = recordResult.begin(); iter != recordResult.end(); iter++) {
+        ani_ref picturesArrayRef = iter->second;
+        std::vector<std::shared_ptr<PixelMap>> pixelMaps = {};
+        if ((status = GetPixelMapArrayByRef(env, picturesArrayRef, pixelMaps)) != ANI_OK) {
+            ANS_LOGE("GetPixelMapArrayByRef fail. status : %{public}d", status);
+            deleteVectorWithSpPoints(pixelMaps);
+            deleteVectorWithArraySpPoints(pictureMap);
+            return status;
+        }
+        pictureMap[iter->first] = pixelMaps;
     }
     ANS_LOGD("GetMapOfPictureInfo end");
     return status;
@@ -472,9 +393,15 @@ bool GetAniPictrueInfo(ani_env *env, std::map<std::string, std::vector<std::shar
         ANS_LOGE("GetAniPictrueInfo failed, env is nullPtr or pictureMap is empty");
         return false;
     }
-    pictureInfoObj = newRecordClass(env);
-    if (pictureInfoObj == nullptr) {
-        ANS_LOGE("GetAniPictrueInfo failed, pictureInfoObj is nullPtr");
+    ani_class recordCls;
+    if (!CreateClassObjByClassName(env, "escompat.Record", recordCls, pictureInfoObj) || pictureInfoObj == nullptr) {
+        ANS_LOGE("Create recordObj faild.");
+        return false;
+    }
+    ani_status status = ANI_OK;
+    ani_method recordSetMethod = nullptr;
+    if (ANI_OK != (status = env->Class_FindMethod(recordCls, "$_set", nullptr, &recordSetMethod))) {
+        ANS_LOGE("Find recordObj setMethod faild.");
         return false;
     }
     for (const auto& [key, value] : pictureMap) {
@@ -488,9 +415,9 @@ bool GetAniPictrueInfo(ani_env *env, std::map<std::string, std::vector<std::shar
             ANS_LOGE("GetAniPictrueInfo : GetAniArrayPixelMap failed");
             return false;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(pictureInfoObj,
-            "$_set", "C{std.core.Object}C{std.core.Object}:", aniKey, aniPictrueArray)) {
-            ANS_LOGE("GetAniPictrueInfo : Object_CallMethodByName_Void failed");
+        if (ANI_OK != (status = env->Object_CallMethod_Void(pictureInfoObj, recordSetMethod, aniKey,
+            aniPictrueArray))) {
+            ANS_LOGE("GetAniPictrueInfo : Object_CallMethod_Void failed, status:%{public}d", status);
             return false;
         }
     }
