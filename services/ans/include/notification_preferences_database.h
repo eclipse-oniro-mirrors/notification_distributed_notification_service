@@ -449,6 +449,7 @@ public:
     bool SetLiveViewConfigVersion(const int32_t& version);
     bool GetLiveViewRebuildFlag(std::string& flag, int32_t userId);
     bool SetLiveViewRebuildFlag(int32_t userId);
+    bool RemoveLiveViewRebuildFlag(int32_t userId);
 private:
     bool CheckRdbStore();
 

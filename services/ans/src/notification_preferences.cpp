@@ -813,6 +813,16 @@ bool NotificationPreferences::SetLiveViewRebuildFlag(int32_t userId)
     return preferncesDB_->SetLiveViewRebuildFlag(userId);
 }
 
+bool NotificationPreferences::RemoveLiveViewRebuildFlag(int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return false;
+    }
+    return preferncesDB_->RemoveLiveViewRebuildFlag(userId);
+}
+
 void NotificationPreferences::GetDoNotDisturbProfileListByUserId(int32_t userId,
     std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
 {
