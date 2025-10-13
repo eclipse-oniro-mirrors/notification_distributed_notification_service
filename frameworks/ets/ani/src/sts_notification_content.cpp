@@ -1508,7 +1508,7 @@ bool WarpNotificationLiveViewContent(
     }
     ani_object pictureInfoObj = nullptr;
     if (!GetAniPictrueInfo(env, content->GetPicture(), pictureInfoObj)
-        || pictureInfoObj == nullptr || SetPropertyByRef(env, contentObj, "pictureInfo", pictureInfoObj)) {
+        || pictureInfoObj == nullptr || !SetPropertyByRef(env, contentObj, "pictureInfo", pictureInfoObj)) {
         ANS_LOGD("SetNotificationLiveViewContent: set pictureInfo failed");
     }
     return true;

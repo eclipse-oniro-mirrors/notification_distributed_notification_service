@@ -101,7 +101,7 @@ ani_object AniGetActiveNotificationByFilter(ani_env *env, ani_object obj)
     }
     sptr<OHOS::Notification::NotificationRequest> notificationRequest = nullptr;
     int returncode = Notification::NotificationHelper::GetActiveNotificationByFilter(filter, notificationRequest);
-    if (returncode != ERR_OK) {
+    if (returncode != ERR_OK && returncode != Notification::ERR_ANS_NOTIFICATION_NOT_EXISTS) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniGetActiveNotificationByFilter error, errorCode: %{public}d", externalCode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
