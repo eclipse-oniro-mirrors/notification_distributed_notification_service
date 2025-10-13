@@ -176,6 +176,7 @@ export class EnableNotificationDialog {
         
         if (isPcDevice) {
           extensionWindow.on('rectChange', uiExtension.RectChangeReason.HOST_WINDOW_RECT_CHANGE, (data):void => {
+            console.info(TAG, 'uec rect change');
             let uecRectChangeNum:number = AppStorage.get('uecRectChangeNum');
             if (uecRectChangeNum === undefined || uecRectChangeNum > UPDATE_BOUNDARY) {
               AppStorage.setOrCreate('uecRectChangeNum', UPDATE_NUM);

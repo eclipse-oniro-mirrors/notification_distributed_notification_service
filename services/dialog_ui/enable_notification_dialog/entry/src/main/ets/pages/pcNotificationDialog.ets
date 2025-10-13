@@ -206,14 +206,14 @@ struct PermissionDialog {
                 })
               }
             }
+            .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+              console.info(TAG, `content onSizeChange`);
+              this.contentComW = vp2px(newValue.width as number);
+              this.contentComH = vp2px(newValue.height as number);
+              this.updateContentCompoment();
+            })
           }
           .constraintSize({ maxHeight: this.showInDisplayCenter ? '100%' : '90%'})
-          .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-            console.info(TAG, `content onSizeChange`);
-            this.contentComW = vp2px(newValue.width as number);
-            this.contentComH = vp2px(newValue.height as number);
-            this.updateContentCompoment();
-          })
         }
         .borderRadius(Constants.PC_RDIUS_16)
         .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
@@ -253,9 +253,11 @@ struct PermissionDialog {
   async updateOnPageShow(): Promise<void> {
     if (this.isUpdate > 0) {
       await this.updateStatus();
+      this.isUpdate = 0;
     }
     if (this.uecRectChangeNum > 0) {
       await this.updateContentCompoment();
+      this.uecRectChangeNum = 0;
     }
   }
 
@@ -309,6 +311,11 @@ struct PermissionDialog {
         this.dialog?.extensionWindow, this.dialog?.subWindow, display);
       console.info(TAG, `shouldMoveToDisplayCenter = ${tempResult}`);
       if (tempResult === this.showInDisplayCenter) {
+        if (tempResult) {
+          this.dialog?.subWindow?.resize(this.contentComW, this.contentComH);
+          this.dialog?.subWindow?.moveWindowTo((display.width - this.contentComW) / 2,
+           (display.height - this.contentComH) / 2); 
+        }
         return;
       }
       this.showInDisplayCenter = tempResult;
