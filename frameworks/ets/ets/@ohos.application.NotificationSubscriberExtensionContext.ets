@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-sequenceable OHOS.Notification.NotificationRequest;
-interface OHOS.Notification.INotificationSubscriber {
-    void OnReceiveMessage([in] sptr<NotificationRequest> notificationRequest);
-    void OnCancelMessages([in] String[] hashCode);
-}
+import ExtensionContext from 'application.ExtensionContext';
+
+export default class NotificationSubscriberExtensionContext extends ExtensionContext {}

@@ -323,6 +323,102 @@ ohos_prebuilt_etc("notification_subscribe_etc") {
 
 # end : @ohos.notificationSubscribe.ets
 
+# start : notification/NotificationExtensionContent.ets
+generate_static_abc("notification_extension_content_abc") {
+  base_url = "./"
+  files = [ "./notification/NotificationExtensionContent.ets" ]
+
+  dst_file = "$target_out_dir/notification_extension_content.abc"
+  out_puts = [ "$target_out_dir/notification_extension_content.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_extension_content.abc"
+}
+
+ohos_prebuilt_etc("notification_extension_content_etc") {
+  source = "$target_out_dir/notification_extension_content.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_extension_content_abc" ]
+}
+
+# end : notification/NotificationExtensionContent.ets
+
+# start : notification/NotificationInfo.ets
+generate_static_abc("notification_info_abc") {
+  base_url = "./"
+  files = [ "./notification/NotificationInfo.ets" ]
+
+  dst_file = "$target_out_dir/notification_info.abc"
+  out_puts = [ "$target_out_dir/notification_info.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_info.abc"
+}
+
+ohos_prebuilt_etc("notification_info_etc") {
+  source = "$target_out_dir/notification_info.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_info_abc" ]
+}
+
+# end : notification/NotificationInfo.ets
+
+# start : @ohos.application.NotificationSubscriberExtensionAbility.ets
+generate_static_abc("notification_extension_subscriber_extension_ability_abc") {
+  base_url = "./"
+  files = [ "./@ohos.application.NotificationSubscriberExtensionAbility.ets" ]
+
+  dst_file =
+      "$target_out_dir/notification_extension_subscriber_extension_ability.abc"
+  out_puts = [
+    "$target_out_dir/notification_extension_subscriber_extension_ability.abc",
+  ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_extension_subscriber_extension_ability.abc"
+}
+
+ohos_prebuilt_etc("notification_extension_subscriber_extension_ability_etc") {
+  source =
+      "$target_out_dir/notification_extension_subscriber_extension_ability.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_extension_subscriber_extension_ability_abc" ]
+}
+
+# end : @ohos.application.NotificationSubscriberExtensionAbility.ets
+
+# start : @ohos.application.NotificationSubscriberExtensionContext.ets
+generate_static_abc("notification_extension_subscriber_extension_context_abc") {
+  base_url = "./"
+  files = [ "./@ohos.application.NotificationSubscriberExtensionContext.ets" ]
+
+  dst_file =
+      "$target_out_dir/notification_extension_subscriber_extension_context.abc"
+  out_puts = [
+    "$target_out_dir/notification_extension_subscriber_extension_context.abc",
+  ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_extension_subscriber_extension_context.abc"
+}
+
+ohos_prebuilt_etc("notification_extension_subscriber_extension_context_etc") {
+  source =
+      "$target_out_dir/notification_extension_subscriber_extension_context.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_extension_subscriber_extension_context_abc" ]
+}
+
+# end : @ohos.application.NotificationSubscriberExtensionContext.ets
+
 group("ets_files") {
   deps = [
     ":notification_action_button_abc",
@@ -331,8 +427,16 @@ group("ets_files") {
     ":notification_common_def_etc",
     ":notification_content_abc",
     ":notification_content_etc",
+    ":notification_extension_content_abc",
+    ":notification_extension_content_etc",
+    ":notification_extension_subscriber_extension_ability_abc",
+    ":notification_extension_subscriber_extension_ability_etc",
+    ":notification_extension_subscriber_extension_context_abc",
+    ":notification_extension_subscriber_extension_context_etc",
     ":notification_flags_abc",
     ":notification_flags_etc",
+    ":notification_info_abc",
+    ":notification_info_etc",
     ":notification_manager_abc",
     ":notification_manager_etc",
     ":notification_request_abc",

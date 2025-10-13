@@ -136,6 +136,7 @@
           "//base/notification/distributed_notification_service/frameworks/js/napi:napi_extension_subscription",
           "//base/notification/distributed_notification_service/frameworks/js/napi:napi_notification",
           "//base/notification/distributed_notification_service/frameworks/js/napi:napi_reminder",
+          "//base/notification/distributed_notification_service/interfaces/kits/napi:napi_packages",
           "//base/notification/distributed_notification_service/interfaces/ndk:ohnotification",
           "//base/notification/distributed_notification_service/frameworks/reminder:reminder_client",
           "//base/notification/distributed_notification_service/frameworks/ets:ani_packages",

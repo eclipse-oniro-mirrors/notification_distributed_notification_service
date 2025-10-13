@@ -14,11 +14,12 @@
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 
-group("ani_packages") {
-  deps = [
-    "./ani:notification_manager_ani",
-    "./ani:notification_subscribe_ani",
-    "./ani:notification_subscriber_extension_ani",
-    "./ets:ets_files",
-  ]
+group("napi_packages") {
+  deps = []
+  if (support_jsapi) {
+    deps += [
+      "${interfaces_path}/kits/napi/notification_subscriber_extension:notificationsubscriberextensionability_napi",
+      "${interfaces_path}/kits/napi/notification_subscriber_extension_context:notificationsubscriberextensioncontext_napi",
+    ]
+  }
 }
