@@ -68,11 +68,12 @@ ani_status GetStsActionButtonByWantParams(ani_env *env, ani_object param,
     ani_boolean isUndefind = ANI_TRUE;
     WantParams wantParams = {};
     ani_ref extrasRef;
-    if (ANI_OK == GetPropertyRef(env, param, "extras", isUndefind, extrasRef) && isUndefind == ANI_FALSE) {
-        UnwrapWantParams(env, extrasRef, wantParams);
-    } else {
+    if (ANI_OK != GetPropertyRef(env, param, "extras", isUndefind, extrasRef)) {
         ANS_LOGE("GetStsActionButtonByWantParams: GetPropertyRef extras failed");
         return ANI_INVALID_ARGS;
+    }
+    if (isUndefind == ANI_FALSE) {
+        UnwrapWantParams(env, extrasRef, wantParams);
     }
     std::shared_ptr<WantParams> extras = std::make_shared<WantParams>(wantParams);
     actionButton.extras = extras;
