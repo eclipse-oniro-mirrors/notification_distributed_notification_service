@@ -85,6 +85,20 @@ public:
     virtual std::shared_ptr<Media::PixelMap> GetLockScreenPicture() const;
 
     /**
+     * @brief Sets the structuredText of a notification.
+     *
+     * @param structuredText Indicates the structuredText of the notification.
+     */
+    virtual void SetStructuredText(const std::vector<std::pair<std::string, std::string>> &structuredText);
+
+    /**
+     * @brief Obtains the structuredText of a notification.
+     *
+     * @return Returns the structuredText of the notification.
+     */
+    virtual std::vector<std::pair<std::string, std::string>> GetStructuredText() const;
+
+    /**
      * @brief Returns a string representation of the object.
      *
      * @return Returns a string representation of the object.
@@ -136,6 +150,7 @@ protected:
     std::string additionalText_ {};
     std::shared_ptr<Media::PixelMap> lockScreenPicture_ {};
     int32_t contentType_;
+    std::vector<std::pair<std::string, std::string>> structuredText_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS

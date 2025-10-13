@@ -205,8 +205,9 @@ HWTEST_F(NotificationConversationalContentTest, AddConversationalMessage_00002, 
     rrc->AddConversationalMessage(messagePtr);
     EXPECT_EQ(rrc->GetAllConversationalMessages().size(), 0);
     std::string result = rrc->Dump();
-    std::string ret = "NotificationConversationalContent{ title = , text = , additionalText = ,"
-        " lockScreenPicture = null, conversationTitle = , isGroup = false, messageUser = MessageUser{ key = , name = , "
+    std::string ret = "NotificationConversationalContent{ title = , text = , additionalText = , "
+        "lockScreenPicture = null, structuredText = null, conversationTitle = , "
+        "isGroup = false, messageUser = MessageUser{ key = , name = , "
         "pixelMap = null, uri = , isMachine = false, isUserImportant = false }, messages =  }";
     EXPECT_EQ(result, ret);
 }
