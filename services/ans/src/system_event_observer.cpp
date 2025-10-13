@@ -133,6 +133,9 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb(userId);
         NotificationCloneManager::GetInstance().OnUserSwitch(userId);
         AdvancedNotificationService::GetInstance()->TriggerLiveViewSwitchCheck(userId);
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+        AdvancedNotificationService::GetInstance()->TryStartExtensionSubscribeService();
+#endif
 #ifdef ALL_SCENARIO_COLLABORATION
         DistributedDeviceManager::GetInstance().InitTrustList();
 #endif

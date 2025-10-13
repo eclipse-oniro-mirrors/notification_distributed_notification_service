@@ -250,23 +250,12 @@ void ExtensionServiceConnection::PrepareFreeze()
 void ExtensionServiceConnection::Freeze()
 {
     std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
-    if (state_ != ExtensionServiceConnectionState::CONNECTED) {
-        ANS_LOGD("state not match: %{public}d", static_cast<int32_t>(state_));
-        return;
-    }
-
     DoFreezeUnfreeze(true);
-
-    state_ = ExtensionServiceConnectionState::FREEZED;
 }
 
 void ExtensionServiceConnection::Unfreeze()
 {
     std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
-    if (state_ != ExtensionServiceConnectionState::FREEZED) {
-        ANS_LOGD("state not match: %{public}d", static_cast<int32_t>(state_));
-        return;
-    }
 
     auto timerClient = MiscServices::TimeServiceClient::GetInstance();
     if (timerClient == nullptr) {
@@ -278,17 +267,11 @@ void ExtensionServiceConnection::Unfreeze()
     timerClient->StopTimer(timerIdDisconnect_);
 
     DoFreezeUnfreeze(false);
-
-    state_ = ExtensionServiceConnectionState::CONNECTED;
 }
 
 void ExtensionServiceConnection::PrepareDisconnect()
 {
     std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
-    if (state_ != ExtensionServiceConnectionState::FREEZED) {
-        ANS_LOGD("state not match: %{public}d", static_cast<int32_t>(state_));
-        return;
-    }
 
     auto timerClient = MiscServices::TimeServiceClient::GetInstance();
     if (timerClient == nullptr) {
@@ -305,11 +288,6 @@ void ExtensionServiceConnection::PrepareDisconnect()
 void ExtensionServiceConnection::Disconnect()
 {
     std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
-    if (state_ != ExtensionServiceConnectionState::FREEZED) {
-        ANS_LOGD("state not match: %{public}d", static_cast<int32_t>(state_));
-        return;
-    }
-
     wptr<ExtensionServiceConnection> wThis = this;
     messageQueue_->submit([wThis]() {
         sptr<ExtensionServiceConnection> sThis = wThis.promote();

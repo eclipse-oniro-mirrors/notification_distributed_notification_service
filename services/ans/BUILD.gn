@@ -59,7 +59,7 @@ ohos_source_set("ans_service_sources") {
 
   defines = []
 
-  if (notification_extension_subscription_supported) {
+  if (distributed_notification_service_feature_notification_extension_subscription) {
     defines += [ "NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED" ]
   }
 

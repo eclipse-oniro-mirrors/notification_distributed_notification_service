@@ -71,11 +71,11 @@ declare_args() {
   distributed_notification_service_feature_all_scenario_collaboration = true
   distributed_notification_service_feature_phone_collaboration = true
   distributed_notification_service_disable_control = false
+  distributed_notification_service_feature_notification_extension_subscription = false
   notification_smart_reminder_supported = true
   ans_config_policy_enable = true
   screenlock_mgr_enable = true
   telephony_cust = true
-  notification_extension_subscription_supported = false
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_device_usage_statistics)) {

@@ -104,7 +104,7 @@ public:
     constexpr static const char* CFG_KEY_DFX_NORMAL_EVENT = "dfxNormalEvent";
     constexpr static const char* CFG_KEY_BUNDLE_NAME = "dfxKeyBundle";
     constexpr static const char* CFG_KEY_NOTIFICATION_EXTENSION = "notificationExtension";
-    constexpr static const char* CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTROY_TIME = "lifecycleDestroyTime";
+    constexpr static const char* CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTORY_TIME = "lifecycleDestoryTime";
     constexpr static const char* CFG_KEY_SUPPORT_HFP = "supportHfp";
     constexpr static const char* CFG_KEY_ENABLED_BUNDLES_WRITE_LIST = "enabledBundlesWriteList";
 

@@ -254,6 +254,9 @@ bool AdvancedNotificationService::CheckBluetoothConnectionInInfos(
             if (CheckAndUpdateHfpDeviceStatus(bundleOption, info, infos, bluetoothAddress)) {
                 return true;
             }
+            if (info->IsHfp()) {
+                continue;
+            }
         }
         if (CheckBluetoothConditions(bluetoothAddress)) {
             return true;
@@ -494,6 +497,33 @@ void AdvancedNotificationService::HandleBundleInstall(const sptr<NotificationBun
     }
 }
 
+ErrCode AdvancedNotificationService::RefreshExtensionSubscriptionBundlesFromConfig(
+    int32_t userId, const sptr<NotificationBundleOption>& bundleOption,
+    std::vector<sptr<NotificationBundleOption>>& enabledBundles)
+{
+    ErrCode result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(
+        bundleOption, enabledBundles);
+    if (result != ERR_OK) {
+        ANS_LOGE("Failed to get enabled bundles from database, ret: %{public}d", result);
+        return result;
+    }
+
+    std::vector<std::string> bundleNames;
+    NotificationConfigParse::GetInstance()->GetNotificationExtensionEnabledBundlesWriteList(bundleNames);
+    for (const auto& name : bundleNames) {
+        auto uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(name, userId);
+        sptr<NotificationBundleOption> opt = new (std::nothrow) NotificationBundleOption(name, uid);
+        enabledBundles.emplace_back(opt);
+    }
+
+    result = NotificationPreferences::GetInstance()->AddExtensionSubscriptionBundles(bundleOption, enabledBundles);
+    if (result != ERR_OK) {
+        ANS_LOGE("Failed to set enabled bundles into database, ret: %{public}d", result);
+        return result;
+    }
+    return ERR_OK;
+}
+
 void AdvancedNotificationService::HandleBundleUpdate(const sptr<NotificationBundleOption> &bundleOption)
 {
     if (bundleOption == nullptr) {
@@ -509,31 +539,13 @@ void AdvancedNotificationService::HandleBundleUpdate(const sptr<NotificationBund
     }
     
     std::vector<sptr<NotificationBundleOption>> enabledBundles;
-    std::vector<sptr<NotificationBundleOption>> insertBundles;
     ErrCode result = ERR_OK;
     bool enabled = false;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         EnsureExtensionServiceLoadedAndSubscribed(bundleOption);
-        result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundleOption, enabledBundles);
-        if (result != ERR_OK) {
-            ANS_LOGE("Failed to get enabled bundles from database, ret: %{public}d", result);
-            return;
-        }
-
-        if (enabledBundles.size() != 0) {
-            return;
-        }
-        std::vector<std::string> bundleNames;
-        NotificationConfigParse::GetInstance()->GetNotificationExtensionEnabledBundlesWriteList(bundleNames);
-        for (const auto& bundleName : bundleNames) {
-            auto uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, userId);
-            sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
-            insertBundles.emplace_back(bundleOption);
-        }
-        
-        result = NotificationPreferences::GetInstance()->AddExtensionSubscriptionBundles(bundleOption, insertBundles);
-        if (result != ERR_OK) {
-            ANS_LOGE("Failed to set enabled bundles into database, ret: %{public}d", result);
+        ErrCode refreshResult = RefreshExtensionSubscriptionBundlesFromConfig(userId, bundleOption, enabledBundles);
+        if (refreshResult != ERR_OK) {
+            ANS_LOGE("RefreshExtensionSubscriptionBundlesFromConfig failed: %{public}d", refreshResult);
             return;
         }
         NotificationConstant::SWITCH_STATE state;
@@ -566,13 +578,17 @@ void AdvancedNotificationService::HandleBundleUninstall(const sptr<NotificationB
         ANS_LOGE("HandleBundleUninstall bundleOption is nullptr");
         return;
     }
-    ShutdownExtensionServiceAndUnSubscribed(bundleOption);
-    std::vector<sptr<NotificationBundleOption>> bundles;
-    GetNotificationExtensionEnabledBundles(bundles);
-    if (cacheNotificationExtensionBundles_.size() != bundles.size()) {
-        PublishExtensionServiceStateChange(NotificationConstant::EXTENSION_ABILITY_REMOVED, bundleOption, false, {});
-    }
-    cacheNotificationExtensionBundles_ = bundles;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ShutdownExtensionServiceAndUnSubscribed(bundleOption);
+        std::vector<sptr<NotificationBundleOption>> bundles;
+        GetNotificationExtensionEnabledBundles(bundles);
+        if (cacheNotificationExtensionBundles_.size() != bundles.size()) {
+            PublishExtensionServiceStateChange(
+                NotificationConstant::EXTENSION_ABILITY_REMOVED, bundleOption, false, {});
+        }
+        cacheNotificationExtensionBundles_ = bundles;
+    }));
+    notificationSvrQueue_->wait(handler);
 }
 
 void AdvancedNotificationService::RegisterHfpObserver()
@@ -656,10 +672,9 @@ ErrCode AdvancedNotificationService::GetNotificationExtensionEnabledBundles(
 {
     ANS_LOGD("AdvancedNotificationService::GetNotificationExtensionEnabledBundles");
     int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
     ErrCode result = ERR_OK;
-    
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     if (!BundleManagerHelper::GetInstance()->QueryExtensionInfos(extensionInfos, userId)) {
         ANS_LOGE("Failed to QueryExtensionInfos, ret: %{public}d", result);
         return ERR_ANS_INVALID_PARAM;

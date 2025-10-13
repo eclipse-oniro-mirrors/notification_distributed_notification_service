@@ -1936,6 +1936,10 @@ private:
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
     ErrCode PreReminderInfoCheck();
     bool isProxyForUnaware(const int32_t uid);
+	
+    ErrCode RefreshExtensionSubscriptionBundlesFromConfig(int32_t userId,
+        const sptr<NotificationBundleOption>& bundleOption,
+        std::vector<sptr<NotificationBundleOption>>& enabledBundles);
     bool isExtensionServiceExist();
     int32_t LoadExtensionService();
     int32_t SubscribeExtensionService(const sptr<NotificationBundleOption> &bundleOption,
