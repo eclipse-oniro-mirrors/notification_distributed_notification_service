@@ -1,0 +1,35 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_SUBSCRIBER_EXTENSION_H
+#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_SUBSCRIBER_EXTENSION_H
+#include "ani.h"
+
+namespace OHOS {
+namespace NotificationExtensionSubScriptionSts {
+void AniSubscribe(ani_env *env, ani_object notificationInfoArrayobj);
+void AniUnsubscribe(ani_env *env);
+ani_object AniGetSubscribeInfo(ani_env *env);
+ani_object AniGetAllSubscriptionBundles(ani_env *env);
+ani_boolean AniIsUserGranted(ani_env *env);
+ani_boolean AniGetUserGrantedState(ani_env *env, ani_object bundleOption);
+void AniSetUserGrantedState(ani_env *env, ani_object bundleOption, ani_boolean enable);
+ani_object AniGetUserGrantedEnableBundles(ani_env *env, ani_object bundleOption);
+ani_object AniGetUserGrantedEnableBundlesForSelf(ani_env *env);
+void AniSetUserGrantedBundleState(ani_env *env, ani_object bundleOption, ani_object bundles, ani_boolean enabled);
+} // namespace NotificationExtensionSubScriptionSts
+} // namespace OHOS
+#endif
+

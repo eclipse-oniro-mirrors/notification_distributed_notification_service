@@ -19,6 +19,7 @@ group("ani_packages") {
     "./ani:notification_manager_ani",
     "./ani:notification_subscribe_ani",
     "./ani:notification_subscriber_extension_ani",
+    "./ani:notificationextensionsubscription_ani",
     "./ets:ets_files",
   ]
 }
