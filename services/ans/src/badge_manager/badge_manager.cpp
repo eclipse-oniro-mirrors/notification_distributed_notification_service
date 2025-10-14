@@ -86,25 +86,28 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundles(
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
-    bool flag = true;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
             ANS_LOGD("called");
             for (const auto &bundleOption : bundleOptions) {
                 sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption.first);
+                if (bundle == nullptr) {
+                    continue;
+                }
                 result = NotificationPreferences::GetInstance()->SetShowBadge(bundle, bundleOption.second);
                 if (result == ERR_OK) {
                     HandleBadgeEnabledChanged(bundle, bundleOption.second);
                 } else {
-                    flag = false;
+                    message.Message(bundle->GetBundleName() + "_" + std::to_string(bundle->GetUid()) +
+                        "_" + std::to_string(bundleOption.second) + "set showbadge failed.");
+                    NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_3));
                 }
             }
         }));
     notificationSvrQueue_->wait(handler);
-    result = flag ? ERR_OK : ERR_ANS_INVALID_PARAM;
-    message.ErrorCode(result).BranchId(BRANCH_3);
+    message.ErrorCode(result).Message("SetShowBadgeEnabledForBundles end").BranchId(BRANCH_4);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
-    return result;
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
@@ -218,26 +221,31 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundles(
     std::map<sptr<NotificationBundleOption>, bool> &bundleEnable)
 {
     ANS_LOGD("GetShowBadgeEnabledForBundles called");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_16, EventBranchId::BRANCH_0);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGD("VerifyNativeToken is bogus.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NON_SYSTEM_APP));
         return ERR_ANS_NON_SYSTEM_APP;
     }
-
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_1));
         return ERR_ANS_PERMISSION_DENIED;
     }
-
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("null notificationSvrQueue");
+        message.Message("Serial queue is invalid.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_2));
         return ERR_ANS_INVALID_PARAM;
     }
+
     ErrCode result = ERR_OK;
-    bool flag = true;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("called");
         for (sptr<NotificationBundleOption> bundleOption : bundleOptions) {
             sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+            if (bundle == nullptr) {
+                continue;
+            }
             bool enable = false;
             result = NotificationPreferences::GetInstance()->IsShowBadge(bundle, enable);
             if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
@@ -245,15 +253,19 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundles(
                 enable = true;
             }
             if (result != ERR_OK) {
-                ANS_LOGE("get show badge failed");
-                flag = false;
+                ANS_LOGE("%{public}s_%{public}d, get showbadge failed.",
+                    bundle->GetBundleName().c_str(), bundle->GetUid());
+                message.Message(bundle->GetBundleName() + "_" + std::to_string(bundle->GetUid()) +
+                    " get showbadge failed.");
+                NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_3));
                 continue;
             }
             bundleEnable.insert(std::make_pair(bundleOption, enable));
         }
     }));
     notificationSvrQueue_->wait(handler);
-    return flag? ERR_OK : ERR_ANS_INVALID_PARAM;
+
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)

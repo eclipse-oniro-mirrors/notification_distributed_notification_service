@@ -157,7 +157,6 @@ ErrCode AdvancedNotificationService::GetReminderInfoByBundles(
     if (result != ERR_OK) {
         return result;
     }
-    bool allOk = true;
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_26, EventBranchId::BRANCH_3);
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -179,7 +178,6 @@ ErrCode AdvancedNotificationService::GetReminderInfoByBundles(
                 flags = DEFAULT_SLOT_FLAGS;
             }
             if (result != ERR_OK) {
-                allOk = false;
                 ANS_LOGE("%{public}s_%{public}d, get reminderflags failed.",
                     validBundle->GetBundleName().c_str(), validBundle->GetUid());
                 message.Message(validBundle->GetBundleName() + "_" + std::to_string(validBundle->GetUid()) +
@@ -193,10 +191,9 @@ ErrCode AdvancedNotificationService::GetReminderInfoByBundles(
             silentReminderEnabled = ((enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) ||
                 (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON));
             if (result != ERR_OK) {
-                allOk = false;
                 ANS_LOGE("%{public}s_%{public}d, get silentreminderenable failed.",
                     validBundle->GetBundleName().c_str(), validBundle->GetUid());
-                message.Message(bundle->GetBundleName() + "_" + std::to_string(bundle->GetUid()) +
+                message.Message(validBundle->GetBundleName() + "_" + std::to_string(validBundle->GetUid()) +
                     " get silentreminderenable failed.");
                 NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_4));
                 continue;
@@ -210,10 +207,9 @@ ErrCode AdvancedNotificationService::GetReminderInfoByBundles(
 
     notificationSvrQueue_->wait(handler);
     ANS_LOGI("GetReminderInfoByBundles end");
-    result = allOk ? ERR_OK : ERR_ANS_INVALID_PARAM;
     NotificationAnalyticsUtil::ReportModifyEvent(
         message.ErrorCode(result).Message("GetReminderInfoByBundles end.").BranchId(BRANCH_5));
-    return result;
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::SetReminderInfoByBundles(
@@ -224,7 +220,6 @@ ErrCode AdvancedNotificationService::SetReminderInfoByBundles(
     if (result != ERR_OK) {
         return result;
     }
-    bool allOk = true;
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_26, EventBranchId::BRANCH_6);
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -242,21 +237,19 @@ ErrCode AdvancedNotificationService::SetReminderInfoByBundles(
             // 2、SetNotificationSlotFlagsForBundle
             result = NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(validBundle, flags);
             if (result != ERR_OK) {
-                allOk = false;
                 ANS_LOGE("%{public}s_%{public}d, set reminderflags failed.",
                     validBundle->GetBundleName().c_str(), validBundle->GetUid());
                 message.Message(validBundle->GetBundleName() + "_" + std::to_string(validBundle->GetUid()) +
-                    " set reminderflags failed.");
+                    "_" + std::to_string(flags) + " set reminderflags failed.");
                 NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result));
                 continue;
             }
             result = UpdateSlotReminderModeBySlotFlags(validBundle, flags);
             if (result != ERR_OK) {
-                allOk = false;
                 ANS_LOGE("%{public}s_%{public}d, update slot reminder mode failed.",
                     validBundle->GetBundleName().c_str(), validBundle->GetUid());
                 message.Message(validBundle->GetBundleName() + "_" + std::to_string(validBundle->GetUid()) +
-                    " update slot reminder mode failed.");
+                    "_" + std::to_string(flags) + " update slot reminder mode failed.");
                 NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_7));
                 continue;
             }
@@ -265,11 +258,10 @@ ErrCode AdvancedNotificationService::SetReminderInfoByBundles(
             result = NotificationPreferences::GetInstance()->SetSilentReminderEnabled(
                 validBundle, silentReminderEnabled);
             if (result != ERR_OK) {
-                allOk = false;
                 ANS_LOGE("%{public}s_%{public}d, set silentreminderenable failed.",
                     validBundle->GetBundleName().c_str(), validBundle->GetUid());
                 message.Message(validBundle->GetBundleName() + "_" + std::to_string(validBundle->GetUid()) +
-                    " set silentreminderenable failed.");
+                    "_" + std::to_string(silentReminderEnabled) + " set silentreminderenable failed.");
                 NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_8));
                 continue;
             }
@@ -278,10 +270,9 @@ ErrCode AdvancedNotificationService::SetReminderInfoByBundles(
 
     notificationSvrQueue_->wait(handler);
     ANS_LOGI("SetReminderInfoByBundles end");
-    result = allOk ? ERR_OK : ERR_ANS_INVALID_PARAM;
     NotificationAnalyticsUtil::ReportModifyEvent(
         message.ErrorCode(result).Message("SetReminderInfoByBundles end.").BranchId(BRANCH_9));
-    return result;
+    return ERR_OK;
 }
 }  // namespace Notification
 }  // namespace OHOS
