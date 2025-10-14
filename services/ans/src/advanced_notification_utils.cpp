@@ -48,6 +48,7 @@
 #include "distributed_database.h"
 #endif
 
+#include "system_sound_helper.h"
 #include "advanced_notification_inline.h"
 #include "notification_analytics_util.h"
 #include "notification_clone_disturb_service.h"
@@ -1958,6 +1959,71 @@ ErrCode AdvancedNotificationService::OnRecoverLiveView(
     return ERR_OK;
 }
 
+sptr<NotificationRingtoneInfo> GetRingtoneInfoForClone(NotificationRingtoneInfo ringtoneInfo)
+{
+    sptr<NotificationRingtoneInfo> ringtoneInfoPtr = new (std::nothrow) NotificationRingtoneInfo();
+    if (ringtoneInfoPtr == nullptr) {
+        ANS_LOGW("New info failed.");
+        return nullptr;
+    }
+    ringtoneInfoPtr->SetRingtoneType(ringtoneInfo.GetRingtoneType());
+    ringtoneInfoPtr->SetRingtoneTitle(ringtoneInfo.GetRingtoneTitle());
+    ringtoneInfoPtr->SetRingtoneFileName(ringtoneInfo.GetRingtoneFileName());
+    ringtoneInfoPtr->SetRingtoneUri(ringtoneInfo.GetRingtoneUri());
+    return ringtoneInfoPtr;
+}
+
+void AdvancedNotificationService::UpdateCloneBundleInfoForRingtone(NotificationRingtoneInfo ringtoneInfo,
+    const sptr<NotificationBundleOption> bundle, const NotificationCloneBundleInfo cloneBundleInfo)
+{
+    if (ringtoneInfo.GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT) {
+        sptr<NotificationRingtoneInfo> oldRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
+        auto result = NotificationPreferences::GetInstance()->GetRingtoneInfoByBundle(bundle, oldRingtoneInfo);
+        if (result == ERR_OK) {
+            NotificationPreferences::GetInstance()->RemoveRingtoneInfoByBundle(bundle);
+            ANSR_LOGI("Remove current ringtone %{public}s %{public}s.", bundle->GetBundleName().c_str(),
+                oldRingtoneInfo->GetRingtoneUri().c_str());
+        }
+        return;
+    }
+
+    // clear last clone save ringtone info by current clone ringtone info, that last info is not set.
+    int32_t userId = -1;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+        ANSR_LOGW("Failed to get active user id!");
+        return;
+    }
+    NotificationRingtoneInfo lastCloneRingtone;
+    NotificationPreferences::GetInstance()->GetCloneRingtoneInfo(userId, cloneBundleInfo, lastCloneRingtone);
+    if (lastCloneRingtone.GetRingtoneType() != NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT) {
+        if (lastCloneRingtone.GetRingtoneFileName() != ringtoneInfo.GetRingtoneFileName() ||
+            lastCloneRingtone.GetRingtoneType() != ringtoneInfo.GetRingtoneType() ||
+            lastCloneRingtone.GetRingtoneUri() != ringtoneInfo.GetRingtoneUri() ||
+            lastCloneRingtone.GetRingtoneTitle() != ringtoneInfo.GetRingtoneTitle()) {
+            SystemSoundHelper::GetInstance()->RemoveCustomizedTone(lastCloneRingtone.GetRingtoneUri());
+        }
+        NotificationPreferences::GetInstance()->DeleteCloneRingtoneInfo(userId, cloneBundleInfo);
+    }
+
+    // if the application has ringtone before clone, clear the information.
+    int64_t curTime = GetCurrentTime();
+    int64_t cloneTime = NotificationPreferences::GetInstance()->GetCloneTimeStamp();
+    if (cloneTime != 0 && cloneTime <= curTime &&
+        (curTime - cloneTime < NotificationConstant::MAX_CLONE_TIME)) {
+        sptr<NotificationRingtoneInfo> ringtoneInfoPtr = GetRingtoneInfoForClone(ringtoneInfo);
+        sptr<NotificationRingtoneInfo> oldRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
+        auto result = NotificationPreferences::GetInstance()->GetRingtoneInfoByBundle(bundle, oldRingtoneInfo);
+        if (result == ERR_OK && (
+            oldRingtoneInfo->GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL ||
+            oldRingtoneInfo->GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE)) {
+            SystemSoundHelper::GetInstance()->RemoveCustomizedTone(oldRingtoneInfo);
+        }
+
+        ANSR_LOGW("Clone : %{public}d %{public}s", result, oldRingtoneInfo->GetRingtoneUri().c_str());
+        NotificationPreferences::GetInstance()->SetRingtoneInfoByBundle(bundle, ringtoneInfoPtr);
+    }
+}
+
 void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo)
 {
     ANS_LOGI("Event bundle update %{public}s.", cloneBundleInfo.Dump().c_str());
@@ -1965,7 +2031,12 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
         return;
     }
 
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&, cloneBundleInfo]() {
+    NotificationRingtoneInfo ringtoneInfo;
+    if (cloneBundleInfo.GetRingtoneInfo() != nullptr) {
+        ringtoneInfo = (*cloneBundleInfo.GetRingtoneInfo());
+    }
+
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&, ringtoneInfo, cloneBundleInfo]() {
         sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
             cloneBundleInfo.GetBundleName(), cloneBundleInfo.GetUid());
         if (bundle == nullptr) {
@@ -1974,15 +2045,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
         bundle->SetAppIndex(cloneBundleInfo.GetAppIndex());
         UpdateCloneBundleInfoForEnable(cloneBundleInfo, bundle);
         UpdateCloneBundleInfoFoSlot(cloneBundleInfo, bundle);
-        if (cloneBundleInfo.GetRingtoneInfo() != nullptr) {
-            int64_t curTime = GetCurrentTime();
-            int64_t cloneTime = NotificationPreferences::GetInstance()->GetCloneTimeStamp();
-            if (cloneTime != 0 && cloneTime <= curTime &&
-                (curTime - cloneTime < NotificationConstant::MAX_CLONE_TIME)) {
-                NotificationPreferences::GetInstance()->SetRingtoneInfoByBundle(bundle,
-                    cloneBundleInfo.GetRingtoneInfo());
-            }
-        }
+        UpdateCloneBundleInfoForRingtone(ringtoneInfo, bundle, cloneBundleInfo);
 
         if (NotificationPreferences::GetInstance()->SetShowBadge(bundle, cloneBundleInfo.GetIsShowBadge()) == ERR_OK) {
             HandleBadgeEnabledChanged(bundle, cloneBundleInfo.GetIsShowBadge());

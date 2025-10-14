@@ -16,7 +16,6 @@
 #include "system_sound_helper.h"
 
 #include "ans_log_wrapper.h"
-#include "distributed_data_define.h"
 #ifdef PLAYER_FRAMEWORK_ENABLE
 #include "media_errors.h"
 #endif
@@ -39,11 +38,9 @@ void SystemSoundHelper::Connect()
     }
 }
 
-void SystemSoundHelper::RemoveCustomizedTone(sptr<NotificationRingtoneInfo> ringtoneInfo)
+void SystemSoundHelper::RemoveCustomizedTone(const std::string uri)
 {
-    if (ringtoneInfo == nullptr || (
-        ringtoneInfo->GetRingtoneType() != NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL &&
-        ringtoneInfo->GetRingtoneType() != NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE)) {
+    if (uri.empty()) {
         return;
     }
 
@@ -53,9 +50,19 @@ void SystemSoundHelper::RemoveCustomizedTone(sptr<NotificationRingtoneInfo> ring
         ANS_LOGW("Get system clint failed.");
         return;
     }
-    int32_t result = systemSoundClient_->RemoveCustomizedTone(nullptr, ringtoneInfo->GetRingtoneUri());
-    ANS_LOGI("Remove Customized tone, uri: %{public}s, result: %{public}d",
-        StringAnonymous(ringtoneInfo->GetRingtoneUri()).c_str(), result);
+    int32_t result = systemSoundClient_->RemoveCustomizedTone(nullptr, uri);
+    ANS_LOGI("Remove Customized tone, uri: %{public}s, result: %{public}d", uri.c_str(), result);
+}
+
+void SystemSoundHelper::RemoveCustomizedTone(sptr<NotificationRingtoneInfo> ringtoneInfo)
+{
+    if (ringtoneInfo == nullptr || (
+        ringtoneInfo->GetRingtoneType() != NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL &&
+        ringtoneInfo->GetRingtoneType() != NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE)) {
+        return;
+    }
+
+    RemoveCustomizedTone(ringtoneInfo->GetRingtoneUri());
 }
 
 void SystemSoundHelper::RemoveCustomizedTones(std::vector<NotificationRingtoneInfo> ringtoneInfos)
@@ -87,10 +94,15 @@ void SystemSoundHelper::RemoveCustomizedTones(std::vector<NotificationRingtoneIn
     auto results = systemSoundClient_->RemoveCustomizedToneList(uris, error);
     for (auto item : results) {
         ANS_LOGI("Remove Customized tone, uri: %{public}s, result: %{public}d",
-            StringAnonymous(item.first).c_str(), item.second);
+            item.first.c_str(), item.second);
     }
 }
 #else
+void SystemSoundHelper::RemoveCustomizedTone(const std::string uri)
+{
+    ANS_LOGW("remove ringtone uri.");
+}
+
 void SystemSoundHelper::RemoveCustomizedTone(sptr<NotificationRingtoneInfo> ringtoneInfo)
 {
     ANS_LOGW("remove ringtone info.");
