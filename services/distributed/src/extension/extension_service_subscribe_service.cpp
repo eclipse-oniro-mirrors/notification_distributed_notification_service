@@ -15,6 +15,7 @@
 
 #include "extension_service_subscribe_service.h"
 #include "notification_helper.h"
+#include "os_account_manager.h"
 
 namespace OHOS {
 namespace Notification {
@@ -28,6 +29,7 @@ ExtensionServiceSubscribeService& ExtensionServiceSubscribeService::GetInstance(
 void ExtensionServiceSubscribeService::SubscribeNotification(
     const sptr<NotificationBundleOption> bundle, const std::vector<sptr<NotificationBundleOption>>& subscribeBundles)
 {
+    ANS_LOGD("ExtensionServiceSubscribeService::SubscribeNotification");
     if (bundle == nullptr) {
         ANS_LOGE("null bundle");
         return;
@@ -39,6 +41,15 @@ void ExtensionServiceSubscribeService::SubscribeNotification(
         iter == subscriberMap_.end() ? std::make_shared<ExtensionServiceSubscriber>(*bundle) : iter->second;
     sptr<NotificationSubscribeInfo> subscribeInfo = new (std::nothrow) NotificationSubscribeInfo();
     subscribeInfo->AddDeviceType(NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE);
+    
+    int32_t userId = -1;
+    int result = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundle->GetUid(), userId);
+    if (result != ERR_OK) {
+        ANS_LOGW("Failed to GetOsAccountLocalIdFromUid for extension, uid: %{public}d, ret: %{public}d",
+            bundle->GetUid(), result);
+        return;
+    }
+    subscribeInfo->AddAppUserId(userId);
     for (const auto& subscribeBundle : subscribeBundles) {
         if (subscribeBundle == nullptr) {
             ANS_LOGW("null subscribeBundle");
@@ -46,7 +57,7 @@ void ExtensionServiceSubscribeService::SubscribeNotification(
         }
         subscribeInfo->AddAppName(subscribeBundle->GetBundleName());
     }
-    int result = NotificationHelper::SubscribeNotification(subscriber, subscribeInfo);
+    result = NotificationHelper::SubscribeNotification(subscriber, subscribeInfo);
     if (result == 0) {
         subscriberMap_.insert_or_assign(bundleKey, subscriber);
     } else {
@@ -56,6 +67,7 @@ void ExtensionServiceSubscribeService::SubscribeNotification(
 
 void ExtensionServiceSubscribeService::UnsubscribeNotification(const sptr<NotificationBundleOption> bundle)
 {
+    ANS_LOGD("ExtensionServiceSubscribeService::UnsubscribeNotification");
     if (bundle == nullptr) {
         ANS_LOGE("null bundle");
         return;
@@ -76,17 +88,12 @@ void ExtensionServiceSubscribeService::UnsubscribeNotification(const sptr<Notifi
 
 void ExtensionServiceSubscribeService::UnsubscribeAllNotification()
 {
+    ANS_LOGD("ExtensionServiceSubscribeService::UnsubscribeAllNotification");
     std::lock_guard<ffrt::mutex> lock(mapLock_);
     for (auto& subscriberInfo : subscriberMap_) {
         int32_t result = NotificationHelper::UnSubscribeNotification(subscriberInfo.second);
         ANS_LOGI("UnSubscribe %{public}s %{public}d.", subscriberInfo.first.c_str(), result);
     }
-}
-
-size_t ExtensionServiceSubscribeService::GetSubscriberCount()
-{
-    std::lock_guard<ffrt::mutex> lock(mapLock_);
-    return subscriberMap_.size();
 }
 
 std::string ExtensionServiceSubscribeService::MakeBundleKey(const NotificationBundleOption& bundle)

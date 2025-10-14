@@ -28,8 +28,10 @@ namespace Notification {
 
 class ExtensionServiceConnection : public AAFwk::AbilityConnectionStub {
 public:
-    ExtensionServiceConnection(const ExtensionSubscriberInfo& subscriberInfo);
+    ExtensionServiceConnection(const ExtensionSubscriberInfo& subscriberInfo,
+        std::function<void(const ExtensionSubscriberInfo& subscriberInfo)> onDisconnected);
     virtual ~ExtensionServiceConnection();
+    void Close();
     void NotifyOnReceiveMessage(const sptr<NotificationRequest> notificationRequest);
     void NotifyOnCancelMessages(const std::shared_ptr<std::vector<std::string>> hashCodes);
 
@@ -60,6 +62,7 @@ private:
     void Disconnect();
     void GetPid();
     void DoFreezeUnfreeze(bool isFreeze);
+    void HandleDisconnectedState();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
 
 private:
@@ -84,6 +87,7 @@ private:
     int32_t pid_ = -1;
     sptr<IRemoteObject> remoteObject_ = nullptr;
     sptr<RemoteDeathRecipient> deathRecipient_ = nullptr;
+    std::function<void(const ExtensionSubscriberInfo& subscriberInfo)> onDisconnected_;
 };
 }
 }

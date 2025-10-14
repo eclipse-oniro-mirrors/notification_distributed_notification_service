@@ -39,8 +39,9 @@ namespace {
 }
 uint32_t ExtensionServiceConnection::DISCONNECT_DELAY_TIME = DEFAULT_DISCONNECT_DELAY_TIME;
 
-ExtensionServiceConnection::ExtensionServiceConnection(const ExtensionSubscriberInfo& subscriberInfo)
-    : subscriberInfo_(subscriberInfo)
+ExtensionServiceConnection::ExtensionServiceConnection(const ExtensionSubscriberInfo& subscriberInfo,
+    std::function<void(const ExtensionSubscriberInfo& subscriberInfo)> onDisconnected)
+    : subscriberInfo_(subscriberInfo), onDisconnected_(onDisconnected)
 {
     messageQueue_ = std::make_shared<ffrt::queue>("ExtensionServiceConnection");
 
@@ -67,30 +68,28 @@ ExtensionServiceConnection::ExtensionServiceConnection(const ExtensionSubscriber
 
 ExtensionServiceConnection::~ExtensionServiceConnection()
 {
-    if (messageQueue_ == nullptr) {
-        ANS_LOGE("null messageQueue_");
+}
+
+void ExtensionServiceConnection::Close()
+{
+    ANS_LOGD("Close %{public}s", subscriberInfo_.Dump().c_str());
+    std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
+    auto timerClient = MiscServices::TimeServiceClient::GetInstance();
+    if (timerClient == nullptr) {
+        ANS_LOGE("null TimeServiceClient");
         return;
     }
-    ffrt::task_handle handler = messageQueue_->submit_h([&]() {
-        std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
-        auto timerClient = MiscServices::TimeServiceClient::GetInstance();
-        if (timerClient == nullptr) {
-            ANS_LOGE("null TimeServiceClient");
-            return;
-        }
 
-        timerClient->DestroyTimer(timerIdFreeze_);
-        timerClient->DestroyTimer(timerIdDisconnect_);
-        if (state_ != ExtensionServiceConnectionState::CREATED &&
-            state_ != ExtensionServiceConnectionState::DISCONNECTED) {
-            AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(this);
-        }
-        if (remoteObject_ != nullptr) {
-            remoteObject_->RemoveDeathRecipient(deathRecipient_);
-            remoteObject_ = nullptr;
-        }
-    });
-    messageQueue_->wait(handler);
+    timerClient->DestroyTimer(timerIdFreeze_);
+    timerIdFreeze_ = 0L;
+    timerClient->DestroyTimer(timerIdDisconnect_);
+    timerIdDisconnect_ = 0L;
+    if (state_ == ExtensionServiceConnectionState::CREATED ||
+        state_ == ExtensionServiceConnectionState::DISCONNECTED) {
+        HandleDisconnectedState();
+    } else {
+        AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(this);
+    }
 }
 
 void ExtensionServiceConnection::NotifyOnReceiveMessage(const sptr<NotificationRequest> notificationRequest)
@@ -102,7 +101,12 @@ void ExtensionServiceConnection::NotifyOnReceiveMessage(const sptr<NotificationR
             ANS_LOGE("null sThis");
             return;
         }
+        ANS_LOGD("NotifyOnReceiveMessage %{public}s", sThis->subscriberInfo_.Dump().c_str());
+
         std::lock_guard<ffrt::recursive_mutex> lock(sThis->mutex_);
+        if (sThis->state_ == ExtensionServiceConnectionState::DISCONNECTED) {
+            return;
+        }
         if (sThis->state_ == ExtensionServiceConnectionState::CREATED ||
             sThis->state_ == ExtensionServiceConnectionState::CONNECTING) {
             NotifyParam param = { .notificationRequest = notificationRequest };
@@ -130,6 +134,7 @@ void ExtensionServiceConnection::NotifyOnReceiveMessage(const sptr<NotificationR
             ANS_LOGD("Notify NotifyOnReceiveMessage result %{public}d", result);
         }
         sThis->PrepareFreeze();
+        sThis->PrepareDisconnect();
     });
 }
 
@@ -142,7 +147,12 @@ void ExtensionServiceConnection::NotifyOnCancelMessages(const std::shared_ptr<st
             ANS_LOGE("null sThis");
             return;
         }
+        ANS_LOGD("NotifyOnCancelMessages %{public}s", sThis->subscriberInfo_.Dump().c_str());
+
         std::lock_guard<ffrt::recursive_mutex> lock(sThis->mutex_);
+        if (sThis->state_ == ExtensionServiceConnectionState::DISCONNECTED) {
+            return;
+        }
         if (sThis->state_ == ExtensionServiceConnectionState::CREATED ||
             sThis->state_ == ExtensionServiceConnectionState::CONNECTING) {
             NotifyParam param = { .hashCodes = hashCodes };
@@ -170,12 +180,15 @@ void ExtensionServiceConnection::NotifyOnCancelMessages(const std::shared_ptr<st
             ANS_LOGD("Notify OnCancelMessages result %{public}d", result);
         }
         sThis->PrepareFreeze();
+        sThis->PrepareDisconnect();
     });
 }
 
 void ExtensionServiceConnection::OnAbilityConnectDone(
     const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
+    ANS_LOGD("OnAbilityConnectDone %{public}s", subscriberInfo_.Dump().c_str());
+
     std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
     state_ = ExtensionServiceConnectionState::CONNECTED;
     remoteObject_ = remoteObject;
@@ -204,18 +217,11 @@ void ExtensionServiceConnection::OnAbilityConnectDone(
 
 void ExtensionServiceConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode)
 {
-    {
-        std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
-        state_ = ExtensionServiceConnectionState::DISCONNECTED;
-        pid_ = -1;
-        if (remoteObject_ == nullptr) {
-            ANS_LOGW("null remoteObject_");
-            return;
-        }
-        remoteObject_->RemoveDeathRecipient(deathRecipient_);
-        remoteObject_ = nullptr;
-    }
-    ExtensionServiceConnectionService::GetInstance().RemoveConnection(subscriberInfo_);
+    ANS_LOGD("OnAbilityDisconnectDone %{public}s", subscriberInfo_.Dump().c_str());
+    std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
+    state_ = ExtensionServiceConnectionState::DISCONNECTED;
+    pid_ = -1;
+    HandleDisconnectedState();
 }
 
 void ExtensionServiceConnection::SetExtensionLifecycleDestroyTime(uint32_t value)
@@ -230,6 +236,8 @@ void ExtensionServiceConnection::SetExtensionLifecycleDestroyTime(uint32_t value
 
 void ExtensionServiceConnection::PrepareFreeze()
 {
+    ANS_LOGD("PrepareFreeze %{public}s", subscriberInfo_.Dump().c_str());
+
     std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
     if (state_ != ExtensionServiceConnectionState::CONNECTED) {
         ANS_LOGD("state not match: %{public}d", static_cast<int32_t>(state_));
@@ -249,12 +257,14 @@ void ExtensionServiceConnection::PrepareFreeze()
 
 void ExtensionServiceConnection::Freeze()
 {
+    ANS_LOGD("Freeze %{public}s", subscriberInfo_.Dump().c_str());
     std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
     DoFreezeUnfreeze(true);
 }
 
 void ExtensionServiceConnection::Unfreeze()
 {
+    ANS_LOGD("Unfreeze %{public}s", subscriberInfo_.Dump().c_str());
     std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
 
     auto timerClient = MiscServices::TimeServiceClient::GetInstance();
@@ -271,6 +281,8 @@ void ExtensionServiceConnection::Unfreeze()
 
 void ExtensionServiceConnection::PrepareDisconnect()
 {
+    ANS_LOGD("PrepareDisconnect %{public}s", subscriberInfo_.Dump().c_str());
+
     std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
 
     auto timerClient = MiscServices::TimeServiceClient::GetInstance();
@@ -281,12 +293,13 @@ void ExtensionServiceConnection::PrepareDisconnect()
 
     auto now = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
-    timerClient->StartTimer(timerIdDisconnect_,
-        duration.count() + (DISCONNECT_DELAY_TIME - FREEZE_PREPARE_TIME) * MS_PER_SECOND);
+    timerClient->StartTimer(timerIdDisconnect_, duration.count() + DISCONNECT_DELAY_TIME * MS_PER_SECOND);
 }
 
 void ExtensionServiceConnection::Disconnect()
 {
+    ANS_LOGD("Disconnect %{public}s", subscriberInfo_.Dump().c_str());
+
     std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
     wptr<ExtensionServiceConnection> wThis = this;
     messageQueue_->submit([wThis]() {
@@ -349,6 +362,11 @@ void ExtensionServiceConnection::GetPid()
 void ExtensionServiceConnection::DoFreezeUnfreeze(bool isFreeze)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    if (isFreeze) {
+        ANS_LOGD("Do Freeze pid:%{public}d", pid_);
+    } else {
+        ANS_LOGD("Do Unfreeze pid:%{public}d", pid_);
+    }
     auto type = ResourceSchedule::ResType::RES_TYPE_SA_CONTROL_APP_EVENT;
     auto status = isFreeze ?
         ResourceSchedule::ResType::SaControlAppStatus::SA_STOP_APP :
@@ -363,26 +381,26 @@ void ExtensionServiceConnection::DoFreezeUnfreeze(bool isFreeze)
 #endif
 }
 
+void ExtensionServiceConnection::HandleDisconnectedState()
+{
+    if (remoteObject_ != nullptr) {
+        remoteObject_->RemoveDeathRecipient(deathRecipient_);
+        remoteObject_ = nullptr;
+    }
+    proxy_ = nullptr;
+    if (onDisconnected_) {
+        ANS_LOGE("call onDisconnected %{public}s", subscriberInfo_.Dump().c_str());
+        onDisconnected_(subscriberInfo_);
+        onDisconnected_ = nullptr;
+    }
+}
+
 void ExtensionServiceConnection::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
-    ANS_LOGD("ExtensionServiceConnection::OnRemoteDied");
-    {
-        std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
-        state_ = ExtensionServiceConnectionState::DISCONNECTED;
-    }
-
-    if (remote == nullptr) {
-        ANS_LOGE("null remote");
-        return;
-    }
-
-    sptr<IRemoteObject> object = remote.promote();
-    if (object == nullptr) {
-        ANS_LOGE("null object");
-        return;
-    }
-    object->RemoveDeathRecipient(deathRecipient_);
-    ExtensionServiceConnectionService::GetInstance().RemoveConnection(subscriberInfo_);
+    ANS_LOGD("OnRemoteDied %{public}s", subscriberInfo_.Dump().c_str());
+    std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
+    state_ = ExtensionServiceConnectionState::DISCONNECTED;
+    Close();
 }
 }
 }

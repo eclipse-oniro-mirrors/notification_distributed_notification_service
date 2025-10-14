@@ -1927,11 +1927,12 @@ private:
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos,
         const std::string &bluetoothAddress);
     bool CheckBluetoothConditions(const std::string &addr);
+    void FilterPermissionBundles(std::vector<sptr<NotificationBundleOption>> &bundles);
     void FilterGrantedBundles(std::vector<sptr<NotificationBundleOption>> &bundles);
     void FilterBundlesByBluetoothConnection(std::vector<sptr<NotificationBundleOption>> &bundles);
     bool HasExtensionSubscriptionStateChanged(const sptr<NotificationBundleOption> &bundle, bool enabled);
     bool HasGrantedBundleStateChanged(const sptr<NotificationBundleOption>& bundle,
-        const std::vector<sptr<NotificationBundleOption>>& enabledBundles);
+        const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled);
     bool HasExtensionSubscriptionInfosChanged(const sptr<NotificationBundleOption> &bundle,
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
     ErrCode PreReminderInfoCheck();
@@ -1946,6 +1947,7 @@ private:
         const std::vector<sptr<NotificationBundleOption>> &bundles);
     int32_t UnSubscribeExtensionService(const sptr<NotificationBundleOption> &bundleOption);
     int32_t ShutdownExtensionService();
+    void PrepareShutdownExtensionService();
     size_t GetSubscriberCount();
     bool EnsureExtensionServiceLoadedAndSubscribed(const sptr<NotificationBundleOption> &bundle);
     bool EnsureExtensionServiceLoadedAndSubscribed(const sptr<NotificationBundleOption> &bundle,
@@ -1995,6 +1997,7 @@ private:
     std::shared_ptr<NotificationLoadUtils> notificationExtensionHandler_;
     bool supportHfp_ = false;
     std::vector<sptr<NotificationBundleOption>> cacheNotificationExtensionBundles_;
+    uint64_t timerIdShutdownExtensionService_ = 0L;
     std::shared_ptr<HfpStateObserver> hfpObserver_;
 };
 

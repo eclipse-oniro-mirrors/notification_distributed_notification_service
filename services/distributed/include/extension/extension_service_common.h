@@ -32,6 +32,12 @@ struct ExtensionSubscriberInfo {
     std::string extensionName;
     int32_t uid = -1;
     int32_t userId = -1;
+
+    std::string Dump() const
+    {
+        return "ExtensionSubscriberInfo { bundleName: " + bundleName + ", extensionName: " + extensionName +
+               ", uid: " + std::to_string(uid) + ", userId: " + std::to_string(userId) + " }";
+    }
 };
 }
 }

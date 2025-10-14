@@ -26,15 +26,15 @@ class NotificationExtensionService {
 public:
     NotificationExtensionService();
     static NotificationExtensionService& GetInstance();
-    int32_t InitService();
+    int32_t InitService(std::function<void()> shutdownCallback);
     void DestroyService();
     void SubscribeNotification(const sptr<NotificationBundleOption> bundle,
         const std::vector<sptr<NotificationBundleOption>>& subscribedBundles);
     void UnsubscribeNotification(const sptr<NotificationBundleOption> bundle);
-    size_t GetSubscriberCount();
 
 private:
     std::shared_ptr<ffrt::queue> serviceQueue_ = nullptr;
+    std::function<void()> shutdownCallback_;
 };
 }
 }
