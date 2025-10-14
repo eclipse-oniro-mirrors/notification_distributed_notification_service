@@ -1209,7 +1209,7 @@ ErrCode AnsNotification::SetShowBadgeEnabledForBundles(
         sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption(option.first);
         if (bo == nullptr) {
             ANS_LOGE("null bundleOption");
-            continue;
+            return ERR_ANS_NO_MEMORY;
         }
         sptrBundleOptions[bo] = option.second;
     }
@@ -1257,7 +1257,7 @@ ErrCode AnsNotification::GetShowBadgeEnabledForBundles(const std::vector<Notific
         sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption(option);
         if (bo == nullptr) {
             ANS_LOGE("null bundleOption");
-            continue;
+            return ERR_ANS_NO_MEMORY;
         }
         sptrBundleOptions.emplace_back(std::move(bo));
     }
@@ -2916,7 +2916,12 @@ ErrCode AnsNotification::GetReminderInfoByBundles(
     std::vector<sptr<NotificationBundleOption>> bundlesSptr;
     bundlesSptr.reserve(bundles.size());
     for (const auto &it : bundles) {
-        bundlesSptr.emplace_back(new (std::nothrow) NotificationBundleOption(it));
+        sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(it);
+        if (bundle == nullptr) {
+            ANS_LOGE("null bundleOption");
+            return ERR_ANS_NO_MEMORY;
+        }
+        bundlesSptr.emplace_back(std::move(bundle));
     }
     return proxy->GetReminderInfoByBundles(bundlesSptr, reminderInfo);
 }
@@ -2937,7 +2942,12 @@ ErrCode AnsNotification::SetReminderInfoByBundles(const std::vector<Notification
     std::vector<sptr<NotificationReminderInfo>> reminderInfoSptr;
     reminderInfoSptr.reserve(reminderInfo.size());
     for (const auto &it : reminderInfo) {
-        reminderInfoSptr.emplace_back(new (std::nothrow) NotificationReminderInfo(it));
+        sptr<NotificationReminderInfo> reminder = new (std::nothrow) NotificationReminderInfo(it);
+        if (reminder == nullptr) {
+            ANS_LOGE("null reminderInfo");
+            return ERR_ANS_NO_MEMORY;
+        }
+        reminderInfoSptr.emplace_back(std::move(reminder));
     }
     return proxy->SetReminderInfoByBundles(reminderInfoSptr);
 }
