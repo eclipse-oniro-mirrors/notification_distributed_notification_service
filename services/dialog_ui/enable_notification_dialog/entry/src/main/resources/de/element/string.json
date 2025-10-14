@@ -16,7 +16,7 @@
         },
         {
             "name":"BAN",
-            "value":"Ablehnen",
+            "value":"Verweigern",
             "attr":{
                 "priority":"LT"
             }

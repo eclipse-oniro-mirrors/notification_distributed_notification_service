@@ -9,7 +9,7 @@
         },
         {
             "name":"ALLOW",
-            "value":"İzin Ver",
+            "value":"İzin ver",
             "attr":{
                 "priority":"LT"
             }

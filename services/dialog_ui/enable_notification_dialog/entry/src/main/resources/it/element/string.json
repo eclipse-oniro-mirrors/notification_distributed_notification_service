@@ -16,7 +16,7 @@
         },
         {
             "name":"BAN",
-            "value":"Nega",
+            "value":"Rifiuta",
             "attr":{
                 "priority":"LT"
             }

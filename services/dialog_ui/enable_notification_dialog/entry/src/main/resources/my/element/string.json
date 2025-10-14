@@ -9,14 +9,14 @@
         },
         {
             "name":"ALLOW",
-            "value":"ခွင့်ပြုမည်",
+            "value":"ခွင့်ပြုရန်",
             "attr":{
                 "priority":"LT"
             }
         },
         {
             "name":"BAN",
-            "value":"ငြင်းပယ်မည်",
+            "value":"ပိတ်ပင်ရန်",
             "attr":{
                 "priority":"LT"
             }

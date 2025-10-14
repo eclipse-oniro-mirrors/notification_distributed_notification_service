@@ -25,28 +25,28 @@
             "name":"reason",
             "value":"Esto puede incluir las notificaciones en pantalla de bloqueo, las tiras, los globos, los sonidos y las vibraciones. Esta configuración se puede modificar en los Ajustes.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_simple",
             "value":"Esto puede incluir las tiras, los globos y los sonidos. Esta configuración se puede modificar en los Ajustes.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_zyt",
             "value":"Estas pueden incluir notificaciones de pantalla de bloqueo, banners, insignias, sonidos y vibraciones. Puedes cambiar estos ajustes en DroiTong > Gestión de aplicaciones.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_cjy",
             "value":"Estas pueden incluir notificaciones de la pantalla de bloqueo, banners, globos, sonidos y vibraciones. Puedes cambiar estos ajustes en EasyAbroad > Gestión de aplicaciones.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
