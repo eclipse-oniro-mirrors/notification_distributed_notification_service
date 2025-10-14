@@ -589,6 +589,7 @@ public:
     bool SetLiveViewConfigVersion(const int32_t& version);
     ErrCode GetLiveViewRebuildFlag(std::string& flag, int32_t userId);
     bool SetLiveViewRebuildFlag(int32_t userId);
+    bool RemoveLiveViewRebuildFlag(int32_t userId);
     ErrCode InitBundlesInfo(int32_t userId, std::unordered_map<std::string, std::string>& bundlesMap);
     void GetAllLiveViewBundles(std::vector<sptr<NotificationBundleOption>>& bundleOption);
     ErrCode GetExtensionSubscriptionInfos(const sptr<NotificationBundleOption>& bundleOption,

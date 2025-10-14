@@ -53,6 +53,7 @@ public:
     void NotifyLiveViewEvent(const std::string& event, const sptr<NotificationBundleOption>& bundleInfo);
     bool CheckLiveViewRebuild(int32_t userId);
     void SetLiveViewRebuild(int32_t userId, int32_t data);
+    void RemoveLiveViewRebuild(int32_t userId);
 
     static const int32_t ERASE_FLAG_INIT = 0;
     static const int32_t ERASE_FLAG_RUNNING = 1;

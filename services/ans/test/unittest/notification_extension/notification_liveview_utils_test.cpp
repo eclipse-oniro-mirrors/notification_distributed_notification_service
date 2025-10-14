@@ -62,6 +62,7 @@ HWTEST_F(NotificationLiveViewUtilTest, CheckData_100, Function | SmallTest | Lev
  */
 HWTEST_F(NotificationLiveViewUtilTest, CheckData_200, Function | SmallTest | Level1)
 {
+    NotificationLiveViewUtils::GetInstance().RemoveLiveViewRebuild(100);
     bool check = NotificationLiveViewUtils::GetInstance().CheckLiveViewRebuild(100);
     ASSERT_EQ(check, true);
     // invoke again

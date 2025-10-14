@@ -188,5 +188,12 @@ void NotificationLiveViewUtils::SetLiveViewRebuild(int32_t userId, int32_t data)
         NotificationPreferences::GetInstance()->SetLiveViewRebuildFlag(userId);
     }
 }
+
+void NotificationLiveViewUtils::RemoveLiveViewRebuild(int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> lock(eraseMutex);
+    eraseFlag.erase(userId);
+    NotificationPreferences::GetInstance()->RemoveLiveViewRebuildFlag(userId);
+}
 }
 }

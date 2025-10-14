@@ -2455,6 +2455,17 @@ bool NotificationPreferencesDatabase::SetLiveViewRebuildFlag(int32_t userId)
     return (result == NativeRdb::E_OK);
 }
 
+bool NotificationPreferencesDatabase::RemoveLiveViewRebuildFlag(int32_t userId)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+    int32_t result = rdbDataManager_->DeleteData(LIVE_VIEW_REBUILD_FLAG, userId);
+    ANS_LOGI("Remove liveViewRebuildflag ret=%{public}d", result);
+    return (result == NativeRdb::E_OK);
+}
+
 bool NotificationPreferencesDatabase::IsSilentReminderEnabled(
     NotificationPreferencesInfo::SilentReminderInfo &silentReminderInfo)
 {
