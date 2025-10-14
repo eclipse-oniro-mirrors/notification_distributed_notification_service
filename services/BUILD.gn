@@ -22,7 +22,7 @@ group("ans_service") {
   if (distributed_notification_service_feature_all_scenario_collaboration) {
     deps += [ "distributed:libdans" ]
   }
-  if (notification_extension_subscription_supported) {
+  if (distributed_notification_service_feature_notification_extension_subscription) {
     deps += [ "distributed:libans_extension_service" ]
   }
 }

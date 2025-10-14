@@ -67,7 +67,6 @@ void AdvancedNotificationServiceAbility::OnStart()
 #endif
     AddSystemAbilityListener(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
     AddSystemAbilityListener(ALL_CONNECT_SA_ID);
-    service_->TryStartExtensionSubscribeService();
 }
 
 void AdvancedNotificationServiceAbility::OnStop()

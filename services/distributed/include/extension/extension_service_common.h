@@ -24,7 +24,6 @@ enum class ExtensionServiceConnectionState {
     CREATED,
     CONNECTING,
     CONNECTED,
-    FREEZED,
     DISCONNECTED
 };
 

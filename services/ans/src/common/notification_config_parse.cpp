@@ -620,7 +620,7 @@ bool NotificationConfigParse::IsNotificationExtensionLifecycleDestroyTimeConfigu
     jsonPoint.append("/");
     jsonPoint.append(CFG_KEY_NOTIFICATION_EXTENSION);
     jsonPoint.append("/");
-    jsonPoint.append(CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTROY_TIME);
+    jsonPoint.append(CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTORY_TIME);
     
     if (!GetConfigJson(jsonPoint, root)) {
         ANS_LOGE("Failed to get extension lifecycle destroy time config.");
@@ -640,8 +640,8 @@ bool NotificationConfigParse::IsNotificationExtensionLifecycleDestroyTimeConfigu
         return false;
     }
     
-    if (extension.contains(CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTROY_TIME)) {
-        outDestroyTime = extension[CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTROY_TIME];
+    if (extension.contains(CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTORY_TIME)) {
+        outDestroyTime = extension[CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTORY_TIME];
         ANS_LOGI("Notification extension lifecycle destroy time config found and valid");
         return true;
     }
