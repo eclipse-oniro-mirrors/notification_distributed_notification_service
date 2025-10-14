@@ -64,6 +64,7 @@ private:
         const std::string &policy, const std::string &profileId, const std::string isSupportIntelligentScene);
     bool dealWithContactResult(std::shared_ptr<DataShare::DataShareResultSet> resultSet, const std::string &policy);
     std::string GetIntelligentData(const std::string &uri, const std::string &key);
+    void SetPhoneNumQueryCondition(DataShare::DataSharePredicates &predicates, const std::string &phoneNumber);
 private:
     static bool isDataShareReady_;
 };
