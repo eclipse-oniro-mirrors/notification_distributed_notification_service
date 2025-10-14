@@ -843,6 +843,9 @@ ani_status UnWarpNotificationMultiLineContent(ani_env *env, ani_object obj,
         ANS_LOGE("UnWarpNotificationMultiLineContent: get lineWantAgents failed");
         return ANI_INVALID_ARGS;
     }
+    if (lineWantAgents.size() > 0) {
+        multiLineContent->SetLineWantAgents(lineWantAgents);
+    }
     ANS_LOGD("UnWarpNotificationMultiLineContent end");
     return status;
 }
