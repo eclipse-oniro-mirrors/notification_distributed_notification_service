@@ -361,6 +361,10 @@ void NotificationCloneBundleInfo::RingtoneFromJson(const nlohmann::json &jsonObj
 {
     if (jsonObject.contains(BUNDLE_INFO_RINGTONE_INFO) && jsonObject[BUNDLE_INFO_RINGTONE_INFO].is_string()) {
         ringtoneInfo_ = new (std::nothrow) NotificationRingtoneInfo();
+        if (ringtoneInfo_ == nullptr) {
+            ANS_LOGE("New rington info failed.");
+            return;
+        }
         ringtoneInfo_->FromJson(jsonObject[BUNDLE_INFO_RINGTONE_INFO].get<std::string>());
     }
 }

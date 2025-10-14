@@ -32,6 +32,8 @@ namespace OHOS {
 namespace Notification {
 class SystemSoundHelper : public DelayedSingleton<SystemSoundHelper> {
 public:
+    void RemoveCustomizedTone(const std::string uri);
+
     void RemoveCustomizedTone(sptr<NotificationRingtoneInfo> ringtoneInfo);
 
     void RemoveCustomizedTones(std::vector<NotificationRingtoneInfo> ringtoneInfos);

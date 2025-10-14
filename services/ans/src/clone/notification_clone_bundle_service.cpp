@@ -128,13 +128,6 @@ void NotificationCloneBundle::OnRestoreStart(const std::string bundleName, int32
             bundle->SetUid(uid);
             AdvancedNotificationService::GetInstance()->UpdateCloneBundleInfo(*bundle);
             NotificationPreferences::GetInstance()->DelCloneBundleInfo(userId, *bundle);
-            std::vector<NotificationRingtoneInfo> cloneRingtoneInfos;
-            NotificationPreferences::GetInstance()->GetCloneRingtoneInfo(userId, *bundle, cloneRingtoneInfos);
-            NotificationRingtoneInfo ringtoneInfo;
-            if (bundle->GetRingtoneInfo() != nullptr) {
-                ringtoneInfo = (*bundle->GetRingtoneInfo());
-            }
-            AdvancedNotificationService::GetInstance()->ClearCloneRingToneInfo(ringtoneInfo, cloneRingtoneInfos);
             bundle = bundlesInfo_.erase(bundle);
             break;
         }

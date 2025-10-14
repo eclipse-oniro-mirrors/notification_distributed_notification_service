@@ -1475,6 +1475,9 @@ public:
     void SetAndPublishSubscriberExistFlag(const std::string& deviceType, bool existFlag);
     ErrCode RemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason);
 
+    void UpdateCloneBundleInfoForRingtone(NotificationRingtoneInfo ringtoneInfo,
+        const sptr<NotificationBundleOption> bundle, const NotificationCloneBundleInfo cloneBundleInfo);
+
     /**
      * @brief set rule of generate hashCode.
      *

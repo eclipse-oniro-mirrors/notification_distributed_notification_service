@@ -3031,6 +3031,10 @@ void NotificationPreferencesDatabase::ParseRingtoneFromDisturbeDB(
     const std::pair<std::string, std::string> &entry)
 {
     sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
+    if (ringtoneInfo == nullptr) {
+        ANS_LOGE("New rington info failed.");
+        return;
+    }
     ringtoneInfo->FromJson(entry.second);
     bundleInfo.SetRingtoneInfo(ringtoneInfo);
 }

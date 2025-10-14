@@ -32,9 +32,7 @@
 #include "os_account_manager_helper.h"
 #include "notification_analytics_util.h"
 #include "notification_config_parse.h"
-#ifdef PLAYER_FRAMEWORK_ENABLE
-#include "system_sound_manager.h"
-#endif
+#include "system_sound_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -209,6 +207,7 @@ ErrCode NotificationPreferences::RemoveNotificationForBundle(const sptr<Notifica
         if (!preferncesDB_->RemoveBundleFromDisturbeDB(GenerateBundleKey(bundleOption), bundleOption->GetUid())) {
             result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
         }
+        SystemSoundHelper::GetInstance()->RemoveCustomizedTone(bundleInfo.GetRingtoneInfo());
     } else {
         result = ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
     }
@@ -1478,8 +1477,8 @@ ErrCode NotificationPreferences::SetRingtoneInfoByBundle(const sptr<Notification
         return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     preferencesInfo_.SetBundleInfo(bundleInfo);
-    ANS_LOGI("Set ringtone %{public}s %{public}d", bundleOption->GetBundleName().c_str(),
-        ringtoneInfo->GetRingtoneType());
+    ANS_LOGI("Set ringtone %{public}s %{public}d %{public}s", bundleOption->GetBundleName().c_str(),
+        ringtoneInfo->GetRingtoneType(), ringtoneInfo->GetRingtoneUri().c_str());
     return ERR_OK;
 }
 
@@ -1504,9 +1503,7 @@ ErrCode NotificationPreferences::GetRingtoneInfoByBundle(const sptr<Notification
     if (savedRingtoneInfo == nullptr) {
         savedRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
         if (!preferncesDB_->GetRingtoneInfoByBundle(bundleInfo, savedRingtoneInfo)) {
-            ANS_LOGW("Get ringtone info from db failed, bundleName: %{public}s uid: %{public}d",
-                bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid());
-            return ERR_ANS_SPECIFIED_BUNDLE_INVALID;
+            savedRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
         }
         bundleInfo.SetRingtoneInfo(savedRingtoneInfo);
         preferencesInfo_.SetBundleInfo(bundleInfo);
@@ -1551,18 +1548,7 @@ void NotificationPreferences::RemoveRingtoneInfoByBundle(const sptr<Notification
         return;
     }
 
-#ifdef PLAYER_FRAMEWORK_ENABLE
-    if (savedRingtoneInfo->GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL ||
-        savedRingtoneInfo->GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE) {
-        std::shared_ptr<Media::SystemSoundManager> systemSoundManager =
-            Media::SystemSoundManagerFactory::CreateSystemSoundManager();
-        if (systemSoundManager != nullptr) {
-            int32_t result = systemSoundManager->RemoveCustomizedTone(nullptr, savedRingtoneInfo->GetRingtoneUri());
-            ANS_LOGI("Remove Customized tone, uri: %{public}s, result: %{public}d",
-                savedRingtoneInfo->GetRingtoneUri().c_str(), result);
-        }
-    }
-#endif
+    SystemSoundHelper::GetInstance()->RemoveCustomizedTone(savedRingtoneInfo);
     if (preferncesDB_->RemoveRingtoneInfoByBundle(bundleInfo)) {
         bundleInfo.RemoveRingtoneInfo();
         preferencesInfo_.SetBundleInfo(bundleInfo);
@@ -1596,8 +1582,7 @@ void NotificationPreferences::SetCloneTimeStamp(const int32_t& userId, const int
 }
 
 void NotificationPreferences::GetCloneRingtoneInfo(const int32_t& userId,
-    const NotificationCloneBundleInfo& bundleInfo,
-    std::vector<NotificationRingtoneInfo>& cloneRingtoneInfos)
+    const NotificationCloneBundleInfo& bundleInfo, NotificationRingtoneInfo& cloneRingtoneInfos)
 {
     std::string originData;
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -1610,17 +1595,9 @@ void NotificationPreferences::GetCloneRingtoneInfo(const int32_t& userId,
         return;
     }
 
-    nlohmann::json jsonObject = nlohmann::json::parse(originData, nullptr, false);
-    if (jsonObject.is_null() || !jsonObject.is_array()) {
-        ANS_LOGI("ringtone is null or not array.");
-        return;
-    }
-    for (auto &item : jsonObject) {
-        NotificationRingtoneInfo info;
-        info.FromJson(item.get<std::string>());
-        cloneRingtoneInfos.push_back(info);
-    }
-    ANS_LOGI("Get ringtone %{public}zu.", cloneRingtoneInfos.size());
+    cloneRingtoneInfos.FromJson(originData);
+    ANS_LOGI("Get ringtone %{public}d %{public}s.", cloneRingtoneInfos.GetRingtoneType(),
+        cloneRingtoneInfos.GetRingtoneUri().c_str());
 }
 
 void NotificationPreferences::UpdateCloneRingtoneInfo(const int32_t& userId,
@@ -1633,27 +1610,26 @@ void NotificationPreferences::UpdateCloneRingtoneInfo(const int32_t& userId,
         return;
     }
 
+    // clear clone rington info for last not clone information.
     nlohmann::json jsonNewObject = nlohmann::json::array();
-    std::vector<NotificationRingtoneInfo> cloneRingtoneInfos;
+    NotificationRingtoneInfo cloneRingtoneInfos;
     GetCloneRingtoneInfo(userId, bundleInfo, cloneRingtoneInfos);
-    for (auto& item : cloneRingtoneInfos) {
-        if (item.GetRingtoneType() == cloneRingtone->GetRingtoneType() &&
-            item.GetRingtoneTitle() == cloneRingtone->GetRingtoneTitle() &&
-            item.GetRingtoneFileName() == cloneRingtone->GetRingtoneFileName() &&
-            item.GetRingtoneUri() == cloneRingtone->GetRingtoneUri()) {
-            ANS_LOGI("Exist info %{public}s %{public}d", bundleInfo.GetBundleName().c_str(),
-                bundleInfo.GetAppIndex());
-            return;
-        }
-        std::string node = item.ToJson();
-        jsonNewObject.push_back(node);
+    if (cloneRingtoneInfos.GetRingtoneType() == cloneRingtone->GetRingtoneType() &&
+        cloneRingtoneInfos.GetRingtoneTitle() == cloneRingtone->GetRingtoneTitle() &&
+        cloneRingtoneInfos.GetRingtoneFileName() == cloneRingtone->GetRingtoneFileName() &&
+        cloneRingtoneInfos.GetRingtoneUri() == cloneRingtone->GetRingtoneUri()) {
+        return;
+    }
+
+    if (cloneRingtoneInfos.GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL ||
+        cloneRingtoneInfos.GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE) {
+        SystemSoundHelper::GetInstance()->RemoveCustomizedTone(cloneRingtoneInfos.GetRingtoneUri());
     }
 
     std::string ringtoneNode = cloneRingtone->ToJson();
-    jsonNewObject.push_back(ringtoneNode);
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     auto result = preferncesDB_->SetCloneRingtoneInfo(userId, bundleInfo.GetBundleName(),
-        bundleInfo.GetAppIndex(), jsonNewObject.dump());
+        bundleInfo.GetAppIndex(), ringtoneNode);
     ANS_LOGI("Set info %{public}d %{public}d %{public}s %{public}d", userId, result,
         bundleInfo.GetBundleName().c_str(), bundleInfo.GetAppIndex());
 }
@@ -1686,17 +1662,10 @@ void NotificationPreferences::GetAllCloneRingtoneInfo(const int32_t& userId,
         return;
     }
 
-    for (auto& ringtonJson : values) {
-        nlohmann::json jsonObject = nlohmann::json::parse(ringtonJson, nullptr, false);
-        if (jsonObject.is_null() || !jsonObject.is_array()) {
-            ANS_LOGI("ringtone is null or not array.");
-            continue;
-        }
-        for (auto &item : jsonObject) {
-            NotificationRingtoneInfo info;
-            info.FromJson(item.get<std::string>());
-            cloneRingtoneInfos.push_back(info);
-        }
+    for (auto& ringtonData : values) {
+        NotificationRingtoneInfo info;
+        info.FromJson(ringtonData);
+        cloneRingtoneInfos.push_back(info);
     }
     ANS_LOGI("Get all ringtone %{public}zu", cloneRingtoneInfos.size());
 }

@@ -583,7 +583,7 @@ public:
     void GetAllCloneRingtoneInfo(const int32_t& userId, std::vector<NotificationRingtoneInfo>& cloneRingtoneInfos);
     void DeleteCloneRingtoneInfo(const int32_t& userId, const NotificationCloneBundleInfo& bundleInfo);
     void GetCloneRingtoneInfo(const int32_t& userId, const NotificationCloneBundleInfo& bundleInfo,
-        std::vector<NotificationRingtoneInfo>& cloneRingtoneInfos);
+        NotificationRingtoneInfo& cloneRingtoneInfos);
 
     ErrCode GetLiveViewConfigVersion(int32_t &version);
     bool SetLiveViewConfigVersion(const int32_t& version);

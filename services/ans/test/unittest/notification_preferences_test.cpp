@@ -2797,32 +2797,31 @@ HWTEST_F(NotificationPreferencesTest, CloneRingtoneInfo_001, Function | SmallTes
     bundleInfo.AddRingtoneInfo(ringtoneInfo);
     NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, bundleInfo);
 
-    std::vector<NotificationRingtoneInfo> cloneRingtoneInfos;
+    NotificationRingtoneInfo cloneRingtoneInfos;
     NotificationPreferences::GetInstance()->GetCloneRingtoneInfo(100, bundleInfo, cloneRingtoneInfos);
-    ASSERT_EQ(cloneRingtoneInfos.empty(), true);
+    ASSERT_EQ(cloneRingtoneInfos.GetRingtoneType(), NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT);
 
-    cloneRingtoneInfos.clear();
     ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
     bundleInfo.AddRingtoneInfo(ringtoneInfo);
     NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, bundleInfo);
     NotificationPreferences::GetInstance()->GetCloneRingtoneInfo(100, bundleInfo, cloneRingtoneInfos);
-    ASSERT_EQ(cloneRingtoneInfos.size(), 1);
+    ASSERT_EQ(cloneRingtoneInfos.GetRingtoneType(), NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
 
-    cloneRingtoneInfos.clear();
+    cloneRingtoneInfos.ResetRingtone();
     NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, bundleInfo);
     NotificationPreferences::GetInstance()->GetCloneRingtoneInfo(100, bundleInfo, cloneRingtoneInfos);
-    ASSERT_EQ(cloneRingtoneInfos.size(), 1);
+    ASSERT_EQ(cloneRingtoneInfos.GetRingtoneType(), NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
 
-    cloneRingtoneInfos.clear();
+    cloneRingtoneInfos.ResetRingtone();
     NotificationPreferences::GetInstance()->DeleteAllCloneRingtoneInfo(100);
     NotificationPreferences::GetInstance()->GetCloneRingtoneInfo(100, bundleInfo, cloneRingtoneInfos);
-    ASSERT_EQ(cloneRingtoneInfos.size(), 0);
+    ASSERT_EQ(cloneRingtoneInfos.GetRingtoneType(), NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT);
 
-    cloneRingtoneInfos.clear();
+    cloneRingtoneInfos.ResetRingtone();
     NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, bundleInfo);
     NotificationPreferences::GetInstance()->DeleteCloneRingtoneInfo(100, bundleInfo);
     NotificationPreferences::GetInstance()->GetCloneRingtoneInfo(100, bundleInfo, cloneRingtoneInfos);
-    ASSERT_EQ(cloneRingtoneInfos.size(), 0);
+    ASSERT_EQ(cloneRingtoneInfos.GetRingtoneType(), NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT);
 }
 }  // namespace Notification
 }  // namespace OHOS
