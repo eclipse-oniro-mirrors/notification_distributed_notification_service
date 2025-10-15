@@ -895,7 +895,15 @@ ErrCode AdvancedNotificationService::GetDistributedAuthStatus(
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    return NotificationPreferences::GetInstance()->GetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
+    auto result = NotificationPreferences::GetInstance()->GetDistributedAuthStatus(deviceType, deviceId,
+        userId, isAuth);
+    if (result == ERR_OK && isAuth) {
+        int32_t curUserId = DEFAULT_USER_ID;
+        if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(curUserId) == ERR_OK) {
+            UpdateDistributedDeviceList(deviceType, curUserId);
+        }
+    }
+    return result;
 }
 
 void AdvancedNotificationService::UpdateDistributedDeviceList(const std::string &deviceType, int32_t userId)
