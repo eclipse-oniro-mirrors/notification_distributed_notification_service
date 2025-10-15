@@ -225,6 +225,70 @@ ohos_shared_library("notification_subscribe_ani") {
   part_name = "${component_name}"
 }
 
+ohos_shared_library("notificationextensionsubscription_ani") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  include_dirs = [
+    "./include",
+    "./include/extension_subscription",
+    "./include/manager",
+    "${core_path}/common/include",
+    "${inner_api_path}",
+  ]
+
+  configs = []
+
+  sources = [
+    "./src/sts_common.cpp",
+    "./src/sts_notification_manager.cpp",
+    "./src/sts_throw_erro.cpp",
+    "./src/sts_bundle_option.cpp",
+    "./src/extension_subscription/ani_notification_subscriber_extension.cpp",
+    "./src/extension_subscription/ani_extension_subscription.cpp",
+    "./src/extension_subscription/ani_notification_extension_subscription_info.cpp",
+    "./src/extension_subscription/ani_open_subscribe_settings.cpp",
+  ]
+
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:ani_base_context",
+    "ability_runtime:ani_common",
+    "ability_runtime:app_context",
+    "ability_runtime:extensionkit_native",
+    "ability_runtime:napi_common",
+    "ability_runtime:runtime",
+    "ace_engine:ace_uicontent",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "napi:ace_napi",
+    "resource_management:global_resmgr",
+    "runtime_core:ani",
+  ]
+
+  innerapi_tags = [ "platformsdk" ]
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
 ohos_shared_library("notification_subscriber_extension_ani") {
   branch_protector_ret = "pac_ret"
   sanitize = {
