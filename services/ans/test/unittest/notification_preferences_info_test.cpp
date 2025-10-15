@@ -659,6 +659,29 @@ HWTEST_F(NotificationPreferencesInfoTest, GetDisableNotificationInfo_0700, TestS
 }
 
 /**
+ * @tc.name: GetRingtoneInfo_0100
+ * @tc.desc: test GetRingtoneInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetRingtoneInfo_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    sptr<NotificationRingtoneInfo> savedRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
+    std::string fileName = "ringtone.file.name";
+    std::string title = "ringtone.title";
+    std::string uri = "ringtone.uri";
+    savedRingtoneInfo->SetRingtoneFileName(fileName);
+    savedRingtoneInfo->SetRingtoneTitle(title);
+    savedRingtoneInfo->SetRingtoneUri(uri);
+    bundleInfo.SetRingtoneInfo(savedRingtoneInfo);
+    sptr<NotificationRingtoneInfo> ringtoneInfo = bundleInfo.GetRingtoneInfo();
+    ASSERT_NE(ringtoneInfo, nullptr);
+    EXPECT_EQ(ringtoneInfo->GetRingtoneFileName(), fileName);
+    EXPECT_EQ(ringtoneInfo->GetRingtoneTitle(), title);
+    EXPECT_EQ(ringtoneInfo->GetRingtoneUri(), uri);
+}
+
+/**
  * @tc.name: SetExtensionSubscriptionInfos_0100
  * @tc.desc: test SetExtensionSubscriptionInfos.
  * @tc.type: FUNC
