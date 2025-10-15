@@ -23,13 +23,15 @@
 #include "errors.h"
 #include "notification_config_parse.h"
 #include "notification_preferences.h"
+#include "notification_timer_info.h"
 #include "os_account_manager_helper.h"
 #include "parameters.h"
+#include "time_service_client.h"
 
 namespace OHOS {
 namespace Notification {
 
-using STARTUP = int32_t (*)();
+using STARTUP = int32_t (*)(std::function<void()>);
 using SHUTDOWN = void (*)();
 using SUBSCRIBE = void (*)(const sptr<NotificationBundleOption>,
     const std::vector<sptr<NotificationBundleOption>> &);
@@ -37,6 +39,7 @@ using UNSUBSCRIBE = void (*)(const sptr<NotificationBundleOption>);
 using GETSUBSCRIBECOUNT = size_t (*)();
 namespace {
 constexpr const char* ANS_EXTENSION_SERVICE_MODULE_NAME = "libans_extension_service.z.so";
+constexpr const int64_t SHUTDOWN_DELAY_TIME = 1;    // 1s
 }
 
 bool AdvancedNotificationService::isExtensionServiceExist()
@@ -62,10 +65,12 @@ int32_t AdvancedNotificationService::LoadExtensionService()
         ANS_LOGW("GetProxyFunc Startup init failed.");
         return -1;
     }
-    if (startup() != 0) {
-        notificationExtensionLoaded_.store(false);
-        return -1;
-    }
+    startup([this]() {
+        ANS_LOGD("ANS submit destroy service.");
+        notificationSvrQueue_->submit([&]() {
+            PrepareShutdownExtensionService();
+        });
+    });
     notificationExtensionLoaded_.store(true);
     return 0;
 #else
@@ -132,6 +137,39 @@ int32_t AdvancedNotificationService::ShutdownExtensionService()
 #endif
 }
 
+void AdvancedNotificationService::PrepareShutdownExtensionService()
+{
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+    ANS_LOGD("PrepareShutdownExtensionService");
+
+    auto timerClient = MiscServices::TimeServiceClient::GetInstance();
+    if (timerClient == nullptr) {
+        ANS_LOGE("null TimeServiceClient");
+        return;
+    }
+
+    auto timerInfoShutdownExtensionService = std::make_shared<NotificationTimerInfo>();
+    timerInfoShutdownExtensionService->SetCallbackInfo([this] {
+        notificationSvrQueue_->submit([this]() {
+            auto client = MiscServices::TimeServiceClient::GetInstance();
+            client->DestroyTimer(timerIdShutdownExtensionService_);
+            timerIdShutdownExtensionService_ = 0L;
+            ANS_LOGD("ANS Start destroy service.");
+            if (ShutdownExtensionService() != 0) {
+                return;
+            }
+            notificationExtensionHandler_.reset();
+            notificationExtensionLoaded_.store(false);
+        });
+    });
+    timerIdShutdownExtensionService_ = timerClient->CreateTimer(timerInfoShutdownExtensionService);
+    auto now = std::chrono::system_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    timerClient->StartTimer(
+        timerIdShutdownExtensionService_, duration.count() + SHUTDOWN_DELAY_TIME * NotificationConstant::SECOND_TO_MS);
+#endif
+}
+
 size_t AdvancedNotificationService::GetSubscriberCount()
 {
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
@@ -164,24 +202,8 @@ void AdvancedNotificationService::CheckExtensionServiceCondition(
         return;
     }
 
-    bool hasPermission = false;
-    for (const auto &bundle : bundles) {
-        AppExecFwk::BundleInfo bundleInfo;
-        int32_t userId = -1;
-        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundle->GetUid(), userId);
-        int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
-        if (!BundleManagerHelper::GetInstance()->GetBundleInfoV9(bundle->GetBundleName(), flags, bundleInfo, userId)) {
-            ANS_LOGW("CheckExtensionServiceCondition GetBundleInfoV9 faild");
-            continue;
-        }
-        if (AccessTokenHelper::VerifyCallerPermission(
-            bundleInfo.applicationInfo.accessTokenId, OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
-            hasPermission = true;
-            break;
-        }
-    }
-
-    if (!hasPermission) {
+    FilterPermissionBundles(bundles);
+    if (bundles.empty()) {
         ANS_LOGW("User has no permission, skip loading ExtensionService");
         return;
     }
@@ -202,6 +224,24 @@ void AdvancedNotificationService::CheckExtensionServiceCondition(
         if (NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(*it, enableBundles) == ERR_OK &&
             !enableBundles.empty()) {
             extensionBundleInfos.emplace_back(*it, enableBundles);
+        }
+    }
+}
+
+void AdvancedNotificationService::FilterPermissionBundles(std::vector<sptr<NotificationBundleOption>> &bundles)
+{
+    for (auto it = bundles.begin(); it != bundles.end();) {
+        AppExecFwk::BundleInfo bundleInfo;
+        int32_t userId = -1;
+        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid((*it)->GetUid(), userId);
+        int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+        auto result = BundleManagerHelper::GetInstance()->GetBundleInfoV9(
+            (*it)->GetBundleName(), flags, bundleInfo, userId);
+        if (result && AccessTokenHelper::VerifyCallerPermission(
+            bundleInfo.applicationInfo.accessTokenId, OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
+            ++it;
+        } else {
+            it = bundles.erase(it);
         }
     }
 }
@@ -304,10 +344,22 @@ bool AdvancedNotificationService::CheckBluetoothConditions(const std::string& ad
 
 bool AdvancedNotificationService::HasGrantedBundleStateChanged(
     const sptr<NotificationBundleOption>& bundle,
-    const std::vector<sptr<NotificationBundleOption>>& enabledBundles)
+    const std::vector<sptr<NotificationBundleOption>>& enabledBundles,
+    bool enabled)
 {
+    NotificationConstant::SWITCH_STATE state;
+    ErrCode result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionEnabled(bundle, state);
+    if (result != ERR_OK) {
+        return true;
+    }
+    
+    bool oldEnabled = (state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    if (oldEnabled != enabled) {
+        return true;
+    }
+    
     std::vector<sptr<NotificationBundleOption>> bundles;
-    ErrCode result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundle, bundles);
+    result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundle, bundles);
     if (result != ERR_OK) {
         return true;
     }
@@ -410,7 +462,17 @@ bool AdvancedNotificationService::EnsureExtensionServiceLoadedAndSubscribed(
     std::vector<std::pair<sptr<NotificationBundleOption>,
         std::vector<sptr<NotificationBundleOption>>>> extensionBundleInfos;
     std::vector<sptr<NotificationBundleOption>> bundles{bundle};
-    
+
+    if (timerIdShutdownExtensionService_ != 0L) {
+        auto timerClient = MiscServices::TimeServiceClient::GetInstance();
+        if (timerClient == nullptr) {
+            ANS_LOGE("null TimeServiceClient");
+            return false;
+        }
+        ANS_LOGD("cancel shutdown timer");
+        timerClient->StopTimer(timerIdShutdownExtensionService_);
+    }
+
     if (!isExtensionServiceExist()) {
         CheckExtensionServiceCondition(extensionBundleInfos, bundles);
         if (extensionBundleInfos.size() == 0) {
@@ -440,13 +502,7 @@ bool AdvancedNotificationService::ShutdownExtensionServiceAndUnSubscribed(const 
     if (UnSubscribeExtensionService(bundle) != 0) {
         return false;
     }
-    if (GetSubscriberCount() <= 0) {
-        if (ShutdownExtensionService() != 0) {
-            return false;
-        }
-        notificationExtensionHandler_.reset();
-        notificationExtensionLoaded_.store(false);
-    }
+
     return true;
 #else
     return true;
@@ -578,7 +634,7 @@ void AdvancedNotificationService::HandleBundleUninstall(const sptr<NotificationB
         ANS_LOGE("HandleBundleUninstall bundleOption is nullptr");
         return;
     }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ShutdownExtensionServiceAndUnSubscribed(bundleOption);
         std::vector<sptr<NotificationBundleOption>> bundles;
         GetNotificationExtensionEnabledBundles(bundles);
@@ -588,7 +644,6 @@ void AdvancedNotificationService::HandleBundleUninstall(const sptr<NotificationB
         }
         cacheNotificationExtensionBundles_ = bundles;
     }));
-    notificationSvrQueue_->wait(handler);
 }
 
 void AdvancedNotificationService::RegisterHfpObserver()
@@ -642,15 +697,15 @@ bool AdvancedNotificationService::TryStartExtensionSubscribeService()
 {
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     NotificationConfigParse::GetInstance()->IsNotificationExtensionSubscribeSupportHfp(supportHfp_);
-    std::vector<std::pair<sptr<NotificationBundleOption>,
-        std::vector<sptr<NotificationBundleOption>>>> extensionBundleInfos;
-    std::vector<sptr<NotificationBundleOption>> bundles;
-    if (GetNotificationExtensionEnabledBundles(bundles) != ERR_OK || bundles.empty()) {
-        ANS_LOGI("No bundle has extensionAbility, skip loading ExtensionService");
-        return false;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
+        std::vector<std::pair<sptr<NotificationBundleOption>,
+            std::vector<sptr<NotificationBundleOption>>>> extensionBundleInfos;
+        std::vector<sptr<NotificationBundleOption>> bundles;
+        if (GetNotificationExtensionEnabledBundles(bundles) != ERR_OK || bundles.empty()) {
+            ANS_LOGI("No bundle has extensionAbility, skip loading ExtensionService");
+            return;
+        }
         CheckExtensionServiceCondition(extensionBundleInfos, bundles);
         if (extensionBundleInfos.size() > 0) {
             LoadExtensionService();
@@ -660,7 +715,6 @@ bool AdvancedNotificationService::TryStartExtensionSubscribeService()
             }
         }
     }));
-    notificationSvrQueue_->wait(handler);
     return true;
 #else
     return true;
@@ -1065,7 +1119,7 @@ ErrCode AdvancedNotificationService::SetUserGrantedBundleState(
 
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        if (!HasGrantedBundleStateChanged(bundle, enabledBundles)) {
+        if (!HasGrantedBundleStateChanged(bundle, enabledBundles, enabled)) {
             ANS_LOGW("User granted bundle state has no change");
             return;
         }

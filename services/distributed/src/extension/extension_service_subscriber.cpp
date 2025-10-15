@@ -72,7 +72,7 @@ ExtensionServiceSubscriber::~ExtensionServiceSubscriber()
 {
     ffrt::task_handle handler = messageQueue_->submit_h([this]() {
         for (const auto& extensionSubscriberInfo : extensionSubscriberInfos_) {
-            ExtensionServiceConnectionService::GetInstance().RemoveConnection(*extensionSubscriberInfo);
+            ExtensionServiceConnectionService::GetInstance().CloseConnection(*extensionSubscriberInfo);
         }
     });
     messageQueue_->wait(handler);

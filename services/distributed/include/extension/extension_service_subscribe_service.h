@@ -31,7 +31,6 @@ public:
         const std::vector<sptr<NotificationBundleOption>>& subscribeBundles);
     void UnsubscribeNotification(const sptr<NotificationBundleOption> bundle);
     void UnsubscribeAllNotification();
-    size_t GetSubscriberCount();
 private:
     std::string MakeBundleKey(const NotificationBundleOption& bundle);
 private:

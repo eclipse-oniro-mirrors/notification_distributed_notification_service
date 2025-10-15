@@ -30,15 +30,22 @@ public:
         const sptr<NotificationRequest> notificationRequest);
     void NotifyOnCancelMessages(const std::shared_ptr<ExtensionSubscriberInfo> subscriberInfo,
         const std::shared_ptr<std::vector<std::string>> hashCodes);
-    void RemoveConnection(const ExtensionSubscriberInfo& subscriberInfo);
+    void CloseConnection(const ExtensionSubscriberInfo& subscriberInfo);
+    void inline SetOnAllConnectionsClosed(std::function<void()> onAllConnectionsClosed)
+    {
+        onAllConnectionsClosed_ = onAllConnectionsClosed;
+    }
 
 private:
+    std::string GetConnectionKey(const ExtensionSubscriberInfo& subscriberInfo);
+    void RemoveConnection(const ExtensionSubscriberInfo& subscriberInfo);
     std::shared_ptr<ExtensionServiceConnection> GetConnection(
         const std::shared_ptr<ExtensionSubscriberInfo> subscriberInfo);
 
 private:
     ffrt::mutex mapLock_;
     std::map<std::string, std::shared_ptr<ExtensionServiceConnection>> connectionMap_;
+    std::function<void()> onAllConnectionsClosed_;
 };
 }
 }

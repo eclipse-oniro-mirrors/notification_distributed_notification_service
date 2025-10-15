@@ -24,9 +24,9 @@ namespace Notification {
 extern "C" {
 #endif
 
-SYMBOL_EXPORT int32_t Startup()
+SYMBOL_EXPORT int32_t Startup(std::function<void()> shutdownCallback)
 {
-    return NotificationExtensionService::GetInstance().InitService();
+    return NotificationExtensionService::GetInstance().InitService(shutdownCallback);
 }
 
 SYMBOL_EXPORT void Shutdown()
@@ -43,11 +43,6 @@ SYMBOL_EXPORT void Subscribe(
 SYMBOL_EXPORT void Unsubscribe(const sptr<NotificationBundleOption> bundle)
 {
     NotificationExtensionService::GetInstance().UnsubscribeNotification(bundle);
-}
-
-SYMBOL_EXPORT size_t GetSubscriberCount()
-{
-    return NotificationExtensionService::GetInstance().GetSubscriberCount();
 }
 
 #ifdef __cplusplus

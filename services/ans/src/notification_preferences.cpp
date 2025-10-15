@@ -21,6 +21,7 @@
 
 #include "ability_manager_client.h"
 #include "access_token_helper.h"
+#include "aes_gcm_helper.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
@@ -1996,6 +1997,15 @@ ErrCode NotificationPreferences::GetExtensionSubscriptionInfos(const sptr<Notifi
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         infos = bundleInfo.GetExtensionSubscriptionInfos();
+        for (auto& info : infos) {
+            if (info == nullptr) {
+                continue;
+            }
+            std::string decryptedAddr;
+            if (AesGcmHelper::Decrypt(decryptedAddr, info->GetAddr()) == ERR_OK) {
+                info->SetAddr(decryptedAddr);
+            }
+        }
     } else {
         ANS_LOGW("Notification bundle does not exsit.");
         infos.clear();
@@ -2022,7 +2032,17 @@ ErrCode NotificationPreferences::SetExtensionSubscriptionInfos(const sptr<Notifi
             NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
         bundleInfo.SetEnableNotification(defaultState);
     }
-    bundleInfo.SetExtensionSubscriptionInfos(infos);
+
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> encryptedInfos = infos;
+    for (auto& info : encryptedInfos) {
+        if (info != nullptr) {
+            std::string encryptedAddr;
+            if (AesGcmHelper::Encrypt(info->GetAddr(), encryptedAddr) == ERR_OK) {
+                info->SetAddr(encryptedAddr);
+            }
+        }
+    }
+    bundleInfo.SetExtensionSubscriptionInfos(encryptedInfos);
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("the prefernces db is nullptr");
         return ERR_ANS_SERVICE_NOT_READY;

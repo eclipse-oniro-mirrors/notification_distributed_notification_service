@@ -48,17 +48,58 @@ void ExtensionServiceConnectionService::NotifyOnCancelMessages(
     connection->NotifyOnCancelMessages(hashCodes);
 }
 
-void ExtensionServiceConnectionService::RemoveConnection(const ExtensionSubscriberInfo& subscriberInfo)
+void ExtensionServiceConnectionService::CloseConnection(const ExtensionSubscriberInfo& subscriberInfo)
 {
-    std::lock_guard<ffrt::mutex> lock(mapLock_);
+    std::string connectionKey = GetConnectionKey(subscriberInfo);
+    ANS_LOGD("close connection: %{public}s", connectionKey.c_str());
+    bool needNotify = false;
+    do {
+        std::lock_guard<ffrt::mutex> lock(mapLock_);
+        auto iter = connectionMap_.find(connectionKey);
+        if (iter == connectionMap_.end()) {
+            ANS_LOGE("connection not found");
+            needNotify = connectionMap_.empty();
+            break;
+        }
+        if (iter->second == nullptr) {
+            ANS_LOGE("null connection");
+            connectionMap_.erase(iter);
+            needNotify = connectionMap_.empty();
+            break;
+        }
+        iter->second->Close();
+    } while (false);
+
+    if (needNotify && onAllConnectionsClosed_) {
+        onAllConnectionsClosed_();
+    }
+}
+
+std::string ExtensionServiceConnectionService::GetConnectionKey(const ExtensionSubscriberInfo& subscriberInfo)
+{
     std::string connectionKey(subscriberInfo.bundleName);
     connectionKey.append("_")
         .append(subscriberInfo.extensionName)
         .append("_")
         .append(std::to_string(subscriberInfo.userId));
-    auto iter = connectionMap_.find(connectionKey);
-    if (iter != connectionMap_.end()) {
-        connectionMap_.erase(iter);
+    return connectionKey;
+}
+
+void ExtensionServiceConnectionService::RemoveConnection(const ExtensionSubscriberInfo& subscriberInfo)
+{
+    std::string connectionKey = GetConnectionKey(subscriberInfo);
+    ANS_LOGD("remove connection: %{public}s", connectionKey.c_str());
+    bool needNotify = false;
+    {
+        std::lock_guard<ffrt::mutex> lock(mapLock_);
+        auto iter = connectionMap_.find(connectionKey);
+        if (iter != connectionMap_.end()) {
+            connectionMap_.erase(iter);
+        }
+        needNotify = connectionMap_.empty();
+    }
+    if (needNotify && onAllConnectionsClosed_) {
+        onAllConnectionsClosed_();
     }
 }
 
@@ -70,17 +111,16 @@ std::shared_ptr<ExtensionServiceConnection> ExtensionServiceConnectionService::G
         return nullptr;
     }
     std::lock_guard<ffrt::mutex> lock(mapLock_);
-    std::string connectionKey(subscriberInfo->bundleName);
-    connectionKey.append("_")
-        .append(subscriberInfo->extensionName)
-        .append("_")
-        .append(std::to_string(subscriberInfo->userId));
+    std::string connectionKey = GetConnectionKey(*subscriberInfo);
     std::shared_ptr<ExtensionServiceConnection> connection = nullptr;
     auto iter = connectionMap_.find(connectionKey);
     if (iter == connectionMap_.end()) {
-        connection = std::make_shared<ExtensionServiceConnection>(*subscriberInfo);
+        ANS_LOGD("create connection: %{public}s", connectionKey.c_str());
+        connection = std::make_shared<ExtensionServiceConnection>(*subscriberInfo,
+            [this](const ExtensionSubscriberInfo& info) { RemoveConnection(info); });
         connectionMap_[connectionKey] = connection;
     } else {
+        ANS_LOGD("found connection: %{public}s", connectionKey.c_str());
         connection = iter->second;
     }
 

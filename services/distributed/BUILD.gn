@@ -264,6 +264,11 @@ ohos_shared_library("libans_extension_service") {
     "zlib:libz",
   ]
 
+  if (ans_config_policy_enable) {
+    external_deps += [ "config_policy:configpolicy_util" ]
+    defines += [ "CONFIG_POLICY_ENABLE" ]
+  }
+
   if (defined(global_parts_info) &&
       defined(global_parts_info.resourceschedule_resource_schedule_service)) {
     defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]

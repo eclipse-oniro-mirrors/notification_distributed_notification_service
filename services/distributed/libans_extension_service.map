@@ -17,7 +17,6 @@
     Shutdown;
     Subscribe;
     Unsubscribe;
-    GetSubscriberCount;
   local:
     *;
 };
