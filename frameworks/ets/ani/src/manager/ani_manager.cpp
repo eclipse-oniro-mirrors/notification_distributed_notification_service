@@ -98,6 +98,10 @@ static std::array kitManagerFunctions = {
         "Lapplication/UIAbilityContext/UIAbilityContext;:Lstd/core/Promise;",
         reinterpret_cast<void *>(AniRequestEnableNotification)},
     ani_native_function {"nativeGetNotificationSetting", nullptr, reinterpret_cast<void *>(AniGetNotificationSetting)},
+    ani_native_function {"nativeSetRingtoneInfoByBundle", nullptr,
+        reinterpret_cast<void *>(AniSetRingtoneInfoByBundle)},
+    ani_native_function {"nativeGetRingtoneInfoByBundle", nullptr,
+        reinterpret_cast<void *>(AniGetRingtoneInfoByBundle)},
 #ifdef ANS_FEATURE_BADGE_MANAGER
     ani_native_function {"nativeDisplayBadge", nullptr, reinterpret_cast<void *>(AniDisplayBadge)},
     ani_native_function {"nativeIsBadgeDisplayed", nullptr, reinterpret_cast<void *>(AniIsBadgeDisplayed)},
@@ -127,10 +131,6 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeGetDeviceRemindType", nullptr, reinterpret_cast<void *>(AniGetDeviceRemindType)},
     ani_native_function {"nativeSetSyncNotificationEnabledWithoutApp", nullptr,
         reinterpret_cast<void *>(AniSetSyncNotificationEnabledWithoutApp)},
-    ani_native_function {"nativeSetRingtoneInfoByBundle", nullptr,
-        reinterpret_cast<void *>(AniSetRingtoneInfoByBundle)},
-    ani_native_function {"nativeGetRingtoneInfoByBundle", nullptr,
-        reinterpret_cast<void *>(AniGetRingtoneInfoByBundle)},
 #else
     ani_native_function {"nativeIsDistributedEnabled", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
     ani_native_function {"nativeIsDistributedEnabledByBundle", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},

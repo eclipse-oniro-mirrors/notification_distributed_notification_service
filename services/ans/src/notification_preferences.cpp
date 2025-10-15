@@ -1496,7 +1496,7 @@ ErrCode NotificationPreferences::GetRingtoneInfoByBundle(const sptr<Notification
     if (!GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         ANS_LOGW("Get info failed %{public}s %{public}d", bundleOption->GetBundleName().c_str(),
             bundleOption->GetUid());
-        return ERR_ANS_SPECIFIED_BUNDLE_INVALID;
+        return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
     sptr<NotificationRingtoneInfo> savedRingtoneInfo = bundleInfo.GetRingtoneInfo();

@@ -24,8 +24,8 @@ namespace NotificationSts {
 namespace {
 bool UnwrapRingtoneStringInfo(ani_env *env, ani_object obj, NotificationRingtoneInfo &ringtoneInfo)
 {
-    ani_boolean isUndefined = ANI_TRUE;
     // ringtoneTitle?: string
+    ani_boolean isUndefined = ANI_TRUE;
     std::string ringtoneTitle;
     if (ANI_OK == GetPropertyString(env, obj, "ringtoneTitle", isUndefined, ringtoneTitle)) {
         ringtoneInfo.SetRingtoneTitle(GetResizeStr(ringtoneTitle, STR_MAX_SIZE));
@@ -34,16 +34,18 @@ bool UnwrapRingtoneStringInfo(ani_env *env, ani_object obj, NotificationRingtone
     }
 
     // ringtoneFileName?: string
+    isUndefined = ANI_TRUE;
     std::string ringtoneFileName;
-    if (ANI_OK != GetPropertyString(env, obj, "ringtoneFileName", isUndefined, ringtoneFileName)) {
+    if (ANI_OK == GetPropertyString(env, obj, "ringtoneFileName", isUndefined, ringtoneFileName)) {
         ringtoneInfo.SetRingtoneFileName(GetResizeStr(ringtoneFileName, STR_MAX_SIZE));
     } else {
         ANS_LOGD("UnwrapRingtoneInfo get ringtoneFileName failed.");
     }
 
     // ringtoneUri?: string
+    isUndefined = ANI_TRUE;
     std::string ringtoneUri;
-    if (ANI_OK != GetPropertyString(env, obj, "ringtoneUri", isUndefined, ringtoneUri)) {
+    if (ANI_OK == GetPropertyString(env, obj, "ringtoneUri", isUndefined, ringtoneUri)) {
         ringtoneInfo.SetRingtoneUri(GetResizeStr(ringtoneUri, STR_MAX_SIZE));
     } else {
         ANS_LOGD("UnwrapRingtoneInfo get ringtoneUri failed.");
@@ -78,12 +80,12 @@ bool WrapRingtoneStringInfo(ani_env *env, ani_class &ringtoneInfoClass,
 
     status = ANI_ERROR;
     stringValue = nullptr;
-    if (ANI_OK != (status = GetAniStringByString(env, ringtoneInfo.GetRingtoneFileName(), stringValue))) {
+    if (ANI_OK != (status = GetAniStringByString(env, ringtoneInfo.GetRingtoneUri(), stringValue))) {
         ANS_LOGE("GetAniStringByString failed. status %{public}d", status);
         return false;
     }
-    if (!CallSetter(env, ringtoneInfoClass, ringtoneInfoObject, "ringtoneFileName", stringValue)) {
-        ANS_LOGE("set ringtoneFileName failed");
+    if (!CallSetter(env, ringtoneInfoClass, ringtoneInfoObject, "ringtoneUri", stringValue)) {
+        ANS_LOGE("set ringtoneUri failed");
         return false;
     }
     return true;

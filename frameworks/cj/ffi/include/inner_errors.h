@@ -139,9 +139,6 @@ const int32_t ERROR_SETTING_WINDOW_EXIST         = 1600018;    // The notificati
 const int32_t ERROR_NO_PROFILE_TEMPLATE          = 1600019;    // The do-not-disturb profile does not exist.
 const int32_t ERROR_REJECTED_WITH_DISABLE_NOTIFICATION =
     1600020; // The application is not allowed to send notifications due to permission settings.
-const int32_t ERROR_SPECIFIED_BUNDLE_INVALID     = 1600022;    // The specified bundle is invalid.
-const int32_t ERROR_NO_CUSTOM_RINGTONE_INFO      =
-    1600023;    // The specified bundle has no custom ringtone information.
 const int32_t ERROR_NETWORK_UNREACHABLE          = 2300007;    // Network unreachable.
 const int32_t ERROR_BUNDLE_NOT_FOUND             = 17700001;   // The specified bundle name was not found.
 

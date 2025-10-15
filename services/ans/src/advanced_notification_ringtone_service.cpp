@@ -60,7 +60,7 @@ ErrCode AdvancedNotificationService::SetRingtoneInfoByBundle(const sptr<Notifica
     sptr<NotificationBundleOption> bundleOption = GenerateValidBundleOption(bundle);
     if (bundleOption == nullptr) {
         ANS_LOGE("Bundle is null.");
-        return ERR_ANS_SPECIFIED_BUNDLE_INVALID;
+        return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
     NotificationPreferences::GetInstance()->RemoveRingtoneInfoByBundle(bundleOption);
@@ -90,7 +90,7 @@ ErrCode AdvancedNotificationService::GetRingtoneInfoByBundle(const sptr<Notifica
     sptr<NotificationBundleOption> bundleOption = GenerateValidBundleOption(bundle);
     if (bundleOption == nullptr) {
         ANS_LOGE("Bundle is null.");
-        return ERR_ANS_SPECIFIED_BUNDLE_INVALID;
+        return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
     ClearOverTimeRingToneInfo();
