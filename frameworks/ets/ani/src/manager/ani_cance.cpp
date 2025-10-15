@@ -76,7 +76,7 @@ void AniCancelWithBundle(ani_env* env, ani_object bundleObj, ani_int id)
     
     ANS_LOGD("Cancel by bundle:%{public}s id:%{public}d",
         option.GetBundleName().c_str(), id);
-    int returncode = Notification::NotificationHelper::CancelAsBundle(option, static_cast<int32_t>(id));
+    int returncode = Notification::NotificationHelper::CancelAsBundleWithAgent(option, static_cast<int32_t>(id));
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
