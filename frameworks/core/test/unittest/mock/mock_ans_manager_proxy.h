@@ -165,6 +165,7 @@ public:
     MOCK_METHOD1(GetDistributedAbility, ErrCode(int32_t&));
     MOCK_METHOD4(GetDistributedAuthStatus, ErrCode(const std::string&, const std::string&, int32_t, bool&));
     MOCK_METHOD4(SetDistributedAuthStatus, ErrCode(const std::string&, const std::string&, int32_t, bool));
+    MOCK_METHOD1(UpdateDistributedDeviceList, ErrCode(const std::string&));
     MOCK_METHOD2(IsSmartReminderEnabled, ErrCode(const std::string&, bool&));
     MOCK_METHOD2(SetSmartReminderEnabled, ErrCode(const std::string&, bool));
     MOCK_METHOD3(IsDistributedEnabledByBundle,

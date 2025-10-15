@@ -748,6 +748,19 @@ HWTEST_F(NotificationHelperTest, IsDistributedEnabled_00001, Function | SmallTes
 }
 
 /**
+ * @tc.name: IsDistributedEnabled_00001
+ * @tc.desc: Test IsDistributedEnabled parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationHelperTest, UpdateDistributedDeviceList_00001, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.UpdateDistributedDeviceList(NotificationConstant::PAD_DEVICE_TYPE);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
  * @tc.name: EnableDistributedByBundle_00001
  * @tc.desc: Test EnableDistributedByBundle parameters.
  * @tc.type: FUNC

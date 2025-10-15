@@ -95,6 +95,8 @@ private:
         set<string> &syncDevices, set<string> &smartDevices,
         map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
         const sptr<NotificationRequest> &request) const;
+    bool IsSmartRemindBySwitch(
+        const string &deviceType, const DeviceStatus &deviceStatus, const sptr<NotificationRequest> &request) const;
 #endif
     void FillRequestExtendInfo(const string &deviceType, DeviceStatus &deviceStatus,
         const sptr<NotificationRequest> &request,

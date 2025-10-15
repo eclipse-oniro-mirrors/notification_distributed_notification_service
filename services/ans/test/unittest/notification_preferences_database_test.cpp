@@ -1733,14 +1733,13 @@ HWTEST_F(NotificationPreferencesDatabaseTest, SetDistributedEnabledBySlot_0100, 
 {
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
     std::string deviceType = "test1";
-    
-    auto res = preferncesDB_->SetDistributedEnabledBySlot(slotType, deviceType, true);
+    NotificationConstant::SWITCH_STATE enabled = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    auto res = preferncesDB_->SetDistributedEnabledBySlot(slotType, deviceType, enabled);
     ASSERT_EQ(res, true);
 
-    bool enabled = false;
     res = preferncesDB_->IsDistributedEnabledBySlot(slotType, deviceType, enabled);
     ASSERT_EQ(res, true);
-    ASSERT_EQ(enabled, true);
+    ASSERT_EQ(enabled, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
 }
 
 /**
@@ -1753,10 +1752,10 @@ HWTEST_F(NotificationPreferencesDatabaseTest, SetDistributedEnabledBySlot_0200, 
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
     std::string deviceType = "test2";
     
-    bool enabled = false;
+    NotificationConstant::SWITCH_STATE enabled = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     auto res = preferncesDB_->IsDistributedEnabledBySlot(slotType, deviceType, enabled);
     ASSERT_EQ(res, true);
-    ASSERT_EQ(enabled, true);
+    ASSERT_EQ(enabled, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
 }
 
 /**

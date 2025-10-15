@@ -336,14 +336,16 @@ void SmartReminderCenter::InitValidDevices(
         request->AdddeviceStatu(deviceType, status.bitset<DistributedDeviceStatus::STATUS_SIZE>::to_string());
 
         if (NotificationConstant::SlotType::LIVE_VIEW == request->GetSlotType()) {
-            bool isEnable = false;
+            NotificationConstant::SWITCH_STATE liveViewEnableStatus =
+                NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
             std::string queryDeviceType = deviceType;
             if (deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) == 0) {
                 queryDeviceType = NotificationConstant::LITEWEARABLE_DEVICE_TYPE;
             }
             NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(
-                request->GetSlotType(), queryDeviceType, isEnable);
-            if (!isEnable) {
+                request->GetSlotType(), queryDeviceType, liveViewEnableStatus);
+            if (liveViewEnableStatus != NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON &&
+                liveViewEnableStatus != NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
                 ANS_LOGI("liveView smart switch is closed, deviceType = %{public}s", deviceType.c_str());
                 continue;
             }
@@ -440,20 +442,10 @@ void SmartReminderCenter::InitPcPadDevices(const string &deviceType,
         ANS_LOGI("PC/PAD init, not get any used device, type = %{public}s", deviceType.c_str());
         return;
     }
-    // switch
-    string deviceId = deviceStatus.deviceId;
-    if (NotificationConstant::SlotType::LIVE_VIEW == request->GetSlotType()) {
-        if (!DistributedDeviceDataService::GetInstance().GetDeviceLiveViewEnable(deviceType, deviceId)) {
-            ANS_LOGI("PC/PAD init, liveView switch is closed , type = %{public}s", deviceType.c_str());
-            return;
-        }
-    } else {
-        if (!DistributedDeviceDataService::GetInstance().GetDeviceNotificationEnable(deviceType, deviceId)) {
-            ANS_LOGI("PC/PAD init, notification switch is closed , type = %{public}s", deviceType.c_str());
-            return;
-        }
+    if (!IsSmartRemindBySwitch(deviceType, deviceStatus, request)) {
+        return;
     }
-
+    string deviceId = deviceStatus.deviceId;
     std::string bundleName = request->GetOwnerBundleName();
     int32_t userId = request->GetOwnerUserId();
     if (userId == SUBSCRIBE_USER_INIT) {
@@ -499,6 +491,43 @@ void SmartReminderCenter::InitPcPadDevices(const string &deviceType,
     syncDevices.insert(deviceType);
     smartDevices.insert(deviceType);
     return;
+}
+
+bool SmartReminderCenter::IsSmartRemindBySwitch(
+    const string &deviceType, const DeviceStatus &deviceStatus, const sptr<NotificationRequest> &request) const
+{
+    string deviceId = deviceStatus.deviceId;
+    if (NotificationConstant::SlotType::LIVE_VIEW == request->GetSlotType()) {
+        if (!DistributedDeviceDataService::GetInstance().GetDeviceLiveViewEnable(deviceType, deviceId)) {
+            ANS_LOGI("PC/PAD init, liveView switch is closed , type = %{public}s", deviceType.c_str());
+            return false;
+        }
+        NotificationConstant::SWITCH_STATE liveViewEnableStatus =
+                NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+        // master use current to be switch key for expand later
+        ErrCode result = NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(
+            request->GetSlotType(), NotificationConstant::CURRENT_DEVICE_TYPE, liveViewEnableStatus);
+        if ((liveViewEnableStatus != NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON &&
+            liveViewEnableStatus != NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) || result != ERR_OK) {
+            ANS_LOGI("PC/PAD init, current liveView switch is closed");
+            return false;
+        }
+    } else {
+        if (!DistributedDeviceDataService::GetInstance().GetDeviceNotificationEnable(deviceType, deviceId)) {
+            ANS_LOGI("PC/PAD init, notification switch is closed , type = %{public}s", deviceType.c_str());
+            return false;
+        }
+        NotificationConstant::SWITCH_STATE enableStatus;
+        // master use current to be switch key for expand later
+        ErrCode result = NotificationPreferences::GetInstance()->IsDistributedEnabled(
+            NotificationConstant::CURRENT_DEVICE_TYPE, enableStatus);
+        if ((enableStatus != NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON &&
+            enableStatus != NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) || result != ERR_OK) {
+            ANS_LOGI("PC/PAD init, current distributed switch is closed");
+            return false;
+        }
+    }
+    return true;
 }
 #endif
 

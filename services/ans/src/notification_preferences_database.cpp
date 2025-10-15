@@ -2725,11 +2725,9 @@ bool NotificationPreferencesDatabase::PutExtensionSubscriptionBundles(
     return (result == NativeRdb::E_OK);
 }
 
-bool NotificationPreferencesDatabase::SetDistributedEnabledBySlot(
-    const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled)
+bool NotificationPreferencesDatabase::SetDistributedEnabledBySlot(const NotificationConstant::SlotType &slotType,
+    const std::string &deviceType, const NotificationConstant::SWITCH_STATE &enabled)
 {
-    ANS_LOGD("%{public}s, %{public}d,deviceType:%{public}s,enabled[%{public}d]",
-        __FUNCTION__, slotType, deviceType.c_str(), enabled);
     int32_t userId = SUBSCRIBE_USER_INIT;
     OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
     if (userId == SUBSCRIBE_USER_INIT) {
@@ -2737,14 +2735,15 @@ bool NotificationPreferencesDatabase::SetDistributedEnabledBySlot(
         return false;
     }
 
+    ANS_LOGI("%{public}s, %{public}d, deviceType:%{public}s, enabled[%{public}d]",
+        __FUNCTION__, slotType, deviceType.c_str(), static_cast<int32_t>(enabled));
     std::string key = GenerateBundleLablel(slotType, deviceType, userId);
-    ANS_LOGD("%{public}s, key:%{public}s,enabled[%{public}d]", __FUNCTION__, key.c_str(), enabled);
-    int32_t result = PutDataToDB(key, enabled, userId);
+    int32_t result = PutDataToDB(key, static_cast<int32_t>(enabled), userId);
     return (result == NativeRdb::E_OK);
 }
 
-bool NotificationPreferencesDatabase::IsDistributedEnabledBySlot(
-    const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled)
+bool NotificationPreferencesDatabase::IsDistributedEnabledBySlot(const NotificationConstant::SlotType &slotType,
+    const std::string &deviceType, NotificationConstant::SWITCH_STATE &enabled)
 {
     ANS_LOGD("%{public}s, %{public}d,deviceType:%{public}s]",
         __FUNCTION__, slotType, deviceType.c_str());
@@ -2757,18 +2756,20 @@ bool NotificationPreferencesDatabase::IsDistributedEnabledBySlot(
 
     std::string key = GenerateBundleLablel(slotType, deviceType, userId);
     bool result = false;
-    enabled = false;
+    enabled = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
         switch (status) {
             case NativeRdb::E_EMPTY_VALUES_BUCKET: {
                 result = true;
                 // master use current to be switch key for expand later; default false here
-                enabled = deviceType != NotificationConstant::CURRENT_DEVICE_TYPE;
+                enabled = deviceType != NotificationConstant::CURRENT_DEVICE_TYPE ?
+                NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
+                NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
                 break;
             }
             case NativeRdb::E_OK: {
                 result = true;
-                enabled = static_cast<bool>(StringToInt(value));
+                enabled = static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(value));
                 break;
             }
             default:

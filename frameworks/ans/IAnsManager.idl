@@ -290,6 +290,8 @@ interface OHOS.Notification.IAnsManager {
 
     void SetDistributedAuthStatus([in] String deviceType, [in] String deviceId, [in] int userId, [in] boolean isAuth);
 
+    void UpdateDistributedDeviceList([in] String deviceType);
+
     void IsSmartReminderEnabled([in] String deviceType, [out] boolean enabled);
 
     void SetSmartReminderEnabled([in] String deviceType, [in] boolean enabled);

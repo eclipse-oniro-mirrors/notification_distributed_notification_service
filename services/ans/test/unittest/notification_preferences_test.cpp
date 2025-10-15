@@ -1946,13 +1946,16 @@ HWTEST_F(NotificationPreferencesTest, GetTemplateSupported_00100, Function | Sma
 HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledBySlot_00100, Function | SmallTest | Level1)
 {
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
     auto res = NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(
-        slotType, "test", true);
+        slotType, "test", enableStatus);
     ASSERT_EQ(res, ERR_OK);
-    
-    bool enabled = false;
+
+    enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     res = NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(
-        slotType, "test", enabled);
+        slotType, "test", enableStatus);
+    bool enabled = enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+        enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
     ASSERT_EQ(res, ERR_OK);
     ASSERT_EQ(enabled, true);
 }
@@ -2393,9 +2396,10 @@ HWTEST_F(NotificationPreferencesTest, NullDeviceTypeTest_001, Function | SmallTe
     NotificationPreferences notificationPreferences;
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
 
-    res = notificationPreferences.SetDistributedEnabledBySlot(slotType, deviceType, flag);
+    NotificationConstant::SWITCH_STATE enabled = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    res = notificationPreferences.SetDistributedEnabledBySlot(slotType, deviceType, enabled);
     ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
-    res = notificationPreferences.IsDistributedEnabledBySlot(slotType, deviceType, flag);
+    res = notificationPreferences.IsDistributedEnabledBySlot(slotType, deviceType, enabled);
     ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
     res = notificationPreferences.SetSubscriberExistFlag(deviceType, flag);
     ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);

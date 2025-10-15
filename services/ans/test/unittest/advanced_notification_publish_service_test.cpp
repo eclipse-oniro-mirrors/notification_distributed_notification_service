@@ -2427,13 +2427,15 @@ HWTEST_F(AnsPublishServiceTest, CollaborateFilter_00002, Function | SmallTest | 
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     NotificationPreferences::GetInstance()->SetDistributedAuthStatus(deviceType, deviceId, userId, true);
     
+    NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
     NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(
-        NotificationConstant::SlotType::LIVE_VIEW, localType, true);
+        NotificationConstant::SlotType::LIVE_VIEW, localType, enableStatus);
     auto ret = advancedNotificationService_->CollaborateFilter(request);
     ASSERT_EQ(ret, (int)ERR_OK);
     
+    enableStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(
-        NotificationConstant::SlotType::LIVE_VIEW, localType, false);
+        NotificationConstant::SlotType::LIVE_VIEW, localType, enableStatus);
     ret = advancedNotificationService_->CollaborateFilter(request);
     ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
 

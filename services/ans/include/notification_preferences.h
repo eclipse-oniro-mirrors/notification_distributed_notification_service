@@ -449,8 +449,8 @@ public:
      * @param enabled Indicates slot switch status.
      * @return Returns set channel switch result.
      */
-    ErrCode SetDistributedEnabledBySlot(
-        const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled);
+    ErrCode SetDistributedEnabledBySlot(const NotificationConstant::SlotType &slotType,
+        const std::string &deviceType, const NotificationConstant::SWITCH_STATE &enabled);
 
     /**
      * @brief Query the channel switch for collaborative reminders.
@@ -461,8 +461,8 @@ public:
      * @param enabled Indicates slot switch status.
      * @return Returns channel switch result.
      */
-    ErrCode IsDistributedEnabledBySlot(
-        const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled);
+    ErrCode IsDistributedEnabledBySlot(const NotificationConstant::SlotType &slotType,
+        const std::string &deviceType, NotificationConstant::SWITCH_STATE &enabled);
 
     /**
      * @brief Get the bundle name set for send the sound.

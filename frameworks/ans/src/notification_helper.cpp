@@ -647,6 +647,11 @@ ErrCode NotificationHelper::SetDistributedAuthStatus(
         deviceType, deviceId, userId, isAuth);
 }
 
+ErrCode NotificationHelper::UpdateDistributedDeviceList(const std::string &deviceType)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->UpdateDistributedDeviceList(deviceType);
+}
+
 ErrCode NotificationHelper::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetSmartReminderEnabled(deviceType, enabled);
