@@ -27,7 +27,6 @@ namespace NotificationManagerSts {
 void AniSetRingtoneInfoByBundle(ani_env* env, ani_object bundleObj, ani_object ringtoneInfoObj)
 {
     ANS_LOGD("AniSetRingtoneInfoByBundle call");
-
     Notification::NotificationBundleOption bundle;
     if (!NotificationSts::UnwrapBundleOption(env, bundleObj, bundle)) {
         NotificationSts::ThrowErrorWithMsg(env, "AniSetRingtoneInfoByBundle : erro bundle.");

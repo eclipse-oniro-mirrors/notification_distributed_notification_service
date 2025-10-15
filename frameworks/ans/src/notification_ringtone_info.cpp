@@ -21,8 +21,8 @@ namespace OHOS {
 namespace Notification {
 namespace {
 constexpr const char *RINGTONE_INFO_RINGTONE_TYPE = "ringtoneType";
-constexpr const char *RINGTONE_INFO_RINGTONE_NAME = "ringtoneTitle";
-constexpr const char *RINGTONE_INFO_RINGTONE_PATH = "ringtoneFileName";
+constexpr const char *RINGTONE_INFO_RINGTONE_TITLE = "ringtoneTitle";
+constexpr const char *RINGTONE_INFO_RINGTONE_FILE_NAME = "ringtoneFileName";
 constexpr const char *RINGTONE_INFO_RINGTONE_URI = "ringtoneUri";
 } // namespace
 NotificationRingtoneInfo::NotificationRingtoneInfo(NotificationConstant::RingtoneType ringtoneType,
@@ -127,8 +127,8 @@ std::string NotificationRingtoneInfo::ToJson()
 {
     nlohmann::json jsonObject;
     jsonObject[RINGTONE_INFO_RINGTONE_TYPE] = static_cast<int32_t>(ringtoneType_);
-    jsonObject[RINGTONE_INFO_RINGTONE_NAME] = ringtoneTitle_;
-    jsonObject[RINGTONE_INFO_RINGTONE_PATH] = ringtoneFileName_;
+    jsonObject[RINGTONE_INFO_RINGTONE_TITLE] = ringtoneTitle_;
+    jsonObject[RINGTONE_INFO_RINGTONE_FILE_NAME] = ringtoneFileName_;
     jsonObject[RINGTONE_INFO_RINGTONE_URI] = ringtoneUri_;
     return jsonObject.dump();
 }
@@ -148,11 +148,12 @@ void NotificationRingtoneInfo::FromJson(const std::string &jsonObj)
         ringtoneType_ =
             static_cast<NotificationConstant::RingtoneType>(jsonObject.at(RINGTONE_INFO_RINGTONE_TYPE).get<int32_t>());
     }
-    if (jsonObject.contains(RINGTONE_INFO_RINGTONE_NAME) && jsonObject[RINGTONE_INFO_RINGTONE_NAME].is_string()) {
-        ringtoneTitle_ = jsonObject.at(RINGTONE_INFO_RINGTONE_NAME).get<std::string>();
+    if (jsonObject.contains(RINGTONE_INFO_RINGTONE_TITLE) && jsonObject[RINGTONE_INFO_RINGTONE_TITLE].is_string()) {
+        ringtoneTitle_ = jsonObject.at(RINGTONE_INFO_RINGTONE_TITLE).get<std::string>();
     }
-    if (jsonObject.contains(RINGTONE_INFO_RINGTONE_PATH) && jsonObject[RINGTONE_INFO_RINGTONE_PATH].is_string()) {
-        ringtoneFileName_ = jsonObject.at(RINGTONE_INFO_RINGTONE_PATH).get<std::string>();
+    if (jsonObject.contains(RINGTONE_INFO_RINGTONE_FILE_NAME) &&
+        jsonObject[RINGTONE_INFO_RINGTONE_FILE_NAME].is_string()) {
+        ringtoneFileName_ = jsonObject.at(RINGTONE_INFO_RINGTONE_FILE_NAME).get<std::string>();
     }
     if (jsonObject.contains(RINGTONE_INFO_RINGTONE_URI) && jsonObject[RINGTONE_INFO_RINGTONE_URI].is_string()) {
         ringtoneUri_ = jsonObject.at(RINGTONE_INFO_RINGTONE_URI).get<std::string>();
