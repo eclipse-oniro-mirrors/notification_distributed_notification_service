@@ -264,7 +264,7 @@ ani_boolean AniIsDistributedEnabledBySlot(ani_env *env, ani_enum_item slot, ani_
     if (!NotificationSts::SlotTypeEtsToC(env, slot, slotType)) {
         std::string msg = "Parameter verification failed";
         ANS_LOGE("SlotTypeEtsToC failed. msg: %{public}s", msg.c_str());
-        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
+        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_INTERNAL_ERROR, msg);
         return ANI_FALSE;
     }
     if (env == nullptr || deviceType == nullptr) {
@@ -274,7 +274,7 @@ ani_boolean AniIsDistributedEnabledBySlot(ani_env *env, ani_enum_item slot, ani_
     if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
         std::string msg = "Parameter verification failed";
         ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
-        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
+        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_INTERNAL_ERROR, msg);
         return ANI_FALSE;
     }
     bool isEnable = false;
@@ -285,6 +285,101 @@ ani_boolean AniIsDistributedEnabledBySlot(ani_env *env, ani_enum_item slot, ani_
         NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
     return isEnable ? ANI_TRUE : ANI_FALSE;
+}
+
+ani_boolean AniIsDistributedEnabledByDeviceType(ani_env *env, ani_string deviceType)
+{
+    ANS_LOGD("AniIsDistributedEnabledByDeviceType call");
+    bool enable = false;
+    std::string deviceTypeStr;
+    if (env == nullptr || deviceType == nullptr) {
+        ANS_LOGE("Invalid env or deviceType is null");
+        return ANI_FALSE;
+    }
+    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
+        ANS_LOGE("GetStringByAniString failed");
+        OHOS::NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return ANI_FALSE;
+    }
+    int returncode = Notification::NotificationHelper::IsDistributedEnabled(deviceTypeStr, enable);
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
+        ANS_LOGE("AniIsDistributedEnabledByDeviceType error, errorCode: %{public}d", externalCode);
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+    ANS_LOGD("AniIsDistributedEnabledByDeviceType end");
+    return NotificationSts::BoolToAniBoolean(enable);
+}
+
+void AniSetDistributedEnableByBundles(ani_env *env, ani_object obj, ani_string deviceType)
+{
+    ANS_LOGD("AniSetDistributedEnableByBundles call");
+    std::string deviceTypeStr;
+    if (env == nullptr || deviceType == nullptr) {
+        ANS_LOGE("Invalid env or deviceType is null");
+        return;
+    }
+    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
+        ANS_LOGE("GetStringByAniString fail");
+        OHOS::NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return;
+    }
+    std::vector<DistributedBundleOption> bundles;
+    if (!NotificationSts::UnwrapArrayDistributedBundleOption(env, obj, bundles)) {
+        ANS_LOGE("UnwrapArrayDistributedBundleOption fail");
+        OHOS::NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return;
+    }
+    int returncode = Notification::NotificationHelper::SetDistributedBundleOption(bundles, deviceTypeStr);
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
+        ANS_LOGE("AniSetDistributedEnableByBundles error, errorCode: %{public}d", externalCode);
+        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+    ANS_LOGD("AniSetDistributedEnableByBundles end");
+}
+
+void AniSetDistributedEnabled(ani_env *env, ani_boolean enable, ani_string deviceType)
+{
+    ANS_LOGD("AniSetDistributedEnabled call");
+    std::string deviceTypeStr;
+    if (env == nullptr || deviceType == nullptr) {
+        ANS_LOGE("Invalid env or deviceType is null");
+        return;
+    }
+    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
+        ANS_LOGE("GetStringByAniString fail");
+        OHOS::NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return;
+    }
+    int returncode = Notification::NotificationHelper::SetDistributedEnabled(deviceTypeStr,
+        NotificationSts::AniBooleanToBool(enable));
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
+        ANS_LOGE("AniSetDistributedEnabled error, errorCode: %{public}d", externalCode);
+        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+    ANS_LOGD("AniSetDistributedEnabled end");
+}
+
+ani_object AniGetDistributedDeviceList(ani_env *env)
+{
+    ANS_LOGD("AniGetDistributedDeviceList call");
+    std::vector<std::string> deviceList;
+    int returncode = Notification::NotificationHelper::GetDistributedDevicelist(deviceList);
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
+        ANS_LOGE("AniGetDistributedDeviceList error, errorCode: %{public}d", externalCode);
+        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+    ani_object deviceListArray = NotificationSts::GetAniStringArrayByVectorString(env, deviceList);
+    if (deviceListArray == nullptr) {
+        ANS_LOGE("deviceListArray nullptr");
+        OHOS::NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return nullptr;
+    }
+    ANS_LOGD("AniGetDistributedDeviceList end");
+    return deviceListArray;
 }
 }
 }

@@ -39,6 +39,7 @@ type CallbackForCheckInfo =
 const ERROR_OK = 0;
 const ERROR_PARAM_INVALID = 401;
 const ERROR_INTERNAL_ERROR = 160001;
+const MAX_USER_ID = 10736;
 
 const rejectInternalError: BusinessError<string> = {code: ERROR_INTERNAL_ERROR, data: "Internal error."};
 const callbackInternalError: BusinessError = {code: ERROR_INTERNAL_ERROR, data: undefined};
@@ -154,6 +155,25 @@ export default namespace notificationManager {
         RINGTONE_TYPE_NONE = 3
     }
 
+    export interface DistributedBundleEnableInfo {
+        bundleName: string;
+        uid: number;
+        enable?: boolean;
+    }
+
+    class DistributedBundleEnableInfoInner implements DistributedBundleEnableInfo {
+        bundleName: string = "";
+        uid: number = -1;
+        enable?: boolean | undefined;
+    }
+
+    export enum SwitchState {
+        USER_MODIFIED_OFF = 0,
+        USER_MODIFIED_ON = 1,
+        SYSTEM_DEFAULT_OFF = 2,
+        SYSTEM_DEFAULT_ON = 3,
+    }
+
     export native function nativeCancelAll(): void;
     export native function nativeCancelWithId(id: int): void;
     export native function nativeCancelWithIdLabel(id: int, label: string): void;
@@ -249,6 +269,14 @@ export default namespace notificationManager {
     export native function nativeGetNotificationSetting(): NotificationSetting;
     export native function nativeSetRingtoneInfoByBundle(bundle: BundleOption, ringtoneInfo: RingtoneInfo): void;
     export native function nativeGetRingtoneInfoByBundle(bundle: BundleOption): RingtoneInfo;
+
+    export native function nativeIsDistributedEnabledByDeviceType(deviceType: string): boolean;
+    export native function nativeSetDistributedEnabled(enable: boolean, deviceType: string): void;
+    export native function nativeSetDistributedEnableByBundles(bundleEnableInfos: Array<DistributedBundleEnableInfo>, deviceType: string): void;
+    export native function nativeGetDistributedDeviceList(): Array<string>;
+    export native function nativeDisableNotificationFeatureWithId(disabled:boolean, bundleList: Array<string>, userId: int): void;
+    export native function nativeSetSilentReminderEnabled(bundle: BundleOption, enable: boolean): void;
+    export native function nativeIsSilentReminderEnabled(bundle: BundleOption): SwitchState;
 
     function isInvalidParameter(doNotDisturbDate: DoNotDisturbDate): BusinessError
     {
@@ -2631,6 +2659,141 @@ export default namespace notificationManager {
                 { return nativeGetRingtoneInfoByBundle(bundle); });
             p.then((data: NullishType): void => {
                 let ret : RingtoneInfo = data as RingtoneInfo;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function isDistributedEnabled(deviceType: string): Promise<boolean>
+    {
+        if (deviceType.trim().isEmpty()) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): boolean => {
+                return nativeIsDistributedEnabledByDeviceType(deviceType); 
+            });
+            p.then((data: NullishType): void => {
+                let ret : boolean = data as boolean;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function disableNotificationFeature(disabled: boolean, bundleList: Array<string>, userId: int): Promise<void>
+    {
+        if (bundleList.length == 0) {
+            throw errorParamInvalid;
+        }
+        bundleList.forEach((value, index, bundleList) => {
+            if (value.trim().isEmpty()) {
+                throw errorParamInvalid;
+            }
+        });
+        if (userId < 0 || userId > MAX_USER_ID) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => {
+                nativeDisableNotificationFeatureWithId(disabled, bundleList, userId);
+            });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function setDistributedEnabled(enabled: boolean, deviceType: string): Promise<void>
+    {
+        if (deviceType.trim().isEmpty()) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => {
+                return nativeSetDistributedEnabled(enabled, deviceType); 
+            });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function setDistributedEnableByBundles(bundleEnableInfos: Array<DistributedBundleEnableInfo>, deviceType: string): Promise<void>
+    {
+        if (bundleEnableInfos.length == 0 || deviceType.trim().isEmpty()) {
+            throw errorParamInvalid;
+        }
+        bundleEnableInfos.forEach((value, index, bundleEnableInfos) => {
+            if (value.bundleName.trim().isEmpty()) {
+                throw errorParamInvalid;
+            }
+        });
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => {
+                return nativeSetDistributedEnableByBundles(bundleEnableInfos, deviceType); 
+            });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function getDistributedDeviceList(): Promise<Array<string>>
+    {
+        let pPromise = new Promise<Array<string>>((resolve: ResolveCallback<Array<string>>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): Array<string> => { return nativeGetDistributedDeviceList(); });
+            p.then((data: NullishType): void => {
+                let ret : Array<string> = data as Array<string>;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function setSilentReminderEnabled(bundle: BundleOption, enabled: boolean): Promise<void>
+    {
+        if (bundle.bundle.trim().isEmpty()) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => {
+                return nativeSetSilentReminderEnabled(bundle, enabled); 
+            });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function isSilentReminderEnabled(bundle: BundleOption): Promise<SwitchState>
+    {
+        if (bundle.bundle.trim().isEmpty()) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<SwitchState>((resolve: ResolveCallback<SwitchState>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): SwitchState => { return nativeIsSilentReminderEnabled(bundle); });
+            p.then((data: NullishType): void => {
+                let ret : SwitchState = data as SwitchState;
                 resolve(ret);
             }, (error: Error): void => {
                 reject(error);
