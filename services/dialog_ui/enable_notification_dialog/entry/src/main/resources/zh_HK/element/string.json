@@ -44,7 +44,7 @@
             "name":"reason_tv",
             "value":"通知提醒方式包括橫幅。可前往「設定」更改。",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

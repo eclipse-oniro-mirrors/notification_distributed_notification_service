@@ -53,7 +53,7 @@
             "name":"reason_tv",
             "value":"通知はバナーとして配信されます。通知の設定は、設定でいつでも変更できます。",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

@@ -44,7 +44,7 @@
             "name":"reason_tv",
             "value":"Notifications will be delivered as banners. You can change your notification preferences at any time in Settings.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
