@@ -101,6 +101,7 @@ ohos_source_set("reminder_service_sources") {
     "i18n:intl_util",
     "image_framework:image_native",
     "init:libbegetutil",
+    "input:libmmi-client",
     "kv_store:distributeddata_inner",
     "openssl:libcrypto_shared",
     "os_account:os_account_innerkits",

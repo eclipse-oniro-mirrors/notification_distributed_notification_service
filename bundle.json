@@ -91,6 +91,7 @@
         "player_framework",
         "image_framework",
         "init",
+        "input",
         "eventhandler",
         "c_utils",
         "runtime_core",

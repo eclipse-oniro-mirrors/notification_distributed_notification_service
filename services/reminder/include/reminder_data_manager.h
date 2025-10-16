@@ -273,6 +273,7 @@ public:
      * @param want Which contains the given reminder.
      */
     void TerminateAlerting(const OHOS::EventFwk::Want &want);
+    void TerminateAlerting();
 
     /**
      * @brief Update reminders based on the system language.
@@ -765,6 +766,7 @@ private:
      * Indicates the reminder which is playing sound or vibration.
      */
     std::atomic<int32_t> alertingReminderId_ = -1;
+    std::atomic<bool> alertingIdIsShared_ = false;
     sptr<ReminderRequest> alertingReminder_ = nullptr;
 #ifdef PLAYER_FRAMEWORK_ENABLE
     std::shared_ptr<Media::Player> soundPlayer_ = nullptr;
