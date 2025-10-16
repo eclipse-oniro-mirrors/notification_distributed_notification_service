@@ -38,6 +38,7 @@ using RemindType = OHOS::Notification::NotificationConstant::RemindType;
 using SourceType = OHOS::Notification::NotificationConstant::SourceType;
 using NotificationConstant = OHOS::Notification::NotificationConstant;
 using RingtoneType = OHOS::Notification::NotificationConstant::RingtoneType;
+using SwitchState = OHOS::Notification::NotificationConstant::SWITCH_STATE;
 
 enum STSDoNotDisturbType {
     TYPE_NONE = 0,
@@ -95,6 +96,13 @@ enum class STSSourceType {
     TYPE_TIMER
 };
 
+enum class STSSwitchState {
+    USER_MODIFIED_OFF,
+    USER_MODIFIED_ON,
+    SYSTEM_DEFAULT_OFF,
+    SYSTEM_DEFAULT_ON
+};
+
 class StsDoNotDisturbTypeUtils {
 public:
 static bool StsToC(const STSDoNotDisturbType inType,
@@ -135,6 +143,12 @@ class StsSourceTypeUtils {
 public:
 static bool StsToC(const STSSourceType inType, SourceType &outType);
 static bool CToSts(const SourceType inType, STSSourceType &outType);
+};
+
+class StsSwitchStateUtils {
+public:
+static bool StsToC(const STSSwitchState inType, SwitchState &outType);
+static bool CToSts(const SwitchState inType, STSSwitchState &outType);
 };
 
 class StsNotificationLocalLiveViewSubscriber : public NotificationLocalLiveViewSubscriber {
@@ -201,6 +215,9 @@ bool DeviceRemindTypeEtsToC(ani_env *env, ani_enum_item enumItem, RemindType &re
 
 bool SourceTypeCToEts(ani_env *env, SourceType sourceType, ani_enum_item &enumItem);
 bool SourceTypeEtsToC(ani_env *env, ani_enum_item enumItem, SourceType &sourceType);
+
+bool SwitchStateCToEts(ani_env *env, SwitchState switchState, ani_enum_item &enumItem);
+bool SwitchStateEtsToC(ani_env *env, ani_enum_item enumItem, SwitchState &switchState);
 
 ani_status UnWarpNotificationButtonOption(ani_env *env, const ani_object buttonOptionObj,
     ButtonOption &buttonOption);

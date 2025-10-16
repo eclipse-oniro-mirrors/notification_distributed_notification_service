@@ -29,6 +29,7 @@
 #include "ani_remove_group.h"
 #include "ani_request_enable.h"
 #include "ani_ringtone_info_by_bundle.h"
+#include "ani_silent_reminder_enable.h"
 #include "ani_slot.h"
 #include "ani_support_template.h"
 #include "ani_sync_config.h"
@@ -102,6 +103,12 @@ static std::array kitManagerFunctions = {
         reinterpret_cast<void *>(AniSetRingtoneInfoByBundle)},
     ani_native_function {"nativeGetRingtoneInfoByBundle", nullptr,
         reinterpret_cast<void *>(AniGetRingtoneInfoByBundle)},
+    ani_native_function {"nativeDisableNotificationFeatureWithId", nullptr,
+        reinterpret_cast<void *>(AniDisableNotificationFeatureWithId)},
+    ani_native_function {"nativeSetSilentReminderEnabled", nullptr,
+        reinterpret_cast<void *>(AniSetSilentReminderEnabled)},
+    ani_native_function {"nativeIsSilentReminderEnabled", nullptr,
+        reinterpret_cast<void *>(AniIsSilentReminderEnabled)},
 #ifdef ANS_FEATURE_BADGE_MANAGER
     ani_native_function {"nativeDisplayBadge", nullptr, reinterpret_cast<void *>(AniDisplayBadge)},
     ani_native_function {"nativeIsBadgeDisplayed", nullptr, reinterpret_cast<void *>(AniIsBadgeDisplayed)},
@@ -131,6 +138,13 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeGetDeviceRemindType", nullptr, reinterpret_cast<void *>(AniGetDeviceRemindType)},
     ani_native_function {"nativeSetSyncNotificationEnabledWithoutApp", nullptr,
         reinterpret_cast<void *>(AniSetSyncNotificationEnabledWithoutApp)},
+    ani_native_function {"nativeIsDistributedEnabledByDeviceType", nullptr,
+        reinterpret_cast<void *>(AniIsDistributedEnabledByDeviceType)},
+    ani_native_function {"nativeSetDistributedEnabled", nullptr, reinterpret_cast<void *>(AniSetDistributedEnabled)},
+    ani_native_function {"nativeSetDistributedEnableByBundles", nullptr,
+        reinterpret_cast<void *>(AniSetDistributedEnableByBundles)},
+    ani_native_function {"nativeGetDistributedDeviceList", nullptr,
+        reinterpret_cast<void *>(AniGetDistributedDeviceList)},
 #else
     ani_native_function {"nativeIsDistributedEnabled", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
     ani_native_function {"nativeIsDistributedEnabledByBundle", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
@@ -146,6 +160,11 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeGetDeviceRemindType", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
     ani_native_function {"nativeSetSyncNotificationEnabledWithoutApp", nullptr,
         reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeIsDistributedEnabledByDeviceType", nullptr,
+        reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeSetDistributedEnabled", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeSetDistributedEnableByBundles", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeGetDistributedDeviceList", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
 #endif
 #ifdef ANS_FEATURE_DISTURB_MANAGER
     ani_native_function {"nativeSetDoNotDisturbDate", nullptr, reinterpret_cast<void *>(AniSetDoNotDisturbDate)},

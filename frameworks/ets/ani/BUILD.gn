@@ -51,6 +51,7 @@ ohos_shared_library("notification_manager_ani") {
     "./src/manager/ani_remove_group.cpp",
     "./src/manager/ani_request_enable.cpp",
     "./src/manager/ani_ringtone_info_by_bundle.cpp",
+    "./src/manager/ani_silent_reminder_enable.cpp",
     "./src/manager/ani_slot.cpp",
     "./src/manager/ani_support_template.cpp",
     "./src/manager/ani_sync_config.cpp",
@@ -245,14 +246,14 @@ ohos_shared_library("notificationextensionsubscription_ani") {
   configs = []
 
   sources = [
+    "./src/extension_subscription/ani_extension_subscription.cpp",
+    "./src/extension_subscription/ani_notification_extension_subscription_info.cpp",
+    "./src/extension_subscription/ani_notification_subscriber_extension.cpp",
+    "./src/extension_subscription/ani_open_subscribe_settings.cpp",
+    "./src/sts_bundle_option.cpp",
     "./src/sts_common.cpp",
     "./src/sts_notification_manager.cpp",
     "./src/sts_throw_erro.cpp",
-    "./src/sts_bundle_option.cpp",
-    "./src/extension_subscription/ani_notification_subscriber_extension.cpp",
-    "./src/extension_subscription/ani_extension_subscription.cpp",
-    "./src/extension_subscription/ani_notification_extension_subscription_info.cpp",
-    "./src/extension_subscription/ani_open_subscribe_settings.cpp",
   ]
 
   cflags = []
@@ -260,9 +261,7 @@ ohos_shared_library("notificationextensionsubscription_ani") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [
-    "${frameworks_module_ans_path}:ans_innerkits",
-  ]
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
     "ability_base:want",
