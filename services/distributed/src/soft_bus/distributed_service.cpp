@@ -533,23 +533,26 @@ void DistributedService::HandleMatchByType(
                 DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->SubscribeAllConnect(true);
                 DistributedDeviceService::GetInstance().SetSubscribeAllConnect(true);
             }
-            if (NotificationHelper::GetDistributedAuthStatus(
-                DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_),
-                device.deviceId_, peerUserId, isAuth) == ERR_OK && !isAuth) {
-                // AuthStatus followed phone And turn on distributed switch
-                NotificationHelper::SetDistributedEnabled(
-                    DistributedDeviceService::DeviceTypeToTypeString(
-                        DistributedDeviceService::GetInstance().GetLocalDevice().deviceType_), true);
-                NotificationHelper::SetDistributedEnabledBySlot(
-                    NotificationConstant::SlotType::LIVE_VIEW,
-                    DistributedDeviceService::DeviceTypeToTypeString(
-                        DistributedDeviceService::GetInstance().GetLocalDevice().deviceType_),
-                    DistributedDeviceService::GetInstance().GetLocalDevice().deviceType_ ==
-                    DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD);
+            std::vector<std::string> deviceTypes;
+            ErrCode result = NotificationHelper::GetDistributedDevicelist(deviceTypes);
+            if (result != ERR_OK) {
+                ANS_LOGI("GetDistributedDevicelist fail %{public}d, try set", result);
             }
-            NotificationHelper::SetDistributedAuthStatus(
-                DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_),
-                device.udid_, peerUserId, true);
+            result = NotificationHelper::UpdateDistributedDeviceList(
+                DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_));
+            if (result != ERR_OK || deviceTypes.size() > 0) {
+                return;
+            }
+            ANS_LOGI("Enable switch first matching");
+            // AuthStatus followed phone And turn on distributed switch
+            NotificationHelper::SetDistributedEnabled(DistributedDeviceService::DeviceTypeToTypeString(
+                DistributedDeviceService::GetInstance().GetLocalDevice().deviceType_), true);
+            NotificationHelper::SetDistributedEnabledBySlot(
+                NotificationConstant::SlotType::LIVE_VIEW,
+                DistributedDeviceService::DeviceTypeToTypeString(
+                    DistributedDeviceService::GetInstance().GetLocalDevice().deviceType_),
+                DistributedDeviceService::GetInstance().GetLocalDevice().deviceType_ ==
+                DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD);
             return;
         }
     }

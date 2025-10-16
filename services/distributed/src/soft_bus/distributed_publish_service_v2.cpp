@@ -546,6 +546,12 @@ bool DistributedPublishService::MakeRequestBox(
 bool DistributedPublishService::IsInterceptNotification(
     const DistributedDeviceInfo &peerDevice, sptr<NotificationRequest> requestPoint)
 {
+    if (peerDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD &&
+        peerDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PC &&
+        peerDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1) {
+        ANS_LOGI("device{%{public}d} no block by distributed switch.", peerDevice.deviceType_);
+        return false;
+    }
     bool queryRes = false;
     bool result = false;
     // master use current to be switch key for expand later

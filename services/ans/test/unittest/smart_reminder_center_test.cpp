@@ -175,9 +175,10 @@ HWTEST_F(SmartReminderCenterTest, InitValidDevices_00001, Function | SmallTest |
     set<string> validDevices;
     set<string> smartDevices;
     map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> statusMap;
+    NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
     NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(
-                request->GetSlotType(), "headset", true);
-    smartReminderCenter_->InitValidDevices(validDevices, smartDevices, statusMap,  request);
+        request->GetSlotType(), "headset", enableStatus);
+    smartReminderCenter_->InitValidDevices(validDevices, smartDevices, statusMap, request);
     ASSERT_EQ(request->GetNotificationControlFlags(), 0);
 }
 

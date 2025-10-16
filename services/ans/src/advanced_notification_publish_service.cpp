@@ -203,31 +203,27 @@ ErrCode AdvancedNotificationService::CollaborateFilter(const sptr<NotificationRe
         ANS_LOGI("Collaborate filter check is false.");
         return ERR_OK;
     }
-    bool switchEnabled = false;
-    std::string deviceType = params->GetStringParam("notification_collaboration_deviceType");
-    std::string deviceId = params->GetStringParam("notification_collaboration_deviceId");
+    NotificationConstant::SWITCH_STATE switchEnabled = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     std::string localType = params->GetStringParam("notification_collaboration_localType");
-    int32_t userId = params->GetIntParam("notification_collaboration_userId", DEFAULT_USER_ID);
-    auto result = NotificationPreferences::GetInstance()->GetDistributedAuthStatus(deviceType,
-        deviceId, userId, switchEnabled);
-    if (result != ERR_OK || !switchEnabled) {
-        ANS_LOGW("Collaborate live view auth %{public}d %{public}d.", result, switchEnabled);
-        return ERR_ANS_NOT_ALLOWED;
-    }
-    switchEnabled = false;
     NotificationConstant::SlotType slotType = request->GetSlotType();
+    ErrCode result = ERR_OK;
     if (slotType == NotificationConstant::SlotType::LIVE_VIEW) {
         result = NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(
             NotificationConstant::SlotType::LIVE_VIEW, localType, switchEnabled);
-        if (result != ERR_OK || !switchEnabled) {
-            ANS_LOGW("Get live view distributed failed %{public}d %{public}d.", result, switchEnabled);
+        if (result != ERR_OK ||
+            (switchEnabled != NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON &&
+            switchEnabled != NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON)) {
+            ANS_LOGW("Get live view distributed failed %{public}d %{public}d.",
+                result, static_cast<int32_t>(switchEnabled));
             return ERR_ANS_NOT_ALLOWED;
         }
         return ERR_OK;
     }
     NotificationConstant::SWITCH_STATE enable;
     result = NotificationPreferences::GetInstance()->IsDistributedEnabled(localType, enable);
-    if (result != ERR_OK || enable != NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
+    if (result != ERR_OK ||
+        (enable != NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON &&
+        enable != NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
         ANS_LOGW("Get notification distributed failed %{public}d %{public}d.", result, enable);
         return ERR_ANS_NOT_ALLOWED;
     }

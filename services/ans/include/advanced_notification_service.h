@@ -1208,6 +1208,15 @@ public:
         const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth) override;
 
     /**
+     * @brief Set distributed target device list.
+     *
+     * @param deviceType Type of the target device whose status you want to set.
+     * @param userId The userid of the target device.
+     * @return Returns set result.
+     */
+    ErrCode UpdateDistributedDeviceList(const std::string &deviceType) override;
+
+    /**
      * @brief get distributed device list.
      *
      * @param deviceTypes Indicates device types.
@@ -1851,7 +1860,6 @@ private:
     void CancelWantAgent(const sptr<Notification> &notification);
     void CancelOnceWantAgent(const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &wantAgent);
     void PublishSubscriberExistFlagEvent(bool headsetExistFlag, bool wearableExistFlag);
-    void UpdateDistributedDeviceList(const std::string &deviceType, int32_t userId);
     void SetClassificationWithVoip(const sptr<NotificationRequest> &request);
     void UpdateCollaborateTimerInfo(const std::shared_ptr<NotificationRecord> &record);
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER

@@ -99,8 +99,11 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    NotificationConstant::SWITCH_STATE enableStatus = enabled ?
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     ErrCode result = NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(slotType,
-        deviceType, enabled);
+        deviceType, enableStatus);
 #ifdef ALL_SCENARIO_COLLABORATION
     if (result == ERR_OK && slotType == NotificationConstant::SlotType::LIVE_VIEW) {
         NotificationConstant::SWITCH_STATE notification = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
@@ -109,7 +112,8 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
             ANS_LOGW("Get notification distributed failed %{public}s!", deviceType.c_str());
         }
         DeviceStatueChangeInfo changeInfo;
-        changeInfo.enableChange = (notification == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) ? true : false;
+        changeInfo.enableChange = (notification == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
+            notification == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) ? true : false;
         changeInfo.liveViewChange = enabled;
         changeInfo.changeType = DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE;
         DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
@@ -148,7 +152,12 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledBySlot(
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    return NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(slotType, deviceType, enabled);
+    NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    ErrCode result =
+        NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(slotType, deviceType, enableStatus);
+    enabled = enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
+        enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    return result;
 }
 
 ErrCode AdvancedNotificationService::EnableDistributed(bool enabled)
@@ -817,14 +826,16 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
 
 #ifdef ALL_SCENARIO_COLLABORATION
     if (result == ERR_OK) {
-        bool liveViewEnabled = false;
+        NotificationConstant::SWITCH_STATE liveViewEnableStatus =
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
         if (NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(
-            NotificationConstant::SlotType::LIVE_VIEW, deviceType, liveViewEnabled) != ERR_OK) {
+            NotificationConstant::SlotType::LIVE_VIEW, deviceType, liveViewEnableStatus) != ERR_OK) {
             ANS_LOGW("Get live view distributed failed %{public}s!", deviceType.c_str());
         }
         DeviceStatueChangeInfo changeInfo;
         changeInfo.enableChange = enabled;
-        changeInfo.liveViewChange = liveViewEnabled;
+        changeInfo.liveViewChange = liveViewEnableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+            liveViewEnableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
         changeInfo.changeType = DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE;
         DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
     }
@@ -855,7 +866,8 @@ ErrCode AdvancedNotificationService::IsDistributedEnabled(const std::string &dev
 
     NotificationConstant::SWITCH_STATE enableStatus;
     ErrCode errResult = NotificationPreferences::GetInstance()->IsDistributedEnabled(deviceType, enableStatus);
-    enabled = (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    enabled = (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
+        enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
     return errResult;
 }
 
@@ -898,30 +910,58 @@ ErrCode AdvancedNotificationService::GetDistributedAuthStatus(
     auto result = NotificationPreferences::GetInstance()->GetDistributedAuthStatus(deviceType, deviceId,
         userId, isAuth);
     if (result == ERR_OK && isAuth) {
-        int32_t curUserId = DEFAULT_USER_ID;
-        if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(curUserId) == ERR_OK) {
-            UpdateDistributedDeviceList(deviceType, curUserId);
-        }
+        UpdateDistributedDeviceList(deviceType);
     }
     return result;
 }
 
-void AdvancedNotificationService::UpdateDistributedDeviceList(const std::string &deviceType, int32_t userId)
+ErrCode AdvancedNotificationService::UpdateDistributedDeviceList(const std::string &deviceType)
 {
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("IsSystemApp is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("no permission");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    auto result = OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    if (result != ERR_OK) {
+        ANS_LOGD("GetCurrentActiveUserId fail %{public}d.", result);
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+
     std::vector<std::string> deviceTypes;
-    auto result = NotificationPreferences::GetInstance()->GetDistributedDevicelist(deviceTypes);
+    result = NotificationPreferences::GetInstance()->GetDistributedDevicelist(deviceTypes);
     if (result != ERR_OK) {
         ANS_LOGE("Get distributed device list failed");
-        return;
+        return result;
     }
     auto it = std::find(deviceTypes.begin(), deviceTypes.end(), deviceType);
-    if (it == deviceTypes.end()) {
-        deviceTypes.push_back(deviceType);
-        result = NotificationPreferences::GetInstance()->SetDistributedDevicelist(deviceTypes, userId);
-        if (result != ERR_OK) {
-            ANS_LOGE("Set distributed device list failed");
-        }
+    if (it != deviceTypes.end()) {
+        ANS_LOGI("Distributed %{public}s set Previously", deviceType.c_str());
+        return ERR_OK;
     }
+    deviceTypes.push_back(deviceType);
+    result = NotificationPreferences::GetInstance()->SetDistributedDevicelist(deviceTypes, userId);
+    if (result != ERR_OK) {
+        ANS_LOGE("Set distributed device list failed");
+        return result;
+    }
+    EventFwk::Want want;
+    want.SetAction(NOTIFICATION_EVENT_DISTRIBUTED_DEVICE_TYPES_CHANGE);
+    EventFwk::CommonEventData commonData{ want };
+    EventFwk::CommonEventPublishInfo publishInfo;
+    publishInfo.SetSubscriberType(EventFwk::SubscriberType::SYSTEM_SUBSCRIBER_TYPE);
+    if (!EventFwk::CommonEventManager::PublishCommonEventAsUser(commonData, publishInfo, userId)) {
+        ANS_LOGE("Publish common event failed");
+    }
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::SetDistributedAuthStatus(
@@ -942,21 +982,8 @@ ErrCode AdvancedNotificationService::SetDistributedAuthStatus(
 
     auto result =
         NotificationPreferences::GetInstance()->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
-    if (result == ERR_OK) {
-        int32_t currentUserId = userId;
-        auto ret = OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(currentUserId);
-        if (isAuth && ret == ERR_OK) {
-            UpdateDistributedDeviceList(deviceType, currentUserId);
-        }
-        EventFwk::Want want;
-        want.SetAction(NOTIFICATION_EVENT_DISTRIBUTED_DEVICE_TYPES_CHANGE);
-        EventFwk::CommonEventData commonData{ want };
-        EventFwk::CommonEventPublishInfo publishInfo;
-        publishInfo.SetSubscriberType(EventFwk::SubscriberType::SYSTEM_SUBSCRIBER_TYPE);
-        if (ret != ERR_OK || !EventFwk::CommonEventManager::PublishCommonEventAsUser(
-            commonData, publishInfo, currentUserId)) {
-            ANS_LOGE("Publish common event failed");
-        }
+    if (result == ERR_OK && isAuth) {
+        UpdateDistributedDeviceList(deviceType);
     }
     return result;
 }

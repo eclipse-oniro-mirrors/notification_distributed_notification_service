@@ -1233,6 +1233,14 @@ public:
         const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth);
 
     /**
+     * @brief Set distributed target device list.
+     *
+     * @param deviceType Type of the target device whose status you want to set.
+     * @return Returns set result.
+     */
+    ErrCode UpdateDistributedDeviceList(const std::string &deviceType);
+
+    /**
      * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
      *
      * @param deviceType Indicates the type of the device running the application.

@@ -214,8 +214,8 @@ public:
      * @param enabled Indicates slot switch status.
      * @return Returns set channel switch result.
      */
-    bool SetDistributedEnabledBySlot(
-        const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled);
+    bool SetDistributedEnabledBySlot(const NotificationConstant::SlotType &slotType,
+        const std::string &deviceType, const NotificationConstant::SWITCH_STATE &enabled);
 
     /**
      * @brief Query the channel switch for collaborative reminders.
@@ -226,8 +226,8 @@ public:
      * @param enabled Indicates slot switch status.
      * @return Returns channel switch result.
      */
-    bool IsDistributedEnabledBySlot(
-        const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled);
+    bool IsDistributedEnabledBySlot(const NotificationConstant::SlotType &slotType,
+        const std::string &deviceType, NotificationConstant::SWITCH_STATE &enabled);
 
     /**
      * @brief Querying Aggregation Configuration Values

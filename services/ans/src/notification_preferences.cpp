@@ -1338,8 +1338,8 @@ ErrCode NotificationPreferences::IsSmartReminderEnabled(const std::string &devic
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
-ErrCode NotificationPreferences::SetDistributedEnabledBySlot(
-    const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled)
+ErrCode NotificationPreferences::SetDistributedEnabledBySlot(const NotificationConstant::SlotType &slotType,
+    const std::string &deviceType, const NotificationConstant::SWITCH_STATE &enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (deviceType.empty()) {
@@ -1352,8 +1352,8 @@ ErrCode NotificationPreferences::SetDistributedEnabledBySlot(
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
-ErrCode NotificationPreferences::IsDistributedEnabledBySlot(
-    const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled)
+ErrCode NotificationPreferences::IsDistributedEnabledBySlot(const NotificationConstant::SlotType &slotType,
+    const std::string &deviceType, NotificationConstant::SWITCH_STATE &enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (deviceType.empty()) {

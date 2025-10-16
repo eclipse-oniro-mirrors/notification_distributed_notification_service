@@ -2189,6 +2189,23 @@ ErrCode AnsNotification::SetDistributedAuthStatus(
     return proxy->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
 }
 
+ErrCode AnsNotification::UpdateDistributedDeviceList(const std::string &deviceType)
+{
+    ANS_LOGD("called");
+    if (deviceType.empty()) {
+        ANS_LOGE("Invalid deviceType.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->UpdateDistributedDeviceList(deviceType);
+}
+
 ErrCode AnsNotification::IsDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
     const std::string &deviceType, bool &enabled)
 {
