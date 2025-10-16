@@ -50,6 +50,7 @@ namespace {
     constexpr char CALL_UI_BUNDLE[] = "com.ohos.callui";
     constexpr char LIVEVIEW_CONFIG_KEY[] = "APP_LIVEVIEW_CONFIG";
     constexpr uint32_t NOTIFICATION_SETTING_FLAG_BASE = 0x11;
+    constexpr uint32_t NOTIFICATION_SETTING_SILENT = 0;
     constexpr int32_t MAX_LIVEVIEW_CONFIG_SIZE = 60;
     constexpr int32_t MAX_CHECK_RETRY_TIME = 3;
     constexpr int32_t PUSH_CHECK_ERR_DEVICE = 6;
@@ -491,6 +492,12 @@ ErrCode AdvancedNotificationService::GetNotificationSettings(uint32_t &slotFlags
             slotFlags = DEFAULT_SLOT_FLAGS;
         }
         slotFlags = slotFlags & NOTIFICATION_SETTING_FLAG_BASE;
+        NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+        NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
+        if (enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+            enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
+            slotFlags = NOTIFICATION_SETTING_SILENT;
+        }
     }));
     notificationSvrQueue_->wait(handler);
 

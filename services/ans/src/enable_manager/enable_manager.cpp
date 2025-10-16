@@ -85,6 +85,10 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
     bool ret = BundleManagerHelper::GetInstance()->GetBundleInfoV9(bundleName,
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
         bundleInfo, ZERO_USER_ID);
+    if (bundleInfo.applicationInfo.label.empty()) {
+        ANS_LOGE("empty label, %{public}s", bundleName.c_str());
+        return ERR_ANS_NOT_ALLOWED;
+    }
     bool easyAbroad = false;
     if (bundleInfo.applicationInfo.installSource == INSTALL_SOURCE_EASYABROAD) {
         ANS_LOGW("abroad app");
