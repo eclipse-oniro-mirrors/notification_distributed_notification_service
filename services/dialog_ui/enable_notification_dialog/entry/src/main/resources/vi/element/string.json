@@ -53,7 +53,7 @@
             "name":"reason_tv",
             "value":"Thông báo sẽ được gửi dưới dạng biểu ngữ. Bạn có thể thay đổi các tùy chọn thông báo của mình bất kỳ lúc nào trong mục Cài đặt.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

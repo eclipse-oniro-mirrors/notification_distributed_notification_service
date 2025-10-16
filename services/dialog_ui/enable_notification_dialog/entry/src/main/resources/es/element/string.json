@@ -53,7 +53,7 @@
             "name":"reason_tv",
             "value":"Las notificaciones se enviarán en forma de tiras. Puedes cambiar las preferencias de notificaciones en cualquier momento en Ajustes.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]
