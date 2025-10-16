@@ -987,7 +987,7 @@ void ParseRecord(ani_env *env, ani_object recordRef, std::map<std::string, ani_r
     }
     ani_ref keys {};
     if (env->Object_CallMethodByName_Ref(recordRef, "keys",
-        ":C{escompat.IterableIterator}", &keys) != ANI_OK) {
+        ":C{std.core.IterableIterator}", &keys) != ANI_OK) {
         ANS_LOGE("call method keys() failed.");
         return;
     }
