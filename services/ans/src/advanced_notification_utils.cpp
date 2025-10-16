@@ -83,7 +83,7 @@ constexpr char RECENT_NOTIFICATION_OPTION[] = "recent";
 constexpr char HIDUMPER_ERR_MSG[] =
     "error: unknown option.\nThe arguments are illegal and you can enter '-h' for help.";
 constexpr int32_t MAIN_USER_ID = 100;
-constexpr int32_t FIRST_USERID = 0;
+constexpr int32_t ZERO_USER_ID = 0;
 constexpr char OLD_KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION[] = "enabledNotificationDistributed";
 constexpr char KEY_TABLE_VERSION[] = "tableVersion";
 constexpr char SPLIT_FLAG[] = "-";
@@ -1277,7 +1277,8 @@ void AdvancedNotificationService::DeleteAllByUserStopped(int32_t userId)
         sptr<Notification> notification = nullptr;
         for (auto record : notificationList_) {
             if ((record->notification->GetKey() == key) &&
-                (record->notification->GetRecvUserId() == userId)) {
+                ((record->notification->GetRecvUserId() == userId) ||
+                (record->notification->GetRecvUserId() == ZERO_USER_ID))) {
                 ProcForDeleteLiveView(record);
                 notification = record->notification;
                 notificationList_.remove(record);
@@ -1288,7 +1289,7 @@ void AdvancedNotificationService::DeleteAllByUserStopped(int32_t userId)
         if (notification == nullptr) {
             continue;
         }
-        if (notification->GetRecvUserId() == userId) {
+        if (notification->GetRecvUserId() == userId || notification->GetRecvUserId() == ZERO_USER_ID) {
             UpdateRecentNotification(notification, true, NotificationConstant::USER_LOGOUT_REASON_DELETE);
             notifications.emplace_back(notification);
             timerIds.emplace_back(notification->GetAutoDeletedTimer());
@@ -1867,17 +1868,17 @@ void AdvancedNotificationService::ResetDistributedEnabled()
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         std::string value;
-        NotificationPreferences::GetInstance()->GetKvFromDb(KEY_TABLE_VERSION, value, FIRST_USERID);
+        NotificationPreferences::GetInstance()->GetKvFromDb(KEY_TABLE_VERSION, value, ZERO_USER_ID);
         if (!value.empty()) {
             return;
         }
         ANS_LOGI("start ResetDistributedEnabled");
         std::unordered_map<std::string, std::string> oldValues;
         NotificationPreferences::GetInstance()->GetBatchKvsFromDb(
-            OLD_KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION, oldValues, FIRST_USERID);
+            OLD_KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION, oldValues, ZERO_USER_ID);
         if (oldValues.empty()) {
             NotificationPreferences::GetInstance()->SetKvToDb(
-                KEY_TABLE_VERSION, std::to_string(MIN_VERSION), FIRST_USERID);
+                KEY_TABLE_VERSION, std::to_string(MIN_VERSION), ZERO_USER_ID);
             return;
         }
         std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
@@ -1906,9 +1907,9 @@ void AdvancedNotificationService::ResetDistributedEnabled()
                     iter.first.c_str(), uid);
             }
         }
-        NotificationPreferences::GetInstance()->DeleteBatchKvFromDb(delKeys, FIRST_USERID);
+        NotificationPreferences::GetInstance()->DeleteBatchKvFromDb(delKeys, ZERO_USER_ID);
         NotificationPreferences::GetInstance()->SetKvToDb(
-            KEY_TABLE_VERSION, std::to_string(MIN_VERSION), FIRST_USERID);
+            KEY_TABLE_VERSION, std::to_string(MIN_VERSION), ZERO_USER_ID);
     }));
 }
 
