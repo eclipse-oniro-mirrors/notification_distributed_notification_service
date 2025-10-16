@@ -1565,7 +1565,7 @@ public:
     void HandleBundleUpdate(const sptr<NotificationBundleOption> &bundleOption);
     void HandleBundleUninstall(const sptr<NotificationBundleOption> &bundleOption);
     bool TryStartExtensionSubscribeService();
-    void OnHfpDeviceConnected();
+    void OnHfpDeviceConnectChanged(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
 
 private:
     struct RecentInfo {
@@ -1942,10 +1942,6 @@ private:
     void FilterGrantedBundles(std::vector<sptr<NotificationBundleOption>> &bundles);
     void FilterBundlesByBluetoothConnection(std::vector<sptr<NotificationBundleOption>> &bundles);
     bool HasExtensionSubscriptionStateChanged(const sptr<NotificationBundleOption> &bundle, bool enabled);
-    bool HasGrantedBundleStateChanged(const sptr<NotificationBundleOption>& bundle,
-        const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled);
-    bool HasExtensionSubscriptionInfosChanged(const sptr<NotificationBundleOption> &bundle,
-        const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
     ErrCode PreReminderInfoCheck();
     bool isProxyForUnaware(const int32_t uid);
 	
@@ -1959,14 +1955,13 @@ private:
     int32_t UnSubscribeExtensionService(const sptr<NotificationBundleOption> &bundleOption);
     int32_t ShutdownExtensionService();
     void PrepareShutdownExtensionService();
-    size_t GetSubscriberCount();
     bool EnsureExtensionServiceLoadedAndSubscribed(const sptr<NotificationBundleOption> &bundle);
     bool EnsureExtensionServiceLoadedAndSubscribed(const sptr<NotificationBundleOption> &bundle,
         const std::vector<sptr<NotificationBundleOption>> &subscribeBundles);
     bool ShutdownExtensionServiceAndUnSubscribed(const sptr<NotificationBundleOption> &bundle);
     ErrCode GetNotificationExtensionEnabledBundles(std::vector<sptr<NotificationBundleOption>>  &bundles);
     void RegisterHfpObserver();
-    bool isExistHfpAddress(const std::vector<sptr<NotificationBundleOption>> &ExtensionBundles);
+    void ProcessHfpDeviceStateChange(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;

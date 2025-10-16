@@ -794,7 +794,7 @@ napi_value NapiNotificationExtensionOpenSubscriptionSettings(napi_env env, napi_
     ErrCode permRet = NotificationHelper::CanOpenSubscribeSettings();
     if (permRet != ERR_OK) {
         ANS_LOGE("OpenSettings call failed, err=%{public}d", permRet);
-        Common::NapiThrow(env, ERR_ANS_PERMISSION_DENIED);
+        Common::NapiThrow(env, ErrorToExternal(permRet));
         return Common::NapiGetUndefined(env);
     }
 

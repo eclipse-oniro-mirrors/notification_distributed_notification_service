@@ -751,20 +751,6 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, CanOpenSubscribeSettings
 }
 
 /**
- * @tc.number    : isExistHfpAddress_0100
- * @tc.name      : isExistHfpAddress
- * @tc.desc      : Test isExistHfpAddress case
- */
-HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, isExistHfpAddress_0100, Function | SmallTest | Level1)
-{
-    std::vector<sptr<NotificationBundleOption>> ExtensionBundles;
-    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
-    ExtensionBundles.push_back(bundleOption);
-    ErrCode ret = advancedNotificationService_->isExistHfpAddress(ExtensionBundles);
-    EXPECT_FALSE(ret);
-}
-
-/**
  * @tc.number    : CheckBluetoothConnectionInInfos_0100
  * @tc.name      : CheckBluetoothConnectionInInfos
  * @tc.desc      : Test CheckBluetoothConnectionInInfos case
