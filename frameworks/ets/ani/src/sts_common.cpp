@@ -193,7 +193,7 @@ ani_status GetPropertyBool(ani_env *env, ani_object obj, const char *name,
     }
     ani_boolean result = ANI_FALSE;
     if ((status = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(refObj),
-        "unboxed", ":z", &result)) != ANI_OK) {
+        "toBoolean", ":z", &result)) != ANI_OK) {
         ANS_LOGE("Object_CallMethodByName_Boolean failed, status : %{public}d", status);
         return status;
     }
@@ -217,7 +217,7 @@ ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
         return ANI_INVALID_ARGS;
     }
     if ((status = env->Object_CallMethodByName_Double(static_cast<ani_object>(refObj),
-        "unboxed", ":d", &outvalue)) != ANI_OK) {
+        "toDouble", ":d", &outvalue)) != ANI_OK) {
         ANS_LOGE("Object_CallMethodByName_Double failed, status : %{public}d", status);
         return status;
     }
@@ -241,7 +241,7 @@ ani_status GetPropertyInt(ani_env *env, ani_object obj, const char *name,
         return ANI_INVALID_ARGS;
     }
     if ((status = env->Object_CallMethodByName_Int(static_cast<ani_object>(refObj),
-        "unboxed", ":i", &outvalue)) != ANI_OK) {
+        "toInt", ":i", &outvalue)) != ANI_OK) {
         ANS_LOGE("Object_CallMethodByName_Int failed, status : %{public}d", status);
         return status;
     }
@@ -265,7 +265,7 @@ ani_status GetPropertyLong(ani_env *env, ani_object obj, const char *name,
         return ANI_INVALID_ARGS;
     }
     if ((status = env->Object_CallMethodByName_Long(static_cast<ani_object>(refObj),
-        "unboxed", ":l", &outvalue)) != ANI_OK) {
+        "toLong", ":l", &outvalue)) != ANI_OK) {
         ANS_LOGE("Object_CallMethodByName_Long failed, status : %{public}d", status);
         return status;
     }
@@ -425,7 +425,7 @@ ani_status GetPropertyNumberArray(ani_env *env, ani_object param, const char *na
             return status;
         }
         ani_double doubleValue = 0.0;
-        status = env->Object_CallMethodByName_Double(static_cast<ani_object>(numEntryRef), "unboxed",
+        status = env->Object_CallMethodByName_Double(static_cast<ani_object>(numEntryRef), "toDouble",
             ":d", &doubleValue);
         if (status != ANI_OK) {
             ANS_LOGI("Object_CallMethodByName_Double uid fail, status: %{public}d", status);
@@ -464,7 +464,7 @@ ani_status GetPropertyLongArray(ani_env *env, ani_object param, const char *name
             return status;
         }
         ani_long longValue = 0.0;
-        status = env->Object_CallMethodByName_Long(static_cast<ani_object>(numEntryRef), "unboxed",
+        status = env->Object_CallMethodByName_Long(static_cast<ani_object>(numEntryRef), "toLong",
             ":l", &longValue);
         if (status != ANI_OK) {
             ANS_LOGE("Object_CallMethodByName_Long uid fail, status: %{public}d", status);

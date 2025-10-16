@@ -513,7 +513,7 @@ bool getCapsuleByInt(ani_env *env, ani_object obj, const char *name, int32_t &ou
         return true;
     }
     if ((status = env->Object_CallMethodByName_Int(static_cast<ani_object>(refObj),
-        "unboxed", ":i", &out)) != ANI_OK) {
+        "toInt", ":i", &out)) != ANI_OK) {
         ANS_LOGE("Object_CallMethodByName_Int failed, status : %{public}d", status);
         return false;
     }
