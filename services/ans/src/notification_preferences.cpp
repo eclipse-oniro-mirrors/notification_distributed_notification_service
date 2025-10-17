@@ -595,11 +595,20 @@ bool NotificationPreferences::GetBundleInfo(NotificationPreferencesInfo &prefere
 {
     if (preferencesInfo.GetBundleInfo(bundleOption, info)) {
         return true;
-    } else if (preferncesDB_->GetBundleInfo(bundleOption, info)) {
-        preferencesInfo.SetBundleInfo(info);
-        return true;
     }
-    return false;
+    if (!preferncesDB_->GetBundleInfo(bundleOption, info)) {
+        return false;
+    }
+    preferencesInfo.SetBundleInfo(info);
+    std::vector<sptr<NotificationSlot>> slots;
+    info.GetAllSlots(slots);
+    std::string strSlotTypes = "|";
+    for (auto slot : slots) {
+        strSlotTypes.append(std::to_string(static_cast<int32_t>(slot->GetType()))).append("|");
+    }
+    ANS_LOGI("%{public}s get Bundle info from DB, slot: %{public}s",
+        bundleOption->GetBundleName().c_str(), strSlotTypes.c_str());
+    return true;
 }
 
 ErrCode NotificationPreferences::RemoveDoNotDisturbProfiles(

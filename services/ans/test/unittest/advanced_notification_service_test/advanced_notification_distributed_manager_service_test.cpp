@@ -944,6 +944,52 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDistributedAuthStatus_300, F
 }
 
 /**
+ * @tc.name: UpdateDistributedDeviceList_100
+ * @tc.desc: Test UpdateDistributedDeviceList when caller is not subsystem or system app.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, UpdateDistributedDeviceList_100, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    auto ret = advancedNotificationService_->UpdateDistributedDeviceList("testDeviceType");
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+}
+ 
+/**
+ * @tc.name: UpdateDistributedDeviceList_200
+ * @tc.desc: Test UpdateDistributedDeviceList when succeed to call.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, UpdateDistributedDeviceList_200, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(true);
+    MockIsSystemApp(true);
+    auto ret = advancedNotificationService_->UpdateDistributedDeviceList("testDeviceType");
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ret = advancedNotificationService_->UpdateDistributedDeviceList("testDeviceType");
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+ 
+/**
+ * @tc.name: UpdateDistributedDeviceList_300
+ * @tc.desc: Test UpdateDistributedDeviceList when caller has no permission.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, UpdateDistributedDeviceList_300, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    auto ret = advancedNotificationService_->UpdateDistributedDeviceList("testDeviceType");
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
  * @tc.name: GetDistributedDevicelist_0100
  * @tc.desc: Test GetDistributedDevicelist.
  * @tc.type: FUNC

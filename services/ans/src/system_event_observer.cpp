@@ -128,7 +128,10 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
             ANS_LOGE("Illegal userId, userId[%{public}d].", userId);
             return;
         }
-
+        if (AdvancedNotificationService::GetInstance() == nullptr) {
+            ANS_LOGE("new AdvancedNotificationService fail.");
+            return;
+        }
         NotificationPreferences::GetInstance()->InitSettingFromDisturbDB(userId);
         AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb(userId);
         NotificationCloneManager::GetInstance().OnUserSwitch(userId);

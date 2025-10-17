@@ -1520,6 +1520,27 @@ HWTEST_F(AnsNotificationUnitTest, SetDistributedEnabledByBundle_0300, TestSize.L
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
 
+/**
+ * @tc.name: UpdateDistributedDeviceList_0100
+ * @tc.desc: test UpdateDistributedDeviceList with parameters, expect errorCode ERR_ANS_INVALID_PARAM
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, UpdateDistributedDeviceList_0100, TestSize.Level1)
+{
+    ErrCode ret = ans_->UpdateDistributedDeviceList("");
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: UpdateDistributedDeviceList_0200
+ * @tc.desc: test UpdateDistributedDeviceList with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, UpdateDistributedDeviceList_0200, TestSize.Level1)
+{
+    ErrCode ret = ans_->UpdateDistributedDeviceList("testDeviceType");
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
 
 /**
  * @tc.name: IsDistributedEnabledByBundle_0100
@@ -1846,6 +1867,17 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSettings_0200, Function | Mediu
     uint32_t slotFlags = 0;
     ErrCode result = ans_->GetNotificationSettings(slotFlags);
     EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: UpdateDistributedDeviceList_0300
+ * @tc.desc: test UpdateDistributedDeviceList with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, UpdateDistributedDeviceList_0300, TestSize.Level1)
+{
+    ErrCode ret = ans_->UpdateDistributedDeviceList("testDeviceType");
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /*
