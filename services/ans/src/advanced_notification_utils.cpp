@@ -2052,7 +2052,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
         } else {
             ANS_LOGW("Set notification badge failed.");
         }
-        if (NotificationPreferences::GetInstance()->SetHasPoppedDialog(
+        if (cloneBundleInfo.GetIshasPoppedSupportClone() && NotificationPreferences::GetInstance()->SetHasPoppedDialog(
             bundle, cloneBundleInfo.GetHasPoppedDialog()) != ERR_OK) {
             ANS_LOGW("Set hasPoped failed.");
         }
