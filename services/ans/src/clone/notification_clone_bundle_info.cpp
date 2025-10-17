@@ -100,6 +100,11 @@ bool NotificationCloneBundleInfo::GetHasPoppedDialog() const
     return hasPoppedDialog_;
 }
 
+bool NotificationCloneBundleInfo::GetIshasPoppedSupportClone() const
+{
+    return ishasPoppedSupportClone_;
+}
+
 void NotificationCloneBundleInfo::SetEnableNotification(const NotificationConstant::SWITCH_STATE &state)
 {
     isEnabledNotification_ = state;
@@ -318,6 +323,7 @@ void NotificationCloneBundleInfo::FromJson(const nlohmann::json &jsonObject)
     if (jsonObject.contains(BUNDLE_INFO_POP_DIALOG) && jsonObject[BUNDLE_INFO_POP_DIALOG].is_number()) {
         int32_t popDialog = jsonObject.at(BUNDLE_INFO_POP_DIALOG).get<int32_t>();
         hasPoppedDialog_ = (popDialog == CONST_ENABLE_INT);
+        ishasPoppedSupportClone_ = true;
     }
     if (jsonObject.contains(BUNDLE_INFO_ENABLE_NOTIFICATION) &&
         jsonObject[BUNDLE_INFO_ENABLE_NOTIFICATION].is_number()) {

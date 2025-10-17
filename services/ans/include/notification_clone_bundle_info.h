@@ -59,6 +59,7 @@ public:
 
     void SetHasPoppedDialog(const bool &hasPoppedDialog);
     bool GetHasPoppedDialog() const;
+    bool GetIshasPoppedSupportClone() const;
 
     void SetEnableNotification(const NotificationConstant::SWITCH_STATE &state);
     NotificationConstant::SWITCH_STATE GetEnableNotification() const;
@@ -97,6 +98,7 @@ private:
     uint32_t slotFlags_ = 0;
     bool isShowBadge_ = false;
     bool hasPoppedDialog_ = false;
+    bool ishasPoppedSupportClone_ = false;
     NotificationConstant::SWITCH_STATE isEnabledNotification_ = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     std::vector<SlotInfo> slotsInfo_;
     sptr<NotificationRingtoneInfo> ringtoneInfo_ = nullptr;
