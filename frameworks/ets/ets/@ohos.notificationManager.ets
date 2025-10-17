@@ -157,13 +157,13 @@ export default namespace notificationManager {
 
     export interface DistributedBundleEnableInfo {
         bundleName: string;
-        uid: number;
+        uid: int;
         enable?: boolean;
     }
 
     class DistributedBundleEnableInfoInner implements DistributedBundleEnableInfo {
         bundleName: string = "";
-        uid: number = -1;
+        uid: int = -1;
         enable?: boolean | undefined;
     }
 

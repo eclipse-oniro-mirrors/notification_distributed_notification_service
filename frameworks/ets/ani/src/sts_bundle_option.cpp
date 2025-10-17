@@ -85,17 +85,18 @@ bool UnwrapArrayBundleOption(ani_env *env,
         return false;
     }
     ani_status status;
-    ani_int length;
-    status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
-    if (status != ANI_OK) {
-        ANS_LOGE("UnwrapArrayBundleOption: get length failed, status = %{public}d", status);
-        return false;
-    }
     Notification::NotificationBundleOption option;
-    for (int32_t i = 0; i < length; i++) {
+    ani_array optionArray = static_cast<ani_array>(arrayObj);
+    ani_size length;
+    status = env->Array_GetLength(optionArray, &length);
+    if (status != ANI_OK) {
+        ANS_LOGE("Array_GetLength fail. status : %{public}d", status);
+        return status;
+    }
+    int32_t arraySize = static_cast<int32_t>(length);
+    for (int32_t i = 0; i < arraySize; i++) {
         ani_ref optionRef;
-        status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "i:C{std.core.Object}", &optionRef, i);
+        status = env->Array_Get(optionArray, i, &optionRef);
         if (status != ANI_OK) {
             ANS_LOGE("UnwrapArrayBundleOption: get bundleOptionRef failed, status = %{public}d", status);
             return false;
@@ -161,12 +162,12 @@ bool UnwrapDistributedBundleOption(ani_env *env, ani_object obj, DistributedBund
     }
     std::string bundleName = GetResizeStr(tempStr, STR_MAX_SIZE);
     optionValue->SetBundleName(bundleName);
-    ani_double result = 0.0;
-    if ((status = env->Object_GetPropertyByName_Double(obj, "uid", &result)) != ANI_OK) {
+    ani_int result = 0;
+    if ((status = env->Object_GetPropertyByName_Int(obj, "uid", &result)) != ANI_OK) {
         ANS_LOGE("Object_GetPropertyByName_Int 'uid' fail. status:%{public}d", status);
         return false;
     }
-    optionValue->SetUid(static_cast<ani_int>(result));
+    optionValue->SetUid(result);
     distributedOption.SetBundle(optionValue);
     bool enable = true;
     status = GetPropertyBool(env, obj, "enable", isUndefined, enable);
@@ -186,16 +187,18 @@ bool UnwrapArrayDistributedBundleOption(ani_env *env, ani_object arrayObj,
         return false;
     }
     ani_status status;
-    ani_int length;
-    if (ANI_OK!= (status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj),
-        "length", &length))) {
-        ANS_LOGE("get length failed, status = %{public}d", status);
-        return false;
-    }
     Notification::DistributedBundleOption option;
-    for (int32_t i = 0; i < length; i++) {
+    ani_array optionArray = static_cast<ani_array>(arrayObj);
+    ani_size length;
+    status = env->Array_GetLength(optionArray, &length);
+    if (status != ANI_OK) {
+        ANS_LOGE("Array_GetLength fail. status : %{public}d", status);
+        return status;
+    }
+    int32_t arraySize = static_cast<int32_t>(length);
+    for (int32_t i = 0; i < arraySize; i++) {
         ani_ref optionRef;
-        status = env->Object_CallMethodByName_Ref(arrayObj, "$_get", "I:C{std.core.Object}", &optionRef, i);
+        status = env->Array_Get(optionArray, i, &optionRef);
         if (status != ANI_OK) {
             ANS_LOGE("get optionRef failed, status = %{public}d", status);
             return false;
