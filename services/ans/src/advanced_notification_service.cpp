@@ -1975,25 +1975,6 @@ ErrCode AdvancedNotificationService::CheckSoundPermission(const sptr<Notificatio
         return ERR_ANS_INVALID_PARAM;
     }
 
-    // Update sound permission info cache
-    ANS_LOGD("Check sound permission: %{public}d, %{public}s, %{public}d",
-        length, bundleOption->GetBundleName().c_str(), soundPermissionInfo_->needUpdateCache_.load());
-    if (soundPermissionInfo_->needUpdateCache_.load()) {
-        std::lock_guard<ffrt::mutex> lock(soundPermissionInfo_->dbMutex_);
-        if (soundPermissionInfo_->needUpdateCache_.load()) {
-            soundPermissionInfo_->allPackage_ = false;
-            soundPermissionInfo_->bundleName_.clear();
-            NotificationPreferences::GetInstance()->GetBundleSoundPermission(
-                soundPermissionInfo_->allPackage_, soundPermissionInfo_->bundleName_);
-            soundPermissionInfo_->needUpdateCache_ = false;
-        }
-    }
-
-    if (!soundPermissionInfo_->allPackage_
-        && soundPermissionInfo_->bundleName_.count(bundleOption->GetBundleName()) == 0
-        && !VerifyCloudCapability(bundleOption->GetUid(), SOUND_CAPABILITY)) {
-        request->SetSound("");
-    }
     return ERR_OK;
 }
 
