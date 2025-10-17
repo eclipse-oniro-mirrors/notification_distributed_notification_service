@@ -277,6 +277,8 @@ export default namespace notificationManager {
     export native function nativeDisableNotificationFeatureWithId(disabled:boolean, bundleList: Array<string>, userId: int): void;
     export native function nativeSetSilentReminderEnabled(bundle: BundleOption, enable: boolean): void;
     export native function nativeIsSilentReminderEnabled(bundle: BundleOption): SwitchState;
+    export native function nativeSetReminderInfoByBundles(reminderInfos: Array<NotificationReminderInfo>) : void;
+    export native function nativeGetReminderInfoByBundles(bundles: Array<BundleOption>) : Array<NotificationReminderInfo>;
 
     function isInvalidParameter(doNotDisturbDate: DoNotDisturbDate): BusinessError
     {
@@ -2660,6 +2662,49 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : RingtoneInfo = data as RingtoneInfo;
                 resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export interface NotificationReminderInfo {
+        bundle: BundleOption;
+        reminderFlags: long;
+        silentReminderEnabled: boolean;
+    }
+
+    class NotificationReminderInfoInner implements NotificationReminderInfo {
+        public bundle: BundleOption = { bundle: '', uid: undefined };
+        public reminderFlags: long = -1;
+        public silentReminderEnabled: boolean = false;
+    }
+
+    export function getReminderInfoByBundles(bundles: Array<BundleOption>): Promise<Array<NotificationReminderInfo>> {
+        if (!bundles || bundles.length == 0) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<Array<NotificationReminderInfo>>((resolve: ResolveCallback<Array<NotificationReminderInfo>>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): Array<NotificationReminderInfo> => { return nativeGetReminderInfoByBundles(bundles); });
+            p.then((data: NullishType): void => {
+                let ret : Array<NotificationReminderInfo> = data as Array<NotificationReminderInfo>;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function setReminderInfoByBundles(reminderInfos: Array<NotificationReminderInfo>): Promise<void> {
+        if (!reminderInfos || reminderInfos.length == 0) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativeSetReminderInfoByBundles(reminderInfos); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
             }, (error: Error): void => {
                 reject(error);
             });

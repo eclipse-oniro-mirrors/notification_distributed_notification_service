@@ -596,9 +596,9 @@ bool SetOptionalFieldBoolean(ani_env *env, ani_class cls, ani_object &object,
     if (boolObj == nullptr) {
         return false;
     }
-    status = env->Object_SetField_Ref(object, field, boolObj);
+    status = env->Object_SetField_Boolean(object, field, static_cast<ani_boolean>(value));
     if (status != ANI_OK) {
-        ANS_LOGE("Object_SetField_Ref failed, status=%{public}d, fieldName=%{public}s",
+        ANS_LOGE("Object_SetField_Boolean failed, status=%{public}d, fieldName=%{public}s",
             status, fieldName.c_str());
         return false;
     }
