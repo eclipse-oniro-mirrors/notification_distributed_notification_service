@@ -28,6 +28,7 @@
 #include "ani_publish.h"
 #include "ani_remove_group.h"
 #include "ani_request_enable.h"
+#include "ani_reminder_info.h"
 #include "ani_ringtone_info_by_bundle.h"
 #include "ani_silent_reminder_enable.h"
 #include "ani_slot.h"
@@ -99,6 +100,10 @@ static std::array kitManagerFunctions = {
         "Lapplication/UIAbilityContext/UIAbilityContext;:Lstd/core/Promise;",
         reinterpret_cast<void *>(AniRequestEnableNotification)},
     ani_native_function {"nativeGetNotificationSetting", nullptr, reinterpret_cast<void *>(AniGetNotificationSetting)},
+    ani_native_function {"nativeGetReminderInfoByBundles", nullptr,
+        reinterpret_cast<void *>(AniGetReminderInfoByBundles)},
+    ani_native_function {"nativeSetReminderInfoByBundles", nullptr,
+        reinterpret_cast<void *>(AniSetReminderInfoByBundles)},
     ani_native_function {"nativeSetRingtoneInfoByBundle", nullptr,
         reinterpret_cast<void *>(AniSetRingtoneInfoByBundle)},
     ani_native_function {"nativeGetRingtoneInfoByBundle", nullptr,
