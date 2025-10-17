@@ -417,13 +417,11 @@ bool AdvancedNotificationService::ShutdownExtensionServiceAndUnSubscribed(const 
 void AdvancedNotificationService::HandleBundleInstall(const sptr<NotificationBundleOption> &bundleOption)
 {
     if (bundleOption == nullptr) {
-        ANS_LOGE("HandleBundleUpdate bundleOption is nullptr");
+        ANS_LOGE("HandleBundleInstall bundleOption is nullptr");
         return;
     }
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
-    if (!BundleManagerHelper::GetInstance()->
-        CheckBundleImplExtensionAbility(bundleOption->GetBundleName(), userId)) {
+    
+    if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
         ShutdownExtensionServiceAndUnSubscribed(bundleOption);
         return;
     }
@@ -435,12 +433,17 @@ void AdvancedNotificationService::HandleBundleInstall(const sptr<NotificationBun
         std::vector<std::string> bundleNames;
         NotificationConfigParse::GetInstance()->GetNotificationExtensionEnabledBundlesWriteList(bundleNames);
         for (const auto& bundleName : bundleNames) {
-            auto uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, userId);
-            if (uid == -1) {
+            sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, 0);
+            if (bundleOption == nullptr) {
+                ANS_LOGE("Failed to create NotificationBundleOption");
                 continue;
             }
-            sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
-            insertBundles.emplace_back(bundleOption);
+            sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(bundleOption);
+            if (bundle == nullptr) {
+                ANS_LOGE("Failed to create GenerateValidBundleOptionV2 for %{public}s", bundleName.c_str());
+                continue;
+            }
+            insertBundles.emplace_back(bundle);
         }
         
         result = NotificationPreferences::GetInstance()->AddExtensionSubscriptionBundles(bundleOption, insertBundles);
@@ -459,7 +462,7 @@ void AdvancedNotificationService::HandleBundleInstall(const sptr<NotificationBun
 }
 
 ErrCode AdvancedNotificationService::RefreshExtensionSubscriptionBundlesFromConfig(
-    int32_t userId, const sptr<NotificationBundleOption>& bundleOption,
+    const sptr<NotificationBundleOption>& bundleOption,
     std::vector<sptr<NotificationBundleOption>>& enabledBundles)
 {
     ErrCode result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(
@@ -472,8 +475,16 @@ ErrCode AdvancedNotificationService::RefreshExtensionSubscriptionBundlesFromConf
     std::vector<std::string> bundleNames;
     NotificationConfigParse::GetInstance()->GetNotificationExtensionEnabledBundlesWriteList(bundleNames);
     for (const auto& name : bundleNames) {
-        auto uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(name, userId);
-        sptr<NotificationBundleOption> opt = new (std::nothrow) NotificationBundleOption(name, uid);
+        sptr<NotificationBundleOption> opt = new (std::nothrow) NotificationBundleOption(name, 0);
+        if (opt == nullptr) {
+            ANS_LOGE("Failed to create NotificationBundleOption");
+            continue;
+        }
+        sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(opt);
+        if (bundle == nullptr) {
+            ANS_LOGE("Failed to create GenerateValidBundleOptionV2 for %{public}s", name.c_str());
+            continue;
+        }
         enabledBundles.emplace_back(opt);
     }
 
@@ -491,10 +502,8 @@ void AdvancedNotificationService::HandleBundleUpdate(const sptr<NotificationBund
         ANS_LOGE("HandleBundleUpdate bundleOption is nullptr");
         return;
     }
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
-    if (!BundleManagerHelper::GetInstance()->
-        CheckBundleImplExtensionAbility(bundleOption->GetBundleName(), userId)) {
+
+    if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
         ShutdownExtensionServiceAndUnSubscribed(bundleOption);
         return;
     }
@@ -504,7 +513,7 @@ void AdvancedNotificationService::HandleBundleUpdate(const sptr<NotificationBund
     bool enabled = false;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         EnsureExtensionServiceLoadedAndSubscribed(bundleOption);
-        ErrCode refreshResult = RefreshExtensionSubscriptionBundlesFromConfig(userId, bundleOption, enabledBundles);
+        ErrCode refreshResult = RefreshExtensionSubscriptionBundlesFromConfig(bundleOption, enabledBundles);
         if (refreshResult != ERR_OK) {
             ANS_LOGE("RefreshExtensionSubscriptionBundlesFromConfig failed: %{public}d", refreshResult);
             return;
@@ -710,10 +719,7 @@ ErrCode AdvancedNotificationService::NotificationExtensionSubscribe(
         return ERR_ANS_INVALID_PARAM;
     }
 
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
-    if (!BundleManagerHelper::GetInstance()->
-        CheckBundleImplExtensionAbility(bundleOption->GetBundleName(), userId)) {
+    if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
         ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
         return ERR_ANS_NOT_IMPL_EXTENSIONABILITY;
     }
@@ -860,9 +866,14 @@ ErrCode AdvancedNotificationService::GetUserGrantedState(
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(targetBundle);
+    sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(targetBundle);
     if (bundle == nullptr) {
         ANS_LOGE("Bundle is null.");
+        return ERR_ANS_INVALID_BUNDLE_OPTION;
+    }
+
+    if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundle)) {
+        ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
@@ -870,6 +881,7 @@ ErrCode AdvancedNotificationService::GetUserGrantedState(
         ANS_LOGE("NotificationSvrQueue_ is nullptr.");
         return ERR_ANS_INVALID_PARAM;
     }
+
     ErrCode result = ERR_OK;
     NotificationConstant::SWITCH_STATE state;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
@@ -900,9 +912,14 @@ ErrCode AdvancedNotificationService::SetUserGrantedState(
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(targetBundle);
+    sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(targetBundle);
     if (bundle == nullptr) {
         ANS_LOGE("Bundle is null.");
+        return ERR_ANS_INVALID_BUNDLE_OPTION;
+    }
+
+    if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundle)) {
+        ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
@@ -913,28 +930,7 @@ ErrCode AdvancedNotificationService::SetUserGrantedState(
 
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
-        if (!HasExtensionSubscriptionStateChanged(bundle, enabled)) {
-            ANS_LOGW("User State No change for bundle: %{public}s", bundle->GetBundleName().c_str());
-            return;
-        }
-        PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_STATE, bundle, enabled, {});
-        NotificationConstant::SWITCH_STATE state = enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON
-            : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
-        result = NotificationPreferences::GetInstance()->SetExtensionSubscriptionEnabled(bundle, state);
-        if (result != ERR_OK) {
-            ANS_LOGE("Failed to set user granted state for bundle: %{public}s, ret: %{public}d",
-                bundle->GetBundleName().c_str(), result);
-        }
-        if (enabled) {
-            if (!EnsureExtensionServiceLoadedAndSubscribed(bundle)) {
-                return;
-            }
-        } else {
-            if (!ShutdownExtensionServiceAndUnSubscribed(bundle)) {
-                return;
-            }
-        }
+        ProcessSetUserGrantedState(bundle, enabled, result);
     }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -953,9 +949,14 @@ ErrCode AdvancedNotificationService::GetUserGrantedEnabledBundles(
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(targetBundle);
+    sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(targetBundle);
     if (bundle == nullptr) {
         ANS_LOGE("Bundle is null.");
+        return ERR_ANS_INVALID_BUNDLE_OPTION;
+    }
+
+    if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundle)) {
+        ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
@@ -963,6 +964,7 @@ ErrCode AdvancedNotificationService::GetUserGrantedEnabledBundles(
         ANS_LOGE("NotificationSvrQueue_ is nullptr.");
         return ERR_ANS_INVALID_PARAM;
     }
+    
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter GetUserGrantedEnabledBundles!");
@@ -1022,9 +1024,24 @@ ErrCode AdvancedNotificationService::SetUserGrantedBundleState(
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(targetBundle);
+    sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(targetBundle);
     if (bundle == nullptr) {
         ANS_LOGE("Bundle is null.");
+        return ERR_ANS_INVALID_BUNDLE_OPTION;
+    }
+
+    std::vector<sptr<NotificationBundleOption>> enabledBundlesProcessed;
+    for (const auto& bundle : enabledBundles) {
+        sptr<NotificationBundleOption> bundleProcessed = GenerateValidBundleOptionV2(bundle);
+        if (bundleProcessed == nullptr) {
+            ANS_LOGE("Failed to create NotificationBundleOption");
+            return ERR_ANS_INVALID_BUNDLE_OPTION;
+        }
+        enabledBundlesProcessed.emplace_back(bundleProcessed);
+    }
+
+    if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundle)) {
+        ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
     
@@ -1035,30 +1052,7 @@ ErrCode AdvancedNotificationService::SetUserGrantedBundleState(
 
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_BUNDLE_STATE, bundle, enabled,
-            enabledBundles);
-        result = enabled ?
-            NotificationPreferences::GetInstance()->AddExtensionSubscriptionBundles(bundle, enabledBundles) :
-            NotificationPreferences::GetInstance()->RemoveExtensionSubscriptionBundles(bundle, enabledBundles);
-        if (result != ERR_OK) {
-            ANS_LOGE("Failed to set enabled bundles to database, ret: %{public}d", result);
-            return;
-        }
-        std::vector<sptr<NotificationBundleOption>> existBundles;
-        result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundle, existBundles);
-        if (result != ERR_OK) {
-            ANS_LOGE("Failed to get enabled bundles from database, ret: %{public}d", result);
-            return;
-        }
-        if (existBundles.size() > 0) {
-            if (!EnsureExtensionServiceLoadedAndSubscribed(bundle)) {
-                return;
-            }
-        } else {
-            if (!ShutdownExtensionServiceAndUnSubscribed(bundle)) {
-                return;
-            }
-        }
+        ProcessSetUserGrantedBundleState(bundle, enabledBundlesProcessed, enabled, result);
     }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -1075,10 +1069,8 @@ ErrCode AdvancedNotificationService::CanOpenSubscribeSettings()
         ANS_LOGE("Failed to create NotificationBundleOption");
         return ERR_ANS_INVALID_PARAM;
     }
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
-    if (!BundleManagerHelper::GetInstance()->
-        CheckBundleImplExtensionAbility(bundleOption->GetBundleName(), userId)) {
+
+    if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
         ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
         return ERR_ANS_NOT_IMPL_EXTENSIONABILITY;
     }
@@ -1091,6 +1083,63 @@ void HfpStateObserver::OnConnectionStateChanged(
     ANS_LOGI("HFP connection state changed: %{public}s, state: %{public}d",
              device.GetDeviceAddr().c_str(), state);
     AdvancedNotificationService::GetInstance()->OnHfpDeviceConnectChanged(device, state);
+}
+
+void AdvancedNotificationService::ProcessSetUserGrantedState(
+    const sptr<NotificationBundleOption>& bundle, bool enabled, ErrCode& result)
+{
+    ANS_LOGD("ffrt enter!");
+    if (!HasExtensionSubscriptionStateChanged(bundle, enabled)) {
+        ANS_LOGW("User State No change for bundle: %{public}s", bundle->GetBundleName().c_str());
+        return;
+    }
+    PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_STATE, bundle, enabled, {});
+    NotificationConstant::SWITCH_STATE state = enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON
+        : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    result = NotificationPreferences::GetInstance()->SetExtensionSubscriptionEnabled(bundle, state);
+    if (result != ERR_OK) {
+        ANS_LOGE("Failed to set user granted state for bundle: %{public}s, ret: %{public}d",
+            bundle->GetBundleName().c_str(), result);
+    }
+    if (enabled) {
+        if (!EnsureExtensionServiceLoadedAndSubscribed(bundle)) {
+            return;
+        }
+    } else {
+        if (!ShutdownExtensionServiceAndUnSubscribed(bundle)) {
+            return;
+        }
+    }
+}
+
+void AdvancedNotificationService::ProcessSetUserGrantedBundleState(
+    const sptr<NotificationBundleOption>& bundle,
+    const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled, ErrCode& result)
+{
+    PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_BUNDLE_STATE, bundle, enabled,
+        enabledBundles);
+    result = enabled ?
+        NotificationPreferences::GetInstance()->AddExtensionSubscriptionBundles(bundle, enabledBundles) :
+        NotificationPreferences::GetInstance()->RemoveExtensionSubscriptionBundles(bundle, enabledBundles);
+    if (result != ERR_OK) {
+        ANS_LOGE("Failed to set enabled bundles to database, ret: %{public}d", result);
+        return;
+    }
+    std::vector<sptr<NotificationBundleOption>> existBundles;
+    result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundle, existBundles);
+    if (result != ERR_OK) {
+        ANS_LOGE("Failed to get enabled bundles from database, ret: %{public}d", result);
+        return;
+    }
+    if (existBundles.size() > 0) {
+        if (!EnsureExtensionServiceLoadedAndSubscribed(bundle)) {
+            return;
+        }
+    } else {
+        if (!ShutdownExtensionServiceAndUnSubscribed(bundle)) {
+            return;
+        }
+    }
 }
 }  // namespace Notification
 }  // namespace OHOS

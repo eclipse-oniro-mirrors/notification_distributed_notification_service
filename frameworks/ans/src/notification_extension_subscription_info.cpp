@@ -25,6 +25,11 @@ NotificationExtensionSubscriptionInfo::NotificationExtensionSubscriptionInfo(
     : addr_(addr), type_(type)
 {}
 
+NotificationExtensionSubscriptionInfo::NotificationExtensionSubscriptionInfo(
+    const NotificationExtensionSubscriptionInfo& info)
+    : addr_(info.addr_), isHfp_(info.isHfp_), type_(info.type_)
+{}
+
 NotificationExtensionSubscriptionInfo::~NotificationExtensionSubscriptionInfo()
 {}
 

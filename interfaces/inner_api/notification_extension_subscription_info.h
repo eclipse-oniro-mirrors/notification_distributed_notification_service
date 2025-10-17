@@ -35,6 +35,13 @@ public:
      */
     NotificationExtensionSubscriptionInfo(const std::string& addr, const NotificationConstant::SubscribeType type);
 
+    /**
+     * @brief Copy constructor.
+     *
+     * @param info Another NotificationExtensionSubscriptionInfo instance to copy from.
+     */
+    NotificationExtensionSubscriptionInfo(const NotificationExtensionSubscriptionInfo& info);
+
     virtual ~NotificationExtensionSubscriptionInfo();
 
     /**

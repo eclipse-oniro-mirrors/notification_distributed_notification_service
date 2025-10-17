@@ -187,7 +187,7 @@ public:
      */
     bool QueryExtensionInfos(
         std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos, int32_t userId);
-    bool CheckBundleImplExtensionAbility(const std::string &bundleName, int32_t userId);
+    bool CheckBundleImplExtensionAbility(const sptr<NotificationBundleOption> &bundleOption);
     std::string GetBundleLabel(const std::string& bundleName);
 
 private:
