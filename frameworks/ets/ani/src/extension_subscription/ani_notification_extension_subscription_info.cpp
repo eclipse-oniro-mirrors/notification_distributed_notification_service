@@ -20,7 +20,50 @@
 
 namespace OHOS {
 namespace NotificationSts {
+namespace {
+constexpr const char* NOTIFICATION_EXTENSION_SUBSCRIPTION_INFO_CLASSNAME =
+    "notification.notificationExtensionContent.NotificationExtensionsSubscriptionInfoInner";
+constexpr const char* NOTIFICATION_EXTENSION_SUBSCRIPTION_SUBSCRIBE_TYPE_CLASSNAME =
+    "@ohos.notificationExtensionSubscription.notificationExtensionSubscription.SubscribeType";
+}
 
+bool SubscribeTypeCToSts(const NotificationConstant::SubscribeType inType, STSSubscribeType& outType)
+{
+    switch (inType) {
+        case NotificationConstant::SubscribeType::BLUETOOTH:
+            outType = STSSubscribeType::BLUETOOTH;
+            break;
+        default:
+            ANS_LOGE("SubscribeType %{public}d is an invalid value", inType);
+            return false;
+    }
+    return true;
+}
+
+bool SubscribeTypeCToSts(ani_env *env, const NotificationConstant::SubscribeType inType, ani_enum_item &enumItem)
+{
+    ANS_LOGD("SubscribeTypeCToSts call");
+    STSSubscribeType outType;
+    if (!SubscribeTypeCToSts(inType, outType) ||
+        !EnumConvertNativeToAni(env, NOTIFICATION_EXTENSION_SUBSCRIPTION_SUBSCRIBE_TYPE_CLASSNAME, outType, enumItem)) {
+        ANS_LOGE("SubscribeTypeCToSts failed");
+        return false;
+    }
+    return true;
+}
+
+bool SubscribeTypeStsToC(const STSSubscribeType inType, NotificationConstant::SubscribeType& outType)
+{
+    switch (inType) {
+        case STSSubscribeType::BLUETOOTH:
+            outType = NotificationConstant::SubscribeType::BLUETOOTH;
+            break;
+        default:
+            ANS_LOGE("STSSubscribeType %{public}d is an invalid value", inType);
+            return false;
+    }
+    return true;
+}
 
 ani_status UnwarpNotificationExtensionSubscribeInfo(
     ani_env *env, ani_object value, sptr<NotificationExtensionSubscriptionInfo> &info)
@@ -33,7 +76,7 @@ ani_status UnwarpNotificationExtensionSubscribeInfo(
 
     ani_status status = ANI_ERROR;
     std::string addr;
-    ani_int typeValue = 0;
+    ani_ref type = nullptr;
     ani_boolean isUndefined = ANI_TRUE;
 
     isUndefined = ANI_TRUE;
@@ -41,14 +84,23 @@ ani_status UnwarpNotificationExtensionSubscribeInfo(
         ANS_LOGE("GetPropertyString addr failed, status: %{public}d, isUndefined: %{public}d", status, isUndefined);
         return ANI_INVALID_ARGS;
     }
+    info->SetAddr(GetResizeStr(addr, STR_MAX_SIZE));
 
-    if ((status = GetPropertyInt(env, value, "type", isUndefined, typeValue)) != ANI_OK) {
-        ANS_LOGE("GetPropertyInt type failed, status: %{public}d, isUndefined: %{public}d", status, isUndefined);
+    if ((status = GetPropertyRef(env, value, "type", isUndefined, type)) != ANI_OK) {
+        ANS_LOGE("GetPropertyRef type failed, status: %{public}d, isUndefined: %{public}d", status, isUndefined);
         return ANI_INVALID_ARGS;
     }
-
-    info->SetAddr(GetResizeStr(addr, STR_MAX_SIZE));
-    info->SetType(static_cast<NotificationConstant::SubscribeType>(typeValue));
+    ani_int typeValue {};
+    if ((status = env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(type), &typeValue)) != ANI_OK) {
+        ANS_LOGE("EnumItem_GetValue_Int type failed, status: %{public}d, isUndefined: %{public}d", status, isUndefined);
+        return ANI_INVALID_ARGS;
+    }
+    NotificationConstant::SubscribeType typeEnum;
+    if (!SubscribeTypeStsToC(static_cast<STSSubscribeType>(typeValue), typeEnum)) {
+        ANS_LOGE("SubscribeTypeStsToC failed");
+        return ANI_INVALID_ARGS;
+    }
+    info->SetType(typeEnum);
 
     ANS_LOGD("UnwarpNotificationExtensionSubscribeInfo success - addr: %{public}s, type: %{public}d",
         info->GetAddr().c_str(), static_cast<int>(info->GetType()));
@@ -64,24 +116,29 @@ ani_status UnwarpNotificationExtensionSubscribeInfoArrayByAniObj(ani_env *env, a
         ANS_LOGE("arrayValue is null");
         return ANI_ERROR;
     }
-    ani_int length;
-    ani_status status = env->Object_GetPropertyByName_Int(arrayValue, "length", &length);
+    infos.clear();
+    ani_size size = 0;
+    ani_status status = env->Array_GetLength(reinterpret_cast<ani_array>(arrayValue), &size);
     if (status != ANI_OK) {
-        ANS_LOGE("Object_GetPropertyByName_Int faild. status : %{public}d", status);
+        ANS_LOGE("Array_GetLength failed. status : %{public}d", status);
         return status;
     }
-    for (int32_t i = 0; i < length; i++) {
-        ani_ref notificationExtensionSubscribeInfoEntryRef;
-        status = env->Object_CallMethodByName_Ref(arrayValue,
-            "$_get", "i:C{std.core.Object}", &notificationExtensionSubscribeInfoEntryRef, i);
+    ani_ref ref;
+    for (ani_size i = 0; i < size; i++) {
+        status = env->Array_Get_Ref(reinterpret_cast<ani_array_ref>(arrayValue), i, &ref);
         if (status != ANI_OK) {
-            ANS_LOGE("Object_CallMethodByName_Ref faild. status : %{public}d", status);
+            ANS_LOGE("Array_Get_Ref failed. status : %{public}d", status);
+            return status;
         }
         sptr<NotificationExtensionSubscriptionInfo> info = new (std::nothrow)NotificationExtensionSubscriptionInfo();
-        if (info == nullptr || !UnwarpNotificationExtensionSubscribeInfo(
-            env, static_cast<ani_object>(notificationExtensionSubscribeInfoEntryRef), info)) {
-            ANS_LOGE("UnwarpNotificationExtensionSubscribeInfoArrayByAniObj faild");
+        if (info == nullptr) {
+            ANS_LOGE("Create NotificationExtensionSubscriptionInfo failed");
             return ANI_ERROR;
+        }
+        status = UnwarpNotificationExtensionSubscribeInfo(env, static_cast<ani_object>(ref), info);
+        if (status != ANI_OK) {
+            ANS_LOGE("UnwarpNotificationExtensionSubscribeInfo failed. status : %{public}d", status);
+            return status;
         }
         infos.emplace_back(info);
     }
@@ -99,7 +156,7 @@ bool WrapNotificationExtensionSubscribeInfo(
     }
     ani_class cls;
     if (!CreateClassObjByClassName(env, NOTIFICATION_EXTENSION_SUBSCRIPTION_INFO_CLASSNAME, cls, outAniObj)) {
-        ANS_LOGE("CreateClassObjByClassName fail");
+        ANS_LOGE("WrapNotificationExtensionSubscribeInfo: CreateClassObjByClassName fail");
         return false;
     }
     if (cls == nullptr || outAniObj == nullptr) {
@@ -107,11 +164,13 @@ bool WrapNotificationExtensionSubscribeInfo(
         return false;
     }
 
-    if (!SetFieldString(env, cls, outAniObj, "addr", info->GetAddr())) {
+    if (!SetPropertyOptionalByString(env, outAniObj, "addr", info->GetAddr())) {
         ANS_LOGE("Set addr fail");
         return false;
     }
-    if (!SetFieldInt(env, cls, outAniObj, "type", static_cast<int32_t>(info->GetType()))) {
+    ani_enum_item typeEnum {};
+    if (!SubscribeTypeCToSts(env, info->GetType(), typeEnum) ||
+        !SetPropertyByRef(env, outAniObj, "type", typeEnum)) {
         ANS_LOGE("Set type fail");
         return false;
     }
@@ -123,29 +182,39 @@ bool WrapNotificationExtensionSubscribeInfoArray(ani_env* env,
     const std::vector<sptr<Notification::NotificationExtensionSubscriptionInfo>>& infos, ani_object& outAniObj)
 {
     ANS_LOGD("WrapNotificationExtensionSubscribeInfo call");
-    if (env == nullptr || infos.empty()) {
-        ANS_LOGE("WrapNotificationExtensionSubscribeInfo failed, has nullptr or infos is empty");
+    if (env == nullptr) {
+        ANS_LOGE("WrapNotificationExtensionSubscribeInfo failed, has nullptr");
         return false;
     }
-    outAniObj = newArrayClass(env, infos.size());
-    if (outAniObj == nullptr) {
-        ANS_LOGE("outAniObj is null, newArrayClass Faild");
+    ani_class cls = nullptr;
+    ani_status status = env->FindClass(NOTIFICATION_EXTENSION_SUBSCRIPTION_INFO_CLASSNAME, &cls);
+    if (status != ANI_OK) {
+        ANS_LOGE("FindClass failed. status : %{public}d", status);
+        return false;
+    }
+    ani_array_ref array = nullptr;
+    size_t size = infos.size();
+    status = env->Array_New_Ref(cls, size, nullptr, &array);
+    if (status != ANI_OK) {
+        ANS_LOGE("Array_New_Ref failed. status : %{public}d", status);
         return false;
     }
     int32_t index = 0;
     for (auto &it : infos) {
         ani_object infoObj;
         if (!WrapNotificationExtensionSubscribeInfo(env, it, infoObj) || infoObj == nullptr) {
-            ANS_LOGE("WrapNotificationExtensionSubscribeInfo Faild. index = %{public}d", index);
+            ANS_LOGE("WrapNotificationExtensionSubscribeInfo Failed. index = %{public}d", index);
             return false;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(outAniObj, "$_set", "iC{std.core.Object}:", index, infoObj)) {
-            ANS_LOGE("set Faild. index = %{public}d", index);
+        status = env->Array_Set_Ref(array, index, infoObj);
+        if (status != ANI_OK) {
+            ANS_LOGE("Array_Set_Ref Failed. index = %{public}d, status = %{public}d", index, status);
             return false;
         }
         index++;
     }
     ANS_LOGD("WrapNotificationExtensionSubscribeInfo end");
+    outAniObj = array;
     return true;
 }
 }

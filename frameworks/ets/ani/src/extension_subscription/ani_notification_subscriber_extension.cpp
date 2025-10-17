@@ -89,17 +89,10 @@ ani_object AniGetAllSubscriptionBundles(ani_env *env)
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return nullptr;
     }
-    std::vector<BundleOption> plainBundles;
-    for (const auto& sptrBundle : bundles) {
-        if (sptrBundle != nullptr) {
-            plainBundles.emplace_back(*sptrBundle);
-        }
-    }
-    bundles.clear();
 
-    ani_object arrayBundles = NotificationSts::GetAniArrayBundleOption(env, plainBundles);
-    if (arrayBundles == nullptr) {
-        ANS_LOGE("AniGetAllSubscriptionBundles filed, arrayBundles is nullptr");
+    ani_object arrayBundles = nullptr;
+    if (!NotificationSts::GetAniArrayBundleOptionV2(env, bundles, arrayBundles) || arrayBundles == nullptr) {
+        ANS_LOGE("AniGetAllSubscriptionBundles failed, arrayBundles is nullptr");
         NotificationSts::ThrowErrorWithMsg(env, "AniGetAllSubscriptionBundles ERROR_INTERNAL_ERROR");
         return nullptr;
     }
@@ -164,53 +157,45 @@ void AniSetUserGrantedState(ani_env *env, ani_object bundleOption, ani_boolean e
     ANS_LOGD("AniSetUserGrantedState end");
 }
 
-ani_object AniGetUserGrantedEnableBundles(ani_env *env, ani_object bundleOption)
+ani_object AniGetUserGrantedEnabledBundles(ani_env *env, ani_object bundleOption)
 {
-    ANS_LOGD("AniGetUserGrantedEnableBundles enter");
+    ANS_LOGD("AniGetUserGrantedEnabledBundles enter");
     int returncode = ERR_OK;
     std::vector<sptr<BundleOption>> bundles;
     BundleOption option;
     if (NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
         returncode = Notification::NotificationHelper::GetUserGrantedEnabledBundles(option, bundles);
     } else {
-        NotificationSts::ThrowErrorWithMsg(env, "sts GetUserGrantedEnableBundles ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithMsg(env, "sts GetUserGrantedEnabledBundles ERROR_INTERNAL_ERROR");
         return nullptr;
     }
 
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniGetUserGrantedEnableBundles error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("AniGetUserGrantedEnabledBundles error, errorCode: %{public}d", externalCode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return nullptr;
     }
 
-    std::vector<BundleOption> plainBundles;
-    for (const auto& sptrBundle : bundles) {
-        if (sptrBundle != nullptr) {
-            plainBundles.emplace_back(*sptrBundle);
-        }
-    }
-    bundles.clear();
-
-    ani_object arrayBundles = NotificationSts::GetAniArrayBundleOption(env, plainBundles);
-    if (arrayBundles == nullptr) {
-        ANS_LOGE("AniGetUserGrantedEnableBundles filed, arrayBundles is nullptr");
-        NotificationSts::ThrowErrorWithMsg(env, "AniGetUserGrantedEnableBundles ERROR_INTERNAL_ERROR");
+    ani_object arrayBundles = nullptr;
+    if (!NotificationSts::GetAniArrayBundleOptionV2(env, bundles, arrayBundles) || arrayBundles == nullptr) {
+        ANS_LOGE("AniGetUserGrantedEnabledBundles failed, arrayBundles is nullptr");
+        NotificationSts::ThrowErrorWithMsg(env, "AniGetUserGrantedEnabledBundles ERROR_INTERNAL_ERROR");
         return nullptr;
     }
-    ANS_LOGD("AniGetUserGrantedEnableBundles end");
+    ANS_LOGD("AniGetUserGrantedEnabledBundles end");
     return arrayBundles;
 }
 
-ani_object AniGetUserGrantedEnableBundlesForSelf(ani_env *env)
+ani_object AniGetUserGrantedEnabledBundlesForSelf(ani_env *env)
 {
-    ANS_LOGD("AniGetUserGrantedEnableBundlesForSelf enter");
+    ANS_LOGD("AniGetUserGrantedEnabledBundlesForSelf enter");
     int returncode = ERR_OK;
     std::vector<sptr<BundleOption>> bundles;
     returncode = Notification::NotificationHelper::GetUserGrantedEnabledBundlesForSelf(bundles);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniGetUserGrantedEnableBundlesForSelf error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("AniGetUserGrantedEnabledBundlesForSelf error, errorCode: %{public}d", externalCode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return nullptr;
     }
@@ -219,10 +204,11 @@ ani_object AniGetUserGrantedEnableBundlesForSelf(ani_env *env)
     for (const auto& bundle : bundles) {
         bundleNames.emplace_back(bundle->GetBundleName());
     }
-    ani_object arrayBundles = NotificationSts::GetAniStringArrayByVectorString(env, bundleNames);
-    if (arrayBundles == nullptr) {
-        ANS_LOGE("AniGetUserGrantedEnableBundlesForSelf failed, arrayBundles is nullptr");
-        NotificationSts::ThrowErrorWithMsg(env, "AniGetUserGrantedEnableBundlesForSelf ERROR_INTERNAL_ERROR");
+    ani_object arrayBundles = nullptr;
+    if (!NotificationSts::GetAniStringArrayByVectorStringV2(env, bundleNames, arrayBundles) ||
+        arrayBundles == nullptr) {
+        ANS_LOGE("AniGetUserGrantedEnabledBundlesForSelf failed, arrayBundles is nullptr");
+        NotificationSts::ThrowErrorWithMsg(env, "AniGetUserGrantedEnabledBundlesForSelf ERROR_INTERNAL_ERROR");
         return nullptr;
     }
     return arrayBundles;

@@ -47,9 +47,9 @@ void AniNotificationExtensionRegistryInit(ani_env *env)
         ani_native_function { "nativeGetUserGrantedState", nullptr, reinterpret_cast<void*>(AniGetUserGrantedState) },
         ani_native_function { "nativeSetUserGrantedState", nullptr, reinterpret_cast<void*>(AniSetUserGrantedState) },
         ani_native_function {
-            "nativeGetUserGrantedEnableBundles", nullptr, reinterpret_cast<void*>(AniGetUserGrantedEnableBundles) },
-        ani_native_function { "nativeGetUserGrantedEnableBundlesForSelf", nullptr,
-            reinterpret_cast<void*>(AniGetUserGrantedEnableBundlesForSelf) },
+            "nativeGetUserGrantedEnabledBundles", nullptr, reinterpret_cast<void*>(AniGetUserGrantedEnabledBundles) },
+        ani_native_function { "nativeGetUserGrantedEnabledBundlesForSelf", nullptr,
+            reinterpret_cast<void*>(AniGetUserGrantedEnabledBundlesForSelf) },
         ani_native_function {
             "nativeSetUserGrantedBundleState", nullptr, reinterpret_cast<void*>(AniSetUserGrantedBundleState) },
     };

@@ -22,8 +22,6 @@
 namespace OHOS {
 namespace NotificationSts {
 using NotificationExtensionSubscriptionInfo = OHOS::Notification::NotificationExtensionSubscriptionInfo;
-constexpr const char* NOTIFICATION_EXTENSION_SUBSCRIPTION_INFO_CLASSNAME =
-    "notification.notificationExtensionContent.NotificationExtensionsSubscriptionInfoInner";
 ani_status UnwarpNotificationExtensionSubscribeInfo(ani_env *env, ani_object value,
     sptr<NotificationExtensionSubscriptionInfo> &info);
 ani_status UnwarpNotificationExtensionSubscribeInfoArrayByAniObj(ani_env *env, ani_object arrayValue,
@@ -32,6 +30,10 @@ bool WrapNotificationExtensionSubscribeInfo(ani_env *env, sptr<NotificationExten
     ani_object &outAniObj);
 bool WrapNotificationExtensionSubscribeInfoArray(ani_env *env,
     const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos, ani_object &outAniObj);
+
+enum class STSSubscribeType {
+    BLUETOOTH = 0
+};
 }
 }
 #endif
