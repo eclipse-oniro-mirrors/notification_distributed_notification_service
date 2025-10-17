@@ -1835,6 +1835,160 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSettings_0100, Function | Mediu
 }
 
 /*
+ * @tc.name: CanOpenSubscribeSettings_0100
+ * @tc.desc: test CanOpenSubscribeSettings ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, CanOpenSubscribeSettings_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    ErrCode ret = ans_->CanOpenSubscribeSettings();
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: GetAllSubscriptionBundles_0100
+ * @tc.desc: test GetAllSubscriptionBundles ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetAllSubscriptionBundles_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    ErrCode ret = ans_->GetAllSubscriptionBundles(bundles);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: IsUserGranted_0100
+ * @tc.desc: test IsUserGranted ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, IsUserGranted_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    bool isGranted = true;
+    ErrCode ret = ans_->IsUserGranted(isGranted);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: GetUserGrantedState_0100
+ * @tc.desc: test GetUserGrantedState ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetUserGrantedState_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    NotificationBundleOption bundle;
+    bundle.SetBundleName("testBundle");
+    bool isGranted = true;
+    ErrCode ret = ans_->GetUserGrantedState(bundle, isGranted);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: SetUserGrantedState_0100
+ * @tc.desc: test SetUserGrantedState ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetUserGrantedState_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    NotificationBundleOption bundle;
+    bundle.SetBundleName("testBundle");
+    ErrCode ret = ans_->SetUserGrantedState(bundle, true);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: GetUserGrantedEnabledBundles_0100
+ * @tc.desc: test GetUserGrantedEnabledBundles ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetUserGrantedEnabledBundles_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    NotificationBundleOption bundle;
+    bundle.SetBundleName("testBundle");
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    ErrCode ret = ans_->GetUserGrantedEnabledBundles(bundle, bundles);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: SetUserGrantedBundleState_0100
+ * @tc.desc: test SetUserGrantedBundleState ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetUserGrantedBundleState_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    auto bundle = new (std::nothrow) NotificationBundleOption();
+    bundle->SetBundleName("testBundle");
+    bundles.emplace_back(sptr<NotificationBundleOption>(bundle));
+    NotificationBundleOption bundle2;
+    bundle2.SetBundleName("targetBundle");
+    ErrCode ret = ans_->SetUserGrantedBundleState(bundle2, bundles, true);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: GetUserGrantedEnabledBundlesForSelf_0100
+ * @tc.desc: test GetUserGrantedEnabledBundlesForSelf ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetUserGrantedEnabledBundlesForSelf_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    ErrCode ret = ans_->GetUserGrantedEnabledBundlesForSelf(bundles);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
  * @tc.name: GetNotificationSettings_0200
  * @tc.desc: test GetNotificationSetting.
  * @tc.type: FUNC
@@ -2486,6 +2640,180 @@ HWTEST_F(AnsNotificationUnitTest, SetReminderInfoByBundles_0200, Function | Medi
     NotificationReminderInfo reminder;
     reminders.emplace_back(reminder);
     ErrCode ret = ans_->SetReminderInfoByBundles(reminders);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: CanOpenSubscribeSettings_0200
+ * @tc.desc: test CanOpenSubscribeSettings ErrCode ERR_OK.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, CanOpenSubscribeSettings_0200, Function | MediumTest | Level1)
+{
+    ErrCode result = ans_->CanOpenSubscribeSettings();
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/*
+ * @tc.name: NotificationExtensionSubscribe_0300
+ * @tc.desc: test NotificationExtensionSubscribe ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, NotificationExtensionSubscribe_0300, Function | MediumTest | Level1)
+{
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    ErrCode result = ans_->NotificationExtensionSubscribe(infos);
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetAllSubscriptionBundles_0200
+ * @tc.desc: test GetAllSubscriptionBundles ErrCode ERR_OK.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetAllSubscriptionBundles_0200, Function | MediumTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    auto bundle = new (std::nothrow) NotificationBundleOption();
+    bundle->SetBundleName("testBundle");
+    bundles.emplace_back(sptr<NotificationBundleOption>(bundle));
+    ErrCode ret = ans_->GetAllSubscriptionBundles(bundles);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: IsUserGranted_0200
+ * @tc.desc: test IsUserGranted ErrCode ERR_OK.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, IsUserGranted_0200, Function | MediumTest | Level1)
+{
+    bool isGranted = true;
+    ErrCode ret = ans_->IsUserGranted(isGranted);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: GetUserGrantedState_0200
+ * @tc.desc: test GetUserGrantedState ErrCode ERR_OK.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetUserGrantedState_0200, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundle;
+    bundle.SetBundleName("testBundle");
+    bool isGranted = true;
+    ErrCode ret = ans_->GetUserGrantedState(bundle, isGranted);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: GetUserGrantedState_0300
+ * @tc.desc: test GetUserGrantedState ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetUserGrantedState_0300, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundle;
+    bool isGranted = true;
+    ErrCode ret = ans_->GetUserGrantedState(bundle, isGranted);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetUserGrantedState_0200
+ * @tc.desc: test SetUserGrantedState ErrCode ERR_OK.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetUserGrantedState_0200, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundle;
+    bundle.SetBundleName("testBundle");
+    ErrCode ret = ans_->SetUserGrantedState(bundle, true);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: SetUserGrantedState_0300
+ * @tc.desc: test SetUserGrantedState ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetUserGrantedState_0300, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundle;
+    ErrCode ret = ans_->SetUserGrantedState(bundle, true);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetUserGrantedEnabledBundles_0200
+ * @tc.desc: test GetUserGrantedEnabledBundles ErrCode ERR_OK.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetUserGrantedEnabledBundles_0200, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundle;
+    bundle.SetBundleName("testBundle");
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    ErrCode ret = ans_->GetUserGrantedEnabledBundles(bundle, bundles);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: GetUserGrantedEnabledBundles_0300
+ * @tc.desc: test GetUserGrantedEnabledBundles ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetUserGrantedEnabledBundles_0300, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundle;
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    ErrCode ret = ans_->GetUserGrantedEnabledBundles(bundle, bundles);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetUserGrantedBundleState_0200
+ * @tc.desc: test SetUserGrantedBundleState ErrCode ERR_OK.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetUserGrantedBundleState_0200, Function | MediumTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    auto bundle = new (std::nothrow) NotificationBundleOption();
+    bundle->SetBundleName("testBundle");
+    bundles.emplace_back(sptr<NotificationBundleOption>(bundle));
+    NotificationBundleOption bundle2;
+    bundle2.SetBundleName("targetBundle");
+    ErrCode ret = ans_->SetUserGrantedBundleState(bundle2, bundles, true);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: SetUserGrantedBundleState_0300
+ * @tc.desc: test SetUserGrantedBundleState ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetUserGrantedBundleState_0300, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundle;
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    ErrCode ret = ans_->SetUserGrantedBundleState(bundle, bundles, true);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    bundle.SetBundleName("testBundle");
+    ret = ans_->SetUserGrantedBundleState(bundle, bundles, true);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetUserGrantedEnabledBundlesForSelf_0200
+ * @tc.desc: test GetUserGrantedEnabledBundlesForSelf ErrCode ERR_OK.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetUserGrantedEnabledBundlesForSelf_0200, Function | MediumTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    ErrCode ret = ans_->GetUserGrantedEnabledBundlesForSelf(bundles);
     EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace Notification
