@@ -79,6 +79,8 @@ enum EventBranchId {
     BRANCH_20 = 20,
     BRANCH_21 = 21,
     BRANCH_22 = 22,
+    BRANCH_23 = 23,
+    BRANCH_24 = 24,
 };
 
 class OperationalMeta {

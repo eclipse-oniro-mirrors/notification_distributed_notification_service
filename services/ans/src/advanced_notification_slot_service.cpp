@@ -319,6 +319,8 @@ ErrCode AdvancedNotificationService::RemoveAllSlots()
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
     }
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_24);
+    message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()));
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -349,6 +351,8 @@ ErrCode AdvancedNotificationService::RemoveAllSlots()
         }
     }));
     notificationSvrQueue_->wait(handler);
+    message.ErrorCode(result);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 
@@ -827,7 +831,11 @@ ErrCode AdvancedNotificationService::RemoveSlotByType(int32_t slotTypeInt)
         return ERR_ANS_INVALID_PARAM;
     }
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_23);
+    message.Message(bundleOption->GetBundleName() +
+        "_" + std::to_string(bundleOption->GetUid()) + " slotType: " + std::to_string(slotTypeInt));
     ErrCode result = ERR_OK;
+    ErrCode dbResult = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = IsAllowedRemoveSlot(bundleOption, slotType);
@@ -836,10 +844,12 @@ ErrCode AdvancedNotificationService::RemoveSlotByType(int32_t slotTypeInt)
             return;
         }
 
-        NotificationPreferences::GetInstance()->RemoveNotificationSlot(bundleOption, slotType);
+        dbResult = NotificationPreferences::GetInstance()->RemoveNotificationSlot(bundleOption, slotType);
     }));
     notificationSvrQueue_->wait(handler);
     // if remove slot failed, it still return ok.
+    message.ErrorCode(dbResult);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 
