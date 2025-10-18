@@ -14,6 +14,7 @@
  */
 #include "notification_preferences_info.h"
 
+#include "aes_gcm_helper.h"
 #include "ans_log_wrapper.h"
 #include "notification_constant.h"
 #include "bundle_manager_helper.h"
@@ -247,8 +248,18 @@ std::string NotificationPreferencesInfo::BundleInfo::GetExtensionSubscriptionInf
 {
     auto jsonObject = nlohmann::json::array();
     for (const auto& item : extensionSubscriptionInfos_) {
+        sptr<NotificationExtensionSubscriptionInfo> itemcopy =
+            new (std::nothrow) NotificationExtensionSubscriptionInfo(*item);
+        if (itemcopy == nullptr) {
+            ANS_LOGE("Failed to create NotificationExtensionSubscriptionInfo");
+            continue;
+        }
+        std::string encryptedAddr;
+        if (AesGcmHelper::Encrypt(itemcopy->GetAddr(), encryptedAddr) == ERR_OK) {
+            itemcopy->SetAddr(encryptedAddr);
+        }
         nlohmann::json jsonNode;
-        item->ToJson(jsonNode);
+        itemcopy->ToJson(jsonNode);
         jsonObject.emplace_back(jsonNode);
     }
     return jsonObject.dump();
@@ -284,9 +295,12 @@ bool NotificationPreferencesInfo::BundleInfo::SetExtensionSubscriptionInfosFromJ
             extensionSubscriptionInfos_.clear();
             return false;
         }
+        std::string decryptedAddr;
+        if (AesGcmHelper::Decrypt(decryptedAddr, subscriptionInfo->GetAddr()) == ERR_OK) {
+            subscriptionInfo->SetAddr(decryptedAddr);
+        }
         extensionSubscriptionInfos_.emplace_back(std::move(subscriptionInfo));
     }
-
     return true;
 }
 

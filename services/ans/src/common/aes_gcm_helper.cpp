@@ -222,12 +222,12 @@ bool AesGcmHelper::EncryptAesGcm(const std::string &plainText, std::string &ciph
 
 bool AesGcmHelper::DecryptAesGcm(std::string &plainText, const std::string &cipherText, std::string &key)
 {
-    const unsigned int bufferLen = cipherText.size() - G_AES_GCM_IV_LEN - G_AES_GCM_TAG_LEN;
+    std::string cipherBytes = Hex2Byte(cipherText);
+    const unsigned int bufferLen = cipherBytes.size() - G_AES_GCM_IV_LEN - G_AES_GCM_TAG_LEN;
     std::vector<unsigned char> buffer(bufferLen);
     std::vector<unsigned char> iv(G_AES_GCM_IV_LEN);
     std::vector<unsigned char> cipherByte(bufferLen);
     std::vector<unsigned char> tag(G_AES_GCM_TAG_LEN);
-    std::string cipherBytes = Hex2Byte(cipherText);
     iv.assign(cipherBytes.begin(), cipherBytes.begin() + G_AES_GCM_IV_LEN);
     cipherByte.assign(cipherBytes.begin() + G_AES_GCM_IV_LEN, cipherBytes.end() - G_AES_GCM_TAG_LEN);
     tag.assign(cipherBytes.end() - G_AES_GCM_TAG_LEN, cipherBytes.end());

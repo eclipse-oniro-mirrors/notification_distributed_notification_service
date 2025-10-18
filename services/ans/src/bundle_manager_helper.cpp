@@ -407,17 +407,20 @@ bool BundleManagerHelper::QueryExtensionInfos(std::vector<AppExecFwk::ExtensionA
     return true;
 }
 
-bool BundleManagerHelper::CheckBundleImplExtensionAbility(const std::string &bundleName, int32_t userId)
+bool BundleManagerHelper::CheckBundleImplExtensionAbility(const sptr<NotificationBundleOption> &bundleOption)
 {
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
     auto flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION)
         | static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE)
         | static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY)
         | static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY);
 
     AppExecFwk::BundleInfo bundleInfo;
-    if (!GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
-        ANS_LOGE("GetBundleInfoV9 error, bundleName = %{public}s uid = %{public}d", bundleInfo.name.c_str(),
-            bundleInfo.uid);
+    if (!GetBundleInfoV9(bundleOption->GetBundleName(), flags, bundleInfo, userId)) {
+        ANS_LOGE("GetBundleInfoV9 error, bundleName = %{public}s, userId = %{public}d",
+            bundleOption->GetBundleName().c_str(), userId);
+        return false;
     }
     for (const auto& hapmodule : bundleInfo.hapModuleInfos) {
         for (const auto& extInfo : hapmodule.extensionInfos) {

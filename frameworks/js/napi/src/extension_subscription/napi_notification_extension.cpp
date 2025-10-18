@@ -61,6 +61,12 @@ napi_value GetNotificationExtensionSubscriptionInfo(
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
+    if (strLen == 0) {
+        ANS_LOGE("addr parameter is empty.");
+        std::string msg = "Incorrect parameter addr. The addr must not be empty.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
     info->SetAddr(str);
 
     // type: SubscribeType

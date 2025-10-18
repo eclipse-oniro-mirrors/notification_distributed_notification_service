@@ -1566,6 +1566,10 @@ public:
     void HandleBundleUninstall(const sptr<NotificationBundleOption> &bundleOption);
     bool TryStartExtensionSubscribeService();
     void OnHfpDeviceConnectChanged(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
+    void ProcessSetUserGrantedState(const sptr<NotificationBundleOption>& bundle,
+        bool enabled, ErrCode& result);
+    void ProcessSetUserGrantedBundleState(const sptr<NotificationBundleOption>& bundle,
+        const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled, ErrCode& result);
 
 private:
     struct RecentInfo {
@@ -1783,6 +1787,7 @@ private:
         const NotificationConstant::SlotType &slotType);
     void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool enabled);
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
+    sptr<NotificationBundleOption> GenerateValidBundleOptionV2(const sptr<NotificationBundleOption> &bundleOption);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
     ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record,
         bool isSystemApp, bool isUpdateByOwner, const bool isAgentController);
@@ -1945,8 +1950,7 @@ private:
     ErrCode PreReminderInfoCheck();
     bool isProxyForUnaware(const int32_t uid);
 	
-    ErrCode RefreshExtensionSubscriptionBundlesFromConfig(int32_t userId,
-        const sptr<NotificationBundleOption>& bundleOption,
+    ErrCode RefreshExtensionSubscriptionBundlesFromConfig(const sptr<NotificationBundleOption>& bundleOption,
         std::vector<sptr<NotificationBundleOption>>& enabledBundles);
     bool isExtensionServiceExist();
     int32_t LoadExtensionService();

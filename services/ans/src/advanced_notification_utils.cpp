@@ -1796,6 +1796,50 @@ ErrCode AdvancedNotificationService::CheckBundleOptionValid(sptr<NotificationBun
     return ERR_OK;
 }
 
+sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleOptionV2(
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("bundleOption or bundle name is invalid!");
+        return nullptr;
+    }
+
+    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+    if (bundleManager == nullptr) {
+        return nullptr;
+    }
+
+    int32_t activeUserId = -1;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
+        ANS_LOGE("Failed to get active user id!");
+        return nullptr;
+    }
+
+    int32_t actualUid = bundleManager->GetDefaultUidByBundleName(bundleOption->GetBundleName(), activeUserId);
+    if (actualUid < 0) {
+        ANS_LOGE("Bundle name %{public}s does not exist in userId %{public}d",
+            bundleOption->GetBundleName().c_str(), activeUserId);
+        return nullptr;
+    }
+
+    sptr<NotificationBundleOption> validBundleOption = nullptr;
+    if (bundleOption->GetUid() <= 0) {
+        validBundleOption = new (std::nothrow) NotificationBundleOption(bundleOption->GetBundleName(), actualUid);
+        if (validBundleOption == nullptr) {
+            ANS_LOGE("Failed to create NotificationBundleOption instance");
+            return nullptr;
+        }
+    } else {
+        if (actualUid != bundleOption->GetUid()) {
+            ANS_LOGE("UID mismatch: expected %{public}d, actual %{public}d for bundle %{public}s",
+                     bundleOption->GetUid(), actualUid, bundleOption->GetBundleName().c_str());
+            return nullptr;
+        }
+        validBundleOption = bundleOption;
+    }
+    return validBundleOption;
+}
+
 std::vector<AppExecFwk::BundleInfo> AdvancedNotificationService::GetBundlesOfActiveUser()
 {
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
