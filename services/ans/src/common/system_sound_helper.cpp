@@ -31,6 +31,10 @@ SystemSoundHelper::~SystemSoundHelper()
 }
 
 #ifdef PLAYER_FRAMEWORK_ENABLE
+
+static const int32_t REMOVE_SUCCESS_COUNT = 1;
+static const uint64_t TASK_DELAY = 2 * 1000 * 1000;
+
 void SystemSoundHelper::Connect()
 {
     if (systemSoundClient_ == nullptr) {
@@ -38,20 +42,32 @@ void SystemSoundHelper::Connect()
     }
 }
 
-void SystemSoundHelper::RemoveCustomizedTone(const std::string uri)
+int32_t SystemSoundHelper::InvokeRemoveCustomizedTone(const std::string uri, bool retry)
 {
     if (uri.empty()) {
-        return;
+        return REMOVE_SUCCESS_COUNT;
     }
 
     std::lock_guard<ffrt::mutex> lock(lock_);
     Connect();
     if (systemSoundClient_ == nullptr) {
         ANS_LOGW("Get system clint failed.");
-        return;
+        return -1;
     }
     int32_t result = systemSoundClient_->RemoveCustomizedTone(nullptr, uri);
-    ANS_LOGI("Remove Customized tone, uri: %{public}s, result: %{public}d", uri.c_str(), result);
+    ANS_LOGI("Remove Customized tone %{public}d, uri: %{public}s, result: %{public}d",
+        retry, uri.c_str(), result);
+    return result;
+}
+
+void SystemSoundHelper::RemoveCustomizedTone(const std::string uri)
+{
+    if (InvokeRemoveCustomizedTone(uri) != REMOVE_SUCCESS_COUNT) {
+        std::function<void()> retryTask = [uri]() {
+            SystemSoundHelper::GetInstance()->InvokeRemoveCustomizedTone(uri, true);
+        };
+        ffrt::submit(retryTask, ffrt::task_attr().delay(TASK_DELAY));
+    }
 }
 
 void SystemSoundHelper::RemoveCustomizedTone(sptr<NotificationRingtoneInfo> ringtoneInfo)
@@ -63,6 +79,32 @@ void SystemSoundHelper::RemoveCustomizedTone(sptr<NotificationRingtoneInfo> ring
     }
 
     RemoveCustomizedTone(ringtoneInfo->GetRingtoneUri());
+}
+
+std::vector<std::pair<std::string, int32_t>> SystemSoundHelper::InvokeRemoveCustomizedTones(
+    const std::vector<std::string> uris, bool retry)
+{
+    std::vector<std::pair<std::string, int32_t>> invockResults;
+    if (uris.empty()) {
+        ANS_LOGI("Empty local or online info.");
+        return invockResults;
+    }
+
+    std::lock_guard<ffrt::mutex> lock(lock_);
+    Connect();
+    if (systemSoundClient_ == nullptr) {
+        ANS_LOGW("Get system clint failed.");
+        return invockResults;
+    }
+
+    Media::SystemSoundError error = Media::SystemSoundError::ERROR_OK;
+    auto results = systemSoundClient_->RemoveCustomizedToneList(uris, error);
+    for (auto item : results) {
+        ANS_LOGI("Remove Customized tone %{public}d, uri: %{public}s, result: %{public}d",
+            retry, item.first.c_str(), item.second);
+        invockResults.push_back(std::make_pair(item.first, item.second));
+    }
+    return invockResults;
 }
 
 void SystemSoundHelper::RemoveCustomizedTones(std::vector<NotificationRingtoneInfo> ringtoneInfos)
@@ -78,23 +120,24 @@ void SystemSoundHelper::RemoveCustomizedTones(std::vector<NotificationRingtoneIn
             uris.push_back(ringtoneInfo.GetRingtoneUri());
         }
     }
-    if (uris.empty()) {
-        ANS_LOGI("Empty local or online info.");
+
+    auto results = InvokeRemoveCustomizedTones(uris);
+    if (results.empty()) {
         return;
     }
 
-    std::lock_guard<ffrt::mutex> lock(lock_);
-    Connect();
-    if (systemSoundClient_ == nullptr) {
-        ANS_LOGW("Get system clint failed.");
-        return;
+    std::vector<std::string> failedUris;
+    for (auto& item : results) {
+        if (item.second != Media::SystemSoundError::ERROR_OK) {
+            failedUris.push_back(item.first);
+        }
     }
 
-    Media::SystemSoundError error = Media::SystemSoundError::ERROR_OK;
-    auto results = systemSoundClient_->RemoveCustomizedToneList(uris, error);
-    for (auto item : results) {
-        ANS_LOGI("Remove Customized tone, uri: %{public}s, result: %{public}d",
-            item.first.c_str(), item.second);
+    if (!failedUris.empty()) {
+        std::function<void()> retryTask = [failedUris]() {
+            SystemSoundHelper::GetInstance()->InvokeRemoveCustomizedTones(failedUris, true);
+        };
+        ffrt::submit(retryTask, ffrt::task_attr().delay(TASK_DELAY));
     }
 }
 #else
