@@ -16,14 +16,18 @@
 #include "mock_notification_helper.h"
 
 #include "notification_helper.h"
+#include "common_event_manager.h"
 
-namespace OHOS::Notification {
+namespace OHOS {
 namespace {
 bool g_mockIsAllowUseReminder = true;
 bool g_mockIsAllowedNotify = true;
+bool g_mockSubscribeCommonEventRet = true;
 int32_t g_mockIsAllowedNotifyRet = 0;
+int32_t g_mockSubscribeNotificationRet = 0;
 }
 
+namespace Notification {
 void MockNotificationHelper::MockIsAllowUseReminder(const bool isAllowUseReminder)
 {
     g_mockIsAllowUseReminder = isAllowUseReminder;
@@ -33,6 +37,16 @@ void MockNotificationHelper::MockIsAllowedNotify(const bool isAllowedNotify, con
 {
     g_mockIsAllowedNotify = isAllowedNotify;
     g_mockIsAllowedNotifyRet = ret;
+}
+
+void MockNotificationHelper::MockSubscribeNotification(const int32_t ret)
+{
+    g_mockSubscribeNotificationRet = ret;
+}
+
+void MockNotificationHelper::MockSubscribeCommonEvent(const bool ret)
+{
+    g_mockSubscribeCommonEventRet = ret;
 }
 
 ErrCode NotificationHelper::AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder)
@@ -46,4 +60,17 @@ ErrCode NotificationHelper::IsAllowedNotify(const NotificationBundleOption& bund
     allowed = g_mockIsAllowedNotify;
     return g_mockIsAllowedNotifyRet;
 }
-} // namespace OHOS::Notification
+
+ErrCode NotificationHelper::SubscribeNotification(const NotificationSubscriber& subscriber)
+{
+    return g_mockSubscribeNotificationRet;
+}
+}
+
+namespace EventFwk {
+bool CommonEventManager::SubscribeCommonEvent(const std::shared_ptr<CommonEventSubscriber>& subscriber)
+{
+    return g_mockSubscribeCommonEventRet;
+}
+}
+} // namespace OHOS

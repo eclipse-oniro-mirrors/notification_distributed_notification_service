@@ -29,6 +29,26 @@ public:
     static void MockDelExcludeDates(const int32_t ret);
     static void MockGetExcludeDates(const int32_t ret);
     static void MockQueryActiveReminderCount(const int32_t ret);
+
+    static void ResetFlag();
+
+    static bool callCancelAllReminders_;
+    static bool callOnProcessDiedLocked_;
+    static bool callRefreshRemindersDueToSysTimeChange_;
+    static bool callOnUserSwitch_;
+    static bool callOnUserRemove_;
+    static bool callOnUnlockScreen_;
+    static bool callShowActiveReminder_;
+    static bool callTerminateAlerting_;
+    static bool callCloseReminder_;
+    static bool callSnoozeReminder_;
+    static bool callHandleCustomButtonClick_;
+    static bool callClickReminder_;
+    static bool callOnBundleMgrServiceStart_;
+    static bool callOnAbilityMgrServiceStart_;
+    static bool callOnRemoveAppMgr_;
+    static bool callHandleAutoDeleteReminder_;
+    static bool callOnLanguageChanged_;
 };
 }  // namespace OHOS::Notification
 

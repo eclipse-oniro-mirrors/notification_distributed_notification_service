@@ -22,7 +22,6 @@
 #include "common_event_support.h"
 #include "matching_skills.h"
 #include "reminder_data_manager.h"
-#include "reminder_event_manager.h"
 #include "reminder_request_timer.h"
 #include "reminder_request_alarm.h"
 #include "reminder_request.h"
@@ -112,7 +111,8 @@ HWTEST_F(ReminderDataManagerTest, CancelReminderToDb_0001, Level1)
     reminder1->InitUid(callingUid);
     reminder1->SetExpired(false);
     manager->PublishReminder(reminder1, callingUid);
-    
+
+    sleep(2);
     auto store = std::move(manager->store_);
     int32_t ret = manager->CancelReminderToDb(reminder1->GetReminderId(), callingUid);
     EXPECT_TRUE(ret == ERR_REMINDER_NOT_EXIST);
@@ -539,90 +539,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_018, Level1)
 }
 
 /**
- * @tc.name: ReminderEventManagerTest_001
- * @tc.desc: Reminder data manager test
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_001, Level1)
-{
-    MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
-    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
-    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CLOSE_ALERT);
-    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_REMOVED);
-    CommonEventSubscribeInfo subscriberInfo(matchingSkills);
-    auto subscriber = std::make_shared<ReminderEventManager::ReminderEventSubscriber>(subscriberInfo, manager);
-    EventFwk::CommonEventData data;
-    Want want;
-    want.SetAction(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(ReminderRequest::REMINDER_EVENT_CLOSE_ALERT);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(CommonEventSupport::COMMON_EVENT_USER_REMOVED);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
-}
-
-/**
- * @tc.name: ReminderEventManagerTest_002
- * @tc.desc: Reminder data manager test
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_002, Level1)
-{
-    auto statusChangeListener
-        = std::make_shared<ReminderEventManager::SystemAbilityStatusChangeListener>(manager);
-    statusChangeListener->OnAddSystemAbility(0, "");
-    statusChangeListener->OnRemoveSystemAbility(0, "");
-    remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
-}
-
-/**
  * @tc.name: ReminderEventManagerTest_003
  * @tc.desc: Reminder data manager test
  * @tc.type: FUNC
@@ -864,125 +780,6 @@ HWTEST_F(ReminderDataManagerTest, IsMatched_00001, Level1)
     EXPECT_EQ(ret, false);
     ret = manager->IsMatched(reminder, 100, -1, true);
     EXPECT_EQ(ret, true);
-}
-
-/**
- * @tc.name: ReminderEventManager_00001
- * @tc.desc: Reminder data manager test
- * @tc.type: FUNC
- * @tc.require: issue#I9IIDE
- */
-HWTEST_F(ReminderDataManagerTest, ReminderEventManager_001, Level1)
-{
-    MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
-    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
-    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CLOSE_ALERT);
-    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_REMOVED);
-    CommonEventSubscribeInfo subscriberInfo(matchingSkills);
-    auto subscriber = std::make_shared<ReminderEventManager::ReminderEventSubscriber>(subscriberInfo, manager);
-    
-    EventFwk::Want want;
-    want.SetParam(ReminderRequest::PARAM_REMINDER_ID, 0);
-    AppExecFwk::ElementName element("", "test", "EntryAbility");
-    want.SetElement(element);
-    subscriber->HandlePackageRemove(want);
-    EXPECT_TRUE(manager != nullptr);
-}
-
-/**
- * @tc.name: IsMatched_00001
- * @tc.desc: Reminder data manager test
- * @tc.type: FUNC
- * @tc.require: issue#I9IIDE
- */
-HWTEST_F(ReminderDataManagerTest, ReminderEventManager_002, Level1)
-{
-    auto statusChangeListener
-        = std::make_shared<ReminderEventManager::SystemAbilityStatusChangeListener>(manager);
-    statusChangeListener->OnAddSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID, "");
-    statusChangeListener->OnAddSystemAbility(APP_MGR_SERVICE_ID, "");
-    statusChangeListener->OnAddSystemAbility(ABILITY_MGR_SERVICE_ID, "");
-    statusChangeListener->OnAddSystemAbility(-1, "");
-    statusChangeListener->OnRemoveSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID, "");
-    statusChangeListener->OnRemoveSystemAbility(APP_MGR_SERVICE_ID, "");
-    statusChangeListener->OnRemoveSystemAbility(ABILITY_MGR_SERVICE_ID, "");
-    statusChangeListener->OnRemoveSystemAbility(-1, "");
-    EXPECT_TRUE(manager != nullptr);
-}
-
-/**
- * @tc.name: ReminderEventManagerTest_005
- * @tc.desc: Reminder data manager test
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_005, Level1)
-{
-    MatchingSkills customMatchingSkills;
-    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
-    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
-    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CLOSE_ALERT);
-    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT);
-    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION);
-    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT);
-    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CLICK_ALERT);
-    CommonEventSubscribeInfo subscriberInfo(customMatchingSkills);
-    auto subscriber = std::make_shared<ReminderEventManager::ReminderEventCustomSubscriber>(subscriberInfo, manager);
-    EventFwk::CommonEventData data;
-    Want want;
-    want.SetAction(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(ReminderRequest::REMINDER_EVENT_CLOSE_ALERT);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(ReminderRequest::REMINDER_EVENT_CLICK_ALERT);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    EXPECT_TRUE(manager != nullptr);
-}
-
-/**
- * @tc.name: ReminderEventManagerTest_006
- * @tc.desc: Reminder data manager test
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_006, Level1)
-{
-    std::shared_ptr<ReminderDataManager> data;
-    ReminderEventManager::ReminderNotificationSubscriber subscriber(data);
-    subscriber.OnCanceled(nullptr, nullptr, NotificationConstant::PACKAGE_REMOVE_REASON_DELETE);
-    subscriber.OnCanceled(nullptr, nullptr, NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
-    sptr<NotificationRequest> request = new NotificationRequest();
-    std::shared_ptr<Notification> notification = std::make_shared<Notification>(request);
-    subscriber.OnCanceled(notification, nullptr, NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
-    request->SetAutoDeletedTime(100);
-    subscriber.OnCanceled(notification, nullptr, NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
-    request->SetLabel("REMINDER_AGENT");
-    subscriber.OnCanceled(notification, nullptr, NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**

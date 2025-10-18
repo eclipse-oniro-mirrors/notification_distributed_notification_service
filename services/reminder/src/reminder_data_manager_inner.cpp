@@ -399,8 +399,10 @@ void ReminderDataManager::SetAlertingReminder(const sptr<ReminderRequest> &remin
     if (reminder == nullptr) {
         // alertingReminder_ should not be set with null as it point to actual object.
         alertingReminderId_ = -1;
+        alertingIdIsShared_ = false;
     } else {
         alertingReminderId_ = reminder->GetReminderId();
+        alertingIdIsShared_ = reminder->IsShare();
         alertingReminder_ = reminder;
     }
     ANSR_LOGD("Set alertingReminderId=%{public}d", alertingReminderId_.load());

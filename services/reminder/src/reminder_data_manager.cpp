@@ -621,7 +621,7 @@ std::shared_ptr<ReminderDataManager> ReminderDataManager::InitInstance()
     if (REMINDER_DATA_MANAGER == nullptr) {
         REMINDER_DATA_MANAGER = std::make_shared<ReminderDataManager>();
         REMINDER_DATA_MANAGER->Init();
-        ReminderEventManager reminderEventManager(REMINDER_DATA_MANAGER);
+        ReminderEventManager::GetInstance().Init();
     }
     return REMINDER_DATA_MANAGER;
 }
@@ -873,6 +873,21 @@ void ReminderDataManager::TerminateAlerting(const OHOS::EventFwk::Want &want)
     TerminateAlerting(reminder, "timeOut");
 }
 
+void ReminderDataManager::TerminateAlerting()
+{
+    int32_t reminderId = alertingReminderId_;
+    bool isShare = alertingIdIsShared_;
+    if (reminderId == -1) {
+        return;
+    }
+    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, isShare);
+    if (reminder == nullptr) {
+        ANSR_LOGE("null reminder: %{public}d", reminderId);
+        return;
+    }
+    TerminateAlerting(reminder, "manual");
+}
+
 void ReminderDataManager::TerminateAlerting(const uint16_t waitInSecond, const sptr<ReminderRequest> &reminder)
 {
     sleep(waitInSecond);
@@ -892,15 +907,6 @@ void ReminderDataManager::TerminateAlerting(const sptr<ReminderRequest> &reminde
     if (!reminder->OnTerminate()) {
         return;
     }
-    int32_t reminderId = reminder->GetReminderId();
-    int32_t uid = reminder->GetUid();
-    NotificationRequest notificationRequest(reminder->GetNotificationId());
-    notificationRequest.SetNotificationControlFlags(static_cast<uint32_t>(
-        NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_SOUND));
-    int32_t appIndex = ReminderBundleManagerHelper::GetInstance().GetAppIndexByUid(uid);
-    reminder->UpdateNotificationRequest(notificationRequest, false, appIndex);
-    IN_PROCESS_CALL_WITHOUT_RET(NotificationHelper::PublishNotification(
-        ReminderRequest::NOTIFICATION_LABEL, notificationRequest));
     store_->UpdateOrInsert(reminder);
 }
 
@@ -1837,6 +1843,7 @@ void ReminderDataManager::ResetStates(TimerType type)
             timerId = timerIdAlerting_;
             timerIdAlerting_ = 0;
             alertingReminderId_ = -1;
+            alertingIdIsShared_ = false;
             break;
         }
         default: {

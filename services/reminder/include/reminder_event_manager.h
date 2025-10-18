@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,85 +17,72 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_EVENT_MANAGER_H
 
 #include "common_event_subscriber.h"
-#include "reminder_data_manager.h"
-#include "system_ability_status_change_stub.h"
 #include "notification_subscriber.h"
+#include "system_ability_status_change_stub.h"
 
-#include <memory>
-
-namespace OHOS {
-namespace Notification {
+namespace OHOS::Notification {
 class ReminderEventManager {
 public:
-    explicit ReminderEventManager(std::shared_ptr<ReminderDataManager> &reminderDataManager);
-    virtual ~ReminderEventManager() {};
+    static ReminderEventManager& GetInstance();
+
+private:
+    ReminderEventManager() = default;
+    ~ReminderEventManager() = default;
     ReminderEventManager(ReminderEventManager &other) = delete;
     ReminderEventManager& operator = (const ReminderEventManager &other) = delete;
 
+public:
+    void Init();
+
 private:
-    void init(std::shared_ptr<ReminderDataManager> &reminderDataManager) const;
-    void SubscribeSystemAbility(std::shared_ptr<ReminderDataManager> &reminderDataManager) const;
+    void SubscribeEvent();
+    void SubscribeSystemAbility(const int32_t systemAbilityId);
+    void SubscribeKeyEvent(const int32_t keyCode);
 
 class ReminderEventSubscriber : public EventFwk::CommonEventSubscriber {
 public:
-    ReminderEventSubscriber(const EventFwk::CommonEventSubscribeInfo &subscriberInfo,
-        std::shared_ptr<ReminderDataManager> &reminderDataManager);
-    virtual void OnReceiveEvent(const EventFwk::CommonEventData &data);
-
-private:
-    sptr<NotificationBundleOption> GetBundleOption(const OHOS::EventFwk::Want &want) const;
-    int32_t GetUid(const OHOS::EventFwk::Want &want) const;
-    void HandlePackageRemove(const EventFwk::Want &want) const;
-    void HandleProcessDied(const EventFwk::Want &want) const;
-    std::shared_ptr<ReminderDataManager> reminderDataManager_ = nullptr;
+    ReminderEventSubscriber(const EventFwk::CommonEventSubscribeInfo &subscriberInfo);
+    void OnReceiveEvent(const EventFwk::CommonEventData &data) override;
 };
 
 class ReminderEventCustomSubscriber : public EventFwk::CommonEventSubscriber {
 public:
-    ReminderEventCustomSubscriber(const EventFwk::CommonEventSubscribeInfo &subscriberInfo,
-        std::shared_ptr<ReminderDataManager> &reminderDataManager);
-    virtual void OnReceiveEvent(const EventFwk::CommonEventData &data);
-
-private:
-    std::shared_ptr<ReminderDataManager> reminderDataManager_ = nullptr;
+    ReminderEventCustomSubscriber(const EventFwk::CommonEventSubscribeInfo &subscriberInfo);
+    void OnReceiveEvent(const EventFwk::CommonEventData &data) override;
 };
 
 class SystemAbilityStatusChangeListener : public OHOS::SystemAbilityStatusChangeStub {
 public:
-    explicit SystemAbilityStatusChangeListener(std::shared_ptr<ReminderDataManager> &reminderDataManager);
-    ~SystemAbilityStatusChangeListener() {};
-    virtual void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
-    virtual void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
-private:
-    std::shared_ptr<ReminderDataManager> reminderDataManager_ = nullptr;
+    SystemAbilityStatusChangeListener() = default;
+    ~SystemAbilityStatusChangeListener() = default;
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
 };
 
 class ReminderNotificationSubscriber : public NotificationSubscriber {
 public:
-    explicit ReminderNotificationSubscriber(std::shared_ptr<ReminderDataManager> &reminderDataManager);
-    ~ReminderNotificationSubscriber() override;
-    void OnConnected() override;
-    void OnDisconnected() override;
+    ReminderNotificationSubscriber() = default;
+    ~ReminderNotificationSubscriber() = default;
+    void OnConnected() override {}
+    void OnDisconnected() override {}
     void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override;
     void OnConsumed(const std::shared_ptr<Notification> &request,
-        const std::shared_ptr<NotificationSortingMap> &sortingMap) override;
-    void OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap) override;
-    void OnDied() override;
+        const std::shared_ptr<NotificationSortingMap> &sortingMap) override {}
+    void OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap) override {}
+    void OnDied() override {}
     void OnDoNotDisturbDateChange(
-        const std::shared_ptr<NotificationDoNotDisturbDate> &date) override;
+        const std::shared_ptr<NotificationDoNotDisturbDate> &date) override {}
     void OnEnabledNotificationChanged(
-        const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override;
-    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override;
-    void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
+        const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override {}
+    void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override {}
+    void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override {}
     void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>> &requestList,
-        const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override;
-private:
-    std::shared_ptr<ReminderDataManager> reminderDataManager_ = nullptr;
+        const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override {}
 };
 
-    static std::shared_ptr<ReminderNotificationSubscriber> subscriber_;
+private:
+    std::shared_ptr<ReminderNotificationSubscriber> subscriber_;
 };
-}  // namespace OHOS
-}  // namespace Notification
+}  // namespace OHOS::Notification
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_EVENT_MANAGER_H

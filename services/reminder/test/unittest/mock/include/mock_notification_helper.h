@@ -23,6 +23,8 @@ class MockNotificationHelper {
 public:
     static void MockIsAllowUseReminder(const bool isAllowUseReminder);
     static void MockIsAllowedNotify(const bool isAllowedNotify, const int32_t ret);
+    static void MockSubscribeNotification(const int32_t ret);
+    static void MockSubscribeCommonEvent(const bool ret);
 };
 }  // namespace OHOS::Notification
 
