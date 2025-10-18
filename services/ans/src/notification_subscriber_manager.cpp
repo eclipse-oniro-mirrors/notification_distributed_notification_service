@@ -650,6 +650,15 @@ void NotificationSubscriberManager::NotifyCanceledInner(
         HaOperationMessage(liveView).SyncDelete(notification->GetKey());
     }
 
+    if (IsSystemUser(notification->GetUserId())) {
+        if ((notification->GetNotificationRequestPoint()->GetWantAgent() != nullptr) ||
+            (notification->GetNotificationRequestPoint()->GetRemovalWantAgent() != nullptr) ||
+            (notification->GetNotificationRequestPoint()->GetMaxScreenWantAgent() != nullptr)) {
+                HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_11, EventBranchId::BRANCH_0);
+                message.Message("User 0 ntf:" + notification->GetKey());
+                NotificationAnalyticsUtil::ReportModifyEvent(message);
+            }
+    }
     ANS_LOGI("CancelNotification key=%{public}s", notification->GetKey().c_str());
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);
