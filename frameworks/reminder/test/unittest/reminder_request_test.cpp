@@ -22,8 +22,6 @@
 #include "reminder_request_factory.h"
 #include "reminder_request_adaptation.h"
 
-extern void MockNowInstantMilli(bool mockRet);
-
 using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
@@ -420,7 +418,6 @@ HWTEST_F(ReminderRequestTest, OnDateTimeChange_00100, Function | SmallTest | Lev
  */
 HWTEST_F(ReminderRequestTest, OnSnooze_00100, Function | SmallTest | Level1)
 {
-    MockNowInstantMilli(true);
     auto rrc = std::make_shared<ReminderRequestChild>();
     EXPECT_EQ(rrc->OnSnooze(), true);
 }
@@ -445,7 +442,6 @@ HWTEST_F(ReminderRequestTest, OnTerminate_00100, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, ShouldShowImmediately_00100, Function | SmallTest | Level1)
 {
-    MockNowInstantMilli(true);
     auto rrc = std::make_shared<ReminderRequestChild>();
     EXPECT_EQ(rrc->ShouldShowImmediately(), true);
 }
@@ -559,7 +555,6 @@ HWTEST_F(ReminderRequestTest, Marshalling_00100, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, CanShow_00001, Function | SmallTest | Level1)
 {
-    MockNowInstantMilli(true);
     auto rrc = std::make_shared<ReminderRequestChild>();
     EXPECT_EQ(rrc->CanShow(), true);
 }
@@ -678,7 +673,6 @@ HWTEST_F(ReminderRequestTest, HandleSysTimeChange_00002, Function | SmallTest | 
  */
 HWTEST_F(ReminderRequestTest, OnSnooze_00001, Function | SmallTest | Level1)
 {
-    MockNowInstantMilli(true);
     auto rrc = std::make_shared<ReminderRequestChild>();
     rrc->OnShow(false, false, true);
     EXPECT_EQ(rrc->OnSnooze(), true);
@@ -692,7 +686,6 @@ HWTEST_F(ReminderRequestTest, OnSnooze_00001, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, OnSnooze_00002, Function | SmallTest | Level1)
 {
-    MockNowInstantMilli(true);
     auto rrc = std::make_shared<ReminderRequestChild>();
     rrc->UpdateNextReminder(false);
     EXPECT_EQ(rrc->OnSnooze(), true);
@@ -706,7 +699,6 @@ HWTEST_F(ReminderRequestTest, OnSnooze_00002, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, OnSnooze_00003, Function | SmallTest | Level1)
 {
-    MockNowInstantMilli(true);
     auto rrc = std::make_shared<ReminderRequestChild>();
     rrc->SetTimeInterval(100);
     EXPECT_EQ(rrc->OnSnooze(), true);
@@ -738,7 +730,6 @@ HWTEST_F(ReminderRequestTest, OnSnooze_00004, Function | SmallTest | Level1)
  */
 HWTEST_F(ReminderRequestTest, OnSnooze_00005, Function | SmallTest | Level1)
 {
-    MockNowInstantMilli(true);
     auto rrc = std::make_shared<ReminderRequestChild>();
     bool deSet = true;
     uint8_t newState = 1;
