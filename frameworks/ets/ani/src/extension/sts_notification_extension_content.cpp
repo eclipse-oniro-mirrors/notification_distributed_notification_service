@@ -83,7 +83,7 @@ ani_object WrapNotificationExtensionContent(ani_env* env,
     ani_object contentObject = nullptr;
     ani_class contentCls = nullptr;
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationExtensionContent/NotificationExtensionContentInner;", contentCls, contentObject)) {
+        "notification.NotificationExtensionContent.NotificationExtensionContentInner", contentCls, contentObject)) {
         ANS_LOGE("WrapNotificationExtensionContent : CreateClassObjByClassName failed");
         return nullptr;
     }

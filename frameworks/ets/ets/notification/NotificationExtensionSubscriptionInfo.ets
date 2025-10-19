@@ -13,16 +13,14 @@
  * limitations under the License.
  */
 
-export enum SubscribeType {
-	BLUETOOTH = 0,
-}
+import type notificationExtensionSubscription from '@ohos.notificationExtensionSubscription';
 
 export interface NotificationExtensionSubscriptionInfo {
 	addr:string;
-	type: SubscribeType;
+	type: notificationExtensionSubscription.SubscribeType;
 }
 
 export class NotificationExtensionSubscriptionInfoInner implements NotificationExtensionSubscriptionInfo {
 	public addr: string = '';
-	public type: SubscribeType = SubscribeType.BLUETOOTH;
+	public type: notificationExtensionSubscription.SubscribeType = notificationExtensionSubscription.SubscribeType.BLUETOOTH;
 }

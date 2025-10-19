@@ -23,7 +23,7 @@ namespace OHOS {
 namespace NotificationSts {
 namespace {
 constexpr const char* NOTIFICATION_SUBSCRIBER_EXTENSION_CONTEXT_CLASS_NAME =
-"L@ohos/application/NotificationSubscriberExtensionContext/NotificationSubscriberExtensionContext;";
+"@ohos.application.NotificationSubscriberExtensionContext.NotificationSubscriberExtensionContext";
 }
 
 static void StartAbility([[maybe_unused]] ani_env *env,

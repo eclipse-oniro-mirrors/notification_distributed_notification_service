@@ -19,6 +19,10 @@
 
 namespace OHOS {
 namespace NotificationSts {
+namespace {
+constexpr const char* BUNDLE_OPTION_CLASSNAME = "notification.NotificationCommonDef.BundleOptionInner";
+}
+
 bool UnwrapBundleOption(ani_env *env, ani_object obj, Notification::NotificationBundleOption& option)
 {
     ANS_LOGD("UnwrapBundleOption call");
@@ -76,6 +80,47 @@ ani_object GetAniArrayBundleOption(ani_env* env,
     return arrayObj;
 }
 
+bool GetAniArrayBundleOptionV2(
+    ani_env* env, const std::vector<sptr<BundleOption>>& bundleOptions, ani_object& outAniObj)
+{
+    ANS_LOGD("GetAniArrayBundleOptionV2 call");
+    if (env == nullptr) {
+        ANS_LOGE("GetAniArrayBundleOptionV2 failed, has nullptr");
+        return false;
+    }
+    ani_class cls = nullptr;
+    ani_status status = env->FindClass(BUNDLE_OPTION_CLASSNAME, &cls);
+    if (status != ANI_OK) {
+        ANS_LOGE("FindClass failed. status : %{public}d", status);
+        return false;
+    }
+    ani_array_ref array = nullptr;
+    size_t size = bundleOptions.size();
+    status = env->Array_New_Ref(cls, size, nullptr, &array);
+    if (status != ANI_OK) {
+        ANS_LOGE("Array_New_Ref failed. status : %{public}d", status);
+        return false;
+    }
+    int32_t index = 0;
+    for (auto& bundleOption : bundleOptions) {
+        std::shared_ptr<BundleOption> optSp = std::make_shared<BundleOption>(*bundleOption);
+        ani_object item;
+        if (!WrapBundleOption(env, optSp, item) || item == nullptr) {
+            ANS_LOGE("WrapBundleOption Failed. index = %{public}d", index);
+            return false;
+        }
+        status = env->Array_Set_Ref(array, index, item);
+        if (status != ANI_OK) {
+            ANS_LOGE("Array_Set_Ref Failed. index = %{public}d, status = %{public}d", index, status);
+            return false;
+        }
+        index++;
+    }
+    ANS_LOGD("GetAniArrayBundleOptionV2 end");
+    outAniObj = array;
+    return true;
+}
+
 bool UnwrapArrayBundleOption(ani_env *env,
     ani_ref arrayObj, std::vector<Notification::NotificationBundleOption>& options)
 {
@@ -111,8 +156,7 @@ bool UnwrapArrayBundleOption(ani_env *env,
     return true;
 }
 
-bool WrapBundleOption(ani_env* env,
-    const std::shared_ptr<BundleOption> &bundleOption, ani_object &bundleObject)
+bool WrapBundleOption(ani_env* env, const std::shared_ptr<BundleOption> &bundleOption, ani_object &bundleObject)
 {
     ANS_LOGD("WrapBundleOption call");
     if (env == nullptr || bundleOption == nullptr) {
@@ -120,9 +164,8 @@ bool WrapBundleOption(ani_env* env,
         return false;
     }
     ani_class bundleCls = nullptr;
-    if (!CreateClassObjByClassName(env, "notification.NotificationCommonDef.BundleOptionInner",
-        bundleCls, bundleObject)
-        || bundleCls == nullptr || bundleObject == nullptr) {
+    if (!CreateClassObjByClassName(env, BUNDLE_OPTION_CLASSNAME, bundleCls, bundleObject) ||
+        bundleCls == nullptr || bundleObject == nullptr) {
         ANS_LOGE("WrapBundleOption: create BundleOption failed");
         return false;
     }

@@ -498,6 +498,45 @@ ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string
     return arrayObj;
 }
 
+bool GetAniStringArrayByVectorStringV2(ani_env *env, std::vector<std::string> strs, ani_object& aniArray)
+{
+    ANS_LOGD("WrapNotificationExtensionSubscribeInfo call");
+    if (env == nullptr) {
+        ANS_LOGE("WrapNotificationExtensionSubscribeInfo failed, has nullptr");
+        return false;
+    }
+    ani_class cls = nullptr;
+    ani_status status = env->FindClass("std.core.String", &cls);
+    if (status != ANI_OK) {
+        ANS_LOGE("FindClass failed. status : %{public}d", status);
+        return false;
+    }
+    ani_array_ref array = nullptr;
+    size_t size = strs.size();
+    status = env->Array_New_Ref(cls, size, nullptr, &array);
+    if (status != ANI_OK) {
+        ANS_LOGE("Array_New_Ref failed. status : %{public}d", status);
+        return false;
+    }
+    int32_t index = 0;
+    for (auto& str : strs) {
+        ani_string aniStr;
+        if ((GetAniStringByString(env, str, aniStr) != ANI_OK) || aniStr == nullptr) {
+            ANS_LOGE("GetAniStringByString failed");
+            return false;
+        }
+        status = env->Array_Set_Ref(array, index, aniStr);
+        if (status != ANI_OK) {
+            ANS_LOGE("Array_Set_Ref Failed. index = %{public}d, status = %{public}d", index, status);
+            return false;
+        }
+        index++;
+    }
+    ANS_LOGD("WrapNotificationExtensionSubscribeInfo end");
+    aniArray = array;
+    return true;
+}
+
 bool SetFieldString(ani_env *env, ani_class cls, ani_object &object,
     const std::string fieldName, const std::string value)
 {

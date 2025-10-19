@@ -26,8 +26,8 @@ ani_object AniGetAllSubscriptionBundles(ani_env *env);
 ani_boolean AniIsUserGranted(ani_env *env);
 ani_boolean AniGetUserGrantedState(ani_env *env, ani_object bundleOption);
 void AniSetUserGrantedState(ani_env *env, ani_object bundleOption, ani_boolean enable);
-ani_object AniGetUserGrantedEnableBundles(ani_env *env, ani_object bundleOption);
-ani_object AniGetUserGrantedEnableBundlesForSelf(ani_env *env);
+ani_object AniGetUserGrantedEnabledBundles(ani_env *env, ani_object bundleOption);
+ani_object AniGetUserGrantedEnabledBundlesForSelf(ani_env *env);
 void AniSetUserGrantedBundleState(ani_env *env, ani_object bundleOption, ani_object bundles, ani_boolean enabled);
 } // namespace NotificationExtensionSubScriptionSts
 } // namespace OHOS
