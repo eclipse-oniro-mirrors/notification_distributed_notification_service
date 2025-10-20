@@ -302,6 +302,24 @@ void DeleteExcludeDatesSync(int32_t reminderId)
     }
     return ::taihe::array<::ohos::reminderAgentManager::manager::ReminderInfo>(aniReminders);
 }
+
+void UpdateReminderSync(int32_t reminderId, ::ohos::reminderAgentManager::manager::ParamReminder const& reminderReq)
+{
+    if (!CheckReminderId(reminderId)) {
+        return;
+    }
+    std::shared_ptr<OHOS::Notification::ReminderRequest> reminder;
+    if (!ReminderAgentManagerNapi::Common::CreateReminder(reminderReq, reminder)) {
+        int32_t ret = ReminderAgentManagerNapi::Common::ERR_REMINDER_INVALID_PARAM;
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        return;
+    }
+    int32_t ret = OHOS::Notification::ReminderHelper::UpdateReminder(reminderId, *reminder);
+    if (ret != ERR_OK) {
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        return;
+    }
+}
 }  // namespace
 
 // Since these macros are auto-generate, lint will cause false positive.
@@ -316,4 +334,5 @@ TH_EXPORT_CPP_API_AddExcludeDateSync(AddExcludeDateSync);
 TH_EXPORT_CPP_API_DeleteExcludeDatesSync(DeleteExcludeDatesSync);
 TH_EXPORT_CPP_API_GetExcludeDatesSync(GetExcludeDatesSync);
 TH_EXPORT_CPP_API_GetAllValidRemindersSync(GetAllValidRemindersSync);
+TH_EXPORT_CPP_API_UpdateReminderSync(UpdateReminderSync);
 // NOLINTEND

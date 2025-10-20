@@ -19,4 +19,5 @@
 import type notification from '@ohos.notificationManager';
 import type { NotificationSlot } from 'notification.notificationSlot';
 import type { ValuesBucket } from '@ohos.data.ValuesBucket';
+import type { RecordData } from '@ohos.base';
 """)
