@@ -440,5 +440,16 @@ std::string BundleManagerHelper::GetBundleLabel(const std::string& bundleName)
     int32_t result = GetBundleResourceInfo(bundleName, bundleResourceInfo, 0);
     return bundleResourceInfo.label;
 }
+
+bool BundleManagerHelper::IsAtomicServiceByBundle(const std::string& bundleName, const int32_t userId)
+{
+    auto flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
+        ANS_LOGE("GetBundleInfoV9 error, bundleName = %{public}s uid = %{public}d", bundleInfo.name.c_str(),
+            bundleInfo.uid);
+    }
+    return bundleInfo.applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE;
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -241,5 +241,19 @@ HWTEST_F(BundleManagerHelperBranchTest, GetBundleInfos_00001, Function | SmallTe
 
     ASSERT_EQ(false, bundleManagerHelper.GetBundleInfos(flag, bundleInfos, 1));
 }
+
+/**
+ * @tc.number    : IsAtomicServiceByBundle_00001
+ * @tc.name      : IsAtomicServiceByBundle_00001
+ * @tc.desc      : test IsAtomicServiceByBundle
+ */
+HWTEST_F(BundleManagerHelperBranchTest, IsAtomicServiceByBundle_00001, Function | SmallTest | Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    int32_t userId = 100;
+    std::string bundleName = "testBundleName";
+
+    ASSERT_EQ(false, bundleManagerHelper.IsAtomicServiceByBundle(bundleName, userId));
+}
 }  // namespace Notification
 }  // namespace OHOS

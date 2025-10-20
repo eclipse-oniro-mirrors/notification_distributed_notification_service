@@ -190,6 +190,14 @@ public:
     bool CheckBundleImplExtensionAbility(const sptr<NotificationBundleOption> &bundleOption);
     std::string GetBundleLabel(const std::string& bundleName);
 
+    /**
+     * @brief Determine whether the application is an atomic service based on the bundle name and userId.
+     * @param bundleName Bundle name.
+     * @param userId User id.
+     * @return Returns true if the application is an atomic service; returns false otherwise.
+     */
+    bool IsAtomicServiceByBundle(const std::string& bundleName, const int32_t userId);
+
 private:
     void Connect();
     void Disconnect();
