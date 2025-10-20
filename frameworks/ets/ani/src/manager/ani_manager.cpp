@@ -89,14 +89,17 @@ static std::array kitManagerFunctions = {
         reinterpret_cast<void *>(AniSetDistributedEnableBySlot)},
     ani_native_function {"nativeisDistributedEnabledBySlot", nullptr,
         reinterpret_cast<void *>(AniIsDistributedEnabledBySlot)},
-    ani_native_function {"nativedisableNotificationFeature", nullptr,
-        reinterpret_cast<void *>(AniDisableNotificationFeature)},
     ani_native_function {"nativesetTargetDeviceStatus", nullptr, reinterpret_cast<void *>(AniSetTargetDeviceStatus)},
     ani_native_function {"nativeRequestEnableNotification",
         "C{application.UIAbilityContext.UIAbilityContext}:C{std.core.Promise}",
         reinterpret_cast<void *>(AniRequestEnableNotification)},
     ani_native_function {"nativeGetNotificationSetting", nullptr, reinterpret_cast<void *>(AniGetNotificationSetting)},
-    
+#ifdef DISABLE_NOTIFICATION_FEATURE_ENABLE
+    ani_native_function {"nativedisableNotificationFeature", nullptr,
+        reinterpret_cast<void *>(AniDisableNotificationFeature)},
+#else
+    ani_native_function {"nativedisableNotificationFeature", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+#endif
 #ifdef ANS_FEATURE_BADGE_MANAGER
     ani_native_function {"nativeDisplayBadge", nullptr, reinterpret_cast<void *>(AniDisplayBadge)},
     ani_native_function {"nativeIsBadgeDisplayed", nullptr, reinterpret_cast<void *>(AniIsBadgeDisplayed)},
