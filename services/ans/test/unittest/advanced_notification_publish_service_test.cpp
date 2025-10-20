@@ -840,7 +840,7 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00003, Function | Smal
 
 /**
  * @tc.name: RequestEnableNotification_00004
- * @tc.desc: Test RequestEnableNotification,two parameters,except is ERROR_INTERNAL_ERROR
+ * @tc.desc: Test RequestEnableNotification,two parameters,except is ERR_ANS_NOT_ALLOWED
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -849,7 +849,7 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00004, Function | Smal
     std::string bundleName = "bundleName1";
     int32_t uid = 1;
     auto ret = advancedNotificationService_->RequestEnableNotification(bundleName, uid);
-    ASSERT_EQ(ret, (int)ERROR_INTERNAL_ERROR);
+    ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
 }
 
 /**
