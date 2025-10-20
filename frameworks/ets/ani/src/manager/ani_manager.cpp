@@ -93,8 +93,6 @@ static std::array kitManagerFunctions = {
         reinterpret_cast<void *>(AniSetDistributedEnableBySlot)},
     ani_native_function {"nativeisDistributedEnabledBySlot", nullptr,
         reinterpret_cast<void *>(AniIsDistributedEnabledBySlot)},
-    ani_native_function {"nativedisableNotificationFeature", nullptr,
-        reinterpret_cast<void *>(AniDisableNotificationFeature)},
     ani_native_function {"nativesetTargetDeviceStatus", nullptr, reinterpret_cast<void *>(AniSetTargetDeviceStatus)},
     ani_native_function {"nativeRequestEnableNotification",
         "Lapplication/UIAbilityContext/UIAbilityContext;:Lstd/core/Promise;",
@@ -108,12 +106,20 @@ static std::array kitManagerFunctions = {
         reinterpret_cast<void *>(AniSetRingtoneInfoByBundle)},
     ani_native_function {"nativeGetRingtoneInfoByBundle", nullptr,
         reinterpret_cast<void *>(AniGetRingtoneInfoByBundle)},
-    ani_native_function {"nativeDisableNotificationFeatureWithId", nullptr,
-        reinterpret_cast<void *>(AniDisableNotificationFeatureWithId)},
     ani_native_function {"nativeSetSilentReminderEnabled", nullptr,
         reinterpret_cast<void *>(AniSetSilentReminderEnabled)},
     ani_native_function {"nativeIsSilentReminderEnabled", nullptr,
         reinterpret_cast<void *>(AniIsSilentReminderEnabled)},
+#ifdef DISABLE_NOTIFICATION_FEATURE_ENABLE
+    ani_native_function {"nativedisableNotificationFeature", nullptr,
+        reinterpret_cast<void *>(AniDisableNotificationFeature)},
+    ani_native_function {"nativeDisableNotificationFeatureWithId", nullptr,
+        reinterpret_cast<void *>(AniDisableNotificationFeatureWithId)},
+#else
+    ani_native_function {"nativedisableNotificationFeature", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeDisableNotificationFeatureWithId", nullptr,
+        reinterpret_cast<void *>(ThrowSystemCapErr)},
+#endif
 #ifdef ANS_FEATURE_BADGE_MANAGER
     ani_native_function {"nativeDisplayBadge", nullptr, reinterpret_cast<void *>(AniDisplayBadge)},
     ani_native_function {"nativeIsBadgeDisplayed", nullptr, reinterpret_cast<void *>(AniIsBadgeDisplayed)},
