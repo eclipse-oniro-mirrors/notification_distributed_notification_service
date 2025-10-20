@@ -646,9 +646,8 @@ bool SourceTypeEtsToC(ani_env *env, ani_enum_item enumItem, SourceType &sourceTy
 bool SwitchStateCToEts(ani_env *env, SwitchState switchState, ani_enum_item &enumItem)
 {
     STSSwitchState stsSwitchState = STSSwitchState::USER_MODIFIED_OFF;
-    if (!EnumConvertNativeToAni(env,
-        "@ohos.notificationManager.notificationManager.SwitchState", stsSwitchState, enumItem)
-        || !StsSwitchStateUtils::CToSts(switchState, stsSwitchState)) {
+    if (!StsSwitchStateUtils::CToSts(switchState, stsSwitchState) || !EnumConvertNativeToAni(env,
+        "@ohos.notificationManager.notificationManager.SwitchState", stsSwitchState, enumItem)) {
         ANS_LOGE("SwitchStateCToEts failed");
         return false;
     }
