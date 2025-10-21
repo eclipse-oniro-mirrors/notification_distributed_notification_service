@@ -42,6 +42,9 @@ const std::string EVENT_PARAM_PARTITION_NAME = "PARTITION_NAME";
 const std::string EVENT_PARAM_REMAIN_PARTITION_SIZE = "REMAIN_PARTITION_SIZE";
 const std::string EVENT_PARAM_FILE_OR_FOLDER_PATH = "FILE_OR_FOLDER_PATH";
 const std::string EVENT_PARAM_FILE_OR_FOLDER_SIZE = "FILE_OR_FOLDER_SIZE";
+const std::string EVENT_PARAM_PNAMEID = "PNAMEID";
+const std::string AUTH_DIALOG_PKG = "com.ohos.notificationdialog";
+const std::string EVENT_PARAM_PVERSIONID = "PVERSIONID";
 } // namespace
 
 void EventReport::SendHiSysEvent(const std::string &eventName, const EventInfo &eventInfo)
@@ -95,6 +98,9 @@ std::unordered_map<std::string, void (*)(const EventInfo& eventInfo)> EventRepor
     }},
     {ENABLE_NOTIFICATION, [](const EventInfo& eventInfo) {
         InnerSendEnableNotificationEvent(eventInfo);
+    }},
+    {AUTH_DIALOG_CLICK, [](const EventInfo& eventInfo) {
+        InnerSendDialogClickEvent(eventInfo);
     }},
     {ENABLE_NOTIFICATION_SLOT, [](const EventInfo& eventInfo) {
         InnerSendEnableNotificationSlotEvent(eventInfo);
@@ -212,6 +218,18 @@ void EventReport::InnerSendEnableNotificationEvent(const EventInfo &eventInfo)
         EVENT_PARAM_ENABLE, eventInfo.enable);
 }
 
+void EventReport::InnerSendDialogClickEvent(const EventInfo &eventInfo)
+{
+    InnerUeEventWrite(
+        AUTH_DIALOG_CLICK,
+        HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_PARAM_BUNDLE_NAME, eventInfo.bundleName,
+        EVENT_PARAM_UID, eventInfo.uid,
+        EVENT_PARAM_ENABLE, eventInfo.enable,
+        EVENT_PARAM_PNAMEID, AUTH_DIALOG_PKG,
+        EVENT_PARAM_PVERSIONID, "");
+}
+
 void EventReport::InnerSendEnableNotificationSlotEvent(const EventInfo &eventInfo)
 {
     InnerEventWrite(
@@ -297,6 +315,18 @@ void EventReport::InnerEventWrite(const std::string &eventName,
     }
     HiSysEventWrite(
         HiviewDFX::HiSysEvent::Domain::NOTIFICATION,
+        eventName,
+        static_cast<HiviewDFX::HiSysEvent::EventType>(type),
+        keyValues...);
+}
+
+template<typename... Types>
+void EventReport::InnerUeEventWrite(
+    const std::string &eventName,
+    HiviewDFX::HiSysEvent::EventType type, Types... keyValues)
+{
+    HiSysEventWrite(
+        NOTIFICATION_UE,
         eventName,
         static_cast<HiviewDFX::HiSysEvent::EventType>(type),
         keyValues...);

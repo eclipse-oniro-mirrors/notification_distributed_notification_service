@@ -253,6 +253,7 @@ bool NotificationDialogManager::OnDialogButtonClicked(const std::string& bundleN
         ANS_LOGE("SetNotificationsEnabledForSpecialBundle Failed, code is %{public}d", result);
         // Do not return here, need to clear the data
     }
+    ans_.SendDialogClickHiSysEvent(bundleOption, enabled);
     EnabledDialogStatus status = enabled ? EnabledDialogStatus::ALLOW_CLICKED : EnabledDialogStatus::DENY_CLICKED;
     return HandleOneDialogClosed(bundleOption, status);
 }
