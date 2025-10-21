@@ -56,7 +56,7 @@ ani_boolean AniIsDistributedEnabledByBundle(ani_env* env, ani_object obj)
     ANS_LOGD("AniIsDistributedEnabledByBundle call");
     Notification::NotificationBundleOption option;
     if (!NotificationSts::UnwrapBundleOption(env, obj, option)) {
-        NotificationSts::ThrowErrorWithMsg(env, "AniIsDistributedEnabledByBundle : erro arguments.");
+        NotificationSts::ThrowErrorWithMsg(env, "AniIsDistributedEnabledByBundle : error arguments.");
         return NotificationSts::BoolToAniBoolean(false);
     }
     bool enabled = false;
@@ -75,7 +75,7 @@ ani_boolean AniIsDistributedEnabledByBundleType(ani_env* env, ani_object obj, an
     ANS_LOGD("AniIsDistributedEnabledByBundleType call");
     Notification::NotificationBundleOption option;
     if (!NotificationSts::UnwrapBundleOption(env, obj, option)) {
-        NotificationSts::ThrowErrorWithMsg(env, "AniIsDistributedEnabledByBundleType : erro arguments.");
+        NotificationSts::ThrowErrorWithMsg(env, "AniIsDistributedEnabledByBundleType : error arguments.");
         return NotificationSts::BoolToAniBoolean(false);
     }
     std::string deviceTypeStr;

@@ -130,7 +130,6 @@ bool UnwrapArrayBundleOption(ani_env *env,
         return false;
     }
     ani_status status;
-    Notification::NotificationBundleOption option;
     ani_array optionArray = static_cast<ani_array>(arrayObj);
     ani_size length;
     status = env->Array_GetLength(optionArray, &length);
@@ -146,6 +145,7 @@ bool UnwrapArrayBundleOption(ani_env *env,
             ANS_LOGE("UnwrapArrayBundleOption: get bundleOptionRef failed, status = %{public}d", status);
             return false;
         }
+        Notification::NotificationBundleOption option;
         if (!UnwrapBundleOption(env, static_cast<ani_object>(optionRef), option)) {
             ANS_LOGE("UnwrapArrayBundleOption: get option status = %{public}d, index = %{public}d", status, i);
             return false;
@@ -230,7 +230,6 @@ bool UnwrapArrayDistributedBundleOption(ani_env *env, ani_object arrayObj,
         return false;
     }
     ani_status status;
-    Notification::DistributedBundleOption option;
     ani_array optionArray = static_cast<ani_array>(arrayObj);
     ani_size length;
     status = env->Array_GetLength(optionArray, &length);
@@ -246,6 +245,7 @@ bool UnwrapArrayDistributedBundleOption(ani_env *env, ani_object arrayObj,
             ANS_LOGE("get optionRef failed, status = %{public}d", status);
             return false;
         }
+        Notification::DistributedBundleOption option;
         if (!UnwrapDistributedBundleOption(env, static_cast<ani_object>(optionRef), option)) {
             ANS_LOGE("get option status = %{public}d, index = %{public}d", status, i);
             return false;
