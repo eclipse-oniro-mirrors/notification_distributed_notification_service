@@ -92,6 +92,7 @@ void DhNotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
 
     NotificationPreferences::GetInstance()->UpdateBatchCloneBundleInfo(ZERO_USERID, bundlesInfo_);
     for (auto bundle = bundlesInfo_.begin(); bundle != bundlesInfo_.end(); bundle++) {
+        NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(ZERO_USERID, *bundle);
         ANS_LOGD("Event dh bundle left %{public}s.", bundle->Dump().c_str());
     }
     ANS_LOGD("dh Notification bundle list on restore end.");
@@ -110,7 +111,7 @@ void DhNotificationCloneBundle::OnRestoreStart(const std::string bundleName, int
     for (auto bundle = bundlesInfo_.begin(); bundle != bundlesInfo_.end();) {
         if (bundle->GetBundleName() == bundleName) {
             bundle->SetUid(uid);
-            AdvancedNotificationService::GetInstance()->UpdateCloneBundleInfo(*bundle);
+            AdvancedNotificationService::GetInstance()->UpdateCloneBundleInfo(*bundle, ZERO_USERID);
             NotificationPreferences::GetInstance()->DelCloneBundleInfo(ZERO_USERID, *bundle);
             bundle = bundlesInfo_.erase(bundle);
             break;

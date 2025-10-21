@@ -75,8 +75,6 @@ void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
     }
 
     int32_t userId = NotificationCloneUtil::GetActiveUserId();
-    NotificationPreferences::GetInstance()->SetCloneTimeStamp(userId,
-        NotificationAnalyticsUtil::GetCurrentTime());
     std::unique_lock lock(lock_);
     if (!bundlesInfo_.empty()) {
         NotificationPreferences::GetInstance()->DelBatchCloneBundleInfo(userId, bundlesInfo_);
@@ -101,7 +99,7 @@ void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
             continue;
         }
         bundle->SetUid(uid);
-        AdvancedNotificationService::GetInstance()->UpdateCloneBundleInfo(*bundle);
+        AdvancedNotificationService::GetInstance()->UpdateCloneBundleInfo(*bundle, userId);
         bundle = bundlesInfo_.erase(bundle);
     }
 
@@ -126,7 +124,7 @@ void NotificationCloneBundle::OnRestoreStart(const std::string bundleName, int32
     for (auto bundle = bundlesInfo_.begin(); bundle != bundlesInfo_.end();) {
         if (bundle->GetBundleName() == bundleName && bundle->GetAppIndex() == appIndex) {
             bundle->SetUid(uid);
-            AdvancedNotificationService::GetInstance()->UpdateCloneBundleInfo(*bundle);
+            AdvancedNotificationService::GetInstance()->UpdateCloneBundleInfo(*bundle, userId);
             NotificationPreferences::GetInstance()->DelCloneBundleInfo(userId, *bundle);
             bundle = bundlesInfo_.erase(bundle);
             break;
