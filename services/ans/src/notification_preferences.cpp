@@ -1650,11 +1650,6 @@ void NotificationPreferences::DeleteAllCloneRingtoneInfo(const int32_t& userId)
         ANS_LOGW("Clear ringtone failed %{public}d.", userId);
         return;
     }
-
-    if (preferncesDB_->SetCloneTimeStamp(userId, 0)) {
-        cloneTimestamp = 0;
-    }
-    ANS_LOGI("Clear ringtone %{public}d", userId);
 }
 
 void NotificationPreferences::GetAllCloneRingtoneInfo(const int32_t& userId,

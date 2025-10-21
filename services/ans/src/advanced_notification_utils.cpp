@@ -2019,8 +2019,9 @@ sptr<NotificationRingtoneInfo> GetRingtoneInfoForClone(NotificationRingtoneInfo 
 }
 
 void AdvancedNotificationService::UpdateCloneBundleInfoForRingtone(NotificationRingtoneInfo ringtoneInfo,
-    const sptr<NotificationBundleOption> bundle, const NotificationCloneBundleInfo cloneBundleInfo)
+    int32_t userId, const sptr<NotificationBundleOption> bundle, const NotificationCloneBundleInfo cloneBundleInfo)
 {
+    ANS_LOGI("Update ring %{public}s, %{public}d", ringtoneInfo.GetRingtoneUri().c_str(), userId);
     if (ringtoneInfo.GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT) {
         sptr<NotificationRingtoneInfo> oldRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
         auto result = NotificationPreferences::GetInstance()->GetRingtoneInfoByBundle(bundle, oldRingtoneInfo);
@@ -2033,11 +2034,6 @@ void AdvancedNotificationService::UpdateCloneBundleInfoForRingtone(NotificationR
     }
 
     // clear last clone save ringtone info by current clone ringtone info, that last info is not set.
-    int32_t userId = -1;
-    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
-        ANSR_LOGW("Failed to get active user id!");
-        return;
-    }
     NotificationRingtoneInfo lastCloneRingtone;
     NotificationPreferences::GetInstance()->GetCloneRingtoneInfo(userId, cloneBundleInfo, lastCloneRingtone);
     if (lastCloneRingtone.GetRingtoneType() != NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT) {
@@ -2058,18 +2054,25 @@ void AdvancedNotificationService::UpdateCloneBundleInfoForRingtone(NotificationR
         sptr<NotificationRingtoneInfo> ringtoneInfoPtr = GetRingtoneInfoForClone(ringtoneInfo);
         sptr<NotificationRingtoneInfo> oldRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
         auto result = NotificationPreferences::GetInstance()->GetRingtoneInfoByBundle(bundle, oldRingtoneInfo);
-        if (result == ERR_OK && (
-            oldRingtoneInfo->GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL ||
-            oldRingtoneInfo->GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE)) {
+        if (result == ERR_OK) {
+            if (oldRingtoneInfo->GetRingtoneFileName() == ringtoneInfo.GetRingtoneFileName() &&
+                oldRingtoneInfo->GetRingtoneType() == ringtoneInfo.GetRingtoneType() &&
+                oldRingtoneInfo->GetRingtoneUri() == ringtoneInfo.GetRingtoneUri() &&
+                oldRingtoneInfo->GetRingtoneTitle() == ringtoneInfo.GetRingtoneTitle()) {
+                ANS_LOGI("Same Clone : %{public}s %{public}s.", bundle->GetBundleName().c_str(),
+                    oldRingtoneInfo->GetRingtoneUri().c_str());
+                return;
+            }
             SystemSoundHelper::GetInstance()->RemoveCustomizedTone(oldRingtoneInfo);
         }
 
-        ANSR_LOGW("Clone : %{public}d %{public}s", result, oldRingtoneInfo->GetRingtoneUri().c_str());
+        ANS_LOGW("Clone : %{public}d %{public}s", result, oldRingtoneInfo->GetRingtoneUri().c_str());
         NotificationPreferences::GetInstance()->SetRingtoneInfoByBundle(bundle, ringtoneInfoPtr);
     }
 }
 
-void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo)
+void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo,
+    int32_t userId)
 {
     ANS_LOGI("Event bundle update %{public}s.", cloneBundleInfo.Dump().c_str());
     if (notificationSvrQueue_ == nullptr) {
@@ -2081,7 +2084,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
         ringtoneInfo = (*cloneBundleInfo.GetRingtoneInfo());
     }
 
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&, ringtoneInfo, cloneBundleInfo]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&, userId, ringtoneInfo, cloneBundleInfo]() {
         sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
             cloneBundleInfo.GetBundleName(), cloneBundleInfo.GetUid());
         if (bundle == nullptr) {
@@ -2090,7 +2093,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
         bundle->SetAppIndex(cloneBundleInfo.GetAppIndex());
         UpdateCloneBundleInfoForEnable(cloneBundleInfo, bundle);
         UpdateCloneBundleInfoFoSlot(cloneBundleInfo, bundle);
-        UpdateCloneBundleInfoForRingtone(ringtoneInfo, bundle, cloneBundleInfo);
+        UpdateCloneBundleInfoForRingtone(ringtoneInfo, userId, bundle, cloneBundleInfo);
 
         if (NotificationPreferences::GetInstance()->SetShowBadge(bundle, cloneBundleInfo.GetIsShowBadge()) == ERR_OK) {
             HandleBadgeEnabledChanged(bundle, cloneBundleInfo.GetIsShowBadge());

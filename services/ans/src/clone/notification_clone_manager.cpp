@@ -32,6 +32,7 @@
 #include "notification_analytics_util.h"
 #include "notification_liveview_utils.h"
 #include "common_event_support.h"
+#include "notification_preferences.h"
 
 namespace OHOS {
 namespace Notification {
@@ -186,6 +187,9 @@ int32_t NotificationCloneManager::OnRestore(MessageParcel& data, MessageParcel& 
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ANS_CLONE_ERROR;
     }
+
+    int32_t userId = NotificationCloneUtil::GetActiveUserId();
+    NotificationPreferences::GetInstance()->SetCloneTimeStamp(userId, NotificationAnalyticsUtil::GetCurrentTime());
     for (auto iter = cloneTemplates.begin(); iter != cloneTemplates.end(); ++iter) {
         if (jsonObject.contains(iter->first) && iter->second != nullptr) {
             iter->second->OnRestore(jsonObject.at(iter->first));

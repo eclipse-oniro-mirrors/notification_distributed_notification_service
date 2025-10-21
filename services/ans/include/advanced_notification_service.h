@@ -1455,7 +1455,7 @@ public:
 
     ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
 
-    void UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo);
+    void UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo, int32_t userId);
 
     void UpdateCloneBundleInfoForEnable(
         const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle);
@@ -1484,7 +1484,7 @@ public:
     void SetAndPublishSubscriberExistFlag(const std::string& deviceType, bool existFlag);
     ErrCode RemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason);
 
-    void UpdateCloneBundleInfoForRingtone(NotificationRingtoneInfo ringtoneInfo,
+    void UpdateCloneBundleInfoForRingtone(NotificationRingtoneInfo ringtoneInfo, int32_t userId,
         const sptr<NotificationBundleOption> bundle, const NotificationCloneBundleInfo cloneBundleInfo);
 
     /**

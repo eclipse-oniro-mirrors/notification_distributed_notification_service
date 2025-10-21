@@ -721,7 +721,7 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00001, Function | SmallTest | Level
     info.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
     info.enable_ = true;
     cloneBundleInfo.AddSlotInfo(info);
-    advancedNotificationService_->UpdateCloneBundleInfo(cloneBundleInfo);
+    advancedNotificationService_->UpdateCloneBundleInfo(cloneBundleInfo, 0);
     SleepForFC();
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
@@ -759,7 +759,7 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00002, Function | SmallTest | Level
     info.enable_ = true;
     cloneBundleInfo.AddSlotInfo(info);
     ans.notificationSvrQueue_ = nullptr;
-    ans.UpdateCloneBundleInfo(cloneBundleInfo);
+    ans.UpdateCloneBundleInfo(cloneBundleInfo, 0);
     SleepForFC();
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("UpdateCloneBundleInfo_00002", 1);
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
@@ -794,7 +794,7 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00003, Function | SmallTest | Level
     info.enable_ = true;
     cloneBundleInfo.AddSlotInfo(info);
     ans.notificationSvrQueue_ = nullptr;
-    ans.UpdateCloneBundleInfo(cloneBundleInfo);
+    ans.UpdateCloneBundleInfo(cloneBundleInfo, 0);
     SleepForFC();
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("UpdateCloneBundleInfo_00003", 1);
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
@@ -815,7 +815,7 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00004, Function | SmallTest | Level
     cloneBundleInfo.SetUid(1);
     cloneBundleInfo.SetIsShowBadge(true);
     cloneBundleInfo.SetEnabledExtensionSubscription(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
-    advancedNotificationService_->UpdateCloneBundleInfo(cloneBundleInfo);
+    advancedNotificationService_->UpdateCloneBundleInfo(cloneBundleInfo, 0);
     SleepForFC();
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test", 1);
     NotificationConstant::SWITCH_STATE state {};
