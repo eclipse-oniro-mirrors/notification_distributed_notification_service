@@ -103,7 +103,7 @@ void ExtensionServiceConnectionService::RemoveConnection(const ExtensionSubscrib
     }
 }
 
-std::shared_ptr<ExtensionServiceConnection> ExtensionServiceConnectionService::GetConnection(
+sptr<ExtensionServiceConnection> ExtensionServiceConnectionService::GetConnection(
     const std::shared_ptr<ExtensionSubscriberInfo> subscriberInfo)
 {
     if (subscriberInfo == nullptr) {
@@ -112,13 +112,17 @@ std::shared_ptr<ExtensionServiceConnection> ExtensionServiceConnectionService::G
     }
     std::lock_guard<ffrt::mutex> lock(mapLock_);
     std::string connectionKey = GetConnectionKey(*subscriberInfo);
-    std::shared_ptr<ExtensionServiceConnection> connection = nullptr;
+    sptr<ExtensionServiceConnection> connection = nullptr;
     auto iter = connectionMap_.find(connectionKey);
     if (iter == connectionMap_.end()) {
         ANS_LOGD("create connection: %{public}s", connectionKey.c_str());
-        connection = std::make_shared<ExtensionServiceConnection>(*subscriberInfo,
-            [this](const ExtensionSubscriberInfo& info) { RemoveConnection(info); });
-        connectionMap_[connectionKey] = connection;
+        connection = new (std::nothrow) ExtensionServiceConnection(
+            *subscriberInfo, [this](const ExtensionSubscriberInfo& info) { RemoveConnection(info); });
+        if (connection == nullptr) {
+            ANS_LOGE("new connection failed: %{public}s", connectionKey.c_str());
+        } else {
+            connectionMap_[connectionKey] = connection;
+        }
     } else {
         ANS_LOGD("found connection: %{public}s", connectionKey.c_str());
         connection = iter->second;

@@ -33,9 +33,9 @@
 namespace OHOS {
 namespace Notification {
 namespace {
-    const int64_t MS_PER_SECOND = 1000;
-    const uint32_t FREEZE_PREPARE_TIME = 10;
-    const uint32_t DEFAULT_DISCONNECT_DELAY_TIME = 1800;  //default: 30m
+constexpr const int64_t MS_PER_SECOND = 1000;
+constexpr const uint32_t FREEZE_PREPARE_TIME = 10;
+constexpr const uint32_t DEFAULT_DISCONNECT_DELAY_TIME = 1800;  //default: 30m
 }
 uint32_t ExtensionServiceConnection::DISCONNECT_DELAY_TIME = DEFAULT_DISCONNECT_DELAY_TIME;
 
@@ -56,12 +56,21 @@ ExtensionServiceConnection::ExtensionServiceConnection(const ExtensionSubscriber
         ANS_LOGE("null TimeServiceClient");
         return;
     }
-    auto timerInfoFreeze = std::make_shared<ExtensionServiceConnectionTimerInfo>([&] {
-        Freeze();
+    wptr<ExtensionServiceConnection> wThis = this;
+    auto timerInfoFreeze = std::make_shared<ExtensionServiceConnectionTimerInfo>([wThis] {
+        sptr<ExtensionServiceConnection> sThis = wThis.promote();
+        if (!sThis) {
+            return;
+        }
+        sThis->Freeze();
     });
     timerIdFreeze_ = timerClient->CreateTimer(timerInfoFreeze);
-    auto timerInfoDisconnect = std::make_shared<ExtensionServiceConnectionTimerInfo>([&] {
-        Disconnect();
+    auto timerInfoDisconnect = std::make_shared<ExtensionServiceConnectionTimerInfo>([wThis] {
+        sptr<ExtensionServiceConnection> sThis = wThis.promote();
+        if (!sThis) {
+            return;
+        }
+        sThis->Disconnect();
     });
     timerIdDisconnect_ = timerClient->CreateTimer(timerInfoDisconnect);
 }
@@ -389,7 +398,7 @@ void ExtensionServiceConnection::HandleDisconnectedState()
     }
     proxy_ = nullptr;
     if (onDisconnected_) {
-        ANS_LOGE("call onDisconnected %{public}s", subscriberInfo_.Dump().c_str());
+        ANS_LOGD("call onDisconnected %{public}s", subscriberInfo_.Dump().c_str());
         onDisconnected_(subscriberInfo_);
         onDisconnected_ = nullptr;
     }

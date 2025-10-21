@@ -122,7 +122,7 @@ void ExtensionServiceSubscriber::OnCanceled(const std::shared_ptr<Notification> 
             ANS_LOGE("null hashCodes");
             return;
         }
-        hashCodes->emplace_back(requestPoint->GetNotificationHashCode());
+        hashCodes->emplace_back(requestPoint->GetBaseKey(""));
         for (const auto& extensionSubscriberInfo : extensionSubscriberInfos_) {
             ExtensionServiceConnectionService::GetInstance().NotifyOnCancelMessages(
                 extensionSubscriberInfo, hashCodes);
