@@ -83,6 +83,8 @@ private:
     static bool ParseActionButton(
         const ::taihe::array<::ohos::reminderAgentManager::manager::ActionButton>& actionButtons,
         std::shared_ptr<Notification::ReminderRequest>& reminder);
+    static void ParseRingChannel(const ::ohos::reminderAgentManager::manager::RingChannel channel,
+        std::shared_ptr<Notification::ReminderRequest>& reminder);
 
     static bool ParseCalendarParam(const ::ohos::reminderAgentManager::manager::ReminderRequestCalendar& calendarReq,
         std::vector<uint8_t>& repeatMonths, std::vector<uint8_t>& repeatDays, std::vector<uint8_t>& daysOfWeek);
@@ -109,6 +111,8 @@ private:
         ::taihe::optional<::ohos::reminderAgentManager::manager::MaxScreenWantAgent>& aniWantAgent);
     static void GenAniActionButton(const sptr<Notification::ReminderRequest>& reminder,
         ::taihe::optional<::taihe::array<::ohos::reminderAgentManager::manager::ActionButton>>& aniActionButtons);
+    static void GenAniRingChannel(const sptr<Notification::ReminderRequest>& reminder,
+        ::taihe::optional<::ohos::reminderAgentManager::manager::RingChannel>& aniRingChannel);
 
     static void GenAniReminderBase(const sptr<Notification::ReminderRequest>& reminder,
         ::ohos::reminderAgentManager::manager::ReminderRequest& base);

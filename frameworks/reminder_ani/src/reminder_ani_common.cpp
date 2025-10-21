@@ -482,6 +482,21 @@ bool Common::ParseActionButton(
     return true;
 }
 
+void Common::ParseRingChannel(const ::ohos::reminderAgentManager::manager::RingChannel channel,
+    std::shared_ptr<Notification::ReminderRequest>& reminder)
+{
+    switch (channel.get_key()) {
+        case reminderAgentManager::manager::RingChannel::key_t::RING_CHANNEL_ALARM:
+            reminder->SetRingChannel(Notification::ReminderRequest::RingChannel::ALARM);
+            break;
+        case reminderAgentManager::manager::RingChannel::key_t::RING_CHANNEL_MEDIA:
+            reminder->SetRingChannel(Notification::ReminderRequest::RingChannel::MEDIA);
+            break;
+        default:
+            break;
+    }
+}
+
 bool Common::ParseCalendarParam(const ::ohos::reminderAgentManager::manager::ReminderRequestCalendar& calendarReq,
     std::vector<uint8_t>& repeatMonths, std::vector<uint8_t>& repeatDays, std::vector<uint8_t>& daysOfWeek)
 {
@@ -507,6 +522,9 @@ bool Common::CreateReminderBase(const reminderAgentManager::manager::ReminderReq
         return false;
     }
     ParseStringParam(reminderReq, reminder);
+    if (reminderReq.ringChannel.has_value()) {
+        ParseRingChannel(reminderReq.ringChannel.value(), reminder);
+    }
     if (reminderReq.tapDismissed.has_value()) {
         reminder->SetTapDismissed(reminderReq.tapDismissed.value());
     }
@@ -721,12 +739,32 @@ void Common::GenAniActionButton(const sptr<Notification::ReminderRequest>& remin
     aniActionButtons = ::taihe::optional<::taihe::array<reminderAgentManager::manager::ActionButton>>::make(aniButtons);
 }
 
+void Common::GenAniRingChannel(const sptr<Notification::ReminderRequest>& reminder,
+    ::taihe::optional<::ohos::reminderAgentManager::manager::RingChannel>& aniRingChannel)
+{
+    reminderAgentManager::manager::RingChannel::key_t type;
+    switch (reminder->GetRingChannel()) {
+        case Notification::ReminderRequest::RingChannel::ALARM:
+            type = reminderAgentManager::manager::RingChannel::key_t::RING_CHANNEL_ALARM;
+            break;
+        case Notification::ReminderRequest::RingChannel::MEDIA:
+            type = reminderAgentManager::manager::RingChannel::key_t::RING_CHANNEL_MEDIA;
+            break;
+        default:
+            type = reminderAgentManager::manager::RingChannel::key_t::RING_CHANNEL_ALARM;
+            break;
+    }
+    reminderAgentManager::manager::RingChannel aniChannel(type);
+    aniRingChannel = ::taihe::optional<reminderAgentManager::manager::RingChannel>::make(aniChannel);
+}
+
 void Common::GenAniReminderBase(const sptr<Notification::ReminderRequest>& reminder,
     reminderAgentManager::manager::ReminderRequest& base)
 {
     GenAniIntResult(reminder, base);
     GenAniStringResult(reminder, base);
     base.tapDismissed = ::taihe::optional<bool>::make(reminder->IsTapDismissed());
+    GenAniRingChannel(reminder, base.ringChannel);
     GenAniWantAgent(reminder, base.wantAgent);
     GenAniMaxScreenWantAgent(reminder, base.maxScreenWantAgent);
     GenAniActionButton(reminder, base.actionButton);
