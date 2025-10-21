@@ -161,7 +161,7 @@ __attribute__((no_sanitize("cfi"))) napi_value NapiIsNotificationEnabled(napi_en
                         asynccallbackinfo->params.userId,
                         asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
                 } else {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
+                    asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotifySelf(
                         asynccallbackinfo->allowed);
                     ANS_LOGI("isNotificationEnabled code=%{public}d,allowed=%{public}d",
                         asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
