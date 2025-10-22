@@ -279,6 +279,8 @@ export default namespace notificationManager {
     export native function nativeIsSilentReminderEnabled(bundle: BundleOption): SwitchState;
     export native function nativeSetReminderInfoByBundles(reminderInfos: Array<NotificationReminderInfo>) : void;
     export native function nativeGetReminderInfoByBundles(bundles: Array<BundleOption>) : Array<NotificationReminderInfo>;
+    export native function nativeGetBadgeDisplayStatusByBundles(bundles: Array<BundleOption>): Map<BundleOption, boolean>;
+    export native function nativeSetBadgeDisplayStatusByBundles(badges: Map<BundleOption, boolean>): void;
 
     function isInvalidParameter(doNotDisturbDate: DoNotDisturbDate): BusinessError
     {
@@ -2839,6 +2841,38 @@ export default namespace notificationManager {
             let p = taskpool.execute((): SwitchState => { return nativeIsSilentReminderEnabled(bundle); });
             p.then((data: NullishType): void => {
                 let ret : SwitchState = data as SwitchState;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function setBadgeDisplayStatusByBundles(badges: Map<BundleOption, boolean>): Promise<void> {
+        if (!badges || badges.size == 0) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativeSetBadgeDisplayStatusByBundles(badges); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function getBadgeDisplayStatusByBundles(bundles: Array<BundleOption>): Promise<Map<BundleOption, boolean>> {
+        if (!bundles || bundles.length == 0) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<Map<BundleOption, boolean>>(
+            (resolve: ResolveCallback<Map<BundleOption, boolean>>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): Map<BundleOption, boolean> => { return nativeGetBadgeDisplayStatusByBundles(bundles); });
+            p.then((data: NullishType): void => {
+                let ret : Map<BundleOption, boolean> = data as Map<BundleOption, boolean>;
                 resolve(ret);
             }, (error: Error): void => {
                 reject(error);
