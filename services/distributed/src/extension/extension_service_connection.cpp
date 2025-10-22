@@ -17,6 +17,8 @@
 #include "extension_service_connection.h"
 #include "extension_service_connection_service.h"
 #include "extension_service_connection_timer_info.h"
+#include "extension_service.h"
+#include "notification_analytics_util.h"
 #include "notification_helper.h"
 #include "time_service_client.h"
 
@@ -141,6 +143,11 @@ void ExtensionServiceConnection::NotifyOnReceiveMessage(const sptr<NotificationR
         } else {
             ErrCode result = sThis->proxy_->OnReceiveMessage(notificationRequest);
             ANS_LOGD("Notify NotifyOnReceiveMessage result %{public}d", result);
+            std::string message = sThis->subscriberInfo_.bundleName + ", " +
+                std::to_string(sThis->subscriberInfo_.uid) +
+                " receive message " + notificationRequest->GetNotificationHashCode();
+            NotificationExtensionService::GetInstance().SendHaReport(
+                EventSceneId::SCENE_27, 0, EventBranchId::BRANCH_8, message);
         }
         sThis->PrepareFreeze();
         sThis->PrepareDisconnect();
@@ -187,6 +194,11 @@ void ExtensionServiceConnection::NotifyOnCancelMessages(const std::shared_ptr<st
         } else {
             ErrCode result = sThis->proxy_->OnCancelMessages(*hashCodes);
             ANS_LOGD("Notify OnCancelMessages result %{public}d", result);
+            std::string message = sThis->subscriberInfo_.bundleName + ", " +
+                std::to_string(sThis->subscriberInfo_.uid) +
+                " cancel message size " + std::to_string(hashCodes->size());
+            NotificationExtensionService::GetInstance().SendHaReport(
+                EventSceneId::SCENE_27, 0, EventBranchId::BRANCH_9, message);
         }
         sThis->PrepareFreeze();
         sThis->PrepareDisconnect();
@@ -206,6 +218,9 @@ void ExtensionServiceConnection::OnAbilityConnectDone(
     if (proxy_ == nullptr) {
         ANS_LOGE("failed to create NotificationSubscriberProxy!");
     }
+    std::string message = subscriberInfo_.bundleName + ", " + std::to_string(subscriberInfo_.uid) + " connect";
+    NotificationExtensionService::GetInstance().SendHaReport(
+        EventSceneId::SCENE_27, 0, EventBranchId::BRANCH_10, message);
     GetPid();
 
     for (auto& message : messages_) {
