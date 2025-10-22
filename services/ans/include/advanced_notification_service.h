@@ -1959,11 +1959,6 @@ private:
     bool CheckBluetoothConnectionInInfos(
         const sptr<NotificationBundleOption> &bundleOption,
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos);
-    bool CheckAndUpdateHfpDeviceStatus(
-        const sptr<NotificationBundleOption> &bundleOption,
-        const sptr<NotificationExtensionSubscriptionInfo> &info,
-        const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos,
-        const std::string &bluetoothAddress);
     bool CheckBluetoothConditions(const std::string &addr);
     void FilterPermissionBundles(std::vector<sptr<NotificationBundleOption>> &bundles);
     void FilterGrantedBundles(std::vector<sptr<NotificationBundleOption>> &bundles);
@@ -1994,6 +1989,10 @@ private:
         bool enabled, ErrCode& result);
     void ProcessSetUserGrantedBundleState(const sptr<NotificationBundleOption>& bundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled, ErrCode& result);
+    void UpdateHfpStateForInfos(std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
+    bool CheckHfpState(const std::string &bluetoothAddress);
+    std::vector<sptr<NotificationBundleOption>>::iterator FindBundleInCache(
+        const sptr<NotificationBundleOption> &bundleOption);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;

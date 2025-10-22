@@ -268,7 +268,7 @@ bool AdvancedNotificationService::CheckBluetoothConnectionInInfos(
             continue;
         }
         if (supportHfp_) {
-            if (CheckAndUpdateHfpDeviceStatus(bundleOption, info, infos, bluetoothAddress)) {
+            if (CheckHfpState(bluetoothAddress)) {
                 return true;
             }
             if (info->IsHfp()) {
@@ -278,31 +278,6 @@ bool AdvancedNotificationService::CheckBluetoothConnectionInInfos(
         if (CheckBluetoothConditions(bluetoothAddress)) {
             return true;
         }
-    }
-    return false;
-}
-
-bool AdvancedNotificationService::CheckAndUpdateHfpDeviceStatus(
-    const sptr<NotificationBundleOption> &bundleOption,
-    const sptr<NotificationExtensionSubscriptionInfo> &info,
-    const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos,
-    const std::string& bluetoothAddress)
-{
-    OHOS::Bluetooth::BluetoothRemoteDevice remoteDevice(bluetoothAddress, OHOS::Bluetooth::BT_TRANSPORT_NONE);
-    int32_t btConnectState = static_cast<int32_t>(Bluetooth::BTConnectState::DISCONNECTED);
-    int32_t ret = OHOS::Bluetooth::HandsFreeAudioGateway::GetProfile()->GetDeviceState(remoteDevice, btConnectState);
-    if (ret == ERR_OK && btConnectState == static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED)) {
-        std::string encryptedAddr;
-        if (AesGcmHelper::Encrypt(bluetoothAddress, encryptedAddr) == ERR_OK) {
-            ANS_LOGI("Bluetooth HFP device connected: %{public}s", encryptedAddr.c_str());
-        }
-        info->SetHfp(true);
-        ErrCode updateResult = NotificationPreferences::GetInstance()->SetExtensionSubscriptionInfos(bundleOption,
-            infos);
-        if (updateResult != ERR_OK) {
-            ANS_LOGW("Failed to update HFP status to database for device: %{public}s", encryptedAddr.c_str());
-        }
-        return true;
     }
     return false;
 }
@@ -455,12 +430,8 @@ void AdvancedNotificationService::HandleBundleInstall(const sptr<NotificationBun
         }
     }));
     notificationSvrQueue_->wait(handler);
-    std::vector<sptr<NotificationBundleOption>> bundles;
-    GetNotificationExtensionEnabledBundles(bundles);
-    if (cacheNotificationExtensionBundles_.size() != bundles.size()) {
-        PublishExtensionServiceStateChange(NotificationConstant::EXTENSION_ABILITY_ADDED, bundleOption, false, {});
-        cacheNotificationExtensionBundles_ = bundles;
-    }
+    PublishExtensionServiceStateChange(NotificationConstant::EXTENSION_ABILITY_ADDED, bundleOption, false, {});
+    cacheNotificationExtensionBundles_.emplace_back(bundleOption);
 }
 
 ErrCode AdvancedNotificationService::RefreshExtensionSubscriptionBundlesFromConfig(
@@ -506,7 +477,13 @@ void AdvancedNotificationService::HandleBundleUpdate(const sptr<NotificationBund
     }
 
     if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
-        ShutdownExtensionServiceAndUnSubscribed(bundleOption);
+        auto it = FindBundleInCache(bundleOption);
+        if (it != cacheNotificationExtensionBundles_.end()) {
+            cacheNotificationExtensionBundles_.erase(it);
+            ShutdownExtensionServiceAndUnSubscribed(bundleOption);
+            PublishExtensionServiceStateChange(
+                NotificationConstant::EXTENSION_ABILITY_REMOVED, bundleOption, false, {});
+        }
         return;
     }
     
@@ -530,18 +507,13 @@ void AdvancedNotificationService::HandleBundleUpdate(const sptr<NotificationBund
         enabled = ((state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) ? true : false);
     }));
     notificationSvrQueue_->wait(handler);
-    std::vector<sptr<NotificationBundleOption>> bundles;
-    GetNotificationExtensionEnabledBundles(bundles);
-    if (cacheNotificationExtensionBundles_.size() == bundles.size()) {
+    auto it = FindBundleInCache(bundleOption);
+    if (it != cacheNotificationExtensionBundles_.end()) {
+        ANS_LOGW("HandleBundleUpdate bundle already exists, skip publish event");
         return;
     }
-    NotificationConstant::EventCodeType eventcode = NotificationConstant::EXTENSION_ABILITY_ADDED;
-    if (cacheNotificationExtensionBundles_.size() > bundles.size()) {
-        eventcode = NotificationConstant::EXTENSION_ABILITY_REMOVED;
-    }
-    
-    PublishExtensionServiceStateChange(eventcode, bundleOption, enabled, {});
-    cacheNotificationExtensionBundles_ = bundles;
+    cacheNotificationExtensionBundles_.emplace_back(bundleOption);
+    PublishExtensionServiceStateChange(NotificationConstant::EXTENSION_ABILITY_ADDED, bundleOption, enabled, {});
 }
 
 void AdvancedNotificationService::HandleBundleUninstall(const sptr<NotificationBundleOption> &bundleOption)
@@ -551,14 +523,13 @@ void AdvancedNotificationService::HandleBundleUninstall(const sptr<NotificationB
         return;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
-        ShutdownExtensionServiceAndUnSubscribed(bundleOption);
-        std::vector<sptr<NotificationBundleOption>> bundles;
-        GetNotificationExtensionEnabledBundles(bundles);
-        if (cacheNotificationExtensionBundles_.size() != bundles.size()) {
+        auto it = FindBundleInCache(bundleOption);
+        if (it != cacheNotificationExtensionBundles_.end()) {
+            cacheNotificationExtensionBundles_.erase(it);
+            ShutdownExtensionServiceAndUnSubscribed(bundleOption);
             PublishExtensionServiceStateChange(
                 NotificationConstant::EXTENSION_ABILITY_REMOVED, bundleOption, false, {});
         }
-        cacheNotificationExtensionBundles_ = bundles;
     }));
 }
 
@@ -621,7 +592,10 @@ void AdvancedNotificationService::ProcessHfpDeviceStateChange(
         }
     }
     if (processBundle == nullptr) {
-        ANS_LOGD("No matching bundle found for device: %{public}s", device.GetDeviceAddr().c_str());
+        std::string encryptedAddr;
+        if (AesGcmHelper::Encrypt(device.GetDeviceAddr(), encryptedAddr) == ERR_OK) {
+            ANS_LOGW("No matching bundle found for device: %{public}s", encryptedAddr.c_str());
+        }
         return;
     }
     
@@ -698,11 +672,7 @@ ErrCode AdvancedNotificationService::GetNotificationExtensionEnabledBundles(
         }
         bundles.emplace_back(bundleOption);
     }
-
-    if (cacheNotificationExtensionBundles_.size() == 0) {
-        cacheNotificationExtensionBundles_ = bundles;
-    }
-    
+    cacheNotificationExtensionBundles_ = bundles;
     return ERR_OK;
 }
 
@@ -710,8 +680,7 @@ ErrCode AdvancedNotificationService::NotificationExtensionSubscribe(
     const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos)
 {
     ANS_LOGD("AdvancedNotificationService::NotificationExtensionSubscribe");
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION) ||
-        !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_ACCESS_BLUETOOTH)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -739,6 +708,11 @@ ErrCode AdvancedNotificationService::NotificationExtensionSubscribe(
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
+        for (auto &info : infos) {
+            if (CheckHfpState(info->GetAddr())) {
+                info->SetHfp(true);
+            }
+        }
         result = NotificationPreferences::GetInstance()->SetExtensionSubscriptionInfos(bundleOption, infos);
         if (result != ERR_OK) {
             ANS_LOGE("Failed to insert subscription info into db, ret: %{public}d", result);
@@ -1092,8 +1066,7 @@ ErrCode AdvancedNotificationService::CanOpenSubscribeSettings()
 void HfpStateObserver::OnConnectionStateChanged(
     const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state, int cause)
 {
-    ANS_LOGI("HFP connection state changed: %{public}s, state: %{public}d",
-             device.GetDeviceAddr().c_str(), state);
+    ANS_LOGI("HFP connection state changed with state: %{public}d", state);
     AdvancedNotificationService::GetInstance()->OnHfpDeviceConnectChanged(device, state);
 }
 
@@ -1205,6 +1178,35 @@ void AdvancedNotificationService::OnBluetoothStateChanged()
     if (extensionBundleInfos.size() > 0) {
         LoadExtensionService();
     }
+}
+
+bool AdvancedNotificationService::CheckHfpState(const std::string &bluetoothAddress)
+{
+    if (!supportHfp_) {
+        return false;
+    }
+    OHOS::Bluetooth::BluetoothRemoteDevice remoteDevice(bluetoothAddress, OHOS::Bluetooth::BT_TRANSPORT_NONE);
+    int32_t btConnectState = static_cast<int32_t>(Bluetooth::BTConnectState::DISCONNECTED);
+    int32_t ret = OHOS::Bluetooth::HandsFreeAudioGateway::GetProfile()->GetDeviceState(remoteDevice, btConnectState);
+    if (ret == ERR_OK && btConnectState == static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED)) {
+        std::string encryptedAddr;
+        if (AesGcmHelper::Encrypt(bluetoothAddress, encryptedAddr) == ERR_OK) {
+            ANS_LOGI("Bluetooth HFP device connected: %{public}s", encryptedAddr.c_str());
+        }
+        return true;
+    }
+    return false;
+}
+
+std::vector<sptr<NotificationBundleOption>>::iterator AdvancedNotificationService::FindBundleInCache(
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    return std::find_if(cacheNotificationExtensionBundles_.begin(), cacheNotificationExtensionBundles_.end(),
+        [&](const sptr<NotificationBundleOption>& option) {
+            return option != nullptr && bundleOption != nullptr &&
+                option->GetBundleName() == bundleOption->GetBundleName() &&
+                option->GetUid() == bundleOption->GetUid();
+        });
 }
 }  // namespace Notification
 }  // namespace OHOS
