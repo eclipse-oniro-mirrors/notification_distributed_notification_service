@@ -62,6 +62,9 @@ public:
     std::weak_ptr<JsNotificationSubscriberExtension> GetWeakPtr();
 
 private:
+    napi_value CreateOnCancelMessagesResult(napi_env env, const std::shared_ptr<std::vector<std::string>> hashCodes);
+
+private:
     AbilityRuntime::JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;
 };

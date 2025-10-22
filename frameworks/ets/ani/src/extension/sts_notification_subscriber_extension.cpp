@@ -125,27 +125,15 @@ void StsNotificationSubscriberExtension::OnDestroy()
 {
     ANS_LOGD("OnDestroy called");
 
-    if (handler_ == nullptr) {
-        ANS_LOGE("handler is invalid");
+    ani_env* env = stsRuntime_.GetAniEnv();
+    if (!env) {
+        ANS_LOGE("task env not found env");
         return;
     }
-    std::weak_ptr<StsNotificationSubscriberExtension> wThis = GetWeakPtr();
-    auto task = [wThis, this]() {
-        std::shared_ptr<StsNotificationSubscriberExtension> sThis = wThis.lock();
-        if (sThis == nullptr) {
-            return;
-        }
-        ani_env* env = sThis->stsRuntime_.GetAniEnv();
-        if (!env) {
-            ANS_LOGE("task env not found env");
-            return;
-        }
 
-        ani_object ani_data {};
-        const char* signature  = "V:V";
-        CallObjectMethod(false, "onDestroy", signature, ani_data);
-    };
-    handler_->PostTask(task, "OnDestroy");
+    ani_object ani_data {};
+    const char* signature  = "V:V";
+    CallObjectMethod(false, "onDestroy", signature, ani_data);
 }
 
 void StsNotificationSubscriberExtension::OnReceiveMessage(const std::shared_ptr<NotificationInfo> info)
@@ -236,6 +224,7 @@ void StsNotificationSubscriberExtension::OnStart(const AAFwk::Want& want)
 void StsNotificationSubscriberExtension::OnStop()
 {
     ANS_LOGD("%{public}s called.", __func__);
+    OnDestroy();
     Extension::OnStop();
 }
 

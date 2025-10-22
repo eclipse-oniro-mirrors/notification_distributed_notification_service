@@ -63,7 +63,7 @@ std::shared_ptr<NotificationInfo> NotificationSubscriberStubImpl::ConvertNotific
         ANS_LOGE("null notificationInfo");
         return nullptr;
     }
-    notificationInfo->SetHashCode(notificationRequest->GetNotificationHashCode());
+    notificationInfo->SetHashCode(notificationRequest->GetBaseKey(""));
     notificationInfo->SetNotificationSlotType(notificationRequest->GetSlotType());
     auto content = notificationRequest->GetContent();
     if (content == nullptr) {

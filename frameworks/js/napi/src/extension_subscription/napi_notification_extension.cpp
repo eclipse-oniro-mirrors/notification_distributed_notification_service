@@ -116,6 +116,39 @@ napi_value SetNotificationExtensionSubscriptionInfo(
     return result;
 }
 
+sptr<NotificationExtensionSubscriptionInfo> GetParameterArrayItem(
+    const napi_env& env, const napi_value& array, const size_t index)
+{
+    napi_value nNotificationExtensionSubscriptionInfo = nullptr;
+    napi_valuetype valuetype = napi_undefined;
+    napi_get_element(env, array, index, &nNotificationExtensionSubscriptionInfo);
+    NAPI_CALL_BASE(env, napi_typeof(env, nNotificationExtensionSubscriptionInfo, &valuetype), nullptr);
+    if (valuetype != napi_object) {
+        ANS_LOGE("Wrong argument type. Object expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be object.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    sptr<NotificationExtensionSubscriptionInfo> item =
+        new (std::nothrow) NotificationExtensionSubscriptionInfo();
+    if (item == nullptr) {
+        ANS_LOGE("Failed to create NotificationExtensionSubscriptionInfo.");
+        std::string msg =
+            "Parameter verification failed. Failed to create NotificationExtensionSubscriptionInfo ptr";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    auto retValue = GetNotificationExtensionSubscriptionInfo(
+        env, nNotificationExtensionSubscriptionInfo, item);
+    if (retValue == nullptr) {
+        ANS_LOGE("null retValue");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        return nullptr;
+    }
+
+    return item;
+}
+
 napi_value ParseParameters(const napi_env& env, const napi_callback_info& info,
     std::vector<sptr<NotificationExtensionSubscriptionInfo>>& subscriptionInfo)
 {
@@ -147,29 +180,8 @@ napi_value ParseParameters(const napi_env& env, const napi_callback_info& info,
         return nullptr;
     }
     for (size_t index = 0; index < length; index++) {
-        napi_value nNotificationExtensionSubscriptionInfo = nullptr;
-        napi_get_element(env, argv[PARAM0], index, &nNotificationExtensionSubscriptionInfo);
-        NAPI_CALL_BASE(env, napi_typeof(env, nNotificationExtensionSubscriptionInfo, &valuetype), nullptr);
-        if (valuetype != napi_object) {
-            ANS_LOGE("Wrong argument type. Object expected.");
-            std::string msg = "Incorrect parameter types.The type of param must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-            return nullptr;
-        }
-        sptr<NotificationExtensionSubscriptionInfo> item =
-            new (std::nothrow) NotificationExtensionSubscriptionInfo();
+        auto item = GetParameterArrayItem(env, argv[PARAM0], index);
         if (item == nullptr) {
-            ANS_LOGE("Failed to create NotificationExtensionSubscriptionInfo.");
-            std::string msg =
-                "Parameter verification failed. Failed to create NotificationExtensionSubscriptionInfo ptr";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-            return nullptr;
-        }
-        auto retValue = GetNotificationExtensionSubscriptionInfo(
-            env, nNotificationExtensionSubscriptionInfo, item);
-        if (retValue == nullptr) {
-            ANS_LOGE("null retValue");
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
         subscriptionInfo.emplace_back(item);
@@ -285,6 +297,57 @@ napi_value ParseParametersForGetUserGrantedEnableBundle(const napi_env& env, con
     return Common::NapiGetNull(env);
 }
 
+bool ParseEnabledBundlesForSetUserGrantedBundleState(
+    const napi_env& env, const napi_value& value, NotificationExtensionUserGrantedParams& params)
+{
+    ANS_LOGD("called");
+
+    bool isArray = false;
+    napi_is_array(env, value, &isArray);
+    if (!isArray) {
+        ANS_LOGE("Wrong argument type. Array expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be array.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return false;
+    }
+    uint32_t length = 0;
+    napi_get_array_length(env, value, &length);
+    if (length == 0) {
+        ANS_LOGD("The array is empty.");
+        std::string msg = "Mandatory parameters are left unspecified. The array is empty.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return false;
+    }
+    napi_valuetype valuetype = napi_undefined;
+    for (size_t index = 0; index < length; index++) {
+        napi_value bundle = nullptr;
+        napi_get_element(env, value, index, &bundle);
+        NAPI_CALL_BASE(env, napi_typeof(env, bundle, &valuetype), false);
+        if (valuetype != napi_object) {
+            ANS_LOGE("Wrong argument type. Object expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be object.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return false;
+        }
+        sptr<NotificationBundleOption> item = new (std::nothrow) NotificationBundleOption();
+        if (item == nullptr) {
+            ANS_LOGE("Failed to create NotificationBundleOption.");
+            std::string msg = "Parameter verification failed. Failed to create NotificationBundleOption ptr";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return false;
+        }
+        auto retValue = Common::GetBundleOption(env, bundle, *item);
+        if (retValue == nullptr) {
+            ANS_LOGE("null retValue");
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+            return false;
+        }
+        params.bundles.emplace_back(item);
+    }
+
+    return true;
+}
+
 napi_value ParseParametersForSetUserGrantedBundleState(const napi_env& env, const napi_callback_info& info,
     NotificationExtensionUserGrantedParams& params)
 {
@@ -317,46 +380,8 @@ napi_value ParseParametersForSetUserGrantedBundleState(const napi_env& env, cons
     }
 
     // argv[1]: enabledBundles
-    bool isArray = false;
-    napi_is_array(env, argv[PARAM1], &isArray);
-    if (!isArray) {
-        ANS_LOGE("Wrong argument type. Array expected.");
-        std::string msg = "Incorrect parameter types.The type of param must be array.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+    if (!ParseEnabledBundlesForSetUserGrantedBundleState(env, argv[PARAM1], params)) {
         return nullptr;
-    }
-    uint32_t length = 0;
-    napi_get_array_length(env, argv[PARAM1], &length);
-    if (length == 0) {
-        ANS_LOGD("The array is empty.");
-        std::string msg = "Mandatory parameters are left unspecified. The array is empty.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-        return nullptr;
-    }
-    for (size_t index = 0; index < length; index++) {
-        napi_value bundle = nullptr;
-        napi_get_element(env, argv[PARAM1], index, &bundle);
-        NAPI_CALL_BASE(env, napi_typeof(env, bundle, &valuetype), nullptr);
-        if (valuetype != napi_object) {
-            ANS_LOGE("Wrong argument type. Object expected.");
-            std::string msg = "Incorrect parameter types.The type of param must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-            return nullptr;
-        }
-        sptr<NotificationBundleOption> item = new (std::nothrow) NotificationBundleOption();
-        if (item == nullptr) {
-            ANS_LOGE("Failed to create NotificationBundleOption.");
-            std::string msg = "Parameter verification failed. Failed to create NotificationBundleOption ptr";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-            return nullptr;
-        }
-        auto retValue = Common::GetBundleOption(env, bundle, *item);
-        if (retValue == nullptr) {
-            ANS_LOGE("null retValue");
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
-            return nullptr;
-        }
-        params.bundles.emplace_back(item);
     }
 
     // argv[2]: enabled
@@ -756,6 +781,31 @@ void CreateExtensionSub(AsyncCallbackInfoOpenSettings* asynccallbackinfo)
     ANS_LOGI("errorCode: %{public}d", asynccallbackinfo->info.errorCode);
 }
 
+void ProcessExtensionSubCreation(napi_env env, void* data)
+{
+    if (data == nullptr) {
+        ANS_LOGE("null data");
+        return;
+    }
+    auto* asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings*>(data);
+    CreateExtensionSub(asynccallbackinfo);
+    ErrCode errCode = asynccallbackinfo->info.errorCode;
+    if (errCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
+        ANS_LOGE("errCode: %{public}d.", errCode);
+        NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
+        if (errCode != ERROR_SETTING_WINDOW_EXIST) {
+            subisExist.store(false);
+        }
+        return;
+    }
+    if (!InitSub(env, asynccallbackinfo, NapiAsyncCompleteCallbackOpenSettings)) {
+        ANS_LOGE("init error");
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
+        return;
+    }
+}
+
 
 napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_info &info, OpenSettingsParams &params)
 {
@@ -825,27 +875,7 @@ napi_value NapiNotificationExtensionOpenSubscriptionSettings(napi_env env, napi_
 
     auto createExtension = [](napi_env, void*) {};
     auto jsCb = [](napi_env env, napi_status, void* data) {
-        if (data == nullptr) {
-            ANS_LOGE("null data");
-            return;
-        }
-        auto* asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings*>(data);
-        CreateExtensionSub(asynccallbackinfo);
-        ErrCode errCode = asynccallbackinfo->info.errorCode;
-        if (errCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
-            ANS_LOGE("errCode: %{public}d.", errCode);
-            NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
-            if (errCode != ERROR_SETTING_WINDOW_EXIST) {
-                subisExist.store(false);
-            }
-            return;
-        }
-        if (!InitSub(env, asynccallbackinfo, NapiAsyncCompleteCallbackOpenSettings)) {
-            ANS_LOGE("init error");
-            asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
-            NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
-            return;
-        }
+        ProcessExtensionSubCreation(env, data);
     };
 
     napi_create_async_work(env, nullptr, resourceName, createExtension, jsCb,

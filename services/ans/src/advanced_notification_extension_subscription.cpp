@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "access_token_helper.h"
 #include "advanced_notification_service.h"
+#include "access_token_helper.h"
+#include "aes_gcm_helper.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_permission_def.h"
@@ -65,12 +66,7 @@ int32_t AdvancedNotificationService::LoadExtensionService()
         ANS_LOGW("GetProxyFunc Startup init failed.");
         return -1;
     }
-    startup([this]() {
-        ANS_LOGD("ANS submit destroy service.");
-        notificationSvrQueue_->submit([&]() {
-            PrepareShutdownExtensionService();
-        });
-    });
+    startup(nullptr);
     notificationExtensionLoaded_.store(true);
     return 0;
 #else
@@ -296,12 +292,15 @@ bool AdvancedNotificationService::CheckAndUpdateHfpDeviceStatus(
     int32_t btConnectState = static_cast<int32_t>(Bluetooth::BTConnectState::DISCONNECTED);
     int32_t ret = OHOS::Bluetooth::HandsFreeAudioGateway::GetProfile()->GetDeviceState(remoteDevice, btConnectState);
     if (ret == ERR_OK && btConnectState == static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED)) {
-        ANS_LOGI("Bluetooth HFP device connected: %{public}s", bluetoothAddress.c_str());
+        std::string encryptedAddr;
+        if (AesGcmHelper::Encrypt(bluetoothAddress, encryptedAddr) == ERR_OK) {
+            ANS_LOGI("Bluetooth HFP device connected: %{public}s", encryptedAddr.c_str());
+        }
         info->SetHfp(true);
         ErrCode updateResult = NotificationPreferences::GetInstance()->SetExtensionSubscriptionInfos(bundleOption,
             infos);
         if (updateResult != ERR_OK) {
-            ANS_LOGW("Failed to update HFP status to database for device: %{public}s", bluetoothAddress.c_str());
+            ANS_LOGW("Failed to update HFP status to database for device: %{public}s", encryptedAddr.c_str());
         }
         return true;
     }
@@ -318,7 +317,10 @@ bool AdvancedNotificationService::CheckBluetoothConditions(const std::string& ad
     if (state == OHOS::Bluetooth::PAIR_PAIRED) {
         result = true;
     } else {
-        ANS_LOGW("Bluetooth device not paired: %{public}s, state: %{public}d", addr.c_str(), state);
+        std::string encryptedAddr;
+        if (AesGcmHelper::Encrypt(addr, encryptedAddr) == ERR_OK) {
+            ANS_LOGW("Bluetooth device not paired: %{public}s, state: %{public}d", encryptedAddr.c_str(), state);
+        }
     }
     return result;
 }
@@ -566,6 +568,11 @@ void AdvancedNotificationService::RegisterHfpObserver()
         hfpObserver_ = std::make_shared<HfpStateObserver>();
     }
     
+    if (isHfpObserverRegistered_.load()) {
+        return;
+    }
+
+    isHfpObserverRegistered_.store(true);
     auto profile = OHOS::Bluetooth::HandsFreeAudioGateway::GetProfile();
     if (profile != nullptr) {
         profile->RegisterObserver(hfpObserver_);
@@ -635,8 +642,13 @@ bool AdvancedNotificationService::TryStartExtensionSubscribeService()
         std::vector<std::pair<sptr<NotificationBundleOption>,
             std::vector<sptr<NotificationBundleOption>>>> extensionBundleInfos;
         std::vector<sptr<NotificationBundleOption>> bundles;
+        if (!CheckBluetoothSwitchState()) {
+            ANS_LOGW("Bluetooth is not enabled, skip checking extension service condition");
+            RegisterBluetoothAccessObserver();
+            return;
+        }
         if (GetNotificationExtensionEnabledBundles(bundles) != ERR_OK || bundles.empty()) {
-            ANS_LOGI("No bundle has extensionAbility, skip loading ExtensionService");
+            ANS_LOGW("No bundle has extensionAbility, skip loading ExtensionService");
             return;
         }
         CheckExtensionServiceCondition(extensionBundleInfos, bundles);
@@ -1085,6 +1097,14 @@ void HfpStateObserver::OnConnectionStateChanged(
     AdvancedNotificationService::GetInstance()->OnHfpDeviceConnectChanged(device, state);
 }
 
+void BluetoothAccessObserver::OnStateChanged(const int transport, const int status)
+{
+    ANS_LOGI("Bluetooth state changed: transport: %{public}d, status: %{public}d", transport, status);
+    if (status == OHOS::Bluetooth::BTStateID::STATE_TURN_ON) {
+        AdvancedNotificationService::GetInstance()->OnBluetoothStateChanged();
+    }
+}
+
 void AdvancedNotificationService::ProcessSetUserGrantedState(
     const sptr<NotificationBundleOption>& bundle, bool enabled, ErrCode& result)
 {
@@ -1139,6 +1159,51 @@ void AdvancedNotificationService::ProcessSetUserGrantedBundleState(
         if (!ShutdownExtensionServiceAndUnSubscribed(bundle)) {
             return;
         }
+    }
+}
+
+bool AdvancedNotificationService::CheckBluetoothSwitchState()
+{
+    Bluetooth::BluetoothState state = Bluetooth::BluetoothHost::GetDefaultHost().GetBluetoothState();
+    if (state != Bluetooth::BluetoothState::STATE_ON) {
+        return false;
+    }
+    return true;
+}
+
+void AdvancedNotificationService::RegisterBluetoothAccessObserver()
+{
+    if (bluetoothAccessObserver_ == nullptr) {
+        bluetoothAccessObserver_ = std::make_shared<BluetoothAccessObserver>();
+    }
+    
+    if (isBluetoothObserverRegistered_.load()) {
+        return;
+    }
+
+    isBluetoothObserverRegistered_.store(true);
+    Bluetooth::BluetoothHost::GetDefaultHost().RegisterObserver(bluetoothAccessObserver_);
+}
+
+void AdvancedNotificationService::OnBluetoothStateChanged()
+{
+    ANS_LOGD("OnBluetoothStateChanged");
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    if (cacheNotificationExtensionBundles_.size() != 0) {
+        bundles = cacheNotificationExtensionBundles_;
+    } else {
+        GetNotificationExtensionEnabledBundles(bundles);
+    }
+
+    if (bundles.size() == 0) {
+        return;
+    }
+
+    std::vector<std::pair<sptr<NotificationBundleOption>,
+        std::vector<sptr<NotificationBundleOption>>>> extensionBundleInfos;
+    CheckExtensionServiceCondition(extensionBundleInfos, bundles);
+    if (extensionBundleInfos.size() > 0) {
+        LoadExtensionService();
     }
 }
 }  // namespace Notification

@@ -51,7 +51,7 @@ napi_value SetNotificationExtensionContent(const napi_env &env,
 
     // text: string;
     napi_create_string_utf8(env, notificationExtensionContent->GetText().c_str(), NAPI_AUTO_LENGTH, &value);
-    napi_set_named_property(env, result, "notificationText", value);
+    napi_set_named_property(env, result, "text", value);
 
     return Common::NapiGetBoolean(env, true);
 }
@@ -72,7 +72,12 @@ napi_value SetNotificationInfo(
     napi_set_named_property(env, result, "hashCode", value);
 
     // readonly notificationSlotType: notificationManager.SlotType;
-    napi_create_int32(env, static_cast<int32_t>(notificationInfo->GetNotificationSlotType()), &value);
+    SlotType outType = SlotType::UNKNOWN_TYPE;
+    if (!AnsEnumUtil::SlotTypeCToJS(notificationInfo->GetNotificationSlotType(), outType)) {
+        ANS_LOGE("SlotTypeCToJS failed");
+        return Common::NapiGetBoolean(env, false);
+    }
+    napi_create_int32(env, static_cast<int32_t>(outType), &value);
     napi_set_named_property(env, result, "notificationSlotType", value);
 
     //readonly content: NotificationExtensionContent;
