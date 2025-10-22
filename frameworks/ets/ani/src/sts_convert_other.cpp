@@ -16,6 +16,7 @@
 
 #include "sts_common.h"
 #include "pixel_map_taihe_ani.h"
+#include "sts_bundle_option.h"
 
 namespace OHOS {
 namespace NotificationSts {
@@ -483,7 +484,7 @@ ani_object CreateAniUndefined(ani_env *env)
     env->GetUndefined(&aniRef);
     return reinterpret_cast<ani_object>(aniRef);
 }
- 
+
 ani_object CreateMapObject(ani_env *env, const std::string name, const char *signature)
 {
     ani_class cls = nullptr;
@@ -503,7 +504,7 @@ ani_object CreateMapObject(ani_env *env, const std::string name, const char *sig
     }
     return obj;
 }
- 
+
 ani_status GetMapIterator(ani_env *env, ani_object &mapObj, const char *method, ani_ref *it)
 {
     ani_status status = env->Object_CallMethodByName_Ref(mapObj, method, nullptr, it);
@@ -512,7 +513,7 @@ ani_status GetMapIterator(ani_env *env, ani_object &mapObj, const char *method, 
     }
     return status;
 }
- 
+
 ani_status GetMapIteratorNext(ani_env *env, ani_ref &it, ani_ref *next)
 {
     ani_status status = env->Object_CallMethodByName_Ref(reinterpret_cast<ani_object>(it), "next", nullptr, next);
@@ -521,7 +522,7 @@ ani_status GetMapIteratorNext(ani_env *env, ani_ref &it, ani_ref *next)
     }
     return status;
 }
- 
+
 ani_status GetMapIteratorStringValue(ani_env *env, ani_ref &next, std::string &str)
 {
     ani_ref val;
@@ -544,22 +545,22 @@ ani_status GetMapByAniMap(ani_env *env, ani_object &mapObj,
     ani_ref keys;
     ani_ref values;
     bool done = false;
- 
+
     if (GetMapIterator(env, mapObj, "keys", &keys) != ANI_OK ||
         GetMapIterator(env, mapObj, "values", &values) != ANI_OK) {
         return ANI_ERROR;
     }
- 
+
     while (!done) {
         ani_ref nextKey;
         ani_ref nextVal;
         ani_boolean done;
- 
+
         if (GetMapIteratorNext(env, keys, &nextKey) != ANI_OK ||
             GetMapIteratorNext(env, values, &nextVal) != ANI_OK) {
             return ANI_ERROR;
         }
- 
+
         if ((status = env->Object_GetFieldByName_Boolean(reinterpret_cast<ani_object>(nextKey), "done", &done))
             != ANI_OK) {
             ANS_LOGD("Failed to check iterator done, status: %{public}d", status);
@@ -568,7 +569,7 @@ ani_status GetMapByAniMap(ani_env *env, ani_object &mapObj,
         if (done) {
             break;
         }
- 
+
         std::string keyStr;
         std::string valStr;
         if (GetMapIteratorStringValue(env, nextKey, keyStr) != ANI_OK||
@@ -577,7 +578,65 @@ ani_status GetMapByAniMap(ani_env *env, ani_object &mapObj,
         }
         out.emplace_back(keyStr, valStr);
     }
- 
+
+    return ANI_OK;
+}
+
+ani_status GetMapByAniMap(ani_env *env, ani_object &mapObj,
+    std::vector<std::pair<Notification::NotificationBundleOption, bool>> &out)
+{
+    ani_status status = ANI_ERROR;
+    ani_ref keys;
+    ani_ref values;
+    bool done = false;
+
+    if (GetMapIterator(env, mapObj, "keys", &keys) != ANI_OK ||
+        GetMapIterator(env, mapObj, "values", &values) != ANI_OK) {
+        return ANI_ERROR;
+    }
+
+    while (!done) {
+        ani_ref nextKey;
+        ani_ref nextVal;
+        ani_boolean done;
+
+        if (GetMapIteratorNext(env, keys, &nextKey) != ANI_OK ||
+            GetMapIteratorNext(env, values, &nextVal) != ANI_OK) {
+            return ANI_ERROR;
+        }
+
+        if ((status = env->Object_GetFieldByName_Boolean(reinterpret_cast<ani_object>(nextKey), "done", &done))
+            != ANI_OK) {
+            ANS_LOGE("Failed to check iterator done, status: %{public}d", status);
+            return ANI_ERROR;
+        }
+        if (done) {
+            break;
+        }
+
+        ani_ref val;
+        ani_status status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(nextKey), "value", &val);
+        if (status != ANI_OK) {
+            ANS_LOGE("Failed to get value, status: %{public}d", status);
+        }
+        Notification::NotificationBundleOption option;
+        if (!UnwrapBundleOption(env, static_cast<ani_object>(val), option)) {
+            ANS_LOGE("UnwrapNotificationSlot failed");
+            return ANI_ERROR;
+        }
+        status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(nextVal), "value", &val);
+        if (status != ANI_OK) {
+            ANS_LOGE("Failed to get value, status: %{public}d", status);
+            return ANI_ERROR;
+        }
+        ani_boolean anivalue = ANI_FALSE;
+        if ((status = env->Object_CallMethodByName_Boolean(
+            reinterpret_cast<ani_object>(val), "unboxed", nullptr, &anivalue)) != ANI_OK) {
+            ANS_LOGE("Failed to get bool, status: %{public}d", status);
+            return ANI_ERROR;
+        }
+        out.emplace_back(option, AniBooleanToBool(anivalue));
+    }
     return ANI_OK;
 }
 } // namespace NotificationSts

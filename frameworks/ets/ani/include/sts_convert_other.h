@@ -20,6 +20,7 @@
 #include "pixel_map.h"
 #include "want_agent.h"
 #include "ani_common_want_agent.h"
+#include "notification_bundle_option.h"
 
 using ResourceManager = OHOS::Global::Resource::ResourceManager;
 namespace OHOS {
@@ -62,6 +63,8 @@ ani_object CreateAniUndefined(ani_env *env);
 ani_object CreateMapObject(ani_env *env, const std::string name, const char *signature);
 ani_status GetMapByAniMap(ani_env *env, ani_object &mapObj,
     std::vector<std::pair<std::string, std::string>> &out);
+ani_status GetMapByAniMap(ani_env *env, ani_object &mapObj,
+    std::vector<std::pair<OHOS::Notification::NotificationBundleOption, bool>> &out);
 } // namespace NotificationSts
 } // OHOS
 #endif

@@ -125,11 +125,17 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeIsBadgeDisplayed", nullptr, reinterpret_cast<void *>(AniIsBadgeDisplayed)},
     ani_native_function {"nativeSetBadgeNumber", "I:V", reinterpret_cast<void *>(AniSetBadgeNumber)},
     ani_native_function {"nativeSetBadgeNumberByBundle", nullptr, reinterpret_cast<void *>(AniSetBadgeNumberByBundle)},
+    ani_native_function {"nativeSetBadgeDisplayStatusByBundles", nullptr,
+        reinterpret_cast<void *>(AniSetBadgeDisplayStatusByBundles)},
+    ani_native_function {"nativeGetBadgeDisplayStatusByBundles", nullptr,
+        reinterpret_cast<void *>(AniGetBadgeDisplayStatusByBundles)},
 #else
     ani_native_function {"nativeDisplayBadge", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
     ani_native_function {"nativeIsBadgeDisplayed", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
     ani_native_function {"nativeSetBadgeNumber", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
     ani_native_function {"nativeSetBadgeNumberByBundle", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeSetBadgeDisplayStatusByBundles", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeGetBadgeDisplayStatusByBundles", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
 #endif
 #ifdef ANS_FEATURE_DISTRIBUTED_DB
     ani_native_function {"nativeIsDistributedEnabled", nullptr, reinterpret_cast<void *>(AniIsDistributedEnabled)},
