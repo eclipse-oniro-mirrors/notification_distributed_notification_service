@@ -43,6 +43,10 @@ constexpr char CANCEL[] = "CANCEL";
 constexpr char REMOVE[] = "REMOVE";
 constexpr char STATIC_LIVE_VIEW_UPLOAD[] = "STATIC_LIVE_VIEW_UPLOAD";
 constexpr char USER_DATA_SIZE[] = "USER_DATA_SIZE";
+constexpr char AUTH_DIALOG_CLICK[] = "AUTH_DIALOG_CLICK";
+
+//domain
+static constexpr char NOTIFICATION_UE[] = "NOTIFICATION_UE";
 } // namespace
 
 struct EventInfo {
@@ -102,6 +106,7 @@ private:
     static void InnerSendSubscribeEvent(const EventInfo &eventInfo);
     static void InnerSendUnSubscribeEvent(const EventInfo &eventInfo);
     static void InnerSendEnableNotificationEvent(const EventInfo &eventInfo);
+    static void InnerSendDialogClickEvent(const EventInfo &eventInfo);
     static void InnerSendEnableNotificationSlotEvent(const EventInfo &eventInfo);
 
     // statistic event
@@ -113,6 +118,10 @@ private:
 
     template<typename... Types>
     static void InnerEventWrite(const std::string &eventName,
+        HiviewDFX::HiSysEvent::EventType type, Types... keyValues);
+    
+    template<typename... Types>
+    static void InnerUeEventWrite(const std::string &eventName,
         HiviewDFX::HiSysEvent::EventType type, Types... keyValues);
 
     static std::unordered_map<std::string, void (*)(const EventInfo &eventInfo)> ansSysEventFuncMap_;

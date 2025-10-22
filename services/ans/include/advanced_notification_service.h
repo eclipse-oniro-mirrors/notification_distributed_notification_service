@@ -1538,6 +1538,8 @@ public:
 
     ErrCode CanOpenSubscribeSettings() override;
 
+    void SendDialogClickHiSysEvent(const sptr<NotificationBundleOption> &bundleOption, bool enabled);
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
