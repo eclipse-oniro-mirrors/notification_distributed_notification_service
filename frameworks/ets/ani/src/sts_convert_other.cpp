@@ -453,17 +453,17 @@ ani_object GetAniWantAgentArray(ani_env *env, std::vector<std::shared_ptr<WantAg
     ani_status status = ANI_ERROR;
     ani_class arrayCls = nullptr;
     if (ANI_OK != (status = env->FindClass("escompat.Array", &arrayCls))) {
-        ANS_LOGE("GetAniWantAgentArray : FindClass status = %{public}d", status);
+        ANS_LOGE("FindClass status = %{public}d", status);
         return nullptr;
     }
     ani_method arrayCtor;
     if (ANI_OK != (status = env->Class_FindMethod(arrayCls, "<ctor>", "i:", &arrayCtor))) {
-        ANS_LOGE("GetAniWantAgentArray : Class_FindMethod status = %{public}d", status);
+        ANS_LOGE("Class_FindMethod status = %{public}d", status);
         return nullptr;
     }
     ani_object arrayObj;
     if (ANI_OK != (status = env->Object_New(arrayCls, arrayCtor, &arrayObj, wantAgents.size()))) {
-        ANS_LOGE("GetAniWantAgentArray : Object_New status = %{public}d", status);
+        ANS_LOGE("Object_New status = %{public}d", status);
         return nullptr;
     }
     ani_size index = 0;
@@ -471,7 +471,7 @@ ani_object GetAniWantAgentArray(ani_env *env, std::vector<std::shared_ptr<WantAg
         ani_object item = WarpWantAgent(env, wantAgent);
         if (item == nullptr
             || ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, item)) {
-            ANS_LOGE("GetAniWantAgentArray : set WantAgent failed");
+            ANS_LOGE("set WantAgent failed");
             return nullptr;
         }
         index ++;
