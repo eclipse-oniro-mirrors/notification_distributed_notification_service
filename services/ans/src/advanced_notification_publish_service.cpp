@@ -1083,20 +1083,20 @@ ErrCode AdvancedNotificationService::PublishExtensionServiceStateChange(
     want.SetAction("usual.event.notification.EXTENSION_SUBSCRIBE_STATE_CHANGE");
     want.SetParam("state", state);
     if (eventCode == NotificationConstant::USER_GRANTED_BUNDLE_STATE) {
-        ANS_LOGI("Publish USER_GRANTED_BUNDLE_STATE event for bundle: %{public}s, state: %{public}d",
-            bundleOption->GetBundleName().c_str(), state);
-        std::vector<std::string> bundleNames;
+        nlohmann::json enabledBundlesJson = nlohmann::json::array();
         for (const auto &bundle : enabledBundles) {
             if (bundle != nullptr) {
-                bundleNames.emplace_back(bundle->GetBundleName());
-                ANS_LOGD("Enabled bundle: %{public}s", bundle->GetBundleName().c_str());
+                enabledBundlesJson.push_back({
+                    {"bundle", bundle->GetBundleName()},
+                    {"uid", bundle->GetUid()}
+                });
             }
         }
-        want.SetParam("enabledBundles", bundleNames);
-    } else {
-        ANS_LOGI("Publish event code=%{public}d for bundle: %{public}s, state: %{public}d",
-            eventCode, bundleOption->GetBundleName().c_str(), state);
+        want.SetParam("enabledBundles", enabledBundlesJson.dump());
     }
+    
+    nlohmann::json targetBundle = {{"bundle", bundleOption->GetBundleName()}, {"uid", bundleOption->GetUid()}};
+    want.SetParam("targetBundle", targetBundle.dump());
 
     EventFwk::CommonEventData commonData;
     commonData.SetWant(want);
@@ -1111,7 +1111,8 @@ ErrCode AdvancedNotificationService::PublishExtensionServiceStateChange(
             bundleOption->GetBundleName().c_str(), eventCode);
         return ERR_ANS_TASK_ERR;
     }
-
+    ANS_LOGI("Publish event code=%{public}d for bundle: %{public}s, state: %{public}d",
+        eventCode, bundleOption->GetBundleName().c_str(), state);
     return ERR_OK;
 }
 

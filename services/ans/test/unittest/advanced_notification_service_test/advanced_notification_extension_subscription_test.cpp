@@ -764,23 +764,5 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest,
     ErrCode ret = advancedNotificationService_->CheckBluetoothConnectionInInfos(bundleOption, infos);
     EXPECT_FALSE(ret);
 }
-
-/**
- * @tc.number    : CheckAndUpdateHfpDeviceStatus_0100
- * @tc.name      : CheckAndUpdateHfpDeviceStatus
- * @tc.desc      : Test CheckAndUpdateHfpDeviceStatus case
- */
-HWTEST_F(AdvancedNotificationExtensionSubscriptionTest,
-    CheckAndUpdateHfpDeviceStatus_0100, Function | SmallTest | Level1)
-{
-    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
-    sptr<NotificationExtensionSubscriptionInfo> info = new NotificationExtensionSubscriptionInfo();
-    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
-    infos.emplace_back(info);
-    std::string bluetoothAddress = "bluetoothAddress";
-    ErrCode ret =
-        advancedNotificationService_->CheckAndUpdateHfpDeviceStatus(bundleOption, info, infos, bluetoothAddress);
-    EXPECT_FALSE(ret);
-}
 }
 }

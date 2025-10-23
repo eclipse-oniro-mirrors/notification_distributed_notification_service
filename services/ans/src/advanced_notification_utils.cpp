@@ -1838,6 +1838,7 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleO
         }
         validBundleOption = bundleOption;
     }
+    validBundleOption->SetAppIndex(BundleManagerHelper::GetInstance()->GetAppIndexByUid(validBundleOption->GetUid()));
     return validBundleOption;
 }
 

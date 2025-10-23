@@ -337,19 +337,15 @@ napi_value JsNotificationSubscriberExtension::CreateOnCancelMessagesResult(
     napi_env env, const std::shared_ptr<std::vector<std::string>> hashCodes)
 {
     napi_value result = nullptr;
-    napi_create_object(env, &result);
-
+    napi_create_array(env, &result);
     uint32_t count = 0;
-    napi_value napiHashCodes = nullptr;
-    napi_create_array(env, &napiHashCodes);
     for (auto vec : *hashCodes) {
         napi_value vecValue = nullptr;
         ANS_LOGD("hashCodes = %{public}s", vec.c_str());
         napi_create_string_utf8(env, vec.c_str(), NAPI_AUTO_LENGTH, &vecValue);
-        napi_set_element(env, napiHashCodes, count, vecValue);
+        napi_set_element(env, result, count, vecValue);
         count++;
     }
-    napi_set_named_property(env, result, "hashCodes", napiHashCodes);
     return result;
 }
 }  // namespace NotificationNapi
