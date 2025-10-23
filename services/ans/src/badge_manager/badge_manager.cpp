@@ -59,9 +59,9 @@ ErrCode AdvancedNotificationService::SetNotificationBadgeNum(int32_t num)
 ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundles(
     const std::map<sptr<NotificationBundleOption>, bool> &bundleOptions)
 {
+    ANS_LOGD("SetShowBadgeEnabledForBundles call");
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_0);
     if (bundleOptions.empty()) {
-        ANS_LOGE("null bundleOptions");
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_BUNDLE));
         return ERR_ANS_INVALID_BUNDLE;
     }
@@ -83,12 +83,13 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundles(
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("null notificationSvrQueue");
+        message.Message("Serial queue is invalid.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_3));
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
-            ANS_LOGD("called");
             for (const auto &bundleOption : bundleOptions) {
                 sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption.first);
                 if (bundle == nullptr) {
@@ -100,13 +101,14 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundles(
                 } else {
                     message.Message(bundle->GetBundleName() + "_" + std::to_string(bundle->GetUid()) +
                         "_" + std::to_string(bundleOption.second) + "set showbadge failed.");
-                    NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_3));
+                    NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_4));
                 }
             }
         }));
     notificationSvrQueue_->wait(handler);
-    message.ErrorCode(result).Message("SetShowBadgeEnabledForBundles end").BranchId(BRANCH_4);
+    message.ErrorCode(result).Message("SetShowBadgeEnabledForBundles end").BranchId(BRANCH_5);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
+    ANS_LOGD("SetShowBadgeEnabledForBundles end");
     return ERR_OK;
 }
 
@@ -224,10 +226,12 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundles(
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_16, EventBranchId::BRANCH_0);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("IsSystemApp is false.");
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NON_SYSTEM_APP));
         return ERR_ANS_NON_SYSTEM_APP;
     }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission Denied");
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_1));
         return ERR_ANS_PERMISSION_DENIED;
     }
@@ -240,7 +244,6 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundles(
 
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("called");
         for (sptr<NotificationBundleOption> bundleOption : bundleOptions) {
             sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
             if (bundle == nullptr) {
@@ -264,7 +267,9 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundles(
         }
     }));
     notificationSvrQueue_->wait(handler);
-
+    message.ErrorCode(result).Message("GetShowBadgeEnabledForBundles end").BranchId(BRANCH_4);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
+    ANS_LOGD("GetShowBadgeEnabledForBundles end");
     return ERR_OK;
 }
 
