@@ -1139,11 +1139,11 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_029, Level1)
  */
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_030, Level1)
 {
-    ReminderDataShareHelper::GetInstance().isNewRdbVer_ = true;
+    ReminderDataShareHelper::GetInstance().rdbVersion_ = 1;
     auto result = ReminderDataShareHelper::GetInstance().GetColumns();
     EXPECT_TRUE(result.size() == 19);
 
-    ReminderDataShareHelper::GetInstance().isNewRdbVer_ = false;
+    ReminderDataShareHelper::GetInstance().rdbVersion_ = 0;
     result = ReminderDataShareHelper::GetInstance().GetColumns();
     EXPECT_TRUE(result.size() == 11);
 
@@ -1152,11 +1152,11 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_030, Level1)
 
     DataShare::DataShareObserver::ChangeInfo::Value ringDuration = static_cast<double>(10);
     info[ReminderCalendarShareTable::RING_DURATION] = ringDuration;
-    ReminderDataShareHelper::GetInstance().isNewRdbVer_ = false;
+    ReminderDataShareHelper::GetInstance().rdbVersion_ = 0;
     ReminderDataShareHelper::GetInstance().BuildReminderV1(info, timer);
     EXPECT_TRUE(timer->GetRingDuration() == 1);
 
-    ReminderDataShareHelper::GetInstance().isNewRdbVer_ = true;
+    ReminderDataShareHelper::GetInstance().rdbVersion_ = 1;
     info.clear();
     ReminderDataShareHelper::GetInstance().BuildReminderV1(info, timer);
     EXPECT_TRUE(timer->GetRingDuration() == 1);
@@ -1188,7 +1188,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_030, Level1)
     info[ReminderCalendarShareTable::TIME_INTERVAL] = timeInterval5;
     ReminderDataShareHelper::GetInstance().BuildReminderV1(info, timer);
     EXPECT_TRUE(timer->GetTimeInterval() == 30);
-    ReminderDataShareHelper::GetInstance().isNewRdbVer_ = false;
+    ReminderDataShareHelper::GetInstance().rdbVersion_ = 0;
 }
 
 /**
@@ -1199,7 +1199,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_030, Level1)
  */
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_031, Level1)
 {
-    ReminderDataShareHelper::GetInstance().isNewRdbVer_ = true;
+    ReminderDataShareHelper::GetInstance().rdbVersion_ = 1;
     sptr<ReminderRequest> timer = new ReminderRequestTimer(500);
     DataShare::DataShareObserver::ChangeInfo::VBucket info;
     DataShare::DataShareObserver::ChangeInfo::Value snoozeTimes1 = static_cast<double>(UINT64_MAX);
@@ -1245,7 +1245,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_031, Level1)
     info[ReminderCalendarShareTable::RING_DURATION] = ringDuration5;
     ReminderDataShareHelper::GetInstance().BuildReminderV1(info, timer);
     EXPECT_TRUE(timer->GetRingDuration() == testValue);
-    ReminderDataShareHelper::GetInstance().isNewRdbVer_ = false;
+    ReminderDataShareHelper::GetInstance().rdbVersion_ = 0;
 }
 
 /**
@@ -1256,7 +1256,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_031, Level1)
  */
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_032, Level1)
 {
-    ReminderDataShareHelper::GetInstance().isNewRdbVer_ = true;
+    ReminderDataShareHelper::GetInstance().rdbVersion_ = 1;
     sptr<ReminderRequest> timer = new ReminderRequestTimer(500);
     DataShare::DataShareObserver::ChangeInfo::VBucket info;
     DataShare::DataShareObserver::ChangeInfo::Value type = static_cast<double>(1);
@@ -1326,7 +1326,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_032, Level1)
     info[ReminderCalendarShareTable::MAX_SCREEN_WANT_AGENT] = wantAgent5;
     ReminderDataShareHelper::GetInstance().BuildReminderV1(info, timer);
     EXPECT_TRUE(timer->maxScreenWantAgentInfo_->abilityName == "Entry");
-    ReminderDataShareHelper::GetInstance().isNewRdbVer_ = false;
+    ReminderDataShareHelper::GetInstance().rdbVersion_ = 0;
 }
 
 /**
