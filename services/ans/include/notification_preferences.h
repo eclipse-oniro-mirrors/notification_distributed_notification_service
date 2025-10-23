@@ -633,7 +633,7 @@ private:
     void SetDistributedEnabledForBundle(const NotificationPreferencesInfo::BundleInfo& bundleInfo);
 
 private:
-    int64_t cloneTimestamp = -1;
+    std::map<int32_t, int64_t> cloneTimestamp;
     static ffrt::mutex instanceMutex_;
     static std::shared_ptr<NotificationPreferences> instance_;
     NotificationPreferencesInfo preferencesInfo_ {};

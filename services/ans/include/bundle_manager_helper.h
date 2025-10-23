@@ -190,6 +190,7 @@ public:
     bool CheckBundleImplExtensionAbility(const sptr<NotificationBundleOption> &bundleOption);
     std::string GetBundleLabel(const std::string& bundleName);
 
+    bool IsAncoApp(const std::string &bundleName, int32_t uid);
 private:
     void Connect();
     void Disconnect();

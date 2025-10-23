@@ -3173,15 +3173,8 @@ bool NotificationPreferencesDatabase::SetCloneTimeStamp(const int32_t &userId, c
     return (result == NativeRdb::E_OK);
 }
 
-bool NotificationPreferencesDatabase::GetCloneTimeStamp(int64_t& timestamp)
+bool NotificationPreferencesDatabase::GetCloneTimeStamp(const int32_t userId, int64_t& timestamp)
 {
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
-    if (userId == SUBSCRIBE_USER_INIT) {
-        ANS_LOGW("Current user acquisition failed");
-        return false;
-    }
-
     bool result = false;
     GetValueFromDisturbeDB(CLONE_TIMESTAMP, userId, [&](const int32_t& status, std::string& value) {
         switch (status) {

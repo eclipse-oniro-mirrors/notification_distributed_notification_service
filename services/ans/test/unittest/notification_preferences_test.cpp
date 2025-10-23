@@ -2780,7 +2780,7 @@ HWTEST_F(NotificationPreferencesTest, GetCloneTimeStamp_001, Function | SmallTes
     time = NotificationPreferences::GetInstance()->GetCloneTimeStamp();
     ASSERT_EQ(time, 123456);
 
-    NotificationPreferences::GetInstance()->cloneTimestamp = -1;
+    NotificationPreferences::GetInstance()->cloneTimestamp.clear();
     time = NotificationPreferences::GetInstance()->GetCloneTimeStamp();
     ASSERT_EQ(time, 123456);
 

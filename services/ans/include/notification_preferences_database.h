@@ -437,7 +437,7 @@ public:
     bool IsRingtoneKey(const std::string &bundleKey, const std::string &key) const;
     void ParseRingtoneFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo,
         const std::pair<std::string, std::string> &entry);
-    bool GetCloneTimeStamp(int64_t& timestamp);
+    bool GetCloneTimeStamp(const int32_t userId, int64_t& timestamp);
     bool SetCloneTimeStamp(const int32_t &userId, const int64_t& timestamp);
     bool DelAllCloneRingtoneInfo(const int32_t &userId);
     bool GetAllCloneRingtoneInfo(const int32_t &userId, std::vector<std::string>& ringInfoJson);
