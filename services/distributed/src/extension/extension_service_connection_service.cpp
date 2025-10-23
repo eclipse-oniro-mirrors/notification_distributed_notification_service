@@ -54,7 +54,7 @@ void ExtensionServiceConnectionService::CloseConnection(const ExtensionSubscribe
     ANS_LOGD("close connection: %{public}s", connectionKey.c_str());
     bool needNotify = false;
     do {
-        std::lock_guard<ffrt::mutex> lock(mapLock_);
+        std::lock_guard<ffrt::recursive_mutex> lock(mapLock_);
         auto iter = connectionMap_.find(connectionKey);
         if (iter == connectionMap_.end()) {
             ANS_LOGE("connection not found");
@@ -91,7 +91,7 @@ void ExtensionServiceConnectionService::RemoveConnection(const ExtensionSubscrib
     ANS_LOGD("remove connection: %{public}s", connectionKey.c_str());
     bool needNotify = false;
     {
-        std::lock_guard<ffrt::mutex> lock(mapLock_);
+        std::lock_guard<ffrt::recursive_mutex> lock(mapLock_);
         auto iter = connectionMap_.find(connectionKey);
         if (iter != connectionMap_.end()) {
             connectionMap_.erase(iter);
@@ -110,7 +110,7 @@ sptr<ExtensionServiceConnection> ExtensionServiceConnectionService::GetConnectio
         ANS_LOGE("null subscriberInfo");
         return nullptr;
     }
-    std::lock_guard<ffrt::mutex> lock(mapLock_);
+    std::lock_guard<ffrt::recursive_mutex> lock(mapLock_);
     std::string connectionKey = GetConnectionKey(*subscriberInfo);
     sptr<ExtensionServiceConnection> connection = nullptr;
     auto iter = connectionMap_.find(connectionKey);

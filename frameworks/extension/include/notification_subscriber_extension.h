@@ -24,6 +24,16 @@
 
 namespace OHOS {
 namespace Notification {
+enum class NotificationSubscriberExtensionResult : int32_t {
+    OK = 0,
+    INVALID_PARAM,
+    INTERNAL_ERROR,
+    OBJECT_RELEASED,
+    SET_OBJECT_FAIL,
+    GET_OBJECT_FAIL,
+    GET_METHOD_FAIL,
+    CALL_METHOD_FAIL,
+};
 class NotificationSubscriberExtension : public AbilityRuntime::ExtensionBase<NotificationSubscriberExtensionContext> {
 public:
     NotificationSubscriberExtension() = default;
@@ -43,8 +53,9 @@ public:
     static NotificationSubscriberExtension* Create(const std::unique_ptr<AbilityRuntime::Runtime>& runtime);
 
     virtual void OnDestroy();
-    virtual void OnReceiveMessage(const std::shared_ptr<NotificationInfo> info);
-    virtual void OnCancelMessages(const std::shared_ptr<std::vector<std::string>> hashCodes);
+    virtual NotificationSubscriberExtensionResult OnReceiveMessage(const std::shared_ptr<NotificationInfo> info);
+    virtual NotificationSubscriberExtensionResult OnCancelMessages(
+        const std::shared_ptr<std::vector<std::string>> hashCodes);
 };
 }  // namespace Notification
 }  // namespace OHOS

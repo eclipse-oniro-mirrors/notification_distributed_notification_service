@@ -39,10 +39,12 @@ NotificationExtensionService::NotificationExtensionService()
     ANS_LOGI("Extension service init successfully.");
 }
 
-int32_t NotificationExtensionService::InitService(std::function<void()> shutdownCallback)
+int32_t NotificationExtensionService::InitService(std::function<void()> shutdownCallback,
+    std::function<void(uint32_t, uint32_t, int32_t, std::string)> haReportCallback)
 {
     ANS_LOGD("NotificationExtensionService::InitService");
     shutdownCallback_ = shutdownCallback;
+    haReportCallback_ = haReportCallback;
     ExtensionServiceConnectionService::GetInstance().SetOnAllConnectionsClosed([this]() {
         ANS_LOGD("onAllConnectionsClosed");
         if (serviceQueue_ == nullptr) {
@@ -104,6 +106,14 @@ void NotificationExtensionService::UnsubscribeNotification(const sptr<Notificati
         ExtensionServiceSubscribeService::GetInstance().UnsubscribeNotification(bundle);
     });
     serviceQueue_->wait(handler);
+}
+
+void NotificationExtensionService::SendHaReport(
+    uint32_t scene, uint32_t branchId, int32_t errorCode, const std::string& message)
+{
+    if (haReportCallback_) {
+        haReportCallback_(scene, branchId, errorCode, message);
+    }
 }
 }
 }

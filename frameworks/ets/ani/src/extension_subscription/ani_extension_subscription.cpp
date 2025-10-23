@@ -23,12 +23,11 @@
 
 namespace OHOS {
 namespace NotificationExtensionSubScriptionSts {
-static const char *OPENSETTINGS_SIGNATURE = "Lapplication/UIAbilityContext/UIAbilityContext;:Lstd/core/Promise;";
 
 void AniNotificationExtensionRegistryInit(ani_env *env)
 {
     ANS_LOGD("AniNotificationExtensionRegistryInit call");
-    static const char *npName = "L@ohos/notificationExtensionSubscription/notificationExtensionSubscription;";
+    static const char *npName = "@ohos.notificationExtensionSubscription.notificationExtensionSubscription";
     ani_namespace np;
     if (ANI_OK != env->FindNamespace(npName, &np)) {
         ANS_LOGD("Not found '%{public}s'", npName);
@@ -36,8 +35,8 @@ void AniNotificationExtensionRegistryInit(ani_env *env)
     }
 
     std::array methods = {
-        ani_native_function { "nativeOpenSubscriptionSettings", OPENSETTINGS_SIGNATURE,
-            reinterpret_cast<void*>(AniOpenSubscribeSettings) },
+        ani_native_function {
+            "nativeOpenSubscriptionSettings", nullptr, reinterpret_cast<void*>(AniOpenSubscribeSettings) },
         ani_native_function { "nativeSubscribe", nullptr, reinterpret_cast<void*>(AniSubscribe) },
         ani_native_function { "nativeUnsubscribe", nullptr, reinterpret_cast<void*>(AniUnsubscribe) },
         ani_native_function { "nativeGetSubscribeInfo", nullptr, reinterpret_cast<void*>(AniGetSubscribeInfo) },

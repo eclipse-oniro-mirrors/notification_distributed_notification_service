@@ -39,7 +39,7 @@ export default namespace notificationExtensionSubscription {
         BLUETOOTH = 0
     }
 
-    native function nativeOpenSubscriptionSettings(context: UIAbilityContext): void;
+    native function nativeOpenSubscriptionSettings(context: UIAbilityContext): Promise<int>;
     native function nativeSubscribe(info: NotificationExtensionSubscriptionInfo[]): void;
     native function nativeUnsubscribe(): void;
     native function nativeGetSubscribeInfo(): NotificationExtensionSubscriptionInfo[];
@@ -66,16 +66,23 @@ export default namespace notificationExtensionSubscription {
         return error;
     }
 
-    function openSubscriptionSettings(context: UIAbilityContext): Promise<void>
-    {
+    function openSubscriptionSettings(context: UIAbilityContext): Promise<void> {
         if (context == undefined || context === null) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((
-            resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeOpenSubscriptionSettings(context); });
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): Promise<int> => { return nativeOpenSubscriptionSettings(context); });
             p.then((data: NullishType): void => {
-                resolve(undefined);
+                if (data == undefined) {
+                    reject(rejectInternalError);
+                } else {
+                    let result: int = data as int;
+                    if (result == 0) {
+                        resolve(undefined);
+                    } else {
+                        reject(rejectInternalError);
+                    }
+                }
             }, (error: Error): void => {
                 reject(error);
             });
@@ -83,8 +90,7 @@ export default namespace notificationExtensionSubscription {
         return pPromise;
     }
 
-    function subscribe(info: NotificationExtensionSubscriptionInfo[]): Promise<void>
-    {
+    function subscribe(info: NotificationExtensionSubscriptionInfo[]): Promise<void> {
         let pPromise = new Promise<void>((
             resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeSubscribe(info); });
@@ -97,8 +103,7 @@ export default namespace notificationExtensionSubscription {
         return pPromise;
     }
 
-    function unsubscribe(): Promise<void>
-    {
+    function unsubscribe(): Promise<void> {
         let pPromise = new Promise<void>((
             resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeUnsubscribe(); });
@@ -111,8 +116,7 @@ export default namespace notificationExtensionSubscription {
         return pPromise;
     }
 
-    function getSubscribeInfo(): Promise<NotificationExtensionSubscriptionInfo[]>
-    {
+    function getSubscribeInfo(): Promise<NotificationExtensionSubscriptionInfo[]> {
         let pPromise = new Promise<NotificationExtensionSubscriptionInfo[]>((
             resolve: ResolveCallback<NotificationExtensionSubscriptionInfo[]>, reject: RejectCallback): void => {
             let p = taskpool.execute((): NotificationExtensionSubscriptionInfo[] => { 
@@ -128,8 +132,7 @@ export default namespace notificationExtensionSubscription {
         return pPromise;
     }
 
-    function getAllSubscriptionBundles(): Promise<BundleOption[]>
-    {
+    function getAllSubscriptionBundles(): Promise<BundleOption[]> {
         let pPromise = new Promise<BundleOption[]>(
             (resolve: ResolveCallback<BundleOption[]>, reject: RejectCallback): void => {
             let p = taskpool.execute((): BundleOption[] => { return nativeGetAllSubscriptionBundles(); });
@@ -143,8 +146,7 @@ export default namespace notificationExtensionSubscription {
         return pPromise;
     }
 
-    function isUserGranted(): Promise<boolean>
-    {
+    function isUserGranted(): Promise<boolean> {
         let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
             let p = taskpool.execute((): boolean => { return nativeIsUserGranted(); });
             p.then((data: NullishType): void => {
@@ -174,8 +176,7 @@ export default namespace notificationExtensionSubscription {
         return pPromise;
     }
 
-    function setUserGrantedState(targetBundle: BundleOption, enabled: boolean): Promise<void>
-    {
+    function setUserGrantedState(targetBundle: BundleOption, enabled: boolean): Promise<void> {
         let error: BusinessError = isInvalidParameter(targetBundle);
         if (error.code !== ERROR_OK) {
             throw error;
@@ -222,7 +223,7 @@ export default namespace notificationExtensionSubscription {
     }
 
     function setUserGrantedBundleState(targetBundle: BundleOption,
-        enabledBundles:BundleOption[], enabled:boolean): Promise<void> {
+        enabledBundles: BundleOption[], enabled: boolean): Promise<void> {
         let error: BusinessError = isInvalidParameter(targetBundle);
         if (error.code !== ERROR_OK) {
             throw error;

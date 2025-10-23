@@ -29,9 +29,9 @@ public:
 
     virtual ~NotificationSubscriberStubImpl() = default;
 
-    ErrCode OnReceiveMessage(const sptr<NotificationRequest>& notificationRequest) override;
+    ErrCode OnReceiveMessage(const sptr<NotificationRequest>& notificationRequest, int32_t& retResult) override;
 
-    ErrCode OnCancelMessages(const std::vector<std::string>& hashCode) override;
+    ErrCode OnCancelMessages(const std::vector<std::string>& hashCode, int32_t& retResult) override;
 
 private:
     std::shared_ptr<NotificationInfo> ConvertNotificationRequest(const sptr<NotificationRequest>& notificationRequest);
