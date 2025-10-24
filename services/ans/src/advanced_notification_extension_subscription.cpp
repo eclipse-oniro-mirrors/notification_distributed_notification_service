@@ -32,7 +32,7 @@
 namespace OHOS {
 namespace Notification {
 
-using STARTUP = int32_t (*)(std::function<void()>);
+using STARTUP = int32_t (*)(std::function<void()>, std::function<void(uint32_t, uint32_t, int32_t, std::string)>);
 using SHUTDOWN = void (*)();
 using SUBSCRIBE = void (*)(const sptr<NotificationBundleOption>,
     const std::vector<sptr<NotificationBundleOption>> &);
@@ -66,7 +66,10 @@ int32_t AdvancedNotificationService::LoadExtensionService()
         ANS_LOGW("GetProxyFunc Startup init failed.");
         return -1;
     }
-    startup(nullptr);
+    startup(nullptr, [](uint32_t sceneId, uint32_t branchId, int errorCode, std::string message) {
+        HaMetaMessage msg = HaMetaMessage(sceneId, branchId);
+        NotificationAnalyticsUtil::ReportModifyEvent(msg.Message(message));
+    });
     notificationExtensionLoaded_.store(true);
     return 0;
 #else
@@ -172,10 +175,11 @@ void AdvancedNotificationService::CheckExtensionServiceCondition(
     std::vector<sptr<NotificationBundleOption>> &bundles)
 {
     extensionBundleInfos.clear();
-
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_7);
     std::string isPCMode = OHOS::system::GetParameter("persist.sceneboard.ispcmode", "false");
     if (isPCMode == "true") {
         ANS_LOGW("PC Mode, skip loading ExtensionService");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.Message("cannot subscribe, due to PC Mode"));
         return;
     }
 
@@ -207,6 +211,8 @@ void AdvancedNotificationService::CheckExtensionServiceCondition(
 
 void AdvancedNotificationService::FilterPermissionBundles(std::vector<sptr<NotificationBundleOption>> &bundles)
 {
+    std::string noPermissionBundles = "";
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_7);
     for (auto it = bundles.begin(); it != bundles.end();) {
         AppExecFwk::BundleInfo bundleInfo;
         int32_t userId = -1;
@@ -215,30 +221,54 @@ void AdvancedNotificationService::FilterPermissionBundles(std::vector<sptr<Notif
         auto result = BundleManagerHelper::GetInstance()->GetBundleInfoV9(
             (*it)->GetBundleName(), flags, bundleInfo, userId);
         if (result && AccessTokenHelper::VerifyCallerPermission(
-            bundleInfo.applicationInfo.accessTokenId, OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
+            bundleInfo.applicationInfo.accessTokenId, OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)
+            && AccessTokenHelper::VerifyCallerPermission(
+                bundleInfo.applicationInfo.accessTokenId, OHOS_PERMISSION_ACCESS_BLUETOOTH)) {
             ++it;
         } else {
+            noPermissionBundles.append((*it)->GetBundleName())
+                .append(":")
+                .append(std::to_string((*it)->GetUid()))
+                .append(",");
             it = bundles.erase(it);
         }
+    }
+    if (!noPermissionBundles.empty()) {
+        std::string errMessage = noPermissionBundles;
+        errMessage.append(" cannot subscribe, due to User has no permission");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.Message(errMessage));
     }
 }
 
 void AdvancedNotificationService::FilterGrantedBundles(std::vector<sptr<NotificationBundleOption>> &bundles)
 {
+    std::string noGrantedBundles = "";
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_7);
     for (auto it = bundles.begin(); it != bundles.end();) {
         NotificationConstant::SWITCH_STATE state;
         if (NotificationPreferences::GetInstance()->GetExtensionSubscriptionEnabled(*it, state) == ERR_OK &&
             state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
             ++it;
         } else {
+            noGrantedBundles.append((*it)->GetBundleName())
+                .append(":")
+                .append(std::to_string((*it)->GetUid()))
+                .append(",");
             it = bundles.erase(it);
         }
+    }
+    if (!noGrantedBundles.empty()) {
+        std::string errMessage = noGrantedBundles;
+        errMessage.append(" cannot subscribe, due to No bundle is granted");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.Message(errMessage));
     }
 }
 
 void AdvancedNotificationService::FilterBundlesByBluetoothConnection(
     std::vector<sptr<NotificationBundleOption>> &bundles)
 {
+    std::string noBluetoothBundles = "";
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_7);
     for (auto it = bundles.begin(); it != bundles.end();) {
         std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
         ErrCode result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionInfos(*it, infos);
@@ -250,8 +280,17 @@ void AdvancedNotificationService::FilterBundlesByBluetoothConnection(
         if (hasValidConnection) {
             ++it;
         } else {
+            noBluetoothBundles.append((*it)->GetBundleName())
+                .append(":")
+                .append(std::to_string((*it)->GetUid()))
+                .append(",");
             it = bundles.erase(it);
         }
+    }
+    if (!noBluetoothBundles.empty()) {
+        std::string errMessage = noBluetoothBundles;
+        errMessage.append(" cannot subscribe, due to No valid bluetooth connections found");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.Message(errMessage));
     }
 }
 
@@ -640,12 +679,15 @@ ErrCode AdvancedNotificationService::GetNotificationExtensionEnabledBundles(
     std::vector<sptr<NotificationBundleOption>>& bundles)
 {
     ANS_LOGD("AdvancedNotificationService::GetNotificationExtensionEnabledBundles");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     int32_t userId = -1;
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
     ErrCode result = ERR_OK;
     OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     if (!BundleManagerHelper::GetInstance()->QueryExtensionInfos(extensionInfos, userId)) {
         ANS_LOGE("Failed to QueryExtensionInfos, ret: %{public}d", result);
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_4));
         return ERR_ANS_INVALID_PARAM;
     }
     
@@ -660,6 +702,8 @@ ErrCode AdvancedNotificationService::GetNotificationExtensionEnabledBundles(
         if (!AccessTokenHelper::VerifyCallerPermission(
             bundleInfo.applicationInfo.accessTokenId, OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
             ANS_LOGW("GetNotificationExtensionEnabledBundles No Permission");
+            NotificationAnalyticsUtil::ReportModifyEvent(
+                message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
             continue;
         }
 
@@ -680,7 +724,10 @@ ErrCode AdvancedNotificationService::NotificationExtensionSubscribe(
     const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos)
 {
     ANS_LOGD("AdvancedNotificationService::NotificationExtensionSubscribe");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -692,16 +739,21 @@ ErrCode AdvancedNotificationService::NotificationExtensionSubscribe(
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create NotificationBundleOption");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_5));
         return ERR_ANS_INVALID_PARAM;
     }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
         return ERR_ANS_INVALID_PARAM;
     }
 
     if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
         ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NOT_IMPL_EXTENSIONABILITY).Message(
+            "Not implement NotificationSubscriberExtensionAbility").BranchId(BRANCH_3));
         return ERR_ANS_NOT_IMPL_EXTENSIONABILITY;
     }
     
@@ -729,18 +781,24 @@ ErrCode AdvancedNotificationService::NotificationExtensionSubscribe(
 ErrCode AdvancedNotificationService::NotificationExtensionUnsubscribe()
 {
     ANS_LOGD("AdvancedNotificationService::NotificationExtensionUnsubscribe");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create NotificationBundleOption");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_5));
         return ERR_ANS_INVALID_PARAM;
     }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -763,18 +821,24 @@ ErrCode AdvancedNotificationService::NotificationExtensionUnsubscribe()
 ErrCode AdvancedNotificationService::GetSubscribeInfo(std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos)
 {
     ANS_LOGD("AdvancedNotificationService::GetSubscribeInfo");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create NotificationBundleOption");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_5));
         return ERR_ANS_INVALID_PARAM;
     }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -794,12 +858,17 @@ ErrCode AdvancedNotificationService::GetSubscribeInfo(std::vector<sptr<Notificat
 ErrCode AdvancedNotificationService::GetAllSubscriptionBundles(std::vector<sptr<NotificationBundleOption>>& bundles)
 {
     ANS_LOGD("AdvancedNotificationService::GetAllSubscriptionBundles");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Not systemApp").BranchId(BRANCH_1));
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
         return ERR_ANS_PERMISSION_DENIED;
     }
     auto result = GetNotificationExtensionEnabledBundles(bundles);
@@ -809,18 +878,24 @@ ErrCode AdvancedNotificationService::GetAllSubscriptionBundles(std::vector<sptr<
 ErrCode AdvancedNotificationService::IsUserGranted(bool& isEnabled)
 {
     ANS_LOGD("AdvancedNotificationService::IsUserGranted");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create NotificationBundleOption");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_5));
         return ERR_ANS_INVALID_PARAM;
     }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -843,28 +918,39 @@ ErrCode AdvancedNotificationService::GetUserGrantedState(
     const sptr<NotificationBundleOption>& targetBundle, bool& enabled)
 {
     ANS_LOGD("AdvancedNotificationService::GetUserGrantedState");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Not systemApp"));
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(targetBundle);
     if (bundle == nullptr) {
         ANS_LOGE("Bundle is null.");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INVALID_BUNDLE_OPTION).BranchId(BRANCH_6));
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
     if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundle)) {
         ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NOT_IMPL_EXTENSIONABILITY).Message(
+            "Not implement NotificationSubscriberExtensionAbility").BranchId(BRANCH_3));
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -889,28 +975,39 @@ ErrCode AdvancedNotificationService::SetUserGrantedState(
     const sptr<NotificationBundleOption>& targetBundle, bool enabled)
 {
     ANS_LOGD("AdvancedNotificationService::SetUserGrantedState");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Not systemApp"));
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(targetBundle);
     if (bundle == nullptr) {
         ANS_LOGE("Bundle is null.");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INVALID_BUNDLE_OPTION).BranchId(BRANCH_6));
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
     if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundle)) {
         ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NOT_IMPL_EXTENSIONABILITY).Message(
+            "Not implement NotificationSubscriberExtensionAbility").BranchId(BRANCH_3));
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -926,28 +1023,39 @@ ErrCode AdvancedNotificationService::GetUserGrantedEnabledBundles(
     const sptr<NotificationBundleOption>& targetBundle, std::vector<sptr<NotificationBundleOption>>& enabledBundles)
 {
     ANS_LOGD("AdvancedNotificationService::GetUserGrantedEnabledBundles");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Not systemApp"));
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(targetBundle);
     if (bundle == nullptr) {
         ANS_LOGE("Bundle is null.");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INVALID_BUNDLE_OPTION).BranchId(BRANCH_6));
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
     if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundle)) {
         ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NOT_IMPL_EXTENSIONABILITY).Message(
+            "Not implement NotificationSubscriberExtensionAbility").BranchId(BRANCH_3));
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
         return ERR_ANS_INVALID_PARAM;
     }
     
@@ -968,18 +1076,24 @@ ErrCode AdvancedNotificationService::GetUserGrantedEnabledBundlesForSelf(
     std::vector<sptr<NotificationBundleOption>>& bundles)
 {
     ANS_LOGD("AdvancedNotificationService::GetUserGrantedEnabledBundlesForSelf");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create NotificationBundleOption");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_5));
         return ERR_ANS_INVALID_PARAM;
     }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -1001,12 +1115,17 @@ ErrCode AdvancedNotificationService::SetUserGrantedBundleState(
     const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled)
 {
     ANS_LOGD("AdvancedNotificationService::SetUserGrantedBundleState");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Not systemApp"));
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -1028,11 +1147,15 @@ ErrCode AdvancedNotificationService::SetUserGrantedBundleState(
 
     if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundle)) {
         ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NOT_IMPL_EXTENSIONABILITY).Message(
+            "Not implement NotificationSubscriberExtensionAbility").BranchId(BRANCH_3));
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
     
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -1047,17 +1170,23 @@ ErrCode AdvancedNotificationService::SetUserGrantedBundleState(
 ErrCode AdvancedNotificationService::CanOpenSubscribeSettings()
 {
     ANS_LOGD("AdvancedNotificationService::CanOpenSubscribeSettings");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
         return ERR_ANS_PERMISSION_DENIED;
     }
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create NotificationBundleOption");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_5));
         return ERR_ANS_INVALID_PARAM;
     }
 
     if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
         ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NOT_IMPL_EXTENSIONABILITY).Message(
+            "Not implement NotificationSubscriberExtensionAbility").BranchId(BRANCH_3));
         return ERR_ANS_NOT_IMPL_EXTENSIONABILITY;
     }
     return ERR_OK;

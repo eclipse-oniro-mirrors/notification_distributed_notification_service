@@ -422,11 +422,14 @@ bool BundleManagerHelper::CheckBundleImplExtensionAbility(const sptr<Notificatio
             bundleOption->GetBundleName().c_str(), userId);
         return false;
     }
+    if (!AccessTokenHelper::VerifyCallerPermission(
+        bundleInfo.applicationInfo.accessTokenId, OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
+        return false;
+    }
+    
     for (const auto& hapmodule : bundleInfo.hapModuleInfos) {
         for (const auto& extInfo : hapmodule.extensionInfos) {
-            if ((extInfo.type == AppExecFwk::ExtensionAbilityType::NOTIFICATION_SUBSCRIBER) &&
-                AccessTokenHelper::VerifyCallerPermission(
-                    bundleInfo.applicationInfo.accessTokenId, OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
+            if (extInfo.type == AppExecFwk::ExtensionAbilityType::NOTIFICATION_SUBSCRIBER) {
                 return true;
             }
         }

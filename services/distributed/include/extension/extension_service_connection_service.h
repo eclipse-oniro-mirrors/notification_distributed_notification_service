@@ -43,7 +43,7 @@ private:
         const std::shared_ptr<ExtensionSubscriberInfo> subscriberInfo);
 
 private:
-    ffrt::mutex mapLock_;
+    ffrt::recursive_mutex mapLock_;
     std::map<std::string, sptr<ExtensionServiceConnection>> connectionMap_;
     std::function<void()> onAllConnectionsClosed_;
 };

@@ -26,15 +26,18 @@ class NotificationExtensionService {
 public:
     NotificationExtensionService();
     static NotificationExtensionService& GetInstance();
-    int32_t InitService(std::function<void()> shutdownCallback);
+    int32_t InitService(std::function<void()> shutdownCallback,
+        std::function<void(uint32_t, uint32_t, int32_t, std::string)> haReportCallback);
     void DestroyService();
     void SubscribeNotification(const sptr<NotificationBundleOption> bundle,
         const std::vector<sptr<NotificationBundleOption>>& subscribedBundles);
     void UnsubscribeNotification(const sptr<NotificationBundleOption> bundle);
+    void SendHaReport(uint32_t scene, uint32_t branchId, int32_t errorCode, const std::string& message);
 
 private:
     std::shared_ptr<ffrt::queue> serviceQueue_ = nullptr;
     std::function<void()> shutdownCallback_;
+    std::function<void(uint32_t, uint32_t, int32_t, std::string)> haReportCallback_;
 };
 }
 }

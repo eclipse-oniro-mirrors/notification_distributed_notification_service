@@ -133,80 +133,85 @@ void StsNotificationSubscriberExtension::OnDestroy()
 
     ani_object ani_data {};
     const char* signature  = "V:V";
-    CallObjectMethod(false, "onDestroy", signature, ani_data);
+    CallObjectMethod("onDestroy", signature, ani_data);
 }
 
-void StsNotificationSubscriberExtension::OnReceiveMessage(const std::shared_ptr<NotificationInfo> info)
+NotificationSubscriberExtensionResult StsNotificationSubscriberExtension::OnReceiveMessage(
+    const std::shared_ptr<NotificationInfo> info)
 {
     ANS_LOGD("OnReceiveMessage called");
     if (info == nullptr) {
         ANS_LOGE("info is invalid");
-        return;
+        return NotificationSubscriberExtensionResult::INVALID_PARAM;
     }
     if (handler_ == nullptr) {
         ANS_LOGE("handler is invalid");
-        return;
+        return NotificationSubscriberExtensionResult::INTERNAL_ERROR;
     }
     std::weak_ptr<StsNotificationSubscriberExtension> wThis = GetWeakPtr();
-    auto task = [wThis, info, this]() {
+    NotificationSubscriberExtensionResult result = NotificationSubscriberExtensionResult::OK;
+    auto task = [wThis, info, &result]() {
         std::shared_ptr<StsNotificationSubscriberExtension> sThis = wThis.lock();
         if (sThis == nullptr) {
+            result = NotificationSubscriberExtensionResult::OBJECT_RELEASED;
             return;
         }
         ani_env* env = sThis->stsRuntime_.GetAniEnv();
         if (!env) {
             ANS_LOGE("task env not found env");
+            result = NotificationSubscriberExtensionResult::INTERNAL_ERROR;
             return;
         }
 
         ani_object ani_info = WrapNotificationInfo(env, info);
         if (ani_info == nullptr) {
-            ANS_LOGW("WrapNotificationInfo failed");
+            ANS_LOGE("WrapNotificationInfo failed");
+            result = NotificationSubscriberExtensionResult::SET_OBJECT_FAIL;
+            return;
         }
-        const char* signature  = "Lnotification/notificationInfo/NotificationInfoInner;:V";
-        CallObjectMethod(false, "onReceiveMessage", signature, ani_info);
+        result = sThis->CallObjectMethod("onReceiveMessage", nullptr, ani_info);
     };
-    handler_->PostTask(task, "OnReceiveMessage");
+    handler_->PostSyncTask(task, "OnReceiveMessage");
+    return result;
 }
 
-
-void StsNotificationSubscriberExtension::OnCancelMessages(const std::shared_ptr<std::vector<std::string>> hashCodes)
+NotificationSubscriberExtensionResult StsNotificationSubscriberExtension::OnCancelMessages(
+    const std::shared_ptr<std::vector<std::string>> hashCodes)
 {
     ANS_LOGD("OnCancelMessages called");
     if (hashCodes == nullptr) {
-        ANS_LOGE("info is invalid");
-        return;
+        ANS_LOGE("hashCodes is invalid");
+        return NotificationSubscriberExtensionResult::INVALID_PARAM;
     }
     if (handler_ == nullptr) {
         ANS_LOGE("handler is invalid");
-        return;
+        return NotificationSubscriberExtensionResult::INTERNAL_ERROR;
     }
     std::weak_ptr<StsNotificationSubscriberExtension> wThis = GetWeakPtr();
-    auto task = [wThis, hashCodes, this]() {
+    NotificationSubscriberExtensionResult result = NotificationSubscriberExtensionResult::OK;
+    auto task = [wThis, hashCodes, &result]() {
         std::shared_ptr<StsNotificationSubscriberExtension> sThis = wThis.lock();
         if (sThis == nullptr) {
+            result = NotificationSubscriberExtensionResult::OBJECT_RELEASED;
             return;
         }
         ani_env* env = sThis->stsRuntime_.GetAniEnv();
         if (!env) {
             ANS_LOGE("task env not found env");
+            result = NotificationSubscriberExtensionResult::INTERNAL_ERROR;
             return;
         }
 
-        ani_object aniObject {};
         ani_object aniArray = GetAniStringArrayByVectorString(env, *hashCodes);
         if (aniArray == nullptr) {
             ANS_LOGE("aniArray is nullptr");
+            result = NotificationSubscriberExtensionResult::SET_OBJECT_FAIL;
             return;
         }
-        if (!SetPropertyByRef(env, aniObject, "hashCodes", aniArray)) {
-            ANS_LOGE("Set names failed");
-            return;
-        }
-        const char* signature  = "Lstd/core/Object;:V";
-        CallObjectMethod(false, "onCancelMessages", signature, aniObject);
+        result = sThis->CallObjectMethod("onCancelMessages", nullptr, aniArray);
     };
-    handler_->PostTask(task, "OnCancelMessages");
+    handler_->PostSyncTask(task, "OnCancelMessages");
+    return result;
 }
 
 void StsNotificationSubscriberExtension::ResetEnv(ani_env* env)
@@ -247,44 +252,36 @@ sptr<IRemoteObject> StsNotificationSubscriberExtension::OnConnect(const AAFwk::W
     return remoteObject->AsObject();
 }
 
-void StsNotificationSubscriberExtension::CallObjectMethod(
-    bool withResult, const char *name, const char *signature, ...)
+NotificationSubscriberExtensionResult StsNotificationSubscriberExtension::CallObjectMethod(
+    const char* name, const char* signature, ...)
 {
     ani_status status = ANI_ERROR;
     ani_method method = nullptr;
     auto env = stsRuntime_.GetAniEnv();
     if (!env) {
         ANS_LOGE("env not found StsNotificationSubscriberExtensions");
-        return;
+        return NotificationSubscriberExtensionResult::INTERNAL_ERROR;
     }
     if (stsObj_ == nullptr) {
         ANS_LOGE("stsObj_ nullptr");
-        return;
+        return NotificationSubscriberExtensionResult::INTERNAL_ERROR;
     }
     if ((status = env->Class_FindMethod(stsObj_->aniCls, name, signature, &method)) != ANI_OK) {
         ANS_LOGE("Class_FindMethod nullptr:%{public}d", status);
-        return;
+        return NotificationSubscriberExtensionResult::GET_METHOD_FAIL;
     }
     if (method == nullptr) {
-        return;
+        return NotificationSubscriberExtensionResult::GET_METHOD_FAIL;
     }
 
-    ani_ref res = nullptr;
     va_list args;
-    if (withResult) {
-        va_start(args, signature);
-        if ((status = env->Object_CallMethod_Ref_V(stsObj_->aniObj, method, &res, args)) != ANI_OK) {
-            ANS_LOGE("status : %{public}d", status);
-        }
-        va_end(args);
-        return;
-    }
     va_start(args, signature);
     if ((status = env->Object_CallMethod_Void_V(stsObj_->aniObj, method, args)) != ANI_OK) {
         ANS_LOGE("status : %{public}d", status);
+        return NotificationSubscriberExtensionResult::CALL_METHOD_FAIL;
     }
     va_end(args);
-    return;
+    return NotificationSubscriberExtensionResult::OK;
 }
 }
 }

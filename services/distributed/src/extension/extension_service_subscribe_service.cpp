@@ -94,6 +94,7 @@ void ExtensionServiceSubscribeService::UnsubscribeAllNotification()
         int32_t result = NotificationHelper::UnSubscribeNotification(subscriberInfo.second);
         ANS_LOGI("UnSubscribe %{public}s %{public}d.", subscriberInfo.first.c_str(), result);
     }
+    subscriberMap_.clear();
 }
 
 std::string ExtensionServiceSubscribeService::MakeBundleKey(const NotificationBundleOption& bundle)

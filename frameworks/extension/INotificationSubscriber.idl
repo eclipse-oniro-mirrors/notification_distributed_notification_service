@@ -15,6 +15,6 @@
 
 sequenceable OHOS.Notification.NotificationRequest;
 interface OHOS.Notification.INotificationSubscriber {
-    void OnReceiveMessage([in] sptr<NotificationRequest> notificationRequest);
-    void OnCancelMessages([in] String[] hashCode);
+    void OnReceiveMessage([in] sptr<NotificationRequest> notificationRequest, [out] int retResult);
+    void OnCancelMessages([in] String[] hashCode, [out] int retResult);
 }
