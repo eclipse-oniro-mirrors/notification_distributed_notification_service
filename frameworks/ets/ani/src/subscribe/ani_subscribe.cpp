@@ -74,7 +74,7 @@ ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object 
     }
     callback->SetVm(vm);
     int32_t result = Notification::NotificationHelper::DistributeOperation(info, callback);
-    ANS_LOGD("StsDistributeOperation ret %{public}d. ErrorToExternal %{public}d",
+    ANS_LOGD("result: %{public}d. ErrorToExternal %{public}d",
         result, NotificationSts::GetExternalCode(result));
     if (result != ERR_OK || noWithOperationInfo) {
         callback->OnStsOperationCallback(env, result);
