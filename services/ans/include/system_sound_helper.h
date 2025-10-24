@@ -39,7 +39,7 @@ public:
     void RemoveCustomizedTones(std::vector<NotificationRingtoneInfo> ringtoneInfos);
 #ifdef PLAYER_FRAMEWORK_ENABLE
     void Connect();
-    int32_t InvokeRemoveCustomizedTone(const std::string uri, bool retry = false);
+    int32_t InvokeRemoveCustomizedTone(const std::string uri, int32_t retry);
     std::vector<std::pair<std::string, int32_t>> InvokeRemoveCustomizedTones(
         const std::vector<std::string> uris, bool retry = false);
 #endif

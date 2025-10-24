@@ -434,6 +434,24 @@ bool BundleManagerHelper::CheckBundleImplExtensionAbility(const sptr<Notificatio
     return false;
 }
 
+bool BundleManagerHelper::IsAncoApp(const std::string &bundleName, int32_t uid)
+{
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
+    if (userId == -1 || userId != ZERO_USERID) {
+        return false;
+    }
+
+    AppExecFwk::BundleInfo bundleInfo;
+    int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+    if (!GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
+        ANS_LOGW("Get Bundle bundleName %{public}s, %{public}d", bundleName.c_str(), userId);
+        return false;
+    }
+
+    return bundleInfo.applicationInfo.codePath == std::to_string(APP_TYPE_ONE);
+}
+
 std::string BundleManagerHelper::GetBundleLabel(const std::string& bundleName)
 {
     AppExecFwk::BundleResourceInfo bundleResourceInfo = {};

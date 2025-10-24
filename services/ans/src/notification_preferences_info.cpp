@@ -547,6 +547,12 @@ void NotificationPreferencesInfo::GetAllCLoneBundlesInfo(const int32_t &userId,
             continue;
         }
 
+        if (userId != ZERO_USERID &&
+            BundleManagerHelper::GetInstance()->IsAncoApp(iter->second.GetBundleName(), iter->second.GetBundleUid())) {
+            ANS_LOGI("Anco bundle info %{public}s.", bundleItem.second.c_str());
+            continue;
+        }
+
         std::vector<sptr<NotificationSlot>> slots;
         NotificationCloneBundleInfo cloneBundleInfo;
         int32_t index = BundleManagerHelper::GetInstance()->GetAppIndexByUid(iter->second.GetBundleUid());

@@ -33,6 +33,7 @@
 #include "notification_analytics_util.h"
 #include "notification_config_parse.h"
 #include "system_sound_helper.h"
+#include "os_account_manager.h"
 
 namespace OHOS {
 namespace Notification {
@@ -1571,21 +1572,30 @@ void NotificationPreferences::RemoveRingtoneInfoByBundle(const sptr<Notification
 int64_t NotificationPreferences::GetCloneTimeStamp()
 {
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
-    if (cloneTimestamp != -1) {
-        return cloneTimestamp;
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGW("Current user acquisition failed");
+        return 0;
     }
 
-    if (!preferncesDB_->GetCloneTimeStamp(cloneTimestamp)) {
+    if (cloneTimestamp.find(userId) != cloneTimestamp.end()) {
+        return cloneTimestamp[userId];
+    }
+
+    int64_t timestamp;
+    if (!preferncesDB_->GetCloneTimeStamp(userId, timestamp)) {
         ANS_LOGW("Get time stamp failed");
         return 0;
     }
-    return cloneTimestamp;
+    cloneTimestamp[userId] = timestamp;
+    return timestamp;
 }
 
 void NotificationPreferences::SetCloneTimeStamp(const int32_t& userId, const int64_t& timestamp)
 {
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
-    cloneTimestamp = timestamp;
+    cloneTimestamp[userId] = timestamp;
     auto result = preferncesDB_->SetCloneTimeStamp(userId, timestamp);
     ANS_LOGI("Set time stamp %{public}d %{public}d %{public}" PRId64, userId, result, timestamp);
 }
