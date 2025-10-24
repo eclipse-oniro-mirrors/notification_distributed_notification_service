@@ -44,6 +44,7 @@ ani_object AniGetReminderInfoByBundles(ani_env *env, ani_object obj)
         int externalCode = NotificationSts::GetExternalCode(returncode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniGetReminderInfoByBundles error, errorCode: %{public}d", externalCode);
+        return nullptr;
     }
 
     ani_object aniReminders = NotificationSts::GetAniArrayReminderInfo(env, reminders);

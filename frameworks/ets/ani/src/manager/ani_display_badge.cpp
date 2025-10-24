@@ -212,6 +212,12 @@ ani_object AniGetBadgeDisplayStatusByBundles(ani_env *env, ani_object obj)
     std::map<sptr<Notification::NotificationBundleOption>, bool> bundleEnable;
     int returncode = Notification::NotificationHelper::GetShowBadgeEnabledForBundles(
         bundles, bundleEnable);
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        ANS_LOGE("AniGetBadgeDisplayStatusByBundles error, errorCode: %{public}d", externalCode);
+        return nullptr;
+    }
     ani_object outAniObj;
     if (!WrapBadges(env, outAniObj, bundleEnable)) {
         ANS_LOGE("WrapNotificationSlotArray faild");
