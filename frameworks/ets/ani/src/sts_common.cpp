@@ -647,18 +647,18 @@ ani_object CreateBoolean(ani_env *env, bool value)
     ani_class persion_cls;
     ani_status status = ANI_ERROR;
     if ((status = env->FindClass(CLASSNAME_BOOLEAN, &persion_cls)) != ANI_OK) {
-        ANS_LOGE("FindClass fail, status : %{public}d", status);
+        ANS_LOGE("FindClass failed, status : %{public}d", status);
         return nullptr;
     }
     ani_method personInfoCtor;
     if ((status = env->Class_FindMethod(persion_cls, "<ctor>", "z:", &personInfoCtor)) != ANI_OK) {
-        ANS_LOGE("Class_FindMethod fail, status : %{public}d", status);
+        ANS_LOGE("Class_FindMethod failed, status : %{public}d", status);
         return nullptr;
     }
     ani_object personInfoObj;
     if ((status = env->Object_New(persion_cls, personInfoCtor, &personInfoObj, value ? ANI_TRUE : ANI_FALSE))
         != ANI_OK) {
-        ANS_LOGE("Object_New fail, status : %{public}d", status);
+        ANS_LOGE("Object_New failed, status : %{public}d", status);
         return nullptr;
     }
     return personInfoObj;
