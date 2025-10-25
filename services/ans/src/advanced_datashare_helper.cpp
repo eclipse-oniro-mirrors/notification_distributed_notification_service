@@ -216,12 +216,7 @@ std::shared_ptr<DataShare::DataShareResultSet> AdvancedDatashareHelper::GetConta
         DataShare::DataSharePredicates predicates;
         predicates.EqualTo(MODE_ID, profileId);
         predicates.EqualTo(FOCUS_MODE_LIST, focusModeList);
-        if (phoneNumber.size() >= PHONE_NUMBER_LENGTH) {
-            predicates.EndsWith(DETAIL_INFO,
-                phoneNumber.substr(phoneNumber.size() - PHONE_NUMBER_LENGTH, phoneNumber.size()));
-        } else {
-            predicates.EqualTo(DETAIL_INFO, phoneNumber);
-        }
+        SetPhoneNumQueryCondition(predicates, phoneNumber);
         resultSet = helper->Query(uri, predicates, QUERY_INTELLIGENT_COLUMN_LIST);
     } else {
         helper = CreateContactDataShareHelper(CONTACT_URI);
@@ -233,12 +228,7 @@ std::shared_ptr<DataShare::DataShareResultSet> AdvancedDatashareHelper::GetConta
         DataShare::DataSharePredicates predicates;
         predicates.EqualTo(IS_DELETED, 0);
         predicates.EqualTo(TYPE_ID, TYPE_ID_FIVE);
-        if (phoneNumber.size() >= PHONE_NUMBER_LENGTH) {
-            predicates.EndsWith(DETAIL_INFO,
-                phoneNumber.substr(phoneNumber.size() - PHONE_NUMBER_LENGTH, phoneNumber.size()));
-        } else {
-            predicates.EqualTo(DETAIL_INFO, phoneNumber);
-        }
+        SetPhoneNumQueryCondition(predicates, phoneNumber);
         resultSet = helper->Query(uri, predicates, QUERY_CONTACT_COLUMN_LIST);
     }
     helper->Release();
@@ -374,6 +364,25 @@ std::string AdvancedDatashareHelper::GetIntelligentData(const std::string &uri, 
         return "";
     }
     return value + std::to_string(userId);
+}
+
+void AdvancedDatashareHelper::SetPhoneNumQueryCondition(DataShare::DataSharePredicates &predicates,
+    const std::string &phoneNumber)
+{
+    if (phoneNumber.size() >= PHONE_NUMBER_LENGTH) {
+        std::string matchCase = phoneNumber.substr(phoneNumber.size() - PHONE_NUMBER_LENGTH, phoneNumber.size());
+        predicates.BeginWrap()
+            ->EndsWith(DETAIL_INFO, matchCase)
+            ->Or()
+            ->EndsWith(FORMAT_PHONE_NUMBER, matchCase)
+            ->EndWrap();
+    } else {
+        predicates.BeginWrap()
+            ->EqualTo(DETAIL_INFO, phoneNumber)
+            ->Or()
+            ->EqualTo(FORMAT_PHONE_NUMBER, phoneNumber)
+            ->EndWrap();
+    }
 }
 
 std::string AdvancedDatashareHelper::GetIntelligentUri()
