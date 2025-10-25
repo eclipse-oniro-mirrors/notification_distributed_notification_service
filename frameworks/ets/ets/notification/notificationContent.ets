@@ -39,6 +39,8 @@ export interface NotificationBasicContent {
     additionalText?: string;
 
     lockscreenPicture?: image.PixelMap;
+
+    structuredText?: Map<string, string>;
 }
 
 class NotificationBasicContentInner implements NotificationBasicContent {
@@ -50,6 +52,8 @@ class NotificationBasicContentInner implements NotificationBasicContent {
     public additionalText?: string | undefined;
 
     public lockscreenPicture?: image.PixelMap | undefined;
+
+    public structuredText?: Map<string, string>;
 }
 
 export interface NotificationLongTextContent extends NotificationBasicContent {
@@ -70,6 +74,8 @@ class NotificationLongTextContentInner implements NotificationLongTextContent {
   public additionalText?: string;
 
   public lockscreenPicture?: image.PixelMap | undefined;
+
+  public structuredText?: Map<string, string>;
 
   public longText: string = '';
 
@@ -121,6 +127,8 @@ class NotificationLiveViewContentInner implements NotificationLiveViewContent {
 
     public lockscreenPicture?: image.PixelMap | undefined;
 
+    public structuredText?: Map<string, string>;
+
     public status: LiveViewStatus = LiveViewStatus.LIVE_VIEW_CREATE;
 
     public version?: number | undefined;
@@ -151,6 +159,8 @@ class NotificationMultiLineContentInner implements NotificationMultiLineContent 
 
     public lockscreenPicture?: image.PixelMap | undefined;
 
+    public structuredText?: Map<string, string>;
+
     public briefText: string = '';
 
     public longTitle: string = '';
@@ -180,6 +190,8 @@ class NotificationPictureContentInner implements NotificationPictureContent {
     public additionalText?: string | undefined;
 
     public lockscreenPicture?: image.PixelMap | undefined;
+
+    public structuredText?: Map<string, string>;
 
     public briefText: string = '';
 
@@ -218,6 +230,8 @@ class NotificationSystemLiveViewContentInner implements NotificationSystemLiveVi
     public additionalText?: string | undefined;
 
     public lockscreenPicture?: image.PixelMap | undefined;
+
+    public structuredText?: Map<string, string>;
 
     public briefText: string = '';
 

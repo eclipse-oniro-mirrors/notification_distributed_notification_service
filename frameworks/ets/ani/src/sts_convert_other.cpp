@@ -508,5 +508,109 @@ ani_object GetAniWantAgentArray(ani_env *env, std::vector<std::shared_ptr<WantAg
     ANS_LOGD("GetAniWantAgentArray end");
     return arrayObj;
 }
+
+ani_object CreateAniUndefined(ani_env *env)
+{
+    ani_ref aniRef;
+    env->GetUndefined(&aniRef);
+    return reinterpret_cast<ani_object>(aniRef);
+}
+
+ani_object CreateMapObject(ani_env *env, const std::string name, const char *signature)
+{
+    ani_class cls = nullptr;
+    if (env->FindClass(name.c_str(), &cls) != ANI_OK) {
+        ANS_LOGE("Failed to found %{public}s", name.c_str());
+        return nullptr;
+    }
+    ani_method ctor;
+    if (env->Class_FindMethod(cls, "<ctor>", signature, &ctor) != ANI_OK) {
+        ANS_LOGE("Failed to get ctor %{public}s", name.c_str());
+        return nullptr;
+    }
+    ani_object obj = {};
+    if (env->Object_New(cls, ctor, &obj) != ANI_OK) {
+        ANS_LOGE("Failed to create object %{public}s", name.c_str());
+        return nullptr;
+    }
+    return obj;
+}
+ 
+ani_status GetMapIterator(ani_env *env, ani_object &mapObj, const char *method, ani_ref *it)
+{
+    ani_status status = env->Object_CallMethodByName_Ref(mapObj, method, nullptr, it);
+    if (status != ANI_OK) {
+        ANS_LOGD("Failed to get %{public}s iterator, status: %{public}d", method, status);
+    }
+    return status;
+}
+ 
+ani_status GetMapIteratorNext(ani_env *env, ani_ref &it, ani_ref *next)
+{
+    ani_status status = env->Object_CallMethodByName_Ref(reinterpret_cast<ani_object>(it), "next", nullptr, next);
+    if (status != ANI_OK) {
+        ANS_LOGD("Failed to get next, status: %{public}d", status);
+    }
+    return status;
+}
+ 
+ani_status GetMapIteratorStringValue(ani_env *env, ani_ref &next, std::string &str)
+{
+    ani_ref val;
+    ani_status status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(next), "value", &val);
+    if (status != ANI_OK) {
+        ANS_LOGD("Falied to get value, status: %{public}d", status);
+    }
+    status = GetStringByAniString(env, reinterpret_cast<ani_string>(val), str);
+    if (status == ANI_OK && str.size() > STRUCTURED_TEXT_SIZE) {
+        str.resize(STRUCTURED_TEXT_SIZE);
+        ANS_LOGW("Structured text truncated to 512 bytes.");
+    }
+    return status;
+}
+ 
+ani_status GetMapByAniMap(ani_env *env, ani_object &mapObj,
+    std::vector<std::pair<std::string, std::string>> &out)
+{
+    ani_status status = ANI_ERROR;
+    ani_ref keys;
+    ani_ref values;
+    bool done = false;
+
+    if (GetMapIterator(env, mapObj, "keys", &keys) != ANI_OK ||
+        GetMapIterator(env, mapObj, "values", &values) != ANI_OK) {
+        return ANI_ERROR;
+    }
+
+    while (!done) {
+        ani_ref nextKey;
+        ani_ref nextVal;
+        ani_boolean done;
+ 
+        if (GetMapIteratorNext(env, keys, &nextKey) != ANI_OK ||
+            GetMapIteratorNext(env, values, &nextVal) != ANI_OK) {
+            return ANI_ERROR;
+        }
+
+        if ((status = env->Object_GetFieldByName_Boolean(reinterpret_cast<ani_object>(nextKey), "done", &done))
+            != ANI_OK) {
+            ANS_LOGD("Failed to check iterator done, status: %{public}d", status);
+            return ANI_ERROR;
+        }
+        if (done) {
+            break;
+        }
+
+        std::string keyStr;
+        std::string valStr;
+        if (GetMapIteratorStringValue(env, nextKey, keyStr) != ANI_OK||
+            GetMapIteratorStringValue(env, nextVal, valStr) != ANI_OK) {
+            return ANI_ERROR;
+        }
+        out.emplace_back(keyStr, valStr);
+    }
+
+    return ANI_OK;
+}
 } // namespace NotificationSts
 } // OHOS

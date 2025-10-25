@@ -62,10 +62,22 @@ std::shared_ptr<Media::PixelMap> NotificationBasicContent::GetLockScreenPicture(
     return lockScreenPicture_;
 }
 
+void NotificationBasicContent::SetStructuredText(
+    const std::vector<std::pair<std::string, std::string>> &structuredText)
+{
+    structuredText_ = structuredText;
+}
+
+std::vector<std::pair<std::string, std::string>> NotificationBasicContent::GetStructuredText() const
+{
+    return structuredText_;
+}
+
 std::string NotificationBasicContent::Dump()
 {
     return "title = " + title_ + ", text = " + text_ + ", additionalText = " + additionalText_ +
-    ", lockScreenPicture = " + (lockScreenPicture_ ? "not null" : "null");
+    ", lockScreenPicture = " + (lockScreenPicture_ ? "not null" : "null") +
+    ", structuredText = " + (structuredText_.empty() ? "null" : "not null");
 }
 
 bool NotificationBasicContent::ToJson(nlohmann::json &jsonObject) const
@@ -74,6 +86,12 @@ bool NotificationBasicContent::ToJson(nlohmann::json &jsonObject) const
     jsonObject["title"]          = title_;
     jsonObject["additionalText"] = additionalText_;
     jsonObject["lockscreenPicture"] = AnsImageUtil::PackImage(lockScreenPicture_);
+
+    nlohmann::json structuredTextJson;
+    for (const auto& [key, value] : structuredText_) {
+        structuredTextJson[key] = value;
+    }
+    jsonObject["structuredText"] = structuredTextJson;
 
     return true;
 }
@@ -102,6 +120,16 @@ void NotificationBasicContent::ReadFromJson(const nlohmann::json &jsonObject)
         auto lockScreenPictureStr = jsonObject.at("lockscreenPicture").get<std::string>();
         lockScreenPicture_ = AnsImageUtil::UnPackImage(lockScreenPictureStr);
     }
+
+    if (jsonObject.find("structuredText") != jsonEnd) {
+        auto structuredTextJson = jsonObject.at("structuredText");
+        if (!structuredTextJson.empty()) {
+            for (const auto& iter : structuredTextJson.items()) {
+                structuredText_.emplace_back(iter.key(), iter.value().get<std::string>());
+            }
+        }
+    }
+    return;
 }
 
 bool NotificationBasicContent::Marshalling(Parcel &parcel) const
@@ -134,6 +162,22 @@ bool NotificationBasicContent::Marshalling(Parcel &parcel) const
         }
     }
 
+    int32_t size = static_cast<int32_t>(structuredText_.size());
+    if (!parcel.WriteInt32(size)) {
+        ANS_LOGE("Failed to write structuredText size.");
+        return false;
+    }
+    for (const auto& [key, value] : structuredText_) {
+        if (!parcel.WriteString(key)) {
+            ANS_LOGE("Failed to write structuredText key.");
+            return false;
+        }
+        if (!parcel.WriteString(value)) {
+            ANS_LOGE("Failed to write structuredText value.");
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -161,6 +205,25 @@ bool NotificationBasicContent::ReadFromParcel(Parcel &parcel)
             ANS_LOGE("Failed to read lockScreenPicture");
             return false;
         }
+    }
+
+    int32_t size = -1;
+    if (!parcel.ReadInt32(size)) {
+        ANS_LOGE("Failed to read structuredText size.");
+        return false;
+    }
+    for (int32_t i = 0; i < size; ++i) {
+        std::string key;
+        std::string value;
+        if (!parcel.ReadString(key)) {
+            ANS_LOGE("Failed to read structuredText key.");
+            return false;
+        }
+        if (!parcel.ReadString(value)) {
+            ANS_LOGE("Failed to read structuredText value.");
+            return false;
+        }
+        structuredText_.emplace_back(key, value);
     }
 
     return true;
