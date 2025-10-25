@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 SYMBOL_EXPORT int32_t Startup(std::function<void()> shutdownCallback,
-    std::function<void(int32_t, int32_t, uint32_t, std::string)> haReportCallback)
+    std::function<void(uint32_t, uint32_t, int32_t, std::string)> haReportCallback)
 {
     return NotificationExtensionService::GetInstance().InitService(shutdownCallback, haReportCallback);
 }
