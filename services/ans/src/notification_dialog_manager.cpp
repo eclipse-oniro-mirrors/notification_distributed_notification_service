@@ -254,6 +254,10 @@ bool NotificationDialogManager::OnDialogButtonClicked(const std::string& bundleN
         // Do not return here, need to clear the data
     }
     ans_.SendDialogClickHiSysEvent(bundleOption, enabled);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_28, EventBranchId::BRANCH_0);
+    message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+        " allow:" + std::to_string(enabled));
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     EnabledDialogStatus status = enabled ? EnabledDialogStatus::ALLOW_CLICKED : EnabledDialogStatus::DENY_CLICKED;
     return HandleOneDialogClosed(bundleOption, status);
 }
