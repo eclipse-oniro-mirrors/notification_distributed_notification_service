@@ -27,12 +27,12 @@
 #include "reminder_utils.h"
 
 namespace OHOS::Notification {
-namespace {
-constexpr int64_t DURATION_PRELOAD_TIME = 10 * 60 * 60 * 1000;  // 10h, millisecond
-constexpr int64_t DURATION_DELAY_TASK = 1 * 1000 * 1000;  // 1s, microsecond
-constexpr int64_t CYCLE_DATASHARE_TASK = 1;  // 1s
-constexpr int64_t DURATION_ONE_SECOND = 1000;  // 1s, millisecond
-}
+static constexpr int64_t DURATION_PRELOAD_TIME = 10 * 60 * 60 * 1000;  // 10h, millisecond
+static constexpr int64_t DURATION_DELAY_TASK = 1 * 1000 * 1000;  // 1s, microsecond
+static constexpr int64_t CYCLE_DATASHARE_TASK = 1;  // 1s
+static constexpr int64_t DURATION_ONE_SECOND = 1000;  // 1s, millisecond
+static constexpr int8_t CALENDAR_RDB_V1 = 1;
+static constexpr int8_t CALENDAR_RDB_V2 = 2;
 
 template<typename T>
 void GetRdbValue(const std::shared_ptr<DataShare::DataShareResultSet>& resultSet,
@@ -120,6 +120,10 @@ bool ReminderDataShareHelper::Query(std::map<std::string, sptr<ReminderRequest>>
     DataShare::DataSharePredicates predicates;
     predicates.NotEqualTo(ReminderCalendarShareTable::STATE, ReminderCalendarShareTable::STATE_DISMISSED);
     predicates.And();
+    if (rdbVersion_ == CALENDAR_RDB_V2) {
+        predicates.NotEqualTo(ReminderCalendarShareTable::NEED_AGENT, 0);
+        predicates.And();
+    }
     predicates.BeginWrap();
     predicates.BeginWrap();
     predicates.LessThanOrEqualTo(ReminderCalendarShareTable::ALARM_TIME, timestamp);
@@ -226,11 +230,16 @@ void ReminderDataShareHelper::UpdateCalendarUid()
     }
     for (const auto& moduleInfo : bundleInfo.hapModuleInfos) {
         for (const auto& metaData : moduleInfo.metadata) {
-            if (metaData.name == "hmos.calendardata.reminderDbVersion") {
-                isNewRdbVer_ = true;
-                ANSR_LOGE("New calendar rdb version");
-                return;
+            if (metaData.name != "hmos.calendardata.reminderDbVersion") {
+                continue;
             }
+            ANSR_LOGI("calendar rdb is new version.");
+            if (metaData.value == "1") {
+                rdbVersion_ = CALENDAR_RDB_V1;
+            } else if (metaData.value == "2") {
+                rdbVersion_ = CALENDAR_RDB_V2;
+            }
+            return;
         }
     }
 }
@@ -345,7 +354,7 @@ bool ReminderDataShareHelper::ReleaseDataShareHelper(const std::shared_ptr<DataS
 
 std::vector<std::string> ReminderDataShareHelper::GetColumns() const
 {
-    if (isNewRdbVer_) {
+    if (rdbVersion_ != 0) {
         return std::vector<std::string> {
             ReminderCalendarShareTable::ID, ReminderCalendarShareTable::EVENT_ID,
             ReminderCalendarShareTable::END, ReminderCalendarShareTable::ALARM_TIME,
@@ -516,7 +525,7 @@ void ReminderDataShareHelper::InitBaseInfo(const DataShare::DataShareObserver::C
 void ReminderDataShareHelper::BuildReminderV1(const std::shared_ptr<DataShare::DataShareResultSet>& result,
     sptr<ReminderRequest>& reminder)
 {
-    if (!isNewRdbVer_) {
+    if (rdbVersion_ == 0) {
         return;
     }
     uint64_t timeInterval = 0;
@@ -548,7 +557,7 @@ void ReminderDataShareHelper::BuildReminderV1(const std::shared_ptr<DataShare::D
 void ReminderDataShareHelper::BuildReminderV1(const DataShare::DataShareObserver::ChangeInfo::VBucket& info,
     sptr<ReminderRequest>& reminder)
 {
-    if (!isNewRdbVer_) {
+    if (rdbVersion_ == 0) {
         return;
     }
     auto iter = info.find(ReminderCalendarShareTable::TIME_INTERVAL);
