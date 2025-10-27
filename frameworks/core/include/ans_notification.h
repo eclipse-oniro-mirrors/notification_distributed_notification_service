@@ -1120,6 +1120,40 @@ public:
     ErrCode SetAdditionConfig(const std::string &key, const std::string &value);
 
     /**
+     * @brief set priority notification switch.
+     *
+     * @param enabled Whether to allow sending priority notification.
+     * @return Returns set result.
+     */
+    ErrCode SetPriorityEnabled(const bool enabled);
+
+    /**
+     * @brief set priority notification switch with bundle info.
+     *
+     * @param bundleOption Indicates the bundle bundleOption.
+     * @param enabled Whether to allow sending priority notification by bundle.
+     * @return Returns set result.
+     */
+    ErrCode SetPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, const bool enabled);
+
+    /**
+     * @brief Query switch for sending priority notification.
+     *
+     * @param enabled Whether to allow sending priority notification.
+     * @return Returns configuring Whether to allow sending priority notification.
+     */
+    ErrCode IsPriorityEnabled(bool &enabled);
+
+    /**
+     * @brief Query switch for sending priority notification by bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param enabled Whether to allow sending priority notification by bundle.
+     * @return Returns configuring Whether to allow sending priority notification by bundle.
+     */
+    ErrCode IsPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, bool &enabled);
+
+    /**
      * @brief Sets whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
      *

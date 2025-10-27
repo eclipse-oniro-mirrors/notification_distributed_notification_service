@@ -201,6 +201,10 @@ ohos_shared_library("ans_innerkits") {
     defines += [ "ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER" ]
   }
 
+  if (distributed_notification_service_feature_priority_notification) {
+    defines += [ "ANS_FEATURE_PRIORITY_NOTIFICATION" ]
+  }
+
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }

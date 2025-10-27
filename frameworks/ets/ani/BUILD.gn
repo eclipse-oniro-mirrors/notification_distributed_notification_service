@@ -122,6 +122,10 @@ ohos_shared_library("notification_manager_ani") {
     defines += [ "ANS_FEATURE_OPEN_NOTIFICATION_SETTINGS" ]
   }
 
+  if (distributed_notification_service_feature_priority_notification) {
+    defines += [ "ANS_FEATURE_PRIORITY_NOTIFICATION" ]
+  }
+
   external_deps = [
     "ability_base:zuri",
     "ability_runtime:ability_context_native",

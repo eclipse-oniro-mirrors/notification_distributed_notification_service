@@ -1273,6 +1273,40 @@ public:
     static ErrCode SetAdditionConfig(const std::string &key, const std::string &value);
 
     /**
+     * @brief Configuring Whether to allow sending priority notification.
+     *
+     * @param enabled Whether to allow sending priority notification.
+     * @return Returns configuring Whether to allow sending priority notification.
+     */
+    static ErrCode SetPriorityEnabled(const bool enabled);
+
+    /**
+     * @brief Configuring Whether to allow sending priority notification by bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param enabled Whether to allow sending priority notification by bundle.
+     * @return Returns configuring Whether to allow sending priority notification by bundle.
+     */
+    static ErrCode SetPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, const bool enabled);
+
+    /**
+     * @brief Query switch for sending priority notification.
+     *
+     * @param enabled Whether to allow sending priority notification.
+     * @return Returns configuring Whether to allow sending priority notification.
+     */
+    static ErrCode IsPriorityEnabled(bool &enabled);
+
+    /**
+     * @brief Query switch for sending priority notification by bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param enabled Whether to allow sending priority notification by bundle.
+     * @return Returns configuring Whether to allow sending priority notification by bundle.
+     */
+    static ErrCode IsPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, bool &enabled);
+
+    /**
      * @brief Cancels a published agent notification.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.

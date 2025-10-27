@@ -279,6 +279,11 @@ static const char* const CLONE_RINGTONE_INFO = "clone_ringtone_";
 static const char* const KEY_DISTRIBUTED_NOTIFICATION_SWITCH = "distributedNotificationSwitch";
 
 /**
+ * Indicates that priority notification switch.
+ */
+static const char* const KEY_PRIORITY_NOTIFICATION_SWITCH = "priorityNotificationSwitch";
+
+/**
  * Indicates the target device's authorization status.
  */
 static const char* const KEY_ENABLE_DISTRIBUTED_AUTH_STATUS = "enabledDistributedAuthStatus";
@@ -2283,6 +2288,113 @@ int32_t NotificationPreferencesDatabase::PutDataToDB(const std::string &key, con
     }
     std::string valueStr = std::to_string(value);
     int32_t result = rdbDataManager_->InsertData(key, valueStr, userId);
+    return result;
+}
+
+bool NotificationPreferencesDatabase::PutPriorityEnabled(const NotificationConstant::SWITCH_STATE &enabled)
+{
+    ANS_LOGD("%{public}s, enabled: %{public}d", __FUNCTION__, static_cast<int32_t>(enabled));
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+    std::string key =
+        std::string(KEY_PRIORITY_NOTIFICATION_SWITCH).append(KEY_MIDDLE_LINE).append(std::to_string(userId));
+    int32_t result = PutDataToDB(key, static_cast<int32_t>(enabled), userId);
+    ANS_LOGI("PutPriorityEnabled key: %{public}s, result: %{public}d", key.c_str(), result);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::PutPriorityEnabledForBundle(
+    const NotificationPreferencesInfo::BundleInfo &bundleInfo, const NotificationConstant::SWITCH_STATE &enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleInfo.GetBundleName().empty()) {
+        ANS_LOGE("Invalid parameters");
+        return false;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+    std::string key = GenerateBundleKey(GenerateBundleLablel(bundleInfo), (KEY_PRIORITY_NOTIFICATION_SWITCH));
+    int32_t result = PutDataToDB(key, static_cast<int32_t>(enabled), userId);
+    ANS_LOGI("PutPriorityEnabledForBundle key: %{public}s, result: %{public}d", key.c_str(), result);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::GetPriorityEnabled(NotificationConstant::SWITCH_STATE &enabled)
+{
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+    std::string key =
+        std::string(KEY_PRIORITY_NOTIFICATION_SWITCH).append(KEY_MIDDLE_LINE).append(std::to_string(userId));
+    bool result = false;
+    enabled = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = true;
+                enabled = static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(value));
+                break;
+            }
+            default:
+                result = false;
+                break;
+        }
+    });
+    ANS_LOGI("GetPriorityEnabled key: %{public}s, result: %{public}d, enabled: %{public}d",
+        key.c_str(), result, static_cast<int32_t>(enabled));
+    return result;
+}
+
+bool NotificationPreferencesDatabase::GetPriorityEnabledForBundle(
+    const NotificationPreferencesInfo::BundleInfo &bundleInfo, NotificationConstant::SWITCH_STATE &enabled)
+{
+    if (bundleInfo.GetBundleName().empty()) {
+        ANS_LOGE("Bundle name is null.");
+        return false;
+    }
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+    std::string key = GenerateBundleKey(GenerateBundleLablel(bundleInfo), (KEY_PRIORITY_NOTIFICATION_SWITCH));
+    bool result = false;
+    enabled = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = true;
+                enabled = static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(value));
+                break;
+            }
+            default:
+                result = false;
+                break;
+        }
+    });
+    ANS_LOGI("GetPriorityEnabledForBundle key: %{public}s, result: %{public}d, enabled: %{public}d",
+        key.c_str(), result, static_cast<int32_t>(enabled));
     return result;
 }
 

@@ -1954,8 +1954,8 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledBySlot_00100, Functio
     enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     res = NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(
         slotType, "test", enableStatus);
-    bool enabled = enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
-        enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    bool enabled = (enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+        enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     ASSERT_EQ(res, ERR_OK);
     ASSERT_EQ(enabled, true);
 }

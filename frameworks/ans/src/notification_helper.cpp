@@ -694,6 +694,26 @@ ErrCode NotificationHelper::SetAdditionConfig(const std::string &key, const std:
     return DelayedSingleton<AnsNotification>::GetInstance()->SetAdditionConfig(key, value);
 }
 
+ErrCode NotificationHelper::SetPriorityEnabled(const bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetPriorityEnabled(enabled);
+}
+
+ErrCode NotificationHelper::SetPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, const bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetPriorityEnabledByBundle(bundleOption, enabled);
+}
+
+ErrCode NotificationHelper::IsPriorityEnabled(bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsPriorityEnabled(enabled);
+}
+
+ErrCode NotificationHelper::IsPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsPriorityEnabledByBundle(bundleOption, enabled);
+}
+
 ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
     const std::string deviceId)
 {
