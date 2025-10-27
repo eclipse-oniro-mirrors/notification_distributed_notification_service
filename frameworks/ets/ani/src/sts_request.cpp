@@ -1320,7 +1320,7 @@ ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<Notific
             return nullptr;
         }
         if (ANI_OK != env->Object_CallMethodByName_Void(
-            arrayObj, "$_set", "iC{std.core.Object}:", index, requestObj)) {
+            arrayObj, "$_set", "iY:", index, requestObj)) {
             ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}d", index);
             return nullptr;
         }
@@ -1347,7 +1347,7 @@ ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vect
                 return nullptr;
             }
         if (ANI_OK
-            != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, requestObj)) {
+            != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iY:", index, requestObj)) {
             ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}d", index);
             return nullptr;
         }

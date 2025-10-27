@@ -73,7 +73,7 @@ bool UnwrapArrayDoNotDisturbProfile(ani_env *env, ani_object arrayObj,
     }
     for (int32_t i = 0; i < length; i++) {
         ani_ref optionRef;
-        status = env->Object_CallMethodByName_Ref(arrayObj, "$_get", "i:C{std.core.Object}", &optionRef, i);
+        status = env->Object_CallMethodByName_Ref(arrayObj, "$_get", "i:Y", &optionRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("UnwrapArrayDoNotDisturbProfile: status : %{public}d, index: %{public}d", status, i);
             return false;
@@ -113,7 +113,7 @@ bool WrapProfileTrustList(ani_env* env, sptr<NotificationDoNotDisturbProfile> pr
             return false;
         }
         if (ANI_OK != (status = env->Object_CallMethodByName_Void(arrayObj, "$_set",
-            "iC{std.core.Object}:", index, bundleObj))) {
+            "iY:", index, bundleObj))) {
             ANS_LOGE("WrapProfileTrustList set object faild. index %{public}d status %{public}d",
                 index, status);
             return false;
