@@ -66,7 +66,7 @@ int32_t AdvancedNotificationService::LoadExtensionService()
         ANS_LOGW("GetProxyFunc Startup init failed.");
         return -1;
     }
-    startup(nullptr, [](uint32_t sceneId, uint32_t branchId, int errorCode, std::string message) {
+    startup(nullptr, [](uint32_t sceneId, uint32_t branchId, int32_t errorCode, std::string message) {
         HaMetaMessage msg = HaMetaMessage(sceneId, branchId);
         NotificationAnalyticsUtil::ReportModifyEvent(msg.Message(message));
     });
