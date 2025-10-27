@@ -58,6 +58,7 @@
 #include "advanced_notification_flow_control_service.h"
 #include "notification_operation_info.h"
 #include "notification_operation_service.h"
+#include "distributed_data_define.h"
 
 namespace OHOS {
 namespace Notification {
@@ -1114,7 +1115,7 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
     }
 
     ANS_LOGI("%{public}s_%{public}d, deviceId: %{public}s, Request enable notification dailog result: %{public}d",
-        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), deviceId.c_str(), result);
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), StringAnonymous(deviceId).c_str(), result);
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
@@ -1225,7 +1226,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
 
     ANS_LOGI("%{public}s_%{public}d, deviceId: %{public}s, enable: %{public}s, "
         "Set notifications enabled for special bundle result: %{public}d", bundleOption->GetBundleName().c_str(),
-        bundleOption->GetUid(), deviceId.c_str(), std::to_string(enabled).c_str(), result);
+        bundleOption->GetUid(), StringAnonymous(deviceId).c_str(), std::to_string(enabled).c_str(), result);
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     SendEnableNotificationHiSysEvent(bundleOption, enabled, result);

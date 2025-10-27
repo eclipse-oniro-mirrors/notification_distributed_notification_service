@@ -20,6 +20,7 @@
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "hitrace_meter_adapter.h"
+#include "distributed_data_define.h"
 
 namespace OHOS {
 namespace Notification {
@@ -145,7 +146,8 @@ void DistributedNotificationManager::OnDatabaseInsert(
     }
     distributedQueue_->submit(std::bind([=]() {
         if (!CheckDeviceId(deviceId, key)) {
-            ANS_LOGD("device id is distinct. deviceId:%{public}s key:%{public}s", deviceId.c_str(), key.c_str());
+            ANS_LOGD("device id is distinct. deviceId:%{public}s key:%{public}s",
+                StringAnonymous(deviceId).c_str(), key.c_str());
         }
 
         ResolveKey resolveKey;
@@ -175,7 +177,8 @@ void DistributedNotificationManager::OnDatabaseUpdate(
     }
     ffrt::task_handle handler = distributedQueue_->submit_h(std::bind([=]() {
         if (!CheckDeviceId(deviceId, key)) {
-            ANS_LOGD("device id are not the same. deviceId:%{public}s key:%{public}s", deviceId.c_str(), key.c_str());
+            ANS_LOGD("device id are not the same. deviceId:%{public}s key:%{public}s",
+                StringAnonymous(deviceId).c_str(), key.c_str());
         }
 
         ResolveKey resolveKey;
@@ -205,7 +208,8 @@ void DistributedNotificationManager::OnDatabaseDelete(
     }
     distributedQueue_->submit(std::bind([=]() {
         if (!CheckDeviceId(deviceId, key)) {
-            ANS_LOGD("device id are not the same. deviceId:%{public}s key:%{public}s", deviceId.c_str(), key.c_str());
+            ANS_LOGD("device id are not the same. deviceId:%{public}s key:%{public}s",
+                StringAnonymous(deviceId).c_str(), key.c_str());
         }
 
         ResolveKey resolveKey;
