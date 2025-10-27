@@ -49,6 +49,8 @@ public:
     static bool callOnRemoveAppMgr_;
     static bool callHandleAutoDeleteReminder_;
     static bool callOnLanguageChanged_;
+    static bool callOnDataShareInsertOrDelete_;
+    static bool callOnDataShareUpdate_;
 };
 }  // namespace OHOS::Notification
 

@@ -46,6 +46,8 @@ bool MockReminderDataManager::callOnAbilityMgrServiceStart_ = false;
 bool MockReminderDataManager::callOnRemoveAppMgr_ = false;
 bool MockReminderDataManager::callHandleAutoDeleteReminder_ = false;
 bool MockReminderDataManager::callOnLanguageChanged_ = false;
+bool MockReminderDataManager::callOnDataShareInsertOrDelete_ = false;
+bool MockReminderDataManager::callOnDataShareUpdate_ = false;
 
 void MockReminderDataManager::MockPublishReminder(const int32_t ret)
 {
@@ -106,6 +108,8 @@ void MockReminderDataManager::ResetFlag()
     callOnRemoveAppMgr_ = false;
     callHandleAutoDeleteReminder_ = false;
     callOnLanguageChanged_ = false;
+    callOnDataShareInsertOrDelete_ = false;
+    callOnDataShareUpdate_ = false;
 }
 
 std::shared_ptr<ReminderDataManager> ReminderDataManager::REMINDER_DATA_MANAGER = nullptr;
@@ -262,5 +266,15 @@ void ReminderDataManager::HandleAutoDeleteReminder(const int32_t notificationId,
 void ReminderDataManager::OnLanguageChanged()
 {
     MockReminderDataManager::callOnLanguageChanged_ = true;
+}
+
+void ReminderDataManager::OnDataShareInsertOrDelete()
+{
+    MockReminderDataManager::callOnDataShareInsertOrDelete_ = true;
+}
+
+void ReminderDataManager::OnDataShareUpdate(const std::map<std::string, sptr<ReminderRequest>>& reminders)
+{
+    MockReminderDataManager::callOnDataShareUpdate_ = true;
 }
 } // namespace OHOS::Notification
