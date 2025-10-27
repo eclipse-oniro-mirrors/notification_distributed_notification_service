@@ -397,7 +397,7 @@ bool GetAniPictrueInfo(ani_env *env, std::map<std::string, std::vector<std::shar
         return false;
     }
     ani_class recordCls;
-    if (!CreateClassObjByClassName(env, "escompat.Record", recordCls, pictureInfoObj) || pictureInfoObj == nullptr) {
+    if (!CreateClassObjByClassName(env, "std.core.Record", recordCls, pictureInfoObj) || pictureInfoObj == nullptr) {
         ANS_LOGE("Create recordObj faild.");
         return false;
     }
