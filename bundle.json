@@ -210,6 +210,7 @@
         "//base/notification/distributed_notification_service/frameworks/reminder/test/unittest:unittest",
         "//base/notification/distributed_notification_service/frameworks/ans/test/unittest:unittest",
         "//base/notification/distributed_notification_service/frameworks/core/test/unittest:unittest",
+        "//base/notification/distributed_notification_service/frameworks/extension/test/unittest:unittest",
         "//base/notification/distributed_notification_service/test:systemtest",
         "//base/notification/distributed_notification_service/tools:unittest",
         "//base/notification/distributed_notification_service/test/bechmarktest:benchmarktest",
