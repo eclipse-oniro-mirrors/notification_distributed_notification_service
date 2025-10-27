@@ -125,7 +125,8 @@ public:
     MOCK_METHOD(ReturnPairType, InsertEx,
                 (Uri& uri, const DataShare::DataShareValuesBucket& value), (override));
     MOCK_METHOD(ReturnPairType, UpdateEx,
-                (Uri& uri, const DataShare::DataSharePredicates& predicates, const DataShare::DataShareValuesBucket& value),
+                (Uri& uri, const DataShare::DataSharePredicates& predicates, 
+                const DataShare::DataShareValuesBucket& value),
                 (override));
     MOCK_METHOD(ReturnPairType, DeleteEx,
                 (Uri& uri, const DataShare::DataSharePredicates& predicates), (override));
@@ -135,7 +136,8 @@ public:
                 (override));
 
     MOCK_METHOD(int, TryRegisterObserverExt,
-                (const Uri& uri, std::shared_ptr<DataShare::DataShareObserver> dataObserver, bool isDescendants, bool isSystem),
+                (const Uri& uri, std::shared_ptr<DataShare::DataShareObserver> dataObserver, 
+                bool isDescendants, bool isSystem),
                 (override));
     MOCK_METHOD(int, TryUnregisterObserverExt,
                 (const Uri& uri, std::shared_ptr<DataShare::DataShareObserver> dataObserver, bool isSystem),
