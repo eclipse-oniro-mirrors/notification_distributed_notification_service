@@ -686,6 +686,16 @@ uint32_t AdvancedNotificationService::GetDefaultSlotFlags(const sptr<Notificatio
     return flags;
 }
 
+void UpdateScreenReminderFlag(uint32_t& slotReminderMode, NotificationConstant::SlotType type)
+{
+    uint32_t before = slotReminderMode;
+    uint32_t config = DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(type);
+    uint32_t lightBit = (config & NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG);
+    slotReminderMode |=  lightBit;
+    ANS_LOGI("Update screen: %{public}d, %{public}d, %{public}d, %{public}d, %{public}d.",
+        type, config, before, lightBit, slotReminderMode);
+}
+
 void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRequest> &request,
     const sptr<NotificationBundleOption> &bundleOption)
 {
@@ -725,6 +735,7 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
         !request->GetCreatorBundleName().empty() && request->IsAgentNotification()) {
         slotReminderMode = slotReminderMode |= NotificationConstant::ReminderFlag::BANNER_FLAG;
     }
+    UpdateScreenReminderFlag(slotReminderMode, slotType);
     if ((slotReminderMode & NotificationConstant::ReminderFlag::SOUND_FLAG) != 0) {
         request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, true);
     } else {
