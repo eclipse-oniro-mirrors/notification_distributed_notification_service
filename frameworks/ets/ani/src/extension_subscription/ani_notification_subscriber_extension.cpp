@@ -27,8 +27,10 @@ void AniSubscribe(ani_env *env, ani_object notificationInfoArrayobj)
 {
     ANS_LOGD("AniSubscribe call");
     std::vector<sptr<Notification::NotificationExtensionSubscriptionInfo>> infos;
-    if (!NotificationSts::UnwarpNotificationExtensionSubscribeInfoArrayByAniObj(env, notificationInfoArrayobj, infos)) {
-        ANS_LOGE("UnwrapNotificationSlotArrayByAniObj failed");
+    ani_status status =
+        NotificationSts::UnwarpNotificationExtensionSubscribeInfoArrayByAniObj(env, notificationInfoArrayobj, infos);
+    if (status != ANI_OK) {
+        ANS_LOGE("UnwrapNotificationSlotArrayByAniObj failed with %{public}d", status);
         NotificationSts::ThrowErrorWithMsg(env, "sts Subscribe ERROR_INTERNAL_ERROR");
         return;
     }
