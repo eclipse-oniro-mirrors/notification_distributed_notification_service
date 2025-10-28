@@ -748,8 +748,8 @@ HWTEST_F(NotificationHelperTest, IsDistributedEnabled_00001, Function | SmallTes
 }
 
 /**
- * @tc.name: IsDistributedEnabled_00001
- * @tc.desc: Test IsDistributedEnabled parameters.
+ * @tc.name: UpdateDistributedDeviceList_00001
+ * @tc.desc: Test UpdateDistributedDeviceList parameters.
  * @tc.type: FUNC
  * @tc.require: issueI5WRQ2
  */
@@ -757,7 +757,7 @@ HWTEST_F(NotificationHelperTest, UpdateDistributedDeviceList_00001, Function | S
 {
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.UpdateDistributedDeviceList(NotificationConstant::PAD_DEVICE_TYPE);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -1275,6 +1275,40 @@ HWTEST_F(NotificationHelperTest, RegisterSwingCallback_0100, TestSize.Level1)
     ErrCode ret = notificationHelper.RegisterSwingCallback(swingCbFunc);
     EXPECT_EQ(ret, ERR_OK);
 #endif
+}
+
+/**
+ * @tc.name: SetPriorityEnabled_0100
+ * @tc.desc: test SetPriorityEnabled success
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetPriorityEnabled_0100, TestSize.Level1)
+{
+    bool enabled = true;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetPriorityEnabled(enabled);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    ret = notificationHelper.IsPriorityEnabled(enabled);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: SetPriorityEnabledByBundle_0100
+ * @tc.desc: test SetPriorityEnabled success
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetPriorityEnabledByBundle_0100, TestSize.Level1)
+{
+    bool enabled = true;
+    NotificationHelper notificationHelper;
+    NotificationBundleOption bo;
+    bo.SetBundleName("bundleName");
+    bo.SetUid(1);
+    ErrCode ret = notificationHelper.SetPriorityEnabledByBundle(bo, enabled);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    ret = notificationHelper.IsPriorityEnabledByBundle(bo, enabled);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_TRUE(enabled);
 }
 
 /**

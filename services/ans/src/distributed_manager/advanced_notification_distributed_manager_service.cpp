@@ -155,8 +155,8 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledBySlot(
     NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     ErrCode result =
         NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(slotType, deviceType, enableStatus);
-    enabled = enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
-        enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    enabled = (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
+        enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
     return result;
 }
 
@@ -834,8 +834,8 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
         }
         DeviceStatueChangeInfo changeInfo;
         changeInfo.enableChange = enabled;
-        changeInfo.liveViewChange = liveViewEnableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
-            liveViewEnableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+        changeInfo.liveViewChange = (liveViewEnableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+            liveViewEnableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
         changeInfo.changeType = DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE;
         DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
     }

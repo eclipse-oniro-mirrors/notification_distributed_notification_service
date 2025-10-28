@@ -24,6 +24,7 @@
 #include "napi_display_badge.h"
 #include "napi_distributed.h"
 #include "napi_disturb_mode.h"
+#include "napi_priority.h"
 #include "napi_enable_notification.h"
 #include "napi_get_active.h"
 #include "napi_publish.h"
@@ -213,7 +214,19 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
 #else
         DECLARE_NAPI_FUNCTION("openNotificationSettings", Common::NapiReturnCapErr),
 #endif
-};
+
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+        DECLARE_NAPI_FUNCTION("setPriorityEnabled", NapiSetPriorityEnabled),
+        DECLARE_NAPI_FUNCTION("setPriorityEnabledByBundle", NapiSetPriorityEnabledByBundle),
+        DECLARE_NAPI_FUNCTION("isPriorityEnabled", NapiIsPriorityEnabled),
+        DECLARE_NAPI_FUNCTION("isPriorityEnabledByBundle", NapiIsPriorityEnabledByBundle),
+#else
+        DECLARE_NAPI_FUNCTION("setPriorityEnabled", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("setPriorityEnabledByBundle", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("isPriorityEnabled", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("isPriorityEnabledByBundle", Common::NapiReturnCapErr),
+#endif
+    };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
 

@@ -1372,6 +1372,40 @@ public:
     ErrCode SetAdditionConfig(const std::string &key, const std::string &value) override;
 
     /**
+     * @brief Configuring Whether to allow sending priority notification.
+     *
+     * @param enabled Whether to allow sending priority notification.
+     * @return Returns configuring Whether to allow sending priority notification.
+     */
+    ErrCode SetPriorityEnabled(const bool enabled) override;
+
+    /**
+     * @brief Configuring Whether to allow sending priority notification by bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param enabled Whether to allow sending priority notification by bundle.
+     * @return Returns configuring Whether to allow sending priority notification by bundle.
+     */
+    ErrCode SetPriorityEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption, const bool enabled) override;
+
+    /**
+     * @brief Query switch for sending priority notification.
+     *
+     * @param enabled Whether to allow sending priority notification.
+     * @return Returns configuring Whether to allow sending priority notification.
+     */
+    ErrCode IsPriorityEnabled(bool &enabled) override;
+
+    /**
+     * @brief Query switch for sending priority notification by bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param enabled Whether to allow sending priority notification by bundle.
+     * @return Returns configuring Whether to allow sending priority notification by bundle.
+     */
+    ErrCode IsPriorityEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption, bool &enabled) override;
+
+    /**
      * @brief Cancels a published agent notification.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
@@ -1561,6 +1595,10 @@ public:
     ErrCode CanOpenSubscribeSettings() override;
 
     void SendDialogClickHiSysEvent(const sptr<NotificationBundleOption> &bundleOption, bool enabled);
+
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    void UpdatePriorityType(const sptr<NotificationRequest> &request);
+#endif
 
 protected:
     /**
@@ -1965,6 +2003,7 @@ private:
     void FilterBundlesByBluetoothConnection(std::vector<sptr<NotificationBundleOption>> &bundles);
     bool HasExtensionSubscriptionStateChanged(const sptr<NotificationBundleOption> &bundle, bool enabled);
     ErrCode PreReminderInfoCheck();
+    ErrCode SyncAdditionConfig(const std::string &key, const std::string &value, HaMetaMessage &message);
     bool isProxyForUnaware(const int32_t uid);
 	
     ErrCode RefreshExtensionSubscriptionBundlesFromConfig(const sptr<NotificationBundleOption>& bundleOption,
@@ -1990,6 +2029,7 @@ private:
     void ProcessSetUserGrantedBundleState(const sptr<NotificationBundleOption>& bundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled, ErrCode& result);
     void UpdateHfpStateForInfos(std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
+    ErrCode SystemSwitchPermissionCheck();
     bool CheckHfpState(const std::string &bluetoothAddress);
     std::vector<sptr<NotificationBundleOption>>::iterator FindBundleInCache(
         const sptr<NotificationBundleOption> &bundleOption);

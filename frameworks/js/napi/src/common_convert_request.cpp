@@ -70,6 +70,10 @@ napi_value Common::SetNotificationRequestByString(
     napi_create_string_utf8(env, request->GetAppInstanceKey().c_str(), NAPI_AUTO_LENGTH, &value);
     napi_set_named_property(env, result, "appInstanceKey", value);
 
+    // readonly priorityNotificationType?: string
+    napi_create_string_utf8(env, request->GetPriorityNotificationType().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "priorityNotificationType", value);
+
     return NapiGetBoolean(env, true);
 }
 
@@ -630,6 +634,10 @@ napi_value Common::GetNotificationRequestByString(
     }
     // sound?: string
     if (GetNotificationSound(env, value, request) == nullptr) {
+        return nullptr;
+    }
+    // priorityNotificationType?: string
+    if (GetNotificationPriorityNotificationType(env, value, request) == nullptr) {
         return nullptr;
     }
     return NapiGetNull(env);
@@ -2081,6 +2089,34 @@ napi_value Common::GetNotificationControlFlags(
 
         napi_get_value_uint32(env, result, &notificationControlFlags);
         request.SetNotificationControlFlags(notificationControlFlags);
+    }
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationPriorityNotificationType(
+    const napi_env &env, const napi_value &value, NotificationRequest &request)
+{
+    ANS_LOGD("Called.");
+    napi_valuetype valuetype = napi_undefined;
+    napi_value result = nullptr;
+    bool hasProperty = false;
+    size_t strLen = 0;
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "priorityNotificationType", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, value, "priorityNotificationType", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_string) {
+            ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of priorityNotificationType must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+
+        char str[STR_MAX_SIZE] = {0};
+        NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
+        request.SetPriorityNotificationType(str);
     }
 
     return NapiGetNull(env);

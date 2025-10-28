@@ -26,6 +26,7 @@
 #include "telephony_extension_wrapper.h"
 #endif
 #include "advanced_datashare_helper.h"
+#include "notification_ai_extension_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -64,6 +65,9 @@ void AdvancedNotificationServiceAbility::OnStart()
 
 #ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
     TEL_EXTENTION_WRAPPER->InitTelExtentionWrapper();
+#endif
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    NOTIFICATION_AI_EXTENSION_WRAPPER->Init();
 #endif
     AddSystemAbilityListener(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
     AddSystemAbilityListener(ALL_CONNECT_SA_ID);

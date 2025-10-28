@@ -146,6 +146,43 @@ public:
         NotificationPreferencesInfo::SilentReminderInfo &silentReminderInfo);
 
     /**
+     * @brief Put priority notification enable into disturbe DB.
+     *
+     * @param enabled Indicates to whether to enabled.
+     * @return Return true on success, false on failure.
+     */
+    bool PutPriorityEnabled(const NotificationConstant::SWITCH_STATE &enabled);
+
+    /**
+     * @brief Put priority notification enable by bundle into disturbe DB.
+     *
+     * @param bundleName Indicates bundle name.
+     * @param bundleUid Indicates bundle uid.
+     * @param enabled Indicates to whether to enabled.
+     * @return Return true on success, false on failure.
+     */
+    bool PutPriorityEnabledForBundle(
+        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const NotificationConstant::SWITCH_STATE &enabled);
+
+    /**
+     * @brief Get priority notification enable into disturbe DB.
+     *
+     * @param enabled Indicates to whether to enabled.
+     * @return Return true on success, false on failure.
+     */
+    bool GetPriorityEnabled(NotificationConstant::SWITCH_STATE &enabled);
+
+    /**
+     * @brief Get priority notification enable by bundle into disturbe DB.
+     *
+     * @param bundleInfo Indicates bundle info.
+     * @param enabled Indicates to whether to enabled.
+     * @return Return true on success, false on failure.
+     */
+    bool GetPriorityEnabledForBundle(
+        const NotificationPreferencesInfo::BundleInfo &bundleInfo, NotificationConstant::SWITCH_STATE &enabled);
+
+    /**
      * @brief Put distributed enable notification in the of  bundle into disturbe DB.
      *
      * @param deviceType Indicates device type.

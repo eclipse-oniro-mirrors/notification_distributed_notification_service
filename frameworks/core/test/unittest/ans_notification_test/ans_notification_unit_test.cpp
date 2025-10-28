@@ -522,6 +522,91 @@ HWTEST_F(AnsNotificationUnitTest, SetAdditionConfig_0200, Function | MediumTest 
 }
 
 /*
+ * @tc.name: SetPriorityEnabled_0100
+ * @tc.desc: test SetPriorityEnabled with null proxy.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabled_0100, Function | MediumTest | Level1)
+{
+    ErrCode ret = ans_->SetPriorityEnabled(true);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: SetPriorityEnabledByBundle_0100
+ * @tc.desc: test SetPriorityEnabledByBundle with empty key.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundle_0100, Function | MediumTest | Level1)
+{
+    bool enabled = true;
+    NotificationBundleOption bo;
+    ErrCode ret = ans_->SetPriorityEnabledByBundle(bo, enabled);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetPriorityEnabledByBundle_0200
+ * @tc.desc: test SetPriorityEnabledByBundle with null proxy.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundle_0200, Function | MediumTest | Level1)
+{
+    bool enabled = true;
+    NotificationBundleOption bo;
+    bo.SetBundleName("bundleName");
+    bo.SetUid(1);
+    ErrCode ret = ans_->SetPriorityEnabledByBundle(bo, enabled);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: IsPriorityEnabled_0100
+ * @tc.desc: test IsPriorityEnabled with null proxy.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, IsPriorityEnabled_0100, Function | MediumTest | Level1)
+{
+    bool enabled = true;
+    ErrCode ret = ans_->IsPriorityEnabled(enabled);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: IsPriorityEnabledByBundle_0100
+ * @tc.desc: test IsPriorityEnabledByBundle with empty bundleName.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, IsPriorityEnabledByBundle_0100, Function | MediumTest | Level1)
+{
+    bool enabled = true;
+    NotificationBundleOption bo;
+    ErrCode ret = ans_->IsPriorityEnabledByBundle(bo, enabled);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: IsPriorityEnabledByBundle_0200
+ * @tc.desc: test IsPriorityEnabledByBundle with null proxy.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, IsPriorityEnabledByBundle_0200, Function | MediumTest | Level1)
+{
+    bool enabled = true;
+    NotificationBundleOption bo;
+    bo.SetBundleName("bundleName");
+    bo.SetUid(1);
+    ErrCode ret = ans_->IsPriorityEnabledByBundle(bo, enabled);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
  * @tc.name: CancelAsBundleWithAgent_0100
  * @tc.desc: test CancelAsBundleWithAgent.
  * @tc.type: FUNC

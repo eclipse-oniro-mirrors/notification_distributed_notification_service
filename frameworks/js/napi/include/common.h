@@ -1819,6 +1819,17 @@ public:
         const napi_env &env, const napi_value &value, NotificationRequest &request);
 
     /**
+     * @brief Get the notification priority type.
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param request Indicates a NotificationRequest object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationPriorityNotificationType(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
+
+    /**
      * @brief Create a napi value with specified error object for callback
      *
      * @param env Indicates the environment that the API is invoked under

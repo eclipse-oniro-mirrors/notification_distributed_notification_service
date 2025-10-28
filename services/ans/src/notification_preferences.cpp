@@ -1280,6 +1280,53 @@ void NotificationPreferences::RemoveSilentEnabledDbByBundle(const sptr<Notificat
     }
 }
 
+ErrCode NotificationPreferences::SetPriorityEnabled(const NotificationConstant::SWITCH_STATE &enableStatus)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    bool storeDBResult = preferncesDB_->PutPriorityEnabled(enableStatus);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::SetPriorityEnabledByBundle(
+    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SWITCH_STATE &enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleOption->GetBundleName());
+    bundleInfo.SetBundleUid(bundleOption->GetUid());
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    bool storeDBResult =
+        preferncesDB_->PutPriorityEnabledForBundle(bundleInfo, enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::IsPriorityEnabled(NotificationConstant::SWITCH_STATE &enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    bool storeDBResult = preferncesDB_->GetPriorityEnabled(enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::IsPriorityEnabledByBundle(
+    const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::SWITCH_STATE &enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleOption->GetBundleName());
+    bundleInfo.SetBundleUid(bundleOption->GetUid());
+    bool storeDBResult = preferncesDB_->GetPriorityEnabledForBundle(bundleInfo, enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
 ErrCode NotificationPreferences::SetDistributedEnabled(
     const std::string &deviceType, const NotificationConstant::SWITCH_STATE &enableStatus)
 {
