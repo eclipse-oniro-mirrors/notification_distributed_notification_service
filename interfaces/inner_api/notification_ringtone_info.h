@@ -23,6 +23,11 @@ namespace OHOS {
 namespace Notification {
 class NotificationRingtoneInfo : public Parcelable {
 public:
+    static constexpr const char* RINGTONE_INFO_RINGTONE_TYPE = "ringtoneType";
+    static constexpr const char* RINGTONE_INFO_RINGTONE_TITLE = "ringtoneTitle";
+    static constexpr const char* RINGTONE_INFO_RINGTONE_FILE_NAME = "fileName";
+    static constexpr const char* RINGTONE_INFO_RINGTONE_URI = "uri";
+
     /**
      * Default constructor used to create a NotificationRingtoneInfo instance.
      */

@@ -1076,6 +1076,95 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
   part_name = "${component_name}"
 }
 
+ohos_unittest("advanced_notification_ringtone_service_test") {
+  module_out_path = module_output_path
+  include_dirs = [
+    ".",
+    "include",
+    "/${services_path}/ans/include",
+    "${services_path}/ans/test/unittest/mock/include",
+    "/${services_path}/ans/include/utils/",
+  ]
+
+  defines = []
+
+  sources = [
+    "${test_path}/mock/mock_tokenid_kit.cpp",
+    "advanced_notification_ringtone_service_test.cpp",
+    "mock/blob.cpp",
+    "mock/distributed_kv_data_manager.cpp",
+    "mock/mock_accesstoken_kit.cpp",
+    "mock/mock_bundle_manager_helper.cpp",
+    "mock/mock_bundle_mgr.cpp",
+    "mock/mock_event_handler.cpp",
+    "mock/mock_ipc.cpp",
+    "mock/mock_push_callback_stub.cpp",
+    "mock/mock_single_kv_store.cpp",
+    "notification_dialog_test/mock_os_account_manager_annex.cpp",
+    "notification_subscriber_manager_branch_test/mock_access_token_helper.cpp",
+  ]
+
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/ans:libans",
+  ]
+
+  if (distributed_notification_service_feature_distributed_db) {
+    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+    deps += [ "${services_path}/distributed:libans_distributed" ]
+    include_dirs += [ "${services_path}/distributed/include" ]
+  }
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_manager",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "device_manager:devicemanagersdk",
+    "eventhandler:libeventhandler",
+    "ffrt:libffrt",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
+    "image_framework:image_native",
+    "ipc:ipc_core",
+    "kv_store:distributeddata_inner",
+    "os_account:os_account_innerkits",
+    "relational_store:native_rdb",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "time_service:time_client",
+    "bluetooth:btframework",
+  ]
+
+  if (device_usage) {
+    external_deps += [ "device_usage_statistics:usagestatsinner" ]
+    defines += [ "DEVICE_USAGE_STATISTICS_ENABLE" ]
+  }
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
+
+  cflags = []
+  if (hisysevent_usage) {
+    external_deps += [ "hisysevent:libhisysevent" ]
+    cflags += [ "-DHAS_HISYSEVENT_PART" ]
+  }
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
 ohos_unittest("advanced_notification_service_branch_test") {
   module_out_path = module_output_path
   include_dirs = [
@@ -1800,6 +1889,7 @@ group("unittest") {
   deps = [
     ":access_token_helper_test",
     ":advanced_datashare_observer_unit_test",
+    ":advanced_notification_ringtone_service_test",
     ":advanced_notification_service_branch_test",
     ":advanced_notification_service_unit_test",
     ":ans_unit_test",

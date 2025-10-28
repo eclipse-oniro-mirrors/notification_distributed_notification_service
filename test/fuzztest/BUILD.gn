@@ -96,6 +96,7 @@ group("fuzztest") {
     "setnotificationbadgenum_fuzzer:SetNotificationBadgeNumFuzzTest",
     "setnotificationsenabledforallbundles_fuzzer:SetNotificationsEnabledForAllBundlesFuzzTest",
     "setprogressbar_fuzzer:SetProgressBarFuzzTest",
+    "setringtoneinfobybundle_fuzzer:SetRingtoneInfoByBundleFuzzTest",
     "settemplate_fuzzer:SetTemplateFuzzTest",
   ]
 

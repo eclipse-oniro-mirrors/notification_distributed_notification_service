@@ -1462,5 +1462,75 @@ HWTEST_F(NotificationHelperTest, GetSubscribeInfo_0100, Function | SmallTest | L
     ErrCode ret = notificationHelper.GetSubscribeInfo(infos);
     EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
+
+/**
+ * @tc.name: SetRingtoneInfoByBundle_0100
+ * @tc.desc: Test SetRingtoneInfoByBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetRingtoneInfoByBundle_0100, Function | SmallTest | Level1)
+{
+    NotificationBundleOption bundleOption;
+    NotificationRingtoneInfo ringtoneInfo;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetRingtoneInfoByBundle_0200
+ * @tc.desc: Test SetRingtoneInfoByBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetRingtoneInfoByBundle_0200, Function | SmallTest | Level1)
+{
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(20);
+    NotificationRingtoneInfo ringtoneInfo;
+    ringtoneInfo.SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    ringtoneInfo.SetRingtoneTitle("title");
+    ringtoneInfo.SetRingtoneFileName("name");
+    ringtoneInfo.SetRingtoneUri("uri");
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: GetRingtoneInfoByBundle_0100
+ * @tc.desc: Test GetRingtoneInfoByBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, GetRingtoneInfoByBundle_0100, Function | SmallTest | Level1)
+{
+    NotificationBundleOption bundleOption;
+    NotificationRingtoneInfo ringtoneInfo;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetRingtoneInfoByBundle_0200
+ * @tc.desc: Test GetRingtoneInfoByBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, GetRingtoneInfoByBundle_0200, Function | SmallTest | Level1)
+{
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(20);
+    NotificationRingtoneInfo ringtoneInfo;
+    ringtoneInfo.SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    ringtoneInfo.SetRingtoneTitle("title");
+    ringtoneInfo.SetRingtoneFileName("name");
+    ringtoneInfo.SetRingtoneUri("uri");
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    ErrCode res = notificationHelper.GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(res, ERR_ANS_PERMISSION_DENIED);
+}
 }
 }

@@ -2933,5 +2933,59 @@ HWTEST_F(AnsNotificationUnitTest, GetUserGrantedEnabledBundlesForSelf_0200, Func
     ErrCode ret = ans_->GetUserGrantedEnabledBundlesForSelf(bundles);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/*
+ * @tc.name: SetRingtoneInfoByBundle_0100
+ * @tc.desc: test SetRingtoneInfoByBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetRingtoneInfoByBundle_0100, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundle;
+    NotificationRingtoneInfo ringtoneInfo;
+    ErrCode res = ans_->SetRingtoneInfoByBundle(bundle, ringtoneInfo);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetRingtoneInfoByBundle_0200
+ * @tc.desc: test SetRingtoneInfoByBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetRingtoneInfoByBundle_0200, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundle;
+    bundle.SetBundleName("testBundle");
+    NotificationRingtoneInfo ringtoneInfo;
+    ErrCode res = ans_->SetRingtoneInfoByBundle(bundle, ringtoneInfo);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: GetRingtoneInfoByBundle_0100
+ * @tc.desc: test GetRingtoneInfoByBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetRingtoneInfoByBundle_0100, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundle;
+    NotificationRingtoneInfo ringtoneInfo;
+    ErrCode res = ans_->GetRingtoneInfoByBundle(bundle, ringtoneInfo);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetRingtoneInfoByBundle_0200
+ * @tc.desc: test GetRingtoneInfoByBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetRingtoneInfoByBundle_0200, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundle;
+    bundle.SetBundleName("testBundle");
+    NotificationRingtoneInfo ringtoneInfo;
+    ErrCode res = ans_->GetRingtoneInfoByBundle(bundle, ringtoneInfo);
+    EXPECT_EQ(res, ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS
