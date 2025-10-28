@@ -51,7 +51,8 @@ static const std::unordered_map<int32_t, std::string> ANS_ERROR_CODE_MESSAGE_MAP
     {ERROR_DISTRIBUTED_OPERATION_TIMEOUT, "Distributed operation timeout"},
     {ERROR_NO_CUSTOM_RINGTONE_INFO, "The specified bundle has no custom ringtone information"},
     {ERROR_BUNDLE_INVALID, "The specified bundle is invalid"},
-    {ERROR_NOT_IMPL_EXTENSIONABILITY, "App Not Implement NotificationSubscriberExtensionAbility"},
+    {ERROR_NOT_IMPL_EXTENSIONABILITY,
+        "The application does not implement the NotificationSubscriberExtensionAbility"},
 };
 
 static std::vector<std::pair<uint32_t, int32_t>> errorsConvert = {

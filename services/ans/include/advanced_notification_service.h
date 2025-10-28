@@ -1628,7 +1628,7 @@ public:
     void HandleBundleUninstall(const sptr<NotificationBundleOption> &bundleOption);
     bool TryStartExtensionSubscribeService();
     void OnHfpDeviceConnectChanged(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
-    void OnBluetoothStateChanged();
+    void OnBluetoothStateChanged(const int status);
 
 private:
     struct RecentInfo {
@@ -2014,7 +2014,6 @@ private:
         const std::vector<sptr<NotificationBundleOption>> &bundles);
     int32_t UnSubscribeExtensionService(const sptr<NotificationBundleOption> &bundleOption);
     int32_t ShutdownExtensionService();
-    void PrepareShutdownExtensionService();
     bool EnsureExtensionServiceLoadedAndSubscribed(const sptr<NotificationBundleOption> &bundle);
     bool EnsureExtensionServiceLoadedAndSubscribed(const sptr<NotificationBundleOption> &bundle,
         const std::vector<sptr<NotificationBundleOption>> &subscribeBundles);
@@ -2028,11 +2027,11 @@ private:
         bool enabled, ErrCode& result);
     void ProcessSetUserGrantedBundleState(const sptr<NotificationBundleOption>& bundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled, ErrCode& result);
-    void UpdateHfpStateForInfos(std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
     ErrCode SystemSwitchPermissionCheck();
     bool CheckHfpState(const std::string &bluetoothAddress);
     std::vector<sptr<NotificationBundleOption>>::iterator FindBundleInCache(
         const sptr<NotificationBundleOption> &bundleOption);
+    void ProcessBluetoothStateChanged(const int status);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;
@@ -2074,7 +2073,6 @@ private:
     std::shared_ptr<NotificationLoadUtils> notificationExtensionHandler_;
     bool supportHfp_ = false;
     std::vector<sptr<NotificationBundleOption>> cacheNotificationExtensionBundles_;
-    uint64_t timerIdShutdownExtensionService_ = 0L;
     std::shared_ptr<HfpStateObserver> hfpObserver_ = nullptr;
     std::shared_ptr<BluetoothAccessObserver> bluetoothAccessObserver_ = nullptr;
     std::atomic<bool> isBluetoothObserverRegistered_ = false;
