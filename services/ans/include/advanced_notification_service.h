@@ -1988,7 +1988,6 @@ private:
         bool enabled, ErrCode& result);
     void ProcessSetUserGrantedBundleState(const sptr<NotificationBundleOption>& bundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled, ErrCode& result);
-    void UpdateHfpStateForInfos(std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
     bool CheckHfpState(const std::string &bluetoothAddress);
     std::vector<sptr<NotificationBundleOption>>::iterator FindBundleInCache(
         const sptr<NotificationBundleOption> &bundleOption);
