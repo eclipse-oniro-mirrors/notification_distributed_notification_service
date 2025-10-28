@@ -191,6 +191,14 @@ public:
     std::string GetBundleLabel(const std::string& bundleName);
 
     bool IsAncoApp(const std::string &bundleName, int32_t uid);
+
+    /**
+     * @brief Determine whether the application is an atomic service based on the bundle name and userId.
+     * @param bundleName Bundle name.
+     * @param userId User id.
+     * @return Returns true if the application is an atomic service; returns false otherwise.
+     */
+    bool IsAtomicServiceByBundle(const std::string& bundleName, const int32_t userId);
 private:
     void Connect();
     void Disconnect();

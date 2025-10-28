@@ -727,6 +727,14 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     }
 
     auto slotReminderMode = slot->GetReminderMode();
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), userId);
+    uint32_t notificationControlFlags = request->GetNotificationControlFlags();
+    if (((notificationControlFlags & NotificationConstant::ReminderFlag::SA_SELF_BANNER_FLAG) != 0) &&
+        BundleManagerHelper::GetInstance()->IsAtomicServiceByBundle(request->GetOwnerBundleName(), userId) &&
+        !request->GetCreatorBundleName().empty() && request->IsAgentNotification()) {
+        slotReminderMode = slotReminderMode |= NotificationConstant::ReminderFlag::BANNER_FLAG;
+    }
     UpdateScreenReminderFlag(slotReminderMode, slotType);
     if ((slotReminderMode & NotificationConstant::ReminderFlag::SOUND_FLAG) != 0) {
         request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, true);
