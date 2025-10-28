@@ -788,6 +788,12 @@ void ProcessExtensionSubCreation(napi_env env, void* data)
         return;
     }
     auto* asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings*>(data);
+    
+    if (asynccallbackinfo->info.errorCode != ERR_OK) {
+        NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
+        return;
+    }
+    
     CreateExtensionSub(asynccallbackinfo);
     ErrCode errCode = asynccallbackinfo->info.errorCode;
     if (errCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
@@ -847,12 +853,6 @@ napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_
 napi_value NapiNotificationExtensionOpenSubscriptionSettings(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("start subscribe settings");
-    ErrCode permRet = NotificationHelper::CanOpenSubscribeSettings();
-    if (permRet != ERR_OK) {
-        ANS_LOGE("OpenSettings call failed, err=%{public}d", permRet);
-        Common::NapiThrow(env, ErrorToExternal(permRet));
-        return Common::NapiGetUndefined(env);
-    }
 
     OpenSettingsParams params {};
     if (ParseOpenSettingsParameters(env, info, params) == nullptr) {
@@ -873,7 +873,13 @@ napi_value NapiNotificationExtensionOpenSubscriptionSettings(napi_env env, napi_
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "openSubscribeSettings", NAPI_AUTO_LENGTH, &resourceName);
 
-    auto createExtension = [](napi_env, void*) {};
+    auto createExtension = [](napi_env env, void* data) {
+        ANS_LOGD("openSubscribeSettings work execute.");
+        AsyncCallbackInfoOpenSettings *asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings *>(data);
+        if (asynccallbackinfo) {
+            asynccallbackinfo->info.errorCode = NotificationHelper::CanOpenSubscribeSettings();
+        }
+    };
     auto jsCb = [](napi_env env, napi_status, void* data) {
         ProcessExtensionSubCreation(env, data);
     };
