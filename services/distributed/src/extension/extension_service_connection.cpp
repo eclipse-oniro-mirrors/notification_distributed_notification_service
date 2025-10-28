@@ -17,6 +17,8 @@
 #include "extension_service_connection.h"
 #include "extension_service_connection_service.h"
 #include "extension_service_connection_timer_info.h"
+#include "extension_service.h"
+#include "notification_analytics_util.h"
 #include "notification_helper.h"
 #include "time_service_client.h"
 
@@ -33,9 +35,9 @@
 namespace OHOS {
 namespace Notification {
 namespace {
-    const int64_t MS_PER_SECOND = 1000;
-    const uint32_t FREEZE_PREPARE_TIME = 10;
-    const uint32_t DEFAULT_DISCONNECT_DELAY_TIME = 1800;  //default: 30m
+constexpr const int64_t MS_PER_SECOND = 1000;
+constexpr const uint32_t FREEZE_PREPARE_TIME = 10;
+constexpr const uint32_t DEFAULT_DISCONNECT_DELAY_TIME = 1800;  //default: 30m
 }
 uint32_t ExtensionServiceConnection::DISCONNECT_DELAY_TIME = DEFAULT_DISCONNECT_DELAY_TIME;
 
@@ -56,12 +58,21 @@ ExtensionServiceConnection::ExtensionServiceConnection(const ExtensionSubscriber
         ANS_LOGE("null TimeServiceClient");
         return;
     }
-    auto timerInfoFreeze = std::make_shared<ExtensionServiceConnectionTimerInfo>([&] {
-        Freeze();
+    wptr<ExtensionServiceConnection> wThis = this;
+    auto timerInfoFreeze = std::make_shared<ExtensionServiceConnectionTimerInfo>([wThis] {
+        sptr<ExtensionServiceConnection> sThis = wThis.promote();
+        if (!sThis) {
+            return;
+        }
+        sThis->Freeze();
     });
     timerIdFreeze_ = timerClient->CreateTimer(timerInfoFreeze);
-    auto timerInfoDisconnect = std::make_shared<ExtensionServiceConnectionTimerInfo>([&] {
-        Disconnect();
+    auto timerInfoDisconnect = std::make_shared<ExtensionServiceConnectionTimerInfo>([wThis] {
+        sptr<ExtensionServiceConnection> sThis = wThis.promote();
+        if (!sThis) {
+            return;
+        }
+        sThis->Disconnect();
     });
     timerIdDisconnect_ = timerClient->CreateTimer(timerInfoDisconnect);
 }
@@ -130,8 +141,15 @@ void ExtensionServiceConnection::NotifyOnReceiveMessage(const sptr<NotificationR
         if (sThis->proxy_ == nullptr) {
             ANS_LOGE("null proxy_");
         } else {
-            ErrCode result = sThis->proxy_->OnReceiveMessage(notificationRequest);
-            ANS_LOGD("Notify NotifyOnReceiveMessage result %{public}d", result);
+            int32_t retResult = 0;
+            ErrCode callResult = sThis->proxy_->OnReceiveMessage(notificationRequest, retResult);
+            ANS_LOGD("Notify NotifyOnReceiveMessage callResult %{public}d retResult %{public}d", callResult, retResult);
+            std::string message = sThis->subscriberInfo_.bundleName + ", " +
+                std::to_string(sThis->subscriberInfo_.uid) +
+                " receive message " + notificationRequest->GetNotificationHashCode();
+            AppendMessage(message, callResult, retResult);
+            NotificationExtensionService::GetInstance().SendHaReport(
+                EventSceneId::SCENE_27, 0, EventBranchId::BRANCH_8, message);
         }
         sThis->PrepareFreeze();
         sThis->PrepareDisconnect();
@@ -176,8 +194,15 @@ void ExtensionServiceConnection::NotifyOnCancelMessages(const std::shared_ptr<st
         if (sThis->proxy_ == nullptr) {
             ANS_LOGE("null proxy_");
         } else {
-            ErrCode result = sThis->proxy_->OnCancelMessages(*hashCodes);
-            ANS_LOGD("Notify OnCancelMessages result %{public}d", result);
+            int32_t retResult = 0;
+            ErrCode callResult = sThis->proxy_->OnCancelMessages(*hashCodes, retResult);
+            ANS_LOGD("Notify OnCancelMessages callResult %{public}d retResult %{public}d", callResult, retResult);
+            std::string message = sThis->subscriberInfo_.bundleName + ", " +
+                std::to_string(sThis->subscriberInfo_.uid) +
+                " cancel message size " + std::to_string(hashCodes->size());
+            AppendMessage(message, callResult, retResult);
+            NotificationExtensionService::GetInstance().SendHaReport(
+                EventSceneId::SCENE_27, 0, EventBranchId::BRANCH_9, message);
         }
         sThis->PrepareFreeze();
         sThis->PrepareDisconnect();
@@ -197,6 +222,9 @@ void ExtensionServiceConnection::OnAbilityConnectDone(
     if (proxy_ == nullptr) {
         ANS_LOGE("failed to create NotificationSubscriberProxy!");
     }
+    std::string message = subscriberInfo_.bundleName + ", " + std::to_string(subscriberInfo_.uid) + " connect";
+    NotificationExtensionService::GetInstance().SendHaReport(
+        EventSceneId::SCENE_27, 0, EventBranchId::BRANCH_10, message);
     GetPid();
 
     for (auto& message : messages_) {
@@ -389,7 +417,7 @@ void ExtensionServiceConnection::HandleDisconnectedState()
     }
     proxy_ = nullptr;
     if (onDisconnected_) {
-        ANS_LOGE("call onDisconnected %{public}s", subscriberInfo_.Dump().c_str());
+        ANS_LOGD("call onDisconnected %{public}s", subscriberInfo_.Dump().c_str());
         onDisconnected_(subscriberInfo_);
         onDisconnected_ = nullptr;
     }
@@ -401,6 +429,17 @@ void ExtensionServiceConnection::OnRemoteDied(const wptr<IRemoteObject> &remote)
     std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
     state_ = ExtensionServiceConnectionState::DISCONNECTED;
     Close();
+}
+
+void ExtensionServiceConnection::AppendMessage(std::string& message, ErrCode callResult, int32_t retResult)
+{
+    if (callResult != ERR_OK) {
+        message += " failed with callResult " + std::to_string(callResult);
+    } else if (retResult != ERR_OK) {
+        message += " failed with retResult " + std::to_string(retResult);
+    } else {
+        message += " OK";
+    }
 }
 }
 }

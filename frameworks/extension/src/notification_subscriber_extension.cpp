@@ -55,14 +55,18 @@ void NotificationSubscriberExtension::OnDestroy()
     ANS_LOGD("OnDestroy called");
 }
 
-void NotificationSubscriberExtension::OnReceiveMessage(std::shared_ptr<NotificationInfo> info)
+NotificationSubscriberExtensionResult NotificationSubscriberExtension::OnReceiveMessage(
+    std::shared_ptr<NotificationInfo> info)
 {
     ANS_LOGD("OnReceiveMessage called");
+    return NotificationSubscriberExtensionResult::OK;
 }
 
-void NotificationSubscriberExtension::OnCancelMessages(std::shared_ptr<std::vector<std::string>> hashCodes)
+NotificationSubscriberExtensionResult NotificationSubscriberExtension::OnCancelMessages(
+    std::shared_ptr<std::vector<std::string>> hashCodes)
 {
     ANS_LOGD("OnCancelMessages called");
+    return NotificationSubscriberExtensionResult::OK;
 }
 
 }  // namespace Notification

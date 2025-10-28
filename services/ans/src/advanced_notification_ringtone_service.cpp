@@ -119,6 +119,13 @@ void AdvancedNotificationService::ClearOverTimeRingToneInfo()
             NotificationPreferences::GetInstance()->GetAllCloneRingtoneInfo(userId, cloneRingtoneInfos);
             SystemSoundHelper::GetInstance()->RemoveCustomizedTones(cloneRingtoneInfos);
             NotificationPreferences::GetInstance()->DeleteAllCloneRingtoneInfo(userId);
+
+            // clear dh data
+            cloneRingtoneInfos.clear();
+            NotificationPreferences::GetInstance()->GetAllCloneRingtoneInfo(ZERO_USERID, cloneRingtoneInfos);
+            SystemSoundHelper::GetInstance()->RemoveCustomizedTones(cloneRingtoneInfos);
+            NotificationPreferences::GetInstance()->DeleteAllCloneRingtoneInfo(ZERO_USERID);
+            NotificationPreferences::GetInstance()->SetCloneTimeStamp(userId, 0);
             ANS_LOGI("Clear overtime ringinfo %{public}d", userId);
         }),
             ffrt::task_attr().name("ringtone").delay(DEL_TASK_DELAY));

@@ -18,6 +18,7 @@
 #include <functional>
 #include <gtest/gtest.h>
 #include "ans_ut_constant.h"
+#include "ans_log_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -26,6 +27,7 @@ bool g_isNonBundleName = false;
 bool g_isEnable = true;
 bool g_setBundleInfoEnabled = false;
 bool g_getBundleInfoFailed = false;
+bool g_isNeedHapModuleInfos = false;
 }
 
 void MockSetBundleInfoFailed(bool getFail)
@@ -46,6 +48,11 @@ void MockIsNonBundleName(bool isNonBundleName)
 void MockDistributedNotificationEnabled(bool isEnable)
 {
     g_isEnable = isEnable;
+}
+
+void MockIsNeedHapModuleInfos(bool isNeed)
+{
+    g_isNeedHapModuleInfos = isNeed;
 }
 }
 }
@@ -103,6 +110,23 @@ bool BundleMgrProxy::GetBundleInfos(const BundleFlag  flags, std::vector<BundleI
         return true;
     }
     return false;
+}
+
+ErrCode BundleMgrProxy::GetBundleInfoV9(
+    const std::string& bundleName, int32_t flags, BundleInfo& bundleInfo, int32_t userId)
+{
+    if (Notification::g_getBundleInfoFailed) {
+        return -1;
+    }
+    if (Notification::g_isNeedHapModuleInfos) {
+        HapModuleInfo hapModuleInfo;
+        ExtensionAbilityInfo extensionInfo;
+        extensionInfo.type = AppExecFwk::ExtensionAbilityType::NOTIFICATION_SUBSCRIBER;
+        extensionInfo.bundleName = "test_bundle";
+        hapModuleInfo.extensionInfos.push_back(extensionInfo);
+        bundleInfo.hapModuleInfos.push_back(hapModuleInfo);
+    }
+    return ERR_OK;
 }
 } // namespace AppExecFwk
 } // namespace OHOS

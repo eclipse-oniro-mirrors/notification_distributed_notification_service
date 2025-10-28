@@ -146,6 +146,43 @@ public:
         NotificationPreferencesInfo::SilentReminderInfo &silentReminderInfo);
 
     /**
+     * @brief Put priority notification enable into disturbe DB.
+     *
+     * @param enabled Indicates to whether to enabled.
+     * @return Return true on success, false on failure.
+     */
+    bool PutPriorityEnabled(const NotificationConstant::SWITCH_STATE &enabled);
+
+    /**
+     * @brief Put priority notification enable by bundle into disturbe DB.
+     *
+     * @param bundleName Indicates bundle name.
+     * @param bundleUid Indicates bundle uid.
+     * @param enabled Indicates to whether to enabled.
+     * @return Return true on success, false on failure.
+     */
+    bool PutPriorityEnabledForBundle(
+        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const NotificationConstant::SWITCH_STATE &enabled);
+
+    /**
+     * @brief Get priority notification enable into disturbe DB.
+     *
+     * @param enabled Indicates to whether to enabled.
+     * @return Return true on success, false on failure.
+     */
+    bool GetPriorityEnabled(NotificationConstant::SWITCH_STATE &enabled);
+
+    /**
+     * @brief Get priority notification enable by bundle into disturbe DB.
+     *
+     * @param bundleInfo Indicates bundle info.
+     * @param enabled Indicates to whether to enabled.
+     * @return Return true on success, false on failure.
+     */
+    bool GetPriorityEnabledForBundle(
+        const NotificationPreferencesInfo::BundleInfo &bundleInfo, NotificationConstant::SWITCH_STATE &enabled);
+
+    /**
      * @brief Put distributed enable notification in the of  bundle into disturbe DB.
      *
      * @param deviceType Indicates device type.
@@ -437,7 +474,7 @@ public:
     bool IsRingtoneKey(const std::string &bundleKey, const std::string &key) const;
     void ParseRingtoneFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo,
         const std::pair<std::string, std::string> &entry);
-    bool GetCloneTimeStamp(int64_t& timestamp);
+    bool GetCloneTimeStamp(const int32_t userId, int64_t& timestamp);
     bool SetCloneTimeStamp(const int32_t &userId, const int64_t& timestamp);
     bool DelAllCloneRingtoneInfo(const int32_t &userId);
     bool GetAllCloneRingtoneInfo(const int32_t &userId, std::vector<std::string>& ringInfoJson);

@@ -986,6 +986,7 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["groupName"]         = groupName_;
     jsonObject["label"]             = label_;
     jsonObject["classification"]    = classification_;
+    jsonObject["priorityNotificationType"] = priorityNotificationType_;
 
     jsonObject["slotType"]       = static_cast<int32_t>(slotType_);
     jsonObject["notificationSlotType"] = static_cast<int32_t>(slotType_);
@@ -1285,6 +1286,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteString(distributedHashCode_)) {
         ANS_LOGE("Failed to write distributedHashCode");
+        return false;
+    }
+
+    if (!parcel.WriteString(priorityNotificationType_)) {
+        ANS_LOGE("Failed to write priority notification type");
         return false;
     }
 
@@ -1786,6 +1792,13 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         return false;
     }
 
+    std::string tempPriorityType;
+    if (!parcel.ReadString(tempPriorityType)) {
+        ANS_LOGE("Failed to read distributedHashCode");
+        return false;
+    }
+    SetPriorityNotificationType(tempPriorityType);
+
     int32_t slotTypeValue = parcel.ReadInt32();
     if (slotTypeValue < 0 ||
         slotTypeValue >= static_cast<int>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
@@ -2223,6 +2236,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->visiblenessType_ = other.visiblenessType_;
     this->badgeStyle_ = other.badgeStyle_;
     this->notificationContentType_ = other.notificationContentType_;
+    this->priorityNotificationType_ = other.priorityNotificationType_;
 }
 
 void NotificationRequest::CopyOther(const NotificationRequest &other)
@@ -2480,8 +2494,19 @@ void NotificationRequest::ConvertJsonToString(NotificationRequest *target, const
         target->creatorBundleName_ = jsonObject.at("creatorBundleName").get<std::string>();
     }
 
+    SubConvertJsonToString(target, jsonObject);
+}
+
+void NotificationRequest::SubConvertJsonToString(NotificationRequest *target, const nlohmann::json &jsonObject)
+{
+    const auto &jsonEnd = jsonObject.cend();
     if (jsonObject.find("distributedHashCode") != jsonEnd && jsonObject.at("distributedHashCode").is_string()) {
         target->distributedHashCode_ = jsonObject.at("distributedHashCode").get<std::string>();
+    }
+
+    if (jsonObject.find("priorityNotificationType") != jsonEnd &&
+        jsonObject.at("priorityNotificationType").is_string()) {
+        target->SetPriorityNotificationType(jsonObject.at("priorityNotificationType").get<std::string>());
     }
 }
 
@@ -3314,6 +3339,42 @@ void NotificationRequest::SetFlagBit(
             ANS_LOGE("unknow bit");
             break;
     }
+}
+
+void NotificationRequest::SetPriorityNotificationType(std::string priorityNotificationType)
+{
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    if (priorityTypeList_.empty()) {
+        priorityTypeList_.push_back(PriorityNotificationType::OTHER);
+        priorityTypeList_.push_back(PriorityNotificationType::PRIMARY_CONTACT);
+        priorityTypeList_.push_back(PriorityNotificationType::AT_ME);
+        priorityTypeList_.push_back(PriorityNotificationType::URGENT_MESSAGE);
+        priorityTypeList_.push_back(PriorityNotificationType::SCHEDULE_REMINDER);
+        priorityTypeList_.push_back(PriorityNotificationType::PAYMENT_DUE);
+        priorityTypeList_.push_back(PriorityNotificationType::TRANSACTION_ALERT);
+        priorityTypeList_.push_back(PriorityNotificationType::EXPRESS_PROGRESS);
+        priorityTypeList_.push_back(PriorityNotificationType::MISS_CALL);
+        priorityTypeList_.push_back(PriorityNotificationType::TRAVEL_ALERT);
+        priorityTypeList_.push_back(PriorityNotificationType::ACCOUNT_ALERT);
+        priorityTypeList_.push_back(PriorityNotificationType::APPOINTMENT_REMINDER);
+        priorityTypeList_.push_back(PriorityNotificationType::TRAFFIC_NOTICE);
+        priorityTypeList_.push_back(PriorityNotificationType::KEY_PROGRESS);
+        priorityTypeList_.push_back(PriorityNotificationType::PUBLIC_EVENT);
+        priorityTypeList_.push_back(PriorityNotificationType::IOT_WARNING);
+    }
+    auto iter = std::find(priorityTypeList_.cbegin(), priorityTypeList_.cend(), priorityNotificationType);
+    if (iter == priorityTypeList_.cend()) {
+        ANS_LOGE("unknow priorityNotificationType %{public}s", priorityNotificationType.c_str());
+        priorityNotificationType_ = PriorityNotificationType::OTHER;
+        return;
+    }
+    priorityNotificationType_ = priorityNotificationType;
+#endif
+}
+
+std::string NotificationRequest::GetPriorityNotificationType() const
+{
+    return priorityNotificationType_;
 }
 }  // namespace Notification
 }  // namespace OHOS

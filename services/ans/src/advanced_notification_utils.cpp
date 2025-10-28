@@ -1830,12 +1830,49 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleO
             return nullptr;
         }
     } else {
-        if (actualUid != bundleOption->GetUid()) {
-            ANS_LOGE("UID mismatch: expected %{public}d, actual %{public}d for bundle %{public}s",
-                     bundleOption->GetUid(), actualUid, bundleOption->GetBundleName().c_str());
+        std::string actualBundleName = bundleManager->GetBundleNameByUid(bundleOption->GetUid());
+        if (actualBundleName != bundleOption->GetBundleName()) {
+            ANS_LOGE("Bundle name mismatch: expected %{public}s, actual %{public}s",
+                actualBundleName.c_str(), bundleOption->GetBundleName().c_str());
             return nullptr;
         }
         validBundleOption = bundleOption;
+    }
+    validBundleOption->SetAppIndex(BundleManagerHelper::GetInstance()->GetAppIndexByUid(validBundleOption->GetUid()));
+    return validBundleOption;
+}
+
+sptr<NotificationBundleOption> AdvancedNotificationService::GenerateCloneValidBundleOption(
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("bundleOption or bundle name is invalid!");
+        return nullptr;
+    }
+
+    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+    if (bundleManager == nullptr) {
+        return nullptr;
+    }
+
+    int32_t activeUserId = -1;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
+        ANS_LOGE("Failed to get active user id!");
+        return nullptr;
+    }
+
+    int32_t actualUid = bundleManager->GetDefaultUidByBundleName(bundleOption->GetBundleName(), activeUserId);
+    if (actualUid < 0) {
+        ANS_LOGE("Bundle name %{public}s does not exist in userId %{public}d",
+            bundleOption->GetBundleName().c_str(), activeUserId);
+        return nullptr;
+    }
+
+    sptr<NotificationBundleOption> validBundleOption = nullptr;
+    validBundleOption = new (std::nothrow) NotificationBundleOption(bundleOption->GetBundleName(), actualUid);
+    if (validBundleOption == nullptr) {
+        ANS_LOGE("Failed to create CloneNotificationBundleOption instance");
+        return nullptr;
     }
     return validBundleOption;
 }
@@ -2019,8 +2056,9 @@ sptr<NotificationRingtoneInfo> GetRingtoneInfoForClone(NotificationRingtoneInfo 
 }
 
 void AdvancedNotificationService::UpdateCloneBundleInfoForRingtone(NotificationRingtoneInfo ringtoneInfo,
-    const sptr<NotificationBundleOption> bundle, const NotificationCloneBundleInfo cloneBundleInfo)
+    int32_t userId, const sptr<NotificationBundleOption> bundle, const NotificationCloneBundleInfo cloneBundleInfo)
 {
+    ANS_LOGI("Update ring %{public}s, %{public}d", ringtoneInfo.GetRingtoneUri().c_str(), userId);
     if (ringtoneInfo.GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT) {
         sptr<NotificationRingtoneInfo> oldRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
         auto result = NotificationPreferences::GetInstance()->GetRingtoneInfoByBundle(bundle, oldRingtoneInfo);
@@ -2033,11 +2071,6 @@ void AdvancedNotificationService::UpdateCloneBundleInfoForRingtone(NotificationR
     }
 
     // clear last clone save ringtone info by current clone ringtone info, that last info is not set.
-    int32_t userId = -1;
-    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
-        ANSR_LOGW("Failed to get active user id!");
-        return;
-    }
     NotificationRingtoneInfo lastCloneRingtone;
     NotificationPreferences::GetInstance()->GetCloneRingtoneInfo(userId, cloneBundleInfo, lastCloneRingtone);
     if (lastCloneRingtone.GetRingtoneType() != NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT) {
@@ -2058,18 +2091,25 @@ void AdvancedNotificationService::UpdateCloneBundleInfoForRingtone(NotificationR
         sptr<NotificationRingtoneInfo> ringtoneInfoPtr = GetRingtoneInfoForClone(ringtoneInfo);
         sptr<NotificationRingtoneInfo> oldRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
         auto result = NotificationPreferences::GetInstance()->GetRingtoneInfoByBundle(bundle, oldRingtoneInfo);
-        if (result == ERR_OK && (
-            oldRingtoneInfo->GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL ||
-            oldRingtoneInfo->GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE)) {
+        if (result == ERR_OK) {
+            if (oldRingtoneInfo->GetRingtoneFileName() == ringtoneInfo.GetRingtoneFileName() &&
+                oldRingtoneInfo->GetRingtoneType() == ringtoneInfo.GetRingtoneType() &&
+                oldRingtoneInfo->GetRingtoneUri() == ringtoneInfo.GetRingtoneUri() &&
+                oldRingtoneInfo->GetRingtoneTitle() == ringtoneInfo.GetRingtoneTitle()) {
+                ANS_LOGI("Same Clone : %{public}s %{public}s.", bundle->GetBundleName().c_str(),
+                    oldRingtoneInfo->GetRingtoneUri().c_str());
+                return;
+            }
             SystemSoundHelper::GetInstance()->RemoveCustomizedTone(oldRingtoneInfo);
         }
 
-        ANSR_LOGW("Clone : %{public}d %{public}s", result, oldRingtoneInfo->GetRingtoneUri().c_str());
+        ANS_LOGW("Clone : %{public}d %{public}s", result, oldRingtoneInfo->GetRingtoneUri().c_str());
         NotificationPreferences::GetInstance()->SetRingtoneInfoByBundle(bundle, ringtoneInfoPtr);
     }
 }
 
-void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo)
+void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo,
+    int32_t userId)
 {
     ANS_LOGI("Event bundle update %{public}s.", cloneBundleInfo.Dump().c_str());
     if (notificationSvrQueue_ == nullptr) {
@@ -2081,7 +2121,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
         ringtoneInfo = (*cloneBundleInfo.GetRingtoneInfo());
     }
 
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&, ringtoneInfo, cloneBundleInfo]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&, userId, ringtoneInfo, cloneBundleInfo]() {
         sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
             cloneBundleInfo.GetBundleName(), cloneBundleInfo.GetUid());
         if (bundle == nullptr) {
@@ -2090,7 +2130,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
         bundle->SetAppIndex(cloneBundleInfo.GetAppIndex());
         UpdateCloneBundleInfoForEnable(cloneBundleInfo, bundle);
         UpdateCloneBundleInfoFoSlot(cloneBundleInfo, bundle);
-        UpdateCloneBundleInfoForRingtone(ringtoneInfo, bundle, cloneBundleInfo);
+        UpdateCloneBundleInfoForRingtone(ringtoneInfo, userId, bundle, cloneBundleInfo);
 
         if (NotificationPreferences::GetInstance()->SetShowBadge(bundle, cloneBundleInfo.GetIsShowBadge()) == ERR_OK) {
             HandleBadgeEnabledChanged(bundle, cloneBundleInfo.GetIsShowBadge());
@@ -2101,27 +2141,47 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
             bundle, cloneBundleInfo.GetHasPoppedDialog()) != ERR_OK) {
             ANS_LOGW("Set hasPoped failed.");
         }
-        if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionInfos(
-            bundle, cloneBundleInfo.GetExtensionSubscriptionInfos()) == ERR_OK) {
-            // handle bundle subscription infos changed
-        } else {
-            ANS_LOGW("Set subscription infos failed.");
-        }
         NotificationConstant::SWITCH_STATE state = cloneBundleInfo.GetEnabledExtensionSubscription();
-        if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionEnabled(bundle, state) != ERR_OK) {
-            ANS_LOGW("Set subscription enabled failed.");
+        if (state != NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF) {
+            UpdateCloneBundleInfoForExtensionSubscription(cloneBundleInfo, bundle, state);
         }
-        if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionBundles(
-            bundle, cloneBundleInfo.GetExtensionSubscriptionBundles()) == ERR_OK) {
-            // handle bundle subscription bundles changed
-        } else {
-            ANS_LOGW("Set subscription bundles failed.");
-        }
-
         UpdateCloneBundleInfoFoSilentReminder(cloneBundleInfo, bundle);
         NotificationAnalyticsUtil::ReportCloneInfo(cloneBundleInfo);
         EnsureExtensionServiceLoadedAndSubscribed(bundle, cloneBundleInfo.GetExtensionSubscriptionBundles());
     }));
+}
+
+void AdvancedNotificationService::UpdateCloneBundleInfoForExtensionSubscription(
+    const NotificationCloneBundleInfo &cloneBundleInfo,
+    const sptr<NotificationBundleOption> &bundle,
+    NotificationConstant::SWITCH_STATE state)
+{
+    sptr<NotificationBundleOption> processBundle = GenerateCloneValidBundleOption(bundle);
+    if (processBundle == nullptr) {
+        return;
+    }
+
+    if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionEnabled(processBundle, state) != ERR_OK) {
+        ANS_LOGW("Set subscription enabled failed.");
+    }
+
+    if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionInfos(
+        processBundle, cloneBundleInfo.GetExtensionSubscriptionInfos()) != ERR_OK) {
+        ANS_LOGW("Set subscription infos failed.");
+    }
+
+    std::vector<sptr<NotificationBundleOption>> grantBundles;
+    for (const auto grantBundle : cloneBundleInfo.GetExtensionSubscriptionBundles()) {
+        sptr<NotificationBundleOption> processGrantBundle = GenerateCloneValidBundleOption(grantBundle);
+        if (processGrantBundle == nullptr) {
+            continue;
+        }
+        grantBundles.emplace_back(processGrantBundle);
+    }
+    if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionBundles(
+        processBundle, grantBundles) != ERR_OK) {
+        ANS_LOGW("Set subscription bundles failed.");
+    }
 }
 
 void AdvancedNotificationService::UpdateCloneBundleInfoForEnable(

@@ -33,6 +33,7 @@ SystemSoundHelper::~SystemSoundHelper()
 #ifdef PLAYER_FRAMEWORK_ENABLE
 
 static const int32_t REMOVE_SUCCESS_COUNT = 1;
+static const int32_t MAX_RETRY_TIME = 2;
 static const uint64_t TASK_DELAY = 2 * 1000 * 1000;
 
 void SystemSoundHelper::Connect()
@@ -42,7 +43,7 @@ void SystemSoundHelper::Connect()
     }
 }
 
-int32_t SystemSoundHelper::InvokeRemoveCustomizedTone(const std::string uri, bool retry)
+int32_t SystemSoundHelper::InvokeRemoveCustomizedTone(const std::string uri, int32_t retry)
 {
     if (uri.empty()) {
         return REMOVE_SUCCESS_COUNT;
@@ -62,12 +63,15 @@ int32_t SystemSoundHelper::InvokeRemoveCustomizedTone(const std::string uri, boo
 
 void SystemSoundHelper::RemoveCustomizedTone(const std::string uri)
 {
-    if (InvokeRemoveCustomizedTone(uri) != REMOVE_SUCCESS_COUNT) {
-        std::function<void()> retryTask = [uri]() {
-            SystemSoundHelper::GetInstance()->InvokeRemoveCustomizedTone(uri, true);
-        };
-        ffrt::submit(retryTask, ffrt::task_attr().delay(TASK_DELAY));
-    }
+    std::function<void()> retryTask = [uri]() {
+        for (int32_t i = 0; i < MAX_RETRY_TIME; i++) {
+            auto result = SystemSoundHelper::GetInstance()->InvokeRemoveCustomizedTone(uri, i);
+            if (result == REMOVE_SUCCESS_COUNT) {
+                break;
+            }
+        }
+    };
+    ffrt::submit(retryTask, ffrt::task_attr().delay(TASK_DELAY));
 }
 
 void SystemSoundHelper::RemoveCustomizedTone(sptr<NotificationRingtoneInfo> ringtoneInfo)
@@ -121,24 +125,24 @@ void SystemSoundHelper::RemoveCustomizedTones(std::vector<NotificationRingtoneIn
         }
     }
 
-    auto results = InvokeRemoveCustomizedTones(uris);
-    if (results.empty()) {
-        return;
-    }
-
-    std::vector<std::string> failedUris;
-    for (auto& item : results) {
-        if (item.second != Media::SystemSoundError::ERROR_OK) {
-            failedUris.push_back(item.first);
+    std::function<void()> retryTask = [uris]() {
+        auto results = SystemSoundHelper::GetInstance()->InvokeRemoveCustomizedTones(uris);
+        if (results.empty()) {
+            return;
         }
-    }
 
-    if (!failedUris.empty()) {
-        std::function<void()> retryTask = [failedUris]() {
+        std::vector<std::string> failedUris;
+        for (auto& item : results) {
+            if (item.second != Media::SystemSoundError::ERROR_OK) {
+                failedUris.push_back(item.first);
+            }
+        }
+
+        if (!failedUris.empty()) {
             SystemSoundHelper::GetInstance()->InvokeRemoveCustomizedTones(failedUris, true);
-        };
-        ffrt::submit(retryTask, ffrt::task_attr().delay(TASK_DELAY));
-    }
+        }
+    };
+    ffrt::submit(retryTask, ffrt::task_attr().delay(TASK_DELAY));
 }
 #else
 void SystemSoundHelper::RemoveCustomizedTone(const std::string uri)

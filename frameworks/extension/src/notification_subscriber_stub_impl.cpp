@@ -19,7 +19,8 @@
 namespace OHOS {
 namespace Notification {
 
-ErrCode NotificationSubscriberStubImpl::OnReceiveMessage(const sptr<NotificationRequest>& notificationRequest)
+ErrCode NotificationSubscriberStubImpl::OnReceiveMessage(
+    const sptr<NotificationRequest>& notificationRequest, int32_t& retResult)
 {
     ANS_LOGD("OnReceiveMessage begin.");
     if (notificationRequest == nullptr) {
@@ -36,18 +37,18 @@ ErrCode NotificationSubscriberStubImpl::OnReceiveMessage(const sptr<Notification
         ANS_LOGE("ConvertNotificationRequest error");
         return ERR_INVALID_DATA;
     }
-    extension->OnReceiveMessage(param);
+    retResult = static_cast<int32_t>(extension->OnReceiveMessage(param));
     ANS_LOGI("OnReceiveMessage end successfully.");
     return ERR_OK;
 }
 
-ErrCode NotificationSubscriberStubImpl::OnCancelMessages(const std::vector<std::string>& hashCode)
+ErrCode NotificationSubscriberStubImpl::OnCancelMessages(const std::vector<std::string>& hashCode, int32_t& retResult)
 {
     ANS_LOGD("OnCancelMessages begin.");
     auto extension = extension_.lock();
     if (extension != nullptr) {
         std::shared_ptr<std::vector<std::string>> param = std::make_shared<std::vector<std::string>>(hashCode);
-        extension->OnCancelMessages(param);
+        retResult = static_cast<int32_t>(extension->OnCancelMessages(param));
         ANS_LOGI("OnCancelMessages end successfully.");
         return ERR_OK;
     }
@@ -63,7 +64,7 @@ std::shared_ptr<NotificationInfo> NotificationSubscriberStubImpl::ConvertNotific
         ANS_LOGE("null notificationInfo");
         return nullptr;
     }
-    notificationInfo->SetHashCode(notificationRequest->GetNotificationHashCode());
+    notificationInfo->SetHashCode(notificationRequest->GetBaseKey(""));
     notificationInfo->SetNotificationSlotType(notificationRequest->GetSlotType());
     auto content = notificationRequest->GetContent();
     if (content == nullptr) {

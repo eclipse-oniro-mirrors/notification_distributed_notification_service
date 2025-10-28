@@ -86,6 +86,7 @@ ohos_shared_library("notification") {
     "src/disable_notification.cpp",
     "src/display_badge.cpp",
     "src/distributed.cpp",
+    "src/priority.cpp",
     "src/disturb_mode.cpp",
     "src/enable_notification.cpp",
     "src/get_active.cpp",

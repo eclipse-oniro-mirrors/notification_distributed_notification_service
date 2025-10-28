@@ -156,6 +156,10 @@ public:
     MOCK_METHOD2(RegisterPushCallback, ErrCode(const sptr<IRemoteObject>&, const sptr<NotificationCheckRequest>&));
     MOCK_METHOD0(UnregisterPushCallback, ErrCode());
     MOCK_METHOD2(SetAdditionConfig, ErrCode(const std::string&, const std::string&));
+    MOCK_METHOD1(SetPriorityEnabled, ErrCode(const bool));
+    MOCK_METHOD2(SetPriorityEnabledByBundle, ErrCode(const sptr<NotificationBundleOption> &, const bool));
+    MOCK_METHOD1(IsPriorityEnabled, ErrCode(bool &));
+    MOCK_METHOD2(IsPriorityEnabledByBundle, ErrCode(const sptr<NotificationBundleOption> &, bool &));
     MOCK_METHOD3(SetDistributedEnabledByBundle,
         ErrCode(const sptr<NotificationBundleOption>&, const std::string&, bool));
     MOCK_METHOD2(SetDistributedBundleOption,

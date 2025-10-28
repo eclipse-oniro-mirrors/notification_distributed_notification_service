@@ -130,7 +130,6 @@ bool UnwrapArrayBundleOption(ani_env *env,
         return false;
     }
     ani_status status;
-    Notification::NotificationBundleOption option;
     ani_array optionArray = static_cast<ani_array>(arrayObj);
     ani_size length;
     status = env->Array_GetLength(optionArray, &length);
@@ -146,6 +145,7 @@ bool UnwrapArrayBundleOption(ani_env *env,
             ANS_LOGE("UnwrapArrayBundleOption: get bundleOptionRef failed, status = %{public}d", status);
             return false;
         }
+        Notification::NotificationBundleOption option;
         if (!UnwrapBundleOption(env, static_cast<ani_object>(optionRef), option)) {
             ANS_LOGE("UnwrapArrayBundleOption: get option status = %{public}d, index = %{public}d", status, i);
             return false;
@@ -166,6 +166,35 @@ bool WrapBundleOption(ani_env* env, const std::shared_ptr<BundleOption> &bundleO
     ani_class bundleCls = nullptr;
     if (!CreateClassObjByClassName(env, BUNDLE_OPTION_CLASSNAME, bundleCls, bundleObject) ||
         bundleCls == nullptr || bundleObject == nullptr) {
+        ANS_LOGE("WrapBundleOption: create BundleOption failed");
+        return false;
+    }
+    // bundle: string;
+    ani_string stringValue = nullptr;
+    if (ANI_OK != GetAniStringByString(env, bundleOption->GetBundleName(), stringValue)
+        || !CallSetter(env, bundleCls, bundleObject, "bundle", stringValue)) {
+        ANS_LOGE("WrapBundleOption: set bundle failed");
+        return false;
+    }
+    // uid?: int;
+    int32_t uid = bundleOption->GetUid();
+    SetPropertyOptionalByInt(env, bundleObject, "uid", uid);
+    ANS_LOGD("WrapBundleOption end");
+    return true;
+}
+
+bool WrapBundleOption(ani_env* env,
+    const sptr<BundleOption> &bundleOption, ani_object &bundleObject)
+{
+    ANS_LOGD("WrapBundleOption call");
+    if (env == nullptr || bundleOption == nullptr) {
+        ANS_LOGE("WrapBundleOption failed, has nullptr");
+        return false;
+    }
+    ani_class bundleCls = nullptr;
+    if (!CreateClassObjByClassName(env, "notification.NotificationCommonDef.BundleOptionInner",
+        bundleCls, bundleObject)
+        || bundleCls == nullptr || bundleObject == nullptr) {
         ANS_LOGE("WrapBundleOption: create BundleOption failed");
         return false;
     }
@@ -230,7 +259,6 @@ bool UnwrapArrayDistributedBundleOption(ani_env *env, ani_object arrayObj,
         return false;
     }
     ani_status status;
-    Notification::DistributedBundleOption option;
     ani_array optionArray = static_cast<ani_array>(arrayObj);
     ani_size length;
     status = env->Array_GetLength(optionArray, &length);
@@ -246,6 +274,7 @@ bool UnwrapArrayDistributedBundleOption(ani_env *env, ani_object arrayObj,
             ANS_LOGE("get optionRef failed, status = %{public}d", status);
             return false;
         }
+        Notification::DistributedBundleOption option;
         if (!UnwrapDistributedBundleOption(env, static_cast<ani_object>(optionRef), option)) {
             ANS_LOGE("get option status = %{public}d, index = %{public}d", status, i);
             return false;

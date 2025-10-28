@@ -147,10 +147,10 @@ private:
     ReminderDataShareHelper& operator=(ReminderDataShareHelper&&) = delete;
 
 private:
+    int8_t rdbVersion_ {0};  // calendar rdb version
     int32_t curUserId_ {0};
     int32_t uid_ {0};  // calendar
     int32_t dataUid_ {0};  // calendardata
-    bool isNewRdbVer_ = false;  // is new calendar rdb version
     std::atomic<bool> insertTask_ {false};
     std::atomic<bool> updateTask_ {false};
     std::atomic<int64_t> insertTime_ {0};

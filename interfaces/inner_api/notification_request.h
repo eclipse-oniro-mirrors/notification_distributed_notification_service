@@ -99,6 +99,92 @@ public:
     };
 
     /**
+     * Indicates priority notification type
+     */
+    class PriorityNotificationType {
+    public:
+        /**
+         * Indicates non-priority notification
+         */
+        constexpr static const char* OTHER = "OTHER";
+
+        /**
+         * Indicates Priority contact
+         */
+        constexpr static const char* PRIMARY_CONTACT = "PRIMARY_CONTACT";
+
+        /**
+         * Indicates Someone @me
+         */
+        constexpr static const char* AT_ME = "AT_ME";
+
+        /**
+         * Indicates Urgent message
+         */
+        constexpr static const char* URGENT_MESSAGE = "URGENT_MESSAGE";
+
+        /**
+         * Indicates Schedule reminder
+         */
+        constexpr static const char* SCHEDULE_REMINDER = "SCHEDULE_REMINDER";
+
+        /**
+         * Indicates Payment due
+         */
+        constexpr static const char* PAYMENT_DUE = "PAYMENT_DUE";
+
+        /**
+         * Indicates Transaction alert
+         */
+        constexpr static const char* TRANSACTION_ALERT = "TRANSACTION_ALERT";
+
+        /**
+         * Indicates Express progress
+         */
+        constexpr static const char* EXPRESS_PROGRESS = "EXPRESS_PROGRESS";
+
+        /**
+         * Indicates Miss call
+         */
+        constexpr static const char* MISS_CALL = "MISS_CALL";
+
+        /**
+         * Indicates Travel alert
+         */
+        constexpr static const char* TRAVEL_ALERT = "TRAVEL_ALERT";
+
+        /**
+         * Indicates Account alert
+         */
+        constexpr static const char* ACCOUNT_ALERT = "ACCOUNT_ALERT";
+ 
+        /**
+         * Indicates Appointment reminder
+         */
+        constexpr static const char* APPOINTMENT_REMINDER = "APPOINTMENT_REMINDER";
+
+        /**
+         * Indicates Traffic notice
+         */
+        constexpr static const char* TRAFFIC_NOTICE = "TRAFFIC_NOTICE";
+
+        /**
+         * Indicates Key progress
+         */
+        constexpr static const char* KEY_PROGRESS = "KEY_PROGRESS";
+
+        /**
+         * Indicates Public event
+         */
+        constexpr static const char* PUBLIC_EVENT = "PUBLIC_EVENT";
+
+        /**
+         * Indicates Iot warning
+         */
+        constexpr static const char* IOT_WARNING = "IOT_WARNING";
+    };
+
+    /**
      * Indicates the classification of notifications for alarms or timers.
      */
     static const std::string CLASSIFICATION_ALARM;
@@ -1516,6 +1602,10 @@ public:
 
     std::string GetAppName() const;
 
+    void SetPriorityNotificationType(std::string priorityNotificationType);
+
+    std::string GetPriorityNotificationType() const;
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).
@@ -1562,6 +1652,7 @@ private:
     static void ConvertJsonToNum(NotificationRequest *target, const nlohmann::json &jsonObject);
     static void ConvertJsonToNumExt(NotificationRequest *target, const nlohmann::json &jsonObject);
     static void ConvertJsonToString(NotificationRequest *target, const nlohmann::json &jsonObject);
+    static void SubConvertJsonToString(NotificationRequest *target, const nlohmann::json &jsonObject);
     static void ConvertJsonToEnum(NotificationRequest *target, const nlohmann::json &jsonObject);
     static void ConvertJsonToBool(NotificationRequest *target, const nlohmann::json &jsonObject);
     static void ConvertJsonToBoolExt(NotificationRequest *target, const nlohmann::json &jsonObject);
@@ -1678,6 +1769,8 @@ private:
     std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> notificationFlagsOfDevices_ {};
 
     uint32_t publishDelayTime_ {0};
+    std::string priorityNotificationType_ {PriorityNotificationType::OTHER};
+    std::vector<std::string> priorityTypeList_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS

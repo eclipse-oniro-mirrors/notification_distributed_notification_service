@@ -1954,8 +1954,8 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledBySlot_00100, Functio
     enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     res = NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(
         slotType, "test", enableStatus);
-    bool enabled = enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
-        enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    bool enabled = (enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+        enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     ASSERT_EQ(res, ERR_OK);
     ASSERT_EQ(enabled, true);
 }
@@ -2780,7 +2780,7 @@ HWTEST_F(NotificationPreferencesTest, GetCloneTimeStamp_001, Function | SmallTes
     time = NotificationPreferences::GetInstance()->GetCloneTimeStamp();
     ASSERT_EQ(time, 123456);
 
-    NotificationPreferences::GetInstance()->cloneTimestamp = -1;
+    NotificationPreferences::GetInstance()->cloneTimestamp.clear();
     time = NotificationPreferences::GetInstance()->GetCloneTimeStamp();
     ASSERT_EQ(time, 123456);
 

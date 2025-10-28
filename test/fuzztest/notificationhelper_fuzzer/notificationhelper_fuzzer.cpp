@@ -135,19 +135,23 @@ public:
         FuzzNotificationSubscriber fuzzNotificationSub;
         std::shared_ptr<NotificationSubscriber> fuzzNotificationSubSptr =
             std::make_shared<FuzzNotificationSubscriber>();
+        std::shared_ptr<NotificationSubscriber> fuzzNotificationSubSptr2 =
+            std::make_shared<FuzzNotificationSubscriber>();
+        std::shared_ptr<NotificationSubscriber> fuzzNotificationSubSptr3 =
+            std::make_shared<FuzzNotificationSubscriber>();
         
         notificationHelper.SubscribeNotification(fuzzNotificationSub);
         notificationHelper.SubscribeNotification(fuzzNotificationSubSptr);
         notificationHelper.SubscribeNotificationSelf(fuzzNotificationSub);
-        notificationHelper.SubscribeNotificationSelf(fuzzNotificationSubSptr);
+        notificationHelper.SubscribeNotificationSelf(fuzzNotificationSubSptr3);
         
         sptr<NotificationSubscribeInfo> fuzzNotificationSubInfoSptr =
             ObjectBuilder<NotificationSubscribeInfo>::Build(fdp);
-        notificationHelper.SubscribeNotification(fuzzNotificationSubSptr, fuzzNotificationSubInfoSptr);
+        notificationHelper.SubscribeNotification(fuzzNotificationSubSptr2, fuzzNotificationSubInfoSptr);
         
         notificationHelper.UnSubscribeNotification(fuzzNotificationSub);
         notificationHelper.UnSubscribeNotification(fuzzNotificationSubSptr);
-        notificationHelper.UnSubscribeNotification(fuzzNotificationSubSptr, fuzzNotificationSubInfoSptr);
+        notificationHelper.UnSubscribeNotification(fuzzNotificationSubSptr2, fuzzNotificationSubInfoSptr);
         return true;
     }
 

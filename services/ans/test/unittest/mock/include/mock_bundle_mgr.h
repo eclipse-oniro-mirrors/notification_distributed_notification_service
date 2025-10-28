@@ -38,6 +38,8 @@ public:
     bool GetApplicationInfo(
         const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo) override;
     bool GetBundleInfos(const BundleFlag  flags, std::vector<BundleInfo> &bundleInfos, int32_t userId) override;
+    ErrCode GetBundleInfoV9(
+        const std::string& bundleName, int32_t flags, BundleInfo& bundleInfo, int32_t userId) override;
 };
 }  // namespace AppExecFwk
 
@@ -48,6 +50,8 @@ void MockIsNonBundleName(bool isNonBundleName);
 void MockDistributedNotificationEnabled(bool isEnable);
 
 void MockSetBundleInfoFailed(bool getFail);
+
+void MockIsNeedHapModuleInfos(bool isNeed);
 }  // namespace Notification
 }  // namespace OHOS
 

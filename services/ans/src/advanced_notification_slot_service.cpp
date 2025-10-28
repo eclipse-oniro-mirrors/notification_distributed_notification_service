@@ -38,6 +38,7 @@
 #include "advanced_notification_inline.h"
 #include "notification_config_parse.h"
 #include "notification_extension_wrapper.h"
+#include "notification_ai_extension_wrapper.h"
 #include "notification_analytics_util.h"
 #include "liveview_all_scenarios_extension_wrapper.h"
 
@@ -1416,6 +1417,25 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
         soundPermissionInfo_->needUpdateCache_ = true;
     }
 
+    ErrCode result = SyncAdditionConfig(key, value, message);
+    if (result != ERR_OK) {
+        return result;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = NotificationPreferences::GetInstance()->SetKvToDb(key, value, SUBSCRIBE_USER_INIT);
+    }));
+    notificationSvrQueue_->wait(handler);
+    ANS_LOGI("Set addition config result: %{public}d, key: %{public}s, value: %{public}s",
+        result, key.c_str(), value.c_str());
+    message.ErrorCode(result);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
+    return result;
+}
+
+ErrCode AdvancedNotificationService::SyncAdditionConfig(
+    const std::string &key, const std::string &value, HaMetaMessage &message)
+{
     bool isSyncConfig = (strcmp(key.c_str(), KEY_NAME) == 0 ||
         strcmp(key.c_str(), CTRL_LIST_KEY_NAME) == 0 || strcmp(key.c_str(), SWITCH_LIST_KEY_NAME) == 0);
     if (isSyncConfig) {
@@ -1430,17 +1450,18 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     }
 #endif
     }
-    ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance()->SetKvToDb(key, value, SUBSCRIBE_USER_INIT);
-    }));
-    notificationSvrQueue_->wait(handler);
-    ANS_LOGI("Set addition config result: %{public}d, key: %{public}s, value: %{public}s",
-        result, key.c_str(), value.c_str());
-    message.ErrorCode(result);
-    NotificationAnalyticsUtil::ReportModifyEvent(message);
-    return result;
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    if (key == PRIORITY_RULE_CONFIG_KEY) {
+        int32_t syncResult = NOTIFICATION_AI_EXTENSION_WRAPPER->SyncRules(value);
+        if (syncResult != NotificationAiExtensionWrapper::ErrorCode::ERR_OK) {
+            ANS_LOGE("Sync addition config result: %{public}d, key: %{public}s", syncResult, key.c_str());
+            message.ErrorCode(syncResult).Append(" Sync failed");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+            return syncResult;
+        }
+    }
+#endif
+    return ERR_OK;
 }
 
 bool AdvancedNotificationService::IsAgentRelationship(const std::string &agentBundleName,

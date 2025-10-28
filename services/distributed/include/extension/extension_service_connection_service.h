@@ -39,12 +39,12 @@ public:
 private:
     std::string GetConnectionKey(const ExtensionSubscriberInfo& subscriberInfo);
     void RemoveConnection(const ExtensionSubscriberInfo& subscriberInfo);
-    std::shared_ptr<ExtensionServiceConnection> GetConnection(
+    sptr<ExtensionServiceConnection> GetConnection(
         const std::shared_ptr<ExtensionSubscriberInfo> subscriberInfo);
 
 private:
-    ffrt::mutex mapLock_;
-    std::map<std::string, std::shared_ptr<ExtensionServiceConnection>> connectionMap_;
+    ffrt::recursive_mutex mapLock_;
+    std::map<std::string, sptr<ExtensionServiceConnection>> connectionMap_;
     std::function<void()> onAllConnectionsClosed_;
 };
 }

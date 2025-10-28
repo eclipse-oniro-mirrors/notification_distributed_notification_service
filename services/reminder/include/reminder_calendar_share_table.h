@@ -41,6 +41,7 @@ public:
     static constexpr const char* EXPIRED_CONTENT = "expiredContent";
     static constexpr const char* MAX_SCREEN_WANT_AGENT = "maxScreenWantAgent";
     static constexpr const char* CUSTOM_RING_URI = "customRingUri";
+    static constexpr const char* NEED_AGENT = "needAgent";
 
     static constexpr const char* PROXY = "datashareproxy://com.ohos.calendardata/CalendarAlerts";
     static constexpr const char* NAME = "com.ohos.calendar";

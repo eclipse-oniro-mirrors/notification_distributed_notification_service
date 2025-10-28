@@ -383,6 +383,42 @@ public:
     ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled);
 
     /**
+     * @brief Configuring Whether to allow sending priority notification.
+     *
+     * @param enableStatus Whether to allow sending priority notification.
+     * @return Returns configuring Whether to allow sending priority notification.
+     */
+    ErrCode SetPriorityEnabled(const NotificationConstant::SWITCH_STATE &enableStatus);
+
+    /**
+     * @brief Configuring Whether to allow sending priority notification by bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param enabled Whether to allow sending priority notification by bundle.
+     * @return Returns configuring Whether to allow sending priority notification by bundle.
+     */
+    ErrCode SetPriorityEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SWITCH_STATE &enabled);
+
+    /**
+     * @brief Query switch for sending priority notification.
+     *
+     * @param enabled Whether to allow sending priority notification.
+     * @return Returns configuring Whether to allow sending priority notification.
+     */
+    ErrCode IsPriorityEnabled(NotificationConstant::SWITCH_STATE &enabled);
+
+    /**
+     * @brief Query switch for sending priority notification by bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param enabled Whether to allow sending priority notification by bundle.
+     * @return Returns configuring Whether to allow sending priority notification by bundle.
+     */
+    ErrCode IsPriorityEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::SWITCH_STATE &enabled);
+
+    /**
      * @brief Get whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
      *
@@ -633,7 +669,7 @@ private:
     void SetDistributedEnabledForBundle(const NotificationPreferencesInfo::BundleInfo& bundleInfo);
 
 private:
-    int64_t cloneTimestamp = -1;
+    std::map<int32_t, int64_t> cloneTimestamp;
     static ffrt::mutex instanceMutex_;
     static std::shared_ptr<NotificationPreferences> instance_;
     NotificationPreferencesInfo preferencesInfo_ {};

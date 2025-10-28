@@ -166,6 +166,21 @@ void AdvancedNotificationService::SendEnableNotificationHiSysEvent(const sptr<No
     }
 }
 
+void AdvancedNotificationService::SendDialogClickHiSysEvent(
+    const sptr<NotificationBundleOption> &bundleOption, bool enabled)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("bundleOption null");
+        return;
+    }
+
+    EventInfo eventInfo;
+    eventInfo.bundleName = bundleOption->GetBundleName();
+    eventInfo.uid = bundleOption->GetUid();
+    eventInfo.enable = enabled;
+    EventReport::SendHiSysEvent(AUTH_DIALOG_CLICK, eventInfo);
+}
+
 void AdvancedNotificationService::SendEnableNotificationSlotHiSysEvent(
     const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
     bool enabled, ErrCode errCode)

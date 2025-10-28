@@ -869,6 +869,11 @@ bool SetNotificationRequestByString(ani_env* env, ani_class cls, const OHOS::Not
     if (!SetPropertyOptionalByString(env, object, "appInstanceKey", request->GetAppInstanceKey())) {
         ANS_LOGD("SetNotificationRequest set 'appInstanceKey' faild");
     }
+
+    // readonly priorityNotificationType?: string
+    if (!SetPropertyOptionalByString(env, object, "priorityNotificationType", request->GetPriorityNotificationType())) {
+        ANS_LOGD("SetNotificationRequest set 'priorityNotificationType' faild");
+    }
     return true;
 }
 

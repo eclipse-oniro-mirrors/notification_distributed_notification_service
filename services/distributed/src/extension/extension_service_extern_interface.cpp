@@ -24,9 +24,10 @@ namespace Notification {
 extern "C" {
 #endif
 
-SYMBOL_EXPORT int32_t Startup(std::function<void()> shutdownCallback)
+SYMBOL_EXPORT int32_t Startup(std::function<void()> shutdownCallback,
+    std::function<void(uint32_t, uint32_t, int32_t, std::string)> haReportCallback)
 {
-    return NotificationExtensionService::GetInstance().InitService(shutdownCallback);
+    return NotificationExtensionService::GetInstance().InitService(shutdownCallback, haReportCallback);
 }
 
 SYMBOL_EXPORT void Shutdown()

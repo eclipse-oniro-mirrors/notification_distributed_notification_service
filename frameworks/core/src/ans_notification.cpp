@@ -2057,6 +2057,74 @@ ErrCode AnsNotification::SetAdditionConfig(const std::string &key, const std::st
     return proxy->SetAdditionConfig(key, value);
 }
 
+ErrCode AnsNotification::SetPriorityEnabled(const bool enabled)
+{
+    ANS_LOGD("called");
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->SetPriorityEnabled(enabled);
+}
+
+ErrCode AnsNotification::SetPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, const bool enabled)
+{
+    ANS_LOGD("called");
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    if (bo == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return proxy->SetPriorityEnabledByBundle(bo, enabled);
+}
+
+ErrCode AnsNotification::IsPriorityEnabled(bool &enabled)
+{
+    ANS_LOGD("called");
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->IsPriorityEnabled(enabled);
+}
+
+ErrCode AnsNotification::IsPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, bool &enabled)
+{
+    ANS_LOGD("called");
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    if (bo == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return proxy->IsPriorityEnabledByBundle(bo, enabled);
+}
+
 ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
     const std::string &deviceType, const bool enabled)
 {

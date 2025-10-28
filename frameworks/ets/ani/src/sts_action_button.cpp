@@ -126,8 +126,10 @@ ani_status UnwrapNotificationActionButton(ani_env *env, ani_object param,
         return ANI_INVALID_ARGS;
     }
     if (ANI_OK != GetStsActionButtonByWantParams(env, param, actionButton)) {
-        ANS_LOGE("UnwrapNotificationActionButton : GetStsActionButtonByWantParams failed");
-        return ANI_INVALID_ARGS;
+        ANS_LOGD("UnwrapNotificationActionButton : GetStsActionButtonByWantParams failed");
+    }
+    if (ANI_OK != GetStsActionButtonByUserInput(env, param, actionButton)) {
+        ANS_LOGD("UnwrapNotificationActionButton : GetStsActionButtonByUserInput failed");
     }
     GetStsActionButtonByOther(actionButton);
     ANS_LOGD("UnwrapNotificationActionButton end");

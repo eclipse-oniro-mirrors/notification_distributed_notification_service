@@ -25,6 +25,7 @@ namespace {
     constexpr int8_t SETADDITION_CONFIG_NUM = 2;
     constexpr char KEY_NAME[] = "AGGREGATE_CONFIG";
     constexpr char RING_LIST_KEY_NAME[] = "RING_TRUSTLIST_PKG";
+    constexpr char PRIORITY_RULE_CONFIG_KEY_NAME[] = "notificationRuleConfig";
     constexpr char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
     constexpr char CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG[] = "CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG";
     constexpr char HEALTH_BUNDLE_WHITE_LIST[]  = "HEALTH_BUNDLE_WHITE_LIST";
@@ -71,10 +72,12 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM0], keyStr, STR_MAX_SIZE - 1, &keyStrLen));
     params.key = keyStr;
     if (std::strlen(keyStr) == 0 ||
-        (strcmp(keyStr, KEY_NAME) != 0 && strcmp(keyStr, RING_LIST_KEY_NAME) != 0
-        && strcmp(keyStr, CTRL_LIST_KEY_NAME) != 0
-        && strcmp(keyStr, CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG) != 0
-        && strcmp(keyStr, HEALTH_BUNDLE_WHITE_LIST) != 0)) {
+        (strcmp(keyStr, KEY_NAME) != 0 &&
+        strcmp(keyStr, RING_LIST_KEY_NAME) != 0 &&
+        strcmp(keyStr, CTRL_LIST_KEY_NAME) != 0 &&
+        strcmp(keyStr, CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG) != 0 &&
+        strcmp(keyStr, HEALTH_BUNDLE_WHITE_LIST) != 0 &&
+        strcmp(keyStr, PRIORITY_RULE_CONFIG_KEY_NAME) != 0)) {
         ANS_LOGE("Argument type error. String expected.");
         std::string msg = "Incorrect parameter types.The type of param must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);

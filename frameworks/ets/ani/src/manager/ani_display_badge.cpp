@@ -20,7 +20,7 @@
 #include "sts_common.h"
 #include "notification_helper.h"
 #include "notification_bundle_option.h"
-
+#include "sts_convert_other.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
@@ -108,6 +108,123 @@ void AniSetBadgeNumberByBundle(ani_env *env, ani_object obj, ani_int badgeNumber
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
     ANS_LOGD("AniSetBadgeNumberByBundle end");
+}
+
+ani_status GetBadgesFromAni(ani_env *env, ani_object obj,
+    std::vector<std::pair<Notification::NotificationBundleOption, bool>> &badges)
+{
+    ANS_LOGD("GetBadgesFromAni enter");
+    ani_boolean isUndefined;
+    ani_status status = ANI_ERROR;
+
+    status = env->Reference_IsUndefined(obj, &isUndefined);
+    if (status != ANI_OK) {
+        ANS_LOGE("Failed to check undefined, status: %{public}d", status);
+        return ANI_ERROR;
+    }
+    if (isUndefined == ANI_TRUE) {
+        return ANI_ERROR;
+    }
+
+    ani_class mapClass;
+    if (env->FindClass("Lescompat/Map;", &mapClass) != ANI_OK) {
+        ANS_LOGE("Find Map class failed.");
+        return ANI_ERROR;
+    }
+    ani_type typeMap = mapClass;
+    ani_boolean isMap;
+    status = env->Object_InstanceOf(obj, typeMap, &isMap);
+    if (isMap != ANI_TRUE) {
+        ANS_LOGE("Current obj is not map type.");
+        return ANI_ERROR;
+    }
+
+    if (NotificationSts::GetMapByAniMap(env, obj, badges) != ANI_OK) {
+        return ANI_ERROR;
+    }
+    ANS_LOGD("GetBadgesFromAni end");
+    return ANI_OK;
+}
+
+void AniSetBadgeDisplayStatusByBundles(ani_env *env, ani_object obj)
+{
+    std::vector<std::pair<Notification::NotificationBundleOption, bool>> options;
+    if (GetBadgesFromAni(env, obj, options) != ANI_OK) {
+        ANS_LOGE("GetBadgesFromAni faild");
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+        return;
+    }
+    int returncode = Notification::NotificationHelper::SetShowBadgeEnabledForBundles(options);
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
+        ANS_LOGE("sts BatchSetBadgeDisplayStatus error, errorCode: %{public}d", externalCode);
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+    ANS_LOGD("AniSetBadgeDisplayStatusByBundles end");
+    return;
+}
+
+bool WrapBadges(ani_env *env, ani_object &outAniObj,
+    const std::map<sptr<Notification::NotificationBundleOption>, bool> &bundleEnable)
+{
+    ANS_LOGD("WrapBadges enter");
+    outAniObj = nullptr;
+    outAniObj = NotificationSts::CreateMapObject(env, "Lescompat/Map;", ":V");
+    if (outAniObj == nullptr) {
+        return false;
+    }
+    ani_ref mapRef = nullptr;
+    ani_status status = ANI_ERROR;
+    for (const auto& [k, v] : bundleEnable) {
+        ani_object bundleObj;
+        if (!NotificationSts::WrapBundleOption(env, k, bundleObj) || bundleObj == nullptr) {
+            ANS_LOGE("WrapNotificationBadgeInfo: WrapBundleOption failed");
+            continue;
+        }
+        ani_object enable = NotificationSts::CreateBoolean(env, v);
+        status = env->Object_CallMethodByName_Ref(outAniObj, "set",
+            "Lstd/core/Object;Lstd/core/Object;:Lescompat/Map;", &mapRef,
+            static_cast<ani_object>(bundleObj), static_cast<ani_object>(enable));
+        if (status != ANI_OK) {
+            ANS_LOGE("Faild to set bundleEnable map, status : %{public}d", status);
+            continue;
+        }
+    }
+    if (outAniObj == nullptr) {
+        return false;
+    }
+    ANS_LOGD("WrapBadges end");
+    return true;
+}
+
+ani_object AniGetBadgeDisplayStatusByBundles(ani_env *env, ani_object obj)
+{
+    ani_status status = ANI_ERROR;
+    std::vector<Notification::NotificationBundleOption> bundles;
+    if (!NotificationSts::UnwrapArrayBundleOption(env, obj, bundles)) {
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+        ANS_LOGE("AniGetBadgeDisplayStatusByBundles failed : ERROR_INTERNAL_ERROR");
+        return nullptr;
+    }
+
+    std::map<sptr<Notification::NotificationBundleOption>, bool> bundleEnable;
+    int returncode = Notification::NotificationHelper::GetShowBadgeEnabledForBundles(
+        bundles, bundleEnable);
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        ANS_LOGE("AniGetBadgeDisplayStatusByBundles error, errorCode: %{public}d", externalCode);
+        return nullptr;
+    }
+    ani_object outAniObj;
+    if (!WrapBadges(env, outAniObj, bundleEnable)) {
+        ANS_LOGE("WrapNotificationSlotArray faild");
+        NotificationSts::ThrowErrorWithMsg(env, "AniGetSlots:failed to WrapNotificationSlotArray");
+        return nullptr;
+    }
+    return outAniObj;
 }
 }
 }

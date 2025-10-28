@@ -54,12 +54,17 @@ public:
     void OnStop() override;
 
     virtual void OnDestroy() override;
-    virtual void OnReceiveMessage(const std::shared_ptr<NotificationInfo> info) override;
-    virtual void OnCancelMessages(const std::shared_ptr<std::vector<std::string>> hashCodes) override;
+    virtual NotificationSubscriberExtensionResult OnReceiveMessage(
+        const std::shared_ptr<NotificationInfo> info) override;
+    virtual NotificationSubscriberExtensionResult OnCancelMessages(
+        const std::shared_ptr<std::vector<std::string>> hashCodes) override;
 
     void ExecNapiWrap(napi_env env, napi_value obj);
 
     std::weak_ptr<JsNotificationSubscriberExtension> GetWeakPtr();
+
+private:
+    napi_value CreateOnCancelMessagesResult(napi_env env, const std::shared_ptr<std::vector<std::string>> hashCodes);
 
 private:
     AbilityRuntime::JsRuntime& jsRuntime_;

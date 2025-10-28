@@ -1577,6 +1577,7 @@ ohos_unittest("advanced_notification_service_unit_test") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
+    "relational_store:native_rdb",
     "time_service:time_client",
     "bluetooth:btframework",
   ]
@@ -1722,6 +1723,8 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/notification_smart_reminder/reminder_affected.cpp",
     "${services_path}/ans/src/notification_smart_reminder/smart_reminder_center.cpp",
     "${services_path}/ans/src/notification_smart_reminder/string_utils.cpp",
+    "${services_path}/ans/src/priority_notification/advanced_notification_priority_manager_service.cpp",
+    "${services_path}/ans/src/priority_notification/notification_ai_extension_wrapper.cpp",
     "${services_path}/ans/src/notification_subscriber_manager.cpp",
     "${services_path}/ans/src/notification_timer_info.cpp",
     "${services_path}/ans/src/os_account_manager_helper.cpp",

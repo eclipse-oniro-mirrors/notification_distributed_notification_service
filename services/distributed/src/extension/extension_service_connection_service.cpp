@@ -54,7 +54,7 @@ void ExtensionServiceConnectionService::CloseConnection(const ExtensionSubscribe
     ANS_LOGD("close connection: %{public}s", connectionKey.c_str());
     bool needNotify = false;
     do {
-        std::lock_guard<ffrt::mutex> lock(mapLock_);
+        std::lock_guard<ffrt::recursive_mutex> lock(mapLock_);
         auto iter = connectionMap_.find(connectionKey);
         if (iter == connectionMap_.end()) {
             ANS_LOGE("connection not found");
@@ -91,7 +91,7 @@ void ExtensionServiceConnectionService::RemoveConnection(const ExtensionSubscrib
     ANS_LOGD("remove connection: %{public}s", connectionKey.c_str());
     bool needNotify = false;
     {
-        std::lock_guard<ffrt::mutex> lock(mapLock_);
+        std::lock_guard<ffrt::recursive_mutex> lock(mapLock_);
         auto iter = connectionMap_.find(connectionKey);
         if (iter != connectionMap_.end()) {
             connectionMap_.erase(iter);
@@ -103,22 +103,26 @@ void ExtensionServiceConnectionService::RemoveConnection(const ExtensionSubscrib
     }
 }
 
-std::shared_ptr<ExtensionServiceConnection> ExtensionServiceConnectionService::GetConnection(
+sptr<ExtensionServiceConnection> ExtensionServiceConnectionService::GetConnection(
     const std::shared_ptr<ExtensionSubscriberInfo> subscriberInfo)
 {
     if (subscriberInfo == nullptr) {
         ANS_LOGE("null subscriberInfo");
         return nullptr;
     }
-    std::lock_guard<ffrt::mutex> lock(mapLock_);
+    std::lock_guard<ffrt::recursive_mutex> lock(mapLock_);
     std::string connectionKey = GetConnectionKey(*subscriberInfo);
-    std::shared_ptr<ExtensionServiceConnection> connection = nullptr;
+    sptr<ExtensionServiceConnection> connection = nullptr;
     auto iter = connectionMap_.find(connectionKey);
     if (iter == connectionMap_.end()) {
         ANS_LOGD("create connection: %{public}s", connectionKey.c_str());
-        connection = std::make_shared<ExtensionServiceConnection>(*subscriberInfo,
-            [this](const ExtensionSubscriberInfo& info) { RemoveConnection(info); });
-        connectionMap_[connectionKey] = connection;
+        connection = new (std::nothrow) ExtensionServiceConnection(
+            *subscriberInfo, [this](const ExtensionSubscriberInfo& info) { RemoveConnection(info); });
+        if (connection == nullptr) {
+            ANS_LOGE("new connection failed: %{public}s", connectionKey.c_str());
+        } else {
+            connectionMap_[connectionKey] = connection;
+        }
     } else {
         ANS_LOGD("found connection: %{public}s", connectionKey.c_str());
         connection = iter->second;

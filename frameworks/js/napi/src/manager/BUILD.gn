@@ -67,6 +67,7 @@ ohos_shared_library("notificationmanager") {
     "../display_badge.cpp",
     "../distributed.cpp",
     "../disturb_mode.cpp",
+    "../priority.cpp",
     "../enable_notification.cpp",
     "../get_active.cpp",
     "../js_ans_dialog_callback.cpp",
@@ -79,6 +80,7 @@ ohos_shared_library("notificationmanager") {
     "napi_display_badge.cpp",
     "napi_distributed.cpp",
     "napi_distributed_enable.cpp",
+    "napi_priority.cpp",
     "napi_disturb_mode.cpp",
     "napi_enable_notification.cpp",
     "napi_get_active.cpp",
@@ -158,6 +160,10 @@ ohos_shared_library("notificationmanager") {
 
   if (distributed_notification_service_feature_open_notification_settings) {
     defines += [ "ANS_FEATURE_OPEN_NOTIFICATION_SETTINGS" ]
+  }
+
+  if (distributed_notification_service_feature_priority_notification) {
+    defines += [ "ANS_FEATURE_PRIORITY_NOTIFICATION" ]
   }
 
   relative_install_dir = "module"

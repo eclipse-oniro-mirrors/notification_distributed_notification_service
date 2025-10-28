@@ -179,6 +179,7 @@ void JsNotificationSubscriberExtension::OnStart(const AAFwk::Want& want)
 void JsNotificationSubscriberExtension::OnStop()
 {
     ANS_LOGD("called");
+    OnDestroy();
     Extension::OnStop();
 }
 
@@ -208,65 +209,57 @@ std::weak_ptr<JsNotificationSubscriberExtension> JsNotificationSubscriberExtensi
 
 void JsNotificationSubscriberExtension::OnDestroy()
 {
-    ANS_LOGD("called");
-    if (handler_ == nullptr) {
-        ANS_LOGE("handler is invalid");
+    ANS_LOGD("OnDestroy");
+
+    if (!jsObj_) {
+        ANS_LOGE("Not found NotificationSubscriberExtension.js");
         return;
     }
-    std::weak_ptr<JsNotificationSubscriberExtension> wThis = GetWeakPtr();
 
-    auto task = [wThis]() {
-        std::shared_ptr<JsNotificationSubscriberExtension> sThis = wThis.lock();
-        if (sThis == nullptr) {
-            return;
-        }
-        if (!sThis->jsObj_) {
-            ANS_LOGE("Not found NotificationSubscriberExtension.js");
-            return;
-        }
+    AbilityRuntime::HandleScope handleScope(jsRuntime_);
+    napi_env env = jsRuntime_.GetNapiEnv();
 
-        AbilityRuntime::HandleScope handleScope(sThis->jsRuntime_);
-        napi_env env = sThis->jsRuntime_.GetNapiEnv();
+    napi_value argv[] = {};
+    napi_value obj = jsObj_->GetNapiValue();
+    if (obj == nullptr) {
+        ANS_LOGE("Failed to get NotificationSubscriberExtension object");
+        return;
+    }
 
-        napi_value argv[] = {};
-        napi_value obj = sThis->jsObj_->GetNapiValue();
-        if (obj == nullptr) {
-            ANS_LOGE("Failed to get NotificationSubscriberExtension object");
-            return;
-        }
-
-        napi_value method = nullptr;
-        napi_get_named_property(env, obj, "onDestroy", &method);
-        if (method == nullptr) {
-            ANS_LOGE("Failed to get onDestroy from NotificationSubscriberExtension object");
-            return;
-        }
-        napi_call_function(env, obj, method, ARGC_ZERO, argv, nullptr);
-        ANS_LOGD("JsNotificationSubscriberExtension js receive event called.");
-    };
-    handler_->PostTask(task, "OnDestroy");
+    napi_value method = nullptr;
+    napi_get_named_property(env, obj, "onDestroy", &method);
+    if (method == nullptr) {
+        ANS_LOGE("Failed to get onDestroy from NotificationSubscriberExtension object");
+        return;
+    }
+    napi_call_function(env, obj, method, ARGC_ZERO, argv, nullptr);
+    ANS_LOGD("JsNotificationSubscriberExtension js receive event called.");
 }
 
-void JsNotificationSubscriberExtension::OnReceiveMessage(const std::shared_ptr<NotificationInfo> info)
+NotificationSubscriberExtensionResult JsNotificationSubscriberExtension::OnReceiveMessage(
+    const std::shared_ptr<NotificationInfo> info)
 {
     ANS_LOGD("called");
     if (info == nullptr) {
-        ANS_LOGE("handler is invalid");
-        return;
+        ANS_LOGE("info is invalid");
+        return NotificationSubscriberExtensionResult::INVALID_PARAM;
     }
     if (handler_ == nullptr) {
         ANS_LOGE("handler is invalid");
-        return;
+        return NotificationSubscriberExtensionResult::INTERNAL_ERROR;
     }
     std::weak_ptr<JsNotificationSubscriberExtension> wThis = GetWeakPtr();
-
-    auto task = [wThis, info]() {
+    NotificationSubscriberExtensionResult result = NotificationSubscriberExtensionResult::OK;
+    auto task = [wThis, info, &result]() {
         std::shared_ptr<JsNotificationSubscriberExtension> sThis = wThis.lock();
         if (sThis == nullptr) {
+            ANS_LOGE("null sThis");
+            result = NotificationSubscriberExtensionResult::OBJECT_RELEASED;
             return;
         }
         if (!sThis->jsObj_) {
             ANS_LOGE("Not found NotificationSubscriberExtension.js");
+            result = NotificationSubscriberExtensionResult::INTERNAL_ERROR;
             return;
         }
 
@@ -277,6 +270,7 @@ void JsNotificationSubscriberExtension::OnReceiveMessage(const std::shared_ptr<N
 
         if (!SetNotificationInfo(env, info, napiInfo)) {
             ANS_LOGE("Set NotificationInfo object failed.");
+            result = NotificationSubscriberExtensionResult::SET_OBJECT_FAIL;
             return;
         }
 
@@ -284,6 +278,7 @@ void JsNotificationSubscriberExtension::OnReceiveMessage(const std::shared_ptr<N
         napi_value obj = sThis->jsObj_->GetNapiValue();
         if (obj == nullptr) {
             ANS_LOGE("Failed to get NotificationSubscriberExtension object");
+            result = NotificationSubscriberExtensionResult::GET_OBJECT_FAIL;
             return;
         }
 
@@ -291,58 +286,51 @@ void JsNotificationSubscriberExtension::OnReceiveMessage(const std::shared_ptr<N
         napi_get_named_property(env, obj, "onReceiveMessage", &method);
         if (method == nullptr) {
             ANS_LOGE("Failed to get onReceiveMessage from NotificationSubscriberExtension object");
+            result = NotificationSubscriberExtensionResult::GET_METHOD_FAIL;
             return;
         }
         napi_call_function(env, obj, method, ARGC_ONE, argv, nullptr);
         ANS_LOGD("JsNotificationSubscriberExtension js receive event called.");
     };
-    handler_->PostTask(task, "OnReceiveMessage");
+    handler_->PostSyncTask(task, "OnReceiveMessage");
+    return result;
 }
 
-void JsNotificationSubscriberExtension::OnCancelMessages(const std::shared_ptr<std::vector<std::string>> hashCodes)
+NotificationSubscriberExtensionResult JsNotificationSubscriberExtension::OnCancelMessages(
+    const std::shared_ptr<std::vector<std::string>> hashCodes)
 {
     ANS_LOGD("called");
     if (hashCodes == nullptr) {
         ANS_LOGE("hashCodes is invalid");
-        return;
+        return NotificationSubscriberExtensionResult::INVALID_PARAM;
     }
     if (handler_ == nullptr) {
         ANS_LOGE("handler is invalid");
-        return;
+        return NotificationSubscriberExtensionResult::INTERNAL_ERROR;
     }
     std::weak_ptr<JsNotificationSubscriberExtension> wThis = GetWeakPtr();
-
-    auto task = [wThis, hashCodes]() {
+    NotificationSubscriberExtensionResult result = NotificationSubscriberExtensionResult::OK;
+    auto task = [wThis, hashCodes, &result]() {
         std::shared_ptr<JsNotificationSubscriberExtension> sThis = wThis.lock();
         if (sThis == nullptr) {
+            ANS_LOGE("null sThis");
+            result = NotificationSubscriberExtensionResult::OBJECT_RELEASED;
             return;
         }
         if (!sThis->jsObj_) {
             ANS_LOGE("Not found NotificationSubscriberExtension.js");
+            result = NotificationSubscriberExtensionResult::INTERNAL_ERROR;
             return;
         }
 
         AbilityRuntime::HandleScope handleScope(sThis->jsRuntime_);
         napi_env env = sThis->jsRuntime_.GetNapiEnv();
-        napi_value result = nullptr;
-        napi_create_object(env, &result);
-
-        uint32_t count = 0;
-        napi_value napiHashCodes = nullptr;
-        napi_create_array(env, &napiHashCodes);
-        for (auto vec : *hashCodes) {
-            napi_value vecValue = nullptr;
-            ANS_LOGD("hashCodes = %{public}s", vec.c_str());
-            napi_create_string_utf8(env, vec.c_str(), NAPI_AUTO_LENGTH, &vecValue);
-            napi_set_element(env, napiHashCodes, count, vecValue);
-            count++;
-        }
-        napi_set_named_property(env, result, "hashCodes", napiHashCodes);
-
-        napi_value argv[] = {result};
+        napi_value arg = sThis->CreateOnCancelMessagesResult(env, hashCodes);
+        napi_value argv[] = { arg };
         napi_value obj = sThis->jsObj_->GetNapiValue();
         if (obj == nullptr) {
             ANS_LOGE("Failed to get NotificationSubscriberExtension object");
+            result =  NotificationSubscriberExtensionResult::GET_OBJECT_FAIL;
             return;
         }
 
@@ -350,13 +338,30 @@ void JsNotificationSubscriberExtension::OnCancelMessages(const std::shared_ptr<s
         napi_get_named_property(env, obj, "onCancelMessages", &method);
         if (method == nullptr) {
             ANS_LOGE("Failed to get onCancelMessages from NotificationSubscriberExtension object");
+            result =  NotificationSubscriberExtensionResult::GET_METHOD_FAIL;
             return;
         }
         napi_call_function(env, obj, method, ARGC_ONE, argv, nullptr);
         ANS_LOGD("JsNotificationSubscriberExtension js receive event called.");
     };
-    handler_->PostTask(task, "OnCancelMessages");
+    handler_->PostSyncTask(task, "OnCancelMessages");
+    return result;
 }
 
+napi_value JsNotificationSubscriberExtension::CreateOnCancelMessagesResult(
+    napi_env env, const std::shared_ptr<std::vector<std::string>> hashCodes)
+{
+    napi_value result = nullptr;
+    napi_create_array(env, &result);
+    uint32_t count = 0;
+    for (auto vec : *hashCodes) {
+        napi_value vecValue = nullptr;
+        ANS_LOGD("hashCodes = %{public}s", vec.c_str());
+        napi_create_string_utf8(env, vec.c_str(), NAPI_AUTO_LENGTH, &vecValue);
+        napi_set_element(env, result, count, vecValue);
+        count++;
+    }
+    return result;
+}
 }  // namespace NotificationNapi
 }  // namespace OHOS
