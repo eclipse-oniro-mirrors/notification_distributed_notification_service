@@ -290,7 +290,8 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
             message.BranchId(EventBranchId::BRANCH_5).ErrorCode(result).Message("publish failed with FlowControl");
             return;
         }
-        if (AssignToNotificationList(record) != ERR_OK) {
+        result = AssignToNotificationList(record);
+        if (result != ERR_OK) {
             ANS_LOGE("Failed to assign notification list");
             message.BranchId(EventBranchId::BRANCH_5).ErrorCode(result).Message("Failed to assign notification list");
             return;

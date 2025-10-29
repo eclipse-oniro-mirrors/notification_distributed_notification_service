@@ -220,6 +220,10 @@ ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(
     const sptr<NotificationBundleOption> &bundleOption, const int32_t id)
 {
     ANS_LOGD("Called.");
+    if (bundleOption == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
     int32_t reason = NotificationConstant::APP_CANCEL_AS_BUNELE_WITH_AGENT_REASON_DELETE;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
