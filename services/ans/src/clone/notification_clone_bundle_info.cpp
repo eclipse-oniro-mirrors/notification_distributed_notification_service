@@ -28,6 +28,7 @@ constexpr const char *BUNDLE_INFO_SLOT_FLAGS = "slotFlags";
 constexpr const char *BUNDLE_INFO_SHOW_BADGE = "badge";
 constexpr const char *BUNDLE_INFO_POP_DIALOG = "popDialog";
 constexpr const char *BUNDLE_INFO_ENABLE_NOTIFICATION = "enable";
+constexpr const char *BUNDLE_INFO_ENABLEDSTATE_NOTIFICATION = "enabledState";
 constexpr const char *BUNDLE_INFO_SLOT_LIST = "slotList";
 constexpr const char *BUNDLE_INFO_SLOT_TYPE = "slotType";
 constexpr const char *BUNDLE_INFO_SLOT_ENABLE = "slotEnable";
@@ -213,14 +214,16 @@ void NotificationCloneBundleInfo::ToJson(nlohmann::json &jsonObject) const
     if (ringtoneInfo_ != nullptr) {
         jsonObject[BUNDLE_INFO_RINGTONE_INFO] = ringtoneInfo_->ToJson();
     }
-    jsonObject[BUNDLE_INFO_NAME] =  bundleName_;
-    jsonObject[BUNDLE_INFO_APP_INDEX] =  appIndex_;
-    jsonObject[BUNDLE_INFO_SLOT_FLAGS] =  slotFlags_;
-    jsonObject[BUNDLE_INFO_SHOW_BADGE] =  isShowBadge_ ? 1 : 0;
+    jsonObject[BUNDLE_INFO_NAME] = bundleName_;
+    jsonObject[BUNDLE_INFO_APP_INDEX] = appIndex_;
+    jsonObject[BUNDLE_INFO_SLOT_FLAGS] = slotFlags_;
+    jsonObject[BUNDLE_INFO_SHOW_BADGE] = isShowBadge_ ? 1 : 0;
     jsonObject[BUNDLE_INFO_POP_DIALOG] = hasPoppedDialog_ ? 1 : 0;
-    jsonObject[BUNDLE_INFO_ENABLE_NOTIFICATION] =  static_cast<int32_t>(isEnabledNotification_);
-    jsonObject[BUNDLE_INFO_SILENT_REMINDER] =  static_cast<int32_t>(silentReminderEnabled_);
-    jsonObject[BUNDLE_INFO_SUBSCRIPTION_ENABLED] =  static_cast<int32_t>(enabledExtensionSubscription_);
+    int32_t state = static_cast<int32_t>(isEnabledNotification_);
+    jsonObject[BUNDLE_INFO_ENABLE_NOTIFICATION] = state & 1;
+    jsonObject[BUNDLE_INFO_ENABLEDSTATE_NOTIFICATION] = state;
+    jsonObject[BUNDLE_INFO_SILENT_REMINDER] = static_cast<int32_t>(silentReminderEnabled_);
+    jsonObject[BUNDLE_INFO_SUBSCRIPTION_ENABLED] = static_cast<int32_t>(enabledExtensionSubscription_);
 }
 
 void NotificationCloneBundleInfo::SlotsFromJson(const nlohmann::json &jsonObject)
@@ -333,6 +336,14 @@ void NotificationCloneBundleInfo::FromJson(const nlohmann::json &jsonObject)
             isEnabledNotification_ = static_cast<NotificationConstant::SWITCH_STATE>(enabledNotification);
         }
     }
+    if (jsonObject.contains(BUNDLE_INFO_ENABLEDSTATE_NOTIFICATION) &&
+        jsonObject[BUNDLE_INFO_ENABLEDSTATE_NOTIFICATION].is_number()) {
+        int32_t enabledNotificationState = jsonObject.at(BUNDLE_INFO_ENABLEDSTATE_NOTIFICATION).get<int32_t>();
+        if (enabledNotificationState >= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) &&
+            enabledNotificationState <= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+            isEnabledNotification_ = static_cast<NotificationConstant::SWITCH_STATE>(enabledNotificationState);
+        }
+    }
     if (jsonObject.contains(BUNDLE_INFO_SILENT_REMINDER) && jsonObject[BUNDLE_INFO_SILENT_REMINDER].is_number()) {
         int32_t silentReminderEnabled = jsonObject.at(BUNDLE_INFO_SILENT_REMINDER).get<int32_t>();
         if (silentReminderEnabled >= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) &&
@@ -347,6 +358,7 @@ void NotificationCloneBundleInfo::FromJson(const nlohmann::json &jsonObject)
     ExtensionSubscriptionFromJson(jsonObject);
     SubscriptionBundlesFromJson(jsonObject);
 }
+
 std::string NotificationCloneBundleInfo::SlotInfo::Dump() const
 {
     return "type: " + std::to_string(slotType_) + " " + std::to_string(enable_) + " "
