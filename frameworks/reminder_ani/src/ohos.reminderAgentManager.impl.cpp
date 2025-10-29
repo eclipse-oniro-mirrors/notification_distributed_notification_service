@@ -26,11 +26,11 @@
 using namespace OHOS;
 
 namespace {
-static bool CheckReminderId(int32_t reminderId)
+static bool CheckReminderId(int32_t reminderId,
+    int32_t ret = ReminderAgentManagerNapi::Common::ERR_REMINDER_INVALID_PARAM)
 {
     if (reminderId < 0) {
         ANSR_LOGW("Param reminder id is illegal.");
-        int32_t ret = ReminderAgentManagerNapi::Common::ERR_REMINDER_INVALID_PARAM;
         ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
         return false;
     }
@@ -305,7 +305,7 @@ void DeleteExcludeDatesSync(int32_t reminderId)
 
 void UpdateReminderSync(int32_t reminderId, ::ohos::reminderAgentManager::manager::ParamReminder const& reminderReq)
 {
-    if (!CheckReminderId(reminderId)) {
+    if (!CheckReminderId(reminderId, ReminderAgentManagerNapi::Common::ERR_REMINDER_PARAM_ERROR)) {
         return;
     }
     std::shared_ptr<OHOS::Notification::ReminderRequest> reminder;
