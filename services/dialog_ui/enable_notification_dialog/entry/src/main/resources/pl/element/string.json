@@ -20,6 +20,27 @@
             "attr":{
                 "priority":"LT"
             }
+        },
+        {
+            "name":"reason",
+            "value":"Mogą one obejmować powiadomienia wyświetlane na ekranie blokady, banery, odznaki, dźwięki i wibracje. Można to zmienić w Ustawieniach.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_zyt",
+            "value":"Mogą one obejmować powiadomienia wyświetlane na ekranie blokady, banery, odznaki, dźwięki i wibracje. Te ustawienia można zmienić w obszarze DroiTong > Zarządzanie aplikacjami.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_cjy",
+            "value":"Mogą one obejmować powiadomienia wyświetlane na ekranie blokady, banery, odznaki, dźwięki i wibracje. Te ustawienia można zmienić w obszarze EasyAbroad > Zarządzanie aplikacjami.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }
