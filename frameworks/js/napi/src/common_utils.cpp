@@ -154,6 +154,10 @@ void Common::SetCallback(
     napi_value callback = nullptr;
     napi_value resultout = nullptr;
     napi_get_reference_value(env, callbackIn, &callback);
+    if (callback == nullptr) {
+        ANS_LOGE("callback is nullptr");
+        return;
+    }
     napi_value results[ARGS_TWO] = {nullptr};
     results[PARAM0] = CreateErrorValue(env, errorCode, newType);
     results[PARAM1] = result;
@@ -175,6 +179,10 @@ void Common::SetCallback(
     napi_value callback = nullptr;
     napi_value resultout = nullptr;
     napi_get_reference_value(env, callbackIn, &callback);
+    if (callback == nullptr) {
+        ANS_LOGE("callback is nullptr");
+        return;
+    }
     napi_status napi_result = napi_call_function(env, undefined, callback, ARGS_ONE, &result, &resultout);
     if (napi_result != napi_ok) {
         ANS_LOGE("napi_call_function failed, result = %{public}d", napi_result);
@@ -194,6 +202,10 @@ void Common::SetCallbackArg2(
     napi_value callback = nullptr;
     napi_value resultout = nullptr;
     napi_get_reference_value(env, callbackIn, &callback);
+    if (callback == nullptr) {
+        ANS_LOGE("callback is nullptr");
+        return;
+    }
     napi_status napi_result = napi_call_function(env, undefined, callback, ARGS_TWO, result, &resultout);
     if (napi_result != napi_ok) {
         ANS_LOGE("napi_call_function failed, result = %{public}d", napi_result);

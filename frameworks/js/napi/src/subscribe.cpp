@@ -1152,6 +1152,9 @@ bool HasNotificationSubscriber(const napi_env &env, const napi_value &value, Sub
     for (auto vec : subscriberInstances_) {
         napi_value callback = nullptr;
         napi_get_reference_value(env, vec.ref, &callback);
+        if (value == nullptr || callback == nullptr) {
+            continue;
+        }
         bool isEquals = false;
         napi_strict_equals(env, value, callback, &isEquals);
         if (isEquals) {
