@@ -20,6 +20,27 @@
             "attr":{
                 "priority":"LT"
             }
+        },
+        {
+            "name":"reason",
+            "value":"Ini mungkin mencakup notifikasi layar kunci, banner, lencana, suara, dan getar. Anda dapat mengubah ini di Pengaturan.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_zyt",
+            "value":"Ini mungkin mencakup notifikasi layar kunci, banner, lencana, suara, dan getar. Anda dapat mengubah pengaturan ini dari DroiTong > Pengelolaan aplikasi.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_cjy",
+            "value":"Ini mungkin mencakup notifikasi layar kunci, banner, lencana, suara, dan getar. Anda dapat mengubah pengaturan ini dari EasyAbroad > Pengelolaan aplikasi.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }
