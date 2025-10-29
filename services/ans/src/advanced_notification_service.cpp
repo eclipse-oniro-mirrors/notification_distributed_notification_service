@@ -1656,6 +1656,10 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
     }
 
     sptr<IPushCallBack> pushCallBack = iface_cast<IPushCallBack>(pushCallback);
+    if (pushCallBack == nullptr) {
+        ANS_LOGE("pushCallBack is null");
+        return ERROR_INTERNAL_ERROR;
+    }
     NotificationConstant::SlotType slotType = notificationCheckRequest->GetSlotType();
     int32_t uid = IPCSkeleton::GetCallingUid();
 
