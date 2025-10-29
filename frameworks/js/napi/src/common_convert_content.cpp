@@ -576,7 +576,6 @@ napi_value Common::GetNotificationBasicContentDetailed(
         return nullptr;
     }
     basicContent->SetTitle(shortStr);
-    ANS_LOGD("normal::title = %{public}s", shortStr);
 
     // text: string
     value = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "text", napi_string);
@@ -592,7 +591,6 @@ napi_value Common::GetNotificationBasicContentDetailed(
         return nullptr;
     }
     basicContent->SetText(commonStr);
-    ANS_LOGD("normal::text = %{public}s", commonStr);
 
     // additionalText?: string
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "additionalText", &hasProperty));
@@ -606,7 +604,6 @@ napi_value Common::GetNotificationBasicContentDetailed(
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, value, commonStr, COMMON_TEXT_SIZE - 1, &strLen));
         basicContent->SetAdditionalText(commonStr);
-        ANS_LOGD("normal::additionalText = %{public}s", commonStr);
     }
 
     // lockScreenPicture?: pixelMap
@@ -690,7 +687,6 @@ napi_value Common::GetNotificationLongTextContentDetailed(
         return nullptr;
     }
     longContent->SetLongText(commonStr);
-    ANS_LOGD("longText::longText = %{public}s", commonStr);
 
     // briefText: string
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "briefText", &hasProperty));
@@ -712,7 +708,6 @@ napi_value Common::GetNotificationLongTextContentDetailed(
         return nullptr;
     }
     longContent->SetBriefText(shortStr);
-    ANS_LOGD("longText::briefText = %{public}s", shortStr);
 
     // expandedTitle: string
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "expandedTitle", &hasProperty));
@@ -734,7 +729,6 @@ napi_value Common::GetNotificationLongTextContentDetailed(
         return nullptr;
     }
     longContent->SetExpandedTitle(shortStr);
-    ANS_LOGD("longText::expandedTitle = %{public}s", shortStr);
 
     return NapiGetNull(env);
 }
@@ -1404,7 +1398,6 @@ napi_value Common::GetNotificationMultiLineContent(
         return nullptr;
     }
     multiLineContent->SetBriefText(shortStr);
-    ANS_LOGD("multiLine: briefText = %{public}s", shortStr);
 
     // longTitle: string
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "longTitle", &hasProperty));
@@ -1424,7 +1417,6 @@ napi_value Common::GetNotificationMultiLineContent(
         return nullptr;
     }
     multiLineContent->SetExpandedTitle(shortStr);
-    ANS_LOGD("multiLine: longTitle = %{public}s", shortStr);
 
     // lines: Array<String>
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "lines", &hasProperty));

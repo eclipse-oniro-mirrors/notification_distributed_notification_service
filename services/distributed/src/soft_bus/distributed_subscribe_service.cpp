@@ -283,7 +283,6 @@ void DistributedService::OnBatchCanceled(const std::vector<std::shared_ptr<Notif
             ANS_LOGE("notification or GetNotificationRequestPoint is nullptr");
             continue;
         }
-        ANS_LOGI("dans OnBatchCanceled %{public}s", notification->Dump().c_str());
         keysStream << GetNotificationKey(notification) << ' ';
         slotTypesStream << std::to_string(notification->GetNotificationRequestPoint()->GetSlotType()) << ' ';
     }

@@ -544,7 +544,6 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
 
         NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
         capsule.SetTitle(str);
-        ANS_LOGD("capsule title = %{public}s", str);
     }
 
     NAPI_CALL(env, napi_has_named_property(env, capsuleResult, "backgroundColor", &hasProperty));
