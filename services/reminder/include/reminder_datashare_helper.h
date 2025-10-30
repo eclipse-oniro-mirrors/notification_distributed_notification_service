@@ -30,107 +30,198 @@ public:
     static ReminderDataShareHelper& GetInstance();
 
     /**
-     * @brief Register datashare observer.
+     * @brief Register a DataShare observer to listen for calendar reminder changes.
+     *
+     * The observer will receive OnChange callbacks from the DataShare framework.
+     * This method creates and registers an internal observer and stores it in `observer_`.
+     *
+     * @return true if the observer was successfully registered; false otherwise.
      */
     bool RegisterObserver();
 
     /**
-     * @brief UnRegister datashare observer.
+     * @brief Unregister the DataShare observer previously registered by RegisterObserver.
+     *
+     * This will stop receiving DataShare OnChange notifications and release observer resources.
+     *
+     * @return true if the observer was successfully unregistered or no observer was registered;
+     *         false on failure.
      */
     bool UnRegisterObserver();
 
 public:
     /**
-     * @brief Search for reminders from the current time to X minutes.
+     * @brief Query reminders within a configured time window (relative to current time).
+     *
+     * The implementation typically queries the DataShare provider for reminders within a
+     * time range (e.g., from now to now + X minutes) and returns them as a map keyed by
+     * reminder identifier.
+     *
+     * @param[out] reminders A map to be filled with identifier -> ReminderRequest mappings.
+     * @return true on successful query (even if the result set is empty), false on error.
      */
     bool Query(std::map<std::string, sptr<ReminderRequest>>& reminders);
 
     /**
-     * @brief Search value from uri.
+     * @brief Query a single string value from the specified DataShare URI by key/column name.
+     *
+     * Typical usage includes fetching metadata values such as provider uid or version strings.
+     *
+     * @param[in] uri DataShare Uri to query.
+     * @param[in] key Column name to retrieve.
+     * @param[out] value Retrieved string value when returns true.
+     * @return true if the value was found and assigned to `value`, false otherwise.
      */
     bool Query(Uri& uri, const std::string& key, std::string& value);
 
     /**
-     * @brief Update the reminder state.
-     * state is ReminderCalendarShareTable::STATE_*
+     * @brief Update the state field of a reminder identified by `identifier`.
+     *
+     * The `state` parameter must be one of ReminderCalendarShareTable::STATE_* constants.
+     *
+     * @param[in] identifier The unique identifier of the reminder to update.
+     * @param[in] state New state value to set.
+     * @return true if the update succeeded, false otherwise.
      */
     bool Update(const std::string& identifier, const int32_t state);
 
     /**
-     * @brief Start calendar data extension.
-     * reason is ReminderCalendarShareTable::START_*
+     * @brief Start calendar data extension actions such as sync or background processing.
+     *
+     * The `reason` parameter should use codes defined in ReminderCalendarShareTable::START_*.
+     *
+     * @param[in] reason Reason code that indicates why the data extension is started.
      */
     void StartDataExtension(const int32_t reason);
 
 public:
     /**
-     * @brief Set current user id.
+     * @brief Set the current user id used to build URIs and access contexts.
+     * @param[in] userId User id to set for subsequent operations.
      */
     void SetUserId(const int32_t userId)
     {
-        curUserId_ = userId;
+        userId_ = userId;
     }
 
     /**
-     * @brief Update calendar uid and calendar data uid.
+     * @brief Update cached calendar provider UIDs (calendar and calendardata).
+     *
+     * This method refreshes `uid_` and `dataUid_` based on system/provider discovery.
+     * Call when user context or provider configuration changes.
      */
     void UpdateCalendarUid();
 
     /**
-     * @brief Get cache update reminders.
+     * @brief Get a snapshot copy of cached reminders pending processing.
+     *
+     * Returns a thread-safe copy of the internal cache so callers can safely iterate
+     * without holding internal locks.
+     *
+     * @return Move of the internal reminder cache map.
      */
     std::map<std::string, sptr<ReminderRequest>> GetCacheReminders();
 
     /**
-     * @brief Save update reminders to cache.
+     * @brief Insert or merge provided reminders into the internal cache.
+     *
+     * The method is thread-safe and protected by `cacheMutex_`. The cache is used to
+     * coalesce frequent updates before delivering them to upper layers.
+     *
+     * @param[in] reminders Map of identifier -> ReminderRequest to insert into cache.
      */
     void InsertCacheReminders(const std::map<std::string, sptr<ReminderRequest>>& reminders);
 
 public:
     /**
-     * @brief When datashare notify OnChange, the change type is insert or delete.
+     * @brief Handle DataShare OnChange events that are insert or delete type.
+     *
+     * Implementation may throttle or coalesce rapid insert/delete events to reduce
+     * query frequency. This method is intended to be lightweight and signal work
+     * to an asynchronous queue (`queue_`) if needed.
      */
     void OnDataInsertOrDelete();
 
     /**
-     * @brief When datashare notify OnChange, the change type is update.
+     * @brief Handle DataShare OnChange events that contain update details.
+     *
+     * Parses `info` to construct ReminderRequest objects and inserts them into the cache
+     * or dispatches them to listeners as required.
+     *
+     * @param[in] info ChangeInfo structure containing column/value buckets describing updates.
      */
     void OnDataUpdate(const DataShare::DataShareObserver::ChangeInfo& info);
 
 private:
     /**
-     * @brief Build datasharehelper, need to release it after use,
-     * call ReleaseDataShareHelper.
+     * @brief Create a DataShareHelper for the given URI string.
+     *
+     * The returned helper should be released by calling DataShareHelper::Release when no
+     * longer needed.
+     *
+     * @param[in] uriStr String representation of the DataShare URI.
+     * @return Shared pointer to a DataShareHelper instance, or nullptr on failure.
      */
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper(const std::string& uriStr);
-    bool ReleaseDataShareHelper(const std::shared_ptr<DataShare::DataShareHelper>& helper);
 
     /**
-     * @brief Get share table columns.
+     * @brief Get the projection column names required for DataShare queries.
+     *
+     * @return Vector of column names used when querying the reminder share table.
      */
     std::vector<std::string> GetColumns() const;
 
 private:
     /**
-     * @brief Build ReminderRequest from DataShareResultSet.
+     * @brief Build a ReminderRequest from a DataShare result row.
+     *
+     * Parses the DataShare::DataShareResultSet row according to the detected RDB
+     * schema version and fills a ReminderRequest instance.
+     *
+     * @param[in] result Result set row to parse.
+     * @return Smart pointer to a constructed ReminderRequest; nullptr on parse failure.
      */
     sptr<ReminderRequest> CreateReminder(const std::shared_ptr<DataShare::DataShareResultSet>& result);
 
     /**
-     * @brief Build ReminderRequest from ChangeInfo.
+     * @brief Build ReminderRequest objects from ChangeInfo update buckets.
+     *
+     * Iterates over ChangeInfo VBucket entries and constructs a map of identifier ->
+     * ReminderRequest representing updated rows.
+     *
+     * @param[in] info ChangeInfo carrying VBucket entries with column/value mappings.
+     * @return Map of identifier to constructed ReminderRequest objects.
      */
     std::map<std::string, sptr<ReminderRequest>> CreateReminder(
         const DataShare::DataShareObserver::ChangeInfo& info);
 
     /**
-     * @brief Init reminder base info.
+     * @brief Initialize common reminder fields after construction/parsing.
+     *
+     * Normalizes values, sets defaults and computes derived fields required for
+     * ReminderRequest to be consumable by notification logic.
+     *
+     * @param[in,out] reminder ReminderRequest instance to initialize.
      */
     void InitNormalInfo(sptr<ReminderRequest>& reminder);
+
+    /**
+     * @brief Populate base fields of a ReminderRequest from a single VBucket entry.
+     *
+     * Reads standard columns from the provided VBucket and maps them to ReminderRequest
+     * members. Used by CreateReminder(ChangeInfo).
+     *
+     * @param[in] info Single change bucket with column/value pairs.
+     * @param[in,out] reminder Target ReminderRequest to fill.
+     */
     void InitBaseInfo(const DataShare::DataShareObserver::ChangeInfo::VBucket& info,
         sptr<ReminderRequest>& reminder);
 
     /**
-     * @brief Calendar database version1
+     * @brief Parsing helpers for calendar RDB schema version 1.
+     *
+     * These overloads parse version-1-formatted rows or VBucket entries into a
+     * ReminderRequest.
      */
     void BuildReminderV1(const std::shared_ptr<DataShare::DataShareResultSet>& result,
         sptr<ReminderRequest>& reminder);
@@ -148,7 +239,7 @@ private:
 
 private:
     int8_t rdbVersion_ {0};  // calendar rdb version
-    int32_t curUserId_ {0};
+    int32_t userId_ {0};
     int32_t uid_ {0};  // calendar
     int32_t dataUid_ {0};  // calendardata
     std::atomic<bool> insertTask_ {false};
@@ -171,7 +262,12 @@ public:
     ~ReminderDataObserver() = default;
 
     /**
-     * @brief Notification of data changes.
+     * @brief DataShare change notification entry point.
+     *
+     * Implementations should forward the `info` to the owning ReminderDataShareHelper
+     * in a thread-safe and non-blocking manner (e.g., by posting a task to `queue_`).
+     *
+     * @param[in] info Structure describing the data change.
      */
     void OnChange(const ChangeInfo& info) override;
 };

@@ -553,6 +553,7 @@ void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool c
     if (isButtonClick) {
         UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
         CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
+        CheckAndCloseShareReminder(reminder);
     }
     StartRecentReminder();
 }
@@ -1054,7 +1055,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, co
     int32_t reminderId = reminder->GetReminderId();
     bool isShare = reminder->IsShare();
     if (!IsAllowedNotify(reminder)) {
-        ANSR_LOGE("Not allow to notify.");
+        ANSR_LOGE("Not allow to notify[%{public}s].", reminder->GetBundleName().c_str());
         reminder->OnShow(false, isSysTimeChanged, false);
         store_->UpdateOrInsert(reminder);
         return;
@@ -1081,7 +1082,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, co
         RemoveFromShowedReminders(reminder);
     } else {
         if (toPlaySound) {
-            PlaySoundAndVibration(reminder);  // play sound and vibration
+            PlaySoundAndVibrationLocked(reminder);  // play sound and vibration
             if (needScheduleTimeout) {
                 StartTimer(reminder, TimerType::ALERTING_TIMER);
             } else {
@@ -1184,7 +1185,7 @@ void ReminderDataManager::StopAlertingReminder(const sptr<ReminderRequest> &remi
         ANSR_LOGE("StopAlertingReminder is illegal.");
         return;
     }
-    StopSoundAndVibration(alertingReminder_);
+    StopSoundAndVibrationLocked(alertingReminder_);
     StopTimer(TimerType::ALERTING_TIMER);
 }
 

@@ -16,6 +16,8 @@
 #ifndef BASE_NOTIFICATION_REMINDER_MOCK_REMINDER_BUNDLE_MANAGER_HELPER_H
 #define BASE_NOTIFICATION_REMINDER_MOCK_REMINDER_BUNDLE_MANAGER_HELPER_H
 
+#include "bundle_mgr_interface.h"
+
 #include <string>
 #include <cstdint>
 
@@ -24,6 +26,7 @@ class MockReminderBundleManagerHelper {
 public:
     static void MockGetBundleNameByUid(const std::string& ret);
     static void MockGetDefaultUidByBundleName(const int32_t ret);
+    static void MockGetBundleInfo(const bool ret, const AppExecFwk::BundleInfo& bundleInfo);
 };
 }  // namespace OHOS::Notification
 

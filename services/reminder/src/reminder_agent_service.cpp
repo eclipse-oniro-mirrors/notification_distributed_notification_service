@@ -66,7 +66,7 @@ ErrCode ReminderAgentService::PublishReminder(const ReminderRequest& reminder, i
     ANSR_LOGD("called");
     sptr<ReminderRequest> tarReminder = CreateReminderRequest(reminder);
     if (nullptr == tarReminder) {
-        ANSR_LOGE("null tarReminder");
+        ANSR_LOGE("CreateReminderRequest is nullptr.");
         return ERR_REMINDER_INVALID_PARAM;
     }
     if (!CheckReminderPermission()) {
@@ -110,7 +110,7 @@ ErrCode ReminderAgentService::UpdateReminder(const int32_t reminderId, const Rem
     ANSR_LOGD("called");
     sptr<ReminderRequest> tarReminder = CreateReminderRequest(reminder);
     if (nullptr == tarReminder) {
-        ANSR_LOGE("null tarReminder");
+        ANSR_LOGE("CreateReminderRequest is nullptr.");
         return ERR_REMINDER_INVALID_PARAM;
     }
     if (!CheckReminderPermission()) {
@@ -314,7 +314,7 @@ ErrCode ReminderAgentService::InitReminderRequest(sptr<ReminderRequest>& reminde
     const std::string& bundle, const int32_t callingUid)
 {
     if (reminder->GetWantAgentInfo() == nullptr || reminder->GetMaxScreenWantAgentInfo() == nullptr) {
-        ANSR_LOGE("null WantAgentInfo");
+        ANSR_LOGE("WantAgentInfo or MaxScreenWantAgentInfo is nullptr.");
         return ERR_REMINDER_INVALID_PARAM;
     }
     std::string wantAgentName = reminder->GetWantAgentInfo()->pkgName;
