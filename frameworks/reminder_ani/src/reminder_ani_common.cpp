@@ -92,6 +92,8 @@ std::string Common::getErrCodeMsg(const int32_t errorCode)
             return "The caller token invalid.";
         case ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED:
             return "The data share permission denied.";
+        case ERR_REMINDER_PARAM_ERROR:
+            return "Parameter error.";
         default:
             return "Inner error";
     }
