@@ -168,7 +168,7 @@ HaMetaMessage& HaMetaMessage::Message(const std::string& message, bool print)
 {
     message_ = message;
     if (print) {
-        ANSR_LOGE("%{public}s, %{public}d", message.c_str(), errorCode_);
+        ANS_LOGE("%{public}s, %{public}d", message.c_str(), errorCode_);
     }
     return *this;
 }
