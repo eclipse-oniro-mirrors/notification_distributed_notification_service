@@ -546,19 +546,26 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
         ANS_LOGE("Serial queue is invalidity.");
         return ERR_ANS_INVALID_PARAM;
     }
+    uint32_t setFlags = slotFlags;
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
+            uint32_t savedFlags = 0;
+            NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundle, savedFlags);
+            slotFlags |= NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG;
+            slotFlags |= NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG;
             result = NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(bundle, slotFlags);
             if (result != ERR_OK) {
                 return;
             }
-            ANS_LOGD("Set slotflags %{public}d to %{public}s.", slotFlags, bundle->GetBundleName().c_str());
+            message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+                " set:" + std::to_string(setFlags) + " save:" + std::to_string(savedFlags) + " slot:" +
+                std::to_string(slotFlags), true);
             result = UpdateSlotReminderModeBySlotFlags(bundle, slotFlags);
         }));
     notificationSvrQueue_->wait(handler);
-    ANS_LOGI("%{public}s_%{public}d, slotFlags: %{public}d, SetSlotFlagsAsBundle result: %{public}d",
-        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), slotFlags, result);
+    ANS_LOGI("%{public}s_%{public}d, slotFlags: %{public}d %{public}d, SetSlotFlagsAsBundle result: %{public}d",
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), slotFlags, setFlags, result);
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
