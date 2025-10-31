@@ -434,7 +434,8 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_239000, Function | SmallTest | Level1)
 
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    ASSERT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info, subscriber->subscribedFlags_),
+        ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -450,7 +451,8 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_240000, Function | SmallTest | Level1)
 
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    ASSERT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info, subscriber->subscribedFlags_),
+        ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -475,7 +477,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_241000, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, SubscribeSelf_279001, Function | SmallTest | Level1)
 {
-    auto res = advancedNotificationService_->SubscribeSelf(nullptr);
+    auto res = advancedNotificationService_->SubscribeSelf(nullptr, 1);
     ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
 }
 
@@ -490,7 +492,8 @@ HWTEST_F(AnsBranchTest, SubscribeSelf_279002, Function | SmallTest | Level1)
 
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    ASSERT_EQ(advancedNotificationService_->SubscribeSelf(subscriber->GetImpl()), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->SubscribeSelf(subscriber->GetImpl(), subscriber->subscribedFlags_),
+        ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -503,7 +506,8 @@ HWTEST_F(AnsBranchTest, SubscribeSelf_279003, Function | SmallTest | Level1)
 
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    ASSERT_EQ(advancedNotificationService_->SubscribeSelf(subscriber->GetImpl()), ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->SubscribeSelf(subscriber->GetImpl(), subscriber->subscribedFlags_),
+        ERR_OK);
 }
 
 /**

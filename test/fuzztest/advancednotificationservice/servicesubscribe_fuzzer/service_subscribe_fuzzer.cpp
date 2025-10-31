@@ -60,7 +60,7 @@ public:
         std::shared_ptr<NotificationSubscriber> testSubscriber = std::make_shared<FuzzTestSubscriber>();
         sptr<IAnsSubscriber> subscriber = new (std::nothrow) SubscriberListener(testSubscriber);
         sptr<NotificationSubscribeInfo> info = ObjectBuilder<NotificationSubscribeInfo>::Build(fuzzData);
-        service->Subscribe(subscriber, info);
+        service->Subscribe(subscriber, info, fuzzData->ConsumeIntegral<uint32_t>());
         return true;
     }
 }

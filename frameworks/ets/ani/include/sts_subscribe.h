@@ -83,6 +83,7 @@ public:
     bool IsInit();
     bool Compare(ani_env *env, ani_object obj);
     bool Compare(ani_env *env, ani_ref ref);
+    bool HasFunctionImplemented(ani_env *env, const char *func);
 
 private:
     bool CallFunction(ani_env *env, const char* func, std::vector<ani_ref> &parm);

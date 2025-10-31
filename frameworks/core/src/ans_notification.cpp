@@ -611,7 +611,7 @@ ErrCode AnsNotification::SubscribeNotification(const NotificationSubscriber &sub
         ANS_LOGE("null subscriberSptr");
         return ERR_ANS_INVALID_PARAM;
     }
-    return proxy->Subscribe(subscriberSptr);
+    return proxy->Subscribe(subscriberSptr, subscriber.GetSubscribedFlags());
 }
 
 ErrCode AnsNotification::SubscribeNotificationSelf(const NotificationSubscriber &subscriber)
@@ -628,7 +628,7 @@ ErrCode AnsNotification::SubscribeNotificationSelf(const NotificationSubscriber 
         ANS_LOGE("null subscriberSptr");
         return ERR_ANS_INVALID_PARAM;
     }
-    return proxy->SubscribeSelf(subscriberSptr);
+    return proxy->SubscribeSelf(subscriberSptr, subscriber.GetSubscribedFlags());
 }
 
 ErrCode AnsNotification::SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber,
@@ -673,7 +673,7 @@ ErrCode AnsNotification::SubscribeNotification(
     if (!subscribeInfo.GetDeviceType().empty()) {
         subscriberSptr->subscriber_.SetDeviceType(subscribeInfo.GetDeviceType());
     }
-    return proxy->Subscribe(subscriberSptr, sptrInfo);
+    return proxy->Subscribe(subscriberSptr, sptrInfo, subscriber.GetSubscribedFlags());
 }
 
 ErrCode AnsNotification::UnSubscribeNotification(NotificationSubscriber &subscriber)
@@ -744,7 +744,7 @@ ErrCode AnsNotification::SubscribeNotificationSelf(const std::shared_ptr<Notific
         return ERR_ANS_NO_MEMORY;
     }
     DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
-    return proxy->SubscribeSelf(listener);
+    return proxy->SubscribeSelf(listener, subscriber->GetSubscribedFlags());
 }
 
 ErrCode AnsNotification::SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
@@ -774,9 +774,9 @@ ErrCode AnsNotification::SubscribeNotification(const std::shared_ptr<Notificatio
     DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
 
     if (subscribeInfo == nullptr) {
-        return proxy->Subscribe(listener);
+        return proxy->Subscribe(listener, subscriber->GetSubscribedFlags());
     }
-    return proxy->Subscribe(listener, subscribeInfo);
+    return proxy->Subscribe(listener, subscribeInfo, subscriber->GetSubscribedFlags());
 }
 
 ErrCode AnsNotification::UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)

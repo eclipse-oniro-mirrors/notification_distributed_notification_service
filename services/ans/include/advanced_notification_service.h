@@ -604,20 +604,22 @@ public:
      *
      * @param subscriber Indicates the subscriber.
      * @param info Indicates the NotificationSubscribeInfo object.
+     * @param subscribedFlags Indicated the subscriber implemented method by bitset
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode Subscribe(const sptr<IAnsSubscriber> &subscriber,
-        const sptr<NotificationSubscribeInfo> &info) override;
+        const sptr<NotificationSubscribeInfo> &info, uint32_t subscribedFlags) override;
 
-    ErrCode Subscribe(const sptr<IAnsSubscriber> &subscriber) override;
+    ErrCode Subscribe(const sptr<IAnsSubscriber> &subscriber, uint32_t subscribedFlags) override;
 
     /**
      * @brief Subscribes notifications self.
      *
      * @param subscriber Indicates the subscriber.
+     * @param subscribedFlags Indicated the subscriber implemented method by bitset
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode SubscribeSelf(const sptr<IAnsSubscriber> &subscriber) override;
+    ErrCode SubscribeSelf(const sptr<IAnsSubscriber> &subscriber, uint32_t subscribedFlags) override;
 
     /**
      * @brief Subscribes notifications.

@@ -141,8 +141,8 @@ namespace OHOS {
         service->SetEnabledForBundleSlot(bundleOption, slotType, enabled, isForceControl);
         service->RequestEnableNotification(stringData, callback, nullptr);
         service->RequestEnableNotification(stringData, callback);
-        service->Subscribe(nullptr, info);
-        service->Subscribe(nullptr);
+        service->Subscribe(nullptr, info, fuzzData->ConsumeIntegral<uint32_t>());
+        service->Subscribe(nullptr, fuzzData->ConsumeIntegral<uint32_t>());
         service->Unsubscribe(nullptr, info);
         service->Unsubscribe(nullptr);
         service->SubscribeLocalLiveView(nullptr, info, isNative);

@@ -41,13 +41,13 @@
 namespace OHOS {
 namespace Notification {
 
-ErrCode AdvancedNotificationService::Subscribe(const sptr<IAnsSubscriber> &subscriber)
+ErrCode AdvancedNotificationService::Subscribe(const sptr<IAnsSubscriber> &subscriber, uint32_t subscribedFlags)
 {
-    return Subscribe(subscriber, nullptr);
+    return Subscribe(subscriber, nullptr, subscribedFlags);
 }
 
 ErrCode AdvancedNotificationService::Subscribe(
-    const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &info)
+    const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &info, uint32_t subscribedFlags)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -77,7 +77,7 @@ ErrCode AdvancedNotificationService::Subscribe(
             }
         }
 
-        errCode = NotificationSubscriberManager::GetInstance()->AddSubscriber(subscriber, info);
+        errCode = NotificationSubscriberManager::GetInstance()->AddSubscriber(subscriber, info, subscribedFlags);
         if (errCode != ERR_OK) {
             break;
         }
@@ -86,7 +86,7 @@ ErrCode AdvancedNotificationService::Subscribe(
     return errCode;
 }
 
-ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<IAnsSubscriber> &subscriber)
+ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<IAnsSubscriber> &subscriber, uint32_t subscribedFlags)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -114,7 +114,7 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<IAnsSubscriber> &s
         sptrInfo->AddAppName(bundle);
         sptrInfo->SetIsSubscribeSelf(true);
 
-        errCode = NotificationSubscriberManager::GetInstance()->AddSubscriber(subscriber, sptrInfo);
+        errCode = NotificationSubscriberManager::GetInstance()->AddSubscriber(subscriber, sptrInfo, subscribedFlags);
         if (errCode != ERR_OK) {
             break;
         }

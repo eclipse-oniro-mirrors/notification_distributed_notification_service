@@ -511,6 +511,26 @@ bool StsSubscriberInstance::CallFunction(ani_env *env, const char *func, std::ve
     return true;
 }
 
+bool StsSubscriberInstance::HasFunctionImplemented(ani_env *env, const char *func)
+{
+    ANS_LOGD("enter");
+    if (env == nullptr) {
+        return false;
+    }
+    ani_ref fn_ref;
+    ani_status aniResult = env->Object_GetPropertyByName_Ref(static_cast<ani_object>(ref_), func, &fn_ref);
+    if (ANI_OK != aniResult) {
+        ANS_LOGD("Object_GetPropertyByName_Ref '%{public}s' error. result: %{public}d.", func, aniResult);
+        return false;
+    }
+    ani_boolean IsUndefined = ANI_FALSE;
+    if (ANI_OK != env->Reference_IsUndefined(fn_ref, &IsUndefined) || IsUndefined == ANI_TRUE) {
+        ANS_LOGD("Reference_IsUndefined  faild. or IsUndefined");
+        return false;
+    }
+    return true;
+}
+
 bool SubscriberInstanceManager::HasNotificationSubscriber(
     ani_env *env, ani_object value, std::shared_ptr<StsSubscriberInstance> &subscriberInfo)
 {
@@ -562,8 +582,44 @@ bool SubscriberInstanceManager::GetNotificationSubscriber(
         ANS_LOGD("SetObject faild");
         return false;
     }
+    uint32_t subscribedFlags = 0;
+    if (subscriberInfo->HasFunctionImplemented(env, "onConsume")) {
+        subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONSUMED;
+    }
+    if (subscriberInfo->HasFunctionImplemented(env, "onUpdate")) {
+        subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_UPDATE;
+    }
+    if (subscriberInfo->HasFunctionImplemented(env, "onCancel")) {
+        subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CANCELED;
+    }
+    if (subscriberInfo->HasFunctionImplemented(env, "onConnect")) {
+        subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONNECTED;
+    }
+    if (subscriberInfo->HasFunctionImplemented(env, "onDisconnect")) {
+        subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_DISCONNECTED;
+    }
+    if (subscriberInfo->HasFunctionImplemented(env, "onDestroy")) {
+        subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_DIED;
+    }
+    if (subscriberInfo->HasFunctionImplemented(env, "onDoNotDisturbChanged")) {
+        subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_DONOTDISTURBDATA_CHANGED;
+    }
+    if (subscriberInfo->HasFunctionImplemented(env, "onEnabledNotificationChanged")) {
+        subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLENOTIFICATION_CHANGED;
+    }
+    if (subscriberInfo->HasFunctionImplemented(env, "onBadgeChanged")) {
+        subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BADGE_CHANGED;
+    }
+    if (subscriberInfo->HasFunctionImplemented(env, "onBadgeEnabledChanged")) {
+        subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BADGEENABLE_CHANGED;
+    }
+    if (subscriberInfo->HasFunctionImplemented(env, "onBatchCancel")) {
+        subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BATCHCANCELED;
+    }
+    subscriberInfo->SetSubscribedFlags(subscribedFlags);
     return true;
 }
+
 bool SubscriberInstanceManager::AddDeletingSubscriber(std::shared_ptr<StsSubscriberInstance> subscriber)
 {
     ANS_LOGD("enter");

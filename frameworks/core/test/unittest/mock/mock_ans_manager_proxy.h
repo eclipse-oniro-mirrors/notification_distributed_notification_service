@@ -98,9 +98,9 @@ public:
     MOCK_METHOD2(SetShowBadgeEnabledForBundle, ErrCode(const sptr<NotificationBundleOption>&, bool));
     MOCK_METHOD2(GetShowBadgeEnabledForBundle, ErrCode(const sptr<NotificationBundleOption>&, bool&));
     MOCK_METHOD1(GetShowBadgeEnabled, ErrCode(bool&));
-    MOCK_METHOD1(Subscribe, ErrCode(const sptr<IAnsSubscriber>&));
-    MOCK_METHOD2(Subscribe, ErrCode(const sptr<IAnsSubscriber>&, const sptr<NotificationSubscribeInfo>&));
-    MOCK_METHOD1(SubscribeSelf, ErrCode(const sptr<IAnsSubscriber>&));
+    MOCK_METHOD2(Subscribe, ErrCode(const sptr<IAnsSubscriber>&, uint32_t));
+    MOCK_METHOD3(Subscribe, ErrCode(const sptr<IAnsSubscriber>&, const sptr<NotificationSubscribeInfo>&, uint32_t));
+    MOCK_METHOD2(SubscribeSelf, ErrCode(const sptr<IAnsSubscriber>&, uint32_t));
     MOCK_METHOD2(SubscribeLocalLiveView, ErrCode(const sptr<IAnsSubscriberLocalLiveView>&, bool));
     MOCK_METHOD3(SubscribeLocalLiveView,
         ErrCode(const sptr<IAnsSubscriberLocalLiveView>&, const sptr<NotificationSubscribeInfo>&, bool));

@@ -216,11 +216,11 @@ namespace OHOS {
         bool enabledByslot;
         service->GetEnabledForBundleSlotSelf(slotType, enabledByslot);
 
-        service->Subscribe(nullptr, info);
-        service->Subscribe(nullptr);
+        service->Subscribe(nullptr, info, fuzzData->ConsumeIntegral<uint32_t>());
+        service->Subscribe(nullptr, fuzzData->ConsumeIntegral<uint32_t>());
         service->Unsubscribe(nullptr, info);
         service->Unsubscribe(nullptr);
-        service->SubscribeSelf(nullptr);
+        service->SubscribeSelf(nullptr, fuzzData->ConsumeIntegral<uint32_t>());
 
         service->SubscribeLocalLiveView(nullptr, info, isNative);
         service->SubscribeLocalLiveView(nullptr, isNative);

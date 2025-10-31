@@ -133,6 +133,9 @@ public:
 
     std::string GetDeviceType() const;
 
+    void SetSubscribedFlags(const uint32_t subscribedMethod);
+    uint32_t GetSubscribedFlags() const;
+
     bool SyncLiveViewVoip(const std::string &deviceType, std::shared_ptr<Notification> &notification) const;
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     bool ProcessSyncDecision(const std::string &deviceType, std::shared_ptr<Notification> &notification) const;
@@ -225,7 +228,7 @@ private:
 private:
     sptr<SubscriberImpl> impl_ = nullptr;
     std::string deviceType_;
-
+    uint32_t subscribedFlags_ = 0xffffffff;
     friend class AnsNotification;
 };
 }  // namespace Notification
