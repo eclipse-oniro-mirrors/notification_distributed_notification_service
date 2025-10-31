@@ -136,39 +136,6 @@ int32_t AdvancedNotificationService::ShutdownExtensionService()
 #endif
 }
 
-void AdvancedNotificationService::PrepareShutdownExtensionService()
-{
-#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
-    ANS_LOGD("PrepareShutdownExtensionService");
-
-    auto timerClient = MiscServices::TimeServiceClient::GetInstance();
-    if (timerClient == nullptr) {
-        ANS_LOGE("null TimeServiceClient");
-        return;
-    }
-
-    auto timerInfoShutdownExtensionService = std::make_shared<NotificationTimerInfo>();
-    timerInfoShutdownExtensionService->SetCallbackInfo([this] {
-        notificationSvrQueue_->submit([this]() {
-            auto client = MiscServices::TimeServiceClient::GetInstance();
-            client->DestroyTimer(timerIdShutdownExtensionService_);
-            timerIdShutdownExtensionService_ = 0L;
-            ANS_LOGD("ANS Start destroy service.");
-            if (ShutdownExtensionService() != 0) {
-                return;
-            }
-            notificationExtensionHandler_.reset();
-            notificationExtensionLoaded_.store(false);
-        });
-    });
-    timerIdShutdownExtensionService_ = timerClient->CreateTimer(timerInfoShutdownExtensionService);
-    auto now = std::chrono::system_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
-    timerClient->StartTimer(
-        timerIdShutdownExtensionService_, duration.count() + SHUTDOWN_DELAY_TIME * NotificationConstant::SECOND_TO_MS);
-#endif
-}
-
 void AdvancedNotificationService::CheckExtensionServiceCondition(
     std::vector<std::pair<sptr<NotificationBundleOption>,
     std::vector<sptr<NotificationBundleOption>>>> &extensionBundleInfos,
@@ -384,16 +351,6 @@ bool AdvancedNotificationService::EnsureExtensionServiceLoadedAndSubscribed(
         std::vector<sptr<NotificationBundleOption>>>> extensionBundleInfos;
     std::vector<sptr<NotificationBundleOption>> bundles{bundle};
 
-    if (timerIdShutdownExtensionService_ != 0L) {
-        auto timerClient = MiscServices::TimeServiceClient::GetInstance();
-        if (timerClient == nullptr) {
-            ANS_LOGE("null TimeServiceClient");
-            return false;
-        }
-        ANS_LOGD("cancel shutdown timer");
-        timerClient->StopTimer(timerIdShutdownExtensionService_);
-    }
-
     if (!isExtensionServiceExist()) {
         CheckExtensionServiceCondition(extensionBundleInfos, bundles);
         if (extensionBundleInfos.size() == 0) {
@@ -593,19 +550,18 @@ void AdvancedNotificationService::RegisterHfpObserver()
 void AdvancedNotificationService::OnHfpDeviceConnectChanged(
     const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state)
 {
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        return;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
-        ProcessHfpDeviceStateChange(device, state);
-    }));
+    ProcessHfpDeviceStateChange(device, state);
+}
+
+void AdvancedNotificationService::OnBluetoothStateChanged(int status)
+{
+    ProcessBluetoothStateChanged(status);
 }
 
 void AdvancedNotificationService::ProcessHfpDeviceStateChange(
     const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state)
 {
-    sptr<NotificationBundleOption> processBundle;
+    std::vector<sptr<NotificationBundleOption>> processBundles;
     std::vector<sptr<NotificationBundleOption>> bundles;
     if (cacheNotificationExtensionBundles_.size() != 0) {
         bundles = cacheNotificationExtensionBundles_;
@@ -620,17 +576,17 @@ void AdvancedNotificationService::ProcessHfpDeviceStateChange(
             continue;
         }
         for (const auto& info : infos) {
-            if (info == nullptr) {
+            if (info == nullptr && !info->IsHfp()) {
                 continue;
             }
             std::string bluetoothAddress = info->GetAddr();
             if (!bluetoothAddress.empty() && bluetoothAddress == device.GetDeviceAddr()) {
-                processBundle = bundle;
+                processBundles.emplace_back(bundle);
                 break;
             }
         }
     }
-    if (processBundle == nullptr) {
+    if (processBundles.size() == 0) {
         std::string encryptedAddr;
         if (AesGcmHelper::Encrypt(device.GetDeviceAddr(), encryptedAddr) == ERR_OK) {
             ANS_LOGW("No matching bundle found for device: %{public}s", encryptedAddr.c_str());
@@ -638,10 +594,12 @@ void AdvancedNotificationService::ProcessHfpDeviceStateChange(
         return;
     }
     
-    if (state == static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED)) {
-        EnsureExtensionServiceLoadedAndSubscribed(processBundle);
-    } else {
-        ShutdownExtensionServiceAndUnSubscribed(processBundle);
+    for (const auto& processBundle : processBundles) {
+        if (state == static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED)) {
+            EnsureExtensionServiceLoadedAndSubscribed(processBundle);
+        } else {
+            ShutdownExtensionServiceAndUnSubscribed(processBundle);
+        }
     }
 }
 
@@ -1196,15 +1154,27 @@ void HfpStateObserver::OnConnectionStateChanged(
     const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state, int cause)
 {
     ANS_LOGI("HFP connection state changed with state: %{public}d", state);
-    AdvancedNotificationService::GetInstance()->OnHfpDeviceConnectChanged(device, state);
+    auto queue = AdvancedNotificationService::GetInstance()->GetNotificationSvrQueue();
+    if (queue == nullptr) {
+        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        return;
+    }
+    ffrt::task_handle handler = queue->submit_h(std::bind([=]() {
+        AdvancedNotificationService::GetInstance()->OnHfpDeviceConnectChanged(device, state);
+    }));
 }
 
 void BluetoothAccessObserver::OnStateChanged(const int transport, const int status)
 {
     ANS_LOGI("Bluetooth state changed: transport: %{public}d, status: %{public}d", transport, status);
-    if (status == OHOS::Bluetooth::BTStateID::STATE_TURN_ON) {
-        AdvancedNotificationService::GetInstance()->OnBluetoothStateChanged();
+    auto queue = AdvancedNotificationService::GetInstance()->GetNotificationSvrQueue();
+    if (queue == nullptr) {
+        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        return;
     }
+    ffrt::task_handle handler = queue->submit_h(std::bind([=]() {
+        AdvancedNotificationService::GetInstance()->OnBluetoothStateChanged(status);
+    }));
 }
 
 void AdvancedNotificationService::ProcessSetUserGrantedState(
@@ -1287,25 +1257,34 @@ void AdvancedNotificationService::RegisterBluetoothAccessObserver()
     Bluetooth::BluetoothHost::GetDefaultHost().RegisterObserver(bluetoothAccessObserver_);
 }
 
-void AdvancedNotificationService::OnBluetoothStateChanged()
+void AdvancedNotificationService::ProcessBluetoothStateChanged(const int status)
 {
-    ANS_LOGD("OnBluetoothStateChanged");
-    std::vector<sptr<NotificationBundleOption>> bundles;
-    if (cacheNotificationExtensionBundles_.size() != 0) {
-        bundles = cacheNotificationExtensionBundles_;
-    } else {
-        GetNotificationExtensionEnabledBundles(bundles);
+    ANS_LOGD("ProcessBluetoothStateChanged");
+    if (status == OHOS::Bluetooth::BTStateID::STATE_TURN_ON) {
+        std::vector<sptr<NotificationBundleOption>> bundles;
+        if (cacheNotificationExtensionBundles_.size() != 0) {
+            bundles = cacheNotificationExtensionBundles_;
+        } else {
+            GetNotificationExtensionEnabledBundles(bundles);
+        }
+    
+        if (bundles.size() == 0) {
+            ANS_LOGD("No bundle match conditon");
+            return;
+        }
+    
+        std::vector<std::pair<sptr<NotificationBundleOption>,
+            std::vector<sptr<NotificationBundleOption>>>> extensionBundleInfos;
+        CheckExtensionServiceCondition(extensionBundleInfos, bundles);
+        if (extensionBundleInfos.size() > 0) {
+            LoadExtensionService();
+            for (const auto& extensionBundleInfo : extensionBundleInfos) {
+                SubscribeExtensionService(extensionBundleInfo.first, extensionBundleInfo.second);
+            }
+        }
     }
-
-    if (bundles.size() == 0) {
-        return;
-    }
-
-    std::vector<std::pair<sptr<NotificationBundleOption>,
-        std::vector<sptr<NotificationBundleOption>>>> extensionBundleInfos;
-    CheckExtensionServiceCondition(extensionBundleInfos, bundles);
-    if (extensionBundleInfos.size() > 0) {
-        LoadExtensionService();
+    if (status == OHOS::Bluetooth::BTStateID::STATE_TURN_OFF) {
+        ShutdownExtensionService();
     }
 }
 

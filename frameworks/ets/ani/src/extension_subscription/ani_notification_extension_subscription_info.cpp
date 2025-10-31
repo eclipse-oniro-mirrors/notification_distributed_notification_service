@@ -22,7 +22,7 @@ namespace OHOS {
 namespace NotificationSts {
 namespace {
 constexpr const char* NOTIFICATION_EXTENSION_SUBSCRIPTION_INFO_CLASSNAME =
-    "notification.notificationExtensionContent.NotificationExtensionsSubscriptionInfoInner";
+    "notification.NotificationExtensionSubscriptionInfo.NotificationExtensionSubscriptionInfoInner";
 constexpr const char* NOTIFICATION_EXTENSION_SUBSCRIPTION_SUBSCRIBE_TYPE_CLASSNAME =
     "@ohos.notificationExtensionSubscription.notificationExtensionSubscription.SubscribeType";
 }

@@ -1815,15 +1815,14 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleO
         return nullptr;
     }
 
-    int32_t actualUid = bundleManager->GetDefaultUidByBundleName(bundleOption->GetBundleName(), activeUserId);
-    if (actualUid < 0) {
-        ANS_LOGE("Bundle name %{public}s does not exist in userId %{public}d",
-            bundleOption->GetBundleName().c_str(), activeUserId);
-        return nullptr;
-    }
-
     sptr<NotificationBundleOption> validBundleOption = nullptr;
     if (bundleOption->GetUid() <= 0) {
+        int32_t actualUid = bundleManager->GetDefaultUidByBundleName(bundleOption->GetBundleName(), activeUserId);
+        if (actualUid < 0) {
+            ANS_LOGE("Bundle name %{public}s does not exist in userId %{public}d",
+                bundleOption->GetBundleName().c_str(), activeUserId);
+            return nullptr;
+        }
         validBundleOption = new (std::nothrow) NotificationBundleOption(bundleOption->GetBundleName(), actualUid);
         if (validBundleOption == nullptr) {
             ANS_LOGE("Failed to create NotificationBundleOption instance");
