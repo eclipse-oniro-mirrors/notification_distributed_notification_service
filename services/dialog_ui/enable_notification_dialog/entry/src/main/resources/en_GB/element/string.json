@@ -41,6 +41,20 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"reason_simple",
+            "value":"These may include banners, badges, and sounds. You can change this in Settings.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_tv",
+            "value":"Notifications will be delivered as banners. You can change your notification preferences at any time in Settings.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

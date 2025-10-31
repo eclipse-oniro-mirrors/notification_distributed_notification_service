@@ -41,6 +41,20 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"reason_simple",
+            "value":"Ini mungkin mencakup banner, lencana, dan suara. Anda dapat mengubah ini di Pengaturan.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_tv",
+            "value":"Notifikasi akan dikirimkan sebagai banner. Anda dapat mengubah preferensi notifikasi Anda kapan saja di Pengaturan.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

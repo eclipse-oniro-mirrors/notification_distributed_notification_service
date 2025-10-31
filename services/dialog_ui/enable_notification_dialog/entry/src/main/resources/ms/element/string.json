@@ -41,6 +41,20 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"reason_simple",
+            "value":"Ini mungkin termasuk sepanduk, lencana, dan bunyi. Buat penukaran dalam Tetapan.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_tv",
+            "value":"Pemberitahuan akan dihantar sebagai sepanduk. Tukar keutamaan pemberitahuan pada bila-bila masa dalam Tetapan.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

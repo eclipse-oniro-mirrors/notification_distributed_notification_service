@@ -41,6 +41,20 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"reason_simple",
+            "value":"Mogą one obejmować banery, odznaki i dźwięki. Można to zmienić w Ustawieniach.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_tv",
+            "value":"Powiadomienia będą dostarczane w postaci banerów. Preferencje dotyczące powiadomień można zmienić w dowolnym momencie w Ustawieniach.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }
