@@ -41,6 +41,20 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"reason_simple",
+            "value":"Possono includere banner, badge e suoni. Puoi apportare delle modifiche in Impostazioni.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_tv",
+            "value":"Le notifiche verranno visualizzate come banner. Puoi modificare le tue preferenze di notifica in qualsiasi momento in Impostazioni.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

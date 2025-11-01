@@ -41,6 +41,20 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"reason_simple",
+            "value":"Bunlara bildirim başlıkları, rozetler ve sesler dahil olabilir. Bunu Ayarlar bölümünden değiştirebilirsiniz.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_tv",
+            "value":"Bildirimler, bildirim başlıkları olarak gönderilecektir. Bildirim tercihlerinizi istediğiniz zaman Ayarlar bölümünden değiştirebilirsiniz.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }
