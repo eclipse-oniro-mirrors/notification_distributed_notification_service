@@ -326,6 +326,36 @@ HWTEST_F(NotificationCloneBundleInfoTest, ToJson_00002, Function | SmallTest | L
 }
 
 /**
+ * @tc.name: ToJson_00003
+ * @tc.desc: Test ToJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, ToJson_00003, Function | SmallTest | Level1)
+{
+    std::string bundleName = "BundleName";
+    int32_t appIndex = 1;
+    int32_t uid = 1;
+    int32_t slotFlags = 1;
+    bool isShowBadge = true;
+    NotificationConstant::SWITCH_STATE enabledNotification = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    rrc->SetBundleName(bundleName);
+    rrc->SetAppIndex(appIndex);
+    rrc->SetUid(uid);
+    rrc->SetSlotFlags(slotFlags);
+    rrc->SetIsShowBadge(isShowBadge);
+    rrc->SetEnableNotification(enabledNotification);
+    nlohmann::json jsonObject;
+    EXPECT_EQ(jsonObject.is_null(), true);
+    EXPECT_EQ(jsonObject.is_object(), false);
+    rrc->ToJson(jsonObject);
+    rrc->FromJson(jsonObject);
+    EXPECT_EQ(jsonObject.is_object(), true);
+    EXPECT_EQ(rrc->GetEnableNotification(), enabledNotification);
+}
+
+/**
  * @tc.name: Dump_00001
  * @tc.desc: Test Dump parameters.
  * @tc.type: FUNC
