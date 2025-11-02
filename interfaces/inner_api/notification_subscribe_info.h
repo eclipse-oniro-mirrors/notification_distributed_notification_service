@@ -198,6 +198,10 @@ private:
      **/
     int32_t GetSubscriberUid() const;
 
+    void SetSubscribedFlags(uint32_t subscribedFlags);
+
+    uint32_t GetSubscribedFlags() const;
+
 private:
     std::vector<std::string> appNames_ {};
     int32_t userId_ {-1};
@@ -205,6 +209,7 @@ private:
     int32_t subscriberUid_ {-1};
     std::string subscriberBundleName_;
     uint32_t filterType_ {0};
+    uint32_t subscribedFlags_ {0};
     std::vector<NotificationConstant::SlotType> slotTypes_ {};
     bool needNotifyApplicationChanged_ = false;
     bool needNotifyResponse_ = false;

@@ -175,7 +175,8 @@ BENCHMARK_F(BenchmarkNotificationService, SubscribeTestCase)(benchmark::State &s
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     while (state.KeepRunning()) {
-        ErrCode errCode = advancedNotificationService_->Subscribe(subscriber->GetImpl(), info);
+        ErrCode errCode = advancedNotificationService_->Subscribe(subscriber->GetImpl(), info,
+            subscriber->subscribedFlags_);
         if (errCode != ERR_OK) {
             state.SkipWithError("SubscribeTestCase failed.");
         }

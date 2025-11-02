@@ -1243,6 +1243,7 @@ napi_value GetNotificationSubscriber(
         ThreadFinished, nullptr, ThreadSafeCommon, &tsfn);
     subscriberInfo.subscriber->SetThreadSafeFunction(tsfn);
     subscriberInfo.subscriber->SetEnv(env);
+    uint32_t subscribedFlag = 0;
 
     // onConsume?:(data: SubscribeCallbackData) => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onConsume", &hasProperty));
@@ -1258,6 +1259,7 @@ napi_value GetNotificationSubscriber(
         }
         napi_create_reference(env, nOnConsumed, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, CONSUME, result);
+        subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONSUMED;
     }
     // onCancel?:(data: SubscribeCallbackData) => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onCancel", &hasProperty));
@@ -1273,6 +1275,7 @@ napi_value GetNotificationSubscriber(
         }
         napi_create_reference(env, nOnCanceled, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, CANCEL, result);
+        subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CANCELED;
     }
     // onUpdate?:(data: NotificationSortingMap) => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onUpdate", &hasProperty));
@@ -1288,6 +1291,7 @@ napi_value GetNotificationSubscriber(
         }
         napi_create_reference(env, nOnUpdate, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, UPDATE, result);
+        subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_UPDATE;
     }
     // onConnect?:() => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onConnect", &hasProperty));
@@ -1303,6 +1307,7 @@ napi_value GetNotificationSubscriber(
         }
         napi_create_reference(env, nOnConnected, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, CONNECTED, result);
+        subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONNECTED;
     }
     // onDisconnect?:() => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onDisconnect", &hasProperty));
@@ -1318,6 +1323,7 @@ napi_value GetNotificationSubscriber(
         }
         napi_create_reference(env, nOnDisConnect, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, DIS_CONNECTED, result);
+        subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_DISCONNECTED;
     }
     // onDestroy?:() => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onDestroy", &hasProperty));
@@ -1333,6 +1339,7 @@ napi_value GetNotificationSubscriber(
         }
         napi_create_reference(env, nOnDied, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, DIE, result);
+        subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_DIED;
     }
     // onDisturbModeChange?:(mode: notification.DoNotDisturbMode) => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onDisturbModeChange", &hasProperty));
@@ -1364,6 +1371,7 @@ napi_value GetNotificationSubscriber(
         }
         napi_create_reference(env, nOnDisturbDateChanged, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, DISTURB_DATE_CHANGE, result);
+        subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_DONOTDISTURBDATA_CHANGED;
     }
 
     // onDoNotDisturbChanged?:(mode: notificationManager.DoNotDisturbDate) => void
@@ -1380,6 +1388,7 @@ napi_value GetNotificationSubscriber(
         }
         napi_create_reference(env, nOnDoNotDisturbChanged, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, DISTURB_CHANGED, result);
+        subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_DONOTDISTURBDATA_CHANGED;
     }
 
     // onEnabledNotificationChanged?:(data: notification.EnabledNotificationCallbackData) => void
@@ -1396,6 +1405,7 @@ napi_value GetNotificationSubscriber(
         }
         napi_create_reference(env, nOnEnabledNotificationChanged, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, ENABLE_NOTIFICATION_CHANGED, result);
+        subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLENOTIFICATION_CHANGED;
     }
 
     // onBadgeChanged?:(data: BadgeNumberCallbackData) => void
@@ -1412,6 +1422,7 @@ napi_value GetNotificationSubscriber(
         }
         napi_create_reference(env, nOnBadgeChanged, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, BADGE_CHANGED, result);
+        subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BADGE_CHANGED;
     }
 
     // onBadgeEnabledChanged?:(data: EnabledNotificationCallbackData) => void
@@ -1428,6 +1439,7 @@ napi_value GetNotificationSubscriber(
         }
         napi_create_reference(env, nOnBadgeEnabledChanged, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, BADGE_ENABLED_CHANGED, result);
+        subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BADGEENABLE_CHANGED;
     }
 
     // onBatchCancel?:(data: Array<SubscribeCallbackData>) => void
@@ -1444,6 +1456,7 @@ napi_value GetNotificationSubscriber(
         }
         napi_create_reference(env, onBatchCancel, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, BATCH_CANCEL, result);
+        subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BATCHCANCELED;
     }
 
     return Common::NapiGetNull(env);

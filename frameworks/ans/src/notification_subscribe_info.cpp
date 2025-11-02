@@ -126,6 +126,10 @@ bool NotificationSubscribeInfo::Marshalling(Parcel &parcel) const
         ANS_LOGE("Can't write isSubscribeSelf");
         return false;
     }
+    if (!parcel.WriteUint32(subscribedFlags_)) {
+        ANS_LOGE("Can't write subscribedFlags");
+        return false;
+    }
     return true;
 }
 
@@ -138,6 +142,16 @@ NotificationSubscribeInfo *NotificationSubscribeInfo::Unmarshalling(Parcel &parc
     }
 
     return info;
+}
+
+void NotificationSubscribeInfo::SetSubscribedFlags(uint32_t subscribedFlags)
+{
+    subscribedFlags_ = subscribedFlags;
+}
+
+uint32_t NotificationSubscribeInfo::GetSubscribedFlags() const
+{
+    return subscribedFlags_;
 }
 
 bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
@@ -187,6 +201,7 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
     needNotifyResponse_ = parcel.ReadBool();
     // read isSubscribeSelf_
     isSubscribeSelf_ = parcel.ReadBool();
+    subscribedFlags_ = parcel.ReadUint32();
     return true;
 }
 

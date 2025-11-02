@@ -72,8 +72,8 @@ void NotificationSubscriberManager::ResetFfrtQueue()
     }
 }
 
-ErrCode NotificationSubscriberManager::AddSubscriber(
-    const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
+ErrCode NotificationSubscriberManager::AddSubscriber(const sptr<IAnsSubscriber> &subscriber,
+    const sptr<NotificationSubscribeInfo> &subscribeInfo, uint32_t subscribedFlags)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (subscriber == nullptr) {
@@ -93,6 +93,7 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
     std::string callingBuneldName = GetClientBundleName();
     subInfo->SetSubscriberBundleName(callingBuneldName);
     subInfo->SetSubscriberUid(callingUid);
+    subInfo->SetSubscribedFlags(subscribedFlags);
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_2);
     message.Message(callingBuneldName + "_" +
@@ -203,7 +204,8 @@ void NotificationSubscriberManager::NotifyApplicationInfochangedInner(const std:
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("bundleName: %{public}s", bundleName.c_str());
     for (auto record : subscriberRecordList_) {
-        if (record->needNotifyApplicationChanged) {
+        if (record->needNotifyApplicationChanged && (record->subscribedFlags_ &
+            NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_APPLICATIONINFONEED_CHANGED)) {
             record->subscriber->OnApplicationInfoNeedChanged(bundleName);
         }
     }
@@ -413,6 +415,7 @@ void NotificationSubscriberManager::AddRecordInfo(
     record->needNotifyApplicationChanged = subscribeInfo->GetNeedNotifyApplication();
     record->needNotifyResponse = subscribeInfo->GetNeedNotifyResponse();
     record->isSubscribeSelf = subscribeInfo->GetIsSubscribeSelf();
+    record->subscribedFlags_ = subscribeInfo->GetSubscribedFlags();
 }
 
 void NotificationSubscriberManager::RemoveRecordInfo(
@@ -449,8 +452,9 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
             subscriberRecordList_.push_back(record);
         }
         record->subscriber->AsObject()->AddDeathRecipient(recipient_);
-
-        record->subscriber->OnConnected();
+        if (subscribeInfo->GetSubscribedFlags() & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONNECTED) {
+            record->subscriber->OnConnected();
+        }
         ANS_LOGD("subscriber connected");
     }
 
@@ -488,7 +492,9 @@ ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
             std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
             subscriberRecordList_.remove(record);
         }
-        record->subscriber->OnDisconnected();
+        if (record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_DISCONNECTED) {
+            record->subscriber->OnDisconnected();
+        }
         ANS_LOGI("subscriber is disconnected.");
     }
 
@@ -510,7 +516,8 @@ void NotificationSubscriberManager::NotifyConsumedInner(
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d> BundleName  = <%{public}s deviceType = %{public}s",
             __FUNCTION__, record->userId, notification->GetBundleName().c_str(), record->deviceType.c_str());
-        if (IsSubscribedBysubscriber(record, notification) && ConsumeRecordFilter(record, notification)) {
+        if (IsSubscribedBysubscriber(record, notification) && ConsumeRecordFilter(record, notification) &&
+            (record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONSUMED)) {
             if (!record->subscriber->AsObject()->IsProxyObject()) {
                 MessageParcel data;
                 if (!data.WriteParcelable(notification)) {
@@ -606,6 +613,10 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<s
         ANS_LOGE("Invalid input.");
         return;
     }
+    if (!(record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONSUMED)) {
+        ANS_LOGE("Subscriber does not implement OnConsumed method");
+        return;
+    }
 
     ANS_LOGD("Record->userId = <%{public}d>", record->userId);
     std::vector<sptr<Notification>> currNotifications;
@@ -667,7 +678,8 @@ void NotificationSubscriberManager::NotifyCanceledInner(
     ANS_LOGI("CancelNotification key=%{public}s", notification->GetKey().c_str());
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);
-        if (IsSubscribedBysubscriber(record, notification)) {
+        if (IsSubscribedBysubscriber(record, notification) &&
+            (record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CANCELED)) {
             if (notificationMap != nullptr && notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
                 record->subscriber->OnCanceledWithMaxCapacity(notification, notificationMap, deleteReason);
             } else if (notificationMap != nullptr && !notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
@@ -770,6 +782,9 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
         if (record == nullptr) {
             continue;
         }
+        if (!(record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BATCHCANCELED)) {
+            continue;
+        }
         ANS_LOGD("record->userId = <%{public}d>", record->userId);
         std::vector<sptr<Notification>> currNotifications;
         for (size_t i = 0; i < notifications.size(); i ++) {
@@ -818,16 +833,18 @@ void NotificationSubscriberManager::NotifyUpdatedInner(const sptr<NotificationSo
         return;
     }
     for (auto record : subscriberRecordList_) {
-        record->subscriber->OnUpdated(notificationMap);
+        if (record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_UPDATE) {
+            record->subscriber->OnUpdated(notificationMap);
+        }
     }
 }
 
 template <typename... Args>
 void NotificationSubscriberManager::NotifySubscribers(int32_t userId, const std::string& bundle,
-    ErrCode (IAnsSubscriber::*func)(Args...), Args&& ... args)
+    NotificationConstant::SubscribedFlag flags, ErrCode (IAnsSubscriber::*func)(Args...), Args&& ... args)
 {
     for (auto& record : subscriberRecordList_) {
-        if (IsNeedNotifySubscribers(record, userId, bundle)) {
+        if (IsNeedNotifySubscribers(record, userId, bundle) && (record->subscribedFlags_ & flags)) {
             (record->subscriber->*func)(std::forward<Args>(args)...);
         }
     }
@@ -860,7 +877,8 @@ void NotificationSubscriberManager::NotifyDoNotDisturbDateChangedInner(const int
         ANS_LOGE("null date");
         return;
     }
-    NotifySubscribers(userId, bundle, &IAnsSubscriber::OnDoNotDisturbDateChange, date);
+    NotifySubscribers(userId, bundle, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_DONOTDISTURBDATA_CHANGED,
+        &IAnsSubscriber::OnDoNotDisturbDateChange, date);
 }
 
 void NotificationSubscriberManager::NotifyBadgeEnabledChangedInner(
@@ -873,7 +891,8 @@ void NotificationSubscriberManager::NotifyBadgeEnabledChangedInner(
     int32_t userId = SUBSCRIBE_USER_INIT;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(callbackData->GetUid(), userId);
     std::string bundle = callbackData->GetBundle();
-    NotifySubscribers(userId, bundle, &IAnsSubscriber::OnBadgeEnabledChanged, callbackData);
+    NotifySubscribers(userId, bundle, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BADGEENABLE_CHANGED,
+        &IAnsSubscriber::OnBadgeEnabledChanged, callbackData);
 }
 
 bool NotificationSubscriberManager::IsSystemUser(int32_t userId)
@@ -891,7 +910,8 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChangedInner(
     int32_t userId = SUBSCRIBE_USER_INIT;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(callbackData->GetUid(), userId);
     std::string bundle = callbackData->GetBundle();
-    NotifySubscribers(userId, bundle, &IAnsSubscriber::OnEnabledNotificationChanged, callbackData);
+    NotifySubscribers(userId, bundle, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLENOTIFICATION_CHANGED,
+        &IAnsSubscriber::OnEnabledNotificationChanged, callbackData);
 }
 
 void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbackData> &badgeData)
@@ -904,7 +924,8 @@ void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbac
         int32_t userId = SUBSCRIBE_USER_INIT;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(badgeData->GetUid(), userId);
         std::string bundle = badgeData->GetBundle();
-        NotifySubscribers(userId, bundle, &IAnsSubscriber::OnBadgeChanged, badgeData);
+        NotifySubscribers(userId, bundle, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BADGE_CHANGED,
+            &IAnsSubscriber::OnBadgeChanged, badgeData);
         NotificationAnalyticsUtil::ReportBadgeChange(badgeData);
     };
     notificationSubQueue_->submit(setBadgeNumberFunc);
@@ -995,6 +1016,9 @@ ErrCode NotificationSubscriberManager::DistributeOperationTask(const sptr<Notifi
     ErrCode result = ERR_OK;
     for (const auto& record : subscriberRecordList_) {
         if (record == nullptr) {
+            continue;
+        }
+        if (!(record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_OPERATIONRESPONSE)) {
             continue;
         }
         std::string notificationUdid = "";

@@ -52,6 +52,7 @@ public:
         uint32_t filterType {0};
         std::set<NotificationConstant::SlotType> slotTypes {};
         bool isSubscribeSelf = false;
+        uint32_t subscribedFlags_ {0};
     };
 
     /**
@@ -59,10 +60,11 @@ public:
      *
      * @param subscriber Indicates the AnsSubscriberInterface object.
      * @param subscribeInfo Indicates the NotificationSubscribeInfo object.
+     * @param subscribedFlags Indicated the subscriber implemented method by bitset
      * @return Indicates the result code.
      */
     ErrCode AddSubscriber(const sptr<IAnsSubscriber> &subscriber,
-        const sptr<NotificationSubscribeInfo> &subscribeInfo);
+        const sptr<NotificationSubscribeInfo> &subscribeInfo, uint32_t subscribedFlags);
 
     /**
      * @brief Remove a subscriber.
@@ -207,7 +209,7 @@ private:
     bool IsNeedNotifySubscribers(const std::shared_ptr<SubscriberRecord> &record,
         const int32_t &userId, const std::string &bundle);
     template <typename... Args>
-    void NotifySubscribers(int32_t userId, const std::string& bundle,
+    void NotifySubscribers(int32_t userId, const std::string& bundle, NotificationConstant::SubscribedFlag flags,
         ErrCode (IAnsSubscriber::*func)(Args...), Args&& ... args);
 
 private:

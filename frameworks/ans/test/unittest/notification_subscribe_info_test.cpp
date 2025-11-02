@@ -147,6 +147,14 @@ HWTEST_F(NotificationSubscribeInfoTest, AddDeviceType_00001, Function | SmallTes
     EXPECT_EQ(rrc->GetDeviceType(), deviceType);
 }
 
+HWTEST_F(NotificationSubscribeInfoTest, AddSubscribedFlags_00001, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
+    rrc->SetSubscribedFlags(0xfff);
+    EXPECT_EQ(rrc->GetSubscribedFlags(), 0xfff);
+}
+
 /**
  * @tc.name: Dump_00001
  * @tc.desc: Test Dump.

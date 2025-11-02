@@ -159,6 +159,7 @@ private:
 std::shared_ptr<NotificationSubscriberManager> NotificationSubscriberManagerTest::notificationSubscriberManager_ =
     nullptr;
 sptr<IAnsSubscriber> NotificationSubscriberManagerTest::subscriber_ = nullptr;
+NotificationSubscriberManagerTest::TestAnsSubscriber NotificationSubscriberManagerTest::testAnsSubscriber_;
 
 void NotificationSubscriberManagerTest::SetUpTestCase()
 {
@@ -179,7 +180,7 @@ void NotificationSubscriberManagerTest::TearDownTestCase()
 void NotificationSubscriberManagerTest::SetUp()
 {
     MockGetOsAccountLocalIdFromUid(true, 0);
-    notificationSubscriberManager_->AddSubscriber(subscriber_, nullptr);
+    notificationSubscriberManager_->AddSubscriber(subscriber_, nullptr, testAnsSubscriber_.subscribedFlags_);
 }
 
 void NotificationSubscriberManagerTest::TearDown()
@@ -192,7 +193,7 @@ void NotificationSubscriberManagerTest::TearDown()
  * @tc.name      : ANS_AddSubscriber_0100
  * @tc.desc      : Test AddSubscriber function, return is ERR_OK.
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_001, Level1)
 {
     // Test NotifyUpdated function.
     const std::vector<NotificationSorting> sortingList;
@@ -202,8 +203,10 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
     // Test AddSubscriber function.
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     info->AddAppName("test_bundle");
-    ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(subscriber_, info), (int)ERR_OK);
-    ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(subscriber_, nullptr), (int)ERR_OK);
+    ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(subscriber_, info, testAnsSubscriber_.subscribedFlags_),
+        (int)ERR_OK);
+    ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(subscriber_, nullptr, testAnsSubscriber_.subscribedFlags_),
+        (int)ERR_OK);
 }
 
 /**
@@ -211,7 +214,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
  * @tc.name      : ANS_AddSubscriber_0100
  * @tc.desc      : Test AddSubscriber function when subscriber is nullptr, return is ERR_ANS_INVALID_PARAM.
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_002, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_002, Level1)
 {
     // Test NotifyDisturbModeChanged function.
     sptr<NotificationDoNotDisturbDate> date =
@@ -221,7 +224,8 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
 
     // Test AddSubscriber function.
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(nullptr, info), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(nullptr, info, testAnsSubscriber_.subscribedFlags_),
+        (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -229,7 +233,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
  * @tc.name      : ANS_RemoveSubscriber_0100
  * @tc.desc      : Test RemoveSubscriber function, return is ERR_OK.
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_003, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_003, Level1)
 {
     // Test NotifyConsumed function.
     std::vector<NotificationSorting> sortingList;
@@ -249,7 +253,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
  * @tc.name      : ANS_AddSubscriber_0100
  * @tc.desc      : Test RemoveSubscriber function when subscriber is nullptr, return is ERR_ANS_INVALID_PARAM.
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_004, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_004, Level1)
 {
     // Test NotifyCanceled function.
     std::vector<NotificationSorting> sortingList;
@@ -270,7 +274,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
  * @tc.desc      : Test RegisterOnSubscriberAddCallback .
  */
 void OnSubscriberAddFake(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &recode) {}
-HWTEST_F(NotificationSubscriberManagerTest, RegisterOnSubscriberAddCallbackTest_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, RegisterOnSubscriberAddCallbackTest_001, Level1)
 {
     std::function<void(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &)> callback =
         std::bind(OnSubscriberAddFake, std::placeholders::_1);
@@ -284,7 +288,7 @@ HWTEST_F(NotificationSubscriberManagerTest, RegisterOnSubscriberAddCallbackTest_
  * @tc.name      : RegisterOnSubscriberAddCallback and callback is nullptr
  * @tc.desc      : Test RegisterOnSubscriberAddCallback .
  */
-HWTEST_F(NotificationSubscriberManagerTest, RegisterOnSubscriberAddCallbackTest_002, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, RegisterOnSubscriberAddCallbackTest_002, Level1)
 {
     std::function<void(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &)> callback =
         std::bind(OnSubscriberAddFake, std::placeholders::_1);
@@ -301,7 +305,7 @@ HWTEST_F(NotificationSubscriberManagerTest, RegisterOnSubscriberAddCallbackTest_
  * @tc.name      : UnRegisterOnSubscriberAddCallback
  * @tc.desc      : Test UnRegisterOnSubscriberAddCallback .
  */
-HWTEST_F(NotificationSubscriberManagerTest, UnRegisterOnSubscriberAddCallbackTest_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, UnRegisterOnSubscriberAddCallbackTest_001, Level1)
 {
     std::function<void(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &)> callback =
         std::bind(OnSubscriberAddFake, std::placeholders::_1);
@@ -317,7 +321,7 @@ HWTEST_F(NotificationSubscriberManagerTest, UnRegisterOnSubscriberAddCallbackTes
  * @tc.name      : BatchNotifyConsumedInner
  * @tc.desc      : Test BatchNotifyConsumedInner .
  */
-HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_001, Level1)
 {
     sptr<MockAnsSubscriber> mockSubscriber = new MockAnsSubscriber(new MockIRemoteObject());
     EXPECT_CALL(*mockSubscriber, OnConsumedList(_, _)).Times(1);
@@ -336,6 +340,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_001, Functi
     const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
     subscribeInfo->AddAppName("test");
     subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->SetSubscribedFlags(0xFFFFFFFF);
     notificationSubscriberManager_->AddRecordInfo(record, subscribeInfo);
     notificationSubscriberManager_->BatchNotifyConsumedInner(notifications, notificationMap, record);
 }
@@ -345,7 +350,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_001, Functi
  * @tc.name      : BatchNotifyConsumedInner and params is invalid
  * @tc.desc      : Test BatchNotifyConsumedInner .
  */
-HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_002, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_002, Level1)
 {
     sptr<MockAnsSubscriber> mockSubscriber = new MockAnsSubscriber(new MockIRemoteObject());
     EXPECT_CALL(*mockSubscriber, OnConsumedList(_, _)).Times(0);
@@ -358,7 +363,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_002, Functi
  * @tc.name      : BatchNotifyConsumedInner and subscriber isn't subscribed to this notification
  * @tc.desc      : Test BatchNotifyConsumedInner .
  */
-HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_003, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_003, Level1)
 {
     sptr<MockAnsSubscriber> mockSubscriber = new MockAnsSubscriber(new MockIRemoteObject());
     EXPECT_CALL(*mockSubscriber, OnConsumedList(_, _)).Times(0);
@@ -385,7 +390,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_003, Functi
  * @tc.name      : BatchNotifyConsumed and params is nullptr
  * @tc.desc      : Test BatchNotifyConsumed .
  */
-HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumed_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumed_001, Level1)
 {
     std::vector<sptr<OHOS::Notification::Notification>> notifications;
     sptr<NotificationSortingMap> notificationMap(new NotificationSortingMap());
@@ -400,6 +405,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumed_001, Function | 
 
     NotificationSubscriberManager notificationSubscriberManager;
     auto record = notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscribedFlags_ = testAnsSubscriber->GetSubscribedFlags();
     notificationSubscriberManager.BatchNotifyConsumed(notifications, notificationMap, record);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     isCallback = testAnsSubscriber->GetCallBack();
@@ -412,13 +418,36 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumed_001, Function | 
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 }
+
+HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumed_subscribedFlagFalse, Level1)
+{
+    std::vector<sptr<OHOS::Notification::Notification>> notifications;
+    sptr<NotificationSortingMap> notificationMap(new NotificationSortingMap());
+    sptr<NotificationRequest> request(new NotificationRequest());
+    sptr<Notification> notification(new Notification(request));
+    notifications.emplace_back(notification);
+     
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    testAnsSubscriber->SetSubscribedFlags(0);
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    auto isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+
+    NotificationSubscriberManager notificationSubscriberManager;
+    auto record = notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscribedFlags_ = testAnsSubscriber->GetSubscribedFlags();
+    notificationSubscriberManager.BatchNotifyConsumed(notifications, notificationMap, record);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+}
  
 /**
  * @tc.number    : AddSubscriber001
  * @tc.name      : AddSubscriber and params is nullptr
  * @tc.desc      : Test AddSubscriber .
  */
-HWTEST_F(NotificationSubscriberManagerTest, AddSubscriber_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, AddSubscriber_001, Level1)
 {
     MockGetOsAccountLocalIdFromUid(false, 0);
     NotificationSubscriberManager notificationSubscriberManager;
@@ -426,7 +455,7 @@ HWTEST_F(NotificationSubscriberManagerTest, AddSubscriber_001, Function | SmallT
     sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     
     ASSERT_EQ(notificationSubscriberManager.AddSubscriber(
-        subscriber, nullptr), (int)ERR_ANS_INVALID_PARAM);
+        subscriber, nullptr, testAnsSubscriber->subscribedFlags_), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -434,7 +463,7 @@ HWTEST_F(NotificationSubscriberManagerTest, AddSubscriber_001, Function | SmallT
  * @tc.name      : AddSubscriber and params is nullptr
  * @tc.desc      : Test AddSubscriber .he
  */
-HWTEST_F(NotificationSubscriberManagerTest, AddSubscriber_002, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, AddSubscriber_002, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
@@ -447,7 +476,8 @@ HWTEST_F(NotificationSubscriberManagerTest, AddSubscriber_002, Function | SmallT
     slotTypes.push_back(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     info->SetSlotTypes(slotTypes);
 
-    ASSERT_EQ(notificationSubscriberManager.AddSubscriber(subscriber, info), (int)ERR_OK);
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriber(subscriber, info, testAnsSubscriber->subscribedFlags_),
+        (int)ERR_OK);
     
     sptr<NotificationSortingMap> notificationMap(new NotificationSortingMap());
     notificationSubscriberManager.NotifyUpdated(notificationMap);
@@ -458,7 +488,33 @@ HWTEST_F(NotificationSubscriberManagerTest, AddSubscriber_002, Function | SmallT
     ASSERT_EQ(notificationSubscriberManager.RemoveSubscriber(subscriber, nullptr), (int)ERR_OK);
 }
 
-HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotifyUpdate_SubscribedFlagsFalse, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    testAnsSubscriber->SetSubscribedFlags(0);
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    auto isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+    sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
+    info->AddDeviceType("current");
+    std::vector<NotificationConstant::SlotType> slotTypes;
+    slotTypes.push_back(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    info->SetSlotTypes(slotTypes);
+
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriber(subscriber, info, testAnsSubscriber->subscribedFlags_),
+        (int)ERR_OK);
+    
+    sptr<NotificationSortingMap> notificationMap(new NotificationSortingMap());
+    notificationSubscriberManager.NotifyUpdated(notificationMap);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+
+    ASSERT_EQ(notificationSubscriberManager.RemoveSubscriber(subscriber, nullptr), (int)ERR_OK);
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_001, Level1)
 {
     sptr<NotificationRequest> request(new NotificationRequest());
     request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
@@ -480,7 +536,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_001, Functi
     ASSERT_FALSE(res);
 }
 
-HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_002, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_002, Level1)
 {
     sptr<NotificationRequest> request(new NotificationRequest());
     request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
@@ -502,7 +558,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_002, Functi
     ASSERT_TRUE(res);
 }
 
-HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_003, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_003, Level1)
 {
     sptr<NotificationRequest> request(new NotificationRequest());
     request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
@@ -529,7 +585,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_003, Functi
 //  * @tc.number    : NotifyConsumed_001
 //  * @tc.name      :
 //  */
-HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumed_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumed_001, Level1)
 {
     sptr<NotificationSortingMap> notificationMap(new NotificationSortingMap());
     sptr<NotificationRequest> request(new NotificationRequest());
@@ -554,6 +610,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumed_001, Function | Small
 
     NotificationSubscriberManager notificationSubscriberManager;
     sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
     notificationSubscriberManager.NotifyConsumed(notification, notificationMap);
     std::this_thread::sleep_for(std::chrono::milliseconds(400));
@@ -565,7 +622,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumed_001, Function | Small
  * @tc.number    : NotifyBadgeEnabledChanged_001
  * @tc.name      : test notify badge enable to trigger call back success
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotifyBadgeEnabledChanged_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotifyBadgeEnabledChanged_001, Level1)
 {
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
     sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
@@ -574,7 +631,8 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyBadgeEnabledChanged_001, Funct
     std::string bundle = "com.example.test";
     sptr<NotificationSubscribeInfo> subscribeInfo(new NotificationSubscribeInfo());
     subscribeInfo->AddAppName(bundle);
-    ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(subscriber, subscribeInfo), (int)ERR_OK);
+    ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(subscriber, subscribeInfo,
+        testAnsSubscriber->subscribedFlags_), (int)ERR_OK);
     sptr<EnabledNotificationCallbackData> callbackData(new EnabledNotificationCallbackData());
     callbackData->SetBundle(bundle);
     notificationSubscriberManager_->NotifyBadgeEnabledChanged(callbackData);
@@ -583,11 +641,31 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyBadgeEnabledChanged_001, Funct
     ASSERT_TRUE(isCallback);
 }
 
+HWTEST_F(NotificationSubscriberManagerTest, NotifyBadgeEnabledChanged_SubscribedFlagsFalse, Level1)
+{
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    testAnsSubscriber->SetSubscribedFlags(0);
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    auto isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+    std::string bundle = "com.example.test";
+    sptr<NotificationSubscribeInfo> subscribeInfo(new NotificationSubscribeInfo());
+    subscribeInfo->AddAppName(bundle);
+    ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(subscriber, subscribeInfo,
+        testAnsSubscriber->subscribedFlags_), (int)ERR_OK);
+    sptr<EnabledNotificationCallbackData> callbackData(new EnabledNotificationCallbackData());
+    callbackData->SetBundle(bundle);
+    notificationSubscriberManager_->NotifyBadgeEnabledChanged(callbackData);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+}
+
 /**
  * @tc.number    : ConsumeRecordFilter_001
  * @tc.name      :
  */
-HWTEST_F(NotificationSubscriberManagerTest, ConsumeRecordFilter_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, ConsumeRecordFilter_001, Level1)
 {
     std::shared_ptr<NotificationActionButton> actionButton =
         std::make_shared<NotificationActionButton>();
@@ -616,7 +694,7 @@ HWTEST_F(NotificationSubscriberManagerTest, ConsumeRecordFilter_001, Function | 
  * @tc.number    : ConsumeRecordFilter_002
  * @tc.name      :
  */
-HWTEST_F(NotificationSubscriberManagerTest, ConsumeRecordFilter_002, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, ConsumeRecordFilter_002, Level1)
 {
     std::shared_ptr<NotificationActionButton> actionButton = std::make_shared<NotificationActionButton>();
     std::shared_ptr<NotificationUserInput> userInput = NotificationUserInput::Create("userInput");
@@ -644,7 +722,7 @@ HWTEST_F(NotificationSubscriberManagerTest, ConsumeRecordFilter_002, Function | 
  * @tc.number    : ConsumeRecordFilter_003
  * @tc.name      :
  */
-HWTEST_F(NotificationSubscriberManagerTest, ConsumeRecordFilter_003, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, ConsumeRecordFilter_003, Level1)
 {
     sptr<NotificationRequest> request(new NotificationRequest());
     request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
@@ -667,7 +745,7 @@ HWTEST_F(NotificationSubscriberManagerTest, ConsumeRecordFilter_003, Function | 
  * @tc.number    : BatchNotifyCanceledInner_001
  * @tc.name      :
  */
-HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyCanceledInner_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyCanceledInner_001, Level1)
 {
     //build request
     sptr<NotificationSortingMap> notificationMap(new NotificationSortingMap());
@@ -709,6 +787,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyCanceledInner_001, Functi
 
     NotificationSubscriberManager notificationSubscriberManager;
     sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
     //brach need nullptr
     notificationSubscriberManager.subscriberRecordList_.push_back(nullptr);
@@ -719,11 +798,65 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyCanceledInner_001, Functi
     ASSERT_TRUE(isCallback);
 }
 
+HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyCanceledInner_SubscribedFlagsFalse, Level1)
+{
+    //build request
+    sptr<NotificationSortingMap> notificationMap(new NotificationSortingMap());
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetLabel("label");
+    request->SetCreatorUid(0);
+    std::shared_ptr<NotificationLiveViewContent> liveViewContentcontent =
+        std::make_shared<NotificationLiveViewContent>();
+    liveViewContentcontent->SetText("notification text");
+    liveViewContentcontent->SetTitle("notification title");
+    std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> pixelMap;
+    liveViewContentcontent->SetPicture(pixelMap);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContentcontent);
+    request->SetContent(content);
+    sptr<Notification> notification(new Notification(request));
+
+    sptr<NotificationRequest> requestLocal(new NotificationRequest());
+    requestLocal->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    requestLocal->SetLabel("label");
+    requestLocal->SetCreatorUid(0);
+    std::shared_ptr<NotificationLocalLiveViewContent> liveViewLocalContentcontent =
+        std::make_shared<NotificationLocalLiveViewContent>();
+    liveViewLocalContentcontent->SetText("notification text");
+    liveViewLocalContentcontent->SetTitle("notification title");
+    std::shared_ptr<NotificationContent> contentLocal =
+        std::make_shared<NotificationContent>(liveViewLocalContentcontent);
+    requestLocal->SetContent(contentLocal);
+    sptr<Notification> notificationLocal(new Notification(requestLocal));
+
+    std::vector<sptr<Notification>> notifications;
+    notifications.push_back(notification);
+    notifications.push_back(notificationLocal);
+    //build subscriber
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    testAnsSubscriber->SetSubscribedFlags(0);
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    auto isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
+    //brach need nullptr
+    notificationSubscriberManager.subscriberRecordList_.push_back(nullptr);
+
+    notificationSubscriberManager.BatchNotifyCanceledInner(notifications, notificationMap, 99);
+    std::this_thread::sleep_for(std::chrono::milliseconds(400));
+    isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+}
+
 /**
  * @tc.number    : NotifyDoNotDisturbDateChangedInner_001
  * @tc.name      : test set do not disturb date to trigger call back success
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotifyDoNotDisturbDateChangedInner_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotifyDoNotDisturbDateChangedInner_001, Level1)
 {
     //build notificationMap
     sptr<NotificationDoNotDisturbDate> date(new NotificationDoNotDisturbDate());
@@ -740,6 +873,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyDoNotDisturbDateChangedInner_0
     
     info->AddAppUserId(101);
     info->AddAppName(bundle);
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
     notificationSubscriberManager.NotifyDoNotDisturbDateChangedInner(101, date, bundle);
@@ -748,11 +882,39 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyDoNotDisturbDateChangedInner_0
     ASSERT_TRUE(isCallback);
 }
 
+HWTEST_F(NotificationSubscriberManagerTest, NotifyDoNotDisturbDateChangedInner_SubscribedFlagsFalse, Level1)
+{
+    //build notificationMap
+    sptr<NotificationDoNotDisturbDate> date(new NotificationDoNotDisturbDate());
+    std::string bundle = "com.example.test";
+
+    //build subscriber
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    testAnsSubscriber->SetSubscribedFlags(0);
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    auto isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
+    
+    info->AddAppUserId(101);
+    info->AddAppName(bundle);
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
+
+    notificationSubscriberManager.NotifyDoNotDisturbDateChangedInner(101, date, bundle);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+}
+
+
 /**
  * @tc.number    : NotifyEnabledNotificationChangedInner_002
  * @tc.name      : test enable notification changed to trigger call back success
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledNotificationChangedInner_002, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledNotificationChangedInner_002, Level1)
 {
     //build notificationMap
     sptr<EnabledNotificationCallbackData> callback(new EnabledNotificationCallbackData());
@@ -770,6 +932,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledNotificationChangedInne
     sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
     info->AddAppUserId(100);
     info->AddAppName(bundle);
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
     notificationSubscriberManager.NotifyEnabledNotificationChangedInner(callback);
@@ -778,11 +941,39 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledNotificationChangedInne
     ASSERT_TRUE(isCallback);
 }
 
+HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledNotificationChangedInner_SubscribedFlagsFalse, Level1)
+{
+    //build notificationMap
+    sptr<EnabledNotificationCallbackData> callback(new EnabledNotificationCallbackData());
+    std::string bundle = "com.example.test";
+    callback->SetBundle(bundle);
+    callback->SetUid(101);
+
+    //build subscriber
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    testAnsSubscriber->SetSubscribedFlags(0);
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    auto isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
+    info->AddAppUserId(100);
+    info->AddAppName(bundle);
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
+
+    notificationSubscriberManager.NotifyEnabledNotificationChangedInner(callback);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+}
+
 /**
  * @tc.number    : SetBadgeNumber_001
  * @tc.name      : test set badge number to trigger call back success
  */
-HWTEST_F(NotificationSubscriberManagerTest, SetBadgeNumber_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, SetBadgeNumber_001, Level1)
 {
     //build notificationMap
     sptr<BadgeNumberCallbackData> badge(new BadgeNumberCallbackData());
@@ -802,6 +993,7 @@ HWTEST_F(NotificationSubscriberManagerTest, SetBadgeNumber_001, Function | Small
     sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
     info->AddAppUserId(100);
     info->AddAppName(bundle);
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
     notificationSubscriberManager.SetBadgeNumber(badge);
@@ -810,11 +1002,41 @@ HWTEST_F(NotificationSubscriberManagerTest, SetBadgeNumber_001, Function | Small
     ASSERT_TRUE(isCallback);
 }
 
+HWTEST_F(NotificationSubscriberManagerTest, SetBadgeNumber_SubscribedFlagsFalse, Level1)
+{
+    //build notificationMap
+    sptr<BadgeNumberCallbackData> badge(new BadgeNumberCallbackData());
+    std::string bundle = "com.example.test";
+    badge->SetBundle(bundle);
+
+    //build subscriber
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    testAnsSubscriber->SetSubscribedFlags(0);
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    auto isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+
+    sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
+    info->AddAppUserId(100);
+    info->AddAppName(bundle);
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
+
+    notificationSubscriberManager.SetBadgeNumber(badge);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+}
+
 /**
  * @tc.number    : NotifyApplicationInfoNeedChanged_001
  * @tc.name      :
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotifyApplicationInfoNeedChanged_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotifyApplicationInfoNeedChanged_001, Level1)
 {
     //build subscriber
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
@@ -825,6 +1047,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyApplicationInfoNeedChanged_001
     NotificationSubscriberManager notificationSubscriberManager;
     sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
     info->SetNeedNotifyApplication(true);
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
     notificationSubscriberManager.NotifyApplicationInfoNeedChanged("test");
@@ -833,11 +1056,32 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyApplicationInfoNeedChanged_001
     ASSERT_TRUE(isCallback);
 }
 
+HWTEST_F(NotificationSubscriberManagerTest, NotifyApplicationInfoNeedChanged_SubscribedFlagsFalse, Level1)
+{
+    //build subscriber
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    testAnsSubscriber->SetSubscribedFlags(0);
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    auto isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
+    info->SetNeedNotifyApplication(true);
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
+
+    notificationSubscriberManager.NotifyApplicationInfoNeedChanged("test");
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+}
+
 /**
  * @tc.number    : DistributeOperation_001
  * @tc.name      : test DistributeOperation call back success
  */
-HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_001, Level1)
 {
     sptr<NotificationOperationInfo> operationInfo(new NotificationOperationInfo);
     //build subscriber
@@ -849,6 +1093,7 @@ HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_001, Function | 
     NotificationSubscriberManager notificationSubscriberManager;
     sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
     info->SetNeedNotifyResponse(true);
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
     sptr request = new (std::nothrow) NotificationRequest();
@@ -858,11 +1103,34 @@ HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_001, Function | 
     ASSERT_TRUE(isCallback);
 }
 
+HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_SubscribedFlagsFalse, Level1)
+{
+    sptr<NotificationOperationInfo> operationInfo(new NotificationOperationInfo);
+    //build subscriber
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    testAnsSubscriber->SetSubscribedFlags(0);
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    auto isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
+    info->SetNeedNotifyResponse(true);
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
+
+    sptr request = new (std::nothrow) NotificationRequest();
+    notificationSubscriberManager.DistributeOperation(operationInfo, request);
+    std::this_thread::sleep_for(std::chrono::milliseconds(400));
+    isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+}
+
 /**
  * @tc.number    : DistributeOperation_002
  * @tc.name      : test DistributeOperation with operationInfo nullptr
  */
-HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_002, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_002, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
     ASSERT_EQ((int)ERR_ANS_TASK_ERR, notificationSubscriberManager.DistributeOperation(nullptr, nullptr));
@@ -872,7 +1140,7 @@ HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_002, Function | 
  * @tc.number    : DistributeOperation_003
  * @tc.name      : test DistributeOperation ERR_ANS_DISTRIBUTED_OPERATION_FAILED
  */
-HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_003, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_003, Level1)
 {
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     std::shared_ptr<AAFwk::WantParams> extendInfo = std::make_shared<AAFwk::WantParams>();
@@ -880,9 +1148,11 @@ HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_003, Function | 
     sptr<NotificationOperationInfo> operationInfo = new (std::nothrow) NotificationOperationInfo();
     operationInfo->SetHashCode("hashCode");
     NotificationSubscriberManager notificationSubscriberManager;
+
+    auto record = notificationSubscriberManager.CreateSubscriberRecord(nullptr);
+    record->subscribedFlags_ = 0xFFFFFFFF;
     notificationSubscriberManager.subscriberRecordList_.push_back(nullptr);
-    notificationSubscriberManager.subscriberRecordList_.push_back(
-        notificationSubscriberManager.CreateSubscriberRecord(nullptr));
+    notificationSubscriberManager.subscriberRecordList_.push_back(record);
     ASSERT_EQ((int)ERR_ANS_DISTRIBUTED_OPERATION_FAILED,
         notificationSubscriberManager.DistributeOperation(operationInfo, request));
 }
@@ -892,7 +1162,7 @@ HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_003, Function | 
  * @tc.name      : OnRemoteDied and params is nullptr
  * @tc.desc      : Test OnRemoteDied .
  */
-HWTEST_F(NotificationSubscriberManagerTest, OnRemoteDied_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, OnRemoteDied_001, Level1)
 {
     notificationSubscriberManager_->notificationSubQueue_ = nullptr;
     wptr<IRemoteObject> obj = nullptr;
@@ -944,7 +1214,7 @@ HWTEST_F(NotificationSubscriberManagerTest, OnRemoteDied_recordIsSubscribeSelf, 
  * @tc.desc: Test NotifyConsumedInner when notification is nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_001, Level1)
 {
     sptr<Notification> notification = nullptr;
     sptr<NotificationSortingMap> notificationMap = nullptr;
@@ -960,12 +1230,13 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_001, Function | 
  * @tc.desc: Test NotifyConsumedInner when notificationMap is not nullptr and notification type is not liveview
  * @tc.type: FUNC
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_002, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_002, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
     sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
     const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
     subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->SetSubscribedFlags(0xFFFFFFFF);
     notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetCreatorUid(DEFAULT_UID);
@@ -989,12 +1260,13 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_002, Function | 
  * @tc.desc: Test NotifyConsumedInner when notificationMap is not nullptr and notification type is liveview
  * @tc.type: FUNC
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_003, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_003, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
     sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
     const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
     subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->SetSubscribedFlags(0xFFFFFFFF);
     notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetCreatorUid(DEFAULT_UID);
@@ -1017,12 +1289,13 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_003, Function | 
  * @tc.desc: Test NotifyConsumedInner when notificationMap is nullptr and notification type is not liveview
  * @tc.type: FUNC
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_004, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_004, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
     sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
     const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
     subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->SetSubscribedFlags(0xFFFFFFFF);
     notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetCreatorUid(DEFAULT_UID);
@@ -1046,12 +1319,13 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_004, Function | 
  * @tc.desc: Test NotifyConsumedInner when notificationMap is nullptr and notification type is liveview
  * @tc.type: FUNC
  */
-HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_005, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_005, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
     sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
     const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
     subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->SetSubscribedFlags(0xFFFFFFFF);
     notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetCreatorUid(DEFAULT_UID);
@@ -1075,7 +1349,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_005, Function | 
  * @tc.desc: Test GetIsEnableEffectedRemind when subscriberRecordList_ is empty
  * @tc.type: FUNC
  */
-HWTEST_F(NotificationSubscriberManagerTest, GetIsEnableEffectedRemind_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, GetIsEnableEffectedRemind_001, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
 
@@ -1089,7 +1363,7 @@ HWTEST_F(NotificationSubscriberManagerTest, GetIsEnableEffectedRemind_001, Funct
  * @tc.desc: Test GetIsEnableEffectedRemind when subscriberRecordList_ is not empty
  * @tc.type: FUNC
  */
-HWTEST_F(NotificationSubscriberManagerTest, GetIsEnableEffectedRemind_002, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, GetIsEnableEffectedRemind_002, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
     sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
@@ -1107,7 +1381,7 @@ HWTEST_F(NotificationSubscriberManagerTest, GetIsEnableEffectedRemind_002, Funct
  * @tc.desc: Test IsDeviceTypeSubscriberd when subscriberRecordList_ is empty
  * @tc.type: FUNC
  */
-HWTEST_F(NotificationSubscriberManagerTest, IsDeviceTypeSubscriberd_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, IsDeviceTypeSubscriberd_001, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
     std::string deviceType = NotificationConstant::PC_DEVICE_TYPE;
@@ -1122,7 +1396,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsDeviceTypeSubscriberd_001, Functio
  * @tc.desc: Test IsDeviceTypeSubscriberd when subscriberRecordList_ is not empty
  * @tc.type: FUNC
  */
-HWTEST_F(NotificationSubscriberManagerTest, IsDeviceTypeSubscriberd_002, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, IsDeviceTypeSubscriberd_002, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
     std::string deviceType = NotificationConstant::PC_DEVICE_TYPE;
@@ -1142,7 +1416,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsDeviceTypeSubscriberd_002, Functio
  * @tc.desc: Test IsDeviceTypeAffordConsume
  * @tc.type: FUNC
  */
-HWTEST_F(NotificationSubscriberManagerTest, IsDeviceTypeAffordConsume_001, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, IsDeviceTypeAffordConsume_001, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
     std::string deviceType = NotificationConstant::PC_DEVICE_TYPE;

@@ -103,6 +103,16 @@ NotificationConstant::FlagStatus NotificationSubscriber::DowngradeReminder(
 }
 #endif
 
+void NotificationSubscriber::SetSubscribedFlags(uint32_t subscribedFlags)
+{
+    subscribedFlags_ = subscribedFlags;
+}
+
+uint32_t NotificationSubscriber::GetSubscribedFlags() const
+{
+    return subscribedFlags_;
+}
+
 const sptr<NotificationSubscriber::SubscriberImpl> NotificationSubscriber::GetImpl() const
 {
     return impl_;

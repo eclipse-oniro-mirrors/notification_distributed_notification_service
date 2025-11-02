@@ -85,6 +85,22 @@ public:
         SA_SELF_BANNER_FLAG = 1 << 9,
     };
 
+    enum SubscribedFlag {
+        SUBSCRIBE_ON_CANCELED = 1 << 0,
+        SUBSCRIBE_ON_CONNECTED = 1 << 1,
+        SUBSCRIBE_ON_CONSUMED = 1 << 2,
+        SUBSCRIBE_ON_DISCONNECTED = 1 << 3,
+        SUBSCRIBE_ON_UPDATE = 1 << 4,
+        SUBSCRIBE_ON_BATCHCANCELED = 1 << 5,
+        SUBSCRIBE_ON_DONOTDISTURBDATA_CHANGED = 1 << 6,
+        SUBSCRIBE_ON_ENABLENOTIFICATION_CHANGED = 1 << 7,
+        SUBSCRIBE_ON_BADGE_CHANGED = 1 << 8,
+        SUBSCRIBE_ON_BADGEENABLE_CHANGED = 1 << 9,
+        SUBSCRIBE_ON_APPLICATIONINFONEED_CHANGED = 1 << 10,
+        SUBSCRIBE_ON_OPERATIONRESPONSE = 1 << 11,
+        SUBSCRIBE_ON_DIED = 1 << 12,
+    };
+
     enum DistributedDeleteType {
         ALL,
         SLOT,

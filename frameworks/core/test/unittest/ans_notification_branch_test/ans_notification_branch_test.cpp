@@ -278,18 +278,18 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode Subscribe(const sptr<IAnsSubscriber>& subscriber) override
+    ErrCode Subscribe(const sptr<IAnsSubscriber>& subscriber, uint32_t subscribedFlags) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
     ErrCode Subscribe(const sptr<IAnsSubscriber> &subscriber,
-        const sptr<NotificationSubscribeInfo> &info) override
+        const sptr<NotificationSubscribeInfo> &info, uint32_t subscribedFlags) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SubscribeSelf(const sptr<IAnsSubscriber> &subscriber) override
+    ErrCode SubscribeSelf(const sptr<IAnsSubscriber> &subscriber, uint32_t subscribedFlags) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

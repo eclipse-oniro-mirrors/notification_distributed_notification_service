@@ -148,10 +148,10 @@ interface OHOS.Notification.IAnsManager {
 
     void GetShowBadgeEnabled([out] boolean enabled);
 
-    void Subscribe([in] IAnsSubscriber subscriber);
-    void Subscribe([in] IAnsSubscriber subscriber, [in] sptr<NotificationSubscribeInfo> info);
+    void Subscribe([in] IAnsSubscriber subscriber, [in] unsigned int subscribedFlags);
+    void Subscribe([in] IAnsSubscriber subscriber, [in] sptr<NotificationSubscribeInfo> info, [in] unsigned int subscribedFlags);
 
-    void SubscribeSelf([in] IAnsSubscriber subscriber);
+    void SubscribeSelf([in] IAnsSubscriber subscriber, [in] unsigned int subscribedFlags);
 
     void SubscribeLocalLiveView(
         [in] IAnsSubscriberLocalLiveView subscriber,

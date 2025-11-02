@@ -4033,7 +4033,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SubscribeTest_0100, Function | MediumTest | Le
     ASSERT_NE(nullptr, proxy);
     auto subscriber = new (std::nothrow) TestSubscriber();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
-    int32_t result = proxy->Subscribe(subscriber->GetImpl(), subInfo);
+    int32_t result = proxy->Subscribe(subscriber->GetImpl(), subInfo, subscriber->subscribedFlags_);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
@@ -4057,7 +4057,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SubscribeTest_0200, Function | MediumTest | Le
     ASSERT_NE(nullptr, proxy);
     auto subscriber = new (std::nothrow) TestSubscriber();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
-    int32_t result = proxy->Subscribe(subscriber->GetImpl(), subInfo);
+    int32_t result = proxy->Subscribe(subscriber->GetImpl(), subInfo, subscriber->subscribedFlags_);
     EXPECT_EQ(ERR_OK, result);
 }
 
@@ -4079,7 +4079,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SubscribeTest_0300, Function | MediumTest | Le
     ASSERT_NE(nullptr, proxy);
     auto subscriber = new (std::nothrow) TestSubscriber();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
-    int32_t result = proxy->Subscribe(subscriber->GetImpl(), subInfo);
+    int32_t result = proxy->Subscribe(subscriber->GetImpl(), subInfo, subscriber->subscribedFlags_);
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -4102,7 +4102,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SubscribeTest_0400, Function | MediumTest | Le
     ASSERT_NE(nullptr, proxy);
     auto subscriber = new (std::nothrow) TestSubscriber();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
-    int32_t result = proxy->Subscribe(subscriber->GetImpl(), subInfo);
+    int32_t result = proxy->Subscribe(subscriber->GetImpl(), subInfo, subscriber->subscribedFlags_);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
