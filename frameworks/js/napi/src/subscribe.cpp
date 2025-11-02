@@ -1455,7 +1455,7 @@ napi_value GetNotificationSubscriber(
         subscriberInfo.subscriber->SetCallbackInfo(env, BATCH_CANCEL, result);
         subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BATCHCANCELED;
     }
-
+    subscriberInfo.subscriber->SetSubscribedFlags(subscribedFlag);
     return Common::NapiGetNull(env);
 }
 
