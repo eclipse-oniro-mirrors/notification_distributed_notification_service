@@ -782,8 +782,8 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
         if (record == nullptr) {
             continue;
         }
-        if (!(record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BATCHCANCELED &
-            NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CANCELED)) {
+        if (!(record->subscribedFlags_ & (NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BATCHCANCELED |
+            NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CANCELED))) {
             continue;
         }
         ANS_LOGD("record->userId = <%{public}d>", record->userId);
