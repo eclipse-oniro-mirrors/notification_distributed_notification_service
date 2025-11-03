@@ -2096,5 +2096,117 @@ HWTEST_F(NotificationPreferencesDatabaseTest, SetDisableNotificationInfo_0400, T
     notificationDisable->SetUserId(101);
     EXPECT_TRUE(notificationPreferencesDatabase->SetDisableNotificationInfo(notificationDisable));
 }
+
+/**
+ * @tc.name: SetRingtoneInfoByBundle_0100
+ * @tc.desc: test SetRingtoneInfoByBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetRingtoneInfoByBundle_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
+    ASSERT_NE(ringtoneInfo, nullptr);
+    ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    ringtoneInfo->SetRingtoneFileName("fileName");
+    ringtoneInfo->SetRingtoneUri("uri");
+    auto ret = preferncesDB_->SetRingtoneInfoByBundle(bundleInfo, ringtoneInfo);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: SetRingtoneInfoByBundle_0200
+ * @tc.desc: test SetRingtoneInfoByBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetRingtoneInfoByBundle_0200, TestSize.Level1)
+{
+    preferncesDB_->rdbDataManager_ = nullptr;
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("bundle");
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
+    ASSERT_NE(ringtoneInfo, nullptr);
+    ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    ringtoneInfo->SetRingtoneFileName("fileName");
+    ringtoneInfo->SetRingtoneUri("uri");
+    auto ret = preferncesDB_->SetRingtoneInfoByBundle(bundleInfo, ringtoneInfo);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: SetRingtoneInfoByBundle_0300
+ * @tc.desc: test SetRingtoneInfoByBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetRingtoneInfoByBundle_0300, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("bundle");
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
+    ASSERT_NE(ringtoneInfo, nullptr);
+    ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    ringtoneInfo->SetRingtoneFileName("fileName");
+    ringtoneInfo->SetRingtoneUri("uri");
+    auto ret = preferncesDB_->SetRingtoneInfoByBundle(bundleInfo, ringtoneInfo);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: GetRingtoneInfoByBundle_0100
+ * @tc.desc: test GetRingtoneInfoByBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetRingtoneInfoByBundle_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
+    ASSERT_NE(ringtoneInfo, nullptr);
+    ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    ringtoneInfo->SetRingtoneFileName("fileName");
+    ringtoneInfo->SetRingtoneUri("uri");
+    auto ret = preferncesDB_->GetRingtoneInfoByBundle(bundleInfo, ringtoneInfo);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetRingtoneInfoByBundle_0200
+ * @tc.desc: test GetRingtoneInfoByBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetRingtoneInfoByBundle_0200, TestSize.Level1)
+{
+    preferncesDB_->rdbDataManager_ = nullptr;
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("bundle");
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
+    ASSERT_NE(ringtoneInfo, nullptr);
+    ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    ringtoneInfo->SetRingtoneFileName("fileName");
+    ringtoneInfo->SetRingtoneUri("uri");
+    auto ret = preferncesDB_->GetRingtoneInfoByBundle(bundleInfo, ringtoneInfo);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetRingtoneInfoByBundle_0300
+ * @tc.desc: test GetRingtoneInfoByBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetRingtoneInfoByBundle_0300, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("bundle");
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
+    ASSERT_NE(ringtoneInfo, nullptr);
+    ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    ringtoneInfo->SetRingtoneFileName("fileName");
+    ringtoneInfo->SetRingtoneUri("uri");
+    auto ret = preferncesDB_->SetRingtoneInfoByBundle(bundleInfo, ringtoneInfo);
+    ASSERT_EQ(ret, true);
+    sptr<NotificationRingtoneInfo> info = new NotificationRingtoneInfo();
+    ASSERT_NE(info, nullptr);
+    auto res = preferncesDB_->GetRingtoneInfoByBundle(bundleInfo, info);
+    ASSERT_EQ(res, true);
+}
 }  // namespace Notification
 }  // namespace OHOS
