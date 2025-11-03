@@ -20,6 +20,7 @@
 
 #include "advanced_notification_service.h"
 #include "advanced_datashare_helper.h"
+#include "notification_bluetooth_helper.h"
 #include "notification_check_request.h"
 #include "notification_constant.h"
 #include "notification_preferences.h"
@@ -1020,7 +1021,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, FilterBundlesByBluetooth
  */
 HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, CheckBluetoothConditions_0100, Function | SmallTest | Level1)
 {
-    bool ret = advancedNotificationService_->CheckBluetoothConditions("test_addr");
+    bool ret = NotificationBluetoothHelper::GetInstance().CheckBluetoothConditions("test_addr");
     ASSERT_FALSE(ret);
 }
 
