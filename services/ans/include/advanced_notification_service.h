@@ -1628,6 +1628,8 @@ public:
     void HandleBundleInstall(const sptr<NotificationBundleOption> &bundleOption);
     void HandleBundleUpdate(const sptr<NotificationBundleOption> &bundleOption);
     void HandleBundleUninstall(const sptr<NotificationBundleOption> &bundleOption);
+    void HandleNewWhitelistBundle(const sptr<NotificationBundleOption> &bundleOption);
+    void GetCachedNotificationExtensionBundles(std::vector<sptr<NotificationBundleOption>> &extensionBundles);
     bool TryStartExtensionSubscribeService();
     void OnHfpDeviceConnectChanged(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
     void OnBluetoothStateChanged(const int status);
@@ -2008,8 +2010,6 @@ private:
     ErrCode SyncAdditionConfig(const std::string &key, const std::string &value, HaMetaMessage &message);
     bool isProxyForUnaware(const int32_t uid);
 	
-    ErrCode RefreshExtensionSubscriptionBundlesFromConfig(const sptr<NotificationBundleOption>& bundleOption,
-        std::vector<sptr<NotificationBundleOption>>& enabledBundles);
     bool isExtensionServiceExist();
     int32_t LoadExtensionService();
     int32_t SubscribeExtensionService(const sptr<NotificationBundleOption> &bundleOption,
@@ -2025,6 +2025,8 @@ private:
     void ProcessHfpDeviceStateChange(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
     bool CheckBluetoothSwitchState();
     void RegisterBluetoothAccessObserver();
+    bool GetCloneBundleList(const sptr<NotificationBundleOption>& bundleOption,
+        std::vector<sptr<NotificationBundleOption>>& cloneBundleList);
     void ProcessSetUserGrantedState(const sptr<NotificationBundleOption>& bundle,
         bool enabled, ErrCode& result);
     void ProcessSetUserGrantedBundleState(const sptr<NotificationBundleOption>& bundle,

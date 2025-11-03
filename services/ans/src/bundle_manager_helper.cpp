@@ -455,6 +455,52 @@ bool BundleManagerHelper::IsAncoApp(const std::string &bundleName, int32_t uid)
     return bundleInfo.applicationInfo.codePath == std::to_string(APP_TYPE_ONE);
 }
 
+bool BundleManagerHelper::GetCloneAppIndexes(
+    const std::string& bundleName, std::vector<int32_t>& appIndexes, int32_t userId)
+{
+    ErrCode result = 0;
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
+    Connect();
+    if (bundleMgr_ == nullptr) {
+        ANS_LOGE("GetBundleInfo bundle proxy failed.");
+        return -1;
+    }
+
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    result = bundleMgr_->GetCloneAppIndexes(bundleName, appIndexes, userId);
+    IPCSkeleton::SetCallingIdentity(identity);
+
+    if (result != ERR_OK) {
+        ANS_LOGE("GetCloneAppIndexes failed %{public}d.", result);
+        return false;
+    }
+
+    return true;
+}
+
+bool BundleManagerHelper::GetCloneBundleInfo(
+    const std::string& bundleName, int32_t flag, int32_t appIndex, AppExecFwk::BundleInfo& bundleInfo, int32_t userId)
+{
+    ErrCode result = 0;
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
+    Connect();
+    if (bundleMgr_ == nullptr) {
+        ANS_LOGE("GetBundleInfo bundle proxy failed.");
+        return -1;
+    }
+
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    result = bundleMgr_->GetCloneBundleInfo(bundleName, flag, appIndex, bundleInfo, userId);
+    IPCSkeleton::SetCallingIdentity(identity);
+
+    if (result != ERR_OK) {
+        ANS_LOGE("GetCloneAppIndexes failed %{public}d.", result);
+        return false;
+    }
+
+    return true;
+}
+
 std::string BundleManagerHelper::GetBundleLabel(const std::string& bundleName)
 {
     AppExecFwk::BundleResourceInfo bundleResourceInfo = {};

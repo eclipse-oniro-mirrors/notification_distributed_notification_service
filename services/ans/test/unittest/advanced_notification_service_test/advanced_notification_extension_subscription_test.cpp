@@ -1045,37 +1045,6 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HasExtensionSubscription
 }
 
 /**
- * @tc.number    : RefreshExtensionSubscriptionBundlesFromConfig_0100
- * @tc.name      : RefreshExtensionSubscriptionBundlesFromConfig
- * @tc.desc      : Test RefreshExtensionSubscriptionBundlesFromConfig case
- */
-HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, RefreshExtensionSubscriptionBundlesFromConfig_0100,
-    Function | SmallTest | Level1)
-{
-    std::vector<sptr<NotificationBundleOption>> bundles;
-    ErrCode ret = advancedNotificationService_->RefreshExtensionSubscriptionBundlesFromConfig(nullptr, bundles);
-    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
-
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("", NON_SYSTEM_APP_UID);
-    ret = advancedNotificationService_->RefreshExtensionSubscriptionBundlesFromConfig(bundle, bundles);
-    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
-}
-
-/**
- * @tc.number    : RefreshExtensionSubscriptionBundlesFromConfig_0200
- * @tc.name      : RefreshExtensionSubscriptionBundlesFromConfig
- * @tc.desc      : Test RefreshExtensionSubscriptionBundlesFromConfig case
- */
-HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, RefreshExtensionSubscriptionBundlesFromConfig_0200,
-    Function | SmallTest | Level1)
-{
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", NON_SYSTEM_APP_UID);
-    std::vector<sptr<NotificationBundleOption>> bundles;
-    ErrCode ret = advancedNotificationService_->RefreshExtensionSubscriptionBundlesFromConfig(bundle, bundles);
-    ASSERT_EQ(ret, ERR_OK);
-}
-
-/**
  * @tc.number    : GetNotificationExtensionEnabledBundles_0100
  * @tc.name      : GetNotificationExtensionEnabledBundles
  * @tc.desc      : Test GetNotificationExtensionEnabledBundles case

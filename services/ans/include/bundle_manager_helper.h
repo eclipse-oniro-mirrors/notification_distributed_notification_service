@@ -189,6 +189,9 @@ public:
         std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos, int32_t userId);
     bool CheckBundleImplExtensionAbility(const sptr<NotificationBundleOption> &bundleOption);
     std::string GetBundleLabel(const std::string& bundleName);
+    bool GetCloneAppIndexes(const std::string &bundleName, std::vector<int32_t> &appIndexes, int32_t userId);
+    bool GetCloneBundleInfo(const std::string &bundleName, int32_t flag, int32_t appIndex,
+        AppExecFwk::BundleInfo& bundleInfo, int32_t userId);
 
     bool IsAncoApp(const std::string &bundleName, int32_t uid);
 
