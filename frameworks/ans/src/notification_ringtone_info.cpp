@@ -63,7 +63,7 @@ std::string NotificationRingtoneInfo::GetRingtoneFileName() const
 
 void NotificationRingtoneInfo::ResetRingtone()
 {
-    ringtoneType_ = NotificationConstant::RingtoneType::RINGTONE_TYPE_NONE;
+    ringtoneType_ = NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT;
     ringtoneTitle_ = "";
     ringtoneFileName_ = "";
     ringtoneUri_ = "";

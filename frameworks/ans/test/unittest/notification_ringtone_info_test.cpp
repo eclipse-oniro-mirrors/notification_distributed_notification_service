@@ -187,7 +187,7 @@ HWTEST_F(NotificationRingtoneInfoTest, ResetRingtone_0001, Level1)
     info.ResetRingtone();
 
     EXPECT_EQ(static_cast<int>(info.GetRingtoneType()),
-        static_cast<int>(OHOS::Notification::NotificationConstant::RingtoneType::RINGTONE_TYPE_NONE));
+        static_cast<int>(OHOS::Notification::NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT));
     EXPECT_EQ(info.GetRingtoneTitle(), "");
     EXPECT_EQ(info.GetRingtoneFileName(), "");
     EXPECT_EQ(info.GetRingtoneUri(), "");
