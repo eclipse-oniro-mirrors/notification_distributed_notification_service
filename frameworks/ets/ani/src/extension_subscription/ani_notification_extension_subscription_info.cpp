@@ -82,23 +82,31 @@ ani_status UnwarpNotificationExtensionSubscribeInfo(
     isUndefined = ANI_TRUE;
     if ((status = GetPropertyString(env, value, "addr", isUndefined, addr)) != ANI_OK) {
         ANS_LOGE("GetPropertyString addr failed, status: %{public}d, isUndefined: %{public}d", status, isUndefined);
+        return status;
+    }
+    if (addr.empty()) {
+        ANS_LOGE("empty addr");
         return ANI_INVALID_ARGS;
     }
     info->SetAddr(GetResizeStr(addr, STR_MAX_SIZE));
 
     if ((status = GetPropertyRef(env, value, "type", isUndefined, type)) != ANI_OK) {
         ANS_LOGE("GetPropertyRef type failed, status: %{public}d, isUndefined: %{public}d", status, isUndefined);
+        return status;
+    }
+    if (type == nullptr || isUndefined == ANI_TRUE) {
+        ANS_LOGE("null or undefined type");
         return ANI_INVALID_ARGS;
     }
     ani_int typeValue {};
     if ((status = env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(type), &typeValue)) != ANI_OK) {
         ANS_LOGE("EnumItem_GetValue_Int type failed, status: %{public}d, isUndefined: %{public}d", status, isUndefined);
-        return ANI_INVALID_ARGS;
+        return status;
     }
     NotificationConstant::SubscribeType typeEnum;
     if (!SubscribeTypeStsToC(static_cast<STSSubscribeType>(typeValue), typeEnum)) {
         ANS_LOGE("SubscribeTypeStsToC failed");
-        return ANI_INVALID_ARGS;
+        return status;
     }
     info->SetType(typeEnum);
 
