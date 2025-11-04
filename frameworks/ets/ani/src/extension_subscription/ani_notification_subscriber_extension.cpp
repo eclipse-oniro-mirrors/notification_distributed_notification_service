@@ -31,7 +31,7 @@ void AniSubscribe(ani_env *env, ani_object notificationInfoArrayobj)
         NotificationSts::UnwarpNotificationExtensionSubscribeInfoArrayByAniObj(env, notificationInfoArrayobj, infos);
     if (status != ANI_OK) {
         ANS_LOGE("UnwrapNotificationSlotArrayByAniObj failed with %{public}d", status);
-        NotificationSts::ThrowErrorWithMsg(env, "sts Subscribe ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithInvalidParam(env);
         return;
     }
     
@@ -124,10 +124,11 @@ ani_boolean AniGetUserGrantedState(ani_env *env, ani_object bundleOption)
     int returncode = ERR_OK;
     bool enabled = false;
     BundleOption option;
-    if (NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
+    if (NotificationSts::UnwrapBundleOption(env, bundleOption, option) &&
+        !option.GetBundleName().empty()) {
         returncode = Notification::NotificationHelper::GetUserGrantedState(option, enabled);
     } else {
-        NotificationSts::ThrowErrorWithMsg(env, "sts GetUserGrantedState ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithInvalidParam(env);
         return ANI_FALSE;
     }
 
@@ -145,8 +146,9 @@ void AniSetUserGrantedState(ani_env *env, ani_object bundleOption, ani_boolean e
 {
     ANS_LOGD("AniSetUserGrantedState call");
     BundleOption option;
-    if (!NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
-        NotificationSts::ThrowErrorWithMsg(env, "sts SetUserGrantedState ERROR_INTERNAL_ERROR");
+    if (!NotificationSts::UnwrapBundleOption(env, bundleOption, option) &&
+        !option.GetBundleName().empty()) {
+        NotificationSts::ThrowErrorWithInvalidParam(env);
         return;
     }
     int returncode = Notification::NotificationHelper::SetUserGrantedState(option,
@@ -165,10 +167,11 @@ ani_object AniGetUserGrantedEnabledBundles(ani_env *env, ani_object bundleOption
     int returncode = ERR_OK;
     std::vector<sptr<BundleOption>> bundles;
     BundleOption option;
-    if (NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
+    if (NotificationSts::UnwrapBundleOption(env, bundleOption, option) &&
+        !option.GetBundleName().empty()) {
         returncode = Notification::NotificationHelper::GetUserGrantedEnabledBundles(option, bundles);
     } else {
-        NotificationSts::ThrowErrorWithMsg(env, "sts GetUserGrantedEnabledBundles ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithInvalidParam(env);
         return nullptr;
     }
 
@@ -222,7 +225,8 @@ void AniSetUserGrantedBundleState(ani_env *env, ani_object bundleOption, ani_obj
     int returncode = ERR_OK;
     std::vector<BundleOption> bundlesArray;
     BundleOption option;
-    if (NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
+    if (NotificationSts::UnwrapBundleOption(env, bundleOption, option) &&
+        !option.GetBundleName().empty()) {
         if (NotificationSts::UnwrapArrayBundleOption(env, bundles, bundlesArray)) {
             std::vector<sptr<BundleOption>> sptrBundlesArray;
             for (const auto& bundle : bundlesArray) {
@@ -236,8 +240,7 @@ void AniSetUserGrantedBundleState(ani_env *env, ani_object bundleOption, ani_obj
             return;
         }
     } else {
-        NotificationSts::ThrowErrorWithMsg(
-            env, "sts SetUserGrantedBundleState UnwrapBundleOption ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithInvalidParam(env);
         return;
     }
 

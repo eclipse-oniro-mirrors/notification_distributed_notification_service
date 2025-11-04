@@ -59,7 +59,7 @@ export default namespace notificationExtensionSubscription {
             error = errorParamInvalid
             return error;
         }
-        if (bundle.bundle == null || bundle.bundle?.length === 0) {
+        if (bundle.bundle == null) {
             error = errorParamInvalid
             return error;
         }

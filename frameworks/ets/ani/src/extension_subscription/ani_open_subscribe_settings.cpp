@@ -180,11 +180,12 @@ ani_object AniOpenSubscribeSettings(ani_env *env, ani_object content)
     std::shared_ptr<OpenSettingsInfo> info = std::make_shared<OpenSettingsInfo>();
     if (!GetOpenSettingsInfo(env, content, info)) {
         ANS_LOGE("sts AniOpenSubscribeSettings GetOpenSettingsInfo fail");
+        NotificationSts::ThrowErrorWithInvalidParam(env);
         return nullptr;
     }
     if (info->context == nullptr) {
         ANS_LOGE("sts AniOpenSubscribeSettings context is null");
-        NotificationSts::ThrowErrorWithMsg(env, "");
+        NotificationSts::ThrowErrorWithInvalidParam(env);
         return nullptr;
     }
     std::string bundleName {""};
@@ -198,15 +199,13 @@ ani_object AniOpenSubscribeSettings(ani_env *env, ani_object content)
     ani_resolver aniResolver {};
     if (ANI_OK != env->Promise_New(&aniResolver, &aniPromise)) {
         ANS_LOGE("Promise_New faild");
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
         return nullptr;
     }
     info->resolver = aniResolver;
-    bool success = CreateSettingsUIExtension(info->context, bundleName, env, info);
-    if (success) {
-        info->errorCode = OHOS::Notification::ERR_ANS_DIALOG_POP_SUCCEEDED;
-    } else {
-        info->errorCode = OHOS::Notification::ERROR_INTERNAL_ERROR;
-    }
+    info->errorCode = CreateSettingsUIExtension(info->context, bundleName, env, info) ?
+        OHOS::Notification::ERR_ANS_DIALOG_POP_SUCCEEDED : OHOS::Notification::ERROR_INTERNAL_ERROR;
     if (info->errorCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
         ANS_LOGE("error, code is %{public}d.", info->errorCode);
         StsAsyncCompleteCallbackOpenSettings(env, info);
