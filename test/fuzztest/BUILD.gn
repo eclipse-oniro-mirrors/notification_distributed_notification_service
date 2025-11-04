@@ -37,6 +37,7 @@ group("fuzztest") {
     "getnotificationslotnumasbundle_fuzzer:GetNotificationSlotNumAsBundleFuzzTest",
     "getnotificationslotsforbundle_fuzzer:GetNotificationSlotsForBundleFuzzTest",
     "messageuser_fuzzer:MessageUserFuzzTest",
+    "notifhelper_fuzzer:NotifHelperFuzzTest",
     "notification_fuzzer:NotificationFuzzTest",
     "notificationactionbutton_fuzzer:NotificationActionButtonFuzzTest",
     "notificationanalyticsutil_fuzzer:NotificationAnalyticsUtilFuzzTest",
