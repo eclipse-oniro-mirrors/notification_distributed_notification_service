@@ -1625,6 +1625,8 @@ public:
     ErrCode PublishExtensionServiceStateChange(NotificationConstant::EventCodeType eventCode,
         const sptr<NotificationBundleOption> &bundleOption, bool state,
         const std::vector<sptr<NotificationBundleOption>> &enabledBundles = {});
+    void ReportRingtoneChanged(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<NotificationRingtoneInfo> &ringtoneInfo, NotificationConstant::RingtoneReportType reportType);
     void HandleBundleInstall(const sptr<NotificationBundleOption> &bundleOption);
     void HandleBundleUpdate(const sptr<NotificationBundleOption> &bundleOption);
     void HandleBundleUninstall(const sptr<NotificationBundleOption> &bundleOption);
