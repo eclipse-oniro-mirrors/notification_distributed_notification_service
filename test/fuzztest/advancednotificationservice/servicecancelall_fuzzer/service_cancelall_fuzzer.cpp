@@ -17,6 +17,7 @@
 #include <fuzzer/FuzzedDataProvider.h>
 #include "advanced_notification_service.h"
 #include "ans_permission_def.h"
+#include "ans_result_data_synchronizer.h"
 #include "mock_notification_request.h"
 
 namespace OHOS {
@@ -28,7 +29,11 @@ namespace Notification {
         service->CreateDialogManager();
 
         std::string stringData = fuzzData->ConsumeRandomLengthString();
-        service->CancelAll(stringData);
+        sptr<AnsResultDataSynchronizerImpl> synchronizer = new AnsResultDataSynchronizerImpl();
+        if (service->CancelAll(stringData,
+            iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
         return true;
     }
 }

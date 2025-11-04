@@ -31,8 +31,8 @@
 
 namespace OHOS {
 namespace Notification {
-ErrCode AdvancedNotificationService::Cancel(int32_t notificationId,
-    const std::string &label, const std::string &instanceKey)
+ErrCode AdvancedNotificationService::Cancel(int32_t notificationId, const std::string &label,
+    const std::string &instanceKey, const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
     ANS_LOGD("called");
 
@@ -48,10 +48,11 @@ ErrCode AdvancedNotificationService::Cancel(int32_t notificationId,
     }
     bundleOption->SetAppInstanceKey(instanceKey);
     return CancelPreparedNotification(notificationId, label, bundleOption,
-        NotificationConstant::APP_CANCEL_REASON_DELETE);
+        NotificationConstant::APP_CANCEL_REASON_DELETE, synchronizer);
 }
 
-ErrCode AdvancedNotificationService::CancelAll(const std::string &instanceKey)
+ErrCode AdvancedNotificationService::CancelAll(const std::string &instanceKey,
+    const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
     ANS_LOGD("called");
     const int reason = NotificationConstant::APP_CANCEL_ALL_REASON_DELETE;
@@ -69,16 +70,16 @@ ErrCode AdvancedNotificationService::CancelAll(const std::string &instanceKey)
         ANS_LOGE("CacelAll proxy uid: %{public}d", bundleOption->GetUid());
         return ERR_OK;
     }
-    ErrCode result = ExcuteCancelAll(bundleOption, reason);
+    ErrCode result = ExcuteCancelAll(bundleOption, reason, synchronizer);
     return result;
 }
 
-ErrCode AdvancedNotificationService::ExcuteCancelAll(
-    const sptr<NotificationBundleOption>& bundleOption, const int32_t reason)
+ErrCode AdvancedNotificationService::ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption,
+    const int32_t reason, const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
-    ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
+        ErrCode result = ERR_OK;
         sptr<Notification> notification = nullptr;
 
         std::vector<std::string> keys = GetNotificationKeysByBundle(bundleOption);
@@ -117,13 +118,13 @@ ErrCode AdvancedNotificationService::ExcuteCancelAll(
         }
         BatchCancelTimer(timerIds);
         result = ERR_OK;
+        synchronizer->TransferResultData(result);
     }));
-    notificationSvrQueue_->wait(handler);
-    return result;
+    return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::CancelAsBundle(
-    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId)
+ErrCode AdvancedNotificationService::CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption,
+    int32_t notificationId, int32_t userId, const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
     ANS_LOGD("called");
     int32_t reason = NotificationConstant::APP_CANCEL_AS_BUNELE_REASON_DELETE;
@@ -163,7 +164,7 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     }
     sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
         bundleOption->GetBundleName(), uid);
-    return CancelPreparedNotification(notificationId, "", bundle, reason);
+    return CancelPreparedNotification(notificationId, "", bundle, reason, synchronizer);
 }
 
 ErrCode AdvancedNotificationService::ValidRightsForCancelAsBundle(int32_t notificationId, int32_t &reason)
@@ -190,8 +191,8 @@ ErrCode AdvancedNotificationService::ValidRightsForCancelAsBundle(int32_t notifi
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::CancelAsBundle(
-    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId)
+ErrCode AdvancedNotificationService::CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption,
+    int32_t notificationId, const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
     ANS_LOGD("uid = %{public}d", bundleOption->GetUid());
     int32_t userId = -1;
@@ -200,11 +201,11 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     } else {
         OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
     }
-    return CancelAsBundle(bundleOption, notificationId, userId);
+    return CancelAsBundle(bundleOption, notificationId, userId, synchronizer);
 }
 
-ErrCode AdvancedNotificationService::CancelAsBundle(
-    int32_t notificationId, const std::string &representativeBundle, int32_t userId)
+ErrCode AdvancedNotificationService::CancelAsBundle(int32_t notificationId, const std::string &representativeBundle,
+    int32_t userId, const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
     ANS_LOGD("called");
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(
@@ -213,11 +214,11 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
         ANS_LOGE("null bundleOption");
         return ERR_ANS_TASK_ERR;
     }
-    return CancelAsBundle(bundleOption, notificationId, userId);
+    return CancelAsBundle(bundleOption, notificationId, userId, synchronizer);
 }
 
-ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(
-    const sptr<NotificationBundleOption> &bundleOption, const int32_t id)
+ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption,
+    const int32_t id, const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
     ANS_LOGD("Called.");
     if (bundleOption == nullptr) {
@@ -262,7 +263,7 @@ ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(
         }
         sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
             bundleOption->GetBundleName(), uid);
-        return CancelPreparedNotification(id, "", bundle, reason);
+        return CancelPreparedNotification(id, "", bundle, reason, synchronizer);
     }
     std::string message = "no agent setting";
     OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 6)

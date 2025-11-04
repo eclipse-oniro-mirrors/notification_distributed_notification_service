@@ -169,17 +169,20 @@ public:
      * @param notificationId Indicates the ID of the notification to cancel.
      * @param label Indicates the label of the notification to cancel.
      * @param instanceKey Indicates the application instance key.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns cancel notification result.
      */
-    ErrCode Cancel(int32_t notificationId, const std::string &label, const std::string &instanceKey) override;
+    ErrCode Cancel(int32_t notificationId, const std::string &label, const std::string &instanceKey,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Cancels all the published notifications.
      *
      * @param instanceKey Indicates the application instance key.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode CancelAll(const std::string &instanceKey) override;
+    ErrCode CancelAll(const std::string &instanceKey, const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -189,10 +192,11 @@ public:
      *                       Otherwise, this method does not take effect.
      * @param representativeBundle Indicates the name of application bundle your application is representing.
      * @param userId Indicates the specific user.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundle(
-        int32_t notificationId, const std::string &representativeBundle, int32_t userId) override;
+    ErrCode CancelAsBundle(int32_t notificationId, const std::string &representativeBundle, int32_t userId,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -201,9 +205,11 @@ public:
      * @param notificationId Indicates the unique notification ID in the application.
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId) override;
+    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -213,10 +219,11 @@ public:
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
      * @param userId Indicates the specific user.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundle(
-        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) override;
+    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Adds a notification slot by type.
@@ -1006,7 +1013,8 @@ public:
     void OnDistributedKvStoreDeathRecipient();
 
     ErrCode CancelPreparedNotification(int32_t notificationId, const std::string &label,
-        const sptr<NotificationBundleOption> &bundleOption, const int32_t reason);
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t reason,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer);
 
     ErrCode PrepareNotificationInfo(
         const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption);
@@ -1412,9 +1420,11 @@ public:
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
      * @param id Indicates the unique notification ID in the application.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns cancel result.
      */
-    ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) override;
+    ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Get the status of the target device.
@@ -1907,7 +1917,8 @@ private:
     ErrCode CheckLongTermLiveView(const sptr<NotificationRequest> &request, const std::string &key);
     void ExcuteCancelGroupCancel(const sptr<NotificationBundleOption>& bundleOption,
         const std::string &groupName, const int32_t reason);
-    ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason);
+    ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer);
     ErrCode ExcuteDelete(const std::string &key, const int32_t removeReason);
     ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId);
     ErrCode QueryContactByProfileId(const std::string &phoneNumber, const std::string &policy, int32_t userId);

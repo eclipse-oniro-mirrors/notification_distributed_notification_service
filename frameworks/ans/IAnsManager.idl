@@ -14,6 +14,7 @@
  */
 
 interface OHOS.Notification.IAnsDialogCallback;
+interface OHOS.Notification.IAnsResultDataSynchronizer;
 interface OHOS.Notification.IAnsSubscriberLocalLiveView;
 interface OHOS.Notification.IAnsSubscriber;
 interface OHOS.Notification.IAnsOperationCallback;
@@ -42,15 +43,15 @@ interface OHOS.Notification.IAnsManager {
     void PublishNotificationForIndirectProxy([in] sptr<NotificationRequest> notification);
     [ipcincapacity 520] void PublishNotificationForIndirectProxyWithMaxCapacity([in] sptr<NotificationRequest> notification);
 
-    void Cancel([in] int notificationId, [in] String label, [in] String instanceKey);
+    void Cancel([in] int notificationId, [in] String label, [in] String instanceKey, [in] IAnsResultDataSynchronizer synchronizer);
 
-    void CancelAll([in] String instanceKey);
+    void CancelAll([in] String instanceKey, [in] IAnsResultDataSynchronizer synchronizer);
 
-    void CancelAsBundle([in] int notificationId, [in] String representativeBundle, [in] int userId);
+    void CancelAsBundle([in] int notificationId, [in] String representativeBundle, [in] int userId, [in] IAnsResultDataSynchronizer synchronizer);
 
-    void CancelAsBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int notificationId);
+    void CancelAsBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int notificationId, [in] IAnsResultDataSynchronizer synchronizer);
 
-    void CancelAsBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int notificationId, [in] int userId);
+    void CancelAsBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int notificationId, [in] int userId, [in] IAnsResultDataSynchronizer synchronizer);
 
     void AddSlotByType([in] int slotTypeInt);
 
@@ -310,7 +311,7 @@ interface OHOS.Notification.IAnsManager {
 
     void IsDistributedEnabledByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] String deviceType, [out] boolean enabled);
 
-    void CancelAsBundleWithAgent([in] sptr<NotificationBundleOption> bundleOption, [in] int id);
+    void CancelAsBundleWithAgent([in] sptr<NotificationBundleOption> bundleOption, [in] int id, [in] IAnsResultDataSynchronizer synchronizer);
 
     void SetTargetDeviceStatus([in] String deviceType, [in] unsigned int status, [in] String deviceId);
 
