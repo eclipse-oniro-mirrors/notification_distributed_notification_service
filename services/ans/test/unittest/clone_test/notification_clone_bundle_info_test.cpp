@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -450,6 +450,74 @@ HWTEST_F(NotificationCloneBundleInfoTest, SubscriptionBundlesFromJson_00002, Fun
     
     bundleInfo->SubscriptionBundlesFromJson(jsonObject);
     EXPECT_EQ(bundleInfo->GetExtensionSubscriptionBundles().size(), 0);
+}
+
+/**
+ * @tc.name: ExtensionSubscriptionFromJson_00001
+ * @tc.desc: Test ExtensionSubscriptionFromJson when BUNDLE_INFO_SUBSCRIPTION_ENABLED is missing.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, ExtensionSubscriptionFromJson_00001, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"validKey", 123}
+    };
+    auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    ASSERT_NE(rrc, nullptr);
+    rrc->ExtensionSubscriptionFromJson(jsonObject);
+    EXPECT_EQ(rrc->GetEnabledExtensionSubscription(), NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+}
+
+/**
+ * @tc.name: ExtensionSubscriptionFromJson_00002
+ * @tc.desc: Test ExtensionSubscriptionFromJson when BUNDLE_INFO_SUBSCRIPTION_ENABLED not a number.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, ExtensionSubscriptionFromJson_00002, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"enableExtensionSubscription", "not_a_number"}
+    };
+    auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    ASSERT_NE(rrc, nullptr);
+    rrc->ExtensionSubscriptionFromJson(jsonObject);
+    EXPECT_EQ(rrc->GetEnabledExtensionSubscription(), NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+}
+
+/**
+ * @tc.name: ExtensionSubscriptionFromJson_00003
+ * @tc.desc: Test ExtensionSubscriptionFromJson when BUNDLE_INFO_SUBSCRIPTION_ENABLED equals CONST_ENABLE_INT.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, ExtensionSubscriptionFromJson_00003, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"enableExtensionSubscription", 1}
+    };
+    auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    ASSERT_NE(rrc, nullptr);
+    rrc->ExtensionSubscriptionFromJson(jsonObject);
+    EXPECT_EQ(rrc->GetEnabledExtensionSubscription(), NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+}
+
+/**
+ * @tc.name: ExtensionSubscriptionFromJson_00004
+ * @tc.desc: Test ExtensionSubscriptionFromJson when BUNDLE_INFO_SUBSCRIPTION_ENABLED not equal to CONST_ENABLE_INT.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, ExtensionSubscriptionFromJson_00004, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"enableExtensionSubscription", 0}
+    };
+    auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    ASSERT_NE(rrc, nullptr);
+    rrc->ExtensionSubscriptionFromJson(jsonObject);
+    EXPECT_EQ(rrc->GetEnabledExtensionSubscription(), NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
 }
 }
 }
