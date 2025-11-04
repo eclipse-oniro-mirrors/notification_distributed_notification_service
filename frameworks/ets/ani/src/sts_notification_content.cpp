@@ -339,7 +339,7 @@ ani_status GetIconButtonArray(ani_env *env, ani_object param, const char *name,
     for (int32_t i = 0; i < length; i++) {
         ani_ref buttonRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "i:C{std.core.Object}", &buttonRef, i);
+            "$_get", "i:Y", &buttonRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("status : %{public}d, index: %{public}d", status, i);
             return status;
@@ -514,7 +514,7 @@ bool getCapsuleByInt(ani_env *env, ani_object obj, const char *name, int32_t &ou
         return true;
     }
     if ((status = env->Object_CallMethodByName_Int(static_cast<ani_object>(refObj),
-        "unboxed", ":i", &out)) != ANI_OK) {
+        "toInt", ":i", &out)) != ANI_OK) {
         ANS_LOGE("Object_CallMethodByName_Int failed, status : %{public}d", status);
         return false;
     }
@@ -640,7 +640,7 @@ ani_object GetAniIconButtonArray(ani_env *env, const std::vector<NotificationIco
             ANS_LOGE("GetAniIconButtonArray: item is nullptr");
             return nullptr;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, item)) {
+        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iY:", index, item)) {
             ANS_LOGE("GetAniIconButtonArray: add item failed");
             return nullptr;
         }
@@ -885,7 +885,6 @@ ani_status UnWarpNotificationMultiLineContent(ani_env *env, ani_object obj,
     }
     multiLineContent->SetBriefText(GetResizeStr(briefText, SHORT_TEXT_SIZE));
     std::vector<std::string> lines = {};
-    isUndefined = ANI_TRUE;
     if ((status = GetPropertyStringArray(env, obj, "lines", lines)) != ANI_OK) {
         ANS_LOGE("UnWarpNotificationMultiLineContent: get lines failed");
         return ANI_INVALID_ARGS;

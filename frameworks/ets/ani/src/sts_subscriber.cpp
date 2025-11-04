@@ -112,7 +112,7 @@ bool SetVibrationValues(ani_env *env, const std::shared_ptr<NotificationSts> &re
                 return false;
             }
             status = env->Object_CallMethodByName_Void(
-                vibrationValuesObj, "$_set", "iC{std.core.Object}:", i, longObj);
+                vibrationValuesObj, "$_set", "iY:", i, longObj);
             if (status != ANI_OK) {
                 ANS_LOGE("faild. status : %{public}d", status);
                 return false;
@@ -199,7 +199,7 @@ bool WarpSubscribeCallbackDataArray(
             return false;
         }
         if (ANI_OK != (status = env->Object_CallMethodByName_Void(
-            outObj, "$_set", "iC{std.core.Object}:", i, obj))) {
+            outObj, "$_set", "iY:", i, obj))) {
                 ANS_LOGE("set object faild. status %{public}d", status);
                 return false;
             }

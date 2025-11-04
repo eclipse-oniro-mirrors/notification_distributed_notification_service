@@ -70,7 +70,7 @@ ani_object GetAniArrayBundleOption(ani_env* env,
             ANS_LOGE("GetAniArrayActionButton: item is nullptr");
             return nullptr;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, item)) {
+        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iY:", index, item)) {
             ANS_LOGE("GetAniArrayActionButton: Object_CallMethodByName_Void failed");
             return nullptr;
         }
@@ -130,22 +130,21 @@ bool UnwrapArrayBundleOption(ani_env *env,
         return false;
     }
     ani_status status;
-    ani_array optionArray = static_cast<ani_array>(arrayObj);
-    ani_size length;
-    status = env->Array_GetLength(optionArray, &length);
+    ani_int length;
+    status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
-        ANS_LOGE("Array_GetLength fail. status : %{public}d", status);
-        return status;
+        ANS_LOGE("UnwrapArrayBundleOption: get length failed, status = %{public}d", status);
+        return false;
     }
-    int32_t arraySize = static_cast<int32_t>(length);
-    for (int32_t i = 0; i < arraySize; i++) {
+    Notification::NotificationBundleOption option;
+    for (int32_t i = 0; i < length; i++) {
         ani_ref optionRef;
-        status = env->Array_Get(optionArray, i, &optionRef);
+        status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
+            "$_get", "i:Y", &optionRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("UnwrapArrayBundleOption: get bundleOptionRef failed, status = %{public}d", status);
             return false;
         }
-        Notification::NotificationBundleOption option;
         if (!UnwrapBundleOption(env, static_cast<ani_object>(optionRef), option)) {
             ANS_LOGE("UnwrapArrayBundleOption: get option status = %{public}d, index = %{public}d", status, i);
             return false;
@@ -184,7 +183,7 @@ bool WrapBundleOption(ani_env* env, const std::shared_ptr<BundleOption> &bundleO
 }
 
 bool WrapBundleOption(ani_env* env,
-    const sptr<BundleOption> &bundleOption, ani_object &bundleObject)
+    const std::shared_ptr<BundleOption> &bundleOption, ani_object &bundleObject)
 {
     ANS_LOGD("WrapBundleOption call");
     if (env == nullptr || bundleOption == nullptr) {

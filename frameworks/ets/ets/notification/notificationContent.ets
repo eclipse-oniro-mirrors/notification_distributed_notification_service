@@ -17,6 +17,7 @@ import image from '@ohos.multimedia.image';
 import { Resource } from 'global.resource';
 import type notificationManager from '@ohos.notificationManager';
 import { WantAgent } from '@ohos.app.ability.wantAgent';
+import { RecordData } from '@ohos.base';
 
 type IconType = Resource | image.PixelMap;
 
@@ -111,7 +112,7 @@ export interface NotificationLiveViewContent extends NotificationBasicContent {
 
     version?: int;
 
-    extraInfo?: Record<string, Object>;
+    extraInfo?: Record<string, RecordData>;
 
     pictureInfo?: Record<string, Array<image.PixelMap>>;
 
@@ -134,7 +135,7 @@ class NotificationLiveViewContentInner implements NotificationLiveViewContent {
 
     public version?: int | undefined;
 
-    public extraInfo?: Record<string, Object> | undefined;
+    public extraInfo?: Record<string, RecordData> | undefined;
 
     public pictureInfo?: Record<string, Array<image.PixelMap>> | undefined;
 
