@@ -62,28 +62,6 @@ static const uint32_t SILENT_REMINDER__SLOT_FLAGS = 32; // 0b100000
 constexpr char REMINDER_CAPABILITY[] = "reminder_capability";
 constexpr char SOUND_CAPABILITY[] = "sound_capability";
 
-class HfpStateObserver : public OHOS::Bluetooth::HandsFreeAudioGatewayObserver {
-public:
-    HfpStateObserver() = default;
-    ~HfpStateObserver() override = default;
-    void OnConnectionStateChanged(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state, int cause) override;
-};
-
-class BluetoothAccessObserver : public OHOS::Bluetooth::BluetoothHostObserver {
-public:
-    BluetoothAccessObserver() = default;
-    ~BluetoothAccessObserver() override = default;
-
-    void OnStateChanged(const int transport, const int status) override;
-    void OnDiscoveryStateChanged(int status) override {};
-    void OnDiscoveryResult(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int rssi,
-        const std::string deviceName, int deviceClass) override {};
-    void OnPairRequested(const OHOS::Bluetooth::BluetoothRemoteDevice &device) override {};
-    void OnPairConfirmed(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int reqType, int number) override {};
-    void OnScanModeChanged(int mode) override {};
-    void OnDeviceNameChanged(const std::string &deviceName) override {};
-    void OnDeviceAddrChanged(const std::string &address) override {};
-};
 class AdvancedNotificationService final : public AnsManagerStub,
     public std::enable_shared_from_this<AdvancedNotificationService> {
 public:
@@ -1633,6 +1611,7 @@ public:
     bool TryStartExtensionSubscribeService();
     void OnHfpDeviceConnectChanged(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
     void OnBluetoothStateChanged(const int status);
+    void OnBluetoothPairedStatusChanged(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
 
 private:
     struct RecentInfo {
@@ -2001,7 +1980,6 @@ private:
     bool CheckBluetoothConnectionInInfos(
         const sptr<NotificationBundleOption> &bundleOption,
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos);
-    bool CheckBluetoothConditions(const std::string &addr);
     void FilterPermissionBundles(std::vector<sptr<NotificationBundleOption>> &bundles);
     void FilterGrantedBundles(std::vector<sptr<NotificationBundleOption>> &bundles);
     void FilterBundlesByBluetoothConnection(std::vector<sptr<NotificationBundleOption>> &bundles);
@@ -2021,21 +1999,23 @@ private:
         const std::vector<sptr<NotificationBundleOption>> &subscribeBundles);
     bool ShutdownExtensionServiceAndUnSubscribed(const sptr<NotificationBundleOption> &bundle);
     ErrCode GetNotificationExtensionEnabledBundles(std::vector<sptr<NotificationBundleOption>>  &bundles);
-    void RegisterHfpObserver();
-    void ProcessHfpDeviceStateChange(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
-    bool CheckBluetoothSwitchState();
-    void RegisterBluetoothAccessObserver();
     bool GetCloneBundleList(const sptr<NotificationBundleOption>& bundleOption,
         std::vector<sptr<NotificationBundleOption>>& cloneBundleList);
     void ProcessSetUserGrantedState(const sptr<NotificationBundleOption>& bundle,
         bool enabled, ErrCode& result);
     void ProcessSetUserGrantedBundleState(const sptr<NotificationBundleOption>& bundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled, ErrCode& result);
+    void ProcessExtensionSubscriptionInfos(const sptr<NotificationBundleOption>& bundleOption,
+        const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos, ErrCode& result);
     ErrCode SystemSwitchPermissionCheck();
-    bool CheckHfpState(const std::string &bluetoothAddress);
     std::vector<sptr<NotificationBundleOption>>::iterator FindBundleInCache(
         const sptr<NotificationBundleOption> &bundleOption);
+    void ProcessHfpDeviceStateChange(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
     void ProcessBluetoothStateChanged(const int status);
+    void ProcessBluetoothPairedStatusChange(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
+    void FindMatchingBundlesByDevice(
+        const OHOS::Bluetooth::BluetoothRemoteDevice &device, bool filterHfpOnly,
+        std::vector<sptr<NotificationBundleOption>> &processBundles);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;
@@ -2077,10 +2057,6 @@ private:
     std::shared_ptr<NotificationLoadUtils> notificationExtensionHandler_;
     bool supportHfp_ = false;
     std::vector<sptr<NotificationBundleOption>> cacheNotificationExtensionBundles_;
-    std::shared_ptr<HfpStateObserver> hfpObserver_ = nullptr;
-    std::shared_ptr<BluetoothAccessObserver> bluetoothAccessObserver_ = nullptr;
-    std::atomic<bool> isBluetoothObserverRegistered_ = false;
-    std::atomic<bool> isHfpObserverRegistered_ = false;
 };
 
 /**
