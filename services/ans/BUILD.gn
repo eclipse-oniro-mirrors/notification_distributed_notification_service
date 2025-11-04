@@ -114,6 +114,7 @@ ohos_source_set("ans_service_sources") {
     "src/priority_notification/advanced_notification_priority_manager_service.cpp",
     "src/priority_notification/notification_ai_extension_wrapper.cpp",
     "src/liveview_all_scenarios_extension_wrapper.cpp",
+    "src/notification_bluetooth_helper.cpp",
     "src/notification_dialog.cpp",
     "src/notification_dialog_manager.cpp",
     "src/notification_extension_wrapper.cpp",

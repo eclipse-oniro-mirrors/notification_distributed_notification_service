@@ -1795,6 +1795,7 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/enable_manager/silent_reminder_manager.cpp",
     "${services_path}/ans/src/event_report.cpp",
     "${services_path}/ans/src/liveview_all_scenarios_extension_wrapper.cpp",
+    "${services_path}/ans/src/notification_bluetooth_helper.cpp",
     "${services_path}/ans/src/notification_dialog.cpp",
     "${services_path}/ans/src/notification_dialog_manager.cpp",
     "${services_path}/ans/src/notification_extension/distributed_collaboration_service.cpp",

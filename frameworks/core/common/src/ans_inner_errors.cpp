@@ -40,7 +40,7 @@ static const std::unordered_map<int32_t, std::string> ANS_ERROR_CODE_MESSAGE_MAP
     {ERROR_BUNDLE_NOT_FOUND, "The specified bundle name was not found"},
     {ERROR_NO_AGENT_SETTING, "There is no corresponding agent relationship configuration"},
     {ERROR_DIALOG_IS_POPPING, "Dialog is popping"},
-    {ERROR_SETTING_WINDOW_EXIST, "The notification settings window is already displayed"},
+    {ERROR_SETTING_WINDOW_EXIST, "the notification settings window is already displayed"},
     {ERROR_NO_PROFILE_TEMPLATE, "The do-not-disturb profile does not exist"},
     {ERROR_REPEAT_SET, "Repeat create or end"},
     {ERROR_NO_RIGHT, "The specified process does not have the permission"},
