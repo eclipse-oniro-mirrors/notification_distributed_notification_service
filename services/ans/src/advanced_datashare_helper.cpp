@@ -69,6 +69,7 @@ constexpr const unsigned int MAX_TIME_INTERVAL = 15 * 60;
 constexpr const int TYPE_ID_FIVE = 5;
 constexpr const int ERROR_QUERY_INFO_FAILED = -1;
 constexpr const int QUERY_INFO_SUCCESS = 1;
+constexpr const int PHONE_NUMBER_LAST_SPACE_POS = 4;
 std::vector<std::string> QUERY_CONTACT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FAVORITE, FOCUS_MODE_LIST, DETAIL_INFO};
 std::vector<std::string> QUERY_INTELLIGENT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FOCUS_MODE_LIST, DETAIL_INFO};
 } // namespace
@@ -371,10 +372,14 @@ void AdvancedDatashareHelper::SetPhoneNumQueryCondition(DataShare::DataSharePred
 {
     if (phoneNumber.size() >= PHONE_NUMBER_LENGTH) {
         std::string matchCase = phoneNumber.substr(phoneNumber.size() - PHONE_NUMBER_LENGTH, phoneNumber.size());
+        std::string exceptionMatchCase = matchCase;
+        exceptionMatchCase.insert(exceptionMatchCase.length() - PHONE_NUMBER_LAST_SPACE_POS, " ");
         predicates.BeginWrap()
             ->EndsWith(DETAIL_INFO, matchCase)
             ->Or()
             ->EndsWith(FORMAT_PHONE_NUMBER, matchCase)
+            ->Or()
+            ->EndsWith(FORMAT_PHONE_NUMBER, exceptionMatchCase)
             ->EndWrap();
     } else {
         predicates.BeginWrap()
