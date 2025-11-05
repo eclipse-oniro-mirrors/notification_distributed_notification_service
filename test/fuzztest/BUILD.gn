@@ -51,6 +51,7 @@ group("fuzztest") {
     "notificationdistributedoptions_fuzzer:NotificationDistributedOptionsFuzzTest",
     "notificationdonotdisturbdate_fuzzer:NotificationDoNotDisturbDateFuzzTest",
     "notificationflags_fuzzer:NotificationFlagsFuzzTest",
+    "notificationframeworks_fuzzer:NotificationFrameworksFuzzTest",
     "notificationhelper_fuzzer:NotificationHelperFuzzTest",
     "notificationlongtextcontent_fuzzer:NotificationLongTextContentFuzzTest",
     "notificationlongtextcontentannex_fuzzer:NotificationLongTextContentAnnexFuzzTest",
