@@ -297,13 +297,13 @@ export default namespace notificationManager {
         if (slot == null) {
             return errorParamInvalid;
         }
-        if (slot.lockscreenVisibility !== undefined && typeof slot.lockscreenVisibility === 'int') {
+        if (slot.lockscreenVisibility !== undefined && typeof slot.lockscreenVisibility === 'number') {
             const num = slot.lockscreenVisibility ?? -1;
             if (num < 0) {
                 return errorParamInvalid;
             }
         }
-        if (slot.lightColor !== undefined && typeof slot.lightColor === 'int') {
+        if (slot.lightColor !== undefined && typeof slot.lightColor === 'number') {
             const num = slot.lightColor ?? -1;
             if (num < 0) {
                 return errorParamInvalid;
@@ -612,13 +612,13 @@ export default namespace notificationManager {
         if (request?.agentBundle !== undefined && !isInvalidBundleOption(request.agentBundle)) {
             return errorParamInvalid;
         }
-        if (request?.color !== undefined && typeof request.color === 'long') {
+        if (request?.color !== undefined && typeof request.color === 'number') {
             const num = request.color ?? -1;
             if (num < 0) {
                 return errorParamInvalid;
             }
         }
-        if (request?.badgeNumber !== undefined && typeof request.badgeNumber === 'long') {
+        if (request?.badgeNumber !== undefined && typeof request.badgeNumber === 'number') {
             const num = request.badgeNumber ?? -1;
             if (num < 0) {
                 return errorParamInvalid;
