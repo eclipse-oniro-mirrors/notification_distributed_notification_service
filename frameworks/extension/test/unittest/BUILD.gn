@@ -55,6 +55,7 @@ ohos_unittest("notification_subscriber_stub_test") {
     "hilog:libhilog",
     "googletest:gmock_main",
     "googletest:gtest_main",
+    "ipc:ipc_core",
     "ipc:ipc_napi",
     "napi:ace_napi",
   ]
@@ -102,6 +103,7 @@ ohos_unittest("notification_subscriber_extension_context_test") {
     "hilog:libhilog",
     "googletest:gmock_main",
     "googletest:gtest_main",
+    "ipc:ipc_core",
     "ipc:ipc_napi",
     "napi:ace_napi",
   ]
