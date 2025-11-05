@@ -147,6 +147,7 @@ ohos_shared_library("notification_manager_ani") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
   ]
 
   innerapi_tags = [ "platformsdk" ]
