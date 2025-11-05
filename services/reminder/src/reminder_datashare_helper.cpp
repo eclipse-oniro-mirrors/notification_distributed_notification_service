@@ -16,15 +16,15 @@
 #include "reminder_datashare_helper.h"
 
 #include "ans_log_wrapper.h"
-#include "iservice_registry.h"
-#include "reminder_calendar_share_table.h"
-#include "system_ability_definition.h"
-#include "reminder_request_calendar.h"
 #include "reminder_data_manager.h"
+#include "reminder_request_calendar.h"
+#include "reminder_calendar_share_table.h"
+
+#include "iservice_registry.h"
 #include "ability_manager_client.h"
 #include "in_process_call_wrapper.h"
+#include "system_ability_definition.h"
 #include "reminder_bundle_manager_helper.h"
-#include "reminder_utils.h"
 
 namespace OHOS::Notification {
 static constexpr int64_t DURATION_PRELOAD_TIME = 10 * 60 * 60 * 1000;  // 10h, millisecond
@@ -75,13 +75,19 @@ bool ReminderDataShareHelper::RegisterObserver()
     }
     auto helper = CreateDataShareHelper(ReminderCalendarShareTable::PROXY);
     if (helper == nullptr) {
-        ANSR_LOGE("null helper");
+        ANSR_LOGE("DataShareHelper is null.");
         return false;
     }
     observer_ = std::make_shared<ReminderDataObserver>();
     Uri uri(ReminderCalendarShareTable::PROXY);
-    helper->RegisterObserverExt(uri, observer_, false);
-    ReleaseDataShareHelper(helper);
+    int32_t ret = helper->TryRegisterObserverExt(uri, observer_, false);
+    if (ret != ERR_OK) {
+        ANSR_LOGE("RegisterObserver failed[%{public}d]", ret);
+        observer_ = nullptr;
+        helper->Release();
+        return false;
+    }
+    helper->Release();
     return true;
 }
 
@@ -93,12 +99,12 @@ bool ReminderDataShareHelper::UnRegisterObserver()
     }
     auto helper = CreateDataShareHelper(ReminderCalendarShareTable::PROXY);
     if (helper == nullptr) {
-        ANSR_LOGE("null helper");
+        ANSR_LOGE("DataShareHelper is null.");
         return false;
     }
     Uri uri(ReminderCalendarShareTable::PROXY);
-    helper->UnregisterObserverExt(uri, observer_);
-    ReleaseDataShareHelper(helper);
+    helper->TryUnregisterObserverExt(uri, observer_);
+    helper->Release();
     observer_ = nullptr;
     return true;
 }
@@ -107,14 +113,15 @@ bool ReminderDataShareHelper::Query(std::map<std::string, sptr<ReminderRequest>>
 {
     auto helper = CreateDataShareHelper(ReminderCalendarShareTable::PROXY);
     if (helper == nullptr) {
-        ANSR_LOGE("null helper");
+        ANSR_LOGE("DataShareHelper is null.");
         return false;
     }
-    int64_t timestamp = GetCurrentTime();
+    int64_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
     int64_t targetTimestamp = timestamp + DURATION_PRELOAD_TIME;
 
     std::string proxy = ReminderCalendarShareTable::PROXY;
-    proxy.append("?user=").append(std::to_string(curUserId_));
+    proxy.append("?user=").append(std::to_string(userId_));
     Uri uri(proxy);
     std::vector<std::string> columns = GetColumns();
     DataShare::DataSharePredicates predicates;
@@ -139,7 +146,7 @@ bool ReminderDataShareHelper::Query(std::map<std::string, sptr<ReminderRequest>>
     predicates.EndWrap();
     auto resultSet = helper->Query(uri, predicates, columns);
     if (resultSet == nullptr) {
-        ReleaseDataShareHelper(helper);
+        helper->Release();
         return false;
     }
 
@@ -150,19 +157,19 @@ bool ReminderDataShareHelper::Query(std::map<std::string, sptr<ReminderRequest>>
         }
         reminders[reminder->GetIdentifier()] = reminder;
     }
-    ReleaseDataShareHelper(helper);
+    helper->Release();
     ANSR_LOGD("Query size: %{public}d.", static_cast<int32_t>(reminders.size()));
     return true;
 }
 
 bool ReminderDataShareHelper::Query(Uri& uri, const std::string& key, std::string& value)
 {
-    static constexpr const char* SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
-    static constexpr const char* DATA_COLUMN_KEYWORD = "KEYWORD";
-    static constexpr const char* DATA_COLUMN_VALUE = "VALUE";
+    constexpr const char* SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
+    constexpr const char* DATA_COLUMN_KEYWORD = "KEYWORD";
+    constexpr const char* DATA_COLUMN_VALUE = "VALUE";
     auto helper = CreateDataShareHelper(SETTINGS_DATA_EXT_URI);
     if (helper == nullptr) {
-        ANSR_LOGE("null helper");
+        ANSR_LOGE("DataShareHelper is null.");
         return false;
     }
     DataShare::DataSharePredicates predicates;
@@ -191,19 +198,22 @@ bool ReminderDataShareHelper::Update(const std::string& identifier, const int32_
 {
     auto helper = CreateDataShareHelper(ReminderCalendarShareTable::PROXY);
     if (helper == nullptr) {
-        ANSR_LOGE("null helper");
+        ANSR_LOGE("DataShareHelper is null.");
         return false;
     }
     std::string proxy = ReminderCalendarShareTable::PROXY;
-    proxy.append("?user=").append(std::to_string(curUserId_));
+    proxy.append("?user=").append(std::to_string(userId_));
     Uri uri(proxy);
 
     DataShare::DataSharePredicates predicates;
     predicates.EqualTo(ReminderCalendarShareTable::IDENTIFIER, identifier);
     DataShare::DataShareValuesBucket valuesBucket;
     valuesBucket.Put(ReminderCalendarShareTable::STATE, state);
-    helper->UpdateEx(uri, predicates, valuesBucket);
-    ReleaseDataShareHelper(helper);
+    auto ret = helper->UpdateEx(uri, predicates, valuesBucket);
+    if (ret.first != ERR_OK) {
+        ANSR_LOGE("Update calendar rdb failed[%{public}d].", ret.first);
+    }
+    helper->Release();
     return true;
 }
 
@@ -219,9 +229,9 @@ void ReminderDataShareHelper::UpdateCalendarUid()
 {
     ANSR_LOGI("Update calendar uid and query calendar info");
     uid_ = ReminderBundleManagerHelper::GetInstance().GetDefaultUidByBundleName(ReminderCalendarShareTable::NAME,
-        curUserId_);
+        userId_);
     dataUid_ = ReminderBundleManagerHelper::GetInstance().GetDefaultUidByBundleName(
-        ReminderCalendarShareTable::DATA_NAME, curUserId_);
+        ReminderCalendarShareTable::DATA_NAME, userId_);
     AppExecFwk::BundleInfo bundleInfo;
     if (!ReminderBundleManagerHelper::GetInstance().GetBundleInfo(ReminderCalendarShareTable::DATA_NAME,
         AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO, dataUid_, bundleInfo)) {
@@ -267,7 +277,6 @@ void ReminderDataShareHelper::OnDataInsertOrDelete()
     auto func = []() {
         auto manager = ReminderDataManager::GetInstance();
         if (manager == nullptr) {
-            ANSR_LOGE("null manager");
             return;
         }
         manager->OnDataShareInsertOrDelete();
@@ -293,7 +302,6 @@ void ReminderDataShareHelper::OnDataUpdate(const DataShare::DataShareObserver::C
     auto func = []() {
         auto manager = ReminderDataManager::GetInstance();
         if (manager == nullptr) {
-            ANSR_LOGE("null manager");
             return;
         }
         auto reminders = ReminderDataShareHelper::GetInstance().GetCacheReminders();
@@ -322,17 +330,17 @@ std::shared_ptr<DataShare::DataShareHelper> ReminderDataShareHelper::CreateDataS
 {
     sptr<ISystemAbilityManager> manager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (manager == nullptr) {
-        ANSR_LOGE("null manager");
+        ANSR_LOGE("GetSystemAbilityManager is null.");
         return nullptr;
     }
     sptr<IRemoteObject> remoteObj = manager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
     if (remoteObj == nullptr) {
-        ANSR_LOGE("null remoteObj");
+        ANSR_LOGE("GetSystemAbility is null.");
         return nullptr;
     }
 
     std::string proxy = uriStr;
-    proxy.append("?user=").append(std::to_string(curUserId_));
+    proxy.append("?user=").append(std::to_string(userId_));
     std::pair<int, std::shared_ptr<DataShare::DataShareHelper>> ret =
         DataShare::DataShareHelper::Create(remoteObj, proxy, "");
     if (ret.first == 0 && ret.second != nullptr) {
@@ -341,15 +349,6 @@ std::shared_ptr<DataShare::DataShareHelper> ReminderDataShareHelper::CreateDataS
         ANSR_LOGE("Create DataShareHelper failed.");
         return nullptr;
     }
-}
-
-bool ReminderDataShareHelper::ReleaseDataShareHelper(const std::shared_ptr<DataShare::DataShareHelper>& helper)
-{
-    if (helper == nullptr) {
-        ANSR_LOGE("null helper");
-        return false;
-    }
-    return helper->Release();
 }
 
 std::vector<std::string> ReminderDataShareHelper::GetColumns() const
@@ -388,6 +387,7 @@ sptr<ReminderRequest> ReminderDataShareHelper::CreateReminder(
     uint64_t triggerTime = 0;
     GetRdbValue<uint64_t>(result, ReminderCalendarShareTable::ALARM_TIME, triggerTime);
     reminder->SetTriggerTimeInMilli(triggerTime);
+    reminder->SetOriTriggerTimeInMilli(triggerTime);
 
     int32_t reminderId = 0;
     GetRdbValue<int32_t>(result, ReminderCalendarShareTable::ID, reminderId);
@@ -442,6 +442,7 @@ std::map<std::string, sptr<ReminderRequest>> ReminderDataShareHelper::CreateRemi
         if (iter != values.end()) {
             triggerTime = static_cast<uint64_t>(std::get<double>(iter->second));
             reminder->SetTriggerTimeInMilli(triggerTime);
+            reminder->SetOriTriggerTimeInMilli(triggerTime);
         }
         InitBaseInfo(values, reminder);
         BuildReminderV1(values, reminder);
@@ -474,7 +475,7 @@ void ReminderDataShareHelper::InitNormalInfo(sptr<ReminderRequest>& reminder)
     reminder->SetRingDuration(0);
     reminder->SetRingLoop(false);
     reminder->SetRingChannel(ReminderRequest::RingChannel::NOTIFICATION);
-    reminder->InitUserId(curUserId_);
+    reminder->InitUserId(userId_);
     reminder->InitUid(uid_);
     reminder->InitCreatorUid(dataUid_);
     reminder->SetShare(true);

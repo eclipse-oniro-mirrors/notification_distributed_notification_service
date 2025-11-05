@@ -818,6 +818,21 @@ public:
     }
 
     /**
+     * @brief Set the original trigger time in milliseconds(for share reminder).
+     */
+    void SetOriTriggerTimeInMilli(const uint64_t oriTriggerTimeInMilli)
+    {
+        oriTriggerTimeInMilli_ = oriTriggerTimeInMilli;
+    }
+    /**
+     * @brief Get the original trigger time in milliseconds(for share reminder).
+     */
+    uint64_t GetOriTriggerTimeInMilli() const
+    {
+        return oriTriggerTimeInMilli_;
+    }
+
+    /**
      * @brief Sets want agent information.
      *
      * @param wantAgentInfo Indicates want agent information.
@@ -1198,6 +1213,7 @@ private:
     uint64_t reminderTimeInMilli_ {0};
     uint64_t ringDurationInMilli_ {MILLI_SECONDS};
     uint64_t triggerTimeInMilli_ {0};
+    uint64_t oriTriggerTimeInMilli_ {0};
     uint64_t timeIntervalInMilli_ {0};
     ReminderType reminderType_ {ReminderType::INVALID};
     NotificationConstant::SlotType slotType_ {NotificationConstant::SlotType::SOCIAL_COMMUNICATION};

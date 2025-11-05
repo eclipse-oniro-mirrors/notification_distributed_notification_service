@@ -19,8 +19,10 @@
 
 namespace OHOS::Notification {
 namespace {
+bool g_mockGetBundleInfoRet = false;
 int32_t g_mockGetDefaultUidByBundleNameRet = 0;
 std::string g_mockGetBundleNameByUidRet;
+AppExecFwk::BundleInfo g_mockBundleInfo;
 }
 
 void MockReminderBundleManagerHelper::MockGetBundleNameByUid(const std::string& ret)
@@ -31,6 +33,12 @@ void MockReminderBundleManagerHelper::MockGetBundleNameByUid(const std::string& 
 void MockReminderBundleManagerHelper::MockGetDefaultUidByBundleName(const int32_t ret)
 {
     g_mockGetDefaultUidByBundleNameRet = ret;
+}
+
+void MockReminderBundleManagerHelper::MockGetBundleInfo(const bool ret, const AppExecFwk::BundleInfo& bundleInfo)
+{
+    g_mockBundleInfo = bundleInfo;
+    g_mockGetBundleInfoRet = ret;
 }
 
 ReminderBundleManagerHelper::ReminderBundleManagerHelper()
@@ -47,5 +55,12 @@ std::string ReminderBundleManagerHelper::GetBundleNameByUid(int32_t uid)
 int32_t ReminderBundleManagerHelper::GetDefaultUidByBundleName(const std::string& bundle, const int32_t userId)
 {
     return g_mockGetDefaultUidByBundleNameRet;
+}
+
+bool ReminderBundleManagerHelper::GetBundleInfo(const std::string& bundleName, const AppExecFwk::BundleFlag flag,
+    const int32_t userId, AppExecFwk::BundleInfo& bundleInfo)
+{
+    bundleInfo = g_mockBundleInfo;
+    return g_mockGetBundleInfoRet;
 }
 } // namespace OHOS

@@ -2501,5 +2501,18 @@ HWTEST_F(ReminderRequestTest, ReminderRequestTest_009, Function | SmallTest | Le
     child.AddActionButtons(request, true);
     EXPECT_EQ(request.actionButtons_.size(), 3);
 }
+
+/**
+ * @tc.name: ReminderRequestTest_010
+ * @tc.desc: Test G/SetOriTriggerTimeInMilli parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, ReminderRequestTest_010, Function | SmallTest | Level1)
+{
+    ReminderRequestChild child;
+    child.SetOriTriggerTimeInMilli(1762150774000);
+    EXPECT_EQ(child.GetOriTriggerTimeInMilli(), 1762150774000);
+}
 }
 }
