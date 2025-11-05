@@ -32,6 +32,7 @@
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
+#include "ans_result_data_synchronizer.h"
 #include "ans_ut_constant.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
@@ -94,7 +95,12 @@ void AdvancedNotificationServiceTest::SetUp()
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-    advancedNotificationService_->CancelAll("");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelAll("",
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+    }
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     GTEST_LOG_(INFO) << "SetUp end";
 }
@@ -629,7 +635,16 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04700,
         req->SetCreatorUid(1);
         ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
     }
-    ASSERT_EQ(advancedNotificationService_->Cancel(1, label, ""), (int)ERR_OK);
+    int32_t result = ERR_OK;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->Cancel(1, label, "",
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
@@ -641,8 +656,16 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04800,
 {
     int32_t notificationId = 0;
     std::string label = "testLabel";
-    ASSERT_EQ((int)advancedNotificationService_->Cancel(
-        notificationId, label, ""), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    int32_t result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->Cancel(notificationId, label, "",
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
@@ -655,7 +678,16 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04900,
     TestAddSlot(NotificationConstant::SlotType::OTHER);
     sptr<NotificationRequest> req = new NotificationRequest(1);
     req->SetSlotType(NotificationConstant::OTHER);
-    ASSERT_EQ(advancedNotificationService_->CancelAll(""), (int)ERR_OK);
+    int32_t result = ERR_OK;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelAll("",
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
@@ -679,7 +711,16 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_05000,
     req->SetUnremovable(true);
     req->SetCreatorUid(1);
     ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
-    ASSERT_EQ(advancedNotificationService_->Cancel(notificationId, label, ""), (int)ERR_OK);
+    int32_t result = ERR_OK;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->Cancel(notificationId, label, "",
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 
@@ -1314,7 +1355,15 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12600,
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 1;
     int result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
-    ASSERT_EQ(advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId), result);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**

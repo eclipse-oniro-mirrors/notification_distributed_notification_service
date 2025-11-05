@@ -29,6 +29,7 @@
 #include "accesstoken_kit.h"
 #include "notification_preferences.h"
 #include "notification_constant.h"
+#include "ans_result_data_synchronizer.h"
 #include "ans_ut_constant.h"
 #include "ans_dialog_host_client.h"
 #include "mock_parameters.h"
@@ -80,7 +81,12 @@ void AnsPublishServiceTest::SetUp()
 
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
     NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
-    advancedNotificationService_->CancelAll("");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelAll("",
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+    }
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     GTEST_LOG_(INFO) << "SetUp end";
@@ -1292,8 +1298,16 @@ HWTEST_F(AnsPublishServiceTest, NotificationSvrQueue_00001, Function | SmallTest
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
 
-    auto ret = advancedNotificationService_->CancelAll("");
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    int32_t result = ERR_ANS_INVALID_PARAM;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelAll("",
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 
     ret = advancedNotificationService_->Delete("", 1);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
@@ -1981,25 +1995,54 @@ HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00002, Funct
 HWTEST_F(AnsPublishServiceTest, CancelAsBundle_00001, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", 1);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
-    auto result = advancedNotificationService_->CancelAsBundle(bundle, 1, 1);
-    ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+    int32_t result = ERR_ANS_NON_SYSTEM_APP;
+    auto ret = advancedNotificationService_->CancelAsBundle(bundle, 1, 1,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
-    result = advancedNotificationService_->CancelAsBundle(bundle, 1, 1);
-    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    ret = advancedNotificationService_->CancelAsBundle(bundle, 1, 1,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(false);
-    result = advancedNotificationService_->CancelAsBundle(bundle, 1, 1);
-    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    ret = advancedNotificationService_->CancelAsBundle(bundle, 1, 1,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 
     MockIsSystemApp(true);
-    result = advancedNotificationService_->CancelAsBundle(bundle, 1, 1);
-    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    ret = advancedNotificationService_->CancelAsBundle(bundle, 1, 1,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
@@ -2013,8 +2056,16 @@ HWTEST_F(AnsPublishServiceTest, CancelAsBundle_00002, Function | SmallTest | Lev
 {
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", 1);
     MockIsOsAccountExists(false);
-    auto result = advancedNotificationService_->CancelAsBundle(bundle, 1, -2);
-    ASSERT_EQ(result, (int)ERROR_USER_NOT_EXIST);
+    int32_t result = ERROR_USER_NOT_EXIST;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelAsBundle(bundle, 1, -2,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
@@ -2028,8 +2079,16 @@ HWTEST_F(AnsPublishServiceTest, CancelAsBundle_00003, Function | SmallTest | Lev
 {
     MockIsOsAccountExists(true);
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", 0);
-    auto result = advancedNotificationService_->CancelAsBundle(bundle, 1);
-    ASSERT_EQ(result, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    int32_t result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelAsBundle(bundle, 1,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
@@ -2046,29 +2105,64 @@ HWTEST_F(AnsPublishServiceTest, CancelAsBundle_00003, Function | SmallTest | Lev
 HWTEST_F(AnsPublishServiceTest, CancelAsBundleWithAgent_00001, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", 1);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
-    auto result = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1);
-    ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+    int32_t result = ERR_ANS_NON_SYSTEM_APP;
+    auto ret = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
-    result = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1);
-    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    ret = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(false);
-    result = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1);
-    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
-
+    result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    ret = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
     MockIsSystemApp(true);
-    result = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1);
-    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    ret = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 
     bundle->SetUid(-1);
-    result = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1);
-    ASSERT_EQ(result, ERR_ANS_INVALID_UID);
+    result = ERR_ANS_INVALID_UID;
+    ret = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**

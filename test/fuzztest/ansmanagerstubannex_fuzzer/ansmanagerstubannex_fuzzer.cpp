@@ -20,6 +20,7 @@
 #undef protected
 #include "ans_dialog_callback_proxy.h"
 #include "ans_permission_def.h"
+#include "ans_result_data_synchronizer.h"
 #include "ansmanagerstubannex_fuzzer.h"
 #include "reminder_request_timer.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
@@ -106,6 +107,8 @@ namespace OHOS {
         std::vector<Notification::NotificationBundleOption> bundleOptions;
         std::vector<sptr<Notification::NotificationSlot>> slots;
         std::vector<sptr<Notification::NotificationRequest>> notificationRequests;
+        sptr<Notification::AnsResultDataSynchronizerImpl> synchronizer =
+            new Notification::AnsResultDataSynchronizerImpl();
 
         service->Delete(stringData, removeReason);
         service->DeleteByBundle(bundleOption);
@@ -149,11 +152,26 @@ namespace OHOS {
         service->PublishWithMaxCapacity(stringData, notificationRequest);
         service->PublishNotificationForIndirectProxy(notificationRequest);
         service->PublishNotificationForIndirectProxyWithMaxCapacity(notificationRequest);
-        service->CancelAsBundle(notificationId, stringData, userId);
-        service->CancelAsBundle(bundleOption, notificationId);
-        service->CancelAsBundle(bundleOption, notificationId, userId);
-        service->CancelAll(key1);
-        service->Cancel(notificationId, stringData, key1);
+        if (service->CancelAsBundle(notificationId, stringData, userId,
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
+        if (service->CancelAsBundle(bundleOption, notificationId,
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
+        if (service->CancelAsBundle(bundleOption, notificationId, userId,
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
+        if (service->CancelAll(key1,
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
+        if (service->Cancel(notificationId, stringData, key1,
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
         service->AddSlotByType(slotType);
         service->AddSlots(slots);
         service->RemoveSlotByType(slotType);
@@ -205,7 +223,10 @@ namespace OHOS {
         service->SetSmartReminderEnabled(deviceType, enabled);
         service->IsSmartReminderEnabled(deviceType, enabled);
         service->SetAdditionConfig(key1, value);
-        service->CancelAsBundleWithAgent(bundleOption, userId);
+        if (service->CancelAsBundleWithAgent(bundleOption, userId,
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
         service->GetTargetDeviceStatus(deviceType, deviceStatus);
 
         service->AddDoNotDisturbProfiles(profiles);

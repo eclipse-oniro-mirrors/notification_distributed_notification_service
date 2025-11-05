@@ -22,6 +22,7 @@
 #include "advanced_notification_service.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
+#include "ans_result_data_synchronizer.h"
 #include "mock_ipc_skeleton.h"
 #include "notification.h"
 #include "notification_subscriber.h"
@@ -244,7 +245,12 @@ BENCHMARK_F(BenchmarkNotificationService, CancelNotificationTestCase001)(benchma
         if (errCode != ERR_OK) {
             state.SkipWithError("CancelNotificationTestCase001 publish failed.");
         }
-        advancedNotificationService_->Cancel(id, label, "");
+        sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+        auto ret = advancedNotificationService_->Cancel(id, label, "",
+            iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+        if (ret == ERR_OK) {
+            synchronizer->Wait();
+        }
     }
 }
 

@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include "ans_inner_errors.h"
+#include "ans_result_data_synchronizer.h"
 #include "ans_ut_constant.h"
 #define private public
 #define protected public
@@ -439,8 +440,16 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.CancelAsBundle(notificationId, representativeBundle, userId),
-        ERR_ANS_NON_SYSTEM_APP);
+    int32_t result = ERR_ANS_NON_SYSTEM_APP;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService.CancelAsBundle(notificationId, representativeBundle, userId,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**

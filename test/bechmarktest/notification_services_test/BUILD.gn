@@ -51,6 +51,7 @@ ohos_benchmarktest("Benchmark_Notification_Servece_Test") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",
+    "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
     "selinux_adapter:librestorecon",

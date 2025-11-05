@@ -20,6 +20,7 @@
 #include "ans_trace_wrapper.h"
 #include "ans_manager_death_recipient.h"
 #include "ans_manager_proxy.h"
+#include "ans_result_data_synchronizer.h"
 #include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -346,7 +347,19 @@ ErrCode AnsNotification::CancelNotification(const std::string &label, int32_t no
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return proxy->Cancel(notificationId, label, instanceKey);
+
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    if (synchronizer == nullptr) {
+        ANS_LOGE("null synchronizer");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode ret = proxy->Cancel(notificationId, label, instanceKey, synchronizer);
+    // ERR_OK means the task is put into the ffrt queue at service layer.
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    synchronizer->Wait();
+    return synchronizer->GetResultCode();
 }
 
 ErrCode AnsNotification::CancelAllNotifications(const std::string &instanceKey)
@@ -358,7 +371,19 @@ ErrCode AnsNotification::CancelAllNotifications(const std::string &instanceKey)
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return proxy->CancelAll(instanceKey);
+
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    if (synchronizer == nullptr) {
+        ANS_LOGE("null synchronizer");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode ret = proxy->CancelAll(instanceKey, synchronizer);
+    // ERR_OK means the task is put into the ffrt queue at service layer.
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    synchronizer->Wait();
+    return synchronizer->GetResultCode();
 }
 
 ErrCode AnsNotification::CancelAsBundle(
@@ -370,7 +395,19 @@ ErrCode AnsNotification::CancelAsBundle(
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return proxy->CancelAsBundle(notificationId, representativeBundle, userId);
+
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    if (synchronizer == nullptr) {
+        ANS_LOGE("null synchronizer");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode ret = proxy->CancelAsBundle(notificationId, representativeBundle, userId, synchronizer);
+    // ERR_OK means the task is put into the ffrt queue at service layer.
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    synchronizer->Wait();
+    return synchronizer->GetResultCode();
 }
 
 ErrCode AnsNotification::CancelAsBundle(
@@ -383,7 +420,19 @@ ErrCode AnsNotification::CancelAsBundle(
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    return proxy->CancelAsBundle(bo, notificationId);
+
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    if (synchronizer == nullptr) {
+        ANS_LOGE("null synchronizer");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode ret = proxy->CancelAsBundle(bo, notificationId, synchronizer);
+    // ERR_OK means the task is put into the ffrt queue at service layer.
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    synchronizer->Wait();
+    return synchronizer->GetResultCode();
 }
 
 ErrCode AnsNotification::GetActiveNotificationNums(uint64_t &num)
@@ -2396,7 +2445,18 @@ ErrCode AnsNotification::CancelAsBundleWithAgent(const NotificationBundleOption 
         ANS_LOGE("null bundle");
         return ERR_ANS_INVALID_PARAM;
     }
-    return proxy->CancelAsBundleWithAgent(bundle, id);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    if (synchronizer == nullptr) {
+        ANS_LOGE("null synchronizer");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode ret = proxy->CancelAsBundleWithAgent(bundle, id, synchronizer);
+    // ERR_OK means the task is put into the ffrt queue at service layer.
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    synchronizer->Wait();
+    return synchronizer->GetResultCode();
 }
 
 ErrCode AnsNotification::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)

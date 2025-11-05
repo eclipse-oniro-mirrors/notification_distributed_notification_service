@@ -22,6 +22,7 @@
 #undef protected
 #include "ans_dialog_callback_proxy.h"
 #include "ans_permission_def.h"
+#include "ans_result_data_synchronizer.h"
 #include "ansmanagerstub_fuzzer.h"
 #include "notification_record.h"
 #include "notification_request.h"
@@ -48,10 +49,21 @@ namespace OHOS {
         service->Publish(stringData, notification);
         service->PublishWithMaxCapacity(stringData, notification);
         int notificationId = fuzzData->ConsumeIntegral<int32_t>();
-        service->Cancel(notificationId, stringData, fuzzData->ConsumeRandomLengthString());
-        service->CancelAll(fuzzData->ConsumeRandomLengthString());
         int32_t userId = fuzzData->ConsumeIntegral<int32_t>();
-        service->CancelAsBundle(notificationId, stringData, userId);
+        sptr<Notification::AnsResultDataSynchronizerImpl> synchronizer =
+            new (std::nothrow) Notification::AnsResultDataSynchronizerImpl();
+        if (service->Cancel(notificationId, stringData, fuzzData->ConsumeRandomLengthString(),
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
+        if (service->CancelAll(fuzzData->ConsumeRandomLengthString(),
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
+        if (service->CancelAsBundle(notificationId, stringData, userId,
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
         uint8_t type = fuzzData->ConsumeIntegral<uint8_t>() % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
         service->AddSlotByType(slotType);
@@ -67,9 +79,18 @@ namespace OHOS {
         bundleOption->SetBundleName(fuzzData->ConsumeRandomLengthString());
         bundleOption->SetUid(fuzzData->ConsumeIntegral<int32_t>());
         uint64_t num = fuzzData->ConsumeIntegral<uint64_t>();
-        service->CancelAsBundle(bundleOption, fuzzData->ConsumeIntegral<int32_t>());
-        service->CancelAsBundle(bundleOption, fuzzData->ConsumeIntegral<int32_t>(), userId);
-        service->CancelAsBundleWithAgent(bundleOption, fuzzData->ConsumeIntegral<int32_t>());
+        if (service->CancelAsBundle(bundleOption, fuzzData->ConsumeIntegral<int32_t>(),
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
+        if (service->CancelAsBundle(bundleOption, fuzzData->ConsumeIntegral<int32_t>(), userId,
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
+        if (service->CancelAsBundleWithAgent(bundleOption, fuzzData->ConsumeIntegral<int32_t>(),
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
         service->GetSlotNumAsBundle(bundleOption, num);
         std::vector<sptr<Notification::NotificationRequest>> notifications;
         service->GetActiveNotifications(notifications, fuzzData->ConsumeRandomLengthString());
@@ -163,7 +184,10 @@ namespace OHOS {
             fuzzData->ConsumeBool());
         service->IsDistributedEnableByBundle(bundleOption, enable);
         service->SetDefaultNotificationEnabled(bundleOption, enabled);
-        service->ExcuteCancelAll(bundleOption, fuzzData->ConsumeIntegral<int32_t>());
+        if (service->ExcuteCancelAll(bundleOption, fuzzData->ConsumeIntegral<int32_t>(),
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
         service->ExcuteDelete(stringData, fuzzData->ConsumeIntegral<int32_t>());
         service->HandleBadgeEnabledChanged(bundleOption, enabled);
         service->RemoveSystemLiveViewNotifications(bundleName, fuzzData->ConsumeIntegral<int32_t>());

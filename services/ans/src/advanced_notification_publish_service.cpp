@@ -504,7 +504,7 @@ void AdvancedNotificationService::ExcuteCancelGroupCancel(
     const sptr<NotificationBundleOption>& bundleOption,
     const std::string &groupName, const int32_t reason)
 {
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
         for (auto record : notificationList_) {
@@ -547,7 +547,6 @@ void AdvancedNotificationService::ExcuteCancelGroupCancel(
         }
         BatchCancelTimer(timerIds);
     }));
-    notificationSvrQueue_->wait(handler);
 }
 
 ErrCode AdvancedNotificationService::RemoveGroupByBundle(
@@ -598,7 +597,7 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
         int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
@@ -641,7 +640,6 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
         }
         BatchCancelTimer(timerIds);
     }));
-    notificationSvrQueue_->wait(handler);
 
     return ERR_OK;
 }
