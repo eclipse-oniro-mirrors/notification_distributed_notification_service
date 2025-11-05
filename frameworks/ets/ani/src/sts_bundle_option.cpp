@@ -155,33 +155,6 @@ bool UnwrapArrayBundleOption(ani_env *env,
     return true;
 }
 
-bool WrapBundleOption(ani_env* env, const std::shared_ptr<BundleOption> &bundleOption, ani_object &bundleObject)
-{
-    ANS_LOGD("WrapBundleOption call");
-    if (env == nullptr || bundleOption == nullptr) {
-        ANS_LOGE("WrapBundleOption failed, has nullptr");
-        return false;
-    }
-    ani_class bundleCls = nullptr;
-    if (!CreateClassObjByClassName(env, BUNDLE_OPTION_CLASSNAME, bundleCls, bundleObject) ||
-        bundleCls == nullptr || bundleObject == nullptr) {
-        ANS_LOGE("WrapBundleOption: create BundleOption failed");
-        return false;
-    }
-    // bundle: string;
-    ani_string stringValue = nullptr;
-    if (ANI_OK != GetAniStringByString(env, bundleOption->GetBundleName(), stringValue)
-        || !CallSetter(env, bundleCls, bundleObject, "bundle", stringValue)) {
-        ANS_LOGE("WrapBundleOption: set bundle failed");
-        return false;
-    }
-    // uid?: int;
-    int32_t uid = bundleOption->GetUid();
-    SetPropertyOptionalByInt(env, bundleObject, "uid", uid);
-    ANS_LOGD("WrapBundleOption end");
-    return true;
-}
-
 bool WrapBundleOption(ani_env* env,
     const std::shared_ptr<BundleOption> &bundleOption, ani_object &bundleObject)
 {
@@ -191,8 +164,7 @@ bool WrapBundleOption(ani_env* env,
         return false;
     }
     ani_class bundleCls = nullptr;
-    if (!CreateClassObjByClassName(env, "notification.NotificationCommonDef.BundleOptionInner",
-        bundleCls, bundleObject)
+    if (!CreateClassObjByClassName(env, BUNDLE_OPTION_CLASSNAME, bundleCls, bundleObject)
         || bundleCls == nullptr || bundleObject == nullptr) {
         ANS_LOGE("WrapBundleOption: create BundleOption failed");
         return false;
