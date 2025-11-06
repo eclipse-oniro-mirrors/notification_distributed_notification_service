@@ -870,7 +870,7 @@ bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
         ANS_LOGE("Object_New faild. status %{public}d", status);
         return false;
     }
-    ani_double msObj = 0;
+    ani_long msObj = 0;
     if ((status = env->Object_CallMethodByName_Long(outObj, "setTime", "l:l", &msObj, time))
         != ANI_OK) {
         ANS_LOGD("Object_CallMethodByName_Long setDate faild. status %{public}d", status);
