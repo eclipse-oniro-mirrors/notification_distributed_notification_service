@@ -536,7 +536,7 @@ void AdvancedNotificationService::OnHfpDeviceConnectChanged(
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
-        ProcessHfpDeviceStateChange(device, state);
+        ProcessHfpDeviceStateChange(state);
     }));
 }
 
@@ -561,72 +561,59 @@ void AdvancedNotificationService::OnBluetoothPairedStatusChanged(
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
-        ProcessBluetoothPairedStatusChange(device, state);
+        ProcessBluetoothPairedStatusChange(state);
     }));
 }
 
-void AdvancedNotificationService::FindMatchingBundlesByDevice(
-    const OHOS::Bluetooth::BluetoothRemoteDevice &device, bool filterHfpOnly,
-    std::vector<sptr<NotificationBundleOption>> &processBundles)
+void AdvancedNotificationService::ProcessSubscriptionInfoForStateChange(
+    const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos,
+    const sptr<NotificationBundleOption> &bundle, bool filterHfpOnly)
 {
-    processBundles.clear();
+    for (const auto& info : infos) {
+        if (info == nullptr) {
+            continue;
+        }
+        std::string bluetoothAddress = info->GetAddr();
+        if (filterHfpOnly && info->IsHfp()) {
+            if (NotificationBluetoothHelper::GetInstance().CheckHfpState(bluetoothAddress)) {
+                EnsureExtensionServiceLoadedAndSubscribed(bundle);
+                return;
+            }
+        }
+        if (!filterHfpOnly && !info->IsHfp()) {
+            if (NotificationBluetoothHelper::GetInstance().CheckBluetoothConditions(bluetoothAddress)) {
+                EnsureExtensionServiceLoadedAndSubscribed(bundle);
+                return;
+            }
+        }
+    }
+    ShutdownExtensionServiceAndUnSubscribed(bundle);
+}
+
+void AdvancedNotificationService::CheckBleAndHfpStateChange(bool filterHfpOnly)
+{
     std::vector<sptr<NotificationBundleOption>> bundles;
     if (cacheNotificationExtensionBundles_.size() != 0) {
         bundles = cacheNotificationExtensionBundles_;
     } else {
         GetNotificationExtensionEnabledBundles(bundles);
     }
-    
-    std::string randomAddress;
-    Bluetooth::BluetoothHost::GetDefaultHost().GetRandomAddress(device.GetDeviceAddr(), randomAddress, 0);
     for (const auto& bundle : bundles) {
         std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
         ErrCode result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionInfos(bundle, infos);
         if (result != ERR_OK || infos.empty()) {
             continue;
         }
-        for (const auto& info : infos) {
-            if (info == nullptr) {
-                continue;
-            }
-
-            if (filterHfpOnly && !info->IsHfp()) {
-                continue;
-            }
-            if (!filterHfpOnly && info->IsHfp()) {
-                continue;
-            }
-            std::string bluetoothAddress = info->GetAddr();
-            if (!bluetoothAddress.empty() &&
-                (bluetoothAddress == device.GetDeviceAddr() || bluetoothAddress == randomAddress)) {
-                processBundles.emplace_back(bundle);
-                break;
-            }
-        }
+        ProcessSubscriptionInfoForStateChange(infos, bundle, filterHfpOnly);
     }
 }
 
-void AdvancedNotificationService::ProcessHfpDeviceStateChange(
-    const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state)
+void AdvancedNotificationService::ProcessHfpDeviceStateChange(int state)
 {
-    std::vector<sptr<NotificationBundleOption>> processBundles;
-    FindMatchingBundlesByDevice(device, true, processBundles);
-    if (processBundles.size() == 0) {
-        std::string encryptedAddr;
-        if (AesGcmHelper::Encrypt(device.GetDeviceAddr(), encryptedAddr) == ERR_OK) {
-            ANS_LOGW("ProcessHfpDeviceStateChange No matching bundle found for device: %{public}s",
-                encryptedAddr.c_str());
-        }
-        return;
-    }
-
-    for (const auto& processBundle : processBundles) {
-        if (state == static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED)) {
-            EnsureExtensionServiceLoadedAndSubscribed(processBundle);
-        }
-        if (state == static_cast<int32_t>(Bluetooth::BTConnectState::DISCONNECTED)) {
-            ShutdownExtensionServiceAndUnSubscribed(processBundle);
-        }
+    ANS_LOGI("ProcessHfpDeviceStateChange: state: %{public}d", state);
+    if (state == static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED) ||
+        state == static_cast<int32_t>(Bluetooth::BTConnectState::DISCONNECTED)) {
+        CheckBleAndHfpStateChange(true);
     }
 }
 
@@ -640,7 +627,6 @@ void AdvancedNotificationService::ProcessBluetoothStateChanged(const int status)
         } else {
             GetNotificationExtensionEnabledBundles(bundles);
         }
-    
         if (bundles.size() == 0) {
             ANS_LOGD("No bundle match conditon");
             return;
@@ -661,28 +647,11 @@ void AdvancedNotificationService::ProcessBluetoothStateChanged(const int status)
     }
 }
 
-void AdvancedNotificationService::ProcessBluetoothPairedStatusChange(
-    const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state)
+void AdvancedNotificationService::ProcessBluetoothPairedStatusChange(int state)
 {
-    ANS_LOGI("Bluetooth paired device status changed: status: %{public}d", state);
-    std::vector<sptr<NotificationBundleOption>> processBundles;
-    FindMatchingBundlesByDevice(device, false, processBundles);
-    if (processBundles.size() == 0) {
-        std::string encryptedAddr;
-        if (AesGcmHelper::Encrypt(device.GetDeviceAddr(), encryptedAddr) == ERR_OK) {
-            ANS_LOGW("ProcessBluetoothPairedStatusChange No matching bundle found for device: %{public}s",
-                encryptedAddr.c_str());
-        }
-        return;
-    }
-    
-    for (const auto& processBundle : processBundles) {
-        if (state == OHOS::Bluetooth::PAIR_PAIRED) {
-            EnsureExtensionServiceLoadedAndSubscribed(processBundle);
-        }
-        if (state == OHOS::Bluetooth::PAIR_NONE) {
-            ShutdownExtensionServiceAndUnSubscribed(processBundle);
-        }
+    ANS_LOGI("ProcessBluetoothPairedStatusChange: state: %{public}d", state);
+    if (state == OHOS::Bluetooth::PAIR_PAIRED || state == OHOS::Bluetooth::PAIR_NONE) {
+        CheckBleAndHfpStateChange(false);
     }
 }
 

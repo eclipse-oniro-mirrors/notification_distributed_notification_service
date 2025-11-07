@@ -824,7 +824,7 @@ napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
 
     if (argc == 0) {
-        return Common::NapiGetNull(env);
+        return nullptr;
     }
 
     // argv[0]: context
@@ -832,7 +832,7 @@ napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if ((valuetype != napi_object) && (valuetype != napi_function)) {
         ANS_LOGW("Wrong argument type. Function or object expected. Excute promise.");
-        return Common::NapiGetNull(env);
+        return nullptr;
     }
     if (valuetype == napi_object) {
         bool stageMode = false;
