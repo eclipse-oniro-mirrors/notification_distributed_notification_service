@@ -65,6 +65,9 @@ ErrCode AdvancedNotificationService::SetRingtoneInfoByBundle(const sptr<Notifica
 
     NotificationPreferences::GetInstance()->RemoveRingtoneInfoByBundle(bundleOption);
 
+    ReportRingtoneChanged(
+        bundleOption, ringtoneInfo, NotificationConstant::RingtoneReportType::RINGTONE_UPDATE);
+
     return NotificationPreferences::GetInstance()->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
 }
 

@@ -852,6 +852,29 @@ void AdvancedNotificationService::ReportDoNotDisturbModeChanged(const int32_t &u
     }
 }
 
+void AdvancedNotificationService::ReportRingtoneChanged(const sptr<NotificationBundleOption> &bundleOption,
+    const sptr<NotificationRingtoneInfo> &ringtoneInfo, NotificationConstant::RingtoneReportType reportType)
+{
+    if (bundleOption == nullptr || ringtoneInfo == nullptr) {
+        ANS_LOGE("Invalid param.");
+        return;
+    }
+    HaMetaMessage message;
+    std::string ringtoneMessage;
+    if (reportType == NotificationConstant::RingtoneReportType::RINGTONE_UPDATE) {
+        message = HaMetaMessage(EventSceneId::SCENE_29, EventBranchId::BRANCH_1);
+        ringtoneMessage = "Set ringtone ";
+    } else {
+        message = HaMetaMessage(EventSceneId::SCENE_29, EventBranchId::BRANCH_2);
+        ringtoneMessage = "Remove Customized tone ";
+    }
+    uint32_t ringtoneType = static_cast<uint32_t>(ringtoneInfo->GetRingtoneType());
+    std::string info = ringtoneMessage + bundleOption->GetBundleName() + " " +
+        std::to_string(ringtoneType) + " " + ringtoneInfo->GetRingtoneUri();
+    message.Message(info);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
+}
+
 void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr<NotificationRecord> &record)
 {
     ANS_LOGD("Called.");

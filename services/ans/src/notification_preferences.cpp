@@ -208,6 +208,8 @@ ErrCode NotificationPreferences::RemoveNotificationForBundle(const sptr<Notifica
         if (!preferncesDB_->RemoveBundleFromDisturbeDB(GenerateBundleKey(bundleOption), bundleOption->GetUid())) {
             result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
         }
+        AdvancedNotificationService::GetInstance()->ReportRingtoneChanged(
+            bundleOption, bundleInfo.GetRingtoneInfo(), NotificationConstant::RingtoneReportType::RINGTONE_REMOVE);
         SystemSoundHelper::GetInstance()->RemoveCustomizedTone(bundleInfo.GetRingtoneInfo());
     } else {
         result = ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;

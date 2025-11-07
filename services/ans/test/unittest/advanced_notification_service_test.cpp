@@ -67,6 +67,7 @@ namespace OHOS {
 namespace Notification {
 namespace {
 constexpr int32_t MAX_USER_ID = 10737;
+constexpr int32_t TEST_RINGTONE_BUNDLE_OPTION_UID = 20010080;
 }
 extern void MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum mockRet);
 extern void MockIsSystemApp(bool isSystemApp);
@@ -83,6 +84,8 @@ public:
 private:
     void TestAddSlot(NotificationConstant::SlotType type);
     void TestAddLiveViewSlot(bool isForceControl);
+    sptr<NotificationBundleOption> CreateValidBundleOption();
+    sptr<NotificationRingtoneInfo> CreateValidRingtoneInfo();
     void MockSystemApp();
 
 private:
@@ -128,6 +131,22 @@ inline void SleepForFC()
     // For ANS Flow Control
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
+
+sptr<NotificationBundleOption> AdvancedNotificationServiceTest::CreateValidBundleOption()
+{
+    return new NotificationBundleOption("test.bundle.name", TEST_RINGTONE_BUNDLE_OPTION_UID);
+}
+
+sptr<NotificationRingtoneInfo> AdvancedNotificationServiceTest::CreateValidRingtoneInfo()
+{
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
+    ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_SYSTEM);
+    ringtoneInfo->SetRingtoneFileName("test_ringtone");
+    ringtoneInfo->SetRingtoneUri("file:///data/test_ringtone");
+    ringtoneInfo->SetRingtoneTitle("Test Ringtone");
+    return ringtoneInfo;
+}
+
 
 class TestAnsSubscriber : public NotificationSubscriber {
 public:
@@ -4544,6 +4563,146 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00008, Function | SmallTest | L
     sptr<NotificationBundleOption> bundleOption = nullptr;
     ASSERT_EQ(advancedNotificationService_->dialogManager_->HandleOneDialogClosed(
         bundleOption, EnabledDialogStatus::ALLOW_CLICKED), false);
+}
+
+/**
+ * @tc.name: SetRingtoneInfoByBundle_0100
+ * @tc.desc: Test SetRingtoneInfoByBundle with valid parameters from not system app.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetRingtoneInfoByBundle_0100, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    sptr<NotificationBundleOption> bundleOption = CreateValidBundleOption();
+    sptr<NotificationRingtoneInfo> ringtoneInfo = CreateValidRingtoneInfo();
+    ErrCode result = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: SetRingtoneInfoByBundle_0200
+ * @tc.desc: Test SetRingtoneInfoByBundle without permission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetRingtoneInfoByBundle_0200, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+
+    sptr<NotificationBundleOption> bundleOption = CreateValidBundleOption();
+    sptr<NotificationRingtoneInfo> ringtoneInfo = CreateValidRingtoneInfo();
+
+    ErrCode result = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: SetRingtoneInfoByBundle_0300
+ * @tc.desc: Test SetRingtoneInfoByBundle with null ringtone info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetRingtoneInfoByBundle_0300, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    sptr<NotificationBundleOption> bundleOption = CreateValidBundleOption();
+    sptr<NotificationRingtoneInfo> ringtoneInfo = nullptr;
+
+    ErrCode result = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetRingtoneInfoByBundle_0400
+ * @tc.desc: Test SetRingtoneInfoByBundle with invalid ringtone type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetRingtoneInfoByBundle_0400, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    sptr<NotificationBundleOption> bundleOption = CreateValidBundleOption();
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
+    ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT);
+
+    ErrCode result = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetRingtoneInfoByBundle_0500
+ * @tc.desc: Test SetRingtoneInfoByBundle with empty bundle name.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetRingtoneInfoByBundle_0500, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("", 1000);
+    sptr<NotificationRingtoneInfo> ringtoneInfo = CreateValidRingtoneInfo();
+
+    ErrCode result = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetRingtoneInfoByBundle_0100
+ * @tc.desc: Test GetRingtoneInfoByBundle with non-system app.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetRingtoneInfoByBundle_0100, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+
+    sptr<NotificationBundleOption> bundleOption = CreateValidBundleOption();
+    sptr<NotificationRingtoneInfo> ringtoneInfo = nullptr;
+
+    ErrCode result = advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: GetRingtoneInfoByBundle_0200
+ * @tc.desc: Test GetRingtoneInfoByBundle without permission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetRingtoneInfoByBundle_0200, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+
+    sptr<NotificationBundleOption> bundleOption = CreateValidBundleOption();
+    sptr<NotificationRingtoneInfo> ringtoneInfo = nullptr;
+
+    ErrCode result = advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: GetRingtoneInfoByBundle_0300
+ * @tc.desc: Test GetRingtoneInfoByBundle with empty bundle name.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetRingtoneInfoByBundle_0300, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("", 1000);
+    sptr<NotificationRingtoneInfo> ringtoneInfo = nullptr;
+
+    ErrCode result = advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
 }
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
