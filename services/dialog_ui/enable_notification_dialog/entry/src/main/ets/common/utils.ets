@@ -154,3 +154,7 @@ export function shouldMoveToDisplayCenter(comW: number, comH: number,
   }
   return false;
 }
+
+export async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
