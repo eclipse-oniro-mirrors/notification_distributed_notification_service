@@ -60,7 +60,7 @@ void ExtensionServiceSubscribeService::SubscribeNotification(
             ANS_LOGW("null subscribeBundle");
             continue;
         }
-        subscribeInfo->AddAppName(subscribeBundle->GetBundleName());
+        subscribeInfo->AddAppUid(subscribeBundle->GetUid());
     }
     result = NotificationHelper::SubscribeNotification(subscriber, subscribeInfo);
     if (result == 0) {
