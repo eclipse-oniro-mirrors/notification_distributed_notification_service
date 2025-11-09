@@ -226,6 +226,8 @@ public:
 
         void SetBundleUid(const int32_t &uid);
         int32_t GetBundleUid() const;
+        void SetBundleUserId(const int32_t &userId);
+        int32_t GetBundleUserId() const;
         void SetSlotEnabled(NotificationConstant::SlotType slotType, bool enabled);
         bool GetSlotEnabled(NotificationConstant::SlotType slotType, bool &enabled) const;
         void SetRingtoneInfo(const sptr<NotificationRingtoneInfo> &ringtoneInfo);
@@ -246,6 +248,7 @@ public:
     private:
         std::string bundleName_;
         int32_t uid_ = 0;
+        int32_t userId_ = -1;
         uint32_t slotFlags_ = 59; // 0b111011
         int32_t importance_ = BUNDLE_IMPORTANCE;
         bool isShowBadge_ = BUNDLE_SHOW_BADGE;
@@ -369,7 +372,8 @@ public:
     void RemoveDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
     bool GetDoNotDisturbProfiles(int64_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profiles);
     void GetAllDoNotDisturbProfiles(int32_t userId, std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
-    void GetAllCLoneBundlesInfo(const int32_t &userId, const std::unordered_map<std::string, std::string> &bunlesMap,
+    void GetAllCLoneBundlesInfo(const int32_t &dbUserId, const int32_t &userId,
+        const std::unordered_map<std::string, std::string> &bunlesMap,
         std::vector<NotificationCloneBundleInfo> &cloneBundles);
     void SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
     bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);

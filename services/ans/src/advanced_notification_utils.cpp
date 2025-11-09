@@ -577,6 +577,8 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
 
         // In order to adapt to the publish reminder interface, currently only the input from the whitelist is written
         UpdateNotificationSwitchState(bundleOption, bundleInfo);
+        // set userid for anco application
+        UpdateAncoBundleUserId(bundleOption);
         if (bundleInfo.applicationInfo.allowEnableNotification) {
             SetSlotFlagsTrustlistsAsBundle(bundleOption);
             auto errCode = NotificationPreferences::GetInstance()->SetShowBadge(bundleOption, true);
@@ -1173,6 +1175,14 @@ void AdvancedNotificationService::OnResourceRemove(int32_t userId)
         ANS_LOGD("ffrt enter!");
         NotificationPreferences::GetInstance()->RemoveSettings(userId);
     }));
+    notificationSvrQueue_->submit_h(std::bind([=]() {
+        ANS_LOGI("Resource remove %{public}d", userId);
+        std::vector<sptr<NotificationBundleOption>> bundles;
+        NotificationPreferences::GetInstance()->GetAllAncoBundlesInfo(ZERO_USER_ID, userId, bundles);
+        for (auto bundleOption : bundles) {
+            OnBundleRemoved(bundleOption);
+        }
+    }));
 }
 
 void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBundleOption> &bundleOption)
@@ -1427,6 +1437,30 @@ ErrCode AdvancedNotificationService::ShellDump(const std::string &cmd, const std
     }));
     notificationSvrQueue_->wait(handler);
     return result;
+}
+
+void AdvancedNotificationService::UpdateAncoBundleUserId(const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (!BundleManagerHelper::GetInstance()->IsAncoApp(bundleOption->GetBundleName(), bundleOption->GetUid())) {
+        return;
+    }
+
+    std::vector<int32_t> userIds;
+    if (OsAccountManagerHelper::GetInstance().GetAllOsAccount(userIds) != ERR_OK) {
+        return;
+    }
+
+    ANS_LOGE("Add anco bundle %{public}d", bundleOption->GetUid());
+    for (auto userId : userIds) {
+        if (userId == ZERO_USERID) {
+            continue;
+        }
+        if (BundleManagerHelper::GetInstance()->CheckCurrentUserIdApp(bundleOption->GetBundleName(),
+            bundleOption->GetUid(), userId)) {
+            NotificationPreferences::GetInstance()->SetAncoApplicationUserId(bundleOption, userId);
+            break;
+        }
+    }
 }
 
 int AdvancedNotificationService::Dump(int fd, const std::vector<std::u16string> &args)
@@ -1749,11 +1783,28 @@ bool AdvancedNotificationService::GetBundleInfoByNotificationBundleOption(
         ANS_LOGE("bundleMgr instance error!");
         return false;
     }
+    // for anco application in privacy space
+    if (callingUserId > ZERO_USERID && callingUserId < DEFAULT_USER_ID) {
+        callingUserId = ZERO_USERID;
+    }
     if (!bundleMgr->GetBundleInfoByBundleName(bundleOption->GetBundleName(), callingUserId, bundleInfo)) {
         ANS_LOGE("Get bundle info error!");
         return false;
     }
     return true;
+}
+
+void AdvancedNotificationService::RecoverAncoApplicationUserId(int32_t userId)
+{
+    if (notificationSvrQueue_ == nullptr) {
+        return;
+    }
+
+    ANS_LOGI("Recover anco application userId %{public}d.", userId);
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&, userId]() {
+        ANS_LOGI("Start Recover anco userId %{public}d.", userId);
+        NotificationPreferences::GetInstance()->SetAncoApplicationUserId(userId);
+    }));
 }
 
 ErrCode AdvancedNotificationService::CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption)

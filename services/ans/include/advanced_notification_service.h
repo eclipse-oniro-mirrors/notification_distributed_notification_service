@@ -1423,6 +1423,11 @@ public:
     */
     void RecoverLiveViewFromDb(int32_t userId = -1);
 
+   /**
+    * @brief Recover anco application userid.
+    */
+    void RecoverAncoApplicationUserId(int32_t userId);
+
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     /**
      * @brief Register Swing Callback.
@@ -1923,6 +1928,7 @@ private:
     void PublishSubscriberExistFlagEvent(bool headsetExistFlag, bool wearableExistFlag);
     void SetClassificationWithVoip(const sptr<NotificationRequest> &request);
     void UpdateCollaborateTimerInfo(const std::shared_ptr<NotificationRecord> &record);
+    void UpdateAncoBundleUserId(const sptr<NotificationBundleOption> &bundleOption);
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
     void SetDialogPoppedUnEnableTime(const sptr<NotificationBundleOption> &bundleOption);
 #endif

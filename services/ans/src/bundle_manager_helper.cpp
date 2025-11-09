@@ -437,14 +437,27 @@ bool BundleManagerHelper::CheckBundleImplExtensionAbility(const sptr<Notificatio
     return false;
 }
 
+bool BundleManagerHelper::CheckCurrentUserIdApp(const std::string &bundleName, const int32_t uid, const int32_t userId)
+{
+    AppExecFwk::BundleInfo bundleInfo;
+    int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+    if (!GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
+        ANS_LOGW("Get Bundle bundleName %{public}s, %{public}d", bundleName.c_str(), userId);
+        return false;
+    }
+
+    return bundleInfo.uid == uid;
+}
+
 bool BundleManagerHelper::IsAncoApp(const std::string &bundleName, int32_t uid)
 {
     int32_t userId = -1;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
-    if (userId == -1 || userId != ZERO_USERID) {
+    if (userId == -1 || userId >= DEFAULT_USER_ID) {
         return false;
     }
 
+    userId = ZERO_USERID;
     AppExecFwk::BundleInfo bundleInfo;
     int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
     if (!GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
