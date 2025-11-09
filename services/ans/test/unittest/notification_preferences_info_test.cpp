@@ -505,7 +505,7 @@ HWTEST_F(NotificationPreferencesInfoTest, GetAllCLoneBundlesInfo_0100, TestSize.
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     preferencesInfo->SetBundleInfoFromDb(bundleInfo, "test100");
     
-    preferencesInfo->GetAllCLoneBundlesInfo(100, bunlesMap, cloneBundles);
+    preferencesInfo->GetAllCLoneBundlesInfo(100, 100, bunlesMap, cloneBundles);
     ASSERT_EQ(cloneBundles.size(), 1);
 }
 

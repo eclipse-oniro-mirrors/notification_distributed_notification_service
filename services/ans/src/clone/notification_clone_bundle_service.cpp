@@ -49,7 +49,7 @@ ErrCode NotificationCloneBundle::OnBackup(nlohmann::json &jsonObject)
     ANS_LOGI("NotificationCloneBundle OnBackup");
     int32_t userId = NotificationCloneUtil::GetActiveUserId();
     std::vector<NotificationCloneBundleInfo> cloneBundles;
-    NotificationPreferences::GetInstance()->GetAllCLoneBundlesInfo(userId, cloneBundles);
+    NotificationPreferences::GetInstance()->GetAllCLoneBundlesInfo(userId, userId, cloneBundles);
 
     if (cloneBundles.empty()) {
         ANS_LOGI("Notification bundle list is empty.");

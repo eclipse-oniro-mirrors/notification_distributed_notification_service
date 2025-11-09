@@ -48,8 +48,9 @@ DhNotificationCloneBundle::~DhNotificationCloneBundle()
 ErrCode DhNotificationCloneBundle::OnBackup(nlohmann::json &jsonObject)
 {
     ANS_LOGI("DhNotificationCloneBundle OnBackup");
+    int32_t userId = NotificationCloneUtil::GetActiveUserId();
     std::vector<NotificationCloneBundleInfo> cloneBundles;
-    NotificationPreferences::GetInstance()->GetAllCLoneBundlesInfo(ZERO_USERID, cloneBundles);
+    NotificationPreferences::GetInstance()->GetAllCLoneBundlesInfo(ZERO_USERID, userId, cloneBundles);
 
     if (cloneBundles.empty()) {
         ANS_LOGI("dh Notification bundle list is empty.");

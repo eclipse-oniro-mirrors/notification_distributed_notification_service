@@ -224,6 +224,16 @@ int32_t NotificationPreferencesInfo::BundleInfo::GetBundleUid() const
     return uid_;
 }
 
+void NotificationPreferencesInfo::BundleInfo::SetBundleUserId(const int32_t &userId)
+{
+    userId_ = userId;
+}
+
+int32_t NotificationPreferencesInfo::BundleInfo::GetBundleUserId() const
+{
+    return userId_;
+}
+
 void NotificationPreferencesInfo::BundleInfo::SetRingtoneInfo(const sptr<NotificationRingtoneInfo> &ringtoneInfo)
 {
     ringtoneInfo_ = ringtoneInfo;
@@ -536,7 +546,7 @@ void NotificationPreferencesInfo::GetAllDoNotDisturbProfiles(
     }
 }
 
-void NotificationPreferencesInfo::GetAllCLoneBundlesInfo(const int32_t &userId,
+void NotificationPreferencesInfo::GetAllCLoneBundlesInfo(const int32_t &dbUserId, const int32_t &userId,
     const std::unordered_map<std::string, std::string> &bunlesMap,
     std::vector<NotificationCloneBundleInfo> &cloneBundles)
 {
@@ -544,6 +554,13 @@ void NotificationPreferencesInfo::GetAllCLoneBundlesInfo(const int32_t &userId,
         auto iter = infos_.find(bundleItem.second);
         if (iter == infos_.end()) {
             ANS_LOGI("No finde bundle info %{public}s.", bundleItem.second.c_str());
+            continue;
+        }
+
+        // back up anco bundle, filter not current userid application.
+        if (dbUserId == ZERO_USERID && iter->second.GetBundleUserId() != -1 &&
+            iter->second.GetBundleUserId() != userId) {
+            ANS_LOGI("Anco userid %{public}s %{public}d.", bundleItem.second.c_str(), iter->second.GetBundleUid());
             continue;
         }
 
