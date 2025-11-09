@@ -462,8 +462,8 @@ bool BundleManagerHelper::GetCloneAppIndexes(
     std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Connect();
     if (bundleMgr_ == nullptr) {
-        ANS_LOGE("GetBundleInfo bundle proxy failed.");
-        return -1;
+        ANS_LOGE("GetCloneAppIndexes bundle proxy failed.");
+        return false;
     }
 
     std::string identity = IPCSkeleton::ResetCallingIdentity();
@@ -486,7 +486,7 @@ bool BundleManagerHelper::GetCloneBundleInfo(
     Connect();
     if (bundleMgr_ == nullptr) {
         ANS_LOGE("GetBundleInfo bundle proxy failed.");
-        return -1;
+        return false;
     }
 
     std::string identity = IPCSkeleton::ResetCallingIdentity();
@@ -494,7 +494,7 @@ bool BundleManagerHelper::GetCloneBundleInfo(
     IPCSkeleton::SetCallingIdentity(identity);
 
     if (result != ERR_OK) {
-        ANS_LOGE("GetCloneAppIndexes failed %{public}d.", result);
+        ANS_LOGE("GetCloneBundleInfo failed %{public}d.", result);
         return false;
     }
 

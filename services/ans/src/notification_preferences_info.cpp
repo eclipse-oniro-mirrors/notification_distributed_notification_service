@@ -278,7 +278,7 @@ bool NotificationPreferencesInfo::BundleInfo::SetExtensionSubscriptionInfosFromJ
         return false;
     }
     nlohmann::json jsonObject = nlohmann::json::parse(json, nullptr, false);
-    if (jsonObject.is_null() || jsonObject.empty()) {
+    if (jsonObject.is_null()) {
         ANS_LOGE("Invalid JSON object");
         return false;
     }
@@ -350,7 +350,7 @@ bool NotificationPreferencesInfo::BundleInfo::SetExtensionSubscriptionBundlesFro
         return false;
     }
     nlohmann::json jsonObject = nlohmann::json::parse(json, nullptr, false);
-    if (jsonObject.is_null() || jsonObject.empty()) {
+    if (jsonObject.is_null()) {
         ANS_LOGE("Invalid JSON object");
         return false;
     }
