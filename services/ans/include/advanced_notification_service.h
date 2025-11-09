@@ -2023,12 +2023,13 @@ private:
     ErrCode SystemSwitchPermissionCheck();
     std::vector<sptr<NotificationBundleOption>>::iterator FindBundleInCache(
         const sptr<NotificationBundleOption> &bundleOption);
-    void ProcessHfpDeviceStateChange(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
+    void ProcessHfpDeviceStateChange(int state);
     void ProcessBluetoothStateChanged(const int status);
-    void ProcessBluetoothPairedStatusChange(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
-    void FindMatchingBundlesByDevice(
-        const OHOS::Bluetooth::BluetoothRemoteDevice &device, bool filterHfpOnly,
-        std::vector<sptr<NotificationBundleOption>> &processBundles);
+    void ProcessBluetoothPairedStatusChange(int state);
+    void CheckBleAndHfpStateChange(bool filterHfpOnly);
+    void ProcessSubscriptionInfoForStateChange(
+        const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos,
+        const sptr<NotificationBundleOption> &bundle, bool filterHfpOnly);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;
