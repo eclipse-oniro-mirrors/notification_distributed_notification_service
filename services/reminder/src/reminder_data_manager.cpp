@@ -432,19 +432,21 @@ void ReminderDataManager::OnProcessDiedLocked(const int32_t callingUid)
 {
     std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
     std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
-    for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end(); ++it) {
-        if ((*it)->GetUid() != callingUid) {
+    for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end();) {
+        sptr<ReminderRequest> reminder = *it;
+        if (reminder->GetUid() != callingUid) {
+            ++it;
             continue;
         }
-        if ((*it)->IsAlerting()) {
-            TerminateAlerting((*it), "onProcessDied");
+        if (reminder->IsAlerting()) {
+            TerminateAlerting(reminder, "onProcessDied");
+            ++it;
         } else {
-            CancelNotification(*it);
-            (*it)->OnClose(false);
-            showedReminderVector_.erase(it);
-            --it;
+            CancelNotification(reminder);
+            reminder->OnClose(false);
+            it = showedReminderVector_.erase(it);
         }
-        store_->UpdateOrInsert((*it));
+        store_->UpdateOrInsert(reminder);
     }
 }
 
