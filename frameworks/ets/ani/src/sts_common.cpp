@@ -753,7 +753,7 @@ ani_object newArrayClass(ani_env *env, int length)
 {
     ANS_LOGD("newArrayClass call");
     if (env == nullptr || length < 0) {
-        ANS_LOGE("CreateDouble fail, env is nullptr or length is less than zero");
+        ANS_LOGE("newArrayClass fail, env is nullptr or length is less than zero");
         return nullptr;
     }
     ani_class arrayCls = nullptr;
@@ -862,7 +862,7 @@ bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
         return false;
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) != ANI_OK) {
         ANS_LOGD("error. not find method name '<ctor>'. status %{public}d", status);
         return false;
     }

@@ -116,11 +116,12 @@ void AniAddSlotBySlotType(ani_env *env, ani_enum_item enumObj)
 ani_object AniGetSlot(ani_env *env, ani_enum_item enumObj)
 {
     ANS_LOGD("AniGetSlot enter");
+    ani_object nullObj = NotificationSts::GetNullObject(env);
     Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
     if (!NotificationSts::SlotTypeEtsToC(env, enumObj, slotType)) {
         ANS_LOGE("SlotTypeEtsToC failed");
         NotificationSts::ThrowErrorWithMsg(env, "sts GetSlot ERROR_INTERNAL_ERROR");
-        return nullptr;
+        return nullObj;
     }
     sptr<Notification::NotificationSlot> slot = nullptr;
     int returncode = Notification::NotificationHelper::GetNotificationSlot(slotType, slot);
@@ -128,17 +129,18 @@ ani_object AniGetSlot(ani_env *env, ani_enum_item enumObj)
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("GetNotificationSlot failed, errorCode: %{public}d", externalCode);
         NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        return nullObj;
     }
     if (slot == nullptr) {
         ANS_LOGD("AniGetSlot -> slot is nullptr");
         NotificationSts::ThrowError(env, RETURN_EXCEPTION_VALUE, "slot is null");
-        return nullptr;
+        return nullObj;
     }
     ani_object slotObj;
     if (!NotificationSts::WrapNotificationSlot(env, slot, slotObj)) {
         ANS_LOGE("WrapNotificationSlot faild");
         NotificationSts::ThrowErrorWithMsg(env, "sts GetSlot ERROR_INTERNAL_ERROR");
-        return nullptr;
+        return nullObj;
     }
     ANS_LOGD("AniGetSlot leave");
     return slotObj;
