@@ -133,7 +133,6 @@ ani_object AniGetSlot(ani_env *env, ani_enum_item enumObj)
     }
     if (slot == nullptr) {
         ANS_LOGD("AniGetSlot -> slot is nullptr");
-        NotificationSts::ThrowError(env, RETURN_EXCEPTION_VALUE, "slot is null");
         return nullObj;
     }
     ani_object slotObj;
