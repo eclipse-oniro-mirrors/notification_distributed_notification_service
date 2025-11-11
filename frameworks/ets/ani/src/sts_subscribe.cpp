@@ -249,7 +249,7 @@ void StsSubscriberInstance::OnDied()
 void StsSubscriberInstance::OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date)
 {
     ANS_LOGD("enter");
-    std::lock_guard<std::mutex> l(lock_);
+    onDoNotDisturbChanged(date);
 }
 void StsSubscriberInstance::onDoNotDisturbChanged(const std::shared_ptr<NotificationDoNotDisturbDate> &date)
 {
@@ -407,7 +407,7 @@ bool StsSubscriberInstance::HasOnBatchCancelCallback()
     }
 
     ani_ref fn_ref;
-    aniResult = etsEnv->Object_GetFieldByName_Ref(static_cast<ani_object>(ref_), "onBatchCancel", &fn_ref);
+    aniResult = etsEnv->Object_GetPropertyByName_Ref(static_cast<ani_object>(ref_), "onBatchCancel", &fn_ref);
     if (ANI_OK != aniResult) {
         ANS_LOGD("Object_GetFieldByName_Ref 'onBatchCancel' error. result: %{public}d.", aniResult);
         vm_->DetachCurrentThread();
