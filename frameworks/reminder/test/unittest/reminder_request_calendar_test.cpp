@@ -206,24 +206,6 @@ HWTEST_F(ReminderRequestCalendarTest, initDateTime_00500, Function | SmallTest |
     EXPECT_TRUE(actualRepeatMonths.size() == 0) << "Set repeat month with 13 error.";
 }
 
-namespace {
-    bool g_mockNowInstantMilliRet = true;
-    uint64_t g_mockNumber = 1675876480000;
-}
-
-void MockNowInstantMilli(bool mockRet)
-{
-    g_mockNowInstantMilliRet = mockRet;
-}
-
-uint64_t ReminderRequest::GetNowInstantMilli() const
-{
-    if (g_mockNowInstantMilliRet == false) {
-        return 0;
-    }
-    return g_mockNumber;
-}
-
 /**
  * @tc.name: initDateTime_00600
  * @tc.desc: Check repeatDay set with nomal value successfully.
