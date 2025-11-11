@@ -1260,7 +1260,17 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04100,
     ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
 
     std::vector<sptr<Notification>> allNotifications;
-    ASSERT_EQ(advancedNotificationService_->GetAllActiveNotifications(allNotifications), (int)ERR_OK);
+    int32_t result = ERR_OK;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->GetAllActiveNotifications(
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        allNotifications = synchronizer->GetNotifications();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
     ASSERT_EQ(allNotifications.size(), (size_t)1);
     std::vector<std::string> keys;
     for (auto notification : allNotifications) {

@@ -59,9 +59,9 @@ public:
     MOCK_METHOD2(GetSlotByType, ErrCode(int32_t, sptr<NotificationSlot>&));
     MOCK_METHOD1(GetSlots, ErrCode(std::vector<sptr<NotificationSlot>>&));
     MOCK_METHOD2(GetSlotNumAsBundle, ErrCode(const sptr<NotificationBundleOption>&, uint64_t&));
-    MOCK_METHOD2(GetActiveNotifications, ErrCode(std::vector<sptr<NotificationRequest>>&, const std::string&));
+    MOCK_METHOD2(GetActiveNotifications, ErrCode(const std::string&, const sptr<IAnsResultDataSynchronizer>&));
     MOCK_METHOD1(GetActiveNotificationNums, ErrCode(uint64_t&));
-    MOCK_METHOD1(GetAllActiveNotifications, ErrCode(std::vector<sptr<Notification>>&));
+    MOCK_METHOD1(GetAllActiveNotifications, ErrCode(const sptr<IAnsResultDataSynchronizer>&));
     MOCK_METHOD2(GetAllNotificationsBySlotType, ErrCode(std::vector<sptr<Notification>>&, int32_t));
     MOCK_METHOD2(GetSpecialActiveNotifications,
         ErrCode(const std::vector<std::string>&, std::vector<sptr<Notification>>&));
@@ -100,8 +100,9 @@ public:
     MOCK_METHOD4(SetNotificationsEnabledForSpecialBundle,
         ErrCode(const std::string&, const sptr<NotificationBundleOption>&, bool, bool));
     MOCK_METHOD2(SetShowBadgeEnabledForBundle, ErrCode(const sptr<NotificationBundleOption>&, bool));
-    MOCK_METHOD2(GetShowBadgeEnabledForBundle, ErrCode(const sptr<NotificationBundleOption>&, bool&));
-    MOCK_METHOD1(GetShowBadgeEnabled, ErrCode(bool&));
+    MOCK_METHOD2(GetShowBadgeEnabledForBundle, ErrCode(const sptr<NotificationBundleOption>&,
+        const sptr<IAnsResultDataSynchronizer>&));
+    MOCK_METHOD1(GetShowBadgeEnabled, ErrCode(const sptr<IAnsResultDataSynchronizer>&));
     MOCK_METHOD2(Subscribe, ErrCode(const sptr<IAnsSubscriber>&, uint32_t));
     MOCK_METHOD3(Subscribe, ErrCode(const sptr<IAnsSubscriber>&, const sptr<NotificationSubscribeInfo>&, uint32_t));
     MOCK_METHOD2(SubscribeSelf, ErrCode(const sptr<IAnsSubscriber>&, uint32_t));

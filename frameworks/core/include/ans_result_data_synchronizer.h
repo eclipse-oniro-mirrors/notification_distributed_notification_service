@@ -50,8 +50,52 @@ public:
      */
     ErrCode GetResultCode() const;
 
+    /**
+     * @brief The service transmits an error code and notifications to the framework.
+     * @param resultCode Service execution result error code.
+     * @param requests Published notification requests.
+     * @return Returns the error code of the transmission execution result.
+     */
+    ErrCode TransferResultData(int32_t resultCode, const std::vector<sptr<NotificationRequest>> &requests) override;
+
+    /**
+     * @brief Get the notification requests code transmitted back by the service layer.
+     * @return Returns the notification requests transmitted back by the service layer.
+     */
+    std::vector<sptr<NotificationRequest>> GetNotificationRequests() const;
+
+    /**
+     * @brief The service transmits an error code and notifications to the framework.
+     * @param resultCode Service execution result error code.
+     * @param notifications Published notifications.
+     * @return Returns the error code of the transmission execution result.
+     */
+    ErrCode TransferResultData(int32_t resultCode, const std::vector<sptr<Notification>> &notifications) override;
+
+    /**
+     * @brief Get the notifications transmitted back by the service layer.
+     * @return Returns the notification transmitted back by the service layer.
+     */
+    std::vector<sptr<Notification>> GetNotifications() const;
+
+    /**
+     * @brief The service transmits an error code and notifications to the framework.
+     * @param resultCode Service execution result error code.
+     * @param enabled Enable switch.
+     * @return Returns the error code of the transmission execution result.
+     */
+    ErrCode TransferResultData(int32_t resultCode, bool enabled) override;
+
+    /**
+     * @brief Get the enable switch transmitted back by the service layer.
+     * @return Returns enable switch transmitted back by the service layer.
+     */
+    bool GetEnabled() const;
 private:
     ErrCode resultCode_ {};
+    bool enabled_ {false};
+    std::vector<sptr<NotificationRequest>> requests_ {};
+    std::vector<sptr<Notification>> notifications_ {};
 
 private:
     std::mutex condMutex_ {};

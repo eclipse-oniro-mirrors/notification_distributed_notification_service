@@ -124,8 +124,8 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications,
-        const std::string &instanceKey) override
+    ErrCode GetActiveNotifications(const std::string &instanceKey,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -135,7 +135,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetAllActiveNotifications(std::vector<sptr<Notification>> &notifications) override
+    ErrCode GetAllActiveNotifications(const sptr<IAnsResultDataSynchronizer> &synchronizer) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -269,12 +269,13 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetShowBadgeEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &enabled) override
+    ErrCode GetShowBadgeEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetShowBadgeEnabled(bool &enabled) override
+    ErrCode GetShowBadgeEnabled(const sptr<IAnsResultDataSynchronizer> &synchronizer) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

@@ -67,11 +67,11 @@ interface OHOS.Notification.IAnsManager {
 
     void GetSlotNumAsBundle([in] sptr<NotificationBundleOption> bundleOption, [out] unsigned long num);
 
-    void GetActiveNotifications([out] sptr<NotificationRequest>[] notifications, [in] String instanceKey);
+    void GetActiveNotifications([in] String instanceKey, [in] IAnsResultDataSynchronizer synchronizer);
 
     void GetActiveNotificationNums([out] unsigned long num);
 
-    void GetAllActiveNotifications([out] sptr<Notification>[] notifications);
+    void GetAllActiveNotifications([in] IAnsResultDataSynchronizer synchronizer);
 
     void GetAllNotificationsBySlotType([out] sptr<Notification>[] notifications, [in] int slotTypeInt);
 
@@ -142,12 +142,12 @@ interface OHOS.Notification.IAnsManager {
 
     void SetShowBadgeEnabledForBundles([in] OrderedMap<sptr<NotificationBundleOption>, boolean> bundleOptions);
 
-    void GetShowBadgeEnabledForBundle([in] sptr<NotificationBundleOption> bundleOption, [out] boolean enabled);
+    void GetShowBadgeEnabledForBundle([in] sptr<NotificationBundleOption> bundleOption, [in] IAnsResultDataSynchronizer synchronizer);
 
     void GetShowBadgeEnabledForBundles([in] sptr<NotificationBundleOption>[] bundleOptions,
         [out] OrderedMap<sptr<NotificationBundleOption>, boolean> badgeEnabled);
 
-    void GetShowBadgeEnabled([out] boolean enabled);
+    void GetShowBadgeEnabled([in] IAnsResultDataSynchronizer synchronizer);
 
     void Subscribe([in] IAnsSubscriber subscriber, [in] unsigned int subscribedFlags);
     void Subscribe([in] IAnsSubscriber subscriber, [in] sptr<NotificationSubscribeInfo> info, [in] unsigned int subscribedFlags);

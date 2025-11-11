@@ -42,10 +42,14 @@ inline bool IsContained(const std::vector<std::string> &vec, const std::string &
     return isContained;
 }
 
-ErrCode AdvancedNotificationService::GetActiveNotifications(
-    std::vector<sptr<NotificationRequest>> &notifications, const std::string &instanceKey)
+ErrCode AdvancedNotificationService::GetActiveNotifications(const std::string &instanceKey,
+    const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
     ANS_LOGD("called");
+    if (synchronizer == nullptr) {
+        ANS_LOGE("synchronizer is null");
+        return ERR_ANS_INVALID_PARAM;
+    }
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
@@ -57,18 +61,18 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(
         ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("called");
-        notifications.clear();
+        std::vector<sptr<NotificationRequest>> requests;
         for (auto record : notificationList_) {
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
                 (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
                 (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey())) {
-                notifications.push_back(record->request);
+                requests.push_back(record->request);
             }
         }
+        synchronizer->TransferResultData(ERR_OK, requests);
     }));
-    notificationSvrQueue_->wait(handler);
     return ERR_OK;
 }
 
@@ -101,10 +105,13 @@ ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<Notification>> &notifications)
+ErrCode AdvancedNotificationService::GetAllActiveNotifications(const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
     ANS_LOGD("called");
-
+    if (synchronizer == nullptr) {
+        ANS_LOGE("synchronizer is null");
+        return ERR_ANS_INVALID_PARAM;
+    }
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
@@ -120,16 +127,16 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
         ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("called");
-        notifications.clear();
+        std::vector<sptr<Notification>> notifications;
         for (auto record : notificationList_) {
             if (record->notification != nullptr && record->notification->request_ != nullptr) {
                 notifications.push_back(record->notification);
             }
         }
+        synchronizer->TransferResultData(ERR_OK, notifications);
     }));
-    notificationSvrQueue_->wait(handler);
     return ERR_OK;
 }
 
