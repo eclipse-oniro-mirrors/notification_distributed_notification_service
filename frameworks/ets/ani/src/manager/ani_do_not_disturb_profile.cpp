@@ -78,7 +78,7 @@ ani_object AniGetDoNotDisturbProfile(ani_env *env, ani_long id)
         return nullptr;
     }
 
-    ANS_LOGD("AniGetDoNotDisturbProfile: idTest: %{public}lld", id);
+    ANS_LOGD("AniGetDoNotDisturbProfile: idTest: %{public}ld", id);
     int returncode = Notification::NotificationHelper::GetDoNotDisturbProfile(id, doNotDisturbProfile);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
