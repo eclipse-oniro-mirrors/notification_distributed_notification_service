@@ -628,7 +628,7 @@ ani_object GetAniIconButtonArray(ani_env *env, const std::vector<NotificationIco
         ANS_LOGE("GetAniIconButtonArray failed, env is nullptr or buttons is empty");
         return nullptr;
     }
-    ani_object arrayObj = newArrayClass(env, buttons.size());
+    ani_array arrayObj = newArrayClass(env, buttons.size());
     if (arrayObj == nullptr) {
         ANS_LOGE("GetAniIconButtonArray failed, arrayObj is nullptr");
         return nullptr;
@@ -640,7 +640,7 @@ ani_object GetAniIconButtonArray(ani_env *env, const std::vector<NotificationIco
             ANS_LOGE("GetAniIconButtonArray: item is nullptr");
             return nullptr;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iY:", index, item)) {
+        if (ANI_OK != env->Array_Set(arrayObj, index, item)) {
             ANS_LOGE("GetAniIconButtonArray: add item failed");
             return nullptr;
         }

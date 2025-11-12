@@ -98,7 +98,7 @@ bool WrapProfileTrustList(ani_env* env, sptr<NotificationDoNotDisturbProfile> pr
         ANS_LOGE("WrapProfileTrustList trustlist is nullptr");
         return true;
     }
-    ani_object arrayObj = newArrayClass(env, trustList.size());
+    ani_array arrayObj = newArrayClass(env, trustList.size());
     if (arrayObj == nullptr) {
         ANS_LOGE("WrapProfileTrustList Failed to create trustlist array");
         return false;
@@ -112,8 +112,7 @@ bool WrapProfileTrustList(ani_env* env, sptr<NotificationDoNotDisturbProfile> pr
             ANS_LOGE("WrapProfileTrustList WrapBundleOption failed");
             return false;
         }
-        if (ANI_OK != (status = env->Object_CallMethodByName_Void(arrayObj, "$_set",
-            "iY:", index, bundleObj))) {
+        if (ANI_OK != (status = env->Array_Set(arrayObj, index, bundleObj))) {
             ANS_LOGE("WrapProfileTrustList set object faild. index %{public}d status %{public}d",
                 index, status);
             return false;

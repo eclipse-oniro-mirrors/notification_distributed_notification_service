@@ -49,7 +49,7 @@ ani_status GetStringByAniString(ani_env *env, ani_string str, std::string &res);
 bool GetStringArrayByAniObj(ani_env *env, const ani_object ani_obj, std::vector<std::string> &stdVString);
 ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string> strs);
 bool GetAniStringArrayByVectorStringV2(ani_env *env, std::vector<std::string> strs, ani_object& aniArray);
-ani_object newArrayClass(ani_env *env, int length);
+ani_array newArrayClass(ani_env *env, int length);
 ani_object ConvertArrayDoubleToAniObj(ani_env *env, const std::vector<std::int64_t> values);
 void ParseRecord(ani_env *env, ani_object recordRef, std::map<std::string, ani_ref>& recordResult);
 

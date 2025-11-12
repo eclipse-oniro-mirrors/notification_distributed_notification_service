@@ -482,7 +482,7 @@ ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string
         return nullptr;
     }
     int length = strs.size();
-    ani_object arrayObj = newArrayClass(env, length);
+    ani_array arrayObj = newArrayClass(env, length);
     if (arrayObj == nullptr) {
         return nullptr;
     }
@@ -493,10 +493,9 @@ ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string
             ANS_LOGE("GetAniStringByString faild");
             return nullptr;
         }
-        ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iY:",
-            i, aniStr);
+        ani_status status = env->Array_Set(arrayObj, i, aniStr);
         if (status != ANI_OK) {
-            ANS_LOGE("Object_CallMethodByName_Void failed %{public}d", status);
+            ANS_LOGE("Array_Set failed %{public}d", status);
             return nullptr;
         }
         i++;
@@ -749,7 +748,7 @@ ani_object CreateDouble(ani_env *env, double value)
     return doubleObj;
 }
 
-ani_object newArrayClass(ani_env *env, int length)
+ani_array newArrayClass(ani_env *env, int length)
 {
     ANS_LOGD("newArrayClass call");
     if (env == nullptr || length < 0) {
@@ -772,7 +771,7 @@ ani_object newArrayClass(ani_env *env, int length)
         return nullptr;
     }
     ANS_LOGD("newArrayClass end");
-    return arrayObj;
+    return static_cast<ani_array>(arrayObj);
 }
 
 ani_object ConvertArrayLongToAniObj(ani_env *env, const std::vector<std::int64_t> values)
@@ -781,21 +780,23 @@ ani_object ConvertArrayLongToAniObj(ani_env *env, const std::vector<std::int64_t
         ANS_LOGE("ConvertArrayLongToAniObj fail, env is nullptr");
         return nullptr;
     }
-    ani_object arrayObj = newArrayClass(env, values.size());
+    ani_array arrayObj = newArrayClass(env, values.size());
     if (arrayObj == nullptr) {
         return nullptr;
     }
-    for (size_t i = 0; i < values.size(); i++) {
-        ani_object longObj = CreateLong(env, values[i]);
+    ani_size i = 0;
+    for (auto value : values) {
+        ani_object longObj = CreateLong(env, value);
         if (longObj == nullptr) {
             ANS_LOGE("null intObj");
             return nullptr;
         }
-        ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iY:", i, longObj);
+        ani_status status = env->Array_Set(arrayObj, i, longObj);
         if (status != ANI_OK) {
             ANS_LOGE("status : %{public}d", status);
             return nullptr;
         }
+        i++;
     }
     return arrayObj;
 }

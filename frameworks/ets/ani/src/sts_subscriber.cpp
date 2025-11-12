@@ -98,7 +98,7 @@ bool SetVibrationValues(ani_env *env, const std::shared_ptr<NotificationSts> &re
 {
     ani_status status = ANI_OK;
     if (request->EnableVibrate()) {
-        ani_object vibrationValuesObj;
+        ani_array vibrationValuesObj;
         const std::vector<int64_t> vibrationValues = request->GetVibrationStyle();
         vibrationValuesObj = newArrayClass(env, vibrationValues.size());
         if (vibrationValuesObj == nullptr) {
@@ -111,8 +111,7 @@ bool SetVibrationValues(ani_env *env, const std::shared_ptr<NotificationSts> &re
                 ANS_LOGE("CreateLong faild null intObj");
                 return false;
             }
-            status = env->Object_CallMethodByName_Void(
-                vibrationValuesObj, "$_set", "iY:", i, longObj);
+            status = env->Array_Set(vibrationValuesObj, i, longObj);
             if (status != ANI_OK) {
                 ANS_LOGE("faild. status : %{public}d", status);
                 return false;
@@ -175,7 +174,7 @@ bool WarpSubscribeCallbackDataArray(
     const std::vector<std::shared_ptr<OHOS::Notification::Notification>> &requestList,
     const std::shared_ptr<NotificationSortingMap> &sortingMap,
     int32_t deleteReason,
-    ani_object &outObj)
+    ani_array &outObj)
 {
     ANS_LOGD("enter");
     if (env == nullptr || sortingMap == nullptr) {
@@ -198,8 +197,7 @@ bool WarpSubscribeCallbackDataArray(
             ANS_LOGE("WarpSubscribeCallbackData faild");
             return false;
         }
-        if (ANI_OK != (status = env->Object_CallMethodByName_Void(
-            outObj, "$_set", "iY:", i, obj))) {
+        if (ANI_OK != (status = env->Array_Set(outObj, i, obj))) {
                 ANS_LOGE("set object faild. status %{public}d", status);
                 return false;
             }

@@ -37,7 +37,7 @@ bool WarpSubscribeCallbackDataArray(
     const std::vector<std::shared_ptr<NotificationSts>> &requestList,
     const std::shared_ptr<NotificationSortingMap> &sortingMap,
     int32_t deleteReason,
-    ani_object &outObj);
+    ani_array &outObj);
 bool WarpEnabledNotificationCallbackData(
     ani_env *env, const std::shared_ptr<EnabledNotificationCallbackData> &callbackData, ani_object &outObj);
 bool WarpBadgeNumberCallbackData(

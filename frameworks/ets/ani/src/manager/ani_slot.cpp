@@ -48,7 +48,7 @@ ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption)
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return nullptr;
     }
-    ani_object outAniObj;
+    ani_array outAniObj;
     if (!NotificationSts::WrapNotificationSlotArray(env, slots, outAniObj)) {
         NotificationSts::ThrowErrorWithMsg(env, "GetSlotsByBundle:failed to WrapNotificationSlotArray");
         return nullptr;
@@ -156,7 +156,7 @@ ani_object AniGetSlots(ani_env *env)
         NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return nullptr;
     }
-    ani_object outAniObj;
+    ani_array outAniObj;
     if (!NotificationSts::WrapNotificationSlotArray(env, slots, outAniObj)) {
         ANS_LOGE("WrapNotificationSlotArray faild");
         NotificationSts::ThrowErrorWithMsg(env, "AniGetSlots:failed to WrapNotificationSlotArray");

@@ -217,7 +217,7 @@ bool WrapNotificationSlot(ani_env *env, sptr<Notification::NotificationSlot> slo
 }
 
 bool WrapNotificationSlotArray(ani_env *env, const std::vector<sptr<Notification::NotificationSlot>>& slots,
-    ani_object &outAniObj)
+    ani_array &outAniObj)
 {
     ANS_LOGD("WrapNotificationSlotArray call");
     outAniObj = newArrayClass(env, slots.size());
@@ -232,7 +232,7 @@ bool WrapNotificationSlotArray(ani_env *env, const std::vector<sptr<Notification
             ANS_LOGE("WrapNotificationSlot Faild. index = %{public}d", index);
             return false;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(outAniObj, "$_set", "iY:", index, infoObj)) {
+        if (ANI_OK != env->Array_Set(outAniObj, index, infoObj)) {
             ANS_LOGE("set Faild. index = %{public}d", index);
             return false;
         }

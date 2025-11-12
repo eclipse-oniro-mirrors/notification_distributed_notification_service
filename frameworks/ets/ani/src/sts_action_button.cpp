@@ -278,7 +278,7 @@ ani_object GetAniArrayNotificationActionButton(ani_env* env,
         ANS_LOGE("GetAniArrayActionButton failed, has nullptr");
         return nullptr;
     }
-    ani_object arrayObj = newArrayClass(env, actionButtons.size());
+    ani_array arrayObj = newArrayClass(env, actionButtons.size());
     if (arrayObj == nullptr) {
         ANS_LOGE("GetAniArrayActionButton: arrayObj is nullptr");
         return nullptr;
@@ -290,8 +290,8 @@ ani_object GetAniArrayNotificationActionButton(ani_env* env,
             ANS_LOGE("GetAniArrayActionButton: item is nullptr");
             return nullptr;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iY:", index, item)) {
-            ANS_LOGE("GetAniArrayActionButton: Object_CallMethodByName_Void failed");
+        if (ANI_OK != env->Array_Set(arrayObj, index, item)) {
+            ANS_LOGE("GetAniArrayActionButton: Array_Set failed");
             return nullptr;
         }
         index ++;

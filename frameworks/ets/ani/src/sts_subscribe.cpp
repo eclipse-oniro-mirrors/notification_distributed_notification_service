@@ -382,7 +382,7 @@ void StsSubscriberInstance::OnBatchCanceled(
         return;
     }
     std::vector<ani_ref> vec;
-    ani_object obj;
+    ani_array obj;
     if (WarpSubscribeCallbackDataArray(etsEnv, requestList, sortingMap, deleteReason, obj)) {
         vec.push_back(obj);
         CallFunction(etsEnv, "onBatchCancel", vec);
