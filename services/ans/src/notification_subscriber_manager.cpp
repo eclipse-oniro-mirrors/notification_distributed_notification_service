@@ -395,9 +395,14 @@ void NotificationSubscriberManager::AddRecordInfo(
     std::shared_ptr<SubscriberRecord> &record, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
     record->bundleList_.clear();
+    record->uidList_.clear();
     record->subscribedAll = true;
     for (auto bundle : subscribeInfo->GetAppNames()) {
         record->bundleList_.insert(bundle);
+        record->subscribedAll = false;
+    }
+    for (auto uid : subscribeInfo->GetAppUids()) {
+        record->uidList_.insert(uid);
         record->subscribedAll = false;
     }
     record->slotTypes.clear();
@@ -429,8 +434,16 @@ void NotificationSubscriberManager::RemoveRecordInfo(
                 record->bundleList_.erase(bundle);
             }
         }
+        for (auto uid : subscribeInfo->GetAppUids()) {
+            if (record->subscribedAll) {
+                record->uidList_.insert(uid);
+            } else {
+                record->uidList_.erase(uid);
+            }
+        }
     } else {
         record->bundleList_.clear();
+        record->uidList_.clear();
         record->subscribedAll = false;
     }
 }
@@ -486,7 +499,7 @@ ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
 
     RemoveRecordInfo(record, subscribeInfo);
 
-    if (!record->subscribedAll && record->bundleList_.empty()) {
+    if (!record->subscribedAll && record->bundleList_.empty() && record->uidList_.empty()) {
         record->subscriber->AsObject()->RemoveDeathRecipient(recipient_);
         {
             std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
@@ -698,6 +711,7 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
 {
     auto soltType = notification->GetNotificationRequestPoint()->GetSlotType();
     auto bundleNames = notification->GetBundleName();
+    auto uid = notification->GetNotificationRequestPoint()->GetOwnerUid();
 #ifdef ENABLE_ANS_ADDITIONAL_CONTROL
     if (!record->isSubscribeSelf &&
         EXTENTION_WRAPPER->IsSubscribeControl(record->subscriberBundleName_, soltType)) {
@@ -706,7 +720,9 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
     }
 #endif
     auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), bundleNames);
-    bool isSubscribedTheNotification = record->subscribedAll || (iter != record->bundleList_.end()) ||
+    auto iterUid = std::find(record->uidList_.begin(), record->uidList_.end(), uid);
+    bool isSubscribedTheNotification =
+        record->subscribedAll || (iter != record->bundleList_.end()) || (iterUid != record->uidList_.end()) ||
         (notification->GetNotificationRequestPoint()->GetCreatorUid() == record->subscriberUid);
     if (!isSubscribedTheNotification) {
         return false;

@@ -26,6 +26,7 @@
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_subscriber_listener.h"
+#include "ans_result_data_synchronizer.h"
 #include "ans_ut_constant.h"
 #include "iremote_object.h"
 #include "want_agent_info.h"
@@ -83,7 +84,12 @@ void AnsBranchTest::SetUp()
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-    advancedNotificationService_->CancelAll("");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelAll("",
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+    }
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     GTEST_LOG_(INFO) << "SetUp end";
@@ -205,8 +211,16 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_225000, Function | SmallTest | Level1)
     int32_t notificationId = 1;
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 1;
-    ASSERT_EQ(advancedNotificationService_->CancelAsBundle(
-        notificationId, representativeBundle, userId), ERR_ANS_NON_SYSTEM_APP);
+    int32_t result = ERR_ANS_NON_SYSTEM_APP;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
@@ -223,8 +237,16 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_226000, Function | SmallTest | Level1)
     int32_t notificationId = 1;
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 1;
-    ASSERT_EQ(advancedNotificationService_->CancelAsBundle(
-        notificationId, representativeBundle, userId), ERR_ANS_PERMISSION_DENIED);
+    int32_t result = ERR_ANS_PERMISSION_DENIED;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**

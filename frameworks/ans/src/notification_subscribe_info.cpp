@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@ NotificationSubscribeInfo::~NotificationSubscribeInfo()
 NotificationSubscribeInfo::NotificationSubscribeInfo(const NotificationSubscribeInfo &subscribeInfo)
 {
     appNames_ = subscribeInfo.GetAppNames();
+    appUids_ = subscribeInfo.GetAppUids();
     deviceType_ = subscribeInfo.GetDeviceType();
     userId_ = subscribeInfo.GetAppUserId();
     subscriberUid_ = subscribeInfo.GetSubscriberUid();
@@ -53,6 +54,21 @@ void NotificationSubscribeInfo::AddAppNames(const std::vector<std::string> &appN
 std::vector<std::string> NotificationSubscribeInfo::GetAppNames() const
 {
     return appNames_;
+}
+
+void NotificationSubscribeInfo::AddAppUid(const int32_t appUid)
+{
+    appUids_.push_back(appUid);
+}
+
+void NotificationSubscribeInfo::AddAppUids(const std::vector<int32_t> &appUids)
+{
+    appUids_.insert(appUids_.end(), appUids.begin(), appUids.end());
+}
+
+std::vector<int32_t> NotificationSubscribeInfo::GetAppUids() const
+{
+    return appUids_;
 }
 
 void NotificationSubscribeInfo::AddAppUserId(const int32_t userId)

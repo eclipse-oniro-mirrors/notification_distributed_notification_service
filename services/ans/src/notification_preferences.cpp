@@ -208,6 +208,8 @@ ErrCode NotificationPreferences::RemoveNotificationForBundle(const sptr<Notifica
         if (!preferncesDB_->RemoveBundleFromDisturbeDB(GenerateBundleKey(bundleOption), bundleOption->GetUid())) {
             result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
         }
+        AdvancedNotificationService::GetInstance()->ReportRingtoneChanged(
+            bundleOption, bundleInfo.GetRingtoneInfo(), NotificationConstant::RingtoneReportType::RINGTONE_REMOVE);
         SystemSoundHelper::GetInstance()->RemoveCustomizedTone(bundleInfo.GetRingtoneInfo());
     } else {
         result = ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
@@ -754,19 +756,93 @@ void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
     preferencesInfo_ = preferencesInfo;
 }
 
-void NotificationPreferences::GetAllCLoneBundlesInfo(int32_t userId,
+void NotificationPreferences::GetAllCLoneBundlesInfo(int32_t dbUserId, int32_t userId,
     std::vector<NotificationCloneBundleInfo> &cloneBundles)
 {
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     std::unordered_map<std::string, std::string> bundlesMap;
-    if (GetBatchKvsFromDb(KEY_BUNDLE_LABEL, bundlesMap, userId) != ERR_OK) {
+    if (GetBatchKvsFromDb(KEY_BUNDLE_LABEL, bundlesMap, dbUserId) != ERR_OK) {
         ANS_LOGE("Get bundle map info failed.");
         return;
     }
-    preferncesDB_->ParseBundleFromDistureDB(preferencesInfo, bundlesMap, userId);
-    preferencesInfo.GetAllCLoneBundlesInfo(userId, bundlesMap, cloneBundles);
+    preferncesDB_->ParseBundleFromDistureDB(preferencesInfo, bundlesMap, dbUserId);
+    preferencesInfo.GetAllCLoneBundlesInfo(dbUserId, userId, bundlesMap, cloneBundles);
     preferencesInfo_ = preferencesInfo;
+}
+
+void NotificationPreferences::GetAllAncoBundlesInfo(int32_t dbUserId, int32_t userId,
+    std::vector<sptr<NotificationBundleOption>> &bundles)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    std::unordered_map<std::string, std::string> bundlesMap;
+    if (GetBatchKvsFromDb(KEY_BUNDLE_LABEL, bundlesMap, dbUserId) != ERR_OK) {
+        ANS_LOGE("Get bundle map info failed.");
+        return;
+    }
+    std::vector<NotificationPreferencesInfo::BundleInfo> bundlesList;
+    preferncesDB_->ParseAncoBundleFromDistureDB(bundlesMap, ZERO_USERID, bundlesList);
+    for (auto bundle : bundlesList) {
+        if (bundle.GetBundleUserId() != userId) {
+            continue;
+        }
+        sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(
+            bundle.GetBundleName(), bundle.GetBundleUid());
+        if (bundleOption == nullptr) {
+            ANS_LOGE("null bundleOption");
+            continue;
+        }
+        bundles.emplace_back(bundleOption);
+    }
+}
+
+void NotificationPreferences::SetAncoApplicationUserId(int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    std::unordered_map<std::string, std::string> bundlesMap;
+    if (GetBatchKvsFromDb(KEY_BUNDLE_LABEL, bundlesMap, ZERO_USERID) != ERR_OK) {
+        ANS_LOGE("Get bundle map info failed.");
+        return;
+    }
+    std::vector<NotificationPreferencesInfo::BundleInfo> bundlesList;
+    preferncesDB_->ParseAncoBundleFromDistureDB(bundlesMap, ZERO_USERID, bundlesList);
+    std::vector<NotificationPreferencesInfo::BundleInfo> setBundlesList;
+    for (auto bundle : bundlesList) {
+        if (bundle.GetBundleUserId() != -1) {
+            continue;
+        }
+        if (BundleManagerHelper::GetInstance()->IsAncoApp(bundle.GetBundleName(), bundle.GetBundleUid())) {
+            continue;
+        }
+        if (BundleManagerHelper::GetInstance()->CheckCurrentUserIdApp(bundle.GetBundleName(),
+            bundle.GetBundleUid(), userId)) {
+            setBundlesList.push_back(bundle);
+            ANS_LOGI("Update bundle info %{public}s, %{public}d, %{public}d.", bundle.GetBundleName().c_str(),
+                bundle.GetBundleUid(), userId);
+        } else {
+            ANS_LOGI("Not userid bundle %{public}s, %{public}d, %{public}d.", bundle.GetBundleName().c_str(),
+                bundle.GetBundleUid(), userId);
+        }
+    }
+    ANS_LOGI("Set userid bundle %{public}zu %{public}d.", setBundlesList.size(), userId);
+    preferncesDB_->PutBundleUserIdToDisturbeDB(setBundlesList, userId, ZERO_USERID);
+}
+
+void NotificationPreferences::SetAncoApplicationUserId(const sptr<NotificationBundleOption>& bundleOption,
+    int32_t userId)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Invalid bundle option.");
+        return;
+    }
+
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    std::vector<NotificationPreferencesInfo::BundleInfo> setBundlesList;
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleOption->GetBundleName());
+    bundleInfo.SetBundleUid(bundleOption->GetUid());
+    setBundlesList.push_back(bundleInfo);
+    preferncesDB_->PutBundleUserIdToDisturbeDB(setBundlesList, userId, ZERO_USERID);
 }
 
 ErrCode NotificationPreferences::InitBundlesInfo(int32_t userId,

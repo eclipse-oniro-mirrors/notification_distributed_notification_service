@@ -62,28 +62,6 @@ static const uint32_t SILENT_REMINDER__SLOT_FLAGS = 32; // 0b100000
 constexpr char REMINDER_CAPABILITY[] = "reminder_capability";
 constexpr char SOUND_CAPABILITY[] = "sound_capability";
 
-class HfpStateObserver : public OHOS::Bluetooth::HandsFreeAudioGatewayObserver {
-public:
-    HfpStateObserver() = default;
-    ~HfpStateObserver() override = default;
-    void OnConnectionStateChanged(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state, int cause) override;
-};
-
-class BluetoothAccessObserver : public OHOS::Bluetooth::BluetoothHostObserver {
-public:
-    BluetoothAccessObserver() = default;
-    ~BluetoothAccessObserver() override = default;
-
-    void OnStateChanged(const int transport, const int status) override;
-    void OnDiscoveryStateChanged(int status) override {};
-    void OnDiscoveryResult(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int rssi,
-        const std::string deviceName, int deviceClass) override {};
-    void OnPairRequested(const OHOS::Bluetooth::BluetoothRemoteDevice &device) override {};
-    void OnPairConfirmed(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int reqType, int number) override {};
-    void OnScanModeChanged(int mode) override {};
-    void OnDeviceNameChanged(const std::string &deviceName) override {};
-    void OnDeviceAddrChanged(const std::string &address) override {};
-};
 class AdvancedNotificationService final : public AnsManagerStub,
     public std::enable_shared_from_this<AdvancedNotificationService> {
 public:
@@ -169,17 +147,20 @@ public:
      * @param notificationId Indicates the ID of the notification to cancel.
      * @param label Indicates the label of the notification to cancel.
      * @param instanceKey Indicates the application instance key.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns cancel notification result.
      */
-    ErrCode Cancel(int32_t notificationId, const std::string &label, const std::string &instanceKey) override;
+    ErrCode Cancel(int32_t notificationId, const std::string &label, const std::string &instanceKey,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Cancels all the published notifications.
      *
      * @param instanceKey Indicates the application instance key.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode CancelAll(const std::string &instanceKey) override;
+    ErrCode CancelAll(const std::string &instanceKey, const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -189,10 +170,11 @@ public:
      *                       Otherwise, this method does not take effect.
      * @param representativeBundle Indicates the name of application bundle your application is representing.
      * @param userId Indicates the specific user.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundle(
-        int32_t notificationId, const std::string &representativeBundle, int32_t userId) override;
+    ErrCode CancelAsBundle(int32_t notificationId, const std::string &representativeBundle, int32_t userId,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -201,9 +183,11 @@ public:
      * @param notificationId Indicates the unique notification ID in the application.
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId) override;
+    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -213,10 +197,11 @@ public:
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
      * @param userId Indicates the specific user.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundle(
-        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) override;
+    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Adds a notification slot by type.
@@ -1006,7 +991,8 @@ public:
     void OnDistributedKvStoreDeathRecipient();
 
     ErrCode CancelPreparedNotification(int32_t notificationId, const std::string &label,
-        const sptr<NotificationBundleOption> &bundleOption, const int32_t reason);
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t reason,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer);
 
     ErrCode PrepareNotificationInfo(
         const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption);
@@ -1412,9 +1398,11 @@ public:
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
      * @param id Indicates the unique notification ID in the application.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns cancel result.
      */
-    ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) override;
+    ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Get the status of the target device.
@@ -1434,6 +1422,11 @@ public:
     * @brief Recover LiveView from DB.
     */
     void RecoverLiveViewFromDb(int32_t userId = -1);
+
+   /**
+    * @brief Recover anco application userid.
+    */
+    void RecoverAncoApplicationUserId(int32_t userId);
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     /**
@@ -1625,6 +1618,8 @@ public:
     ErrCode PublishExtensionServiceStateChange(NotificationConstant::EventCodeType eventCode,
         const sptr<NotificationBundleOption> &bundleOption, bool state,
         const std::vector<sptr<NotificationBundleOption>> &enabledBundles = {});
+    void ReportRingtoneChanged(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<NotificationRingtoneInfo> &ringtoneInfo, NotificationConstant::RingtoneReportType reportType);
     void HandleBundleInstall(const sptr<NotificationBundleOption> &bundleOption);
     void HandleBundleUpdate(const sptr<NotificationBundleOption> &bundleOption);
     void HandleBundleUninstall(const sptr<NotificationBundleOption> &bundleOption);
@@ -1633,6 +1628,7 @@ public:
     bool TryStartExtensionSubscribeService();
     void OnHfpDeviceConnectChanged(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
     void OnBluetoothStateChanged(const int status);
+    void OnBluetoothPairedStatusChanged(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
 
 private:
     struct RecentInfo {
@@ -1907,7 +1903,8 @@ private:
     ErrCode CheckLongTermLiveView(const sptr<NotificationRequest> &request, const std::string &key);
     void ExcuteCancelGroupCancel(const sptr<NotificationBundleOption>& bundleOption,
         const std::string &groupName, const int32_t reason);
-    ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason);
+    ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer);
     ErrCode ExcuteDelete(const std::string &key, const int32_t removeReason);
     ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId);
     ErrCode QueryContactByProfileId(const std::string &phoneNumber, const std::string &policy, int32_t userId);
@@ -1931,6 +1928,7 @@ private:
     void PublishSubscriberExistFlagEvent(bool headsetExistFlag, bool wearableExistFlag);
     void SetClassificationWithVoip(const sptr<NotificationRequest> &request);
     void UpdateCollaborateTimerInfo(const std::shared_ptr<NotificationRecord> &record);
+    void UpdateAncoBundleUserId(const sptr<NotificationBundleOption> &bundleOption);
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
     void SetDialogPoppedUnEnableTime(const sptr<NotificationBundleOption> &bundleOption);
 #endif
@@ -2001,7 +1999,6 @@ private:
     bool CheckBluetoothConnectionInInfos(
         const sptr<NotificationBundleOption> &bundleOption,
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos);
-    bool CheckBluetoothConditions(const std::string &addr);
     void FilterPermissionBundles(std::vector<sptr<NotificationBundleOption>> &bundles);
     void FilterGrantedBundles(std::vector<sptr<NotificationBundleOption>> &bundles);
     void FilterBundlesByBluetoothConnection(std::vector<sptr<NotificationBundleOption>> &bundles);
@@ -2021,21 +2018,24 @@ private:
         const std::vector<sptr<NotificationBundleOption>> &subscribeBundles);
     bool ShutdownExtensionServiceAndUnSubscribed(const sptr<NotificationBundleOption> &bundle);
     ErrCode GetNotificationExtensionEnabledBundles(std::vector<sptr<NotificationBundleOption>>  &bundles);
-    void RegisterHfpObserver();
-    void ProcessHfpDeviceStateChange(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
-    bool CheckBluetoothSwitchState();
-    void RegisterBluetoothAccessObserver();
     bool GetCloneBundleList(const sptr<NotificationBundleOption>& bundleOption,
         std::vector<sptr<NotificationBundleOption>>& cloneBundleList);
     void ProcessSetUserGrantedState(const sptr<NotificationBundleOption>& bundle,
         bool enabled, ErrCode& result);
     void ProcessSetUserGrantedBundleState(const sptr<NotificationBundleOption>& bundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled, ErrCode& result);
+    void ProcessExtensionSubscriptionInfos(const sptr<NotificationBundleOption>& bundleOption,
+        const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos, ErrCode& result);
     ErrCode SystemSwitchPermissionCheck();
-    bool CheckHfpState(const std::string &bluetoothAddress);
     std::vector<sptr<NotificationBundleOption>>::iterator FindBundleInCache(
         const sptr<NotificationBundleOption> &bundleOption);
+    void ProcessHfpDeviceStateChange(int state);
     void ProcessBluetoothStateChanged(const int status);
+    void ProcessBluetoothPairedStatusChange(int state);
+    void CheckBleAndHfpStateChange(bool filterHfpOnly);
+    void ProcessSubscriptionInfoForStateChange(
+        const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos,
+        const sptr<NotificationBundleOption> &bundle, bool filterHfpOnly);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;
@@ -2077,10 +2077,6 @@ private:
     std::shared_ptr<NotificationLoadUtils> notificationExtensionHandler_;
     bool supportHfp_ = false;
     std::vector<sptr<NotificationBundleOption>> cacheNotificationExtensionBundles_;
-    std::shared_ptr<HfpStateObserver> hfpObserver_ = nullptr;
-    std::shared_ptr<BluetoothAccessObserver> bluetoothAccessObserver_ = nullptr;
-    std::atomic<bool> isBluetoothObserverRegistered_ = false;
-    std::atomic<bool> isHfpObserverRegistered_ = false;
 };
 
 /**

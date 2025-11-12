@@ -432,19 +432,21 @@ void ReminderDataManager::OnProcessDiedLocked(const int32_t callingUid)
 {
     std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
     std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
-    for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end(); ++it) {
-        if ((*it)->GetUid() != callingUid) {
+    for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end();) {
+        sptr<ReminderRequest> reminder = *it;
+        if (reminder->GetUid() != callingUid) {
+            ++it;
             continue;
         }
-        if ((*it)->IsAlerting()) {
-            TerminateAlerting((*it), "onProcessDied");
+        if (reminder->IsAlerting()) {
+            TerminateAlerting(reminder, "onProcessDied");
+            ++it;
         } else {
-            CancelNotification(*it);
-            (*it)->OnClose(false);
-            showedReminderVector_.erase(it);
-            --it;
+            CancelNotification(reminder);
+            reminder->OnClose(false);
+            it = showedReminderVector_.erase(it);
         }
-        store_->UpdateOrInsert((*it));
+        store_->UpdateOrInsert(reminder);
     }
 }
 
@@ -553,6 +555,7 @@ void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool c
     if (isButtonClick) {
         UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
         CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
+        CheckAndCloseShareReminder(reminder);
     }
     StartRecentReminder();
 }
@@ -1054,7 +1057,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, co
     int32_t reminderId = reminder->GetReminderId();
     bool isShare = reminder->IsShare();
     if (!IsAllowedNotify(reminder)) {
-        ANSR_LOGE("Not allow to notify.");
+        ANSR_LOGE("Not allow to notify[%{public}s].", reminder->GetBundleName().c_str());
         reminder->OnShow(false, isSysTimeChanged, false);
         store_->UpdateOrInsert(reminder);
         return;
@@ -1081,7 +1084,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, co
         RemoveFromShowedReminders(reminder);
     } else {
         if (toPlaySound) {
-            PlaySoundAndVibration(reminder);  // play sound and vibration
+            PlaySoundAndVibrationLocked(reminder);  // play sound and vibration
             if (needScheduleTimeout) {
                 StartTimer(reminder, TimerType::ALERTING_TIMER);
             } else {
@@ -1184,7 +1187,7 @@ void ReminderDataManager::StopAlertingReminder(const sptr<ReminderRequest> &remi
         ANSR_LOGE("StopAlertingReminder is illegal.");
         return;
     }
-    StopSoundAndVibration(alertingReminder_);
+    StopSoundAndVibrationLocked(alertingReminder_);
     StopTimer(TimerType::ALERTING_TIMER);
 }
 

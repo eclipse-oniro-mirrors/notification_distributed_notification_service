@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,6 +58,30 @@ public:
      * @return Returns the set of application names.
      **/
     std::vector<std::string> GetAppNames() const;
+
+    /**
+     * @brief Sets a single application uid as the filter criterion,
+     * which means to subscribe to notifications of this application.
+     *
+     * @param uid Indicates the application uid.
+     **/
+    void AddAppUid(const int32_t appUid);
+
+    /**
+     * @brief Sets multiple application uids as the filter criteria,
+     * which means to subscribe to notifications of these applications.
+     *
+     * @param appUids Indicates the set of application names.
+     **/
+    void AddAppUids(const std::vector<int32_t> &appUids);
+
+    /**
+     * @brief Obtains the application uids in the current NotificationSubscribeInfo object.
+     * The application uids can be set by calling AddAppUids.
+     *
+     * @return Returns the set of application uids.
+     **/
+    std::vector<int32_t> GetAppUids() const;
 
     /**
      * @brief Adds application userid.
@@ -204,6 +228,7 @@ private:
 
 private:
     std::vector<std::string> appNames_ {};
+    std::vector<int32_t> appUids_ {};
     int32_t userId_ {-1};
     std::string deviceType_;
     int32_t subscriberUid_ {-1};

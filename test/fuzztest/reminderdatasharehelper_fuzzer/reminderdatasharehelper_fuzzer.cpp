@@ -42,7 +42,6 @@ namespace OHOS {
         DataShare::DataShareObserver::ChangeInfo info;
         helper.OnDataUpdate(info);
         auto result = helper.CreateDataShareHelper(Notification::ReminderCalendarShareTable::PROXY);
-        helper.ReleaseDataShareHelper(result);
         helper.GetColumns();
         helper.CreateReminder(info);
         helper.InitNormalInfo(reminder);

@@ -32,6 +32,7 @@
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
+#include "ans_result_data_synchronizer.h"
 #include "ans_ut_constant.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
@@ -66,6 +67,7 @@ namespace OHOS {
 namespace Notification {
 namespace {
 constexpr int32_t MAX_USER_ID = 10737;
+constexpr int32_t TEST_RINGTONE_BUNDLE_OPTION_UID = 20010080;
 }
 extern void MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum mockRet);
 extern void MockIsSystemApp(bool isSystemApp);
@@ -82,6 +84,8 @@ public:
 private:
     void TestAddSlot(NotificationConstant::SlotType type);
     void TestAddLiveViewSlot(bool isForceControl);
+    sptr<NotificationBundleOption> CreateValidBundleOption();
+    sptr<NotificationRingtoneInfo> CreateValidRingtoneInfo();
     void MockSystemApp();
 
 private:
@@ -105,7 +109,12 @@ void AdvancedNotificationServiceTest::SetUp()
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-    advancedNotificationService_->CancelAll("");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelAll("",
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+    }
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     GTEST_LOG_(INFO) << "SetUp end";
 }
@@ -122,6 +131,22 @@ inline void SleepForFC()
     // For ANS Flow Control
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
+
+sptr<NotificationBundleOption> AdvancedNotificationServiceTest::CreateValidBundleOption()
+{
+    return new NotificationBundleOption("test.bundle.name", TEST_RINGTONE_BUNDLE_OPTION_UID);
+}
+
+sptr<NotificationRingtoneInfo> AdvancedNotificationServiceTest::CreateValidRingtoneInfo()
+{
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
+    ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_SYSTEM);
+    ringtoneInfo->SetRingtoneFileName("test_ringtone");
+    ringtoneInfo->SetRingtoneUri("file:///data/test_ringtone");
+    ringtoneInfo->SetRingtoneTitle("Test Ringtone");
+    return ringtoneInfo;
+}
+
 
 class TestAnsSubscriber : public NotificationSubscriber {
 public:
@@ -394,8 +419,16 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03500,
 {
     int32_t id = 0;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
-    auto ret = advancedNotificationService_->CancelAsBundleWithAgent(bundleOption, id);
-    ASSERT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    int32_t result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelAsBundleWithAgent(bundleOption, id,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
@@ -1260,9 +1293,16 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16000,
     int32_t notificationId = 0;
     std::string label = "testLabel";
     sptr<NotificationBundleOption> bundleOption = nullptr;
-    ASSERT_EQ(advancedNotificationService_->CancelPreparedNotification(notificationId, label, bundleOption, 8),
-        ERR_ANS_INVALID_BUNDLE);
-
+    int32_t result = ERR_ANS_INVALID_BUNDLE;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelPreparedNotification(notificationId, label, bundleOption, 8,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
     GTEST_LOG_(INFO) << "CancelPreparedNotification_1000 test end";
 }
 
@@ -1282,8 +1322,15 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16200,
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 1;
     int result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
-    ASSERT_EQ(advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId), result);
-
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
     GTEST_LOG_(INFO) << "ANS_CancelAsBundle_0200 test end";
 }
 
@@ -1302,8 +1349,15 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16300,
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 0;
     int result = ERR_ANS_INVALID_UID;
-    ASSERT_EQ(advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId), result);
-
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
     GTEST_LOG_(INFO) << "ANS_CancelAsBundle_0300 test end";
 }
 
@@ -1321,8 +1375,15 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16500,
     int32_t notificationId = 1;
 
     int result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
-    ASSERT_EQ(advancedNotificationService_->CancelAsBundle(bundleOption, notificationId), result);
-
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelAsBundle(bundleOption, notificationId,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
     GTEST_LOG_(INFO) << "ANS_CancelAsBundle_0400 test end";
 }
 
@@ -3871,8 +3932,16 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00001, Function |
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     auto request = new (std::nothrow) NotificationRequest();
 
-    auto ret = advancedNotificationService_->CancelPreparedNotification(1, "label", bundle, 8);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    int32_t result = ERR_ANS_INVALID_PARAM;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelPreparedNotification(1, "label", bundle, 8,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 
     std::vector<sptr<NotificationRequest>> requests;
     ret = advancedNotificationService_->GetActiveNotifications(requests, "");
@@ -4494,6 +4563,146 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00008, Function | SmallTest | L
     sptr<NotificationBundleOption> bundleOption = nullptr;
     ASSERT_EQ(advancedNotificationService_->dialogManager_->HandleOneDialogClosed(
         bundleOption, EnabledDialogStatus::ALLOW_CLICKED), false);
+}
+
+/**
+ * @tc.name: SetRingtoneInfoByBundle_0100
+ * @tc.desc: Test SetRingtoneInfoByBundle with valid parameters from not system app.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetRingtoneInfoByBundle_0100, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    sptr<NotificationBundleOption> bundleOption = CreateValidBundleOption();
+    sptr<NotificationRingtoneInfo> ringtoneInfo = CreateValidRingtoneInfo();
+    ErrCode result = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: SetRingtoneInfoByBundle_0200
+ * @tc.desc: Test SetRingtoneInfoByBundle without permission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetRingtoneInfoByBundle_0200, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+
+    sptr<NotificationBundleOption> bundleOption = CreateValidBundleOption();
+    sptr<NotificationRingtoneInfo> ringtoneInfo = CreateValidRingtoneInfo();
+
+    ErrCode result = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: SetRingtoneInfoByBundle_0300
+ * @tc.desc: Test SetRingtoneInfoByBundle with null ringtone info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetRingtoneInfoByBundle_0300, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    sptr<NotificationBundleOption> bundleOption = CreateValidBundleOption();
+    sptr<NotificationRingtoneInfo> ringtoneInfo = nullptr;
+
+    ErrCode result = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetRingtoneInfoByBundle_0400
+ * @tc.desc: Test SetRingtoneInfoByBundle with invalid ringtone type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetRingtoneInfoByBundle_0400, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    sptr<NotificationBundleOption> bundleOption = CreateValidBundleOption();
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
+    ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT);
+
+    ErrCode result = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetRingtoneInfoByBundle_0500
+ * @tc.desc: Test SetRingtoneInfoByBundle with empty bundle name.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetRingtoneInfoByBundle_0500, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("", 1000);
+    sptr<NotificationRingtoneInfo> ringtoneInfo = CreateValidRingtoneInfo();
+
+    ErrCode result = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetRingtoneInfoByBundle_0100
+ * @tc.desc: Test GetRingtoneInfoByBundle with non-system app.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetRingtoneInfoByBundle_0100, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+
+    sptr<NotificationBundleOption> bundleOption = CreateValidBundleOption();
+    sptr<NotificationRingtoneInfo> ringtoneInfo = nullptr;
+
+    ErrCode result = advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: GetRingtoneInfoByBundle_0200
+ * @tc.desc: Test GetRingtoneInfoByBundle without permission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetRingtoneInfoByBundle_0200, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+
+    sptr<NotificationBundleOption> bundleOption = CreateValidBundleOption();
+    sptr<NotificationRingtoneInfo> ringtoneInfo = nullptr;
+
+    ErrCode result = advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: GetRingtoneInfoByBundle_0300
+ * @tc.desc: Test GetRingtoneInfoByBundle with empty bundle name.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetRingtoneInfoByBundle_0300, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("", 1000);
+    sptr<NotificationRingtoneInfo> ringtoneInfo = nullptr;
+
+    ErrCode result = advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
 }
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED

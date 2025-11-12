@@ -24,6 +24,7 @@
 #include "advanced_notification_service.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_result_data_synchronizer.h"
 #include "accesstoken_kit.h"
 #include "notification_preferences.h"
 #include "notification_constant.h"
@@ -82,7 +83,12 @@ void AnsLiveViewServiceTest::SetUp()
 
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
     NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
-    advancedNotificationService_->CancelAll("");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->CancelAll("",
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+    }
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     GTEST_LOG_(INFO) << "SetUp end";

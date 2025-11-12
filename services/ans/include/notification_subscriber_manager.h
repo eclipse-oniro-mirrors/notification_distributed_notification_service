@@ -42,6 +42,7 @@ public:
     struct SubscriberRecord {
         sptr<IAnsSubscriber> subscriber {nullptr};
         std::set<std::string> bundleList_ {};
+        std::set<int32_t> uidList_ {};
         bool subscribedAll {false};
         int32_t userId {SUBSCRIBE_USER_INIT};
         std::string deviceType {CURRENT_DEVICE_TYPE};

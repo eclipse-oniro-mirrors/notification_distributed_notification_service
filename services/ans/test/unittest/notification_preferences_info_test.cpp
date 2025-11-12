@@ -505,7 +505,7 @@ HWTEST_F(NotificationPreferencesInfoTest, GetAllCLoneBundlesInfo_0100, TestSize.
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     preferencesInfo->SetBundleInfoFromDb(bundleInfo, "test100");
     
-    preferencesInfo->GetAllCLoneBundlesInfo(100, bunlesMap, cloneBundles);
+    preferencesInfo->GetAllCLoneBundlesInfo(100, 100, bunlesMap, cloneBundles);
     ASSERT_EQ(cloneBundles.size(), 1);
 }
 
@@ -753,19 +753,25 @@ HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionInfosFromJson_
  */
 HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionInfosFromJson_0500, TestSize.Level1)
 {
-    std::string json = R"([
-        {
-            "addr": "addr1",
-            "isHfp": true,
-            "type": 0
-        }
-    ])";
-    NotificationPreferencesInfo::BundleInfo bundleInfo;
-    bool ret = bundleInfo.SetExtensionSubscriptionInfosFromJson(json);
-    EXPECT_TRUE(ret);
+    NotificationPreferencesInfo::BundleInfo bundleInfo1;
+    auto info1 = new (std::nothrow) NotificationExtensionSubscriptionInfo();
+    info1->SetAddr("test address");
+    info1->SetHfp(true);
+    info1->SetType(NotificationConstant::SubscribeType::BLUETOOTH);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos1 = { info1 };
+    bundleInfo1.SetExtensionSubscriptionInfos(infos1);
+    std::string json1 = bundleInfo1.GetExtensionSubscriptionInfosJson();
+    EXPECT_FALSE(json1.empty());
 
-    std::string result = bundleInfo.GetExtensionSubscriptionInfosJson();
-    EXPECT_FALSE(result.empty());
+    NotificationPreferencesInfo::BundleInfo bundleInfo2;
+    bool ret = bundleInfo2.SetExtensionSubscriptionInfosFromJson(json1);
+    EXPECT_TRUE(ret);
+    auto infos2 = bundleInfo2.GetExtensionSubscriptionInfos();
+    EXPECT_EQ(infos2.size(), 1);
+    auto info2 = infos2[0];
+    EXPECT_STREQ(info1->GetAddr().c_str(), info2->GetAddr().c_str());
+    EXPECT_EQ(info1->IsHfp(), info2->IsHfp());
+    EXPECT_EQ(info1->GetType(), info2->GetType());
 }
 }
 }

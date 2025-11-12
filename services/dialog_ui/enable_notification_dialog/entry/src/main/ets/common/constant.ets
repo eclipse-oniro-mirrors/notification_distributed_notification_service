@@ -172,6 +172,7 @@ export default class Constants {
   public static PC_BUTTON_HEIGHT = 40;
 
   public static PC_RDIUS_16 = 16;
+  public static PC_RDIUS_12 = 12;
   public static PC_RDIUS_8 = 8;
   public static PC_DOCK_HEIGHT = 120;
   public static PC_INIT_CONTENT_HEIGHT = 230;

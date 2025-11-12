@@ -43,11 +43,15 @@ public:
     MOCK_METHOD2(PublishWithMaxCapacity, ErrCode(const std::string&, const sptr<NotificationRequest>&));
     MOCK_METHOD1(PublishNotificationForIndirectProxy, ErrCode(const sptr<NotificationRequest>&));
     MOCK_METHOD1(PublishNotificationForIndirectProxyWithMaxCapacity, ErrCode(const sptr<NotificationRequest>&));
-    MOCK_METHOD3(Cancel, ErrCode(int32_t, const std::string&, const std::string&));
-    MOCK_METHOD1(CancelAll, ErrCode(const std::string&));
-    MOCK_METHOD3(CancelAsBundle, ErrCode(int32_t, const std::string&, int32_t));
-    MOCK_METHOD2(CancelAsBundle, ErrCode(const sptr<NotificationBundleOption>&, int32_t));
-    MOCK_METHOD3(CancelAsBundle, ErrCode(const sptr<NotificationBundleOption>&, int32_t, int32_t));
+    MOCK_METHOD4(Cancel, ErrCode(int32_t, const std::string&, const std::string&,
+        const sptr<IAnsResultDataSynchronizer>&));
+    MOCK_METHOD2(CancelAll, ErrCode(const std::string&, const sptr<IAnsResultDataSynchronizer>&));
+    MOCK_METHOD4(CancelAsBundle, ErrCode(int32_t, const std::string&, int32_t,
+        const sptr<IAnsResultDataSynchronizer>&));
+    MOCK_METHOD3(CancelAsBundle, ErrCode(const sptr<NotificationBundleOption>&, int32_t,
+        const sptr<IAnsResultDataSynchronizer>&));
+    MOCK_METHOD4(CancelAsBundle, ErrCode(const sptr<NotificationBundleOption>&, int32_t, int32_t,
+        const sptr<IAnsResultDataSynchronizer>&));
     MOCK_METHOD1(AddSlotByType, ErrCode(int32_t));
     MOCK_METHOD1(AddSlots, ErrCode(const std::vector<sptr<NotificationSlot>>&));
     MOCK_METHOD1(RemoveSlotByType, ErrCode(int32_t));
@@ -174,7 +178,8 @@ public:
     MOCK_METHOD2(SetSmartReminderEnabled, ErrCode(const std::string&, bool));
     MOCK_METHOD3(IsDistributedEnabledByBundle,
         ErrCode(const sptr<NotificationBundleOption>&, const std::string&, bool&));
-    MOCK_METHOD2(CancelAsBundleWithAgent, ErrCode(const sptr<NotificationBundleOption>&, int32_t));
+    MOCK_METHOD3(CancelAsBundleWithAgent, ErrCode(const sptr<NotificationBundleOption>&, int32_t,
+        const sptr<IAnsResultDataSynchronizer>&));
     MOCK_METHOD3(SetTargetDeviceStatus, ErrCode(const std::string&, uint32_t, const std::string&));
     MOCK_METHOD5(SetTargetDeviceStatus, ErrCode(const std::string&, uint32_t, uint32_t, const std::string&, int32_t));
     MOCK_METHOD2(GetDoNotDisturbProfile, ErrCode(int64_t, sptr<NotificationDoNotDisturbProfile>&));

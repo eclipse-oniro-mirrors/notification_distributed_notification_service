@@ -545,7 +545,11 @@ public:
     void RemoveDoNotDisturbProfileTrustList(int32_t userId, const sptr<NotificationBundleOption> &bundleOption);
     void GetDoNotDisturbProfileListByUserId(int32_t userId,
         std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
-    void GetAllCLoneBundlesInfo(int32_t userId, std::vector<NotificationCloneBundleInfo> &cloneBundles);
+    void SetAncoApplicationUserId(int32_t userId);
+    void SetAncoApplicationUserId(const sptr<NotificationBundleOption>& bundleOption, int32_t userId);
+    void GetAllAncoBundlesInfo(int32_t dbUserId, int32_t userId, std::vector<sptr<NotificationBundleOption>> &bundles);
+    void GetAllCLoneBundlesInfo(int32_t dbUserId, int32_t userId,
+        std::vector<NotificationCloneBundleInfo> &cloneBundles);
     void UpdateCloneBundleInfo(int32_t userId, const NotificationCloneBundleInfo& cloneBundleInfo);
     bool IsNotificationSlotFlagsExists(const sptr<NotificationBundleOption> &bundleOption);
     bool DelCloneProfileInfo(const int32_t &userId, const sptr<NotificationDoNotDisturbProfile>& info);

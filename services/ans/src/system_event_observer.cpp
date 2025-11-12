@@ -136,6 +136,7 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb(userId);
         NotificationCloneManager::GetInstance().OnUserSwitch(userId);
         AdvancedNotificationService::GetInstance()->TriggerLiveViewSwitchCheck(userId);
+        AdvancedNotificationService::GetInstance()->RecoverAncoApplicationUserId(userId);
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
         AdvancedNotificationService::GetInstance()->TryStartExtensionSubscribeService();
 #endif

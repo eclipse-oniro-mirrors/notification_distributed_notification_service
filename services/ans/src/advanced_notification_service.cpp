@@ -400,8 +400,9 @@ ErrCode AdvancedNotificationService::AssignToNotificationList(const std::shared_
     return result;
 }
 
-ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notificationId,
-    const std::string &label, const sptr<NotificationBundleOption> &bundleOption, int32_t reason)
+ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notificationId, const std::string &label,
+    const sptr<NotificationBundleOption> &bundleOption, int32_t reason,
+    const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (bundleOption == nullptr) {
@@ -413,20 +414,29 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    if (synchronizer == nullptr) {
+        std::string message = "synchronizer is null";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 2)
+            .ErrorCode(ERR_ANS_INVALID_BUNDLE).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     if (notificationSvrQueue_ == nullptr) {
         std::string message = "notificationSvrQueue is null";
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
-    ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
         NotificationKey notificationKey;
         notificationKey.id = notificationId;
         notificationKey.label = label;
-        result = RemoveFromNotificationList(bundleOption, notificationKey, notification, reason, true);
+        ErrCode result = RemoveFromNotificationList(bundleOption, notificationKey, notification, reason, true);
         if (result != ERR_OK) {
+            synchronizer->TransferResultData(result);
             return;
         }
 
@@ -438,10 +448,10 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
             DoDistributedDelete("", "", notification);
 #endif
         }
+        synchronizer->TransferResultData(result);
+        SendCancelHiSysEvent(notificationId, label, bundleOption, result);
     }));
-    notificationSvrQueue_->wait(handler);
-    SendCancelHiSysEvent(notificationId, label, bundleOption, result);
-    return result;
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::PrepareNotificationInfo(
@@ -840,6 +850,29 @@ void AdvancedNotificationService::ReportDoNotDisturbModeChanged(const int32_t &u
         }
         doNotDisturbEnableRecord_.insert_or_assign(userId, enable);
     }
+}
+
+void AdvancedNotificationService::ReportRingtoneChanged(const sptr<NotificationBundleOption> &bundleOption,
+    const sptr<NotificationRingtoneInfo> &ringtoneInfo, NotificationConstant::RingtoneReportType reportType)
+{
+    if (bundleOption == nullptr || ringtoneInfo == nullptr) {
+        ANS_LOGE("Invalid param.");
+        return;
+    }
+    HaMetaMessage message;
+    std::string ringtoneMessage;
+    if (reportType == NotificationConstant::RingtoneReportType::RINGTONE_UPDATE) {
+        message = HaMetaMessage(EventSceneId::SCENE_29, EventBranchId::BRANCH_1);
+        ringtoneMessage = "Set ringtone ";
+    } else {
+        message = HaMetaMessage(EventSceneId::SCENE_29, EventBranchId::BRANCH_2);
+        ringtoneMessage = "Remove Customized tone ";
+    }
+    uint32_t ringtoneType = static_cast<uint32_t>(ringtoneInfo->GetRingtoneType());
+    std::string info = ringtoneMessage + bundleOption->GetBundleName() + " " +
+        std::to_string(ringtoneType) + " " + ringtoneInfo->GetRingtoneUri();
+    message.Message(info);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
 }
 
 void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr<NotificationRecord> &record)

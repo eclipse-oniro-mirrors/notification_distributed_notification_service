@@ -22,7 +22,8 @@ import {
   getFontSizeScale,
   sourceToVp,
   getLimitFontSize,
-  shouldMoveToDisplayCenter
+  shouldMoveToDisplayCenter,
+  sleep
 } from '../common/utils';
 import Constants from '../common/constant';
 import fs from '@ohos.file.fs';
@@ -79,7 +80,7 @@ struct NotificationDialogPage {
     autoCancel: false,
     alignment: DialogAlignment.Center,
     customStyle: true,
-    cornerRadius: Constants.PC_RDIUS_16,
+    cornerRadius: Constants.PC_RDIUS_12,
     maskColor: $r('sys.color.ohos_id_color_mask_thin'),
     onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
       console.info(TAG, `dialog onWillDismiss reason= : ${JSON.stringify(dismissDialogAction.reason)}`);
@@ -103,6 +104,10 @@ struct PermissionDialog {
   @State contentComW: number = 0;
   @State contentComH: number = 0;
   @State showInDisplayCenter: boolean = false;
+  @State followParentMode: boolean = true;
+  @State waterFallMode: boolean = false;
+  @State contentSizeChangeUpdated: boolean = false;
+  @State firstUpdateCompoment:boolean = true;
   @State isBottomPopover: boolean = false;
   @StorageLink('clicked') clicked: boolean = false;
   @Link @Watch('updateOnPageShow') isUpdate: number;
@@ -190,13 +195,16 @@ struct PermissionDialog {
                     await this.enableNotification(false);
                     })
                     .customizeButton()
-                    .margin({right: Constants.BUTTON_RIGHT})
+                  Divider()
+                    .color(Color.Transparent)
+                    .height(Constants.DIVIDER_HEIGHT)
+                    .vertical(true)
+                    .margin({left: Constants.BUTTON_LEFT, right: Constants.BUTTON_RIGHT})
                   Button($r('app.string.ALLOW'))
                     .onClick(async (): Promise<void> => {
                       await this.enableNotification(true);
                     })
                     .customizeButton()
-                    .margin({left: Constants.BUTTON_LEFT})
                 }
                 .margin({ 
                   left: Constants.PC_OPERATE_MARGIN_SIDE, 
@@ -207,21 +215,24 @@ struct PermissionDialog {
               }
             }
             .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-              console.info(TAG, `content onSizeChange`);
               this.contentComW = vp2px(newValue.width as number);
               this.contentComH = vp2px(newValue.height as number);
-              this.updateContentCompoment();
+              console.info(TAG, `content onSizeChange size ${this.contentComW} ${this.contentComH}`);
+              if (!this.contentSizeChangeUpdated) {
+                this.updateContentCompoment();
+                this.contentSizeChangeUpdated = true;
+              }
             })
           }
-          .constraintSize({ maxHeight: this.showInDisplayCenter ? '100%' : '90%'})
         }
-        .borderRadius(Constants.PC_RDIUS_16)
+        .borderRadius(Constants.PC_RDIUS_12)
         .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
         .width(Constants.PC_DIALOG_WIDTH)
+        .constraintSize({minWidth:Constants.PC_DIALOG_WIDTH})
         .outline({
             width: 1,
             color: Constants.PC_OUTLINE_COLOR,
-            radius: Constants.PC_RDIUS_16
+            radius: Constants.PC_RDIUS_12
           })
         .clip(true)
       }
@@ -253,6 +264,7 @@ struct PermissionDialog {
   async updateOnPageShow(): Promise<void> {
     if (this.isUpdate > 0) {
       await this.updateStatus();
+      await this.updateContentCompoment();
       this.isUpdate = 0;
     }
     if (this.uecRectChangeNum > 0) {
@@ -303,44 +315,99 @@ struct PermissionDialog {
   async updateContentCompoment(): Promise<void> {
     console.info(TAG, `updateContentCompoment`);
     if (this.contentComW <= 0 || this.contentComH <= 0) {
+      console.error(TAG, `contentCompoment info not init`);
       return;
     }
+    if (!this.firstUpdateCompoment) {
+      await sleep(150);
+    } else {
+      this.firstUpdateCompoment = false;
+    }
+    
     try {
+      let queryWaterFallMode = await this.dialog?.subWindow.isMainWindowFullScreenAcrossDisplays();
+      this.waterFallMode = this.waterFallMode || queryWaterFallMode;
       let display = DisplayUtils.getCurWindowDisplay(this.dialog?.subWindow);
-      let tempResult = shouldMoveToDisplayCenter(this.contentComW, this.contentComH,
+      this.showInDisplayCenter = shouldMoveToDisplayCenter(this.contentComW, this.contentComH,
         this.dialog?.extensionWindow, this.dialog?.subWindow, display);
-      console.info(TAG, `shouldMoveToDisplayCenter = ${tempResult}`);
-      if (tempResult === this.showInDisplayCenter) {
-        if (tempResult) {
-          this.dialog?.subWindow?.resize(this.contentComW, this.contentComH);
-          this.dialog?.subWindow?.moveWindowTo((display.width - this.contentComW) / 2,
-           (display.height - this.contentComH) / 2); 
-        }
-        return;
-      }
-      this.showInDisplayCenter = tempResult;
-      
+      console.info(TAG, `shouldMoveToCenter = ${this.showInDisplayCenter} waterFallMode = ${this.waterFallMode}`);
+
       if (this.showInDisplayCenter) {
-        await this.dialog?.subWindow?.setFollowParentWindowLayoutEnabled(false);
-        this.session?.loadContent(EMPTY_PAGE_PATH, storage);
-        this.session?.setWindowBackgroundColor(MASK_COLOR);
-        this.dialog?.subWindow?.resize(this.contentComW, this.contentComH);
-        this.dialog?.subWindow?.moveWindowTo((display.width - this.contentComW) / 2,
-         (display.height - this.contentComH) / 2);
+        await this.moveToDisplayCenter();
       } else {
-        await this.dialog?.subWindow?.setFollowParentWindowLayoutEnabled(true);
-        this.session?.setWindowBackgroundColor(TRANSPARANT_COLOR);
+        if (this.waterFallMode) {
+          await this.moveToParentWindowCenter();
+        } else {
+          await this.follwParentWindow();
+        }
+        
       }
     } catch (err) {
       console.error(TAG, `updateContentCompoment fail. code=${err?.code} msg=${err?.message}`);
     }
   }
 
+  async moveToParentWindowCenter(): Promise<void> {
+    try {
+      if (this.followParentMode) {
+        await this.dialog?.subWindow?.setFollowParentWindowLayoutEnabled(false);
+        this.session?.loadContent(EMPTY_PAGE_PATH, storage);
+        this.session?.setWindowBackgroundColor(MASK_COLOR);
+        this.followParentMode = false;
+      }
+      let windowRect = this.dialog?.extensionWindow.properties?.uiExtensionHostWindowProxyRect;
+      if (windowRect.width <= 0 || windowRect.height <= 0) {
+        console.error(TAG, `unavaliable windowRect info`);
+        return;
+      }
+      this.dialog?.subWindow?.resize(this.contentComW, this.contentComH);
+      this.dialog?.subWindow?.moveWindowTo((windowRect.width - this.contentComW) / 2 + windowRect.left,
+        (windowRect.height - this.contentComH) / 2 + windowRect.top);
+    } catch (err) {
+      console.error(TAG, `moveToParentWindowCenter fail. code=${err?.code} msg=${err?.message}`);
+    }
+  }
+
+  async moveToDisplayCenter(): Promise<void> {
+    try {
+      if (this.followParentMode) {
+        await this.dialog?.subWindow?.setFollowParentWindowLayoutEnabled(false);
+        this.session?.loadContent(EMPTY_PAGE_PATH, storage);
+        this.session?.setWindowBackgroundColor(MASK_COLOR);
+        this.followParentMode = false;
+      }
+      let display = DisplayUtils.getCurWindowDisplay(this.dialog?.subWindow);
+      this.dialog?.subWindow?.resize(this.contentComW, this.contentComH);
+      this.dialog?.subWindow?.moveWindowTo((display.width - this.contentComW) / 2,
+         (display.height - this.contentComH) / 2);
+    } catch (err) {
+      console.error(TAG, `moveToDisplayCenter fail. code=${err?.code} msg=${err?.message}`);
+    }
+  }
+
+  async follwParentWindow(): Promise<void> {
+    try {
+      if (this.followParentMode) {
+        return;
+      }
+      await this.dialog?.subWindow?.setFollowParentWindowLayoutEnabled(true);
+      this.session?.setWindowBackgroundColor(TRANSPARANT_COLOR);
+      this.followParentMode = true;
+    } catch (err) {
+      console.error(TAG, `follwParentWindow fail. code=${err?.code} msg=${err?.message}`);
+    }
+  }
+
   async registerFoldStatusChange(): Promise<void> {
     let callback: Callback<display.FoldStatus> = async (data: display.FoldStatus) => {
       try {
-        console.info(TAG, `foldStatusChange`);
-        this.updateContentCompoment();
+        console.info(TAG, `foldStatusChange waterFallMode = ${this.waterFallMode}`);
+        let dis = DisplayUtils.getCurWindowDisplay(this.dialog?.subWindow);
+        let windowRect = this.dialog?.extensionWindow.properties?.uiExtensionHostWindowProxyRect;
+        if (this.waterFallMode || data === display.FoldStatus.FOLD_STATUS_EXPANDED ||
+          windowRect.height > dis.height) {
+          this.updateContentCompoment();
+        }
       } catch (err) {
         console.error(TAG, `Failed to touch foldStatusChange callback. code=${err?.code} msg=${err?.message}`);
       }

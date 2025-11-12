@@ -700,6 +700,18 @@ private:
 
     void UpdateReminderFromDb(const std::vector<sptr<ReminderRequest>>& remindersFromDb);
     ErrCode CancelReminderToDb(const int32_t reminderId, const int32_t callingUid);
+
+    /**
+     * @brief Synchronously close shared reminders with the same notificationId within the next 24 hours.
+     *
+     * When the user clicks the "close" button for a shared reminder, this function locates
+     * other reminders that are:
+     *  - shared reminder
+     *  - have the same notificationId, and
+     *  - scheduled to trigger within the next 24 hours (relative to the current system time).
+     */
+    void CheckAndCloseShareReminder(const sptr<ReminderRequest>& reminder);
+
    /**
     * Single instance.
     */

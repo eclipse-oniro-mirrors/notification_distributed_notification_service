@@ -149,7 +149,7 @@ void ExtensionServiceConnection::NotifyOnReceiveMessage(const sptr<NotificationR
                 " receive message " + notificationRequest->GetNotificationHashCode();
             AppendMessage(message, callResult, retResult);
             NotificationExtensionService::GetInstance().SendHaReport(
-                EventSceneId::SCENE_27, 0, EventBranchId::BRANCH_8, message);
+                EventSceneId::SCENE_27, EventBranchId::BRANCH_8, 0, message);
         }
         sThis->PrepareFreeze();
         sThis->PrepareDisconnect();
@@ -202,7 +202,7 @@ void ExtensionServiceConnection::NotifyOnCancelMessages(const std::shared_ptr<st
                 " cancel message size " + std::to_string(hashCodes->size());
             AppendMessage(message, callResult, retResult);
             NotificationExtensionService::GetInstance().SendHaReport(
-                EventSceneId::SCENE_27, 0, EventBranchId::BRANCH_9, message);
+                EventSceneId::SCENE_27, EventBranchId::BRANCH_9, 0, message);
         }
         sThis->PrepareFreeze();
         sThis->PrepareDisconnect();
@@ -224,7 +224,7 @@ void ExtensionServiceConnection::OnAbilityConnectDone(
     }
     std::string message = subscriberInfo_.bundleName + ", " + std::to_string(subscriberInfo_.uid) + " connect";
     NotificationExtensionService::GetInstance().SendHaReport(
-        EventSceneId::SCENE_27, 0, EventBranchId::BRANCH_10, message);
+        EventSceneId::SCENE_27, EventBranchId::BRANCH_10, 0, message);
     GetPid();
 
     for (auto& message : messages_) {
@@ -336,7 +336,10 @@ void ExtensionServiceConnection::Disconnect()
             ANS_LOGE("null sThis");
             return;
         }
-
+        if (sThis->remoteObject_ != nullptr) {
+            sThis->remoteObject_->RemoveDeathRecipient(sThis->deathRecipient_);
+            sThis->remoteObject_ = nullptr;
+        }
         AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(sThis);
     });
 }
@@ -426,9 +429,13 @@ void ExtensionServiceConnection::HandleDisconnectedState()
 void ExtensionServiceConnection::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     ANS_LOGD("OnRemoteDied %{public}s", subscriberInfo_.Dump().c_str());
-    std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
-    state_ = ExtensionServiceConnectionState::DISCONNECTED;
-    Close();
+    wptr<ExtensionServiceConnection> wThis = this;
+    sptr<ExtensionServiceConnection> sThis = wThis.promote();
+    if (sThis) {
+        std::lock_guard<ffrt::recursive_mutex> lock(sThis->mutex_);
+        sThis->state_ = ExtensionServiceConnectionState::DISCONNECTED;
+        sThis->Close();
+    }
 }
 
 void ExtensionServiceConnection::AppendMessage(std::string& message, ErrCode callResult, int32_t retResult)

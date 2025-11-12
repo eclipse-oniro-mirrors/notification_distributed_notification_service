@@ -43,6 +43,7 @@
 #include "hitrace_meter_adapter.h"
 #include "notification_helper.h"
 #include "reminder_datashare_helper.h"
+#include "reminder_calendar_share_table.h"
 #ifdef HAS_HISYSEVENT_PART
 #include <sys/statfs.h>
 #include "hisysevent.h"
@@ -549,6 +550,41 @@ bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &rem
         }
     }
     return true;
+}
+
+void ReminderDataManager::CheckAndCloseShareReminder(const sptr<ReminderRequest>& reminder)
+{
+    if (!reminder->IsShare()) {
+        return;
+    }
+    constexpr int64_t interval = 24 * 60 * 60 * 1000;
+    std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+    for (auto vit = reminderVector_.begin(); vit != reminderVector_.end(); vit++) {
+        sptr<ReminderRequest> tarReminder = *vit;
+        if (tarReminder == nullptr) {
+            continue;
+        }
+        if (!tarReminder->IsShare()) {
+            continue;
+        }
+        if (tarReminder->GetIdentifier() == reminder->GetIdentifier()) {
+            continue;
+        }
+        if (tarReminder->GetNotificationId() != reminder->GetNotificationId()) {
+            continue;
+        }
+        int64_t diff = static_cast<int64_t>(tarReminder->GetOriTriggerTimeInMilli())
+            - static_cast<int64_t>(reminder->GetOriTriggerTimeInMilli());
+        if (diff > 0 && diff < interval) {
+            tarReminder->SetExpired(true);
+            tarReminder->SetStateToInActive();
+            ReminderDataShareHelper::GetInstance().Update(tarReminder->GetIdentifier(),
+                ReminderCalendarShareTable::STATE_DISMISSED);
+            ANSR_LOGI("Cancel reminder[%{public}d] by same notificationId and close button",
+                tarReminder->GetReminderId());
+        }
+    }
+    StopTimerLocked(TimerType::TRIGGER_TIMER);
 }
 }
 }

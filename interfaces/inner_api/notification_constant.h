@@ -222,6 +222,11 @@ public:
         RINGTONE_TYPE_BUTT = 4,
     };
 
+    enum class RingtoneReportType {
+        RINGTONE_UPDATE = 0,
+        RINGTONE_REMOVE = 1,
+    };
+
     static const int32_t DEFAULT_REASON_DELETE = 0;
 
     /**

@@ -20,6 +20,7 @@
 #define private public
 #include "accesstoken_kit.h"
 #include "advanced_notification_service.h"
+#include "ans_result_data_synchronizer.h"
 #include "ans_subscriber_listener.h"
 #include "notification_subscriber.h"
 
@@ -163,10 +164,27 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_002, Function | SmallTest | Level1)
     uint64_t num;
     g_advancedNotificationService->GetActiveNotificationNums(num);
     EXPECT_EQ(num, 3);
-    EXPECT_EQ((int)g_advancedNotificationService->Cancel(2, "testLabel1", ""), (int)ERR_OK);
+    int32_t result = ERR_OK;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = g_advancedNotificationService->Cancel(2, "testLabel1", "",
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
     EXPECT_EQ((int)g_advancedNotificationService->GetAllActiveNotifications(notifications), (int)ERR_OK);
     EXPECT_EQ((int)notifications.size(), (int)2);
-    EXPECT_EQ((int)g_advancedNotificationService->CancelAll(""), (int)ERR_OK);
+    result = ERR_OK;
+    ret = g_advancedNotificationService->CancelAll("",
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
@@ -899,7 +917,12 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0035, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
-    g_advancedNotificationService->Cancel(0, label, "");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = g_advancedNotificationService->Cancel(0, label, "",
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+    }
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(listener, subscriberInfo);
@@ -945,7 +968,12 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0036, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
-    g_advancedNotificationService->CancelAll("");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = g_advancedNotificationService->CancelAll("",
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+    }
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(listener, subscriberInfo);
@@ -2770,7 +2798,12 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0131, Function | SmallTest | Level1)
     subscriber->canceledCb_ = [](const std::shared_ptr<Notification> &request,
                                   const std::shared_ptr<NotificationSortingMap> &sortingMap,
                                   int deleteReason) { passed = true; };
-    g_advancedNotificationService->Cancel(1, "1", "");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = g_advancedNotificationService->Cancel(1, "1", "",
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+    }
     g_advancedNotificationService->Unsubscribe(listener, nullptr);
     EXPECT_EQ(false, passed);
 }

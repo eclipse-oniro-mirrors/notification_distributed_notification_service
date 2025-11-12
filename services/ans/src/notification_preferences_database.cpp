@@ -134,6 +134,11 @@ const static std::string KEY_BUNDLE_POPPED_DIALOG = "poppedDialog";
 const static std::string KEY_BUNDLE_UID = "uid";
 
 /**
+ * Indicates that disturbe key which bundle user id.
+ */
+const static std::string KEY_BUNDLE_USERID = "userid";
+
+/**
  * Indicates that disturbe key which slot.
  */
 const static std::string KEY_SLOT = "slot";
@@ -1226,6 +1231,59 @@ void NotificationPreferencesDatabase::ParseBundleFromDistureDB(NotificationPrefe
     }
 }
 
+void NotificationPreferencesDatabase::ParseAncoBundleFromDistureDB(
+    const std::unordered_map<std::string, std::string> &values, const int32_t &userId,
+    std::vector<NotificationPreferencesInfo::BundleInfo>& bundleList)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return;
+    }
+    for (auto item : values) {
+        std::string bundleKey = item.second;
+        ANS_LOGD("Bundle name is %{public}s.", bundleKey.c_str());
+        std::unordered_map<std::string, std::string> bundleEntries;
+        rdbDataManager_->QueryDataBeginWithKey((GenerateBundleKey(bundleKey)), bundleEntries, userId);
+        NotificationPreferencesInfo::BundleInfo bundleInfo;
+        for (auto bundleEntry : bundleEntries) {
+            std::string typeStr = FindLastString(GenerateBundleKey(bundleKey), bundleEntry.first);
+            std::string valueStr = bundleEntry.second;
+            if (typeStr.compare(KEY_BUNDLE_NAME) == 0) {
+                ParseBundleName(bundleInfo, valueStr);
+            }
+            if (typeStr.compare(KEY_BUNDLE_UID) == 0) {
+                ParseBundleUid(bundleInfo, valueStr);
+            }
+            if (typeStr.compare(KEY_BUNDLE_USERID) == 0) {
+                bundleInfo.SetBundleUserId(StringToInt(valueStr));
+            }
+        }
+        bundleList.push_back(bundleInfo);
+    }
+    ANS_LOGI("Anco bundles is %{public}zu.", bundleList.size());
+}
+
+void NotificationPreferencesDatabase::PutBundleUserIdToDisturbeDB(
+    std::vector<NotificationPreferencesInfo::BundleInfo>& bundleList, const int32_t &userId, const int32_t &dbUserId)
+{
+    if (bundleList.empty()) {
+        return;
+    }
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return;
+    }
+    std::unordered_map<std::string, std::string> values;
+    for (auto bundle : bundleList) {
+        std::string bundleKey = bundle.GetBundleName().append(std::to_string(bundle.GetBundleUid()));
+        GenerateEntry(GenerateBundleKey(bundleKey, KEY_BUNDLE_USERID), std::to_string(userId), values);
+    }
+    int32_t result = rdbDataManager_->InsertBatchData(values, dbUserId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Add user profiles failed %{public}d.", result);
+    }
+}
+
 void NotificationPreferencesDatabase::ParseSlotFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo,
     const std::string &bundleKey, const std::pair<std::string, std::string> &entry, const int32_t &userId)
 {
@@ -1282,6 +1340,10 @@ void NotificationPreferencesDatabase::ParseBundlePropertyFromDisturbeDB(
     }
     if (typeStr.compare(KEY_BUNDLE_UID) == 0) {
         return ParseBundleUid(bundleInfo, valueStr);
+    }
+    if (typeStr.compare(KEY_BUNDLE_USERID) == 0) {
+        bundleInfo.SetBundleUserId(StringToInt(valueStr));
+        return;
     }
     if (typeStr.compare(KEY_BUNDLE_SLOTFLGS_TYPE) == 0) {
         return ParseBundleSlotFlags(bundleInfo, valueStr);

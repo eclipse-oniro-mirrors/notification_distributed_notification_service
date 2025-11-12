@@ -628,6 +628,7 @@ void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
     }
     napi_delete_async_work(env, asynccallbackinfo->asyncWork);
     delete asynccallbackinfo;
+    asynccallbackinfo = nullptr;
 }
 
 bool CreateSettingsUIExtensionSub(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName)
@@ -823,7 +824,7 @@ napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
 
     if (argc == 0) {
-        return Common::NapiGetNull(env);
+        return nullptr;
     }
 
     // argv[0]: context
@@ -831,7 +832,7 @@ napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if ((valuetype != napi_object) && (valuetype != napi_function)) {
         ANS_LOGW("Wrong argument type. Function or object expected. Excute promise.");
-        return Common::NapiGetNull(env);
+        return nullptr;
     }
     if (valuetype == napi_object) {
         bool stageMode = false;
@@ -903,6 +904,8 @@ napi_value NapiNotificationExtensionSubscribe(napi_env env, napi_callback_info i
 
     if (ParseParameters(env, info, asynccallbackinfo->subscriptionInfo) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return Common::NapiGetUndefined(env);
     }
 
@@ -1100,6 +1103,8 @@ napi_value NapiGetUserGrantedState(napi_env env, napi_callback_info info)
 
     if (ParseParametersForGetUserGrantedState(env, info, asynccallbackinfo->params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return Common::NapiGetUndefined(env);
     }
 
@@ -1144,6 +1149,8 @@ napi_value NapiSetUserGrantedState(napi_env env, napi_callback_info info)
 
     if (ParseParametersForSetUserGrantedState(env, info, asynccallbackinfo->params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return Common::NapiGetUndefined(env);
     }
 
@@ -1177,8 +1184,6 @@ napi_value NapiSetUserGrantedState(napi_env env, napi_callback_info info)
 
 napi_value NapiGetUserGrantedEnabledBundles(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("called");
-
     AsyncCallbackInfoNotificationExtensionUserGranted* asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoNotificationExtensionUserGranted { .env = env, .asyncWork = nullptr };
     if (!asynccallbackinfo) {
@@ -1189,6 +1194,8 @@ napi_value NapiGetUserGrantedEnabledBundles(napi_env env, napi_callback_info inf
     bool isForSelf = false;
     if (ParseParametersForGetUserGrantedEnableBundle(env, info, asynccallbackinfo->params, isForSelf) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return Common::NapiGetUndefined(env);
     }
 
@@ -1197,10 +1204,9 @@ napi_value NapiGetUserGrantedEnabledBundles(napi_env env, napi_callback_info inf
 
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getUserGrantedEnabledBundles", NAPI_AUTO_LENGTH, &resourceName);
-    // Asynchronous function call
     if (isForSelf) {
         napi_create_async_work(env, nullptr, resourceName, [](napi_env env, void *data) {
-            ANS_LOGD("getUserGrantedEnabledBundles work excute.");
+            ANS_LOGD("getUserGrantedEnabledBundlesForSelf work excute.");
             AsyncCallbackInfoNotificationExtensionUserGranted *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoNotificationExtensionUserGranted *>(data);
             if (asynccallbackinfo) {
@@ -1246,6 +1252,8 @@ napi_value NapiSetUserGrantedBundleState(napi_env env, napi_callback_info info)
 
     if (ParseParametersForSetUserGrantedBundleState(env, info, asynccallbackinfo->params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return Common::NapiGetUndefined(env);
     }
 

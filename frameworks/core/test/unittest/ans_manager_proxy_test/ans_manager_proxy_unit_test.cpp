@@ -25,6 +25,7 @@
 #include "ans_const_define.h"
 #include "ans_dialog_host_client.h"
 #include "ans_inner_errors.h"
+#include "ans_result_data_synchronizer.h"
 #include "ans_subscriber_listener.h"
 #include "ians_manager.h"
 #include "message_parcel.h"
@@ -359,7 +360,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0100, Function | MediumTest | Level
     ASSERT_NE(nullptr, proxy);
     int32_t notificationId = 0;
     std::string label = "label";
-    int32_t result = proxy->Cancel(notificationId, label, "");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->Cancel(notificationId, label, "", synchronizer);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
@@ -380,7 +382,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0200, Function | MediumTest | Level
     ASSERT_NE(nullptr, proxy);
     int32_t notificationId = 0;
     std::string label = "";
-    int32_t result = proxy->Cancel(notificationId, label, "");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->Cancel(notificationId, label, "", synchronizer);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -403,7 +406,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0300, Function | MediumTest | Level
     ASSERT_NE(nullptr, proxy);
     int32_t notificationId = 0;
     std::string label = "label";
-    int32_t result = proxy->Cancel(notificationId, label, "");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->Cancel(notificationId, label, "", synchronizer);
     EXPECT_EQ(ERR_OK, result);
 }
 /*
@@ -424,7 +428,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0400, Function | MediumTest | Level
     ASSERT_NE(nullptr, proxy);
     int32_t notificationId = 0;
     std::string label = "label";
-    int32_t result = proxy->Cancel(notificationId, label, "");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->Cancel(notificationId, label, "", synchronizer);
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -447,7 +452,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0500, Function | MediumTest | Level
     ASSERT_NE(nullptr, proxy);
     int32_t notificationId = 0;
     std::string label = "label";
-    int32_t result = proxy->Cancel(notificationId, label, "");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->Cancel(notificationId, label, "", synchronizer);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -466,7 +472,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAllTest_0100, Function | MediumTest | Le
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    int32_t result = proxy->CancelAll("");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->CancelAll("", synchronizer);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
@@ -488,7 +495,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAllTest_0200, Function | MediumTest | Le
         ERR_OK, true, false, false)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    int32_t result = proxy->CancelAll("");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->CancelAll("", synchronizer);
     EXPECT_EQ(ERR_OK, result);
 }
 /*
@@ -507,7 +515,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAllTest_0300, Function | MediumTest | Le
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    int32_t result = proxy->CancelAll("");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->CancelAll("", synchronizer);
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -528,7 +537,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAllTest_0400, Function | MediumTest | Le
         ERR_OK, false, false, false)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    int32_t result = proxy->CancelAll("");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->CancelAll("", synchronizer);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -550,7 +560,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0100, Function | MediumTest
     int32_t notificationId = 0;
     std::string representativeBundle = "Bundle";
     int32_t userId = 0;
-    int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId, synchronizer);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
@@ -572,7 +583,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0200, Function | MediumTest
     int32_t notificationId = 0;
     std::string representativeBundle = "";
     int32_t userId = 0;
-    int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId, synchronizer);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -596,7 +608,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0300, Function | MediumTest
     int32_t notificationId = 0;
     std::string representativeBundle = "Bundle";
     int32_t userId = 0;
-    int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId, synchronizer);
     EXPECT_EQ(ERR_OK, result);
 }
 /*
@@ -618,7 +631,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0400, Function | MediumTest
     int32_t notificationId = 0;
     std::string representativeBundle = "Bundle";
     int32_t userId = 0;
-    int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId, synchronizer);
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -642,7 +656,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0500, Function | MediumTest
     int32_t notificationId = 0;
     std::string representativeBundle = "Bundle";
     int32_t userId = 0;
-    int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId, synchronizer);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -663,7 +678,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0600, Function | MediumTest
     ASSERT_NE(nullptr, proxy);
     int32_t notificationId = 0;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
-    int32_t result = proxy->CancelAsBundle(bundleOption, notificationId);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->CancelAsBundle(bundleOption, notificationId, synchronizer);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
@@ -685,7 +701,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0700, Function | MediumTest
     int32_t notificationId = 0;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t userId = 0;
-    int32_t result = proxy->CancelAsBundle(bundleOption, notificationId, userId);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->CancelAsBundle(bundleOption, notificationId, userId, synchronizer);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 

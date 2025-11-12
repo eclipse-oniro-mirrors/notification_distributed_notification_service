@@ -482,6 +482,11 @@ public:
     bool GetCloneRingtoneInfo(const int32_t &userId, const std::string bundle, int32_t index, std::string& data);
     bool SetCloneRingtoneInfo(const int32_t &userId, const std::string bundle, int32_t index, const std::string& data);
 
+    void ParseAncoBundleFromDistureDB(const std::unordered_map<std::string, std::string> &values,
+        const int32_t &userId, std::vector<NotificationPreferencesInfo::BundleInfo>& bundleList);
+    void PutBundleUserIdToDisturbeDB(std::vector<NotificationPreferencesInfo::BundleInfo>& bundleList,
+        const int32_t &userId, const int32_t &dbUserId);
+
     bool GetLiveViewConfigVersion(int32_t& version);
     bool SetLiveViewConfigVersion(const int32_t& version);
     bool GetLiveViewRebuildFlag(std::string& flag, int32_t userId);
