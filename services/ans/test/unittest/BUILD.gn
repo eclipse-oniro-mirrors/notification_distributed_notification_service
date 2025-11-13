@@ -1429,6 +1429,7 @@ ohos_unittest("notification_config_parse_test") {
   sources = [
     "notification_app_privileges_test.cpp",
     "notification_config_parse_test.cpp",
+    "notification_file_utils_test.cpp",
   ]
 
   deps = [

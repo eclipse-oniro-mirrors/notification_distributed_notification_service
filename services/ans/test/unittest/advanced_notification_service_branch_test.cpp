@@ -1394,6 +1394,8 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_286001, Function | SmallTest | Level1)
     ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
+    result = advancedNotificationService_->SetCheckConfig(0, requestId, key, value);
+    ASSERT_EQ(result, ERR_OK);
     result = advancedNotificationService_->SetCheckConfig(6, requestId, key, value);
     ASSERT_EQ(result, ERR_OK);
     result = advancedNotificationService_->SetCheckConfig(10, requestId, key, value);
@@ -1402,6 +1404,10 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_286001, Function | SmallTest | Level1)
     ASSERT_EQ(result, ERR_OK);
     result = advancedNotificationService_->SetCheckConfig(7, requestId, key, value);
     ASSERT_EQ(result, ERR_OK);
+
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    result = advancedNotificationService_->SetCheckConfig(8, requestId, key, value);
+    ASSERT_EQ(result, ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -1436,6 +1442,92 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_286002, Function | SmallTest | Level1)
     bundle->SetUid(NON_SYSTEM_APP_UID);
     result = advancedNotificationService_->SetDefaultSlotForBundle(bundle, 5, true, true);
     ASSERT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.number : AnsBranchTest_286003
+ * @tc.name : GetLiveViewConfig
+ * @tc.desc : Test GetLiveViewConfig function return ERR_ANS_INVALID_PARAM.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_286003, Function | SmallTest | Level1)
+{
+    std::vector<std::string> bundle_list;
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    auto ret = advancedNotificationService_->GetLiveViewConfig(bundle_list);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    for (int i = 0; i < 80; i++) {
+        bundle_list.emplace_back("com.sankuai.hmeituan");
+    }
+
+    ret = advancedNotificationService_->GetLiveViewConfig(bundle_list);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number : AnsBranchTest_286004
+ * @tc.name : GetLiveViewConfig
+ * @tc.desc : Test GetLiveViewConfig function return ERR_ANS_INVALID_PARAM.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_286004, Function | SmallTest | Level1)
+{
+    std::vector<std::string> bundle_list;
+    for (int i = 0; i < 10; i++) {
+        bundle_list.emplace_back("com.sankuai.hmeituan");
+    }
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    auto ret = advancedNotificationService_->GetLiveViewConfig(bundle_list);
+    ASSERT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_UNREGISTERED);
+
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    ret = advancedNotificationService_->GetLiveViewConfig(bundle_list);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    MockIsVerfyPermisson(false);
+    ret = advancedNotificationService_->GetLiveViewConfig(bundle_list);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number : AnsBranchTest_286005
+ * @tc.name : TriggerLiveViewSwitchCheck
+ * @tc.desc : Test TriggerLiveViewSwitchCheck.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_286005, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->TriggerLiveViewSwitchCheck(0);
+}
+
+/**
+ * @tc.number : AnsBranchTest_286006
+ * @tc.name : InvokeCheckConfig
+ * @tc.desc : Test InvokeCheckConfig.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_286006, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->InvokeCheckConfig(0);
+}
+
+/**
+ * @tc.number : AnsBranchTest_286007
+ * @tc.name : InvockLiveViewSwitchCheck
+ * @tc.desc : Test InvockLiveViewSwitchCheck.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_286007, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("com.sankuai.hmeituan", 100);
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    bundles.emplace_back(bundle);
+    advancedNotificationService_->InvockLiveViewSwitchCheck(bundles, 100, 100);
 }
 }  // namespace Notification
 }  // namespace OHOS
