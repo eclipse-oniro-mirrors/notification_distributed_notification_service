@@ -2743,8 +2743,7 @@ bool NotificationPreferencesDatabase::GetDistributedEnabledForBundle(const std::
     std::string key = GenerateBundleLablel(bundleInfo, deviceType);
     bool result = false;
     enabled = false;
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId);
+    int32_t userId = DEFAULT_USER_ID;
     GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
         switch (status) {
             case NativeRdb::E_EMPTY_VALUES_BUCKET: {
