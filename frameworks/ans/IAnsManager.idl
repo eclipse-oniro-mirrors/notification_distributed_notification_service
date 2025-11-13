@@ -18,6 +18,7 @@ interface OHOS.Notification.IAnsResultDataSynchronizer;
 interface OHOS.Notification.IAnsSubscriberLocalLiveView;
 interface OHOS.Notification.IAnsSubscriber;
 interface OHOS.Notification.IAnsOperationCallback;
+interface OHOS.Notification.IBadgeQueryCallback;
 
 sequenceable OHOS.Notification.NotificationBundleOption;
 sequenceable OHOS.Notification.NotificationReminderInfo;
@@ -251,6 +252,8 @@ interface OHOS.Notification.IAnsManager {
 
     void GetSyncNotificationEnabledWithoutApp([in] int userId, [out] boolean enabled);
 
+    void GetBadgeNumber([out] int badgeNumber);
+
     void SetBadgeNumber([in] int badgeNumber, [in] String instanceKey);
 
     void SetBadgeNumberByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int badgeNumber);
@@ -272,6 +275,10 @@ interface OHOS.Notification.IAnsManager {
     void RegisterPushCallback([in] IRemoteObject pushCallback, [in] sptr<NotificationCheckRequest> notificationCheckRequest);
 
     void UnregisterPushCallback();
+
+    void RegisterBadgeQueryCallback([in] IBadgeQueryCallback badgeQueryCallback);
+ 
+    void UnRegisterBadgeQueryCallback();
 
     void SetAdditionConfig([in] String key, [in] String value);
 

@@ -888,6 +888,21 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ErrCode GetBadgeNumber(int32_t &badgeNumber) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode RegisterBadgeQueryCallback(const sptr<IBadgeQueryCallback> &badgeQueryCallback) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode UnRegisterBadgeQueryCallback() override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 private:
     std::string cmd_;
     std::string bundle_;

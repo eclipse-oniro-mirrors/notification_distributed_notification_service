@@ -16,6 +16,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_DISPLAY_BADGE_H
 
 #include "common.h"
+#include "napi_badge_query_callback.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -34,12 +35,20 @@ struct AsyncCallbackSetBadgeNumber {
     CallbackPromiseInfo info;
 };
 
+struct AsyncCallbackGetBadgeNumber {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    CallbackPromiseInfo info;
+    int32_t badgeNumber = 0;
+};
+
 napi_value NapiDisplayBadge(napi_env env, napi_callback_info info);
 napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info);
 napi_value NapiSetBadgeNumber(napi_env env, napi_callback_info info);
 napi_value NapiSetBadgeNumberByBundle(napi_env env, napi_callback_info info);
 napi_value NapiSetBadgeDisplayStatusByBundles(napi_env env, napi_callback_info info);
 napi_value NapiGetBadgeDisplayStatusByBundles(napi_env env, napi_callback_info info);
+napi_value NapiGetBadgeNumber(napi_env env, napi_callback_info info);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_DISPLAY_BADGE_H

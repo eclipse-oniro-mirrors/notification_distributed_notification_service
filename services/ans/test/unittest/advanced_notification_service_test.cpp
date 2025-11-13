@@ -54,6 +54,7 @@
 #include "distributed_notification_manager.h"
 #endif
 #include "ans_dialog_host_client.h"
+#include "mock_badgequery_callback_stub.h"
 
 extern void MockIsOsAccountExists(bool mockRet);
 
@@ -4937,6 +4938,73 @@ HWTEST_F(AdvancedNotificationServiceTest, GetShowBadgeEnabledForBundles_100, Fun
     std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
     auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
     EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.number    : RegisterBadgeQueryCallbackTest_0100
+ * @tc.name      : RegisterBadgeQueryCallback_0100
+ * @tc.desc      : Test RegisterBadgeQueryCallback function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, RegisterBadgeQueryCallbackTest_0100, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "RegisterBadgeQueryCallbackTest_0100 test start";
+
+    sptr<MockBadgeQueryCallBackStub> badgeQueryCallbackStub = new (std::nothrow)MockBadgeQueryCallBackStub();
+    EXPECT_NE(badgeQueryCallbackStub, nullptr);
+    ASSERT_EQ(advancedNotificationService_->RegisterBadgeQueryCallback(badgeQueryCallbackStub), (int)ERR_OK);
+    advancedNotificationService_->UnRegisterBadgeQueryCallback();
+}
+
+/**
+ * @tc.number    : RegisterBadgeQueryCallbackTest_0200
+ * @tc.name      : RegisterBadgeQueryCallback_0200
+ * @tc.desc      : Test RegisterBadgeQueryCallback function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, RegisterBadgeQueryCallbackTest_0200, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "RegisterBadgeQueryCallbackTest_0200 test start";
+
+    sptr<MockBadgeQueryCallBackStub> badgeQueryCallbackStub = new (std::nothrow)MockBadgeQueryCallBackStub();
+    EXPECT_NE(badgeQueryCallbackStub, nullptr);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    ASSERT_EQ(advancedNotificationService_->RegisterBadgeQueryCallback(badgeQueryCallbackStub), (int)ERR_OK);
+    advancedNotificationService_->UnRegisterBadgeQueryCallback();
+}
+
+/**
+ * @tc.number    : RegisterBadgeQueryCallbackTest_0300
+ * @tc.name      : RegisterBadgeQueryCallback_0300
+ * @tc.desc      : Test RegisterBadgeQueryCallback function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, RegisterBadgeQueryCallbackTest_0300, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "RegisterBadgeQueryCallbackTest_0300 test start";
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    ASSERT_EQ(advancedNotificationService_->RegisterBadgeQueryCallback(nullptr), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->UnRegisterBadgeQueryCallback(), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : RegisterBadgeQueryCallbackTest_0400
+ * @tc.name      : RegisterBadgeQueryCallback_0400
+ * @tc.desc      : Test RegisterBadgeQueryCallback function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, RegisterBadgeQueryCallbackTest_0400, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "RegisterBadgeQueryCallbackTest_0400 test start";
+    int32_t badgeNumber = 0;
+    ASSERT_EQ(advancedNotificationService_->GetBadgeNumber(badgeNumber), (int)ERR_ANS_TASK_ERR);
+    sptr<MockBadgeQueryCallBackStub> badgeQueryCallbackStub = new (std::nothrow)MockBadgeQueryCallBackStub();
+    EXPECT_NE(badgeQueryCallbackStub, nullptr);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    ASSERT_EQ(advancedNotificationService_->RegisterBadgeQueryCallback(badgeQueryCallbackStub), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->GetBadgeNumber(badgeNumber), (int)ERR_OK);
+    ASSERT_EQ(badgeNumber, 1);
+    ASSERT_EQ(advancedNotificationService_->UnRegisterBadgeQueryCallback(), (int)ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS

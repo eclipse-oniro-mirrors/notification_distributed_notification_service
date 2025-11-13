@@ -916,5 +916,20 @@ ErrCode NotificationHelper::CanOpenSubscribeSettings()
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CanOpenSubscribeSettings();
 }
+
+ErrCode NotificationHelper::GetBadgeNumber(int32_t &badgeNumber)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetBadgeNumber(badgeNumber);
+}
+
+ErrCode NotificationHelper::RegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->RegisterBadgeQueryCallback(badgeQueryCallback);
+}
+
+ErrCode NotificationHelper::UnRegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->UnRegisterBadgeQueryCallback(badgeQueryCallback);
+}
 }  // namespace Notification
 }  // namespace OHOS

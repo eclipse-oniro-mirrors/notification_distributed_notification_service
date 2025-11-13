@@ -20,6 +20,7 @@
 
 #include <iremote_proxy.h>
 #include "ians_manager.h"
+#include "ibadge_query_callback.h"
 
 namespace OHOS {
 namespace Notification {
@@ -237,6 +238,9 @@ public:
         const sptr<NotificationRingtoneInfo> &ringtoneInfo));
     MOCK_METHOD2(GetRingtoneInfoByBundle, ErrCode(const sptr<NotificationBundleOption> &bundle,
         sptr<NotificationRingtoneInfo> &ringtoneInfo));
+    MOCK_METHOD1(GetBadgeNumber, ErrCode(int32_t&));
+    MOCK_METHOD1(RegisterBadgeQueryCallback, ErrCode(const sptr<IBadgeQueryCallback>&));
+    MOCK_METHOD0(UnRegisterBadgeQueryCallback, ErrCode());
 };
 } // namespace Notification
 } // namespace OHOS
