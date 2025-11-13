@@ -265,12 +265,12 @@ public:
     /**
      * @brief Obtains active notifications of the current application in the system.
      *
-     * @param notifications Indicates active NotificationRequest objects of the current application.
      * @param instanceKey Indicates the application instance key.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications,
-        const std::string &instanceKey) override;
+    ErrCode GetActiveNotifications(const std::string &instanceKey,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Obtains the number of active notifications of the current application in the system.
@@ -294,10 +294,10 @@ public:
      * @brief Obtains all active notifications in the current system. The caller must have system permissions to
      * call this method.
      *
-     * @param notifications Indicates all active notifications of this application.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetAllActiveNotifications(std::vector<sptr<Notification>> &notifications) override;
+    ErrCode GetAllActiveNotifications(const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Obtains the active notifications corresponding to the specified key in the system. To call this method
@@ -562,9 +562,11 @@ public:
      *
      * @param bundleOption Indicates the NotificationBundleOption object.
      * @param enabled Indicates the flag that allows badge to be shown.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetShowBadgeEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &enabled) override;
+    ErrCode GetShowBadgeEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Obtains the flag that whether to allow applications to show badge.
@@ -579,10 +581,10 @@ public:
     /**
      * @brief Gets whether allows the badge to display the status of notifications.
      *
-     * @param enabled Indicates the flag that allows badge to be shown.
+     * * @param synchronizer Inter-process data synchronization object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetShowBadgeEnabled(bool &enabled) override;
+    ErrCode GetShowBadgeEnabled(const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Subscribes notifications.

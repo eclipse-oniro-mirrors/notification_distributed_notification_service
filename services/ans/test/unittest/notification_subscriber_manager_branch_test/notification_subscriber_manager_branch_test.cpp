@@ -17,10 +17,10 @@
 #include <gtest/gtest.h>
 
 #include "ans_inner_errors.h"
-#include "ans_result_data_synchronizer.h"
 #include "ans_ut_constant.h"
 #define private public
 #define protected public
+#include "ans_result_data_synchronizer.h"
 #include "advanced_notification_service.h"
 #include "notification_subscriber_manager.h"
 #undef private
@@ -576,13 +576,20 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
 
     sptr<NotificationBundleOption> bundleOption = nullptr;
-    bool enabled = true;
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.GetShowBadgeEnabledForBundle(bundleOption, enabled),
-        ERR_ANS_NON_SYSTEM_APP);
+    int32_t result = ERR_ANS_NON_SYSTEM_APP;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService.GetShowBadgeEnabledForBundle(bundleOption,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
@@ -613,7 +620,16 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.GetAllActiveNotifications(notifications), ERR_ANS_NON_SYSTEM_APP);
+    int32_t result = ERR_ANS_NON_SYSTEM_APP;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService.GetAllActiveNotifications(
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**

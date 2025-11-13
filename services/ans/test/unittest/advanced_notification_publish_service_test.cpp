@@ -674,9 +674,16 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_00001, Function | S
     auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundleOption, true);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 
-    bool enabled = false;
-    ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundleOption, enabled);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    int32_t result = ERR_ANS_INVALID_BUNDLE;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundleOption,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
@@ -692,9 +699,16 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_00002, Function | S
     auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, true);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
-    bool enabled = false;
-    ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle, enabled);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    int32_t result = ERR_ANS_INVALID_PARAM;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
@@ -716,28 +730,60 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_00003, Function | S
     bool enabled = true;
     auto result = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, enabled);
     ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
-    result = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle, enabled);
-    ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
-   
+    result = ERR_ANS_NON_SYSTEM_APP;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     result = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, enabled);
     ASSERT_EQ(result, ERR_OK);
-    result = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle, enabled);
-    ASSERT_EQ(result, ERR_OK);
-  
+    result = ERR_OK;
+    synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(false);
     result = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, enabled);
     ASSERT_EQ(result, ERR_OK);
-    result = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle, enabled);
-    ASSERT_EQ(result, ERR_OK);
-  
+    result = ERR_OK;
+    synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
+
     MockIsSystemApp(true);
     result = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, enabled);
     ASSERT_EQ(result, ERR_OK);
-    result = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle, enabled);
-    ASSERT_EQ(result, ERR_OK);
+    result = ERR_OK;
+    synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle,
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
@@ -749,9 +795,16 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_00003, Function | S
 HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_00001, Function | SmallTest | Level1)
 {
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
-    bool enabled = false;
-    auto ret = advancedNotificationService_->GetShowBadgeEnabled(enabled);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    auto result = ERR_ANS_INVALID_PARAM;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->GetShowBadgeEnabled(
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
@@ -762,13 +815,19 @@ HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_00001, Function | SmallTest 
  */
 HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_00002, Function | SmallTest | Level1)
 {
-    bool enabled = true;
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    auto ret = advancedNotificationService_->GetShowBadgeEnabled(enabled);
-    ASSERT_EQ(ret, (int)ERR_OK);
-    ASSERT_EQ(enabled, true);
+    auto result = ERR_OK;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->GetShowBadgeEnabled(
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**

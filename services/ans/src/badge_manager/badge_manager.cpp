@@ -180,11 +180,14 @@ void AdvancedNotificationService::HandleBadgeEnabledChanged(
     NotificationSubscriberManager::GetInstance()->NotifyBadgeEnabledChanged(enabledData);
 }
 
-ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
-    const sptr<NotificationBundleOption> &bundleOption, bool &enabled)
+ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption,
+    const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
     ANS_LOGD("called");
-
+    if (synchronizer == nullptr) {
+        ANS_LOGE("synchronizer is null");
+        return ERR_ANS_INVALID_PARAM;
+    }
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("VerifyNativeToken is bogus.");
@@ -205,17 +208,18 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
         ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
-    ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("called");
+        ErrCode result = ERR_OK;
+        bool enabled = false;
         result = NotificationPreferences::GetInstance()->IsShowBadge(bundle, enabled);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             enabled = true;
         }
+        synchronizer->TransferResultData(result, enabled);
     }));
-    notificationSvrQueue_->wait(handler);
-    return result;
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundles(
@@ -273,10 +277,13 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundles(
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
+ErrCode AdvancedNotificationService::GetShowBadgeEnabled(const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
     ANS_LOGD("called");
-
+    if (synchronizer == nullptr) {
+        ANS_LOGE("synchronizer is null");
+        return ERR_ANS_INVALID_PARAM;
+    }
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
@@ -286,17 +293,18 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
         ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
-    ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("called");
+        ErrCode result = ERR_OK;
+        bool enabled = false;
         result = NotificationPreferences::GetInstance()->IsShowBadge(bundleOption, enabled);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             enabled = true;
         }
+        synchronizer->TransferResultData(result, enabled);
     }));
-    notificationSvrQueue_->wait(handler);
-    return result;
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey)

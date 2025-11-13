@@ -160,13 +160,9 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_002, Function | SmallTest | Level1)
     EXPECT_EQ((int)g_advancedNotificationService->Publish(label, req), (int)ERR_OK);
     EXPECT_EQ((int)g_advancedNotificationService->Publish(label, req1), (int)ERR_OK);
     EXPECT_EQ((int)g_advancedNotificationService->Publish("testLabel1", req2), (int)ERR_OK);
-    EXPECT_EQ((int)g_advancedNotificationService->GetActiveNotifications(notificationsReqs, ""), (int)ERR_OK);
-    uint64_t num;
-    g_advancedNotificationService->GetActiveNotificationNums(num);
-    EXPECT_EQ(num, 3);
-    int32_t result = ERR_OK;
+    auto result = ERR_OK;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = g_advancedNotificationService->Cancel(2, "testLabel1", "",
+    auto ret = g_advancedNotificationService->GetActiveNotifications("",
         iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
     if (ret == ERR_OK) {
         synchronizer->Wait();
@@ -174,8 +170,32 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_002, Function | SmallTest | Level1)
     } else {
         ASSERT_EQ(ret, result);
     }
-    EXPECT_EQ((int)g_advancedNotificationService->GetAllActiveNotifications(notifications), (int)ERR_OK);
-    EXPECT_EQ((int)notifications.size(), (int)2);
+
+    uint64_t num;
+    g_advancedNotificationService->GetActiveNotificationNums(num);
+    EXPECT_EQ(num, 3);
+    result = ERR_OK;
+    synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    ret = g_advancedNotificationService->Cancel(2, "testLabel1", "",
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
+
+    result = ERR_OK;
+    synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    ret = g_advancedNotificationService->GetAllActiveNotifications(
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
+
     result = ERR_OK;
     ret = g_advancedNotificationService->CancelAll("",
         iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));

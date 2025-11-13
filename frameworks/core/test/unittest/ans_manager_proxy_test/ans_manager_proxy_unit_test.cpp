@@ -1872,8 +1872,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0100, Function | Me
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    std::vector<sptr<NotificationRequest>> notifications;
-    int32_t result = proxy->GetActiveNotifications(notifications, "");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetActiveNotifications("", synchronizer);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
@@ -1892,13 +1892,12 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0200, Function | Me
     ASSERT_NE(nullptr, iremoteObject);
     EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplaceNotifications, _1, _2, _3, _4,
-        ERR_OK, true, 1)), Return(NO_ERROR)));
+        ERR_INVALID_DATA, true, 1)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    std::vector<sptr<NotificationRequest>> notifications;
-    int32_t result = proxy->GetActiveNotifications(notifications, "");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetActiveNotifications("", synchronizer);
     EXPECT_EQ(ERR_INVALID_DATA, result);
-    EXPECT_EQ(0, notifications.size());
 }
 /*
  * @tc.name: GetActiveNotificationsTest_0300
@@ -1916,8 +1915,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0300, Function | Me
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    std::vector<sptr<NotificationRequest>> notifications;
-    int32_t result = proxy->GetActiveNotifications(notifications, "");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetActiveNotifications("", synchronizer);
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -1938,8 +1937,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0400, Function | Me
         ERR_OK, false, 1)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    std::vector<sptr<NotificationRequest>> notifications;
-    int32_t result = proxy->GetActiveNotifications(notifications, "");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetActiveNotifications("", synchronizer);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
@@ -1960,8 +1959,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0500, Function | Me
         ERR_OK, true, 0)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    std::vector<sptr<NotificationRequest>> notifications;
-    int32_t result = proxy->GetActiveNotifications(notifications, "");
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetActiveNotifications("", synchronizer);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -2089,8 +2088,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0100, Function |
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    std::vector<sptr<Notification>> notifications;
-    int32_t result = proxy->GetAllActiveNotifications(notifications);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetAllActiveNotifications(synchronizer);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
@@ -2109,13 +2108,12 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0200, Function |
     ASSERT_NE(nullptr, iremoteObject);
     EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplaceNotifications, _1, _2, _3, _4,
-        ERR_OK, true, 1)), Return(NO_ERROR)));
+        ERR_INVALID_DATA, true, 1)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    std::vector<sptr<Notification>> notifications;
-    int32_t result = proxy->GetAllActiveNotifications(notifications);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetAllActiveNotifications(synchronizer);
     EXPECT_EQ(ERR_INVALID_DATA, result);
-    EXPECT_EQ(0, notifications.size());
 }
 /*
  * @tc.name: GetAllActiveNotificationsTest_0300
@@ -2133,8 +2131,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0300, Function |
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    std::vector<sptr<Notification>> notifications;
-    int32_t result = proxy->GetAllActiveNotifications(notifications);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetAllActiveNotifications(synchronizer);
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -2155,8 +2153,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0400, Function |
         ERR_OK, false, 1)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    std::vector<sptr<Notification>> notifications;
-    int32_t result = proxy->GetAllActiveNotifications(notifications);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetAllActiveNotifications(synchronizer);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
@@ -2177,8 +2175,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0500, Function |
         ERR_OK, true, 0)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    std::vector<sptr<Notification>> notifications;
-    int32_t result = proxy->GetAllActiveNotifications(notifications);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetAllActiveNotifications(synchronizer);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -3825,9 +3823,9 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0100, Functio
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    bool enabled = false;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
-    int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, enabled);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, synchronizer);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
@@ -3849,11 +3847,10 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0200, Functio
         ERR_OK, true, true, true)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
     ASSERT_NE(nullptr, proxy);
-    bool enabled = false;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
-    int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, enabled);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, synchronizer);
     EXPECT_EQ(ERR_OK, result);
-    EXPECT_EQ(true, enabled);
 }
 
 /*
@@ -3872,9 +3869,9 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0300, Functio
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    bool enabled = false;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
-    int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, enabled);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, synchronizer);
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -3895,9 +3892,9 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0400, Functio
         ERR_OK, false, true, true)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    bool enabled = false;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
-    int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, enabled);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, synchronizer);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
@@ -3918,9 +3915,9 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0500, Functio
         ERR_OK, true, true, false)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    bool enabled = false;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
-    int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, enabled);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, synchronizer);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -3939,8 +3936,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0100, Function | Mediu
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    bool enabled = false;
-    int32_t result = proxy->GetShowBadgeEnabled(enabled);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetShowBadgeEnabled(synchronizer);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
@@ -3962,10 +3959,9 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0200, Function | Mediu
         ERR_OK, true, true, true)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    bool enabled = false;
-    int32_t result = proxy->GetShowBadgeEnabled(enabled);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetShowBadgeEnabled(synchronizer);
     EXPECT_EQ(ERR_OK, result);
-    EXPECT_EQ(true, enabled);
 }
 
 /*
@@ -3984,8 +3980,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0300, Function | Mediu
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    bool enabled = false;
-    int32_t result = proxy->GetShowBadgeEnabled(enabled);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetShowBadgeEnabled(synchronizer);
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -4006,8 +4002,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0400, Function | Mediu
         ERR_OK, false, true, true)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    bool enabled = false;
-    int32_t result = proxy->GetShowBadgeEnabled(enabled);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetShowBadgeEnabled(synchronizer);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
@@ -4028,8 +4024,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0500, Function | Mediu
         ERR_OK, true, true, false)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    bool enabled = false;
-    int32_t result = proxy->GetShowBadgeEnabled(enabled);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    int32_t result = proxy->GetShowBadgeEnabled(synchronizer);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 

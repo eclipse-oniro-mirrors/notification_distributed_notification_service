@@ -453,7 +453,20 @@ ErrCode AnsNotification::GetActiveNotifications(std::vector<sptr<NotificationReq
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return proxy->GetActiveNotifications(request, instanceKey);
+
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    if (synchronizer == nullptr) {
+        ANS_LOGE("null synchronizer");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode ret = proxy->GetActiveNotifications(instanceKey, synchronizer);
+    // ERR_OK means the task is put into the ffrt queue at service layer.
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    synchronizer->Wait();
+    request = synchronizer->GetNotificationRequests();
+    return synchronizer->GetResultCode();
 }
 
 ErrCode AnsNotification::CanPublishNotificationAsBundle(const std::string &representativeBundle, bool &canPublish)
@@ -1109,7 +1122,20 @@ ErrCode AnsNotification::GetAllActiveNotifications(std::vector<sptr<Notification
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return proxy->GetAllActiveNotifications(notification);
+
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    if (synchronizer == nullptr) {
+        ANS_LOGE("null synchronizer");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode ret = proxy->GetAllActiveNotifications(synchronizer);
+    // ERR_OK means the task is put into the ffrt queue at service layer.
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    synchronizer->Wait();
+    notification = synchronizer->GetNotifications();
+    return synchronizer->GetResultCode();
 }
 
 ErrCode AnsNotification::GetAllActiveNotifications(
@@ -1283,7 +1309,20 @@ ErrCode AnsNotification::GetShowBadgeEnabledForBundle(const NotificationBundleOp
         ANS_LOGE("null bundleOption");
         return ERR_ANS_INVALID_PARAM;
     }
-    return proxy->GetShowBadgeEnabledForBundle(bo, enabled);
+
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    if (synchronizer == nullptr) {
+        ANS_LOGE("null synchronizer");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode ret = proxy->GetShowBadgeEnabledForBundle(bo, synchronizer);
+    // ERR_OK means the task is put into the ffrt queue at service layer.
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    synchronizer->Wait();
+    enabled = synchronizer->GetEnabled();
+    return synchronizer->GetResultCode();
 }
 
 ErrCode AnsNotification::GetShowBadgeEnabledForBundles(const std::vector<NotificationBundleOption> &bundleOptions,
@@ -1321,7 +1360,19 @@ ErrCode AnsNotification::GetShowBadgeEnabled(bool &enabled)
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return proxy->GetShowBadgeEnabled(enabled);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    if (synchronizer == nullptr) {
+        ANS_LOGE("null synchronizer");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode ret = proxy->GetShowBadgeEnabled(synchronizer);
+    // ERR_OK means the task is put into the ffrt queue at service layer.
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    synchronizer->Wait();
+    enabled = synchronizer->GetEnabled();
+    return synchronizer->GetResultCode();
 }
 
 ErrCode AnsNotification::CancelGroup(const std::string &groupName, const std::string &instanceKey)

@@ -422,9 +422,17 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_237000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
 
-    bool allow = false;
-    ASSERT_EQ(advancedNotificationService_->GetShowBadgeEnabledForBundle(
-        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), allow), ERR_ANS_NON_SYSTEM_APP);
+    int32_t result = ERR_ANS_NON_SYSTEM_APP;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID),
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
@@ -438,9 +446,17 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_238000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
 
-    bool allow = false;
-    ASSERT_EQ(advancedNotificationService_->GetShowBadgeEnabledForBundle(
-        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), allow), ERR_ANS_PERMISSION_DENIED);
+    int32_t result = ERR_ANS_PERMISSION_DENIED;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID),
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
@@ -543,8 +559,16 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_242000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
 
-    std::vector<sptr<Notification>> allNotifications;
-    ASSERT_EQ(advancedNotificationService_->GetAllActiveNotifications(allNotifications), ERR_ANS_PERMISSION_DENIED);
+    int32_t result = ERR_ANS_PERMISSION_DENIED;
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    auto ret = advancedNotificationService_->GetAllActiveNotifications(
+        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+    if (ret == ERR_OK) {
+        synchronizer->Wait();
+        ASSERT_EQ(synchronizer->GetResultCode(), result);
+    } else {
+        ASSERT_EQ(ret, result);
+    }
 }
 
 /**
