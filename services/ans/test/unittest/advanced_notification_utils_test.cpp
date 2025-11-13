@@ -42,6 +42,7 @@
 #include "bundle_manager_helper.h"
 #include "mock_bundle_mgr.h"
 #include "notification_extension_wrapper.h"
+#include "os_account_manager_helper.h"
 
 using namespace testing::ext;
 using namespace OHOS::Media;
@@ -1187,5 +1188,140 @@ HWTEST_F(AnsUtilsTest, GetCommonTargetRecordList_0001, Function | SmallTest | Le
     ASSERT_EQ(recordList.size(), 1);
 }
 
+/**
+ * @tc.name: UpdateCloneBundleInfoForRingtone_0001
+ * @tc.desc: old device without rington info, new device has.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfoForRingtone_0001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("com.ohos.demo", 20020300);
+    sptr<NotificationRingtoneInfo> info = new NotificationRingtoneInfo(
+        NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE, "title", "name", "uri");
+    NotificationPreferences::GetInstance()->SetRingtoneInfoByBundle(bundleOption, info);
+
+    NotificationRingtoneInfo ringtoneInfo;
+    NotificationCloneBundleInfo cloneBundleInfo;
+    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
+
+    sptr<NotificationRingtoneInfo> newInfo = new NotificationRingtoneInfo();
+    auto reuslt = NotificationPreferences::GetInstance()->GetRingtoneInfoByBundle(bundleOption, newInfo);
+    ASSERT_EQ(reuslt, (int32_t)ERR_ANS_NO_CUSTOM_RINGTONE_INFO);
+}
+
+/**
+ * @tc.name: UpdateCloneBundleInfoForRingtone_0002
+ * @tc.desc: old device without rington info, new device has.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfoForRingtone_0002, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("com.ohos.demo", 20020300);
+
+    NotificationCloneBundleInfo cloneBundleInfo;
+    cloneBundleInfo.SetAppIndex(0);
+    cloneBundleInfo.SetBundleName("com.ohos.demo");
+    NotificationRingtoneInfo ringtoneInfo(NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE,
+        "title", "name", "uri");
+    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
+
+    NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption,
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+    sptr<NotificationRingtoneInfo> newInfo = new NotificationRingtoneInfo();
+    auto reuslt = NotificationPreferences::GetInstance()->GetRingtoneInfoByBundle(bundleOption, newInfo);
+    ASSERT_EQ(reuslt, (int32_t)ERR_ANS_NO_CUSTOM_RINGTONE_INFO);
+
+    // not in clone range time
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    int64_t curTime = NotificationAnalyticsUtil::GetCurrentTime() - NotificationConstant::MAX_CLONE_TIME - 10000;
+    NotificationPreferences::GetInstance()->SetCloneTimeStamp(userId, curTime);
+
+    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
+    reuslt = NotificationPreferences::GetInstance()->GetRingtoneInfoByBundle(bundleOption, newInfo);
+    ASSERT_EQ(reuslt, (int32_t)ERR_ANS_NO_CUSTOM_RINGTONE_INFO);
+
+    // not in clone range time
+    curTime = NotificationAnalyticsUtil::GetCurrentTime() + NotificationConstant::MAX_CLONE_TIME;
+    NotificationPreferences::GetInstance()->SetCloneTimeStamp(userId, curTime);
+
+    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
+    reuslt = NotificationPreferences::GetInstance()->GetRingtoneInfoByBundle(bundleOption, newInfo);
+    ASSERT_EQ(reuslt, (int32_t)ERR_ANS_NO_CUSTOM_RINGTONE_INFO);
+
+    // not in clone range time
+    curTime = NotificationAnalyticsUtil::GetCurrentTime() - 100000;
+    NotificationPreferences::GetInstance()->SetCloneTimeStamp(userId, curTime);
+
+    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
+    reuslt = NotificationPreferences::GetInstance()->GetRingtoneInfoByBundle(bundleOption, newInfo);
+    ASSERT_EQ(reuslt, (int32_t)ERR_OK);
+    ASSERT_EQ(newInfo->GetRingtoneUri(), "uri");
+
+    NotificationPreferences::GetInstance()->RemoveRingtoneInfoByBundle(bundleOption);
+}
+
+/**
+ * @tc.name: UpdateCloneBundleInfoForRingtone_0003
+ * @tc.desc: continuous cloning.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfoForRingtone_0003, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("com.ohos.demo", 20020300);
+
+    NotificationCloneBundleInfo cloneBundleInfo;
+    cloneBundleInfo.SetAppIndex(0);
+    cloneBundleInfo.SetBundleName("com.ohos.demo");
+    NotificationRingtoneInfo ringtoneInfo(NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE,
+        "title", "name", "uri");
+
+    NotificationCloneBundleInfo bundleInfo;
+    sptr<NotificationRingtoneInfo> cloneRingtoneInfo = new NotificationRingtoneInfo(
+        NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE, "title", "name", "uri");
+    cloneBundleInfo.AddRingtoneInfo(cloneRingtoneInfo);
+    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, cloneBundleInfo);
+    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
+
+    // case
+    cloneRingtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, cloneBundleInfo);
+    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
+    // case
+    cloneRingtoneInfo->SetRingtoneTitle("title1");
+    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, cloneBundleInfo);
+    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
+    // case
+    cloneRingtoneInfo->SetRingtoneFileName("name1");
+    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, cloneBundleInfo);
+    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
+    // case
+    cloneRingtoneInfo->SetRingtoneUri("uri1");
+    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, cloneBundleInfo);
+    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
+    // case
+    cloneRingtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE);
+    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, cloneBundleInfo);
+    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
+    // case
+    cloneRingtoneInfo->SetRingtoneTitle("title");
+    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, cloneBundleInfo);
+    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
+    // case
+    cloneRingtoneInfo->SetRingtoneFileName("name");
+    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, cloneBundleInfo);
+    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
+
+    NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption,
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+    sptr<NotificationRingtoneInfo> newInfo = new NotificationRingtoneInfo();
+    auto reuslt = NotificationPreferences::GetInstance()->GetRingtoneInfoByBundle(bundleOption, newInfo);
+    ASSERT_EQ(reuslt, (int32_t)ERR_OK);
+
+    NotificationPreferences::GetInstance()->RemoveRingtoneInfoByBundle(bundleOption);
+}
 }  // namespace Notification
 }  // namespace OHOS
