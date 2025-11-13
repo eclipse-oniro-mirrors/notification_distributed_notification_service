@@ -27,6 +27,7 @@ ohos_unittest("ans_unit_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "${services_path}/../framworks/core/include",
     "/${services_path}/ans/include/utils",
+    "/${services_path}/ans/include/notification_extension",
   ]
 
   defines = []
