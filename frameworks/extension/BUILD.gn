@@ -45,6 +45,7 @@ ohos_source_set("notification_subscriber_proxy") {
     "${frameworks_module_ans_path}:ans_innerkits",
   ]
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "c_utils:utils",
     "hilog:libhilog",
@@ -71,6 +72,7 @@ ohos_source_set("notification_subscriber_stub") {
     "${frameworks_module_ans_path}:ans_innerkits",
   ]
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "c_utils:utils",
     "hilog:libhilog",

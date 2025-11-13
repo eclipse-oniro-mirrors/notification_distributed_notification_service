@@ -209,6 +209,7 @@ ohos_shared_library("notification_subscribe_ani") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:ani_common",
