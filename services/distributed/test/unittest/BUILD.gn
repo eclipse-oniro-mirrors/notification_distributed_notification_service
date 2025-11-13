@@ -1201,6 +1201,7 @@ ohos_unittest("notification_extension_service_test") {
     "/${services_path}/distributed/src/extension/extension_service_subscribe_service.cpp",
     "/${services_path}/distributed/src/extension/extension_service_subscriber.cpp",
     "/${services_path}/distributed/src/extension/extension_service.cpp",
+    "distributed_extension_test/extension_service_subscriber_test.cpp",
     "distributed_extension_test/notification_extension_service_test.cpp",
     "mock/mock_notification_helper.cpp",
   ]

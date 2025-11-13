@@ -2020,6 +2020,7 @@ private:
     ErrCode GetNotificationExtensionEnabledBundles(std::vector<sptr<NotificationBundleOption>>  &bundles);
     bool GetCloneBundleList(const sptr<NotificationBundleOption>& bundleOption,
         std::vector<sptr<NotificationBundleOption>>& cloneBundleList);
+    void ReportInvalidBundleOption(const sptr<NotificationBundleOption>& targetBundle, HaMetaMessage &message);
     void ProcessSetUserGrantedState(const sptr<NotificationBundleOption>& bundle,
         bool enabled, ErrCode& result);
     void ProcessSetUserGrantedBundleState(const sptr<NotificationBundleOption>& bundle,
