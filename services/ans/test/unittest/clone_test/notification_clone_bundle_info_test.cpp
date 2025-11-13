@@ -25,10 +25,15 @@ constexpr const char *BUNDLE_INFO_APP_INDEX = "index";
 constexpr const char *BUNDLE_INFO_SLOT_FLAGS = "slotFlags";
 constexpr const char *BUNDLE_INFO_SHOW_BADGE = "badge";
 constexpr const char *BUNDLE_INFO_ENABLE_NOTIFICATION = "enable";
+constexpr const char *BUNDLE_INFO_ENABLEDSTATE_NOTIFICATION = "enabledState";
+constexpr const char *BUNDLE_INFO_SLOT_AUTHSTATUS = "slotAuthorized";
 constexpr const char *BUNDLE_INFO_SLOT_LIST = "slotList";
 constexpr const char *BUNDLE_INFO_SLOT_TYPE = "slotType";
 constexpr const char *BUNDLE_INFO_SLOT_ENABLE = "slotEnable";
 constexpr const char *BUNDLE_INFO_SLOT_CONTROL = "slotControl";
+constexpr const char *BUNDLE_INFO_POP_DIALOG = "popDialog";
+constexpr const char *BUNDLE_INFO_RINGTONE_INFO = "ringtone";
+constexpr const char *BUNDLE_INFO_SILENT_REMINDER = "enabledSilentReminder";
 class NotificationCloneBundleInfoTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -134,6 +139,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, AddSlotInfo_00001, Function | SmallTes
     slotInfo.enable_ = true;
     slotInfo.isForceControl_ = true;
     auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    rrc->AddSlotInfo(slotInfo);
     rrc->AddSlotInfo(slotInfo);
     EXPECT_EQ(rrc->GetSlotInfo().size(), 1);
 }
@@ -256,6 +262,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, ToJson_00001, Function | SmallTest | L
     int32_t uid = 1;
     int32_t slotFlags = 1;
     bool isShowBadge = true;
+    bool hasPoppedDialog = true;
     NotificationConstant::SWITCH_STATE enabledNotification = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
     NotificationCloneBundleInfo::SlotInfo slotInfo;
     slotInfo.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
@@ -269,6 +276,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, ToJson_00001, Function | SmallTest | L
     rrc->SetUid(uid);
     rrc->SetSlotFlags(slotFlags);
     rrc->SetIsShowBadge(isShowBadge);
+    rrc->SetHasPoppedDialog(hasPoppedDialog);
     rrc->SetEnableNotification(enabledNotification);
     rrc->AddSlotInfo(slotInfo);
     std::vector<std::shared_ptr<NotificationCloneBundleInfo>> extensionBundles;
@@ -287,6 +295,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, ToJson_00001, Function | SmallTest | L
     EXPECT_EQ(rrc->GetUid(), uid);
     EXPECT_EQ(rrc->GetSlotFlags(), slotFlags);
     EXPECT_EQ(rrc->GetIsShowBadge(), isShowBadge);
+    EXPECT_EQ(rrc->GetHasPoppedDialog(), hasPoppedDialog);
     EXPECT_EQ(rrc->GetEnableNotification(), enabledNotification);
     delete extensionBundle;
 }
@@ -518,6 +527,103 @@ HWTEST_F(NotificationCloneBundleInfoTest, ExtensionSubscriptionFromJson_00004, F
     ASSERT_NE(rrc, nullptr);
     rrc->ExtensionSubscriptionFromJson(jsonObject);
     EXPECT_EQ(rrc->GetEnabledExtensionSubscription(), NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+}
+
+/**
+ * @tc.name: SlotsFromJson_00001
+ * @tc.desc: Test SlotsFromJson when json object does not contain keys.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, SlotsFromJson_00001, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonArray = nlohmann::json::array();
+    jsonArray.emplace_back(nlohmann::json::object());
+    nlohmann::json jsonObject = nlohmann::json {
+        {BUNDLE_INFO_SLOT_LIST, jsonArray}
+    };
+    auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    ASSERT_NE(rrc, nullptr);
+    rrc->SlotsFromJson(jsonObject);
+    EXPECT_EQ(rrc->GetSlotInfo().size(), 1);
+}
+
+/**
+ * @tc.name: SlotsFromJson_00002
+ * @tc.desc: Test SlotsFromJson when json object contains keys and has wrong type.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, SlotsFromJson_00002, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonArray = nlohmann::json::array();
+    nlohmann::json slotJson = nlohmann::json::object();
+    slotJson[BUNDLE_INFO_SLOT_TYPE] = 0;
+    slotJson[BUNDLE_INFO_SLOT_ENABLE] = "123";
+    slotJson[BUNDLE_INFO_SLOT_CONTROL] = "123";
+    slotJson[BUNDLE_INFO_SLOT_AUTHSTATUS] = "123";
+    jsonArray.emplace_back(slotJson);
+    nlohmann::json jsonObject = nlohmann::json {
+        {BUNDLE_INFO_SLOT_LIST, jsonArray}
+    };
+    auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    ASSERT_NE(rrc, nullptr);
+    rrc->SlotsFromJson(jsonObject);
+    EXPECT_EQ(rrc->GetSlotInfo().size(), 1);
+}
+
+/**
+ * @tc.name: FromJson_00001
+ * @tc.desc: Test SlotsFromJson when json object does not contain keys.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, FromJson_00001, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json::object();
+    auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    ASSERT_NE(rrc, nullptr);
+    rrc->FromJson(jsonObject);
+    EXPECT_EQ(rrc->GetSlotInfo().size(), 0);
+}
+
+/**
+ * @tc.name: FromJson_00002
+ * @tc.desc: Test FromJson when json object contains keys and has wrong type.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, FromJson_00002, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json::object();
+    jsonObject[BUNDLE_INFO_NAME] = 1;
+    jsonObject[BUNDLE_INFO_APP_INDEX] = "123";
+    jsonObject[BUNDLE_INFO_SLOT_FLAGS] = "123";
+    jsonObject[BUNDLE_INFO_SHOW_BADGE] = "123";
+    jsonObject[BUNDLE_INFO_POP_DIALOG] = "123";
+    jsonObject[BUNDLE_INFO_ENABLE_NOTIFICATION] = "123";
+    jsonObject[BUNDLE_INFO_ENABLEDSTATE_NOTIFICATION] = "123";
+    jsonObject[BUNDLE_INFO_SILENT_REMINDER] = "123";
+    auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    ASSERT_NE(rrc, nullptr);
+    rrc->FromJson(jsonObject);
+    EXPECT_EQ(rrc->GetSlotInfo().size(), 0);
+}
+
+/**
+ * @tc.name: RingtoneFromJson_00001
+ * @tc.desc: Test SlotsFromJson when json object contains keys.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, RingtoneFromJson_00001, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json::object();
+    jsonObject[BUNDLE_INFO_RINGTONE_INFO] = "{}";
+    auto rrc = std::make_shared<NotificationCloneBundleInfo>();
+    ASSERT_NE(rrc, nullptr);
+    rrc->RingtoneFromJson(jsonObject);
+    EXPECT_NE(rrc->GetRingtoneInfo(), nullptr);
 }
 }
 }

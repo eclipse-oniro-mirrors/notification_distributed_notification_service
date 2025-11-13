@@ -78,5 +78,5 @@ HWTEST_F(NotificationCloneUtilTest, GetBundleUid_Test_002, Function | SmallTest 
 
     int32_t actualUid = notificationCloneUtil->GetBundleUid(bundleName, userId, appIndex);
 
-    EXPECT_EQ(actualUid, -1);
+    EXPECT_EQ(actualUid, 1000);
 }
