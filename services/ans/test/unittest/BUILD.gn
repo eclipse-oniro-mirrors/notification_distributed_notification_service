@@ -435,8 +435,10 @@ ohos_unittest("notification_clone_test") {
 
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
+    "clone_test/dh_notification_clone_bundle_service_test.cpp",
     "clone_test/notification_clone_bundle_info_test.cpp",
-    "clone_test/notification_clone_disturb_service.cpp",
+    "clone_test/notification_clone_bundle_service_test.cpp",
+    "clone_test/notification_clone_disturb_service_test.cpp",
     "clone_test/notification_clone_manager_test.cpp",
     "clone_test/notification_clone_util_test.cpp",
     "mock/blob.cpp",
@@ -447,6 +449,7 @@ ohos_unittest("notification_clone_test") {
     "mock/mock_bundle_mgr.cpp",
     "mock/mock_event_handler.cpp",
     "mock/mock_ipc.cpp",
+    "mock/mock_notification_clone_util.cpp",
     "mock/mock_push_callback_stub.cpp",
     "mock/mock_single_kv_store.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
@@ -500,6 +503,7 @@ ohos_unittest("notification_clone_test") {
     defines += [ "DEVICE_USAGE_STATISTICS_ENABLE" ]
   }
 
+  version_script = "${services_path}/ans/libans.map"
   cflags = []
   if (hisysevent_usage) {
     external_deps += [ "hisysevent:libhisysevent" ]

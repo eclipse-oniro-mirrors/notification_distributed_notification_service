@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 #include "gmock/gmock.h"
+#include <chrono>
+#include <thread>
 #define private public
 #define protected public
 #include "notification_clone_disturb_service.h"
@@ -23,7 +25,7 @@
 #include "ans_inner_errors.h"
 #include "notification_preferences.h"
 #include "notification_clone_util.h"
-#include "mock/mock_notification_clone_util.h"
+#include "mock_notification_clone_util.h"
 #undef private
 #undef protected
 
@@ -43,6 +45,12 @@ protected:
     {
         // Initialize objects and dependencies
         notificationCloneDisturb = new NotificationCloneDisturb();
+        int32_t initTestUserId = 100;
+        int32_t initTestUid = 1000;
+        MockSetActiveUserIdForClone(initTestUserId);
+        MockSetBundleUidForClone(initTestUid);
+        SetFuncGetActiveUserIdIsCalled(false);
+        SetFuncGetBundleUidIsCalled(false);
     }
 
     void TearDown() override
@@ -72,22 +80,137 @@ HWTEST_F(NotificationCloneDisturbTest, OnBackUp_00001, Function | SmallTest | Le
     auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles);
     
     ErrCode result = notificationCloneDisturb->OnBackup(jsonObject);
-    notificationCloneDisturb->OnRestore(jsonObject);
     EXPECT_EQ(result, ERR_OK);
 }
 
+/**
+ * @tc.name: OnBackUp_00002
+ * @tc.desc: Test clone OnBackUp.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneDisturbTest, OnBackUp_00002, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject;
+    int32_t userId = 100;
+    auto advancedNotificationService_ = AdvancedNotificationService::GetInstance();
+
+    sptr<NotificationDoNotDisturbProfile> date = new NotificationDoNotDisturbProfile();
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
+    auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles);
+    
+    ErrCode result = notificationCloneDisturb->OnBackup(jsonObject);
+    EXPECT_EQ(result, ERR_OK);
+}
 
 /**
  * @tc.name: OnRestore_00001
- * @tc.desc: Test clone OnRestore jsonObject is null.
+ * @tc.desc: Test clone OnRestore jsonObject is wrong type.
  * @tc.type: FUNC
  * @tc.require: issue
  */
 HWTEST_F(NotificationCloneDisturbTest, OnRestore_00001, Function | SmallTest | Level1)
 {
-    nlohmann::json jsonObject = nullptr;
+    // Given
+    nlohmann::json jsonNull;
+    nlohmann::json jsonObject = nlohmann::json::object();
+
+    // When
+    notificationCloneDisturb->OnRestore(jsonNull);
     notificationCloneDisturb->OnRestore(jsonObject);
-    EXPECT_EQ(jsonObject, nullptr);
+
+    // Then
+    EXPECT_FALSE(GetFuncGetActiveUserIdIsCalled());
+}
+
+/**
+ * @tc.name: OnRestore_00002
+ * @tc.desc: Test clone OnRestore when cloneDisturbQueue_ is null.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneDisturbTest, OnRestore_00002, Function | SmallTest | Level1)
+{
+    // Given
+    nlohmann::json jsonArray = nlohmann::json::array();
+    sptr<NotificationDoNotDisturbProfile> profile = new NotificationDoNotDisturbProfile();
+    nlohmann::json jsonNode;
+    jsonNode = profile->ToJson();
+    jsonArray.emplace_back(jsonNode);
+    notificationCloneDisturb->profiles_.emplace_back(profile);
+    notificationCloneDisturb->cloneDisturbQueue_ == nullptr;
+
+    // When
+    notificationCloneDisturb->OnRestore(jsonArray);
+
+    // Then
+    EXPECT_FALSE(notificationCloneDisturb->profiles_.empty());
+}
+
+/**
+ * @tc.name: OnRestore_00003
+ * @tc.desc: Test clone OnRestore when profiles_ is empty.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneDisturbTest, OnRestore_00003, Function | SmallTest | Level1)
+{
+    // Given
+    nlohmann::json jsonArray = nlohmann::json::array();
+
+    // When
+    notificationCloneDisturb->OnRestore(jsonArray);
+
+    // Then
+    EXPECT_TRUE(notificationCloneDisturb->profiles_.empty());
+}
+
+/**
+ * @tc.name: OnRestore_00004
+ * @tc.desc: Test clone OnRestore when Bundle exists.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneDisturbTest, OnRestore_00004, Function | SmallTest | Level1)
+{
+    // Given
+    nlohmann::json jsonArray = nlohmann::json::array();
+    sptr<NotificationDoNotDisturbProfile> profile = new NotificationDoNotDisturbProfile();
+    profile->SetProfileTrustList({{"testBundleName", 1}});
+    nlohmann::json jsonNode = nlohmann::json::parse(profile->ToJson());
+    jsonArray.emplace_back(jsonNode);
+    notificationCloneDisturb->profiles_.emplace_back(profile);
+
+    // When
+    notificationCloneDisturb->OnRestore(jsonArray);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    // Then
+    EXPECT_TRUE(notificationCloneDisturb->profiles_.empty());
+}
+
+/**
+ * @tc.name: OnRestore_00005
+ * @tc.desc: Test clone OnRestore when Bundle exists.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneDisturbTest, OnRestore_00005, Function | SmallTest | Level1)
+{
+    // Given
+    nlohmann::json jsonArray = nlohmann::json::array();
+    sptr<NotificationDoNotDisturbProfile> profile = new NotificationDoNotDisturbProfile();
+    profile->SetProfileTrustList({{"testBundleName", 1}});
+    nlohmann::json jsonNode = nlohmann::json::parse(profile->ToJson());
+    jsonArray.emplace_back(jsonNode);
+    notificationCloneDisturb->profiles_.emplace_back(profile);
+    int32_t invalidUid = -1;
+    MockSetBundleUidForClone(invalidUid);
+
+    // When
+    notificationCloneDisturb->OnRestore(jsonArray);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    // Then
+    EXPECT_FALSE(notificationCloneDisturb->profiles_.empty());
 }
 
 /**
@@ -132,6 +255,8 @@ HWTEST_F(NotificationCloneDisturbTest, GetProfileUid_Test_002, Function | SmallT
     std::vector<NotificationBundleOption> trustList;
     std::vector<NotificationBundleOption> exitBunldleList;
     std::vector<NotificationBundleOption> notExitBunldleList;
+    int32_t invalidUid = -1;
+    MockSetBundleUidForClone(invalidUid);
 
     // Create a bundle with an unknown key
     NotificationBundleOption bundle;
@@ -180,6 +305,8 @@ HWTEST_F(NotificationCloneDisturbTest, OnRestoreStart_Test_002, Function | Small
     int32_t appIndex = 1;
     int32_t userId = 100;
     int32_t uid = 12345;
+    sptr<NotificationDoNotDisturbProfile> profile = new NotificationDoNotDisturbProfile();
+    notificationCloneDisturb->profiles_.emplace_back(profile);
 
     // Ensure cloneDisturbQueue_ is null
     notificationCloneDisturb->cloneDisturbQueue_ = nullptr;
@@ -189,6 +316,29 @@ HWTEST_F(NotificationCloneDisturbTest, OnRestoreStart_Test_002, Function | Small
 
     // Verify that the function returned without any action
     EXPECT_EQ(notificationCloneDisturb->cloneDisturbQueue_, nullptr);
+}
+
+/**
+ * @tc.name: OnRestoreStart_Test_003
+ * @tc.desc: Test OnRestoreStart function when trustList is empty
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneDisturbTest, OnRestoreStart_Test_003, Function | SmallTest | Level1)
+{
+    std::string bundleName = "com.example.app";
+    int32_t appIndex = 1;
+    int32_t userId = 100;
+    int32_t uid = 12345;
+    sptr<NotificationDoNotDisturbProfile> profile = new NotificationDoNotDisturbProfile();
+    notificationCloneDisturb->profiles_.emplace_back(profile);
+
+    // Call the function
+    notificationCloneDisturb->OnRestoreStart(bundleName, appIndex, userId, uid);
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    // Verify that the profile is deleted
+    EXPECT_TRUE(notificationCloneDisturb->profiles_.empty());
 }
 
 /**
@@ -203,18 +353,15 @@ HWTEST_F(NotificationCloneDisturbTest, OnRestoreStart_Test_004, Function | Small
     int32_t appIndex = 1;
     int32_t userId = 100;
     int32_t uid = 12345;
-
-    // Add a profile to profiles_ with an empty trust list
-    auto profile = NotificationDoNotDisturbProfile(1, "name", {});
-
-    // Ensure cloneDisturbQueue_ is not null
-    notificationCloneDisturb->cloneDisturbQueue_ = std::make_shared<ffrt::queue>("NotificationCloneDisturbQueue");
+    sptr<NotificationDoNotDisturbProfile> profile = new NotificationDoNotDisturbProfile();
+    profile->SetProfileTrustList({{}});
+    notificationCloneDisturb->profiles_.emplace_back(profile);
 
     // Call the function
     notificationCloneDisturb->OnRestoreStart(bundleName, appIndex, userId, uid);
-
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     // Verify that the profile is deleted
-    EXPECT_TRUE(notificationCloneDisturb->profiles_.empty());
+    EXPECT_FALSE(notificationCloneDisturb->profiles_.empty());
 }
 
 /**

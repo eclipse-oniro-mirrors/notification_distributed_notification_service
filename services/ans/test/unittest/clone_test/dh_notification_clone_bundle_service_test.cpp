@@ -20,6 +20,7 @@
 #include "ans_inner_errors.h"
 #include "dh_notification_clone_bundle_service.h"
 #include "advanced_notification_service.h"
+#include "mock_notification_clone_util.h"
 #undef private
 #undef protected
 
@@ -35,6 +36,12 @@ protected:
     {
         // Initialize objects and dependencies
         dhNotificationCloneBundle = DhNotificationCloneBundle::GetInstance();
+        int32_t initTestUserId = 100;
+        int32_t initTestUid = 1000;
+        MockSetActiveUserIdForClone(initTestUserId);
+        MockSetBundleUidForClone(initTestUid);
+        SetFuncGetActiveUserIdIsCalled(false);
+        SetFuncGetBundleUidIsCalled(false);
     }
 
     void TearDown() override
@@ -44,24 +51,90 @@ protected:
 };
 
 /**
- * @tc.name: OnRestore_Test_001
- * @tc.desc: Test that error is reported when appIndex is -1
+ * @tc.name: OnRestore_Test_00001
+ * @tc.desc: Test that OnRestore does nothing when input param has wrong type.
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(DhNotificationCloneBundleTest, OnRestore_Test_001, Function | SmallTest | Level1)
+HWTEST_F(DhNotificationCloneBundleTest, OnRestore_Test_00001, Function | SmallTest | Level1)
 {
-    nlohmann::json jsonObject;
-    int32_t userId = 100;
-    auto advancedNotificationService_ = AdvancedNotificationService::GetInstance();
+    // Given
+    nlohmann::json jsonNull;
+    nlohmann::json jsonObject = nlohmann::json::object();
+    NotificationCloneBundleInfo cloneBundleInfo;
+    dhNotificationCloneBundle->bundlesInfo_.emplace_back(cloneBundleInfo);
 
-    sptr<NotificationDoNotDisturbProfile> date = nullptr;
-    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
-    auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles);
-    
-    ErrCode result = dhNotificationCloneBundle->OnBackup(jsonObject);
+    // When
+    dhNotificationCloneBundle->OnRestore(jsonNull);
     dhNotificationCloneBundle->OnRestore(jsonObject);
-    EXPECT_EQ(result, ERR_OK);
+
+    // Then
+    EXPECT_FALSE(dhNotificationCloneBundle->bundlesInfo_.empty());
+}
+
+/**
+ * @tc.name: OnRestore_Test_00002
+ * @tc.desc: Test OnRestore when task queue is nullptr.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(DhNotificationCloneBundleTest, OnRestore_Test_00002, Function | SmallTest | Level1)
+{
+    // Given
+    nlohmann::json jsonArray = nlohmann::json::array();
+    NotificationCloneBundleInfo cloneBundleInfo;
+    nlohmann::json jsonNode;
+    cloneBundleInfo.ToJson(jsonNode);
+    jsonArray.emplace_back(jsonNode);
+    dhNotificationCloneBundle->bundlesInfo_.emplace_back(cloneBundleInfo);
+    dhNotificationCloneBundle->dhCloneBundleQueue_ = nullptr;
+
+    // When
+    dhNotificationCloneBundle->OnRestore(jsonArray);
+
+    // Then
+    EXPECT_FALSE(dhNotificationCloneBundle->bundlesInfo_.empty());
+}
+
+/**
+ * @tc.name: OnRestore_Test_00003
+ * @tc.desc: Test OnRestore when task bundlesInfo_ is empty.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(DhNotificationCloneBundleTest, OnRestore_Test_00003, Function | SmallTest | Level1)
+{
+    // Given
+    nlohmann::json jsonArray = nlohmann::json::array();
+
+    // When
+    dhNotificationCloneBundle->OnRestore(jsonArray);
+
+    // Then
+    EXPECT_TRUE(dhNotificationCloneBundle->bundlesInfo_.empty());
+}
+
+/**
+ * @tc.name: OnRestore_Test_00004
+ * @tc.desc: Test OnRestore when bundle doesn't exist.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(DhNotificationCloneBundleTest, OnRestore_Test_00004, Function | SmallTest | Level1)
+{
+    // Given
+    nlohmann::json jsonArray = nlohmann::json::array();
+    NotificationCloneBundleInfo cloneBundleInfo;
+    nlohmann::json jsonNode;
+    cloneBundleInfo.ToJson(jsonNode);
+    jsonArray.emplace_back(jsonNode);
+    dhNotificationCloneBundle->bundlesInfo_.emplace_back(cloneBundleInfo);
+
+    // When
+    dhNotificationCloneBundle->OnRestore(jsonArray);
+
+    // Then
+    EXPECT_FALSE(dhNotificationCloneBundle->bundlesInfo_.empty());
 }
 
 /**
