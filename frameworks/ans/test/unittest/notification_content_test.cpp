@@ -108,6 +108,10 @@ HWTEST_F(NotificationContentTest, NotificationBasicContentGetTitle_0100, Level1)
     notificationBasicContent.SetTitle(title);
     auto result = notificationBasicContent.GetTitle();
     EXPECT_EQ(result, title);
+    std::vector<std::pair<std::string, std::string>> structuredText;
+    structuredText.emplace_back("123", "abc");
+    notificationBasicContent.SetStructuredText(structuredText);
+    EXPECT_EQ(notificationBasicContent.GetStructuredText().front().first, "123");
 }
 
 /**
