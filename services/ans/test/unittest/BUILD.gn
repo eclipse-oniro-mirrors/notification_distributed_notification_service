@@ -32,6 +32,8 @@ ohos_unittest("ans_unit_test") {
 
   defines = []
 
+  version_script = "libans_test.map"
+
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "mock/blob.cpp",
@@ -55,6 +57,9 @@ ohos_unittest("ans_unit_test") {
 
   if (distributed_notification_service_feature_all_scenario_collaboration) {
     defines += [ "ALL_SCENARIO_COLLABORATION" ]
+  }
+  if (distributed_notification_service_feature_notification_extension_subscription) {
+    defines += [ "NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED" ]
   }
 
   deps = [

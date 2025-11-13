@@ -90,6 +90,9 @@ private:
     void InitValidDevices(set<string> &syncDevices, set<string> &smartDevices,
         map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
         const sptr<NotificationRequest> &request) const;
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+    void InitThirdPartyWearableDevices(set<string> &syncDevices, const sptr<NotificationRequest> &request) const;
+#endif
 #ifdef ALL_SCENARIO_COLLABORATION
     void InitPcPadDevices(const string &deviceType,
         set<string> &syncDevices, set<string> &smartDevices,

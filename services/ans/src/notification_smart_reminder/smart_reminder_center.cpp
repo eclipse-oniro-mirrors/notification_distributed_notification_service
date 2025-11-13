@@ -331,6 +331,12 @@ void SmartReminderCenter::InitValidDevices(
             continue;
         }
 
+        if (NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE == deviceType) {
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+            InitThirdPartyWearableDevices(syncDevices, request);
+#endif
+            continue;
+        }
         GetDeviceStatusByType(deviceType, status);
         statusMap.insert(pair<string, bitset<DistributedDeviceStatus::STATUS_SIZE>>(deviceType, status));
         request->AdddeviceStatu(deviceType, status.bitset<DistributedDeviceStatus::STATUS_SIZE>::to_string());
@@ -349,9 +355,6 @@ void SmartReminderCenter::InitValidDevices(
                 ANS_LOGI("liveView smart switch is closed, deviceType = %{public}s", deviceType.c_str());
                 continue;
             }
-            if (NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE == deviceType) {
-                continue;
-            }
             if (!CheckHealthWhiteList(request, deviceType)) {
                 continue;
             }
@@ -363,19 +366,6 @@ void SmartReminderCenter::InitValidDevices(
                 NotificationConstant::SlotType::SERVICE_REMINDER != request->GetSlotType() &&
                 NotificationConstant::SlotType::CUSTOMER_SERVICE != request->GetSlotType()) {
                 ANS_LOGD("unaffect slot");
-                continue;
-            }
-            if (deviceType.compare(NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE) == 0) {
-                ANS_LOGD("3rd-party wearable");
-                if (request->GetClassification() == NotificationConstant::ANS_VOIP) {
-                    ANS_LOGD("skip voip");
-                    continue;
-                }
-                if (BundleManagerHelper::GetInstance()->GetBundleNameByUid(request->GetCreatorUid()).empty()) {
-                    ANS_LOGD("skip SA");
-                    continue;
-                }
-                syncDevices.insert(deviceType);
                 continue;
             }
             bool distributedSwitch = GetDistributedSwitch(deviceType);
@@ -416,6 +406,25 @@ void SmartReminderCenter::InitValidDevices(
     return;
 }
 
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+void SmartReminderCenter::InitThirdPartyWearableDevices(set<string> &syncDevices,
+    const sptr<NotificationRequest> &request) const
+{
+    if (NotificationConstant::SlotType::LIVE_VIEW == request->GetSlotType()) {
+        ANS_LOGD("skip liveview");
+        return;
+    }
+    if (request->GetClassification() == NotificationConstant::ANS_VOIP) {
+        ANS_LOGD("skip voip");
+        return;
+    }
+    if (BundleManagerHelper::GetInstance()->GetBundleNameByUid(request->GetCreatorUid()).empty()) {
+        ANS_LOGD("skip SA");
+        return;
+    }
+    syncDevices.insert(NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE);
+}
+#endif
 #ifdef ALL_SCENARIO_COLLABORATION
 void SmartReminderCenter::InitPcPadDevices(const string &deviceType,
     set<string> &syncDevices, set<string> &smartDevices,
