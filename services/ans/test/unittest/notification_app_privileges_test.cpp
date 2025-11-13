@@ -80,5 +80,25 @@ HWTEST_F(NotificationAppPrivilegesTest, NotificationAppPrivileges_00400, Functio
     EXPECT_EQ(appPrivileges.IsBannerEnabled(), false);
     EXPECT_EQ(appPrivileges.IsReminderEnabled(), true);
 }
+
+/**
+ * @tc.name      : NotificationAppPrivileges_00500
+ * @tc.number    :
+ * @tc.desc      : Test constructure.
+ */
+HWTEST_F(NotificationAppPrivilegesTest, NotificationAppPrivileges_00500, Function | SmallTest | Level1)
+{
+    NotificationAppPrivileges appPrivileges_01("11111");
+    EXPECT_EQ(appPrivileges_01.IsLiveViewEnabled(), true);
+    EXPECT_EQ(appPrivileges_01.IsBannerEnabled(), true);
+    EXPECT_EQ(appPrivileges_01.IsReminderEnabled(), true);
+    EXPECT_EQ(appPrivileges_01.IsDistributedReplyEnabled(), true);
+
+    NotificationAppPrivileges appPrivileges_02("11110");
+    EXPECT_EQ(appPrivileges_02.IsLiveViewEnabled(), true);
+    EXPECT_EQ(appPrivileges_02.IsBannerEnabled(), true);
+    EXPECT_EQ(appPrivileges_02.IsReminderEnabled(), true);
+    EXPECT_EQ(appPrivileges_02.IsDistributedReplyEnabled(), false);
+}
 } // namespace Notification
 } // namespace OHOS
