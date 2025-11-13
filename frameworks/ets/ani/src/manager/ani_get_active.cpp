@@ -50,7 +50,6 @@ ani_object AniGetAllActiveNotifications(ani_env *env)
         return nullptr;
     }
     ani_array arrayRequestObj = NotificationSts::GetAniNotificationRequestArrayByNotifocations(env, notifications);
-
     if (arrayRequestObj == nullptr) {
         OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
@@ -72,7 +71,6 @@ ani_object AniGetActiveNotifications(ani_env *env)
         return nullptr;
     }
     ani_array arrayRequestObj = NotificationSts::GetAniNotificationRequestArray(env, requests);
-
     if (arrayRequestObj == nullptr) {
         OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
