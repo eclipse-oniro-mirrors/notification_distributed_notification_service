@@ -3157,5 +3157,70 @@ ErrCode AnsNotification::ProxyForUnaware(const std::vector<int32_t>& uidList, bo
     }
     return proxy->ProxyForUnaware(uidList, isProxy);
 }
+
+ErrCode AnsNotification::GetBadgeNumber(int32_t &badgeNumber)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->GetBadgeNumber(badgeNumber);
+}
+
+void AnsNotification::CreateBadgeQueryListener(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback,
+    sptr<BadgeQueryListener> &listener)
+{
+    std::lock_guard<std::mutex> lock(badgeQueryMutex_);
+    auto item = badgeQueryCallbacks_.find(badgeQueryCallback);
+    if (item != badgeQueryCallbacks_.end()) {
+        listener = item->second;
+        ANS_LOGD("badgeQueryCallback has listener");
+        return;
+    }
+    listener = new (std::nothrow) BadgeQueryListener(badgeQueryCallback);
+    if (listener != nullptr) {
+        badgeQueryCallbacks_[badgeQueryCallback] = listener;
+        ANS_LOGD("CreateBadgeQueryListener success");
+    }
+    return;
+}
+
+ErrCode AnsNotification::RegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback)
+{
+    if (badgeQueryCallback == nullptr) {
+        ANS_LOGE("null badgeQueryCallback");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("RegisterBadgeQueryCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<BadgeQueryListener> listener = nullptr;
+    CreateBadgeQueryListener(badgeQueryCallback, listener);
+    if (listener == nullptr) {
+        ANS_LOGE("null listener");
+        return ERR_ANS_NO_MEMORY;
+    }
+
+    return proxy->RegisterBadgeQueryCallback(listener);
+}
+
+ErrCode AnsNotification::UnRegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("UnRegisterBadgeQueryCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    {
+        std::lock_guard<std::mutex> lock(badgeQueryMutex_);
+        badgeQueryCallbacks_.erase(badgeQueryCallback);
+    }
+    return proxy->UnRegisterBadgeQueryCallback();
+}
 }  // namespace Notification
 }  // namespace OHOS

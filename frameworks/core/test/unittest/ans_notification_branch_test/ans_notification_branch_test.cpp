@@ -30,6 +30,7 @@
 #include "notification_request.h"
 #include "singleton.h"
 #include "notification_subscriber.h"
+#include "ibadge_query_callback.h"
 
 extern void MockGetAnsManagerProxy(OHOS::sptr<OHOS::Notification::IAnsManager> mockRet);
 
@@ -915,6 +916,21 @@ public:
     }
 
     ErrCode CanOpenSubscribeSettings() override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetBadgeNumber(int32_t &badgeNumber) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode RegisterBadgeQueryCallback(const sptr<IBadgeQueryCallback> &badgeQueryCallback) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode UnRegisterBadgeQueryCallback() override
     {
         return ERR_ANS_INVALID_PARAM;
     }

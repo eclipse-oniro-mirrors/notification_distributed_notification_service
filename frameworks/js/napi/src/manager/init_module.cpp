@@ -40,6 +40,7 @@
 #include "napi_open_settings.h"
 #include "napi_silent_reminder_enable.h"
 #include "napi_reminder_info.h"
+#include "napi_badge_query_callback.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -114,17 +115,24 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
 #ifdef ANS_FEATURE_BADGE_MANAGER
         DECLARE_NAPI_FUNCTION("displayBadge", NapiDisplayBadge),
         DECLARE_NAPI_FUNCTION("isBadgeDisplayed", NapiIsBadgeDisplayed),
+        DECLARE_NAPI_FUNCTION("getBadgeNumber", NapiGetBadgeNumber),
         DECLARE_NAPI_FUNCTION("setBadgeNumber", NapiSetBadgeNumber),
         DECLARE_NAPI_FUNCTION("setBadgeNumberByBundle", NapiSetBadgeNumberByBundle),
         DECLARE_NAPI_FUNCTION("setBadgeDisplayStatusByBundles", NapiSetBadgeDisplayStatusByBundles),
         DECLARE_NAPI_FUNCTION("getBadgeDisplayStatusByBundles", NapiGetBadgeDisplayStatusByBundles),
+        DECLARE_NAPI_FUNCTION("onBadgeNumberQuery", NapiOnBadgeNumberQuery),
+        DECLARE_NAPI_FUNCTION("offBadgeNumberQuery", NapiOffBadgeNumberQuery),
 #else
         DECLARE_NAPI_FUNCTION("displayBadge", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("isBadgeDisplayed", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("getBadgeNumber", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("setBadgeNumber", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("setBadgeNumberByBundle", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("getBadgeDisplayStatusByBundles", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("setBadgeDisplayStatusByBundles", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("onBadgeNumberQuery", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("offBadgeNumberQuery", Common::NapiReturnCapErrCb),
+
 #endif
 
 #ifdef ANS_FEATURE_DISTRIBUTED_DB

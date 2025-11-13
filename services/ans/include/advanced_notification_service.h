@@ -53,6 +53,7 @@
 #include "reminder_swing_decision_center.h"
 #endif
 #include "notification_clone_bundle_info.h"
+#include "ibadge_query_callback.h"
 
 namespace OHOS {
 namespace Notification {
@@ -1040,6 +1041,29 @@ public:
      */
     ErrCode SetBadgeNumberForDhByBundle(
         const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber) override;
+
+    /**
+     * @brief Obtains the badge number of the current application in the system.
+     *
+     * @param nums Indicates the badge number of the current application.
+     * @return Returns get notification badge number result.
+     */
+    ErrCode GetBadgeNumber(int32_t &badgeNumber) override;
+
+    /**
+     * @brief Register BadgeQuery Callback.
+     *
+     * @param badgeQueryCallback badgeQueryCallback.
+     * @return Returns register badgeQuery Callback result.
+     */
+    ErrCode RegisterBadgeQueryCallback(const sptr<IBadgeQueryCallback> &badgeQueryCallback) override;
+
+    /**
+     * @brief Unregister BadgeQuery Callback.
+     *
+     * @return Returns unregister badgeQuery Callback result.
+     */
+    ErrCode UnRegisterBadgeQueryCallback() override;
 
     /**
      * @brief Obtains allow notification application list.
@@ -2044,6 +2068,8 @@ private:
     static ffrt::mutex pushMutex_;
     static std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> pushCallBacks_;
     static std::map<NotificationConstant::SlotType, sptr<NotificationCheckRequest>> checkRequests_;
+    static ffrt::mutex badgeQueryMutex_;
+    static std::map<int32_t, sptr<IBadgeQueryCallback>> badgeQueryCallBack_;
     bool aggregateLocalSwitch_ = false;
     std::set<int32_t> currentUserId;
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;

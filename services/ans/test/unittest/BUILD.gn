@@ -342,6 +342,7 @@ ohos_unittest("notification_service_test") {
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_access_token_helper.cpp",
     "mock/mock_accesstoken_kit.cpp",
+    "mock/mock_badgequery_callback_stub.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_bundle_mgr.cpp",
     "mock/mock_event_handler.cpp",

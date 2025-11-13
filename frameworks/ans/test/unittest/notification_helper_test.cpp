@@ -1532,5 +1532,32 @@ HWTEST_F(NotificationHelperTest, GetRingtoneInfoByBundle_0200, Function | SmallT
     ErrCode res = notificationHelper.GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
     EXPECT_EQ(res, ERR_ANS_PERMISSION_DENIED);
 }
+
+/**
+ * @tc.name: GetBadgeNumber_0100
+ * @tc.desc: Test GetBadgeNumber.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, GetBadgeNumber_0100, Function | SmallTest | Level1)
+{
+    int32_t badgeNumber;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.GetBadgeNumber(badgeNumber);
+    EXPECT_EQ(ret, ERR_ANS_TASK_ERR);
+}
+
+/**
+ * @tc.name: RegisterBadgeQueryCallback_0100
+ * @tc.desc: Test RegisterBadgeQueryCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, RegisterBadgeQueryCallback_0100, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.RegisterBadgeQueryCallback(nullptr);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    notificationHelper.UnRegisterBadgeQueryCallback(nullptr);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
 }
 }

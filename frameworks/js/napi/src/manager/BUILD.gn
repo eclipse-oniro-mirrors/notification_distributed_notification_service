@@ -96,6 +96,7 @@ ohos_shared_library("notificationmanager") {
     "napi_slot.cpp",
     "napi_sync_config.cpp",
     "napi_template.cpp",
+    "napi_badge_query_callback.cpp",
   ]
 
   deps = [

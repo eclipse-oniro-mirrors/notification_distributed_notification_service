@@ -1626,6 +1626,30 @@ public:
      * @return Returns ERR_OK if allowed; otherwise returns the specific error code.
      */
     static ErrCode CanOpenSubscribeSettings();
+
+    /**
+     * @brief Obtains the badge number of the current application in the system.
+     *
+     * @param badgeNumber Indicates the badge number of the current application.
+     * @return Returns get notification badge number result.
+     */
+    static ErrCode GetBadgeNumber(int32_t &badgeNumber);
+
+    /**
+     * @brief Register Badge Query Callback.
+     *
+     * @param badgeQueryCallback query appliction's badge Callback.
+     * @return Returns register badge query callback result.
+     */
+    static ErrCode RegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback);
+
+    /**
+     * @brief Unregister Badge Query Callback.
+     *
+     * @param badgeQueryCallback query appliction's badge Callback.
+     * @return Returns unregister Badge Query Callback result.
+     */
+    static ErrCode UnRegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback);
 };
 }  // namespace Notification
 }  // namespace OHOS
