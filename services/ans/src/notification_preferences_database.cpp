@@ -279,6 +279,11 @@ static const char* const CLONE_TIMESTAMP = "clone_time_stamp";
 static const char* const CLONE_RINGTONE_INFO = "clone_ringtone_";
 
 /**
+ * Indicates whether the type of geofence is enabled.
+ */
+const static std::string KEY_ANS_GEOFENCE_ENABLED = "ans_geofenceEnabled";
+
+/**
  * Indicates that distributed notification switch.
  */
 static const char* const KEY_DISTRIBUTED_NOTIFICATION_SWITCH = "distributedNotificationSwitch";
@@ -2563,6 +2568,63 @@ bool NotificationPreferencesDatabase::SetSilentReminderEnabled(
     ANS_LOGI("SilentReminder result:%{public}d, key:%{public}s, enableStatus:%{public}d",
         result, key.c_str(), silentReminderInfo.enableStatus);
     return (result == NativeRdb::E_OK);
+}
+bool NotificationPreferencesDatabase::SetGeofenceEnabled(bool enabled)
+{
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("current user acquisition failed");
+        return false;
+    }
+    std::string typeKey =
+        std::string().append(KEY_ANS_GEOFENCE_ENABLED).append(KEY_UNDER_LINE).append(std::to_string(userId));
+    int32_t result = PutDataToDB(typeKey, static_cast<int32_t>(enabled), userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::IsGeofenceEnabled(bool &enabled)
+{
+    int32_t userId = -1;
+    std::string value;
+    bool result = false;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("current user acquisition failed");
+        return false;
+    }
+    std::string key =
+        std::string().append(KEY_ANS_GEOFENCE_ENABLED).append(KEY_UNDER_LINE).append(std::to_string(userId));
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                enabled = false;
+                result = true;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                if (value == "0") {
+                    enabled = false;
+                    result = true;
+                    break;
+                }
+                if (value == "1") {
+                    enabled = true;
+                    result = true;
+                    break;
+                }
+                enabled = false;
+                result = false;
+                ANS_LOGE("invalid db geofenceEnabled value.");
+                break;
+            }
+            default:
+                enabled = false;
+                result = false;
+                break;
+        }
+    });
+    return result;
 }
 
 bool NotificationPreferencesDatabase::GetLiveViewConfigVersion(int32_t& version)

@@ -845,6 +845,16 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode SetGeofenceEnabled(bool enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode IsGeofenceEnabled(bool &enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode GetUserGrantedEnabledBundlesForSelf(std::vector<sptr<NotificationBundleOption>>& bundles) override
     {
         return ERR_ANS_INVALID_PARAM;

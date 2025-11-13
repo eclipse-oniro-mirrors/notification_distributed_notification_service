@@ -1616,8 +1616,24 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode SetReminderInfoByBundles(const std::vector<NotificationReminderInfo> &reminderInfo);
-	
-	 /**
+
+    /**
+     * @brief Set geofence switch.
+     *
+     * @param enabled Set enable or not.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetGeofenceEnabled(bool enabled);
+
+    /**
+     * @brief Checks if the geofence is enabled.
+     *
+     * @param enabled whether the geofence is enabled.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode IsGeofenceEnabled(bool &enabled);
+
+    /**
      * @brief Background unaware proxy.
      *
      * @param uidList List of uid applications.

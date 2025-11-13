@@ -883,7 +883,17 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
-    
+
+    ErrCode SetGeofenceEnabled(bool enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode IsGeofenceEnabled(bool &enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode SetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundle,
         const sptr<NotificationRingtoneInfo> &ringtoneInfo) override
     {

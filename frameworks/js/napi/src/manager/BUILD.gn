@@ -83,6 +83,7 @@ ohos_shared_library("notificationmanager") {
     "napi_priority.cpp",
     "napi_disturb_mode.cpp",
     "napi_enable_notification.cpp",
+    "napi_geofence_enabled.cpp",
     "napi_get_active.cpp",
     "napi_local_live_view.cpp",
     "napi_open_settings.cpp",

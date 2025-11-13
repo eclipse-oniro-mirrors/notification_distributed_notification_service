@@ -1758,6 +1758,7 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/advanced_notification_event_service.cpp",
     "${services_path}/ans/src/advanced_notification_extension_subscription.cpp",
     "${services_path}/ans/src/advanced_notification_flow_control_service.cpp",
+    "${services_path}/ans/src/advanced_notification_geofence_service.cpp",
     "${services_path}/ans/src/advanced_notification_inline.cpp",
     "${services_path}/ans/src/advanced_notification_live_view_service.cpp",
     "${services_path}/ans/src/advanced_notification_manager/advanced_notification_publish.cpp",

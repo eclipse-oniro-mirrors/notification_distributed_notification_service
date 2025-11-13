@@ -1580,6 +1580,22 @@ public:
     static ErrCode SetReminderInfoByBundles(const std::vector<NotificationReminderInfo> &reminderInfo);
 
     /**
+     * @brief Set geofence switch.
+     *
+     * @param enabled Set enable or not.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode SetGeofenceEnabled(bool enabled);
+
+    /**
+     * @brief Checks if the geofence is enabled.
+     *
+     * @param enabled whether the geofence is enabled.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode IsGeofenceEnabled(bool &enabled);
+
+    /**
      * @brief Obtains the list of bundleOption which subscribed by targetBundle
      * @param targetBundle The bundle option to be queried.
      * @param enabledBundles the list of subscribed bundle options.

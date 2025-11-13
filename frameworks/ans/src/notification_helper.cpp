@@ -901,6 +901,15 @@ ErrCode NotificationHelper::SetReminderInfoByBundles(const std::vector<Notificat
     return DelayedSingleton<AnsNotification>::GetInstance()->SetReminderInfoByBundles(reminderInfo);
 }
 
+ErrCode NotificationHelper::SetGeofenceEnabled(bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetGeofenceEnabled(enabled);
+}
+
+ErrCode NotificationHelper::IsGeofenceEnabled(bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsGeofenceEnabled(enabled);
+}
 
 ErrCode NotificationHelper::ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy)
 {
