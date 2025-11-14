@@ -22,7 +22,7 @@ import { RecordData } from '@ohos.base';
 type IconType = Resource | image.PixelMap;
 
 class RecordTools {
-  public static GetKeys(record: Record<string, NullishType>): Array<string> {
+  public static GetKeys(record: Record<string, Any>): Array<string> {
     try {
       let keys: Array<string> = Object.keys(record); 
       return keys;
