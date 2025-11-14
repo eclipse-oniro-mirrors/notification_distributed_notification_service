@@ -2275,7 +2275,7 @@ bool NotificationPreferencesDatabase::PutDistributedBundleOption(
 
     if (!CheckRdbStore()) {
         ANS_LOGE("null RdbStore");
-        return NativeRdb::E_ERROR;
+        return false;
     }
     std::unordered_map<std::string, std::string> existSwitchMap;
     int32_t result = rdbDataManager_->QueryDataBeginWithKey(
@@ -2346,7 +2346,7 @@ int32_t NotificationPreferencesDatabase::PutDataToDB(const std::string &key, con
 {
     if (!CheckRdbStore()) {
         ANS_LOGE("null RdbStore");
-        return false;
+        return NativeRdb::E_ERROR;
     }
     std::string valueStr = std::to_string(value);
     int32_t result = rdbDataManager_->InsertData(key, valueStr, userId);
