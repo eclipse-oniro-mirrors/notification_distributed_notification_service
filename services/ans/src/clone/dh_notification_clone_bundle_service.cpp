@@ -67,7 +67,7 @@ ErrCode DhNotificationCloneBundle::OnBackup(nlohmann::json &jsonObject)
     return ERR_OK;
 }
 
-void DhNotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
+void DhNotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject, std::set<std::string> systemApps)
 {
     ANS_LOGI("DhNotificationCloneBundle OnRestore");
     if (jsonObject.is_null() || !jsonObject.is_array()) {

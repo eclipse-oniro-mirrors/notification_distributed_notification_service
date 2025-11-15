@@ -30,7 +30,7 @@ public:
     static std::shared_ptr<DhNotificationCloneBundle> GetInstance();
     ErrCode OnBackup(nlohmann::json &jsonObject) override;
     void OnRestoreStart(const std::string bundleName, int32_t appIndex, int32_t userId, int32_t uid) override;
-    void OnRestore(const nlohmann::json &jsonObject) override;
+    void OnRestore(const nlohmann::json &jsonObject, std::set<std::string> systemApps) override;
     void OnUserSwitch(int32_t userId) override;
     bool isDhSource() override;
 private:

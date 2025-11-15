@@ -16,6 +16,7 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_CLONE_MANAGER_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_CLONE_MANAGER_H
 
+#include <set>
 #include <map>
 #include <string>
 
@@ -58,6 +59,7 @@ private:
     void RemoveBackUpFile();
     ErrCode LoadConfig(UniqueFd &fd, std::string& config);
     ErrCode SaveConfig(const std::string& config);
+    void GetRestoreSystemApp(const std::string& extralInfo, std::set<std::string>& bundles);
     std::vector<std::pair<std::string, std::shared_ptr<NotificationCloneTemplate>>> cloneTemplates;
     std::shared_ptr<AncoRestoreStartEventSubscriber> restoreStartEventSubscriber_ = nullptr;
 };

@@ -155,3 +155,61 @@ HWTEST_F(AncoRestoreStartEventSubscriberTest, OnDhRestoreStart_Test_001, Functio
 
     EXPECT_TRUE(notificationCloneManager->cloneTemplates.empty());
 }
+
+/**
+ * @tc.name: GetRestoreSystemApp_Test_001
+ * @tc.desc: Test get empty system app
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AncoRestoreStartEventSubscriberTest, GetRestoreSystemApp_Test_001, Function | SmallTest | Level1)
+{
+    std::string data;
+    std::set<std::string> bundles;
+    // Call the function
+    notificationCloneManager->GetRestoreSystemApp(data, bundles);
+    EXPECT_TRUE(bundles.empty());
+
+    nlohmann::json jsonObjectEmpty;
+    jsonObjectEmpty["type"] = "name";
+    notificationCloneManager->GetRestoreSystemApp(jsonObjectEmpty.dump(), bundles);
+    EXPECT_TRUE(bundles.empty());
+
+    nlohmann::json jsonObject = nlohmann::json::array();
+    nlohmann::json jsonObject2;
+    jsonObject2["type"] = "userId";
+    jsonObject2["detail"] = "100";
+    jsonObject.emplace_back(jsonObject2);
+    nlohmann::json jsonObject3;
+    jsonObject3["data"] = "userId";
+    jsonObject.emplace_back(jsonObject3);
+    nlohmann::json jsonObject4;
+    jsonObject4["type"] = 100;
+    jsonObject.emplace_back(jsonObject4);
+    nlohmann::json jsonObject5;
+    jsonObject5["type"] = "systemAppInfo";
+    jsonObject.emplace_back(jsonObject5);
+    notificationCloneManager->GetRestoreSystemApp(jsonObject.dump(), bundles);
+    EXPECT_TRUE(bundles.empty());
+}
+
+/**
+ * @tc.name: GetRestoreSystemApp_Test_002
+ * @tc.desc: Test get system app
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AncoRestoreStartEventSubscriberTest, GetRestoreSystemApp_Test_002, Function | SmallTest | Level1)
+{
+    std::string data;
+    std::set<std::string> bundles;
+    nlohmann::json jsonObject = nlohmann::json::array();
+    nlohmann::json jsonObject1;
+    jsonObject1["type"] = "systemAppInfo";
+    nlohmann::json jsonbundle = nlohmann::json::array();
+    jsonbundle.emplace_back("com.ohos.demo");
+    jsonObject1["detail"] = jsonbundle;
+    jsonObject.emplace_back(jsonObject1);
+    notificationCloneManager->GetRestoreSystemApp(jsonObject.dump(), bundles);
+    EXPECT_TRUE(!bundles.empty());
+}

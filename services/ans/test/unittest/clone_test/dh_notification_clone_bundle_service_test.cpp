@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "gmock/gmock.h"
+#include <set>
 #define private public
 #define protected public
 #include "ans_inner_errors.h"
@@ -65,8 +66,9 @@ HWTEST_F(DhNotificationCloneBundleTest, OnRestore_Test_00001, Function | SmallTe
     dhNotificationCloneBundle->bundlesInfo_.emplace_back(cloneBundleInfo);
 
     // When
-    dhNotificationCloneBundle->OnRestore(jsonNull);
-    dhNotificationCloneBundle->OnRestore(jsonObject);
+    std::set<std::string> systemApps;
+    dhNotificationCloneBundle->OnRestore(jsonNull, systemApps);
+    dhNotificationCloneBundle->OnRestore(jsonObject, systemApps);
 
     // Then
     EXPECT_FALSE(dhNotificationCloneBundle->bundlesInfo_.empty());
@@ -90,7 +92,8 @@ HWTEST_F(DhNotificationCloneBundleTest, OnRestore_Test_00002, Function | SmallTe
     dhNotificationCloneBundle->dhCloneBundleQueue_ = nullptr;
 
     // When
-    dhNotificationCloneBundle->OnRestore(jsonArray);
+    std::set<std::string> systemApps;
+    dhNotificationCloneBundle->OnRestore(jsonArray, systemApps);
 
     // Then
     EXPECT_FALSE(dhNotificationCloneBundle->bundlesInfo_.empty());
@@ -108,7 +111,8 @@ HWTEST_F(DhNotificationCloneBundleTest, OnRestore_Test_00003, Function | SmallTe
     nlohmann::json jsonArray = nlohmann::json::array();
 
     // When
-    dhNotificationCloneBundle->OnRestore(jsonArray);
+    std::set<std::string> systemApps;
+    dhNotificationCloneBundle->OnRestore(jsonArray, systemApps);
 
     // Then
     EXPECT_TRUE(dhNotificationCloneBundle->bundlesInfo_.empty());
@@ -131,7 +135,8 @@ HWTEST_F(DhNotificationCloneBundleTest, OnRestore_Test_00004, Function | SmallTe
     dhNotificationCloneBundle->bundlesInfo_.emplace_back(cloneBundleInfo);
 
     // When
-    dhNotificationCloneBundle->OnRestore(jsonArray);
+    std::set<std::string> systemApps;
+    dhNotificationCloneBundle->OnRestore(jsonArray, systemApps);
 
     // Then
     EXPECT_FALSE(dhNotificationCloneBundle->bundlesInfo_.empty());
