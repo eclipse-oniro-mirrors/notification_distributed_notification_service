@@ -35,15 +35,19 @@ HWTEST_F(NotificationIconButtonTest, ToJson_00001, Function | SmallTest | Level1
     nlohmann::json jsonObject;
     auto rrc = std::make_shared<NotificationIconButton>();
     rrc->SetText("text");
+    EXPECT_EQ(rrc->GetText(), "text");
     rrc->SetName("name");
     rrc->SetHidePanel(true);
+    EXPECT_EQ(rrc->GetHidePanel(), true);
     auto resource = std::make_shared<ResourceManager::Resource>();
     resource->id = 1;
     resource->bundleName = "bundleName";
     resource->moduleName = "moduleName";
     rrc->SetIconResource(resource);
+    rrc->GetIconResource();
     std::shared_ptr<Media::PixelMap> iconImage = std::make_shared<Media::PixelMap>();
     rrc->SetIconImage(iconImage);
+    rrc->GetIconImage();
     EXPECT_EQ(rrc->ToJson(jsonObject), true);
 }
 

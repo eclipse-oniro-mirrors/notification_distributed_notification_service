@@ -57,6 +57,7 @@ ohos_unittest("ans_test") {
     "${frameworks_module_ans_path}/test/unittest/notification_multiline_content_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_picture_content_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_progress_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/notification_reminder_info_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_request_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_ringtone_info_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_slot_test.cpp",
