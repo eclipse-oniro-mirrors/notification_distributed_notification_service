@@ -21,6 +21,8 @@
 #include "smart_reminder_center.h"
 #include "distributed_device_data_service.h"
 #include "ans_inner_errors.h"
+#include "ans_ut_constant.h"
+#include "notification_subscriber_manager.h"
 #undef private
 #undef protected
 
@@ -214,6 +216,24 @@ HWTEST_F(SmartReminderCenterTest, InitValidDevices_00002, Function | SmallTest |
     smartReminderCenter_->InitValidDevices(validDevices, smartDevices, statusMap, request);
     ASSERT_EQ(request->GetNotificationControlFlags(), 0);
 }
+
+HWTEST_F(SmartReminderCenterTest, InitValidDevices_00003, Function | SmallTest | Level1)
+{
+    // need subscriber
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->subscribedAll = true;
+    record->deviceType = NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE;
+    NotificationSubscriberManager::GetInstance()->subscriberRecordList_.push_back(record);
+
+    set<string> validDevices;
+    set<string> smartDevices;
+    map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> statusMap;
+    smartReminderCenter_->InitValidDevices(validDevices, smartDevices, statusMap, request);
+    EXPECT_EQ(validDevices.size(), 1);
+}
+
 #ifdef ALL_SCENARIO_COLLABORATION
 /**
  * @tc.name: InitPcPadDevices_100
@@ -711,6 +731,69 @@ HWTEST_F(SmartReminderCenterTest, GetReminderAffecteds_500, Function | SmallTest
 
     ASSERT_EQ(reminderAffecteds.size(), 1);
 }
+
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+HWTEST_F(SmartReminderCenterTest, InitThirdPartyWearableDevices_00001, Function | SmallTest | Level1)
+{
+    std::string ownerBundleName = "test";
+    int32_t ownerUid = 100;
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUid(1000);
+    request->SetOwnerBundleName(ownerBundleName);
+    request->SetOwnerUid(ownerUid);
+
+    set<string> validDevices;
+    smartReminderCenter_->InitThirdPartyWearableDevices(validDevices, request);
+    EXPECT_EQ(validDevices.size(), 1);
+}
+
+HWTEST_F(SmartReminderCenterTest, InitThirdPartyWearableDevices_00002, Function | SmallTest | Level1)
+{
+    std::string ownerBundleName = "test";
+    int32_t ownerUid = 100;
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetCreatorUid(1000);
+    request->SetOwnerBundleName(ownerBundleName);
+    request->SetOwnerUid(ownerUid);
+
+    set<string> validDevices;
+    smartReminderCenter_->InitThirdPartyWearableDevices(validDevices, request);
+    EXPECT_EQ(validDevices.size(), 0);
+}
+
+HWTEST_F(SmartReminderCenterTest, InitThirdPartyWearableDevices_00003, Function | SmallTest | Level1)
+{
+    std::string ownerBundleName = "test";
+    int32_t ownerUid = 100;
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUid(NON_BUNDLE_NAME_UID);
+    request->SetOwnerBundleName(ownerBundleName);
+    request->SetOwnerUid(ownerUid);
+
+    set<string> validDevices;
+    smartReminderCenter_->InitThirdPartyWearableDevices(validDevices, request);
+    EXPECT_EQ(validDevices.size(), 0);
+}
+
+HWTEST_F(SmartReminderCenterTest, InitThirdPartyWearableDevices_00004, Function | SmallTest | Level1)
+{
+    std::string ownerBundleName = "test";
+    int32_t ownerUid = 100;
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUid(1000);
+    request->SetOwnerBundleName(ownerBundleName);
+    request->SetOwnerUid(ownerUid);
+    request->SetClassification(NotificationConstant::ANS_VOIP);
+
+    set<string> validDevices;
+    smartReminderCenter_->InitThirdPartyWearableDevices(validDevices, request);
+    EXPECT_EQ(validDevices.size(), 0);
+}
+#endif
 
 /**
  * @tc.name: IsSmartRemindBySwitch_100
