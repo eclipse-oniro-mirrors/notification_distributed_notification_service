@@ -66,7 +66,7 @@ ErrCode NotificationCloneBundle::OnBackup(nlohmann::json &jsonObject)
     return ERR_OK;
 }
 
-void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
+void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject, std::set<std::string> systemApps)
 {
     ANS_LOGI("NotificationCloneBundle OnRestore");
     if (jsonObject.is_null() || !jsonObject.is_array()) {
@@ -92,6 +92,10 @@ void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
     }
 
     for (auto bundle = bundlesInfo_.begin(); bundle != bundlesInfo_.end();) {
+        if (systemApps.find(bundle->GetBundleName()) == systemApps.end()) {
+            bundle++;
+            continue;
+        }
         int32_t uid = NotificationCloneUtil::GetBundleUid(bundle->GetBundleName(),
             userId, bundle->GetAppIndex());
         if (uid == -1) {

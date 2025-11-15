@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "gmock/gmock.h"
+#include <set>
 #define private public
 #define protected public
 #include "notification_clone_bundle_service.h"
@@ -86,8 +87,9 @@ HWTEST_F(NotificationCloneBundleTest, OnRestore_Test_00001, Function | SmallTest
     nlohmann::json jsonObject = nlohmann::json::object();
 
     // When
-    notificationCloneBundle->OnRestore(jsonNull);
-    notificationCloneBundle->OnRestore(jsonObject);
+    std::set<std::string> systemApps;
+    notificationCloneBundle->OnRestore(jsonNull, systemApps);
+    notificationCloneBundle->OnRestore(jsonObject, systemApps);
 
     // Then
     EXPECT_FALSE(GetFuncGetActiveUserIdIsCalled());
@@ -111,7 +113,8 @@ HWTEST_F(NotificationCloneBundleTest, OnRestore_Test_00002, Function | SmallTest
     notificationCloneBundle->cloneBundleQueue_ = nullptr;
 
     // When
-    notificationCloneBundle->OnRestore(jsonArray);
+    std::set<std::string> systemApps;
+    notificationCloneBundle->OnRestore(jsonArray, systemApps);
 
     // Then
     EXPECT_TRUE(GetFuncGetActiveUserIdIsCalled());
@@ -130,7 +133,8 @@ HWTEST_F(NotificationCloneBundleTest, OnRestore_Test_00003, Function | SmallTest
     nlohmann::json jsonArray = nlohmann::json::array();
 
     // When
-    notificationCloneBundle->OnRestore(jsonArray);
+    std::set<std::string> systemApps;
+    notificationCloneBundle->OnRestore(jsonArray, systemApps);
 
     // Then
     EXPECT_TRUE(notificationCloneBundle->bundlesInfo_.empty());
@@ -147,6 +151,7 @@ HWTEST_F(NotificationCloneBundleTest, OnRestore_Test_00004, Function | SmallTest
     // Given
     nlohmann::json jsonArray = nlohmann::json::array();
     NotificationCloneBundleInfo cloneBundleInfo;
+    cloneBundleInfo.SetBundleName("com.ohos.demo");
     nlohmann::json jsonNode;
     cloneBundleInfo.ToJson(jsonNode);
     jsonArray.emplace_back(jsonNode);
@@ -155,7 +160,9 @@ HWTEST_F(NotificationCloneBundleTest, OnRestore_Test_00004, Function | SmallTest
     MockSetBundleUidForClone(invalidUid);
 
     // When
-    notificationCloneBundle->OnRestore(jsonArray);
+    std::set<std::string> systemApps;
+    systemApps.insert("com.ohos.demo");
+    notificationCloneBundle->OnRestore(jsonArray, systemApps);
 
     // Then
     EXPECT_TRUE(GetFuncGetActiveUserIdIsCalled());
@@ -173,6 +180,7 @@ HWTEST_F(NotificationCloneBundleTest, OnRestore_Test_00005, Function | SmallTest
     // Given
     nlohmann::json jsonArray = nlohmann::json::array();
     NotificationCloneBundleInfo cloneBundleInfo;
+    cloneBundleInfo.SetBundleName("com.ohos.demo");
     nlohmann::json jsonNode;
     cloneBundleInfo.ToJson(jsonNode);
     jsonArray.emplace_back(jsonNode);
@@ -181,7 +189,9 @@ HWTEST_F(NotificationCloneBundleTest, OnRestore_Test_00005, Function | SmallTest
     MockSetBundleUidForClone(initTestUid);
 
     // When
-    notificationCloneBundle->OnRestore(jsonArray);
+    std::set<std::string> systemApps;
+    systemApps.insert("com.ohos.demo");
+    notificationCloneBundle->OnRestore(jsonArray, systemApps);
 
     // Then
     EXPECT_TRUE(GetFuncGetActiveUserIdIsCalled());

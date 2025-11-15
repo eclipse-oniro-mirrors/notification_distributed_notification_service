@@ -17,6 +17,7 @@
 #include "gmock/gmock.h"
 #include <chrono>
 #include <thread>
+#include <set>
 #define private public
 #define protected public
 #include "notification_clone_disturb_service.h"
@@ -116,8 +117,9 @@ HWTEST_F(NotificationCloneDisturbTest, OnRestore_00001, Function | SmallTest | L
     nlohmann::json jsonObject = nlohmann::json::object();
 
     // When
-    notificationCloneDisturb->OnRestore(jsonNull);
-    notificationCloneDisturb->OnRestore(jsonObject);
+    std::set<std::string> systemApps;
+    notificationCloneDisturb->OnRestore(jsonNull, systemApps);
+    notificationCloneDisturb->OnRestore(jsonObject, systemApps);
 
     // Then
     EXPECT_FALSE(GetFuncGetActiveUserIdIsCalled());
@@ -141,7 +143,8 @@ HWTEST_F(NotificationCloneDisturbTest, OnRestore_00002, Function | SmallTest | L
     notificationCloneDisturb->cloneDisturbQueue_ == nullptr;
 
     // When
-    notificationCloneDisturb->OnRestore(jsonArray);
+    std::set<std::string> systemApps;
+    notificationCloneDisturb->OnRestore(jsonArray, systemApps);
 
     // Then
     EXPECT_FALSE(notificationCloneDisturb->profiles_.empty());
@@ -159,7 +162,8 @@ HWTEST_F(NotificationCloneDisturbTest, OnRestore_00003, Function | SmallTest | L
     nlohmann::json jsonArray = nlohmann::json::array();
 
     // When
-    notificationCloneDisturb->OnRestore(jsonArray);
+    std::set<std::string> systemApps;
+    notificationCloneDisturb->OnRestore(jsonArray, systemApps);
 
     // Then
     EXPECT_TRUE(notificationCloneDisturb->profiles_.empty());
@@ -182,7 +186,9 @@ HWTEST_F(NotificationCloneDisturbTest, OnRestore_00004, Function | SmallTest | L
     notificationCloneDisturb->profiles_.emplace_back(profile);
 
     // When
-    notificationCloneDisturb->OnRestore(jsonArray);
+    std::set<std::string> systemApps;
+    systemApps.insert("testBundleName");
+    notificationCloneDisturb->OnRestore(jsonArray, systemApps);
     std::this_thread::sleep_for(std::chrono::seconds(1));
     // Then
     EXPECT_TRUE(notificationCloneDisturb->profiles_.empty());
@@ -207,7 +213,8 @@ HWTEST_F(NotificationCloneDisturbTest, OnRestore_00005, Function | SmallTest | L
     MockSetBundleUidForClone(invalidUid);
 
     // When
-    notificationCloneDisturb->OnRestore(jsonArray);
+    std::set<std::string> systemApps;
+    notificationCloneDisturb->OnRestore(jsonArray, systemApps);
     std::this_thread::sleep_for(std::chrono::seconds(1));
     // Then
     EXPECT_FALSE(notificationCloneDisturb->profiles_.empty());
@@ -222,7 +229,7 @@ HWTEST_F(NotificationCloneDisturbTest, OnRestore_00005, Function | SmallTest | L
 HWTEST_F(NotificationCloneDisturbTest, GetProfileUid_Test_001, Function | SmallTest | Level1)
 {
     int32_t userId = 1;
-    std::map<std::string, int32_t> uidMap;
+    std::set<std::string> systemApps;
     std::vector<NotificationBundleOption> trustList;
     std::vector<NotificationBundleOption> exitBunldleList;
     std::vector<NotificationBundleOption> notExitBunldleList;
@@ -231,12 +238,10 @@ HWTEST_F(NotificationCloneDisturbTest, GetProfileUid_Test_001, Function | SmallT
     NotificationBundleOption bundle;
     bundle.SetBundleName("com.example.app");
     bundle.SetAppIndex(1);
-    std::string key = "com.example.app1";
-    uidMap[key] = 12345;
 
     trustList.push_back(bundle);
-
-    notificationCloneDisturb->GetProfileUid(userId, uidMap, trustList, exitBunldleList, notExitBunldleList);
+    systemApps.insert("com.example.app");
+    notificationCloneDisturb->GetProfileUid(userId, systemApps, trustList, exitBunldleList, notExitBunldleList);
 
     EXPECT_EQ(exitBunldleList.size(), 1);
     EXPECT_EQ(notExitBunldleList.size(), 0);
@@ -251,7 +256,7 @@ HWTEST_F(NotificationCloneDisturbTest, GetProfileUid_Test_001, Function | SmallT
 HWTEST_F(NotificationCloneDisturbTest, GetProfileUid_Test_002, Function | SmallTest | Level1)
 {
     int32_t userId = 1;
-    std::map<std::string, int32_t> uidMap;
+    std::set<std::string> systemApps;
     std::vector<NotificationBundleOption> trustList;
     std::vector<NotificationBundleOption> exitBunldleList;
     std::vector<NotificationBundleOption> notExitBunldleList;
@@ -264,7 +269,7 @@ HWTEST_F(NotificationCloneDisturbTest, GetProfileUid_Test_002, Function | SmallT
     bundle.SetAppIndex(1);
 
     trustList.push_back(bundle);
-    notificationCloneDisturb->GetProfileUid(userId, uidMap, trustList, exitBunldleList, notExitBunldleList);
+    notificationCloneDisturb->GetProfileUid(userId, systemApps, trustList, exitBunldleList, notExitBunldleList);
 
     EXPECT_EQ(exitBunldleList.size(), 0);
     EXPECT_EQ(notExitBunldleList.size(), 1);
