@@ -1578,6 +1578,7 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
         request->SetOwnerBundleName(request->GetCreatorBundleName());
     }
     request->SetAppName(BundleManagerHelper::GetInstance()->GetBundleLabel(request->GetOwnerBundleName()));
+    request->SetAppIndex(BundleManagerHelper::GetInstance()->GetAppIndexByUid(request->GetOwnerUid()));
     return ERR_OK;
 }
 

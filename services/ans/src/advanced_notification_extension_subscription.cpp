@@ -1127,6 +1127,9 @@ ErrCode AdvancedNotificationService::GetUserGrantedEnabledBundlesForSelf(
             ANS_LOGE("Failed to get enabled bundles from database, ret: %{public}d", result);
             return;
         }
+        for (auto bundle : bundles) {
+            bundle->SetAppName(BundleManagerHelper::GetInstance()->GetBundleLabel(bundle->GetBundleName()));
+        }
     }));
     notificationSvrQueue_->wait(handler);
 

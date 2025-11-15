@@ -46,7 +46,7 @@ HWTEST_F(NotificationSubscriberStubTest, OnReceiveMessage_0100, Function | Small
     int32_t retResult = 0;
 
     ErrCode result = stub.OnReceiveMessage(request, retResult);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
 }
 
 /**
@@ -62,7 +62,7 @@ HWTEST_F(NotificationSubscriberStubTest, OnReceiveMessage_0200, Function | Small
     int32_t retResult = 0;
 
     ErrCode result = stub.OnReceiveMessage(nullptr, retResult);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
 }
 
 /**
@@ -81,7 +81,7 @@ HWTEST_F(NotificationSubscriberStubTest, OnReceiveMessage_0300, Function | Small
     int32_t retResult = 0;
 
     ErrCode result = stub.OnReceiveMessage(request, retResult);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
 }
 
 /**
@@ -101,7 +101,7 @@ HWTEST_F(NotificationSubscriberStubTest, OnReceiveMessage_0400, Function | Small
     int32_t retResult = 0;
 
     ErrCode result = stub.OnReceiveMessage(request, retResult);
-    ASSERT_EQ(result, ERR_OK);
+    EXPECT_EQ(result, ERR_OK);
 }
 
 /**
@@ -120,7 +120,7 @@ HWTEST_F(NotificationSubscriberStubTest, OnCancelMessages_0100, Function | Small
     int32_t retResult = 0;
 
     ErrCode result = stub.OnCancelMessages(hashCode, retResult);
-    ASSERT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
 }
 
 /**
@@ -137,7 +137,7 @@ HWTEST_F(NotificationSubscriberStubTest, OnCancelMessages_0200, Function | Small
     int32_t retResult = 0;
 
     ErrCode result = stub.OnCancelMessages(hashCode, retResult);
-    ASSERT_EQ(result, ERR_OK);
+    EXPECT_EQ(result, ERR_OK);
 }
 
 /**
@@ -153,7 +153,7 @@ HWTEST_F(NotificationSubscriberStubTest, ConvertNotificationRequest_0100, Functi
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest(1);
 
     auto notificationInfo = stub.ConvertNotificationRequest(request);
-    ASSERT_EQ(notificationInfo, nullptr);
+    EXPECT_EQ(notificationInfo, nullptr);
 }
 
 /**
@@ -171,7 +171,7 @@ HWTEST_F(NotificationSubscriberStubTest, ConvertNotificationRequest_0200, Functi
     request->SetContent(content);
 
     auto notificationInfo = stub.ConvertNotificationRequest(request);
-    ASSERT_EQ(notificationInfo, nullptr);
+    EXPECT_EQ(notificationInfo, nullptr);
 }
 
 /**
@@ -195,18 +195,20 @@ HWTEST_F(NotificationSubscriberStubTest, ConvertNotificationRequest_0300, Functi
     request->SetAppName("TestAppName");
     request->SetDeliveryTime(1);
     request->SetGroupName("TestGroupName");
+    request->SetAppIndex(10);
 
     auto notificationInfo = stub.ConvertNotificationRequest(request);
-    ASSERT_NE(notificationInfo, nullptr);
-    ASSERT_NE(notificationInfo->GetNotificationExtensionContent(), nullptr);
-    ASSERT_EQ(notificationInfo->GetNotificationExtensionContent()->GetText(), "TestText");
-    ASSERT_EQ(notificationInfo->GetNotificationExtensionContent()->GetTitle(), "TestTitle");
-    ASSERT_NE(notificationInfo->GetHashCode(), "");
-    ASSERT_EQ(notificationInfo->GetNotificationSlotType(), NotificationConstant::SlotType::CONTENT_INFORMATION);
-    ASSERT_EQ(notificationInfo->GetBundleName(), "TestBundleName");
-    ASSERT_EQ(notificationInfo->GetAppName(), "TestAppName");
-    ASSERT_EQ(notificationInfo->GetDeliveryTime(), 1);
-    ASSERT_EQ(notificationInfo->GetGroupName(), "TestGroupName");
+    EXPECT_NE(notificationInfo, nullptr);
+    EXPECT_NE(notificationInfo->GetNotificationExtensionContent(), nullptr);
+    EXPECT_EQ(notificationInfo->GetNotificationExtensionContent()->GetText(), "TestText");
+    EXPECT_EQ(notificationInfo->GetNotificationExtensionContent()->GetTitle(), "TestTitle");
+    EXPECT_NE(notificationInfo->GetHashCode(), "");
+    EXPECT_EQ(notificationInfo->GetNotificationSlotType(), NotificationConstant::SlotType::CONTENT_INFORMATION);
+    EXPECT_EQ(notificationInfo->GetBundleName(), "TestBundleName");
+    EXPECT_EQ(notificationInfo->GetAppName(), "TestAppName");
+    EXPECT_EQ(notificationInfo->GetDeliveryTime(), 1);
+    EXPECT_EQ(notificationInfo->GetGroupName(), "TestGroupName");
+    EXPECT_EQ(notificationInfo->GetAppIndex(), 10);
 }
 
 /**
@@ -219,8 +221,8 @@ HWTEST_F(NotificationSubscriberStubTest, Create_0100, Function | SmallTest | Lev
 {
     std::unique_ptr<AbilityRuntime::Runtime> runtime;
     auto ext = NotificationSubscriberExtension::Create(runtime);
-    ASSERT_NE(ext, nullptr);
-    ASSERT_TRUE(dynamic_cast<NotificationSubscriberExtension *>(ext) != nullptr);
+    EXPECT_NE(ext, nullptr);
+    EXPECT_TRUE(dynamic_cast<NotificationSubscriberExtension *>(ext) != nullptr);
     delete ext;
 }
 
@@ -238,7 +240,7 @@ HWTEST_F(NotificationSubscriberStubTest, Init_0100, Function | SmallTest | Level
     std::shared_ptr<AppExecFwk::AbilityHandler> handler;
     sptr<IRemoteObject> token;
     ext.Init(record, application, handler, token);
-    ASSERT_NE(ext.GetContext(), nullptr);
+    EXPECT_NE(ext.GetContext(), nullptr);
 }
 
 /**
@@ -255,8 +257,8 @@ HWTEST_F(NotificationSubscriberStubTest, CreateAndInitContext_0100, Function | S
     std::shared_ptr<AppExecFwk::AbilityHandler> handler;
     sptr<IRemoteObject> token;
     auto context = ext.CreateAndInitContext(record, application, handler, token);
-    ASSERT_NE(context, nullptr);
-    ASSERT_TRUE(dynamic_cast<NotificationSubscriberExtensionContext *>(context.get()) != nullptr);
+    EXPECT_NE(context, nullptr);
+    EXPECT_TRUE(dynamic_cast<NotificationSubscriberExtensionContext *>(context.get()) != nullptr);
 }
 
 /**
@@ -280,15 +282,15 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationInfo_Dump_0100, Function | 
     info.SetGroupName("GroupA");
 
     std::string dumpStr = info.Dump();
-    ASSERT_NE(dumpStr.find("HashXYZ"), std::string::npos);
-    ASSERT_NE(dumpStr.find(std::to_string(static_cast<int64_t>(NotificationConstant::SlotType::CONTENT_INFORMATION))),
+    EXPECT_NE(dumpStr.find("HashXYZ"), std::string::npos);
+    EXPECT_NE(dumpStr.find(std::to_string(static_cast<int64_t>(NotificationConstant::SlotType::CONTENT_INFORMATION))),
         std::string::npos);
-    ASSERT_NE(dumpStr.find("TitleA"), std::string::npos);
-    ASSERT_NE(dumpStr.find("TextB"), std::string::npos);
-    ASSERT_NE(dumpStr.find("BundleA"), std::string::npos);
-    ASSERT_NE(dumpStr.find("AppA"), std::string::npos);
-    ASSERT_NE(dumpStr.find("123456789"), std::string::npos);
-    ASSERT_NE(dumpStr.find("GroupA"), std::string::npos);
+    EXPECT_NE(dumpStr.find("TitleA"), std::string::npos);
+    EXPECT_NE(dumpStr.find("TextB"), std::string::npos);
+    EXPECT_NE(dumpStr.find("BundleA"), std::string::npos);
+    EXPECT_NE(dumpStr.find("AppA"), std::string::npos);
+    EXPECT_NE(dumpStr.find("123456789"), std::string::npos);
+    EXPECT_NE(dumpStr.find("GroupA"), std::string::npos);
 }
 
 /**
@@ -303,9 +305,9 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationInfo_Dump_0200, Function | 
     info.SetHashCode("NoContentHash");
     info.SetNotificationSlotType(NotificationConstant::SlotType::CUSTOM);
     std::string dumpStr = info.Dump();
-    ASSERT_NE(dumpStr.find("NoContentHash"), std::string::npos);
-    ASSERT_NE(dumpStr.find("null"), std::string::npos);
-    ASSERT_NE(
+    EXPECT_NE(dumpStr.find("NoContentHash"), std::string::npos);
+    EXPECT_NE(dumpStr.find("null"), std::string::npos);
+    EXPECT_NE(
         dumpStr.find(std::to_string(static_cast<int64_t>(NotificationConstant::SlotType::CUSTOM))), std::string::npos);
 }
 
@@ -331,18 +333,18 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationInfo_ToJson_0100, Function 
 
     nlohmann::json obj;
     bool ret = info.ToJson(obj);
-    ASSERT_TRUE(ret);
-    ASSERT_TRUE(obj.is_object());
-    ASSERT_EQ(obj["hashCode"].get<std::string>(), "JsonHash");
-    ASSERT_EQ(obj["notificationSlotType"].get<int32_t>(),
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(obj.is_object());
+    EXPECT_EQ(obj["hashCode"].get<std::string>(), "JsonHash");
+    EXPECT_EQ(obj["notificationSlotType"].get<int32_t>(),
         static_cast<int32_t>(NotificationConstant::SlotType::SERVICE_REMINDER));
-    ASSERT_TRUE(obj.contains("content"));
-    ASSERT_EQ(obj["content"]["title"].get<std::string>(), "JsonTitle");
-    ASSERT_EQ(obj["content"]["text"].get<std::string>(), "JsonText");
-    ASSERT_EQ(obj["bundleName"].get<std::string>(), "JsonBundle");
-    ASSERT_EQ(obj["appName"].get<std::string>(), "JsonApp");
-    ASSERT_EQ(obj["deliveryTime"].get<int64_t>(), 999);
-    ASSERT_EQ(obj["groupName"].get<std::string>(), "JsonGroup");
+    EXPECT_TRUE(obj.contains("content"));
+    EXPECT_EQ(obj["content"]["title"].get<std::string>(), "JsonTitle");
+    EXPECT_EQ(obj["content"]["text"].get<std::string>(), "JsonText");
+    EXPECT_EQ(obj["bundleName"].get<std::string>(), "JsonBundle");
+    EXPECT_EQ(obj["appName"].get<std::string>(), "JsonApp");
+    EXPECT_EQ(obj["deliveryTime"].get<int64_t>(), 999);
+    EXPECT_EQ(obj["groupName"].get<std::string>(), "JsonGroup");
 }
 
 /**
@@ -358,12 +360,12 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationInfo_ToJson_0200, Function 
     info.SetNotificationSlotType(NotificationConstant::SlotType::ILLEGAL_TYPE);
     nlohmann::json obj;
     bool ret = info.ToJson(obj);
-    ASSERT_TRUE(ret);
-    ASSERT_TRUE(obj.is_object());
-    ASSERT_EQ(obj["hashCode"].get<std::string>(), "JsonHash2");
-    ASSERT_EQ(
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(obj.is_object());
+    EXPECT_EQ(obj["hashCode"].get<std::string>(), "JsonHash2");
+    EXPECT_EQ(
         obj["notificationSlotType"].get<int32_t>(), static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE));
-    ASSERT_FALSE(obj.contains("content"));
+    EXPECT_FALSE(obj.contains("content"));
 }
 
 /**
@@ -387,19 +389,19 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationInfo_Marshalling_0100, Func
     info.SetGroupName("ParcelGroup");
 
     Parcel parcel;
-    ASSERT_TRUE(info.Marshalling(parcel));
+    EXPECT_TRUE(info.Marshalling(parcel));
     parcel.RewindRead(0);
     std::unique_ptr<NotificationInfo> back(NotificationInfo::Unmarshalling(parcel));
-    ASSERT_NE(back, nullptr);
-    ASSERT_EQ(back->GetHashCode(), "ParcelHash");
-    ASSERT_EQ(back->GetNotificationSlotType(), NotificationConstant::SlotType::CONTENT_INFORMATION);
-    ASSERT_NE(back->GetNotificationExtensionContent(), nullptr);
-    ASSERT_EQ(back->GetNotificationExtensionContent()->GetTitle(), "ParcelTitle");
-    ASSERT_EQ(back->GetNotificationExtensionContent()->GetText(), "ParcelText");
-    ASSERT_EQ(back->GetBundleName(), "ParcelBundle");
-    ASSERT_EQ(back->GetAppName(), "ParcelApp");
-    ASSERT_EQ(back->GetDeliveryTime(), 111);
-    ASSERT_EQ(back->GetGroupName(), "ParcelGroup");
+    EXPECT_NE(back, nullptr);
+    EXPECT_EQ(back->GetHashCode(), "ParcelHash");
+    EXPECT_EQ(back->GetNotificationSlotType(), NotificationConstant::SlotType::CONTENT_INFORMATION);
+    EXPECT_NE(back->GetNotificationExtensionContent(), nullptr);
+    EXPECT_EQ(back->GetNotificationExtensionContent()->GetTitle(), "ParcelTitle");
+    EXPECT_EQ(back->GetNotificationExtensionContent()->GetText(), "ParcelText");
+    EXPECT_EQ(back->GetBundleName(), "ParcelBundle");
+    EXPECT_EQ(back->GetAppName(), "ParcelApp");
+    EXPECT_EQ(back->GetDeliveryTime(), 111);
+    EXPECT_EQ(back->GetGroupName(), "ParcelGroup");
 }
 
 /**
@@ -411,16 +413,16 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationInfo_Marshalling_0100, Func
 HWTEST_F(NotificationSubscriberStubTest, NotificationInfo_Unmarshalling_Fail_0100, Function | SmallTest | Level1)
 {
     Parcel parcel;
-    ASSERT_TRUE(parcel.WriteString("BadParcelHash"));
-    ASSERT_TRUE(parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::SlotType::SERVICE_REMINDER)));
-    ASSERT_TRUE(parcel.WriteParcelable(nullptr));
-    ASSERT_TRUE(parcel.WriteString("BundleX"));
-    ASSERT_TRUE(parcel.WriteInt64(222));
-    ASSERT_TRUE(parcel.WriteString("GroupX"));
-    ASSERT_TRUE(parcel.WriteString("AppX"));
+    EXPECT_TRUE(parcel.WriteString("BadParcelHash"));
+    EXPECT_TRUE(parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::SlotType::SERVICE_REMINDER)));
+    EXPECT_TRUE(parcel.WriteParcelable(nullptr));
+    EXPECT_TRUE(parcel.WriteString("BundleX"));
+    EXPECT_TRUE(parcel.WriteInt64(222));
+    EXPECT_TRUE(parcel.WriteString("GroupX"));
+    EXPECT_TRUE(parcel.WriteString("AppX"));
     parcel.RewindRead(0);
     std::unique_ptr<NotificationInfo> back(NotificationInfo::Unmarshalling(parcel));
-    ASSERT_EQ(back, nullptr);
+    EXPECT_EQ(back, nullptr);
 }
 
 /**
@@ -437,16 +439,16 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationInfo_FromJson_0100, Functio
         { "content", contentObj }, { "bundleName", "FBundle" }, { "deliveryTime", 333 }, { "groupName", "FGroup" },
         { "appName", "FApp" } };
     std::unique_ptr<NotificationInfo> info(NotificationInfo::FromJson(obj));
-    ASSERT_NE(info, nullptr);
-    ASSERT_EQ(info->GetHashCode(), "FHash");
-    ASSERT_EQ(info->GetNotificationSlotType(), NotificationConstant::SlotType::CONTENT_INFORMATION);
-    ASSERT_NE(info->GetNotificationExtensionContent(), nullptr);
-    ASSERT_EQ(info->GetNotificationExtensionContent()->GetTitle(), "FTitle");
-    ASSERT_EQ(info->GetNotificationExtensionContent()->GetText(), "FText");
-    ASSERT_EQ(info->GetBundleName(), "FBundle");
-    ASSERT_EQ(info->GetDeliveryTime(), 333);
-    ASSERT_EQ(info->GetGroupName(), "FGroup");
-    ASSERT_EQ(info->GetAppName(), "FApp");
+    EXPECT_NE(info, nullptr);
+    EXPECT_EQ(info->GetHashCode(), "FHash");
+    EXPECT_EQ(info->GetNotificationSlotType(), NotificationConstant::SlotType::CONTENT_INFORMATION);
+    EXPECT_NE(info->GetNotificationExtensionContent(), nullptr);
+    EXPECT_EQ(info->GetNotificationExtensionContent()->GetTitle(), "FTitle");
+    EXPECT_EQ(info->GetNotificationExtensionContent()->GetText(), "FText");
+    EXPECT_EQ(info->GetBundleName(), "FBundle");
+    EXPECT_EQ(info->GetDeliveryTime(), 333);
+    EXPECT_EQ(info->GetGroupName(), "FGroup");
+    EXPECT_EQ(info->GetAppName(), "FApp");
 }
 
 /**
@@ -460,14 +462,14 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationInfo_FromJson_0200, Functio
     nlohmann::json obj = { { "hashCode", "PHash" },
         { "notificationSlotType", static_cast<int32_t>(NotificationConstant::SlotType::CUSTOM) } };
     std::unique_ptr<NotificationInfo> info(NotificationInfo::FromJson(obj));
-    ASSERT_NE(info, nullptr);
-    ASSERT_EQ(info->GetHashCode(), "PHash");
-    ASSERT_EQ(info->GetNotificationSlotType(), NotificationConstant::SlotType::CUSTOM);
-    ASSERT_EQ(info->GetNotificationExtensionContent(), nullptr);
-    ASSERT_EQ(info->GetBundleName(), "");
-    ASSERT_EQ(info->GetAppName(), "");
-    ASSERT_EQ(info->GetGroupName(), "");
-    ASSERT_EQ(info->GetDeliveryTime(), 0);
+    EXPECT_NE(info, nullptr);
+    EXPECT_EQ(info->GetHashCode(), "PHash");
+    EXPECT_EQ(info->GetNotificationSlotType(), NotificationConstant::SlotType::CUSTOM);
+    EXPECT_EQ(info->GetNotificationExtensionContent(), nullptr);
+    EXPECT_EQ(info->GetBundleName(), "");
+    EXPECT_EQ(info->GetAppName(), "");
+    EXPECT_EQ(info->GetGroupName(), "");
+    EXPECT_EQ(info->GetDeliveryTime(), 0);
 }
 
 /**
@@ -480,7 +482,7 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationInfo_FromJson_Fail_0100, Fu
 {
     nlohmann::json invalid = nullptr;
     std::unique_ptr<NotificationInfo> info(NotificationInfo::FromJson(invalid));
-    ASSERT_EQ(info, nullptr);
+    EXPECT_EQ(info, nullptr);
 }
 
 /**
@@ -495,7 +497,7 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationInfo_FromJson_Fail_0200, Fu
         { "notificationSlotType", static_cast<int32_t>(NotificationConstant::SlotType::SERVICE_REMINDER) },
         { "content", nlohmann::json::array() } };
     std::unique_ptr<NotificationInfo> info(NotificationInfo::FromJson(obj));
-    ASSERT_EQ(info, nullptr);
+    EXPECT_EQ(info, nullptr);
 }
 
 /**
@@ -510,8 +512,8 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationExtensionContent_Dump_0100,
     content.SetTitle("CTitle");
     content.SetText("CText");
     std::string dumpStr = content.Dump();
-    ASSERT_NE(dumpStr.find("CTitle"), std::string::npos);
-    ASSERT_NE(dumpStr.find("CText"), std::string::npos);
+    EXPECT_NE(dumpStr.find("CTitle"), std::string::npos);
+    EXPECT_NE(dumpStr.find("CText"), std::string::npos);
 }
 
 /**
@@ -524,8 +526,8 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationExtensionContent_Dump_0200,
 {
     NotificationExtensionContent content;
     std::string dumpStr = content.Dump();
-    ASSERT_NE(dumpStr.find("title ="), std::string::npos);
-    ASSERT_NE(dumpStr.find(", text ="), std::string::npos);
+    EXPECT_NE(dumpStr.find("title ="), std::string::npos);
+    EXPECT_NE(dumpStr.find(", text ="), std::string::npos);
 }
 
 /**
@@ -540,10 +542,10 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationExtensionContent_ToJson_010
     content.SetTitle("JTitle");
     content.SetText("JText");
     nlohmann::json obj;
-    ASSERT_TRUE(content.ToJson(obj));
-    ASSERT_TRUE(obj.is_object());
-    ASSERT_EQ(obj["title"].get<std::string>(), "JTitle");
-    ASSERT_EQ(obj["text"].get<std::string>(), "JText");
+    EXPECT_TRUE(content.ToJson(obj));
+    EXPECT_TRUE(obj.is_object());
+    EXPECT_EQ(obj["title"].get<std::string>(), "JTitle");
+    EXPECT_EQ(obj["text"].get<std::string>(), "JText");
 }
 
 /**
@@ -556,12 +558,12 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationExtensionContent_ToJson_020
 {
     NotificationExtensionContent content;
     nlohmann::json obj;
-    ASSERT_TRUE(content.ToJson(obj));
-    ASSERT_TRUE(obj.is_object());
-    ASSERT_TRUE(obj.contains("title"));
-    ASSERT_TRUE(obj.contains("text"));
-    ASSERT_EQ(obj["title"].get<std::string>(), "");
-    ASSERT_EQ(obj["text"].get<std::string>(), "");
+    EXPECT_TRUE(content.ToJson(obj));
+    EXPECT_TRUE(obj.is_object());
+    EXPECT_TRUE(obj.contains("title"));
+    EXPECT_TRUE(obj.contains("text"));
+    EXPECT_EQ(obj["title"].get<std::string>(), "");
+    EXPECT_EQ(obj["text"].get<std::string>(), "");
 }
 
 /**
@@ -574,9 +576,9 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationExtensionContent_FromJson_0
 {
     nlohmann::json obj = { { "title", "FCTitle" }, { "text", "FCText" } };
     std::unique_ptr<NotificationExtensionContent> content(NotificationExtensionContent::FromJson(obj));
-    ASSERT_NE(content, nullptr);
-    ASSERT_EQ(content->GetTitle(), "FCTitle");
-    ASSERT_EQ(content->GetText(), "FCText");
+    EXPECT_NE(content, nullptr);
+    EXPECT_EQ(content->GetTitle(), "FCTitle");
+    EXPECT_EQ(content->GetText(), "FCText");
 }
 
 /**
@@ -589,9 +591,9 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationExtensionContent_FromJson_0
 {
     nlohmann::json obj = { { "title", "OnlyTitle" } };
     std::unique_ptr<NotificationExtensionContent> content(NotificationExtensionContent::FromJson(obj));
-    ASSERT_NE(content, nullptr);
-    ASSERT_EQ(content->GetTitle(), "OnlyTitle");
-    ASSERT_EQ(content->GetText(), "");
+    EXPECT_NE(content, nullptr);
+    EXPECT_EQ(content->GetTitle(), "OnlyTitle");
+    EXPECT_EQ(content->GetText(), "");
 }
 
 /**
@@ -604,7 +606,7 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationExtensionContent_FromJson_F
 {
     nlohmann::json invalid = nullptr;
     std::unique_ptr<NotificationExtensionContent> content(NotificationExtensionContent::FromJson(invalid));
-    ASSERT_EQ(content, nullptr);
+    EXPECT_EQ(content, nullptr);
 }
 
 /**
@@ -617,7 +619,7 @@ HWTEST_F(NotificationSubscriberStubTest, NotificationExtensionContent_FromJson_F
 {
     nlohmann::json invalid = nlohmann::json::array();
     std::unique_ptr<NotificationExtensionContent> content(NotificationExtensionContent::FromJson(invalid));
-    ASSERT_EQ(content, nullptr);
+    EXPECT_EQ(content, nullptr);
 }
 }
 }
