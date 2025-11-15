@@ -28,6 +28,7 @@ bool g_isEnable = true;
 bool g_setBundleInfoEnabled = false;
 bool g_getBundleInfoFailed = false;
 bool g_isNeedHapModuleInfos = false;
+bool g_isMockQueryExtensionAbilityInfos = false;
 }
 
 void MockSetBundleInfoFailed(bool getFail)
@@ -53,6 +54,11 @@ void MockDistributedNotificationEnabled(bool isEnable)
 void MockIsNeedHapModuleInfos(bool isNeed)
 {
     g_isNeedHapModuleInfos = isNeed;
+}
+
+void MockQueryExtensionAbilityInfos(bool enabled)
+{
+    g_isMockQueryExtensionAbilityInfos = enabled;
 }
 }
 }
@@ -127,6 +133,22 @@ ErrCode BundleMgrProxy::GetBundleInfoV9(
         bundleInfo.hapModuleInfos.push_back(hapModuleInfo);
     }
     return ERR_OK;
+}
+
+bool BundleMgrProxy::QueryExtensionAbilityInfos(const ExtensionAbilityType &extensionType, const int32_t &userId,
+    std::vector<ExtensionAbilityInfo> &extensionInfos)
+{
+    ANS_LOGE("fake QueryExtensionAbilityInfos: %{public}s",
+        std::to_string(Notification::g_isMockQueryExtensionAbilityInfos).c_str());
+
+    if (Notification::g_isMockQueryExtensionAbilityInfos) {
+        ExtensionAbilityInfo extensionInfo;
+        extensionInfo.type = AppExecFwk::ExtensionAbilityType::NOTIFICATION_SUBSCRIBER;
+        extensionInfo.bundleName = "test_bundle";
+        extensionInfos.push_back(extensionInfo);
+    }
+
+    return true;
 }
 } // namespace AppExecFwk
 } // namespace OHOS

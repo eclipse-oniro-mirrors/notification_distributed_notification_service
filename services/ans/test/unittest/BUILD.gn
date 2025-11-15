@@ -1637,14 +1637,19 @@ ohos_unittest("advanced_notification_service_unit_test") {
     "advanced_notification_service_test/advanced_notification_system_live_view_service_test.cpp",
     "distributed_device_status_test.cpp",
     "mock/mock_accesstoken_kit.cpp",
+    "mock/mock_bluetooth.cpp",
     "mock/mock_bundle_mgr.cpp",
     "mock/mock_datashare.cpp",
     "mock/mock_ipc.cpp",
+    "mock/mock_notification_helper.cpp",
     "mock/mock_push_callback_stub.cpp",
     "mock/mock_time_service_client.cpp",
   ]
 
   defines = []
+  if (distributed_notification_service_feature_notification_extension_subscription) {
+    defines += [ "NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED" ]
+  }
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",

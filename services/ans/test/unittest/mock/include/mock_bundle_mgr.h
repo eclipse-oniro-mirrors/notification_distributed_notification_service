@@ -40,6 +40,8 @@ public:
     bool GetBundleInfos(const BundleFlag  flags, std::vector<BundleInfo> &bundleInfos, int32_t userId) override;
     ErrCode GetBundleInfoV9(
         const std::string& bundleName, int32_t flags, BundleInfo& bundleInfo, int32_t userId) override;
+    bool QueryExtensionAbilityInfos(const ExtensionAbilityType &extensionType, const int32_t &userId,
+        std::vector<ExtensionAbilityInfo> &extensionInfos) override;
 };
 }  // namespace AppExecFwk
 
@@ -52,6 +54,8 @@ void MockDistributedNotificationEnabled(bool isEnable);
 void MockSetBundleInfoFailed(bool getFail);
 
 void MockIsNeedHapModuleInfos(bool isNeed);
+
+void MockQueryExtensionAbilityInfos(bool enabled);
 }  // namespace Notification
 }  // namespace OHOS
 

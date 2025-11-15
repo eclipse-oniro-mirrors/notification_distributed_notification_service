@@ -961,10 +961,7 @@ ErrCode AdvancedNotificationService::GetUserGrantedState(
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(targetBundle);
     if (bundle == nullptr) {
         ANS_LOGE("Bundle is null.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_BUNDLE_OPTION)
-            .Message(std::string("invalid bundle option. bundle: ") +
-            targetBundle->GetBundleName() + ", uid: " + std::to_string(targetBundle->GetUid()))
-            .BranchId(BRANCH_6));
+        ReportInvalidBundleOption(targetBundle, message);
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
@@ -1020,10 +1017,7 @@ ErrCode AdvancedNotificationService::SetUserGrantedState(
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(targetBundle);
     if (bundle == nullptr) {
         ANS_LOGE("Bundle is null.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_BUNDLE_OPTION)
-            .Message(std::string("invalid bundle option. bundle: ") +
-            targetBundle->GetBundleName() + ", uid: " + std::to_string(targetBundle->GetUid()))
-            .BranchId(BRANCH_6));
+        ReportInvalidBundleOption(targetBundle, message);
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
@@ -1070,10 +1064,7 @@ ErrCode AdvancedNotificationService::GetUserGrantedEnabledBundles(
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(targetBundle);
     if (bundle == nullptr) {
         ANS_LOGE("Bundle is null.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_BUNDLE_OPTION)
-            .Message(std::string("invalid bundle option. bundle: ") +
-            targetBundle->GetBundleName() + ", uid: " + std::to_string(targetBundle->GetUid()))
-            .BranchId(BRANCH_6));
+        ReportInvalidBundleOption(targetBundle, message);
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
@@ -1164,6 +1155,7 @@ ErrCode AdvancedNotificationService::SetUserGrantedBundleState(
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(targetBundle);
     if (bundle == nullptr) {
         ANS_LOGE("Bundle is null.");
+        ReportInvalidBundleOption(targetBundle, message);
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
@@ -1172,10 +1164,7 @@ ErrCode AdvancedNotificationService::SetUserGrantedBundleState(
         sptr<NotificationBundleOption> bundleProcessed = GenerateValidBundleOptionV2(enabledBundle);
         if (bundleProcessed == nullptr) {
             ANS_LOGE("Failed to create NotificationBundleOption");
-            NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_BUNDLE_OPTION)
-                .Message(std::string("invalid bundle option. bundle: ") +
-                enabledBundle->GetBundleName() + ", uid: " + std::to_string(enabledBundle->GetUid()))
-                .BranchId(BRANCH_6));
+            ReportInvalidBundleOption(enabledBundle, message);
             return ERR_ANS_INVALID_BUNDLE_OPTION;
         }
         enabledBundlesProcessed.emplace_back(bundleProcessed);
@@ -1325,6 +1314,19 @@ bool AdvancedNotificationService::GetCloneBundleList(
     }
 
     return true;
+}
+
+void AdvancedNotificationService::ReportInvalidBundleOption(
+    const sptr<NotificationBundleOption>& targetBundle, HaMetaMessage& message)
+{
+    std::string msg = "invalid bundle option: ";
+    if (targetBundle == nullptr) {
+        msg += "<null>";
+    } else {
+        msg += targetBundle->GetBundleName() + ", uid: " + std::to_string(targetBundle->GetUid());
+    }
+    NotificationAnalyticsUtil::ReportModifyEvent(
+        message.ErrorCode(ERR_ANS_INVALID_BUNDLE_OPTION).Message(msg).BranchId(BRANCH_6));
 }
 
 std::vector<sptr<NotificationBundleOption>>::iterator AdvancedNotificationService::FindBundleInCache(
