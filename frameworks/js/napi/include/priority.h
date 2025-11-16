@@ -12,62 +12,62 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_PRIORITY_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_PRIORITY_H
- 
+
 #include "common.h"
- 
+
 namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
 struct EnabledParams {
-    napi_ref callback = nullptr;
     bool enable = false;
 };
- 
+
 struct EnabledByBundleParams {
     NotificationBundleOption option;
-    napi_ref callback = nullptr;
-    bool enable = false;
+    NotificationConstant::PriorityEnableStatus enableStatus =
+        NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT;
 };
- 
+
+struct ConfigByBundleParams {
+    NotificationBundleOption option;
+    std::string configValue;
+};
+
 struct AsyncCallbackInfoEnabled {
     napi_env env = nullptr;
     napi_async_work asyncWork = nullptr;
     CallbackPromiseInfo info;
-    EnabledParams params;
-};
- 
-struct AsyncCallbackInfoIsEnabled {
-    napi_env env = nullptr;
-    napi_async_work asyncWork = nullptr;
-    CallbackPromiseInfo info;
     bool enable = false;
 };
- 
+
 struct AsyncCallbackInfoEnabledByBundle {
     napi_env env = nullptr;
     napi_async_work asyncWork = nullptr;
     CallbackPromiseInfo info;
     NotificationBundleOption option;
-    bool enable = false;
+    NotificationConstant::PriorityEnableStatus enableStatus =
+        NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT;
 };
- 
-struct AsyncCallbackInfoIsEnabledByBundle {
+
+struct AsyncCallbackInfoConfigByBundle {
     napi_env env = nullptr;
     napi_async_work asyncWork = nullptr;
     CallbackPromiseInfo info;
     NotificationBundleOption option;
-    bool enable = false;
+    std::string configValue;
 };
- 
+
 napi_value ParsePriorityParameters(const napi_env &env, const napi_callback_info &info, EnabledParams &params);
 napi_value ParsePriorityParameters(const napi_env &env, const napi_callback_info &info, EnabledByBundleParams &params);
-napi_value ParseIsPriorityEnabledParameters(const napi_env &env, const napi_callback_info &info, EnabledParams &params);
+napi_value ParsePriorityParameters(const napi_env &env, const napi_callback_info &info, ConfigByBundleParams &params);
 napi_value ParseIsPriorityEnabledParameters(
     const napi_env &env, const napi_callback_info &info, EnabledByBundleParams &params);
+napi_value ParseGetPriorityConfigParameters(
+    const napi_env &env, const napi_callback_info &info, ConfigByBundleParams &params);
 }  // namespace NotificationNapi
 }  // namespace OHOS
- 
+
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_PRIORITY_H

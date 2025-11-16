@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_CORE_NOTIFICATION_SUBSCRIBER_LISTENER_H
 
 #include "ans_subscriber_stub.h"
+#include "enabled_priority_notification_by_bundle_callback_data.h"
 #include "ians_manager.h"
 #include "notification_request.h"
 #include "notification_sorting.h"
@@ -72,6 +73,11 @@ public:
     ErrCode OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date) override;
 
     ErrCode OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
+
+    ErrCode OnEnabledPriorityChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
+
+    ErrCode OnEnabledPriorityByBundleChanged(
+        const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData) override;
 
     ErrCode OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override;
 

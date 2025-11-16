@@ -2509,24 +2509,21 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutPriorityEnabledForBundle_0100, 
     MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1);
     std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
         std::make_shared<NotificationPreferencesDatabase>();
-    NotificationConstant::SWITCH_STATE switchState = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::ENABLE;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
 
-    EXPECT_FALSE(notificationPreferencesDatabase->PutPriorityEnabledForBundle(bundleInfo, switchState));
+    EXPECT_FALSE(notificationPreferencesDatabase->PutPriorityEnabledForBundle(bundleInfo, enableStatus));
 }
 
 HWTEST_F(NotificationPreferencesDatabaseTest, PutPriorityEnabledForBundle_0200, TestSize.Level1)
 {
     std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
         std::make_shared<NotificationPreferencesDatabase>();
-    NotificationConstant::SWITCH_STATE switchState = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.bundleName_ = "testBundle";
-
-    EXPECT_TRUE(notificationPreferencesDatabase->PutPriorityEnabledForBundle(bundleInfo, switchState));
-
-    NotificationConstant::SWITCH_STATE result;
-    EXPECT_TRUE(notificationPreferencesDatabase->GetPriorityEnabledForBundle(bundleInfo, result));
+    NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::ENABLE;
+    EXPECT_TRUE(notificationPreferencesDatabase->PutPriorityEnabledForBundle(bundleInfo, enableStatus));
+    EXPECT_TRUE(notificationPreferencesDatabase->GetPriorityEnabledForBundle(bundleInfo, enableStatus));
 }
 
 HWTEST_F(NotificationPreferencesDatabaseTest, PutPriorityEnabledForBundle_0300, TestSize.Level1)
@@ -2534,11 +2531,11 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutPriorityEnabledForBundle_0300, 
     MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1);
     std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
         std::make_shared<NotificationPreferencesDatabase>();
-    NotificationConstant::SWITCH_STATE switchState = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::ENABLE;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.bundleName_ = "testBundle";
 
-    EXPECT_FALSE(notificationPreferencesDatabase->PutPriorityEnabledForBundle(bundleInfo, switchState));
+    EXPECT_FALSE(notificationPreferencesDatabase->PutPriorityEnabledForBundle(bundleInfo, enableStatus));
 }
 
 HWTEST_F(NotificationPreferencesDatabaseTest, GetPriorityEnabledForBundle_0100, TestSize.Level1)
@@ -2546,10 +2543,10 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetPriorityEnabledForBundle_0100, 
     MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1);
     std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
         std::make_shared<NotificationPreferencesDatabase>();
-    NotificationConstant::SWITCH_STATE switchState;
+    NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::ENABLE;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
 
-    EXPECT_FALSE(notificationPreferencesDatabase->GetPriorityEnabledForBundle(bundleInfo, switchState));
+    EXPECT_FALSE(notificationPreferencesDatabase->GetPriorityEnabledForBundle(bundleInfo, enableStatus));
 }
 
 HWTEST_F(NotificationPreferencesDatabaseTest, GetPriorityEnabledForBundle_0200, TestSize.Level1)
@@ -2557,22 +2554,22 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetPriorityEnabledForBundle_0200, 
     MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1);
     std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
         std::make_shared<NotificationPreferencesDatabase>();
-    NotificationConstant::SWITCH_STATE switchState;
+    NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::ENABLE;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.bundleName_ = "testBundle";
 
-    EXPECT_FALSE(notificationPreferencesDatabase->GetPriorityEnabledForBundle(bundleInfo, switchState));
+    EXPECT_FALSE(notificationPreferencesDatabase->GetPriorityEnabledForBundle(bundleInfo, enableStatus));
 }
 
 HWTEST_F(NotificationPreferencesDatabaseTest, GetPriorityEnabledForBundle_0300, TestSize.Level1)
 {
     std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
         std::make_shared<NotificationPreferencesDatabase>();
-    NotificationConstant::SWITCH_STATE switchState;
+    NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::ENABLE;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.bundleName_ = "testBundle";
 
-    EXPECT_TRUE(notificationPreferencesDatabase->GetPriorityEnabledForBundle(bundleInfo, switchState));
+    EXPECT_TRUE(notificationPreferencesDatabase->GetPriorityEnabledForBundle(bundleInfo, enableStatus));
 }
 
 HWTEST_F(NotificationPreferencesDatabaseTest, PutDistributedEnabled_0100, TestSize.Level1)

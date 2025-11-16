@@ -541,9 +541,9 @@ HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabled_0100, Function | MediumTest
  */
 HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundle_0100, Function | MediumTest | Level1)
 {
-    bool enabled = true;
+    NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::ENABLE;
     NotificationBundleOption bo;
-    ErrCode ret = ans_->SetPriorityEnabledByBundle(bo, enabled);
+    ErrCode ret = ans_->SetPriorityEnabledByBundle(bo, enableStatus);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
 
@@ -555,11 +555,11 @@ HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundle_0100, Function | Me
  */
 HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundle_0200, Function | MediumTest | Level1)
 {
-    bool enabled = true;
+    NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::ENABLE;
     NotificationBundleOption bo;
     bo.SetBundleName("bundleName");
     bo.SetUid(1);
-    ErrCode ret = ans_->SetPriorityEnabledByBundle(bo, enabled);
+    ErrCode ret = ans_->SetPriorityEnabledByBundle(bo, enableStatus);
     EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
 
@@ -584,9 +584,9 @@ HWTEST_F(AnsNotificationUnitTest, IsPriorityEnabled_0100, Function | MediumTest 
  */
 HWTEST_F(AnsNotificationUnitTest, IsPriorityEnabledByBundle_0100, Function | MediumTest | Level1)
 {
-    bool enabled = true;
+    NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::DISABLE;
     NotificationBundleOption bo;
-    ErrCode ret = ans_->IsPriorityEnabledByBundle(bo, enabled);
+    ErrCode ret = ans_->IsPriorityEnabledByBundle(bo, enableStatus);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
 
@@ -598,11 +598,11 @@ HWTEST_F(AnsNotificationUnitTest, IsPriorityEnabledByBundle_0100, Function | Med
  */
 HWTEST_F(AnsNotificationUnitTest, IsPriorityEnabledByBundle_0200, Function | MediumTest | Level1)
 {
-    bool enabled = true;
+    NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::DISABLE;
     NotificationBundleOption bo;
     bo.SetBundleName("bundleName");
     bo.SetUid(1);
-    ErrCode ret = ans_->IsPriorityEnabledByBundle(bo, enabled);
+    ErrCode ret = ans_->IsPriorityEnabledByBundle(bo, enableStatus);
     EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
 
@@ -2106,6 +2106,24 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSettings_0200, Function | Mediu
     uint32_t slotFlags = 0;
     ErrCode result = ans_->GetNotificationSettings(slotFlags);
     EXPECT_EQ(result, ERR_OK);
+}
+
+/*
+ * @tc.name: SetPriorityEnabledByBundle_0300
+ * @tc.desc: test SetPriorityEnabledByBundle success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundle_0300, Function | MediumTest | Level1)
+{
+    NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::ENABLE;
+    NotificationBundleOption bo;
+    bo.SetBundleName("bundleName");
+    bo.SetUid(1);
+    ErrCode ret = ans_->SetPriorityEnabledByBundle(bo, enableStatus);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = ans_->IsPriorityEnabledByBundle(bo, enableStatus);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(enableStatus, NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT);
 }
 
 /**

@@ -42,11 +42,17 @@ public:
             const sptr<NotificationRequest> &request,
             const std::list<std::string> &commands,
             std::unordered_map<std::string, sptr<IResult>> &results);
+    typedef int32_t (*SYNC_BUNDLE_KEYWORDS)(
+        const sptr<NotificationBundleOption> &bundleOption, const std::string &keyword);
+    typedef int32_t (*NOTIFY_PRIORITY_EVENT)(
+        const std::string &event, const sptr<NotificationBundleOption> &bundleOption);
     void Init();
     int32_t GetSupportCommands(std::set<std::string> &commands);
     int32_t SyncRules(const std::string &rules);
     int32_t UpdateNotification(
-        const sptr<NotificationRequest> &request, std::unordered_map<std::string, sptr<IResult>> results);
+        const sptr<NotificationRequest> &request, std::unordered_map<std::string, sptr<IResult>> &results);
+    int32_t SyncBundleKeywords(const sptr<NotificationBundleOption> &bundleOption, const std::string &keyword);
+    int32_t NotifyPriorityEvent(const std::string &event, const sptr<NotificationBundleOption> &bundleOption);
 
     enum ErrorCode : int32_t {
         ERR_FAIL = -1,
@@ -59,6 +65,8 @@ private:
     INIT init_ = nullptr;
     SYNC_RULES syncRules_ = nullptr;
     GET_SUPPORT_COMMANDS getSupportCommands_ = nullptr;
+    SYNC_BUNDLE_KEYWORDS syncBundleKeywords_ = nullptr;
+    NOTIFY_PRIORITY_EVENT notifyPriorityEvent_ = nullptr;
 };
 
 #define NOTIFICATION_AI_EXTENSION_WRAPPER \

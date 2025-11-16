@@ -56,6 +56,7 @@ enum EventSceneId {
     SCENE_27 = 27,
     SCENE_28 = 28,
     SCENE_29 = 29,
+    SCENE_30 = 30,
 };
 
 enum EventBranchId {
@@ -84,6 +85,10 @@ enum EventBranchId {
     BRANCH_22 = 22,
     BRANCH_23 = 23,
     BRANCH_24 = 24,
+    BRANCH_25 = 25,
+    BRANCH_26 = 26,
+    BRANCH_27 = 27,
+    BRANCH_28 = 28,
 };
 
 class OperationalMeta {

@@ -1299,16 +1299,15 @@ HWTEST_F(NotificationHelperTest, SetPriorityEnabled_0100, TestSize.Level1)
  */
 HWTEST_F(NotificationHelperTest, SetPriorityEnabledByBundle_0100, TestSize.Level1)
 {
-    bool enabled = true;
+    NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::ENABLE;
     NotificationHelper notificationHelper;
     NotificationBundleOption bo;
     bo.SetBundleName("bundleName");
     bo.SetUid(1);
-    ErrCode ret = notificationHelper.SetPriorityEnabledByBundle(bo, enabled);
+    ErrCode ret = notificationHelper.SetPriorityEnabledByBundle(bo, enableStatus);
     EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
-    ret = notificationHelper.IsPriorityEnabledByBundle(bo, enabled);
+    ret = notificationHelper.IsPriorityEnabledByBundle(bo, enableStatus);
     EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
-    EXPECT_TRUE(enabled);
 }
 
 /**

@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 #include "ans_subscriber_proxy.h"
+#include "enabled_priority_notification_by_bundle_callback_data.h"
 
 namespace OHOS {
 namespace Notification {
@@ -69,6 +70,12 @@ public:
     ErrCode OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date) override { return ERR_OK; };
 
     ErrCode OnEnabledNotificationChanged(
+        const sptr<EnabledNotificationCallbackData> &callbackData) override { return ERR_OK; };
+
+    ErrCode OnEnabledPriorityByBundleChanged(
+        const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData) override { return ERR_OK; };
+
+    ErrCode OnEnabledPriorityChanged(
         const sptr<EnabledNotificationCallbackData> &callbackData) override { return ERR_OK; };
 
     ErrCode OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override { return ERR_OK; };

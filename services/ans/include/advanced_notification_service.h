@@ -1386,6 +1386,25 @@ public:
     ErrCode SetAdditionConfig(const std::string &key, const std::string &value) override;
 
     /**
+     * @brief Set priority config of bundle for intelligent identification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param value Indicates priority config of bundle.
+     * @return Returns set result.
+     */
+    ErrCode SetBundlePriorityConfig(
+        const sptr<NotificationBundleOption> &bundleOption, const std::string &value) override;
+
+    /**
+     * @brief Get priority config of bundle for intelligent identification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param value Indicates priority config of bundle.
+     * @return Returns get result.
+     */
+    ErrCode GetBundlePriorityConfig(const sptr<NotificationBundleOption> &bundleOption, std::string &value) override;
+
+    /**
      * @brief Configuring Whether to allow sending priority notification.
      *
      * @param enabled Whether to allow sending priority notification.
@@ -1400,7 +1419,8 @@ public:
      * @param enabled Whether to allow sending priority notification by bundle.
      * @return Returns configuring Whether to allow sending priority notification by bundle.
      */
-    ErrCode SetPriorityEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption, const bool enabled) override;
+    ErrCode SetPriorityEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t enableStatusInt) override;
 
     /**
      * @brief Query switch for sending priority notification.
@@ -1417,7 +1437,8 @@ public:
      * @param enabled Whether to allow sending priority notification by bundle.
      * @return Returns configuring Whether to allow sending priority notification by bundle.
      */
-    ErrCode IsPriorityEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption, bool &enabled) override;
+    ErrCode IsPriorityEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t &enableStatusInt) override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -2053,7 +2074,7 @@ private:
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled, ErrCode& result);
     void ProcessExtensionSubscriptionInfos(const sptr<NotificationBundleOption>& bundleOption,
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos, ErrCode& result);
-    ErrCode SystemSwitchPermissionCheck();
+    ErrCode SystemPermissionCheck();
     std::vector<sptr<NotificationBundleOption>>::iterator FindBundleInCache(
         const sptr<NotificationBundleOption> &bundleOption);
     void ProcessHfpDeviceStateChange(int state);
@@ -2063,6 +2084,9 @@ private:
     void ProcessSubscriptionInfoForStateChange(
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos,
         const sptr<NotificationBundleOption> &bundle, bool filterHfpOnly);
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    bool IsNeedUpdatePriorityType(const sptr<NotificationRequest> &request);
+#endif
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;

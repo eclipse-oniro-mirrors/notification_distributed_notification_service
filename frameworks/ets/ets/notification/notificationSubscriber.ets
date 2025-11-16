@@ -40,6 +40,10 @@ export interface NotificationSubscriber {
 
     onEnabledNotificationChanged?: (callbackData: EnabledNotificationCallbackData) => void;
 
+    onEnabledPriorityChanged?: (callbackData: EnabledPriorityNotificationCallbackData) => void;
+
+    onEnabledPriorityByBundleChanged?: (callbackData: EnabledPriorityNotificationByBundleCallbackData) => void;
+
     onBadgeChanged?: (data: BadgeNumberCallbackData) => void;
 
     onBadgeEnabledChanged?: BadgeEnabledChangedCallback;
@@ -63,6 +67,10 @@ export class NotificationSubscriberInner implements NotificationSubscriber {
     public onDoNotDisturbChanged?: (mode: notificationManager.DoNotDisturbDate) => void;
 
     public onEnabledNotificationChanged?: (callbackData: EnabledNotificationCallbackData) => void;
+
+    public onEnabledPriorityChanged?: (callbackData: EnabledPriorityNotificationCallbackData) => void;
+
+    public onEnabledPriorityByBundleChanged?: (callbackData: EnabledPriorityNotificationByBundleCallbackData) => void;
 
     public onBadgeChanged?: (data: BadgeNumberCallbackData) => void;
 
@@ -141,6 +149,26 @@ export interface EnabledNotificationCallbackData {
     readonly bundle: string;
     readonly uid: int;
     readonly enable: boolean;
+}
+
+export interface EnabledPriorityNotificationCallbackData {
+    readonly enable: boolean;
+}
+
+export interface EnabledPriorityNotificationByBundleCallbackData {
+    readonly bundle: string;
+    readonly uid: int;
+    readonly enableStatus: int;
+}
+
+class EnabledPriorityNotificationCallbackDataInner implements EnabledPriorityNotificationCallbackData {
+    public readonly enable: boolean = false;
+}
+
+class EnabledPriorityNotificationByBundleCallbackDataInner implements EnabledPriorityNotificationByBundleCallbackData {
+    public readonly bundle: string = '';
+    public readonly uid: int = -1;
+    public readonly enableStatus: int = 1;
 }
 
 class EnabledNotificationCallbackDataInner implements EnabledNotificationCallbackData {

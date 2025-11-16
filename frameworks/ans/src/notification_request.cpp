@@ -57,6 +57,29 @@ constexpr int32_t MAX_MAP_SIZE = 1000;
 constexpr int32_t PKG_INSTALL_STATUS_UNKMOWN = -1;
 constexpr int32_t PKG_INSTALL_STATUS_UNINSTALL = 0;
 
+const std::vector<std::string> NotificationConstant::PriorityNotificationType::VALID_PRIORITY_TYPE_LIST = {
+    NotificationConstant::PriorityNotificationType::OTHER,
+    NotificationConstant::PriorityNotificationType::PRIMARY_CONTACT,
+    NotificationConstant::PriorityNotificationType::AT_ME,
+    NotificationConstant::PriorityNotificationType::URGENT_MESSAGE,
+    NotificationConstant::PriorityNotificationType::SCHEDULE_REMINDER
+};
+
+const std::vector<std::string> NotificationConstant::PriorityNotificationType::INNER_PRIORITY_TYPE_LIST = {
+    NotificationConstant::PriorityNotificationType::PAYMENT_DUE,
+    NotificationConstant::PriorityNotificationType::TRANSACTION_ALERT,
+    NotificationConstant::PriorityNotificationType::EXPRESS_PROGRESS,
+    NotificationConstant::PriorityNotificationType::MISS_CALL,
+    NotificationConstant::PriorityNotificationType::TRAVEL_ALERT,
+    NotificationConstant::PriorityNotificationType::ACCOUNT_ALERT,
+    NotificationConstant::PriorityNotificationType::APPOINTMENT_REMINDER,
+    NotificationConstant::PriorityNotificationType::TRAFFIC_NOTICE,
+    NotificationConstant::PriorityNotificationType::KEY_PROGRESS,
+    NotificationConstant::PriorityNotificationType::PUBLIC_EVENT,
+    NotificationConstant::PriorityNotificationType::IOT_WARNING,
+    NotificationConstant::PriorityNotificationType::CUSTOM_KEYWORD
+};
+
 NotificationRequest::NotificationRequest(int32_t notificationId) : notificationId_(notificationId)
 {
     createTime_ = GetNowSysTime();
@@ -1797,7 +1820,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         ANS_LOGE("Failed to read distributedHashCode");
         return false;
     }
-    SetPriorityNotificationType(tempPriorityType);
+    SetInnerPriorityNotificationType(tempPriorityType);
 
     int32_t slotTypeValue = parcel.ReadInt32();
     if (slotTypeValue < 0 ||
@@ -2506,7 +2529,7 @@ void NotificationRequest::SubConvertJsonToString(NotificationRequest *target, co
 
     if (jsonObject.find("priorityNotificationType") != jsonEnd &&
         jsonObject.at("priorityNotificationType").is_string()) {
-        target->SetPriorityNotificationType(jsonObject.at("priorityNotificationType").get<std::string>());
+        target->SetInnerPriorityNotificationType(jsonObject.at("priorityNotificationType").get<std::string>());
     }
 }
 
@@ -3341,34 +3364,44 @@ void NotificationRequest::SetFlagBit(
     }
 }
 
-void NotificationRequest::SetPriorityNotificationType(std::string priorityNotificationType)
+void NotificationRequest::SetPriorityNotificationType(const std::string &priorityNotificationType)
 {
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-    if (priorityTypeList_.empty()) {
-        priorityTypeList_.push_back(PriorityNotificationType::OTHER);
-        priorityTypeList_.push_back(PriorityNotificationType::PRIMARY_CONTACT);
-        priorityTypeList_.push_back(PriorityNotificationType::AT_ME);
-        priorityTypeList_.push_back(PriorityNotificationType::URGENT_MESSAGE);
-        priorityTypeList_.push_back(PriorityNotificationType::SCHEDULE_REMINDER);
-        priorityTypeList_.push_back(PriorityNotificationType::PAYMENT_DUE);
-        priorityTypeList_.push_back(PriorityNotificationType::TRANSACTION_ALERT);
-        priorityTypeList_.push_back(PriorityNotificationType::EXPRESS_PROGRESS);
-        priorityTypeList_.push_back(PriorityNotificationType::MISS_CALL);
-        priorityTypeList_.push_back(PriorityNotificationType::TRAVEL_ALERT);
-        priorityTypeList_.push_back(PriorityNotificationType::ACCOUNT_ALERT);
-        priorityTypeList_.push_back(PriorityNotificationType::APPOINTMENT_REMINDER);
-        priorityTypeList_.push_back(PriorityNotificationType::TRAFFIC_NOTICE);
-        priorityTypeList_.push_back(PriorityNotificationType::KEY_PROGRESS);
-        priorityTypeList_.push_back(PriorityNotificationType::PUBLIC_EVENT);
-        priorityTypeList_.push_back(PriorityNotificationType::IOT_WARNING);
-    }
-    auto iter = std::find(priorityTypeList_.cbegin(), priorityTypeList_.cend(), priorityNotificationType);
-    if (iter == priorityTypeList_.cend()) {
-        ANS_LOGE("unknow priorityNotificationType %{public}s", priorityNotificationType.c_str());
-        priorityNotificationType_ = PriorityNotificationType::OTHER;
+    if (CheckPriorityNotificationTypeValid(priorityNotificationType)) {
+        priorityNotificationType_ = priorityNotificationType;
         return;
     }
-    priorityNotificationType_ = priorityNotificationType;
+    ANS_LOGE("unknow priorityNotificationType %{public}s", priorityNotificationType.c_str());
+#endif
+}
+
+bool NotificationRequest::CheckPriorityNotificationTypeValid(const std::string &priorityNotificationType)
+{
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    auto iter = std::find(
+        NotificationConstant::PriorityNotificationType::VALID_PRIORITY_TYPE_LIST.cbegin(),
+        NotificationConstant::PriorityNotificationType::VALID_PRIORITY_TYPE_LIST.cend(), priorityNotificationType);
+    if (iter != NotificationConstant::PriorityNotificationType::VALID_PRIORITY_TYPE_LIST.cend()) {
+        return true;
+    }
+#endif
+    return false;
+}
+
+void NotificationRequest::SetInnerPriorityNotificationType(const std::string &priorityNotificationType)
+{
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    if (CheckPriorityNotificationTypeValid(priorityNotificationType)) {
+        priorityNotificationType_ = priorityNotificationType;
+        return;
+    }
+    auto iter = std::find(NotificationConstant::PriorityNotificationType::INNER_PRIORITY_TYPE_LIST.cbegin(),
+        NotificationConstant::PriorityNotificationType::INNER_PRIORITY_TYPE_LIST.cend(), priorityNotificationType);
+    if (iter != NotificationConstant::PriorityNotificationType::INNER_PRIORITY_TYPE_LIST.cend()) {
+        priorityNotificationType_ = priorityNotificationType;
+        return;
+    }
+    ANS_LOGE("unknow inner priorityNotificationType %{public}s", priorityNotificationType.c_str());
 #endif
 }
 

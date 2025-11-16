@@ -229,6 +229,32 @@ ErrCode SubscriberListener::OnEnabledNotificationChanged(
     return ERR_OK;
 }
 
+ErrCode SubscriberListener::OnEnabledPriorityChanged(const sptr<EnabledNotificationCallbackData> &callbackData)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    auto subscriber = subscriber_.lock();
+    if (subscriber == nullptr) {
+        ANS_LOGE("null subscriber");
+        return ERR_INVALID_DATA;
+    }
+    subscriber->OnEnabledPriorityChanged(std::make_shared<EnabledNotificationCallbackData>(*callbackData));
+    return ERR_OK;
+}
+
+ErrCode SubscriberListener::OnEnabledPriorityByBundleChanged(
+    const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    auto subscriber = subscriber_.lock();
+    if (subscriber == nullptr) {
+        ANS_LOGE("null subscriber");
+        return ERR_INVALID_DATA;
+    }
+    subscriber->OnEnabledPriorityByBundleChanged(
+        std::make_shared<EnabledPriorityNotificationByBundleCallbackData>(*callbackData));
+    return ERR_OK;
+}
+
 ErrCode SubscriberListener::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);

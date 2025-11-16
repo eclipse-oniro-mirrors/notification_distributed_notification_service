@@ -228,11 +228,15 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setPriorityEnabledByBundle", NapiSetPriorityEnabledByBundle),
         DECLARE_NAPI_FUNCTION("isPriorityEnabled", NapiIsPriorityEnabled),
         DECLARE_NAPI_FUNCTION("isPriorityEnabledByBundle", NapiIsPriorityEnabledByBundle),
+        DECLARE_NAPI_FUNCTION("setBundlePriorityConfig", NapiSetBundlePriorityConfig),
+        DECLARE_NAPI_FUNCTION("getBundlePriorityConfig", NapiGetBundlePriorityConfig),
 #else
         DECLARE_NAPI_FUNCTION("setPriorityEnabled", Common::NapiReturnCapErr),
         DECLARE_NAPI_FUNCTION("setPriorityEnabledByBundle", Common::NapiReturnCapErr),
         DECLARE_NAPI_FUNCTION("isPriorityEnabled", Common::NapiReturnCapErr),
         DECLARE_NAPI_FUNCTION("isPriorityEnabledByBundle", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("setBundlePriorityConfig", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("getBundlePriorityConfig", Common::NapiReturnCapErr),
 #endif
     };
 
