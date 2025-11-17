@@ -871,10 +871,10 @@ bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
         ANS_LOGE("Object_New faild. status %{public}d", status);
         return false;
     }
-    ani_long msObj = 0;
-    if ((status = env->Object_CallMethodByName_Long(outObj, "setTime", "l:l", &msObj, time))
+    ani_double msObj = 0;
+    if ((status = env->Object_CallMethodByName_Double(outObj, "setTime", "d:d", &msObj, time))
         != ANI_OK) {
-        ANS_LOGD("Object_CallMethodByName_Long setDate faild. status %{public}d", status);
+        ANS_LOGD("Object_CallMethodByName_Double setDate faild. status %{public}d", status);
         return false;
     }
     return true;
@@ -889,8 +889,8 @@ bool GetDateByObject(ani_env *env, ani_object timeObj, int64_t &time)
     }
 
     ani_status status;
-    ani_long timeMsObj = 0;
-    if ((status = env->Object_CallMethodByName_Long(timeObj, "getTime", ":l", &timeMsObj)) != ANI_OK) {
+    ani_double timeMsObj = 0;
+    if ((status = env->Object_CallMethodByName_Long(timeObj, "getTime", ":d", &timeMsObj)) != ANI_OK) {
         ANS_LOGD("Object_CallMethodByName_Long faild. status %{public}d", status);
         return false;
     }
