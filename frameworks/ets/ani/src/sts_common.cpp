@@ -890,8 +890,8 @@ bool GetDateByObject(ani_env *env, ani_object timeObj, int64_t &time)
 
     ani_status status;
     ani_double timeMsObj = 0;
-    if ((status = env->Object_CallMethodByName_Long(timeObj, "getTime", ":d", &timeMsObj)) != ANI_OK) {
-        ANS_LOGD("Object_CallMethodByName_Long faild. status %{public}d", status);
+    if ((status = env->Object_CallMethodByName_Double(timeObj, "getTime", ":d", &timeMsObj)) != ANI_OK) {
+        ANS_LOGD("Object_CallMethodByName_Double faild. status %{public}d", status);
         return false;
     }
     time = static_cast<int64_t>(timeMsObj);
