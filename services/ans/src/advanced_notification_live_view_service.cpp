@@ -40,7 +40,7 @@ namespace OHOS {
 namespace Notification {
 const std::string LOCK_SCREEN_PICTURE_TAG = "lock_screen_picture";
 const std::string PROGRESS_VALUE = "progressValue";
-constexpr int32_t BGTASK_UID = 3051;
+constexpr int32_t BGTASK_UID = 1096;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
 {

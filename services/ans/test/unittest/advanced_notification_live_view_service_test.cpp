@@ -317,7 +317,7 @@ HWTEST_F(AnsLiveViewServiceTest, HandleUpdateLiveViewNotificationTimer_001, Func
     localLiveViewContent->SetType(TYPE_CODE_DOWNLOAD);
     auto content = std::make_shared<NotificationContent>(localLiveViewContent);
     request->SetContent(content);
-    int creatorUid = 3051;
+    int creatorUid = 1096;
     request->SetCreatorUid(creatorUid);
     int ownerUid = 20099999;
     request->SetOwnerUid(ownerUid);
