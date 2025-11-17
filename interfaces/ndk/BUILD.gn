@@ -56,6 +56,7 @@ ohos_shared_library("ohnotification") {
 
   external_deps = [
     "ability_base:base",
+    "ability_base:configuration",
     "ability_base:zuri",
     "c_utils:utils",
     "ffrt:libffrt",

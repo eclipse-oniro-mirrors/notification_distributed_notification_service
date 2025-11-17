@@ -38,6 +38,7 @@ ohos_benchmarktest("Benchmark_Notification_Servece_Test") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",

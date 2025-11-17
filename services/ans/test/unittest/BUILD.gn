@@ -738,6 +738,7 @@ ohos_unittest("notification_preferences_second_test") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "c_utils:utils",
     "data_share:datashare_consumer",
     "ffrt:libffrt",
@@ -1587,6 +1588,7 @@ ohos_unittest("notification_extension_wrapper_unit_test") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_runtime:dataobs_manager",
     "c_utils:utils",
     "ffrt:libffrt",
@@ -1672,6 +1674,7 @@ ohos_unittest("advanced_notification_service_unit_test") {
   }
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
@@ -1724,6 +1727,7 @@ ohos_unittest("common_utils_test") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:zuri",
     "c_utils:utils",
     "ffrt:libffrt",

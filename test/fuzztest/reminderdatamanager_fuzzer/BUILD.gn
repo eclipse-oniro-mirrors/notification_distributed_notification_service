@@ -43,6 +43,7 @@ ohos_fuzztest("ReminderDataManagerFuzzTest") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
