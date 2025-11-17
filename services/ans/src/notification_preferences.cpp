@@ -2451,7 +2451,7 @@ ErrCode NotificationPreferences::SetGeofenceEnabled(bool enabled)
 {
     if (preferncesDB_ == nullptr) {
         ANS_LOGI("Invalid prefernces db.");
-        return ERR_ANS_NO_MEMORY;
+        return ERR_ANS_SERVICE_NOT_READY;
     }
 
     auto storeDBResult = preferncesDB_->SetGeofenceEnabled(enabled);
@@ -2462,7 +2462,7 @@ ErrCode NotificationPreferences::IsGeofenceEnabled(bool &enabled)
 {
     if (preferncesDB_ == nullptr) {
         ANS_LOGI("Invalid prefernces db.");
-        return ERR_ANS_NO_MEMORY;
+        return ERR_ANS_SERVICE_NOT_READY;
     }
 
     auto storeDBResult = preferncesDB_->IsGeofenceEnabled(enabled);

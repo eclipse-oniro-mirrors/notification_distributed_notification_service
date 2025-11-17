@@ -156,7 +156,6 @@ public:
     /**
      * @brief Check if geofence notification is enabled for the specified bundle
      *
-     * @param bundleInfo Application bundle information to check
      * @param enabled Output parameter indicating the enabled status
      * @return true if the query was successful, false if an error occurred
      */

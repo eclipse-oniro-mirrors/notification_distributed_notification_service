@@ -19,6 +19,7 @@
 #include "ani_distributed_enable.h"
 #include "ani_do_not_disturb_date.h"
 #include "ani_do_not_disturb_profile.h"
+#include "ani_geofence_enabled.h"
 #include "ani_get_active.h"
 #include "ani_slot.h"
 #include "ani_local_live_view.h"
@@ -106,6 +107,10 @@ static std::array kitManagerFunctions = {
         reinterpret_cast<void *>(AniSetRingtoneInfoByBundle)},
     ani_native_function {"nativeGetRingtoneInfoByBundle", nullptr,
         reinterpret_cast<void *>(AniGetRingtoneInfoByBundle)},
+    ani_native_function {"nativeSetGeofenceEnabled", nullptr,
+        reinterpret_cast<void *>(AniSetGeofenceEnabled)},
+    ani_native_function {"nativeIsGeofenceEnabled", nullptr,
+        reinterpret_cast<void *>(AniIsGeofenceEnabled)},
     ani_native_function {"nativeSetSilentReminderEnabled", nullptr,
         reinterpret_cast<void *>(AniSetSilentReminderEnabled)},
     ani_native_function {"nativeIsSilentReminderEnabled", nullptr,

@@ -23,9 +23,6 @@
 #include "ipc_skeleton.h"
 #include "notification_preferences.h"
 
-namespace {
-static const uint64_t DEL_TASK_DELAY = 5 * 1000;
-}
 namespace OHOS {
 namespace Notification {
 ErrCode AdvancedNotificationService::SetGeofenceEnabled(bool enabled)
