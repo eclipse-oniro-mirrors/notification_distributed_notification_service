@@ -55,6 +55,10 @@ ErrCode AdvancedNotificationService::CancelAll(const std::string &instanceKey,
     const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
     ANS_LOGD("called");
+    if (synchronizer == nullptr) {
+        ANS_LOGE("synchronizer is null");
+        return ERR_ANS_INVALID_PARAM;
+    }
     const int reason = NotificationConstant::APP_CANCEL_ALL_REASON_DELETE;
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {

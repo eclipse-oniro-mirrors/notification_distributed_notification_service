@@ -42,5 +42,46 @@ ErrCode AnsResultDataSynchronizerImpl::GetResultCode() const
 {
     return resultCode_;
 }
+
+ErrCode AnsResultDataSynchronizerImpl::TransferResultData(int32_t resultCode,
+    const std::vector<sptr<NotificationRequest>> &requests)
+{
+    resultCode_ = resultCode;
+    requests_ = requests;
+    NotifyOne();
+    return resultCode_;
+}
+
+std::vector<sptr<NotificationRequest>> AnsResultDataSynchronizerImpl::GetNotificationRequests() const
+{
+    return requests_;
+}
+
+ErrCode AnsResultDataSynchronizerImpl::TransferResultData(int32_t resultCode,
+    const std::vector<sptr<Notification>> &notifications)
+{
+    resultCode_ = resultCode;
+    notifications_ = notifications;
+    NotifyOne();
+    return resultCode_;
+}
+
+std::vector<sptr<Notification>> AnsResultDataSynchronizerImpl::GetNotifications() const
+{
+    return notifications_;
+}
+
+ErrCode AnsResultDataSynchronizerImpl::TransferResultData(int32_t resultCode, bool enabled)
+{
+    resultCode_ = resultCode;
+    enabled_ = enabled;
+    NotifyOne();
+    return resultCode_;
+}
+
+bool AnsResultDataSynchronizerImpl::GetEnabled() const
+{
+    return enabled_;
+}
 }  // namespace Notification
 }  // namespace OHOS

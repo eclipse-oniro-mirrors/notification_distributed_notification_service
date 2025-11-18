@@ -39,6 +39,7 @@ namespace OHOS {
 namespace Notification {
 namespace {
 const static std::string KEY_BUNDLE_LABEL = "label_ans_bundle_";
+constexpr static const char* KEY_PRIORITY_NOTIFICATION_SWITCH_FOR_BUNDLE = "priorityNotificationSwitchForBundle";
 }
 ffrt::mutex NotificationPreferences::instanceMutex_;
 std::shared_ptr<NotificationPreferences> NotificationPreferences::instance_;
@@ -1365,7 +1366,7 @@ ErrCode NotificationPreferences::SetPriorityEnabled(const NotificationConstant::
 }
 
 ErrCode NotificationPreferences::SetPriorityEnabledByBundle(
-    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SWITCH_STATE &enabled)
+    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::PriorityEnableStatus enableStatus)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
@@ -1376,7 +1377,7 @@ ErrCode NotificationPreferences::SetPriorityEnabledByBundle(
     bundleInfo.SetBundleUid(bundleOption->GetUid());
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult =
-        preferncesDB_->PutPriorityEnabledForBundle(bundleInfo, enabled);
+        preferncesDB_->PutPriorityEnabledForBundle(bundleInfo, enableStatus);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
@@ -1389,7 +1390,7 @@ ErrCode NotificationPreferences::IsPriorityEnabled(NotificationConstant::SWITCH_
 }
 
 ErrCode NotificationPreferences::IsPriorityEnabledByBundle(
-    const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::SWITCH_STATE &enabled)
+    const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::PriorityEnableStatus &enableStatus)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
@@ -1399,7 +1400,37 @@ ErrCode NotificationPreferences::IsPriorityEnabledByBundle(
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(bundleOption->GetBundleName());
     bundleInfo.SetBundleUid(bundleOption->GetUid());
-    bool storeDBResult = preferncesDB_->GetPriorityEnabledForBundle(bundleInfo, enabled);
+    bool storeDBResult = preferncesDB_->GetPriorityEnabledForBundle(bundleInfo, enableStatus);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::SetBundlePriorityConfig(
+    const sptr<NotificationBundleOption> &bundleOption, const std::string &configValue)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleOption->GetBundleName());
+    bundleInfo.SetBundleUid(bundleOption->GetUid());
+    bool storeDBResult = preferncesDB_->SetBundlePriorityConfig(bundleInfo, configValue);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::GetBundlePriorityConfig(
+    const sptr<NotificationBundleOption> &bundleOption, std::string &configValue)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleOption->GetBundleName());
+    bundleInfo.SetBundleUid(bundleOption->GetUid());
+    bool storeDBResult = preferncesDB_->GetBundlePriorityConfig(bundleInfo, configValue);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 

@@ -92,11 +92,16 @@ namespace OHOS {
             synchronizer->Wait();
         }
         service->GetSlotNumAsBundle(bundleOption, num);
-        std::vector<sptr<Notification::NotificationRequest>> notifications;
-        service->GetActiveNotifications(notifications, fuzzData->ConsumeRandomLengthString());
+        if (service->GetActiveNotifications(fuzzData->ConsumeRandomLengthString(),
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
         service->GetActiveNotificationNums(num);
         std::vector<sptr<Notification::Notification>> notificationss;
-        service->GetAllActiveNotifications(notificationss);
+        if (service->GetAllActiveNotifications(
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
         std::vector<std::string> key;
         service->GetSpecialActiveNotifications(key, notificationss);
         bool canPublish = fuzzData->ConsumeBool();
@@ -121,8 +126,14 @@ namespace OHOS {
         service->SetNotificationsEnabledForAllBundles(stringData, enabled);
         service->SetNotificationsEnabledForSpecialBundle(stringData, bundleOption, enabled);
         service->SetShowBadgeEnabledForBundle(bundleOption, enabled);
-        service->GetShowBadgeEnabledForBundle(bundleOption, enabled);
-        service->GetShowBadgeEnabled(enabled);
+        if (service->GetShowBadgeEnabledForBundle(bundleOption,
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
+        if (service->GetShowBadgeEnabled(
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
         sptr<Notification::NotificationSubscribeInfo> info = new Notification::NotificationSubscribeInfo();
         bool allowed = fuzzData->ConsumeBool();
         service->IsAllowedNotify(allowed);

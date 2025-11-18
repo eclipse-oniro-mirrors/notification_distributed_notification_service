@@ -1416,7 +1416,7 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
 {
     ANS_LOGD("SetAdditionConfig called (%{public}s, %{public}s).", key.c_str(), value.c_str());
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_1);
-    message.Message(" key:" + key + " value" + value);
+    message.Message(" key:" + key);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER) &&
         !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_MANAGE_EDM_POLICY)) {
         ANS_LOGE("Permission denied.");
@@ -1471,11 +1471,14 @@ ErrCode AdvancedNotificationService::SyncAdditionConfig(
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
     if (key == PRIORITY_RULE_CONFIG_KEY) {
         int32_t syncResult = NOTIFICATION_AI_EXTENSION_WRAPPER->SyncRules(value);
+        message.ErrorCode(syncResult);
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        ANS_LOGE("Sync addition config to ai result: %{public}d, key: %{public}s", syncResult, key.c_str());
+        if (syncResult == NOTIFICATION_AI_EXTENSION_WRAPPER->ErrorCode::ERR_FAIL) {
+            return ERR_ANS_SERVICE_NOT_READY;
+        }
         if (syncResult != NotificationAiExtensionWrapper::ErrorCode::ERR_OK) {
-            ANS_LOGE("Sync addition config result: %{public}d, key: %{public}s", syncResult, key.c_str());
-            message.ErrorCode(syncResult).Append(" Sync failed");
-            NotificationAnalyticsUtil::ReportModifyEvent(message);
-            return syncResult;
+            return ERR_ANS_INVALID_PARAM;
         }
     }
 #endif

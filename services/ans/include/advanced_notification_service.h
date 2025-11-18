@@ -53,6 +53,7 @@
 #include "reminder_swing_decision_center.h"
 #endif
 #include "notification_clone_bundle_info.h"
+#include "ibadge_query_callback.h"
 
 namespace OHOS {
 namespace Notification {
@@ -265,12 +266,12 @@ public:
     /**
      * @brief Obtains active notifications of the current application in the system.
      *
-     * @param notifications Indicates active NotificationRequest objects of the current application.
      * @param instanceKey Indicates the application instance key.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications,
-        const std::string &instanceKey) override;
+    ErrCode GetActiveNotifications(const std::string &instanceKey,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Obtains the number of active notifications of the current application in the system.
@@ -294,10 +295,10 @@ public:
      * @brief Obtains all active notifications in the current system. The caller must have system permissions to
      * call this method.
      *
-     * @param notifications Indicates all active notifications of this application.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetAllActiveNotifications(std::vector<sptr<Notification>> &notifications) override;
+    ErrCode GetAllActiveNotifications(const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Obtains the active notifications corresponding to the specified key in the system. To call this method
@@ -562,9 +563,11 @@ public:
      *
      * @param bundleOption Indicates the NotificationBundleOption object.
      * @param enabled Indicates the flag that allows badge to be shown.
+     * @param synchronizer Inter-process data synchronization object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetShowBadgeEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &enabled) override;
+    ErrCode GetShowBadgeEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Obtains the flag that whether to allow applications to show badge.
@@ -579,10 +582,10 @@ public:
     /**
      * @brief Gets whether allows the badge to display the status of notifications.
      *
-     * @param enabled Indicates the flag that allows badge to be shown.
+     * * @param synchronizer Inter-process data synchronization object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetShowBadgeEnabled(bool &enabled) override;
+    ErrCode GetShowBadgeEnabled(const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
      * @brief Subscribes notifications.
@@ -1040,6 +1043,29 @@ public:
         const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber) override;
 
     /**
+     * @brief Obtains the badge number of the current application in the system.
+     *
+     * @param nums Indicates the badge number of the current application.
+     * @return Returns get notification badge number result.
+     */
+    ErrCode GetBadgeNumber(int32_t &badgeNumber) override;
+
+    /**
+     * @brief Register BadgeQuery Callback.
+     *
+     * @param badgeQueryCallback badgeQueryCallback.
+     * @return Returns register badgeQuery Callback result.
+     */
+    ErrCode RegisterBadgeQueryCallback(const sptr<IBadgeQueryCallback> &badgeQueryCallback) override;
+
+    /**
+     * @brief Unregister BadgeQuery Callback.
+     *
+     * @return Returns unregister badgeQuery Callback result.
+     */
+    ErrCode UnRegisterBadgeQueryCallback() override;
+
+    /**
      * @brief Obtains allow notification application list.
      *
      * @param bundleOption Indicates the bundle bundleOption.
@@ -1360,6 +1386,25 @@ public:
     ErrCode SetAdditionConfig(const std::string &key, const std::string &value) override;
 
     /**
+     * @brief Set priority config of bundle for intelligent identification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param value Indicates priority config of bundle.
+     * @return Returns set result.
+     */
+    ErrCode SetBundlePriorityConfig(
+        const sptr<NotificationBundleOption> &bundleOption, const std::string &value) override;
+
+    /**
+     * @brief Get priority config of bundle for intelligent identification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param value Indicates priority config of bundle.
+     * @return Returns get result.
+     */
+    ErrCode GetBundlePriorityConfig(const sptr<NotificationBundleOption> &bundleOption, std::string &value) override;
+
+    /**
      * @brief Configuring Whether to allow sending priority notification.
      *
      * @param enabled Whether to allow sending priority notification.
@@ -1374,7 +1419,8 @@ public:
      * @param enabled Whether to allow sending priority notification by bundle.
      * @return Returns configuring Whether to allow sending priority notification by bundle.
      */
-    ErrCode SetPriorityEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption, const bool enabled) override;
+    ErrCode SetPriorityEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t enableStatusInt) override;
 
     /**
      * @brief Query switch for sending priority notification.
@@ -1391,7 +1437,8 @@ public:
      * @param enabled Whether to allow sending priority notification by bundle.
      * @return Returns configuring Whether to allow sending priority notification by bundle.
      */
-    ErrCode IsPriorityEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption, bool &enabled) override;
+    ErrCode IsPriorityEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t &enableStatusInt) override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -2020,13 +2067,14 @@ private:
     ErrCode GetNotificationExtensionEnabledBundles(std::vector<sptr<NotificationBundleOption>>  &bundles);
     bool GetCloneBundleList(const sptr<NotificationBundleOption>& bundleOption,
         std::vector<sptr<NotificationBundleOption>>& cloneBundleList);
+    void ReportInvalidBundleOption(const sptr<NotificationBundleOption>& targetBundle, HaMetaMessage &message);
     void ProcessSetUserGrantedState(const sptr<NotificationBundleOption>& bundle,
         bool enabled, ErrCode& result);
     void ProcessSetUserGrantedBundleState(const sptr<NotificationBundleOption>& bundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled, ErrCode& result);
     void ProcessExtensionSubscriptionInfos(const sptr<NotificationBundleOption>& bundleOption,
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos, ErrCode& result);
-    ErrCode SystemSwitchPermissionCheck();
+    ErrCode SystemPermissionCheck();
     std::vector<sptr<NotificationBundleOption>>::iterator FindBundleInCache(
         const sptr<NotificationBundleOption> &bundleOption);
     void ProcessHfpDeviceStateChange(int state);
@@ -2036,12 +2084,17 @@ private:
     void ProcessSubscriptionInfoForStateChange(
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos,
         const sptr<NotificationBundleOption> &bundle, bool filterHfpOnly);
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    bool IsNeedUpdatePriorityType(const sptr<NotificationRequest> &request);
+#endif
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;
     static ffrt::mutex pushMutex_;
     static std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> pushCallBacks_;
     static std::map<NotificationConstant::SlotType, sptr<NotificationCheckRequest>> checkRequests_;
+    static ffrt::mutex badgeQueryMutex_;
+    static std::map<int32_t, sptr<IBadgeQueryCallback>> badgeQueryCallBack_;
     bool aggregateLocalSwitch_ = false;
     std::set<int32_t> currentUserId;
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;

@@ -23,6 +23,7 @@ idl_gen_interface("ans_manager_interface") {
     "IAnsSubscriber.idl",
     "IAnsSubscriberLocalLiveView.idl",
     "ISwingCallBack.idl",
+    "IBadgeQueryCallback.idl",
   ]
   log_domainid = "0xD001203"
   log_tag = "Ans"
@@ -81,12 +82,14 @@ ohos_shared_library("ans_innerkits") {
     "${core_path}/src/dialog_status_data.cpp",
     "${core_path}/src/hitrace_util.cpp",
     "${core_path}/src/listener/ans_subscriber_listener.cpp",
+    "${core_path}/src/listener/badgequery_callback_listener.cpp",
     "${core_path}/src/listener/swing_callback_service.cpp",
     "${core_path}/src/manager/ans_manager_death_recipient.cpp",
     "${frameworks_module_ans_path}/src/ans_dialog_host_client.cpp",
     "${frameworks_module_ans_path}/src/badge_number_callback_data.cpp",
     "${frameworks_module_ans_path}/src/distributed_bundle_option.cpp",
     "${frameworks_module_ans_path}/src/enabled_notification_callback_data.cpp",
+    "${frameworks_module_ans_path}/src/enabled_priority_notification_by_bundle_callback_data.cpp",
     "${frameworks_module_ans_path}/src/message_user.cpp",
     "${frameworks_module_ans_path}/src/notification.cpp",
     "${frameworks_module_ans_path}/src/notification_action_button.cpp",
@@ -144,6 +147,7 @@ ohos_shared_library("ans_innerkits") {
                               "*_subscriber_proxy.cpp",
                               "*_subscriber_local_live_view_proxy.cpp",
                               "*_manager_proxy.cpp",
+                              "*badge_query_callback_proxy.cpp",
                             ])
   sources += filter_include(output_values,
                             [
@@ -153,6 +157,7 @@ ohos_shared_library("ans_innerkits") {
                               "*_subscriber_stub.cpp",
                               "*_subscriber_local_live_view_stub.cpp",
                               "*_manager_stub.cpp",
+                              "*badge_query_callback_stub.cpp",
                             ])
 
   public_configs = [ ":ans_innerkits_public_config" ]

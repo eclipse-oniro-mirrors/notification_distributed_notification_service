@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "gmock/gmock.h"
+#include <set>
 #define private public
 #define protected public
 #include "notification_clone_bundle_service.h"
@@ -22,7 +23,7 @@
 #include "ans_inner_errors.h"
 #include "notification_clone_util.h"
 #include "advanced_notification_service.h"
-#include "mock/mock_notification_clone_util.h"
+#include "mock_notification_clone_util.h"
 #undef private
 #undef protected
 
@@ -42,6 +43,12 @@ protected:
     {
         // Initialize objects and dependencies
         notificationCloneBundle = new NotificationCloneBundle();
+        int32_t initTestUserId = 100;
+        int32_t initTestUid = 1000;
+        MockSetActiveUserIdForClone(initTestUserId);
+        MockSetBundleUidForClone(initTestUid);
+        SetFuncGetActiveUserIdIsCalled(false);
+        SetFuncGetBundleUidIsCalled(false);
     }
 
     void TearDown() override
@@ -63,16 +70,132 @@ protected:
 HWTEST_F(NotificationCloneBundleTest, OnBackUp_00001, Function | SmallTest | Level1)
 {
     nlohmann::json jsonObject;
-    int32_t userId = 100;
-    auto advancedNotificationService_ = AdvancedNotificationService::GetInstance();
-
-    sptr<NotificationDoNotDisturbProfile> date = nullptr;
-    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
-    auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles);
-    
     ErrCode result = notificationCloneBundle->OnBackup(jsonObject);
-    notificationCloneBundle->OnRestore(jsonObject);
     EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: OnRestore_Test_00001
+ * @tc.desc: Test that OnRestore does nothing when input param has wrong type.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleTest, OnRestore_Test_00001, Function | SmallTest | Level1)
+{
+    // Given
+    nlohmann::json jsonNull;
+    nlohmann::json jsonObject = nlohmann::json::object();
+
+    // When
+    std::set<std::string> systemApps;
+    notificationCloneBundle->OnRestore(jsonNull, systemApps);
+    notificationCloneBundle->OnRestore(jsonObject, systemApps);
+
+    // Then
+    EXPECT_FALSE(GetFuncGetActiveUserIdIsCalled());
+}
+
+/**
+ * @tc.name: OnRestore_Test_00002
+ * @tc.desc: Test OnRestore when task queue is nullptr.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleTest, OnRestore_Test_00002, Function | SmallTest | Level1)
+{
+    // Given
+    nlohmann::json jsonArray = nlohmann::json::array();
+    NotificationCloneBundleInfo cloneBundleInfo;
+    nlohmann::json jsonNode;
+    cloneBundleInfo.ToJson(jsonNode);
+    jsonArray.emplace_back(jsonNode);
+    notificationCloneBundle->bundlesInfo_.emplace_back(cloneBundleInfo);
+    notificationCloneBundle->cloneBundleQueue_ = nullptr;
+
+    // When
+    std::set<std::string> systemApps;
+    notificationCloneBundle->OnRestore(jsonArray, systemApps);
+
+    // Then
+    EXPECT_TRUE(GetFuncGetActiveUserIdIsCalled());
+    EXPECT_FALSE(notificationCloneBundle->bundlesInfo_.empty());
+}
+
+/**
+ * @tc.name: OnRestore_Test_00003
+ * @tc.desc: Test OnRestore when task bundlesInfo_ is empty.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleTest, OnRestore_Test_00003, Function | SmallTest | Level1)
+{
+    // Given
+    nlohmann::json jsonArray = nlohmann::json::array();
+
+    // When
+    std::set<std::string> systemApps;
+    notificationCloneBundle->OnRestore(jsonArray, systemApps);
+
+    // Then
+    EXPECT_TRUE(notificationCloneBundle->bundlesInfo_.empty());
+}
+
+/**
+ * @tc.name: OnRestore_Test_00004
+ * @tc.desc: Test OnRestore when bundle doesn't exist.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleTest, OnRestore_Test_00004, Function | SmallTest | Level1)
+{
+    // Given
+    nlohmann::json jsonArray = nlohmann::json::array();
+    NotificationCloneBundleInfo cloneBundleInfo;
+    cloneBundleInfo.SetBundleName("com.ohos.demo");
+    nlohmann::json jsonNode;
+    cloneBundleInfo.ToJson(jsonNode);
+    jsonArray.emplace_back(jsonNode);
+    notificationCloneBundle->bundlesInfo_.emplace_back(cloneBundleInfo);
+    int32_t invalidUid = -1;
+    MockSetBundleUidForClone(invalidUid);
+
+    // When
+    std::set<std::string> systemApps;
+    systemApps.insert("com.ohos.demo");
+    notificationCloneBundle->OnRestore(jsonArray, systemApps);
+
+    // Then
+    EXPECT_TRUE(GetFuncGetActiveUserIdIsCalled());
+    EXPECT_TRUE(GetFuncGetBundleUidIsCalled());
+}
+
+/**
+ * @tc.name: OnRestore_Test_00005
+ * @tc.desc: Test OnRestore when bundle exists.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleTest, OnRestore_Test_00005, Function | SmallTest | Level1)
+{
+    // Given
+    nlohmann::json jsonArray = nlohmann::json::array();
+    NotificationCloneBundleInfo cloneBundleInfo;
+    cloneBundleInfo.SetBundleName("com.ohos.demo");
+    nlohmann::json jsonNode;
+    cloneBundleInfo.ToJson(jsonNode);
+    jsonArray.emplace_back(jsonNode);
+    notificationCloneBundle->bundlesInfo_.emplace_back(cloneBundleInfo);
+    int32_t initTestUid = 1000;
+    MockSetBundleUidForClone(initTestUid);
+
+    // When
+    std::set<std::string> systemApps;
+    systemApps.insert("com.ohos.demo");
+    notificationCloneBundle->OnRestore(jsonArray, systemApps);
+
+    // Then
+    EXPECT_TRUE(GetFuncGetActiveUserIdIsCalled());
+    EXPECT_TRUE(GetFuncGetBundleUidIsCalled());
 }
 
 /**

@@ -29,6 +29,7 @@ ohos_benchmarktest("Benchmark_Publish_Test") {
   deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",

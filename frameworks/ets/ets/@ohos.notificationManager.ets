@@ -35,6 +35,7 @@ type ResolveCallback<T> = (data: T) => void;
 type RejectCallback = (err: Error) => void;
 type CallbackForCheckInfo =
     (checkInfo: notificationManager.NotificationCheckInfo)=> notificationManager.NotificationCheckResult;
+type CallbackForBadgeQuery = (bundle: BundleOption) => Promise<long>;
 
 const ERROR_OK = 0;
 const ERROR_PARAM_INVALID = 401;
@@ -182,8 +183,12 @@ export default namespace notificationManager {
 
     export native function nativeDisplayBadge(bundle: BundleOption, enable: boolean): void;
     export native function nativeIsBadgeDisplayed(bundle: BundleOption): boolean;
+    export native function nativeGetBadgeNumber(): long;
     export native function nativeSetBadgeNumber(badgeNumber: int): void;
     export native function nativeSetBadgeNumberByBundle(bundle: BundleOption, badgeNumber: int): void;
+    export native function nativeOnBadgeNumberQuery(callback: CallbackForBadgeQuery): void;
+    export native function nativeOffBadgeNumberQuery(): void;
+    export native function nativeHandleBadgeNumberPromise(bundle: BundleOption, badgeNumber: long): void;
 
     export native function nativeGetActiveNotificationCount(): long;
     export native function nativeGetActiveNotifications():Array<NotificationRequest>;
@@ -1743,6 +1748,46 @@ export default namespace notificationManager {
     export function isNotificationEnabledSync(): boolean
     {
         return nativeIsNotificationEnabledSync();
+    }
+
+    export function getBadgeNumber(): Promise<long> {
+        let pPromise = new Promise<long>((resolve: ResolveCallback<long>, reject: RejectCallback):void => {
+            let p = taskpool.execute((): long => { return nativeGetBadgeNumber(); });
+            p.then((data :NullishType): void => {
+                let ret : long = data as long;
+                resolve(ret);
+            }, (err:Error): void => {
+                reject(err);
+            });
+        });
+        return pPromise;
+    }
+
+    export function onBadgeNumberQuery(callback: (bundle: BundleOption) => Promise<long>): void {
+        if (callback == undefined) {
+            throw errorParamInvalid;
+        }
+
+        let funcCallback: CallbackForBadgeQuery = (bundle: BundleOption): Promise<long> => {
+            return callback(bundle)
+                .then((num: NullishType) => {
+                    const result = num as long;
+                    nativeHandleBadgeNumberPromise(bundle, result);
+                    return result;
+                })
+                .catch((error: Error) => {
+                    const result: long = -1;
+                    nativeHandleBadgeNumberPromise(bundle, result);
+                    return result;
+                });
+        };
+        
+        return nativeOnBadgeNumberQuery(funcCallback);
+    }
+
+    export function offBadgeNumberQuery(): void
+    {
+        return nativeOffBadgeNumberQuery();
     }
 
     export function setBadgeNumber(badgeNumber: int, callback: AsyncCallback<void>): void

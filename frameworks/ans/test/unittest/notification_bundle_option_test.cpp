@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 #include "notification_bundle_option.h"
+#include "distributed_bundle_option.h"
 #undef private
 #undef protected
 
@@ -149,6 +150,45 @@ HWTEST_F(NotificationBundleOptionTest, JsonConvert_00001, Function | SmallTest |
     auto *rrcNew = rrc->FromJson(jsonObject);
     EXPECT_EQ(rrcNew->GetBundleName(), rrc->GetBundleName());
     EXPECT_EQ(rrcNew->GetUid(), rrc->GetUid());
+}
+
+/**
+ * @tc.name: DistributedBundleOption_00001
+ * @tc.desc: Test DistributedBundleOption.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationBundleOptionTest, DistributedBundleOption_00001, Function | SmallTest | Level1)
+{
+    std::string bundleName = "BundleName";
+    int32_t uid = 10;
+    auto bundle = std::make_shared<NotificationBundleOption>(bundleName, uid);
+    bool enable = true;
+    auto rrc = std::make_shared<DistributedBundleOption>(bundle, enable);
+    rrc->SetBundle(bundle);
+    EXPECT_EQ(rrc->GetBundle()->GetBundleName(), bundleName);
+    rrc->SetEnable(enable);
+    EXPECT_EQ(rrc->isEnable(), enable);
+
+    std::string dumpstr =
+        "DistributedBundleOption{ bundleName = BundleName, uid = 10, enable = 1 }";
+    EXPECT_EQ(rrc->Dump(), dumpstr);
+
+    Parcel parcel;
+    EXPECT_EQ(rrc->Marshalling(parcel), true);
+
+    bool unmarshalling = true;
+    if (nullptr != rrc) {
+        if (rrc->Unmarshalling(parcel) != nullptr) {
+            unmarshalling = false;
+        }
+    }
+    EXPECT_EQ(unmarshalling, false);
+
+    nlohmann::json jsonObject;
+    EXPECT_TRUE(rrc->ToJson(jsonObject));
+    auto *rrcNew = rrc->FromJson(jsonObject);
+    EXPECT_EQ(rrcNew->GetBundle()->GetBundleName(), rrc->GetBundle()->GetBundleName());
 }
 } // namespace Notification
 } // namespace OHOS

@@ -158,6 +158,42 @@ int32_t NotificationCloneManager::OnBackup(MessageParcel& data, MessageParcel& r
     return ERR_OK;
 }
 
+void NotificationCloneManager::GetRestoreSystemApp(const std::string& extralInfo, std::set<std::string>& bundles)
+{
+    if (extralInfo.empty()) {
+        return;
+    }
+
+    nlohmann::json jsonObject = nlohmann::json::parse(extralInfo, nullptr, false);
+    if (jsonObject.is_null() || !jsonObject.is_array()) {
+        ANS_LOGE("Invalid extralInfo array");
+        return;
+    }
+
+    for (auto& item : jsonObject) {
+        const auto &jsonEnd = item.cend();
+        if (item.find("type") == jsonEnd || !item.at("type").is_string()) {
+            continue;
+        }
+        if (item.at("type").get<std::string>() != "systemAppInfo") {
+            continue;
+        }
+        if (item.find("detail") == jsonEnd || !item.at("detail").is_array() || item.at("detail").empty()) {
+            continue;
+        }
+        auto bundlesJson = item.at("detail");
+        for (auto& bundle : bundlesJson) {
+            if (!bundle.is_string()) {
+                continue;
+            }
+            bundles.emplace(bundle.get<std::string>());
+            ANS_LOGI("Restore extralInfo application %{public}s", bundle.get<std::string>().c_str());
+        }
+        break;
+    }
+    ANS_LOGI("Restore extralInfo %{public}zu", bundles.size());
+}
+
 int32_t NotificationCloneManager::OnRestore(MessageParcel& data, MessageParcel& reply)
 {
     ANS_LOGD("start");
@@ -188,11 +224,14 @@ int32_t NotificationCloneManager::OnRestore(MessageParcel& data, MessageParcel& 
         return ANS_CLONE_ERROR;
     }
 
+    std::set<std::string> systemApps;
+    std::string extralInfo = data.ReadString();
+    GetRestoreSystemApp(extralInfo, systemApps);
     int32_t userId = NotificationCloneUtil::GetActiveUserId();
     NotificationPreferences::GetInstance()->SetCloneTimeStamp(userId, NotificationAnalyticsUtil::GetCurrentTime());
     for (auto iter = cloneTemplates.begin(); iter != cloneTemplates.end(); ++iter) {
         if (jsonObject.contains(iter->first) && iter->second != nullptr) {
-            iter->second->OnRestore(jsonObject.at(iter->first));
+            iter->second->OnRestore(jsonObject.at(iter->first), systemApps);
         }
     }
     ANS_LOGD("end");

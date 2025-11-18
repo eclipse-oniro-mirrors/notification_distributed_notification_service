@@ -117,8 +117,8 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetActiveNotifications(
-        std::vector<sptr<NotificationRequest>>& notifications, const std::string& instanceKey) override
+    ErrCode GetActiveNotifications(const std::string &instanceKey,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -128,7 +128,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetAllActiveNotifications(std::vector<sptr<Notification>>& notifications) override
+    ErrCode GetAllActiveNotifications(const sptr<IAnsResultDataSynchronizer> &synchronizer) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -260,12 +260,13 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetShowBadgeEnabledForBundle(const sptr<NotificationBundleOption>& bundleOption, bool& enabled) override
+    ErrCode GetShowBadgeEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<IAnsResultDataSynchronizer> &synchronizer) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetShowBadgeEnabled(bool& enabled) override
+    ErrCode GetShowBadgeEnabled(const sptr<IAnsResultDataSynchronizer> &synchronizer) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -570,7 +571,8 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SetPriorityEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption, const bool enabled) override
+    ErrCode SetPriorityEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t enableStatusInt) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -580,7 +582,19 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode IsPriorityEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption, bool &enabled) override
+    ErrCode IsPriorityEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t &enableStatusInt) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetBundlePriorityConfig(
+        const sptr<NotificationBundleOption> &bundleOption, const std::string &value) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetBundlePriorityConfig(const sptr<NotificationBundleOption> &bundleOption, std::string &value) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -885,6 +899,21 @@ public:
     }
 
     ErrCode CanOpenSubscribeSettings() override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetBadgeNumber(int32_t &badgeNumber) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode RegisterBadgeQueryCallback(const sptr<IBadgeQueryCallback> &badgeQueryCallback) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode UnRegisterBadgeQueryCallback() override
     {
         return ERR_ANS_INVALID_PARAM;
     }

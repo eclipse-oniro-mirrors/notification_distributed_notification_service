@@ -57,6 +57,7 @@ ohos_shared_library("notification_manager_ani") {
     "./src/manager/ani_support_template.cpp",
     "./src/manager/ani_sync_config.cpp",
     "./src/sts_action_button.cpp",
+    "./src/sts_badge_query_callback.cpp",
     "./src/sts_bundle_option.cpp",
     "./src/sts_common.cpp",
     "./src/sts_convert_other.cpp",
@@ -210,6 +211,7 @@ ohos_shared_library("notification_subscribe_ani") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:ani_common",

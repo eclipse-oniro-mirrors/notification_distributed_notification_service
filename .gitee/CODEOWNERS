@@ -1,7 +1,7 @@
 [FWK NOTIFICATION]
-frameworks/ @fwk_notification
-interfaces/ @fwk_notification
-sa_profile/ @fwk_notification
-services/ @fwk_notification
-test/ @fwk_notification
-tools/ @fwk_notification
+frameworks/ @afwk_helper
+interfaces/ @afwk_helper
+sa_profile/ @afwk_helper
+services/ @afwk_helper
+test/ @afwk_helper
+tools/ @afwk_helper

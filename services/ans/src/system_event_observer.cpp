@@ -21,6 +21,7 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "notification_preferences.h"
+#include "notification_ai_extension_wrapper.h"
 #include "notification_clone_manager.h"
 #ifdef ALL_SCENARIO_COLLABORATION
 #include "distributed_device_manager.h"
@@ -110,6 +111,7 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         }
         if (bundleOption != nullptr) {
             NotificationLiveViewUtils::GetInstance().NotifyLiveViewEvent(action, bundleOption);
+            NOTIFICATION_AI_EXTENSION_WRAPPER->NotifyPriorityEvent(action, bundleOption);
         }
         AdvancedNotificationService::GetInstance()->HandleBundleUninstall(bundleOption);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED

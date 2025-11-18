@@ -99,92 +99,6 @@ public:
     };
 
     /**
-     * Indicates priority notification type
-     */
-    class PriorityNotificationType {
-    public:
-        /**
-         * Indicates non-priority notification
-         */
-        constexpr static const char* OTHER = "OTHER";
-
-        /**
-         * Indicates Priority contact
-         */
-        constexpr static const char* PRIMARY_CONTACT = "PRIMARY_CONTACT";
-
-        /**
-         * Indicates Someone @me
-         */
-        constexpr static const char* AT_ME = "AT_ME";
-
-        /**
-         * Indicates Urgent message
-         */
-        constexpr static const char* URGENT_MESSAGE = "URGENT_MESSAGE";
-
-        /**
-         * Indicates Schedule reminder
-         */
-        constexpr static const char* SCHEDULE_REMINDER = "SCHEDULE_REMINDER";
-
-        /**
-         * Indicates Payment due
-         */
-        constexpr static const char* PAYMENT_DUE = "PAYMENT_DUE";
-
-        /**
-         * Indicates Transaction alert
-         */
-        constexpr static const char* TRANSACTION_ALERT = "TRANSACTION_ALERT";
-
-        /**
-         * Indicates Express progress
-         */
-        constexpr static const char* EXPRESS_PROGRESS = "EXPRESS_PROGRESS";
-
-        /**
-         * Indicates Miss call
-         */
-        constexpr static const char* MISS_CALL = "MISS_CALL";
-
-        /**
-         * Indicates Travel alert
-         */
-        constexpr static const char* TRAVEL_ALERT = "TRAVEL_ALERT";
-
-        /**
-         * Indicates Account alert
-         */
-        constexpr static const char* ACCOUNT_ALERT = "ACCOUNT_ALERT";
- 
-        /**
-         * Indicates Appointment reminder
-         */
-        constexpr static const char* APPOINTMENT_REMINDER = "APPOINTMENT_REMINDER";
-
-        /**
-         * Indicates Traffic notice
-         */
-        constexpr static const char* TRAFFIC_NOTICE = "TRAFFIC_NOTICE";
-
-        /**
-         * Indicates Key progress
-         */
-        constexpr static const char* KEY_PROGRESS = "KEY_PROGRESS";
-
-        /**
-         * Indicates Public event
-         */
-        constexpr static const char* PUBLIC_EVENT = "PUBLIC_EVENT";
-
-        /**
-         * Indicates Iot warning
-         */
-        constexpr static const char* IOT_WARNING = "IOT_WARNING";
-    };
-
-    /**
      * Indicates the classification of notifications for alarms or timers.
      */
     static const std::string CLASSIFICATION_ALARM;
@@ -1602,9 +1516,15 @@ public:
 
     std::string GetAppName() const;
 
-    void SetPriorityNotificationType(std::string priorityNotificationType);
+    void SetPriorityNotificationType(const std::string &priorityNotificationType);
+
+    void SetInnerPriorityNotificationType(const std::string &priorityNotificationType);
 
     std::string GetPriorityNotificationType() const;
+
+    void SetPriorityNotificationSign(uint32_t priorityNotificationSign);
+
+    uint32_t GetPriorityNotificationSign() const;
 
 private:
     /**
@@ -1673,6 +1593,7 @@ private:
         const NotificationConstant::ReminderFlag &bit,
         const bool status,
         std::shared_ptr<NotificationFlags> &flag);
+    bool CheckPriorityNotificationTypeValid(const std::string &priorityNotificationType);
 
 private:
     int32_t notificationId_ {0};
@@ -1769,8 +1690,7 @@ private:
     std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> notificationFlagsOfDevices_ {};
 
     uint32_t publishDelayTime_ {0};
-    std::string priorityNotificationType_ {PriorityNotificationType::OTHER};
-    std::vector<std::string> priorityTypeList_ {};
+    std::string priorityNotificationType_ {NotificationConstant::PriorityNotificationType::OTHER};
 };
 }  // namespace Notification
 }  // namespace OHOS

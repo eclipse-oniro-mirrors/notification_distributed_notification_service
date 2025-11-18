@@ -1299,16 +1299,15 @@ HWTEST_F(NotificationHelperTest, SetPriorityEnabled_0100, TestSize.Level1)
  */
 HWTEST_F(NotificationHelperTest, SetPriorityEnabledByBundle_0100, TestSize.Level1)
 {
-    bool enabled = true;
+    NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::ENABLE;
     NotificationHelper notificationHelper;
     NotificationBundleOption bo;
     bo.SetBundleName("bundleName");
     bo.SetUid(1);
-    ErrCode ret = notificationHelper.SetPriorityEnabledByBundle(bo, enabled);
+    ErrCode ret = notificationHelper.SetPriorityEnabledByBundle(bo, enableStatus);
     EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
-    ret = notificationHelper.IsPriorityEnabledByBundle(bo, enabled);
+    ret = notificationHelper.IsPriorityEnabledByBundle(bo, enableStatus);
     EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
-    EXPECT_TRUE(enabled);
 }
 
 /**
@@ -1531,6 +1530,33 @@ HWTEST_F(NotificationHelperTest, GetRingtoneInfoByBundle_0200, Function | SmallT
     EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
     ErrCode res = notificationHelper.GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
     EXPECT_EQ(res, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: GetBadgeNumber_0100
+ * @tc.desc: Test GetBadgeNumber.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, GetBadgeNumber_0100, Function | SmallTest | Level1)
+{
+    int32_t badgeNumber;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.GetBadgeNumber(badgeNumber);
+    EXPECT_EQ(ret, ERR_ANS_TASK_ERR);
+}
+
+/**
+ * @tc.name: RegisterBadgeQueryCallback_0100
+ * @tc.desc: Test RegisterBadgeQueryCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, RegisterBadgeQueryCallback_0100, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.RegisterBadgeQueryCallback(nullptr);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    notificationHelper.UnRegisterBadgeQueryCallback(nullptr);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
 }
 }

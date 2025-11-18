@@ -122,8 +122,14 @@ namespace OHOS {
         service->SetNotificationsEnabledForAllBundles(stringData, enabled);
         service->SetNotificationsEnabledForSpecialBundle(stringData, bundleOption, enabled);
         service->SetShowBadgeEnabledForBundle(bundleOption, enabled);
-        service->GetShowBadgeEnabledForBundle(bundleOption, enabled);
-        service->GetShowBadgeEnabled(enabled);
+        if (service->GetShowBadgeEnabledForBundle(bundleOption,
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
+        if (service->GetShowBadgeEnabled(
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
         service->IsAllowedNotify(allowed);
         service->IsAllowedNotifySelf(allowed);
         service->IsAllowedNotifySelf(bundleOption, allowed);
@@ -184,9 +190,15 @@ namespace OHOS {
         service->GetSlotNumAsBundle(bundleOption, num);
         service->SetSlotFlagsAsBundle(bundleOption, slotFlags);
         service->GetSlotFlagsAsBundle(bundleOption, slotFlags);
-        service->GetActiveNotifications(notificationRequests, key1);
+        if (service->GetActiveNotifications(key1,
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
         service->GetActiveNotificationNums(num);
-        service->GetAllActiveNotifications(notificationsVector);
+        if (service->GetAllActiveNotifications(
+            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+            synchronizer->Wait();
+        }
         service->GetSpecialActiveNotifications(keys, notificationsVector);
         service->GetActiveNotificationByFilter(
             bundleOption, notificationId, stringData, userId, keys, notificationRequest);

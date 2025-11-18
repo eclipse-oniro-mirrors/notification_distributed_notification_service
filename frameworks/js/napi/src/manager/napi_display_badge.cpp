@@ -572,5 +572,61 @@ napi_value NapiGetBadgeDisplayStatusByBundles(napi_env env, napi_callback_info i
 
     return promise;
 }
+
+void AsyncCompleteCallbackNapiGetBadgeNumber(napi_env env, napi_status status, void *data)
+{
+    ANS_LOGD("AsyncCompleteCallbackNapiGetBadgeNumber");
+    if (!data) {
+        ANS_LOGE("Invalid async callback data");
+        return;
+    }
+    AsyncCallbackGetBadgeNumber *asynccallbackinfo = static_cast<AsyncCallbackGetBadgeNumber*>(data);
+    if (asynccallbackinfo == nullptr) {
+        ANS_LOGE("null asynccallbackinfo");
+        return;
+    }
+    napi_value result = nullptr;
+    if (asynccallbackinfo->info.errorCode != ERR_OK) {
+        result = Common::NapiGetNull(env);
+    } else {
+        napi_create_int32(env, asynccallbackinfo->badgeNumber, &result);
+    }
+    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+    napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+    delete asynccallbackinfo;
+    asynccallbackinfo = nullptr;
+    return;
+}
+
+napi_value NapiGetBadgeNumber(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("called");
+
+    auto asynccallbackinfo = new (std::nothrow) AsyncCallbackGetBadgeNumber {.env = env, .asyncWork = nullptr};
+    if (!asynccallbackinfo) {
+        return Common::JSParaError(env, nullptr);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "getBadgeNumber", NAPI_AUTO_LENGTH, &resourceName);
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGD("NapiGetBadgeNumber word excute.");
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackGetBadgeNumber *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = NotificationHelper::GetBadgeNumber(asynccallbackinfo->badgeNumber);
+            }
+        },
+        AsyncCompleteCallbackNapiGetBadgeNumber,
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    return promise;
+}
 }  // namespace NotificationNapi
 }  // namespace OHOS

@@ -161,8 +161,8 @@ public:
      * @param enabled Indicates to whether to enabled.
      * @return Return true on success, false on failure.
      */
-    bool PutPriorityEnabledForBundle(
-        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const NotificationConstant::SWITCH_STATE &enabled);
+    bool PutPriorityEnabledForBundle(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
+        const NotificationConstant::PriorityEnableStatus enableStatus);
 
     /**
      * @brief Get priority notification enable into disturbe DB.
@@ -179,8 +179,8 @@ public:
      * @param enabled Indicates to whether to enabled.
      * @return Return true on success, false on failure.
      */
-    bool GetPriorityEnabledForBundle(
-        const NotificationPreferencesInfo::BundleInfo &bundleInfo, NotificationConstant::SWITCH_STATE &enabled);
+    bool GetPriorityEnabledForBundle(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
+        NotificationConstant::PriorityEnableStatus &enableStatus);
 
     /**
      * @brief Put distributed enable notification in the of  bundle into disturbe DB.
@@ -492,6 +492,10 @@ public:
     bool GetLiveViewRebuildFlag(std::string& flag, int32_t userId);
     bool SetLiveViewRebuildFlag(int32_t userId);
     bool RemoveLiveViewRebuildFlag(int32_t userId);
+    bool SetBundlePriorityConfig(
+        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &configValue);
+    bool GetBundlePriorityConfig(const NotificationPreferencesInfo::BundleInfo &bundleInfo, std::string &configValue);
+
 private:
     bool CheckRdbStore();
 
@@ -531,6 +535,7 @@ private:
     std::string GenerateSlotKey(
         const std::string &bundleKey, const std::string &type = "", const std::string &subType = "") const;
     std::string GenerateBundleKey(const std::string &bundleKey, const std::string &type = "") const;
+    std::string GetBundleKeyFromGenerate(const std::string &generateBundleKey) const;
 
     void ParseSlotFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &bundleKey,
         const std::pair<std::string, std::string> &entry, const int32_t &userId);
@@ -576,6 +581,7 @@ private:
         const std::unordered_map<std::string, std::string> values);
 
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo) const;
+    std::string GenerateBundleLablel(std::string &bundleName, int32_t bundleUid) const;
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
         const std::string &deviceType) const;
     std::string GenerateBundleLablel(const std::string &deviceType, const int32_t userId) const;

@@ -21,6 +21,7 @@
 
 #include "ans_dialog_host_client.h"
 #include "ans_subscriber_listener.h"
+#include "ans_badgequery_listener.h"
 #include "ians_manager.h"
 #include "notification_extension_subscription_info.h"
 #include "notification_local_live_view_subscriber.h"
@@ -1120,6 +1121,24 @@ public:
     ErrCode SetAdditionConfig(const std::string &key, const std::string &value);
 
     /**
+     * @brief Set priority config of bundle for intelligent identification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param value Indicates priority config of bundle.
+     * @return Returns set result.
+     */
+    ErrCode SetBundlePriorityConfig(const NotificationBundleOption &bundleOption, const std::string &value);
+
+    /**
+     * @brief Get priority config of bundle for intelligent identification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param value Indicates priority config of bundle.
+     * @return Returns get result.
+     */
+    ErrCode GetBundlePriorityConfig(const NotificationBundleOption &bundleOption, std::string &value);
+
+    /**
      * @brief set priority notification switch.
      *
      * @param enabled Whether to allow sending priority notification.
@@ -1131,10 +1150,11 @@ public:
      * @brief set priority notification switch with bundle info.
      *
      * @param bundleOption Indicates the bundle bundleOption.
-     * @param enabled Whether to allow sending priority notification by bundle.
+     * @param enableStatus Whether to allow sending priority notification by bundle.
      * @return Returns set result.
      */
-    ErrCode SetPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, const bool enabled);
+    ErrCode SetPriorityEnabledByBundle(
+        const NotificationBundleOption &bundleOption, const NotificationConstant::PriorityEnableStatus enableStatus);
 
     /**
      * @brief Query switch for sending priority notification.
@@ -1148,10 +1168,11 @@ public:
      * @brief Query switch for sending priority notification by bundle.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
-     * @param enabled Whether to allow sending priority notification by bundle.
+     * @param enableStatus Whether to allow sending priority notification by bundle.
      * @return Returns configuring Whether to allow sending priority notification by bundle.
      */
-    ErrCode IsPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, bool &enabled);
+    ErrCode IsPriorityEnabledByBundle(
+        const NotificationBundleOption &bundleOption, NotificationConstant::PriorityEnableStatus &enableStatus);
 
     /**
      * @brief Sets whether to allow a specified application to publish notifications cross
@@ -1625,6 +1646,30 @@ public:
      * @return Returns request result.
      */
     ErrCode ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy);
+
+    /**
+     * @brief Obtains the badge number of the current application in the system.
+     *
+     * @param badgeNumber Indicates the badge number of the current application.
+     * @return Returns get notification badge number result.
+     */
+    ErrCode GetBadgeNumber(int32_t &badgeNumber);
+
+    /**
+     * @brief Register Badge Query Callback.
+     *
+     * @param badgeQueryCallback BadgeQueryCallback.
+     * @return Returns register Badge Query Callback result.
+     */
+    ErrCode RegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback);
+
+    /**
+     * @brief Unregister Badge Query Callback.
+     *
+     * @param badgeQueryCallback BadgeQueryCallback.
+     * @return Returns unregister Badge Query Callback result.
+     */
+    ErrCode UnRegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback);
 private:
     /**
      * @brief Gets Ans Manager proxy.
@@ -1669,10 +1714,14 @@ private:
     bool IsValidDelayTime(const NotificationRequest &request) const;
     void CreateSubscribeListener(const std::shared_ptr<NotificationSubscriber> &subscriber,
         sptr<SubscriberListener> &listener);
+    void CreateBadgeQueryListener(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback,
+        sptr<BadgeQueryListener> &listener);
 
 private:
     std::mutex subscriberMutex_;
     std::map<std::shared_ptr<NotificationSubscriber>, sptr<SubscriberListener>> subscribers_;
+    std::mutex badgeQueryMutex_;
+    std::map<std::shared_ptr<IBadgeQueryCallback>, sptr<BadgeQueryListener>> badgeQueryCallbacks_;
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     sptr<SwingCallBackService> swingCallBackService_;
 #endif

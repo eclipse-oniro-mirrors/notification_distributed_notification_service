@@ -319,9 +319,15 @@ BENCHMARK_F(BenchmarkNotificationService, GetShowBadgeEnabledForBundleTestCase)(
             state.SkipWithError("GetShowBadgeEnabledForBundleTestCase set failed.");
         }
 
-        bool allow = false;
-        errCode = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundleOption, allow);
-        if (!allow || errCode != ERR_OK) {
+        sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+        auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundleOption,
+            iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+        if (ret == ERR_OK) {
+            synchronizer->Wait();
+            if (!synchronizer->GetEnabled()) {
+                state.SkipWithError("GetShowBadgeEnabledForBundleTestCase get failed.");
+            }
+        } else {
             state.SkipWithError("GetShowBadgeEnabledForBundleTestCase get failed.");
         }
     }
@@ -337,8 +343,12 @@ BENCHMARK_F(BenchmarkNotificationService, GetAllActiveNotificationsTestCase)(ben
 {
     std::vector<sptr<OHOS::Notification::Notification>> notifications;
     while (state.KeepRunning()) {
-        ErrCode errCode = advancedNotificationService_->GetAllActiveNotifications(notifications);
-        if (errCode != ERR_OK) {
+        sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+        auto ret = advancedNotificationService_->GetAllActiveNotifications(
+            iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
+        if (ret == ERR_OK) {
+            synchronizer->Wait();
+        } else {
             state.SkipWithError("GetAllActiveNotificationsTestCase failed.");
         }
     }

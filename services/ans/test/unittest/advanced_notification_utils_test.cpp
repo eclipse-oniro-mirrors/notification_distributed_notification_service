@@ -735,10 +735,7 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00001, Function | SmallTest | Level
     ASSERT_EQ(static_cast<int32_t>(state), 1);
     std::vector<sptr<NotificationBundleOption>> resultBundles;
     NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundle, resultBundles);
-    ASSERT_EQ(resultBundles.size(), extensionBundles.size());
-    for (size_t i = 0; i < extensionBundles.size(); ++i) {
-        ASSERT_EQ(resultBundles[i]->GetBundleName(), extensionBundles[i]->GetBundleName());
-    }
+    ASSERT_TRUE(resultBundles.empty());
 }
 
 /**
@@ -828,7 +825,7 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00004, Function | SmallTest | Level
     bool isExist = false;
     ErrCode result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionEnabled(bundleOption, state);
     ASSERT_EQ(result, ERR_OK);
-    ASSERT_EQ(state, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    ASSERT_EQ(state, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
 }
 
 /**

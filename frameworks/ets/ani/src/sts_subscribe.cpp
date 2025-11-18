@@ -309,6 +309,12 @@ void StsSubscriberInstance::OnEnabledNotificationChanged(
     }
     ANS_LOGD("done");
 }
+void StsSubscriberInstance::OnEnabledPriorityChanged(
+    const std::shared_ptr<EnabledNotificationCallbackData> &callbackData)
+{}
+void StsSubscriberInstance::OnEnabledPriorityByBundleChanged(
+    const std::shared_ptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData)
+{}
 void StsSubscriberInstance::OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData)
 {
     ANS_LOGD("enter");
@@ -618,6 +624,12 @@ bool SubscriberInstanceManager::GetNotificationSubscriber(
     }
     if (subscriberInfo->HasFunctionImplemented(env, "onBatchCancel")) {
         subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BATCHCANCELED;
+    }
+    if (subscriberInfo->HasFunctionImplemented(env, "onEnablePriorityChanged")) {
+        subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLEPRIORITY_CHANGED;
+    }
+    if (subscriberInfo->HasFunctionImplemented(env, "onEnabledPriorityByBundleChanged")) {
+        subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLEPRIORITYBYBUNDLE_CHANGED;
     }
     subscriberInfo->SetSubscribedFlags(subscribedFlags);
     return true;

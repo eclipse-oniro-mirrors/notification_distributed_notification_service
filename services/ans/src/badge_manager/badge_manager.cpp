@@ -31,6 +31,9 @@ namespace OHOS {
 namespace Notification {
 
 constexpr int32_t BADGE_NUM_LIMIT = 0;
+constexpr int32_t INVALID_BADGE_NUMBER = -1;
+ffrt::mutex AdvancedNotificationService::badgeQueryMutex_;
+std::map<int32_t, sptr<IBadgeQueryCallback>> AdvancedNotificationService::badgeQueryCallBack_;
 
 ErrCode AdvancedNotificationService::SetNotificationBadgeNum(int32_t num)
 {
@@ -180,11 +183,14 @@ void AdvancedNotificationService::HandleBadgeEnabledChanged(
     NotificationSubscriberManager::GetInstance()->NotifyBadgeEnabledChanged(enabledData);
 }
 
-ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
-    const sptr<NotificationBundleOption> &bundleOption, bool &enabled)
+ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption,
+    const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
     ANS_LOGD("called");
-
+    if (synchronizer == nullptr) {
+        ANS_LOGE("synchronizer is null");
+        return ERR_ANS_INVALID_PARAM;
+    }
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("VerifyNativeToken is bogus.");
@@ -205,17 +211,18 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
         ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
-    ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("called");
+        ErrCode result = ERR_OK;
+        bool enabled = false;
         result = NotificationPreferences::GetInstance()->IsShowBadge(bundle, enabled);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             enabled = true;
         }
+        synchronizer->TransferResultData(result, enabled);
     }));
-    notificationSvrQueue_->wait(handler);
-    return result;
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundles(
@@ -273,10 +280,13 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundles(
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
+ErrCode AdvancedNotificationService::GetShowBadgeEnabled(const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
     ANS_LOGD("called");
-
+    if (synchronizer == nullptr) {
+        ANS_LOGE("synchronizer is null");
+        return ERR_ANS_INVALID_PARAM;
+    }
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
@@ -286,17 +296,18 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
         ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
-    ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("called");
+        ErrCode result = ERR_OK;
+        bool enabled = false;
         result = NotificationPreferences::GetInstance()->IsShowBadge(bundleOption, enabled);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             enabled = true;
         }
+        synchronizer->TransferResultData(result, enabled);
     }));
-    notificationSvrQueue_->wait(handler);
-    return result;
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey)
@@ -433,6 +444,134 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
         NotificationSubscriberManager::GetInstance()->SetBadgeNumber(badgeData);
     });
 
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetBadgeNumber(int32_t &badgeNumber)
+{
+    ANS_LOGD("called");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_29, EventBranchId::BRANCH_0);
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        message.Message("null bundleOption");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM));
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_1));
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        sptr<IBadgeQueryCallback> callback = nullptr;
+        badgeNumber = INVALID_BADGE_NUMBER;
+        {
+            std::lock_guard<ffrt::mutex> lock(badgeQueryMutex_);
+            if (badgeQueryCallBack_.find(userId) == badgeQueryCallBack_.end()) {
+                ANS_LOGE("BadgeQueryCallback unregistered");
+                message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+                    " get badgenumber failed, badgeQueryCallback unregistered.");
+                NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_2));
+                return;
+            }
+            callback = badgeQueryCallBack_[userId];
+        }
+        if (callback == nullptr) {
+            message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+                " get badgenumber failed, null badgeQueryCallBack.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_3));
+            return;
+        }
+        ErrCode ret = callback->OnBadgeNumberQuery(bundleOption, badgeNumber);
+        if (ret != ERR_OK) {
+            ANS_LOGE("OnBadgeNumberQuery bundle:%{public}s uid:%{public}d failed, ret:%{public}d, number:%{public}d",
+                bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), ret, badgeNumber);
+            message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) + "_" +
+                std::to_string(badgeNumber) + " get badgenumber failed.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ret).BranchId(BRANCH_4));
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+    message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+        " get badgenumber " + std::to_string(badgeNumber));
+    NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_5));
+    return badgeNumber < BADGE_NUM_LIMIT ? ERR_ANS_TASK_ERR : ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::RegisterBadgeQueryCallback(const sptr<IBadgeQueryCallback> &badgeQueryCallback)
+{
+    ANS_LOGD("RegisterBadgeQueryCallback");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_29, EventBranchId::BRANCH_6);
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("Not system app or SA.");
+        message.Message("Not systemApp or SA.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NON_SYSTEM_APP));
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission denied.");
+        message.Message("Permission denied.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_7));
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (badgeQueryCallback == nullptr) {
+        ANS_LOGE("badgeQueryCallback is null.");
+        message.Message("badgeQueryCallback is null.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_8));
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    sptr<IBadgeQueryCallback> callBack = iface_cast<IBadgeQueryCallback>(badgeQueryCallback->AsObject());
+    if (callBack == nullptr) {
+        ANS_LOGE("callBack is null");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    {
+        std::lock_guard<ffrt::mutex> lock(badgeQueryMutex_);
+        badgeQueryCallBack_.insert_or_assign(userId, callBack);
+    }
+    message.Message(std::to_string(userId) + " register badgequerycallback succ.");
+    NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_9));
+    ANS_LOGD("RegisterBadgeQueryCallback end");
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::UnRegisterBadgeQueryCallback()
+{
+    ANS_LOGD("UnRegisterBadgeQueryCallback");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_29, EventBranchId::BRANCH_10);
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("Not system app or SA.");
+        message.Message("Not systemApp or SA.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NON_SYSTEM_APP));
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission denied.");
+        message.Message("Permission denied.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_11));
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    {
+        std::lock_guard<ffrt::mutex> lock(badgeQueryMutex_);
+        badgeQueryCallBack_.erase(userId);
+    }
+    message.Message(std::to_string(userId) + " unregister badgequerycallback succ.");
+    NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_12));
+    ANS_LOGD("UnRegisterBadgeQueryCallback end");
     return ERR_OK;
 }
 } // Notification

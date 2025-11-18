@@ -53,6 +53,7 @@ ohos_shared_library("libans_distributed") {
   deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
     "c_utils:utils",

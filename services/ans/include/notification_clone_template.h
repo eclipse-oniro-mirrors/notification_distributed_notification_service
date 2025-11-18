@@ -16,6 +16,7 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_CLONE_TEMPLATE_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_CLONE_TEMPLATE_H
 
+#include <set>
 #include "errors.h"
 #include "nlohmann/json.hpp"
 
@@ -27,7 +28,7 @@ public:
     NotificationCloneTemplate() = default;
     virtual ~NotificationCloneTemplate() = default;
     virtual ErrCode OnBackup(nlohmann::json &jsonObject) = 0;
-    virtual void OnRestore(const nlohmann::json &jsonObject) = 0;
+    virtual void OnRestore(const nlohmann::json &jsonObject, std::set<std::string> systemApps) = 0;
     virtual void OnUserSwitch(int32_t userId) = 0;
     virtual void OnRestoreStart(const std::string bundleName, int32_t appIndex,
         int32_t userId, int32_t uid) = 0;

@@ -1273,6 +1273,24 @@ public:
     static ErrCode SetAdditionConfig(const std::string &key, const std::string &value);
 
     /**
+     * @brief Set priority config of bundle for intelligent identification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param value Indicates priority config of bundle.
+     * @return Returns set result.
+     */
+    static ErrCode SetBundlePriorityConfig(const NotificationBundleOption &bundleOption, const std::string &value);
+
+    /**
+     * @brief Get priority config of bundle for intelligent identification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param value Indicates priority config of bundle.
+     * @return Returns get result.
+     */
+    static ErrCode GetBundlePriorityConfig(const NotificationBundleOption &bundleOption, std::string &value);
+
+    /**
      * @brief Configuring Whether to allow sending priority notification.
      *
      * @param enabled Whether to allow sending priority notification.
@@ -1287,7 +1305,8 @@ public:
      * @param enabled Whether to allow sending priority notification by bundle.
      * @return Returns configuring Whether to allow sending priority notification by bundle.
      */
-    static ErrCode SetPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, const bool enabled);
+    static ErrCode SetPriorityEnabledByBundle(
+        const NotificationBundleOption &bundleOption, const NotificationConstant::PriorityEnableStatus enableStatus);
 
     /**
      * @brief Query switch for sending priority notification.
@@ -1304,7 +1323,8 @@ public:
      * @param enabled Whether to allow sending priority notification by bundle.
      * @return Returns configuring Whether to allow sending priority notification by bundle.
      */
-    static ErrCode IsPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, bool &enabled);
+    static ErrCode IsPriorityEnabledByBundle(
+        const NotificationBundleOption &bundleOption, NotificationConstant::PriorityEnableStatus &enableStatus);
 
     /**
      * @brief Cancels a published agent notification.
@@ -1626,6 +1646,30 @@ public:
      * @return Returns ERR_OK if allowed; otherwise returns the specific error code.
      */
     static ErrCode CanOpenSubscribeSettings();
+
+    /**
+     * @brief Obtains the badge number of the current application in the system.
+     *
+     * @param badgeNumber Indicates the badge number of the current application.
+     * @return Returns get notification badge number result.
+     */
+    static ErrCode GetBadgeNumber(int32_t &badgeNumber);
+
+    /**
+     * @brief Register Badge Query Callback.
+     *
+     * @param badgeQueryCallback query appliction's badge Callback.
+     * @return Returns register badge query callback result.
+     */
+    static ErrCode RegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback);
+
+    /**
+     * @brief Unregister Badge Query Callback.
+     *
+     * @param badgeQueryCallback query appliction's badge Callback.
+     * @return Returns unregister Badge Query Callback result.
+     */
+    static ErrCode UnRegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback);
 };
 }  // namespace Notification
 }  // namespace OHOS

@@ -453,7 +453,20 @@ ErrCode AnsNotification::GetActiveNotifications(std::vector<sptr<NotificationReq
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return proxy->GetActiveNotifications(request, instanceKey);
+
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    if (synchronizer == nullptr) {
+        ANS_LOGE("null synchronizer");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode ret = proxy->GetActiveNotifications(instanceKey, synchronizer);
+    // ERR_OK means the task is put into the ffrt queue at service layer.
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    synchronizer->Wait();
+    request = synchronizer->GetNotificationRequests();
+    return synchronizer->GetResultCode();
 }
 
 ErrCode AnsNotification::CanPublishNotificationAsBundle(const std::string &representativeBundle, bool &canPublish)
@@ -1109,7 +1122,20 @@ ErrCode AnsNotification::GetAllActiveNotifications(std::vector<sptr<Notification
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return proxy->GetAllActiveNotifications(notification);
+
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    if (synchronizer == nullptr) {
+        ANS_LOGE("null synchronizer");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode ret = proxy->GetAllActiveNotifications(synchronizer);
+    // ERR_OK means the task is put into the ffrt queue at service layer.
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    synchronizer->Wait();
+    notification = synchronizer->GetNotifications();
+    return synchronizer->GetResultCode();
 }
 
 ErrCode AnsNotification::GetAllActiveNotifications(
@@ -1283,7 +1309,20 @@ ErrCode AnsNotification::GetShowBadgeEnabledForBundle(const NotificationBundleOp
         ANS_LOGE("null bundleOption");
         return ERR_ANS_INVALID_PARAM;
     }
-    return proxy->GetShowBadgeEnabledForBundle(bo, enabled);
+
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    if (synchronizer == nullptr) {
+        ANS_LOGE("null synchronizer");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode ret = proxy->GetShowBadgeEnabledForBundle(bo, synchronizer);
+    // ERR_OK means the task is put into the ffrt queue at service layer.
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    synchronizer->Wait();
+    enabled = synchronizer->GetEnabled();
+    return synchronizer->GetResultCode();
 }
 
 ErrCode AnsNotification::GetShowBadgeEnabledForBundles(const std::vector<NotificationBundleOption> &bundleOptions,
@@ -1321,7 +1360,19 @@ ErrCode AnsNotification::GetShowBadgeEnabled(bool &enabled)
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return proxy->GetShowBadgeEnabled(enabled);
+    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
+    if (synchronizer == nullptr) {
+        ANS_LOGE("null synchronizer");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode ret = proxy->GetShowBadgeEnabled(synchronizer);
+    // ERR_OK means the task is put into the ffrt queue at service layer.
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    synchronizer->Wait();
+    enabled = synchronizer->GetEnabled();
+    return synchronizer->GetResultCode();
 }
 
 ErrCode AnsNotification::CancelGroup(const std::string &groupName, const std::string &instanceKey)
@@ -2106,19 +2157,7 @@ ErrCode AnsNotification::SetAdditionConfig(const std::string &key, const std::st
     return proxy->SetAdditionConfig(key, value);
 }
 
-ErrCode AnsNotification::SetPriorityEnabled(const bool enabled)
-{
-    ANS_LOGD("called");
-    sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("Get ans manager proxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-
-    return proxy->SetPriorityEnabled(enabled);
-}
-
-ErrCode AnsNotification::SetPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, const bool enabled)
+ErrCode AnsNotification::SetBundlePriorityConfig(const NotificationBundleOption &bundleOption, const std::string &value)
 {
     ANS_LOGD("called");
     if (bundleOption.GetBundleName().empty()) {
@@ -2135,9 +2174,66 @@ ErrCode AnsNotification::SetPriorityEnabledByBundle(const NotificationBundleOpti
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
+        return ERR_ANS_NO_MEMORY;
+    }
+    return proxy->SetBundlePriorityConfig(bo, value);
+}
+
+ErrCode AnsNotification::GetBundlePriorityConfig(const NotificationBundleOption &bundleOption, std::string &value)
+{
+    ANS_LOGD("called");
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
     }
-    return proxy->SetPriorityEnabledByBundle(bo, enabled);
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    if (bo == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_NO_MEMORY;
+    }
+    return proxy->GetBundlePriorityConfig(bo, value);
+}
+
+ErrCode AnsNotification::SetPriorityEnabled(const bool enabled)
+{
+    ANS_LOGD("called");
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->SetPriorityEnabled(enabled);
+}
+
+ErrCode AnsNotification::SetPriorityEnabledByBundle(
+    const NotificationBundleOption &bundleOption, const NotificationConstant::PriorityEnableStatus enableStatus)
+{
+    ANS_LOGD("called");
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    if (bo == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_NO_MEMORY;
+    }
+    return proxy->SetPriorityEnabledByBundle(bo, static_cast<int32_t>(enableStatus));
 }
 
 ErrCode AnsNotification::IsPriorityEnabled(bool &enabled)
@@ -2152,7 +2248,8 @@ ErrCode AnsNotification::IsPriorityEnabled(bool &enabled)
     return proxy->IsPriorityEnabled(enabled);
 }
 
-ErrCode AnsNotification::IsPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, bool &enabled)
+ErrCode AnsNotification::IsPriorityEnabledByBundle(
+    const NotificationBundleOption &bundleOption, NotificationConstant::PriorityEnableStatus &enableStatus)
 {
     ANS_LOGD("called");
     if (bundleOption.GetBundleName().empty()) {
@@ -2169,9 +2266,12 @@ ErrCode AnsNotification::IsPriorityEnabledByBundle(const NotificationBundleOptio
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_NO_MEMORY;
     }
-    return proxy->IsPriorityEnabledByBundle(bo, enabled);
+    int32_t enableStatusInt = static_cast<int32_t>(NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT);
+    ErrCode result = proxy->IsPriorityEnabledByBundle(bo, enableStatusInt);
+    enableStatus = static_cast<NotificationConstant::PriorityEnableStatus>(enableStatusInt);
+    return result;
 }
 
 ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
@@ -3105,6 +3205,71 @@ ErrCode AnsNotification::ProxyForUnaware(const std::vector<int32_t>& uidList, bo
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->ProxyForUnaware(uidList, isProxy);
+}
+
+ErrCode AnsNotification::GetBadgeNumber(int32_t &badgeNumber)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->GetBadgeNumber(badgeNumber);
+}
+
+void AnsNotification::CreateBadgeQueryListener(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback,
+    sptr<BadgeQueryListener> &listener)
+{
+    std::lock_guard<std::mutex> lock(badgeQueryMutex_);
+    auto item = badgeQueryCallbacks_.find(badgeQueryCallback);
+    if (item != badgeQueryCallbacks_.end()) {
+        listener = item->second;
+        ANS_LOGD("badgeQueryCallback has listener");
+        return;
+    }
+    listener = new (std::nothrow) BadgeQueryListener(badgeQueryCallback);
+    if (listener != nullptr) {
+        badgeQueryCallbacks_[badgeQueryCallback] = listener;
+        ANS_LOGD("CreateBadgeQueryListener success");
+    }
+    return;
+}
+
+ErrCode AnsNotification::RegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback)
+{
+    if (badgeQueryCallback == nullptr) {
+        ANS_LOGE("null badgeQueryCallback");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("RegisterBadgeQueryCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<BadgeQueryListener> listener = nullptr;
+    CreateBadgeQueryListener(badgeQueryCallback, listener);
+    if (listener == nullptr) {
+        ANS_LOGE("null listener");
+        return ERR_ANS_NO_MEMORY;
+    }
+
+    return proxy->RegisterBadgeQueryCallback(listener);
+}
+
+ErrCode AnsNotification::UnRegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("UnRegisterBadgeQueryCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    {
+        std::lock_guard<std::mutex> lock(badgeQueryMutex_);
+        badgeQueryCallbacks_.erase(badgeQueryCallback);
+    }
+    return proxy->UnRegisterBadgeQueryCallback();
 }
 }  // namespace Notification
 }  // namespace OHOS

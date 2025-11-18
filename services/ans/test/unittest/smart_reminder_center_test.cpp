@@ -19,7 +19,10 @@
 #define protected public
 #include "notification_preferences.h"
 #include "smart_reminder_center.h"
+#include "distributed_device_data_service.h"
 #include "ans_inner_errors.h"
+#include "ans_ut_constant.h"
+#include "notification_subscriber_manager.h"
 #undef private
 #undef protected
 
@@ -213,6 +216,24 @@ HWTEST_F(SmartReminderCenterTest, InitValidDevices_00002, Function | SmallTest |
     smartReminderCenter_->InitValidDevices(validDevices, smartDevices, statusMap, request);
     ASSERT_EQ(request->GetNotificationControlFlags(), 0);
 }
+
+HWTEST_F(SmartReminderCenterTest, InitValidDevices_00003, Function | SmallTest | Level1)
+{
+    // need subscriber
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->subscribedAll = true;
+    record->deviceType = NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE;
+    NotificationSubscriberManager::GetInstance()->subscriberRecordList_.push_back(record);
+
+    set<string> validDevices;
+    set<string> smartDevices;
+    map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> statusMap;
+    smartReminderCenter_->InitValidDevices(validDevices, smartDevices, statusMap, request);
+    EXPECT_EQ(validDevices.size(), 1);
+}
+
 #ifdef ALL_SCENARIO_COLLABORATION
 /**
  * @tc.name: InitPcPadDevices_100
@@ -709,6 +730,200 @@ HWTEST_F(SmartReminderCenterTest, GetReminderAffecteds_500, Function | SmallTest
     smartReminderCenter_->GetReminderAffecteds(reminderFilterDevice, request, reminderAffecteds);
 
     ASSERT_EQ(reminderAffecteds.size(), 1);
+}
+
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+HWTEST_F(SmartReminderCenterTest, InitThirdPartyWearableDevices_00001, Function | SmallTest | Level1)
+{
+    std::string ownerBundleName = "test";
+    int32_t ownerUid = 100;
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUid(1000);
+    request->SetOwnerBundleName(ownerBundleName);
+    request->SetOwnerUid(ownerUid);
+
+    set<string> validDevices;
+    smartReminderCenter_->InitThirdPartyWearableDevices(validDevices, request);
+    EXPECT_EQ(validDevices.size(), 1);
+}
+
+HWTEST_F(SmartReminderCenterTest, InitThirdPartyWearableDevices_00002, Function | SmallTest | Level1)
+{
+    std::string ownerBundleName = "test";
+    int32_t ownerUid = 100;
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetCreatorUid(1000);
+    request->SetOwnerBundleName(ownerBundleName);
+    request->SetOwnerUid(ownerUid);
+
+    set<string> validDevices;
+    smartReminderCenter_->InitThirdPartyWearableDevices(validDevices, request);
+    EXPECT_EQ(validDevices.size(), 0);
+}
+
+HWTEST_F(SmartReminderCenterTest, InitThirdPartyWearableDevices_00003, Function | SmallTest | Level1)
+{
+    std::string ownerBundleName = "test";
+    int32_t ownerUid = 100;
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUid(NON_BUNDLE_NAME_UID);
+    request->SetOwnerBundleName(ownerBundleName);
+    request->SetOwnerUid(ownerUid);
+
+    set<string> validDevices;
+    smartReminderCenter_->InitThirdPartyWearableDevices(validDevices, request);
+    EXPECT_EQ(validDevices.size(), 0);
+}
+
+HWTEST_F(SmartReminderCenterTest, InitThirdPartyWearableDevices_00004, Function | SmallTest | Level1)
+{
+    std::string ownerBundleName = "test";
+    int32_t ownerUid = 100;
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUid(1000);
+    request->SetOwnerBundleName(ownerBundleName);
+    request->SetOwnerUid(ownerUid);
+    request->SetClassification(NotificationConstant::ANS_VOIP);
+
+    set<string> validDevices;
+    smartReminderCenter_->InitThirdPartyWearableDevices(validDevices, request);
+    EXPECT_EQ(validDevices.size(), 0);
+}
+#endif
+
+/**
+ * @tc.name: IsSmartRemindBySwitch_100
+ * @tc.desc: Test IsSmartRemindBySwitch when liveView switch closed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, IsSmartRemindBySwitch_100, Function | SmallTest | Level1)
+{
+    std::string deviceType = "testDeviceType1";
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    DeviceStatus deviceStatus(deviceType, deviceId);
+    bool result = smartReminderCenter_->IsSmartRemindBySwitch(deviceType, deviceStatus, request);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: IsSmartRemindBySwitch_200
+ * @tc.desc: Test IsSmartRemindBySwitch when liveView switch open and slot switch close
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, IsSmartRemindBySwitch_200, Function | SmallTest | Level1)
+{
+    std::string deviceType = "testDeviceType2";
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    DeviceStatus deviceStatus(deviceType, deviceId);
+    DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch(deviceType, deviceId, false, true);
+    bool result = smartReminderCenter_->IsSmartRemindBySwitch(deviceType, deviceStatus, request);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: IsSmartRemindBySwitch_300
+ * @tc.desc: Test IsSmartRemindBySwitch when notification switch closed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, IsSmartRemindBySwitch_300, Function | SmallTest | Level1)
+{
+    std::string deviceType = "testDeviceType3";
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    DeviceStatus deviceStatus(deviceType, deviceId);
+    bool result = smartReminderCenter_->IsSmartRemindBySwitch(deviceType, deviceStatus, request);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: IsSmartRemindBySwitch_400
+ * @tc.desc: Test IsSmartRemindBySwitch when notification switch open and slot switch close
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, IsSmartRemindBySwitch_400, Function | SmallTest | Level1)
+{
+    std::string deviceType = "testDeviceType4";
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    DeviceStatus deviceStatus(deviceType, deviceId);
+    DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch(deviceType, deviceId, true, false);
+    bool result = smartReminderCenter_->IsSmartRemindBySwitch(deviceType, deviceStatus, request);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: IsSmartRemindBySwitch_500
+ * @tc.desc: Test IsSmartRemindBySwitch when notification switch open and slot switch open
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, IsSmartRemindBySwitch_500, Function | SmallTest | Level1)
+{
+    std::string deviceType = "testDeviceType5";
+    std::string deviceId = "123";
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    DeviceStatus deviceStatus(deviceType, deviceId);
+    DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch(deviceType, deviceId, true, false);
+    NotificationPreferences::GetInstance()->SetDistributedEnabled(
+        NotificationConstant::CURRENT_DEVICE_TYPE,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    bool result = smartReminderCenter_->IsSmartRemindBySwitch(deviceType, deviceStatus, request);
+    ASSERT_EQ(result, true);
+    NotificationPreferences::GetInstance()->SetDistributedEnabled(
+        NotificationConstant::CURRENT_DEVICE_TYPE,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+}
+
+/**
+ * @tc.name: CheckHealthWhiteList_100
+ * @tc.desc: Test CheckHealthWhiteList when not liveView
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, CheckHealthWhiteList_100, Function | SmallTest | Level1)
+{
+    std::string deviceType = "testDeviceType";
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    bool result = smartReminderCenter_->CheckHealthWhiteList(request, deviceType);
+    ASSERT_EQ(result, true);
+}
+
+/**
+ * @tc.name: CheckHealthWhiteList_200
+ * @tc.desc: Test CheckHealthWhiteList when deviceType not watch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, CheckHealthWhiteList_200, Function | SmallTest | Level1)
+{
+    std::string deviceType = "testDeviceType";
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    bool result = smartReminderCenter_->CheckHealthWhiteList(request, deviceType);
+    ASSERT_EQ(result, true);
+}
+
+/**
+ * @tc.name: CheckHealthWhiteList_300
+ * @tc.desc: Test CheckHealthWhiteList when whiteList is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, CheckHealthWhiteList_300, Function | SmallTest | Level1)
+{
+    std::string deviceType = NotificationConstant::WEARABLE_DEVICE_TYPE;;
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    bool result = smartReminderCenter_->CheckHealthWhiteList(request, deviceType);
+    ASSERT_EQ(result, true);
 }
 }   //namespace Notification
 }   //namespace OHOS
