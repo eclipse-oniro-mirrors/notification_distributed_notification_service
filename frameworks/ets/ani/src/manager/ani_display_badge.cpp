@@ -21,6 +21,7 @@
 #include "notification_helper.h"
 #include "notification_bundle_option.h"
 #include "sts_convert_other.h"
+#include "sts_badge_query_callback.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
@@ -225,6 +226,40 @@ ani_object AniGetBadgeDisplayStatusByBundles(ani_env *env, ani_object obj)
         return nullptr;
     }
     return outAniObj;
+}
+
+ani_long AniGetBadgeNumber(ani_env *env)
+{
+    ANS_LOGD("sts AniGetBadgeNumber call");
+    int32_t num = 0;
+    int returncode = OHOS::Notification::NotificationHelper::GetBadgeNumber(num);
+    ANS_LOGD("sts AniGetBadgeNumber end, badgenumber: %{public}d", num);
+    ani_long retNum = static_cast<ani_long>(num);
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        ANS_LOGE("AniGetBadgeNumber error, errorCode: %{public}d", externalCode);
+        return 0;
+    }
+    return retNum;
+}
+
+void AniOnBadgeNumberQuery(ani_env *env, ani_fn_object fn)
+{
+    ANS_LOGD("AniOnBadgeNumberQuery enter");
+    OHOS::NotificationSts::StsBadgeQueryCallBackManager::GetInstance()->AniOnBadgeNumberQuery(env, fn);
+}
+
+void AniOffBadgeNumberQuery(ani_env *env)
+{
+    ANS_LOGD("AniOffBadgeNumberQuery enter");
+    OHOS::NotificationSts::StsBadgeQueryCallBackManager::GetInstance()->AniOffBadgeNumberQuery(env);
+}
+
+void AniHandleBadgeNumberPromise(ani_env *env, ani_object bundle, ani_long num)
+{
+    ANS_LOGD("AniHandleBadgeNumberPromise enter");
+    OHOS::NotificationSts::StsBadgeQueryCallBackManager::GetInstance()->AniHandleBadgeNumberPromise(env, bundle, num);
 }
 }
 }

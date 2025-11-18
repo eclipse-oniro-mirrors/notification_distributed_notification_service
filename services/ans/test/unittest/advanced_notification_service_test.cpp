@@ -5109,5 +5109,22 @@ HWTEST_F(AdvancedNotificationServiceTest, RegisterBadgeQueryCallbackTest_0400, F
     ASSERT_EQ(badgeNumber, 1);
     ASSERT_EQ(advancedNotificationService_->UnRegisterBadgeQueryCallback(), (int)ERR_OK);
 }
+
+/**
+ * @tc.number    : RegisterBadgeQueryCallbackTest_0500
+ * @tc.name      : RegisterBadgeQueryCallback_0400
+ * @tc.desc      : Test RegisterBadgeQueryCallback function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, RegisterBadgeQueryCallbackTest_0500, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "RegisterBadgeQueryCallbackTest_0500 test start";
+    sptr<MockBadgeQueryCallBackStub> badgeQueryCallbackStub = new (std::nothrow)MockBadgeQueryCallBackStub();
+    EXPECT_NE(badgeQueryCallbackStub, nullptr);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    ASSERT_EQ(advancedNotificationService_->RegisterBadgeQueryCallback(badgeQueryCallbackStub),
+        (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->UnRegisterBadgeQueryCallback(), (int)ERR_ANS_NON_SYSTEM_APP);
+}
 }  // namespace Notification
 }  // namespace OHOS
