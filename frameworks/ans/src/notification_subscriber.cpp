@@ -304,6 +304,23 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnBadgeChanged(const sptr<BadgeN
     return ERR_OK;
 }
 
+ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledPriorityChanged(
+    const sptr<EnabledNotificationCallbackData> &callbackData)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    subscriber_.OnEnabledPriorityChanged(std::make_shared<EnabledNotificationCallbackData>(*callbackData));
+    return ERR_OK;
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledPriorityByBundleChanged(
+    const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    subscriber_.OnEnabledPriorityByBundleChanged(
+        std::make_shared<EnabledPriorityNotificationByBundleCallbackData>(*callbackData));
+    return ERR_OK;
+}
+
 ErrCode NotificationSubscriber::SubscriberImpl::OnBadgeEnabledChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {

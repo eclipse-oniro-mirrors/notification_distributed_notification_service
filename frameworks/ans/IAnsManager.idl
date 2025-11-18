@@ -282,16 +282,20 @@ interface OHOS.Notification.IAnsManager {
 
     void SetAdditionConfig([in] String key, [in] String value);
 
+    void SetBundlePriorityConfig([in] sptr<NotificationBundleOption> bundleOption, [in] String value);
+
+    void GetBundlePriorityConfig([in] sptr<NotificationBundleOption> bundleOption, [out] String value);
+
     void SetDistributedEnabledByBundle(
         [in] sptr<NotificationBundleOption> bundleOption, [in] String deviceType, [in] boolean enabled);
 
     void SetPriorityEnabled([in] boolean enabled);
 
-    void SetPriorityEnabledByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] boolean enabled);
+    void SetPriorityEnabledByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int enableStatusInt);
 
     void IsPriorityEnabled([out] boolean enabled);
 
-    void IsPriorityEnabledByBundle([in] sptr<NotificationBundleOption> bundleOption, [out] boolean enabled);
+    void IsPriorityEnabledByBundle([in] sptr<NotificationBundleOption> bundleOption, [out] int enableStatusInt);
 
     void SetDistributedBundleOption(
         [in] sptr<DistributedBundleOption>[] bundles, [in] String deviceType);

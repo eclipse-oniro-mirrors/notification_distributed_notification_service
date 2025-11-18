@@ -102,6 +102,21 @@ public:
         const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override;
 
     /**
+     * @brief Callback when the priority notification switch is changed.
+     *
+     * @param callbackData Indicates the switch state.
+     */
+    void OnEnabledPriorityChanged(const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override;
+
+    /**
+     * @brief Callback when the priority notification switch by bundle is changed.
+     *
+     * @param callbackData Indicates the EnabledNotificationCallbackData object.
+     */
+    void OnEnabledPriorityByBundleChanged(
+        const std::shared_ptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData) override;
+
+    /**
      * @brief The callback function on the badge number changed.
      *
      * @param badgeData Indicates the BadgeNumberCallbackData object.
@@ -185,6 +200,8 @@ private:
     void SetBadgeCallbackInfo(const napi_env &env, const napi_ref &ref);
     void SetBadgeEnabledCallbackInfo(const napi_env &env, const napi_ref &ref);
     void SetBatchCancelCallbackInfo(const napi_env &env, const napi_ref &ref);
+    void SetEnabledPriorityCallbackInfo(const napi_env &env, const napi_ref &ref);
+    void SetEnabledPriorityByBundleCallbackInfo(const napi_env &env, const napi_ref &ref);
 
     CallbackInfo GetCancelCallbackInfo();
     CallbackInfo GetConsumeCallbackInfo();
@@ -196,11 +213,14 @@ private:
     CallbackInfo GetDisturbDateCallbackInfo();
     CallbackInfo GetDisturbChangedCallbackInfo();
     CallbackInfo GetEnabledNotificationCallbackInfo();
+    CallbackInfo GetEnabledPriorityCallbackInfo();
+    CallbackInfo GetEnabledPriorityByBundleCallbackInfo();
     CallbackInfo GetBadgeCallbackInfo();
     CallbackInfo GetBadgeEnabledCallbackInfo();
     CallbackInfo GetBatchCancelCallbackInfo();
 
     void CallThreadSafeFunc(void *data);
+    void SubDeleteRef();
 
 private:
     ffrt::mutex tsfnMutex_;
@@ -216,6 +236,8 @@ private:
     CallbackInfo disturbDateCallbackInfo_;
     CallbackInfo disturbChangedCallbackInfo_;
     CallbackInfo enabledNotificationCallbackInfo_;
+    CallbackInfo enabledPriorityCallbackInfo_;
+    CallbackInfo enabledPriorityByBundleCallbackInfo_;
     CallbackInfo setBadgeCallbackInfo_;
     CallbackInfo setBadgeEnabledCallbackInfo_;
     CallbackInfo batchCancelCallbackInfo_;

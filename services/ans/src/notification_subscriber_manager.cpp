@@ -28,6 +28,7 @@
 #include "notification_constant.h"
 #include "notification_config_parse.h"
 #include "notification_extension_wrapper.h"
+#include "os_account_manager.h"
 #include "os_account_manager_helper.h"
 #include "remote_death_recipient.h"
 #include "advanced_notification_service.h"
@@ -314,6 +315,32 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChanged(
     AppExecFwk::EventHandler::Callback func =
         std::bind(&NotificationSubscriberManager::NotifyEnabledNotificationChangedInner, this, callbackData);
 
+    notificationSubQueue_->submit(func);
+}
+
+void NotificationSubscriberManager::NotifyEnabledPriorityChanged(
+    const sptr<EnabledNotificationCallbackData> &callbackData)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("null queue");
+        return;
+    }
+    AppExecFwk::EventHandler::Callback func =
+        std::bind(&NotificationSubscriberManager::NotifyEnabledPriorityChangedInner, this, callbackData);
+    notificationSubQueue_->submit(func);
+}
+
+void NotificationSubscriberManager::NotifyEnabledPriorityByBundleChanged(
+    const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("null queue");
+        return;
+    }
+    AppExecFwk::EventHandler::Callback func =
+        std::bind(&NotificationSubscriberManager::NotifyEnabledPriorityByBundleChangedInner, this, callbackData);
     notificationSubQueue_->submit(func);
 }
 
@@ -857,6 +884,28 @@ void NotificationSubscriberManager::NotifyUpdatedInner(const sptr<NotificationSo
 }
 
 template <typename... Args>
+void NotificationSubscriberManager::NotifySubscribers(int32_t userId,
+    NotificationConstant::SubscribedFlag flags, ErrCode (IAnsSubscriber::*func)(Args...), Args&& ... args)
+{
+    for (auto& record : subscriberRecordList_) {
+        if (IsNeedNotifySubscribers(record, userId) && (record->subscribedFlags_ & flags)) {
+            (record->subscriber->*func)(std::forward<Args>(args)...);
+        }
+    }
+}
+
+template <typename... Args>
+void NotificationSubscriberManager::NotifySubscribers(int32_t userId, int32_t uid,
+    NotificationConstant::SubscribedFlag flags, ErrCode (IAnsSubscriber::*func)(Args...), Args&& ... args)
+{
+    for (auto& record : subscriberRecordList_) {
+        if (IsNeedNotifySubscribers(record, userId, uid) && (record->subscribedFlags_ & flags)) {
+            (record->subscriber->*func)(std::forward<Args>(args)...);
+        }
+    }
+}
+
+template <typename... Args>
 void NotificationSubscriberManager::NotifySubscribers(int32_t userId, const std::string& bundle,
     NotificationConstant::SubscribedFlag flags, ErrCode (IAnsSubscriber::*func)(Args...), Args&& ... args)
 {
@@ -865,6 +914,35 @@ void NotificationSubscriberManager::NotifySubscribers(int32_t userId, const std:
             (record->subscriber->*func)(std::forward<Args>(args)...);
         }
     }
+}
+
+bool NotificationSubscriberManager::IsNeedNotifySubscribers(
+    const std::shared_ptr<SubscriberRecord> &record, int32_t userId)
+{
+    if (record->userId == SUBSCRIBE_USER_ALL || IsSystemUser(record->userId) || IsSystemUser(userId)) {
+        return true;
+    }
+    return record->userId == userId && !record->isSubscribeSelf;
+}
+
+bool NotificationSubscriberManager::IsNeedNotifySubscribers(const std::shared_ptr<SubscriberRecord> &record,
+    int32_t userId, int32_t uid)
+{
+    if (record->userId == SUBSCRIBE_USER_ALL || IsSystemUser(record->userId) || IsSystemUser(userId)) {
+        return true;
+    }
+
+    if (record->userId == userId) {
+        if (record->isSubscribeSelf) {
+            if (record->subscriberUid == uid) {
+                ANS_LOGD("Notify self-subscription(uid = %{public}d) success", uid);
+                return true;
+            }
+        } else {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool NotificationSubscriberManager::IsNeedNotifySubscribers(const std::shared_ptr<SubscriberRecord> &record,
@@ -929,6 +1007,41 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChangedInner(
     std::string bundle = callbackData->GetBundle();
     NotifySubscribers(userId, bundle, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLENOTIFICATION_CHANGED,
         &IAnsSubscriber::OnEnabledNotificationChanged, callbackData);
+}
+
+void NotificationSubscriberManager::NotifyEnabledPriorityChangedInner(
+    const sptr<EnabledNotificationCallbackData> &callbackData)
+{
+    if (callbackData == nullptr) {
+        ANS_LOGE("null callbackData");
+        return;
+    }
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return;
+    }
+    NotifySubscribers(userId, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLEPRIORITY_CHANGED,
+        &IAnsSubscriber::OnEnabledPriorityChanged, callbackData);
+}
+
+void NotificationSubscriberManager::NotifyEnabledPriorityByBundleChangedInner(
+    const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData)
+{
+    if (callbackData == nullptr) {
+        ANS_LOGE("null callbackData");
+        return;
+    }
+    int32_t uid = callbackData->GetUid();
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return;
+    }
+    NotifySubscribers(userId, uid, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLEPRIORITYBYBUNDLE_CHANGED,
+        &IAnsSubscriber::OnEnabledPriorityByBundleChanged, callbackData);
 }
 
 void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbackData> &badgeData)

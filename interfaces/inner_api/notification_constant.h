@@ -99,6 +99,8 @@ public:
         SUBSCRIBE_ON_APPLICATIONINFONEED_CHANGED = 1 << 10,
         SUBSCRIBE_ON_OPERATIONRESPONSE = 1 << 11,
         SUBSCRIBE_ON_DIED = 1 << 12,
+        SUBSCRIBE_ON_ENABLEPRIORITY_CHANGED = 1 << 13,
+        SUBSCRIBE_ON_ENABLEPRIORITYBYBUNDLE_CHANGED = 1 << 14,
     };
 
     enum DistributedDeleteType {
@@ -212,6 +214,23 @@ public:
 
     enum class SubscribeType {
         BLUETOOTH = 0
+    };
+
+    enum class PriorityEnableStatus {
+        /**
+         * disable priority notification
+         */
+        DISABLE = 0,
+
+        /**
+         * enable priority notification by intelligent identification
+         */
+        ENABLE_BY_INTELLIGENT = 1,
+
+        /**
+         * enable priority notification
+         */
+        ENABLE = 2,
     };
 
     enum class RingtoneType {
@@ -490,6 +509,107 @@ public:
     constexpr static const char* ANS_VOIP = "ANS_VOIP";
     constexpr static const char* PC_PAD_VOIP_FLAG = "110101";
     constexpr static const char* HEALTH_BUNDLE_WHITE_LIST  = "HEALTH_BUNDLE_WHITE_LIST";
+
+    /**
+     * Indicates priority notification type
+     */
+    class PriorityNotificationType {
+    public:
+        /**
+         * Indicates non-priority notification
+         */
+        constexpr static const char* OTHER = "OTHER";
+
+        /**
+         * Indicates Priority contact
+         */
+        constexpr static const char* PRIMARY_CONTACT = "PRIMARY_CONTACT";
+
+        /**
+         * Indicates Someone @me
+         */
+        constexpr static const char* AT_ME = "AT_ME";
+
+        /**
+         * Indicates Urgent message
+         */
+        constexpr static const char* URGENT_MESSAGE = "URGENT_MESSAGE";
+
+        /**
+         * Indicates Schedule reminder
+         */
+        constexpr static const char* SCHEDULE_REMINDER = "SCHEDULE_REMINDER";
+
+        /**
+         * Indicates Payment due
+         */
+        constexpr static const char* PAYMENT_DUE = "PAYMENT_DUE";
+
+        /**
+         * Indicates Transaction alert
+         */
+        constexpr static const char* TRANSACTION_ALERT = "TRANSACTION_ALERT";
+
+        /**
+         * Indicates Express progress
+         */
+        constexpr static const char* EXPRESS_PROGRESS = "EXPRESS_PROGRESS";
+
+        /**
+         * Indicates Miss call
+         */
+        constexpr static const char* MISS_CALL = "MISS_CALL";
+
+        /**
+         * Indicates Travel alert
+         */
+        constexpr static const char* TRAVEL_ALERT = "TRAVEL_ALERT";
+
+        /**
+         * Indicates Account alert
+         */
+        constexpr static const char* ACCOUNT_ALERT = "ACCOUNT_ALERT";
+
+        /**
+         * Indicates Appointment reminder
+         */
+        constexpr static const char* APPOINTMENT_REMINDER = "APPOINTMENT_REMINDER";
+
+        /**
+         * Indicates Traffic notice
+         */
+        constexpr static const char* TRAFFIC_NOTICE = "TRAFFIC_NOTICE";
+
+        /**
+         * Indicates Key progress
+         */
+        constexpr static const char* KEY_PROGRESS = "KEY_PROGRESS";
+
+        /**
+         * Indicates Public event
+         */
+        constexpr static const char* PUBLIC_EVENT = "PUBLIC_EVENT";
+
+        /**
+         * Indicates Iot warning
+         */
+        constexpr static const char* IOT_WARNING = "IOT_WARNING";
+
+        /**
+         * custom keyword
+         */
+        constexpr static const char* CUSTOM_KEYWORD = "CUSTOM_KEYWORD";
+
+        /**
+         * Use to verify the priority type
+         */
+        static const std::vector<std::string> VALID_PRIORITY_TYPE_LIST;
+
+        /**
+         * Use to verify the priority type for inner process
+         */
+        static const std::vector<std::string> INNER_PRIORITY_TYPE_LIST;
+    };
 };
 }  // namespace Notification
 }  // namespace OHOS

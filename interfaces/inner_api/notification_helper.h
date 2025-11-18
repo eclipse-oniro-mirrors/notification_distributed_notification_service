@@ -1273,6 +1273,24 @@ public:
     static ErrCode SetAdditionConfig(const std::string &key, const std::string &value);
 
     /**
+     * @brief Set priority config of bundle for intelligent identification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param value Indicates priority config of bundle.
+     * @return Returns set result.
+     */
+    static ErrCode SetBundlePriorityConfig(const NotificationBundleOption &bundleOption, const std::string &value);
+
+    /**
+     * @brief Get priority config of bundle for intelligent identification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param value Indicates priority config of bundle.
+     * @return Returns get result.
+     */
+    static ErrCode GetBundlePriorityConfig(const NotificationBundleOption &bundleOption, std::string &value);
+
+    /**
      * @brief Configuring Whether to allow sending priority notification.
      *
      * @param enabled Whether to allow sending priority notification.
@@ -1287,7 +1305,8 @@ public:
      * @param enabled Whether to allow sending priority notification by bundle.
      * @return Returns configuring Whether to allow sending priority notification by bundle.
      */
-    static ErrCode SetPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, const bool enabled);
+    static ErrCode SetPriorityEnabledByBundle(
+        const NotificationBundleOption &bundleOption, const NotificationConstant::PriorityEnableStatus enableStatus);
 
     /**
      * @brief Query switch for sending priority notification.
@@ -1304,7 +1323,8 @@ public:
      * @param enabled Whether to allow sending priority notification by bundle.
      * @return Returns configuring Whether to allow sending priority notification by bundle.
      */
-    static ErrCode IsPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, bool &enabled);
+    static ErrCode IsPriorityEnabledByBundle(
+        const NotificationBundleOption &bundleOption, NotificationConstant::PriorityEnableStatus &enableStatus);
 
     /**
      * @brief Cancels a published agent notification.

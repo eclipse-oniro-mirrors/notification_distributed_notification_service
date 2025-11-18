@@ -28,6 +28,7 @@ NotificationAiExtensionWrapper::NotificationAiExtensionWrapper()
 {
     InitExtensionWrapper();
 }
+
 NotificationAiExtensionWrapper::~NotificationAiExtensionWrapper()
 {
     CloseExtensionWrapper();
@@ -59,6 +60,18 @@ void NotificationAiExtensionWrapper::InitExtensionWrapper()
         return;
     }
 
+    syncBundleKeywords_ = (SYNC_BUNDLE_KEYWORDS)dlsym(ExtensionHandle_, "SyncBundleKeywords");
+    if (syncBundleKeywords_ == nullptr) {
+        ANS_LOGE("failed to sync bundle keywords extension %{public}s.", dlerror());
+        return;
+    }
+
+    notifyPriorityEvent_ = (NOTIFY_PRIORITY_EVENT)dlsym(ExtensionHandle_, "NotifyPriorityEvent");
+    if (notifyPriorityEvent_ == nullptr) {
+        ANS_LOGE("failed to notify priority event extension %{public}s.", dlerror());
+        return;
+    }
+
     getSupportCommands_ = (GET_SUPPORT_COMMANDS)dlsym(ExtensionHandle_, "GetSupportCommands");
     if (getSupportCommands_ == nullptr) {
         ANS_LOGE("failed to get support ai commands extension %{public}s.", dlerror());
@@ -77,12 +90,14 @@ void NotificationAiExtensionWrapper::CloseExtensionWrapper()
         init_ = nullptr;
         syncRules_ = nullptr;
         getSupportCommands_ = nullptr;
+        syncBundleKeywords_ = nullptr;
+        notifyPriorityEvent_ = nullptr;
     }
     ANS_LOGI("notification ai extension wrapper close success");
 }
 
 int32_t NotificationAiExtensionWrapper::UpdateNotification(
-    const sptr<NotificationRequest> &request, std::unordered_map<std::string, sptr<IResult>> results)
+    const sptr<NotificationRequest> &request, std::unordered_map<std::string, sptr<IResult>> &results)
 {
     if (updateNotification_ == nullptr) {
         ANS_LOGE("update priority notification wrapper symbol failed");
@@ -106,14 +121,11 @@ void NotificationAiExtensionWrapper::Init()
     }
 
     std::string rules = NotificationPreferences::GetInstance()->GetAdditionalConfig(PRIORITY_RULE_CONFIG_KEY);
-    if (rules.empty()) {
-        ANS_LOGE("query addition config failed or rules empty");
-        return;
-    }
-
-    result = SyncRules(rules);
-    if (result != ErrorCode::ERR_OK) {
-        ANS_LOGE("sync ai rules failed");
+    if (!rules.empty()) {
+        result = SyncRules(rules);
+        if (result != ErrorCode::ERR_OK) {
+            ANS_LOGE("sync ai rules failed");
+        }
     }
 }
 
@@ -133,5 +145,25 @@ int32_t NotificationAiExtensionWrapper::SyncRules(const std::string &rules)
         return ErrorCode::ERR_FAIL;
     }
     return syncRules_(rules);
+}
+
+int32_t NotificationAiExtensionWrapper::SyncBundleKeywords(
+    const sptr<NotificationBundleOption> &bundleOption, const std::string &keyword)
+{
+    if (syncBundleKeywords_ == nullptr) {
+        ANS_LOGE("sync bundle keywords wrapper symbol failed");
+        return ErrorCode::ERR_FAIL;
+    }
+    return syncBundleKeywords_(bundleOption, keyword);
+}
+
+int32_t NotificationAiExtensionWrapper::NotifyPriorityEvent(
+    const std::string &event, const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (notifyPriorityEvent_  == nullptr) {
+        ANS_LOGE("notify priority event wrapper symbol failed");
+        return ErrorCode::ERR_FAIL;
+    }
+    return notifyPriorityEvent_(event, bundleOption);
 }
 }

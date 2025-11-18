@@ -18,6 +18,7 @@
 
 #include "ians_manager.h"
 #include "ans_subscriber_stub.h"
+#include "enabled_priority_notification_by_bundle_callback_data.h"
 #include "notification_request.h"
 #include "notification_sorting.h"
 #include "notification_sorting_map.h"
@@ -87,6 +88,27 @@ public:
      * @param callbackData Indicates the properties of the application that notification permission has changed.
      **/
     virtual void OnEnabledNotificationChanged(const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) = 0;
+
+    /**
+     * @brief Callback when the priority notification switch is changed.
+     *
+     * @param enable Indicates the switch state.
+     */
+    virtual void OnEnabledPriorityChanged(const std::shared_ptr<EnabledNotificationCallbackData> &callbackData)
+    {
+        return;
+    };
+
+    /**
+     * @brief Callback when the priority notification switch by bundle is changed.
+     *
+     * @param callbackData Indicates the EnabledPriorityNotificationByBundleCallbackData object.
+     */
+    virtual void OnEnabledPriorityByBundleChanged(
+        const std::shared_ptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData)
+    {
+        return;
+    };
 
     /**
      * @brief The callback function on the badge number changed.
@@ -202,6 +224,11 @@ private:
         ErrCode OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date) override;
 
         ErrCode OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
+
+        ErrCode OnEnabledPriorityChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
+
+        ErrCode OnEnabledPriorityByBundleChanged(
+            const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData) override;
 
         ErrCode OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override;
 
