@@ -381,6 +381,10 @@ interface OHOS.Notification.IAnsManager {
 
     void SetReminderInfoByBundles([in] sptr<NotificationReminderInfo>[] reminderInfo);
 
+    void SetGeofenceEnabled([in] boolean enabled);
+
+    void IsGeofenceEnabled([out] boolean enabled);
+
     void GetUserGrantedEnabledBundles([in] sptr<NotificationBundleOption> targetBundle, [out] sptr<NotificationBundleOption>[] enabledBundles);
 
     void GetUserGrantedEnabledBundlesForSelf([out] sptr<NotificationBundleOption>[] bundles);

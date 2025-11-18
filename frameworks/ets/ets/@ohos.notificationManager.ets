@@ -274,6 +274,8 @@ export default namespace notificationManager {
     export native function nativeGetNotificationSetting(): NotificationSetting;
     export native function nativeSetRingtoneInfoByBundle(bundle: BundleOption, ringtoneInfo: RingtoneInfo): void;
     export native function nativeGetRingtoneInfoByBundle(bundle: BundleOption): RingtoneInfo;
+    export native function nativeSetGeofenceEnabled(enabled: boolean): void;
+    export native function nativeIsGeofenceEnabled(): boolean;
 
     export native function nativeIsDistributedEnabledByDeviceType(deviceType: string): boolean;
     export native function nativeSetDistributedEnabled(enable: boolean, deviceType: string): void;
@@ -2708,6 +2710,33 @@ export default namespace notificationManager {
                 { return nativeGetRingtoneInfoByBundle(bundle); });
             p.then((data: NullishType): void => {
                 let ret : RingtoneInfo = data as RingtoneInfo;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function setGeofenceEnabled(enable: boolean): Promise<void>
+    {
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativeSetGeofenceEnabled(enable); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function isGeofenceEnabled(): Promise<boolean>
+    {
+        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): boolean => { return nativeIsGeofenceEnabled(); });
+            p.then((data: NullishType): void => {
+                let ret : boolean = data as boolean;
                 resolve(ret);
             }, (error: Error): void => {
                 reject(error);

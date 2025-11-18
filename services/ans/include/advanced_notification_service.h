@@ -1190,6 +1190,22 @@ public:
     ErrCode SetReminderInfoByBundles(const std::vector<sptr<NotificationReminderInfo>> &reminderInfo) override;
 
     /**
+     * @brief Set geofence switch.
+     *
+     * @param enabled Set enable or not.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetGeofenceEnabled(bool enabled) override;
+
+    /**
+     * @brief Checks if the geofence is enabled.
+     *
+     * @param enabled whether the geofence is enabled.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode IsGeofenceEnabled(bool &enabled) override;
+
+    /**
      * @brief configuring Whether to Synchronize Common Notifications to Target Devices.
      *
      * @param deviceType Target device type.

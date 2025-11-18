@@ -3197,6 +3197,26 @@ ErrCode AnsNotification::SetReminderInfoByBundles(const std::vector<Notification
     return proxy->SetReminderInfoByBundles(reminderInfoSptr);
 }
 
+ErrCode AnsNotification::SetGeofenceEnabled(bool enabled)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->SetGeofenceEnabled(enabled);
+}
+
+ErrCode AnsNotification::IsGeofenceEnabled(bool &enabled)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->IsGeofenceEnabled(enabled);
+}
+
 ErrCode AnsNotification::ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy)
 {
     sptr<IAnsManager> proxy = GetAnsManagerProxy();

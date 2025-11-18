@@ -40,6 +40,7 @@ ohos_shared_library("notification_manager_ani") {
     "./src/manager/ani_distributed_enable.cpp",
     "./src/manager/ani_do_not_disturb_date.cpp",
     "./src/manager/ani_do_not_disturb_profile.cpp",
+    "./src/manager/ani_geofence_enabled.cpp",
     "./src/manager/ani_get_active.cpp",
     "./src/manager/ani_local_live_view.cpp",
     "./src/manager/ani_manager.cpp",

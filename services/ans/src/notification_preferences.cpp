@@ -2478,6 +2478,28 @@ bool NotificationPreferences::IsKioskMode()
     return isKioskMode_;
 }
 
+ErrCode NotificationPreferences::SetGeofenceEnabled(bool enabled)
+{
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGI("Invalid prefernces db.");
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+
+    auto storeDBResult = preferncesDB_->SetGeofenceEnabled(enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::IsGeofenceEnabled(bool &enabled)
+{
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGI("Invalid prefernces db.");
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+
+    auto storeDBResult = preferncesDB_->IsGeofenceEnabled(enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
 int32_t NotificationPreferences::GetKvFromDb(
     const std::string &key, std::string &value, const int32_t &userId, int32_t &retCode)

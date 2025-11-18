@@ -146,6 +146,22 @@ public:
         NotificationPreferencesInfo::SilentReminderInfo &silentReminderInfo);
 
     /**
+     * @brief Set the geofence notification enabled status in the database
+     *
+     * @param enabled true to enable geofence notifications, false to disable
+     * @return true if the operation succeeded, false if it failed
+     */
+    bool SetGeofenceEnabled(bool enabled);
+
+    /**
+     * @brief Check if geofence notification is enabled for the specified bundle
+     *
+     * @param enabled Output parameter indicating the enabled status
+     * @return true if the query was successful, false if an error occurred
+     */
+    bool IsGeofenceEnabled(bool &enabled);
+    
+    /**
      * @brief Put priority notification enable into disturbe DB.
      *
      * @param enabled Indicates to whether to enabled.
