@@ -398,12 +398,10 @@ void AsyncCompleteCallbackNapiOffBadgeNumberQuery(napi_env env, napi_status stat
     if (asynccallbackinfo->objectInfo) {
         napi_threadsafe_function tsfn = asynccallbackinfo->objectInfo->GetThreadSafeFunction();
         if (tsfn != nullptr) {
-            ANS_LOGD("___delete1 tsfn");
             napi_release_threadsafe_function(tsfn, napi_tsfn_release);
             asynccallbackinfo->objectInfo->SetThreadSafeFunction(nullptr);
         }
         if (asynccallbackinfo->objectInfo->ref != nullptr) {
-            ANS_LOGD("___delete1 ref");
             napi_delete_reference(env, asynccallbackinfo->objectInfo->ref);
             asynccallbackinfo->objectInfo->ref = nullptr;
         }
