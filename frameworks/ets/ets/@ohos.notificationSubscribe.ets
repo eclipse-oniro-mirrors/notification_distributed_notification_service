@@ -98,7 +98,7 @@ export default namespace notificationSubscribe {
         }
         let p = taskpool.execute((): void => { notificationSubscribe.nativeSubscribe(subscriber) });
         p.then(
-            (e: NullishType): void => {
+            (e: Any): void => {
                 callback(null, undefined);
             }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
@@ -119,7 +119,7 @@ export default namespace notificationSubscribe {
         }
         let p = taskpool.execute((): void => { notificationSubscribe.nativeSubscribe(subscriber, info) });
         p.then(
-            (e: NullishType): void => {
+            (e: Any): void => {
                 callback(null, undefined);
             }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
@@ -137,7 +137,7 @@ export default namespace notificationSubscribe {
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void =>{
             let p = taskpool.execute((): void => { notificationSubscribe.nativeSubscribe(subscriber, info)});
             p.then(
-                (e: NullishType): void => {
+                (e: Any): void => {
                     resolve(undefined);
                 }, (error: Error): void => {
                     reject(error);
@@ -153,7 +153,7 @@ export default namespace notificationSubscribe {
         }
         let p = taskpool.execute((): void => { notificationSubscribe.nativeUnSubscribe(subscriber) });
         p.then(
-            (e: NullishType): void => {
+            (e: Any): void => {
                 callback(null, undefined);
             }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
@@ -169,7 +169,7 @@ export default namespace notificationSubscribe {
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void =>{
             let p = taskpool.execute((): void => { notificationSubscribe.nativeUnSubscribe(subscriber) });
             p.then(
-                (e: NullishType): void => {
+                (e: Any): void => {
                     resolve(undefined);
                 }, (error: Error): void => {
                     reject(error);
@@ -192,7 +192,7 @@ export default namespace notificationSubscribe {
             notificationSubscribe.nativeRemove(bundle, notificationKey, reason);
         });
         p.then(
-            (e: NullishType): void => {
+            (e: Any): void => {
                 callback(null, undefined);
             }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
@@ -214,7 +214,7 @@ export default namespace notificationSubscribe {
                 notificationSubscribe.nativeRemove(bundle, notificationKey, reason);
             });
             p.then(
-                (e: NullishType): void => {
+                (e: Any): void => {
                     resolve(undefined);
                 }, (error: Error): void => {
                     reject(error);
@@ -232,7 +232,7 @@ export default namespace notificationSubscribe {
             notificationSubscribe.nativeRemove(hashCode, reason);
         });
         p.then(
-            (e: NullishType): void => {
+            (e: Any): void => {
                 callback(null, undefined);
             }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
@@ -250,7 +250,7 @@ export default namespace notificationSubscribe {
                 notificationSubscribe.nativeRemove(hashCode, reason);
             });
             p.then(
-                (e: NullishType): void => {
+                (e: Any): void => {
                     resolve(undefined);
                 }, (error: Error): void => {
                     reject(error);
@@ -268,7 +268,7 @@ export default namespace notificationSubscribe {
             notificationSubscribe.nativeRemove(hashCodes, reason);
         });
         p.then(
-            (e: NullishType): void => {
+            (e: Any): void => {
                 callback(null, undefined);
             }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
@@ -286,7 +286,7 @@ export default namespace notificationSubscribe {
                 notificationSubscribe.nativeRemove(hashCodes, reason);
             });
             p.then(
-                (e: NullishType): void => {
+                (e: Any): void => {
                     resolve(undefined);
                 }, (error: Error): void => {
                     reject(error);
@@ -309,7 +309,7 @@ export default namespace notificationSubscribe {
                 }
             });
             p.then(
-                (e: NullishType): void => {
+                (e: Any): void => {
                     if (e == undefined) {
                         reject(rejectInternalError);
                     }
@@ -348,7 +348,7 @@ export default namespace notificationSubscribe {
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void =>{
             let p = taskpool.execute((): void => { notificationSubscribe.nativeSubscribeSelf(subscriber)});
             p.then(
-                (e: NullishType): void => {
+                (e: Any): void => {
                     resolve(undefined);
                 }, (error: Error): void => {
                     reject(error);
@@ -370,7 +370,7 @@ export default namespace notificationSubscribe {
             notificationSubscribe.nativeRemoveAllForBundle(bundle);
         });
         p.then(
-            (e: NullishType): void => {
+            (e: Any): void => {
                 callback(null, undefined);
             }, (error: Object): void => {
                 let err: BusinessError = error as BusinessError;
@@ -389,7 +389,7 @@ export default namespace notificationSubscribe {
                     notificationSubscribe.nativeRemoveAllForBundle(bundle);
                 }
             });
-            p.then((data: NullishType): void => {
+            p.then((data: Any): void => {
                 resolve(undefined);
             }, (error: Error): void => {
                 reject(error);
@@ -406,7 +406,7 @@ export default namespace notificationSubscribe {
             notificationSubscribe.nativeRemoveAll();
         });
         p.then(
-            (e: NullishType): void => {
+            (e: Any): void => {
                 callback(null, undefined);
             }, (error: Object): void => {
                 let err: BusinessError = error as BusinessError;
@@ -423,7 +423,7 @@ export default namespace notificationSubscribe {
             notificationSubscribe.nativeRemoveAllForUserId(userId);
         });
         p.then(
-            (e: NullishType): void => {
+            (e: Any): void => {
                 callback(null, undefined);
             }, (error: Object): void => {
                 let err: BusinessError = error as BusinessError;
@@ -435,7 +435,7 @@ export default namespace notificationSubscribe {
     export function removeAll(userId: int): Promise<void> {
     let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
         let p = taskpool.execute((): void => { notificationSubscribe.nativeRemoveAllForUserId(userId); });
-        p.then((data: NullishType): void => {
+        p.then((data: Any): void => {
             resolve(undefined);
         }, (error: Error): void => {
             reject(error);
