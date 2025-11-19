@@ -1375,6 +1375,42 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_286000, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.number  : IsNeedSilentInDoNotDisturbMode_3000
+ * @tc.name : IsNeedSilentInDoNotDisturbMode
+ * @tc.desc : Test IsNeedSilentInDoNotDisturbMode.
+ */
+HWTEST_F(AnsBranchTest, IsNeedSilentInDoNotDisturbMode_3000, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    int32_t userId = 100;
+    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(
+        phoneNumber, callerType, userId), -1);
+}
+
+/**
+ * @tc.number  : IsNeedSilentInDoNotDisturbMode_4000
+ * @tc.name : IsNeedSilentInDoNotDisturbMode
+ * @tc.desc : Test IsNeedSilentInDoNotDisturbMode.
+ */
+HWTEST_F(AnsBranchTest, IsNeedSilentInDoNotDisturbMode_4000, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    int32_t userId = 100;
+    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(
+        phoneNumber, callerType, userId), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
  * @tc.number    : AnsBranchTest_286001
  * @tc.name      : SetCheckConfig
  * @tc.desc      : Test SetCheckConfig function return ERR_ANS_INVALID_PARAM.

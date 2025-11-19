@@ -723,6 +723,8 @@ public:
      * @return Returns silent in do not disturb mode.
      */
     ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType) override;
+    ErrCode IsNeedSilentInDoNotDisturbMode(
+        const std::string &phoneNumber, int32_t callerType, const int32_t userId) override;
 
     /**
      * @brief Cancel notifications according to group.

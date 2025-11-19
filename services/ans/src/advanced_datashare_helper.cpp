@@ -132,6 +132,27 @@ std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelper::CreateIntel
     return helper;
 }
 
+std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelper::CreateIntelligentDataShareHelper(
+    std::string uri, const int32_t userId)
+{
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (saManager == nullptr) {
+        ANS_LOGE("The sa manager is nullptr.");
+        return nullptr;
+    }
+    sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
+    if (remoteObj == nullptr) {
+        ANS_LOGE("The remoteObj is nullptr.");
+        return nullptr;
+    }
+    auto [error, helper] = DataShare::DataShareHelper::Create(remoteObj, uri, GetIntelligentUri(userId));
+    if (error != DataShare::E_OK) {
+        ANS_LOGE("Create Intelligent DataShareHelper failed.");
+        return nullptr;
+    }
+    return helper;
+}
+
 bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::string &value)
 {
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = CreateDataShareHelper();
@@ -196,6 +217,39 @@ ErrCode AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phone
     return isFound;
 }
 
+ErrCode AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNumber, const std::string &policy,
+    const std::string &profileId, const std::string isSupportIntelligentScene, const int32_t userId)
+{
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    auto resultSet = GetContactResultSet(uri, phoneNumber, policy, profileId, isSupportIntelligentScene, userId);
+    IPCSkeleton::SetCallingIdentity(identity);
+    if (resultSet == nullptr) {
+        ANS_LOGE("QueryContact error, resultSet is null.");
+        return ERROR_QUERY_INFO_FAILED;
+    }
+    int isFound = 0;
+    int rowCount = 0;
+    resultSet->GetRowCount(rowCount);
+    if (rowCount <= 0) {
+        ANS_LOGI("Query success, but rowCount is 0.");
+        if (atoi(policy.c_str()) == ContactPolicy::FORBID_SPECIFIED_CONTACTS) {
+            isFound = 1;
+        }
+    } else {
+        int resultId = -1;
+#ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
+        resultId = TEL_EXTENTION_WRAPPER->GetCallerIndex(resultSet, phoneNumber);
+        ANS_LOGI("QueryContact resultId: %{public}d.", resultId);
+#endif
+        if ((phoneNumber.size() >= PHONE_NUMBER_LENGTH && resultSet->GoToRow(resultId) == DataShare::E_OK) ||
+            (phoneNumber.size() < PHONE_NUMBER_LENGTH && resultSet->GoToFirstRow() == DataShare::E_OK)) {
+            isFound = dealWithContactResult(resultSet, policy) ? QUERY_INFO_SUCCESS : ERR_OK;
+        }
+    }
+    resultSet->Close();
+    return isFound;
+}
+
 std::shared_ptr<DataShare::DataShareResultSet> AdvancedDatashareHelper::GetContactResultSet(Uri &uri,
     const std::string &phoneNumber, const std::string &policy, const std::string &profileId,
     const std::string isSupportIntelligentScene)
@@ -206,6 +260,46 @@ std::shared_ptr<DataShare::DataShareResultSet> AdvancedDatashareHelper::GetConta
         (atoi(policy.c_str()) == ContactPolicy::ALLOW_SPECIFIED_CONTACTS ||
         atoi(policy.c_str()) == ContactPolicy::FORBID_SPECIFIED_CONTACTS)) {
         helper = CreateIntelligentDataShareHelper(GetIntelligentData(INTELLIGENT_URI, KEY_INTELLIGENT_URI));
+        if (helper == nullptr) {
+            ANS_LOGE("GetContactResultSet, The data share helper is nullptr.");
+            return nullptr;
+        }
+        std::string focusModeList = atoi(policy.c_str()) == ContactPolicy::ALLOW_SPECIFIED_CONTACTS ?
+            WHITE_LIST : BLACK_LIST;
+        ANS_LOGI("GetContactResultSet, profileId: %{public}s, focusModeList: %{public}s",
+            profileId.c_str(), focusModeList.c_str());
+        DataShare::DataSharePredicates predicates;
+        predicates.EqualTo(MODE_ID, profileId);
+        predicates.EqualTo(FOCUS_MODE_LIST, focusModeList);
+        SetPhoneNumQueryCondition(predicates, phoneNumber);
+        resultSet = helper->Query(uri, predicates, QUERY_INTELLIGENT_COLUMN_LIST);
+    } else {
+        helper = CreateContactDataShareHelper(CONTACT_URI);
+        if (helper == nullptr) {
+            ANS_LOGE("GetContactResultSet, The data share helper is nullptr.");
+            return nullptr;
+        }
+        ANS_LOGE("GetContactResultSet, not support IntelligentScene.");
+        DataShare::DataSharePredicates predicates;
+        predicates.EqualTo(IS_DELETED, 0);
+        predicates.EqualTo(TYPE_ID, TYPE_ID_FIVE);
+        SetPhoneNumQueryCondition(predicates, phoneNumber);
+        resultSet = helper->Query(uri, predicates, QUERY_CONTACT_COLUMN_LIST);
+    }
+    helper->Release();
+    return resultSet;
+}
+
+std::shared_ptr<DataShare::DataShareResultSet> AdvancedDatashareHelper::GetContactResultSet(Uri &uri,
+    const std::string &phoneNumber, const std::string &policy, const std::string &profileId,
+    const std::string isSupportIntelligentScene, const int32_t userId)
+{
+    std::shared_ptr<DataShare::DataShareHelper> helper;
+    std::shared_ptr<DataShare::DataShareResultSet> resultSet;
+    if (isSupportIntelligentScene == SUPPORT_INTEGELLIGENT_SCENE &&
+        (atoi(policy.c_str()) == ContactPolicy::ALLOW_SPECIFIED_CONTACTS ||
+        atoi(policy.c_str()) == ContactPolicy::FORBID_SPECIFIED_CONTACTS)) {
+        helper = CreateIntelligentDataShareHelper(GetIntelligentData(INTELLIGENT_URI, KEY_INTELLIGENT_URI, userId));
         if (helper == nullptr) {
             ANS_LOGE("GetContactResultSet, The data share helper is nullptr.");
             return nullptr;
@@ -367,6 +461,19 @@ std::string AdvancedDatashareHelper::GetIntelligentData(const std::string &uri, 
     return value + std::to_string(userId);
 }
 
+std::string AdvancedDatashareHelper::GetIntelligentData(
+    const std::string &uri, const std::string &key, const int32_t userId)
+{
+    std::string value;
+    Uri tempUri(USER_SETTINGS_DATA_SECURE_URI + std::to_string(userId) + uri);
+    bool ret = Query(tempUri, key, value);
+    if (!ret) {
+        ANS_LOGE("Query Intelligent Data id fail.");
+        return "";
+    }
+    return value + std::to_string(userId);
+}
+
 void AdvancedDatashareHelper::SetPhoneNumQueryCondition(DataShare::DataSharePredicates &predicates,
     const std::string &phoneNumber)
 {
@@ -393,6 +500,11 @@ void AdvancedDatashareHelper::SetPhoneNumQueryCondition(DataShare::DataSharePred
 std::string AdvancedDatashareHelper::GetIntelligentUri()
 {
     return GetIntelligentData(INTELLIGENT_SCENE_DATA, KEY_INTELLIGENT_SCENE_DATA);
+}
+
+std::string AdvancedDatashareHelper::GetIntelligentUri(const int32_t userId)
+{
+    return GetIntelligentData(INTELLIGENT_SCENE_DATA, KEY_INTELLIGENT_SCENE_DATA, userId);
 }
 
 void AdvancedDatashareHelper::SetIsDataShareReady(bool isDataShareReady)

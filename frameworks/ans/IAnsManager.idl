@@ -188,6 +188,8 @@ interface OHOS.Notification.IAnsManager {
 
     void IsNeedSilentInDoNotDisturbMode([in] String phoneNumber, [in] int callerType);
 
+    void IsNeedSilentInDoNotDisturbMode([in] String phoneNumber, [in] int callerType, [in] int userId);
+
     void CancelGroup([in] String groupName, [in] String instanceKey);
 
     void RemoveGroupByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] String groupName);

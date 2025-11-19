@@ -124,6 +124,7 @@ public:
     MOCK_METHOD1(RemoveDoNotDisturbProfiles, ErrCode(const std::vector<sptr<NotificationDoNotDisturbProfile>>&));
     MOCK_METHOD1(DoesSupportDoNotDisturbMode, ErrCode(bool&));
     MOCK_METHOD2(IsNeedSilentInDoNotDisturbMode, ErrCode(const std::string&, int32_t));
+    MOCK_METHOD3(IsNeedSilentInDoNotDisturbMode, ErrCode(const std::string&, int32_t, const int32_t userId));
     MOCK_METHOD2(CancelGroup, ErrCode(const std::string&, const std::string&));
     MOCK_METHOD2(RemoveGroupByBundle, ErrCode(const sptr<NotificationBundleOption>&, const std::string&));
     MOCK_METHOD1(IsDistributedEnabled, ErrCode(bool&));

@@ -834,6 +834,7 @@ public:
      * @return Returns silent in do not disturb mode.
      */
     ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType);
+    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType, const int32_t userId);
 
     /**
      * @brief Checks if the device supports distributed notification.
