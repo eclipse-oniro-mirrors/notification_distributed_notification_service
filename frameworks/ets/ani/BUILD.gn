@@ -147,6 +147,7 @@ ohos_shared_library("notification_manager_ani") {
     "image_framework:image_taihe",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "os_account:os_account_innerkits",
     "resource_management:global_resmgr",
     "runtime_core:ani",
   ]
@@ -226,6 +227,7 @@ ohos_shared_library("notification_subscribe_ani") {
     "image_framework:image_taihe",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "os_account:os_account_innerkits",
     "resource_management:global_resmgr",
     "runtime_core:ani",
   ]
@@ -288,6 +290,7 @@ ohos_shared_library("notificationextensionsubscription_ani") {
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "napi:ace_napi",
+    "os_account:os_account_innerkits",
     "resource_management:global_resmgr",
     "runtime_core:ani",
   ]
@@ -350,6 +353,7 @@ ohos_shared_library("notification_subscriber_extension_ani") {
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "napi:ace_napi",
+    "os_account:os_account_innerkits",
     "resource_management:global_resmgr",
     "runtime_core:ani",
   ]

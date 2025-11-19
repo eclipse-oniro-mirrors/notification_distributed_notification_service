@@ -29,6 +29,9 @@
 #include "notification_time.h"
 #include "pixel_map_napi.h"
 #include "napi_common_want_agent.h"
+#include "os_account_constants.h"
+#include "os_account_info.h"
+#include "os_account_manager.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -1846,6 +1849,17 @@ napi_value Common::SetRingtoneInfo(const napi_env &env, const NotificationRingto
     napi_set_named_property(env, result, "ringtoneUri", value);
 
     return NapiGetBoolean(env, true);
+}
+
+int32_t Common::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &userId)
+{
+    int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Get userId failed, uid = <%{public}d>, code is %{public}d", uid, ret);
+        return ret;
+    }
+    ANS_LOGD("Get userId succ, uid = <%{public}d> userId = <%{public}d>", uid, userId);
+    return ret;
 }
 }  // namespace NotificationNapi
 }  // namespace OHOS

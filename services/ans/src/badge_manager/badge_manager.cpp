@@ -464,7 +464,7 @@ ErrCode AdvancedNotificationService::GetBadgeNumber(int32_t &badgeNumber)
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         sptr<IBadgeQueryCallback> callback = nullptr;
         badgeNumber = INVALID_BADGE_NUMBER;
@@ -528,7 +528,7 @@ ErrCode AdvancedNotificationService::RegisterBadgeQueryCallback(const sptr<IBadg
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
     sptr<IBadgeQueryCallback> callBack = iface_cast<IBadgeQueryCallback>(badgeQueryCallback->AsObject());
     if (callBack == nullptr) {
         ANS_LOGE("callBack is null");
@@ -564,7 +564,7 @@ ErrCode AdvancedNotificationService::UnRegisterBadgeQueryCallback()
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
     {
         std::lock_guard<ffrt::mutex> lock(badgeQueryMutex_);
         badgeQueryCallBack_.erase(userId);

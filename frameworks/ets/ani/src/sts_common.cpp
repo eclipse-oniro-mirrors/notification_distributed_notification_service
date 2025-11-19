@@ -17,6 +17,9 @@
 
 #include "ans_log_wrapper.h"
 #include "ani_common_util.h"
+#include "os_account_constants.h"
+#include "os_account_info.h"
+#include "os_account_manager.h"
 
 namespace OHOS {
 namespace NotificationSts {
@@ -51,6 +54,17 @@ std::string GetResizeStr(std::string instr, int32_t length)
         
         return instr.substr(0, endPos);
     }
+}
+
+int32_t GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &userId)
+{
+    int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Get userId failed, uid = <%{public}d>, code is %{public}d", uid, ret);
+        return ret;
+    }
+    ANS_LOGD("Get userId succ, uid = <%{public}d> userId = <%{public}d>", uid, userId);
+    return ret;
 }
 
 bool IsUndefine(ani_env *env, const ani_object &obj)

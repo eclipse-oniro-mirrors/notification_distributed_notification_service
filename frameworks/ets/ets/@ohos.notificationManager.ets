@@ -1770,7 +1770,7 @@ export default namespace notificationManager {
     }
 
     export function onBadgeNumberQuery(callback: (bundle: BundleOption) => Promise<long>): void {
-        if (callback == undefined) {
+        if (callback == undefined || callback == null) {
             throw errorParamInvalid;
         }
 

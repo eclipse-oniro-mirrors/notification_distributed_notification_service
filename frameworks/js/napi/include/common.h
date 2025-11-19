@@ -1939,6 +1939,7 @@ public:
     static bool IsExpectedType(const napi_env &env, const napi_value &param, napi_valuetype expectType);
     static napi_value GetMapObject(const napi_env &env, const napi_value &object,
         std::vector<std::pair<std::string, std::string>> &out);
+    static int32_t GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id);
 private:
     static const int32_t ARGS_ONE = 1;
     static const int32_t ARGS_TWO = 2;
