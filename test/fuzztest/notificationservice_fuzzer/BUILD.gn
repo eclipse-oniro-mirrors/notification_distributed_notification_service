@@ -53,6 +53,10 @@ ohos_fuzztest("NotificationServiceFuzzTest") {
     "ffrt:libffrt",
     "kv_store:distributeddata_inner",
     "bluetooth:btframework",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+    "data_share:datashare_permission",
+    "time_service:time_client",
   ]
 }
 
