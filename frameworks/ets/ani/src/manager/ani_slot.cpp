@@ -48,7 +48,7 @@ ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption)
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return nullptr;
     }
-    ani_object outAniObj;
+    ani_array outAniObj;
     if (!NotificationSts::WrapNotificationSlotArray(env, slots, outAniObj)) {
         NotificationSts::ThrowErrorWithMsg(env, "GetSlotsByBundle:failed to WrapNotificationSlotArray");
         return nullptr;
@@ -116,11 +116,12 @@ void AniAddSlotBySlotType(ani_env *env, ani_enum_item enumObj)
 ani_object AniGetSlot(ani_env *env, ani_enum_item enumObj)
 {
     ANS_LOGD("AniGetSlot enter");
+    ani_object nullObj = NotificationSts::GetNullObject(env);
     Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
     if (!NotificationSts::SlotTypeEtsToC(env, enumObj, slotType)) {
         ANS_LOGE("SlotTypeEtsToC failed");
         NotificationSts::ThrowErrorWithMsg(env, "sts GetSlot ERROR_INTERNAL_ERROR");
-        return nullptr;
+        return nullObj;
     }
     sptr<Notification::NotificationSlot> slot = nullptr;
     int returncode = Notification::NotificationHelper::GetNotificationSlot(slotType, slot);
@@ -128,17 +129,17 @@ ani_object AniGetSlot(ani_env *env, ani_enum_item enumObj)
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("GetNotificationSlot failed, errorCode: %{public}d", externalCode);
         NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        return nullObj;
     }
     if (slot == nullptr) {
         ANS_LOGD("AniGetSlot -> slot is nullptr");
-        NotificationSts::ThrowError(env, RETURN_EXCEPTION_VALUE, "slot is null");
-        return nullptr;
+        return nullObj;
     }
     ani_object slotObj;
     if (!NotificationSts::WrapNotificationSlot(env, slot, slotObj)) {
         ANS_LOGE("WrapNotificationSlot faild");
         NotificationSts::ThrowErrorWithMsg(env, "sts GetSlot ERROR_INTERNAL_ERROR");
-        return nullptr;
+        return nullObj;
     }
     ANS_LOGD("AniGetSlot leave");
     return slotObj;
@@ -155,7 +156,7 @@ ani_object AniGetSlots(ani_env *env)
         NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return nullptr;
     }
-    ani_object outAniObj;
+    ani_array outAniObj;
     if (!NotificationSts::WrapNotificationSlotArray(env, slots, outAniObj)) {
         ANS_LOGE("WrapNotificationSlotArray faild");
         NotificationSts::ThrowErrorWithMsg(env, "AniGetSlots:failed to WrapNotificationSlotArray");
@@ -302,7 +303,7 @@ void AniSetNotificationEnableSlotWithForce(ani_env *env,
 
 ani_boolean AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, ani_enum_item  type)
 {
-    ANS_LOGD("IsNotificationSlotEnabled enter");
+    ANS_LOGD("AniIsNotificationSlotEnabled enter");
     Notification::NotificationBundleOption option;
     Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
     if (!NotificationSts::UnwrapBundleOption(env, bundleOption, option)
@@ -316,7 +317,7 @@ ani_boolean AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, 
     int returncode = Notification::NotificationHelper::GetEnabledForBundleSlot(option, slotType, isEnable);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("IsNotificationSlotEnabled -> error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("GetEnabledForBundleSlot failed, errorCode: %{public}d", externalCode);
         NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
     return isEnable ? ANI_TRUE : ANI_FALSE;
@@ -324,7 +325,7 @@ ani_boolean AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, 
 
 ani_long AniGetSlotFlagsByBundle(ani_env *env, ani_object obj)
 {
-    ANS_LOGD("sts getSlotFlagsByBundle call");
+    ANS_LOGD("AniGetSlotFlagsByBundle enter");
     Notification::NotificationBundleOption option;
     if (!NotificationSts::UnwrapBundleOption(env, obj, option)) {
         NotificationSts::ThrowErrorWithMsg(env, "AniGetSlotFlagsByBundle : erro arguments.");
@@ -342,7 +343,7 @@ ani_long AniGetSlotFlagsByBundle(ani_env *env, ani_object obj)
 
 void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_long slotFlags)
 {
-    ANS_LOGD("sts setSlotFlagsByBundle call");
+    ANS_LOGD("AniSetSlotFlagsByBundle enter");
     Notification::NotificationBundleOption option;
     if (!NotificationSts::UnwrapBundleOption(env, obj, option)) {
         NotificationSts::ThrowErrorWithMsg(env, "AniSetSlotFlagsByBundle : erro arguments.");
@@ -361,12 +362,13 @@ void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_long slotFlags)
 ani_object AniGetSlotByBundle(ani_env *env, ani_object bundleOption, ani_enum_item type)
 {
     ANS_LOGD("AniGetSlotByBundle enter");
+    ani_object nullObj = NotificationSts::GetNullObject(env);
     Notification::NotificationBundleOption option;
     Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
     if (!NotificationSts::UnwrapBundleOption(env, bundleOption, option)
         || !NotificationSts::SlotTypeEtsToC(env, type, slotType)) {
         NotificationSts::ThrowErrorWithMsg(env, "GetSlotByBundle : erro arguments.");
-        return nullptr;
+        return nullObj;
     }
     sptr<Notification::NotificationSlot> slot = nullptr;
     int returncode = Notification::NotificationHelper::GetNotificationSlotForBundle(option, slotType, slot);
@@ -374,12 +376,15 @@ ani_object AniGetSlotByBundle(ani_env *env, ani_object bundleOption, ani_enum_it
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("GetNotificationSlotForBundle failed, errorCode: %{public}d", externalCode);
         NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return nullptr;
+        return nullObj;
+    }
+    if (slot == nullptr) {
+        return nullObj;
     }
     ani_object infoObj;
     if (!NotificationSts::WrapNotificationSlot(env, slot, infoObj) || infoObj == nullptr) {
         NotificationSts::ThrowErrorWithMsg(env, "WrapNotificationSlot Failed");
-        return nullptr;
+        return nullObj;
     }
     return infoObj;
 }

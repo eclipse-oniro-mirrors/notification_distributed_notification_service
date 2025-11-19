@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { RecordData } from '@ohos.base';
 
  export interface NotificationTemplate {
     name: string;
-    data: Record<string, Object>;
+    data: Record<string, RecordData>;
 }
 
 class NotificationTemplateInner implements NotificationTemplate {
     public name: string = '';
-    public data: Record<string, Object> = {};
+    public data: Record<string, RecordData> = {};
 }

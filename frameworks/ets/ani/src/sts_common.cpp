@@ -24,6 +24,12 @@ constexpr const char* CLASSNAME_BOOLEAN = "std.core.Boolean";
 constexpr const char* CLASSNAME_DOUBLE = "std.core.Double";
 constexpr const char* CLASSNAME_INT = "std.core.Int";
 constexpr const char* CLASSNAME_LONG = "std.core.Long";
+ani_object GetNullObject(ani_env *env)
+{
+    ani_ref nullRef;
+    env->GetNull(&nullRef);
+    return static_cast<ani_object>(nullRef);
+}
 std::string GetResizeStr(std::string instr, int32_t length)
 {
     if (static_cast<int32_t>(instr.length()) <= length) {
@@ -117,7 +123,7 @@ bool GetStringArrayByAniObj(ani_env *env, const ani_object ani_obj, std::vector<
     }
     for (int32_t i = 0; i < length; i++) {
         ani_ref stringEntryRef;
-        status = env->Object_CallMethodByName_Ref(ani_obj, "$_get", "i:C{std.core.Object}", &stringEntryRef, i);
+        status = env->Object_CallMethodByName_Ref(ani_obj, "$_get", "i:Y", &stringEntryRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("Object_CallMethodByName_Ref faild. status : %{public}d", status);
             return false;
@@ -188,7 +194,7 @@ ani_status GetPropertyBool(ani_env *env, ani_object obj, const char *name,
     }
     ani_boolean result = ANI_FALSE;
     if ((status = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(refObj),
-        "unboxed", ":Z", &result)) != ANI_OK) {
+        "toBoolean", ":z", &result)) != ANI_OK) {
         ANS_LOGE("Object_CallMethodByName_Boolean failed, status : %{public}d", status);
         return status;
     }
@@ -212,7 +218,7 @@ ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
         return ANI_INVALID_ARGS;
     }
     if ((status = env->Object_CallMethodByName_Double(static_cast<ani_object>(refObj),
-        "unboxed", ":D", &outvalue)) != ANI_OK) {
+        "toDouble", ":d", &outvalue)) != ANI_OK) {
         ANS_LOGE("Object_CallMethodByName_Double failed, status : %{public}d", status);
         return status;
     }
@@ -236,7 +242,7 @@ ani_status GetPropertyInt(ani_env *env, ani_object obj, const char *name,
         return ANI_INVALID_ARGS;
     }
     if ((status = env->Object_CallMethodByName_Int(static_cast<ani_object>(refObj),
-        "unboxed", ":I", &outvalue)) != ANI_OK) {
+        "toInt", ":i", &outvalue)) != ANI_OK) {
         ANS_LOGE("Object_CallMethodByName_Int failed, status : %{public}d", status);
         return status;
     }
@@ -260,7 +266,7 @@ ani_status GetPropertyLong(ani_env *env, ani_object obj, const char *name,
         return ANI_INVALID_ARGS;
     }
     if ((status = env->Object_CallMethodByName_Long(static_cast<ani_object>(refObj),
-        "unboxed", ":J", &outvalue)) != ANI_OK) {
+        "toLong", ":l", &outvalue)) != ANI_OK) {
         ANS_LOGE("Object_CallMethodByName_Long failed, status : %{public}d", status);
         return status;
     }
@@ -341,7 +347,7 @@ ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *na
     for (int32_t i = 0; i < length; i++) {
         ani_ref stringEntryRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "i:C{std.core.Object}", &stringEntryRef, i);
+            "$_get", "i:Y", &stringEntryRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("status : %{public}d, index: %{public}d", status, i);
             return status;
@@ -382,7 +388,7 @@ ani_status GetPropertyEnumItemArray(ani_env *env, ani_object param, const char *
     for (int i = 0; i < static_cast<int>(length); i++) {
         ani_ref enumItemRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "I:Lstd/core/Object;", &enumItemRef, (ani_int)i);
+            "$_get", "i:Y", &enumItemRef, (ani_int)i);
         if (status != ANI_OK) {
             ANS_LOGE("status: %{public}d, index: %{public}d", status, i);
             return status;
@@ -412,14 +418,14 @@ ani_status GetPropertyNumberArray(ani_env *env, ani_object param, const char *na
     for (int32_t i = 0; i < length; i++) {
         ani_ref numEntryRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "i:C{std.core.Object}", &numEntryRef, i);
+            "$_get", "i:Y", &numEntryRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("status : %{public}d, index: %{public}d", status, i);
             return status;
         }
         ani_double doubleValue = 0.0;
-        status = env->Object_CallMethodByName_Double(static_cast<ani_object>(numEntryRef), "unboxed",
-            ":D", &doubleValue);
+        status = env->Object_CallMethodByName_Double(static_cast<ani_object>(numEntryRef), "toDouble",
+            ":d", &doubleValue);
         if (status != ANI_OK) {
             ANS_LOGE("Object_CallMethodByName_Double uid fail, status: %{public}d", status);
             return status;
@@ -451,14 +457,14 @@ ani_status GetPropertyLongArray(ani_env *env, ani_object param, const char *name
     for (int32_t i = 0; i < length; i++) {
         ani_ref numEntryRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "i:C{std.core.Object}", &numEntryRef, i);
+            "$_get", "i:Y", &numEntryRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("Object_CallMethodByName_Ref status : %{public}d, index: %{public}d", status, i);
             return status;
         }
         ani_long longValue = 0.0;
-        status = env->Object_CallMethodByName_Long(static_cast<ani_object>(numEntryRef), "unboxed",
-            ":J", &longValue);
+        status = env->Object_CallMethodByName_Long(static_cast<ani_object>(numEntryRef), "toLong",
+            ":l", &longValue);
         if (status != ANI_OK) {
             ANS_LOGE("Object_CallMethodByName_Long uid fail, status: %{public}d", status);
             return status;
@@ -476,7 +482,7 @@ ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string
         return nullptr;
     }
     int length = strs.size();
-    ani_object arrayObj = newArrayClass(env, length);
+    ani_array arrayObj = newArrayClass(env, length);
     if (arrayObj == nullptr) {
         return nullptr;
     }
@@ -487,10 +493,9 @@ ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string
             ANS_LOGE("GetAniStringByString faild");
             return nullptr;
         }
-        ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:",
-            i, aniStr);
+        ani_status status = env->Array_Set(arrayObj, i, aniStr);
         if (status != ANI_OK) {
-            ANS_LOGE("Object_CallMethodByName_Void failed %{public}d", status);
+            ANS_LOGE("Array_Set failed %{public}d", status);
             return nullptr;
         }
         i++;
@@ -706,7 +711,7 @@ ani_object CreateLong(ani_env *env, int64_t value)
         return nullptr;
     }
     ani_method longCtor;
-    if ((status = env->Class_FindMethod(longCls, "<ctor>", "J:V", &longCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(longCls, "<ctor>", "l:", &longCtor)) != ANI_OK) {
         ANS_LOGE("Class_FindMethod fail, status : %{public}d", status);
         return nullptr;
     }
@@ -743,16 +748,16 @@ ani_object CreateDouble(ani_env *env, double value)
     return doubleObj;
 }
 
-ani_object newArrayClass(ani_env *env, int length)
+ani_array newArrayClass(ani_env *env, int length)
 {
     ANS_LOGD("newArrayClass call");
     if (env == nullptr || length < 0) {
-        ANS_LOGE("CreateDouble fail, env is nullptr or length is less than zero");
+        ANS_LOGE("newArrayClass fail, env is nullptr or length is less than zero");
         return nullptr;
     }
     ani_class arrayCls = nullptr;
     if (ANI_OK != env->FindClass("escompat.Array", &arrayCls)) {
-        ANS_LOGE("FindClass Lescompat/Array; Failed");
+        ANS_LOGE("FindClass escompat.Array Failed");
         return nullptr;
     }
     ani_method arrayCtor;
@@ -766,7 +771,7 @@ ani_object newArrayClass(ani_env *env, int length)
         return nullptr;
     }
     ANS_LOGD("newArrayClass end");
-    return arrayObj;
+    return static_cast<ani_array>(arrayObj);
 }
 
 ani_object ConvertArrayLongToAniObj(ani_env *env, const std::vector<std::int64_t> values)
@@ -775,21 +780,23 @@ ani_object ConvertArrayLongToAniObj(ani_env *env, const std::vector<std::int64_t
         ANS_LOGE("ConvertArrayLongToAniObj fail, env is nullptr");
         return nullptr;
     }
-    ani_object arrayObj = newArrayClass(env, values.size());
+    ani_array arrayObj = newArrayClass(env, values.size());
     if (arrayObj == nullptr) {
         return nullptr;
     }
-    for (size_t i = 0; i < values.size(); i++) {
-        ani_object longObj = CreateLong(env, values[i]);
+    ani_size i = 0;
+    for (auto value : values) {
+        ani_object longObj = CreateLong(env, value);
         if (longObj == nullptr) {
             ANS_LOGE("null intObj");
             return nullptr;
         }
-        ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", i, longObj);
+        ani_status status = env->Array_Set(arrayObj, i, longObj);
         if (status != ANI_OK) {
             ANS_LOGE("status : %{public}d", status);
             return nullptr;
         }
+        i++;
     }
     return arrayObj;
 }
@@ -856,7 +863,7 @@ bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
         return false;
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) != ANI_OK) {
         ANS_LOGD("error. not find method name '<ctor>'. status %{public}d", status);
         return false;
     }
@@ -865,7 +872,7 @@ bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
         return false;
     }
     ani_double msObj = 0;
-    if ((status = env->Object_CallMethodByName_Double(outObj, "setTime", "D:D", &msObj, static_cast<double>(time)))
+    if ((status = env->Object_CallMethodByName_Double(outObj, "setTime", "d:d", &msObj, time))
         != ANI_OK) {
         ANS_LOGD("Object_CallMethodByName_Double setDate faild. status %{public}d", status);
         return false;
@@ -883,7 +890,7 @@ bool GetDateByObject(ani_env *env, ani_object timeObj, int64_t &time)
 
     ani_status status;
     ani_double timeMsObj = 0;
-    if ((status = env->Object_CallMethodByName_Double(timeObj, "getTime", ":D", &timeMsObj)) != ANI_OK) {
+    if ((status = env->Object_CallMethodByName_Double(timeObj, "getTime", ":d", &timeMsObj)) != ANI_OK) {
         ANS_LOGD("Object_CallMethodByName_Double faild. status %{public}d", status);
         return false;
     }
@@ -1015,7 +1022,7 @@ void ParseRecord(ani_env *env, ani_object recordRef, std::map<std::string, ani_r
     }
     ani_ref keys {};
     if (env->Object_CallMethodByName_Ref(recordRef, "keys",
-        ":C{escompat.IterableIterator}", &keys) != ANI_OK) {
+        ":C{std.core.IterableIterator}", &keys) != ANI_OK) {
         ANS_LOGE("call method keys() failed.");
         return;
     }

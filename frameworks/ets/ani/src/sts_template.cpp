@@ -17,11 +17,13 @@
 #include "sts_common.h"
 #include "want_params.h"
 #include "ani_common_want.h"
+#include <ani_signature_builder.h>
 
 namespace OHOS {
 namespace NotificationSts {
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
+using namespace arkts::ani_signature;
 
 ani_status UnwrapNotificationTemplate(ani_env *env, ani_object aniObj, NotificationTemplate& tmplate)
 {
@@ -31,7 +33,8 @@ ani_status UnwrapNotificationTemplate(ani_env *env, ani_object aniObj, Notificat
     }
     ani_status status = ANI_ERROR;
     ani_ref nameRef;
-    if (ANI_OK != (status = env->Object_CallMethodByName_Ref(aniObj, "<get>name", ":C{std.core.String}", &nameRef))) {
+    if (ANI_OK != (status = env->Object_CallMethodByName_Ref(aniObj, Builder::BuildGetterName("name").c_str(),
+        ":C{std.core.String}", &nameRef))) {
         ANS_LOGE("Object_CallMethodByName_Ref faild. status %{public}d", status);
         return status;
     }

@@ -21,9 +21,12 @@
 #include "sts_sorting_map.h"
 #include "sts_subscribe_info.h"
 #include "ani_common_util.h"
+#include <ani_signature_builder.h>
 
 namespace OHOS {
 namespace NotificationSts {
+using namespace arkts::ani_signature;
+
 StsDistributedOperationCallback::StsDistributedOperationCallback(ani_object promise, ani_resolver resolver)
     : resolver_(resolver)
 {
@@ -385,7 +388,7 @@ void StsSubscriberInstance::OnBatchCanceled(
         return;
     }
     std::vector<ani_ref> vec;
-    ani_object obj;
+    ani_array obj;
     if (WarpSubscribeCallbackDataArray(etsEnv, requestList, sortingMap, deleteReason, obj)) {
         vec.push_back(obj);
         CallFunction(etsEnv, "onBatchCancel", vec);
@@ -737,7 +740,6 @@ bool SubscriberInstanceManager::UnSubscribe(ani_env *env, ani_object subscriber)
             DelDeletingSubscriber(stsSubscriber);
         }
     } else {
-        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(ERROR_INTERNAL_ERROR);
         OHOS::NotificationSts::ThrowError(env, ERROR_INTERNAL_ERROR, "Subscriber is deleting");
         return false;
     }
@@ -848,7 +850,8 @@ bool UnWarpNotificationKey(ani_env *env, const ani_object obj, NotificationKey &
     ani_boolean isUndefined = ANI_TRUE;
     ani_int idInt = 0;
     if (!GetIntValueByClassName(env, obj,
-        "@ohos.notificationSubscribe.notificationSubscribe.NotificationKeyInner", "<get>id", idInt)) {
+        "@ohos.notificationSubscribe.notificationSubscribe.NotificationKeyInner",
+        Builder::BuildGetterName("id").c_str(), idInt)) {
         ANS_LOGD("GetIntValueByClassName id fail");
         return false;
     }
