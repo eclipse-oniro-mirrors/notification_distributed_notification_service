@@ -2919,9 +2919,50 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
     auto newLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
     if (newLiveViewContent->GetLiveViewStatus() ==
         NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE) {
+        UpdateExtraInfo(oldRequest);
         return;
     }
     IncrementalUpdateLiveview(oldRequest);
+}
+
+void NotificationRequest::UpdateExtraInfo(const sptr<NotificationRequest> &oldRequest)
+{
+    auto content = notificationContent_->GetNotificationContent();
+    if (content == nullptr) {
+        return;
+    }
+
+    auto newLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    if (newLiveViewContent == nullptr) {
+        return;
+    }
+
+    auto newExtraInfo = newLiveViewContent->GetExtraInfo();
+
+    auto oldContent = oldRequest->GetContent();
+    if (oldContent == nullptr) {
+        return;
+    }
+
+    auto oldNotificationContent = oldContent->GetNotificationContent();
+    if (oldNotificationContent == nullptr) {
+        return;
+    }
+
+    auto oldLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(oldNotificationContent);
+    if (oldLiveViewContent == nullptr) {
+        return;
+    }
+
+    auto oldExtraInfo = oldLiveViewContent->GetExtraInfo();
+
+    if (oldExtraInfo != nullptr) {
+        if (oldExtraInfo->HasParam("eventControl")) {
+            if (newExtraInfo != nullptr) {
+                newExtraInfo->SetParam("eventControl", oldExtraInfo->GetParam("eventControl"));
+            }
+        }
+    }
 }
 
 void NotificationRequest::IncrementalUpdateLiveview(const sptr<NotificationRequest> &oldRequest)
