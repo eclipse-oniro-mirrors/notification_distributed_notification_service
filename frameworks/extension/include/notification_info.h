@@ -46,6 +46,9 @@ public:
     void SetAppName(const std::string& appName);
     std::string GetAppName() const;
 
+    void SetAppIndex(int32_t appIndex);
+    int32_t GetAppIndex() const;
+
     /**
      * @brief Returns a string representation of the object.
      *
@@ -100,6 +103,7 @@ private:
     std::string appName_ {};
     int64_t deliveryTime_ = 0;
     std::string groupName_ {};
+    int32_t appIndex_ = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS

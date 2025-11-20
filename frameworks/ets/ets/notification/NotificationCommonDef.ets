@@ -22,3 +22,15 @@ class BundleOptionInner implements BundleOption {
     public bundle: string = '';
     public uid?: int | undefined;
 }
+
+export interface GrantedBundleInfo {
+    bundleName: string;
+    readonly appIndex: int;
+    readonly appName?: string;
+}
+
+class GrantedBundleInfoInner implements GrantedBundleInfo {
+    public bundleName: string = '';
+    public readonly appIndex: int = 0;
+    public readonly appName?: string | undefined;
+}

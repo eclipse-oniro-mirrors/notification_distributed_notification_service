@@ -28,12 +28,16 @@ bool WrapBundleOption(ani_env* env,
     const std::shared_ptr<BundleOption> &bundleOption, ani_object &bundleObject);
 bool WrapBundleOption(ani_env* env,
     const sptr<BundleOption> &bundleOption, ani_object &bundleObject);
+bool WrapGrantedBundleInfo(ani_env* env,
+    const std::shared_ptr<BundleOption> &bundleOption, ani_object &bundleObject);
 bool UnwrapArrayBundleOption(ani_env *env, ani_ref arrayObj, std::vector<BundleOption>& options);
 ani_object GetAniArrayBundleOption(ani_env* env, const std::vector<BundleOption> &bundleOptions);
 bool GetAniArrayBundleOptionV2(
     ani_env* env, const std::vector<sptr<BundleOption>>& bundleOptions, ani_object& outAniObj);
 bool UnwrapArrayDistributedBundleOption(ani_env *env, ani_object arrayObj,
     std::vector<DistributedBundleOption> &options);
+bool SetAniArrayGrantedBundleInfo(
+    ani_env* env, const std::vector<sptr<BundleOption>>& bundleOptions, ani_object& outAniObj);
 }
 }
 

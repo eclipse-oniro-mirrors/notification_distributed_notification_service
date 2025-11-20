@@ -1310,5 +1310,13 @@ HWTEST_F(NotificationRequestTest, NotificationCollaboration_0100, Level1)
     sptr<NotificationRequest> point = NotificationRequest::CollaborationFromJson(basicInfo);
     EXPECT_EQ(point != nullptr, true);
 }
+
+HWTEST_F(NotificationRequestTest, SetAppIndex_0001, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetAppIndex(10);
+    EXPECT_EQ(notificationRequest.GetAppIndex(), 10);
+}
 } // namespace Notification
 } // namespace OHOS

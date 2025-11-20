@@ -111,6 +111,9 @@ napi_value SetNotificationInfo(
     napi_create_string_utf8(env, notificationInfo->GetGroupName().c_str(), NAPI_AUTO_LENGTH, &value);
     napi_set_named_property(env, result, "groupName", value);
 
+    napi_create_int32(env, notificationInfo->GetAppIndex(), &value);
+    napi_set_named_property(env, result, "appIndex", value);
+
     return Common::NapiGetBoolean(env, true);
 }
 }

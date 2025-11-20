@@ -205,12 +205,8 @@ ani_object AniGetUserGrantedEnabledBundlesForSelf(ani_env *env)
         return nullptr;
     }
 
-    std::vector<std::string> bundleNames;
-    for (const auto& bundle : bundles) {
-        bundleNames.emplace_back(bundle->GetBundleName());
-    }
     ani_object arrayBundles = nullptr;
-    if (!NotificationSts::GetAniStringArrayByVectorStringV2(env, bundleNames, arrayBundles) ||
+    if (!NotificationSts::SetAniArrayGrantedBundleInfo(env, bundles, arrayBundles) ||
         arrayBundles == nullptr) {
         ANS_LOGE("AniGetUserGrantedEnabledBundlesForSelf failed, arrayBundles is nullptr");
         NotificationSts::ThrowErrorWithMsg(env, "AniGetUserGrantedEnabledBundlesForSelf ERROR_INTERNAL_ERROR");

@@ -1518,6 +1518,8 @@ public:
         const NotificationConstant::ReminderFlag &bit,
         const bool status,
         const std::set<std::string> &unaffectDevice = {});
+    void SetAppIndex(const int32_t &appIndex);
+    int32_t GetAppIndex() const;
 
     void SetAppName(const std::string &appName);
 
@@ -1623,6 +1625,7 @@ private:
     int32_t ownerUserId_ {SUBSCRIBE_USER_INIT};
     int32_t receiverUserId_ {SUBSCRIBE_USER_INIT};
     int32_t creatorInstanceKey_ {DEFAULT_UID};
+    int32_t appIndex_ {0};
     uint32_t hashCodeGenerateType_ {0};
     uint32_t collaboratedReminderFlag_ {0};
 
