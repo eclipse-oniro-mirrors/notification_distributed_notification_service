@@ -160,6 +160,8 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->contentResourceId_ = other.contentResourceId_;
     this->expiredContentResourceId_ = other.expiredContentResourceId_;
     this->snoozeContentResourceId_ = other.snoozeContentResourceId_;
+    this->forceDistributed_ = other.forceDistributed_;
+    this->notDistributed_ = other.notDistributed_;
 }
 
 ReminderRequest::ReminderRequest(int32_t reminderId)
@@ -1107,12 +1109,31 @@ std::string ReminderRequest::GetMaxWantAgentStr()
     return maxWantAgentStr_;
 }
 
+bool ReminderRequest::IsForceDistributed() const
+{
+    return forceDistributed_;
+}
+
+void ReminderRequest::SetForceDistributed(const bool forceDistributed)
+{
+    forceDistributed_ = forceDistributed;
+}
+
+bool ReminderRequest::IsNotDistributed() const
+{
+    return notDistributed_;
+}
+
+void ReminderRequest::SetNotDistributed(const bool notDistributed)
+{
+    notDistributed_ = notDistributed;
+}
+
 void ReminderRequest::UpdateNotificationRequest(NotificationRequest& notificationRequest, const bool isSnooze,
     const int32_t index)
 {
     if (isSnooze) {
         UpdateNotificationStateForSnooze(notificationRequest);
-        UpdateNotificationCommon(notificationRequest, true);
     } else {
         UpdateNotificationStateForAlert(notificationRequest);
     }
@@ -1120,7 +1141,6 @@ void ReminderRequest::UpdateNotificationRequest(NotificationRequest& notificatio
     UpdateNotificationAddRemovalWantAgent(notificationRequest);
     UpdateNotificationWantAgent(notificationRequest, index);
     UpdateNotificationMaxScreenWantAgent(notificationRequest);
-    UpdateNotificationBundleInfo(notificationRequest);
 }
 
 void ReminderRequest::UpdateNotificationWantAgent(NotificationRequest& notificationRequest, const int32_t index)
@@ -1226,6 +1246,8 @@ bool ReminderRequest::WriteParcel(Parcel &parcel) const
     // write bool
     WRITE_BOOL_RETURN_FALSE_LOG(parcel, isExpired_, "isExpired");
     WRITE_BOOL_RETURN_FALSE_LOG(parcel, tapDismissed_, "tapDismissed");
+    WRITE_BOOL_RETURN_FALSE_LOG(parcel, forceDistributed_, "forceDistributed");
+    WRITE_BOOL_RETURN_FALSE_LOG(parcel, notDistributed_, "notDistributed");
 
     // write int
     WRITE_INT64_RETURN_FALSE_LOG(parcel, autoDeletedTime_, "autoDeletedTime");
@@ -1361,6 +1383,8 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
 
     READ_BOOL_RETURN_FALSE_LOG(parcel, isExpired_, "isExpired");
     READ_BOOL_RETURN_FALSE_LOG(parcel, tapDismissed_, "tapDismissed");
+    READ_BOOL_RETURN_FALSE_LOG(parcel, forceDistributed_, "forceDistributed");
+    READ_BOOL_RETURN_FALSE_LOG(parcel, notDistributed_, "notDistributed");
 
     READ_INT64_RETURN_FALSE_LOG(parcel, autoDeletedTime_, "autoDeletedTime");
 
@@ -1762,7 +1786,10 @@ void ReminderRequest::UpdateNotificationCommon(NotificationRequest& notification
     } else {
         notificationRequest.SetSlotType(slotType_);
     }
+    notificationRequest.SetCreatorUid(uid_);
     notificationRequest.SetTapDismissed(tapDismissed_);
+    notificationRequest.SetNotDistributed(notDistributed_);
+    notificationRequest.SetForceDistributed(forceDistributed_);
     notificationRequest.SetAutoDeletedTime(autoDeletedTime_);
     auto notificationNormalContent = std::make_shared<NotificationNormalContent>();
     notificationNormalContent->SetText(displayContent_);
@@ -1773,11 +1800,6 @@ void ReminderRequest::UpdateNotificationCommon(NotificationRequest& notification
         (reminderType_ == ReminderRequest::ReminderType::ALARM)) {
         notificationRequest.SetUnremovable(true);
     }
-}
-
-void ReminderRequest::UpdateNotificationBundleInfo(NotificationRequest& notificationRequest)
-{
-    notificationRequest.SetCreatorUid(uid_);
 }
 
 void ReminderRequest::UpdateNotificationContent(NotificationRequest& notificationRequest, const bool &setSnooze)

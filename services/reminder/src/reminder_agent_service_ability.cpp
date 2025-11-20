@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,13 @@
 
 #include "reminder_agent_service_ability.h"
 
-namespace OHOS {
-namespace Notification {
+namespace OHOS::Notification {
 namespace {
 constexpr int32_t REMINDER_AGENT_SERVICE_ID = 3204;
 REGISTER_SYSTEM_ABILITY_BY_ID(ReminderAgentServiceAbility, REMINDER_AGENT_SERVICE_ID, false);
 }
 
-constexpr int64_t INIT_DELAY_TIME = 60 * 1000 * 1000;
+static constexpr int64_t INIT_DELAY_TIME = 60 * 1000 * 1000;
 
 ReminderAgentServiceAbility::ReminderAgentServiceAbility(const int32_t systemAbilityId, bool runOnCreate)
     : SystemAbility(systemAbilityId, runOnCreate), service_(nullptr)
@@ -45,7 +44,7 @@ void ReminderAgentServiceAbility::OnStart()
     if (!Publish(service_)) {
         return;
     }
-    ReminderAgentService::GetInstance()->TryPostDelayUnloadTask(INIT_DELAY_TIME);
+    service_->TryPostDelayUnloadTask(INIT_DELAY_TIME);
 }
 
 void ReminderAgentServiceAbility::OnStop()
@@ -53,6 +52,4 @@ void ReminderAgentServiceAbility::OnStop()
     service_ = nullptr;
     reminderDataManager_ = nullptr;
 }
-
-}  // namespace Notification
-}  // namespace OHOS
+}  // namespace OHOS::Notification

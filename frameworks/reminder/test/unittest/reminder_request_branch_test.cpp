@@ -513,41 +513,5 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationCommon_00300, Function | S
     reminderRequest->reminderType_ = ReminderRequest::ReminderType::INVALID;
     reminderRequest->UpdateNotificationCommon(notificationRequest, false);
 }
-
-/**
- * @tc.name: UpdateNotificationBundleInfo_00100
- * @tc.desc: 1.Test UpdateNotificationBundleInfo function
- *           2.OwnerBundleName is empty
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(ReminderRequestBranchTest, UpdateNotificationBundleInfo_00100, Function | SmallTest | Level1)
-{
-    auto reminderRequest = std::make_shared<ReminderRequest>();
-    EXPECT_NE(reminderRequest, nullptr);
-    int32_t notificationId_ = 0;
-    NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
-    std::string ownerName = "";
-    notificationRequest.SetOwnerBundleName(ownerName);
-    reminderRequest->UpdateNotificationBundleInfo(notificationRequest);
-}
-
-/**
- * @tc.name: UpdateNotificationBundleInfo_00200
- * @tc.desc: 1.Test UpdateNotificationBundleInfo function
- *           2.OwnerBundleName is not empty
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(ReminderRequestBranchTest, UpdateNotificationBundleInfo_00200, Function | SmallTest | Level1)
-{
-    auto reminderRequest = std::make_shared<ReminderRequest>();
-    EXPECT_NE(reminderRequest, nullptr);
-    int32_t notificationId_ = 0;
-    NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
-    std::string ownerName = "aa";
-    notificationRequest.SetOwnerBundleName(ownerName);
-    reminderRequest->UpdateNotificationBundleInfo(notificationRequest);
-}
 }
 }

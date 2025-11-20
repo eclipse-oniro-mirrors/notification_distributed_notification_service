@@ -72,6 +72,8 @@ void ReminderStrategy::AppendValuesBucket(const sptr<ReminderRequest>& reminder,
     values.PutString(ReminderBaseTable::GROUP_ID, reminder->GetGroupId());
     values.PutString(ReminderBaseTable::CUSTOM_RING_URI, reminder->GetCustomRingUri());
     values.PutInt(ReminderBaseTable::RING_CHANNEL, static_cast<int32_t>(reminder->GetRingChannel()));
+    values.PutString(ReminderBaseTable::FORCE_DISTRIBUTED, reminder->IsForceDistributed() ? "true" : "false");
+    values.PutString(ReminderBaseTable::NOT_DISTRIBUTED, reminder->IsNotDistributed() ? "true" : "false");
     values.PutString(ReminderBaseTable::CREATOR_BUNDLE_NAME, reminder->GetCreatorBundleName());
     values.PutInt(ReminderBaseTable::CREATOR_UID, reminder->GetCreatorUid());
 }
@@ -393,6 +395,14 @@ void ReminderStrategy::RecoverFromDb(sptr<ReminderRequest>& reminder,
     int32_t ringChannel;
     ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::RING_CHANNEL, ringChannel);
     reminder->SetRingChannel(static_cast<ReminderRequest::RingChannel>(ringChannel));
+
+    std::string forceDistributed;
+    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::FORCE_DISTRIBUTED, forceDistributed);
+    reminder->SetForceDistributed(forceDistributed == "true" ? true : false);
+
+    std::string notDistributed;
+    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::NOT_DISTRIBUTED, notDistributed);
+    reminder->SetNotDistributed(notDistributed == "true" ? true : false);
 }
 
 void ReminderTimerStrategy::AppendValuesBucket(const sptr<ReminderRequest>& reminder,

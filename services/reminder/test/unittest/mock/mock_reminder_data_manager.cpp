@@ -23,6 +23,7 @@ int32_t g_mockPublishReminderRet = 0;
 int32_t g_mockUpdateReminderRet = 0;
 int32_t g_mockCancelReminderRet = 0;
 int32_t g_mockCancelAllRemindersRet = 0;
+int32_t g_mockCancelReminderOnDisplayRet = 0;
 int32_t g_mockAddExcludeDateRet = 0;
 int32_t g_mockDelExcludeDatesRet = 0;
 int32_t g_mockGetExcludeDatesRet = 0;
@@ -67,6 +68,11 @@ void MockReminderDataManager::MockCancelReminder(const int32_t ret)
 void MockReminderDataManager::MockCancelAllReminders(const int32_t ret)
 {
     g_mockCancelAllRemindersRet = ret;
+}
+
+void MockReminderDataManager::MockCancelReminderOnDisplay(const int32_t ret)
+{
+    g_mockCancelReminderOnDisplayRet = ret;
 }
 
 void MockReminderDataManager::MockAddExcludeDate(const int32_t ret)
@@ -154,6 +160,11 @@ ErrCode ReminderDataManager::CancelAllReminders(const std::string& packageName, 
 {
     MockReminderDataManager::callCancelAllReminders_ = true;
     return g_mockCancelAllRemindersRet;
+}
+
+ErrCode ReminderDataManager::CancelReminderOnDisplay(const int32_t reminderId, const int32_t callingUid)
+{
+    return g_mockCancelReminderOnDisplayRet;
 }
 
 void ReminderDataManager::GetValidReminders(const int32_t callingUid,

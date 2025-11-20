@@ -186,8 +186,9 @@ public:
      * creator uid
      */
     static const std::string CREATOR_UID;
-
-    static const std::string RING_CHANNEL;
+    static constexpr const char* RING_CHANNEL = "ring_channel";
+    static constexpr const char* FORCE_DISTRIBUTED = "force_distributed";
+    static constexpr const char* NOT_DISTRIBUTED = "not_distributed";
 
 public:
     static void InitDbColumns();

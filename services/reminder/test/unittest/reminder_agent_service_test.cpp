@@ -462,4 +462,29 @@ HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_016, Function | Smal
     MockReminderDataManager::MockUpdateReminder(0);
     EXPECT_EQ(reminderAgentService_->UpdateReminder(reminderId, alarm), 0);
 }
+
+/**
+ * @tc.name: ReminderAgentServiceTest_017
+ * @tc.desc: Test CancelReminderOnDisplay function
+ * @tc.type: FUNC
+ * @tc.require: issueI5S4VP
+ */
+HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_017, Function | SmallTest | Level1)
+{
+    // test CheckReminderPermission
+    MockAccesstokenKit::MockIsVerifyPermisson(false);
+    EXPECT_EQ(reminderAgentService_->CancelReminderOnDisplay(0), ERR_REMINDER_PERMISSION_DENIED);
+    MockAccesstokenKit::MockIsVerifyPermisson(true);
+
+    // test ReminderDataManager::GetInstance()
+    ReminderDataManager::REMINDER_DATA_MANAGER = nullptr;
+    EXPECT_EQ(reminderAgentService_->CancelReminderOnDisplay(0), ERR_NO_INIT);
+    ReminderDataManager::InitInstance();
+
+    // test ReminderDataManager::CancelReminderOnDisplay
+    MockReminderDataManager::MockCancelReminderOnDisplay(1);
+    EXPECT_EQ(reminderAgentService_->CancelReminderOnDisplay(0), 1);
+    MockReminderDataManager::MockCancelReminderOnDisplay(0);
+    EXPECT_EQ(reminderAgentService_->CancelReminderOnDisplay(0), 0);
+}
 }  // namespace OHOS::Notification

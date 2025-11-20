@@ -204,9 +204,10 @@ public:
      * @brief audio stream type
      */
     enum class RingChannel : uint8_t {
-        ALARM,
+        ALARM = 0,
         MEDIA,
-        NOTIFICATION,  // for calendar
+        NOTIFICATION,
+        MAX_CHANNEL = NOTIFICATION,
     };
 
     struct ButtonWantAgent {
@@ -905,6 +906,12 @@ public:
      */
     bool IsTapDismissed() const;
 
+    bool IsForceDistributed() const;
+    void SetForceDistributed(const bool forceDistributed);
+
+    bool IsNotDistributed() const;
+    void SetNotDistributed(const bool notDistributed);
+
     /**
      * @brief Sets autoDeletedTime.
      *
@@ -1146,7 +1153,6 @@ private:
     void UpdateNotificationAddRemovalWantAgent(NotificationRequest& notificationRequest);
     void UpdateNotificationWantAgent(NotificationRequest& notificationRequest, const int32_t index);
     void UpdateNotificationMaxScreenWantAgent(NotificationRequest& notificationRequest);
-    void UpdateNotificationBundleInfo(NotificationRequest& notificationRequest);
 
     /**
      * @brief Determine whether it is repeated every week.
@@ -1202,6 +1208,8 @@ private:
     bool isSystemApp_ {false};
     bool tapDismissed_ {true};
     bool isRingLoop_ {true};
+    bool forceDistributed_ {false};
+    bool notDistributed_ {false};
     int64_t autoDeletedTime_ {0};
     std::string customButtonUri_ {};
     std::string customRingUri_ {};

@@ -54,7 +54,6 @@ const std::string ReminderBaseTable::GROUP_ID = "group_id";
 const std::string ReminderBaseTable::CUSTOM_RING_URI = "custom_ring_uri";
 const std::string ReminderBaseTable::CREATOR_BUNDLE_NAME = "creator_bundle_name";
 const std::string ReminderBaseTable::CREATOR_UID = "creator_uid";
-const std::string ReminderBaseTable::RING_CHANNEL = "ring_channel";
 
 // reminder alarm table
 const std::string ReminderAlarmTable::TABLE_NAME = "reminder_alarm";
@@ -149,6 +148,8 @@ void ReminderBaseTable::InitDbColumns()
     AddColumn(GROUP_ID, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
     AddColumn(CUSTOM_RING_URI, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
     AddColumn(RING_CHANNEL, "INT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(FORCE_DISTRIBUTED, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
+    AddColumn(NOT_DISTRIBUTED, "TEXT", ADD_COLUMNS, SELECT_COLUMNS);
     AddColumn(CREATOR_BUNDLE_NAME, "TEXT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
     AddColumnEnd(CREATOR_UID, "INT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
 }

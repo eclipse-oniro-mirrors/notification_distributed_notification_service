@@ -76,6 +76,13 @@ public:
     static ErrCode CancelAllReminders();
 
     /**
+     * @brief Dismiss the currently displayed alert and only remove it from the Notification Center.
+     *
+     * @return Returns cancel reminder result.
+     */
+    static ErrCode CancelReminderOnDisplay(const int32_t reminderId);
+
+    /**
      * Obtains all valid reminder notifications set by the current application, namely, the reminders that will
      * still be triggered later. If a reminder will never be triggered again, it is not considered a valid reminder.
      *

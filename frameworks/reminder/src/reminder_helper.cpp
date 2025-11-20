@@ -45,6 +45,12 @@ ErrCode ReminderHelper::CancelAllReminders()
     return DelayedSingleton<ReminderRequestClient>::GetInstance()->CancelAllReminders();
 }
 
+ErrCode ReminderHelper::CancelReminderOnDisplay(const int32_t reminderId)
+{
+    ANSR_LOGD("called");
+    return DelayedSingleton<ReminderRequestClient>::GetInstance()->CancelReminderOnDisplay(reminderId);
+}
+
 ErrCode ReminderHelper::GetValidReminders(std::vector<ReminderRequestAdaptation> &validReminders)
 {
     ANSR_LOGD("called");

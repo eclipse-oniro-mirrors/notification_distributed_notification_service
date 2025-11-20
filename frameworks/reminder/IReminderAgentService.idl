@@ -20,6 +20,7 @@ interface OHOS.Notification.IReminderAgentService {
     void UpdateReminder([in] int reminderId, [in] ReminderRequest reminder);
     void CancelReminder([in] int reminderId);
     void CancelAllReminders();
+    void CancelReminderOnDisplay([in] int reminderId);
     void GetValidReminders([out] ReminderRequestAdaptation[] reminders);
     void AddExcludeDate([in] int reminderId, [in] long date);
     void DelExcludeDates([in] int reminderId);

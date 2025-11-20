@@ -37,7 +37,6 @@ namespace OHOS {
         auto manager = Notification::ReminderDataManager::GetInstance();
         manager->RegisterConfigurationObserver();
         manager->Init();
-        manager->Dump();
         manager->CancelAllReminders(bundleName, userId, uid);
         manager->CancelReminder(reminderId, callingUid);
         manager->CheckExcludeDateParam(reminderId, callingUid);
@@ -118,7 +117,7 @@ namespace OHOS {
         manager->HandleSameNotificationIdShowing(reminder);
         manager->IsBelongToSameApp(uid, uid);
         manager->CheckIsSameApp(reminder, uid);
-        manager->ShowReminder(reminder, value, value, value, value, value);
+        manager->ShowReminder(reminder, value, value, value);
         return true;
     }
 
@@ -194,7 +193,6 @@ namespace OHOS {
         manager->StopTimer(t);
         manager->StopTimerLocked(t);
         manager->TerminateAlerting(reminder, uri);
-        manager->TerminateAlerting(second, reminder);
         manager->UpdateAndSaveReminderLocked(reminder);
         Notification::ReminderDataManager::cmp(reminder, reminder);
         manager->ConnectAppMgr();

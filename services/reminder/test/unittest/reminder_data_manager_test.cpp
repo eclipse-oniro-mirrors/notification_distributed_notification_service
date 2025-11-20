@@ -291,7 +291,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_007, Level1)
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_008, Level1)
 {
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
-    manager->TerminateAlerting(0, reminder);
     manager->TerminateAlerting(nullptr, "");
     manager->TerminateAlerting(reminder, "");
     reminder->state_ = 2;

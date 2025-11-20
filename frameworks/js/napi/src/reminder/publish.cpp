@@ -1498,5 +1498,59 @@ napi_value UpdateReminder(napi_env env, napi_callback_info info)
 
     return isCallback ? NotificationNapi::Common::NapiGetNull(env) : promise;
 }
+
+napi_value CancelReminderOnDisplay(napi_env env, napi_callback_info info)
+{
+    ANSR_LOGD("called");
+    AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
+    if (!asynccallbackinfo) {
+        ANSR_LOGE("Low memory.");
+        return NotificationNapi::Common::NapiGetNull(env);
+    }
+    std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
+    // param
+    Parameters params;
+    if (ParseCanCelParameter(env, info, params, *asynccallbackinfo, true) == nullptr) {
+        return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env), true);
+    }
+
+    // promise
+    napi_value promise = nullptr;
+    SetAsynccallbackinfo(env, *asynccallbackinfo, promise);
+    asynccallbackinfo->reminderId = params.reminderId;
+    asynccallbackinfo->isThrow = true;
+
+    // resource name
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "cancelReminderOnDisplay", NAPI_AUTO_LENGTH, &resourceName);
+
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    // create and queue async work
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANSR_LOGI("CancelReminderOnDisplay napi_create_async_work start");
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode =
+                    ReminderHelper::CancelReminderOnDisplay(asynccallbackinfo->reminderId);
+            }
+        },
+        [](napi_env env, napi_status status, void *data) {
+            ANSR_LOGI("CancelReminderOnDisplay napi_create_async_work complete start");
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
+            std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
+
+            ReminderCommon::ReturnCallbackPromise(
+                env, asynccallbackinfo->info, NotificationNapi::Common::NapiGetNull(env), asynccallbackinfo->isThrow);
+            ANSR_LOGI("CancelReminderOnDisplay napi_create_async_work complete end");
+        },
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
+    callbackPtr.release();
+    return isCallback ? NotificationNapi::Common::NapiGetNull(env) : promise;
+}
 }
 }

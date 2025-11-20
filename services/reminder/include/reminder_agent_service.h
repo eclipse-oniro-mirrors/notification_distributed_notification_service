@@ -69,6 +69,13 @@ public:
     ErrCode CancelAllReminders() override;
 
     /**
+     * @brief Dismiss the currently displayed alert and only remove it from the Notification Center.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode CancelReminderOnDisplay(const int32_t reminderId) override;
+
+    /**
      * @brief Get all valid reminder requests.
      *
      * @param reminders Identifies the list of all valid reminder requests.

@@ -112,6 +112,16 @@ ErrCode ReminderRequestClient::CancelAllReminders()
     return proxy->CancelAllReminders();
 }
 
+ErrCode ReminderRequestClient::CancelReminderOnDisplay(const int32_t reminderId)
+{
+    sptr<IReminderAgentService> proxy = GetReminderServiceProxy();
+    if (!proxy) {
+        ANS_LOGE("GetReminderServiceProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->CancelReminderOnDisplay(reminderId);
+}
+
 ErrCode ReminderRequestClient::GetValidReminders(std::vector<ReminderRequestAdaptation> &validReminders)
 {
     sptr<IReminderAgentService> proxy = GetReminderServiceProxy();
