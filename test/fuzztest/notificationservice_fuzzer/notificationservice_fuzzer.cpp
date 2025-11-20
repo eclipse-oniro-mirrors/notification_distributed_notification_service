@@ -278,10 +278,7 @@ namespace Notification {
         auto content = std::make_shared<NotificationContent>(liveContent);
         request->SetContent(content);
         sptr<NotificationBundleOption> bundle = new NotificationBundleOption(str, num);
-        AdvancedNotificationService::NotificationRequestDb requestDb =
-            { .request = request, .bundleOption = bundle};
 
-        service->SetNotificationRequestToDb(requestDb);
         service->SetLockScreenPictureToDb(request);
 
         auto record2 = service->MakeNotificationRecord(request, bundle);
