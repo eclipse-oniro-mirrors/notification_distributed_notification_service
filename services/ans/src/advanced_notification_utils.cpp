@@ -1756,12 +1756,19 @@ void AdvancedNotificationService::InitNotificationEnableList()
                     bundleInfo.applicationInfo.bundleName.c_str());
                 continue;
             }
-            ErrCode result = UpdateNotificationSwitchState(bundleOption, bundleInfo);
+            bool isExist = false;
+            NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+            ErrCode result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(
+                bundleOption, state);
+            if (result == ERR_OK) {
+                isExist = true;
+            }
+            result = UpdateNotificationSwitchState(bundleOption, bundleInfo);
             if (result != ERR_OK) {
                 ANS_LOGE("Update switch state error. code: %{public}d", result);
             }
 
-            if (bundleInfo.applicationInfo.allowEnableNotification) {
+            if (bundleInfo.applicationInfo.allowEnableNotification && !isExist) {
                 result = NotificationPreferences::GetInstance()->SetShowBadge(bundleOption, true);
                 if (result != ERR_OK) {
                     ANS_LOGE("Set badge enable error! code: %{public}d", result);
