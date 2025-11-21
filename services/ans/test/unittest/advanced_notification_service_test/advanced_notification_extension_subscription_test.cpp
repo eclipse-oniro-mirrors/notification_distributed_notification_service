@@ -1760,6 +1760,30 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetNotificationExtension
 }
 
 /**
+ * @tc.number    : GetNotificationExtensionEnabledBundles_0300
+ * @tc.name      : GetNotificationExtensionEnabledBundles
+ * @tc.desc      : Test GetNotificationExtensionEnabledBundles case
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetNotificationExtensionEnabledBundles_0300,
+    Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    MockIsVerfyPermisson(true);
+    MockIsNeedHapModuleInfos(true);
+    MockGetCloneAppIndexes(true);
+    MockGetCloneBundleInfo(true);
+    ErrCode ret = advancedNotificationService_->GetNotificationExtensionEnabledBundles(bundles);
+    for (size_t i = 0; i < bundles.size(); ++i) {
+        ASSERT_EQ(bundles[i]->GetBundleName(), "test_bundle");
+        ASSERT_EQ(bundles[i]->GetUid(), NON_SYSTEM_APP_UID);
+    }
+    MockIsNeedHapModuleInfos(false);
+    MockGetCloneAppIndexes(false);
+    MockGetCloneBundleInfo(false);
+    advancedNotificationService_->cacheNotificationExtensionBundles_.clear();
+}
+
+/**
  * @tc.number    : isExtensionServiceExist_0100
  * @tc.name      : isExtensionServiceExist
  * @tc.desc      : Test isExtensionServiceExist case
@@ -2049,6 +2073,64 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, OnPairStatusChanged_0100
     auto singleton = AdvancedNotificationService::GetInstance();
     ASSERT_NE(singleton, nullptr);
     EXPECT_FALSE(singleton->notificationExtensionLoaded_);
+}
+
+/**
+ * @tc.number    : GetCloneBundleList_0100
+ * @tc.name      : GetCloneBundleList
+ * @tc.desc      : Test GetCloneBundleList case
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetCloneBundleList_0100, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, -1);
+    std::vector<sptr<NotificationBundleOption>> cloneBundleList;
+    EXPECT_FALSE(advancedNotificationService_->GetCloneBundleList(bundleOption, cloneBundleList));
+    EXPECT_TRUE(cloneBundleList.empty());
+}
+
+/**
+ * @tc.number    : GetCloneBundleList_0200
+ * @tc.name      : GetCloneBundleList
+ * @tc.desc      : Test GetCloneBundleList case
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetCloneBundleList_0200, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    std::vector<sptr<NotificationBundleOption>> cloneBundleList;
+    EXPECT_FALSE(advancedNotificationService_->GetCloneBundleList(bundleOption, cloneBundleList));
+    EXPECT_TRUE(cloneBundleList.empty());
+}
+
+/**
+ * @tc.number    : GetCloneBundleList_0300
+ * @tc.name      : GetCloneBundleList
+ * @tc.desc      : Test GetCloneBundleList case
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetCloneBundleList_0300, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    std::vector<sptr<NotificationBundleOption>> cloneBundleList;
+    MockGetCloneAppIndexes(true);
+    EXPECT_TRUE(advancedNotificationService_->GetCloneBundleList(bundleOption, cloneBundleList));
+    EXPECT_TRUE(cloneBundleList.empty());
+    MockGetCloneAppIndexes(false);
+}
+
+/**
+ * @tc.number    : GetCloneBundleList_0400
+ * @tc.name      : GetCloneBundleList
+ * @tc.desc      : Test GetCloneBundleList case
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetCloneBundleList_0400, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    std::vector<sptr<NotificationBundleOption>> cloneBundleList;
+    MockGetCloneAppIndexes(true);
+    MockGetCloneBundleInfo(true);
+    EXPECT_TRUE(advancedNotificationService_->GetCloneBundleList(bundleOption, cloneBundleList));
+    EXPECT_FALSE(cloneBundleList.empty());
+    MockGetCloneAppIndexes(false);
+    MockGetCloneBundleInfo(false);
 }
 }
 }

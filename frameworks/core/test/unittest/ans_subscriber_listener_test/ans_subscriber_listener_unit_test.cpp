@@ -208,7 +208,24 @@ HWTEST_F(SubscriberListenerTest, OnConsumed_0400, Function | MediumTest | Level1
     ErrCode result = listener->OnConsumed(notification);
     EXPECT_EQ(result, ERR_INVALID_DATA);
 }
- 
+
+/**
+ * @tc.name      : OnConsumed_0500
+ * @tc.desc      : Test one param OnConsumed success
+ */
+HWTEST_F(SubscriberListenerTest, OnConsumed_0500, Function | MediumTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest(1);
+    request->SetClassification(NotificationConstant::ANS_VOIP);
+    sptr<Notification> notification = new (std::nothrow) Notification("001", request);
+    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    subscriber->SetDeviceType(NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE);
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    ErrCode result = listener->OnConsumed(notification, notificationMap);
+    EXPECT_EQ(result, ERR_OK);
+}
+
 /**
  * @tc.name      : OnConsumedWithMaxCapacity_0100
  * @tc.desc      : Test OnConsumedWithMaxCapacity success
