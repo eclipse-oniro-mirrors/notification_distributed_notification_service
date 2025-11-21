@@ -64,6 +64,7 @@ public:
     MOCK_METHOD1(GetActiveNotificationNums, ErrCode(uint64_t&));
     MOCK_METHOD1(GetAllActiveNotifications, ErrCode(const sptr<IAnsResultDataSynchronizer>&));
     MOCK_METHOD2(GetAllNotificationsBySlotType, ErrCode(std::vector<sptr<Notification>>&, int32_t));
+    MOCK_METHOD3(GetAllNotificationsBySlotType, ErrCode(std::vector<sptr<Notification>>&, int32_t, int32_t userId));
     MOCK_METHOD2(GetSpecialActiveNotifications,
         ErrCode(const std::vector<std::string>&, std::vector<sptr<Notification>>&));
     MOCK_METHOD6(GetActiveNotificationByFilter, ErrCode(

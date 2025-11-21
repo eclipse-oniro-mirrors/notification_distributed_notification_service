@@ -76,6 +76,8 @@ interface OHOS.Notification.IAnsManager {
 
     void GetAllNotificationsBySlotType([out] sptr<Notification>[] notifications, [in] int slotTypeInt);
 
+    void GetAllNotificationsBySlotType([out] sptr<Notification>[] notifications, [in] int slotTypeInt, [in] int userId);
+
     void GetSpecialActiveNotifications([in] String[] key, [out] sptr<Notification>[] notifications);
 
     [ipcoutcapacity 520] void GetActiveNotificationByFilter(

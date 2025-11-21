@@ -646,6 +646,8 @@ public:
 
     ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
         const NotificationConstant::SlotType slotType);
+    ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+        const NotificationConstant::SlotType slotType, int32_t userId);
 
     /**
      * @brief Obtains the active notifications corresponding to the specified key in the system. To call this method

@@ -1285,7 +1285,8 @@ void AdvancedNotificationService::PublishSubscriberExistFlagEvent(bool headsetEx
     }
 }
 
-ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason)
+ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(
+    const std::string &bundleName, int32_t reason, int32_t userId)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("called");
@@ -1311,6 +1312,16 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(const st
                 ANS_LOGE("record is nullptr");
                 continue;
             }
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+            if (userId != -1) {
+                int32_t bundleUserId = -1;
+                auto ret = OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
+                    record->bundleOption->GetUid(), bundleUserId);
+                if (ret != ERR_OK || bundleUserId != userId) {
+                    continue;
+                }
+            }
+#endif
             if ((record->bundleOption->GetBundleName() == bundleName)
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 && record->deviceId.empty()

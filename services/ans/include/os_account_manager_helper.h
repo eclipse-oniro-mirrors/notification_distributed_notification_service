@@ -91,6 +91,11 @@ public:
      * Get private status from osAccount.
      */
     ErrCode GetOsAccountPrivateStatus(bool &isPrivate);
+
+    /**
+     * Get foreground userIds.
+     */
+    ErrCode GetForegroundUserIds(std::vector<int32_t> &foregroundUserIds);
 };
 } // namespace OHOS
 } // namespace Notification

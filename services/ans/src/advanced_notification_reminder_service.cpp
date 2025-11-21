@@ -96,9 +96,9 @@ ErrCode AdvancedNotificationService::SetNotificationRemindType(sptr<Notification
 void AdvancedNotificationService::TryStartReminderAgentService()
 {
     auto checkCalendarFunc = []() {
-        int32_t activeUserId = 0;
-        if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
-            ANSR_LOGE("Failed to get active user id");
+        std::vector<int32_t> activeUserIds;
+        if (OsAccountManagerHelper::GetInstance().GetForegroundUserIds(activeUserIds) != ERR_OK) {
+            ANSR_LOGE("Failed to get active user ids");
             return false;
         }
         std::shared_ptr<BundleManagerHelper> bundleMgr = BundleManagerHelper::GetInstance();
@@ -106,8 +106,13 @@ void AdvancedNotificationService::TryStartReminderAgentService()
             ANSR_LOGE("Failed to get bundle manager");
             return false;
         }
-        int32_t uid = bundleMgr->GetDefaultUidByBundleName(CALENDAR_DATA_NAME, activeUserId);
-        return uid != -1;
+        for (const auto &activeUserId : activeUserIds) {
+            int32_t uid = bundleMgr->GetDefaultUidByBundleName(CALENDAR_DATA_NAME, activeUserId);
+            if (uid != -1) {
+                return true;
+            }
+        }
+        return false;
     };
     if (!checkCalendarFunc()) {
         if (access(REMINDER_DB_PATH, F_OK) != 0) {

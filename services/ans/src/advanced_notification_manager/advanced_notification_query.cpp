@@ -190,6 +190,50 @@ ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<s
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+    int32_t slotTypeInt, int32_t userId)
+{
+    ANS_LOGD("called");
+
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("AccessTokenHelper::CheckPermission failed.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("null notificationSvrQueue");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("called");
+        notifications.clear();
+        for (auto record : notificationList_) {
+            if (record->notification == nullptr || record->notification->request_ == nullptr) {
+                continue;
+            }
+            if (record->notification->request_->GetSlotType() != slotType) {
+                continue;
+            }
+
+            int32_t receiver = record->notification->request_->GetReceiverUserId();
+            if (receiver == SUBSCRIBE_USER_INIT || (receiver != 0 && receiver != userId)) {
+                ANS_LOGI("Userid %{public}d %{public}d %{public}s.", receiver, userId,
+                    record->notification->GetKey().c_str());
+                continue;
+            }
+            notifications.push_back(record->notification);
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
     const std::vector<std::string> &key, std::vector<sptr<Notification>> &notifications)
 {

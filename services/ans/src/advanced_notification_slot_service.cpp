@@ -1171,9 +1171,8 @@ void AdvancedNotificationService::InvockLiveViewSwitchCheck(
             bundles[index]->GetBundleName())) {
             continue;
         }
-
         if (NotificationLiveViewUtils::GetInstance().CheckLiveViewConfigByBundle(
-            bundles[index]->GetBundleName(), NotificationLiveViewUtils::ALL_EVENT)) {
+            bundles[index]->GetBundleName(), NotificationLiveViewUtils::ALL_EVENT, userId)) {
             continue;
         }
 

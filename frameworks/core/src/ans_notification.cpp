@@ -2883,6 +2883,17 @@ ErrCode AnsNotification::GetAllNotificationsBySlotType(std::vector<sptr<Notifica
     return proxy->GetAllNotificationsBySlotType(notifications, slotType);
 }
 
+ErrCode AnsNotification::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+    const NotificationConstant::SlotType slotType, int32_t userId)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->GetAllNotificationsBySlotType(notifications, slotType, userId);
+}
+
 ErrCode AnsNotification::SetRingtoneInfoByBundle(const NotificationBundleOption &bundle,
     const NotificationRingtoneInfo &ringtoneInfo)
 {

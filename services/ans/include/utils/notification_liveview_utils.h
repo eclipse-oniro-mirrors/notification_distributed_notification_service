@@ -46,6 +46,7 @@ public:
     void EraseLiveViewCheckData(const std::string& requestId);
     bool GetLiveViewCheckData(const std::string& requestId, std::shared_ptr<LiveViewCheckParam>& data);
     bool CheckLiveViewConfigByBundle(const std::string& bundleName, const std::string& event);
+    bool CheckLiveViewConfigByBundle(const std::string& bundleName, const std::string& event, int32_t userId);
     bool CheckLiveViewForBundle(const sptr<NotificationRequest>& request);
 
     bool CheckLiveViewVersion();
