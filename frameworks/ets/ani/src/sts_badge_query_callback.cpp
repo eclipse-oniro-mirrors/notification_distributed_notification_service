@@ -30,6 +30,7 @@ namespace OHOS {
 namespace NotificationSts {
 constexpr int32_t INVALID_BADGE_NUMBER = -1;
 constexpr int32_t BADGEQUERY_TIMEOUT_MS = 500;
+constexpr int32_t INVALID_USER_ID = -1;
 
 ffrt::mutex BadgeNumberPromiseManager::promiseMutex_;
 std::unordered_map<int32_t, std::shared_ptr<std::promise<int32_t>>> BadgeNumberPromiseManager::promises_;
@@ -138,7 +139,7 @@ ErrCode StsBadgeQueryCallBack::GetBadgeNumberQueryInfo(const sptr<NotificationBu
         ANS_LOGE("uid is invalid, %{public}d", uid);
         return ERR_INVALID_DATA;
     }
-    int32_t userId = -1;
+    int32_t userId = INVALID_USER_ID;
     if (GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
         return ERR_INVALID_DATA;
     }
@@ -257,7 +258,7 @@ void StsBadgeQueryCallBackManager::AniOnBadgeNumberQuery(ani_env *env, ani_fn_ob
         ANS_LOGE("uid is invalid, %{public}d", uid);
         return;
     }
-    int32_t userId = -1;
+    int32_t userId = INVALID_USER_ID;
     if (GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
         return;
     }
@@ -294,7 +295,7 @@ void StsBadgeQueryCallBackManager::AniOffBadgeNumberQuery(ani_env *env)
         ANS_LOGE("uid is invalid, %{public}d", uid);
         return;
     }
-    int32_t userId = -1;
+    int32_t userId = INVALID_USER_ID;
     if (GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
         return;
     }
