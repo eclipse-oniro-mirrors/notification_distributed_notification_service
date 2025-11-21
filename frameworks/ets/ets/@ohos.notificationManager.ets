@@ -14,7 +14,7 @@
  */
 
 import { BundleOption } from 'notification.NotificationCommonDef';
-import { BusinessError, AsyncCallback } from '@ohos.base';
+import { BusinessError, AsyncCallback, RecordData } from '@ohos.base';
 import { NotificationSlot } from 'notification.notificationSlot';
 import { NotificationRequest, NotificationCheckRequest } from 'notification.notificationRequest';
 import UIAbilityContext from 'application.UIAbilityContext';
@@ -193,7 +193,7 @@ export default namespace notificationManager {
     export native function nativeGetActiveNotificationCount(): long;
     export native function nativeGetActiveNotifications():Array<NotificationRequest>;
     export native function nativeGetAllActiveNotifications():Array<NotificationRequest>;
-    export native function nativeGetActiveNotificationByFilter(filter: NotificationFilter): NotificationRequest;
+    export native function nativeGetActiveNotificationByFilter(filter: NotificationFilter): NotificationRequest|null;
 
     export native function nativeAddDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): void;
     export native function nativeRemoveDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): void;
@@ -208,7 +208,7 @@ export default namespace notificationManager {
     export native function nativeGetSlotFlagsByBundle(bundle: BundleOption): long;
     export native function nativeSetSlotFlagsByBundle(bundle: BundleOption, slotFlags: long): void;
     export native function nativeGetSlotsByBundle(bundle: BundleOption): Array<NotificationSlot>;
-    export native function nativeGetSlotByBundle(bundle: BundleOption, type: SlotType): NotificationSlot;
+    export native function nativeGetSlotByBundle(bundle: BundleOption, type: SlotType): NotificationSlot|null;
 
     export native function nativeIsNotificationSlotEnabled(bundle: BundleOption, type: SlotType): boolean;
     export native function nativeSetNotificationEnableSlot(
@@ -225,11 +225,11 @@ export default namespace notificationManager {
     export native function nativeIsNotificationEnabledSync(): boolean;
 
     export native function  nativeRemoveGroupByBundle(bundle: BundleOption, groupName: string): void;
-    
+
     export native function nativeAddSlotByNotificationSlot(slot: NotificationSlot): void;
     export native function nativeAddSlotBySlotType(type: SlotType): void;
     export native function nativeAddSlots(slots: Array<NotificationSlot>): void;
-    export native function nativeGetSlot(slotType: SlotType): NotificationSlot;
+    export native function nativeGetSlot(slotType: SlotType): NotificationSlot|null;
     export native function nativeGetSlots(): Array<NotificationSlot>;
     export native function nativeRemoveSlot(slotType: SlotType): void;
     export native function nativeRemoveAllSlots(): void;
@@ -787,12 +787,11 @@ export default namespace notificationManager {
         });
     }
 
-    export function getSlot(slotType: SlotType): Promise<NotificationSlot> {
-        let pPromise = new Promise<NotificationSlot>((resolve: ResolveCallback<NotificationSlot>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): NotificationSlot => { return nativeGetSlot(slotType); });
+    export function getSlot(slotType: SlotType): Promise<NotificationSlot|null> {
+        let pPromise = new Promise<NotificationSlot|null>((resolve: ResolveCallback<NotificationSlot|null>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): NotificationSlot|null => { return nativeGetSlot(slotType); });
             p.then((data: NullishType): void => {
-                let ret : NotificationSlot = data as NotificationSlot;
-                resolve(ret);
+                resolve(data as NotificationSlot|null);
             }, (error: Error): void => {
                 reject(error);
             });
@@ -800,30 +799,28 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function getSlot(slotType: SlotType, callback: AsyncCallback<NotificationSlot>): void {
+    export function getSlot(slotType: SlotType, callback: AsyncCallback<NotificationSlot|null>): void {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): NotificationSlot => { return nativeGetSlot(slotType); });
+        let p = taskpool.execute((): NotificationSlot|null => { return nativeGetSlot(slotType); });
         p.then((data: NullishType): void => {
-            let ret : NotificationSlot = data as NotificationSlot;
-            callback(null, ret);
+            callback(null, data as NotificationSlot|null);
         }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         });
     }
 
-    export function getSlotByBundle(bundle: BundleOption, slotType: SlotType): Promise<NotificationSlot> {
+    export function getSlotByBundle(bundle: BundleOption, slotType: SlotType): Promise<NotificationSlot|null> {
         let error: BusinessError = isInvalidParameter(bundle);
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<NotificationSlot>((resolve: ResolveCallback<NotificationSlot>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): NotificationSlot => { return nativeGetSlotByBundle(bundle, slotType); });
+        let pPromise = new Promise<NotificationSlot|null>((resolve: ResolveCallback<NotificationSlot|null>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): NotificationSlot|null => { return nativeGetSlotByBundle(bundle, slotType); });
             p.then((data: NullishType): void => {
-                let ret : NotificationSlot = data as NotificationSlot;
-                resolve(ret);
+                resolve(data as NotificationSlot|null);
             }, (error: Error): void => {
                 reject(error);
             });
@@ -1659,17 +1656,17 @@ export default namespace notificationManager {
         public message: string = '';
     }
 
-    export function on(
-        type: 'checkNotification', callback: (checkInfo: NotificationCheckInfo) => NotificationCheckResult): void
+    export function onCheckNotification(
+        callback: (checkInfo: NotificationCheckInfo) => NotificationCheckResult): void
     {
-        let errCode = nativeOn(type, callback);
+        let errCode = nativeOn('checkNotification', callback);
         if (errCode != 0) {
             const error: BusinessError = {code: errCode, message: "unknown error"};
             throw error;
         }
     }
 
-    export function on(type: 'checkNotification', checkRequest: NotificationCheckRequest,
+    export function onCheckNotification(checkRequest: NotificationCheckRequest,
         callback: (checkInfo: NotificationCheckInfo) => Promise<NotificationCheckResult>): void
     {
         let onFuncCallback: CallbackForCheckInfo =
@@ -1692,23 +1689,22 @@ export default namespace notificationManager {
                 );
                 return result;
             };
-        let errCode = nativeOn(type, onFuncCallback, checkRequest);
+        let errCode = nativeOn('checkNotification', onFuncCallback, checkRequest);
         if (errCode != 0) {
             const error: BusinessError = {code: errCode, message: "unknown error"};
             throw error;
         }
     }
 
-    export function off(
-        type: 'checkNotification',
+    export function offCheckNotification(
         callback?: (checkInfo: NotificationCheckInfo) => NotificationCheckResult
     ): void
     {
         let errCode = -1;
         if (callback === undefined) {
-            errCode = nativeOff(type);
+            errCode = nativeOff('checkNotification');
         } else {
-            errCode = nativeOff(type, callback);
+            errCode = nativeOff('checkNotification', callback);
         }
         if (errCode != 0) {
             const error: BusinessError = {code: errCode, message: "unknown error"};
@@ -1723,7 +1719,7 @@ export default namespace notificationManager {
         contentType: ContentType;
         creatorUserId: int;
         slotType: SlotType;
-        extraInfos?: Record<string, Object>;
+        extraInfos?: Record<string, RecordData>;
     }
 
     class NotificationCheckInfoInner implements NotificationCheckInfo {
@@ -1733,7 +1729,7 @@ export default namespace notificationManager {
         public contentType: ContentType = ContentType.NOTIFICATION_CONTENT_BASIC_TEXT;
         public creatorUserId: int = -1;
         public slotType: SlotType = SlotType.UNKNOWN_TYPE;
-        public extraInfos?: Record<string, Object>;
+        public extraInfos?: Record<string, RecordData>;
     }
 
     export function getAllNotificationEnabledBundles(): Promise<Array<BundleOption>>
@@ -1839,7 +1835,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function getActiveNotificationByFilter(filter: NotificationFilter, callback: AsyncCallback<NotificationRequest>): void
+    export function getActiveNotificationByFilter(filter: NotificationFilter, callback: AsyncCallback<NotificationRequest|null>): void
     {
         let error: BusinessError = isInvalidParameter(filter);
         if (error.code !== ERROR_OK) {
@@ -1848,27 +1844,25 @@ export default namespace notificationManager {
         if (callback === null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): NotificationRequest => { return nativeGetActiveNotificationByFilter(filter); });
+        let p = taskpool.execute((): NotificationRequest|null => { return nativeGetActiveNotificationByFilter(filter); });
         p.then((data: NullishType): void => {
-            let ret : NotificationRequest = data as NotificationRequest;
-            callback(null, ret);
+            callback(null, data as NotificationRequest|null);
         }, (error: Object): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         })
     }
 
-    export function getActiveNotificationByFilter(filter: NotificationFilter): Promise<NotificationRequest>
+    export function getActiveNotificationByFilter(filter: NotificationFilter): Promise<NotificationRequest|null>
     {
         let error: BusinessError = isInvalidParameter(filter);
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<NotificationRequest>((resolve: ResolveCallback<NotificationRequest>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): NotificationRequest => { return nativeGetActiveNotificationByFilter(filter); });
+        let pPromise = new Promise<NotificationRequest|null>((resolve: ResolveCallback<NotificationRequest|null>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): NotificationRequest|null => { return nativeGetActiveNotificationByFilter(filter); });
             p.then((data: NullishType): void => {
-                let ret : NotificationRequest = data as NotificationRequest;
-                resolve(ret);
+                resolve(data as NotificationRequest|null);
             }, (error: Error): void => {
                 reject(error);
             });
@@ -2487,7 +2481,7 @@ export default namespace notificationManager {
         });
         return pPromise;
     }
-    
+
     export function isDistributedEnabled(callback: AsyncCallback<boolean>): void
     {
         if (callback == null) {
@@ -2540,7 +2534,7 @@ export default namespace notificationManager {
             callback(err, undefined);
         })
     }
-    
+
     export function isDistributedEnabledByBundle(bundle: BundleOption, deviceType: string): Promise<boolean>
     {
         let error: BusinessError = isInvalidParameter(bundle);
@@ -2662,7 +2656,6 @@ export default namespace notificationManager {
         });
         return pPromise;
     }
-
 
     export interface RingtoneInfo {
         ringtoneType: RingtoneType;

@@ -39,6 +39,16 @@ std::string NotificationBundleOption::GetBundleName() const
     return bundleName_;
 }
 
+void NotificationBundleOption::SetAppName(const std::string &appName)
+{
+    appName_ = appName;
+}
+
+std::string NotificationBundleOption::GetAppName() const
+{
+    return appName_;
+}
+
 void NotificationBundleOption::SetUid(const int32_t uid)
 {
     uid_ = uid;
@@ -96,6 +106,11 @@ bool NotificationBundleOption::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteString(appName_)) {
+        ANS_LOGE("Failed to write app name");
+        return false;
+    }
+
     if (!parcel.WriteInt32(uid_)) {
         ANS_LOGE("Failed to write uid");
         return false;
@@ -124,6 +139,11 @@ bool NotificationBundleOption::ReadFromParcel(Parcel &parcel)
 {
     if (!parcel.ReadString(bundleName_)) {
         ANS_LOGE("Failed to read bundle name");
+        return false;
+    }
+
+    if (!parcel.ReadString(appName_)) {
+        ANS_LOGE("Failed to read app name");
         return false;
     }
 

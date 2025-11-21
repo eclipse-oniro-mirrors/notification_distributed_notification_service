@@ -83,7 +83,7 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeGetAllActiveNotifications", nullptr,
         reinterpret_cast<void *>(AniGetAllActiveNotifications)},
     ani_native_function {"nativeGetActiveNotifications", nullptr, reinterpret_cast<void *>(AniGetActiveNotifications)},
-    ani_native_function {"nativeGetActiveNotificationCount", ":J",
+    ani_native_function {"nativeGetActiveNotificationCount", ":l",
         reinterpret_cast<void *>(AniGetActiveNotificationCount)},
     ani_native_function {"nativeGetActiveNotificationByFilter", nullptr,
         reinterpret_cast<void *>(AniGetActiveNotificationByFilter)},
@@ -96,7 +96,7 @@ static std::array kitManagerFunctions = {
         reinterpret_cast<void *>(AniIsDistributedEnabledBySlot)},
     ani_native_function {"nativesetTargetDeviceStatus", nullptr, reinterpret_cast<void *>(AniSetTargetDeviceStatus)},
     ani_native_function {"nativeRequestEnableNotification",
-        "Lapplication/UIAbilityContext/UIAbilityContext;:Lstd/core/Promise;",
+        "C{application.UIAbilityContext.UIAbilityContext}:C{std.core.Promise}",
         reinterpret_cast<void *>(AniRequestEnableNotification)},
     ani_native_function {"nativeGetNotificationSetting", nullptr, reinterpret_cast<void *>(AniGetNotificationSetting)},
     ani_native_function {"nativeGetReminderInfoByBundles", nullptr,
@@ -249,9 +249,9 @@ static std::array kitManagerFunctions = {
 #endif
 #ifdef ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW
     ani_native_function {"nativeOn",
-        "Lstd/core/String;Lstd/core/Function1;Lnotification/notificationRequest/NotificationCheckRequest;:I",
+        "C{std.core.String}C{std.core.Function1}C{notification.notificationRequest.NotificationCheckRequest}:i",
         reinterpret_cast<void *>(AniOn)},
-    ani_native_function {"nativeOff", "Lstd/core/String;Lstd/core/Function1;:I", reinterpret_cast<void *>(AniOff)},
+    ani_native_function {"nativeOff", "C{std.core.String}C{std.core.Function1}:i", reinterpret_cast<void *>(AniOff)},
     ani_native_function {"nativeSubscribeSystemLiveView", nullptr,
         reinterpret_cast<void *>(AniSubscribeSystemLiveView)},
     ani_native_function {"nativeTriggerSystemLiveView", nullptr, reinterpret_cast<void *>(AniTriggerSystemLiveView)},
@@ -268,7 +268,7 @@ static std::array kitManagerFunctions = {
 #endif
 #ifdef ANS_FEATURE_OPEN_NOTIFICATION_SETTINGS
     ani_native_function {"nativeOpenNotificationSettings",
-        "Lapplication/UIAbilityContext/UIAbilityContext;:Lstd/core/Promise;",
+        "C{application.UIAbilityContext.UIAbilityContext}:C{std.core.Promise}",
         reinterpret_cast<void *>(AniOpenNotificationSettings)},
 #else
     ani_native_function {"nativeOpenNotificationSettings", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},

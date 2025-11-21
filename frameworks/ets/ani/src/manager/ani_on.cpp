@@ -23,7 +23,9 @@
 #include "tokenid_kit.h"
 #include "notification_helper.h"
 
+#ifdef ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW
 constexpr const char* TYPE_STRING = "checkNotification";
+#endif
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace OHOS::Notification;

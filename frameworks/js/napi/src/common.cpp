@@ -1701,6 +1701,22 @@ napi_value Common::SetBundleOption(const napi_env &env, const NotificationBundle
     return NapiGetBoolean(env, true);
 }
 
+napi_value Common::SetGrantedBundleInfo(const napi_env &env, const NotificationBundleOption &bundleInfo,
+    napi_value &result)
+{
+    napi_value value = nullptr;
+
+    napi_create_string_utf8(env, bundleInfo.GetBundleName().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "bundleName", value);
+
+    napi_create_string_utf8(env, bundleInfo.GetAppName().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "appName", value);
+
+    napi_create_int32(env, bundleInfo.GetAppIndex(), &value);
+    napi_set_named_property(env, result, "appIndex", value);
+    return NapiGetBoolean(env, true);
+}
+
 napi_value Common::SetDoNotDisturbProfile(const napi_env &env, const NotificationDoNotDisturbProfile &data,
     napi_value &result)
 {

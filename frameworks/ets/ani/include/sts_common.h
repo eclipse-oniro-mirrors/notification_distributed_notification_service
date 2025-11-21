@@ -21,9 +21,12 @@
 #include <string>
 #include <vector>
 #include "ans_log_wrapper.h"
+#include <ani_signature_builder.h>
 
 namespace OHOS {
 namespace NotificationSts {
+using namespace arkts::ani_signature;
+
 constexpr int32_t STR_MAX_SIZE = 202;
 constexpr int32_t PROFILE_NAME_SIZE = 202;
 constexpr int32_t LONG_STR_MAX_SIZE = 1028;
@@ -34,6 +37,7 @@ constexpr float MAX_PIXEL_SIZE = 128.0f;
 std::string GetResizeStr(std::string instr, int32_t length);
 int32_t GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id);
 
+ani_object GetNullObject(ani_env *env);
 bool IsUndefine(ani_env *env, const ani_object &obj);
 ani_object CreateBoolean(ani_env *env, bool value);
 ani_object CreateDouble(ani_env *env, ani_double value);
@@ -46,7 +50,7 @@ ani_status GetStringByAniString(ani_env *env, ani_string str, std::string &res);
 bool GetStringArrayByAniObj(ani_env *env, const ani_object ani_obj, std::vector<std::string> &stdVString);
 ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string> strs);
 bool GetAniStringArrayByVectorStringV2(ani_env *env, std::vector<std::string> strs, ani_object& aniArray);
-ani_object newArrayClass(ani_env *env, int length);
+ani_array newArrayClass(ani_env *env, int length);
 ani_object ConvertArrayDoubleToAniObj(ani_env *env, const std::vector<std::int64_t> values);
 void ParseRecord(ani_env *env, ani_object recordRef, std::map<std::string, ani_ref>& recordResult);
 
@@ -109,10 +113,9 @@ static bool CallSetter(ani_env* env, ani_class cls, ani_object &object, const ch
     if (env == nullptr || cls == nullptr || object == nullptr) {
         return false;
     }
-    std::string setterName("<set>");
-    setterName.append(propertyName);
+    std::string propName(propertyName);
     ani_method setter;
-    ani_status status = env->Class_FindMethod(cls, setterName.c_str(), nullptr, &setter);
+    ani_status status = env->Class_FindMethod(cls, Builder::BuildSetterName(propName).c_str(), nullptr, &setter);
     if (status != ANI_OK) {
         ANS_LOGE("Class_FindMethod %{public}s failed %{public}d", propertyName, status);
         return false;

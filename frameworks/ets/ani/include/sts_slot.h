@@ -32,7 +32,7 @@ bool SetOptionalFieldSlotLevel(ani_env *env, const ani_class cls, ani_object &ob
     const SlotLevel value);
 bool WrapNotificationSlot(ani_env *env, sptr<NotificationSlot> slot, ani_object &outAniObj);
 bool WrapNotificationSlotArray(ani_env *env, const std::vector<sptr<NotificationSlot>>& slots,
-    ani_object &outAniObj);
+    ani_array &outAniObj);
 bool ParseNotificationSlotByBasicType(ani_env *env, ani_object notificationSlotObj,
     NotificationSlot &slot);
 bool UnwrapNotificationSlot(ani_env *env, ani_object notificationSlotObj, NotificationSlot &slot);

@@ -24,6 +24,7 @@ export interface NotificationInfo {
   readonly appName?: string;
   readonly deliveryTime?: long;
   readonly groupName?: string;
+  readonly appIndex: int;
 }
 
 class NotificationInfoInner implements NotificationInfo {
@@ -35,4 +36,5 @@ class NotificationInfoInner implements NotificationInfo {
   public readonly appName?: string | undefined;
   public readonly deliveryTime?: long | undefined;
   public readonly groupName?: string | undefined;
+  public readonly appIndex: int = 0;
 }

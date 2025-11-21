@@ -535,7 +535,7 @@ void AsyncCompleteCallbackRetrunBundleOptionArray(napi_env env, napi_status stat
     delete asynccallbackinfo;
 }
 
-void AsyncCompleteCallbackReturnStringArray(napi_env env, napi_status status, void *data)
+void AsyncCompleteCallbackReturnGrantedBundleInfoArray(napi_env env, napi_status status, void *data)
 {
     ANS_LOGD("called");
     if (!data) {
@@ -559,9 +559,13 @@ void AsyncCompleteCallbackReturnStringArray(napi_env env, napi_status status, vo
                 ANS_LOGW("Invalid NotificationBundleOption object ptr.");
                 continue;
             }
-            napi_value jsStr = nullptr;
-            napi_create_string_utf8(env, item->GetBundleName().c_str(), NAPI_AUTO_LENGTH, &jsStr);
-            napi_set_element(env, arr, count, jsStr);
+            napi_value grantedBundleInfo = nullptr;
+            napi_create_object(env, &grantedBundleInfo);
+            if (!Common::SetGrantedBundleInfo(env, *item, grantedBundleInfo)) {
+                ANS_LOGW("Set NotificationBundleOption object failed.");
+                continue;
+            }
+            napi_set_element(env, arr, count, grantedBundleInfo);
             ++count;
         }
         ANS_LOGI("count = %{public}d", count);
@@ -1215,7 +1219,7 @@ napi_value NapiGetUserGrantedEnabledBundles(napi_env env, napi_callback_info inf
                 ANS_LOGI("GetUserGrantedEnabledBundles errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
         },
-        AsyncCompleteCallbackReturnStringArray,
+        AsyncCompleteCallbackReturnGrantedBundleInfoArray,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     } else {

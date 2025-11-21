@@ -943,6 +943,68 @@ HWTEST_F(NotificationRequestTest, FillMissingParameters_0005, Level1)
 }
 
 /**
+ * @tc.name: FillMissingParameters_0006
+ * @tc.desc: Check update request correctly when old extrainfo is null
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, FillMissingParameters_0006, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+
+    sptr<NotificationRequest> oldNotificationRequest(new (std::nothrow) NotificationRequest());
+    oldNotificationRequest->SetNotificationId(myNotificationId);
+
+    oldNotificationRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
+    oldNotificationRequest->SetContent(oldContent);
+
+    notificationRequest.FillMissingParameters(oldNotificationRequest);
+    EXPECT_EQ(notificationRequest.GetNotificationId(), myNotificationId);
+}
+
+/**
+ * @tc.name: FillMissingParameters_0007
+ * @tc.desc: Check update request correctly when old extrainfo is null
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, FillMissingParameters_0007, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto newExtraInfo = std::make_shared<AAFwk::WantParams>();
+    liveContent->SetExtraInfo(newExtraInfo);
+
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+
+    sptr<NotificationRequest> oldNotificationRequest(new (std::nothrow) NotificationRequest());
+    oldNotificationRequest->SetNotificationId(myNotificationId);
+
+    oldNotificationRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    auto oldExtraInfo = std::make_shared<AAFwk::WantParams>();
+    oldExtraInfo->SetParam("eventControl", AAFwk::String::Box("test_eventControl"));
+    oldLiveContent->SetExtraInfo(oldExtraInfo);
+    auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
+    oldNotificationRequest->SetContent(oldContent);
+
+    notificationRequest.FillMissingParameters(oldNotificationRequest);
+    EXPECT_EQ(notificationRequest.GetNotificationId(), myNotificationId);
+}
+
+/**
  * @tc.name: GetNotificationRequestKey_0001
  * @tc.desc: Check get key right
  * @tc.type: FUNC
@@ -1247,6 +1309,14 @@ HWTEST_F(NotificationRequestTest, NotificationCollaboration_0100, Level1)
 
     sptr<NotificationRequest> point = NotificationRequest::CollaborationFromJson(basicInfo);
     EXPECT_EQ(point != nullptr, true);
+}
+
+HWTEST_F(NotificationRequestTest, SetAppIndex_0001, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetAppIndex(10);
+    EXPECT_EQ(notificationRequest.GetAppIndex(), 10);
 }
 } // namespace Notification
 } // namespace OHOS

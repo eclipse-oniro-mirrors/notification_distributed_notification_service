@@ -522,6 +522,16 @@ void NotificationRequest::SetCreateTime(int64_t createTime)
     createTime_ = createTime;
 }
 
+int32_t NotificationRequest::GetAppIndex() const
+{
+    return appIndex_;
+}
+
+void NotificationRequest::SetAppIndex(const int32_t &appIndex)
+{
+    appIndex_ = appIndex;
+}
+
 bool NotificationRequest::IsShowStopwatch() const
 {
     return showStopwatch_;
@@ -896,6 +906,7 @@ bool NotificationRequest::CollaborationToJson(std::string& data) const
     jsonObject["creatorPid"]        = GetCreatorPid();
     jsonObject["creatorInstanceKey"] = creatorInstanceKey_;
     jsonObject["appInstanceKey"]    = appInstanceKey_;
+    jsonObject["appIndex"]    = appIndex_;
     jsonObject["appName"]    = appName_;
     jsonObject["notificationControlFlags"] = notificationControlFlags_;
 
@@ -1039,6 +1050,7 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["creatorInstanceKey"]    = creatorInstanceKey_;
     jsonObject["appInstanceKey"]    = appInstanceKey_;
     jsonObject["appName"]    = appName_;
+    jsonObject["appIndex"] = appIndex_;
     jsonObject["notificationControlFlags"] = notificationControlFlags_;
     jsonObject["updateDeadLine"]     = updateDeadLine_;
     jsonObject["finishDeadLine"]     = finishDeadLine_;
@@ -1238,6 +1250,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteUint32(collaboratedReminderFlag_)) {
         ANS_LOGE("Failed to write collaborated reminderFlag");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(appIndex_)) {
+        ANS_LOGE("Failed to write appIndex");
         return false;
     }
 
@@ -1744,6 +1761,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     publishDelayTime_ = parcel.ReadUint32();
     hashCodeGenerateType_ = parcel.ReadUint32();
     collaboratedReminderFlag_ = parcel.ReadUint32();
+    appIndex_ = parcel.ReadInt32();
 
     if (!parcel.ReadString(appInstanceKey_)) {
         ANS_LOGE("Failed to read Instance key");
@@ -2229,6 +2247,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->receiverUserId_ = other.receiverUserId_;
     this->creatorInstanceKey_ = other.creatorInstanceKey_;
     this->appInstanceKey_ = other.appInstanceKey_;
+    this->appIndex_ = other.appIndex_;
     this->appName_ = other.appName_;
     this->isAgent_ = other.isAgent_;
     this->isRemoveAllowed_ = other.isRemoveAllowed_;
@@ -2471,6 +2490,10 @@ void NotificationRequest::ConvertJsonToNum(NotificationRequest *target, const nl
     if (jsonObject.find("collaboratedReminderFlag") != jsonEnd &&
         jsonObject.at("collaboratedReminderFlag").is_number_integer()) {
         target->collaboratedReminderFlag_ = jsonObject.at("collaboratedReminderFlag").get<uint32_t>();
+    }
+    if (jsonObject.find("appIndex") != jsonEnd &&
+        jsonObject.at("appIndex").is_number_integer()) {
+        target->appIndex_ = jsonObject.at("appIndex").get<uint32_t>();
     }
 
     ConvertJsonToNumExt(target, jsonObject);
@@ -2919,9 +2942,50 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
     auto newLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
     if (newLiveViewContent->GetLiveViewStatus() ==
         NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE) {
+        UpdateExtraInfo(oldRequest);
         return;
     }
     IncrementalUpdateLiveview(oldRequest);
+}
+
+void NotificationRequest::UpdateExtraInfo(const sptr<NotificationRequest> &oldRequest)
+{
+    auto content = notificationContent_->GetNotificationContent();
+    if (content == nullptr) {
+        return;
+    }
+
+    auto newLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    if (newLiveViewContent == nullptr) {
+        return;
+    }
+
+    auto newExtraInfo = newLiveViewContent->GetExtraInfo();
+
+    auto oldContent = oldRequest->GetContent();
+    if (oldContent == nullptr) {
+        return;
+    }
+
+    auto oldNotificationContent = oldContent->GetNotificationContent();
+    if (oldNotificationContent == nullptr) {
+        return;
+    }
+
+    auto oldLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(oldNotificationContent);
+    if (oldLiveViewContent == nullptr) {
+        return;
+    }
+
+    auto oldExtraInfo = oldLiveViewContent->GetExtraInfo();
+
+    if (oldExtraInfo != nullptr) {
+        if (oldExtraInfo->HasParam("eventControl")) {
+            if (newExtraInfo != nullptr) {
+                newExtraInfo->SetParam("eventControl", oldExtraInfo->GetParam("eventControl"));
+            }
+        }
+    }
 }
 
 void NotificationRequest::IncrementalUpdateLiveview(const sptr<NotificationRequest> &oldRequest)

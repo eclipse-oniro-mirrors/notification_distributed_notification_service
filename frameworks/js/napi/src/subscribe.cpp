@@ -476,6 +476,7 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
     ANS_LOGI("OnConsume key=%{public}s,sortingMap size=%{public}zu,notificationFlag=%{public}s",
         request->GetKey().c_str(), sortingMap->GetKey().size(),
         notificationFlags == nullptr ? "null" : notificationFlags->Dump().c_str());
+    ANS_LOGD("OnConsumed Notification info is: %{public}s", request->GetNotificationRequest().Dump().c_str());
     ANS_LOGD("OnConsumed instanceKey: %{public}s", request->GetInstanceKey().c_str());
 
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();

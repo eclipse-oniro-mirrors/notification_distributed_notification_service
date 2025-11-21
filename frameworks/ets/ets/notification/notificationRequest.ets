@@ -21,6 +21,7 @@ import { NotificationTemplate } from 'notification.notificationTemplate';
 import { NotificationFlags } from 'notification.notificationFlags';
 import { WantAgent } from '@ohos.app.ability.wantAgent';
 import { BundleOption } from 'notification.NotificationCommonDef';
+import { RecordData } from '@ohos.base';
 
 export interface DistributedOptions {
     isDistributed?: boolean;
@@ -66,7 +67,7 @@ export interface UnifiedGroupInfo {
     title?: string;
     content?: string;
     sceneName?: string;
-    extraInfo?: Record<string, Object>;
+    extraInfo?: Record<string, RecordData>;
 }
 
 class UnifiedGroupInfoInner implements UnifiedGroupInfo {
@@ -74,7 +75,7 @@ class UnifiedGroupInfoInner implements UnifiedGroupInfo {
     public title?: string | undefined;
     public content?: string | undefined;
     public sceneName?: string | undefined;
-    public extraInfo?: Record<string, Object> | undefined;
+    public extraInfo?: Record<string, RecordData> | undefined;
 }
 
 export interface NotificationRequest {
@@ -89,8 +90,8 @@ export interface NotificationRequest {
     tapDismissed?: boolean;
     autoDeletedTime?: long;
     wantAgent?: WantAgent;
-    extraInfo?: Record<string, Object>;
-    extendInfo?: Record<string, Object>;
+    extraInfo?: Record<string, RecordData>;
+    extendInfo?: Record<string, RecordData>;
     color?: long;
     colorEnabled?: boolean;
     isAlertOnce?: boolean;
@@ -141,8 +142,8 @@ class NotificationRequestInner implements NotificationRequest {
     public tapDismissed?: boolean | undefined;
     public autoDeletedTime?: long | undefined;
     public wantAgent?: WantAgent | undefined;
-    public extraInfo?: Record<string, Object> | undefined;
-    public extendInfo?: Record<string, Object> | undefined;
+    public extraInfo?: Record<string, RecordData> | undefined;
+    public extendInfo?: Record<string, RecordData> | undefined;
     public color?: long | undefined;
     public colorEnabled?: boolean | undefined;
     public isAlertOnce?: boolean | undefined;

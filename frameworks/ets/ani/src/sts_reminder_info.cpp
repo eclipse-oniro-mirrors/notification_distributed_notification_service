@@ -71,7 +71,7 @@ ani_object GetAniArrayReminderInfo(ani_env* env, const std::vector<ReminderInfo>
         ANS_LOGE("GetAniArrayReminderInfo failed, has nullptr");
         return nullptr;
     }
-    ani_object arrayObj = newArrayClass(env, reminders.size());
+    ani_array arrayObj = newArrayClass(env, reminders.size());
     if (arrayObj == nullptr) {
         ANS_LOGE("GetAniArrayReminderInfo: arrayObj is nullptr");
         return nullptr;
@@ -84,8 +84,8 @@ ani_object GetAniArrayReminderInfo(ani_env* env, const std::vector<ReminderInfo>
             ANS_LOGE("GetAniArrayReminderInfo: item is nullptr");
             return nullptr;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
-            ANS_LOGE("GetAniArrayReminderInfo: Object_CallMethodByName_Void failed");
+        if (ANI_OK != env->Array_Set(arrayObj, index, item)) {
+            ANS_LOGE("GetAniArrayReminderInfo: Array_Set failed");
             return nullptr;
         }
         index ++;

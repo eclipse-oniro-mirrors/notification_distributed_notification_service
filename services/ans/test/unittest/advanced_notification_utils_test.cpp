@@ -487,6 +487,23 @@ HWTEST_F(AnsUtilsTest, InitNotificationEnableList_00001, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: InitNotificationEnableList_00002
+ * @tc.desc: Test InitNotificationEnableList
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, InitNotificationEnableList_00002, Function | SmallTest | Level1)
+{
+    MockSetBundleInfoEnabled(true);
+    advancedNotificationService_->InitNotificationEnableList();
+    SleepForFC();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test1", 2);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
+    ASSERT_EQ(static_cast<int32_t>(state), 2);
+}
+
+/**
  * @tc.name: GetBundleInfoByNotificationBundleOption_00001
  * @tc.desc: Test GetBundleInfoByNotificationBundleOption
  * @tc.type: FUNC
