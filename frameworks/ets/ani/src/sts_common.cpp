@@ -864,7 +864,7 @@ bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
     }
     ani_method ctor;
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) != ANI_OK) {
-        ANS_LOGD("error. not find method name '<ctor>'. status %{public}d", status);
+        ANS_LOGE("error. not find method name '<ctor>'. status %{public}d", status);
         return false;
     }
     if ((status = env->Object_New(cls, ctor, &outObj)) != ANI_OK) {
@@ -872,9 +872,9 @@ bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
         return false;
     }
     ani_double msObj = 0;
-    if ((status = env->Object_CallMethodByName_Double(outObj, "setTime", "d:d", &msObj, time))
+    if ((status = env->Object_CallMethodByName_Double(outObj, "setTime", "d:d", &msObj, static_cast<double>(time)))
         != ANI_OK) {
-        ANS_LOGD("Object_CallMethodByName_Double setDate faild. status %{public}d", status);
+        ANS_LOGE("Object_CallMethodByName_Double setDate faild. status %{public}d", status);
         return false;
     }
     return true;
