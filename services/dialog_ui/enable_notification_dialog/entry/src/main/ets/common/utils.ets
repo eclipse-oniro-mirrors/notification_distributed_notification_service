@@ -101,6 +101,10 @@ export function shouldMoveToDisplayCenter(comW: number, comH: number,
       console.error(TAG, `windowRect is null`);
       return false;
     }
+    if (windowRect.width <= 0 || windowRect.height <= 0) {
+      console.error(TAG, `windowRect info error`);
+      return false;
+    }
     if (win === undefined) {
       console.error(TAG, `window is null`);
       return false;
