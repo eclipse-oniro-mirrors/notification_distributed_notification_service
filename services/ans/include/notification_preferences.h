@@ -24,6 +24,7 @@
 #include <memory>
 #include <mutex>
 #include "notification_clone_bundle_info.h"
+#include "notification_clone_priority_info.h"
 #include "notification_constant.h"
 
 namespace OHOS {
@@ -566,6 +567,11 @@ public:
     void GetAllAncoBundlesInfo(int32_t dbUserId, int32_t userId, std::vector<sptr<NotificationBundleOption>> &bundles);
     void GetAllCLoneBundlesInfo(int32_t dbUserId, int32_t userId,
         std::vector<NotificationCloneBundleInfo> &cloneBundles);
+    void GetAllClonePriorityInfo(const int32_t userId, std::vector<NotificationClonePriorityInfo> &cloneInfos);
+    bool DelClonePriorityInfo(const int32_t &userId, const NotificationClonePriorityInfo &cloneInfo);
+    bool UpdateClonePriorityInfos(const int32_t &userId, const std::vector<NotificationClonePriorityInfo> &cloneInfos);
+    void GetClonePriorityInfos(const int32_t &userId, std::vector<NotificationClonePriorityInfo> &cloneInfos);
+    bool DelClonePriorityInfos(const int32_t &userId, const std::vector<NotificationClonePriorityInfo> &cloneInfos);
     ErrCode SetBundlePriorityConfig(const sptr<NotificationBundleOption> &bundleOption, const std::string &configValue);
     ErrCode GetBundlePriorityConfig(const sptr<NotificationBundleOption> &bundleOption, std::string &configValue);
     void UpdateCloneBundleInfo(int32_t userId, const NotificationCloneBundleInfo& cloneBundleInfo);

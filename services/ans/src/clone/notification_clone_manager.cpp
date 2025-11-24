@@ -26,6 +26,7 @@
 #include "nlohmann/json.hpp"
 #include "notification_clone_disturb_service.h"
 #include "notification_clone_bundle_service.h"
+#include "notification_clone_priority_service.h"
 #include "notification_clone_util.h"
 #include "dh_notification_clone_bundle_service.h"
 #include "common_event_manager.h"
@@ -45,6 +46,7 @@ constexpr uint64_t COMMON_FDSAN_TAG = 0;
 constexpr const char *CLONE_ITEM_BUNDLE_INFO = "notificationBundle";
 constexpr const char *DH_CLONE_ITEM_BUNDLE_INFO = "dhNotificationBundle";
 constexpr const char *CLONE_ITEM_DISTURB = "notificationDisturb";
+constexpr const char *CLONE_ITEM_PRIORITY_INFO = "notificationPriority";
 constexpr const char *BACKUP_CONFIG_FILE_PATH = "/data/service/el1/public/notification/backup_config.conf";
 
 std::shared_ptr<AncoRestoreStartEventSubscriber> AncoRestoreStartEventSubscriber::create()
@@ -245,6 +247,7 @@ NotificationCloneManager::NotificationCloneManager()
     cloneTemplates.push_back(std::make_pair(CLONE_ITEM_BUNDLE_INFO, NotificationCloneBundle::GetInstance()));
     cloneTemplates.push_back(std::make_pair(DH_CLONE_ITEM_BUNDLE_INFO, DhNotificationCloneBundle::GetInstance()));
     cloneTemplates.push_back(std::make_pair(CLONE_ITEM_DISTURB, NotificationCloneDisturb::GetInstance()));
+    cloneTemplates.push_back(std::make_pair(CLONE_ITEM_PRIORITY_INFO, NotificationClonePriority::GetInstance()));
 
     restoreStartEventSubscriber_ = AncoRestoreStartEventSubscriber::create();
     if (!EventFwk::CommonEventManager::SubscribeCommonEvent(restoreStartEventSubscriber_)) {

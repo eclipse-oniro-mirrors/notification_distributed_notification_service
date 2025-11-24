@@ -19,6 +19,9 @@
 #include <memory>
 #include <set>
 
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+#include "advanced_notification_priority_helper.h"
+#endif
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
@@ -180,6 +183,9 @@ void NotificationSubscriberManager::NotifyConsumed(
         ANS_LOGE("null queue");
         return;
     }
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    AdvancedNotificationPriorityHelper::GetInstance()->UpdatePriorityType(notification->GetNotificationRequestPoint());
+#endif
     AppExecFwk::EventHandler::Callback NotifyConsumedFunc =
         std::bind(&NotificationSubscriberManager::NotifyConsumedInner, this, notification, notificationMap);
 
@@ -230,6 +236,15 @@ void NotificationSubscriberManager::BatchNotifyConsumed(const std::vector<sptr<N
 #ifdef ALL_SCENARIO_COLLABORATION
     for (auto item : notifications) {
         DistributedCollaborationService::GetInstance().AddCollaborativeDeleteItem(item);
+    }
+#endif
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    for (auto notification : notifications) {
+        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+            continue;
+        }
+        AdvancedNotificationPriorityHelper::GetInstance()->UpdatePriorityType(
+            notification->GetNotificationRequestPoint());
     }
 #endif
     AppExecFwk::EventHandler::Callback batchNotifyConsumedFunc = std::bind(
@@ -550,9 +565,6 @@ void NotificationSubscriberManager::NotifyConsumedInner(
     }
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-    AdvancedNotificationService::GetInstance()->UpdatePriorityType(notification->GetNotificationRequestPoint());
-#endif
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d> BundleName  = <%{public}s deviceType = %{public}s",
             __FUNCTION__, record->userId, notification->GetBundleName().c_str(), record->deviceType.c_str());
@@ -662,9 +674,6 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<s
     std::vector<sptr<Notification>> currNotifications;
     for (size_t i = 0; i < notifications.size(); i ++) {
         sptr<Notification> notification = notifications[i];
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-        AdvancedNotificationService::GetInstance()->UpdatePriorityType(notification->GetNotificationRequestPoint());
-#endif
         if (notification == nullptr) {
             continue;
         }

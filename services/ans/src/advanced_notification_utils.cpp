@@ -2302,6 +2302,21 @@ void AdvancedNotificationService::UpdateCloneBundleInfoFoSilentReminder(
     }
 }
 
+ErrCode AdvancedNotificationService::SystemPermissionCheck()
+{
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("Not system app or SA!");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("no permission");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    return ERR_OK;
+}
+
 void AdvancedNotificationService::CheckRemovalWantAgent(const sptr<NotificationRequest> &request)
 {
     if (request->GetRemovalWantAgent() != nullptr && request->GetRemovalWantAgent()->GetPendingWant() != nullptr) {
