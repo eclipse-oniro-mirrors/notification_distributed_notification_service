@@ -1337,5 +1337,45 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfoForRingtone_0003, Function | SmallTe
 
     NotificationPreferences::GetInstance()->RemoveRingtoneInfoByBundle(bundleOption);
 }
+
+HWTEST_F(AnsUtilsTest, TestGenerateCloneValidBundleOption_NullBundleOption, Level1) {
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    sptr<NotificationBundleOption> result = advancedNotificationService_->GenerateCloneValidBundleOption(bundleOption);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(AnsUtilsTest, TestGenerateCloneValidBundleOption_EmptyBundleName, Level1) {
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("", 0);
+    sptr<NotificationBundleOption> result = advancedNotificationService_->GenerateCloneValidBundleOption(bundleOption);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(AnsUtilsTest, TestGenerateCloneValidBundleOption_GetCurrentActiveUserIdFailed, Level1) {
+    MockQueryForgroundOsAccountId(false, 0);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test_bundle", 0);
+    sptr<NotificationBundleOption> result = advancedNotificationService_->GenerateCloneValidBundleOption(bundleOption);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(AnsUtilsTest, TestGenerateCloneValidBundleOption_GetCloneBundleInfoFailed, Level1) {
+    MockQueryForgroundOsAccountId(true, 0);
+    MockGetCloneBundleInfo(false);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test_false", 0);
+    sptr<NotificationBundleOption> result = advancedNotificationService_->GenerateCloneValidBundleOption(bundleOption);
+    EXPECT_EQ(result, nullptr);
+}
+
+HWTEST_F(AnsUtilsTest, TestGenerateCloneValidBundleOption_NormalCase, Level1) {
+    MockQueryForgroundOsAccountId(true, 0);
+    MockGetCloneBundleInfo(true);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test_bundle", 0);
+    bundleOption->SetAppIndex(1);
+    bundleOption->SetInstanceKey(10);
+    sptr<NotificationBundleOption> result = advancedNotificationService_->GenerateCloneValidBundleOption(bundleOption);
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->GetBundleName(), "test_bundle");
+    EXPECT_EQ(result->GetAppIndex(), 1);
+    EXPECT_EQ(result->GetInstanceKey(), 10);
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -1908,30 +1908,27 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateCloneValidBu
         return nullptr;
     }
 
-    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
-    if (bundleManager == nullptr) {
-        return nullptr;
-    }
-
     int32_t activeUserId = -1;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
         ANS_LOGE("Failed to get active user id!");
         return nullptr;
     }
-
-    int32_t actualUid = bundleManager->GetDefaultUidByBundleName(bundleOption->GetBundleName(), activeUserId);
-    if (actualUid < 0) {
-        ANS_LOGE("Bundle name %{public}s does not exist in userId %{public}d",
-            bundleOption->GetBundleName().c_str(), activeUserId);
+    int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_DEFAULT);
+    AppExecFwk::BundleInfo bundleInfo = {};
+    if (!BundleManagerHelper::GetInstance()->GetCloneBundleInfo(
+        bundleOption->GetBundleName(), flags, bundleOption->GetAppIndex(), bundleInfo, activeUserId)) {
+        ANS_LOGE("Failed to clone bundle info, name: %{public}s, userId: %{public}d, appIndex: %{public}d",
+            bundleOption->GetBundleName().c_str(), activeUserId, bundleOption->GetAppIndex());
         return nullptr;
     }
-
-    sptr<NotificationBundleOption> validBundleOption = nullptr;
-    validBundleOption = new (std::nothrow) NotificationBundleOption(bundleOption->GetBundleName(), actualUid);
+    sptr<NotificationBundleOption> validBundleOption =
+        new (std::nothrow) NotificationBundleOption(bundleOption->GetBundleName(), bundleInfo.uid);
     if (validBundleOption == nullptr) {
-        ANS_LOGE("Failed to create CloneNotificationBundleOption instance");
+        ANS_LOGE("Failed to clone bundle info, null validBundleOption");
         return nullptr;
     }
+    validBundleOption->SetAppIndex(bundleOption->GetAppIndex());
+    validBundleOption->SetInstanceKey(bundleOption->GetInstanceKey());
     return validBundleOption;
 }
 
