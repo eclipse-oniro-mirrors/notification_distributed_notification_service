@@ -59,7 +59,7 @@ void MockSetBundleInfoFailed(bool getFail);
 
 void MockIsNeedHapModuleInfos(bool isNeed);
 
-void MockQueryExtensionAbilityInfos(bool enabled);
+void MockQueryExtensionAbilityInfos(bool enabled, bool ret);
 
 void MockGetCloneAppIndexes(bool enabled);
 
