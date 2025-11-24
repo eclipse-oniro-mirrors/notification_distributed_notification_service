@@ -111,7 +111,6 @@ HWTEST_F(ReminderEventManagerTest, ReminderEventManagerTest_005, Level1)
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
-    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
@@ -139,11 +138,6 @@ HWTEST_F(ReminderEventManagerTest, ReminderEventManagerTest_005, Level1)
     data.SetWant(want);
     subscriber->OnReceiveEvent(data);
     EXPECT_TRUE(MockReminderDataManager::callCancelAllReminders_ == true);
-
-    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    EXPECT_TRUE(MockReminderDataManager::callOnProcessDiedLocked_ == true);
 
     want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
     data.SetWant(want);

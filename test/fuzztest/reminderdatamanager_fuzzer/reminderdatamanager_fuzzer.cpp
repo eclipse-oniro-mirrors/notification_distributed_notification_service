@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,6 @@ namespace OHOS {
         manager->OnBundleMgrServiceStart();
         manager->OnAbilityMgrServiceStart();
         manager->OnUserSwitch(userId);
-        manager->OnProcessDiedLocked(callingUid);
         manager->RefreshRemindersDueToSysTimeChange(type);
         manager->ShouldAlert(reminder);
         manager->ShowActiveReminder(want);
@@ -111,13 +110,13 @@ namespace OHOS {
         manager->PublishReminder(reminder, callingUid);
         manager->FindReminderRequestLocked(reminderId, false);
         manager->StartRecentReminder();
-        manager->HandleImmediatelyShow(immediatelyReminders, value);
+        manager->HandleImmediatelyShow(immediatelyReminders, value, value);
         int8_t type = fdp->ConsumeIntegral<int8_t>();
         manager->HandleExtensionReminder(extensionReminders, type);
         manager->HandleSameNotificationIdShowing(reminder);
         manager->IsBelongToSameApp(uid, uid);
         manager->CheckIsSameApp(reminder, uid);
-        manager->ShowReminder(reminder, value, value, value);
+        manager->ShowReminder(reminder, value, value, value, value);
         return true;
     }
 
@@ -211,6 +210,7 @@ namespace OHOS {
         manager->CheckShowLimit(limits, totalCount, reminder);
         manager->LoadShareReminders();
         manager->LoadReminderFromDb();
+        manager->CancelReminderOnDisplay(reminderId, callingUid);
         return true;
     }
 

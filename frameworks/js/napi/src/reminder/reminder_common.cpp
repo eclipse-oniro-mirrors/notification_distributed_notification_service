@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -469,7 +469,9 @@ napi_value ReminderCommon::GenReminder(
     if (!GenReminderIntInner(env, value, reminder)) {
         return nullptr;
     }
-    ParseBoolParam(env, value, isSysApp, reminder);
+    if (!ParseBoolParam(env, value, isSysApp, reminder)) {
+        return nullptr;
+    }
 
     // snoozeSlotType
     int32_t snoozeSlotType = 0;
@@ -1167,15 +1169,20 @@ bool ReminderCommon::ParseBoolParam(const napi_env& env, const napi_value& value
     }
 
     // system param
-    if (!isSystemApp) {
-        return true;
-    }
     bool forceDistributed = false;
     if (GetBool(env, value, ReminderAgentNapi::REMINDER_FORCE_DISTRIBUTED, forceDistributed)) {
+        if (!isSystemApp) {
+            ANSR_LOGE("Not system app, use system param[forceDistributed]");
+            return false;
+        }
         reminder->SetForceDistributed(forceDistributed);
     }
     bool notDistributed = false;
     if (GetBool(env, value, ReminderAgentNapi::REMINDER_NOT_DISTRIBUTED, notDistributed)) {
+        if (!isSystemApp) {
+            ANSR_LOGE("Not system app, use system param[notDistributed]");
+            return false;
+        }
         reminder->SetNotDistributed(notDistributed);
     }
     return true;

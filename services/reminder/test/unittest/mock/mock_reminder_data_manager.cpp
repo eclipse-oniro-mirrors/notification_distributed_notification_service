@@ -31,7 +31,6 @@ int32_t g_mockQueryActiveReminderCountRet = 0;
 }
 
 bool MockReminderDataManager::callCancelAllReminders_ = false;
-bool MockReminderDataManager::callOnProcessDiedLocked_ = false;
 bool MockReminderDataManager::callRefreshRemindersDueToSysTimeChange_ = false;
 bool MockReminderDataManager::callOnUserSwitch_ = false;
 bool MockReminderDataManager::callOnUserRemove_ = false;
@@ -98,7 +97,6 @@ void MockReminderDataManager::MockQueryActiveReminderCount(const int32_t ret)
 void MockReminderDataManager::ResetFlag()
 {
     callCancelAllReminders_ = false;
-    callOnProcessDiedLocked_ = false;
     callRefreshRemindersDueToSysTimeChange_ = false;
     callOnUserSwitch_ = false;
     callOnUserRemove_ = false;
@@ -191,11 +189,6 @@ ErrCode ReminderDataManager::GetExcludeDates(const int32_t reminderId, const int
 int32_t ReminderDataManager::QueryActiveReminderCount()
 {
     return g_mockQueryActiveReminderCountRet;
-}
-
-void ReminderDataManager::OnProcessDiedLocked(const int32_t callingUid)
-{
-    MockReminderDataManager::callOnProcessDiedLocked_ = true;
 }
 
 void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)

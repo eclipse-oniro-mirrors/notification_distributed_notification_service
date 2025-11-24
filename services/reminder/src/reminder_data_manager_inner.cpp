@@ -217,7 +217,7 @@ void ReminderDataManager::OnDataShareInsertOrDelete()
     std::vector<sptr<ReminderRequest>> immediatelyReminders;
     std::vector<sptr<ReminderRequest>> extensionReminders;
     CheckReminderTime(immediatelyReminders, extensionReminders);
-    HandleImmediatelyShow(immediatelyReminders, false);
+    HandleImmediatelyShow(immediatelyReminders, false, false);
     StartRecentReminder();
 }
 
@@ -366,7 +366,7 @@ ErrCode ReminderDataManager::CancelReminderOnDisplay(const int32_t reminderId, c
         }
     }
     if (target == nullptr) {
-        return ;
+        return ERR_REMINDER_NOTIFICATION_NO_SHOWING;
     }
     std::lock_guard<std::mutex> locker(cancelMutex_);
     if (activeReminderId_ == reminderId) {

@@ -195,5 +195,19 @@ HWTEST_F(ReminderHelperTest, UpdateReminder_00001, Function | SmallTest | Level1
     ErrCode ret = reminderHelper.UpdateReminder(reminderId, reminder);
     EXPECT_NE(ret, (int)ERR_OK);
 }
+
+/**
+ * @tc.name: CancelReminderOnDisplay_00001
+ * @tc.desc: Test CancelReminderOnDisplay parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(ReminderHelperTest, CancelReminderOnDisplay_00001, Function | SmallTest | Level1)
+{
+    int32_t reminderId = 10;
+    ReminderHelper reminderHelper;
+    ErrCode ret = reminderHelper.CancelReminderOnDisplay(reminderId);
+    EXPECT_NE(ret, (int)ERR_OK);
+}
 }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@
 #include "reminder_config_change_observer.h"
 #include "reminder_timer_info.h"
 #include "reminder_utils.h"
+#include "ans_convert_enum.h"
 
 using namespace testing::ext;
 using namespace OHOS::EventFwk;
@@ -197,8 +198,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_003, Level1)
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_004, Level1)
 {
     manager->showedReminderVector_.clear();
-    int32_t callingUid = -1;
-    manager->OnProcessDiedLocked(callingUid);
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     manager->CreateTimerInfo(ReminderDataManager::TimerType::TRIGGER_TIMER, reminder);
     manager->CreateTimerInfo(ReminderDataManager::TimerType::ALERTING_TIMER, reminder);
@@ -346,14 +345,14 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_011, Level1)
 {
     sptr<ReminderRequest> reminder(new ReminderRequestTimer(10));
     reminder->SetReminderId(0);
-    manager->ShowReminder(reminder, true, true, true, true, true);
+    manager->ShowReminder(reminder, true, true, true, true);
     reminder->SetReminderId(10);
-    manager->ShowReminder(reminder, true, true, true, true, true);
-    manager->ShowReminder(reminder, true, true, true, true, true);
+    manager->ShowReminder(reminder, true, true, true, true);
+    manager->ShowReminder(reminder, true, true, true, true);
     manager->alertingReminderId_ = 1;
-    manager->ShowReminder(reminder, true, true, true, true, true);
+    manager->ShowReminder(reminder, true, true, true, true);
     manager->alertingReminderId_ = -1;
-    manager->ShowReminder(reminder, true, true, true, true, true);
+    manager->ShowReminder(reminder, true, true, true, false);
     remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
@@ -409,7 +408,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_014, Level1)
     manager->StopAlertingReminder(reminder);
     reminder->SetReminderId(1);
     manager->StopAlertingReminder(reminder);
-    manager->Dump();
     remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
@@ -425,7 +423,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_015, Level1)
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     std::vector<sptr<ReminderRequest>> vec;
     vec.push_back(reminder);
-    manager->HandleImmediatelyShow(vec, true);
+    manager->HandleImmediatelyShow(vec, true, true);
     manager->HandleRefreshReminder(0, reminder);
     manager->HandleSameNotificationIdShowing(reminder);
     manager->Init();
@@ -1215,6 +1213,103 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_041, Level1)
     reminder2->SetOriTriggerTimeInMilli(1762153200000);
     manager->CheckAndCloseShareReminder(reminder1);
     EXPECT_EQ(reminder2->IsExpired(), true);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_042
+ * @tc.desc: test SlienceNotification function
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_042, Level1)
+{
+    NotificationRequest notification(1);
+    manager->SlienceNotification(false, false, notification);
+    EXPECT_EQ(notification.GetNotificationControlFlags(), 0);
+    manager->SlienceNotification(true, false, notification);
+    uint32_t expected = static_cast<uint32_t>(
+        NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_SOUND);
+    EXPECT_EQ(notification.GetNotificationControlFlags(), expected);
+    manager->SlienceNotification(true, true, notification);
+    uint32_t closeSound = static_cast<uint32_t>(
+        NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_SOUND);
+    uint32_t closeBanner = static_cast<uint32_t>(
+        NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_BANNER);
+    uint32_t closeVibration = static_cast<uint32_t>(
+        NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_VIBRATION);
+    expected = closeSound | closeBanner | closeVibration;
+    EXPECT_EQ(notification.GetNotificationControlFlags(), expected);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_043
+ * @tc.desc: test CancelReminderOnDisplay function
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_043, Level1)
+{
+    sptr<ReminderRequest> reminder = new ReminderRequestCalendar(300);
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::SHOW_MUTEX);
+        manager->showedReminderVector_.clear();
+    }
+    int32_t ret = manager->CancelReminderOnDisplay(1, 1);
+    EXPECT_EQ(ret, ERR_REMINDER_NOTIFICATION_NO_SHOWING);
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::SHOW_MUTEX);
+        manager->showedReminderVector_.push_back(reminder);
+    }
+    reminder->SetShare(true);
+    ret = manager->CancelReminderOnDisplay(1, 1);
+    EXPECT_EQ(ret, ERR_REMINDER_NOTIFICATION_NO_SHOWING);
+
+    reminder->SetShare(false);
+    reminder->SetReminderId(2);
+    ret = manager->CancelReminderOnDisplay(1, 1);
+    EXPECT_EQ(ret, ERR_REMINDER_NOTIFICATION_NO_SHOWING);
+
+    reminder->SetReminderId(1);
+    reminder->InitCreatorUid(2);
+    ret = manager->CancelReminderOnDisplay(1, 1);
+    EXPECT_EQ(ret, ERR_REMINDER_NOTIFICATION_NO_SHOWING);
+
+    reminder->InitCreatorUid(1);
+    ret = manager->CancelReminderOnDisplay(1, 1);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_044
+ * @tc.desc: test CancelReminderOnDisplay function
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_044, Level1)
+{
+    sptr<ReminderRequest> reminder = new ReminderRequestCalendar(300);
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::SHOW_MUTEX);
+        manager->showedReminderVector_.clear();
+        manager->showedReminderVector_.push_back(reminder);
+    }
+    reminder->SetShare(false);
+    reminder->SetReminderId(1);
+    reminder->InitCreatorUid(1);
+    manager->activeReminderId_ = -1;
+    manager->alertingReminderId_ = -1;
+    int32_t ret = manager->CancelReminderOnDisplay(1, 1);
+    EXPECT_EQ(ret, ERR_OK);
+
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::SHOW_MUTEX);
+        manager->showedReminderVector_.clear();
+        manager->showedReminderVector_.push_back(reminder);
+    }
+    manager->activeReminderId_ = 1;
+    manager->alertingReminderId_ = 1;
+    ret = manager->CancelReminderOnDisplay(1, 1);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS

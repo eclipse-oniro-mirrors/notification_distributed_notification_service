@@ -83,7 +83,6 @@ void ReminderEventManager::SubscribeEvent()
     MatchingSkills matchingSkills;
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
@@ -206,14 +205,6 @@ void ReminderEventManager::ReminderEventSubscriber::OnReceiveEvent(const EventFw
         int32_t userId = want.GetIntParam(AppExecFwk::Constants::USER_ID, -1);
         int32_t uid = want.GetIntParam(AppExecFwk::Constants::UID, -1);
         manager->CancelAllReminders(bundleName, userId, uid);
-        return;
-    }
-    if (action == CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED) {
-        AppExecFwk::ElementName ele = want.GetElement();
-        std::string bundleName = ele.GetBundleName();
-        int32_t userId = want.GetIntParam(AppExecFwk::Constants::USER_ID, -1);
-        int32_t uid = ReminderBundleManagerHelper::GetInstance().GetDefaultUidByBundleName(bundleName, userId);
-        manager->OnProcessDiedLocked(uid);
         return;
     }
     if (action == CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED) {

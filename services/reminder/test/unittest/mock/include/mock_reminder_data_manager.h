@@ -34,7 +34,6 @@ public:
     static void ResetFlag();
 
     static bool callCancelAllReminders_;
-    static bool callOnProcessDiedLocked_;
     static bool callRefreshRemindersDueToSysTimeChange_;
     static bool callOnUserSwitch_;
     static bool callOnUserRemove_;

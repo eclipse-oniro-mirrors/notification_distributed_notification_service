@@ -415,28 +415,6 @@ void ReminderDataManager::OnUserSwitch(const int32_t& userId)
     queue_->submit(callback);
 }
 
-void ReminderDataManager::OnProcessDiedLocked(const int32_t callingUid)
-{
-    std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
-    std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
-    for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end();) {
-        sptr<ReminderRequest> reminder = *it;
-        if (reminder->GetUid() != callingUid) {
-            ++it;
-            continue;
-        }
-        if (reminder->IsAlerting()) {
-            TerminateAlerting(reminder, "onProcessDied");
-            ++it;
-        } else {
-            CancelNotification(reminder);
-            reminder->OnClose(false);
-            it = showedReminderVector_.erase(it);
-        }
-        store_->UpdateOrInsert(reminder);
-    }
-}
-
 void ReminderDataManager::InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &sharedTimerInfo,
     const sptr<ReminderRequest> &reminderRequest, TimerType reminderType) const
 {
@@ -643,7 +621,7 @@ void ReminderDataManager::InitShareReminders(const bool registerObserver)
     std::vector<sptr<ReminderRequest>> immediatelyReminders;
     std::vector<sptr<ReminderRequest>> extensionReminders;
     CheckReminderTime(immediatelyReminders, extensionReminders);
-    HandleImmediatelyShow(immediatelyReminders, false);
+    HandleImmediatelyShow(immediatelyReminders, false, true);
     StartRecentReminder();
 }
 
@@ -845,7 +823,7 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
     std::vector<sptr<ReminderRequest>> showImmediately;
     std::vector<sptr<ReminderRequest>> extensionReminders;
     RefreshRemindersLocked(type, showImmediately, extensionReminders);
-    HandleImmediatelyShow(showImmediately, true);
+    HandleImmediatelyShow(showImmediately, true, false);
     HandleExtensionReminder(extensionReminders, REISSUE_CALLBACK);
     StartRecentReminder();
     StartLoadTimer();
@@ -1032,7 +1010,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& 
 }
 
 void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, const bool isPlaySound,
-    const bool isSysTimeChanged, const bool isNeedCloseDefaultSound, const bool isSlienceNotification)
+    const bool isSysTimeChanged, const bool isCloseDefaultSound, const bool isSlienceNotification)
 {
     int32_t reminderId = reminder->GetReminderId();
     bool isShare = reminder->IsShare();
@@ -1052,7 +1030,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, co
     if (alertingReminderId_ != -1) {
         TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
     }
-    SlienceNotification(toPlaySound || isNeedCloseDefaultSound, isSlienceNotification, notificationRequest);
+    SlienceNotification(toPlaySound || isCloseDefaultSound, isSlienceNotification, notificationRequest);
     ErrCode errCode = IN_PROCESS_CALL(NotificationHelper::PublishNotification(ReminderRequest::NOTIFICATION_LABEL,
         notificationRequest));
     if (errCode != ERR_OK) {
@@ -1208,13 +1186,12 @@ sptr<ReminderRequest> ReminderDataManager::GetRecentReminder()
     return nullptr;
 }
 
-void ReminderDataManager::HandleImmediatelyShow(
-    std::vector<sptr<ReminderRequest>> &showImmediately, bool isSysTimeChanged)
+void ReminderDataManager::HandleImmediatelyShow(std::vector<sptr<ReminderRequest>>& showImmediately,
+    const bool isSysTimeChanged, const bool isSlienceNotification)
 {
     bool isAlerting = false;
     std::unordered_map<std::string, int32_t> limits;
     int32_t totalCount = 0;
-    bool isSlienceNotification = isSysTimeChanged ? false : true;
     sptr<ReminderRequest> playSoundReminder = nullptr;
     for (auto it = showImmediately.begin(); it != showImmediately.end(); ++it) {
         if ((*it)->IsShowing()) {
@@ -1324,7 +1301,7 @@ void ReminderDataManager::Init()
     std::vector<sptr<ReminderRequest>> immediatelyReminders;
     std::vector<sptr<ReminderRequest>> extensionReminders;
     CheckReminderTime(immediatelyReminders, extensionReminders);
-    HandleImmediatelyShow(immediatelyReminders, false);
+    HandleImmediatelyShow(immediatelyReminders, false, true);
     HandleExtensionReminder(extensionReminders, REISSUE_CALLBACK);
     StartRecentReminder();
     StartLoadTimer();
@@ -1540,9 +1517,6 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
     if (reminder == nullptr) {
         return;
     }
-    if (alertingReminderId_ != -1) {
-        TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
-    }
 #ifdef PLAYER_FRAMEWORK_ENABLE
     if (soundPlayer_ == nullptr) {
         soundPlayer_ = Media::PlayerFactory::CreatePlayer();
@@ -1558,12 +1532,7 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
         audioManager->ActivateAudioSession(strategy);
     }
     SetPlayerParam(reminder);
-    if (reminder->IsShare()) {
-        if (CheckSoundConfig(reminder)) {
-            soundPlayer_->PrepareAsync();
-            soundPlayer_->Play();
-        }
-    } else {
+    if (CheckSoundConfig(reminder)) {
         soundPlayer_->PrepareAsync();
         soundPlayer_->Play();
     }

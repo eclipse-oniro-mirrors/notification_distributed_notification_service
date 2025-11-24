@@ -2514,5 +2514,33 @@ HWTEST_F(ReminderRequestTest, ReminderRequestTest_010, Function | SmallTest | Le
     child.SetOriTriggerTimeInMilli(1762150774000);
     EXPECT_EQ(child.GetOriTriggerTimeInMilli(), 1762150774000);
 }
+
+/**
+ * @tc.name: ReminderRequestTest_011
+ * @tc.desc: Test ForceDistributed parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, ReminderRequestTest_011, Function | SmallTest | Level1)
+{
+    ReminderRequestChild child;
+    EXPECT_EQ(child.IsForceDistributed(), false);
+    child.SetForceDistributed(true);
+    EXPECT_EQ(child.IsForceDistributed(), true);
+}
+
+/**
+ * @tc.name: ReminderRequestTest_012
+ * @tc.desc: Test NotDistributed parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, ReminderRequestTest_012, Function | SmallTest | Level1)
+{
+    ReminderRequestChild child;
+    EXPECT_EQ(child.IsNotDistributed(), false);
+    child.SetNotDistributed(true);
+    EXPECT_EQ(child.IsNotDistributed(), true);
+}
 }
 }

@@ -169,13 +169,6 @@ public:
     void OnUserSwitch(const int32_t& userId);
 
     /**
-     * @brief Triggered when third party application died.
-     *
-     * @param bundleOption Indicates the bundleOption of third party application.
-     */
-    void OnProcessDiedLocked(const int32_t callingUid);
-
-    /**
      * Publishs a scheduled reminder.
      *
      * @param reminder Indicates the reminder.
@@ -439,7 +432,8 @@ private:
      */
     sptr<ReminderRequest> GetRecentReminder();
 
-    void HandleImmediatelyShow(std::vector<sptr<ReminderRequest>> &showImmediately, bool isSysTimeChanged);
+    void HandleImmediatelyShow(std::vector<sptr<ReminderRequest>>& showImmediately, const bool isSysTimeChanged,
+        const bool isSlienceNotification);
     void HandleExtensionReminder(std::vector<sptr<ReminderRequest>> &extensionReminders, const int8_t type);
 
     /**
