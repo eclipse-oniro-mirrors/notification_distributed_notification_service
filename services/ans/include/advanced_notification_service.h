@@ -888,6 +888,7 @@ public:
      * @param bundleOption Indicates the bundle info.
      */
     void OnBundleRemoved(const sptr<NotificationBundleOption> &bundleOption);
+    void onBundleRemovedByUserId(const sptr<NotificationBundleOption> &bundleOption, const int32_t userId);
 
     /**
      * @brief Obtains the event of bundle batch removed.
@@ -1080,6 +1081,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption) override;
+    ErrCode GetAllLiveViewEnabledBundles(
+        std::vector<NotificationBundleOption> &bundleOption, const int32_t userId) override;
 
     /**
      * @brief Obtains allow distribued application list.
@@ -1510,6 +1513,7 @@ public:
      * @brief Whether reminders are allowed.
      */
     bool AllowUseReminder(const std::string& bundleName);
+    bool AllowUseReminder(const std::string& bundleName, const int32_t userId);
 
     /**
      * @brief Whether reminders are allowed.
@@ -1519,6 +1523,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder) override;
+    ErrCode AllowUseReminder(const std::string& bundleName, const int32_t userId, bool& isAllowUseReminder) override;
 
     /**
      * @brief Get do not disturb profile by id.
@@ -1928,6 +1933,7 @@ private:
     static ErrCode SetLockScreenPictureToDb(const sptr<NotificationRequest> &request);
     static ErrCode GetLockScreenPictureFromDb(NotificationRequest *request);
     void RemoveDoNotDisturbProfileTrustList(const sptr<NotificationBundleOption> &bundleOption);
+    void RemoveDoNotDisturbProfileTrustList(const sptr<NotificationBundleOption> &bundleOption, const int32_t userId);
     ErrCode DeleteAllByUserInner(const int32_t &userId, int32_t reason, bool isAsync = false, bool removeAll = false);
     ErrCode RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption, int32_t reason);
     void ExcuteRemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption,

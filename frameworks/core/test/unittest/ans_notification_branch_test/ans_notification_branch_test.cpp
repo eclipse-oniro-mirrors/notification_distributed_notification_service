@@ -312,6 +312,12 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetAllLiveViewEnabledBundles(
+        std::vector<NotificationBundleOption> &bundleOption, const int32_t userId) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode GetAllDistribuedEnabledBundles(const std::string& deviceType,
         std::vector<NotificationBundleOption> &bundleOption) override
     {
@@ -780,6 +786,11 @@ public:
     }
 
     ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode AllowUseReminder(const std::string& bundleName, const int32_t userId, bool& isAllowUseReminder) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

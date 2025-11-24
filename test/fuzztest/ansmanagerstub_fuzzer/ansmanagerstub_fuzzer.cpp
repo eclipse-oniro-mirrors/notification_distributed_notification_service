@@ -285,6 +285,7 @@ namespace OHOS {
         service->DistributeOperation(operationInfo, nullptr);
         service->SetHashCodeRule(fuzzData->ConsumeIntegral<uint32_t>());
         service->GetAllLiveViewEnabledBundles(bundleOptions);
+        service->GetAllLiveViewEnabledBundles(bundleOptions, userId);
         sptr<Notification::NotificationDisable> notificationDisable = new Notification::NotificationDisable();
         service->DisableNotificationFeature(notificationDisable);
         service->ReplyDistributeOperation(stringData, fuzzData->ConsumeIntegral<int32_t>());

@@ -158,6 +158,7 @@ public:
     MOCK_METHOD1(GetNotificationSettings, ErrCode(uint32_t&));
     MOCK_METHOD1(GetAllNotificationEnabledBundles, ErrCode(std::vector<NotificationBundleOption>&));
     MOCK_METHOD1(GetAllLiveViewEnabledBundles, ErrCode(std::vector<NotificationBundleOption>&));
+    MOCK_METHOD2(GetAllLiveViewEnabledBundles, ErrCode(std::vector<NotificationBundleOption>&, const int32_t userId));
     MOCK_METHOD2(GetAllDistribuedEnabledBundles, ErrCode(const std::string&, std::vector<NotificationBundleOption>&));
     MOCK_METHOD2(RegisterPushCallback, ErrCode(const sptr<IRemoteObject>&, const sptr<NotificationCheckRequest>&));
     MOCK_METHOD0(UnregisterPushCallback, ErrCode());
@@ -188,6 +189,7 @@ public:
     MOCK_METHOD5(SetTargetDeviceStatus, ErrCode(const std::string&, uint32_t, uint32_t, const std::string&, int32_t));
     MOCK_METHOD2(GetDoNotDisturbProfile, ErrCode(int64_t, sptr<NotificationDoNotDisturbProfile>&));
     MOCK_METHOD2(AllowUseReminder, ErrCode(const std::string&, bool&));
+    MOCK_METHOD3(AllowUseReminder, ErrCode(const std::string&, const int32_t userId, bool&));
     MOCK_METHOD2(UpdateNotificationTimerByUid, ErrCode(int32_t, bool));
     MOCK_METHOD1(DisableNotificationFeature, ErrCode(const sptr<NotificationDisable>&));
     MOCK_METHOD2(GetTargetDeviceStatus, ErrCode(const std::string&, int32_t&));

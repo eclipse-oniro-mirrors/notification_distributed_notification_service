@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace Notification {
 struct ISystemEvent {
-    std::function<void(const sptr<NotificationBundleOption> &)> onBundleRemoved;
+    std::function<void(const sptr<NotificationBundleOption> &, int32_t userId)> onBundleRemovedByUserId;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     std::function<void()> onScreenOn;
     std::function<void()> onScreenOff;

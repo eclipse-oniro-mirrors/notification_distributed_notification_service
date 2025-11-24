@@ -2108,6 +2108,17 @@ ErrCode AnsNotification::GetAllLiveViewEnabledBundles(std::vector<NotificationBu
     return proxy->GetAllLiveViewEnabledBundles(bundleOption);
 }
 
+ErrCode AnsNotification::GetAllLiveViewEnabledBundles(
+    std::vector<NotificationBundleOption> &bundleOption, const int32_t userId)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->GetAllLiveViewEnabledBundles(bundleOption, userId);
+}
+
 ErrCode AnsNotification::GetAllDistribuedEnabledBundles(const std::string& deviceType,
     std::vector<NotificationBundleOption> &bundleOption)
 {
@@ -2698,6 +2709,18 @@ ErrCode AnsNotification::AllowUseReminder(const std::string& bundleName, bool& i
     }
 
     return proxy->AllowUseReminder(bundleName, isAllowUseReminder);
+}
+
+ErrCode AnsNotification::AllowUseReminder(const std::string& bundleName, const int32_t userId, bool& isAllowUseReminder)
+{
+    ANS_LOGD("called");
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->AllowUseReminder(bundleName, userId, isAllowUseReminder);
 }
 
 ErrCode AnsNotification::SetDefaultSlotForBundle(const NotificationBundleOption& bundleOption,

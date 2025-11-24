@@ -353,6 +353,33 @@ HWTEST_F(AnsSlotServiceTest, GetAllLiveViewEnabledBundles_00001, Function | Smal
 }
 
 /**
+ * @tc.name: GetAllLiveViewEnabledBundles_00002
+ * @tc.desc: Test GetAllLiveViewEnabledBundles_00002
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, GetAllLiveViewEnabledBundles_00002, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(false);
+    std::vector<NotificationBundleOption> bundleOptions;
+    NotificationBundleOption bundleOption("GetAllLiveViewEnabledBundles_00002", 999);
+    bundleOptions.push_back(bundleOption);
+    int32_t userId = 100;
+    auto ret = advancedNotificationService_->GetAllLiveViewEnabledBundles(bundleOptions, userId);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    ret = advancedNotificationService_->GetAllLiveViewEnabledBundles(bundleOptions, userId);
+    EXPECT_EQ(ret, (int)ERR_OK);
+
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    ret = advancedNotificationService_->GetAllLiveViewEnabledBundles(bundleOptions, userId);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
  * @tc.name: GetEnabledForBundleSlot_00001
  * @tc.desc: Test UpdateSlots
  * @tc.type: FUNC

@@ -580,6 +580,12 @@ ErrCode NotificationHelper::GetAllLiveViewEnabledBundles(std::vector<Notificatio
     return DelayedSingleton<AnsNotification>::GetInstance()->GetAllLiveViewEnabledBundles(bundleOption);
 }
 
+ErrCode NotificationHelper::GetAllLiveViewEnabledBundles(
+    std::vector<NotificationBundleOption> &bundleOption, const int32_t userId)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetAllLiveViewEnabledBundles(bundleOption, userId);
+}
+
 ErrCode NotificationHelper::GetAllDistribuedEnabledBundles(const std::string& deviceType,
     std::vector<NotificationBundleOption> &bundleOption)
 {
@@ -793,6 +799,12 @@ ErrCode NotificationHelper::UpdateNotificationTimerByUid(const int32_t uid, cons
 ErrCode NotificationHelper::AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->AllowUseReminder(bundleName, isAllowUseReminder);
+}
+
+ErrCode NotificationHelper::AllowUseReminder(
+    const std::string& bundleName, const int32_t userId, bool& isAllowUseReminder)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->AllowUseReminder(bundleName, userId, isAllowUseReminder);
 }
 
 ErrCode NotificationHelper::DisableNotificationFeature(const NotificationDisable &notificationDisable)

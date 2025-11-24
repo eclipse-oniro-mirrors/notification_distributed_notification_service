@@ -316,6 +316,8 @@ public:
         
         std::vector<NotificationBundleOption> bundleOptions;
         notificationHelper.GetAllLiveViewEnabledBundles(bundleOptions);
+        int32_t userId = fdp->ConsumeIntegralInRange<int32_t>(0, 100);
+        notificationHelper.GetAllLiveViewEnabledBundles(bundleOptions, userId);
         notificationHelper.GetAllDistribuedEnabledBundles(deviceType, bundleOptions);
         return true;
     }
