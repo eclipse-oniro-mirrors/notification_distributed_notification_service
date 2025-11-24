@@ -196,15 +196,6 @@ namespace Notification {
         bundleOptions.emplace_back(bundle);
 
         service->GetShowBadgeEnabledForBundles(bundleOptions, bundles);
-
-        service->TryStartReminderAgentService();
-        std::vector<NotificationReminderInfo> reminders;
-        std::vector<sptr<NotificationReminderInfo>> reminderSptr;
-        sptr<NotificationReminderInfo> reminder = new NotificationReminderInfo();
-        reminderSptr.emplace_back(reminder);
-        service->GetReminderInfoByBundles(bundleOptions, reminders);
-        service->SetReminderInfoByBundles(reminderSptr);
-
         return true;
     }
 
@@ -266,8 +257,6 @@ namespace Notification {
         std::string str = fdp->ConsumeRandomLengthString();
         auto service = AdvancedNotificationService::GetInstance();
         service->OnSubscriberAdd(nullptr, num);
-        auto record = NotificationSubscriberManager::GetInstance()->CreateSubscriberRecord(nullptr);
-        service->OnSubscriberAdd(record, num);
 
         auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
         sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
