@@ -76,6 +76,7 @@ const std::string DEVICE_TYPE_LITE_WEARABLE = "liteWearable";
 const std::string DEVICE_TYPE_HEADSET = "headset";
 const std::string ANS_EXTENDINFO_INFO_PRE = "notification_collaboration_";
 const std::string ANS_EXTENDINFO_DEVICE_ID = "deviceId";
+const std::string EXTENDINFO_FLAG = "flag";
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 constexpr NotificationConstant::DistributedReminderPolicy DEFAULT_DISTRIBUTED_REMINDER_POLICY =

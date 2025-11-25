@@ -342,6 +342,14 @@ bool NotificationRequestBox::SetNotificationBasicInfo(const std::string& basicIn
     box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BASIC_INFO, basicInfo));
     return true;
 }
+
+bool NotificationRequestBox::SetPriorityNotificationType(const std::string& priorityNotificationType)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(PRIORITY_NOTIFICATION_TYPE, priorityNotificationType));
+}
 #else
 bool NotificationRequestBox::GetNotificationHashCode(std::string& hasdCode) const
 {
@@ -650,6 +658,14 @@ bool NotificationRequestBox::GetNotificationBasicInfo(std::string& basicInfo) co
     }
     box_->GetStringValue(NOTIFICATION_BASIC_INFO, basicInfo);
     return true;
+}
+
+bool NotificationRequestBox::GetPriorityNotificationType(std::string& priorityNotificationType) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(PRIORITY_NOTIFICATION_TYPE, priorityNotificationType);
 }
 #endif
 }

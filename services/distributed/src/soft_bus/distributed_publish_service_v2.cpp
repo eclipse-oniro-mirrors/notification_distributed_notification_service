@@ -19,6 +19,7 @@
 #include <string>
 #include <sstream>
 
+#include "ans_const_define.h"
 #include "request_box.h"
 #include "remove_box.h"
 #include "batch_remove_box.h"
@@ -47,7 +48,6 @@ namespace Notification {
 
 static const std::string DISTRIBUTED_LABEL = "ans_distributed";
 static const std::string EXTENDINFO_INFO_PRE = "notification_collaboration_";
-static const std::string EXTENDINFO_FLAG = "flag";
 static const std::string EXTENDINFO_USERID = "userId_";
 static const std::string EXTENDINFO_APP_NAME = "app_name";
 static const std::string EXTENDINFO_APP_LABEL = "app_label";
@@ -510,6 +510,9 @@ bool DistributedPublishService::MakeRequestBox(
     requestBox->SetNotificationHashCode(request->GetKey());
     requestBox->SetSlotType(static_cast<int32_t>(requestPoint->GetSlotType()));
     requestBox->SetContentType(static_cast<int32_t>(requestPoint->GetNotificationType()));
+    if (requestPoint->GetPriorityNotificationType() != NotificationConstant::PriorityNotificationType::OTHER) {
+        requestBox->SetPriorityNotificationType(requestPoint->GetPriorityNotificationType());
+    }
 
     int32_t reminderFlag = isSyncNotification ? 0 : requestPoint->GetFlags()->GetReminderFlags();
     requestBox->SetReminderFlag(reminderFlag);
@@ -836,6 +839,10 @@ void DistributedPublishService::PublishNotification(const std::shared_ptr<TlvBox
             ANS_LOGE("NotificationRequest is nullptr");
             return;
         }
+    }
+    std::string priorityNotificationType;
+    if (requestBox.GetPriorityNotificationType(priorityNotificationType) && request != nullptr) {
+        request->SetInnerPriorityNotificationType(priorityNotificationType);
     }
     bool isCommonLiveView = false;
     if (requestBox.GetSlotType(slotType) && requestBox.GetContentType(contentType)) {

@@ -1654,10 +1654,6 @@ public:
 
     void SendDialogClickHiSysEvent(const sptr<NotificationBundleOption> &bundleOption, bool enabled);
 
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-    void UpdatePriorityType(const sptr<NotificationRequest> &request);
-#endif
-
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
@@ -1692,6 +1688,10 @@ public:
     void OnHfpDeviceConnectChanged(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
     void OnBluetoothStateChanged(const int status);
     void OnBluetoothPairedStatusChanged(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
+    ErrCode SetBundlePriorityConfigInner(const sptr<NotificationBundleOption> &bundleOption, const std::string &value);
+    ErrCode SetPriorityEnabledByBundleInner(
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t enableStatusInt);
+    ErrCode SetPriorityEnabledInner(const bool enabled);
 
 private:
     struct RecentInfo {
@@ -2100,9 +2100,6 @@ private:
     void ProcessSubscriptionInfoForStateChange(
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos,
         const sptr<NotificationBundleOption> &bundle, bool filterHfpOnly);
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-    bool IsNeedUpdatePriorityType(const sptr<NotificationRequest> &request);
-#endif
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;

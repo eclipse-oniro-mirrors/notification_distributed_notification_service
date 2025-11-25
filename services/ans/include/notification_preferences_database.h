@@ -22,6 +22,7 @@
 #include <string>
 
 #include "notification_rdb_data_mgr.h"
+#include "notification_clone_priority_info.h"
 #include "notification_preferences_info.h"
 
 namespace OHOS {
@@ -177,7 +178,7 @@ public:
      * @param enabled Indicates to whether to enabled.
      * @return Return true on success, false on failure.
      */
-    bool PutPriorityEnabledForBundle(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
+    bool PutPriorityEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::PriorityEnableStatus enableStatus);
 
     /**
@@ -195,7 +196,7 @@ public:
      * @param enabled Indicates to whether to enabled.
      * @return Return true on success, false on failure.
      */
-    bool GetPriorityEnabledForBundle(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
+    bool GetPriorityEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption,
         NotificationConstant::PriorityEnableStatus &enableStatus);
 
     /**
@@ -508,9 +509,18 @@ public:
     bool GetLiveViewRebuildFlag(std::string& flag, int32_t userId);
     bool SetLiveViewRebuildFlag(int32_t userId);
     bool RemoveLiveViewRebuildFlag(int32_t userId);
+    void ParsePriorityInfosFromDisturbeDB(
+        const std::unordered_map<std::string, std::string> &values,
+        std::vector<NotificationClonePriorityInfo> &cloneInfos,
+        const NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE type);
+    bool DelClonePriorityInfo(const int32_t &userId, const NotificationClonePriorityInfo &cloneInfo);
+    bool UpdateClonePriorityInfos(
+        const int32_t &userId, const std::vector<NotificationClonePriorityInfo> &cloneInfos);
+    void GetClonePriorityInfos(const int32_t &userId, std::vector<NotificationClonePriorityInfo> &cloneInfos);
+    bool DelClonePriorityInfos(const int32_t &userId, const std::vector<NotificationClonePriorityInfo> &cloneInfos);
     bool SetBundlePriorityConfig(
-        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &configValue);
-    bool GetBundlePriorityConfig(const NotificationPreferencesInfo::BundleInfo &bundleInfo, std::string &configValue);
+        const sptr<NotificationBundleOption> &bundleOption, const std::string &configValue);
+    bool GetBundlePriorityConfig(const sptr<NotificationBundleOption> &bundleOption, std::string &configValue);
 
 private:
     bool CheckRdbStore();
@@ -551,7 +561,7 @@ private:
     std::string GenerateSlotKey(
         const std::string &bundleKey, const std::string &type = "", const std::string &subType = "") const;
     std::string GenerateBundleKey(const std::string &bundleKey, const std::string &type = "") const;
-    std::string GetBundleKeyFromGenerate(const std::string &generateBundleKey) const;
+    int32_t GetUidFromGenerate(const std::string &generateBundleKey) const;
 
     void ParseSlotFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &bundleKey,
         const std::pair<std::string, std::string> &entry, const int32_t &userId);
