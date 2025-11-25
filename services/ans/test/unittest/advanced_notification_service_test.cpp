@@ -890,6 +890,21 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_09600,
 }
 
 /**
+ * @tc.name      : ANS_IsAllowedNotifySelf_0200
+ * @tc.desc      : Test IsAllowedNotifySelf function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsAllowedNotifySelf_0200, Function | SmallTest | Level1)
+{
+    MockSystemApp();
+    bool allowed = false;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabled(100, true), (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption,
+        static_cast<NotificationConstant::SWITCH_STATE>(0)), (int)ERR_OK);
+    ASSERT_EQ((int)advancedNotificationService_->IsAllowedNotifySelf(bundleOption, allowed), (int)ERR_OK);
+}
+
+/**
  * @tc.number    : AdvancedNotificationServiceTest_09700
  * @tc.name      : ANS_IsSpecialBundleAllowedNotify_0100
  * @tc.desc      : Test IsSpecialBundleAllowedNotify function

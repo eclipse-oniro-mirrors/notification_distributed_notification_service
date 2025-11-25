@@ -728,7 +728,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     MockQueryForgroundOsAccountId(false, 1);
     AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.IsAllowedNotify(enabled), ERR_ANS_GET_ACTIVE_USER_FAILED);
+    ASSERT_EQ(advancedNotificationService.IsAllowedNotify(enabled), ERR_OK);
 }
 
 /**

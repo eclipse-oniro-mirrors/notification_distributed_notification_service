@@ -1182,7 +1182,7 @@ HWTEST_F(AnsPublishServiceTest, IsAllowedNotify_00001, Function | SmallTest | Le
  
     MockQueryForgroundOsAccountId(true, 1);
     result = advancedNotificationService_->IsAllowedNotify(enabled);
-    ASSERT_EQ(result, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(result, ERR_ANS_GET_ACTIVE_USER_FAILED);
 }
 
 /**

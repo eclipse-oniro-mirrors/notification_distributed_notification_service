@@ -63,6 +63,10 @@ ohos_source_set("ans_service_sources") {
     defines += [ "NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED" ]
   }
 
+  if (distributed_notification_service_feature_notification_multi_foreground_user) {
+    defines += [ "NOTIFICATION_MULTI_FOREGROUND_USER" ]
+  }
+
   sources = [
     "src/access_token_helper.cpp",
     "src/advanced_aggregation_data_roaming_observer.cpp",
