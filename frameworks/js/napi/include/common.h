@@ -1941,6 +1941,7 @@ public:
         std::vector<std::pair<std::string, std::string>> &out);
     static napi_value SetGrantedBundleInfo(const napi_env &env, const NotificationBundleOption &bundleInfo,
         napi_value &result);
+    static int32_t GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id);
 private:
     static const int32_t ARGS_ONE = 1;
     static const int32_t ARGS_TWO = 2;

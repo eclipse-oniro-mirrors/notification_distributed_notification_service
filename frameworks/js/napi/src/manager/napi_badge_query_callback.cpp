@@ -30,9 +30,9 @@ namespace NotificationNapi {
 namespace {
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
-constexpr int32_t UID_TRANSFORM_DIVISOR = 200000;
 constexpr int32_t INVALID_BADGE_NUMBER = -1;
 constexpr int32_t BADGEQUERY_TIMEOUT_MS = 500;
+constexpr int32_t INVALID_USER_ID = -1;
 } // namespace
 
 static ffrt::mutex badgeQueryCallbackInfoMutex_;
@@ -339,7 +339,10 @@ napi_value NapiOnBadgeNumberQuery(napi_env env, napi_callback_info info)
         ANS_LOGE("uid is invalid");
         return Common::NapiGetUndefined(env);
     }
-    int32_t userId = uid / UID_TRANSFORM_DIVISOR;
+    int32_t userId = INVALID_USER_ID;
+    if (Common::GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
+        return Common::NapiGetUndefined(env);
+    }
     if (ParseParameters(env, info, objectInfo, userId) == nullptr) {
         ANS_LOGD("ParseParameters failed");
         return Common::NapiGetUndefined(env);
@@ -423,7 +426,10 @@ napi_value NapiOffBadgeNumberQuery(napi_env env, napi_callback_info info)
         ANS_LOGE("uid is invalid");
         return Common::NapiGetUndefined(env);
     }
-    int32_t userId = uid / UID_TRANSFORM_DIVISOR;
+    int32_t userId = INVALID_USER_ID;
+    if (Common::GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
+        return Common::NapiGetUndefined(env);
+    }
     std::shared_ptr<JSBadgeQueryCallBack> callback;
     {
         std::lock_guard<ffrt::mutex> lock(badgeQueryCallbackInfoMutex_);
