@@ -1665,8 +1665,6 @@ protected:
     bool IsAgentRelationship(const std::string &agentBundleName, const std::string &sourceBundleName);
 
 public:
-    void ClearCloneRingToneInfo(NotificationRingtoneInfo ringtoneInfo,
-        std::vector<NotificationRingtoneInfo> cloneRingtoneInfos);
     void TriggerLiveViewSwitchCheck(int32_t userId);
     bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption);
     ErrCode SetDefaultNotificationEnabled(
