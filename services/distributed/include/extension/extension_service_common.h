@@ -33,10 +33,9 @@ struct ExtensionSubscriberInfo {
     int32_t uid = -1;
     int32_t userId = -1;
 
-    std::string Dump() const
+    std::string GetKey() const
     {
-        return "ExtensionSubscriberInfo { bundleName: " + bundleName + ", extensionName: " + extensionName +
-               ", uid: " + std::to_string(uid) + ", userId: " + std::to_string(userId) + " }";
+        return bundleName + "_" + extensionName + "_" + std::to_string(uid) + "_" + std::to_string(userId);
     }
 };
 }

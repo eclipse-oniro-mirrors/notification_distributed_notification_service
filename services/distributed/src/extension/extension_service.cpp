@@ -74,11 +74,10 @@ void NotificationExtensionService::DestroyService()
         return;
     }
 
-    ffrt::task_handle handler = serviceQueue_->submit_h([&]() {
+    serviceQueue_->submit_h([=]() {
         ANS_LOGD("Start destroy service.");
         ExtensionServiceSubscribeService::GetInstance().UnsubscribeAllNotification();
     });
-    serviceQueue_->wait(handler);
 }
 
 void NotificationExtensionService::SubscribeNotification(const sptr<NotificationBundleOption> bundle,
@@ -89,10 +88,9 @@ void NotificationExtensionService::SubscribeNotification(const sptr<Notification
         ANS_LOGE("null serviceQueue.");
         return;
     }
-    ffrt::task_handle handler = serviceQueue_->submit_h([&]() {
+    serviceQueue_->submit_h([=]() {
         ExtensionServiceSubscribeService::GetInstance().SubscribeNotification(bundle, subscribedBundles);
     });
-    serviceQueue_->wait(handler);
 }
 
 void NotificationExtensionService::UnsubscribeNotification(const sptr<NotificationBundleOption> bundle)
@@ -102,10 +100,9 @@ void NotificationExtensionService::UnsubscribeNotification(const sptr<Notificati
         ANS_LOGE("null serviceQueue.");
         return;
     }
-    ffrt::task_handle handler = serviceQueue_->submit_h([&]() {
+    serviceQueue_->submit_h([=]() {
         ExtensionServiceSubscribeService::GetInstance().UnsubscribeNotification(bundle);
     });
-    serviceQueue_->wait(handler);
 }
 
 void NotificationExtensionService::SendHaReport(

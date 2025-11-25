@@ -149,30 +149,29 @@ NotificationSubscriberExtensionResult StsNotificationSubscriberExtension::OnRece
         return NotificationSubscriberExtensionResult::INTERNAL_ERROR;
     }
     std::weak_ptr<StsNotificationSubscriberExtension> wThis = GetWeakPtr();
-    NotificationSubscriberExtensionResult result = NotificationSubscriberExtensionResult::OK;
-    auto task = [wThis, info, &result]() {
+    auto task = [wThis, info]() {
         std::shared_ptr<StsNotificationSubscriberExtension> sThis = wThis.lock();
         if (sThis == nullptr) {
-            result = NotificationSubscriberExtensionResult::OBJECT_RELEASED;
             return;
         }
         ani_env* env = sThis->stsRuntime_.GetAniEnv();
         if (!env) {
             ANS_LOGE("task env not found env");
-            result = NotificationSubscriberExtensionResult::INTERNAL_ERROR;
             return;
         }
 
         ani_object ani_info = WrapNotificationInfo(env, info);
         if (ani_info == nullptr) {
             ANS_LOGE("WrapNotificationInfo failed");
-            result = NotificationSubscriberExtensionResult::SET_OBJECT_FAIL;
             return;
         }
-        result = sThis->CallObjectMethod("onReceiveMessage", nullptr, ani_info);
+        NotificationSubscriberExtensionResult result = sThis->CallObjectMethod("onReceiveMessage", nullptr, ani_info);
+        if (result != NotificationSubscriberExtensionResult::OK) {
+            ANS_LOGE("call OnReceiveMessage failed, result %{public}d", result);
+        }
     };
-    handler_->PostSyncTask(task, "OnReceiveMessage");
-    return result;
+    handler_->PostTask(task, "OnReceiveMessage");
+    return NotificationSubscriberExtensionResult::OK;
 }
 
 NotificationSubscriberExtensionResult StsNotificationSubscriberExtension::OnCancelMessages(
@@ -188,30 +187,30 @@ NotificationSubscriberExtensionResult StsNotificationSubscriberExtension::OnCanc
         return NotificationSubscriberExtensionResult::INTERNAL_ERROR;
     }
     std::weak_ptr<StsNotificationSubscriberExtension> wThis = GetWeakPtr();
-    NotificationSubscriberExtensionResult result = NotificationSubscriberExtensionResult::OK;
-    auto task = [wThis, hashCodes, &result]() {
+    auto task = [wThis, hashCodes]() {
         std::shared_ptr<StsNotificationSubscriberExtension> sThis = wThis.lock();
         if (sThis == nullptr) {
-            result = NotificationSubscriberExtensionResult::OBJECT_RELEASED;
+            ANS_LOGE("null subscriber extension");
             return;
         }
         ani_env* env = sThis->stsRuntime_.GetAniEnv();
         if (!env) {
             ANS_LOGE("task env not found env");
-            result = NotificationSubscriberExtensionResult::INTERNAL_ERROR;
             return;
         }
 
         ani_object aniArray = GetAniStringArrayByVectorString(env, *hashCodes);
         if (aniArray == nullptr) {
             ANS_LOGE("aniArray is nullptr");
-            result = NotificationSubscriberExtensionResult::SET_OBJECT_FAIL;
             return;
         }
-        result = sThis->CallObjectMethod("onCancelMessages", nullptr, aniArray);
+        NotificationSubscriberExtensionResult result = sThis->CallObjectMethod("onCancelMessages", nullptr, aniArray);
+        if (result != NotificationSubscriberExtensionResult::OK) {
+            ANS_LOGE("call onCancelMessages failed, result %{public}d", result);
+        }
     };
-    handler_->PostSyncTask(task, "OnCancelMessages");
-    return result;
+    handler_->PostTask(task, "OnCancelMessages");
+    return NotificationSubscriberExtensionResult::OK;
 }
 
 void StsNotificationSubscriberExtension::ResetEnv(ani_env* env)

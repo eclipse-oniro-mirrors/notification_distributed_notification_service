@@ -2059,7 +2059,7 @@ private:
         std::vector<sptr<NotificationBundleOption>> &bundles);
     bool CheckBluetoothConnectionInInfos(
         const sptr<NotificationBundleOption> &bundleOption,
-        const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos);
+        const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos, bool &updateHfp);
     void FilterPermissionBundles(std::vector<sptr<NotificationBundleOption>> &bundles);
     void FilterGrantedBundles(std::vector<sptr<NotificationBundleOption>> &bundles);
     void FilterBundlesByBluetoothConnection(std::vector<sptr<NotificationBundleOption>> &bundles);

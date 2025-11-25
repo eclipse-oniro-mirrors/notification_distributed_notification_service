@@ -78,16 +78,17 @@ HWTEST_F(NotificationExtensionServiceTest, GetConnectionTest_0100, Function | Sm
     ExtensionSubscriberInfo subscriberInfo;
     subscriberInfo.bundleName = "testBundle";
     subscriberInfo.extensionName = "testExtension";
+    subscriberInfo.uid = 1;
     subscriberInfo.userId = 1;
 
     auto connection = extensionServiceConnectionService.GetConnection(
         std::make_shared<ExtensionSubscriberInfo>(subscriberInfo));
     ASSERT_NE(connection, nullptr);
     auto& connectionMap = extensionServiceConnectionService.connectionMap_;
-    ASSERT_TRUE(connectionMap.find("testBundle_testExtension_1") != connectionMap.end());
+    ASSERT_TRUE(connectionMap.find("testBundle_testExtension_1_1") != connectionMap.end());
 
     extensionServiceConnectionService.RemoveConnection(subscriberInfo);
-    ASSERT_TRUE(connectionMap.find("testBundle_testExtension_1") == connectionMap.end());
+    ASSERT_TRUE(connectionMap.find("testBundle_testExtension_1_1") == connectionMap.end());
 }
 
 /**
@@ -180,7 +181,7 @@ HWTEST_F(NotificationExtensionServiceTest, CloseConnectionTest_0300, Function | 
     subscriberInfo.extensionName = "testExtension";
     subscriberInfo.userId = 1;
 
-    std::string connectionKey = extensionServiceConnectionService.GetConnectionKey(subscriberInfo);
+    std::string connectionKey = subscriberInfo.GetKey();
     extensionServiceConnectionService.connectionMap_.emplace(connectionKey, nullptr);
     extensionServiceConnectionService.CloseConnection(subscriberInfo);
     ASSERT_TRUE(extensionServiceConnectionService.connectionMap_.empty());
@@ -203,7 +204,7 @@ HWTEST_F(NotificationExtensionServiceTest, NotifyOnReceiveMessageTest_0100, Func
     extensionServiceConnectionService.NotifyOnReceiveMessage(
         std::make_shared<ExtensionSubscriberInfo>(subscriberInfo), request);
     auto& connectionMap = extensionServiceConnectionService.connectionMap_;
-    ASSERT_TRUE(connectionMap.find("testBundle_testExtension_1") != connectionMap.end());
+    ASSERT_TRUE(connectionMap.find("testBundle_testExtension_-1_1") != connectionMap.end());
 
     extensionServiceConnectionService.RemoveConnection(subscriberInfo);
     ASSERT_TRUE(connectionMap.empty());
@@ -228,7 +229,7 @@ HWTEST_F(NotificationExtensionServiceTest, NotifyOnCancelMessagesTest_0100, Func
     extensionServiceConnectionService.NotifyOnCancelMessages(
         std::make_shared<ExtensionSubscriberInfo>(subscriberInfo), hashCodes);
     auto& connectionMap = extensionServiceConnectionService.connectionMap_;
-    ASSERT_TRUE(connectionMap.find("testBundle_testExtension_1") != connectionMap.end());
+    ASSERT_TRUE(connectionMap.find("testBundle_testExtension_-1_1") != connectionMap.end());
 
     extensionServiceConnectionService.RemoveConnection(subscriberInfo);
     ASSERT_TRUE(connectionMap.empty());
@@ -255,11 +256,13 @@ HWTEST_F(NotificationExtensionServiceTest, NotificationExtensionServiceTest_0100
 
     notificationExtensionService.SubscribeNotification(bundle, subscribedBundles);
     notificationExtensionService.SubscribeNotification(bundle2, subscribedBundles2);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     auto& subscriberMap = ExtensionServiceSubscribeService::GetInstance().subscriberMap_;
     ASSERT_TRUE(subscriberMap.find(key) != subscriberMap.end());
     ASSERT_TRUE(subscriberMap.find(key2) != subscriberMap.end());
 
     notificationExtensionService.UnsubscribeNotification(bundle);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     ASSERT_TRUE(subscriberMap.find(key) == subscriberMap.end());
     ASSERT_TRUE(subscriberMap.find(key2) != subscriberMap.end());
     notificationExtensionService.DestroyService();

@@ -16,6 +16,7 @@
 #include "bluetooth_hfp_ag.h"
 #include "bluetooth_remote_device.h"
 #include "mock_bluetooth.h"
+#include "ans_log_wrapper.h"
 
 namespace OHOS {
 namespace Notification {

@@ -45,7 +45,7 @@ public:
     ErrCode OnOperationResponse(const std::shared_ptr<NotificationOperationInfo> &operationInfo) override;
 
 private:
-    std::vector<std::shared_ptr<ExtensionSubscriberInfo>> extensionSubscriberInfos_;
+    std::shared_ptr<ExtensionSubscriberInfo> extensionSubscriberInfo_;
     std::shared_ptr<ffrt::queue> messageQueue_ = nullptr;
 };
 }

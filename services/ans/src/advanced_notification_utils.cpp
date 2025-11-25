@@ -138,6 +138,7 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption
     if (bundleOption == nullptr) {
         return nullptr;
     }
+    bundleOption->SetAppIndex(BundleManagerHelper::GetInstance()->GetAppIndexByUid(uid));
     return bundleOption;
 }
 
