@@ -1558,5 +1558,30 @@ HWTEST_F(NotificationHelperTest, RegisterBadgeQueryCallback_0100, Function | Sma
     notificationHelper.UnRegisterBadgeQueryCallback(nullptr);
     EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
+
+/**
+ * @tc.name: SetGeofenceEnabled_0100
+ * @tc.desc: Test SetGeofenceEnabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetGeofenceEnabled_0100, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetGeofenceEnabled(false);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: IsGeofenceEnabled_0100
+ * @tc.desc: Test IsGeofenceEnabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsGeofenceEnabled_0100, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    bool enabled = false;
+    ErrCode ret = notificationHelper.IsGeofenceEnabled(enabled);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
 }
 }

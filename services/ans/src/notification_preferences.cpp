@@ -2481,7 +2481,7 @@ bool NotificationPreferences::IsKioskMode()
 ErrCode NotificationPreferences::SetGeofenceEnabled(bool enabled)
 {
     if (preferncesDB_ == nullptr) {
-        ANS_LOGI("Invalid prefernces db.");
+        ANS_LOGE("Invalid prefernces db.");
         return ERR_ANS_SERVICE_NOT_READY;
     }
 
@@ -2492,7 +2492,7 @@ ErrCode NotificationPreferences::SetGeofenceEnabled(bool enabled)
 ErrCode NotificationPreferences::IsGeofenceEnabled(bool &enabled)
 {
     if (preferncesDB_ == nullptr) {
-        ANS_LOGI("Invalid prefernces db.");
+        ANS_LOGE("Invalid prefernces db.");
         return ERR_ANS_SERVICE_NOT_READY;
     }
 

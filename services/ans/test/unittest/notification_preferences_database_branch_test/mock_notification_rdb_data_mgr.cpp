@@ -17,7 +17,7 @@
 
 namespace {
     bool g_mockInitRet = true;
-    bool g_mockQueryDataRet = true;
+    int32_t g_mockQueryDataRet = 0;
     bool g_mockInsertDataRet = true;
     bool g_mockInsertBatchDataRet = true;
     bool g_mockQueryDataBeginWithKeyRet = true;
@@ -25,6 +25,7 @@ namespace {
     bool g_mockDeleteDataRet = true;
     bool g_mockQueryAllData = true;
     bool g_mockDropTable = true;
+    std::string g_mockDataValue;
 }
 
 void MockInit(bool mockRet)
@@ -32,9 +33,14 @@ void MockInit(bool mockRet)
     g_mockInitRet = mockRet;
 }
 
-void MockQueryData(bool mockRet)
+void MockQueryData(int32_t mockRet)
 {
     g_mockQueryDataRet = mockRet;
+}
+
+void MockSetDataValue(std::string value)
+{
+    g_mockDataValue = value;
 }
 
 void MockInsertData(bool mockRet)
@@ -96,10 +102,8 @@ int32_t NotificationDataMgr::Destroy()
 
 int32_t NotificationDataMgr::QueryData(const std::string &key, std::string &value, const int32_t &userId)
 {
-    if (g_mockQueryDataRet == false) {
-        return NativeRdb::E_EMPTY_VALUES_BUCKET;
-    }
-    return NativeRdb::E_ERROR;
+    value = g_mockDataValue;
+    return g_mockQueryDataRet;
 }
 
 int32_t NotificationDataMgr::InsertData(const std::string &key, const std::string &value, const int32_t &userId)

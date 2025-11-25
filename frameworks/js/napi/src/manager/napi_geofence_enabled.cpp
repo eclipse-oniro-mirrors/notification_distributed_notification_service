@@ -98,7 +98,6 @@ napi_value NapiSetGeofenceEnabled(napi_env env, napi_callback_info info)
     bool enabled;
     if (ParseParameters(env, info, enabled) == nullptr) {
         ANS_LOGE("ParseParameters failed.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
@@ -139,7 +138,7 @@ napi_value NapiSetGeofenceEnabled(napi_env env, napi_callback_info info)
 napi_value NapiIsGeofenceEnabled(napi_env env, napi_callback_info info)
 {
     AsyncCallbackGeofenceEnabled *asynccallbackinfo =
-        new (std::nothrow) AsyncCallbackGeofenceEnabled {.env = env, .asyncWork = nullptr};
+        new (std::nothrow) AsyncCallbackGeofenceEnabled {.env = env, .asyncWork = nullptr, .enabled = false};
     if (!asynccallbackinfo) {
         Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, nullptr);
