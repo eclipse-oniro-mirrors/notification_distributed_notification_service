@@ -27,6 +27,7 @@ void AniSetSyncNotificationEnabledWithoutApp(ani_env* env, ani_int userId, ani_b
 ani_boolean AniIsNotificationEnabledSync(ani_env *env);
 ani_boolean AniGetSyncNotificationEnabledWithoutApp(ani_env* env, ani_int userId);
 ani_object AniGetAllNotificationEnabledBundles(ani_env *env);
+ani_object AniGetAllNotificationEnabledBundlesByUserId(ani_env *env, ani_int userId);
 void AniDisableNotificationFeature(ani_env *env, ani_boolean disabled, ani_object bundleList);
 void AniDisableNotificationFeatureWithId(ani_env *env, ani_boolean disabled, ani_object bundleList, ani_int userId);
 } // namespace NotificationManagerSts

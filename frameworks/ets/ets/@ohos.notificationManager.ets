@@ -222,7 +222,11 @@ export default namespace notificationManager {
     export native function nativeGetActiveNotificationByFilter(filter: NotificationFilter): NotificationRequest|null;
 
     export native function nativeAddDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): void;
+    export native function nativeAddDoNotDisturbProfileByUserId(
+        templates: Array<DoNotDisturbProfile>, userId : int): void;
     export native function nativeRemoveDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): void;
+    export native function nativeRemoveDoNotDisturbProfileByUserId(
+        templates: Array<DoNotDisturbProfile>, userId: int): void;
 
     export native function nativeSubscribeSystemLiveView(subscriber: SystemLiveViewSubscriber): void;
     export native function nativeTriggerSystemLiveView(
@@ -248,6 +252,7 @@ export default namespace notificationManager {
     export native function nativeSetNotificationEnable(bundle: BundleOption, enable: boolean): void;
     export native function nativeRequestEnableNotification(content: UIAbilityContext): Promise<int>;
     export native function nativeGetAllNotificationEnabledBundles(): Array<BundleOption>;
+    export native function nativeGetAllNotificationEnabledBundlesByUserId(userId : int): Array<BundleOption>;
     export native function nativeIsNotificationEnabledSync(): boolean;
 
     export native function  nativeRemoveGroupByBundle(bundle: BundleOption, groupName: string): void;
@@ -281,6 +286,7 @@ export default namespace notificationManager {
     export native function nativeGetDoNotDisturbDateWithId(userId: int): DoNotDisturbDate;
     export native function nativeIsSupportDoNotDisturbMode(): boolean;
     export native function nativeGetDoNotDisturbProfile(id: long): DoNotDisturbProfile;
+    export native function nativeGetDoNotDisturbProfileByUserId(id: long, userId: int): DoNotDisturbProfile;
 
     export native function nativeOpenNotificationSettings(content: UIAbilityContext): Promise<int>;
 
@@ -1378,12 +1384,43 @@ export default namespace notificationManager {
         return pPromise;
     }
 
+    export function removeDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>, userId: int): Promise<void> {
+        if (!templates || templates.length === 0) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativeRemoveDoNotDisturbProfileByUserId(
+                templates, userId); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
     export function addDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): Promise<void> {
         if (!templates || templates.length === 0) {
             throw errorParamInvalid;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeAddDoNotDisturbProfile(templates); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function addDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>, userId : int): Promise<void> {
+        if (!templates || templates.length === 0) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativeAddDoNotDisturbProfileByUserId(templates, userId); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
             }, (error: Error): void => {
@@ -1769,6 +1806,22 @@ export default namespace notificationManager {
         let pPromise = new Promise<Array<BundleOption>>(
             (resolve: ResolveCallback<Array<BundleOption>>, reject: RejectCallback): void => {
             let p = taskpool.execute((): Array<BundleOption> => { return nativeGetAllNotificationEnabledBundles(); });
+            p.then((data: NullishType): void => {
+                let options : Array<BundleOption> = data as Array<BundleOption>;
+                resolve(options);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function getAllNotificationEnabledBundles(userId : int): Promise<Array<BundleOption>>
+    {
+        let pPromise = new Promise<Array<BundleOption>>(
+            (resolve: ResolveCallback<Array<BundleOption>>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): Array<BundleOption> => { return nativeGetAllNotificationEnabledBundlesByUserId(
+                userId); });
             p.then((data: NullishType): void => {
                 let options : Array<BundleOption> = data as Array<BundleOption>;
                 resolve(options);
@@ -2280,6 +2333,20 @@ export default namespace notificationManager {
     {
         let pPromise = new Promise<DoNotDisturbProfile>((resolve: ResolveCallback<DoNotDisturbProfile>, reject: RejectCallback): void => {
             let p = taskpool.execute((): DoNotDisturbProfile => { return nativeGetDoNotDisturbProfile(id); });
+            p.then((data: NullishType): void => {
+                let ret : DoNotDisturbProfile = data as DoNotDisturbProfile;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function getDoNotDisturbProfile(id: long, userId: int): Promise<DoNotDisturbProfile>
+    {
+        let pPromise = new Promise<DoNotDisturbProfile>((resolve: ResolveCallback<DoNotDisturbProfile>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): DoNotDisturbProfile => { return nativeGetDoNotDisturbProfileByUserId(id, userId); });
             p.then((data: NullishType): void => {
                 let ret : DoNotDisturbProfile = data as DoNotDisturbProfile;
                 resolve(ret);

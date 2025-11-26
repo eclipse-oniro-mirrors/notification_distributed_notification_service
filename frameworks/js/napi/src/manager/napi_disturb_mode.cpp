@@ -17,6 +17,7 @@
 #include "ans_inner_errors.h"
 #include "disturb_mode.h"
 
+const int SUBSCRIBE_MAX_PARA = 1;
 namespace OHOS {
 namespace NotificationNapi {
 napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
@@ -90,12 +91,13 @@ napi_value NapiAddDoNotDisturbProfiles(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("called");
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
-    if (!ParseProfilesParameters(env, info, profiles)) {
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (!ParseProfilesParameters(env, info, profiles, userId)) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
-    AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo =
-        new (std::nothrow) AsyncCallbackInfoDoNotDisturbProfile{.env = env, .asyncWork = nullptr, .profiles = profiles};
+    AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo = new (std::nothrow)
+        AsyncCallbackInfoDoNotDisturbProfile{.env = env, .asyncWork = nullptr, .profiles = profiles, .userId = userId};
     if (!asynccallbackinfo) {
         Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, nullptr);
@@ -111,8 +113,13 @@ napi_value NapiAddDoNotDisturbProfiles(napi_env env, napi_callback_info info)
             AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoDoNotDisturbProfile *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode =
-                    NotificationHelper::AddDoNotDisturbProfiles(asynccallbackinfo->profiles);
+                if (asynccallbackinfo->userId != SUBSCRIBE_USER_INIT) {
+                    asynccallbackinfo->info.errorCode = NotificationHelper::AddDoNotDisturbProfiles(
+                        asynccallbackinfo->profiles, asynccallbackinfo->userId);
+                } else {
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::AddDoNotDisturbProfiles(asynccallbackinfo->profiles);
+                }
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -135,13 +142,15 @@ napi_value NapiAddDoNotDisturbProfiles(napi_env env, napi_callback_info info)
 napi_value NapiRemoveDoNotDisturbProfiles(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("called");
+    int32_t userId = SUBSCRIBE_USER_INIT;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
-    if (!ParseProfilesParameters(env, info, profiles)) {
+    if (!ParseProfilesParameters(env, info, profiles, userId)) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
     AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo =
-        new (std::nothrow) AsyncCallbackInfoDoNotDisturbProfile{.env = env, .asyncWork = nullptr, .profiles = profiles};
+        new (std::nothrow) AsyncCallbackInfoDoNotDisturbProfile{.env = env, .asyncWork = nullptr, .profiles = profiles,
+            .userId = userId};
     if (!asynccallbackinfo) {
         Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, nullptr);
@@ -157,8 +166,14 @@ napi_value NapiRemoveDoNotDisturbProfiles(napi_env env, napi_callback_info info)
             AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoDoNotDisturbProfile *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode =
-                    NotificationHelper::RemoveDoNotDisturbProfiles(asynccallbackinfo->profiles);
+                if (asynccallbackinfo->userId != SUBSCRIBE_USER_INIT) {
+                    asynccallbackinfo->info.errorCode =
+                    NotificationHelper::RemoveDoNotDisturbProfiles(asynccallbackinfo->profiles,
+                        asynccallbackinfo->userId);
+                } else {
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::RemoveDoNotDisturbProfiles(asynccallbackinfo->profiles);
+                }
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -369,14 +384,16 @@ void AsyncCompleteCallbackNapiGetDoNotDisturbProfile(napi_env env, napi_status s
 napi_value NapiGetDoNotDisturbProfile(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("called");
+    int32_t userId = SUBSCRIBE_USER_INIT;
     GetDoNotDisturbProfileParams params {};
-    if (ParseParameters(env, info, params) == nullptr) {
+    if (ParseParameters(env, info, params, userId) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
     AsyncCallbackInfoGetDoNotDisturbProfile *asynccallbackinfo =
-        new (std::nothrow) AsyncCallbackInfoGetDoNotDisturbProfile {.env = env, .asyncWork = nullptr, .params = params};
+        new (std::nothrow) AsyncCallbackInfoGetDoNotDisturbProfile {.env = env, .asyncWork = nullptr, .params = params,
+            .userId = userId};
     if (!asynccallbackinfo) {
         Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
@@ -394,8 +411,13 @@ napi_value NapiGetDoNotDisturbProfile(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiGetDoNotDisturbProfile work excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetDoNotDisturbProfile *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetDoNotDisturbProfile(
-                    asynccallbackinfo->params.profileId, asynccallbackinfo->data);
+                if (asynccallbackinfo->userId != SUBSCRIBE_USER_INIT) {
+                    asynccallbackinfo->info.errorCode = NotificationHelper::GetDoNotDisturbProfile(
+                        asynccallbackinfo->params.profileId, asynccallbackinfo->data, asynccallbackinfo->userId);
+                } else {
+                    asynccallbackinfo->info.errorCode = NotificationHelper::GetDoNotDisturbProfile(
+                        asynccallbackinfo->params.profileId, asynccallbackinfo->data);
+                }
             }
         },
         AsyncCompleteCallbackNapiGetDoNotDisturbProfile,

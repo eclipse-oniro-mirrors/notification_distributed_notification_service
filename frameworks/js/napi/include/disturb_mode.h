@@ -51,6 +51,7 @@ struct AsyncCallbackInfoDoNotDisturbProfile {
     napi_async_work asyncWork = nullptr;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
     CallbackPromiseInfo info;
+    int32_t userId = SUBSCRIBE_USER_INIT;
 };
 
 struct AsyncCallbackInfoGetDoNotDisturb {
@@ -75,6 +76,7 @@ struct AsyncCallbackInfoGetDoNotDisturbProfile {
     GetDoNotDisturbProfileParams params;
     sptr<NotificationDoNotDisturbProfile> data;
     CallbackPromiseInfo info;
+    int32_t userId = SUBSCRIBE_USER_INIT;
 };
 
 napi_value SetDoNotDisturbDate(napi_env env, napi_callback_info info);
@@ -84,8 +86,12 @@ napi_value SupportDoNotDisturbMode(napi_env env, napi_callback_info info);
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, SetDoNotDisturbDateParams &params);
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, GetDoNotDisturbDateParams &params);
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, GetDoNotDisturbProfileParams &params);
+napi_value ParseParameters(
+    const napi_env &env, const napi_callback_info &info, GetDoNotDisturbProfileParams &params, int32_t &userId);
 bool ParseProfilesParameters(
     const napi_env &env, const napi_callback_info &info, std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+bool ParseProfilesParameters(const napi_env &env, const napi_callback_info &info,
+    std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, int32_t &userId);
 bool AnalyseTrustlist(const napi_env &env, const napi_value &value, sptr<NotificationDoNotDisturbProfile> &profile);
 }  // namespace NotificationNapi
 }  // namespace OHOS

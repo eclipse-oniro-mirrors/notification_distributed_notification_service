@@ -112,6 +112,26 @@ ani_object AniGetAllNotificationEnabledBundles(ani_env *env)
     return arrayBundles;
 }
 
+ani_object AniGetAllNotificationEnabledBundlesByUserId(ani_env *env, ani_int userId)
+{
+    ANS_LOGD("AniGetAllNotificationEnabledBundlesByUserId call");
+    std::vector<BundleOption> bundleOptions = {};
+    int returncode = Notification::NotificationHelper::GetAllNotificationEnabledBundles(bundleOptions, userId);
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
+        ANS_LOGE("AniGetAllNotificationEnabledBundlesByUserId error, errorCode: %{public}d", externalCode);
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        return nullptr;
+    }
+    ani_object arrayBundles = NotificationSts::GetAniArrayBundleOption(env, bundleOptions);
+    if (arrayBundles == nullptr) {
+        ANS_LOGE("GetAniArrayBundleOption filed,arrayBundles is nullptr");
+        NotificationSts::ThrowErrorWithMsg(env, "GetAniArrayBundleOption ERROR_INTERNAL_ERROR");
+        return nullptr;
+    }
+    return arrayBundles;
+}
+
 ani_boolean AniIsNotificationEnabledSync(ani_env *env)
 {
     ANS_LOGD("AniIsNotificationEnabledSync call");

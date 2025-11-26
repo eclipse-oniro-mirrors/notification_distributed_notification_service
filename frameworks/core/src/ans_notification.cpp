@@ -1478,6 +1478,29 @@ ErrCode AnsNotification::AddDoNotDisturbProfiles(const std::vector<sptr<Notifica
     return proxy->AddDoNotDisturbProfiles(profiles);
 }
 
+ErrCode AnsNotification::AddDoNotDisturbProfiles(
+    const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, const int32_t userId)
+{
+    if (profiles.empty()) {
+        ANS_LOGW("The profiles is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGW("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    if (profiles.empty()) {
+        ANS_LOGW("The profiles is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    if (profiles.size() > MAX_STATUS_VECTOR_NUM) {
+        ANS_LOGE("The profiles is exceeds limit.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return proxy->AddDoNotDisturbProfiles(profiles, userId);
+}
+
 ErrCode AnsNotification::RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
 {
     if (profiles.empty()) {
@@ -1494,6 +1517,25 @@ ErrCode AnsNotification::RemoveDoNotDisturbProfiles(const std::vector<sptr<Notif
         return ERR_ANS_INVALID_PARAM;
     }
     return proxy->RemoveDoNotDisturbProfiles(profiles);
+}
+
+ErrCode AnsNotification::RemoveDoNotDisturbProfiles(
+    const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, const int32_t userId)
+{
+    if (profiles.empty()) {
+        ANS_LOGW("The profiles is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGW("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    if (profiles.size() > MAX_STATUS_VECTOR_NUM) {
+        ANS_LOGE("The profiles is exceeds limit.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return proxy->RemoveDoNotDisturbProfiles(profiles, userId);
 }
 
 ErrCode AnsNotification::DoesSupportDoNotDisturbMode(bool &doesSupport)
@@ -2098,6 +2140,17 @@ ErrCode AnsNotification::GetAllNotificationEnabledBundles(std::vector<Notificati
     return proxy->GetAllNotificationEnabledBundles(bundleOption);
 }
 
+ErrCode AnsNotification::GetAllNotificationEnabledBundles(
+    std::vector<NotificationBundleOption> &bundleOption, const int32_t userId)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->GetAllNotificationEnabledBundles(bundleOption, userId);
+}
+
 ErrCode AnsNotification::GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
@@ -2686,6 +2739,17 @@ ErrCode AnsNotification::GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoN
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->GetDoNotDisturbProfile(id, profile);
+}
+
+ErrCode AnsNotification::GetDoNotDisturbProfile(
+    int64_t id, sptr<NotificationDoNotDisturbProfile> &profile, const int32_t userId)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->GetDoNotDisturbProfile(id, profile, userId);
 }
 
 ErrCode AnsNotification::AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder)

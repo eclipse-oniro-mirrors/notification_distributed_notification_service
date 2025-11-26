@@ -1317,6 +1317,34 @@ HWTEST_F(NotificationPreferencesTest, GetAllNotificationEnabledBundles_00100, Fu
 }
 
 /**
+ * @tc.number    : GetAllNotificationEnabledBundles_00200
+ * @tc.name      : GetAllNotificationEnabledBundles
+ */
+HWTEST_F(NotificationPreferencesTest, GetAllNotificationEnabledBundles_00200, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    std::vector<NotificationBundleOption> bundleOption;
+    int32_t userId = 100;
+    profiles.clear();
+    notificationPreferences.preferncesDB_ = nullptr;
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetAllNotificationEnabledBundles(bundleOption, userId),
+        (int)ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.number    : GetAllNotificationEnabledBundles_00300
+ * @tc.name      : GetAllNotificationEnabledBundles
+ */
+HWTEST_F(NotificationPreferencesTest, GetAllNotificationEnabledBundles_00300, Function | SmallTest | Level1)
+{
+    std::vector<NotificationBundleOption> bundleOption;
+    int32_t userId = 100;
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetAllNotificationEnabledBundles(bundleOption, userId),
+        (int)ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
  * @tc.number    : CheckSlotForUpdateSlot_00400
  * @tc.name      : CheckSlotForUpdateSlot
  * @tc.desc      : Test CheckSlotForUpdateSlot function after add notification slot, return is ERR_OK.

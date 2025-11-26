@@ -28,6 +28,7 @@ namespace NotificationNapi {
 const int ENABLE_NOTIFICATION_MAX_PARA = 3;
 const int ENABLE_NOTIFICATION_MIN_PARA = 2;
 const int IS_NOTIFICATION_ENABLE_MAX_PARA = 2;
+const int GET_BUNDLE_MAX_PARAM = 1;
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnableParams &params)
 {
@@ -128,6 +129,26 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     }
 
     return Common::NapiGetNull(env);
+}
+
+bool ParseUserIdParameters(const napi_env &env, const napi_callback_info &info, int32_t &userId)
+{
+    size_t argc = GET_BUNDLE_MAX_PARAM;
+    napi_value argv[GET_BUNDLE_MAX_PARAM] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL_BASE(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL), false);
+    if (argc == GET_BUNDLE_MAX_PARAM) {
+        napi_valuetype valuetype = napi_undefined;
+        NAPI_CALL_BASE(env, napi_typeof(env, argv[PARAM0], &valuetype), false);
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return false;
+        }
+        NAPI_CALL_BASE(env, napi_get_value_int32(env, argv[PARAM0], &userId), false);
+    }
+    return true;
 }
 
 void AsyncCompleteCallbackEnableNotification(napi_env env, napi_status status, void *data)

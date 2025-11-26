@@ -20,8 +20,11 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 void AniAddDoNotDisturbProfile(ani_env *env, ani_object obj);
+void AniAddDoNotDisturbProfileByUserId(ani_env *env, ani_object obj, ani_int userId);
 void AniRemoveDoNotDisturbProfile(ani_env *env, ani_object obj);
+void AniRemoveDoNotDisturbProfileByUserId(ani_env *env, ani_object obj, ani_int userId);
 ani_object AniGetDoNotDisturbProfile(ani_env *env, ani_long id);
+ani_object AniGetDoNotDisturbProfileByUserId(ani_env *env, ani_long id, ani_int userId);
 }
 }
 #endif

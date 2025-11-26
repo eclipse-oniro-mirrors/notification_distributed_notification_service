@@ -451,9 +451,14 @@ void AsyncCompleteCallbackNapiGetAllNotificationEnableStatus(napi_env env, napi_
 napi_value NapiGetAllNotificationEnabledBundles(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("called");
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (!ParseUserIdParameters(env, info, userId)) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
     napi_ref callback = nullptr;
     AsyncCallbackInfoEnableStatus *asynccallbackinfo =
-        new (std::nothrow) AsyncCallbackInfoEnableStatus{ .env = env, .asyncWork = nullptr };
+        new (std::nothrow) AsyncCallbackInfoEnableStatus{ .env = env, .asyncWork = nullptr, .userId = userId };
     if (asynccallbackinfo == nullptr) {
         ANS_LOGE("null asynccallbackinfo");
         Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
@@ -468,9 +473,16 @@ napi_value NapiGetAllNotificationEnabledBundles(napi_env env, napi_callback_info
         [](napi_env env, void *data) {
             AsyncCallbackInfoEnableStatus *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableStatus *>(data);
             if (asynccallbackinfo != nullptr) {
-                asynccallbackinfo->info.errorCode =
-                    NotificationHelper::GetAllNotificationEnabledBundles(asynccallbackinfo->bundleOptionVector);
-                ANS_LOGD("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+                if (asynccallbackinfo->userId != SUBSCRIBE_USER_INIT) {
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::GetAllNotificationEnabledBundles(
+                            asynccallbackinfo->bundleOptionVector, asynccallbackinfo->userId);
+                    ANS_LOGD("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+                } else {
+                    asynccallbackinfo->info.errorCode =
+                        NotificationHelper::GetAllNotificationEnabledBundles(asynccallbackinfo->bundleOptionVector);
+                    ANS_LOGD("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+                }
             }
         },
         AsyncCompleteCallbackNapiGetAllNotificationEnableStatus, (void *)asynccallbackinfo,

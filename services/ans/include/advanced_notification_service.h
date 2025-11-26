@@ -701,6 +701,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override;
+    ErrCode AddDoNotDisturbProfiles(
+        const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, const int32_t userId) override;
 
     /**
      * @brief Remove Do Not Disturb profiles.
@@ -709,6 +711,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override;
+    ErrCode RemoveDoNotDisturbProfiles(
+        const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, const int32_t userId) override;
 
     /**
      * @brief Get whether Do Not Disturb mode is supported.
@@ -1074,6 +1078,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption) override;
+    ErrCode GetAllNotificationEnabledBundles(
+        std::vector<NotificationBundleOption> &bundleOption, const int32_t userId) override;
 
     /**
      * @brief Obtains allow liveview application list.
@@ -1530,6 +1536,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile) override;
+    ErrCode GetDoNotDisturbProfile(
+        int64_t id, sptr<NotificationDoNotDisturbProfile> &profile, const int32_t userId) override;
 
     /**
      * @brief Distribution operation based on hashCode.

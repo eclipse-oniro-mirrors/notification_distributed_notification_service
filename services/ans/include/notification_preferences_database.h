@@ -352,6 +352,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     bool GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
+    bool GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
 
     /**
      * @brief Delete all slots in the of bundle from disturbe DB.
@@ -536,6 +537,10 @@ private:
         const std::string &bundleKey, const NotificationPreferencesInfo::BundleInfo &bundleInfo);
     bool HandleDataBaseMap(
         const std::unordered_map<std::string, std::string> &datas, std::vector<NotificationBundleOption> &bundleOption);
+
+    bool HandleDataBaseMap(
+        const std::unordered_map<std::string, std::string> &datas,
+        std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
 
     void GetValueFromDisturbeDB(const std::string &key, const int &userId,
         std::function<void(std::string &)> function);

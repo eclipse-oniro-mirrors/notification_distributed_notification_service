@@ -281,6 +281,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
+    ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
 
     ErrCode GetAllLiveViewEnabledBundles(const int32_t userId, std::vector<NotificationBundleOption> &bundleOption);
 

@@ -809,6 +809,8 @@ public:
      * @return Returns add do not disturb profiles result.
      */
     ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+    ErrCode AddDoNotDisturbProfiles(
+        const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, const int32_t userId);
 
     /**
      * @brief Remove the do not disturb profiles.
@@ -818,6 +820,8 @@ public:
      * @return Returns remove do not disturb profiles result.
      */
     ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+    ErrCode RemoveDoNotDisturbProfiles(
+        const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, const int32_t userId);
 
     /**
      * @brief Obtains the flag that whether to support do not disturb mode.
@@ -1075,6 +1079,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
+    ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
 
     /**
      * @brief Obtains allow liveview application list.
@@ -1401,6 +1406,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile);
+    ErrCode GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile, const int32_t userId);
 
     /**
      * @brief Get the status of the target device.

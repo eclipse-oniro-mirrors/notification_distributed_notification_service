@@ -1001,6 +1001,8 @@ public:
      * @return Returns set do not disturb time result.
      */
     static ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+    static ErrCode AddDoNotDisturbProfiles(
+        const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, const int32_t userId);
 
     /**
      * @brief Obtains the do not disturb on a specified user.
@@ -1010,6 +1012,8 @@ public:
      * @return Returns set do not disturb time result.
      */
     static ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+    static ErrCode RemoveDoNotDisturbProfiles(
+        const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, const int32_t userId);
 
     /**
      * @brief Set whether to sync notifications to devices that do not have the app installed.
@@ -1062,6 +1066,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     static ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
+    static ErrCode GetAllNotificationEnabledBundles(
+        std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
 
     /**
      * @brief Obtains allow liveview application list.
@@ -1416,6 +1422,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     static ErrCode GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile);
+    static ErrCode GetDoNotDisturbProfile(
+        int64_t id, sptr<NotificationDoNotDisturbProfile> &profile, const int32_t userId);
 
     /**
      * @brief Update Notification Timer by uid

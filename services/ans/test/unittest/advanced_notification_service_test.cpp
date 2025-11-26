@@ -462,6 +462,68 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03600,
 }
 
 /**
+ * @tc.name      : ANS_AddDoNotDisturbProfiles_0200
+ * @tc.desc      : Test AddDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ANS_AddDoNotDisturbProfiles_0200, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(true);
+    sptr<NotificationDoNotDisturbProfile> date = nullptr;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
+    int32_t userId = 100;
+    auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles, userId);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name      : ANS_AddDoNotDisturbProfiles_0300
+ * @tc.desc      : Test AddDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ANS_AddDoNotDisturbProfiles_0300, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    sptr<NotificationDoNotDisturbProfile> date = nullptr;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
+    int32_t userId = 100;
+    auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles, userId);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name      : ANS_AddDoNotDisturbProfiles_0400
+ * @tc.desc      : Test AddDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ANS_AddDoNotDisturbProfiles_0400, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    sptr<NotificationDoNotDisturbProfile> date = nullptr;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
+    int32_t userId = 100;
+    auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles, userId);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name      : ANS_AddDoNotDisturbProfiles_0500
+ * @tc.desc      : Test AddDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ANS_AddDoNotDisturbProfiles_0500, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    sptr<NotificationDoNotDisturbProfile> date = nullptr;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
+    int32_t userId = 100;
+    auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles, userId);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
  * @tc.number    : AdvancedNotificationServiceTest_03700
  * @tc.name      : ANS_Delete_0100
  * @tc.desc      : Test Delete function
@@ -4692,6 +4754,85 @@ HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0001,
 }
 
 /**
+ * @tc.number    : GetAllNotificationEnabledBundles_0002
+ * @tc.name      : GetAllNotificationEnabledBundles
+ * @tc.desc      : Test GetAllNotificationEnabledBundles function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0002, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0002 test start";
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    advancedNotificationService_->notificationSvrQueue_ = std::make_shared<ffrt::queue>("NotificationSvrMain");
+    std::vector<NotificationBundleOption> vec;
+    int32_t userId = 100;
+    ASSERT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec, userId),
+        ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+
+    GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0002 test end";
+}
+
+/**
+ * @tc.number    : GetAllNotificationEnabledBundles_0003
+ * @tc.name      : GetAllNotificationEnabledBundles
+ * @tc.desc      : Test GetAllNotificationEnabledBundles function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0003, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0003 test start";
+
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(true);
+    std::vector<NotificationBundleOption> vec;
+    int32_t userId = 100;
+    ASSERT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec, userId), ERR_ANS_NON_SYSTEM_APP);
+
+    GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0003 test end";
+}
+
+/**
+ * @tc.number    : GetAllNotificationEnabledBundles_0004
+ * @tc.name      : GetAllNotificationEnabledBundles
+ * @tc.desc      : Test GetAllNotificationEnabledBundles function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0004, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0004 test start";
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    advancedNotificationService_->notificationSvrQueue_ = std::make_shared<ffrt::queue>("NotificationSvrMain");
+    std::vector<NotificationBundleOption> vec;
+    int32_t userId = 100;
+    ASSERT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec, userId), ERR_ANS_PERMISSION_DENIED);
+
+    GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0004 test end";
+}
+
+/**
+ * @tc.number    : GetAllNotificationEnabledBundles_0005
+ * @tc.name      : GetAllNotificationEnabledBundles
+ * @tc.desc      : Test GetAllNotificationEnabledBundles function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0005, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0005 test start";
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    std::vector<NotificationBundleOption> vec;
+    int32_t userId = 100;
+    ASSERT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec, userId), ERR_ANS_INVALID_PARAM);
+
+    GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0005 test end";
+}
+
+/**
  * @tc.number    : IsNeedNotifyConsumed_00003
  * @tc.name      : IsNeedNotifyConsumed
  * @tc.desc      : Test IsNeedNotifyConsumed function.
@@ -5722,6 +5863,125 @@ HWTEST_F(AdvancedNotificationServiceTest, CheckOverLayIcon_005, Function | Small
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     ErrCode ret = CheckPictureSize(request);
     EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name      : ANS_RemoveDoNotDisturbProfiles_0100
+ * @tc.desc      : Test RemoveDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ANS_RemoveDoNotDisturbProfiles_0100, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    sptr<NotificationDoNotDisturbProfile> date = nullptr;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
+    int32_t userId = 100;
+    auto ret = advancedNotificationService_->RemoveDoNotDisturbProfiles(profiles, userId);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name      : ANS_RemoveDoNotDisturbProfiles_0200
+ * @tc.desc      : Test RemoveDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ANS_RemoveDoNotDisturbProfiles_0200, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    sptr<NotificationDoNotDisturbProfile> date = nullptr;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
+    int32_t userId = 100;
+    auto ret = advancedNotificationService_->RemoveDoNotDisturbProfiles(profiles, userId);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name      : ANS_RemoveDoNotDisturbProfiles_0300
+ * @tc.desc      : Test RemoveDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ANS_RemoveDoNotDisturbProfiles_0300, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    sptr<NotificationDoNotDisturbProfile> date = nullptr;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
+    int32_t userId = 100;
+    auto ret = advancedNotificationService_->RemoveDoNotDisturbProfiles(profiles, userId);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name      : ANS_RemoveDoNotDisturbProfiles_0400
+ * @tc.desc      : Test RemoveDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ANS_RemoveDoNotDisturbProfiles_0400, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    sptr<NotificationDoNotDisturbProfile> date = nullptr;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
+    int32_t userId = 100;
+    auto ret = advancedNotificationService_->RemoveDoNotDisturbProfiles(profiles, userId);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetDoNotDisturbProfile_0100
+ * @tc.desc: Test GetDoNotDisturbProfile function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetDoNotDisturbProfile_0100, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    int64_t id = 101;
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    EXPECT_NE(profile, nullptr);
+    int32_t userId = 100;
+    ErrCode result = advancedNotificationService_->GetDoNotDisturbProfile(id, profile, userId);
+    EXPECT_EQ(result, ERR_ANS_NO_PROFILE_TEMPLATE);
+}
+
+/**
+ * @tc.name: GetDoNotDisturbProfile_0200
+ * @tc.desc: Test GetDoNotDisturbProfile function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetDoNotDisturbProfile_0200, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(true);
+    int64_t id = 101;
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    EXPECT_NE(profile, nullptr);
+    int32_t userId = 100;
+    ErrCode result = advancedNotificationService_->GetDoNotDisturbProfile(id, profile, userId);
+    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: GetDoNotDisturbProfile_0300
+ * @tc.desc: Test GetDoNotDisturbProfile function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetDoNotDisturbProfile_0300, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    int64_t id = 101;
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    EXPECT_NE(profile, nullptr);
+    int32_t userId = 100;
+    ErrCode result = advancedNotificationService_->GetDoNotDisturbProfile(id, profile, userId);
+    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
 }
 }  // namespace Notification
 }  // namespace OHOS
