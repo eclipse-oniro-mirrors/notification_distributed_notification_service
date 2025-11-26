@@ -136,6 +136,20 @@ enum class LiveViewTypes {
     LIVE_VIEW_INSTANT_BANNER
 };
 
+enum class MonitorEvent {
+    MONITOR_TYPE_ENTRY = 1,
+    MONITOR_TYPE_LEAVE = 2
+};
+
+enum class CoordinateSystemType {
+    COORDINATE_TYPE_WGS84 = 1,
+    COORDINATE_TYPE_GCJ02 = 2
+};
+
+enum class TriggerType {
+    TRIGGER_TYPE_FENCE = 1
+};
+
 enum class RingtoneType {
     RINGTONE_TYPE_SYSTEM = 0,
     RINGTONE_TYPE_LOCAL = 1,
@@ -218,6 +232,34 @@ public:
      * @return Returns true if success, returns false otherwise
      */
     static bool LiveViewTypesJSToC(const LiveViewTypes &in, NotificationLocalLiveViewContent::LiveViewTypes &out);
+
+    /**
+     * @brief Converts monitor event types from js to native
+     *
+     * @param in Indicates a js monitor event type object
+     * @param out Indicates a monitor event type object
+     * @return Returns true if success, returns false otherwise
+     */
+    static bool MonitorEventJSToC(const MonitorEvent &in, NotificationConstant::MonitorEvent &out);
+
+    /**
+     * @brief Converts coordinate system type from js to native
+     *
+     * @param in Indicates a js coordinate system type object
+     * @param out Indicates a coordinate system type object
+     * @return Returns true if success, returns false otherwise
+     */
+    static bool CoordinateSystemTypeJSToC(const CoordinateSystemType &in,
+        NotificationConstant::CoordinateSystemType &out);
+
+    /**
+     * @brief Converts trigger type from js to native
+     *
+     * @param in Indicates a js trigger type object
+     * @param out Indicates a trigger type object
+     * @return Returns true if success, returns false otherwise
+     */
+    static bool TriggerTypeJSToC(const TriggerType &in, NotificationConstant::TriggerType &out);
 
     /**
      * @brief Converts slot level from native to js

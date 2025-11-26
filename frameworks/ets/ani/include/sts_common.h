@@ -60,6 +60,7 @@ ani_status GetPropertyBool(ani_env *env, ani_object obj, const char *name,
     ani_boolean &isUndefined, bool &outvalue);
 ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
     ani_boolean &isUndefined, ani_double &outvalue);
+ani_status GetPropertyValueDouble(ani_env *env, ani_object param, const char *name, double &value);
 ani_status GetPropertyInt(ani_env *env, ani_object obj, const char *name,
     ani_boolean &isUndefined, ani_int &outvalue);
 ani_status GetPropertyLong(ani_env *env, ani_object obj, const char *name,
