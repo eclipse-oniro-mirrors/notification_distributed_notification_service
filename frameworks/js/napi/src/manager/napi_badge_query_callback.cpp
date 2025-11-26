@@ -18,12 +18,14 @@
 #include "common.h"
 #include "ans_log_wrapper.h"
 #include "js_runtime.h"
+#include "js_error_utils.h"
 #include "js_runtime_utils.h"
 #include "nlohmann/json.hpp"
 #include "napi_common_util.h"
 #include "ans_log_wrapper.h"
 #include "ans_inner_errors.h"
 #include "ipc_skeleton.h"
+#include "tokenid_kit.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -31,6 +33,7 @@ namespace {
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr int32_t INVALID_BADGE_NUMBER = -1;
+constexpr int32_t INVALID_BADGE_NUMBER_INTERNAL = -2;
 constexpr int32_t BADGEQUERY_TIMEOUT_MS = 500;
 constexpr int32_t INVALID_USER_ID = -1;
 } // namespace
@@ -60,9 +63,14 @@ struct AsyncCallbackOffBadgeNumberQuery {
     std::shared_ptr<JSBadgeQueryCallBack> objectInfo;
 };
 
-void ThreadFinished(napi_env env, void* data, [[maybe_unused]] void* context)
+bool CheckCallerIsSystemApp()
 {
-    ANS_LOGD("called");
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        ANS_LOGE("current app is not system app, not allow.");
+        return false;
+    }
+    return true;
 }
 
 int32_t ConvertBadgeNumberResult(napi_env env, napi_value funcResult)
@@ -197,7 +205,7 @@ void ThreadSafeBadgeQuery(napi_env env, napi_value jsCallback, void* context, vo
         return;
     }
     if (!ThreadSafeBadgeQueryHandle(env, dataWorker)) {
-        dataWorker->promise.set_value(INVALID_BADGE_NUMBER);
+        dataWorker->promise.set_value(INVALID_BADGE_NUMBER_INTERNAL);
         delete dataWorker;
         dataWorker = nullptr;
         ANS_LOGD("Clean dataWorker");
@@ -243,9 +251,12 @@ napi_value GetBadgeQueryCallBackInfo(const napi_env &env, const napi_value &valu
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "tsfn", NAPI_AUTO_LENGTH, &resourceName);
     napi_threadsafe_function tsfn = nullptr;
-    napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, badgeQueryCallbackInfo->ref,
-        ThreadFinished, nullptr, ThreadSafeBadgeQuery, &tsfn);
-    badgeQueryCallbackInfo->SetThreadSafeFunction(tsfn);
+    napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, nullptr, nullptr,
+        nullptr, ThreadSafeBadgeQuery, &tsfn);
+    {
+        std::lock_guard<ffrt::mutex> lock(badgeQueryCallbackInfo->tsfnMutex_);
+        badgeQueryCallbackInfo->SetThreadSafeFunction(tsfn);
+    }
     badgeQueryCallbackInfo->SetEnv(env);
     return Common::NapiGetNull(env);
 }
@@ -313,7 +324,7 @@ void ClearEnvCallback(void *data)
 
 void AsyncCompleteCallbackNapiBadgeNumberQuery(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("AsyncCompleteCallbackNapiOnBadgeNumberQuery");
+    ANS_LOGI("NapiOnBadgeNumberQuery work complete.");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -332,31 +343,32 @@ void AsyncCompleteCallbackNapiBadgeNumberQuery(napi_env env, napi_status status,
 
 napi_value NapiOnBadgeNumberQuery(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("called");
     std::shared_ptr<JSBadgeQueryCallBack> objectInfo;
     int32_t uid = IPCSkeleton::GetCallingUid();
     if (uid < 0) {
-        ANS_LOGE("uid is invalid");
+        ANS_LOGE("uid(%{public}d) is invalid", uid);
         return Common::NapiGetUndefined(env);
     }
     int32_t userId = INVALID_USER_ID;
     if (Common::GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
         return Common::NapiGetUndefined(env);
     }
-    if (ParseParameters(env, info, objectInfo, userId) == nullptr) {
-        ANS_LOGD("ParseParameters failed");
+    if (!CheckCallerIsSystemApp()) {
+        AbilityRuntime::ThrowError(env, ERROR_NOT_SYSTEM_APP);
         return Common::NapiGetUndefined(env);
     }
-
+    ANS_LOGI("uid(%{public}d), userId(%{public}d), start onbadgenumberquery", uid, userId);
+    if (ParseParameters(env, info, objectInfo, userId) == nullptr) {
+        return Common::NapiGetUndefined(env);
+    }
     if (objectInfo == nullptr) {
-        ANS_LOGE("null objectInfo");
         return Common::NapiGetUndefined(env);
     }
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackBadgeNumberQuery {
         .env = env, .asyncWork = nullptr, .objectInfo = objectInfo};
     if (!asynccallbackinfo) {
-        ANS_LOGD("null asynccallbackinfo");
+        ANS_LOGE("null asynccallbackinfo");
         return Common::JSParaError(env, nullptr);
     }
 
@@ -369,7 +381,6 @@ napi_value NapiOnBadgeNumberQuery(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGD("NapiOnBadgeNumberQuery word excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackBadgeNumberQuery *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::RegisterBadgeQueryCallback(
@@ -387,7 +398,7 @@ napi_value NapiOnBadgeNumberQuery(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackNapiOffBadgeNumberQuery(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("NapiOffBadgeNumberQuery work complete.");
+    ANS_LOGI("NapiOffBadgeNumberQuery work complete.");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -399,6 +410,7 @@ void AsyncCompleteCallbackNapiOffBadgeNumberQuery(napi_env env, napi_status stat
     }
     
     if (asynccallbackinfo->objectInfo) {
+        std::lock_guard<ffrt::mutex> lock(asynccallbackinfo->objectInfo->tsfnMutex_);
         napi_threadsafe_function tsfn = asynccallbackinfo->objectInfo->GetThreadSafeFunction();
         if (tsfn != nullptr) {
             napi_release_threadsafe_function(tsfn, napi_tsfn_release);
@@ -420,16 +432,20 @@ void AsyncCompleteCallbackNapiOffBadgeNumberQuery(napi_env env, napi_status stat
 
 napi_value NapiOffBadgeNumberQuery(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("called");
     int32_t uid = IPCSkeleton::GetCallingUid();
     if (uid < 0) {
-        ANS_LOGE("uid is invalid");
+        ANS_LOGE("uid(%{public}d) is invalid", uid);
         return Common::NapiGetUndefined(env);
     }
     int32_t userId = INVALID_USER_ID;
     if (Common::GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
         return Common::NapiGetUndefined(env);
     }
+    if (!CheckCallerIsSystemApp()) {
+        AbilityRuntime::ThrowError(env, ERROR_NOT_SYSTEM_APP);
+        return Common::NapiGetUndefined(env);
+    }
+    ANS_LOGI("uid(%{public}d), userId(%{public}d), start offbadgenumberquery", uid, userId);
     std::shared_ptr<JSBadgeQueryCallBack> callback;
     {
         std::lock_guard<ffrt::mutex> lock(badgeQueryCallbackInfoMutex_);
@@ -445,7 +461,7 @@ napi_value NapiOffBadgeNumberQuery(napi_env env, napi_callback_info info)
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackOffBadgeNumberQuery {
         .env = env, .asyncWork = nullptr, .userId = userId, .objectInfo = callback};
     if (!asynccallbackinfo) {
-        ANS_LOGD("null asynccallbackinfo");
+        ANS_LOGE("null asynccallbackinfo");
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -453,11 +469,8 @@ napi_value NapiOffBadgeNumberQuery(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "OffBadgeNumberQuery", NAPI_AUTO_LENGTH, &resourceName);
 
-    napi_create_async_work(env,
-        nullptr,
-        resourceName,
+    napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGD("NapiOffBadgeNumberQuery word excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackOffBadgeNumberQuery *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
@@ -465,8 +478,7 @@ napi_value NapiOffBadgeNumberQuery(napi_env env, napi_callback_info info)
             }
         },
         AsyncCompleteCallbackNapiOffBadgeNumberQuery,
-        (void *)asynccallbackinfo,
-        &asynccallbackinfo->asyncWork);
+        (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     return promise;
 }
@@ -477,13 +489,11 @@ JSBadgeQueryCallBack::~JSBadgeQueryCallBack() {}
 
 void JSBadgeQueryCallBack::SetThreadSafeFunction(const napi_threadsafe_function &tsfn)
 {
-    std::lock_guard<ffrt::mutex> lock(tsfnMutex_);
     tsfn_ = tsfn;
 }
 
 napi_threadsafe_function JSBadgeQueryCallBack::GetThreadSafeFunction()
 {
-    std::lock_guard<ffrt::mutex> lock(tsfnMutex_);
     return tsfn_;
 }
 
@@ -516,17 +526,20 @@ ErrCode JSBadgeQueryCallBack::OnBadgeNumberQuery(const sptr<NotificationBundleOp
 {
     if (ref == nullptr) {
         ANS_LOGE("null badgeQueryCallBack ref");
-        return ERR_INVALID_DATA;
+        badgeNumber = INVALID_BADGE_NUMBER_INTERNAL;
+        return ERR_OK;
     }
     if (bundleOption == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_INVALID_DATA;
+        badgeNumber = INVALID_BADGE_NUMBER_INTERNAL;
+        return ERR_OK;
     }
 
     NotificationBadgeQueryDataWorker* dataWorker = new (std::nothrow) NotificationBadgeQueryDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("null dataWorker");
-        return ERR_INVALID_DATA;
+        badgeNumber = INVALID_BADGE_NUMBER_INTERNAL;
+        return ERR_OK;
     }
 
     dataWorker->bundle.SetBundleName(bundleOption->GetBundleName());
@@ -536,10 +549,13 @@ ErrCode JSBadgeQueryCallBack::OnBadgeNumberQuery(const sptr<NotificationBundleOp
     {
         std::lock_guard<ffrt::mutex> lock(tsfnMutex_);
         if (tsfn_ == nullptr) {
-            ANS_LOGD("null tsfn_");
+            ANS_LOGE("null tsfn_");
+            badgeNumber = INVALID_BADGE_NUMBER_INTERNAL;
+            // 避免broken promise
+            dataWorker->promise.set_value(INVALID_BADGE_NUMBER_INTERNAL);
             delete dataWorker;
             dataWorker = nullptr;
-            return ERR_INVALID_DATA;
+            return ERR_OK;
         }
         napi_acquire_threadsafe_function(tsfn_);
         napi_call_threadsafe_function(tsfn_, (void*)dataWorker, napi_tsfn_nonblocking);

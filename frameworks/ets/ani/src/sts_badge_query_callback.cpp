@@ -25,6 +25,7 @@
 #include "notification_bundle_option.h"
 #include "sts_convert_other.h"
 #include "ipc_skeleton.h"
+#include "tokenid_kit.h"
 
 namespace OHOS {
 namespace NotificationSts {
@@ -34,6 +35,16 @@ constexpr int32_t INVALID_USER_ID = -1;
 
 ffrt::mutex BadgeNumberPromiseManager::promiseMutex_;
 std::unordered_map<int32_t, std::shared_ptr<std::promise<int32_t>>> BadgeNumberPromiseManager::promises_;
+
+bool CheckCallerIsSystemApp()
+{
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        ANS_LOGE("current app is not system app, not allow.");
+        return false;
+    }
+    return true;
+}
 
 std::future<int32_t> BadgeNumberPromiseManager::CreatePromise(int32_t uid)
 {
@@ -263,6 +274,11 @@ void StsBadgeQueryCallBackManager::AniOnBadgeNumberQuery(ani_env *env, ani_fn_ob
         return;
     }
 
+    if (!CheckCallerIsSystemApp()) {
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERROR_NOT_SYSTEM_APP);
+        return;
+    }
+
     std::shared_ptr<StsBadgeQueryCallBack> objectInfo;
     if (!MakeBadgeQueryCallBackInfo(env, fn, objectInfo)) {
         ANS_LOGE("BadgeQueryCallBackInfo parse failed");
@@ -297,6 +313,11 @@ void StsBadgeQueryCallBackManager::AniOffBadgeNumberQuery(ani_env *env)
     }
     int32_t userId = INVALID_USER_ID;
     if (GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
+        return;
+    }
+
+    if (!CheckCallerIsSystemApp()) {
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERROR_NOT_SYSTEM_APP);
         return;
     }
 

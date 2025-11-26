@@ -40,8 +40,8 @@ public:
     void SetEnv(const napi_env &env);
     void ClearEnv();
     napi_ref ref = nullptr;
-private:
     ffrt::mutex tsfnMutex_;
+private:
     napi_env env_ = nullptr;
     napi_threadsafe_function tsfn_ = nullptr;
 };
