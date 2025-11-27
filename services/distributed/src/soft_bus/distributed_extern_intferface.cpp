@@ -42,14 +42,14 @@ SYMBOL_EXPORT int32_t InitLocalDevice(const std::string &deviceId, uint16_t devi
 }
 
 SYMBOL_EXPORT void AddDevice(const std::string &deviceId, const std::string &udid, uint16_t deviceType,
-    const std::string &networkId)
+    const std::string &networkId, const std::string &extraData)
 {
     ANS_LOGI("AddDevice %{public}s %{public}d %{public}s.", StringAnonymous(deviceId).c_str(),
         (int32_t)(deviceType), StringAnonymous(networkId).c_str());
     DistributedDeviceInfo peerDevice = DistributedDeviceInfo(deviceType, deviceId, networkId);
     peerDevice.udid_ = udid;
     DistributedClient::GetInstance().AddDevice(peerDevice);
-    DistributedService::GetInstance().AddDevice(peerDevice);
+    DistributedService::GetInstance().AddDevice(peerDevice, extraData);
 }
 
 SYMBOL_EXPORT void DeviceStatusChange(const DeviceStatueChangeInfo& changeInfo)
