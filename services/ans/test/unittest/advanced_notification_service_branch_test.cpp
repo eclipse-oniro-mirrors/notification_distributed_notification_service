@@ -1529,5 +1529,40 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_286007, Function | SmallTest | Level1)
     bundles.emplace_back(bundle);
     advancedNotificationService_->InvockLiveViewSwitchCheck(bundles, 100, 100);
 }
+
+/**
+ * @tc.number    : AnsBranchTest_287001
+ * @tc.name      : SetCheckConfig
+ * @tc.desc      : Test SetGeofenceEnabled function return ERR_ANS_SERVICE_NOT_READY.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287001, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    NotificationPreferences::GetInstance()->preferncesDB_ = nullptr;
+    auto result = advancedNotificationService_->SetGeofenceEnabled(false);
+    ASSERT_EQ(result, ERR_ANS_SERVICE_NOT_READY);
+    bool enabled = false;
+    result = advancedNotificationService_->IsGeofenceEnabled(enabled);
+    ASSERT_EQ(result, ERR_ANS_SERVICE_NOT_READY);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287002
+ * @tc.name      : SetCheckConfig
+ * @tc.desc      : Test SetGeofenceEnabled function return ERR_ANS_PERMISSION_DENIED.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287002, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(false);
+    auto result = advancedNotificationService_->SetGeofenceEnabled(false);
+    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    bool enabled = false;
+    result = advancedNotificationService_->IsGeofenceEnabled(enabled);
+    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+}
 }  // namespace Notification
 }  // namespace OHOS

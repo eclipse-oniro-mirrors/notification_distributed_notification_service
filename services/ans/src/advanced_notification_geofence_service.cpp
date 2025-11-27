@@ -27,15 +27,9 @@ namespace OHOS {
 namespace Notification {
 ErrCode AdvancedNotificationService::SetGeofenceEnabled(bool enabled)
 {
-    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGE("Not system app or SA!");
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGE("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
-        return ERR_ANS_PERMISSION_DENIED;
+    auto result = SystemPermissionCheck();
+    if (result != ERR_OK) {
+        return result;
     }
 
     return NotificationPreferences::GetInstance()->SetGeofenceEnabled(enabled);
@@ -43,15 +37,9 @@ ErrCode AdvancedNotificationService::SetGeofenceEnabled(bool enabled)
 
 ErrCode AdvancedNotificationService::IsGeofenceEnabled(bool &enabled)
 {
-    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGE("Not system app or SA!");
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGE("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
-        return ERR_ANS_PERMISSION_DENIED;
+    auto result = SystemPermissionCheck();
+    if (result != ERR_OK) {
+        return result;
     }
 
     return NotificationPreferences::GetInstance()->IsGeofenceEnabled(enabled);

@@ -2685,7 +2685,7 @@ bool NotificationPreferencesDatabase::IsGeofenceEnabled(bool &enabled)
     GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
         switch (status) {
             case NativeRdb::E_EMPTY_VALUES_BUCKET: {
-                enabled = false;
+                enabled = true;
                 result = true;
                 break;
             }

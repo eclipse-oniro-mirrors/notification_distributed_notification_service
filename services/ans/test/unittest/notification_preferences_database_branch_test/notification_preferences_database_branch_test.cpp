@@ -24,13 +24,14 @@
 #undef protected
 
 extern void MockInit(bool mockRet);
-extern void MockQueryData(bool mockRet);
+extern void MockQueryData(int32_t mockRet);
 extern void MockInsertData(bool mockRet);
 extern void MockInsertBatchData(bool mockRet);
 extern void MockQueryDataBeginWithKey(bool mockRet);
 extern void MockDeleteBatchData(bool mockRet);
 extern void MockDeleteData(bool mockRet);
 extern void MockDropTable(bool mockRet);
+extern void MockSetDataValue(std::string value);
 
 using namespace testing::ext;
 namespace OHOS {
@@ -75,7 +76,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0020
     // set CheckRdbStore is true
     MockInit(true);
     // set status is NativeRdb::E_EMPTY_VALUES_BUCKET
-    MockQueryData(false);
+    MockQueryData(NativeRdb::E_EMPTY_VALUES_BUCKET);
     // set PutBundleToDisturbeDB is false
     MockInsertData(false);
     // test PutBundlePropertyToDisturbeDB function
@@ -95,7 +96,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0030
     // set CheckRdbStore is true
     MockInit(true);
     // set status is NativeRdb::E_ERROR
-    MockQueryData(true);
+    MockQueryData(NativeRdb::E_ERROR);
     // test PutBundlePropertyToDisturbeDB function
     ASSERT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo), false);
 }
@@ -110,7 +111,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0040
     // set CheckRdbStore is true
     MockInit(true);
     // set status is NativeRdb::E_ERROR
-    MockQueryData(true);
+    MockQueryData(NativeRdb::E_ERROR);
     // test CheckBundle function
     std::string bundleName = "<bundleName>";
     int32_t bundleUid = 1;
@@ -131,7 +132,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0050
     // set CheckRdbStore is true
     MockInit(true);
     // set status is NativeRdb::E_ERROR
-    MockQueryData(true);
+    MockQueryData(NativeRdb::E_ERROR);
     // test PutShowBadge function
     bool enable = true;
     ASSERT_EQ(preferncesDB_->PutShowBadge(bundleInfo, enable), false);
@@ -151,7 +152,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0060
     // set CheckRdbStore is true
     MockInit(true);
     // set status is NativeRdb::E_ERROR
-    MockQueryData(true);
+    MockQueryData(NativeRdb::E_ERROR);
     // test PutImportance function
     int32_t importance = 1;
     ASSERT_EQ(preferncesDB_->PutImportance(bundleInfo, importance), false);
@@ -171,7 +172,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0070
     // set CheckRdbStore is true
     MockInit(true);
     // set status is NativeRdb::E_ERROR
-    MockQueryData(true);
+    MockQueryData(NativeRdb::E_ERROR);
     // test PutTotalBadgeNums function
     int32_t totalBadgeNum = 1;
     ASSERT_EQ(preferncesDB_->PutTotalBadgeNums(bundleInfo, totalBadgeNum), false);
@@ -191,7 +192,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0090
     // set CheckRdbStore is true
     MockInit(true);
     // set status is NativeRdb::E_ERROR
-    MockQueryData(true);
+    MockQueryData(NativeRdb::E_ERROR);
     // test PutNotificationsEnabledForBundle function
     ASSERT_EQ(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo,
         NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON), false);
@@ -242,7 +243,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0120
     // set CheckRdbStore is true
     MockInit(true);
     // set status is NativeRdb::E_ERROR
-    MockQueryData(true);
+    MockQueryData(NativeRdb::E_ERROR);
     // test PutHasPoppedDialog function
     bool hasPopped = true;
     ASSERT_EQ(preferncesDB_->PutHasPoppedDialog(bundleInfo, hasPopped), false);
@@ -305,7 +306,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0160
     // set CheckRdbStore is true
     MockInit(true);
     // set result == NativeRdb::E_ERROR
-    MockQueryData(true);
+    MockQueryData(NativeRdb::E_ERROR);
     // test GetValueFromDisturbeDB function
     std::string key = "<key>";
     ASSERT_NE(nullptr, preferncesDB_);
@@ -691,7 +692,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0410
     // set CheckRdbStore is true
     MockInit(true);
     // set CheckBundle is false
-    MockQueryData(true);
+    MockQueryData(NativeRdb::E_ERROR);
     // test SlotToEntry function
     std::string bundleName = "<bundleName>";
     int32_t bundleUid = 1;
@@ -713,7 +714,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0420
     // set CheckRdbStore is true
     MockInit(true);
     // set CheckBundle is false
-    MockQueryData(true);
+    MockQueryData(NativeRdb::E_ERROR);
     // test PutSlotsToDisturbeDB function
     std::string bundleName = "<bundleName>";
     int32_t bundleUid = 1;
@@ -782,7 +783,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0470
     // set CheckRdbStore is true
     MockInit(true);
     // set status is NativeRdb::E_ERROR
-    MockQueryData(true);
+    MockQueryData(NativeRdb::E_ERROR);
     // test GetDoNotDisturbType function
     NotificationPreferencesInfo info;
     int32_t userId = 1;
@@ -800,7 +801,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0480
     // set CheckRdbStore is true
     MockInit(true);
     // set status is NativeRdb::E_ERROR
-    MockQueryData(true);
+    MockQueryData(NativeRdb::E_ERROR);
     // test GetDoNotDisturbBeginDate function
     NotificationPreferencesInfo info;
     int32_t userId = 1;
@@ -818,7 +819,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0490
     // set CheckRdbStore is true
     MockInit(true);
     // set status is NativeRdb::E_ERROR
-    MockQueryData(true);
+    MockQueryData(NativeRdb::E_ERROR);
     // test GetDoNotDisturbEndDate function
     NotificationPreferencesInfo info;
     int32_t userId = 1;
@@ -836,7 +837,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0500
     // set CheckRdbStore is true
     MockInit(true);
     // set status is NativeRdb::E_ERROR
-    MockQueryData(true);
+    MockQueryData(NativeRdb::E_ERROR);
     // test GetEnableAllNotification function
     NotificationPreferencesInfo info;
     int32_t userId = 1;
@@ -958,10 +959,10 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0570
 HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_05701, Function | SmallTest | Level1)
 {
     MockInit(true);
-    MockQueryData(false);
+    MockQueryData(NativeRdb::E_EMPTY_VALUES_BUCKET);
     string value;
     ASSERT_EQ(preferncesDB_->GetKvFromDb(string("test"), value, -1), NativeRdb::E_ERROR);
-    MockQueryData(true);
+    MockQueryData(NativeRdb::E_ERROR);
     ASSERT_EQ(preferncesDB_->GetKvFromDb(string("test"), value, -1), NativeRdb::E_ERROR);
 }
 
@@ -1053,5 +1054,73 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, GetAdditionalConfig_00100, F
     ASSERT_EQ(preferncesDB_->GetAdditionalConfig(key), "");
 }
 
+/**
+ * @tc.name      : IsGeofenceEnabled_00100
+ * @tc.number    : IsGeofenceEnabled_00100
+ * @tc.desc      : test IsGeofenceEnabled.
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsGeofenceEnabled_00100, Function | SmallTest | Level1)
+{
+    MockQueryData(NativeRdb::E_EMPTY_VALUES_BUCKET);
+    bool enabled = false;
+    preferncesDB_->IsGeofenceEnabled(enabled);
+    EXPECT_TRUE(preferncesDB_->IsGeofenceEnabled(enabled));
+}
+
+/**
+ * @tc.name      : IsGeofenceEnabled_00200
+ * @tc.number    : IsGeofenceEnabled_00200
+ * @tc.desc      : test IsGeofenceEnabled.
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsGeofenceEnabled_00200, Function | SmallTest | Level1)
+{
+    MockQueryData(NativeRdb::E_NOT_SELECT);
+    bool enabled = false;
+    preferncesDB_->IsGeofenceEnabled(enabled);
+    EXPECT_FALSE(preferncesDB_->IsGeofenceEnabled(enabled));
+}
+
+/**
+ * @tc.name      : IsGeofenceEnabled_00300
+ * @tc.number    : IsGeofenceEnabled_00300
+ * @tc.desc      : test IsGeofenceEnabled.
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsGeofenceEnabled_00300, Function | SmallTest | Level1)
+{
+    MockQueryData(NativeRdb::E_OK);
+    bool enabled = false;
+    preferncesDB_->IsGeofenceEnabled(enabled);
+    EXPECT_FALSE(preferncesDB_->IsGeofenceEnabled(enabled));
+}
+
+/**
+ * @tc.name      : IsGeofenceEnabled_00400
+ * @tc.number    : IsGeofenceEnabled_00400
+ * @tc.desc      : test IsGeofenceEnabled.
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsGeofenceEnabled_00400, Function | SmallTest | Level1)
+{
+    std::string value = "0";
+    MockSetDataValue(value);
+    MockQueryData(NativeRdb::E_OK);
+    bool enabled = false;
+    preferncesDB_->IsGeofenceEnabled(enabled);
+    EXPECT_TRUE(preferncesDB_->IsGeofenceEnabled(enabled));
+}
+
+/**
+ * @tc.name      : IsGeofenceEnabled_00500
+ * @tc.number    : IsGeofenceEnabled_00500
+ * @tc.desc      : test IsGeofenceEnabled.
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsGeofenceEnabled_00500, Function | SmallTest | Level1)
+{
+    std::string value = "1";
+    MockSetDataValue(value);
+    MockQueryData(NativeRdb::E_OK);
+    bool enabled = false;
+    preferncesDB_->IsGeofenceEnabled(enabled);
+    EXPECT_TRUE(preferncesDB_->IsGeofenceEnabled(enabled));
+}
 }  // namespace Notification
 }  // namespace OHOS

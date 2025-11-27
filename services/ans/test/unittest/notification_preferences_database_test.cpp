@@ -2901,5 +2901,44 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetRingtoneInfoByBundle_0300, Test
     auto res = preferncesDB_->GetRingtoneInfoByBundle(bundleInfo, info);
     ASSERT_EQ(res, true);
 }
+
+/**
+ * @tc.name: SetGeofenceEnabled_0100
+ * @tc.desc: Test SetGeofenceEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetGeofenceEnabled_0100, TestSize.Level1)
+{
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1);
+    bool ret = preferncesDB_->SetGeofenceEnabled(false);
+    EXPECT_FALSE(ret);
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(100);
+}
+
+/**
+ * @tc.name: SetGeofenceEnabled_0200
+ * @tc.desc: Test SetGeofenceEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetGeofenceEnabled_0200, TestSize.Level1)
+{
+    preferncesDB_->rdbDataManager_ = nullptr;
+    bool ret = preferncesDB_->SetGeofenceEnabled(true);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsGeofenceEnabled_0100
+ * @tc.desc: Test IsGeofenceEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, IsGeofenceEnabled_0100, TestSize.Level1)
+{
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1);
+    bool enabled = false;
+    bool ret = preferncesDB_->IsGeofenceEnabled(enabled);
+    EXPECT_FALSE(ret);
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(100);
+}
 }  // namespace Notification
 }  // namespace OHOS

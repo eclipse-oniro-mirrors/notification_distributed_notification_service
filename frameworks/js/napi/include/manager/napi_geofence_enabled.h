@@ -23,7 +23,7 @@ namespace NotificationNapi {
 struct AsyncCallbackGeofenceEnabled {
     napi_env env = nullptr;
     napi_async_work asyncWork = nullptr;
-    bool enabled;
+    bool enabled = false;
     CallbackPromiseInfo info;
 };
 napi_value NapiSetGeofenceEnabled(napi_env env, napi_callback_info info);
