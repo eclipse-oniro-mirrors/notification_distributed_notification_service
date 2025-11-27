@@ -118,6 +118,11 @@ declare_args() {
     telephony_cust = false
   }
 
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.communication_dsoftbus)) {
+    distributed_notification_supported = false
+  }
+
   print("hisysevent_usage = " + "$hisysevent_usage")
   print("ans_hitrace_usage = " + "$ans_hitrace_usage")
 }

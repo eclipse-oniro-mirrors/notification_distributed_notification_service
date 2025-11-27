@@ -195,7 +195,6 @@ ohos_source_set("ans_service_sources") {
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "data_share:datashare_permission",
-    "device_manager:devicemanagersdk",
     "ffrt:libffrt",
     "hitrace:libhitracechain",
     "i18n:intl_util",
@@ -210,6 +209,10 @@ ohos_source_set("ans_service_sources") {
     "bluetooth:btframework",
   ]
   external_deps += component_external_deps
+
+  if (distributed_notification_supported) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
@@ -347,7 +350,6 @@ ohos_shared_library("libans") {
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "data_share:datashare_permission",
-    "device_manager:devicemanagersdk",
     "ffrt:libffrt",
     "i18n:intl_util",
     "icu:shared_icuuc",
@@ -362,6 +364,10 @@ ohos_shared_library("libans") {
     "time_service:time_client",
   ]
   external_deps += component_external_deps
+
+  if (distributed_notification_supported) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
