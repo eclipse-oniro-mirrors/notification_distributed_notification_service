@@ -57,6 +57,9 @@ ErrCode OsAccountManagerHelper::GetCurrentCallingUserId(int32_t &userId)
 
 ErrCode OsAccountManagerHelper::GetCurrentActiveUserId(int32_t &id)
 {
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+    ANS_LOGE("multi foreground user is not supported this function");
+#endif
     int32_t ret = OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(id);
     if (ret != ERR_OK) {
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_4)

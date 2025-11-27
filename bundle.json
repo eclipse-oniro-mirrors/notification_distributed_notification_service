@@ -58,7 +58,8 @@
       "distributed_notification_service_feature_all_scenario_collaboration",
       "distributed_notification_service_feature_priority_notification",
       "distributed_notification_service_feature_phone_collaboration",
-      "distributed_notification_service_feature_notification_extension_subscription"
+      "distributed_notification_service_feature_notification_extension_subscription",
+      "distributed_notification_service_feature_notification_multi_foreground_user"
     ],
     "adapted_system_type": [
       "standard"
