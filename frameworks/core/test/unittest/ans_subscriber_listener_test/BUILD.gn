@@ -35,6 +35,7 @@ ohos_unittest("ans_subscriber_listener_test") {
   external_deps = [
     "ability_base:configuration",
     "ability_base:zuri",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "ipc:ipc_single",
     "hilog:libhilog",

@@ -34,6 +34,7 @@ ohos_unittest("ans_subscriber_proxy_branch_test") {
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "googletest:gmock_main",
     "hilog:libhilog",
