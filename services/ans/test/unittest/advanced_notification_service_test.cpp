@@ -5126,5 +5126,121 @@ HWTEST_F(AdvancedNotificationServiceTest, RegisterBadgeQueryCallbackTest_0500, F
         (int)ERR_ANS_NON_SYSTEM_APP);
     ASSERT_EQ(advancedNotificationService_->UnRegisterBadgeQueryCallback(), (int)ERR_ANS_NON_SYSTEM_APP);
 }
+
+/**
+ * @tc.number    : GetUriTest_0100
+ * @tc.name      : GetUri_0100
+ * @tc.desc      : Test GetUri function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetUriTest_0100, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetUriTest_0100 test start";
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    EXPECT_NE(request, nullptr);
+    auto errCode = advancedNotificationService_->GetUri(request);
+    ASSERT_NE(errCode, (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : GetUriTest_0200
+ * @tc.name      : GetUri_0200
+ * @tc.desc      : Test GetUri function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetUriTest_0200, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetUriTest_0200 test start";
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    EXPECT_NE(request, nullptr);
+    auto additionalData = std::make_shared<AAFwk::WantParams>();
+    EXPECT_NE(additionalData, nullptr);
+    request->SetAdditionalData(additionalData);
+    auto errCode = advancedNotificationService_->GetUri(request);
+    ASSERT_NE(errCode, (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : GetUriTest_0300
+ * @tc.name      : GetUri_0300
+ * @tc.desc      : Test GetUri function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetUriTest_0300, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetUriTest_0300 test start";
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    EXPECT_NE(request, nullptr);
+    auto additionalData = std::make_shared<AAFwk::WantParams>();
+    EXPECT_NE(additionalData, nullptr);
+    request->SetAdditionalData(additionalData);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
+    EXPECT_NE(wantAgent, nullptr);
+    request->SetWantAgent(wantAgent);
+    auto errCode = advancedNotificationService_->GetUri(request);
+    ASSERT_NE(errCode, (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : GetUriTest_0400
+ * @tc.name      : GetUri_0400
+ * @tc.desc      : Test GetUri function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetUriTest_0400, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetUriTest_0400 test start";
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    EXPECT_NE(request, nullptr);
+    auto additionalData = std::make_shared<AAFwk::WantParams>();
+    EXPECT_NE(additionalData, nullptr);
+    request->SetAdditionalData(additionalData);
+
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    std::shared_ptr<AbilityRuntime::WantAgent::LocalPendingWant> localPendingWant =
+        std::make_shared<AbilityRuntime::WantAgent::LocalPendingWant>("TestBundleName", want, 0);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>(localPendingWant);
+    EXPECT_NE(wantAgent, nullptr);
+    request->SetWantAgent(wantAgent);
+    auto errCode = advancedNotificationService_->GetUri(request);
+    EXPECT_EQ(errCode, (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : GetUriTest_0500
+ * @tc.name      : GetUri_0500
+ * @tc.desc      : Test GetUri function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetUriTest_0500, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetUriTest_0500 test start";
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    EXPECT_NE(request, nullptr);
+    auto additionalData = std::make_shared<AAFwk::WantParams>();
+    EXPECT_NE(additionalData, nullptr);
+    request->SetAdditionalData(additionalData);
+
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    want->SetUri("test");
+    std::shared_ptr<AbilityRuntime::WantAgent::LocalPendingWant> localPendingWant =
+        std::make_shared<AbilityRuntime::WantAgent::LocalPendingWant>("TestBundleName", want, 0);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>(localPendingWant);
+    EXPECT_NE(wantAgent, nullptr);
+    request->SetWantAgent(wantAgent);
+    auto errCode = advancedNotificationService_->GetUri(request);
+    EXPECT_EQ(errCode, (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : GetUriTest_0600
+ * @tc.name      : GetUri_0600
+ * @tc.desc      : Test GetUri function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetUriTest_0600, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetUriTest_0600 test start";
+    sptr<NotificationRequest> request = nullptr;
+    auto errCode = advancedNotificationService_->GetUri(request);
+    ASSERT_NE(errCode, (int)ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

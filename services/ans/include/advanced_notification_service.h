@@ -2098,6 +2098,7 @@ private:
     void ProcessSubscriptionInfoForStateChange(
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos,
         const sptr<NotificationBundleOption> &bundle, bool filterHfpOnly);
+    ErrCode GetUri(sptr<NotificationRequest> &request);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;
