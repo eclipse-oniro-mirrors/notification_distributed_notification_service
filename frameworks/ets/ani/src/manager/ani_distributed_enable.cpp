@@ -154,7 +154,7 @@ void AniSetDistributedEnableByBundleAndType(ani_env *env,
 
 void AniSetTargetDeviceStatus(ani_env* env, ani_string deviceType, ani_long status)
 {
-    ANS_LOGD("sts setTargetDeviceStatus call, id:%{public}lld", status);
+    ANS_LOGD("sts setTargetDeviceStatus call, id:%{public}" PRId64, status);
     std::string deviceTypeStr;
     if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
         std::string msg = "Parameter verification failed";
@@ -162,7 +162,7 @@ void AniSetTargetDeviceStatus(ani_env* env, ani_string deviceType, ani_long stat
         OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
         return;
     }
-    ANS_LOGD("sts setTargetDeviceStatus id:%{public}lld deviceType:%{public}s", status, deviceTypeStr.c_str());
+    ANS_LOGD("sts setTargetDeviceStatus id:%{public}" PRId64 " deviceType:%{public}s", status, deviceTypeStr.c_str());
     int32_t ret = Notification::NotificationHelper::SetTargetDeviceStatus(deviceTypeStr, status, DISTURB_DEFAULT_FLAG);
     if (ret != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(ret);

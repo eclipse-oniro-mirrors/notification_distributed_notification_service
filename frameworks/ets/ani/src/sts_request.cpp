@@ -1321,11 +1321,11 @@ ani_array GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<Notifica
         ani_class requestCls;
         ani_object requestObj;
         if (!WarpNotificationRequest(env, request.GetRefPtr(), requestCls, requestObj) || requestObj == nullptr) {
-            ANS_LOGE("WarpNotificationRequest faild. index %{public}d", index);
+            ANS_LOGE("WarpNotificationRequest faild. index %{public}zu", index);
             return nullptr;
         }
         if (ANI_OK != env->Array_Set(arrayObj, index, requestObj)) {
-            ANS_LOGE("Array_Set faild. index  %{public}d", index);
+            ANS_LOGE("Array_Set faild. index  %{public}zu", index);
             return nullptr;
         }
         index ++;
@@ -1347,12 +1347,12 @@ ani_array GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vecto
         if (!WarpNotificationRequest(
             env, request->GetNotificationRequestPoint().GetRefPtr(), requestCls, requestObj)
             || requestObj == nullptr) {
-                ANS_LOGE("WarpNotificationRequest faild. index %{public}d", index);
+                ANS_LOGE("WarpNotificationRequest faild. index %{public}zu", index);
                 return nullptr;
             }
         if (ANI_OK
             != env->Array_Set(arrayObj, index, requestObj)) {
-            ANS_LOGE("Array_Set faild. index  %{public}d", index);
+            ANS_LOGE("Array_Set faild. index  %{public}zu", index);
             return nullptr;
         }
         index ++;
