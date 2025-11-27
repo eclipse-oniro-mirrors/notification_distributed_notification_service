@@ -121,6 +121,10 @@ bool NotificationBundleOption::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteInt32(appIndex_)) {
+        ANS_LOGE("Failed to write app index");
+        return false;
+    }
     return true;
 }
 
@@ -150,6 +154,8 @@ bool NotificationBundleOption::ReadFromParcel(Parcel &parcel)
     uid_ = parcel.ReadInt32();
 
     instanceKey_ = parcel.ReadInt32();
+
+    appIndex_ = parcel.ReadInt32();
 
     return true;
 }
