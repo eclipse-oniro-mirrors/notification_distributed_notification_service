@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,7 @@ napi_value ReminderAgentManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("deleteExcludeDates", DelExcludeDates),
         DECLARE_NAPI_FUNCTION("getExcludeDates", GetExcludeDates),
         DECLARE_NAPI_FUNCTION("updateReminder", UpdateReminder),
+        DECLARE_NAPI_FUNCTION("cancelReminderOnDisplay", CancelReminderOnDisplay),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
@@ -79,6 +80,9 @@ napi_value ConstantInit(napi_env env, napi_value exports)
     }
     if (napi_create_int32(env, static_cast<int32_t>(ReminderRequest::RingChannel::ALARM), &prop) == napi_ok) {
         napi_set_named_property(env, objRingChannel, "RING_CHANNEL_ALARM", prop);
+    }
+    if (napi_create_int32(env, static_cast<int32_t>(ReminderRequest::RingChannel::NOTIFICATION), &prop) == napi_ok) {
+        napi_set_named_property(env, objRingChannel, "RING_CHANNEL_NOTIFICATION", prop);
     }
 
     napi_property_descriptor exportFuncs[] = {

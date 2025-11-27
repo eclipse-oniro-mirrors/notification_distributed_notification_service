@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,21 +94,6 @@ bool ReminderCommon::GenActionButtons(
     return true;
 }
 
-bool ReminderCommon::GenRingChannel(const napi_env& env, const napi_value& value,
-    std::shared_ptr<ReminderRequest>& reminder)
-{
-    int32_t ringChannel = static_cast<int32_t>(ReminderRequest::RingChannel::ALARM);
-    if (GetInt32(env, value, ReminderAgentNapi::RING_CHANNEL, ringChannel, false)) {
-        if (!(ReminderRequest::RingChannel(ringChannel) == ReminderRequest::RingChannel::ALARM ||
-            ReminderRequest::RingChannel(ringChannel) == ReminderRequest::RingChannel::MEDIA)) {
-            ANSR_LOGE("Wrong argument type:%{public}s. ringChannel not support.", RING_CHANNEL);
-            return false;
-        }
-        reminder->SetRingChannel(static_cast<ReminderRequest::RingChannel>(ringChannel));
-    }
-    return true;
-}
-
 void ReminderCommon::HandleActionButtonTitle(const napi_env &env, const napi_value &actionButton,
     std::shared_ptr<ReminderRequest>& reminder, const char* str, int32_t buttonType)
 {
@@ -139,7 +124,6 @@ bool ReminderCommon::IsSelfSystemApp()
 {
     auto selfToken = IPCSkeleton::GetSelfTokenID();
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
-        ANSR_LOGE("This application is not system-app, can not use system-api");
         return false;
     }
     return true;
@@ -485,7 +469,9 @@ napi_value ReminderCommon::GenReminder(
     if (!GenReminderIntInner(env, value, reminder)) {
         return nullptr;
     }
-    GenReminderBoolInner(env, value, reminder);
+    if (!ParseBoolParam(env, value, isSysApp, reminder)) {
+        return nullptr;
+    }
 
     // snoozeSlotType
     int32_t snoozeSlotType = 0;
@@ -515,7 +501,7 @@ napi_value ReminderCommon::GenReminder(
     }
 
     // ringChannel
-    if (!GenRingChannel(env, value, reminder)) {
+    if (!ParseRingChannel(env, value, reminder)) {
         return nullptr;
     }
 
@@ -644,16 +630,6 @@ bool ReminderCommon::GenReminderIntInnerOther(
         reminder->SetSnoozeContentResourceId(resourceId);
     }
     return true;
-}
-
-void ReminderCommon::GenReminderBoolInner(
-    const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder)
-{
-    // tapDismissed
-    bool tapDismissed = false;
-    if (GetBool(env, value, ReminderAgentNapi::TAPDISMISSED, tapDismissed)) {
-        reminder->SetTapDismissed(tapDismissed);
-    }
 }
 
 bool ReminderCommon::GetStringUtf8(const napi_env &env, const napi_value &value,
@@ -1176,6 +1152,55 @@ napi_value ReminderCommon::JSParaError(const napi_env &env, const napi_ref &call
         napi_reject_deferred(env, deferred, res);
         return promise;
     }
+}
+
+template<typename T>
+static bool CheckRange(const T value, const T min, const T max)
+{
+    return value >= min && value <= max;
+}
+
+bool ReminderCommon::ParseBoolParam(const napi_env& env, const napi_value& value, const bool isSystemApp,
+    std::shared_ptr<ReminderRequest>& reminder)
+{
+    bool tapDismissed = false;
+    if (GetBool(env, value, ReminderAgentNapi::TAPDISMISSED, tapDismissed)) {
+        reminder->SetTapDismissed(tapDismissed);
+    }
+
+    // system param
+    bool forceDistributed = false;
+    if (GetBool(env, value, ReminderAgentNapi::REMINDER_FORCE_DISTRIBUTED, forceDistributed)) {
+        if (!isSystemApp) {
+            ANSR_LOGE("Not system app, use system param[forceDistributed]");
+            return false;
+        }
+        reminder->SetForceDistributed(forceDistributed);
+    }
+    bool notDistributed = false;
+    if (GetBool(env, value, ReminderAgentNapi::REMINDER_NOT_DISTRIBUTED, notDistributed)) {
+        if (!isSystemApp) {
+            ANSR_LOGE("Not system app, use system param[notDistributed]");
+            return false;
+        }
+        reminder->SetNotDistributed(notDistributed);
+    }
+    return true;
+}
+
+bool ReminderCommon::ParseRingChannel(const napi_env& env, const napi_value& value,
+    std::shared_ptr<ReminderRequest>& reminder)
+{
+    int32_t ringChannel = static_cast<int32_t>(ReminderRequest::RingChannel::ALARM);
+    if (GetInt32(env, value, ReminderAgentNapi::RING_CHANNEL, ringChannel, false)) {
+        if (!CheckRange(ringChannel, static_cast<int32_t>(ReminderRequest::RingChannel::ALARM),
+            static_cast<int32_t>(ReminderRequest::RingChannel::MAX_CHANNEL))) {
+            ANSR_LOGE("Parameter[ringChannel] error value: %{public}d.", ringChannel);
+            return false;
+        }
+        reminder->SetRingChannel(static_cast<ReminderRequest::RingChannel>(ringChannel));
+    }
+    return true;
 }
 }
 }

@@ -168,6 +168,22 @@ ErrCode ReminderAgentService::CancelAllReminders()
     return ret;
 }
 
+ErrCode ReminderAgentService::CancelReminderOnDisplay(const int32_t reminderId)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
+    ANSR_LOGD("called");
+    if (!CheckReminderPermission()) {
+        ANSR_LOGE("Failed to check permission: ohos.permission.PUBLISH_AGENT_REMINDER.");
+        return ERR_REMINDER_PERMISSION_DENIED;
+    }
+    auto rdm = ReminderDataManager::GetInstance();
+    if (nullptr == rdm) {
+        return ERR_NO_INIT;
+    }
+    ErrCode ret = rdm->CancelReminderOnDisplay(reminderId, IPCSkeleton::GetCallingUid());
+    return ret;
+}
+
 ErrCode ReminderAgentService::GetValidReminders(std::vector<ReminderRequestAdaptation>& reminders)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);

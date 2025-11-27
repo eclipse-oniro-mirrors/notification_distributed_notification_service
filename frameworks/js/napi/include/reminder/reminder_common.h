@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,6 +85,8 @@ const char* RING_CHANNEL = "ringChannel";
 const char* SNOOZE_SLOT_TYPE = "snoozeSlotType";
 const char* REMINDER_INFO_REMINDER_REQ = "reminderReq";
 const char* REMINDER_INFO_REMINDER_ID = "reminderId";
+const char* REMINDER_FORCE_DISTRIBUTED = "forceDistributed";
+const char* REMINDER_NOT_DISTRIBUTED = "notDistributed";
 const int INDEX_KEY = 0;
 const int INDEX_TYPE = 1;
 const int INDEX_VALUE = 2;
@@ -142,6 +144,13 @@ public:
         CallbackPromiseInfo &info, napi_value &promise);
 
 private:
+    static bool ParseBoolParam(const napi_env& env, const napi_value& value, const bool isSystemApp,
+        std::shared_ptr<ReminderRequest>& reminder);
+
+    static bool ParseRingChannel(const napi_env& env, const napi_value& value,
+        std::shared_ptr<ReminderRequest>& reminder);
+
+private:
     static bool CheckCalendarParams(const int32_t &year, const int32_t &month, const int32_t &day,
         const int32_t &hour, const int32_t &min);
 
@@ -174,9 +183,6 @@ private:
     static bool GenActionButtons(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder, bool isSysApp);
 
-    static bool GenRingChannel(const napi_env& env, const napi_value& value,
-        std::shared_ptr<ReminderRequest>& reminder);
-
     static napi_value GenReminder(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
 
@@ -190,9 +196,6 @@ private:
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
 
     static bool GenReminderIntInnerOther(
-        const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
-
-    static void GenReminderBoolInner(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
 
     static napi_value ParseInt32Array(const napi_env &env, const napi_value &value,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,21 +20,19 @@
 #include <vector>
 
 #include "ans_inner_errors.h"
+#include "reminder_store.h"
+#include "reminder_request.h"
+#include "reminder_timer_info.h"
+#include "reminder_request_adaptation.h"
+
+#include "app_mgr_interface.h"
+#include "time_service_client.h"
+#include "datashare_predicates.h"
+#include "datashare_values_bucket.h"
 #ifdef PLAYER_FRAMEWORK_ENABLE
 #include "player.h"
 #include "system_sound_manager.h"
 #endif
-#include "ffrt.h"
-#include "app_mgr_client.h"
-#include "reminder_request.h"
-#include "reminder_request_adaptation.h"
-#include "reminder_store.h"
-#include "reminder_timer_info.h"
-#include "reminder_config_change_observer.h"
-#include "datashare_predicates.h"
-#include "datashare_values_bucket.h"
-#include "app_mgr_interface.h"
-#include "time_service_client.h"
 
 namespace OHOS {
 namespace Notification {
@@ -64,6 +62,15 @@ public:
      * @return ERR_OK if success, else not.
      */
     ErrCode CancelReminder(const int32_t &reminderId, const int32_t callingUid);
+
+    /**
+     * @brief Dismiss the currently displayed alert and only remove it from the Notification Center.
+     *
+     * @param reminderId Indicates the reminder id.
+     * @param callingUid Indicates the uid.
+     * @return ERR_OK if success, else not.
+     */
+    ErrCode CancelReminderOnDisplay(const int32_t reminderId, const int32_t callingUid);
 
     sptr<ReminderRequest> CheckExcludeDateParam(const int32_t reminderId,
         const int32_t callingUid);
@@ -104,13 +111,6 @@ public:
      * @param cancelNotification Indicates whether need to cancel notification or not.
      */
     void CloseReminder(const OHOS::EventFwk::Want &want, bool cancelNotification, bool isButtonClick = true);
-
-    /**
-     * Dump all the reminders information.
-     *
-     * @return reminders informations.
-     */
-    std::string Dump() const;
 
     /**
      * Obtains the single instance.
@@ -167,13 +167,6 @@ public:
     void OnAbilityMgrServiceStart();
 
     void OnUserSwitch(const int32_t& userId);
-
-    /**
-     * @brief Triggered when third party application died.
-     *
-     * @param bundleOption Indicates the bundleOption of third party application.
-     */
-    void OnProcessDiedLocked(const int32_t callingUid);
 
     /**
      * Publishs a scheduled reminder.
@@ -317,12 +310,6 @@ private:
     };
 
     static std::shared_ptr<ffrt::queue> serviceQueue_;
-    /**
-     * Add default slot to the reminder if no slot set by user.
-     *
-     * @param reminder Indicates the reminder.
-     */
-    void AddDefaultSlotIfNeeded(sptr<ReminderRequest> &reminder);
 
     /**
      * Add reminder to showed reminder vector.
@@ -445,7 +432,8 @@ private:
      */
     sptr<ReminderRequest> GetRecentReminder();
 
-    void HandleImmediatelyShow(std::vector<sptr<ReminderRequest>> &showImmediately, bool isSysTimeChanged);
+    void HandleImmediatelyShow(std::vector<sptr<ReminderRequest>>& showImmediately, const bool isSysTimeChanged,
+        const bool isSlienceNotification);
     void HandleExtensionReminder(std::vector<sptr<ReminderRequest>> &extensionReminders, const int8_t type);
 
     /**
@@ -559,14 +547,15 @@ private:
      * @brief Show the reminder on SystemUI.
      *
      * @param reminder Indicates the reminder to show.
-     * @param isNeedToPlaySound Indicates whether need to play sound.
-     * @param isNeedToStartNext Indicates whether need to start next reminder.
+     * @param isPlaySound Indicates whether need to play sound.
      * @param isSysTimeChanged Indicates whether it is triggerred as system time changed by user.
-     * @param needScheduleTimeout Indicates whether need to control the ring duration.
+     * @param isCloseDefaultSound Indicates whether need to close default sound.
+     * @param isSlienceNotification Indicates whether need to slience show notification.
      */
-    void ShowReminder(const sptr<ReminderRequest>& reminder, const bool isNeedToPlaySound,
-        const bool isNeedToStartNext, const bool isSysTimeChanged, const bool needScheduleTimeout,
-        const bool isNeedCloseDefaultSound);
+    void ShowReminder(const sptr<ReminderRequest>& reminder, const bool isPlaySound,
+        const bool isSysTimeChanged, const bool isCloseDefaultSound, const bool isSlienceNotification);
+    void SlienceNotification(const bool isCloseDefaultSound, const bool isSlienceNotification,
+        NotificationRequest& notification);
 
     void SnoozeReminderImpl(sptr<ReminderRequest> &reminder);
 
@@ -615,7 +604,6 @@ private:
      * @param reason Indicates the description information.
      */
     void TerminateAlerting(const sptr<ReminderRequest> &reminder, const std::string &reason);
-    void TerminateAlerting(const uint16_t waitInSecond, const sptr<ReminderRequest> &reminder);
 
     /**
      * @brief Assign unique reminder id and save reminder in memory.

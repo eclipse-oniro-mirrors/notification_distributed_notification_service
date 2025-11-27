@@ -25,6 +25,7 @@ public:
     static void MockUpdateReminder(const int32_t ret);
     static void MockCancelReminder(const int32_t ret);
     static void MockCancelAllReminders(const int32_t ret);
+    static void MockCancelReminderOnDisplay(const int32_t ret);
     static void MockAddExcludeDate(const int32_t ret);
     static void MockDelExcludeDates(const int32_t ret);
     static void MockGetExcludeDates(const int32_t ret);
@@ -33,7 +34,6 @@ public:
     static void ResetFlag();
 
     static bool callCancelAllReminders_;
-    static bool callOnProcessDiedLocked_;
     static bool callRefreshRemindersDueToSysTimeChange_;
     static bool callOnUserSwitch_;
     static bool callOnUserRemove_;

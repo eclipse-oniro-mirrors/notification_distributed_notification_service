@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,6 +110,16 @@ ErrCode ReminderRequestClient::CancelAllReminders()
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->CancelAllReminders();
+}
+
+ErrCode ReminderRequestClient::CancelReminderOnDisplay(const int32_t reminderId)
+{
+    sptr<IReminderAgentService> proxy = GetReminderServiceProxy();
+    if (!proxy) {
+        ANS_LOGE("GetReminderServiceProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->CancelReminderOnDisplay(reminderId);
 }
 
 ErrCode ReminderRequestClient::GetValidReminders(std::vector<ReminderRequestAdaptation> &validReminders)

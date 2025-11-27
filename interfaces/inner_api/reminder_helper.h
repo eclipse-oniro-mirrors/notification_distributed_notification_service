@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,6 +74,13 @@ public:
      * @return Returns cancel all reminders result.
      */
     static ErrCode CancelAllReminders();
+
+    /**
+     * @brief Dismiss the currently displayed alert and only remove it from the Notification Center.
+     *
+     * @return Returns cancel reminder result.
+     */
+    static ErrCode CancelReminderOnDisplay(const int32_t reminderId);
 
     /**
      * Obtains all valid reminder notifications set by the current application, namely, the reminders that will
