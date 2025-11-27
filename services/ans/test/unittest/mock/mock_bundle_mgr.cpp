@@ -29,6 +29,7 @@ bool g_setBundleInfoEnabled = false;
 bool g_getBundleInfoFailed = false;
 bool g_isNeedHapModuleInfos = false;
 bool g_isMockQueryExtensionAbilityInfos = false;
+bool g_isMockQueryExtensionAbilityInfosRet = true;
 bool g_isMockGetCloneAppIndexes = false;
 bool g_isMockGetCloneBundleInfo = false;
 constexpr const int32_t MOCK_UID = 20020010;
@@ -59,9 +60,10 @@ void MockIsNeedHapModuleInfos(bool isNeed)
     g_isNeedHapModuleInfos = isNeed;
 }
 
-void MockQueryExtensionAbilityInfos(bool enabled)
+void MockQueryExtensionAbilityInfos(bool enabled, bool ret)
 {
     g_isMockQueryExtensionAbilityInfos = enabled;
+    g_isMockQueryExtensionAbilityInfosRet = ret;
 }
 
 void MockGetCloneAppIndexes(bool enabled)
@@ -158,7 +160,7 @@ bool BundleMgrProxy::QueryExtensionAbilityInfos(const ExtensionAbilityType &exte
         extensionInfos.push_back(extensionInfo);
     }
 
-    return true;
+    return Notification::g_isMockQueryExtensionAbilityInfosRet;
 }
 
 ErrCode BundleMgrProxy::GetCloneAppIndexes(const std::string &bundleName, std::vector<int32_t> &appIndexes,

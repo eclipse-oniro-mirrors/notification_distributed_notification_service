@@ -160,6 +160,114 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSub
 }
 
 /**
+ * @tc.name: NotificationExtensionSubscribe_0600
+ * @tc.desc: Test NotificationExtensionSubscribe.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSubscribe_0600,
+    Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
+    MockIsVerfyPermisson(true);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetDistributedCollaborate(true);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->DeleteAll();
+    advancedNotificationService_->AddToNotificationList(record);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo());
+    MockIsVerfyPermisson(true);
+    MockIsNeedHapModuleInfos(true);
+    auto ret = advancedNotificationService_->NotificationExtensionSubscribe(infos);
+    ASSERT_EQ(ret, ERR_OK);
+    MockIsVerfyPermisson(false);
+    MockIsNeedHapModuleInfos(false);
+}
+
+/**
+ * @tc.name: ProcessExtensionSubscriptionInfos_0100
+ * @tc.desc: Test ProcessExtensionSubscriptionInfos.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, ProcessExtensionSubscriptionInfos_0100,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationExtensionSubscriptionInfo> info =
+        new NotificationExtensionSubscriptionInfo("address", NotificationConstant::SubscribeType::BLUETOOTH);
+    info->SetHfp(false);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos = { info };
+    advancedNotificationService_->supportHfp_ = true;
+    MockHandsFreeAudioGatewayGetDeviceStateEnabled(true);
+    ErrCode ret = ERR_OK;
+    advancedNotificationService_->ProcessExtensionSubscriptionInfos(nullptr, infos, ret);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    ASSERT_TRUE(info->IsHfp());
+    MockHandsFreeAudioGatewayGetDeviceStateEnabled(false);
+}
+
+/**
+ * @tc.name: ProcessExtensionSubscriptionInfos_0200
+ * @tc.desc: Test ProcessExtensionSubscriptionInfos.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, ProcessExtensionSubscriptionInfos_0200,
+    Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationExtensionLoaded_.store(false);
+    sptr<NotificationExtensionSubscriptionInfo> info =
+        new NotificationExtensionSubscriptionInfo("address", NotificationConstant::SubscribeType::BLUETOOTH);
+    info->SetHfp(false);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos = { info };
+    advancedNotificationService_->supportHfp_ = false;
+    ErrCode ret = ERR_OK;
+    sptr<NotificationBundleOption> bundleOption =
+        new NotificationBundleOption("bundleName.ProcessExtensionSubscriptionInfos.0200", NON_SYSTEM_APP_UID);
+    advancedNotificationService_->ProcessExtensionSubscriptionInfos(bundleOption, infos, ret);
+    ASSERT_EQ(ret, ERR_OK);
+    ASSERT_FALSE(info->IsHfp());
+    ASSERT_FALSE(advancedNotificationService_->notificationExtensionLoaded_.load());
+}
+
+/**
+ * @tc.name: ProcessExtensionSubscriptionInfos_0300
+ * @tc.desc: Test ProcessExtensionSubscriptionInfos.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, ProcessExtensionSubscriptionInfos_0300,
+    Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationExtensionLoaded_.store(false);
+    sptr<NotificationExtensionSubscriptionInfo> info =
+        new NotificationExtensionSubscriptionInfo("address", NotificationConstant::SubscribeType::BLUETOOTH);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos = { info };
+    sptr<NotificationBundleOption> bundleOption =
+        new NotificationBundleOption("bundleName.ProcessExtensionSubscriptionInfos.0300", NON_SYSTEM_APP_UID);
+    advancedNotificationService_->cacheNotificationExtensionBundles_.emplace_back(bundleOption);
+    std::vector<sptr<NotificationBundleOption>> bundles = { bundleOption };
+    auto ret = NotificationPreferences::GetInstance()->SetExtensionSubscriptionInfos(bundleOption, infos);
+    ASSERT_EQ(ret, ERR_OK);
+    ret = NotificationPreferences::GetInstance()->SetExtensionSubscriptionBundles(bundleOption, bundles);
+    ASSERT_EQ(ret, ERR_OK);
+    ret = NotificationPreferences::GetInstance()->SetExtensionSubscriptionEnabled(bundleOption,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    ASSERT_EQ(ret, ERR_OK);
+    MockIsVerfyPermisson(true);
+    MockHandsFreeAudioGatewayGetDeviceStateEnabled(true);
+    MockBluetoothRemoteDeviceGetPairStateEnabled(true);
+    advancedNotificationService_->ProcessExtensionSubscriptionInfos(bundleOption, infos, ret);
+    ASSERT_EQ(ret, ERR_OK);
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+    ASSERT_TRUE(advancedNotificationService_->notificationExtensionLoaded_.load());
+#else
+    ASSERT_FALSE(advancedNotificationService_->notificationExtensionLoaded_.load());
+#endif
+    MockIsVerfyPermisson(false);
+    MockHandsFreeAudioGatewayGetDeviceStateEnabled(false);
+    MockBluetoothRemoteDeviceGetPairStateEnabled(false);
+}
+
+/**
  * @tc.name: NotificationExtensionUnsubscribe_0100
  * @tc.desc: Test NotificationExtensionUnsubscribe without permission.
  * @tc.type: FUNC
@@ -713,6 +821,28 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedEnabledBun
 }
 
 /**
+ * @tc.number    : GetUserGrantedEnabledBundlesForSelf_0400
+ * @tc.name      : GetUserGrantedEnabledBundlesForSelf
+ * @tc.desc      : Test GetUserGrantedEnabledBundlesForSelf function
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedEnabledBundlesForSelf_0400, Function | SmallTest
+    | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    sptr<NotificationBundleOption> bundleOption = advancedNotificationService_->GenerateBundleOption();
+    auto ret = NotificationPreferences::GetInstance()->SetExtensionSubscriptionBundles(bundleOption, { bundleOption });
+    ret = advancedNotificationService_->GetUserGrantedEnabledBundlesForSelf(bundles);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_FALSE(bundles.empty());
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(false);
+}
+
+/**
  * @tc.number    : SetUserGrantedBundleState_0100
  * @tc.name      : SetUserGrantedBundleState
  * @tc.desc      : Test SetUserGrantedBundleState function
@@ -817,6 +947,22 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedBundleStat
     ErrCode ret = advancedNotificationService_->SetUserGrantedBundleState(bundle, extensionBundles, true);
     EXPECT_EQ(ret, ERR_OK);
     MockIsNeedHapModuleInfos(false);
+}
+
+/**
+ * @tc.number    : SetUserGrantedBundleState_0600
+ * @tc.name      : SetUserGrantedBundleState
+ * @tc.desc      : Test SetUserGrantedBundleState function
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedBundleState_0600, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
+    std::vector<sptr<NotificationBundleOption>> extensionBundles = {
+        new NotificationBundleOption("bundleName", NON_SYSTEM_APP_UID),
+    };
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", NON_SYSTEM_APP_UID);
+    ErrCode ret = advancedNotificationService_->SetUserGrantedBundleState(bundle, extensionBundles, true);
+    EXPECT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -1615,7 +1761,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, ProcessHfpDeviceStateCha
 {
     advancedNotificationService_->notificationExtensionLoaded_.store(false);
     advancedNotificationService_->ProcessHfpDeviceStateChange(
-        static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED));
+        static_cast<int32_t>(Bluetooth::BTConnectState::DISCONNECTED));
     ASSERT_FALSE(advancedNotificationService_->notificationExtensionLoaded_.load());
 }
 
@@ -1655,6 +1801,97 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, ProcessHfpDeviceStateCha
     advancedNotificationService_->ProcessHfpDeviceStateChange(
         static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED));
     ASSERT_FALSE(advancedNotificationService_->notificationExtensionLoaded_.load());
+}
+
+/**
+ * @tc.number    : ProcessSubscriptionInfoForStateChange_0100
+ * @tc.name      : ProcessSubscriptionInfoForStateChange
+ * @tc.desc      : Test ProcessSubscriptionInfoForStateChange case
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, ProcessSubscriptionInfoForStateChange_0100,
+    Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationExtensionLoaded_.store(false);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos = { nullptr };
+    sptr<NotificationBundleOption> bundle = nullptr;
+    advancedNotificationService_->ProcessSubscriptionInfoForStateChange(infos, bundle, true);
+    ASSERT_FALSE(advancedNotificationService_->notificationExtensionLoaded_.load());
+}
+
+/**
+ * @tc.number    : ProcessSubscriptionInfoForStateChange_0200
+ * @tc.name      : ProcessSubscriptionInfoForStateChange
+ * @tc.desc      : Test ProcessSubscriptionInfoForStateChange case
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, ProcessSubscriptionInfoForStateChange_0200,
+    Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationExtensionLoaded_.store(false);
+    sptr<NotificationBundleOption> bundle =
+        new NotificationBundleOption("bundleName.ProcessSubscriptionInfoForStateChange.0200", NON_SYSTEM_APP_UID);
+    advancedNotificationService_->cacheNotificationExtensionBundles_.emplace_back(bundle);
+    std::vector<sptr<NotificationBundleOption>> bundles = { bundle };
+    sptr<NotificationExtensionSubscriptionInfo> info =
+        new NotificationExtensionSubscriptionInfo("address", NotificationConstant::SubscribeType::BLUETOOTH);
+    info->SetHfp(true);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos = { info };
+    auto ret = NotificationPreferences::GetInstance()->SetExtensionSubscriptionInfos(bundle, infos);
+    ASSERT_EQ(ret, ERR_OK);
+    ret = NotificationPreferences::GetInstance()->SetExtensionSubscriptionBundles(bundle, bundles);
+    ASSERT_EQ(ret, ERR_OK);
+    ret = NotificationPreferences::GetInstance()->SetExtensionSubscriptionEnabled(bundle,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    ASSERT_EQ(ret, ERR_OK);
+    MockIsVerfyPermisson(true);
+    MockHandsFreeAudioGatewayGetDeviceStateEnabled(true);
+    MockBluetoothRemoteDeviceGetPairStateEnabled(true);
+    advancedNotificationService_->ProcessSubscriptionInfoForStateChange(infos, bundle, true);
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+    ASSERT_TRUE(advancedNotificationService_->notificationExtensionLoaded_.load());
+#else
+    ASSERT_FALSE(advancedNotificationService_->notificationExtensionLoaded_.load());
+#endif
+    MockIsVerfyPermisson(false);
+    MockHandsFreeAudioGatewayGetDeviceStateEnabled(false);
+    MockBluetoothRemoteDeviceGetPairStateEnabled(false);
+}
+
+/**
+ * @tc.number    : ProcessSubscriptionInfoForStateChange_0300
+ * @tc.name      : ProcessSubscriptionInfoForStateChange
+ * @tc.desc      : Test ProcessSubscriptionInfoForStateChange case
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, ProcessSubscriptionInfoForStateChange_0300,
+    Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationExtensionLoaded_.store(false);
+    sptr<NotificationBundleOption> bundle =
+        new NotificationBundleOption("bundleName.ProcessSubscriptionInfoForStateChange.0300", NON_SYSTEM_APP_UID);
+    advancedNotificationService_->cacheNotificationExtensionBundles_.emplace_back(bundle);
+    std::vector<sptr<NotificationBundleOption>> bundles = { bundle };
+    sptr<NotificationExtensionSubscriptionInfo> info =
+        new NotificationExtensionSubscriptionInfo("address", NotificationConstant::SubscribeType::BLUETOOTH);
+    info->SetHfp(false);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos = { info };
+    auto ret = NotificationPreferences::GetInstance()->SetExtensionSubscriptionInfos(bundle, infos);
+    ASSERT_EQ(ret, ERR_OK);
+    ret = NotificationPreferences::GetInstance()->SetExtensionSubscriptionBundles(bundle, bundles);
+    ASSERT_EQ(ret, ERR_OK);
+    ret = NotificationPreferences::GetInstance()->SetExtensionSubscriptionEnabled(bundle,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    ASSERT_EQ(ret, ERR_OK);
+    MockIsVerfyPermisson(true);
+    MockHandsFreeAudioGatewayGetDeviceStateEnabled(true);
+    MockBluetoothRemoteDeviceGetPairStateEnabled(true);
+    advancedNotificationService_->ProcessSubscriptionInfoForStateChange(infos, bundle, false);
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+    ASSERT_TRUE(advancedNotificationService_->notificationExtensionLoaded_.load());
+#else
+    ASSERT_FALSE(advancedNotificationService_->notificationExtensionLoaded_.load());
+#endif
+    MockIsVerfyPermisson(false);
+    MockHandsFreeAudioGatewayGetDeviceStateEnabled(false);
+    MockBluetoothRemoteDeviceGetPairStateEnabled(false);
 }
 
 /**
@@ -1781,6 +2018,62 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetNotificationExtension
     MockGetCloneAppIndexes(false);
     MockGetCloneBundleInfo(false);
     advancedNotificationService_->cacheNotificationExtensionBundles_.clear();
+}
+
+/**
+ * @tc.number    : GetNotificationExtensionEnabledBundles_0400
+ * @tc.name      : GetNotificationExtensionEnabledBundles
+ * @tc.desc      : Test GetNotificationExtensionEnabledBundles case
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetNotificationExtensionEnabledBundles_0400,
+    Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    MockQueryExtensionAbilityInfos(true, true);
+    MockSetBundleInfoFailed(true);
+    ASSERT_EQ(advancedNotificationService_->GetNotificationExtensionEnabledBundles(bundles), ERR_OK);
+    ASSERT_TRUE(bundles.empty());
+    MockQueryExtensionAbilityInfos(false, true);
+    MockSetBundleInfoFailed(false);
+}
+
+/**
+ * @tc.number    : GetNotificationExtensionEnabledBundles_0500
+ * @tc.name      : GetNotificationExtensionEnabledBundles
+ * @tc.desc      : Test GetNotificationExtensionEnabledBundles case
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetNotificationExtensionEnabledBundles_0500,
+    Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    MockQueryExtensionAbilityInfos(true, true);
+    MockIsNeedHapModuleInfos(true);
+    MockIsVerfyPermisson(false);
+    ASSERT_EQ(advancedNotificationService_->GetNotificationExtensionEnabledBundles(bundles), ERR_OK);
+    ASSERT_TRUE(bundles.empty());
+    MockQueryExtensionAbilityInfos(false, true);
+    MockIsNeedHapModuleInfos(false);
+}
+
+/**
+ * @tc.number    : GetNotificationExtensionEnabledBundles_0600
+ * @tc.name      : GetNotificationExtensionEnabledBundles
+ * @tc.desc      : Test GetNotificationExtensionEnabledBundles case
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetNotificationExtensionEnabledBundles_0600,
+    Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    MockIsVerfyPermisson(true);
+    MockQueryExtensionAbilityInfos(true, true);
+    MockSetBundleInfoEnabled(true);
+    MockIsNeedHapModuleInfos(true);
+    ASSERT_EQ(advancedNotificationService_->GetNotificationExtensionEnabledBundles(bundles), ERR_OK);
+    ASSERT_FALSE(bundles.empty());
+    MockIsVerfyPermisson(false);
+    MockQueryExtensionAbilityInfos(false, true);
+    MockSetBundleInfoEnabled(false);
+    MockIsNeedHapModuleInfos(false);
 }
 
 /**
