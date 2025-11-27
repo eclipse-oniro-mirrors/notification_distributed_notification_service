@@ -20,11 +20,15 @@
 #include "access_token_helper.h"
 
 #include "ipc_skeleton.h"
+#include "notification_analytics_util.h"
 #include "os_account_manager_helper.h"
+#include "string_wrapper.h"
+#include "want_agent_helper.h"
 
 namespace OHOS {
 namespace Notification {
 constexpr int32_t RSS_UID = 3051;
+constexpr const char *NOTIFICATION_MANAGER_WANTURI = "ohos.notificationManager.wantUri";
 
 inline bool IsContained(const std::vector<std::string> &vec, const std::string &target)
 {
@@ -68,6 +72,7 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(const std::string &i
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
                 (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
                 (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey())) {
+                GetUri(record->request);
                 requests.push_back(record->request);
             }
         }
@@ -302,6 +307,47 @@ ErrCode AdvancedNotificationService::GetNotificationRequestByHashCode(
         }
     }));
     notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetUri(sptr<NotificationRequest> &request)
+{
+    if (request == nullptr) {
+        ANS_LOGE("null request");
+        return ERROR_INTERNAL_ERROR;
+    }
+
+    auto additionalData = request->GetAdditionalData();
+    if (additionalData == nullptr) {
+        ANS_LOGE("null additionalData");
+        return ERROR_INTERNAL_ERROR;
+    }
+    if (additionalData->HasParam(NOTIFICATION_MANAGER_WANTURI)) {
+        additionalData->Remove(NOTIFICATION_MANAGER_WANTURI);
+    }
+
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = request->GetWantAgent();
+    if (!wantAgent) {
+        ANS_LOGD("Failed to get wantAgent!");
+        return ERROR_INTERNAL_ERROR;
+    }
+
+    std::shared_ptr<AAFwk::Want> want = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(wantAgent);
+    if (!want) {
+        std::string msg = "Get want failed, id:" + std::to_string(request->GetNotificationId()) +
+                          ", uid:" + std::to_string(request->GetOwnerUid()) +
+                          ", bundle:" + request->GetOwnerBundleName();
+        ANS_LOGE("%{public}s", msg.c_str());
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_31, EventBranchId::BRANCH_0);
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERROR_INTERNAL_ERROR).Message(msg.c_str()));
+        return ERROR_INTERNAL_ERROR;
+    }
+
+    std::string uri = want->GetUri().ToString();
+    if (!uri.empty()) {
+        additionalData->SetParam(NOTIFICATION_MANAGER_WANTURI, AAFwk::String::Box(uri));
+    }
     return ERR_OK;
 }
 } // Notification
