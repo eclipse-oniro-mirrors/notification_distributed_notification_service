@@ -24,6 +24,7 @@
 #include "notification_bluetooth_helper.h"
 #include "notification_check_request.h"
 #include "notification_constant.h"
+#include "notifictaion_load_utils.h"
 #include "notification_preferences.h"
 
 #include "ans_ut_constant.h"
@@ -37,6 +38,11 @@ using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 namespace Notification {
+
+NotificationLoadUtils::~NotificationLoadUtils()
+{
+    proxyHandle_ = nullptr;
+}
 
 class AdvancedNotificationExtensionSubscriptionTest : public testing::Test {
 public:
@@ -63,7 +69,6 @@ void AdvancedNotificationExtensionSubscriptionTest::SetUp()
 
 void AdvancedNotificationExtensionSubscriptionTest::TearDown()
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     advancedNotificationService_ = nullptr;
 }
 
@@ -1656,6 +1661,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleInstall_0200
     advancedNotificationService_->cacheNotificationExtensionBundles_.clear();
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", NON_SYSTEM_APP_UID);
     advancedNotificationService_->HandleBundleInstall(bundle);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     EXPECT_TRUE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
 }
 
@@ -1672,6 +1678,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleInstall_0300
     MockIsVerfyPermisson(true);
     MockIsNeedHapModuleInfos(true);
     advancedNotificationService_->HandleBundleInstall(bundle);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     EXPECT_FALSE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
     MockIsVerfyPermisson(false);
     MockIsNeedHapModuleInfos(false);
@@ -1704,6 +1711,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleUpdate_0200,
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", NON_SYSTEM_APP_UID);
     advancedNotificationService_->cacheNotificationExtensionBundles_.emplace_back(bundle);
     advancedNotificationService_->HandleBundleUpdate(bundle);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     EXPECT_TRUE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
 }
 
@@ -1720,6 +1728,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleUpdate_0300,
     MockIsVerfyPermisson(true);
     MockIsNeedHapModuleInfos(true);
     advancedNotificationService_->HandleBundleUpdate(bundle);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     EXPECT_FALSE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
     MockIsVerfyPermisson(false);
     MockIsNeedHapModuleInfos(false);
@@ -1739,6 +1748,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleUpdate_0400,
     MockIsNeedHapModuleInfos(true);
     advancedNotificationService_->cacheNotificationExtensionBundles_.emplace_back(bundle);
     advancedNotificationService_->HandleBundleUpdate(bundle);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     EXPECT_FALSE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
     MockIsVerfyPermisson(false);
     MockIsNeedHapModuleInfos(false);
@@ -2219,7 +2229,6 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, LoadExtensionService_010
     EXPECT_EQ(advancedNotificationService_->LoadExtensionService(), 0);
     EXPECT_TRUE(advancedNotificationService_->notificationExtensionLoaded_.load());
     EXPECT_NE(advancedNotificationService_->notificationExtensionHandler_, nullptr);
-    advancedNotificationService_->notificationExtensionHandler_ = nullptr;
 }
 
 /**
@@ -2235,7 +2244,6 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, LoadExtensionService_020
     EXPECT_EQ(advancedNotificationService_->LoadExtensionService(), 0);
     EXPECT_TRUE(advancedNotificationService_->notificationExtensionLoaded_.load());
     EXPECT_NE(advancedNotificationService_->notificationExtensionHandler_, nullptr);
-    advancedNotificationService_->notificationExtensionHandler_ = nullptr;
 }
 #else
 /**
@@ -2279,8 +2287,6 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SubscribeExtensionServic
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     std::vector<sptr<NotificationBundleOption>> bundles;
     EXPECT_EQ(advancedNotificationService_->SubscribeExtensionService(bundle, bundles), 0);
-    advancedNotificationService_->UnSubscribeExtensionService(bundle);
-    advancedNotificationService_->notificationExtensionHandler_ = nullptr;
 }
 #else
 /**
@@ -2324,7 +2330,6 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, UnSubscribeExtensionServ
     EXPECT_EQ(advancedNotificationService_->LoadExtensionService(), 0);
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     EXPECT_EQ(advancedNotificationService_->UnSubscribeExtensionService(bundle), 0);
-    advancedNotificationService_->notificationExtensionHandler_ = nullptr;
 }
 #else
 /**
@@ -2365,7 +2370,6 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, ShutdownExtensionService
     advancedNotificationService_->notificationExtensionHandler_ = nullptr;
     EXPECT_EQ(advancedNotificationService_->LoadExtensionService(), 0);
     EXPECT_EQ(advancedNotificationService_->ShutdownExtensionService(), 0);
-    advancedNotificationService_->notificationExtensionHandler_ = nullptr;
 }
 #else
 /**
