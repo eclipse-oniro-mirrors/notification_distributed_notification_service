@@ -1625,16 +1625,19 @@ napi_value Common::GetNotificationTriggerDisplayTime(const napi_env &env, const 
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
-    int32_t displayTime = 0;
+    int32_t displayTime = NotificationConstant::MIN_GEOFENCE_DISPLAY_TIME_S - 1;
     napi_get_value_int32(env, result, &displayTime);
-    if (displayTime <= NotificationConstant::MIN_GEOFENCE_DISPLAY_TIME_S ||
-        displayTime >= NotificationConstant::MAX_GEOFENCE_DISPLAY_TIME_S) {
+    if (displayTime < NotificationConstant::MIN_GEOFENCE_DISPLAY_TIME_S) {
         ANS_LOGE("displayTime is invalid.");
         std::string msg = std::string("Invalid displayTime. The displayTime must be in range ") +
             std::to_string(NotificationConstant::MIN_GEOFENCE_DISPLAY_TIME_S) + "s to " +
             std::to_string(NotificationConstant::MAX_GEOFENCE_DISPLAY_TIME_S) + "s.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
+    }
+    if (displayTime > NotificationConstant::MAX_GEOFENCE_DISPLAY_TIME_S) {
+        ANS_LOGW("displayTime is invalid.");
+        displayTime = NotificationConstant::MAX_GEOFENCE_DISPLAY_TIME_S;
     }
     notificationTrigger->SetDisplayTime(displayTime);
     return NapiGetNull(env);
@@ -1697,14 +1700,17 @@ napi_value Common::GetNotificationGeofence(const napi_env &env, const napi_value
 napi_value Common::GetNotificationGeofenceByDouble(const napi_env &env, const napi_value &value,
     std::shared_ptr<NotificationGeofence> &geofence)
 {
+    // longitude: double
     if (GetNotificationGeofenceByLongitude(env, value, geofence) == nullptr) {
         return nullptr;
     }
 
+    // latitude: double
     if (GetNotificationGeofenceByLatitude(env, value, geofence) == nullptr) {
         return nullptr;
     }
 
+    // radius: double
     if (GetNotificationGeofenceByRadius(env, value, geofence) == nullptr) {
         return nullptr;
     }
@@ -1725,7 +1731,7 @@ napi_value Common::GetNotificationGeofenceByLongitude(const napi_env &env, const
         ANS_LOGE("Property longitude expected.");
         return nullptr;
     }
-    double longitude = 0.0;
+    double longitude = NotificationConstant::MIN_GEOFENCE_LONGITUDE - 1;
     napi_get_named_property(env, value, "longitude", &result);
     NAPI_CALL(env, napi_typeof(env, result, &valuetype));
     if (valuetype != napi_number) {
@@ -1735,8 +1741,8 @@ napi_value Common::GetNotificationGeofenceByLongitude(const napi_env &env, const
         return nullptr;
     }
     napi_get_value_double(env, result, &longitude);
-    if (longitude <= NotificationConstant::MIN_GEOFENCE_LONGITUDE ||
-        longitude >= NotificationConstant::MAX_GEOFENCE_LONGITUDE) {
+    if (longitude < NotificationConstant::MIN_GEOFENCE_LONGITUDE ||
+        longitude > NotificationConstant::MAX_GEOFENCE_LONGITUDE) {
         ANS_LOGE("longitude is invalid.");
         std::string msg = std::string("Invalid longitude. The longitude must be in range ") +
             std::to_string(NotificationConstant::MIN_GEOFENCE_LONGITUDE) + " to " +
@@ -1762,7 +1768,7 @@ napi_value Common::GetNotificationGeofenceByLatitude(const napi_env &env, const 
         ANS_LOGE("Property latitude expected.");
         return nullptr;
     }
-    double latitude = 0.0;
+    double latitude = NotificationConstant::MIN_GEOFENCE_LATITUDE - 1;
     napi_get_named_property(env, value, "latitude", &result);
     NAPI_CALL(env, napi_typeof(env, result, &valuetype));
     if (valuetype != napi_number) {
@@ -1772,8 +1778,8 @@ napi_value Common::GetNotificationGeofenceByLatitude(const napi_env &env, const 
         return nullptr;
     }
     napi_get_value_double(env, result, &latitude);
-    if (latitude <= NotificationConstant::MIN_GEOFENCE_LATITUDE ||
-        latitude >= NotificationConstant::MAX_GEOFENCE_LATITUDE) {
+    if (latitude < NotificationConstant::MIN_GEOFENCE_LATITUDE ||
+        latitude > NotificationConstant::MAX_GEOFENCE_LATITUDE) {
         ANS_LOGE("latitude is invalid.");
         std::string msg = std::string("Invalid latitude. The latitude must be in range ") +
             std::to_string(NotificationConstant::MIN_GEOFENCE_LATITUDE) + " to " +
@@ -1799,7 +1805,7 @@ napi_value Common::GetNotificationGeofenceByRadius(const napi_env &env, const na
         ANS_LOGE("Property radius expected.");
         return nullptr;
     }
-    double radius = 0.0;
+    double radius = NotificationConstant::MIN_GEOFENCE_RADIUS - 1;
     napi_get_named_property(env, value, "radius", &result);
     NAPI_CALL(env, napi_typeof(env, result, &valuetype));
     if (valuetype != napi_number) {
@@ -1809,8 +1815,8 @@ napi_value Common::GetNotificationGeofenceByRadius(const napi_env &env, const na
         return nullptr;
     }
     napi_get_value_double(env, result, &radius);
-    if (radius <= NotificationConstant::MIN_GEOFENCE_RADIUS ||
-        radius >= NotificationConstant::MAX_GEOFENCE_RADIUS) {
+    if (radius < NotificationConstant::MIN_GEOFENCE_RADIUS ||
+        radius > NotificationConstant::MAX_GEOFENCE_RADIUS) {
         ANS_LOGE("radius is invalid.");
         std::string msg = std::string("Invalid radius. The radius must be in range ") +
             std::to_string(NotificationConstant::MIN_GEOFENCE_RADIUS) + " to " +
@@ -1837,7 +1843,7 @@ napi_value Common::GetNotificationGeofenceByNumber(const napi_env &env, const na
         geofence->SetDelayTime(NotificationConstant::DEFAULT_GEOFENCE_DELAY_TIME_S);
         return NapiGetNull(env);
     }
-    int32_t delayTime = 0;
+    int32_t delayTime = NotificationConstant::MIN_GEOFENCE_DELAY_TIME_S - 1;
     napi_get_named_property(env, value, "delayTime", &result);
     NAPI_CALL(env, napi_typeof(env, result, &valuetype));
     if (valuetype != napi_number) {
@@ -1847,8 +1853,8 @@ napi_value Common::GetNotificationGeofenceByNumber(const napi_env &env, const na
         return nullptr;
     }
     napi_get_value_int32(env, result, &delayTime);
-    if (delayTime <= NotificationConstant::MIN_GEOFENCE_DELAY_TIME_S ||
-        delayTime >= NotificationConstant::MAX_GEOFENCE_DELAY_TIME_S) {
+    if (delayTime < NotificationConstant::MIN_GEOFENCE_DELAY_TIME_S ||
+        delayTime > NotificationConstant::MAX_GEOFENCE_DELAY_TIME_S) {
         ANS_LOGE("delayTime is invalid.");
         std::string msg = std::string("Invalid delayTime. The delayTime must be in range ") +
             std::to_string(NotificationConstant::MIN_GEOFENCE_DELAY_TIME_S) + "s to " +
@@ -1865,10 +1871,12 @@ napi_value Common::GetNotificationGeofenceByEnum(const napi_env &env, const napi
     std::shared_ptr<NotificationGeofence> &geofence)
 {
     ANS_LOGD("called");
+    // coordinateSystemType: CoordinateSystemType
     if (GetNotificationGeofenceByCoordinateSystemType(env, value, geofence) == nullptr) {
         return nullptr;
     }
 
+    // monitorEvent: MonitorEvent
     if (GetNotificationGeofenceByMonitorEvent(env, value, geofence) == nullptr) {
         return nullptr;
     }

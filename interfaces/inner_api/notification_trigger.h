@@ -149,7 +149,7 @@ private:
 
 private:
     NotificationConstant::TriggerType type_;
-    NotificationConstant::ConfigPath configPath_;
+    NotificationConstant::ConfigPath configPath_ = NotificationConstant::ConfigPath::CONFIG_PATH_DEVICE_CONFIG;
     std::shared_ptr<NotificationGeofence> condition_;
     int32_t displayTime_;
 };

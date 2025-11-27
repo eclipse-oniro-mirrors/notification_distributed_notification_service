@@ -41,8 +41,8 @@ namespace Notification {
 
 inline const std::string REQUEST_STORAGE_KEY_PREFIX {"ans_live_view"};
 inline const std::string REQUEST_STORAGE_SECURE_KEY_PREFIX {"secure_live_view"};
-inline const std::string REQUEST_STORAGE_TRIGGER_KEY_PREFIX {"ans_trigger_key"};
-inline const std::string REQUEST_STORAGE_SECURE_TRIGGER_KEY_PREFIX {"secure_trigger_key"};
+constexpr const char *REQUEST_STORAGE_TRIGGER_LIVE_VIEW_PREFIX = "ans_trigger_live_view";
+constexpr const char *REQUEST_STORAGE_SECURE_TRIGGER_LIVE_VIEW_PREFIX = "secure_trigger_live_view";
 
 struct NotificationKey {
     int32_t id {};

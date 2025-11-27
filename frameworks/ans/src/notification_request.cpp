@@ -3198,7 +3198,7 @@ std::string NotificationRequest::GetTriggerKey()
 {
     std::stringstream stream;
     const char *keySpliter = "_";
-    stream << REQUEST_STORAGE_TRIGGER_KEY_PREFIX << keySpliter << GetBaseKey("") <<
+    stream << REQUEST_STORAGE_TRIGGER_LIVE_VIEW_PREFIX << keySpliter << GetBaseKey("") <<
         keySpliter << GetLiveViewStatusKey();
 
     return stream.str();
@@ -3208,7 +3208,7 @@ std::string NotificationRequest::GetTriggerSecureKey()
 {
     std::stringstream stream;
     const char *keySpliter = "_";
-    stream << REQUEST_STORAGE_SECURE_TRIGGER_KEY_PREFIX << keySpliter << GetBaseKey("") <<
+    stream << REQUEST_STORAGE_SECURE_TRIGGER_LIVE_VIEW_PREFIX << keySpliter << GetBaseKey("") <<
         keySpliter << GetLiveViewStatusKey();
 
     return stream.str();

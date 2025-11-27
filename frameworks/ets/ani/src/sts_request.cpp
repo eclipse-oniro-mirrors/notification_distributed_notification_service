@@ -748,21 +748,24 @@ void GetNotificationBundleOption(ani_env *env, ani_object obj,
     }
 }
 
-void GetNotificationTrigger(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+bool GetNotificationTrigger(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
 {
     ani_status status = ANI_ERROR;
     ani_ref triggerRef = {};
     ani_boolean isUndefind = ANI_TRUE;
     status = GetPropertyRef(env, obj, "trigger", isUndefind, triggerRef);
     if (status != ANI_OK || isUndefind == ANI_TRUE) {
-        ANS_LOGE("Cannot get the value of trigger. status %{public}d isUndefind %{public}d",
+        ANS_LOGD("Cannot get the value of trigger. status %{public}d isUndefind %{public}d",
             status, isUndefind);
-        return;
+        return true;
     }
     OHOS::Notification::NotificationTrigger trigger;
-    if (UnwrapTrigger(env, static_cast<ani_object>(triggerRef), trigger)) {
-        request->SetNotificationTrigger(std::make_shared<OHOS::Notification::NotificationTrigger>(trigger));
+    if (!UnwrapTrigger(env, static_cast<ani_object>(triggerRef), trigger)) {
+        ANS_LOGE("UnwrapTrigger failed");
+        return false;
     }
+    request->SetNotificationTrigger(std::make_shared<OHOS::Notification::NotificationTrigger>(trigger));
+    return true;
 }
 
 int32_t GetNotificationRequestByCustom(ani_env *env, ani_object obj,
@@ -785,7 +788,11 @@ int32_t GetNotificationRequestByCustom(ani_env *env, ani_object obj,
     GetNotificationTemplate(env, obj, notificationRequest);
     GetNotificationUnifiedGroupInfo(env, obj, notificationRequest);
     GetNotificationBundleOption(env, obj, notificationRequest);
-    GetNotificationTrigger(env, obj, notificationRequest);
+
+    if (!GetNotificationTrigger(env, obj, notificationRequest)) {
+        ANS_LOGE("GetNotificationRequestByCustom: get notification trigger failed");
+        return ERROR_PARAM_INVALID;
+    }
     return status;
 }
 

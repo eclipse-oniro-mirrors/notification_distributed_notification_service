@@ -206,20 +206,24 @@ bool UnwrapTriggerCondition(ani_env *env, ani_object object, NotificationTrigger
 
 bool UnwrapTriggerDisplayTime(ani_env *env, ani_object object, NotificationTrigger &trigger)
 {
-    // displayTime?:int;
+    // displayTime?: int;
     ani_status status = ANI_ERROR;
     ani_boolean isUndefined = ANI_TRUE;
-    ani_int displayTime = 0;
+    ani_int displayTime = NotificationConstant::MIN_GEOFENCE_DISPLAY_TIME_S - 1;
     status = GetPropertyInt(env, object, "displayTime", isUndefined, displayTime);
     if (status != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGD("UnwrapGeofence get displayTime failed.");
         trigger.SetDisplayTime(NotificationConstant::DEFAULT_GEOFENCE_DISPLAY_TIME_S);
+        return true;
     }
     auto cDisplayTime = static_cast<int32_t>(displayTime);
-    if (cDisplayTime <= NotificationConstant::MIN_GEOFENCE_DISPLAY_TIME_S ||
-        cDisplayTime >= NotificationConstant::MAX_GEOFENCE_DISPLAY_TIME_S) {
+    if (cDisplayTime < NotificationConstant::MIN_GEOFENCE_DISPLAY_TIME_S) {
         ANS_LOGE("UnwrapGeofence displayTime is invalid.");
         return false;
+    }
+    if (cDisplayTime > NotificationConstant::MAX_GEOFENCE_DISPLAY_TIME_S) {
+        ANS_LOGW("UnwrapGeofence displayTime is invalid.");
+        cDisplayTime = NotificationConstant::MAX_GEOFENCE_DISPLAY_TIME_S;
     }
     trigger.SetDisplayTime(cDisplayTime);
     return true;
@@ -233,15 +237,18 @@ bool UnwrapTrigger(ani_env *env, ani_object object, NotificationTrigger &trigger
         return false;
     }
 
+    // type: TriggerType
     if (!UnwrapTriggerType(env, object, trigger)) {
         ANS_LOGE("UnwrapTrigger: cover type failed");
         return false;
     }
 
+    // condition: Geofence
     if (!UnwrapTriggerCondition(env, object, trigger)) {
         ANS_LOGE("UnwrapTrigger: set condition failed");
         return false;
     }
+    // displayTime?: int;
     if (!UnwrapTriggerDisplayTime(env, object, trigger)) {
         ANS_LOGE("UnwrapTrigger: set displayTime failed");
         return false;
@@ -291,7 +298,7 @@ bool WrapTrigger(ani_env* env, const std::shared_ptr<NotificationTrigger> &trigg
         return false;
     }
 
-    // displayTime?:int
+    // displayTime?: int
     if (!SetPropertyOptionalByInt(env, object, "displayTime", trigger->GetDisplayTime())) {
         ANS_LOGD("WrapTrigger: set displayTime failed");
     }
@@ -305,31 +312,37 @@ bool UnwrapGeofence(ani_env *env, ani_object object, NotificationGeofence &condi
         return false;
     }
 
+    // longitude: double
     if (!UnwrapGeofenceLongitude(env, object, condition)) {
         ANS_LOGE("UnwrapGeofence, get longitude failed");
         return false;
     }
 
+    // latitude: double
     if (!UnwrapGeofenceLatitude(env, object, condition)) {
         ANS_LOGE("UnwrapGeofence, get latitude failed");
         return false;
     }
 
+    // radius: double
     if (!UnwrapGeofenceRadius(env, object, condition)) {
         ANS_LOGE("UnwrapGeofence, get radius failed");
         return false;
     }
 
+    // delayTime?: int
     if (!UnwrapGeofenceDelayTime(env, object, condition)) {
         ANS_LOGE("UnwrapGeofence failed, get delayTime failed");
         return false;
     }
 
+    // monitorEvent: MonitorEvent
     if (!UnwrapGeofenceCoordinateSystemType(env, object, condition)) {
         ANS_LOGE("UnwrapGeofence failed, get coordinateSystemType failed");
         return false;
     }
 
+    // coordinateSystemType: CoordinateSystemType
     if (!UnwrapGeofenceMonitorEvent(env, object, condition)) {
         ANS_LOGE("UnwrapGeofence failed, get unwrapGeofenceMonitorEvent failed");
         return false;
@@ -340,7 +353,7 @@ bool UnwrapGeofence(ani_env *env, ani_object object, NotificationGeofence &condi
 
 bool UnwrapGeofenceLongitude(ani_env *env, ani_object object, NotificationGeofence &condition)
 {
-    // longitude:double
+    // longitude: double
     ani_status status = ANI_ERROR;
     double longitude = NotificationConstant::MIN_GEOFENCE_LONGITUDE - 1;
     status = GetPropertyValueDouble(env, object, "longitude", longitude);
@@ -348,8 +361,8 @@ bool UnwrapGeofenceLongitude(ani_env *env, ani_object object, NotificationGeofen
         ANS_LOGE("UnwrapGeofence get longitude failed. status %{public}d", status);
         return false;
     }
-    if (longitude <= NotificationConstant::MIN_GEOFENCE_LONGITUDE ||
-        longitude >= NotificationConstant::MAX_GEOFENCE_LONGITUDE) {
+    if (longitude < NotificationConstant::MIN_GEOFENCE_LONGITUDE ||
+        longitude > NotificationConstant::MAX_GEOFENCE_LONGITUDE) {
         ANS_LOGE("UnwrapGeofence longitude is invalid.");
         return false;
     }
@@ -359,7 +372,7 @@ bool UnwrapGeofenceLongitude(ani_env *env, ani_object object, NotificationGeofen
 
 bool UnwrapGeofenceLatitude(ani_env *env, ani_object object, NotificationGeofence &condition)
 {
-    // latitude:double
+    // latitude: double
     ani_status status = ANI_ERROR;
     double latitude = NotificationConstant::MIN_GEOFENCE_LATITUDE - 1;
     status = GetPropertyValueDouble(env, object, "latitude", latitude);
@@ -367,8 +380,8 @@ bool UnwrapGeofenceLatitude(ani_env *env, ani_object object, NotificationGeofenc
         ANS_LOGE("UnwrapGeofence get latitude failed. status %{public}d", status);
         return false;
     }
-    if (latitude <= NotificationConstant::MIN_GEOFENCE_LATITUDE ||
-        latitude >= NotificationConstant::MAX_GEOFENCE_LATITUDE) {
+    if (latitude < NotificationConstant::MIN_GEOFENCE_LATITUDE ||
+        latitude > NotificationConstant::MAX_GEOFENCE_LATITUDE) {
         ANS_LOGE("UnwrapGeofence latitude is invalid.");
         return false;
     }
@@ -378,7 +391,7 @@ bool UnwrapGeofenceLatitude(ani_env *env, ani_object object, NotificationGeofenc
 
 bool UnwrapGeofenceRadius(ani_env *env, ani_object object, NotificationGeofence &condition)
 {
-    // radius:double
+    // radius: double
     ani_status status = ANI_ERROR;
     double radius = NotificationConstant::MIN_GEOFENCE_RADIUS - 1;
     status = GetPropertyValueDouble(env, object, "radius", radius);
@@ -386,8 +399,8 @@ bool UnwrapGeofenceRadius(ani_env *env, ani_object object, NotificationGeofence 
         ANS_LOGE("UnwrapGeofence get radius failed. status %{public}d", status);
         return false;
     }
-    if (radius <= NotificationConstant::MIN_GEOFENCE_RADIUS ||
-        radius >= NotificationConstant::MAX_GEOFENCE_RADIUS) {
+    if (radius < NotificationConstant::MIN_GEOFENCE_RADIUS ||
+        radius > NotificationConstant::MAX_GEOFENCE_RADIUS) {
         ANS_LOGE("UnwrapGeofence radius is invalid.");
         return false;
     }
@@ -397,18 +410,19 @@ bool UnwrapGeofenceRadius(ani_env *env, ani_object object, NotificationGeofence 
 
 bool UnwrapGeofenceDelayTime(ani_env *env, ani_object object, NotificationGeofence &condition)
 {
-    // delayTime?:int
+    // delayTime?: int
     ani_status status = ANI_ERROR;
     ani_boolean isUndefined = ANI_TRUE;
-    ani_int delayTime = 0;
+    ani_int delayTime = NotificationConstant::MIN_GEOFENCE_DELAY_TIME_S - 1;
     status = GetPropertyInt(env, object, "delayTime", isUndefined, delayTime);
     if (status != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGD("UnwrapGeofence get delayTime failed.");
         condition.SetDelayTime(NotificationConstant::DEFAULT_GEOFENCE_DELAY_TIME_S);
+        return true;
     }
     auto cDelayTime = static_cast<int32_t>(delayTime);
-    if (cDelayTime <= NotificationConstant::MIN_GEOFENCE_DELAY_TIME_S ||
-        cDelayTime >= NotificationConstant::MAX_GEOFENCE_DELAY_TIME_S) {
+    if (cDelayTime < NotificationConstant::MIN_GEOFENCE_DELAY_TIME_S ||
+        cDelayTime > NotificationConstant::MAX_GEOFENCE_DELAY_TIME_S) {
         ANS_LOGE("UnwrapGeofence delayTime is invalid.");
         return false;
     }
@@ -418,7 +432,7 @@ bool UnwrapGeofenceDelayTime(ani_env *env, ani_object object, NotificationGeofen
 
 bool UnwrapGeofenceMonitorEvent(ani_env *env, ani_object object, NotificationGeofence &condition)
 {
-   // coordinateSystemType:CoordinateSystemType
+    // coordinateSystemType: CoordinateSystemType
     ani_status status = ANI_ERROR;
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref coordinateSystemTypeAni = {};
@@ -445,7 +459,7 @@ bool UnwrapGeofenceMonitorEvent(ani_env *env, ani_object object, NotificationGeo
 
 bool UnwrapGeofenceCoordinateSystemType(ani_env *env, ani_object object, NotificationGeofence &condition)
 {
-    // monitorEvent:MonitorEvent
+    // monitorEvent: MonitorEvent
     ani_status status = ANI_ERROR;
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref monitorEventAni = {};
@@ -484,27 +498,27 @@ bool WrapGeofence(ani_env *env,
         return false;
     }
 
-    // longitude:double
+    // longitude: double
     if (!SetPropertyOptionalByDouble(env, object, "longitude", geofence->GetLongitude())) {
         ANS_LOGE("WrapGeofence: set longitude failed");
         return false;
     }
-    // latitude:double
+    // latitude: double
     if (!SetPropertyOptionalByDouble(env, object, "latitude", geofence->GetLatitude())) {
         ANS_LOGE("WrapGeofence: set latitude failed");
         return false;
     }
-    // radius:double
+    // radius: double
     if (!SetPropertyOptionalByDouble(env, object, "radius", geofence->GetRadius())) {
         ANS_LOGE("WrapGeofence: set radius failed");
         return false;
     }
-    // delayTime?:int
+    // delayTime?: int
     if (!SetPropertyOptionalByInt(env, object, "delayTime", geofence->GetDelayTime())) {
         ANS_LOGD("WrapGeofence: set delayTime failed");
     }
 
-    // coordinateSystemType:CoordinateSystemType
+    // coordinateSystemType: CoordinateSystemType
     ani_enum_item coordinateSystemType {};
     if (!CoordinateSystemTypeCToSts(env, geofence->GetCoordinateSystemType(), coordinateSystemType)) {
         ANS_LOGE("WrapGeofence: cover coordinateSystemType failed");
@@ -515,7 +529,7 @@ bool WrapGeofence(ani_env *env,
         return false;
     }
 
-    // monitorEvent:MonitorEvent
+    // monitorEvent: MonitorEvent
     ani_enum_item monitorEvent {};
     if (!MonitorEventCToSts(env, geofence->GetMonitorEvent(), monitorEvent)) {
         ANS_LOGE("WrapGeofence: cover monitorEvent failed");

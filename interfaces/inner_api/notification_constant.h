@@ -638,7 +638,7 @@ public:
     // maximum display time for geofence notification
     static constexpr int32_t MAX_GEOFENCE_DISPLAY_TIME_S = 1800;
 
-    // minimum  display time for geofence notification
+    // minimum display time for geofence notification
     static constexpr int32_t MIN_GEOFENCE_DISPLAY_TIME_S = 15;
 
     // default display time for geofence notification
