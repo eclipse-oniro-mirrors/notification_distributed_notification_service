@@ -32,7 +32,7 @@ typedef int32_t (*INIT_LOCAL_DEVICE)(const std::string &deviceId, uint16_t devic
     DistributedDeviceConfig config, DistributedHaCallbacks callbacks);
 typedef void (*RELEASE_LOCAL_DEVICE)();
 typedef void (*ADD_DEVICE)(const std::string &deviceId, const std::string &udId,
-    uint16_t deviceType, const std::string &networkId);
+    uint16_t deviceType, const std::string &networkId, const std::string &extraData);
 typedef void (*RELEASE_DEVICE)(const std::string &deviceId, uint16_t deviceType);
 typedef void (*REFRESH_DEVICE)(const std::string &deviceId, uint16_t deviceType,
     const std::string &networkId);
@@ -276,7 +276,7 @@ void DistributedExtensionService::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
         std::lock_guard<ffrt::mutex> lock(mapLock_);
         DistributedDeviceDataService::GetInstance().ResetTargetDevice(
             DeviceTypeToTypeString(deviceInfo.deviceTypeId), deviceInfo.deviceId);
-        handler(deviceInfo.deviceId, udid, deviceInfo.deviceTypeId, deviceInfo.networkId);
+        handler(deviceInfo.deviceId, udid, deviceInfo.deviceTypeId, deviceInfo.networkId, deviceInfo.extraData);
         std::string reason = "deviceType: " + std::to_string(deviceInfo.deviceTypeId) +
             " ; deviceId: " + StringAnonymous(deviceInfo.deviceId) + " ; networkId: " +
             StringAnonymous(deviceInfo.networkId);

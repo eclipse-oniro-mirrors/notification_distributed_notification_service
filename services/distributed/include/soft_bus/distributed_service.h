@@ -38,7 +38,7 @@ public:
     static DistributedService& GetInstance();
     void DestroyService();
     int32_t InitService(const std::string &deviceId, uint16_t deviceType);
-    void AddDevice(DistributedDeviceInfo device);
+    void AddDevice(DistributedDeviceInfo device, const std::string &extraData);
     void ReleaseDevice(const std::string &deviceId, uint16_t deviceType);
     void DeviceStatusChange(const DeviceStatueChangeInfo& changeInfo);
     void OnConsumed(const std::shared_ptr<Notification> &request,
@@ -71,6 +71,7 @@ private:
     bool OnConsumedSetFlags(const std::shared_ptr<Notification> &request,
         const DistributedDeviceInfo& peerDevice);
     void HandleMatchByType(const int32_t matchType, const DistributedDeviceInfo& device, const int32_t peerUserId);
+    bool CheckCollaborationAbility(const DistributedDeviceInfo device, const std::string &extraData);
 #ifdef DISTRIBUTED_FEATURE_MASTER
     void HandleSwitchChange(const bool notificationEnable, const bool liveViewEnable);
 #endif

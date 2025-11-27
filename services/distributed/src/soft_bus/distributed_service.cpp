@@ -38,6 +38,7 @@ namespace Notification {
 
 static const std::string DISTRIBUTED_LABEL = "ans_distributed";
 static const std::string LABEL_PLACEHOLDER = "label";
+static const int32_t OHOS_TYPE = 10;
 
 namespace {
 static const int32_t ADD_DEVICE_SLEEP_TIMES_MS = 1000;  // 1s
@@ -125,15 +126,52 @@ void DistributedService::ConnectPeerDevice(DistributedDeviceInfo device)
         ffrt::task_attr().name("sync").delay(SYNC_TASK_DELAY));
 }
 
-void DistributedService::AddDevice(DistributedDeviceInfo device)
+bool DistributedService::CheckCollaborationAbility(const DistributedDeviceInfo device, const std::string &extraData)
+{
+    if (extraData.empty() || !nlohmann::json::accept(extraData)) {
+        return true;
+    }
+
+    auto local = DistributedDeviceService::GetInstance().GetLocalDevice();
+    if (device.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH &&
+        local.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        nlohmann::json jsonObject = nlohmann::json::parse(extraData, nullptr, false);
+        if (jsonObject.is_null() || !jsonObject.is_object()) {
+            ANS_LOGW("Invalid extra data");
+            return true;
+        }
+
+        if (jsonObject.is_discarded()) {
+            ANS_LOGW("Fail to parse extra data");
+            return true;
+        }
+
+        const auto &jsonEnd = jsonObject.cend();
+        if (jsonObject.find("OS_TYPE") == jsonEnd || !jsonObject.at("OS_TYPE").is_number()) {
+            ANS_LOGW("Invalid extra data type.");
+            return true;
+        }
+        int32_t osType = jsonObject.at("OS_TYPE").get<int32_t>();
+        ANS_LOGI("Get extra data %{public}d %{public}s.", osType, StringAnonymous(device.deviceId_).c_str());
+        return osType == OHOS_TYPE;
+    }
+
+    return true;
+}
+
+void DistributedService::AddDevice(DistributedDeviceInfo device, const std::string &extraData)
 {
     if (serviceQueue_ == nullptr) {
         ANS_LOGE("Check handler is null.");
         return;
     }
-    serviceQueue_->submit_h([&, device]() {
-        ANS_LOGI("Dans AddDevice %{public}s %{public}d", StringAnonymous(device.deviceId_).c_str(),
-            device.deviceType_);
+    serviceQueue_->submit_h([&, device, extraData]() {
+        ANS_LOGI("Dans AddDevice %{public}s %{public}d, %{public}s.", StringAnonymous(device.deviceId_).c_str(),
+            device.deviceType_, extraData.c_str());
+        if (!CheckCollaborationAbility(device, extraData)) {
+            ANS_LOGI("Dans not support peer %{public}s.", StringAnonymous(device.deviceId_).c_str());
+            return;
+        }
         DistributedDeviceInfo deviceItem = device;
         deviceItem.peerState_ = DeviceState::STATE_SYNC;
         DistributedDeviceService::GetInstance().AddDeviceInfo(deviceItem);
