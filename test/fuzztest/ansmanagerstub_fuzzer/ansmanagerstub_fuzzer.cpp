@@ -266,7 +266,6 @@ namespace OHOS {
         service->RequestEnableNotification(stringData, callback);
 
         service->SetDistributedEnabledBySlot(slotType, deviceType, enabled);
-        service->GetAllDistribuedEnabledBundles(deviceType, bundleOptions);
         std::vector<sptr<Notification::Notification>> notificationsVector;
         service->GetAllNotificationsBySlotType(notificationsVector, slotType);
         service->AllowUseReminder(bundleName, allowed);
