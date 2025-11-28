@@ -241,6 +241,10 @@ void GetNotificationRequestByString(ani_env *env, ani_object obj,
     if (ANI_OK == GetPropertyString(env, obj, "appMessageId", isUndefined, mString) && isUndefined == ANI_FALSE) {
         request->SetAppMessageId(mString);
     }
+    if (ANI_OK == GetPropertyString(
+        env, obj, "priorityNotificationType", isUndefined, mString) && isUndefined == ANI_FALSE) {
+        request->SetPriorityNotificationType(mString);
+    }
     if (ANI_OK == GetPropertyString(env, obj, "label", isUndefined, mString) && isUndefined == ANI_FALSE) {
         request->SetLabel(GetResizeStr(mString, STR_MAX_SIZE));
     }

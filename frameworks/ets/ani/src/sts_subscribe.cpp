@@ -309,12 +309,61 @@ void StsSubscriberInstance::OnEnabledNotificationChanged(
     }
     ANS_LOGD("done");
 }
+
 void StsSubscriberInstance::OnEnabledPriorityChanged(
     const std::shared_ptr<EnabledNotificationCallbackData> &callbackData)
-{}
+{
+    std::lock_guard<std::mutex> l(lock_);
+    ani_env* etsEnv;
+    ani_status aniResult = ANI_ERROR;
+    ani_options aniArgs { 0, nullptr };
+    aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
+    if (aniResult != ANI_OK) {
+        ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
+        return;
+    }
+    std::vector<ani_ref> vec;
+    ani_object obj;
+    if (WrapEnabledPriorityNotificationCallbackData(etsEnv, callbackData, obj)) {
+        vec.push_back(obj);
+        CallFunction(etsEnv, "onEnabledPriorityChanged", vec);
+    } else {
+        ANS_LOGE("WrapEnabledPriorityNotificationCallbackData faild");
+    }
+    aniResult = vm_->DetachCurrentThread();
+    if (aniResult != ANI_OK) {
+        ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
+        return;
+    }
+}
+
 void StsSubscriberInstance::OnEnabledPriorityByBundleChanged(
     const std::shared_ptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData)
-{}
+{
+    std::lock_guard<std::mutex> l(lock_);
+    ani_env* etsEnv;
+    ani_status aniResult = ANI_ERROR;
+    ani_options aniArgs { 0, nullptr };
+    aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
+    if (aniResult != ANI_OK) {
+        ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
+        return;
+    }
+    std::vector<ani_ref> vec;
+    ani_object obj;
+    if (WrapEnabledPriorityNotificationByBundleCallbackData(etsEnv, callbackData, obj)) {
+        vec.push_back(obj);
+        CallFunction(etsEnv, "onEnabledPriorityByBundleChanged", vec);
+    } else {
+        ANS_LOGE("WrapEnabledPriorityNotificationByBundleCallbackData faild");
+    }
+    aniResult = vm_->DetachCurrentThread();
+    if (aniResult != ANI_OK) {
+        ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
+        return;
+    }
+}
+
 void StsSubscriberInstance::OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData)
 {
     ANS_LOGD("enter");

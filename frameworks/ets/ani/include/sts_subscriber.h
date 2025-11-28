@@ -18,6 +18,7 @@
 #include "ani.h"
 #include "sts_request.h"
 #include "enabled_notification_callback_data.h"
+#include "enabled_priority_notification_by_bundle_callback_data.h"
 #include "badge_number_callback_data.h"
 #include "sts_sorting_map.h"
 
@@ -25,6 +26,8 @@ namespace OHOS {
 namespace NotificationSts {
 using EnabledNotificationCallbackData = OHOS::Notification::EnabledNotificationCallbackData;
 using BadgeNumberCallbackData = OHOS::Notification::BadgeNumberCallbackData;
+using EnabledPriorityNotificationByBundleCallbackData =
+    OHOS::Notification::EnabledPriorityNotificationByBundleCallbackData;
 
 bool WarpSubscribeCallbackData(
     ani_env *env,
@@ -40,6 +43,10 @@ bool WarpSubscribeCallbackDataArray(
     ani_array &outObj);
 bool WarpEnabledNotificationCallbackData(
     ani_env *env, const std::shared_ptr<EnabledNotificationCallbackData> &callbackData, ani_object &outObj);
+bool WrapEnabledPriorityNotificationCallbackData(
+    ani_env *env, const std::shared_ptr<EnabledNotificationCallbackData> &callbackData, ani_object &outObj);
+bool WrapEnabledPriorityNotificationByBundleCallbackData(ani_env *env,
+    const std::shared_ptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData, ani_object &outObj);
 bool WarpBadgeNumberCallbackData(
     ani_env *env, const std::shared_ptr<BadgeNumberCallbackData> &badgeData, ani_object &outObj);
 } // namespace NotificationSts

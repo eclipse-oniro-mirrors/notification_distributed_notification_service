@@ -81,6 +81,7 @@ class UnifiedGroupInfoInner implements UnifiedGroupInfo {
 export interface NotificationRequest {
     content: NotificationContent;
     id?: int;
+    priorityNotificationType?: notificationManager.PriorityNotificationType;
     appMessageId?: string;
     notificationSlotType?: notificationManager.SlotType;
     isOngoing?: boolean;
@@ -133,6 +134,7 @@ export interface NotificationRequest {
 class NotificationRequestInner implements NotificationRequest {
     public content: NotificationContent = {};
     public id?: int | undefined;
+    public priorityNotificationType?: notificationManager.PriorityNotificationType | undefined;
     public appMessageId?: string | undefined;
     public notificationSlotType?: notificationManager.SlotType | undefined;
     public isOngoing?: boolean | undefined;
