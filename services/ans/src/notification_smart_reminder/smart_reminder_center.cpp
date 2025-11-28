@@ -34,6 +34,7 @@
 #endif
 #include "os_account_manager_helper.h"
 #include "distributed_data_define.h"
+#include "nlohmann/json.hpp"
 
 namespace OHOS {
 namespace Notification {
@@ -859,12 +860,18 @@ bool SmartReminderCenter::CheckHealthWhiteList(const sptr<NotificationRequest> &
     if (bundleName.empty()) {
         return true;
     }
-    bool notInWhiteList  = value.find(bundleName) == std::string::npos;
-    if (notInWhiteList) {
-        ANS_LOGI("not in white list. bundleName = %{public}s", bundleName.c_str());
-        return false;
+    nlohmann::json jsonArrayBundles = nlohmann::json::parse(value, nullptr, false);
+    if (jsonArrayBundles.is_null() || !jsonArrayBundles.is_array() || jsonArrayBundles.size() <= 0) {
+        ANS_LOGE("json data error, %{public}s", value.c_str());
+        return true;
     }
-    return true;
+    for (const auto& item : jsonArrayBundles) {
+        if (item == bundleName) {
+            return true;
+        }
+    }
+    ANS_LOGI("not in white list. bundleName = %{public}s", bundleName.c_str());
+    return false;
 }
 }  // namespace Notification
 }  // namespace OHOS
