@@ -33,6 +33,7 @@ ohos_benchmarktest("Benchmark_Publish_Test") {
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "googletest:gtest_main",
     "hilog:libhilog",

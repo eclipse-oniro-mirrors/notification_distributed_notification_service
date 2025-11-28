@@ -140,6 +140,7 @@ ohos_shared_library("notification_manager_ani") {
     "ability_runtime:wantagent_innerkits",
     "access_token:libtokenid_sdk",
     "ace_engine:ace_uicontent",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",

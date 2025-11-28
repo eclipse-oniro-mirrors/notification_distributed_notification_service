@@ -740,6 +740,7 @@ ohos_unittest("notification_preferences_second_test") {
 
   external_deps = [
     "ability_base:configuration",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "data_share:datashare_consumer",
     "ffrt:libffrt",
@@ -1591,6 +1592,7 @@ ohos_unittest("notification_extension_wrapper_unit_test") {
   external_deps = [
     "ability_base:configuration",
     "ability_runtime:dataobs_manager",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "ffrt:libffrt",
     "googletest:gtest_main",
@@ -1730,6 +1732,7 @@ ohos_unittest("common_utils_test") {
   external_deps = [
     "ability_base:configuration",
     "ability_base:zuri",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",

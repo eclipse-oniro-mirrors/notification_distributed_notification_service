@@ -46,6 +46,7 @@ ohos_fuzztest("ReminderDataShareHelperFuzzTest") {
     "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
