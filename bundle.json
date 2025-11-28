@@ -121,7 +121,9 @@
         "selinux_adapter",
         "bluetooth",
         "resource_schedule_service",
-        "background_task_mgr"
+        "background_task_mgr",
+        "window_manager",
+        "graphic_2d"
       ],
       "third_party": [
         "libuv",
