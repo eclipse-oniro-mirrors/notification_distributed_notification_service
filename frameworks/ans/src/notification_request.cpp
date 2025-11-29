@@ -877,6 +877,7 @@ std::string NotificationRequest::Dump()
             ", notificationFlagsOfDevices = " + (notificationFlagsOfDevices_ ? "not null" : "null") +
             ", notificationBundleOption = " + (notificationBundleOption_ != nullptr ? "not null" : "null") +
             ", agentBundle = " + (agentBundle_ != nullptr ? "not null" : "null") +
+            ", notificationTrigger = " + (notificationTrigger_ != nullptr ? "not null" : "null") +
             ", creatorUserId = " + std::to_string(creatorUserId_) + ", ownerUserId = " + std::to_string(ownerUserId_) +
             ", receiverUserId = " + std::to_string(receiverUserId_) + ", updateDeadLine = " +
             std::to_string(updateDeadLine_) + ", finishDeadLine = " + std::to_string(finishDeadLine_) +
@@ -1151,6 +1152,12 @@ NotificationRequest *NotificationRequest::FromJson(const nlohmann::json &jsonObj
     }
 
     ConvertJsonToAgentBundle(pRequest, jsonObject);
+
+    if (!ConvertJsonToNotificationTrigger(pRequest, jsonObject)) {
+        delete pRequest;
+        pRequest = nullptr;
+        return nullptr;
+    }
 
     return pRequest;
 }
@@ -1555,6 +1562,19 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
     if (valid) {
         if (!parcel.WriteParcelable(overlayIcon_.get())) {
             ANS_LOGE("Failed to write overlayIcon");
+            return false;
+        }
+    }
+
+    valid = notificationTrigger_ ? true : false;
+    if (!parcel.WriteBool(valid)) {
+        ANS_LOGE("Failed to write the flag which indicate whether notificationTrigger is null");
+        return false;
+    }
+
+    if (valid) {
+        if (!parcel.WriteParcelable(notificationTrigger_.get())) {
+            ANS_LOGE("Failed to write notification agentBundle");
             return false;
         }
     }
@@ -1979,6 +1999,15 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     valid = parcel.ReadBool();
     if (valid) {
+        notificationTrigger_ = std::shared_ptr<NotificationTrigger>(parcel.ReadParcelable<NotificationTrigger>());
+        if (!notificationTrigger_) {
+            ANS_LOGE("null notificationTrigger");
+            return false;
+        }
+    }
+
+    valid = parcel.ReadBool();
+    if (valid) {
         notificationContent_ = std::shared_ptr<NotificationContent>(parcel.ReadParcelable<NotificationContent>());
         if (!notificationContent_) {
             ANS_LOGE("null notificationContent");
@@ -2159,6 +2188,16 @@ std::shared_ptr<NotificationBundleOption> NotificationRequest::GetAgentBundle() 
     return agentBundle_;
 }
 
+void NotificationRequest::SetNotificationTrigger(const std::shared_ptr<NotificationTrigger> &notificationTrigger)
+{
+    notificationTrigger_ = notificationTrigger;
+}
+
+std::shared_ptr<NotificationTrigger> NotificationRequest::GetNotificationTrigger() const
+{
+    return notificationTrigger_;
+}
+
 void NotificationRequest::SetReceiverUserId(int32_t userId)
 {
     receiverUserId_ = userId;
@@ -2316,6 +2355,7 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->notificationTemplate_ = other.notificationTemplate_;
     this->notificationFlags_ = other.notificationFlags_;
     this->agentBundle_ = other.agentBundle_;
+    this->notificationTrigger_ = other.notificationTrigger_;
     this->unifiedGroupInfo_ = other.unifiedGroupInfo_;
     this->notificationBundleOption_ = other.notificationBundleOption_;
     this->notificationFlagsOfDevices_ = other.notificationFlagsOfDevices_;
@@ -2403,6 +2443,15 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
             return false;
         }
         jsonObject["agentBundle"] = bundleOptionObj;
+    }
+
+    if (notificationTrigger_ != nullptr) {
+        nlohmann::json triggerObj;
+        if (!NotificationJsonConverter::ConvertToJson(notificationTrigger_.get(), triggerObj)) {
+            ANS_LOGE("Cannot convert notificationTrigger to JSON.");
+            return false;
+        }
+        jsonObject["notificationTrigger"] = triggerObj;
     }
 
     return true;
@@ -2838,6 +2887,32 @@ bool NotificationRequest::ConvertJsonToAgentBundle(
     return true;
 }
 
+bool NotificationRequest::ConvertJsonToNotificationTrigger(
+    NotificationRequest *target, const nlohmann::json &jsonObject)
+{
+    if (target == nullptr) {
+        ANS_LOGE("null target");
+        return false;
+    }
+
+    const auto &jsonEnd = jsonObject.cend();
+
+    if (jsonObject.find("notificationTrigger") != jsonEnd) {
+        auto triggerObj = jsonObject.at("notificationTrigger");
+        if (!triggerObj.is_null()) {
+            auto *pNotificationTrigger = NotificationJsonConverter::ConvertFromJson<NotificationTrigger>(triggerObj);
+            if (pNotificationTrigger == nullptr) {
+                ANS_LOGE("null pNotificationTrigger");
+                return false;
+            }
+
+            target->notificationTrigger_ = std::shared_ptr<NotificationTrigger>(pNotificationTrigger);
+        }
+    }
+
+    return true;
+}
+
 bool NotificationRequest::IsCommonLiveView() const
 {
     return (slotType_ == NotificationConstant::SlotType::LIVE_VIEW) &&
@@ -2848,6 +2923,48 @@ bool NotificationRequest::IsSystemLiveView() const
 {
     return (slotType_ == NotificationConstant::SlotType::LIVE_VIEW) &&
         (notificationContentType_ == NotificationContent::Type::LOCAL_LIVE_VIEW);
+}
+
+bool NotificationRequest::IsGeofenceLiveView() const
+{
+    if (!IsCommonLiveView()) {
+        return false;
+    }
+    if (notificationContent_ == nullptr) {
+        ANS_LOGE("null notificationContent_");
+        return false;
+    }
+    auto content = notificationContent_->GetNotificationContent();
+    if (content == nullptr) {
+        ANS_LOGE("null content");
+        return false;
+    }
+
+    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    auto status = liveViewContent->GetLiveViewStatus();
+    return status == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE ||
+        status == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END;
+}
+
+bool NotificationRequest::IsUpdateLiveView() const
+{
+    if (!IsCommonLiveView()) {
+        return false;
+    }
+    if (notificationContent_ == nullptr) {
+        ANS_LOGE("null notificationContent_");
+        return false;
+    }
+    auto content = notificationContent_->GetNotificationContent();
+    if (content == nullptr) {
+        ANS_LOGE("null content");
+        return false;
+    }
+
+    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    auto status = liveViewContent->GetLiveViewStatus();
+    return status == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE ||
+        status == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE;
 }
 
 ErrCode NotificationRequest::CheckVersion(const sptr<NotificationRequest> &oldRequest) const
@@ -3074,6 +3191,48 @@ std::string NotificationRequest::GetSecureKey()
     std::stringstream stream;
     const char *keySpliter = "_";
     stream << REQUEST_STORAGE_SECURE_KEY_PREFIX << keySpliter << GetBaseKey("");
+    return stream.str();
+}
+
+std::string NotificationRequest::GetTriggerKey()
+{
+    std::stringstream stream;
+    const char *keySpliter = "_";
+    stream << REQUEST_STORAGE_TRIGGER_LIVE_VIEW_PREFIX << keySpliter << GetBaseKey("") <<
+        keySpliter << GetLiveViewStatusKey();
+
+    return stream.str();
+}
+
+std::string NotificationRequest::GetTriggerSecureKey()
+{
+    std::stringstream stream;
+    const char *keySpliter = "_";
+    stream << REQUEST_STORAGE_SECURE_TRIGGER_LIVE_VIEW_PREFIX << keySpliter << GetBaseKey("") <<
+        keySpliter << GetLiveViewStatusKey();
+
+    return stream.str();
+}
+
+std::string NotificationRequest::GetLiveViewStatusKey()
+{
+    if (!IsCommonLiveView()) {
+        return "";
+    }
+    if (notificationContent_ == nullptr) {
+        ANS_LOGE("null notificationContent_");
+        return "";
+    }
+    auto content = notificationContent_->GetNotificationContent();
+    if (content == nullptr) {
+        ANS_LOGE("null content");
+        return "";
+    }
+    const char *keySpliter = "_";
+    std::stringstream stream;
+    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    auto status = liveViewContent->GetLiveViewStatus();
+    stream << keySpliter << static_cast<int32_t>(status);
     return stream.str();
 }
 

@@ -220,6 +220,53 @@ bool AnsEnumUtil::LiveViewTypesJSToC(
     return true;
 }
 
+bool AnsEnumUtil::MonitorEventJSToC(const MonitorEvent &in, NotificationConstant::MonitorEvent &out)
+{
+    switch (in) {
+        case MonitorEvent::MONITOR_TYPE_ENTRY:
+            out = NotificationConstant::MonitorEvent::MONITOR_TYPE_ENTRY;
+            break;
+        case MonitorEvent::MONITOR_TYPE_LEAVE:
+            out = NotificationConstant::MonitorEvent::MONITOR_TYPE_LEAVE;
+            break;
+        default:
+            ANS_LOGE("MonitorEvent %{public}d", in);
+            return false;
+    }
+    return true;
+}
+
+bool AnsEnumUtil::CoordinateSystemTypeJSToC(const CoordinateSystemType &in,
+    NotificationConstant::CoordinateSystemType &out)
+{
+    switch (in) {
+        case CoordinateSystemType::COORDINATE_TYPE_WGS84:
+            out = NotificationConstant::CoordinateSystemType::COORDINATE_TYPE_WGS84;
+            break;
+        case CoordinateSystemType::COORDINATE_TYPE_GCJ02:
+            out = NotificationConstant::CoordinateSystemType::COORDINATE_TYPE_GCJ02;
+            break;
+        default:
+            ANS_LOGE("CoordinateSystemType %{public}d", in);
+            return false;
+    }
+    return true;
+}
+
+bool AnsEnumUtil::TriggerTypeJSToC(const TriggerType &in,
+    NotificationConstant::TriggerType &out)
+{
+    switch (in) {
+        case TriggerType::TRIGGER_TYPE_FENCE:
+            out = NotificationConstant::TriggerType::TRIGGER_TYPE_FENCE;
+            break;
+        default:
+            ANS_LOGE("CoordinateSystemType %{public}d", in);
+            return false;
+    }
+    return true;
+}
+
 bool AnsEnumUtil::SlotLevelCToJS(const NotificationSlot::NotificationLevel &inLevel, SlotLevel &outLevel)
 {
     switch (inLevel) {

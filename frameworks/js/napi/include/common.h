@@ -1881,6 +1881,51 @@ public:
      */
     static napi_value GetNotificationBundleOption(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
+
+    /**
+     * @brief Gets the notificationTrigger of NotificationRequest object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param request Indicates a NotificationRequest object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationTrigger(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
+
+    /**
+     * @brief Gets a NotificationTrigger object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param option Indicates a NotificationTrigger object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationTrigger(const napi_env &env, const napi_value &value,
+        std::shared_ptr<NotificationTrigger> &notificationTrigger);
+
+    /**
+     * @brief Gets a NotificationGeofence object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param option Indicates a NotificationGeofence object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationGeofence(const napi_env &env, const napi_value &value,
+        std::shared_ptr<NotificationTrigger> &notificationTrigger);
+
+    /**
+     * @brief Gets a NotificationGeofence object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param option Indicates a NotificationGeofence object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationGeofence(const napi_env &env, const napi_value &value,
+        std::shared_ptr<NotificationGeofence> &geofence);
+
     /**
      * @brief Sets a js object by specified NotificationDoNotDisturbProfile object
      *
@@ -1935,6 +1980,12 @@ public:
         NotificationRingtoneInfo &ringtoneInfo);
     static napi_value SetRingtoneInfo(const napi_env &env, const NotificationRingtoneInfo &ringtoneInfo,
         napi_value &result);
+    static napi_value GetNotificationGeofenceByDouble(const napi_env &env, const napi_value &value,
+        std::shared_ptr<NotificationGeofence> &geofence);
+    static napi_value GetNotificationGeofenceByNumber(const napi_env &env, const napi_value &value,
+        std::shared_ptr<NotificationGeofence> &geofence);
+    static napi_value GetNotificationGeofenceByEnum(const napi_env &env, const napi_value &value,
+        std::shared_ptr<NotificationGeofence> &geofence);
     static void PictureScale(std::shared_ptr<Media::PixelMap> pixelMap);
     static bool IsExpectedType(const napi_env &env, const napi_value &param, napi_valuetype expectType);
     static napi_value GetMapObject(const napi_env &env, const napi_value &object,
@@ -1951,8 +2002,26 @@ private:
     static ffrt::mutex mutex_;
     static const char *GetPropertyNameByContentType(ContentType type);
     static napi_value NapiReturnFalseCbInner(napi_env env, napi_callback_info info, bool newType);
+    static napi_value GetNotificationGeofenceByLongitude(const napi_env &env, const napi_value &value,
+        std::shared_ptr<NotificationGeofence> &geofence);
+    static napi_value GetNotificationGeofenceByLatitude(const napi_env &env, const napi_value &value,
+        std::shared_ptr<NotificationGeofence> &geofence);
+    static napi_value GetNotificationGeofenceByRadius(const napi_env &env, const napi_value &value,
+        std::shared_ptr<NotificationGeofence> &geofence);
+    static napi_value GetNotificationRequestByCustomInnerFirst(const napi_env &env, const napi_value &value,
+        NotificationRequest &request);
+    static napi_value GetNotificationRequestByCustomInnerSecond(const napi_env &env, const napi_value &value,
+        NotificationRequest &request);
     static napi_value GetRingtoneStringInfo(const napi_env &env, const napi_value &value,
         NotificationRingtoneInfo &ringtoneInfo);
+    static napi_value GetNotificationGeofenceByCoordinateSystemType(const napi_env &env, const napi_value &value,
+        std::shared_ptr<NotificationGeofence> &geofence);
+    static napi_value GetNotificationGeofenceByMonitorEvent(const napi_env &env, const napi_value &value,
+        std::shared_ptr<NotificationGeofence> &geofence);
+    static napi_value GetNotificationTriggerType(const napi_env &env, const napi_value &value,
+        std::shared_ptr<NotificationTrigger> &notificationTrigger);
+    static napi_value GetNotificationTriggerDisplayTime(const napi_env &env, const napi_value &value,
+        std::shared_ptr<NotificationTrigger> &notificationTrigger);
 };
 }  // namespace NotificationNapi
 }  // namespace OHOS

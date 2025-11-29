@@ -27,6 +27,7 @@
 #include "ani_common_want.h"
 #include "sts_bundle_option.h"
 #include "sts_subscribe.h"
+#include "sts_trigger.h"
 #include "ans_inner_errors.h"
 
 namespace OHOS {
@@ -747,6 +748,26 @@ void GetNotificationBundleOption(ani_env *env, ani_object obj,
     }
 }
 
+bool GetNotificationTrigger(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+{
+    ani_status status = ANI_ERROR;
+    ani_ref triggerRef = {};
+    ani_boolean isUndefind = ANI_TRUE;
+    status = GetPropertyRef(env, obj, "trigger", isUndefind, triggerRef);
+    if (status != ANI_OK || isUndefind == ANI_TRUE) {
+        ANS_LOGD("Cannot get the value of trigger. status %{public}d isUndefind %{public}d",
+            status, isUndefind);
+        return true;
+    }
+    OHOS::Notification::NotificationTrigger trigger;
+    if (!UnwrapTrigger(env, static_cast<ani_object>(triggerRef), trigger)) {
+        ANS_LOGE("UnwrapTrigger failed");
+        return false;
+    }
+    request->SetNotificationTrigger(std::make_shared<OHOS::Notification::NotificationTrigger>(trigger));
+    return true;
+}
+
 int32_t GetNotificationRequestByCustom(ani_env *env, ani_object obj,
     std::shared_ptr<OHOS::Notification::NotificationRequest> &notificationRequest)
 {
@@ -767,6 +788,11 @@ int32_t GetNotificationRequestByCustom(ani_env *env, ani_object obj,
     GetNotificationTemplate(env, obj, notificationRequest);
     GetNotificationUnifiedGroupInfo(env, obj, notificationRequest);
     GetNotificationBundleOption(env, obj, notificationRequest);
+
+    if (!GetNotificationTrigger(env, obj, notificationRequest)) {
+        ANS_LOGE("GetNotificationRequestByCustom: get notification trigger failed");
+        return ERROR_PARAM_INVALID;
+    }
     return status;
 }
 
@@ -1115,6 +1141,23 @@ bool SetRequestUnifiedGroupInfo(
     return true;
 }
 
+bool SetRequestTrigger(ani_env *env, const OHOS::Notification::NotificationRequest *request, ani_object &object)
+{
+    std::shared_ptr<NotificationTrigger> trigger = request->GetNotificationTrigger();
+    if (trigger == nullptr) {
+        ANS_LOGE("trigger is Undefine");
+        return true;
+    }
+    ani_object triggerObject = nullptr;
+    if (!WrapTrigger(env, trigger, triggerObject) || triggerObject == nullptr) {
+        ANS_LOGD("SetNotificationRequest Warp 'trigger' faild");
+    }
+    if (!SetPropertyByRef(env, object, "trigger", triggerObject)) {
+        ANS_LOGD("SetNotificationRequest set 'trigger' faild");
+    }
+    return true;
+}
+
 bool SetNotificationRequestByCustom(ani_env* env, ani_class cls,
     const OHOS::Notification::NotificationRequest *request, ani_object &object)
 {
@@ -1154,6 +1197,10 @@ bool SetNotificationRequestByCustom(ani_env* env, ani_class cls,
     // unifiedGroupInfo?: unifiedGroupInfo
     if (!SetRequestUnifiedGroupInfo(env, request, object)) {
         ANS_LOGD("set unifiedGroupInfo faild");
+    }
+    // trigger?: Trigger
+    if (!SetRequestTrigger(env, request, object)) {
+        ANS_LOGD("set trigger faild");
     }
     return true;
 }

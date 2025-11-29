@@ -240,6 +240,22 @@ ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
     return status;
 }
 
+ani_status GetPropertyValueDouble(ani_env *env, ani_object param, const char *name, double &value)
+{
+    if (env == nullptr || param == nullptr || name == nullptr) {
+        ANS_LOGE("GetPropertyValueDouble fail, has nullptr");
+        return ANI_INVALID_ARGS;
+    }
+    ani_status status = ANI_ERROR;
+    ani_double res = 0.0;
+    if ((status = env->Object_GetPropertyByName_Double(param, name, &res)) != ANI_OK) {
+        ANS_LOGE("Object_GetPropertyByName_Double failed, status : %{public}d", status);
+        return status;
+    }
+    value = static_cast<double>(res);
+    return status;
+}
+
 ani_status GetPropertyInt(ani_env *env, ani_object obj, const char *name,
     ani_boolean &isUndefined, ani_int &outvalue)
 {

@@ -77,6 +77,7 @@ ohos_shared_library("notification_manager_ani") {
     "./src/sts_subscriber.cpp",
     "./src/sts_template.cpp",
     "./src/sts_throw_erro.cpp",
+    "./src/sts_trigger.cpp",
     "./src/sts_user_input.cpp",
   ]
 
@@ -198,6 +199,7 @@ ohos_shared_library("notification_subscribe_ani") {
     "./src/sts_subscriber.cpp",
     "./src/sts_template.cpp",
     "./src/sts_throw_erro.cpp",
+    "./src/sts_trigger.cpp",
     "./src/sts_user_input.cpp",
     "./src/subscribe/ani_remove.cpp",
     "./src/subscribe/ani_subscribe.cpp",

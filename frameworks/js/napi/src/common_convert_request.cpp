@@ -703,6 +703,19 @@ napi_value Common::GetNotificationRequestByCustom(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
     ANS_LOGD("called");
+    if (GetNotificationRequestByCustomInnerFirst(env, value, request) == nullptr) {
+        return nullptr;
+    }
+    if (GetNotificationRequestByCustomInnerSecond(env, value, request) == nullptr) {
+        return nullptr;
+    }
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationRequestByCustomInnerFirst(
+    const napi_env &env, const napi_value &value, NotificationRequest &request)
+{
     // content: NotificationContent
     if (GetNotificationContent(env, value, request) == nullptr) {
         return nullptr;
@@ -763,6 +776,18 @@ napi_value Common::GetNotificationRequestByCustom(
     if (GetNotificationBundleOption(env, value, request) == nullptr) {
         return nullptr;
     }
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationRequestByCustomInnerSecond(
+    const napi_env &env, const napi_value &value, NotificationRequest &request)
+{
+    // trigger?: Trigger
+    if (GetNotificationTrigger(env, value, request) == nullptr) {
+        return nullptr;
+    }
+
     return NapiGetNull(env);
 }
 

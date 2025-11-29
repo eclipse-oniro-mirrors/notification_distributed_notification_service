@@ -31,6 +31,7 @@
 #include "want_params.h"
 #include "notification_check_request.h"
 #include "notification_bundle_option.h"
+#include "notification_trigger.h"
 #include "notification_unified_group_Info.h"
 #include <string>
 #include <map>
@@ -40,6 +41,8 @@ namespace Notification {
 
 inline const std::string REQUEST_STORAGE_KEY_PREFIX {"ans_live_view"};
 inline const std::string REQUEST_STORAGE_SECURE_KEY_PREFIX {"secure_live_view"};
+constexpr const char *REQUEST_STORAGE_TRIGGER_LIVE_VIEW_PREFIX = "ans_trigger_live_view";
+constexpr const char *REQUEST_STORAGE_SECURE_TRIGGER_LIVE_VIEW_PREFIX = "secure_trigger_live_view";
 
 struct NotificationKey {
     int32_t id {};
@@ -1278,6 +1281,10 @@ public:
 
     bool IsSystemLiveView() const;
 
+    bool IsGeofenceLiveView() const;
+
+    bool IsUpdateLiveView() const;
+
     /**
      * @brief Checks whether the image size exceeds the limit in content.
      *
@@ -1329,6 +1336,20 @@ public:
      * @return Return the unique key of notification request.
      */
     std::string GetSecureKey();
+
+    /**
+     * @brief Get notification request trigger key.
+     *
+     * @return Return the unique key of notification request trigger.
+     */
+    std::string GetTriggerKey();
+
+    /**
+     * @brief Get notification request trigger key.
+     *
+     * @return Return the unique key of notification request trigger.
+     */
+    std::string GetTriggerSecureKey();
 
     /**
      * @brief Get notification request base key.
@@ -1385,6 +1406,20 @@ public:
      * @return Returns the agentBundle of the notification.
      */
     std::shared_ptr<NotificationBundleOption> GetAgentBundle() const;
+
+    /**
+     * @brief Sets the notificationTrigger of this notification.
+     *
+     * @param notificationTrigger Indicates the notificationTrigger of this notification.
+     */
+    void SetNotificationTrigger(const std::shared_ptr<NotificationTrigger> &notificationTrigger);
+
+    /**
+     * @brief Obtains the notificationTrigger of the notification.
+     *
+     * @return Returns the notificationTrigger of the notification.
+     */
+    std::shared_ptr<NotificationTrigger> GetNotificationTrigger() const;
 
     /**
      * @brief Set notification appMessageId value.
@@ -1597,12 +1632,14 @@ private:
         bool collaborateFlag = false);
     static bool ConvertJsonToNotificationBundleOption(NotificationRequest *target, const nlohmann::json &jsonObject);
     static bool ConvertJsonToAgentBundle(NotificationRequest *target, const nlohmann::json &jsonObject);
+    static bool ConvertJsonToNotificationTrigger(NotificationRequest *target, const nlohmann::json &jsonObject);
     static ErrCode CheckLockScreenPictureSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content);
     void SetFlagBit(
         const NotificationConstant::ReminderFlag &bit,
         const bool status,
         std::shared_ptr<NotificationFlags> &flag);
     bool CheckPriorityNotificationTypeValid(const std::string &priorityNotificationType);
+    std::string GetLiveViewStatusKey();
 
 private:
     int32_t notificationId_ {0};
@@ -1696,6 +1733,7 @@ private:
     std::shared_ptr<NotificationFlags> notificationFlags_ {};
     std::shared_ptr<NotificationBundleOption> notificationBundleOption_ {};
     std::shared_ptr<NotificationBundleOption> agentBundle_ {};
+    std::shared_ptr<NotificationTrigger> notificationTrigger_ {};
     std::shared_ptr<NotificationUnifiedGroupInfo> unifiedGroupInfo_ {};
     std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> notificationFlagsOfDevices_ {};
 

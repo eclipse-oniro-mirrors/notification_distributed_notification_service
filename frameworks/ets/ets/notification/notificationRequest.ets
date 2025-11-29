@@ -78,8 +78,53 @@ class UnifiedGroupInfoInner implements UnifiedGroupInfo {
     public extraInfo?: Record<string, RecordData> | undefined;
 }
 
+export enum MonitorEvent {
+    MONITOR_TYPE_ENTRY = 1,
+    MONITOR_TYPE_LEAVE = 2
+}
+
+export enum CoordinateSystemType {
+    COORDINATE_TYPE_WGS84 = 1,
+    COORDINATE_TYPE_GCJ02 = 2
+}
+
+export enum TriggerType {
+    TRIGGER_TYPE_GEOFENCE = 1
+}
+
+export interface Geofence {
+    longitude: double;
+    latitude: double;
+    radius: double;
+    delayTime?: int;
+    coordinateSystemType: CoordinateSystemType;
+    monitorEvent: MonitorEvent;
+}
+
+class GeofenceInner implements Geofence {
+    longitude: double;
+    latitude: double;
+    radius: double;
+    delayTime?: int | undefined;
+    coordinateSystemType: CoordinateSystemType = CoordinateSystemType.COORDINATE_TYPE_WGS84;
+    monitorEvent: MonitorEvent = MonitorEvent.MONITOR_TYPE_ENTRY;
+}
+
+export interface Trigger {
+    type: TriggerType;
+    condition: Geofence;
+    displayTime?: int;
+}
+
+class TriggerInner implements Trigger {
+    type: TriggerType = TriggerType.TRIGGER_TYPE_GEOFENCE;
+    condition: Geofence = {};
+    displayTime?: int | undefined;
+}
+
 export interface NotificationRequest {
     content: NotificationContent;
+    trigger?: Trigger;
     id?: int;
     appMessageId?: string;
     notificationSlotType?: notificationManager.SlotType;
@@ -132,6 +177,7 @@ export interface NotificationRequest {
 
 class NotificationRequestInner implements NotificationRequest {
     public content: NotificationContent = {};
+    public trigger?: Trigger | undefined;
     public id?: int | undefined;
     public appMessageId?: string | undefined;
     public notificationSlotType?: notificationManager.SlotType | undefined;

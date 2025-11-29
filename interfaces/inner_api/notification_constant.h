@@ -233,6 +233,25 @@ public:
         ENABLE = 2,
     };
 
+    enum class MonitorEvent {
+        MONITOR_TYPE_ENTRY = 1,
+        MONITOR_TYPE_LEAVE = 2,
+    };
+
+    enum class ConfigPath {
+        CONFIG_PATH_DEVICE_CONFIG = 1,
+        CONFIG_PATH_CLOUD_CONFIG = 2,
+    };
+
+    enum class CoordinateSystemType {
+        COORDINATE_TYPE_WGS84 = 1,
+        COORDINATE_TYPE_GCJ02 = 2,
+    };
+
+    enum class TriggerType {
+        TRIGGER_TYPE_FENCE = 1,
+    };
+
     enum class RingtoneType {
         RINGTONE_TYPE_SYSTEM = 0,
         RINGTONE_TYPE_LOCAL = 1,
@@ -434,6 +453,11 @@ public:
     static const int32_t DISTRIBUTED_MASTER_ENABLE_CLOSE_DELETE = 37;
 
     /**
+     * Indicates that notification is deleted because geofence timer cancel it.
+     */
+    static const int32_t TRIGGER_GEOFENCE_REASON_DELETE = 38;
+
+    /**
      * Indicates that a notification is deleted for other reasons.
      */
     static const int32_t APP_CANCEL_REASON_OTHER = 100;
@@ -610,6 +634,42 @@ public:
          */
         static const std::vector<std::string> INNER_PRIORITY_TYPE_LIST;
     };
+
+    // maximum display time for geofence notification
+    static constexpr int32_t MAX_GEOFENCE_DISPLAY_TIME_S = 1800;
+
+    // minimum display time for geofence notification
+    static constexpr int32_t MIN_GEOFENCE_DISPLAY_TIME_S = 15;
+
+    // default display time for geofence notification
+    static constexpr int32_t DEFAULT_GEOFENCE_DISPLAY_TIME_S = 900;
+
+    // maximum delay time for publish geofence notification
+    static constexpr int32_t MAX_GEOFENCE_DELAY_TIME_S = 300;
+
+    // minimum delay time for publish geofence notification
+    static constexpr int32_t MIN_GEOFENCE_DELAY_TIME_S = 0;
+
+    // default delay time for publish geofence notification
+    static constexpr int32_t DEFAULT_GEOFENCE_DELAY_TIME_S = 0;
+
+    // maximum longitude for publish geofence notification
+    static constexpr double MAX_GEOFENCE_LONGITUDE = 180.0;
+
+    // minimum longitude for publish geofence notification
+    static constexpr double MIN_GEOFENCE_LONGITUDE = -180.0;
+
+    // maximum latitude for publish geofence notification
+    static constexpr double MAX_GEOFENCE_LATITUDE = 90.0;
+
+    // minimum latitude for publish geofence notification
+    static constexpr double MIN_GEOFENCE_LATITUDE = -90.0;
+
+    // maximum radius for publish geofence notification
+    static constexpr double MAX_GEOFENCE_RADIUS = 2000.0;
+
+    // minimum radius for publish geofence notification
+    static constexpr double MIN_GEOFENCE_RADIUS = 200.0;
 };
 }  // namespace Notification
 }  // namespace OHOS
