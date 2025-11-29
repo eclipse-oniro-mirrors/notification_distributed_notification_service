@@ -960,6 +960,61 @@ HWTEST_F(SmartReminderCenterTest, CheckHealthWhiteList_500, Function | SmallTest
     NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "[]", -1);
     ASSERT_EQ(result, true);
 }
+
+/**
+ * @tc.name: CheckScreenOffForCollaboration_100
+ * @tc.desc: Test sync devices without PC/PAD
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, CheckScreenOffForCollaboration_100, Function | SmallTest | Level1)
+{
+    set<string> syncDevices;
+    map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> statusMap;
+    statusMap[NotificationConstant::CURRENT_DEVICE_TYPE].set(DistributedDeviceStatus::LOCK_FLAG, true);
+    smartReminderCenter_->CheckScreenOffForCollaboration(syncDevices, statusMap);
+    EXPECT_TRUE(statusMap[NotificationConstant::CURRENT_DEVICE_TYPE].test(DistributedDeviceStatus::LOCK_FLAG));
+}
+
+/**
+ * @tc.name: CheckScreenOffForCollaboration_200
+ * @tc.desc: Test status map without current
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, CheckScreenOffForCollaboration_200, Function | SmallTest | Level1)
+{
+    set<string> syncDevices = {NotificationConstant::PAD_DEVICE_TYPE};
+    map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> statusMap;
+    smartReminderCenter_->CheckScreenOffForCollaboration(syncDevices, statusMap);
+    EXPECT_FALSE(statusMap.count(NotificationConstant::CURRENT_DEVICE_TYPE));
+}
+
+/**
+ * @tc.name: CheckScreenOffForCollaboration_300
+ * @tc.desc: Test not modify current screen lock
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, CheckScreenOffForCollaboration_300, Function | SmallTest | Level1)
+{
+    set<string> syncDevices = {NotificationConstant::PAD_DEVICE_TYPE};
+    map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> statusMap;
+    statusMap[NotificationConstant::CURRENT_DEVICE_TYPE].set(DistributedDeviceStatus::LOCK_FLAG, false);
+    smartReminderCenter_->CheckScreenOffForCollaboration(syncDevices, statusMap);
+    EXPECT_FALSE(statusMap[NotificationConstant::CURRENT_DEVICE_TYPE].test(DistributedDeviceStatus::LOCK_FLAG));
+}
+
+/**
+ * @tc.name: CheckScreenOffForCollaboration_400
+ * @tc.desc: Test status map without current
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, CheckScreenOffForCollaboration_400, Function | SmallTest | Level1)
+{
+    set<string> syncDevices = {NotificationConstant::PAD_DEVICE_TYPE};
+    map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> statusMap;
+    statusMap[NotificationConstant::CURRENT_DEVICE_TYPE].set(DistributedDeviceStatus::LOCK_FLAG, true);
+    smartReminderCenter_->CheckScreenOffForCollaboration(syncDevices, statusMap);
+    EXPECT_FALSE(statusMap.count(NotificationConstant::CURRENT_DEVICE_TYPE));
+}
 }   //namespace Notification
 }   //namespace OHOS
 #endif

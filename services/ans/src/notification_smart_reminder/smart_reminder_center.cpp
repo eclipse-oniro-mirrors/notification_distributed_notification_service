@@ -305,6 +305,29 @@ void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest
     request->SetDeviceFlags(notificationFlagsOfDevices);
 }
 
+void SmartReminderCenter::CheckScreenOffForCollaboration(const set<string>& syncDevices,
+    map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap) const
+{
+    if (syncDevices.find(NotificationConstant::PAD_DEVICE_TYPE) == syncDevices.end() &&
+        syncDevices.find(NotificationConstant::PC_DEVICE_TYPE) == syncDevices.end()) {
+        return;
+    }
+
+    if (statusMap.find(NotificationConstant::CURRENT_DEVICE_TYPE) == statusMap.end()) {
+        return;
+    }
+
+    auto current = statusMap[NotificationConstant::CURRENT_DEVICE_TYPE];
+    if (!current.test(DistributedDeviceStatus::LOCK_FLAG)) {
+        return;
+    }
+
+    Rosen::ScreenPowerState powerState = Rosen::ScreenManager::GetInstance().GetScreenPower();
+    current.set(DistributedDeviceStatus::LOCK_FLAG, powerState != Rosen::ScreenPowerState::POWER_OFF);
+    statusMap[NotificationConstant::CURRENT_DEVICE_TYPE] = current;
+    ANS_LOGW("Check Screen Off current power %{public}d %{public}s", powerState, current.to_string().c_str());
+}
+
 void SmartReminderCenter::InitValidDevices(
     set<string> &syncDevices, set<string> &smartDevices,
     map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
@@ -395,6 +418,7 @@ void SmartReminderCenter::InitValidDevices(
             syncDevices.insert(deviceType);
         }
     }
+    CheckScreenOffForCollaboration(syncDevices, statusMap);
     string syncDevicesStr;
     string smartDevicesStr;
     for (auto it = syncDevices.begin(); it != syncDevices.end(); ++it) {
