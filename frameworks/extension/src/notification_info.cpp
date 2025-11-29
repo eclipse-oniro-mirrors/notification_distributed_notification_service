@@ -70,6 +70,16 @@ int64_t NotificationInfo::GetDeliveryTime() const
     return deliveryTime_;
 }
 
+void NotificationInfo::SetAppIndex(int32_t appIndex)
+{
+    appIndex_ = appIndex;
+}
+
+int32_t NotificationInfo::GetAppIndex() const
+{
+    return appIndex_;
+}
+
 void NotificationInfo::SetGroupName(const std::string& groupName)
 {
     groupName_ = groupName;
@@ -161,6 +171,11 @@ bool NotificationInfo::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteInt32(appIndex_)) {
+        ANS_LOGE("Failed to write appIndex");
+        return false;
+    }
+
     return true;
 }
 
@@ -197,6 +212,7 @@ bool NotificationInfo::ReadFromParcel(Parcel &parcel)
     deliveryTime_ = parcel.ReadInt64();
     groupName_ = parcel.ReadString();
     appName_ = parcel.ReadString();
+    appIndex_ = parcel.ReadInt32();
 
     return true;
 }

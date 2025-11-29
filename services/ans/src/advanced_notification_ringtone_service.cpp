@@ -134,38 +134,5 @@ void AdvancedNotificationService::ClearOverTimeRingToneInfo()
             ffrt::task_attr().name("ringtone").delay(DEL_TASK_DELAY));
     }
 }
-
-void AdvancedNotificationService::ClearCloneRingToneInfo(NotificationRingtoneInfo ringtoneInfo,
-    std::vector<NotificationRingtoneInfo> cloneRingtoneInfos)
-{
-    if (cloneRingtoneInfos.empty()) {
-        return;
-    }
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Invalid ffrt queue.");
-        return;
-    }
-
-    ANS_LOGI("Start clear clone ringinfo.");
-    notificationSvrQueue_->submit_h(std::bind([&, ringtoneInfo, cloneRingtoneInfos]() {
-        if (ringtoneInfo.GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT) {
-            SystemSoundHelper::GetInstance()->RemoveCustomizedTones(cloneRingtoneInfos);
-            return;
-        }
-
-        std::vector<NotificationRingtoneInfo> delRingtoneInfos;
-        for (auto& item : cloneRingtoneInfos) {
-            if (ringtoneInfo.GetRingtoneFileName() == item.GetRingtoneFileName() &&
-                ringtoneInfo.GetRingtoneType() == item.GetRingtoneType() &&
-                ringtoneInfo.GetRingtoneUri() == item.GetRingtoneUri() &&
-                ringtoneInfo.GetRingtoneTitle() == item.GetRingtoneTitle()) {
-                continue;
-            }
-            delRingtoneInfos.push_back(item);
-        }
-        SystemSoundHelper::GetInstance()->RemoveCustomizedTones(delRingtoneInfos);
-    }));
-}
 }  // namespace Notification
 }  // namespace OHOS

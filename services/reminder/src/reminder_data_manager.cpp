@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,44 +15,31 @@
 
 #include "reminder_data_manager.h"
 
-#include "ability_manager_client.h"
-#include "ans_convert_enum.h"
 #include "ans_log_wrapper.h"
+#include "ans_convert_enum.h"
 #include "ans_trace_wrapper.h"
-#include "ans_const_define.h"
+
+#include "reminder_utils.h"
+#include "reminder_event_manager.h"
+#include "reminder_datashare_helper.h"
+#include "reminder_request_calendar.h"
+#include "reminder_calendar_share_table.h"
+#include "reminder_bundle_manager_helper.h"
+#include "reminder_config_change_observer.h"
+
+#include "ipc_skeleton.h"
+#include "locale_config.h"
+#include "app_mgr_client.h"
+#include "os_account_manager.h"
+#include "config_policy_utils.h"
+#include "notification_helper.h"
 #include "common_event_support.h"
 #include "common_event_manager.h"
-#include "reminder_request_calendar.h"
+#include "ability_manager_client.h"
 #include "in_process_call_wrapper.h"
-#include "ipc_skeleton.h"
-#include "notification_slot.h"
-#include "os_account_manager.h"
-#include "reminder_event_manager.h"
-#include "time_service_client.h"
-#include "singleton.h"
-#include "locale_config.h"
-#include "reminder_bundle_manager_helper.h"
-#include "datashare_predicates_object.h"
-#include "datashare_value_object.h"
-#include "datashare_helper.h"
-#include "data_share_permission.h"
-#include "datashare_errno.h"
-#include "datashare_template.h"
-#include "system_ability_definition.h"
-#include "app_mgr_constants.h"
-#include "iservice_registry.h"
-#include "config_policy_utils.h"
-#include "hitrace_meter_adapter.h"
-#ifdef HAS_HISYSEVENT_PART
-#include "hisysevent.h"
-#endif
-#include "reminder_utils.h"
-#include "notification_helper.h"
-#include "reminder_datashare_helper.h"
-#include "reminder_calendar_share_table.h"
 #ifdef PLAYER_FRAMEWORK_ENABLE
-#include "audio_session_manager.h"
 #include "audio_stream_info.h"
+#include "audio_session_manager.h"
 #endif
 
 namespace OHOS {
@@ -428,28 +415,6 @@ void ReminderDataManager::OnUserSwitch(const int32_t& userId)
     queue_->submit(callback);
 }
 
-void ReminderDataManager::OnProcessDiedLocked(const int32_t callingUid)
-{
-    std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
-    std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
-    for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end();) {
-        sptr<ReminderRequest> reminder = *it;
-        if (reminder->GetUid() != callingUid) {
-            ++it;
-            continue;
-        }
-        if (reminder->IsAlerting()) {
-            TerminateAlerting(reminder, "onProcessDied");
-            ++it;
-        } else {
-            CancelNotification(reminder);
-            reminder->OnClose(false);
-            it = showedReminderVector_.erase(it);
-        }
-        store_->UpdateOrInsert(reminder);
-    }
-}
-
 void ReminderDataManager::InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &sharedTimerInfo,
     const sptr<ReminderRequest> &reminderRequest, TimerType reminderType) const
 {
@@ -656,7 +621,7 @@ void ReminderDataManager::InitShareReminders(const bool registerObserver)
     std::vector<sptr<ReminderRequest>> immediatelyReminders;
     std::vector<sptr<ReminderRequest>> extensionReminders;
     CheckReminderTime(immediatelyReminders, extensionReminders);
-    HandleImmediatelyShow(immediatelyReminders, false);
+    HandleImmediatelyShow(immediatelyReminders, false, true);
     StartRecentReminder();
 }
 
@@ -858,7 +823,7 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
     std::vector<sptr<ReminderRequest>> showImmediately;
     std::vector<sptr<ReminderRequest>> extensionReminders;
     RefreshRemindersLocked(type, showImmediately, extensionReminders);
-    HandleImmediatelyShow(showImmediately, true);
+    HandleImmediatelyShow(showImmediately, true, false);
     HandleExtensionReminder(extensionReminders, REISSUE_CALLBACK);
     StartRecentReminder();
     StartLoadTimer();
@@ -889,12 +854,6 @@ void ReminderDataManager::TerminateAlerting()
         return;
     }
     TerminateAlerting(reminder, "manual");
-}
-
-void ReminderDataManager::TerminateAlerting(const uint16_t waitInSecond, const sptr<ReminderRequest> &reminder)
-{
-    sleep(waitInSecond);
-    TerminateAlerting(reminder, "waitInMillis");
 }
 
 void ReminderDataManager::TerminateAlerting(const sptr<ReminderRequest> &reminder, const std::string &reason)
@@ -1042,17 +1001,16 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& 
             playSoundReminder = (*it);
             isAlerting = true;
         } else {
-            ShowReminder((*it), false, false, false, false, isAlerting);
+            ShowReminder((*it), false, false, isAlerting, false);
         }
     }
     if (playSoundReminder != nullptr) {
-        ShowReminder(playSoundReminder, true, false, false, true, true);
+        ShowReminder(playSoundReminder, true, false, true, false);
     }
 }
 
-void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, const bool isNeedToPlaySound,
-    const bool isNeedToStartNext, const bool isSysTimeChanged, const bool needScheduleTimeout,
-    const bool isNeedCloseDefaultSound)
+void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, const bool isPlaySound,
+    const bool isSysTimeChanged, const bool isCloseDefaultSound, const bool isSlienceNotification)
 {
     int32_t reminderId = reminder->GetReminderId();
     bool isShare = reminder->IsShare();
@@ -1063,7 +1021,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, co
         return;
     }
     ReportSysEvent(reminder);
-    bool toPlaySound = isNeedToPlaySound && ShouldAlert(reminder) ? true : false;
+    bool toPlaySound = isPlaySound && ShouldAlert(reminder) ? true : false;
     reminder->OnShow(toPlaySound, isSysTimeChanged, true);
     AddToShowedReminders(reminder);
     NotificationRequest notificationRequest(reminder->GetNotificationId());
@@ -1072,11 +1030,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, co
     if (alertingReminderId_ != -1) {
         TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
     }
-    if (toPlaySound || isNeedCloseDefaultSound) {
-        // close notification default sound.
-        notificationRequest.SetNotificationControlFlags(static_cast<uint32_t>(
-            NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_SOUND));
-    }
+    SlienceNotification(toPlaySound || isCloseDefaultSound, isSlienceNotification, notificationRequest);
     ErrCode errCode = IN_PROCESS_CALL(NotificationHelper::PublishNotification(ReminderRequest::NOTIFICATION_LABEL,
         notificationRequest));
     if (errCode != ERR_OK) {
@@ -1085,11 +1039,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, co
     } else {
         if (toPlaySound) {
             PlaySoundAndVibrationLocked(reminder);  // play sound and vibration
-            if (needScheduleTimeout) {
-                StartTimer(reminder, TimerType::ALERTING_TIMER);
-            } else {
-                TerminateAlerting(1, reminder);
-            }
+            StartTimer(reminder, TimerType::ALERTING_TIMER);
         }
         HandleSameNotificationIdShowing(reminder);
         if (isShare) {
@@ -1098,9 +1048,24 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, co
         }
     }
     store_->UpdateOrInsert(reminder);
+}
 
-    if (isNeedToStartNext) {
-        StartRecentReminder();
+void ReminderDataManager::SlienceNotification(const bool isCloseDefaultSound, const bool isSlienceNotification,
+    NotificationRequest& notification)
+{
+    if (isCloseDefaultSound) {
+        // close notification default sound.
+        notification.SetNotificationControlFlags(static_cast<uint32_t>(
+            NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_SOUND));
+    }
+    if (isSlienceNotification) {
+        uint32_t closeSound = static_cast<uint32_t>(
+            NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_SOUND);
+        uint32_t closeBanner = static_cast<uint32_t>(
+            NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_BANNER);
+        uint32_t closeVibration = static_cast<uint32_t>(
+            NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_VIBRATION);
+        notification.SetNotificationControlFlags(closeSound | closeBanner | closeVibration);
     }
 }
 
@@ -1191,50 +1156,6 @@ void ReminderDataManager::StopAlertingReminder(const sptr<ReminderRequest> &remi
     StopTimer(TimerType::ALERTING_TIMER);
 }
 
-std::string ReminderDataManager::Dump() const
-{
-    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-    std::map<std::string, std::vector<sptr<ReminderRequest>>> bundleNameMap;
-    for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
-        if ((*it)->IsExpired()) {
-            continue;
-        }
-        std::string bundleName = (*it)->GetBundleName();
-        auto val = bundleNameMap.find(bundleName);
-        if (val == bundleNameMap.end()) {
-            std::vector<sptr<ReminderRequest>> reminders;
-            reminders.push_back(*it);
-            bundleNameMap.insert(std::pair<std::string, std::vector<sptr<ReminderRequest>>>(bundleName, reminders));
-        } else {
-            val->second.push_back(*it);
-        }
-    }
-
-    std::string allReminders = "";
-    for (auto it = bundleNameMap.begin(); it != bundleNameMap.end(); ++it) {
-        std::string bundleName = it->first;
-        std::vector<sptr<ReminderRequest>> reminders = it->second;
-        sort(reminders.begin(), reminders.end(), cmp);
-        std::string oneBundleReminders = bundleName + ":{\n";
-        oneBundleReminders += "    totalCount:" + std::to_string(reminders.size()) + ",\n";
-        oneBundleReminders += "    reminders:{\n";
-        for (auto vit = reminders.begin(); vit != reminders.end(); ++vit) {
-            oneBundleReminders += "        [\n";
-            std::string reminderInfo = (*vit)->Dump();
-            oneBundleReminders += "            " + reminderInfo + "\n";
-            oneBundleReminders += "        ],\n";
-        }
-        oneBundleReminders += "    },\n";
-        oneBundleReminders += "},\n";
-        allReminders += oneBundleReminders;
-    }
-
-    return "ReminderDataManager{ totalCount:" + std::to_string(totalCount_) + ",\n" +
-           "timerId:" + std::to_string(timerId_) + ",\n" +
-           "activeReminderId:" + std::to_string(activeReminderId_) + ",\n" +
-           allReminders + "}";
-}
-
 sptr<ReminderRequest> ReminderDataManager::GetRecentReminder()
 {
     sort(reminderVector_.begin(), reminderVector_.end(), cmp);
@@ -1265,8 +1186,8 @@ sptr<ReminderRequest> ReminderDataManager::GetRecentReminder()
     return nullptr;
 }
 
-void ReminderDataManager::HandleImmediatelyShow(
-    std::vector<sptr<ReminderRequest>> &showImmediately, bool isSysTimeChanged)
+void ReminderDataManager::HandleImmediatelyShow(std::vector<sptr<ReminderRequest>>& showImmediately,
+    const bool isSysTimeChanged, const bool isSlienceNotification)
 {
     bool isAlerting = false;
     std::unordered_map<std::string, int32_t> limits;
@@ -1288,12 +1209,12 @@ void ReminderDataManager::HandleImmediatelyShow(
             isAlerting = true;
         } else {
             std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-            ShowReminder((*it), false, false, isSysTimeChanged, false, isAlerting);
+            ShowReminder((*it), false, isSysTimeChanged, isAlerting, isSlienceNotification);
         }
     }
     if (playSoundReminder != nullptr) {
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-        ShowReminder(playSoundReminder, true, false, isSysTimeChanged, true, true);
+        ShowReminder(playSoundReminder, true, isSysTimeChanged, true, isSlienceNotification);
     }
 }
 
@@ -1380,7 +1301,7 @@ void ReminderDataManager::Init()
     std::vector<sptr<ReminderRequest>> immediatelyReminders;
     std::vector<sptr<ReminderRequest>> extensionReminders;
     CheckReminderTime(immediatelyReminders, extensionReminders);
-    HandleImmediatelyShow(immediatelyReminders, false);
+    HandleImmediatelyShow(immediatelyReminders, false, true);
     HandleExtensionReminder(extensionReminders, REISSUE_CALLBACK);
     StartRecentReminder();
     StartLoadTimer();
@@ -1596,9 +1517,6 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
     if (reminder == nullptr) {
         return;
     }
-    if (alertingReminderId_ != -1) {
-        TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
-    }
 #ifdef PLAYER_FRAMEWORK_ENABLE
     if (soundPlayer_ == nullptr) {
         soundPlayer_ = Media::PlayerFactory::CreatePlayer();
@@ -1614,12 +1532,7 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
         audioManager->ActivateAudioSession(strategy);
     }
     SetPlayerParam(reminder);
-    if (reminder->IsShare()) {
-        if (CheckSoundConfig(reminder)) {
-            soundPlayer_->PrepareAsync();
-            soundPlayer_->Play();
-        }
-    } else {
+    if (CheckSoundConfig(reminder)) {
         soundPlayer_->PrepareAsync();
         soundPlayer_->Play();
     }
@@ -2017,7 +1930,7 @@ void ReminderDataManager::OnLanguageChanged()
             continue;
         }
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-        ShowReminder((*it), false, false, false, false, false);
+        ShowReminder((*it), false, false, false, true);
     }
     ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_LANGUAGE_CHANGE);
     ANSR_LOGD("end");
@@ -2117,7 +2030,7 @@ void ReminderDataManager::LoadShareReminders()
             calendar->Copy(iter->second);
             // In the logic of insertion or deletion, it can only be updated if the id changes.
             if ((*it)->IsShowing() && reminderId != iter->second->GetReminderId()) {
-                ShowReminder((*it), false, false, false, false, false);
+                ShowReminder((*it), false, false, false, false);
             }
             reminders.erase(iter);
             ++it;

@@ -1,0 +1,87 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <gtest/gtest.h>
+#include "gmock/gmock.h"
+
+#define private public
+#define protected public
+#include "notification_clone_priority_service.h"
+#undef private
+#undef protected
+#include "advanced_notification_service.h"
+#include "notification_clone_util.h"
+#include "notification_preferences.h"
+
+using namespace testing::ext;
+namespace OHOS {
+namespace Notification {
+// Test suite class
+class NotificationClonePriorityTest : public ::testing::Test {
+protected:
+    static void SetUpTestCase() {}
+    static void TearDownTestCase() {}
+    void SetUp() {}
+    void TearDown() {}
+};
+
+/**
+ * @tc.name: OnBackUp_00001
+ * @tc.desc: Test clone OnBackUp.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationClonePriorityTest, OnBackUp_00001, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject;
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 10);
+    AdvancedNotificationService::GetInstance()->SetBundlePriorityConfigInner(bundleOption, "test1\\ntest2\\ntest3");
+    AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundleInner(bundleOption, 2);
+    EXPECT_EQ(NotificationClonePriority::GetInstance()->OnBackup(jsonObject), ERR_OK);
+    std::set<std::string> systemApps;
+    NotificationClonePriority::GetInstance()->OnRestore(jsonObject, systemApps);
+    NotificationConstant::PriorityEnableStatus enableStatus =
+        NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT;
+    EXPECT_EQ(NotificationPreferences::GetInstance()->IsPriorityEnabledByBundle(bundleOption, enableStatus), ERR_OK);
+    EXPECT_EQ(enableStatus, NotificationConstant::PriorityEnableStatus::ENABLE);
+}
+
+/**
+ * @tc.name: OnRestoreStart_00001
+ * @tc.desc: Test clone OnBackUp.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationClonePriorityTest, OnRestoreStart_00001, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject;
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 10);
+    AdvancedNotificationService::GetInstance()->SetBundlePriorityConfigInner(bundleOption, "test1\\ntest2\\ntest3");
+    AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundleInner(bundleOption, 2);
+    EXPECT_EQ(NotificationClonePriority::GetInstance()->OnBackup(jsonObject), ERR_OK);
+    std::vector<NotificationClonePriorityInfo> priorityInfo;
+    for (const auto &jsonNode : jsonObject) {
+        NotificationClonePriorityInfo cloneInfo;
+        cloneInfo.FromJson(jsonNode);
+        priorityInfo.emplace_back(cloneInfo);
+    }
+    int32_t userId = NotificationCloneUtil::GetActiveUserId();
+    NotificationPreferences::GetInstance()->UpdateClonePriorityInfos(userId, priorityInfo);
+    NotificationClonePriority::GetInstance()->OnUserSwitch(userId);
+    NotificationClonePriority::GetInstance()->OnRestoreStart("bundleName", 0, userId, 10);
+    EXPECT_EQ(NotificationClonePriority::GetInstance()->priorityInfo_.size(), 1);
+}
+}
+}

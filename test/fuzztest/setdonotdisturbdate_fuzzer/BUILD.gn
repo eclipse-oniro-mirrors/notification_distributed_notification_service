@@ -41,6 +41,7 @@ ohos_fuzztest("SetDoNotDisturbDateFuzzTest") {
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
+    "bundle_framework:appexecfwk_base",
     "hilog:libhilog",
     "image_framework:image_native",
     "relational_store:native_rdb",

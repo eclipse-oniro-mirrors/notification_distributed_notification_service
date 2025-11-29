@@ -25,6 +25,10 @@ void AniSetBadgeNumber(ani_env *env, ani_int badgeNumber);
 void AniSetBadgeNumberByBundle(ani_env *env, ani_object obj, ani_int badgeNumber);
 void AniSetBadgeDisplayStatusByBundles(ani_env *env, ani_object obj);
 ani_object AniGetBadgeDisplayStatusByBundles(ani_env *env, ani_object obj);
+ani_long AniGetBadgeNumber(ani_env *env);
+void AniOnBadgeNumberQuery(ani_env *env, ani_fn_object fn);
+void AniOffBadgeNumberQuery(ani_env *env);
+void AniHandleBadgeNumberPromise(ani_env *env, ani_object bundle, ani_long num);
 }
 }
 #endif

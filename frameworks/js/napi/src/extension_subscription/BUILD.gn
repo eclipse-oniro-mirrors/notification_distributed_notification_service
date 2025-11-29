@@ -86,6 +86,7 @@ ohos_shared_library("notificationextensionsubscription") {
     "image_framework:image",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "os_account:os_account_innerkits",
     "relational_store:native_rdb",
   ]
 

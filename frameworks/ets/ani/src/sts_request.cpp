@@ -1309,9 +1309,9 @@ bool WarpNotification(ani_env *env, const sptr<NotificationSts> notification, an
     return true;
 }
 
-ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<NotificationRequest>> requests)
+ani_array GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<NotificationRequest>> requests)
 {
-    ani_object arrayObj = newArrayClass(env, requests.size());
+    ani_array arrayObj = newArrayClass(env, requests.size());
     if (arrayObj == nullptr) {
         ANS_LOGE("arrayObj is nullptr");
         return nullptr;
@@ -1324,9 +1324,8 @@ ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<Notific
             ANS_LOGE("WarpNotificationRequest faild. index %{public}d", index);
             return nullptr;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(
-            arrayObj, "$_set", "iC{std.core.Object}:", index, requestObj)) {
-            ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}d", index);
+        if (ANI_OK != env->Array_Set(arrayObj, index, requestObj)) {
+            ANS_LOGE("Array_Set faild. index  %{public}d", index);
             return nullptr;
         }
         index ++;
@@ -1334,9 +1333,9 @@ ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<Notific
     return arrayObj;
 }
 
-ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vector<sptr<NotificationSts>> requests)
+ani_array GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vector<sptr<NotificationSts>> requests)
 {
-    ani_object arrayObj = newArrayClass(env, requests.size());
+    ani_array arrayObj = newArrayClass(env, requests.size());
     if (arrayObj == nullptr) {
         ANS_LOGE("arrayObj is nullptr");
         return nullptr;
@@ -1352,8 +1351,8 @@ ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vect
                 return nullptr;
             }
         if (ANI_OK
-            != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, requestObj)) {
-            ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}d", index);
+            != env->Array_Set(arrayObj, index, requestObj)) {
+            ANS_LOGE("Array_Set faild. index  %{public}d", index);
             return nullptr;
         }
         index ++;

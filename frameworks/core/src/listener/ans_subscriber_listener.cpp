@@ -76,7 +76,13 @@ ErrCode SubscriberListener::OnConsumed(
         return ERR_INVALID_OPERATION;
     }
 #endif
-    
+    if (deviceType.compare(NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE) == 0) {
+        sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
+        if (request != nullptr && request->GetClassification() == NotificationConstant::ANS_VOIP) {
+            ANS_LOGD("skip voip");
+            return ERR_OK;
+        }
+    }
     subscriber->OnConsumed(
         sharedNotification, std::make_shared<NotificationSortingMap>(*notificationMap));
     return ERR_OK;
@@ -226,6 +232,32 @@ ErrCode SubscriberListener::OnEnabledNotificationChanged(
         return ERR_INVALID_DATA;
     }
     subscriber->OnEnabledNotificationChanged(std::make_shared<EnabledNotificationCallbackData>(*callbackData));
+    return ERR_OK;
+}
+
+ErrCode SubscriberListener::OnEnabledPriorityChanged(const sptr<EnabledNotificationCallbackData> &callbackData)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    auto subscriber = subscriber_.lock();
+    if (subscriber == nullptr) {
+        ANS_LOGE("null subscriber");
+        return ERR_INVALID_DATA;
+    }
+    subscriber->OnEnabledPriorityChanged(std::make_shared<EnabledNotificationCallbackData>(*callbackData));
+    return ERR_OK;
+}
+
+ErrCode SubscriberListener::OnEnabledPriorityByBundleChanged(
+    const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    auto subscriber = subscriber_.lock();
+    if (subscriber == nullptr) {
+        ANS_LOGE("null subscriber");
+        return ERR_INVALID_DATA;
+    }
+    subscriber->OnEnabledPriorityByBundleChanged(
+        std::make_shared<EnabledPriorityNotificationByBundleCallbackData>(*callbackData));
     return ERR_OK;
 }
 

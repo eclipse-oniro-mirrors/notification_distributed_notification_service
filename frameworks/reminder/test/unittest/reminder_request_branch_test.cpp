@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -512,42 +512,6 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationCommon_00300, Function | S
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     reminderRequest->reminderType_ = ReminderRequest::ReminderType::INVALID;
     reminderRequest->UpdateNotificationCommon(notificationRequest, false);
-}
-
-/**
- * @tc.name: UpdateNotificationBundleInfo_00100
- * @tc.desc: 1.Test UpdateNotificationBundleInfo function
- *           2.OwnerBundleName is empty
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(ReminderRequestBranchTest, UpdateNotificationBundleInfo_00100, Function | SmallTest | Level1)
-{
-    auto reminderRequest = std::make_shared<ReminderRequest>();
-    EXPECT_NE(reminderRequest, nullptr);
-    int32_t notificationId_ = 0;
-    NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
-    std::string ownerName = "";
-    notificationRequest.SetOwnerBundleName(ownerName);
-    reminderRequest->UpdateNotificationBundleInfo(notificationRequest);
-}
-
-/**
- * @tc.name: UpdateNotificationBundleInfo_00200
- * @tc.desc: 1.Test UpdateNotificationBundleInfo function
- *           2.OwnerBundleName is not empty
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(ReminderRequestBranchTest, UpdateNotificationBundleInfo_00200, Function | SmallTest | Level1)
-{
-    auto reminderRequest = std::make_shared<ReminderRequest>();
-    EXPECT_NE(reminderRequest, nullptr);
-    int32_t notificationId_ = 0;
-    NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
-    std::string ownerName = "aa";
-    notificationRequest.SetOwnerBundleName(ownerName);
-    reminderRequest->UpdateNotificationBundleInfo(notificationRequest);
 }
 }
 }

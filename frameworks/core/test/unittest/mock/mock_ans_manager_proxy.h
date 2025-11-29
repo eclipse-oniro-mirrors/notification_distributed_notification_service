@@ -163,9 +163,11 @@ public:
     MOCK_METHOD0(UnregisterPushCallback, ErrCode());
     MOCK_METHOD2(SetAdditionConfig, ErrCode(const std::string&, const std::string&));
     MOCK_METHOD1(SetPriorityEnabled, ErrCode(const bool));
-    MOCK_METHOD2(SetPriorityEnabledByBundle, ErrCode(const sptr<NotificationBundleOption> &, const bool));
+    MOCK_METHOD2(SetPriorityEnabledByBundle, ErrCode(const sptr<NotificationBundleOption> &, const int32_t));
     MOCK_METHOD1(IsPriorityEnabled, ErrCode(bool &));
-    MOCK_METHOD2(IsPriorityEnabledByBundle, ErrCode(const sptr<NotificationBundleOption> &, bool &));
+    MOCK_METHOD2(IsPriorityEnabledByBundle, ErrCode(const sptr<NotificationBundleOption> &, int32_t &));
+    MOCK_METHOD2(SetBundlePriorityConfig, ErrCode(const sptr<NotificationBundleOption> &, const std::string &));
+    MOCK_METHOD2(GetBundlePriorityConfig, ErrCode(const sptr<NotificationBundleOption> &, std::string &));
     MOCK_METHOD3(SetDistributedEnabledByBundle,
         ErrCode(const sptr<NotificationBundleOption>&, const std::string&, bool));
     MOCK_METHOD2(SetDistributedBundleOption,
@@ -220,6 +222,8 @@ public:
     MOCK_METHOD2(GetReminderInfoByBundles, ErrCode(const std::vector<sptr<NotificationBundleOption>>&,
         std::vector<NotificationReminderInfo>&));
     MOCK_METHOD1(SetReminderInfoByBundles, ErrCode(const std::vector<sptr<NotificationReminderInfo>>&));
+    MOCK_METHOD1(SetGeofenceEnabled, ErrCode(bool));
+    MOCK_METHOD1(IsGeofenceEnabled, ErrCode(bool &));
     MOCK_METHOD2(GetUserGrantedEnabledBundles, ErrCode(const sptr<NotificationBundleOption>& bundleOption,
         std::vector<sptr<NotificationBundleOption>>& enabledBundles));
     MOCK_METHOD1(GetUserGrantedEnabledBundlesForSelf, ErrCode(std::vector<sptr<NotificationBundleOption>>& bundles));

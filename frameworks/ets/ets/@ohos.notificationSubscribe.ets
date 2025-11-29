@@ -42,7 +42,7 @@ function isInvalidParameter(bundle: BundleOption): BusinessError
         code: ERROR_PARAM_INVALID,
         message: "Invalid parameter"
     }
-    
+
     if (bundle == null) {
         return errorCode;
     }
@@ -430,7 +430,7 @@ export default namespace notificationSubscribe {
                 callback(err, undefined);
             }
         )
-    }    
+    }
 
     export function removeAll(userId: int): Promise<void> {
     let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {

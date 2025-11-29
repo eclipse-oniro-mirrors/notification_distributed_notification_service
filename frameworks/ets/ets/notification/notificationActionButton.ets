@@ -15,6 +15,7 @@
 
 import { NotificationUserInput } from './notificationUserInput';
 import { WantAgent } from '@ohos.app.ability.wantAgent';
+import { RecordData } from '@ohos.base';
 
 export interface NotificationActionButton {
 
@@ -22,7 +23,7 @@ export interface NotificationActionButton {
 
     wantAgent: WantAgent;
 
-    extras?: Record<string, Object>;
+    extras?: Record<string, RecordData>;
 
     userInput?: NotificationUserInput;
 }
@@ -33,7 +34,7 @@ class NotificationActionButtonInner implements NotificationActionButton {
 
     public wantAgent: WantAgent = {};
 
-    public extras?: Record<string, Object> | undefined;
+    public extras?: Record<string, RecordData> | undefined;
 
     public userInput?: NotificationUserInput | undefined;
 }

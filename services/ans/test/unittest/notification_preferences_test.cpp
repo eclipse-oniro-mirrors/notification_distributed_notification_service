@@ -2851,5 +2851,61 @@ HWTEST_F(NotificationPreferencesTest, GetAllAncoBundlesInfo_001, Function | Smal
     ASSERT_EQ(bundles.empty(), false);
     NotificationPreferences::GetInstance()->SetAncoApplicationUserId(bundleOption, 0);
 }
+
+/**
+ * @tc.name: SetGeofenceEnabled_001
+ * @tc.desc: Test SetGeofenceEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetGeofenceEnabled_001, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferncesDB_ = nullptr;
+    auto ret = notificationPreferences.SetGeofenceEnabled(false);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_READY);
+}
+
+/**
+ * @tc.name: SetGeofenceEnabled_002
+ * @tc.desc: Test SetGeofenceEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetGeofenceEnabled_002, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
+    auto ret = notificationPreferences.SetGeofenceEnabled(false);
+    EXPECT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: IsGeofenceEnabled_001
+ * @tc.desc: Test IsGeofenceEnabled_001
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, IsGeofenceEnabled_001, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferncesDB_ = nullptr;
+    bool enabled = false;
+    auto ret = notificationPreferences.IsGeofenceEnabled(enabled);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_READY);
+}
+
+/**
+ * @tc.name: IsGeofenceEnabled_002
+ * @tc.desc: Test IsGeofenceEnabled_002
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, IsGeofenceEnabled_002, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
+    bool enabled = false;
+    auto ret = notificationPreferences.IsGeofenceEnabled(enabled);
+    EXPECT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
 }  // namespace Notification
 }  // namespace OHOS

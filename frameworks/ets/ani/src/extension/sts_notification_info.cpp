@@ -65,6 +65,10 @@ bool SetNotificationInfoByRequiredParameter(
         ANS_LOGE("SetNotificationInfoParameter: Set groupName failed");
     }
 
+    if (!SetPropertyOptionalByInt(env, infoObject, "appIndex", notificationInfo->GetAppIndex())) {
+        ANS_LOGE("SetNotificationInfoParameter: Set appIndex failed");
+    }
+
     ANS_LOGD("SetNotificationInfoParameter end");
     return true;
 }

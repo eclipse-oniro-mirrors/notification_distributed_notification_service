@@ -40,6 +40,7 @@ ohos_shared_library("notification_manager_ani") {
     "./src/manager/ani_distributed_enable.cpp",
     "./src/manager/ani_do_not_disturb_date.cpp",
     "./src/manager/ani_do_not_disturb_profile.cpp",
+    "./src/manager/ani_geofence_enabled.cpp",
     "./src/manager/ani_get_active.cpp",
     "./src/manager/ani_local_live_view.cpp",
     "./src/manager/ani_manager.cpp",
@@ -48,15 +49,16 @@ ohos_shared_library("notification_manager_ani") {
     "./src/manager/ani_open_settings.cpp",
     "./src/manager/ani_publish.cpp",
     "./src/manager/ani_push_callback.cpp",
+    "./src/manager/ani_reminder_info.cpp",
     "./src/manager/ani_remove_group.cpp",
     "./src/manager/ani_request_enable.cpp",
-    "./src/manager/ani_reminder_info.cpp",
     "./src/manager/ani_ringtone_info_by_bundle.cpp",
     "./src/manager/ani_silent_reminder_enable.cpp",
     "./src/manager/ani_slot.cpp",
     "./src/manager/ani_support_template.cpp",
     "./src/manager/ani_sync_config.cpp",
     "./src/sts_action_button.cpp",
+    "./src/sts_badge_query_callback.cpp",
     "./src/sts_bundle_option.cpp",
     "./src/sts_common.cpp",
     "./src/sts_convert_other.cpp",
@@ -64,8 +66,8 @@ ohos_shared_library("notification_manager_ani") {
     "./src/sts_notification_content.cpp",
     "./src/sts_notification_flag.cpp",
     "./src/sts_notification_manager.cpp",
-    "./src/sts_request.cpp",
     "./src/sts_reminder_info.cpp",
+    "./src/sts_request.cpp",
     "./src/sts_ringtone_info.cpp",
     "./src/sts_slot.cpp",
     "./src/sts_sorting.cpp",
@@ -138,6 +140,7 @@ ohos_shared_library("notification_manager_ani") {
     "ability_runtime:wantagent_innerkits",
     "access_token:libtokenid_sdk",
     "ace_engine:ace_uicontent",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
@@ -145,8 +148,10 @@ ohos_shared_library("notification_manager_ani") {
     "image_framework:image_taihe",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "os_account:os_account_innerkits",
     "resource_management:global_resmgr",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
   ]
 
   innerapi_tags = [ "platformsdk" ]
@@ -224,8 +229,10 @@ ohos_shared_library("notification_subscribe_ani") {
     "image_framework:image_taihe",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "os_account:os_account_innerkits",
     "resource_management:global_resmgr",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
   ]
 
   innerapi_tags = [ "platformsdk" ]
@@ -286,8 +293,10 @@ ohos_shared_library("notificationextensionsubscription_ani") {
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "napi:ace_napi",
+    "os_account:os_account_innerkits",
     "resource_management:global_resmgr",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
   ]
 
   innerapi_tags = [ "platformsdk" ]
@@ -348,8 +357,10 @@ ohos_shared_library("notification_subscriber_extension_ani") {
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "napi:ace_napi",
+    "os_account:os_account_innerkits",
     "resource_management:global_resmgr",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
   ]
 
   innerapi_tags = [ "platformsdk" ]

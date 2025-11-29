@@ -42,6 +42,7 @@ ohos_fuzztest("ReminderRequestTimerFuzzTest") {
     "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image_native",

@@ -22,6 +22,7 @@
 #include <string>
 
 #include "notification_rdb_data_mgr.h"
+#include "notification_clone_priority_info.h"
 #include "notification_preferences_info.h"
 
 namespace OHOS {
@@ -146,6 +147,22 @@ public:
         NotificationPreferencesInfo::SilentReminderInfo &silentReminderInfo);
 
     /**
+     * @brief Set the geofence notification enabled status in the database
+     *
+     * @param enabled true to enable geofence notifications, false to disable
+     * @return true if the operation succeeded, false if it failed
+     */
+    bool SetGeofenceEnabled(bool enabled);
+
+    /**
+     * @brief Check if geofence notification is enabled for the specified bundle
+     *
+     * @param enabled Output parameter indicating the enabled status
+     * @return true if the query was successful, false if an error occurred
+     */
+    bool IsGeofenceEnabled(bool &enabled);
+    
+    /**
      * @brief Put priority notification enable into disturbe DB.
      *
      * @param enabled Indicates to whether to enabled.
@@ -161,8 +178,8 @@ public:
      * @param enabled Indicates to whether to enabled.
      * @return Return true on success, false on failure.
      */
-    bool PutPriorityEnabledForBundle(
-        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const NotificationConstant::SWITCH_STATE &enabled);
+    bool PutPriorityEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const NotificationConstant::PriorityEnableStatus enableStatus);
 
     /**
      * @brief Get priority notification enable into disturbe DB.
@@ -179,8 +196,8 @@ public:
      * @param enabled Indicates to whether to enabled.
      * @return Return true on success, false on failure.
      */
-    bool GetPriorityEnabledForBundle(
-        const NotificationPreferencesInfo::BundleInfo &bundleInfo, NotificationConstant::SWITCH_STATE &enabled);
+    bool GetPriorityEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption,
+        NotificationConstant::PriorityEnableStatus &enableStatus);
 
     /**
      * @brief Put distributed enable notification in the of  bundle into disturbe DB.
@@ -492,6 +509,19 @@ public:
     bool GetLiveViewRebuildFlag(std::string& flag, int32_t userId);
     bool SetLiveViewRebuildFlag(int32_t userId);
     bool RemoveLiveViewRebuildFlag(int32_t userId);
+    void ParsePriorityInfosFromDisturbeDB(
+        const std::unordered_map<std::string, std::string> &values,
+        std::vector<NotificationClonePriorityInfo> &cloneInfos,
+        const NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE type);
+    bool DelClonePriorityInfo(const int32_t &userId, const NotificationClonePriorityInfo &cloneInfo);
+    bool UpdateClonePriorityInfos(
+        const int32_t &userId, const std::vector<NotificationClonePriorityInfo> &cloneInfos);
+    void GetClonePriorityInfos(const int32_t &userId, std::vector<NotificationClonePriorityInfo> &cloneInfos);
+    bool DelClonePriorityInfos(const int32_t &userId, const std::vector<NotificationClonePriorityInfo> &cloneInfos);
+    bool SetBundlePriorityConfig(
+        const sptr<NotificationBundleOption> &bundleOption, const std::string &configValue);
+    bool GetBundlePriorityConfig(const sptr<NotificationBundleOption> &bundleOption, std::string &configValue);
+
 private:
     bool CheckRdbStore();
 
@@ -531,6 +561,7 @@ private:
     std::string GenerateSlotKey(
         const std::string &bundleKey, const std::string &type = "", const std::string &subType = "") const;
     std::string GenerateBundleKey(const std::string &bundleKey, const std::string &type = "") const;
+    int32_t GetUidFromGenerate(const std::string &generateBundleKey) const;
 
     void ParseSlotFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &bundleKey,
         const std::pair<std::string, std::string> &entry, const int32_t &userId);
@@ -576,6 +607,7 @@ private:
         const std::unordered_map<std::string, std::string> values);
 
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo) const;
+    std::string GenerateBundleLablel(std::string &bundleName, int32_t bundleUid) const;
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
         const std::string &deviceType) const;
     std::string GenerateBundleLablel(const std::string &deviceType, const int32_t userId) const;

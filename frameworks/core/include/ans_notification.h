@@ -1121,6 +1121,24 @@ public:
     ErrCode SetAdditionConfig(const std::string &key, const std::string &value);
 
     /**
+     * @brief Set priority config of bundle for intelligent identification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param value Indicates priority config of bundle.
+     * @return Returns set result.
+     */
+    ErrCode SetBundlePriorityConfig(const NotificationBundleOption &bundleOption, const std::string &value);
+
+    /**
+     * @brief Get priority config of bundle for intelligent identification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param value Indicates priority config of bundle.
+     * @return Returns get result.
+     */
+    ErrCode GetBundlePriorityConfig(const NotificationBundleOption &bundleOption, std::string &value);
+
+    /**
      * @brief set priority notification switch.
      *
      * @param enabled Whether to allow sending priority notification.
@@ -1132,10 +1150,11 @@ public:
      * @brief set priority notification switch with bundle info.
      *
      * @param bundleOption Indicates the bundle bundleOption.
-     * @param enabled Whether to allow sending priority notification by bundle.
+     * @param enableStatus Whether to allow sending priority notification by bundle.
      * @return Returns set result.
      */
-    ErrCode SetPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, const bool enabled);
+    ErrCode SetPriorityEnabledByBundle(
+        const NotificationBundleOption &bundleOption, const NotificationConstant::PriorityEnableStatus enableStatus);
 
     /**
      * @brief Query switch for sending priority notification.
@@ -1149,10 +1168,11 @@ public:
      * @brief Query switch for sending priority notification by bundle.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
-     * @param enabled Whether to allow sending priority notification by bundle.
+     * @param enableStatus Whether to allow sending priority notification by bundle.
      * @return Returns configuring Whether to allow sending priority notification by bundle.
      */
-    ErrCode IsPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, bool &enabled);
+    ErrCode IsPriorityEnabledByBundle(
+        const NotificationBundleOption &bundleOption, NotificationConstant::PriorityEnableStatus &enableStatus);
 
     /**
      * @brief Sets whether to allow a specified application to publish notifications cross
@@ -1617,8 +1637,24 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode SetReminderInfoByBundles(const std::vector<NotificationReminderInfo> &reminderInfo);
-	
-	 /**
+
+    /**
+     * @brief Set geofence switch.
+     *
+     * @param enabled Set enable or not.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetGeofenceEnabled(bool enabled);
+
+    /**
+     * @brief Checks if the geofence is enabled.
+     *
+     * @param enabled whether the geofence is enabled.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode IsGeofenceEnabled(bool &enabled);
+
+    /**
      * @brief Background unaware proxy.
      *
      * @param uidList List of uid applications.

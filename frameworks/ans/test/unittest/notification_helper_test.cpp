@@ -1299,16 +1299,15 @@ HWTEST_F(NotificationHelperTest, SetPriorityEnabled_0100, TestSize.Level1)
  */
 HWTEST_F(NotificationHelperTest, SetPriorityEnabledByBundle_0100, TestSize.Level1)
 {
-    bool enabled = true;
+    NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::ENABLE;
     NotificationHelper notificationHelper;
     NotificationBundleOption bo;
     bo.SetBundleName("bundleName");
     bo.SetUid(1);
-    ErrCode ret = notificationHelper.SetPriorityEnabledByBundle(bo, enabled);
+    ErrCode ret = notificationHelper.SetPriorityEnabledByBundle(bo, enableStatus);
     EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
-    ret = notificationHelper.IsPriorityEnabledByBundle(bo, enabled);
+    ret = notificationHelper.IsPriorityEnabledByBundle(bo, enableStatus);
     EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
-    EXPECT_TRUE(enabled);
 }
 
 /**
@@ -1557,6 +1556,31 @@ HWTEST_F(NotificationHelperTest, RegisterBadgeQueryCallback_0100, Function | Sma
     ErrCode ret = notificationHelper.RegisterBadgeQueryCallback(nullptr);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
     notificationHelper.UnRegisterBadgeQueryCallback(nullptr);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: SetGeofenceEnabled_0100
+ * @tc.desc: Test SetGeofenceEnabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetGeofenceEnabled_0100, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetGeofenceEnabled(false);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: IsGeofenceEnabled_0100
+ * @tc.desc: Test IsGeofenceEnabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsGeofenceEnabled_0100, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    bool enabled = false;
+    ErrCode ret = notificationHelper.IsGeofenceEnabled(enabled);
     EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
 }

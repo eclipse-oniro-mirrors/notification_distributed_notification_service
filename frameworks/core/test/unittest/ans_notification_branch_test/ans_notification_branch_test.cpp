@@ -659,7 +659,8 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SetPriorityEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption, const bool enabled) override
+    ErrCode SetPriorityEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t enableStatusInt) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -669,7 +670,19 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode IsPriorityEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption, bool &enabled) override
+    ErrCode IsPriorityEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t &enableStatusInt) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetBundlePriorityConfig(
+        const sptr<NotificationBundleOption> &bundleOption, const std::string &value) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetBundlePriorityConfig(const sptr<NotificationBundleOption> &bundleOption, std::string &value) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -885,7 +898,17 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
-    
+
+    ErrCode SetGeofenceEnabled(bool enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode IsGeofenceEnabled(bool &enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode SetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundle,
         const sptr<NotificationRingtoneInfo> &ringtoneInfo) override
     {
@@ -1229,5 +1252,62 @@ HWTEST_F(AnsNotificationBranchTest, PublishNotification_0001, Function | MediumT
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
+/*
+ * @tc.name: SetGeofenceEnabled_0100
+ * @tc.desc: SetGeofenceEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationBranchTest, SetGeofenceEnabled_0100, Function | MediumTest | Level1)
+{
+    MockGetAnsManagerProxy(nullptr);
+    auto notification = std::make_shared<AnsNotification>();
+    ASSERT_NE(notification, nullptr);
+    ErrCode ret = notification->SetGeofenceEnabled(false);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: SetGeofenceEnabled_0200
+ * @tc.desc: SetGeofenceEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationBranchTest, SetGeofenceEnabled_0200, Function | MediumTest | Level1)
+{
+    MockGetAnsManagerProxy(new (std::nothrow) MockAnsManagerInterface());
+    auto notification = std::make_shared<AnsNotification>();
+    ASSERT_NE(notification, nullptr);
+    ErrCode ret = notification->SetGeofenceEnabled(false);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: IsGeofenceEnabled_0100
+ * @tc.desc: IsGeofenceEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationBranchTest, IsGeofenceEnabled_0100, Function | MediumTest | Level1)
+{
+    MockGetAnsManagerProxy(nullptr);
+    auto notification = std::make_shared<AnsNotification>();
+    ASSERT_NE(notification, nullptr);
+    bool enabled = false;
+    ErrCode ret = notification->IsGeofenceEnabled(enabled);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: IsGeofenceEnabled_0200
+ * @tc.desc: IsGeofenceEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationBranchTest, IsGeofenceEnabled_0200, Function | MediumTest | Level1)
+{
+    MockGetAnsManagerProxy(new (std::nothrow) MockAnsManagerInterface());
+    auto notification = std::make_shared<AnsNotification>();
+    ASSERT_NE(notification, nullptr);
+    bool enabled = false;
+    ErrCode ret = notification->IsGeofenceEnabled(enabled);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
 }  // namespace Notification
 }  // namespace OHOS

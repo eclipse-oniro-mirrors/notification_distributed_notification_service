@@ -516,7 +516,7 @@ ErrCode AdvancedNotificationService::IsAllowedNotify(bool &allowed)
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId) != ERR_OK) {
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
 
@@ -554,10 +554,17 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK) {
+        ANS_LOGD("GetActiveUserId is false");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+#else
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGD("GetActiveUserId is false");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
+#endif
 
     ErrCode result = ERR_OK;
     allowed = false;
@@ -642,9 +649,15 @@ ErrCode AdvancedNotificationService::IsSpecialBundleAllowedNotify(
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(targetBundle->GetUid(), userId) != ERR_OK) {
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+#else
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
+#endif
 
     ErrCode result = ERR_OK;
     allowed = false;

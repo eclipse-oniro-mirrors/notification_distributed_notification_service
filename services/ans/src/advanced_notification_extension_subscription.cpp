@@ -726,6 +726,11 @@ ErrCode AdvancedNotificationService::GetNotificationExtensionEnabledBundles(
             continue;
         }
         bundles.emplace_back(bundleOption);
+
+        if (!GetCloneBundleList(bundleOption, bundles)) {
+            ANS_LOGE("Failed to GetCloneBundleList for %{public}s", bundleOption->GetBundleName().c_str());
+            continue;
+        }
     }
     cacheNotificationExtensionBundles_ = bundles;
     return ERR_OK;
@@ -1127,6 +1132,9 @@ ErrCode AdvancedNotificationService::GetUserGrantedEnabledBundlesForSelf(
             ANS_LOGE("Failed to get enabled bundles from database, ret: %{public}d", result);
             return;
         }
+        for (auto bundle : bundles) {
+            bundle->SetAppName(BundleManagerHelper::GetInstance()->GetBundleLabel(bundle->GetBundleName()));
+        }
     }));
     notificationSvrQueue_->wait(handler);
 
@@ -1285,22 +1293,20 @@ bool AdvancedNotificationService::GetCloneBundleList(
             bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), result);
         return false;
     }
-    result =
-        BundleManagerHelper::GetInstance()->GetCloneAppIndexes(bundleOption->GetBundleName(), appIndexes, bundleUserId);
-    if (result != ERR_OK) {
-        ANS_LOGE("Failed to GetCloneAppIndexes for bundle, name: %{public}s, uid: %{public}d, ret: %{public}d",
-            bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), result);
+    if (!BundleManagerHelper::GetInstance()->GetCloneAppIndexes(
+        bundleOption->GetBundleName(), appIndexes, bundleUserId)) {
+        ANS_LOGE("Failed to GetCloneAppIndexes for bundle, name: %{public}s, uid: %{public}d",
+            bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
         return false;
     }
 
     int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_DEFAULT);
     for (int32_t appIndex : appIndexes) {
         AppExecFwk::BundleInfo bundleInfo = {};
-        result = BundleManagerHelper::GetInstance()->GetCloneBundleInfo(
-            bundleOption->GetBundleName(), flags, appIndex, bundleInfo, bundleUserId);
-        if (result != ERR_OK) {
-            ANS_LOGE("Failed to GetInstance for bundle, name: %{public}s, uid: %{public}d, ret: %{public}d",
-                bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), result);
+        if (!BundleManagerHelper::GetInstance()->GetCloneBundleInfo(
+            bundleOption->GetBundleName(), flags, appIndex, bundleInfo, bundleUserId)) {
+            ANS_LOGE("Failed to GetInstance for bundle, name: %{public}s, uid: %{public}d",
+                bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
             continue;
         }
 

@@ -571,7 +571,8 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SetPriorityEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption, const bool enabled) override
+    ErrCode SetPriorityEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t enableStatusInt) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -581,7 +582,19 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode IsPriorityEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption, bool &enabled) override
+    ErrCode IsPriorityEnabledByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t &enableStatusInt) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetBundlePriorityConfig(
+        const sptr<NotificationBundleOption> &bundleOption, const std::string &value) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetBundlePriorityConfig(const sptr<NotificationBundleOption> &bundleOption, std::string &value) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -842,6 +855,16 @@ public:
     }
 
     ErrCode SetReminderInfoByBundles(const std::vector<sptr<NotificationReminderInfo>> &reminderInfo) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetGeofenceEnabled(bool enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode IsGeofenceEnabled(bool &enabled) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

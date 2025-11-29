@@ -49,6 +49,10 @@ public:
      */
     std::string GetBundleName() const;
 
+    void SetAppName(const std::string &appName);
+
+    std::string GetAppName() const;
+
     /**
      * @brief Sets the creator uid.
      *
@@ -160,6 +164,7 @@ private:
     int32_t instanceKey_ {};
     int32_t appIndex_ = -1;
     bool badgeEnabled_ = false;
+    std::string appName_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS

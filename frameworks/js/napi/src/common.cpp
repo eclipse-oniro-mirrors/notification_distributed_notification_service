@@ -29,6 +29,9 @@
 #include "notification_time.h"
 #include "pixel_map_napi.h"
 #include "napi_common_want_agent.h"
+#include "os_account_constants.h"
+#include "os_account_info.h"
+#include "os_account_manager.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -260,6 +263,28 @@ napi_value Common::SetEnabledNotificationCallbackData(const napi_env &env, const
     napi_value enableNapi = nullptr;
     napi_get_boolean(env, data.GetEnable(), &enableNapi);
     napi_set_named_property(env, result, "enable", enableNapi);
+
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetEnabledPriorityNotificationByBundleCallbackData(const napi_env &env,
+    const EnabledPriorityNotificationByBundleCallbackData &data, napi_value &result)
+{
+    ANS_LOGD("called");
+    // bundle: string
+    napi_value bundleNapi = nullptr;
+    napi_create_string_utf8(env, data.GetBundle().c_str(), NAPI_AUTO_LENGTH, &bundleNapi);
+    napi_set_named_property(env, result, "bundle", bundleNapi);
+
+    // uid: uid_t
+    napi_value uidNapi = nullptr;
+    napi_create_int32(env, data.GetUid(), &uidNapi);
+    napi_set_named_property(env, result, "uid", uidNapi);
+
+    // enableStatus: number
+    napi_value enableNapi = nullptr;
+    napi_create_int32(env, static_cast<int32_t>(data.GetEnableStatus()), &enableNapi);
+    napi_set_named_property(env, result, "enableStatus", enableNapi);
 
     return NapiGetBoolean(env, true);
 }
@@ -1676,6 +1701,22 @@ napi_value Common::SetBundleOption(const napi_env &env, const NotificationBundle
     return NapiGetBoolean(env, true);
 }
 
+napi_value Common::SetGrantedBundleInfo(const napi_env &env, const NotificationBundleOption &bundleInfo,
+    napi_value &result)
+{
+    napi_value value = nullptr;
+
+    napi_create_string_utf8(env, bundleInfo.GetBundleName().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "bundleName", value);
+
+    napi_create_string_utf8(env, bundleInfo.GetAppName().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "appName", value);
+
+    napi_create_int32(env, bundleInfo.GetAppIndex(), &value);
+    napi_set_named_property(env, result, "appIndex", value);
+    return NapiGetBoolean(env, true);
+}
+
 napi_value Common::SetDoNotDisturbProfile(const napi_env &env, const NotificationDoNotDisturbProfile &data,
     napi_value &result)
 {
@@ -1824,6 +1865,17 @@ napi_value Common::SetRingtoneInfo(const napi_env &env, const NotificationRingto
     napi_set_named_property(env, result, "ringtoneUri", value);
 
     return NapiGetBoolean(env, true);
+}
+
+int32_t Common::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &userId)
+{
+    int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Get userId failed, uid = <%{public}d>, code is %{public}d", uid, ret);
+        return ret;
+    }
+    ANS_LOGD("Get userId succ, uid = <%{public}d> userId = <%{public}d>", uid, userId);
+    return ret;
 }
 }  // namespace NotificationNapi
 }  // namespace OHOS

@@ -207,5 +207,52 @@ HWTEST_F(DistributedServiceTest, DistributedServiceTest_01100, Function | SmallT
     std::string result = DistributedService::GetInstance().GetNotificationKey(notification);
     ASSERT_EQ(result, "ans_distributed_notificationKey");
 }
+
+/**
+ * @tc.name      : CollaborationAbilityTest_01000
+ * @tc.number    : CollaborationAbilityTest_01000
+ * @tc.desc      : Test the check collaboration ability.
+ */
+HWTEST_F(DistributedServiceTest, CollaborationAbilityTest_01000, Function | SmallTest | Level1)
+{
+    std::string extraData;
+    DistributedDeviceInfo peerDevice;
+    auto result = DistributedService::GetInstance().CheckCollaborationAbility(peerDevice, extraData);
+    ASSERT_EQ(result, true);
+
+    extraData = "extra_data";
+    result = DistributedService::GetInstance().CheckCollaborationAbility(peerDevice, extraData);
+    ASSERT_EQ(result, true);
+
+    extraData = "{\"OS_TYPE\":10,\"OS_VERSION\":\"OpenHarmony\"}";
+    peerDevice.deviceType_ = DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1;
+    DistributedDeviceService::GetInstance().InitLocalDevice("id", DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD);
+    result = DistributedService::GetInstance().CheckCollaborationAbility(peerDevice, extraData);
+    ASSERT_EQ(result, true);
+
+    peerDevice.deviceType_ = DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
+    result = DistributedService::GetInstance().CheckCollaborationAbility(peerDevice, extraData);
+    ASSERT_EQ(result, true);
+
+    DistributedDeviceService::GetInstance().InitLocalDevice("id", DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE);
+    result = DistributedService::GetInstance().CheckCollaborationAbility(peerDevice, extraData);
+    ASSERT_EQ(result, true);
+
+    extraData = "{\"OS_TYPE\":9,\"OS_VERSION\":\"OpenHarmony\"}";
+    result = DistributedService::GetInstance().CheckCollaborationAbility(peerDevice, extraData);
+    ASSERT_EQ(result, false);
+
+    extraData = "{\"OS_TYPE\":\"type\",\"OS_VERSION\":\"OpenHarmony\"}";
+    result = DistributedService::GetInstance().CheckCollaborationAbility(peerDevice, extraData);
+    ASSERT_EQ(result, true);
+
+    extraData = "{\"OS_VERSION\":\"OpenHarmony\"}";
+    result = DistributedService::GetInstance().CheckCollaborationAbility(peerDevice, extraData);
+    ASSERT_EQ(result, true);
+
+    extraData = "[\"OS_VERSION\":\"OpenHarmony\"]";
+    result = DistributedService::GetInstance().CheckCollaborationAbility(peerDevice, extraData);
+    ASSERT_EQ(result, true);
+}
 } // namespace Notification
 } // namespace OHOS

@@ -600,8 +600,6 @@ void AsyncCompleteCallbackNapiGetBadgeNumber(napi_env env, napi_status status, v
 
 napi_value NapiGetBadgeNumber(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("called");
-
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackGetBadgeNumber {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, nullptr);

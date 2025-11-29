@@ -2506,73 +2506,24 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetPriorityEnabled_0100, TestSize.
 
 HWTEST_F(NotificationPreferencesDatabaseTest, PutPriorityEnabledForBundle_0100, TestSize.Level1)
 {
-    MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1);
     std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
         std::make_shared<NotificationPreferencesDatabase>();
-    NotificationConstant::SWITCH_STATE switchState = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
-    NotificationPreferencesInfo::BundleInfo bundleInfo;
-
-    EXPECT_FALSE(notificationPreferencesDatabase->PutPriorityEnabledForBundle(bundleInfo, switchState));
+    NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::ENABLE;
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption("testBundle", 10000));
+    EXPECT_TRUE(notificationPreferencesDatabase->PutPriorityEnabledForBundle(bo, enableStatus));
+    EXPECT_TRUE(notificationPreferencesDatabase->GetPriorityEnabledForBundle(bo, enableStatus));
+    EXPECT_EQ(enableStatus, NotificationConstant::PriorityEnableStatus::ENABLE);
 }
 
-HWTEST_F(NotificationPreferencesDatabaseTest, PutPriorityEnabledForBundle_0200, TestSize.Level1)
+HWTEST_F(NotificationPreferencesDatabaseTest, SetBundlePriorityConfig_0200, TestSize.Level1)
 {
     std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
         std::make_shared<NotificationPreferencesDatabase>();
-    NotificationConstant::SWITCH_STATE switchState = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
-    NotificationPreferencesInfo::BundleInfo bundleInfo;
-    bundleInfo.bundleName_ = "testBundle";
-
-    EXPECT_TRUE(notificationPreferencesDatabase->PutPriorityEnabledForBundle(bundleInfo, switchState));
-
-    NotificationConstant::SWITCH_STATE result;
-    EXPECT_TRUE(notificationPreferencesDatabase->GetPriorityEnabledForBundle(bundleInfo, result));
-}
-
-HWTEST_F(NotificationPreferencesDatabaseTest, PutPriorityEnabledForBundle_0300, TestSize.Level1)
-{
-    MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1);
-    std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
-        std::make_shared<NotificationPreferencesDatabase>();
-    NotificationConstant::SWITCH_STATE switchState = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
-    NotificationPreferencesInfo::BundleInfo bundleInfo;
-    bundleInfo.bundleName_ = "testBundle";
-
-    EXPECT_FALSE(notificationPreferencesDatabase->PutPriorityEnabledForBundle(bundleInfo, switchState));
-}
-
-HWTEST_F(NotificationPreferencesDatabaseTest, GetPriorityEnabledForBundle_0100, TestSize.Level1)
-{
-    MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1);
-    std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
-        std::make_shared<NotificationPreferencesDatabase>();
-    NotificationConstant::SWITCH_STATE switchState;
-    NotificationPreferencesInfo::BundleInfo bundleInfo;
-
-    EXPECT_FALSE(notificationPreferencesDatabase->GetPriorityEnabledForBundle(bundleInfo, switchState));
-}
-
-HWTEST_F(NotificationPreferencesDatabaseTest, GetPriorityEnabledForBundle_0200, TestSize.Level1)
-{
-    MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1);
-    std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
-        std::make_shared<NotificationPreferencesDatabase>();
-    NotificationConstant::SWITCH_STATE switchState;
-    NotificationPreferencesInfo::BundleInfo bundleInfo;
-    bundleInfo.bundleName_ = "testBundle";
-
-    EXPECT_FALSE(notificationPreferencesDatabase->GetPriorityEnabledForBundle(bundleInfo, switchState));
-}
-
-HWTEST_F(NotificationPreferencesDatabaseTest, GetPriorityEnabledForBundle_0300, TestSize.Level1)
-{
-    std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
-        std::make_shared<NotificationPreferencesDatabase>();
-    NotificationConstant::SWITCH_STATE switchState;
-    NotificationPreferencesInfo::BundleInfo bundleInfo;
-    bundleInfo.bundleName_ = "testBundle";
-
-    EXPECT_TRUE(notificationPreferencesDatabase->GetPriorityEnabledForBundle(bundleInfo, switchState));
+    NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::ENABLE;
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption("testBundle", 10000));
+    EXPECT_TRUE(notificationPreferencesDatabase->SetBundlePriorityConfig(bo, "key\\nworld"));
+    std::string value;
+    EXPECT_TRUE(notificationPreferencesDatabase->GetBundlePriorityConfig(bo, value));
 }
 
 HWTEST_F(NotificationPreferencesDatabaseTest, PutDistributedEnabled_0100, TestSize.Level1)
@@ -2949,6 +2900,45 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetRingtoneInfoByBundle_0300, Test
     ASSERT_NE(info, nullptr);
     auto res = preferncesDB_->GetRingtoneInfoByBundle(bundleInfo, info);
     ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.name: SetGeofenceEnabled_0100
+ * @tc.desc: Test SetGeofenceEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetGeofenceEnabled_0100, TestSize.Level1)
+{
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1);
+    bool ret = preferncesDB_->SetGeofenceEnabled(false);
+    EXPECT_FALSE(ret);
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(100);
+}
+
+/**
+ * @tc.name: SetGeofenceEnabled_0200
+ * @tc.desc: Test SetGeofenceEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetGeofenceEnabled_0200, TestSize.Level1)
+{
+    preferncesDB_->rdbDataManager_ = nullptr;
+    bool ret = preferncesDB_->SetGeofenceEnabled(true);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsGeofenceEnabled_0100
+ * @tc.desc: Test IsGeofenceEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, IsGeofenceEnabled_0100, TestSize.Level1)
+{
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1);
+    bool enabled = false;
+    bool ret = preferncesDB_->IsGeofenceEnabled(enabled);
+    EXPECT_FALSE(ret);
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(100);
 }
 }  // namespace Notification
 }  // namespace OHOS

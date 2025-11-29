@@ -446,6 +446,7 @@ ohos_unittest("notification_clone_test") {
     "clone_test/notification_clone_bundle_info_test.cpp",
     "clone_test/notification_clone_bundle_service_test.cpp",
     "clone_test/notification_clone_disturb_service_test.cpp",
+    "clone_test/notification_clone_priority_service_test.cpp",
     "clone_test/notification_clone_manager_test.cpp",
     "clone_test/notification_clone_util_test.cpp",
     "mock/blob.cpp",
@@ -739,6 +740,7 @@ ohos_unittest("notification_preferences_second_test") {
 
   external_deps = [
     "ability_base:configuration",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "data_share:datashare_consumer",
     "ffrt:libffrt",
@@ -1590,6 +1592,7 @@ ohos_unittest("notification_extension_wrapper_unit_test") {
   external_deps = [
     "ability_base:configuration",
     "ability_runtime:dataobs_manager",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "ffrt:libffrt",
     "googletest:gtest_main",
@@ -1729,6 +1732,7 @@ ohos_unittest("common_utils_test") {
   external_deps = [
     "ability_base:configuration",
     "ability_base:zuri",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
@@ -1779,6 +1783,7 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/advanced_notification_event_service.cpp",
     "${services_path}/ans/src/advanced_notification_extension_subscription.cpp",
     "${services_path}/ans/src/advanced_notification_flow_control_service.cpp",
+    "${services_path}/ans/src/advanced_notification_geofence_service.cpp",
     "${services_path}/ans/src/advanced_notification_inline.cpp",
     "${services_path}/ans/src/advanced_notification_live_view_service.cpp",
     "${services_path}/ans/src/advanced_notification_manager/advanced_notification_publish.cpp",
@@ -1799,8 +1804,10 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/bundle_manager_helper.cpp",
     "${services_path}/ans/src/clone/dh_notification_clone_bundle_service.cpp",
     "${services_path}/ans/src/clone/notification_clone_bundle_info.cpp",
+    "${services_path}/ans/src/clone/notification_clone_priority_info.cpp",
     "${services_path}/ans/src/clone/notification_clone_bundle_service.cpp",
     "${services_path}/ans/src/clone/notification_clone_disturb_service.cpp",
+    "${services_path}/ans/src/clone/notification_clone_priority_service.cpp",
     "${services_path}/ans/src/clone/notification_clone_manager.cpp",
     "${services_path}/ans/src/clone/notification_clone_util.cpp",
     "${services_path}/ans/src/common/aes_gcm_helper.cpp",
@@ -1835,6 +1842,7 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/notification_smart_reminder/smart_reminder_center.cpp",
     "${services_path}/ans/src/notification_smart_reminder/string_utils.cpp",
     "${services_path}/ans/src/priority_notification/advanced_notification_priority_manager_service.cpp",
+    "${services_path}/ans/src/priority_notification/advanced_notification_priority_helper.cpp",
     "${services_path}/ans/src/priority_notification/notification_ai_extension_wrapper.cpp",
     "${services_path}/ans/src/notification_subscriber_manager.cpp",
     "${services_path}/ans/src/notification_timer_info.cpp",

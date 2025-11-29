@@ -29,6 +29,10 @@ bool g_setBundleInfoEnabled = false;
 bool g_getBundleInfoFailed = false;
 bool g_isNeedHapModuleInfos = false;
 bool g_isMockQueryExtensionAbilityInfos = false;
+bool g_isMockQueryExtensionAbilityInfosRet = true;
+bool g_isMockGetCloneAppIndexes = false;
+bool g_isMockGetCloneBundleInfo = false;
+constexpr const int32_t MOCK_UID = 20020010;
 }
 
 void MockSetBundleInfoFailed(bool getFail)
@@ -56,9 +60,20 @@ void MockIsNeedHapModuleInfos(bool isNeed)
     g_isNeedHapModuleInfos = isNeed;
 }
 
-void MockQueryExtensionAbilityInfos(bool enabled)
+void MockQueryExtensionAbilityInfos(bool enabled, bool ret)
 {
     g_isMockQueryExtensionAbilityInfos = enabled;
+    g_isMockQueryExtensionAbilityInfosRet = ret;
+}
+
+void MockGetCloneAppIndexes(bool enabled)
+{
+    g_isMockGetCloneAppIndexes = enabled;
+}
+
+void MockGetCloneBundleInfo(bool enabled)
+{
+    g_isMockGetCloneBundleInfo = enabled;
 }
 }
 }
@@ -138,9 +153,6 @@ ErrCode BundleMgrProxy::GetBundleInfoV9(
 bool BundleMgrProxy::QueryExtensionAbilityInfos(const ExtensionAbilityType &extensionType, const int32_t &userId,
     std::vector<ExtensionAbilityInfo> &extensionInfos)
 {
-    ANS_LOGE("fake QueryExtensionAbilityInfos: %{public}s",
-        std::to_string(Notification::g_isMockQueryExtensionAbilityInfos).c_str());
-
     if (Notification::g_isMockQueryExtensionAbilityInfos) {
         ExtensionAbilityInfo extensionInfo;
         extensionInfo.type = AppExecFwk::ExtensionAbilityType::NOTIFICATION_SUBSCRIBER;
@@ -148,7 +160,28 @@ bool BundleMgrProxy::QueryExtensionAbilityInfos(const ExtensionAbilityType &exte
         extensionInfos.push_back(extensionInfo);
     }
 
-    return true;
+    return Notification::g_isMockQueryExtensionAbilityInfosRet;
+}
+
+ErrCode BundleMgrProxy::GetCloneAppIndexes(const std::string &bundleName, std::vector<int32_t> &appIndexes,
+    int32_t userId)
+{
+    if (Notification::g_isMockGetCloneAppIndexes) {
+        appIndexes.push_back(1);
+        return ERR_OK;
+    }
+    return -1;
+}
+
+ErrCode BundleMgrProxy::GetCloneBundleInfo(const std::string &bundleName, int32_t flag, int32_t appIndex,
+    BundleInfo &bundleInfo, int32_t userId)
+{
+    if (Notification::g_isMockGetCloneBundleInfo) {
+        bundleInfo.uid = Notification::MOCK_UID;
+        return ERR_OK;
+    }
+
+    return -1;
 }
 } // namespace AppExecFwk
 } // namespace OHOS

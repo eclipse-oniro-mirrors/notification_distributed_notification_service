@@ -39,6 +39,8 @@ namespace OHOS {
 namespace Notification {
 namespace {
 const static std::string KEY_BUNDLE_LABEL = "label_ans_bundle_";
+constexpr static const char* KEY_PRIORITY_NOTIFICATION_SWITCH_FOR_BUNDLE = "priorityNotificationSwitchForBundle";
+constexpr static const char* KEY_PRIORITY_CONFIG_FOR_BUNDLE = "priorityConfigForBundle";
 }
 ffrt::mutex NotificationPreferences::instanceMutex_;
 std::shared_ptr<NotificationPreferences> NotificationPreferences::instance_;
@@ -845,6 +847,34 @@ void NotificationPreferences::SetAncoApplicationUserId(const sptr<NotificationBu
     preferncesDB_->PutBundleUserIdToDisturbeDB(setBundlesList, userId, ZERO_USERID);
 }
 
+void NotificationPreferences::GetAllClonePriorityInfo(
+    const int32_t userId, std::vector<NotificationClonePriorityInfo> &cloneInfos)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    NotificationConstant::SWITCH_STATE enable = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    if (preferncesDB_->GetPriorityEnabled(enable)) {
+        NotificationClonePriorityInfo priorityInfo;
+        priorityInfo.SetClonePriorityType(NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE::PRIORITY_ENABLE);
+        priorityInfo.SetSwitchState(static_cast<int32_t>(enable));
+        cloneInfos.emplace_back(priorityInfo);
+    }
+    std::unordered_map<std::string, std::string> prioritySwitchMap;
+    if (GetBatchKvsFromDbContainsKey(
+        KEY_PRIORITY_NOTIFICATION_SWITCH_FOR_BUNDLE, prioritySwitchMap, userId) != ERR_OK) {
+        ANS_LOGE("Get priority switch map info failed.");
+    } else {
+        preferncesDB_->ParsePriorityInfosFromDisturbeDB(prioritySwitchMap,
+            cloneInfos, NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE::PRIORITY_ENABLE_FOR_BUNDLE);
+    }
+    std::unordered_map<std::string, std::string> priorityConfigMap;
+    if (GetBatchKvsFromDbContainsKey(KEY_PRIORITY_CONFIG_FOR_BUNDLE, priorityConfigMap, userId) != ERR_OK) {
+        ANS_LOGE("Get priority config map info failed.");
+        return;
+    }
+    preferncesDB_->ParsePriorityInfosFromDisturbeDB(
+        priorityConfigMap, cloneInfos, NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE::PRIORITY_CONFIG);
+}
+
 ErrCode NotificationPreferences::InitBundlesInfo(int32_t userId,
     std::unordered_map<std::string, std::string>& bundlesMap)
 {
@@ -1365,18 +1395,15 @@ ErrCode NotificationPreferences::SetPriorityEnabled(const NotificationConstant::
 }
 
 ErrCode NotificationPreferences::SetPriorityEnabledByBundle(
-    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SWITCH_STATE &enabled)
+    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::PriorityEnableStatus enableStatus)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
-    NotificationPreferencesInfo::BundleInfo bundleInfo;
-    bundleInfo.SetBundleName(bundleOption->GetBundleName());
-    bundleInfo.SetBundleUid(bundleOption->GetUid());
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult =
-        preferncesDB_->PutPriorityEnabledForBundle(bundleInfo, enabled);
+        preferncesDB_->PutPriorityEnabledForBundle(bundleOption, enableStatus);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
@@ -1389,17 +1416,38 @@ ErrCode NotificationPreferences::IsPriorityEnabled(NotificationConstant::SWITCH_
 }
 
 ErrCode NotificationPreferences::IsPriorityEnabledByBundle(
-    const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::SWITCH_STATE &enabled)
+    const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::PriorityEnableStatus &enableStatus)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
-    NotificationPreferencesInfo::BundleInfo bundleInfo;
-    bundleInfo.SetBundleName(bundleOption->GetBundleName());
-    bundleInfo.SetBundleUid(bundleOption->GetUid());
-    bool storeDBResult = preferncesDB_->GetPriorityEnabledForBundle(bundleInfo, enabled);
+    bool storeDBResult = preferncesDB_->GetPriorityEnabledForBundle(bundleOption, enableStatus);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::SetBundlePriorityConfig(
+    const sptr<NotificationBundleOption> &bundleOption, const std::string &configValue)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    bool storeDBResult = preferncesDB_->SetBundlePriorityConfig(bundleOption, configValue);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::GetBundlePriorityConfig(
+    const sptr<NotificationBundleOption> &bundleOption, std::string &configValue)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    bool storeDBResult = preferncesDB_->GetBundlePriorityConfig(bundleOption, configValue);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
@@ -1940,6 +1988,42 @@ void NotificationPreferences::GetAllCloneProfileInfo(const int32_t &userId,
     return preferncesDB_->GetAllCloneProfileInfo(userId, profilesInfo);
 }
 
+bool NotificationPreferences::DelClonePriorityInfo(
+    const int32_t &userId, const NotificationClonePriorityInfo &cloneInfo)
+{
+    if (preferncesDB_ == nullptr) {
+        return false;
+    }
+    return preferncesDB_->DelClonePriorityInfo(userId, cloneInfo);
+}
+
+bool NotificationPreferences::UpdateClonePriorityInfos(
+    const int32_t &userId, const std::vector<NotificationClonePriorityInfo> &cloneInfos)
+{
+    if (preferncesDB_ == nullptr) {
+        return false;
+    }
+    return preferncesDB_->UpdateClonePriorityInfos(userId, cloneInfos);
+}
+
+void NotificationPreferences::GetClonePriorityInfos(
+    const int32_t &userId, std::vector<NotificationClonePriorityInfo> &cloneInfos)
+{
+    if (preferncesDB_ == nullptr) {
+        return;
+    }
+    return preferncesDB_->GetClonePriorityInfos(userId, cloneInfos);
+}
+
+bool NotificationPreferences::DelClonePriorityInfos(
+    const int32_t &userId, const std::vector<NotificationClonePriorityInfo> &cloneInfos)
+{
+    if (preferncesDB_ == nullptr) {
+        return false;
+    }
+    return preferncesDB_->DelClonePriorityInfos(userId, cloneInfos);
+}
+
 void NotificationPreferences::GetAllCloneBundleInfo(const int32_t &userId,
     std::vector<NotificationCloneBundleInfo>& cloneBundleInfo)
 {
@@ -2445,6 +2529,28 @@ bool NotificationPreferences::IsKioskMode()
     }
     isKioskMode_ = kioskStatus.isKioskMode_;
     return isKioskMode_;
+}
+
+ErrCode NotificationPreferences::SetGeofenceEnabled(bool enabled)
+{
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("Invalid prefernces db.");
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+
+    auto storeDBResult = preferncesDB_->SetGeofenceEnabled(enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::IsGeofenceEnabled(bool &enabled)
+{
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("Invalid prefernces db.");
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+
+    auto storeDBResult = preferncesDB_->IsGeofenceEnabled(enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER

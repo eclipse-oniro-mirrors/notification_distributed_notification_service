@@ -24,6 +24,7 @@
 #include <memory>
 #include <mutex>
 #include "notification_clone_bundle_info.h"
+#include "notification_clone_priority_info.h"
 #include "notification_constant.h"
 
 namespace OHOS {
@@ -361,6 +362,22 @@ public:
         const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::SWITCH_STATE &enableStatus);
 
     /**
+     * @brief Set geofence switch.
+     *
+     * @param enabled Set enable or not.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetGeofenceEnabled(bool enabled);
+
+    /**
+     * @brief Checks if the geofence is enabled.
+     *
+     * @param enabled whether the geofence is enabled.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode IsGeofenceEnabled(bool &enabled);
+    
+    /**
      * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
      *
      * @param deviceType Indicates the type of the device running the application.
@@ -394,11 +411,11 @@ public:
      * @brief Configuring Whether to allow sending priority notification by bundle.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
-     * @param enabled Whether to allow sending priority notification by bundle.
+     * @param enableStatus Whether to allow sending priority notification by bundle.
      * @return Returns configuring Whether to allow sending priority notification by bundle.
      */
-    ErrCode SetPriorityEnabledByBundle(
-        const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SWITCH_STATE &enabled);
+    ErrCode SetPriorityEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const NotificationConstant::PriorityEnableStatus enableStatus);
 
     /**
      * @brief Query switch for sending priority notification.
@@ -416,7 +433,7 @@ public:
      * @return Returns configuring Whether to allow sending priority notification by bundle.
      */
     ErrCode IsPriorityEnabledByBundle(
-        const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::SWITCH_STATE &enabled);
+        const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::PriorityEnableStatus &enableStatus);
 
     /**
      * @brief Get whether to allow a specified application to publish notifications cross
@@ -550,6 +567,13 @@ public:
     void GetAllAncoBundlesInfo(int32_t dbUserId, int32_t userId, std::vector<sptr<NotificationBundleOption>> &bundles);
     void GetAllCLoneBundlesInfo(int32_t dbUserId, int32_t userId,
         std::vector<NotificationCloneBundleInfo> &cloneBundles);
+    void GetAllClonePriorityInfo(const int32_t userId, std::vector<NotificationClonePriorityInfo> &cloneInfos);
+    bool DelClonePriorityInfo(const int32_t &userId, const NotificationClonePriorityInfo &cloneInfo);
+    bool UpdateClonePriorityInfos(const int32_t &userId, const std::vector<NotificationClonePriorityInfo> &cloneInfos);
+    void GetClonePriorityInfos(const int32_t &userId, std::vector<NotificationClonePriorityInfo> &cloneInfos);
+    bool DelClonePriorityInfos(const int32_t &userId, const std::vector<NotificationClonePriorityInfo> &cloneInfos);
+    ErrCode SetBundlePriorityConfig(const sptr<NotificationBundleOption> &bundleOption, const std::string &configValue);
+    ErrCode GetBundlePriorityConfig(const sptr<NotificationBundleOption> &bundleOption, std::string &configValue);
     void UpdateCloneBundleInfo(int32_t userId, const NotificationCloneBundleInfo& cloneBundleInfo);
     bool IsNotificationSlotFlagsExists(const sptr<NotificationBundleOption> &bundleOption);
     bool DelCloneProfileInfo(const int32_t &userId, const sptr<NotificationDoNotDisturbProfile>& info);

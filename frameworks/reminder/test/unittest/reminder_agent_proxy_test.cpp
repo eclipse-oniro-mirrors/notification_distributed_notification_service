@@ -249,5 +249,25 @@ HWTEST_F(ReminderAgentServiceProxyTest, UpdateReminder_0200, Function | MediumTe
     ErrCode res = proxy->UpdateReminder(reminderId, reminderRequest);
     EXPECT_EQ(ERR_OK, res);
 }
+
+/*
+ * @tc.name: CancelReminderOnDisplay_0100
+ * @tc.desc: test ReminderAgentServiceProxy's CancelReminderOnDisplay function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(ReminderAgentServiceProxyTest, CancelReminderOnDisplay_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "ReminderAgentServiceProxyTest, CancelReminderOnDisplay_0100, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<ReminderAgentServiceProxy> proxy = std::make_shared<ReminderAgentServiceProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+
+    int32_t reminderId = 0;
+    ErrCode res = proxy->CancelReminderOnDisplay(reminderId);
+    EXPECT_EQ(ERR_OK, res);
+}
 }
 }

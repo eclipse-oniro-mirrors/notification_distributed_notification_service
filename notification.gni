@@ -73,6 +73,7 @@ declare_args() {
   distributed_notification_service_feature_phone_collaboration = true
   distributed_notification_service_disable_control = false
   distributed_notification_service_feature_notification_extension_subscription = false
+  distributed_notification_service_feature_notification_multi_foreground_user = false
   notification_smart_reminder_supported = true
   ans_config_policy_enable = true
   screenlock_mgr_enable = true
@@ -116,6 +117,11 @@ declare_args() {
   if (defined(global_parts_info) &&
       !defined(global_parts_info.telephony_telephony_cust)) {
     telephony_cust = false
+  }
+
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.communication_dsoftbus)) {
+    distributed_notification_supported = false
   }
 
   print("hisysevent_usage = " + "$hisysevent_usage")

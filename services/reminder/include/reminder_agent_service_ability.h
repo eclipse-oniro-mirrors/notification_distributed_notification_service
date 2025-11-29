@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,12 +18,11 @@
 
 #include "system_ability.h"
 
-#include "reminder_agent_service.h"
 #include "reminder_data_manager.h"
+#include "reminder_agent_service.h"
 #include "system_ability_definition.h"
 
-namespace OHOS {
-namespace Notification {
+namespace OHOS::Notification {
 class ReminderAgentServiceAbility final : public SystemAbility {
 public:
     /**
@@ -50,7 +49,6 @@ private:
     sptr<ReminderAgentService> service_;
     std::shared_ptr<ReminderDataManager> reminderDataManager_;
 };
-}  // namespace Notification
-}  // namespace OHOS
+}  // namespace OHOS::Notification
 
 #endif // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_SERVICE_ABILITY_H

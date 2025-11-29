@@ -19,6 +19,7 @@
 #include "notification_request.h"
 #include "notification_operation_info.h"
 #include "ans_operation_callback_stub.h"
+#include "enabled_priority_notification_by_bundle_callback_data.h"
 #include "notification_subscriber.h"
 #include "notification_do_not_disturb_date.h"
 
@@ -69,6 +70,11 @@ public:
 
     virtual void OnEnabledNotificationChanged(
         const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override;
+
+    void OnEnabledPriorityChanged(const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override;
+
+    void OnEnabledPriorityByBundleChanged(
+        const std::shared_ptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData) override;
 
     void OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData) override;
 

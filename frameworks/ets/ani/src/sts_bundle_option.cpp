@@ -21,6 +21,7 @@ namespace OHOS {
 namespace NotificationSts {
 namespace {
 constexpr const char* BUNDLE_OPTION_CLASSNAME = "notification.NotificationCommonDef.BundleOptionInner";
+constexpr const char* GRANTED_BUNDLE_INFO_CLASSNAME = "notification.NotificationCommonDef.GrantedBundleInfoInner";
 }
 
 bool UnwrapBundleOption(ani_env *env, ani_object obj, Notification::NotificationBundleOption& option)
@@ -57,7 +58,7 @@ ani_object GetAniArrayBundleOption(ani_env* env,
         ANS_LOGE("GetAniArrayActionButton failed, has nullptr");
         return nullptr;
     }
-    ani_object arrayObj = newArrayClass(env, bundleOptions.size());
+    ani_array arrayObj = newArrayClass(env, bundleOptions.size());
     if (arrayObj == nullptr) {
         ANS_LOGE("GetAniArrayActionButton: arrayObj is nullptr");
         return nullptr;
@@ -70,8 +71,8 @@ ani_object GetAniArrayBundleOption(ani_env* env,
             ANS_LOGE("GetAniArrayActionButton: item is nullptr");
             return nullptr;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, item)) {
-            ANS_LOGE("GetAniArrayActionButton: Object_CallMethodByName_Void failed");
+        if (ANI_OK != env->Array_Set(arrayObj, index, item)) {
+            ANS_LOGE("GetAniArrayActionButton: Array_Set failed");
             return nullptr;
         }
         index ++;
@@ -121,6 +122,48 @@ bool GetAniArrayBundleOptionV2(
     return true;
 }
 
+
+bool SetAniArrayGrantedBundleInfo(
+    ani_env* env, const std::vector<sptr<BundleOption>>& bundleOptions, ani_object& outAniObj)
+{
+    ANS_LOGD("call");
+    if (env == nullptr) {
+        ANS_LOGE("SetAniArrayGrantedBundleInfo failed, has nullptr");
+        return false;
+    }
+    ani_class cls = nullptr;
+    ani_status status = env->FindClass(GRANTED_BUNDLE_INFO_CLASSNAME, &cls);
+    if (status != ANI_OK) {
+        ANS_LOGE("FindClass failed. status : %{public}d", status);
+        return false;
+    }
+    ani_array_ref array = nullptr;
+    size_t size = bundleOptions.size();
+    status = env->Array_New_Ref(cls, size, nullptr, &array);
+    if (status != ANI_OK) {
+        ANS_LOGE("Array_New_Ref failed. status : %{public}d", status);
+        return false;
+    }
+    int32_t index = 0;
+    for (auto& bundleOption : bundleOptions) {
+        std::shared_ptr<BundleOption> optSp = std::make_shared<BundleOption>(*bundleOption);
+        ani_object item;
+        if (!WrapGrantedBundleInfo(env, optSp, item) || item == nullptr) {
+            ANS_LOGE("WrapGrantedBundleInfo Failed. index = %{public}d", index);
+            return false;
+        }
+        status = env->Array_Set_Ref(array, index, item);
+        if (status != ANI_OK) {
+            ANS_LOGE("Array_Set_Ref Failed. index = %{public}d, status = %{public}d", index, status);
+            return false;
+        }
+        index++;
+    }
+    ANS_LOGD("end");
+    outAniObj = array;
+    return true;
+}
+
 bool UnwrapArrayBundleOption(ani_env *env,
     ani_ref arrayObj, std::vector<Notification::NotificationBundleOption>& options)
 {
@@ -153,6 +196,37 @@ bool UnwrapArrayBundleOption(ani_env *env,
         options.push_back(option);
     }
     ANS_LOGD("UnwrapArrayBundleOption end");
+    return true;
+}
+
+bool WrapGrantedBundleInfo(ani_env* env, const std::shared_ptr<BundleOption> &bundleOption, ani_object &bundleObject)
+{
+    ANS_LOGD("called");
+    if (env == nullptr || bundleOption == nullptr) {
+        ANS_LOGE("WrapGrantedBundleInfo failed, has nullptr");
+        return false;
+    }
+    ani_class bundleCls = nullptr;
+    if (!CreateClassObjByClassName(env, GRANTED_BUNDLE_INFO_CLASSNAME, bundleCls, bundleObject) ||
+        bundleCls == nullptr || bundleObject == nullptr) {
+        ANS_LOGE("WrapGrantedBundleInfo: create BundleOption failed");
+        return false;
+    }
+    ani_string stringValue = nullptr;
+    if (ANI_OK != GetAniStringByString(env, bundleOption->GetBundleName(), stringValue)
+        || !CallSetter(env, bundleCls, bundleObject, "bundleName", stringValue)) {
+        ANS_LOGE("WrapGrantedBundleInfo: set bundle failed");
+        return false;
+    }
+    
+    if (ANI_OK != GetAniStringByString(env, bundleOption->GetAppName(), stringValue)
+        || !CallSetter(env, bundleCls, bundleObject, "appName", stringValue)) {
+        ANS_LOGE("WrapGrantedBundleInfo: set appName failed");
+        return false;
+    }
+    int32_t uid = bundleOption->GetAppIndex();
+    SetPropertyOptionalByInt(env, bundleObject, "appIndex", uid);
+    ANS_LOGD("end");
     return true;
 }
 

@@ -684,6 +684,17 @@ ErrCode NotificationHelper::IsDistributedEnabledBySlot(
     return DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabledBySlot(slotType, deviceType, enabled);
 }
 
+ErrCode NotificationHelper::SetBundlePriorityConfig(
+    const NotificationBundleOption &bundleOption, const std::string &value)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetBundlePriorityConfig(bundleOption, value);
+}
+
+ErrCode NotificationHelper::GetBundlePriorityConfig(const NotificationBundleOption &bundleOption, std::string &value)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetBundlePriorityConfig(bundleOption, value);
+}
+
 ErrCode NotificationHelper::CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundleWithAgent(bundleOption, id);
@@ -699,9 +710,10 @@ ErrCode NotificationHelper::SetPriorityEnabled(const bool enabled)
     return DelayedSingleton<AnsNotification>::GetInstance()->SetPriorityEnabled(enabled);
 }
 
-ErrCode NotificationHelper::SetPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, const bool enabled)
+ErrCode NotificationHelper::SetPriorityEnabledByBundle(
+    const NotificationBundleOption &bundleOption, const NotificationConstant::PriorityEnableStatus enableStatus)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->SetPriorityEnabledByBundle(bundleOption, enabled);
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetPriorityEnabledByBundle(bundleOption, enableStatus);
 }
 
 ErrCode NotificationHelper::IsPriorityEnabled(bool &enabled)
@@ -709,9 +721,10 @@ ErrCode NotificationHelper::IsPriorityEnabled(bool &enabled)
     return DelayedSingleton<AnsNotification>::GetInstance()->IsPriorityEnabled(enabled);
 }
 
-ErrCode NotificationHelper::IsPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, bool &enabled)
+ErrCode NotificationHelper::IsPriorityEnabledByBundle(
+    const NotificationBundleOption &bundleOption, NotificationConstant::PriorityEnableStatus &enableStatus)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->IsPriorityEnabledByBundle(bundleOption, enabled);
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsPriorityEnabledByBundle(bundleOption, enableStatus);
 }
 
 ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
@@ -901,6 +914,15 @@ ErrCode NotificationHelper::SetReminderInfoByBundles(const std::vector<Notificat
     return DelayedSingleton<AnsNotification>::GetInstance()->SetReminderInfoByBundles(reminderInfo);
 }
 
+ErrCode NotificationHelper::SetGeofenceEnabled(bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetGeofenceEnabled(enabled);
+}
+
+ErrCode NotificationHelper::IsGeofenceEnabled(bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsGeofenceEnabled(enabled);
+}
 
 ErrCode NotificationHelper::ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy)
 {

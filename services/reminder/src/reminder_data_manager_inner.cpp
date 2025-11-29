@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,39 +15,22 @@
 
 #include "reminder_data_manager.h"
 
-#include "ability_manager_client.h"
 #include "ans_log_wrapper.h"
 #include "ans_trace_wrapper.h"
-#include "ans_const_define.h"
-#include "common_event_support.h"
-#include "common_event_manager.h"
+
+#include "reminder_utils.h"
 #include "reminder_request_calendar.h"
-#include "in_process_call_wrapper.h"
-#include "ipc_skeleton.h"
-#include "notification_slot.h"
-#include "os_account_manager.h"
-#include "reminder_event_manager.h"
-#include "time_service_client.h"
-#include "singleton.h"
-#include "locale_config.h"
-#include "datashare_predicates_object.h"
-#include "datashare_value_object.h"
-#include "datashare_helper.h"
-#include "data_share_permission.h"
-#include "datashare_errno.h"
-#include "datashare_template.h"
-#include "system_ability_definition.h"
-#include "app_mgr_constants.h"
-#include "iservice_registry.h"
-#include "config_policy_utils.h"
-#include "hitrace_meter_adapter.h"
-#include "notification_helper.h"
 #include "reminder_datashare_helper.h"
 #include "reminder_calendar_share_table.h"
+
+#include "ipc_skeleton.h"
+#include "notification_helper.h"
+#include "data_share_permission.h"
+#include "ability_manager_client.h"
+#include "in_process_call_wrapper.h"
 #ifdef HAS_HISYSEVENT_PART
 #include <sys/statfs.h>
 #include "hisysevent.h"
-#include "reminder_utils.h"
 #include "directory_ex.h"
 #endif
 
@@ -234,7 +217,7 @@ void ReminderDataManager::OnDataShareInsertOrDelete()
     std::vector<sptr<ReminderRequest>> immediatelyReminders;
     std::vector<sptr<ReminderRequest>> extensionReminders;
     CheckReminderTime(immediatelyReminders, extensionReminders);
-    HandleImmediatelyShow(immediatelyReminders, false);
+    HandleImmediatelyShow(immediatelyReminders, false, false);
     StartRecentReminder();
 }
 
@@ -259,7 +242,7 @@ void ReminderDataManager::UpdateShareReminders(const std::map<std::string, sptr<
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>((*it).GetRefPtr());
         calendar->Copy(iter->second);
         if ((*it)->IsShowing()) {
-            ShowReminder((*it), false, false, false, false, false);
+            ShowReminder((*it), false, false, false, true);
         }
     }
 }
@@ -357,6 +340,46 @@ ErrCode ReminderDataManager::UpdateReminder(const sptr<ReminderRequest>& reminde
     queue_->submit([this, reminder]() {
         StartRecentReminder();
     });
+    return ERR_OK;
+}
+
+ErrCode ReminderDataManager::CancelReminderOnDisplay(const int32_t reminderId, const int32_t callingUid)
+{
+    ANSR_LOGI("cancel showing reminder id: %{public}d", reminderId);
+    sptr<ReminderRequest> target;
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::SHOW_MUTEX);
+        for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end(); ++it) {
+            sptr<ReminderRequest> reminder = (*it);
+            if (reminder->IsShare()) {
+                continue;
+            }
+            if (reminder->GetReminderId() != reminderId) {
+                continue;
+            }
+            if (reminder->GetCreatorUid() != callingUid) {
+                continue;
+            }
+            target = reminder;
+            showedReminderVector_.erase(it);
+            break;
+        }
+    }
+    if (target == nullptr) {
+        return ERR_REMINDER_NOTIFICATION_NO_SHOWING;
+    }
+    std::lock_guard<std::mutex> locker(cancelMutex_);
+    if (activeReminderId_ == reminderId) {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        StopTimerLocked(TimerType::TRIGGER_TIMER);
+    }
+    if (alertingReminderId_ == reminderId) {
+        StopSoundAndVibrationLocked(target);
+        StopTimerLocked(TimerType::ALERTING_TIMER);
+    }
+    CancelNotification(target);
+    target->OnStop();
+    StartRecentReminder();
     return ERR_OK;
 }
 

@@ -70,7 +70,7 @@ bool WarpNotificationSortingMap(ani_env *env,
         return false;
     }
 
-    if (!CreateClassObjByClassName(env, "escompat.Record", recordCls, recordObj) || recordObj == nullptr) {
+    if (!CreateClassObjByClassName(env, "std.core.Record", recordCls, recordObj) || recordObj == nullptr) {
         ANS_LOGE("Create recordObj faild.");
         return false;
     }

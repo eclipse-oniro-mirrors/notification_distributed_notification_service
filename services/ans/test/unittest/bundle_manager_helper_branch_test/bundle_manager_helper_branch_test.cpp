@@ -255,5 +255,93 @@ HWTEST_F(BundleManagerHelperBranchTest, IsAtomicServiceByBundle_00001, Function 
 
     ASSERT_EQ(false, bundleManagerHelper.IsAtomicServiceByBundle(bundleName, userId));
 }
+
+/**
+ * @tc.number    : GetCloneBundleInfo_00001
+ * @tc.name      : GetCloneBundleInfo_00001
+ * @tc.desc      : test GetCloneBundleInfo
+ */
+HWTEST_F(BundleManagerHelperBranchTest, GetCloneBundleInfo_00001, Function | SmallTest | Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    MockGetSystemAbilityManager(true);
+
+    AppExecFwk::BundleInfo bundleInfo;
+    int32_t flag = (int32_t)AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT;
+    auto result = bundleManagerHelper.GetCloneBundleInfo("testBundle", flag, 0, bundleInfo, 100);
+    ASSERT_EQ(false, result);
+
+    MockGetSystemAbilityManager(false);
+    result = bundleManagerHelper.GetCloneBundleInfo("testBundle", flag, 0, bundleInfo, 100);
+    ASSERT_EQ(false, result);
+}
+
+/**
+ * @tc.number    : GetCloneAppIndexes_00001
+ * @tc.name      : GGetCloneAppIndexes_00001
+ * @tc.desc      : test GGetCloneAppIndexes
+ */
+HWTEST_F(BundleManagerHelperBranchTest, GetCloneAppIndexes_00001, Function | SmallTest | Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    MockGetSystemAbilityManager(true);
+
+    std::vector<int32_t> appIndexes;
+    auto result = bundleManagerHelper.GetCloneAppIndexes("testBundle", appIndexes, 100);
+    ASSERT_EQ(false, result);
+
+    MockGetSystemAbilityManager(false);
+    result = bundleManagerHelper.GetCloneAppIndexes("testBundle", appIndexes, 100);
+    ASSERT_EQ(true, result);
+}
+
+/**
+ * @tc.number    : GetApplicationInfo_00001
+ * @tc.name      : GetApplicationInfo_00001
+ * @tc.desc      : test GetApplicationInfo
+ */
+HWTEST_F(BundleManagerHelperBranchTest, GetApplicationInfo_00001, Function | SmallTest | Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    MockGetSystemAbilityManager(true);
+
+    AppExecFwk::ApplicationInfo appInfo;
+    int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+    auto result = bundleManagerHelper.GetApplicationInfo("testBundle", flags, 100, appInfo);
+    ASSERT_EQ(-1, result);
+
+    MockGetSystemAbilityManager(false);
+    result = bundleManagerHelper.GetApplicationInfo("testBundle", flags, 100, appInfo);
+    ASSERT_NE(0, result);
+}
+
+/**
+ * @tc.number    : CheckSystemApp_00001
+ * @tc.name      : CheckSystemApp_00001
+ * @tc.desc      : test CheckSystemApp
+ */
+HWTEST_F(BundleManagerHelperBranchTest, CheckSystemApp_00001, Function | SmallTest | Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    auto result = bundleManagerHelper.CheckSystemApp("testBundle", -1);
+    ASSERT_EQ(false, result);
+
+    result = bundleManagerHelper.CheckSystemApp("testBundle", 100);
+    ASSERT_EQ(false, result);
+}
+
+/**
+ * @tc.number    : GetAllBundleInfo_00001
+ * @tc.name      : GetAllBundleInfo_00001
+ * @tc.desc      : test GetAllBundleInfo
+ */
+HWTEST_F(BundleManagerHelperBranchTest, GetAllBundleInfo_00001, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(true);
+    BundleManagerHelper bundleManagerHelper;
+    std::map<std::string, sptr<NotificationBundleOption>> bundleOptions;
+    auto result = bundleManagerHelper.GetAllBundleInfo(bundleOptions, 100);
+    ASSERT_NE(result, (int32_t)ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,8 @@ constexpr int32_t REMINDER_RDB_VERSION_V5 = 5;
 constexpr int32_t REMINDER_RDB_VERSION_V6 = 6;
 constexpr int32_t REMINDER_RDB_VERSION_V7 = 7;
 constexpr int32_t REMINDER_RDB_VERSION_V8 = 8;
-constexpr int32_t REMINDER_RDB_VERSION = 9;
+constexpr int32_t REMINDER_RDB_VERSION_V9 = 9;
+constexpr int32_t REMINDER_RDB_VERSION = 10;
 constexpr int64_t DURATION_PRELOAD_TIME = 10 * 60 * 60 * 1000;  // 10h, millisecond
 }
 
@@ -94,6 +95,11 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
                 [[fallthrough]];
             case REMINDER_RDB_VERSION_V8:
                 AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::RING_CHANNEL, "INT", "0");
+                [[fallthrough]];
+            case REMINDER_RDB_VERSION_V9:
+                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::FORCE_DISTRIBUTED,
+                    "TEXT", "false");
+                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::NOT_DISTRIBUTED, "TEXT", "false");
                 [[fallthrough]];
             default:
                 break;

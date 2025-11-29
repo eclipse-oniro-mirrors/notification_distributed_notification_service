@@ -145,6 +145,7 @@ HWTEST_F(NotificationBundleOptionTest, JsonConvert_00001, Function | SmallTest |
     std::string bundleName = "BundleName";
     int32_t uid = 10;
     auto rrc = std::make_shared<NotificationBundleOption>(bundleName, uid);
+    rrc->SetAppName("appName");
     nlohmann::json jsonObject;
     EXPECT_TRUE(rrc->ToJson(jsonObject));
     auto *rrcNew = rrc->FromJson(jsonObject);
@@ -189,6 +190,16 @@ HWTEST_F(NotificationBundleOptionTest, DistributedBundleOption_00001, Function |
     EXPECT_TRUE(rrc->ToJson(jsonObject));
     auto *rrcNew = rrc->FromJson(jsonObject);
     EXPECT_EQ(rrcNew->GetBundle()->GetBundleName(), rrc->GetBundle()->GetBundleName());
+}
+
+HWTEST_F(NotificationBundleOptionTest, SetAppName_00001, Level1)
+{
+    std::string bundleName = "BundleName";
+    int32_t uid = 10;
+    auto rrc = std::make_shared<NotificationBundleOption>(bundleName, uid);
+
+    rrc->SetAppName("appName");
+    EXPECT_EQ(rrc->GetAppName(), "appName");
 }
 } // namespace Notification
 } // namespace OHOS

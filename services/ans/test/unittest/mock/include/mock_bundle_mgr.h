@@ -42,6 +42,10 @@ public:
         const std::string& bundleName, int32_t flags, BundleInfo& bundleInfo, int32_t userId) override;
     bool QueryExtensionAbilityInfos(const ExtensionAbilityType &extensionType, const int32_t &userId,
         std::vector<ExtensionAbilityInfo> &extensionInfos) override;
+    ErrCode GetCloneAppIndexes(const std::string &bundleName, std::vector<int32_t> &appIndexes,
+        int32_t userId = Constants::UNSPECIFIED_USERID) override;
+    ErrCode GetCloneBundleInfo(const std::string &bundleName, int32_t flag, int32_t appIndex,
+        BundleInfo &bundleInfo, int32_t userId = Constants::UNSPECIFIED_USERID) override;
 };
 }  // namespace AppExecFwk
 
@@ -55,7 +59,11 @@ void MockSetBundleInfoFailed(bool getFail);
 
 void MockIsNeedHapModuleInfos(bool isNeed);
 
-void MockQueryExtensionAbilityInfos(bool enabled);
+void MockQueryExtensionAbilityInfos(bool enabled, bool ret);
+
+void MockGetCloneAppIndexes(bool enabled);
+
+void MockGetCloneBundleInfo(bool enabled);
 }  // namespace Notification
 }  // namespace OHOS
 

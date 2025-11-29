@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -162,6 +162,15 @@ napi_value DelExcludeDates(napi_env env, napi_callback_info info);
  * @return opaque pointer that is used to represent a JavaScript value.
  */
 napi_value GetExcludeDates(napi_env env, napi_callback_info info);
+
+/**
+ * @brief Dismiss the currently displayed alert and only remove it from the Notification Center.
+ *
+ * @param env Indicates the context.
+ * @param info Indicates the opaque datatype about the context.
+ * @return opaque pointer that is used to represent a JavaScript value
+ */
+napi_value CancelReminderOnDisplay(napi_env env, napi_callback_info info);
 }  // namespace ReminderAgentNapi
 }  // namespace OHOS
 

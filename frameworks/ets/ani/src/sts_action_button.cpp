@@ -249,7 +249,7 @@ ani_status GetNotificationActionButtonArray(ani_env *env, ani_object param,
     for (int32_t i = 0; i < length; i++) {
         ani_ref buttonRef;
         if (ANI_OK != (status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "i:C{std.core.Object}", &buttonRef, i))) {
+            "$_get", "i:Y", &buttonRef, i))) {
             ANS_LOGE("GetActionButtonArray: get ref failed, status = %{public}d, index = %{public}d", status, i);
             return status;
         }
@@ -278,7 +278,7 @@ ani_object GetAniArrayNotificationActionButton(ani_env* env,
         ANS_LOGE("GetAniArrayActionButton failed, has nullptr");
         return nullptr;
     }
-    ani_object arrayObj = newArrayClass(env, actionButtons.size());
+    ani_array arrayObj = newArrayClass(env, actionButtons.size());
     if (arrayObj == nullptr) {
         ANS_LOGE("GetAniArrayActionButton: arrayObj is nullptr");
         return nullptr;
@@ -290,8 +290,8 @@ ani_object GetAniArrayNotificationActionButton(ani_env* env,
             ANS_LOGE("GetAniArrayActionButton: item is nullptr");
             return nullptr;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, item)) {
-            ANS_LOGE("GetAniArrayActionButton: Object_CallMethodByName_Void failed");
+        if (ANI_OK != env->Array_Set(arrayObj, index, item)) {
+            ANS_LOGE("GetAniArrayActionButton: Array_Set failed");
             return nullptr;
         }
         index ++;

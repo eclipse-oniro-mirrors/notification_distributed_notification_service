@@ -28,6 +28,7 @@
 #include "refbase.h"
 #include "singleton.h"
 
+#include "enabled_priority_notification_by_bundle_callback_data.h"
 #include "ians_subscriber.h"
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
@@ -120,6 +121,22 @@ public:
     void NotifyEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData);
 
     /**
+     * @brief Notify when the priority notification switch is changed.
+     *
+     * @param enable Indicates the switch state.
+     * @param uid Indicates uid.
+     */
+    void NotifyEnabledPriorityChanged(const sptr<EnabledNotificationCallbackData> &callbackData);
+
+    /**
+     * @brief Notify when the priority notification switch by bundle is changed.
+     *
+     * @param callbackData Indicates the EnabledPriorityNotificationByBundleCallbackData object.
+     */
+    void NotifyEnabledPriorityByBundleChanged(
+        const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData);
+
+    /**
      * @brief Notify all subscribers on badge enabled state changed.
      *
      * @param callbackData Indicates the EnabledNotificationCallbackData object.
@@ -201,6 +218,9 @@ private:
     void NotifyDoNotDisturbDateChangedInner(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date,
         const std::string &bundle);
     void NotifyEnabledNotificationChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
+    void NotifyEnabledPriorityChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
+    void NotifyEnabledPriorityByBundleChangedInner(
+        const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData);
     void NotifyBadgeEnabledChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     bool IsSystemUser(int32_t userId);
     bool IsSubscribedBysubscriber(
@@ -209,9 +229,18 @@ private:
         const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);
     bool IsNeedNotifySubscribers(const std::shared_ptr<SubscriberRecord> &record,
         const int32_t &userId, const std::string &bundle);
+    bool IsNeedNotifySubscribers(const std::shared_ptr<SubscriberRecord> &record,
+        int32_t userId, int32_t uid);
+    bool IsNeedNotifySubscribers(const std::shared_ptr<SubscriberRecord> &record, int32_t userId);
+    template <typename... Args>
+    void NotifySubscribers(int32_t userId, int32_t uid, NotificationConstant::SubscribedFlag flags,
+        ErrCode (IAnsSubscriber::*func)(Args...), Args&& ... args);
     template <typename... Args>
     void NotifySubscribers(int32_t userId, const std::string& bundle, NotificationConstant::SubscribedFlag flags,
         ErrCode (IAnsSubscriber::*func)(Args...), Args&& ... args);
+    template <typename... Args>
+    void NotifySubscribers(int32_t userId,
+        NotificationConstant::SubscribedFlag flags, ErrCode (IAnsSubscriber::*func)(Args...), Args&& ... args);
 
 private:
     ffrt::mutex subscriberRecordListMutex_;

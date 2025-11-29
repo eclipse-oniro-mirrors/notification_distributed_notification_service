@@ -88,6 +88,7 @@ std::shared_ptr<NotificationInfo> NotificationSubscriberStubImpl::ConvertNotific
     notificationInfo->SetAppName(notificationRequest->GetAppName());
     notificationInfo->SetDeliveryTime(notificationRequest->GetDeliveryTime());
     notificationInfo->SetGroupName(notificationRequest->GetGroupName());
+    notificationInfo->SetAppIndex(notificationRequest->GetAppIndex());
     return notificationInfo;
 }
 } // namespace EventFwk

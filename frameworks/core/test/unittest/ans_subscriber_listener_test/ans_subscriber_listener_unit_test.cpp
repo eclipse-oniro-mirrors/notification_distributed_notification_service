@@ -208,7 +208,24 @@ HWTEST_F(SubscriberListenerTest, OnConsumed_0400, Function | MediumTest | Level1
     ErrCode result = listener->OnConsumed(notification);
     EXPECT_EQ(result, ERR_INVALID_DATA);
 }
- 
+
+/**
+ * @tc.name      : OnConsumed_0500
+ * @tc.desc      : Test one param OnConsumed success
+ */
+HWTEST_F(SubscriberListenerTest, OnConsumed_0500, Function | MediumTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest(1);
+    request->SetClassification(NotificationConstant::ANS_VOIP);
+    sptr<Notification> notification = new (std::nothrow) Notification("001", request);
+    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    subscriber->SetDeviceType(NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE);
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    ErrCode result = listener->OnConsumed(notification, notificationMap);
+    EXPECT_EQ(result, ERR_OK);
+}
+
 /**
  * @tc.name      : OnConsumedWithMaxCapacity_0100
  * @tc.desc      : Test OnConsumedWithMaxCapacity success
@@ -584,7 +601,63 @@ HWTEST_F(SubscriberListenerTest, OnBadgeEnabledChanged_0200, Function | MediumTe
     ErrCode result = listener->OnBadgeEnabledChanged(callbackData);
     EXPECT_EQ(result, ERR_OK);
 }
- 
+
+/**
+ * @tc.name      : OnEnabledPriorityChanged_0100
+ * @tc.desc      : Test OnEnabledPriorityChanged invalid data
+ */
+HWTEST_F(SubscriberListenerTest, OnEnabledPriorityChanged_0100, Function | MediumTest | Level1)
+{
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(nullptr);
+    sptr<EnabledNotificationCallbackData> callbackData =
+        new (std::nothrow) EnabledNotificationCallbackData("", 100, true);
+    ErrCode result = listener->OnEnabledPriorityChanged(callbackData);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name      : OnEnabledPriorityChanged_0200
+ * @tc.desc      : Test OnEnabledPriorityChanged success
+ */
+HWTEST_F(SubscriberListenerTest, OnEnabledPriorityChanged_0200, Function | MediumTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    sptr<EnabledNotificationCallbackData> callbackData =
+        new (std::nothrow) EnabledNotificationCallbackData("", 100, true);
+    ErrCode result = listener->OnEnabledPriorityChanged(callbackData);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name      : OnEnabledPriorityByBundleChanged_0100
+ * @tc.desc      : Test OnEnabledPriorityByBundleChanged invalid data
+ */
+HWTEST_F(SubscriberListenerTest, OnEnabledPriorityByBundleChanged_0100, Function | MediumTest | Level1)
+{
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(nullptr);
+    sptr<EnabledPriorityNotificationByBundleCallbackData> callbackData =
+        new (std::nothrow) EnabledPriorityNotificationByBundleCallbackData(
+        "", 100, NotificationConstant::PriorityEnableStatus::DISABLE);
+    ErrCode result = listener->OnEnabledPriorityByBundleChanged(callbackData);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name      : OnEnabledPriorityByBundleChanged_0200
+ * @tc.desc      : Test OnEnabledPriorityByBundleChanged success
+ */
+HWTEST_F(SubscriberListenerTest, OnEnabledPriorityByBundleChanged_0200, Function | MediumTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    sptr<EnabledPriorityNotificationByBundleCallbackData> callbackData =
+        new (std::nothrow) EnabledPriorityNotificationByBundleCallbackData(
+        "", 100, NotificationConstant::PriorityEnableStatus::DISABLE);
+    ErrCode result = listener->OnEnabledPriorityByBundleChanged(callbackData);
+    EXPECT_EQ(result, ERR_OK);
+}
+
 /**
  * @tc.name      : OnApplicationInfoNeedChanged_0100
  * @tc.desc      : Test OnApplicationInfoNeedChanged invalid data

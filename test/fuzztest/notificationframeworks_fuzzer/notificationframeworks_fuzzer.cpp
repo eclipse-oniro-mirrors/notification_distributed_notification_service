@@ -171,7 +171,6 @@ public:
         std::string str = fdp->ConsumeRandomLengthString();
         std::string str2 = fdp->ConsumeRandomLengthString();
         int32_t id = fdp->ConsumeIntegral<int32_t>();
-        int32_t id2 = fdp->ConsumeIntegral<int32_t>();
         int32_t num = fdp->ConsumeIntegralInRange<int32_t>(0, 100);
         bundle.SetBundleName(str);
         bundle.SetUid(id);
@@ -198,17 +197,11 @@ public:
         ans.AddDoNotDisturbProfiles(profiles);
         ans.RemoveDoNotDisturbProfiles(profiles);
         ans.IsNeedSilentInDoNotDisturbMode(str, id);
-        ans.ResetAnsManagerProxy();
-        ans.Reconnect();
         ans.SetNotificationsEnabledForAllBundles(str, enabled);
-        std::vector<std::string> dumpInfo;
-        ans.ShellDump(str, str2, id, id2, dumpInfo);
-
         ans.SetBadgeNumberByBundle(bundle, num);
         ans.SetBadgeNumberForDhByBundle(bundle, num);
 
         ans.GetAllNotificationEnabledBundles(bundles);
-        ans.UnregisterPushCallback();
         ans.SetAdditionConfig(str, str2);
         ans.SetDistributedEnabledByBundle(bundle, str, enabled);
         ans.SetDistributedBundleOption(distriBundles, str);

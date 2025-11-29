@@ -2157,19 +2157,7 @@ ErrCode AnsNotification::SetAdditionConfig(const std::string &key, const std::st
     return proxy->SetAdditionConfig(key, value);
 }
 
-ErrCode AnsNotification::SetPriorityEnabled(const bool enabled)
-{
-    ANS_LOGD("called");
-    sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("Get ans manager proxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-
-    return proxy->SetPriorityEnabled(enabled);
-}
-
-ErrCode AnsNotification::SetPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, const bool enabled)
+ErrCode AnsNotification::SetBundlePriorityConfig(const NotificationBundleOption &bundleOption, const std::string &value)
 {
     ANS_LOGD("called");
     if (bundleOption.GetBundleName().empty()) {
@@ -2186,9 +2174,66 @@ ErrCode AnsNotification::SetPriorityEnabledByBundle(const NotificationBundleOpti
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
+        return ERR_ANS_NO_MEMORY;
+    }
+    return proxy->SetBundlePriorityConfig(bo, value);
+}
+
+ErrCode AnsNotification::GetBundlePriorityConfig(const NotificationBundleOption &bundleOption, std::string &value)
+{
+    ANS_LOGD("called");
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
     }
-    return proxy->SetPriorityEnabledByBundle(bo, enabled);
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    if (bo == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_NO_MEMORY;
+    }
+    return proxy->GetBundlePriorityConfig(bo, value);
+}
+
+ErrCode AnsNotification::SetPriorityEnabled(const bool enabled)
+{
+    ANS_LOGD("called");
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->SetPriorityEnabled(enabled);
+}
+
+ErrCode AnsNotification::SetPriorityEnabledByBundle(
+    const NotificationBundleOption &bundleOption, const NotificationConstant::PriorityEnableStatus enableStatus)
+{
+    ANS_LOGD("called");
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    if (bo == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_NO_MEMORY;
+    }
+    return proxy->SetPriorityEnabledByBundle(bo, static_cast<int32_t>(enableStatus));
 }
 
 ErrCode AnsNotification::IsPriorityEnabled(bool &enabled)
@@ -2203,7 +2248,8 @@ ErrCode AnsNotification::IsPriorityEnabled(bool &enabled)
     return proxy->IsPriorityEnabled(enabled);
 }
 
-ErrCode AnsNotification::IsPriorityEnabledByBundle(const NotificationBundleOption &bundleOption, bool &enabled)
+ErrCode AnsNotification::IsPriorityEnabledByBundle(
+    const NotificationBundleOption &bundleOption, NotificationConstant::PriorityEnableStatus &enableStatus)
 {
     ANS_LOGD("called");
     if (bundleOption.GetBundleName().empty()) {
@@ -2220,9 +2266,12 @@ ErrCode AnsNotification::IsPriorityEnabledByBundle(const NotificationBundleOptio
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_NO_MEMORY;
     }
-    return proxy->IsPriorityEnabledByBundle(bo, enabled);
+    int32_t enableStatusInt = static_cast<int32_t>(NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT);
+    ErrCode result = proxy->IsPriorityEnabledByBundle(bo, enableStatusInt);
+    enableStatus = static_cast<NotificationConstant::PriorityEnableStatus>(enableStatusInt);
+    return result;
 }
 
 ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
@@ -3146,6 +3195,26 @@ ErrCode AnsNotification::SetReminderInfoByBundles(const std::vector<Notification
         reminderInfoSptr.emplace_back(std::move(reminder));
     }
     return proxy->SetReminderInfoByBundles(reminderInfoSptr);
+}
+
+ErrCode AnsNotification::SetGeofenceEnabled(bool enabled)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->SetGeofenceEnabled(enabled);
+}
+
+ErrCode AnsNotification::IsGeofenceEnabled(bool &enabled)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->IsGeofenceEnabled(enabled);
 }
 
 ErrCode AnsNotification::ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy)

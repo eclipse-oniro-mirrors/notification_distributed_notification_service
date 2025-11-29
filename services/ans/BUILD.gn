@@ -63,6 +63,10 @@ ohos_source_set("ans_service_sources") {
     defines += [ "NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED" ]
   }
 
+  if (distributed_notification_service_feature_notification_multi_foreground_user) {
+    defines += [ "NOTIFICATION_MULTI_FOREGROUND_USER" ]
+  }
+
   sources = [
     "src/access_token_helper.cpp",
     "src/advanced_aggregation_data_roaming_observer.cpp",
@@ -74,6 +78,7 @@ ohos_source_set("ans_service_sources") {
     "src/advanced_notification_event_service.cpp",
     "src/advanced_notification_extension_subscription.cpp",
     "src/advanced_notification_flow_control_service.cpp",
+    "src/advanced_notification_geofence_service.cpp",
     "src/advanced_notification_inline.cpp",
     "src/advanced_notification_live_view_service.cpp",
     "src/advanced_notification_manager/advanced_notification_atomic_service_publish.cpp",
@@ -95,6 +100,8 @@ ohos_source_set("ans_service_sources") {
     "src/clone/dh_notification_clone_bundle_service.cpp",
     "src/clone/notification_clone_bundle_info.cpp",
     "src/clone/notification_clone_bundle_service.cpp",
+    "src/clone/notification_clone_priority_info.cpp",
+    "src/clone/notification_clone_priority_service.cpp",
     "src/clone/notification_clone_disturb_service.cpp",
     "src/clone/notification_clone_manager.cpp",
     "src/clone/notification_clone_util.cpp",
@@ -112,6 +119,7 @@ ohos_source_set("ans_service_sources") {
     "src/enable_manager/silent_reminder_manager.cpp",
     "src/event_report.cpp",
     "src/priority_notification/advanced_notification_priority_manager_service.cpp",
+    "src/priority_notification/advanced_notification_priority_helper.cpp",
     "src/priority_notification/notification_ai_extension_wrapper.cpp",
     "src/liveview_all_scenarios_extension_wrapper.cpp",
     "src/notification_bluetooth_helper.cpp",
@@ -191,8 +199,8 @@ ohos_source_set("ans_service_sources") {
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "data_share:datashare_permission",
-    "device_manager:devicemanagersdk",
     "ffrt:libffrt",
+    "graphic_2d:librender_service_base",
     "hitrace:libhitracechain",
     "i18n:intl_util",
     "image_framework:image_native",
@@ -204,8 +212,13 @@ ohos_source_set("ans_service_sources") {
     "resource_management:global_resmgr",
     "time_service:time_client",
     "bluetooth:btframework",
+    "window_manager:libdm",
   ]
   external_deps += component_external_deps
+
+  if (distributed_notification_supported) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
@@ -343,7 +356,6 @@ ohos_shared_library("libans") {
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "data_share:datashare_permission",
-    "device_manager:devicemanagersdk",
     "ffrt:libffrt",
     "i18n:intl_util",
     "icu:shared_icuuc",
@@ -358,6 +370,10 @@ ohos_shared_library("libans") {
     "time_service:time_client",
   ]
   external_deps += component_external_deps
+
+  if (distributed_notification_supported) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
