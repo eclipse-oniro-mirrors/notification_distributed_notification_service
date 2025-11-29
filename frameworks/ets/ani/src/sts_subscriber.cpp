@@ -236,6 +236,57 @@ bool WarpEnabledNotificationCallbackData(
     return true;
 }
 
+bool WrapEnabledPriorityNotificationCallbackData(
+    ani_env *env, const std::shared_ptr<EnabledNotificationCallbackData> &callbackData, ani_object &outObj)
+{
+    if (env == nullptr || callbackData == nullptr) {
+        ANS_LOGE("invalid parameter value");
+        return false;
+    }
+    ani_class cls;
+    ani_status status;
+    const char *className = "notification.notificationSubscriber.EnabledPriorityNotificationCallbackDataInner";
+    if (!CreateClassObjByClassName(env, className, cls, outObj)) {
+        ANS_LOGE("CreateClassObjByClassName faild");
+        return false;
+    }
+    status = env->Object_SetPropertyByName_Boolean(outObj, "enable", BoolToAniBoolean(callbackData->GetEnable()));
+    if (status != ANI_OK) {
+        ANS_LOGE("set enable faild. status %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool WrapEnabledPriorityNotificationByBundleCallbackData(ani_env *env,
+    const std::shared_ptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData, ani_object &outObj)
+{
+    if (env == nullptr || callbackData == nullptr) {
+        ANS_LOGE("invalid parameter value");
+        return false;
+    }
+    ani_class cls;
+    const char *className = "notification.notificationSubscriber.EnabledPriorityNotificationByBundleCallbackDataInner";
+    if (!CreateClassObjByClassName(env, className, cls, outObj)) {
+        ANS_LOGE("CreateClassObjByClassName faild");
+        return false;
+    }
+    if (!SetFieldString(env, cls, outObj, "bundle", callbackData->GetBundle())) {
+        ANS_LOGE("SetFieldString bundle faild");
+        return false;
+    }
+    if (!CallSetter(env, cls, outObj, "uid", static_cast<ani_int>(callbackData->GetUid()))) {
+        ANS_LOGE("uid set faild.");
+        return false;
+    }
+    ani_object status = CreateInt(env, static_cast<int32_t>(callbackData->GetEnableStatus()));
+    if (status == nullptr || env->Object_SetPropertyByName_Ref(outObj, "enableStatus", status) != ANI_OK) {
+        ANS_LOGE("status set faild.");
+        return false;
+    }
+    return true;
+}
+
 bool WarpBadgeNumberCallbackData(
     ani_env *env, const std::shared_ptr<BadgeNumberCallbackData> &badgeData, ani_object &outObj)
 {

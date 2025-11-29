@@ -156,6 +156,32 @@ export default namespace notificationManager {
         RINGTONE_TYPE_NONE = 3
     }
 
+    export enum PriorityNotificationType {
+        OTHER = 'OTHER',
+        PRIMARY_CONTACT = 'PRIMARY_CONTACT',
+        AT_ME = 'AT_ME',
+        URGENT_MESSAGE = 'URGENT_MESSAGE',
+        SCHEDULE_REMINDER = 'SCHEDULE_REMINDER',
+        PAYMENT_DUE = 'PAYMENT_DUE',
+        TRANSACTION_ALERT = 'TRANSACTION_ALERT',
+        EXPRESS_PROGRESS = 'EXPRESS_PROGRESS',
+        MISS_CALL = 'MISS_CALL',
+        TRAVEL_ALERT = 'TRAVEL_ALERT',
+        ACCOUNT_ALERT = 'ACCOUNT_ALERT',
+        APPOINTMENT_REMINDER = 'APPOINTMENT_REMINDER',
+        TRAFFIC_NOTICE = 'TRAFFIC_NOTICE',
+        KEY_PROGRESS = 'KEY_PROGRESS',
+        PUBLIC_EVENT = 'PUBLIC_EVENT',
+        IOT_WARNING = 'IOT_WARNING',
+        CUSTOM_KEYWORD = 'CUSTOM_KEYWORD'
+    }
+
+    export enum PriorityEnableStatus {
+        DISABLE = 0,
+        ENABLE_BY_INTELLIGENT = 1,
+        ENABLE = 2
+    }
+
     export interface DistributedBundleEnableInfo {
         bundleName: string;
         uid: int;
@@ -288,6 +314,12 @@ export default namespace notificationManager {
     export native function nativeGetReminderInfoByBundles(bundles: Array<BundleOption>) : Array<NotificationReminderInfo>;
     export native function nativeGetBadgeDisplayStatusByBundles(bundles: Array<BundleOption>): Map<BundleOption, boolean>;
     export native function nativeSetBadgeDisplayStatusByBundles(badges: Map<BundleOption, boolean>): void;
+    export native function nativeSetBundlePriorityConfig(bundle: BundleOption, value: string): void;
+    export native function nativeGetBundlePriorityConfig(bundle: BundleOption): string;
+    export native function nativeSetPriorityEnabledByBundle(bundle: BundleOption, enableStatus: PriorityEnableStatus): void;
+    export native function nativeIsPriorityEnabledByBundle(bundle: BundleOption): PriorityEnableStatus;
+    export native function nativeSetPriorityEnabled(enable: boolean): void;
+    export native function nativeIsPriorityEnabled(): boolean;
 
     function isInvalidParameter(doNotDisturbDate: DoNotDisturbDate): BusinessError
     {
@@ -2873,6 +2905,103 @@ export default namespace notificationManager {
             let p = taskpool.execute((): Array<string> => { return nativeGetDistributedDeviceList(); });
             p.then((data: NullishType): void => {
                 let ret : Array<string> = data as Array<string>;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function setBundlePriorityConfig(bundle: BundleOption, value: string): Promise<void>
+    {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativeSetBundlePriorityConfig(bundle, value); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function getBundlePriorityConfig(bundle: BundleOption): Promise<string>
+    {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        let pPromise = new Promise<string>((resolve: ResolveCallback<string>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): string => { return nativeGetBundlePriorityConfig(bundle); });
+            p.then((data: NullishType): void => {
+                let ret : string = data as string;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function setPriorityEnabledByBundle(bundle: BundleOption, enableStatus: PriorityEnableStatus): Promise<void>
+    {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativeSetPriorityEnabledByBundle(bundle, enableStatus); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function isPriorityEnabledByBundle(bundle: BundleOption): Promise<PriorityEnableStatus>
+    {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        let pPromise = new Promise<PriorityEnableStatus>((resolve: ResolveCallback<PriorityEnableStatus>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): PriorityEnableStatus => { return nativeIsPriorityEnabledByBundle(bundle); });
+            p.then((data: NullishType): void => {
+                let ret : PriorityEnableStatus = data as PriorityEnableStatus;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function setPriorityEnabled(enable: boolean): Promise<void>
+    {
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativeSetPriorityEnabled(enable); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function isPriorityEnabled(): Promise<boolean>
+    {
+        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): boolean => { return nativeIsPriorityEnabled(); });
+            p.then((data: NullishType): void => {
+                let ret : boolean = data as boolean;
                 resolve(ret);
             }, (error: Error): void => {
                 reject(error);

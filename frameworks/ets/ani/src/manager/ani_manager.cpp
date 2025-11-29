@@ -26,6 +26,7 @@
 #include "ani_notification_enable.h"
 #include "ani_on.h"
 #include "ani_open_settings.h"
+#include "ani_priority.h"
 #include "ani_publish.h"
 #include "ani_remove_group.h"
 #include "ani_request_enable.h"
@@ -272,6 +273,25 @@ static std::array kitManagerFunctions = {
         reinterpret_cast<void *>(AniOpenNotificationSettings)},
 #else
     ani_native_function {"nativeOpenNotificationSettings", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+#endif
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    ani_native_function {"nativeSetBundlePriorityConfig",
+        nullptr, reinterpret_cast<void *>(AniSetBundlePriorityConfig)},
+    ani_native_function {"nativeGetBundlePriorityConfig",
+        nullptr, reinterpret_cast<void *>(AniGetBundlePriorityConfig)},
+    ani_native_function {"nativeSetPriorityEnabledByBundle",
+        nullptr, reinterpret_cast<void *>(AniSetPriorityEnabledByBundle)},
+    ani_native_function {"nativeIsPriorityEnabledByBundle",
+        nullptr, reinterpret_cast<void *>(AniIsPriorityEnabledByBundle)},
+    ani_native_function {"nativeSetPriorityEnabled", nullptr, reinterpret_cast<void *>(AniSetPriorityEnabled)},
+    ani_native_function {"nativeIsPriorityEnabled", nullptr, reinterpret_cast<void *>(AniIsPriorityEnabled)},
+#else
+    ani_native_function {"nativeSetBundlePriorityConfig", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeGetBundlePriorityConfig", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeSetPriorityEnabledByBundle", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeIsPriorityEnabledByBundle", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeSetPriorityEnabled", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeIsPriorityEnabled", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
 #endif
 };
 

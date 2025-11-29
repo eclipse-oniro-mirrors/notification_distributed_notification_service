@@ -91,6 +91,7 @@ class SubscribeCallbackDataInner implements SubscribeCallbackData {
     public readonly request: NotificationRequest = {
         content: {},
         id: undefined,
+        priorityNotificationType: undefined,
         appMessageId: undefined,
         notificationSlotType: undefined,
         isOngoing: undefined,

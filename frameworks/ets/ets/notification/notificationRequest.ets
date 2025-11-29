@@ -126,6 +126,7 @@ export interface NotificationRequest {
     content: NotificationContent;
     trigger?: Trigger;
     id?: int;
+    priorityNotificationType?: notificationManager.PriorityNotificationType;
     appMessageId?: string;
     notificationSlotType?: notificationManager.SlotType;
     isOngoing?: boolean;
@@ -179,6 +180,7 @@ class NotificationRequestInner implements NotificationRequest {
     public content: NotificationContent = {};
     public trigger?: Trigger | undefined;
     public id?: int | undefined;
+    public priorityNotificationType?: notificationManager.PriorityNotificationType | undefined;
     public appMessageId?: string | undefined;
     public notificationSlotType?: notificationManager.SlotType | undefined;
     public isOngoing?: boolean | undefined;
