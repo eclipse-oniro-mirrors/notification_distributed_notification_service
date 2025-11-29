@@ -200,6 +200,7 @@ ohos_source_set("ans_service_sources") {
     "data_share:datashare_consumer",
     "data_share:datashare_permission",
     "ffrt:libffrt",
+    "graphic_2d:librender_service_base",
     "hitrace:libhitracechain",
     "i18n:intl_util",
     "image_framework:image_native",
@@ -211,6 +212,7 @@ ohos_source_set("ans_service_sources") {
     "resource_management:global_resmgr",
     "time_service:time_client",
     "bluetooth:btframework",
+    "window_manager:libdm",
   ]
   external_deps += component_external_deps
 

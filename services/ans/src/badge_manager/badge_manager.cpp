@@ -449,7 +449,6 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
 
 ErrCode AdvancedNotificationService::GetBadgeNumber(int32_t &badgeNumber)
 {
-    ANS_LOGD("called");
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_29, EventBranchId::BRANCH_0);
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
@@ -471,7 +470,7 @@ ErrCode AdvancedNotificationService::GetBadgeNumber(int32_t &badgeNumber)
         {
             std::lock_guard<ffrt::mutex> lock(badgeQueryMutex_);
             if (badgeQueryCallBack_.find(userId) == badgeQueryCallBack_.end()) {
-                ANS_LOGE("BadgeQueryCallback unregistered");
+                ANS_LOGW("BadgeQueryCallback unregistered");
                 message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
                     " get badgenumber failed, badgeQueryCallback unregistered.");
                 NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_2));
@@ -480,8 +479,6 @@ ErrCode AdvancedNotificationService::GetBadgeNumber(int32_t &badgeNumber)
             callback = badgeQueryCallBack_[userId];
         }
         if (callback == nullptr) {
-            message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
-                " get badgenumber failed, null badgeQueryCallBack.");
             NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_3));
             return;
         }
@@ -498,6 +495,8 @@ ErrCode AdvancedNotificationService::GetBadgeNumber(int32_t &badgeNumber)
     message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
         " get badgenumber " + std::to_string(badgeNumber));
     NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_5));
+    ANS_LOGD("Bundle(%{public}s_%{public}d) get badgenumber %{public}d", bundleOption->GetBundleName().c_str(),
+        bundleOption->GetUid(), badgeNumber);
     return badgeNumber < BADGE_NUM_LIMIT ? ERR_ANS_TASK_ERR : ERR_OK;
 }
 
@@ -540,7 +539,7 @@ ErrCode AdvancedNotificationService::RegisterBadgeQueryCallback(const sptr<IBadg
     }
     message.Message(std::to_string(userId) + " register badgequerycallback succ.");
     NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_9));
-    ANS_LOGD("RegisterBadgeQueryCallback end");
+    ANS_LOGI("UserId(%{public}d) registerBadgeQueryCallback end", userId);
     return ERR_OK;
 }
 
@@ -571,7 +570,7 @@ ErrCode AdvancedNotificationService::UnRegisterBadgeQueryCallback()
     }
     message.Message(std::to_string(userId) + " unregister badgequerycallback succ.");
     NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_12));
-    ANS_LOGD("UnRegisterBadgeQueryCallback end");
+    ANS_LOGI("UserId(%{public}d) unRegisterBadgeQueryCallback end", userId);
     return ERR_OK;
 }
 } // Notification
