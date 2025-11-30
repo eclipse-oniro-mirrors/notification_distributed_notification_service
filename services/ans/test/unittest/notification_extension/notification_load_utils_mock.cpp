@@ -52,7 +52,7 @@ int32_t InitLocalDevice(const std::string &deviceId, uint16_t deviceType,
 }
 
 void AddDevice(const std::string &deviceId, const std::string &udid, uint16_t deviceType,
-    const std::string &networkId)
+    const std::string &networkId, const std::string &extraData)
 {
     g_deviceList.insert({deviceId, networkId});
     return;
