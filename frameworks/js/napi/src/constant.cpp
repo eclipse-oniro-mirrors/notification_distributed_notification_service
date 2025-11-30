@@ -337,6 +337,8 @@ napi_value LiveViewStatusInit(napi_env env, napi_value exports)
         "LIVE_VIEW_INCREMENTAL_UPDATE");
     SetNamedPropertyByInteger(env, obj, (int32_t)LiveViewStatus::LIVE_VIEW_END, "LIVE_VIEW_END");
     SetNamedPropertyByInteger(env, obj, (int32_t)LiveViewStatus::LIVE_VIEW_FULL_UPDATE, "LIVE_VIEW_FULL_UPDATE");
+    SetNamedPropertyByInteger(env, obj, (int32_t)LiveViewStatus::LIVE_VIEW_PENDING_CREATE, "LIVE_VIEW_PENDING_CREATE");
+    SetNamedPropertyByInteger(env, obj, (int32_t)LiveViewStatus::LIVE_VIEW_PENDING_END, "LIVE_VIEW_PENDING_END");
 
     napi_property_descriptor exportFuncs[] = {
         DECLARE_NAPI_PROPERTY("LiveViewStatus", obj),

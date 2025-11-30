@@ -94,7 +94,11 @@ export enum LiveViewStatus {
 
     LIVE_VIEW_END = 2,
 
-    LIVE_VIEW_FULL_UPDATE = 3
+    LIVE_VIEW_FULL_UPDATE = 3,
+
+    LIVE_VIEW_PENDING_CREATE = 4,
+
+    LIVE_VIEW_PENDING_END = 6
 }
 
 export enum LiveViewTypes {

@@ -126,7 +126,9 @@ enum class LiveViewStatus {
     LIVE_VIEW_INCREMENTAL_UPDATE,
     LIVE_VIEW_END,
     LIVE_VIEW_FULL_UPDATE,
-    LIVE_VIEW_BUTT
+    LIVE_VIEW_PENDING_CREATE = 4,
+    LIVE_VIEW_PENDING_END = 6,
+    LIVE_VIEW_BUTT = 255
 };
 
 enum class LiveViewTypes {

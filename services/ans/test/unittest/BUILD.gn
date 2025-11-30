@@ -1807,6 +1807,7 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/clone/notification_clone_priority_info.cpp",
     "${services_path}/ans/src/clone/notification_clone_bundle_service.cpp",
     "${services_path}/ans/src/clone/notification_clone_disturb_service.cpp",
+    "${services_path}/ans/src/clone/notification_clone_geofence_switch.cpp",
     "${services_path}/ans/src/clone/notification_clone_priority_service.cpp",
     "${services_path}/ans/src/clone/notification_clone_manager.cpp",
     "${services_path}/ans/src/clone/notification_clone_util.cpp",

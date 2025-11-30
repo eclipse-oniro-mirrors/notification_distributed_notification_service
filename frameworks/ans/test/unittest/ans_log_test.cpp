@@ -223,6 +223,12 @@ HWTEST_F(AnsLogTest, AnsConvertTest_006, TestSize.Level1)
     inType = NotificationNapi::LiveViewStatus::LIVE_VIEW_FULL_UPDATE;
     NotificationNapi::AnsEnumUtil::LiveViewStatusJSToC(inType, outType);
     EXPECT_EQ(outType, NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE);
+    inType = NotificationNapi::LiveViewStatus::LIVE_VIEW_PENDING_CREATE;
+    NotificationNapi::AnsEnumUtil::LiveViewStatusJSToC(inType, outType);
+    EXPECT_EQ(outType, NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE);
+    inType = NotificationNapi::LiveViewStatus::LIVE_VIEW_PENDING_END;
+    NotificationNapi::AnsEnumUtil::LiveViewStatusJSToC(inType, outType);
+    EXPECT_EQ(outType, NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END);
 }
 
 /*
@@ -482,6 +488,12 @@ HWTEST_F(AnsLogTest, AnsConvertTest_013, TestSize.Level1)
     inType = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE;
     NotificationNapi::AnsEnumUtil::LiveViewStatusCToJS(inType, outType);
     EXPECT_EQ(outType, NotificationNapi::LiveViewStatus::LIVE_VIEW_FULL_UPDATE);
+    inType = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE;
+    NotificationNapi::AnsEnumUtil::LiveViewStatusCToJS(inType, outType);
+    EXPECT_EQ(outType, NotificationNapi::LiveViewStatus::LIVE_VIEW_PENDING_CREATE);
+    inType = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END;
+    NotificationNapi::AnsEnumUtil::LiveViewStatusCToJS(inType, outType);
+    EXPECT_EQ(outType, NotificationNapi::LiveViewStatus::LIVE_VIEW_PENDING_END);
 }
 
 /*
