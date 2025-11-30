@@ -164,7 +164,7 @@ export interface NotificationRequest {
     template?: NotificationTemplate;
     distributedOption?: DistributedOptions;
     readonly deviceId?: string;
-    readonly notificationFlags?: NotificationFlags;
+    notificationFlags?: NotificationFlags;
     removalWantAgent?: WantAgent;
     badgeNumber?: long;
     representativeBundle?: BundleOption;
@@ -218,7 +218,7 @@ class NotificationRequestInner implements NotificationRequest {
     public template?: NotificationTemplate | undefined;
     public distributedOption?: DistributedOptions | undefined;
     public readonly deviceId?: string | undefined;
-    public readonly notificationFlags?: NotificationFlags | undefined;
+    public notificationFlags?: NotificationFlags | undefined;
     public removalWantAgent?: WantAgent | undefined;
     public badgeNumber?: long | undefined;
     public representativeBundle?: BundleOption | undefined;

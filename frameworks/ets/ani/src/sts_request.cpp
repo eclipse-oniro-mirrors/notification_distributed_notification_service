@@ -772,6 +772,38 @@ bool GetNotificationTrigger(ani_env *env, ani_object obj, std::shared_ptr<Notifi
     return true;
 }
 
+void GetNotificationFlags(ani_env *env, ani_object obj,
+    std::shared_ptr<OHOS::Notification::NotificationRequest> &request)
+{
+    ani_status status = ANI_ERROR;
+    ani_ref flagsRef = {};
+    ani_boolean isUndefind = ANI_TRUE;
+    status = GetPropertyRef(env, obj, "notificationFlags", isUndefind, flagsRef);
+    if (status != ANI_OK || isUndefind == ANI_TRUE) {
+        ANS_LOGE("Cannot get the value of notificationFlags. status %{public}d isUndefind %{public}d",
+            status, isUndefind);
+        return;
+    }
+    std::shared_ptr<NotificationFlags> flags = std::make_shared<NotificationFlags>();
+    NotificationFlagStatus soundEnabled = NotificationFlagStatus::NONE;
+    GetNotificationFlagStatus(env, static_cast<ani_object>(flagsRef), "soundEnabled", soundEnabled);
+    flags->SetSoundEnabled(soundEnabled);
+
+    NotificationFlagStatus vibrationEnabled = NotificationFlagStatus::NONE;
+    GetNotificationFlagStatus(env, static_cast<ani_object>(flagsRef), "vibrationEnabled", vibrationEnabled);
+    flags->SetVibrationEnabled(vibrationEnabled);
+
+    NotificationFlagStatus bannerEnabled = NotificationFlagStatus::NONE;
+    GetNotificationFlagStatus(env, static_cast<ani_object>(flagsRef), "bannerEnabled", bannerEnabled);
+    flags->SetBannerEnabled(bannerEnabled);
+
+    NotificationFlagStatus lockScreenEnabled = NotificationFlagStatus::NONE;
+    GetNotificationFlagStatus(env, static_cast<ani_object>(flagsRef), "lockScreenEnabled", lockScreenEnabled);
+    flags->SetLockScreenEnabled(lockScreenEnabled);
+
+    request->SetFlags(flags);
+}
+
 int32_t GetNotificationRequestByCustom(ani_env *env, ani_object obj,
     std::shared_ptr<OHOS::Notification::NotificationRequest> &notificationRequest)
 {
@@ -797,6 +829,7 @@ int32_t GetNotificationRequestByCustom(ani_env *env, ani_object obj,
         ANS_LOGE("GetNotificationRequestByCustom: get notification trigger failed");
         return ERROR_PARAM_INVALID;
     }
+    GetNotificationFlags(env, obj, notificationRequest);
     return status;
 }
 

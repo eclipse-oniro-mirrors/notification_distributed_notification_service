@@ -326,8 +326,8 @@ HWTEST_F(NotificationAnalyticsUtilTest, SetControlFlags_100, Function | SmallTes
     uint32_t controlFlags = 0;
     flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
     flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
-    flags->SetLockScreenVisblenessEnabled(true);
-    flags->SetBannerEnabled(true);
+    flags->SetLockScreenEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetBannerEnabled(NotificationConstant::FlagStatus::OPEN);
 
     auto ret = NotificationAnalyticsUtil::SetControlFlags(flags, controlFlags);
 
@@ -345,8 +345,8 @@ HWTEST_F(NotificationAnalyticsUtilTest, SetControlFlags_200, Function | SmallTes
     uint32_t controlFlags = 0b1111 << 10;
     flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
     flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
-    flags->SetLockScreenVisblenessEnabled(false);
-    flags->SetBannerEnabled(false);
+    flags->SetLockScreenEnabled(NotificationConstant::FlagStatus::CLOSE);
+    flags->SetBannerEnabled(NotificationConstant::FlagStatus::CLOSE);
 
     auto ret = NotificationAnalyticsUtil::SetControlFlags(flags, controlFlags);
 

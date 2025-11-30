@@ -57,6 +57,7 @@ ohos_shared_library("notificationmanager") {
     "../ans_template.cpp",
     "../cancel.cpp",
     "../common.cpp",
+    "../common2.cpp",
     "../common_convert_content.cpp",
     "../common_convert_liveview.cpp",
     "../common_convert_notification.cpp",

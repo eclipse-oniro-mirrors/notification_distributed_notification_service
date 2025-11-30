@@ -24,9 +24,13 @@ export enum NotificationFlagStatus {
 
 export interface NotificationFlags {
 
-    readonly soundEnabled?: NotificationFlagStatus;
+    soundEnabled?: NotificationFlagStatus;
 
-    readonly vibrationEnabled?: NotificationFlagStatus;
+    vibrationEnabled?: NotificationFlagStatus;
+
+    bannerEnabled?: NotificationFlagStatus;
+
+    lockScreenEnabled?: NotificationFlagStatus;
 
     readonly reminderFlags?: long;
 }
@@ -36,6 +40,10 @@ class NotificationFlagsInner implements NotificationFlags {
     public soundEnabled?: NotificationFlagStatus | undefined;
 
     public vibrationEnabled?: NotificationFlagStatus | undefined;
+
+    public bannerEnabled?: NotificationFlagStatus | undefined;
+
+    public lockScreenEnabled?: NotificationFlagStatus | undefined;
 
     public reminderFlags?: long | undefined;
 }

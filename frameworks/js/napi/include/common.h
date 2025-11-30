@@ -20,6 +20,7 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 #include "notification_button_option.h"
+#include "notification_flags.h"
 #include "notification_helper.h"
 #include "notification_local_live_view_button.h"
 #include "notification_progress.h"
@@ -615,6 +616,17 @@ public:
      */
     static napi_value SetEnabledPriorityNotificationByBundleCallbackData(const napi_env &env,
         const EnabledPriorityNotificationByBundleCallbackData &data, napi_value &result);
+
+    /**
+     * @brief Gets the NotificationFlags of NotificationRequest object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param request Indicates a NotificationRequest object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationFlags(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
 
     /**
      * @brief Gets a NotificationSubscribeInfo object from specified js object
@@ -1998,8 +2010,13 @@ private:
     static const int32_t ARGS_TWO = 2;
     static const int32_t ONLY_CALLBACK_MAX_PARA = 1;
     static const int32_t ONLY_CALLBACK_MIN_PARA = 0;
+    static const int32_t FLAG_STATUS_MAX_TYPE = 2;
     static std::set<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> wantAgent_;
     static ffrt::mutex mutex_;
+    static napi_value GetNotificationFlagsStatus(
+        const napi_env &env, const napi_value &value, const char* name, NotificationConstant::FlagStatus &result);
+    static napi_value GetNotificationFlagsInfo(
+        const napi_env &env, const napi_value &value, std::shared_ptr<NotificationFlags> &result);
     static const char *GetPropertyNameByContentType(ContentType type);
     static napi_value NapiReturnFalseCbInner(napi_env env, napi_callback_info info, bool newType);
     static napi_value GetNotificationGeofenceByLongitude(const napi_env &env, const napi_value &value,

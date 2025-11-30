@@ -38,6 +38,18 @@ NotificationFlags::NotificationFlags(uint32_t reminderFlags): reminderFlags_(rem
     } else {
         vibrationEnabled_ = NotificationConstant::FlagStatus::CLOSE;
     }
+
+    if ((NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG & reminderFlags) > 0) {
+        lockScreenEnabled_ = NotificationConstant::FlagStatus::OPEN;
+    } else {
+        lockScreenEnabled_ = NotificationConstant::FlagStatus::CLOSE;
+    }
+
+    if ((NotificationConstant::ReminderFlag::BANNER_FLAG & reminderFlags) > 0) {
+        bannerEnabled_ = NotificationConstant::FlagStatus::OPEN;
+    } else {
+        bannerEnabled_ = NotificationConstant::FlagStatus::CLOSE;
+    }
 }
 
 void NotificationFlags::SetSoundEnabled(NotificationConstant::FlagStatus soundEnabled)
@@ -72,6 +84,38 @@ NotificationConstant::FlagStatus NotificationFlags::IsVibrationEnabled() const
     return vibrationEnabled_;
 }
 
+void NotificationFlags::SetLockScreenEnabled(NotificationConstant::FlagStatus lockScreenEnabled)
+{
+    if (lockScreenEnabled == NotificationConstant::FlagStatus::OPEN) {
+        reminderFlags_ |= NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG;
+        lockScreenEnabled_ = NotificationConstant::FlagStatus::OPEN;
+    } else {
+        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG);
+        lockScreenEnabled_ = NotificationConstant::FlagStatus::CLOSE;
+    }
+}
+
+NotificationConstant::FlagStatus NotificationFlags::IsLockScreenEnabled() const
+{
+    return lockScreenEnabled_;
+}
+
+void NotificationFlags::SetBannerEnabled(NotificationConstant::FlagStatus bannerEnabled)
+{
+    if (bannerEnabled == NotificationConstant::FlagStatus::OPEN) {
+        reminderFlags_ |= NotificationConstant::ReminderFlag::BANNER_FLAG;
+        bannerEnabled_ = NotificationConstant::FlagStatus::OPEN;
+    } else {
+        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::BANNER_FLAG);
+        bannerEnabled_ = NotificationConstant::FlagStatus::CLOSE;
+    }
+}
+
+NotificationConstant::FlagStatus NotificationFlags::IsBannerEnabled() const
+{
+    return bannerEnabled_;
+}
+
 uint32_t NotificationFlags::GetReminderFlags()
 {
     return reminderFlags_;
@@ -91,40 +135,18 @@ void NotificationFlags::SetReminderFlags(const uint32_t reminderFlag)
     } else {
         soundEnabled_ = NotificationConstant::FlagStatus::CLOSE;
     }
-}
 
-void NotificationFlags::SetLockScreenVisblenessEnabled(bool visblenessEnabled)
-{
-    if (visblenessEnabled) {
-        reminderFlags_ |= NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG;
+    if (reminderFlags_ & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG) {
+        lockScreenEnabled_ = NotificationConstant::FlagStatus::OPEN;
     } else {
-        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG);
+        lockScreenEnabled_ = NotificationConstant::FlagStatus::CLOSE;
     }
-}
 
-bool NotificationFlags::IsLockScreenVisblenessEnabled()
-{
-    if ((reminderFlags_ & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG) != 0) {
-        return true;
-    }
-    return false;
-}
-
-void NotificationFlags::SetBannerEnabled(bool bannerEnabled)
-{
-    if (bannerEnabled) {
-        reminderFlags_ |= NotificationConstant::ReminderFlag::BANNER_FLAG;
+    if (reminderFlags_ & NotificationConstant::ReminderFlag::BANNER_FLAG) {
+        bannerEnabled_ = NotificationConstant::FlagStatus::OPEN;
     } else {
-        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::BANNER_FLAG);
+        bannerEnabled_ = NotificationConstant::FlagStatus::CLOSE;
     }
-}
-
-bool NotificationFlags::IsBannerEnabled()
-{
-    if ((reminderFlags_ & NotificationConstant::ReminderFlag::BANNER_FLAG) != 0) {
-        return true;
-    }
-    return false;
 }
 
 void NotificationFlags::SetLightScreenEnabled(bool lightScreenEnabled)
@@ -165,13 +187,17 @@ std::string NotificationFlags::Dump()
 {
     return "soundEnabled = " + std::to_string(static_cast<uint8_t>(soundEnabled_)) +
            ", vibrationEnabled = " + std::to_string(static_cast<uint8_t>(vibrationEnabled_)) +
+           ", lockScreenEnabled = " + std::to_string(static_cast<uint8_t>(lockScreenEnabled_)) +
+           ", bannerEnabled = " + std::to_string(static_cast<uint8_t>(bannerEnabled_)) +
            ", reminderFlags = " + std::to_string(reminderFlags_);
 }
 
 bool NotificationFlags::ToJson(nlohmann::json &jsonObject) const
 {
-    jsonObject["soundEnabled"]     = soundEnabled_;
+    jsonObject["soundEnabled"] = soundEnabled_;
     jsonObject["vibrationEnabled"] = vibrationEnabled_;
+    jsonObject["lockScreenEnabled"] = lockScreenEnabled_;
+    jsonObject["bannerEnabled"] = bannerEnabled_;
     jsonObject["reminderFlags"] = reminderFlags_;
 
     return true;
@@ -201,6 +227,16 @@ NotificationFlags *NotificationFlags::FromJson(const nlohmann::json &jsonObject)
         pFlags->vibrationEnabled_ = static_cast<NotificationConstant::FlagStatus>(vibrationEnabled);
     }
 
+    if (jsonObject.find("lockScreenEnabled") != jsonEnd && jsonObject.at("lockScreenEnabled").is_number_integer()) {
+        auto lockScreenEnabled = jsonObject.at("lockScreenEnabled").get<uint8_t>();
+        pFlags->lockScreenEnabled_ = static_cast<NotificationConstant::FlagStatus>(lockScreenEnabled);
+    }
+
+    if (jsonObject.find("bannerEnabled") != jsonEnd && jsonObject.at("bannerEnabled").is_number_integer()) {
+        auto bannerEnabled = jsonObject.at("bannerEnabled").get<uint8_t>();
+        pFlags->bannerEnabled_ = static_cast<NotificationConstant::FlagStatus>(bannerEnabled);
+    }
+
     if (jsonObject.find("reminderFlags") != jsonEnd && jsonObject.at("reminderFlags").is_number_integer()) {
         auto reminderFlags = jsonObject.at("reminderFlags").get<uint32_t>();
         pFlags->reminderFlags_ = reminderFlags;
@@ -218,6 +254,16 @@ bool NotificationFlags::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteUint8(static_cast<uint8_t>(vibrationEnabled_))) {
         ANS_LOGE("Failed to write flag vibration enable for the notification");
+        return false;
+    }
+
+    if (!parcel.WriteUint8(static_cast<uint8_t>(lockScreenEnabled_))) {
+        ANS_LOGE("Failed to write flag lockScreen enable for the notification");
+        return false;
+    }
+
+    if (!parcel.WriteUint8(static_cast<uint8_t>(bannerEnabled_))) {
+        ANS_LOGE("Failed to write flag banner enable for the notification");
         return false;
     }
 
@@ -248,6 +294,8 @@ bool NotificationFlags::ReadFromParcel(Parcel &parcel)
 {
     soundEnabled_ = static_cast<NotificationConstant::FlagStatus>(parcel.ReadUint8());
     vibrationEnabled_ = static_cast<NotificationConstant::FlagStatus>(parcel.ReadUint8());
+    lockScreenEnabled_ = static_cast<NotificationConstant::FlagStatus>(parcel.ReadUint8());
+    bannerEnabled_ = static_cast<NotificationConstant::FlagStatus>(parcel.ReadUint8());
     reminderFlags_ = parcel.ReadUint32();
 
     return true;
@@ -270,9 +318,10 @@ bool NotificationFlags::GetReminderFlagsByString(
     }
     reminderFlags->SetSoundEnabled(
         static_cast<NotificationConstant::FlagStatus>(strReminderFlags[SOUND_ENABLED_SEQ] - '0'));
-    reminderFlags->SetLockScreenVisblenessEnabled(
-        static_cast<bool>(strReminderFlags[LOCK_SCREEN_VISIBLENESS_ENABLED_SEQ] - '0'));
-    reminderFlags->SetBannerEnabled(static_cast<bool>(strReminderFlags[BANNER_ENABLED_SEQ] - '0'));
+    reminderFlags->SetLockScreenEnabled(
+        static_cast<NotificationConstant::FlagStatus>(strReminderFlags[LOCK_SCREEN_VISIBLENESS_ENABLED_SEQ] - '0'));
+    reminderFlags->SetBannerEnabled(
+        static_cast<NotificationConstant::FlagStatus>(strReminderFlags[BANNER_ENABLED_SEQ] - '0'));
     reminderFlags->SetLightScreenEnabled(static_cast<bool>(strReminderFlags[LIGHT_SCREEN_ENABLED_SEQ] - '0'));
     reminderFlags->SetVibrationEnabled(
         static_cast<NotificationConstant::FlagStatus>(strReminderFlags[VIBRATION_ENABLED_SEQ] - '0'));
@@ -285,7 +334,9 @@ bool NotificationFlags::ValidCharReminderFlag(const char &charReminderFlag, cons
     if (charReminderFlag == CHAR_REMIND_DISABLE || charReminderFlag == CHAR_REMIND_ENABLE) {
         return true;
     }
-    if ((seq == SOUND_ENABLED_SEQ || seq == VIBRATION_ENABLED_SEQ) && charReminderFlag == CHAR_FLAG_STATUS_CLOSE) {
+    if ((seq == SOUND_ENABLED_SEQ || seq == VIBRATION_ENABLED_SEQ
+        || seq == LOCK_SCREEN_VISIBLENESS_ENABLED_SEQ || seq == BANNER_ENABLED_SEQ)
+        && charReminderFlag == CHAR_FLAG_STATUS_CLOSE) {
         return true;
     }
     return false;

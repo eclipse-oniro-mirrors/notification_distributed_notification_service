@@ -795,12 +795,12 @@ uint32_t NotificationAnalyticsUtil::SetControlFlags(const std::shared_ptr<Notifi
     } else {
         controlFlags &= ~VIBRATION_FLAG;
     }
-    if (flags->IsLockScreenVisblenessEnabled()) {
+    if (flags->IsLockScreenEnabled() == NotificationConstant::FlagStatus::OPEN) {
         controlFlags |= LOCKSCREEN_FLAG;
     } else {
         controlFlags &= ~LOCKSCREEN_FLAG;
     }
-    if (flags->IsBannerEnabled()) {
+    if (flags->IsBannerEnabled() == NotificationConstant::FlagStatus::OPEN) {
         controlFlags |= BANNER_FLAG;
     } else {
         controlFlags &= ~BANNER_FLAG;

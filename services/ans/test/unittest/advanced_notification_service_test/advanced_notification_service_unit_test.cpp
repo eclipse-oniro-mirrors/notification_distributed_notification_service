@@ -760,6 +760,21 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, ChangeNotificationByControlFlags_1
 }
 
 /**
+ * @tc.name: ChangeNotificationByControlFlagsFor3rdApp_100
+ * @tc.desc: Test ChangeNotificationByControlFlagsFor3rdApp when notificationFlags is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    ChangeNotificationByControlFlagsFor3rdApp_100, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->ChangeNotificationByControlFlagsFor3rdApp(record);
+    ASSERT_EQ(record->request->GetNotificationControlFlags(), 0);
+}
+
+/**
  * @tc.name: CheckPublishPreparedNotification_100
  * @tc.desc: Test CheckPublishPreparedNotification when notificationSvrQueue_ is nullptr.
  * @tc.type: FUNC

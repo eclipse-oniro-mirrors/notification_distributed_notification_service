@@ -2066,6 +2066,14 @@ napi_value Common::SetNotificationFlags(
     napi_create_int32(env, vibrationEnabled, &value);
     napi_set_named_property(env, result, "vibrationEnabled", value);
 
+    int32_t bannerEnabled = static_cast<int32_t>(flags->IsBannerEnabled());
+    napi_create_int32(env, bannerEnabled, &value);
+    napi_set_named_property(env, result, "bannerEnabled", value);
+
+    int32_t lockScreenEnabled = static_cast<int32_t>(flags->IsLockScreenEnabled());
+    napi_create_int32(env, lockScreenEnabled, &value);
+    napi_set_named_property(env, result, "lockScreenEnabled", value);
+
     uint32_t reminderFlags = flags->GetReminderFlags();
     napi_create_uint32(env, reminderFlags, &value);
     napi_set_named_property(env, result, "reminderFlags", value);

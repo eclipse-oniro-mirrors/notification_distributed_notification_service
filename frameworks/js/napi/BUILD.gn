@@ -77,6 +77,7 @@ ohos_shared_library("notification") {
     "src/ans_template.cpp",
     "src/cancel.cpp",
     "src/common.cpp",
+    "src/common2.cpp",
     "src/common_convert_content.cpp",
     "src/common_convert_liveview.cpp",
     "src/common_convert_notification.cpp",
