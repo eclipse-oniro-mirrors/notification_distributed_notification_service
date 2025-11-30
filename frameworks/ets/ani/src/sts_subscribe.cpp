@@ -674,7 +674,7 @@ bool SubscriberInstanceManager::GetNotificationSubscriber(
     if (subscriberInfo->HasFunctionImplemented(env, "onBatchCancel")) {
         subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BATCHCANCELED;
     }
-    if (subscriberInfo->HasFunctionImplemented(env, "onEnablePriorityChanged")) {
+    if (subscriberInfo->HasFunctionImplemented(env, "onEnabledPriorityChanged")) {
         subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLEPRIORITY_CHANGED;
     }
     if (subscriberInfo->HasFunctionImplemented(env, "onEnabledPriorityByBundleChanged")) {

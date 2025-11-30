@@ -242,10 +242,6 @@ void GetNotificationRequestByString(ani_env *env, ani_object obj,
     if (ANI_OK == GetPropertyString(env, obj, "appMessageId", isUndefined, mString) && isUndefined == ANI_FALSE) {
         request->SetAppMessageId(mString);
     }
-    if (ANI_OK == GetPropertyString(
-        env, obj, "priorityNotificationType", isUndefined, mString) && isUndefined == ANI_FALSE) {
-        request->SetPriorityNotificationType(mString);
-    }
     if (ANI_OK == GetPropertyString(env, obj, "label", isUndefined, mString) && isUndefined == ANI_FALSE) {
         request->SetLabel(GetResizeStr(mString, STR_MAX_SIZE));
     }
@@ -529,6 +525,27 @@ void GetNotificationSlotType(ani_env *env, ani_object obj, std::shared_ptr<Notif
     ANS_LOGD("GetNotificationSlotType end");
 }
 
+void GetPriorityNotificationType(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+{
+    if (env == nullptr || obj == nullptr || request == nullptr) {
+        ANS_LOGE("GetPriorityNotificationType failed, has nullptr");
+        return;
+    }
+    ani_boolean isUndefined = ANI_OK;
+    ani_ref priorityTypeRef = {};
+    if (GetPropertyRef(env, obj, "priorityNotificationType", isUndefined, priorityTypeRef) != ANI_OK ||
+        isUndefined == ANI_TRUE || priorityTypeRef == nullptr) {
+        ANS_LOGI("GetPriorityNotificationType get Ref failed");
+        return;
+    }
+    std::string priorityType;
+    if (!EnumConvertAniToNative(env, static_cast<ani_enum_item>(priorityTypeRef), priorityType)) {
+        ANS_LOGE("GetPriorityNotificationType EnumConvertAniToNative fail");
+        return;
+    }
+    request->SetPriorityNotificationType(priorityType);
+}
+
 void GetNotificationWantAgent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
 {
     ani_boolean isUndefined = ANI_TRUE;
@@ -780,6 +797,7 @@ int32_t GetNotificationRequestByCustom(ani_env *env, ani_object obj,
         return status;
     }
     GetNotificationSlotType(env, obj, notificationRequest);
+    GetPriorityNotificationType(env, obj, notificationRequest);
     GetNotificationWantAgent(env, obj, notificationRequest);
     GetNotificationExtraInfo(env, obj, notificationRequest);
     GetNotificationExtendInfo(env, obj, notificationRequest);
@@ -901,7 +919,10 @@ bool SetNotificationRequestByString(ani_env* env, ani_class cls, const OHOS::Not
     }
 
     // readonly priorityNotificationType?: string
-    if (!SetPropertyOptionalByString(env, object, "priorityNotificationType", request->GetPriorityNotificationType())) {
+    ani_enum_item enumItem;
+    if (!EnumConvertNativeToAni(env, "@ohos.notificationManager.notificationManager.PriorityNotificationType",
+        request->GetPriorityNotificationType(), enumItem) ||
+        !CallSetter(env, cls, object, "priorityNotificationType", enumItem)) {
         ANS_LOGD("SetNotificationRequest set 'priorityNotificationType' faild");
     }
     return true;

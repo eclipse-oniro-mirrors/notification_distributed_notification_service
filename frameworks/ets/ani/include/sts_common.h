@@ -160,11 +160,12 @@ static bool EnumConvertAniToNative(ani_env *env, ani_enum_item enumItem, T &resu
             ANS_LOGD("EnumItem_GetValue_String failed, status : %{public}d", status);
             return false;
         }
-        status = GetStdString(env, strValue, result);
+        status = GetStringByAniString(env, strValue, result);
         if (ANI_OK != status) {
             ANS_LOGD("EnumConvertAniToNative GetStdString failed, status : %{public}d", status);
             return false;
         }
+        return true;
     } else {
         ANS_LOGD("Enum convert failed: type not supported");
         return false;
