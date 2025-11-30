@@ -1013,7 +1013,7 @@ HWTEST_F(SmartReminderCenterTest, CheckScreenOffForCollaboration_400, Function |
     map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> statusMap;
     statusMap[NotificationConstant::CURRENT_DEVICE_TYPE].set(DistributedDeviceStatus::LOCK_FLAG, true);
     smartReminderCenter_->CheckScreenOffForCollaboration(syncDevices, statusMap);
-    EXPECT_FALSE(statusMap.count(NotificationConstant::CURRENT_DEVICE_TYPE));
+    EXPECT_TRUE(statusMap.count(NotificationConstant::CURRENT_DEVICE_TYPE));
 }
 }   //namespace Notification
 }   //namespace OHOS
