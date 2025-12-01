@@ -29,7 +29,7 @@ NotificationDoNotDisturbProfile* ObjectBuilder<NotificationDoNotDisturbProfile>:
     int64_t id = fdp->ConsumeIntegral<int64_t>();
     std::string profileName = fdp->ConsumeRandomLengthString();
     std::vector<NotificationBundleOption> trustList;
-    size_t listSize = fdp->ConsumeIntegralInRange<size_t>(0, 10);
+    size_t listSize = fdp->ConsumeIntegralInRange<size_t>(0, 3);
     for (size_t i = 0; i < listSize; ++i) {
         std::unique_ptr<NotificationBundleOption> bundleOption(
             ObjectBuilder<NotificationBundleOption>::Build(fdp));

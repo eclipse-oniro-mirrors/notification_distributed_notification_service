@@ -212,9 +212,6 @@ public:
         int32_t uid = fdp->ConsumeIntegralInRange<int32_t>(0, 100);
         notificationHelper.SetNotificationsEnabledForAllBundles(uid, enabled);
         
-        NotificationConstant::SlotType slotType = NotificationConstant::SlotType(fdp->ConsumeIntegral<uint8_t>() % 5);
-        notificationHelper.GetEnabledForBundleSlotSelf(slotType, enabled);
-        
         int32_t badgeNumber = fdp->ConsumeIntegralInRange<int32_t>(0, 100);
         std::string bundleName = fdp->ConsumeRandomLengthString();
         notificationHelper.SetBadgeNumber(badgeNumber, bundleName);
