@@ -1028,7 +1028,7 @@ HWTEST_F(AnsUtilsTest, CloseAlert_00001, Function | SmallTest | Level1)
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetNotificationId(222);
     auto flags = std::make_shared<NotificationFlags>();
-    flags->SetBannerEnabled(true);
+    flags->SetBannerEnabled(NotificationConstant::FlagStatus::OPEN);
     request->SetFlags(flags);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     advancedNotificationService_->CloseAlert(record);

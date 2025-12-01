@@ -129,6 +129,8 @@ public:
 
     ErrCode PublishWithMaxCapacity(const std::string& label, const sptr<NotificationRequest>& request) override;
 
+    void SetControlFlagsByFlagsFor3rd(const sptr<NotificationRequest> &request);
+
     /**
      * @brief Publishes a notification.
      * @note If a notification with the same ID has been published by the current application and has not been deleted,
@@ -1741,6 +1743,7 @@ private:
     ErrCode Filter(const std::shared_ptr<NotificationRecord> &record, bool isRecover = false);
     void ChangeNotificationByControlFlags(const std::shared_ptr<NotificationRecord> &record,
         const bool isAgentController);
+    void ChangeNotificationByControlFlagsFor3rdApp(const std::shared_ptr<NotificationRecord> &record);
     ErrCode CheckPublishPreparedNotification(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
     void AddToNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void AddToDelayNotificationList(const std::shared_ptr<NotificationRecord> &record);

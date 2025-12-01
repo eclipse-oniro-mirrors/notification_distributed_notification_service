@@ -3567,10 +3567,10 @@ void NotificationRequest::SetFlagBit(
             flag->SetSoundEnabled(enumStatus);
             break;
         case NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG :
-            flag->SetLockScreenVisblenessEnabled(status);
+            flag->SetLockScreenEnabled(enumStatus);
             break;
         case NotificationConstant::ReminderFlag::BANNER_FLAG :
-            flag->SetBannerEnabled(status);
+            flag->SetBannerEnabled(enumStatus);
             break;
         case NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG :
             flag->SetLightScreenEnabled(status);

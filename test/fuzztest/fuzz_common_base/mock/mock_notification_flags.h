@@ -29,8 +29,8 @@ NotificationFlags* ObjectBuilder<NotificationFlags>::Build(FuzzedDataProvider *f
     flags->SetSoundEnabled(static_cast<NotificationConstant::FlagStatus>(fdp->ConsumeIntegral<uint8_t>()));
     flags->SetVibrationEnabled(static_cast<NotificationConstant::FlagStatus>(fdp->ConsumeIntegral<uint8_t>()));
     flags->SetReminderFlags(fdp->ConsumeIntegral<uint32_t>());
-    flags->SetLockScreenVisblenessEnabled(fdp->ConsumeBool());
-    flags->SetBannerEnabled(fdp->ConsumeBool());
+    flags->SetLockScreenEnabled(static_cast<NotificationConstant::FlagStatus>(fdp->ConsumeIntegral<uint8_t>()));
+    flags->SetBannerEnabled(static_cast<NotificationConstant::FlagStatus>(fdp->ConsumeIntegral<uint8_t>()));
     flags->SetLightScreenEnabled(fdp->ConsumeBool());
     flags->SetStatusIconEnabled(fdp->ConsumeBool());
     ANS_LOGE("Build mock veriables");

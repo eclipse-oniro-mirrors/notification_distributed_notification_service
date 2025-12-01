@@ -60,6 +60,30 @@ public:
     void SetVibrationEnabled(NotificationConstant::FlagStatus vibrationEnabled);
 
     /**
+     * Sets the notification whether enable lock screen.
+     * @param lockScreenEnabled whether enable lock screen.
+     */
+    void SetLockScreenEnabled(NotificationConstant::FlagStatus lockScreenEnabled);
+
+    /**
+     * Checks whether enable lock screen.
+     * @return lock screen enable.
+     */
+    NotificationConstant::FlagStatus IsLockScreenEnabled() const;
+
+    /**
+     * Sets the notification whether enable banner.
+     * @param bannerEnabled whether enable banner.
+     */
+    void SetBannerEnabled(NotificationConstant::FlagStatus bannerEnabled);
+
+    /**
+     * Checks whether enable banner.
+     * @return banner enable.
+     */
+    NotificationConstant::FlagStatus IsBannerEnabled() const;
+
+    /**
      * Checks whether enable vibration.
      * @return vibration enable.
      */
@@ -75,30 +99,6 @@ public:
      * Set reminder flags.
      */
     void SetReminderFlags(const uint32_t reminderFlag);
-
-    /**
-     * Sets the notification whether enable lock screen.
-     * @param visblenessEnabled whether enable lock screen.
-     */
-    void SetLockScreenVisblenessEnabled(bool visblenessEnabled);
-
-    /**
-     * Checks whether enable lock screen.
-     * @return lock screen enable.
-     */
-    bool IsLockScreenVisblenessEnabled();
-
-    /**
-     * Sets the notification whether enable banner.
-     * @param bannerEnabled whether enable banner.
-     */
-    void SetBannerEnabled(bool bannerEnabled);
-
-    /**
-     * Checks whether enable banner.
-     * @return banner enable.
-     */
-    bool IsBannerEnabled();
 
     /**
      * Sets the notification whether light screen.
@@ -170,6 +170,8 @@ private:
 private:
     NotificationConstant::FlagStatus soundEnabled_ {NotificationConstant::FlagStatus::NONE};
     NotificationConstant::FlagStatus vibrationEnabled_ {NotificationConstant::FlagStatus::NONE};
+    NotificationConstant::FlagStatus bannerEnabled_ {NotificationConstant::FlagStatus::NONE};
+    NotificationConstant::FlagStatus lockScreenEnabled_ {NotificationConstant::FlagStatus::NONE};
     uint32_t reminderFlags_ = 0;
 
     static constexpr char CHAR_REMIND_DISABLE = '0';

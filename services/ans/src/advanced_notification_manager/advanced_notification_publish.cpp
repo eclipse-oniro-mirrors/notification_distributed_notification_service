@@ -45,6 +45,41 @@ ErrCode AdvancedNotificationService::PublishWithMaxCapacity(
     return Publish(label, request);
 }
 
+void AdvancedNotificationService::SetControlFlagsByFlagsFor3rd(const sptr<NotificationRequest> &request)
+{
+    if (request == nullptr || request->GetFlags() == nullptr) {
+        return;
+    }
+    std::shared_ptr<NotificationFlags> flags = request->GetFlags();
+    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(tokenCaller);
+    bool isThirdPartApp = (!AccessTokenHelper::IsSystemApp()) && !isSubsystem;
+    if (!isThirdPartApp) {
+        return;
+    }
+    uint32_t notificationControlFlags = request->GetNotificationControlFlags();
+    if (flags->IsSoundEnabled() == NotificationConstant::FlagStatus::CLOSE &&
+        (notificationControlFlags & NotificationConstant::ReminderFlag::SOUND_FLAG) == 0) {
+        notificationControlFlags |= NotificationConstant::ReminderFlag::SOUND_FLAG;
+    }
+
+    if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::CLOSE &&
+        (notificationControlFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG) == 0) {
+        notificationControlFlags |= NotificationConstant::ReminderFlag::VIBRATION_FLAG;
+    }
+
+    if (flags->IsLockScreenEnabled() == NotificationConstant::FlagStatus::CLOSE &&
+        (notificationControlFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG) == 0) {
+        notificationControlFlags |= NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG;
+    }
+
+    if (flags->IsBannerEnabled() == NotificationConstant::FlagStatus::CLOSE &&
+        (notificationControlFlags & NotificationConstant::ReminderFlag::BANNER_FLAG) == 0) {
+        notificationControlFlags |= NotificationConstant::ReminderFlag::BANNER_FLAG;
+    }
+    request->SetNotificationControlFlags(notificationControlFlags);
+}
+
 ErrCode AdvancedNotificationService::Publish(const std::string &label, const sptr<NotificationRequest> &request)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
@@ -58,6 +93,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    SetControlFlagsByFlagsFor3rd(request);
     SetIsFromSAToExtendInfo(request);
     const auto checkResult = CheckNotificationRequest(request);
     if (checkResult != ERR_OK) {

@@ -315,8 +315,16 @@ void AdvancedNotificationService::ExtendDumpForFlags(
         isEnable = true;
     }
     stream << "\t\tVibration : " << isEnable << "\n";
-    stream << "\t\tLockScreenVisbleness : " << notificationFlags->IsLockScreenVisblenessEnabled() << "\n";
-    stream << "\t\tBanner : " << notificationFlags->IsBannerEnabled() << "\n";
+    isEnable = false;
+    if (notificationFlags->IsBannerEnabled() == NotificationConstant::FlagStatus::OPEN) {
+        isEnable = true;
+    }
+    stream << "\t\tBanner : " << isEnable << "\n";
+    isEnable = false;
+    if (notificationFlags->IsLockScreenEnabled() == NotificationConstant::FlagStatus::OPEN) {
+        isEnable = true;
+    }
+    stream << "\t\tLockScreen : " << isEnable << "\n";
     stream << "\t\tLightScreen : " << notificationFlags->IsLightScreenEnabled() << "\n";
     stream << "\t\tStatusIcon : " << notificationFlags->IsStatusIconEnabled() << "\n";
 }
