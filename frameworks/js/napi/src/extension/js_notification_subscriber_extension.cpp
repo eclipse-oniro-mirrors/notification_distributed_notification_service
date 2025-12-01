@@ -249,17 +249,14 @@ NotificationSubscriberExtensionResult JsNotificationSubscriberExtension::OnRecei
         return NotificationSubscriberExtensionResult::INTERNAL_ERROR;
     }
     std::weak_ptr<JsNotificationSubscriberExtension> wThis = GetWeakPtr();
-    NotificationSubscriberExtensionResult result = NotificationSubscriberExtensionResult::OK;
-    auto task = [wThis, info, &result]() {
+    auto task = [wThis, info]() {
         std::shared_ptr<JsNotificationSubscriberExtension> sThis = wThis.lock();
         if (sThis == nullptr) {
             ANS_LOGE("null sThis");
-            result = NotificationSubscriberExtensionResult::OBJECT_RELEASED;
             return;
         }
         if (!sThis->jsObj_) {
             ANS_LOGE("Not found NotificationSubscriberExtension.js");
-            result = NotificationSubscriberExtensionResult::INTERNAL_ERROR;
             return;
         }
 
@@ -270,7 +267,6 @@ NotificationSubscriberExtensionResult JsNotificationSubscriberExtension::OnRecei
 
         if (!SetNotificationInfo(env, info, napiInfo)) {
             ANS_LOGE("Set NotificationInfo object failed.");
-            result = NotificationSubscriberExtensionResult::SET_OBJECT_FAIL;
             return;
         }
 
@@ -278,7 +274,6 @@ NotificationSubscriberExtensionResult JsNotificationSubscriberExtension::OnRecei
         napi_value obj = sThis->jsObj_->GetNapiValue();
         if (obj == nullptr) {
             ANS_LOGE("Failed to get NotificationSubscriberExtension object");
-            result = NotificationSubscriberExtensionResult::GET_OBJECT_FAIL;
             return;
         }
 
@@ -286,14 +281,13 @@ NotificationSubscriberExtensionResult JsNotificationSubscriberExtension::OnRecei
         napi_get_named_property(env, obj, "onReceiveMessage", &method);
         if (method == nullptr) {
             ANS_LOGE("Failed to get onReceiveMessage from NotificationSubscriberExtension object");
-            result = NotificationSubscriberExtensionResult::GET_METHOD_FAIL;
             return;
         }
         napi_call_function(env, obj, method, ARGC_ONE, argv, nullptr);
         ANS_LOGD("JsNotificationSubscriberExtension js receive event called.");
     };
-    handler_->PostSyncTask(task, "OnReceiveMessage");
-    return result;
+    handler_->PostTask(task, "OnReceiveMessage");
+    return NotificationSubscriberExtensionResult::OK;
 }
 
 NotificationSubscriberExtensionResult JsNotificationSubscriberExtension::OnCancelMessages(
@@ -310,16 +304,14 @@ NotificationSubscriberExtensionResult JsNotificationSubscriberExtension::OnCance
     }
     std::weak_ptr<JsNotificationSubscriberExtension> wThis = GetWeakPtr();
     NotificationSubscriberExtensionResult result = NotificationSubscriberExtensionResult::OK;
-    auto task = [wThis, hashCodes, &result]() {
+    auto task = [wThis, hashCodes]() {
         std::shared_ptr<JsNotificationSubscriberExtension> sThis = wThis.lock();
         if (sThis == nullptr) {
             ANS_LOGE("null sThis");
-            result = NotificationSubscriberExtensionResult::OBJECT_RELEASED;
             return;
         }
         if (!sThis->jsObj_) {
             ANS_LOGE("Not found NotificationSubscriberExtension.js");
-            result = NotificationSubscriberExtensionResult::INTERNAL_ERROR;
             return;
         }
 
@@ -330,7 +322,6 @@ NotificationSubscriberExtensionResult JsNotificationSubscriberExtension::OnCance
         napi_value obj = sThis->jsObj_->GetNapiValue();
         if (obj == nullptr) {
             ANS_LOGE("Failed to get NotificationSubscriberExtension object");
-            result =  NotificationSubscriberExtensionResult::GET_OBJECT_FAIL;
             return;
         }
 
@@ -338,14 +329,13 @@ NotificationSubscriberExtensionResult JsNotificationSubscriberExtension::OnCance
         napi_get_named_property(env, obj, "onCancelMessages", &method);
         if (method == nullptr) {
             ANS_LOGE("Failed to get onCancelMessages from NotificationSubscriberExtension object");
-            result =  NotificationSubscriberExtensionResult::GET_METHOD_FAIL;
             return;
         }
         napi_call_function(env, obj, method, ARGC_ONE, argv, nullptr);
         ANS_LOGD("JsNotificationSubscriberExtension js receive event called.");
     };
-    handler_->PostSyncTask(task, "OnCancelMessages");
-    return result;
+    handler_->PostTask(task, "OnCancelMessages");
+    return NotificationSubscriberExtensionResult::OK;
 }
 
 napi_value JsNotificationSubscriberExtension::CreateOnCancelMessagesResult(

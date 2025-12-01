@@ -47,33 +47,25 @@ ExtensionServiceSubscriber::ExtensionServiceSubscriber(const NotificationBundleO
         ANS_LOGE("Failed to QueryExtensionInfos, bundleUserId: %{public}d", bundleUserId);
         return;
     }
-    for (auto extension : extensionInfos) {
-        if (extension.bundleName != bundle.GetBundleName()) {
-            continue;
-        }
-
-        int32_t userId = -1;
-        result = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(extension.applicationInfo.uid, userId);
-        if (result != ERR_OK) {
-            ANS_LOGE("Failed to GetOsAccountLocalIdFromUid for extension, uid: %{public}d, ret: %{public}d",
-                extension.applicationInfo.uid, result);
-            return;
-        }
+    if (extensionInfos.size() > 0) {
+        auto extension = extensionInfos.front();
         auto info = std::make_shared<ExtensionSubscriberInfo>();
         info->bundleName = extension.bundleName;
         info->extensionName = extension.name;
         info->uid = extension.applicationInfo.uid;
-        info->userId = userId;
-        extensionSubscriberInfos_.emplace_back(info);
+        info->userId = bundleUserId;
+        extensionSubscriberInfo_ = info;
     }
 }
 
 ExtensionServiceSubscriber::~ExtensionServiceSubscriber()
 {
     ffrt::task_handle handler = messageQueue_->submit_h([this]() {
-        for (const auto& extensionSubscriberInfo : extensionSubscriberInfos_) {
-            ExtensionServiceConnectionService::GetInstance().CloseConnection(*extensionSubscriberInfo);
+        if (extensionSubscriberInfo_ == nullptr) {
+            ANS_LOGE("null extension subsciber info");
+            return;
         }
+        ExtensionServiceConnectionService::GetInstance().CloseConnection(*extensionSubscriberInfo_);
     });
     messageQueue_->wait(handler);
 }
@@ -123,10 +115,12 @@ void ExtensionServiceSubscriber::OnCanceled(const std::shared_ptr<Notification> 
             return;
         }
         hashCodes->emplace_back(requestPoint->GetBaseKey(""));
-        for (const auto& extensionSubscriberInfo : extensionSubscriberInfos_) {
-            ExtensionServiceConnectionService::GetInstance().NotifyOnCancelMessages(
-                extensionSubscriberInfo, hashCodes);
+        if (extensionSubscriberInfo_ == nullptr) {
+            ANS_LOGE("null extension subsciber info");
+            return;
         }
+        ExtensionServiceConnectionService::GetInstance().NotifyOnCancelMessages(
+            extensionSubscriberInfo_, hashCodes);
     });
 }
 
@@ -154,10 +148,12 @@ void ExtensionServiceSubscriber::OnConsumed(const std::shared_ptr<Notification> 
             ANS_LOGE("null requestPoint");
             return;
         }
-        for (const auto& extensionSubscriberInfo : extensionSubscriberInfos_) {
-            ExtensionServiceConnectionService::GetInstance().NotifyOnReceiveMessage(
-                extensionSubscriberInfo, requestPoint);
+        if (extensionSubscriberInfo_ == nullptr) {
+            ANS_LOGE("null extension subsciber info");
+            return;
         }
+        ExtensionServiceConnectionService::GetInstance().NotifyOnReceiveMessage(
+            extensionSubscriberInfo_, requestPoint);
     });
 }
 

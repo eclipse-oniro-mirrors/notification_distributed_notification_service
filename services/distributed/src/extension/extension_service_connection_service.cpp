@@ -50,7 +50,7 @@ void ExtensionServiceConnectionService::NotifyOnCancelMessages(
 
 void ExtensionServiceConnectionService::CloseConnection(const ExtensionSubscriberInfo& subscriberInfo)
 {
-    std::string connectionKey = GetConnectionKey(subscriberInfo);
+    std::string connectionKey = subscriberInfo.GetKey();
     ANS_LOGD("close connection: %{public}s", connectionKey.c_str());
     bool needNotify = false;
     do {
@@ -75,19 +75,9 @@ void ExtensionServiceConnectionService::CloseConnection(const ExtensionSubscribe
     }
 }
 
-std::string ExtensionServiceConnectionService::GetConnectionKey(const ExtensionSubscriberInfo& subscriberInfo)
-{
-    std::string connectionKey(subscriberInfo.bundleName);
-    connectionKey.append("_")
-        .append(subscriberInfo.extensionName)
-        .append("_")
-        .append(std::to_string(subscriberInfo.userId));
-    return connectionKey;
-}
-
 void ExtensionServiceConnectionService::RemoveConnection(const ExtensionSubscriberInfo& subscriberInfo)
 {
-    std::string connectionKey = GetConnectionKey(subscriberInfo);
+    std::string connectionKey = subscriberInfo.GetKey();
     ANS_LOGD("remove connection: %{public}s", connectionKey.c_str());
     bool needNotify = false;
     {
@@ -111,7 +101,7 @@ sptr<ExtensionServiceConnection> ExtensionServiceConnectionService::GetConnectio
         return nullptr;
     }
     std::lock_guard<ffrt::recursive_mutex> lock(mapLock_);
-    std::string connectionKey = GetConnectionKey(*subscriberInfo);
+    std::string connectionKey = subscriberInfo->GetKey();
     sptr<ExtensionServiceConnection> connection = nullptr;
     auto iter = connectionMap_.find(connectionKey);
     if (iter == connectionMap_.end()) {

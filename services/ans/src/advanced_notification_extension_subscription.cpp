@@ -245,7 +245,11 @@ void AdvancedNotificationService::FilterBundlesByBluetoothConnection(
             it = bundles.erase(it);
             continue;
         }
-        bool hasValidConnection = CheckBluetoothConnectionInInfos(*it, infos);
+        bool updateHfp = false;
+        bool hasValidConnection = CheckBluetoothConnectionInInfos(*it, infos, updateHfp);
+        if (updateHfp) {
+            NotificationPreferences::GetInstance()->SetExtensionSubscriptionInfos(*it, infos);
+        }
         if (hasValidConnection) {
             ++it;
         } else {
@@ -265,9 +269,10 @@ void AdvancedNotificationService::FilterBundlesByBluetoothConnection(
 
 bool AdvancedNotificationService::CheckBluetoothConnectionInInfos(
     const sptr<NotificationBundleOption> &bundleOption,
-    const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos)
+    const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos,
+    bool &updateHfp)
 {
-    for (const auto& info : infos) {
+    for (auto& info : infos) {
         if (info == nullptr) {
             continue;
         }
@@ -275,17 +280,20 @@ bool AdvancedNotificationService::CheckBluetoothConnectionInInfos(
         if (bluetoothAddress.empty()) {
             continue;
         }
+        if (!NotificationBluetoothHelper::GetInstance().CheckBluetoothConditions(bluetoothAddress)) {
+            continue;
+        }
         if (supportHfp_) {
-            if (NotificationBluetoothHelper::GetInstance().CheckHfpState(bluetoothAddress)) {
-                return true;
-            }
-            if (info->IsHfp()) {
+            bool hfpState = NotificationBluetoothHelper::GetInstance().CheckHfpState(bluetoothAddress);
+            if (hfpState && !info->IsHfp()) {
+                info->SetHfp(true);
+                updateHfp = true;
+            } else if (!hfpState && info->IsHfp()) {
                 continue;
             }
-        }
-        if (NotificationBluetoothHelper::GetInstance().CheckBluetoothConditions(bluetoothAddress)) {
             return true;
         }
+        return true;
     }
     return false;
 }
@@ -718,19 +726,13 @@ ErrCode AdvancedNotificationService::GetNotificationExtensionEnabledBundles(
             continue;
         }
 
-        auto uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(extensionInfo.bundleName, userId);
         sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(
-            extensionInfo.bundleName, uid);
+            bundleInfo.name, bundleInfo.uid);
         if (bundleOption == nullptr) {
             ANS_LOGE("Failed to create NotificationBundleOption for %{public}s", extensionInfo.bundleName.c_str());
             continue;
         }
         bundles.emplace_back(bundleOption);
-
-        if (!GetCloneBundleList(bundleOption, bundles)) {
-            ANS_LOGE("Failed to GetCloneBundleList for %{public}s", bundleOption->GetBundleName().c_str());
-            continue;
-        }
     }
     cacheNotificationExtensionBundles_ = bundles;
     return ERR_OK;
@@ -772,10 +774,18 @@ ErrCode AdvancedNotificationService::NotificationExtensionSubscribe(
             "Not implement NotificationSubscriberExtensionAbility").BranchId(BRANCH_3));
         return ERR_ANS_NOT_IMPL_EXTENSIONABILITY;
     }
+    if (bundleOption->GetAppIndex() > 0) {
+        ANS_LOGE("Clone app cannot subscribe.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message(
+            "Clone app cannot subscribe").BranchId(BRANCH_13));
+        return ERR_ANS_PERMISSION_DENIED;
+    }
 
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ProcessExtensionSubscriptionInfos(bundleOption, infos, result);
+        NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_12).Message(bundleOption->GetBundleName() +
+            ":" + std::to_string(bundleOption->GetUid()) + " subscribe"));
     }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -840,6 +850,8 @@ ErrCode AdvancedNotificationService::NotificationExtensionUnsubscribe()
             ANS_LOGE("Failed to clean subscription info into db, ret: %{public}d", result);
             return;
         }
+        NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_11).Message(bundleOption->GetBundleName() +
+            ":" + std::to_string(bundleOption->GetUid()) + " unsubscribe"));
         if (!ShutdownExtensionServiceAndUnSubscribed(bundleOption)) {
             return;
         }
@@ -1222,6 +1234,12 @@ ErrCode AdvancedNotificationService::CanOpenSubscribeSettings()
             "Not implement NotificationSubscriberExtensionAbility").BranchId(BRANCH_3));
         return ERR_ANS_NOT_IMPL_EXTENSIONABILITY;
     }
+    if (bundleOption->GetAppIndex() > 0) {
+        ANS_LOGE("Clone app cannot open subscription settings.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message(
+            "Clone app cannot open subscription settings").BranchId(BRANCH_13));
+        return ERR_ANS_PERMISSION_DENIED;
+    }
     return ERR_OK;
 }
 
@@ -1233,7 +1251,6 @@ void AdvancedNotificationService::ProcessSetUserGrantedState(
         ANS_LOGW("User State No change for bundle: %{public}s", bundle->GetBundleName().c_str());
         return;
     }
-    PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_STATE, bundle, enabled, {});
     NotificationConstant::SWITCH_STATE state = enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON
         : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     result = NotificationPreferences::GetInstance()->SetExtensionSubscriptionEnabled(bundle, state);
@@ -1241,6 +1258,7 @@ void AdvancedNotificationService::ProcessSetUserGrantedState(
         ANS_LOGE("Failed to set user granted state for bundle: %{public}s, ret: %{public}d",
             bundle->GetBundleName().c_str(), result);
     }
+    PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_STATE, bundle, enabled, {});
     if (enabled) {
         if (!EnsureExtensionServiceLoadedAndSubscribed(bundle)) {
             return;
@@ -1256,8 +1274,6 @@ void AdvancedNotificationService::ProcessSetUserGrantedBundleState(
     const sptr<NotificationBundleOption>& bundle,
     const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled, ErrCode& result)
 {
-    PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_BUNDLE_STATE, bundle, enabled,
-        enabledBundles);
     result = enabled ?
         NotificationPreferences::GetInstance()->AddExtensionSubscriptionBundles(bundle, enabledBundles) :
         NotificationPreferences::GetInstance()->RemoveExtensionSubscriptionBundles(bundle, enabledBundles);
@@ -1265,6 +1281,8 @@ void AdvancedNotificationService::ProcessSetUserGrantedBundleState(
         ANS_LOGE("Failed to set enabled bundles to database, ret: %{public}d", result);
         return;
     }
+    PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_BUNDLE_STATE, bundle, enabled,
+        enabledBundles);
     std::vector<sptr<NotificationBundleOption>> existBundles;
     result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundle, existBundles);
     if (result != ERR_OK) {

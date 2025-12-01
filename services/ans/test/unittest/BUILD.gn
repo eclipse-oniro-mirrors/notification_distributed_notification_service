@@ -1641,7 +1641,6 @@ ohos_unittest("advanced_notification_service_unit_test") {
 
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
-    "advanced_notification_service_test/advanced_notification_extension_subscription_test.cpp",
     "advanced_notification_service_test/advanced_notification_distributed_manager_service_test.cpp",
     "advanced_notification_service_test/advanced_notification_service_unit_test.cpp",
     "advanced_notification_service_test/advanced_notification_system_live_view_service_test.cpp",
@@ -1942,5 +1941,6 @@ group("unittest") {
     ":notification_subscriber_manager_test",
     ":os_account_manager_helper_test",
     ":push_callback_stub_test",
+    "advanced_notification_service_test:unittest"
   ]
 }

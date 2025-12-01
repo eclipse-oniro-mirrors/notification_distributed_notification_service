@@ -52,7 +52,7 @@ HWTEST_F(
 {
     NotificationBundleOption bundle("bundleCtor", 2000);
     ExtensionServiceSubscriber subscriber(bundle);
-    ASSERT_NE(subscriber.messageQueue_, nullptr);
+    EXPECT_NE(subscriber.messageQueue_, nullptr);
 }
 
 /**
@@ -66,7 +66,7 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnDied_0100,
     ExtensionServiceSubscriber subscriber(bundle);
     auto beforeSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnDied();
-    ASSERT_EQ(beforeSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
+    EXPECT_EQ(beforeSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
 }
 
 /**
@@ -82,7 +82,7 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnConnected_
     auto beforeSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnConnected();
     subscriber.OnDisconnected();
-    ASSERT_EQ(beforeSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
+    EXPECT_EQ(beforeSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
 }
 
 /**
@@ -94,11 +94,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnUpdate_010
 {
     NotificationBundleOption bundle("bundleUpd", 2003);
     ExtensionServiceSubscriber subscriber(bundle);
-    auto beforeInfos = subscriber.extensionSubscriberInfos_.size();
     auto beforeConnSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnUpdate(nullptr);
-    ASSERT_EQ(beforeInfos, subscriber.extensionSubscriberInfos_.size());
-    ASSERT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
+    EXPECT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
 }
 
 /**
@@ -111,11 +109,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnDoNotDistu
 {
     NotificationBundleOption bundle("bundleDnd", 2004);
     ExtensionServiceSubscriber subscriber(bundle);
-    auto beforeInfos = subscriber.extensionSubscriberInfos_.size();
     auto beforeConnSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnDoNotDisturbDateChange(nullptr);
-    ASSERT_EQ(beforeInfos, subscriber.extensionSubscriberInfos_.size());
-    ASSERT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
+    EXPECT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
 }
 
 /**
@@ -128,11 +124,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnEnabledNot
 {
     NotificationBundleOption bundle("bundleEn", 2005);
     ExtensionServiceSubscriber subscriber(bundle);
-    auto beforeInfos = subscriber.extensionSubscriberInfos_.size();
     auto beforeConnSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnEnabledNotificationChanged(nullptr);
-    ASSERT_EQ(beforeInfos, subscriber.extensionSubscriberInfos_.size());
-    ASSERT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
+    EXPECT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
 }
 
 /**
@@ -144,11 +138,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnBadgeChang
 {
     NotificationBundleOption bundle("bundleBadge", 2006);
     ExtensionServiceSubscriber subscriber(bundle);
-    auto beforeInfos = subscriber.extensionSubscriberInfos_.size();
     auto beforeConnSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnBadgeChanged(nullptr);
-    ASSERT_EQ(beforeInfos, subscriber.extensionSubscriberInfos_.size());
-    ASSERT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
+    EXPECT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
 }
 
 /**
@@ -161,11 +153,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnBadgeEnabl
 {
     NotificationBundleOption bundle("bundleBadgeEn", 2007);
     ExtensionServiceSubscriber subscriber(bundle);
-    auto beforeInfos = subscriber.extensionSubscriberInfos_.size();
     auto beforeConnSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnBadgeEnabledChanged(nullptr);
-    ASSERT_EQ(beforeInfos, subscriber.extensionSubscriberInfos_.size());
-    ASSERT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
+    EXPECT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
 }
 
 /**
@@ -178,11 +168,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnBatchCance
     NotificationBundleOption bundle("bundleBatch", 2008);
     ExtensionServiceSubscriber subscriber(bundle);
     std::vector<std::shared_ptr<Notification>> emptyList;
-    auto beforeInfos = subscriber.extensionSubscriberInfos_.size();
     auto beforeConnSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnBatchCanceled(emptyList, nullptr, 0);
-    ASSERT_EQ(beforeInfos, subscriber.extensionSubscriberInfos_.size());
-    ASSERT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
+    EXPECT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
 }
 
 /**
@@ -195,11 +183,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnApplicatio
 {
     NotificationBundleOption bundle("bundleAppNeed", 2009);
     ExtensionServiceSubscriber subscriber(bundle);
-    auto beforeInfos = subscriber.extensionSubscriberInfos_.size();
     auto beforeConnSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnApplicationInfoNeedChanged("bundleAppNeed");
-    ASSERT_EQ(beforeInfos, subscriber.extensionSubscriberInfos_.size());
-    ASSERT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
+    EXPECT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
 }
 
 /**
@@ -213,7 +199,7 @@ HWTEST_F(
     NotificationBundleOption bundle("bundleOp", 2010);
     ExtensionServiceSubscriber subscriber(bundle);
     auto ret = subscriber.OnOperationResponse(nullptr);
-    ASSERT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
@@ -231,20 +217,21 @@ HWTEST_F(
     info->extensionName = "extA";
     info->uid = 1000;
     info->userId = 1;
-    subscriber.extensionSubscriberInfos_.push_back(info);
+    subscriber.extensionSubscriberInfo_ = info;
 
     auto notification = CreateNotification(1);
-    ASSERT_NE(notification, nullptr);
+    EXPECT_NE(notification, nullptr);
     ExtensionServiceConnectionService &svc = ExtensionServiceConnectionService::GetInstance();
-    std::string key = info->bundleName + "_" + info->extensionName + "_" + std::to_string(info->userId);
-    ASSERT_TRUE(svc.connectionMap_.find(key) == svc.connectionMap_.end());
+    std::string key = info->bundleName + "_" + info->extensionName + "_" +
+        std::to_string(info->uid) + "_" + std::to_string(info->userId);
+    EXPECT_TRUE(svc.connectionMap_.find(key) == svc.connectionMap_.end());
 
     subscriber.OnConsumed(notification, nullptr);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    ASSERT_TRUE(svc.connectionMap_.find(key) != svc.connectionMap_.end());
+    EXPECT_TRUE(svc.connectionMap_.find(key) != svc.connectionMap_.end());
 
     svc.RemoveConnection(*info);
-    ASSERT_TRUE(svc.connectionMap_.find(key) == svc.connectionMap_.end());
+    EXPECT_TRUE(svc.connectionMap_.find(key) == svc.connectionMap_.end());
 }
 
 /**
@@ -262,13 +249,34 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnConsumed_N
     info->extensionName = "extB";
     info->uid = 1001;
     info->userId = 2;
-    subscriber.extensionSubscriberInfos_.push_back(info);
+    subscriber.extensionSubscriberInfo_ = info;
     ExtensionServiceConnectionService &svc = ExtensionServiceConnectionService::GetInstance();
     std::string key = info->bundleName + "_" + info->extensionName + "_" + std::to_string(info->userId);
 
     subscriber.OnConsumed(nullptr, nullptr);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    ASSERT_TRUE(svc.connectionMap_.find(key) == svc.connectionMap_.end());
+    EXPECT_TRUE(svc.connectionMap_.find(key) == svc.connectionMap_.end());
+}
+
+HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnConsumed_NullSubscribeInfo_0100,
+    Function | SmallTest | Level1)
+{
+    NotificationBundleOption bundle("bundleB", 1001);
+    ExtensionServiceSubscriber subscriber(bundle);
+    auto info = std::make_shared<ExtensionSubscriberInfo>();
+    info->bundleName = "bundleC";
+    info->extensionName = "extC";
+    info->uid = 1002;
+    info->userId = 3;
+
+    subscriber.extensionSubscriberInfo_ = nullptr;
+    ExtensionServiceConnectionService &svc = ExtensionServiceConnectionService::GetInstance();
+    std::string key = info->bundleName + "_" + info->extensionName + "_" + std::to_string(info->userId);
+    auto notification = CreateNotification(1);
+
+    subscriber.OnConsumed(notification, nullptr);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    EXPECT_TRUE(svc.connectionMap_.find(key) == svc.connectionMap_.end());
 }
 
 /**
@@ -286,18 +294,19 @@ HWTEST_F(
     info->extensionName = "extC";
     info->uid = 1002;
     info->userId = 3;
-    subscriber.extensionSubscriberInfos_.push_back(info);
+    subscriber.extensionSubscriberInfo_ = info;
     auto notification = CreateNotification(2);
     ExtensionServiceConnectionService &svc = ExtensionServiceConnectionService::GetInstance();
-    std::string key = info->bundleName + "_" + info->extensionName + "_" + std::to_string(info->userId);
-    ASSERT_TRUE(svc.connectionMap_.find(key) == svc.connectionMap_.end());
+    std::string key = info->bundleName + "_" + info->extensionName + "_" +
+        std::to_string(info->uid) + "_" + std::to_string(info->userId);
+    EXPECT_TRUE(svc.connectionMap_.find(key) == svc.connectionMap_.end());
 
     subscriber.OnCanceled(notification, nullptr, 0);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    ASSERT_TRUE(svc.connectionMap_.find(key) != svc.connectionMap_.end());
+    EXPECT_TRUE(svc.connectionMap_.find(key) != svc.connectionMap_.end());
 
     svc.RemoveConnection(*info);
-    ASSERT_TRUE(svc.connectionMap_.find(key) == svc.connectionMap_.end());
+    EXPECT_TRUE(svc.connectionMap_.find(key) == svc.connectionMap_.end());
 }
 
 /**
@@ -315,43 +324,33 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnCanceled_N
     info->extensionName = "extD";
     info->uid = 1003;
     info->userId = 4;
-    subscriber.extensionSubscriberInfos_.push_back(info);
+    subscriber.extensionSubscriberInfo_ = info;
     ExtensionServiceConnectionService &svc = ExtensionServiceConnectionService::GetInstance();
     std::string key = info->bundleName + "_" + info->extensionName + "_" + std::to_string(info->userId);
 
     subscriber.OnCanceled(nullptr, nullptr, 0);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    ASSERT_TRUE(svc.connectionMap_.find(key) == svc.connectionMap_.end());
+    EXPECT_TRUE(svc.connectionMap_.find(key) == svc.connectionMap_.end());
 }
 
-/**
- * @tc.name   : ExtensionServiceSubscriber_Destructor_0100
- * @tc.number : ExtensionServiceSubscriber_Destructor_0100
- * @tc.desc   : Destructor should close existing connections.
- */
-HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_Destructor_0100, Function | SmallTest | Level1)
+HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnCanceled_NullSubscribeInfo_0100,
+    Function | SmallTest | Level1)
 {
-    ExtensionSubscriberInfo injectedInfo;
-    std::string key;
-    {
-        NotificationBundleOption bundle("bundleE", 1004);
-        auto subscriber = std::make_unique<ExtensionServiceSubscriber>(bundle);
-        auto info = std::make_shared<ExtensionSubscriberInfo>();
-        info->bundleName = "bundleE";
-        info->extensionName = "extE";
-        info->uid = 1004;
-        info->userId = 5;
-        key = info->bundleName + "_" + info->extensionName + "_" + std::to_string(info->userId);
-        subscriber->extensionSubscriberInfos_.push_back(info);
-        auto notification = CreateNotification(3);
-        subscriber->OnConsumed(notification, nullptr);
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        ASSERT_TRUE(ExtensionServiceConnectionService::GetInstance().connectionMap_.find(key) !=
-                    ExtensionServiceConnectionService::GetInstance().connectionMap_.end());
-    }
+    NotificationBundleOption bundle("bundleD", 1003);
+    ExtensionServiceSubscriber subscriber(bundle);
+    auto info = std::make_shared<ExtensionSubscriberInfo>();
+    info->bundleName = "bundleC";
+    info->extensionName = "extC";
+    info->uid = 1002;
+    info->userId = 3;
+    subscriber.extensionSubscriberInfo_ = nullptr;
+    ExtensionServiceConnectionService &svc = ExtensionServiceConnectionService::GetInstance();
+    std::string key = info->bundleName + "_" + info->extensionName + "_" + std::to_string(info->userId);
+    auto notification = CreateNotification(2);
+
+    subscriber.OnCanceled(notification, nullptr, 0);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    ASSERT_TRUE(ExtensionServiceConnectionService::GetInstance().connectionMap_.find(key) ==
-                ExtensionServiceConnectionService::GetInstance().connectionMap_.end());
+    EXPECT_TRUE(svc.connectionMap_.find(key) == svc.connectionMap_.end());
 }
 } // namespace Notification
 } // namespace OHOS

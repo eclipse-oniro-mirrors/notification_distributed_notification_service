@@ -37,7 +37,6 @@ public:
     }
 
 private:
-    std::string GetConnectionKey(const ExtensionSubscriberInfo& subscriberInfo);
     void RemoveConnection(const ExtensionSubscriberInfo& subscriberInfo);
     sptr<ExtensionServiceConnection> GetConnection(
         const std::shared_ptr<ExtensionSubscriberInfo> subscriberInfo);

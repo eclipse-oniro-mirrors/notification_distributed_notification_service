@@ -1100,9 +1100,9 @@ ErrCode AdvancedNotificationService::PublishExtensionServiceStateChange(
     commonData.SetWant(want);
     commonData.SetCode(static_cast<int32_t>(eventCode));
     commonData.SetData(bundleOption->GetBundleName());
-
+    std::vector<std::string> permission { OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER };
     EventFwk::CommonEventPublishInfo publishInfo;
-    publishInfo.SetBundleName("com.ohos.sceneboard");
+    publishInfo.SetSubscriberPermissions(permission);
     bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(commonData, publishInfo);
     if (!publishResult) {
         ANS_LOGE("PublishCommonEvent failed for bundle: %{public}s, code: %{public}d",
