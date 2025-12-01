@@ -181,9 +181,6 @@ public:
         std::vector<DistributedBundleOption> distriBundles;
         distriBundles.emplace_back(distriBundle);
 
-        std::vector<std::pair<NotificationBundleOption, bool>> badges;
-        badges.emplace_back(bundle, enabled);
-        ans.SetShowBadgeEnabledForBundles(badges);
         ans.GetShowBadgeEnabledForBundle(bundle, enabled);
         std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
         ans.GetShowBadgeEnabledForBundles(bundles, bundleEnable);
@@ -205,7 +202,6 @@ public:
         ans.SetAdditionConfig(str, str2);
         ans.SetDistributedEnabledByBundle(bundle, str, enabled);
         ans.SetDistributedBundleOption(distriBundles, str);
-        ans.SetDistributedEnabled(str, enabled);
         ans.IsDistributedEnabled(str, enabled);
         return true;
     }
@@ -275,7 +271,7 @@ public:
         std::vector<NotificationBundleOption> bundles;
         std::vector<sptr<NotificationBundleOption>> bundlesPtr;
         bool enabled = fdp->ConsumeBool();
-    
+
         NotificationRingtoneInfo ringtoneInfo;
         ans.SetRingtoneInfoByBundle(bundle, ringtoneInfo);
         ans.GetRingtoneInfoByBundle(bundle, ringtoneInfo);
