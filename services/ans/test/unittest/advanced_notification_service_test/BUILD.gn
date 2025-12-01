@@ -36,6 +36,7 @@ ohos_unittest("advanced_notification_extension_subscription_test") {
     "${services_path}/ans/include",
     "${services_path}/ans/include/utils/",
   ]
+  version_script = "../libans_test.map"
 
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",

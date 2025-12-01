@@ -194,12 +194,13 @@ void SystemEventObserver::OnReceiveEventInner(const EventFwk::CommonEventData &d
         return;
     }
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) == 0) {
+        OnBundleAddEventInner(data);
         AdvancedNotificationService::GetInstance()->HandleBundleInstall(bundleOption);
-        return OnBundleAddEventInner(data);
+        return;
     }
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) == 0) {
+        OnBundleUpdateEventInner(data);
         AdvancedNotificationService::GetInstance()->HandleBundleUpdate(bundleOption);
-        return OnBundleUpdateEventInner(data);
     }
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) == 0) {
         return OnBootSystemCompletedEventInner(data);

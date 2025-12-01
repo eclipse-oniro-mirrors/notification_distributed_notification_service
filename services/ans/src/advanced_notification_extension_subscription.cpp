@@ -386,18 +386,14 @@ void AdvancedNotificationService::HandleBundleInstall(const sptr<NotificationBun
         return;
     }
 
-    ffrt::task_handle handlerNewWhitelistBundler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    notificationSvrQueue_->submit_h(std::bind([=]() {
         HandleNewWhitelistBundle(bundleOption);
-    }));
-    notificationSvrQueue_->wait(handlerNewWhitelistBundler);
+        if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
+            return;
+        }
 
-    if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
-        return;
-    }
-
-    std::vector<sptr<NotificationBundleOption>> insertBundles;
-    ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        std::vector<sptr<NotificationBundleOption>> insertBundles;
+        ErrCode result = ERR_OK;
         std::vector<std::string> bundleNames;
         NotificationConfigParse::GetInstance()->GetNotificationExtensionEnabledBundlesWriteList(bundleNames);
         for (const auto& bundleName : bundleNames) {
@@ -423,11 +419,9 @@ void AdvancedNotificationService::HandleBundleInstall(const sptr<NotificationBun
             ANS_LOGE("Failed to set enabled bundles into database, ret: %{public}d", result);
             return;
         }
-        EnsureExtensionServiceLoadedAndSubscribed(bundleOption);
+        PublishExtensionServiceStateChange(NotificationConstant::EXTENSION_ABILITY_ADDED, bundleOption, false, {});
+        cacheNotificationExtensionBundles_.emplace_back(bundleOption);
     }));
-    notificationSvrQueue_->wait(handler);
-    PublishExtensionServiceStateChange(NotificationConstant::EXTENSION_ABILITY_ADDED, bundleOption, false, {});
-    cacheNotificationExtensionBundles_.emplace_back(bundleOption);
 }
 
 void AdvancedNotificationService::HandleBundleUpdate(const sptr<NotificationBundleOption> &bundleOption)
@@ -436,22 +430,21 @@ void AdvancedNotificationService::HandleBundleUpdate(const sptr<NotificationBund
         ANS_LOGE("HandleBundleUpdate bundleOption is nullptr");
         return;
     }
-
-    if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
-        auto it = FindBundleInCache(bundleOption);
-        if (it != cacheNotificationExtensionBundles_.end()) {
-            cacheNotificationExtensionBundles_.erase(it);
-            ShutdownExtensionServiceAndUnSubscribed(bundleOption);
-            PublishExtensionServiceStateChange(
-                NotificationConstant::EXTENSION_ABILITY_REMOVED, bundleOption, false, {});
+    notificationSvrQueue_->submit_h(std::bind([=]() {
+        if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
+            auto it = FindBundleInCache(bundleOption);
+            if (it != cacheNotificationExtensionBundles_.end()) {
+                cacheNotificationExtensionBundles_.erase(it);
+                ShutdownExtensionServiceAndUnSubscribed(bundleOption);
+                PublishExtensionServiceStateChange(
+                    NotificationConstant::EXTENSION_ABILITY_REMOVED, bundleOption, false, {});
+            }
+            return;
         }
-        return;
-    }
 
-    std::vector<sptr<NotificationBundleOption>> enabledBundles;
-    ErrCode result = ERR_OK;
-    bool enabled = false;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        std::vector<sptr<NotificationBundleOption>> enabledBundles;
+        ErrCode result = ERR_OK;
+        bool enabled = false;
         EnsureExtensionServiceLoadedAndSubscribed(bundleOption);
         NotificationConstant::SWITCH_STATE state;
         result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionEnabled(bundleOption, state);
@@ -461,15 +454,14 @@ void AdvancedNotificationService::HandleBundleUpdate(const sptr<NotificationBund
             return;
         }
         enabled = ((state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) ? true : false);
+        auto it = FindBundleInCache(bundleOption);
+        if (it != cacheNotificationExtensionBundles_.end()) {
+            ANS_LOGW("HandleBundleUpdate bundle already exists, skip publish event");
+            return;
+        }
+        cacheNotificationExtensionBundles_.emplace_back(bundleOption);
+        PublishExtensionServiceStateChange(NotificationConstant::EXTENSION_ABILITY_ADDED, bundleOption, enabled, {});
     }));
-    notificationSvrQueue_->wait(handler);
-    auto it = FindBundleInCache(bundleOption);
-    if (it != cacheNotificationExtensionBundles_.end()) {
-        ANS_LOGW("HandleBundleUpdate bundle already exists, skip publish event");
-        return;
-    }
-    cacheNotificationExtensionBundles_.emplace_back(bundleOption);
-    PublishExtensionServiceStateChange(NotificationConstant::EXTENSION_ABILITY_ADDED, bundleOption, enabled, {});
 }
 
 void AdvancedNotificationService::HandleBundleUninstall(const sptr<NotificationBundleOption> &bundleOption)
@@ -478,7 +470,7 @@ void AdvancedNotificationService::HandleBundleUninstall(const sptr<NotificationB
         ANS_LOGE("HandleBundleUninstall bundleOption is nullptr");
         return;
     }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    notificationSvrQueue_->submit_h(std::bind([=]() {
         auto it = FindBundleInCache(bundleOption);
         if (it != cacheNotificationExtensionBundles_.end()) {
             cacheNotificationExtensionBundles_.erase(it);
@@ -643,8 +635,7 @@ void AdvancedNotificationService::ProcessBluetoothStateChanged(const int status)
         std::vector<std::pair<sptr<NotificationBundleOption>,
             std::vector<sptr<NotificationBundleOption>>>> extensionBundleInfos;
         CheckExtensionServiceCondition(extensionBundleInfos, bundles);
-        if (extensionBundleInfos.size() > 0) {
-            LoadExtensionService();
+        if (extensionBundleInfos.size() > 0 && LoadExtensionService() == 0) {
             for (const auto& extensionBundleInfo : extensionBundleInfos) {
                 SubscribeExtensionService(extensionBundleInfo.first, extensionBundleInfo.second);
             }
@@ -684,8 +675,10 @@ bool AdvancedNotificationService::TryStartExtensionSubscribeService()
             return;
         }
         CheckExtensionServiceCondition(extensionBundleInfos, bundles);
-        if (extensionBundleInfos.size() > 0) {
-            LoadExtensionService();
+        if (extensionBundleInfos.size() > 0 && LoadExtensionService() == 0) {
+            for (const auto& extensionBundleInfo : extensionBundleInfos) {
+                SubscribeExtensionService(extensionBundleInfo.first, extensionBundleInfo.second);
+            }
         }
     }));
     return true;
