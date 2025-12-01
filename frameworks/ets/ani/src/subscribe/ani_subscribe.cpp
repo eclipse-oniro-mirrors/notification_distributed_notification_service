@@ -31,7 +31,7 @@ static const char *REMOVE_FOR_BUNDLE_SIGNATURE =
 static const char *REMOVE_FOR_HASHCODE_SIGNATURE =
     "C{std.core.String}C{@ohos.notificationSubscribe.notificationSubscribe.RemoveReason}:";
 static const char *REMOVE_FOR_HASHCODES_SIGNATURE =
-    "C{escompat.Array}C{@ohos.notificationSubscribe.notificationSubscribe.RemoveReason}:";
+    "C{std.core.Array}C{@ohos.notificationSubscribe.notificationSubscribe.RemoveReason}:";
 static const char *DISTRIBUTE_OPERATION_SIGNATURE =
     "C{std.core.String}C{@ohos.notificationSubscribe.notificationSubscribe.OperationInfo}:C{std.core.Promise}";
 static const char *SUBSCRIBE_SIGNATURE =

@@ -452,7 +452,7 @@ ani_object GetAniWantAgentArray(ani_env *env, std::vector<std::shared_ptr<WantAg
     }
     ani_status status = ANI_ERROR;
     ani_class arrayCls = nullptr;
-    if (ANI_OK != (status = env->FindClass("escompat.Array", &arrayCls))) {
+    if (ANI_OK != (status = env->FindClass("std.core.Array", &arrayCls))) {
         ANS_LOGE("FindClass status = %{public}d", status);
         return nullptr;
     }
