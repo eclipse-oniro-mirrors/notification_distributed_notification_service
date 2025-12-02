@@ -46,7 +46,7 @@ namespace OHOS {
 namespace Notification {
 namespace {
 const std::string ALL_PACKAGES = "allPackages";
-const int32_t MAIN_USER_ID = 100;
+const int32_t MAIN_USER_ID = 100;·
 const int INDEX_KEY = 0;
 const int INDEX_TYPE = 1;
 const int INDEX_VALUE = 2;
@@ -1794,6 +1794,8 @@ void ReminderDataManager::HandleCustomButtonClick(const OHOS::EventFwk::Want &wa
     std::string buttonPkgName = want.GetStringParam("PkgName");
     std::string buttonAbilityName = want.GetStringParam("AbilityName");
 
+    // Collapse the notification panel
+    CollapseNotificationPanel();
     AAFwk::Want abilityWant;
     abilityWant.SetElementName(buttonPkgName, buttonAbilityName);
     abilityWant.SetUri(reminder->GetCustomButtonUri());
