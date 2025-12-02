@@ -180,9 +180,9 @@ interface OHOS.Notification.IAnsManager {
 
     void GetDoNotDisturbDate([out] sptr<NotificationDoNotDisturbDate> date);
 
-    void AddDoNotDisturbProfiles([in] sptr<NotificationDoNotDisturbProfile>[] profiles);
+    [ipcincapacity 520] void AddDoNotDisturbProfiles([in] sptr<NotificationDoNotDisturbProfile>[] profiles);
 
-    void RemoveDoNotDisturbProfiles([in] sptr<NotificationDoNotDisturbProfile>[] profiles);
+    [ipcincapacity 520] void RemoveDoNotDisturbProfiles([in] sptr<NotificationDoNotDisturbProfile>[] profiles);
 
     void DoesSupportDoNotDisturbMode([out] boolean doesSupport);
 
