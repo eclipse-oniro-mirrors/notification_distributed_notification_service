@@ -27,7 +27,7 @@
 
 namespace OHOS {
 namespace Notification {
-constexpr int32_t RSS_UID = 3051;
+constexpr int32_t RSS_UID = 1096;
 constexpr const char *NOTIFICATION_MANAGER_WANTURI = "ohos.notificationManager.wantUri";
 
 inline bool IsContained(const std::vector<std::string> &vec, const std::string &target)

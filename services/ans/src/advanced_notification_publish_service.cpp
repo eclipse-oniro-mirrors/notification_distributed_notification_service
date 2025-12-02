@@ -71,7 +71,7 @@ namespace Notification {
 constexpr uint32_t SECONDS_IN_ONE_DAY = 24 * 60 * 60;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 const static std::string NOTIFICATION_EVENT_SUBSCRIBER_STATUS = "notification.event.SUBSCRIBER_STATUS";
-constexpr int32_t RSS_PID = 3051;
+constexpr int32_t RSS_PID = 1096;
 constexpr int32_t AVSEESAION_PID = 6700;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 constexpr const char *FOCUS_MODE_REPEAT_CALLERS_ENABLE = "1";
