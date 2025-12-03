@@ -241,6 +241,10 @@ private:
     template <typename... Args>
     void NotifySubscribers(int32_t userId,
         NotificationConstant::SubscribedFlag flags, ErrCode (IAnsSubscriber::*func)(Args...), Args&& ... args);
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    bool IsDelayPriorityTargetSubscriber(
+        const std::shared_ptr<SubscriberRecord> &subscriberRecord, const sptr<NotificationRequest> &request);
+#endif
 
 private:
     ffrt::mutex subscriberRecordListMutex_;

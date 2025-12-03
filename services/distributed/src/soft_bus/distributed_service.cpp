@@ -538,14 +538,11 @@ void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessa
     if (!DistributedDeviceService::GetInstance().GetDeviceInfo(peerDevice.deviceId_, device)) {
         return;
     }
-    int32_t peerUserId = 100;
-    matchBox.GetDeviceUserId(peerUserId);
-    HandleMatchByType(matchType, device, peerUserId);
+    HandleMatchByType(matchType, device);
 }
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
-void DistributedService::HandleMatchByType(
-    const int32_t matchType, const DistributedDeviceInfo& device, const int32_t peerUserId)
+void DistributedService::HandleMatchByType(const int32_t matchType, const DistributedDeviceInfo& device)
 {
     if (matchType == MatchType::MATCH_SYN) {
         DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_ACK);
@@ -557,8 +554,7 @@ void DistributedService::HandleMatchByType(
 }
 
 #else
-void DistributedService::HandleMatchByType(
-    const int32_t matchType, const DistributedDeviceInfo& device, const int32_t peerUserId)
+void DistributedService::HandleMatchByType(const int32_t matchType, const DistributedDeviceInfo& device)
 {
     if (DistributedDeviceService::GetInstance().IsLocalPadOrPC()) {
         if (matchType == MatchType::MATCH_SYN) {

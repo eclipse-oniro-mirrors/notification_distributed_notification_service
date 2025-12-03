@@ -333,7 +333,6 @@ void DistributedDeviceService::SyncDeviceMatch(const DistributedDeviceInfo peerD
     matchBox->SetVersion(CURRENT_VERSION);
     matchBox->SetMatchType(type);
     matchBox->SetLocalDeviceId(localDevice_.deviceId_);
-    matchBox->SetDeviceUserId(DistributedSubscribeService::GetCurrentActiveUserId());
     matchBox->SetLocalDeviceType(localDevice_.deviceType_);
     if (type == MatchType::MATCH_ACK) {
         matchBox->SetPeerDeviceId(peerDevice.deviceId_);

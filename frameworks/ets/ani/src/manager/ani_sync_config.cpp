@@ -50,9 +50,8 @@ ani_int AniSetAdditionalConfig(ani_env *env, ani_string key, ani_string value)
         strcmp(keyStr.c_str(), RING_LIST_KEY_NAME) != 0 &&
         strcmp(keyStr.c_str(), CTRL_LIST_KEY_NAME) != 0 &&
         strcmp(keyStr.c_str(), PRIORITY_RULE_CONFIG_KEY_NAME) != 0)) {
-        ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
-        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
-        return RESULT_FAILED;
+        ANS_LOGW("Parse key failed. msg: %{public}s", msg.c_str());
+        return RESULT_OK;
     }
 
     std::string tempValue;

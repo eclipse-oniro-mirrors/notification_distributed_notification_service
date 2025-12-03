@@ -959,7 +959,7 @@ ErrCode AdvancedNotificationService::UpdateDistributedDeviceList(const std::stri
     EventFwk::CommonEventPublishInfo publishInfo;
     publishInfo.SetSubscriberType(EventFwk::SubscriberType::SYSTEM_SUBSCRIBER_TYPE);
     if (!EventFwk::CommonEventManager::PublishCommonEventAsUser(commonData, publishInfo, userId)) {
-        ANS_LOGE("Publish common event failed");
+        ANS_LOGW("Publish common event failed");
     }
     return ERR_OK;
 }

@@ -491,8 +491,8 @@ void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Not
     if (!MakeRequestBox(isSyncNotification, peerDevice, request, requestPoint, requestBox)) {
         return;
     }
-    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(requestBox, peerDevice,
-            TransDataType::DATA_TYPE_BYTES, PUBLISH_ERROR_EVENT_CODE);
+    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(
+        requestBox, peerDevice, TransDataType::DATA_TYPE_BYTES, PUBLISH_ERROR_EVENT_CODE);
     DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
 }
 
@@ -510,9 +510,6 @@ bool DistributedPublishService::MakeRequestBox(
     requestBox->SetNotificationHashCode(request->GetKey());
     requestBox->SetSlotType(static_cast<int32_t>(requestPoint->GetSlotType()));
     requestBox->SetContentType(static_cast<int32_t>(requestPoint->GetNotificationType()));
-    if (requestPoint->GetPriorityNotificationType() != NotificationConstant::PriorityNotificationType::OTHER) {
-        requestBox->SetPriorityNotificationType(requestPoint->GetPriorityNotificationType());
-    }
 
     int32_t reminderFlag = isSyncNotification ? 0 : requestPoint->GetFlags()->GetReminderFlags();
     requestBox->SetReminderFlag(reminderFlag);
@@ -549,9 +546,7 @@ bool DistributedPublishService::MakeRequestBox(
 bool DistributedPublishService::IsInterceptNotification(
     const DistributedDeviceInfo &peerDevice, sptr<NotificationRequest> requestPoint)
 {
-    if (peerDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD &&
-        peerDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PC &&
-        peerDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1) {
+    if (!peerDevice.IsPadOrPc()) {
         ANS_LOGI("device{%{public}d} no block by distributed switch.", peerDevice.deviceType_);
         return false;
     }
@@ -840,10 +835,6 @@ void DistributedPublishService::PublishNotification(const std::shared_ptr<TlvBox
             return;
         }
     }
-    std::string priorityNotificationType;
-    if (requestBox.GetPriorityNotificationType(priorityNotificationType) && request != nullptr) {
-        request->SetInnerPriorityNotificationType(priorityNotificationType);
-    }
     bool isCommonLiveView = false;
     if (requestBox.GetSlotType(slotType) && requestBox.GetContentType(contentType)) {
         isCommonLiveView =
@@ -916,9 +907,7 @@ void DistributedPublishService::MakeNotificationButtons(const NotificationReques
     NotificationConstant::SlotType slotType, sptr<NotificationRequest>& request)
 {
     auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
-    if ((localDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 ||
-        localDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
-        localDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC)) {
+    if (localDevice.IsPadOrPc()) {
         MakePadNotificationButtons(box, request);
         return;
     }

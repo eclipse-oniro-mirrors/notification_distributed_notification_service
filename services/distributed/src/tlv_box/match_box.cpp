@@ -78,14 +78,6 @@ bool NotifticationMatchBox::SetMatchType(int32_t type)
     return box_->PutValue(std::make_shared<TlvItem>(MATCH_TYPE, type));
 }
 
-bool NotifticationMatchBox::SetDeviceUserId(const int32_t& userId)
-{
-    if (box_ == nullptr) {
-        return false;
-    }
-    return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_USERID, userId));
-}
-
 bool NotifticationMatchBox::GetPeerDeviceType(int32_t& deviceType)
 {
     if (box_ == nullptr) {
@@ -132,14 +124,6 @@ bool NotifticationMatchBox::GetMatchType(int32_t& type)
         return false;
     }
     return box_->GetInt32Value(MATCH_TYPE, type);
-}
-
-bool NotifticationMatchBox::GetDeviceUserId(int32_t& userId)
-{
-    if (box_ == nullptr) {
-        return false;
-    }
-    return box_->GetInt32Value(LOCAL_DEVICE_USERID, userId);
 }
 }
 }

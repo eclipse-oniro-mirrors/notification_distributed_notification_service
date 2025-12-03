@@ -38,7 +38,6 @@ public:
     bool SetLocalDeviceId(const std::string& deviceId);
     bool SetVersion(int32_t version);
     bool SetMatchType(int32_t type);
-    bool SetDeviceUserId(const int32_t& userId);
 
     bool GetPeerDeviceType(int32_t& deviceType);
     bool GetPeerDeviceId(std::string& deviceId);
@@ -46,7 +45,6 @@ public:
     bool GetLocalDeviceId(std::string& deviceId);
     bool GetVersion(int32_t& version);
     bool GetMatchType(int32_t& type);
-    bool GetDeviceUserId(int32_t& userId);
 };
 }  // namespace Notification
 }  // namespace OHOS
