@@ -84,7 +84,7 @@ std::shared_ptr<NotificationInfo> NotificationSubscriberStubImpl::ConvertNotific
     notificationContent->SetTitle(basicContent->GetTitle());
     notificationContent->SetText(basicContent->GetText());
     notificationInfo->SetNotificationExtensionContent(notificationContent);
-    notificationInfo->SetBundleName(notificationRequest->GetCreatorBundleName());
+    notificationInfo->SetBundleName(notificationRequest->GetOwnerBundleName());
     notificationInfo->SetAppName(notificationRequest->GetAppName());
     notificationInfo->SetDeliveryTime(notificationRequest->GetDeliveryTime());
     notificationInfo->SetGroupName(notificationRequest->GetGroupName());
