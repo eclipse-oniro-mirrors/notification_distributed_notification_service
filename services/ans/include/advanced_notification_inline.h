@@ -94,6 +94,13 @@ inline ErrCode CheckPictureSize(const sptr<NotificationRequest> &request)
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp() && request->GetOverlayIcon()
+        && request->GetSlotType() != NotificationConstant::SlotType::SOCIAL_COMMUNICATION) {
+        request->SetOverlayIcon(nullptr);
+        ANS_LOGI("fix overlayicon");
+    }
+
     if (request->CheckImageOverSizeForPixelMap(request->GetOverlayIcon(), MAX_ICON_SIZE)) {
         message.ErrorCode(ERR_ANS_ICON_OVER_SIZE).Message("Check overlay size failed.");
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);

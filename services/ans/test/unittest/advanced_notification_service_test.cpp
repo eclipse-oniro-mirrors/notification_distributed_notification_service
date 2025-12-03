@@ -55,6 +55,7 @@
 #endif
 #include "ans_dialog_host_client.h"
 #include "mock_badgequery_callback_stub.h"
+#include "advanced_notification_inline.h"
 
 extern void MockIsOsAccountExists(bool mockRet);
 
@@ -5616,6 +5617,111 @@ HWTEST_F(AdvancedNotificationServiceTest, GetUriTest_0600, Function | SmallTest 
     sptr<NotificationRequest> request = nullptr;
     auto errCode = advancedNotificationService_->GetUri(request);
     ASSERT_NE(errCode, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: CheckOverLayIcon_001
+ * @tc.desc: test CheckOverLayIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CheckOverLayIcon_001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    std::shared_ptr<Media::PixelMap> overlayIcon = std::make_shared<Media::PixelMap>();
+    request->SetOverlayIcon(overlayIcon);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    std::vector<std::string> devices;
+    devices.push_back("n1");
+    devices.push_back("n2");
+    devices.push_back("n3");
+    request->SetDevicesSupportDisplay(devices);
+    ErrCode ret = CheckPictureSize(request);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: CheckOverLayIcon_002
+ * @tc.desc: test CheckOverLayIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CheckOverLayIcon_002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::CUSTOMER_SERVICE);
+    std::shared_ptr<Media::PixelMap> overlayIcon = nullptr;
+    request->SetOverlayIcon(overlayIcon);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    request->SetAutoDeletedTime(0);
+    ErrCode ret = CheckPictureSize(request);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: CheckOverLayIcon_003
+ * @tc.desc: test CheckOverLayIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CheckOverLayIcon_003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::shared_ptr<Media::PixelMap> overlayIcon = std::make_shared<Media::PixelMap>();
+    request->SetOverlayIcon(overlayIcon);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(false);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    ErrCode ret = CheckPictureSize(request);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: CheckOverLayIcon_004
+ * @tc.desc: test CheckOverLayIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CheckOverLayIcon_004, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::shared_ptr<Media::PixelMap> overlayIcon = std::make_shared<Media::PixelMap>();
+    request->SetOverlayIcon(overlayIcon);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    ErrCode ret = CheckPictureSize(request);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: CheckOverLayIcon_005
+ * @tc.desc: test CheckOverLayIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CheckOverLayIcon_005, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    std::vector<std::string> devices;
+    devices.push_back("t1");
+    devices.push_back("t2");
+    devices.push_back("t3");
+    request->SetDevicesSupportDisplay(devices);
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::shared_ptr<Media::PixelMap> overlayIcon = std::make_shared<Media::PixelMap>();
+    request->SetOverlayIcon(overlayIcon);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(false);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    ErrCode ret = CheckPictureSize(request);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS
