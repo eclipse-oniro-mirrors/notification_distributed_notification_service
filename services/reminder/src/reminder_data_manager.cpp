@@ -46,7 +46,7 @@ namespace OHOS {
 namespace Notification {
 namespace {
 const std::string ALL_PACKAGES = "allPackages";
-const int32_t MAIN_USER_ID = 100;·
+const int32_t MAIN_USER_ID = 100;
 const int INDEX_KEY = 0;
 const int INDEX_TYPE = 1;
 const int INDEX_VALUE = 2;
