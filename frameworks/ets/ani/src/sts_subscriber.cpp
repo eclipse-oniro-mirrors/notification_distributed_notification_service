@@ -279,8 +279,8 @@ bool WrapEnabledPriorityNotificationByBundleCallbackData(ani_env *env,
         ANS_LOGE("uid set faild.");
         return false;
     }
-    ani_object status = CreateInt(env, static_cast<int32_t>(callbackData->GetEnableStatus()));
-    if (status == nullptr || env->Object_SetPropertyByName_Ref(outObj, "enableStatus", status) != ANI_OK) {
+    if (env->Object_SetPropertyByName_Int(
+        outObj, "enableStatus", static_cast<int32_t>(callbackData->GetEnableStatus())) != ANI_OK) {
         ANS_LOGE("status set faild.");
         return false;
     }
