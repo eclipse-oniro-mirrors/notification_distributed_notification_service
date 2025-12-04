@@ -97,7 +97,8 @@ public:
      * "com.ohos.notificationdialog", caller token is not checked
      * when commonEvent callback is triggered.
      */
-    ErrCode OnBundleEnabledStatusChanged(DialogStatus status, const std::string& bundleName, const int32_t& uid);
+    ErrCode OnBundleEnabledStatusChanged(DialogStatus status, const std::string& bundleName,
+        const int32_t& uid, const std::string& versionCode);
 
     /*
      * AddDialogInfo
@@ -125,7 +126,8 @@ private:
     sptr<NotificationBundleOption> GetBundleOptionByBundleName(const std::string& bundleName, const int32_t& uid);
     void RemoveAllDialogInfos(std::list<std::unique_ptr<DialogInfo>>& dialogInfosRemoved);
 
-    bool OnDialogButtonClicked(const std::string& bundleName, const int32_t& uid, bool enabled);
+    bool OnDialogButtonClicked(const std::string& bundleName,
+        const int32_t& uid, bool enabled, const std::string& versionCode);
     bool OnDialogCrashed(const std::string& bundleName, const int32_t& uid);
     bool OnDialogServiceDestroyed();
     bool onRemoveBundle(const std::string bundleName, const int32_t& uid);

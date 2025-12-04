@@ -53,7 +53,6 @@ let storage = LocalStorage.getShared();
 @Extend(Button) function customizeButton() {
   .type(ButtonType.Normal)
   .backgroundColor($r('sys.color.comp_background_tertiary'))
-  .fontColor($r('sys.color.font_emphasize'))
   .fontSize(
     getLimitFontSize(
       sourceToVp($r('sys.float.Body_L')),
@@ -195,6 +194,7 @@ struct PermissionDialog {
                     await this.enableNotification(false);
                     })
                     .customizeButton()
+                    .fontColor($r('sys.color.ohos_id_color_warning'))
                   Divider()
                     .color(Color.Transparent)
                     .height(Constants.DIVIDER_HEIGHT)
@@ -205,6 +205,7 @@ struct PermissionDialog {
                       await this.enableNotification(true);
                     })
                     .customizeButton()
+                    .fontColor($r('sys.color.font_emphasize'))
                 }
                 .margin({ 
                   left: Constants.PC_OPERATE_MARGIN_SIDE, 

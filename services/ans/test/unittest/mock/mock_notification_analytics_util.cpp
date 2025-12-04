@@ -122,7 +122,7 @@ void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationR
     return;
 }
 
-void NotificationAnalyticsUtil::ReportModifyEvent(const HaMetaMessage& message)
+void NotificationAnalyticsUtil::ReportModifyEvent(const HaMetaMessage& message, bool unFlowControl)
 {
     return;
 }

@@ -218,7 +218,7 @@ public:
 
     static void ReportSAPublishSuccessEvent(const sptr<NotificationRequest>& request, int32_t callUid);
 
-    static void ReportModifyEvent(const HaMetaMessage& message);
+    static void ReportModifyEvent(const HaMetaMessage& message, bool unFlowControl = false);
 
     static void ReportDeleteFailedEvent(const HaMetaMessage& message);
 

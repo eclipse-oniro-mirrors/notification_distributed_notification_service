@@ -27,6 +27,7 @@ import configPolicy from '@ohos.configPolicy';
 import fs from '@ohos.file.fs';
 import Constants from '../common/constant';
 import DisplayUtils from '../common/displayUtils';
+import bundleManager from '@ohos.bundle.bundleManager';
 
 const TAG = 'NotificationDialog_Service ';
 
@@ -68,6 +69,7 @@ async function handleDialogQuitException(want: Want): Promise<void> {
 
 interface NotificationConfig {
   deviceInfo: DeviceInfo;
+  banAffectContentWhiteList: string[];
 }
 
 interface DeviceInfo {
@@ -100,6 +102,10 @@ export class EnableNotificationDialog {
   initSubWindowSize: boolean;
   innerLake: boolean;
   easyAbroad: boolean;
+  path: string;
+  hasConfig: boolean;
+  isPcDevice:boolean;
+  banAffectContent: boolean;
 
   constructor(id: number, want: Want, stageModel: boolean, innerLake: boolean, easyAbroad: boolean) {
     this.id = id;
@@ -110,6 +116,10 @@ export class EnableNotificationDialog {
     this.initSubWindowSize = false;
     this.innerLake = innerLake;
     this.easyAbroad = easyAbroad;
+    this.path = EnableNotificationDialog.DIALOG_PATH;
+    this.hasConfig = true;
+    this.isPcDevice = false;
+    this.banAffectContent = false;
   }
 
 
@@ -123,48 +133,9 @@ export class EnableNotificationDialog {
         'dialog': this,
         'session': session
       });
-
-      let path = EnableNotificationDialog.DIALOG_PATH;
-      let hasConfig = true;
-      let isPcDevice = false;
-      try {
-        let filePaths = await configPolicy.getCfgFiles(Constants.CCM_CONFIG_PATH);
-        if (filePaths.length === 0) {
-          console.info(TAG, 'not get any configFile');
-          hasConfig = false;
-        }
-        for (let i = 0; i < filePaths.length; i++) {
-          let res = fs.accessSync(filePaths[i]);
-          if (res) {
-            let fileContent = fs.readTextSync(filePaths[i]);
-            let config: NotificationConfig = JSON.parse(fileContent);
-            if (config.deviceInfo !== undefined) {
-              let deviceInfo: DeviceInfo = config.deviceInfo;
-              if (deviceInfo.isWatch !== undefined) {
-                path = EnableNotificationDialog.WATCH_DIALOG_PATH;
-                console.info(TAG, 'watch request');
-              }
-              if (deviceInfo.isPc !== undefined) {
-                path = EnableNotificationDialog.PC_DIALOG_PATH;
-                isPcDevice = true;
-                console.info(TAG, 'pc request');
-              }
-              if (deviceInfo.isTv !== undefined) {
-                path = EnableNotificationDialog.TV_DIALOG_PATH;
-                console.info(TAG, 'tv request');
-              }
-              if (deviceInfo.isCar !== undefined) {
-                path = EnableNotificationDialog.CAR_DIALOG_PATH;
-                console.info(TAG, 'car request');
-              }
-            }
-          }
-        }
-      } catch (err) {
-        console.error(TAG, 'Failed get ccm files');
-      }
-
-      if (stageModel && hasConfig) {
+      
+      await this.readConfig();
+      if (stageModel && this.hasConfig) {
         let subWindowOpts : window.SubWindowOptions = {
           'title': '',
           decorEnabled: false,
@@ -174,7 +145,7 @@ export class EnableNotificationDialog {
         let subWindow = await extensionWindow.createSubWindowWithOptions('subWindowForHost' + Date(), subWindowOpts);
         this.subWindow = subWindow;
         
-        if (isPcDevice) {
+        if (this.isPcDevice) {
           extensionWindow.on('rectChange', uiExtension.RectChangeReason.HOST_WINDOW_RECT_CHANGE, (data):void => {
             console.info(TAG, 'uec rect change');
             let uecRectChangeNum:number = AppStorage.get('uecRectChangeNum');
@@ -191,7 +162,7 @@ export class EnableNotificationDialog {
         } catch (err) {
           console.error(TAG, `setFollowParentWindowLayoutEnabled failed! ${err.code} ${err.message}`);
         }
-        await subWindow.loadContent(path, this.storage);
+        await subWindow.loadContent(this.path, this.storage);
         try {
           await subWindow.hideNonSystemFloatingWindows(true);
         } catch (err) {
@@ -201,7 +172,7 @@ export class EnableNotificationDialog {
         await subWindow.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
         await subWindow.showWindow();
       } else {
-        await session.loadContent(path, this.storage);  
+        await session.loadContent(this.path, this.storage);  
         try {    
           await extensionWindow.hideNonSecureWindows(shouldHide);
         } catch (err) {
@@ -215,11 +186,54 @@ export class EnableNotificationDialog {
     }
   }
 
-  async sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+async readConfig(): Promise<void> {
+    try {
+      let filePaths = await configPolicy.getCfgFiles(Constants.CCM_CONFIG_PATH);
+      if (filePaths.length === 0) {
+        console.info(TAG, 'not get any configFile');
+        this.hasConfig = false;
+      }
+      for (let i = 0; i < filePaths.length; i++) {
+        let res = fs.accessSync(filePaths[i]);
+        if (!res) {
+          console.error(TAG, 'accessSync false');
+          return;
+        }
+        let fileContent = fs.readTextSync(filePaths[i]);
+        let config: NotificationConfig = JSON.parse(fileContent);
+        if (config.deviceInfo !== undefined) {
+          let deviceInfo: DeviceInfo = config.deviceInfo;
+          if (deviceInfo.isWatch !== undefined) {
+            this.path = EnableNotificationDialog.WATCH_DIALOG_PATH;
+            console.info(TAG, 'watch request');
+          }
+          if (deviceInfo.isPc !== undefined) {
+            this.path = EnableNotificationDialog.PC_DIALOG_PATH;
+            this.isPcDevice = true;
+            console.info(TAG, 'pc request');
+          }
+          if (deviceInfo.isTv !== undefined) {
+            this.path = EnableNotificationDialog.TV_DIALOG_PATH;
+            console.info(TAG, 'tv request');
+          }
+          if (deviceInfo.isCar !== undefined) {
+            this.path = EnableNotificationDialog.CAR_DIALOG_PATH;
+            console.info(TAG, 'car request');
+          }
+        }
+        if (config.banAffectContentWhiteList !== undefined && 
+          config.banAffectContentWhiteList.includes(this.want.parameters.bundleName.toString())) {
+            this.banAffectContent = true;
+        }
+      }
+    } catch (err) {
+      console.error(TAG, 'Failed get ccm files');
+    }
   }
 
   async publishButtonClickedEvent(enabled: boolean): Promise<void> {
+    let bundleFlags = bundleManager.BundleFlag.GET_BUNDLE_INFO_DEFAULT;
+    let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleFlags);
     CommonEventManager.publish(
       COMMON_EVENT_NAME,
       {
@@ -227,7 +241,8 @@ export class EnableNotificationDialog {
         data: this.want.parameters.bundleName.toString(),
         parameters: {
           bundleName: this.want.parameters.bundleName.toString(),
-          bundleUid: this.want.parameters.bundleUid.toString()
+          bundleUid: this.want.parameters.bundleUid.toString(),
+          versionCode: bundleInfo?.versionCode?.toString()
         }
       } as CommonEventManager.CommonEventPublishData,
       () => { console.info(TAG, 'publish CLICKED succeeded'); }
