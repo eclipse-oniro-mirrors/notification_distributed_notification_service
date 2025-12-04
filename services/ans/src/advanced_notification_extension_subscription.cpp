@@ -1327,6 +1327,7 @@ bool AdvancedNotificationService::GetCloneBundleList(
             ANS_LOGE("Failed to create NotificationBundleOption");
             continue;
         }
+        bundle->SetAppIndex(appIndex);
         cloneBundleList.emplace_back(bundle);
     }
 
