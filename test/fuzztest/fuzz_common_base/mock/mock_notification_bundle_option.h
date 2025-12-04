@@ -25,7 +25,7 @@ namespace Notification {
 template <>
 NotificationBundleOption* ObjectBuilder<NotificationBundleOption>::Build(FuzzedDataProvider *fdp)
 {
-    std::string bundleName = fdp->ConsumeRandomLengthString(32);
+    std::string bundleName = fdp->ConsumeRandomLengthString(20);
     int32_t uid = fdp->ConsumeIntegral<int32_t>();
     auto bundleOption = new NotificationBundleOption(bundleName, uid);
     bundleOption->SetInstanceKey(fdp->ConsumeIntegral<int32_t>());

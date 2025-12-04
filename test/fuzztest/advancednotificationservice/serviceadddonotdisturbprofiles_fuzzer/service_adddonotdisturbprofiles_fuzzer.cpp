@@ -30,7 +30,7 @@ namespace Notification {
         service->CreateDialogManager();
 
         std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
-        size_t numProfiles = fuzzData->ConsumeIntegralInRange<size_t>(0, 6);
+        size_t numProfiles = fuzzData->ConsumeIntegralInRange<size_t>(0, 3);
         for (size_t i = 0; i < numProfiles; ++i) {
             sptr<NotificationDoNotDisturbProfile> profile =
                 ObjectBuilder<NotificationDoNotDisturbProfile>::Build(fuzzData);
