@@ -904,9 +904,9 @@ void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationR
     IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, eventCode));
 }
 
-void NotificationAnalyticsUtil::ReportModifyEvent(const HaMetaMessage& message)
+void NotificationAnalyticsUtil::ReportModifyEvent(const HaMetaMessage& message, bool unFlowControl)
 {
-    if (!ReportFlowControl(MODIFY_ERROR_EVENT_CODE)) {
+    if (!unFlowControl && !ReportFlowControl(MODIFY_ERROR_EVENT_CODE)) {
         ANS_LOGI("Publish event failed, reason:%{public}s", message.Build().c_str());
         return;
     }

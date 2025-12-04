@@ -45,7 +45,6 @@ let storage = LocalStorage.getShared();
 
 @Extend(Button) function customizeButton() {
   .backgroundColor(Color.Transparent)
-  .fontColor($r('app.color.button_text'))
   .fontSize(
     getLimitFontSize(
       Constants.TEXT_MIDDLE_FONT_SIZE,
@@ -59,7 +58,6 @@ let storage = LocalStorage.getShared();
 
 @Extend(Button) function singleRowButton() {
   .backgroundColor(Color.Transparent)
-  .fontColor($r('app.color.button_text'))
   .fontSize(
     getLimitFontSize(
       Constants.TEXT_MIDDLE_FONT_SIZE,
@@ -195,6 +193,7 @@ struct PermissionDialog {
                     await this.enableNotification(false);
                     })
                     .customizeButton()
+                    .fontColor($r('sys.color.ohos_id_color_warning'))
                   Divider()
                     .color($r('app.color.comp_divider'))
                     .vertical(true)
@@ -206,6 +205,7 @@ struct PermissionDialog {
                       await this.enableNotification(true);
                     })
                     .customizeButton()
+                    .fontColor($r('app.color.button_text'))
                 }
                 .margin({ 
                   left: Constants.BUTTON_MARGIN_LEFT, 
@@ -222,6 +222,7 @@ struct PermissionDialog {
                     await this.enableNotification(false);
                   })
                   .singleRowButton()
+                  .fontColor($r('sys.color.ohos_id_color_warning'))
                   .margin({ 
                     left: Constants.MARGIN_ZERO,
                     right: Constants.MARGIN_ZERO,
@@ -242,6 +243,7 @@ struct PermissionDialog {
                       await this.enableNotification(true);
                     })
                     .singleRowButton()
+                    .fontColor($r('app.color.button_text'))
                     .margin({ 
                       left: Constants.MARGIN_ZERO, 
                       right: Constants.MARGIN_ZERO

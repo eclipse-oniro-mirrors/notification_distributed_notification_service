@@ -227,7 +227,7 @@ void EventReport::InnerSendDialogClickEvent(const EventInfo &eventInfo)
         EVENT_PARAM_UID, eventInfo.uid,
         EVENT_PARAM_ENABLE, eventInfo.enable,
         EVENT_PARAM_PNAMEID, AUTH_DIALOG_PKG,
-        EVENT_PARAM_PVERSIONID, "");
+        EVENT_PARAM_PVERSIONID, eventInfo.pVersionId);
 }
 
 void EventReport::InnerSendEnableNotificationSlotEvent(const EventInfo &eventInfo)
