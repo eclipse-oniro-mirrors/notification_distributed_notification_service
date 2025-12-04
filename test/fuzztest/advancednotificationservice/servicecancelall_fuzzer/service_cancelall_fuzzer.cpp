@@ -29,6 +29,7 @@ namespace Notification {
         service->CreateDialogManager();
 
         std::string stringData = fuzzData->ConsumeRandomLengthString();
+        service->CancelAll(stringData);
         sptr<AnsResultDataSynchronizerImpl> synchronizer = new AnsResultDataSynchronizerImpl();
         if (service->CancelAll(stringData,
             iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {

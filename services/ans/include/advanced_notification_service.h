@@ -157,6 +157,16 @@ public:
         const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
+     * @brief Cancels a published notification matching the specified label and notificationId.
+     *
+     * @param notificationId Indicates the ID of the notification to cancel.
+     * @param label Indicates the label of the notification to cancel.
+     * @param instanceKey Indicates the application instance key.
+     * @return Returns cancel notification result.
+     */
+    ErrCode Cancel(int32_t notificationId, const std::string &label, const std::string &instanceKey) override;
+
+    /**
      * @brief Cancels all the published notifications.
      *
      * @param instanceKey Indicates the application instance key.
@@ -164,6 +174,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode CancelAll(const std::string &instanceKey, const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
+
+    /**
+     * @brief Cancels all the published notifications.
+     *
+     * @param instanceKey Indicates the application instance key.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode CancelAll(const std::string &instanceKey) override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -178,6 +196,19 @@ public:
      */
     ErrCode CancelAsBundle(int32_t notificationId, const std::string &representativeBundle, int32_t userId,
         const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
+
+    /**
+     * @brief Cancels a published agent notification.
+     *
+     * @param notificationId Indicates the unique notification ID in the application.
+     *                       The value must be the ID of a published notification.
+     *                       Otherwise, this method does not take effect.
+     * @param representativeBundle Indicates the name of application bundle your application is representing.
+     * @param userId Indicates the specific user.
+     * @return Returns cancel notification result.
+     */
+    ErrCode CancelAsBundle(
+        int32_t notificationId, const std::string &representativeBundle, int32_t userId) override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -199,12 +230,36 @@ public:
      * @param notificationId Indicates the unique notification ID in the application.
      *                       The value must be the ID of a published notification.
      *                       Otherwise, this method does not take effect.
+     * @return Returns cancel notification result.
+     */
+    ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId) override;
+
+    /**
+     * @brief Cancels a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle of application bundle your application is representing.
+     * @param notificationId Indicates the unique notification ID in the application.
+     *                       The value must be the ID of a published notification.
+     *                       Otherwise, this method does not take effect.
      * @param userId Indicates the specific user.
      * @param synchronizer Inter-process data synchronization object.
      * @return Returns cancel notification result.
      */
     ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId,
         const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
+
+    /**
+     * @brief Cancels a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle of application bundle your application is representing.
+     * @param notificationId Indicates the unique notification ID in the application.
+     *                       The value must be the ID of a published notification.
+     *                       Otherwise, this method does not take effect.
+     * @param userId Indicates the specific user.
+     * @return Returns cancel notification result.
+     */
+    ErrCode CancelAsBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) override;
 
     /**
      * @brief Adds a notification slot by type.
@@ -276,6 +331,16 @@ public:
         const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
+     * @brief Obtains active notifications of the current application in the system.
+     *
+     * @param notifications Indicates active NotificationRequest objects of the current application.
+     * @param instanceKey Indicates the application instance key.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications,
+        const std::string &instanceKey) override;
+
+    /**
      * @brief Obtains the number of active notifications of the current application in the system.
      *
      * @param num Indicates the number of active notifications of the current application.
@@ -301,6 +366,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetAllActiveNotifications(const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
+
+    /**
+     * @brief Obtains all active notifications in the current system. The caller must have system permissions to
+     * call this method.
+     *
+     * @param notifications Indicates all active notifications of this application.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetAllActiveNotifications(std::vector<sptr<Notification>> &notifications) override;
 
     /**
      * @brief Obtains the active notifications corresponding to the specified key in the system. To call this method
@@ -572,6 +646,16 @@ public:
         const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
+     * @brief Gets whether the bundle allows the badge to display the status of notifications.
+     *
+     * @param bundleOption Indicates the NotificationBundleOption object.
+     * @param enabled Indicates the flag that allows badge to be shown.
+
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetShowBadgeEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &enabled) override;
+
+    /**
      * @brief Obtains the flag that whether to allow applications to show badge.
      *
      * @param bundleOptions Indicates the bundle name and uid of the application.
@@ -588,6 +672,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetShowBadgeEnabled(const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
+
+    /**
+     * @brief Gets whether allows the badge to display the status of notifications.
+     *
+     * @param enabled Indicates the flag that allows badge to be shown.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetShowBadgeEnabled(bool &enabled) override;
 
     /**
      * @brief Subscribes notifications.
@@ -998,6 +1090,9 @@ public:
     ErrCode CancelPreparedNotification(int32_t notificationId, const std::string &label,
         const sptr<NotificationBundleOption> &bundleOption, const int32_t reason,
         const sptr<IAnsResultDataSynchronizer> &synchronizer);
+
+    ErrCode CancelPreparedNotification(int32_t notificationId, const std::string &label,
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t reason);
 
     ErrCode PrepareNotificationInfo(
         const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption);
@@ -1470,6 +1565,15 @@ public:
         const sptr<IAnsResultDataSynchronizer> &synchronizer) override;
 
     /**
+     * @brief Cancels a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param id Indicates the unique notification ID in the application.
+     * @return Returns cancel result.
+     */
+    ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) override;
+
+    /**
      * @brief Get the status of the target device.
      *
      * @param deviceType Type of the device whose status you want to set.
@@ -1649,7 +1753,7 @@ public:
 
     ErrCode SetUserGrantedBundleState(const sptr<NotificationBundleOption>& targetBundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled) override;
-		
+
     ErrCode ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy) override;
 
     ErrCode CanOpenSubscribeSettings() override;
@@ -1722,7 +1826,7 @@ private:
         ALLOW_SPECIFIED_CONTACTS = 5,
         FORBID_SPECIFIED_CONTACTS = 6,
     };
-    
+
     /**
      * @brief Set whether to allow the specified bundle to send notifications.
      *
@@ -1969,6 +2073,7 @@ private:
         const std::string &groupName, const int32_t reason);
     ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason,
         const sptr<IAnsResultDataSynchronizer> &synchronizer);
+    ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason);
     ErrCode ExcuteDelete(const std::string &key, const int32_t removeReason);
     ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId);
     ErrCode QueryContactByProfileId(const std::string &phoneNumber, const std::string &policy, int32_t userId);
@@ -2055,7 +2160,7 @@ private:
     ErrCode UpdateNotificationSwitchState(
         const sptr<NotificationBundleOption> &bundleOption, const AppExecFwk::BundleInfo &bundleInfo);
     ErrCode DistributeOperationInner(const sptr<NotificationOperationInfo>& operationInfo);
-    
+
     void CheckExtensionServiceCondition(
         std::vector<std::pair<sptr<NotificationBundleOption>,
         std::vector<sptr<NotificationBundleOption>>>> &extensionBundleInfos,
@@ -2070,7 +2175,7 @@ private:
     ErrCode PreReminderInfoCheck();
     ErrCode SyncAdditionConfig(const std::string &key, const std::string &value, HaMetaMessage &message);
     bool isProxyForUnaware(const int32_t uid);
-	
+
     bool isExtensionServiceExist();
     int32_t LoadExtensionService();
     int32_t SubscribeExtensionService(const sptr<NotificationBundleOption> &bundleOption,

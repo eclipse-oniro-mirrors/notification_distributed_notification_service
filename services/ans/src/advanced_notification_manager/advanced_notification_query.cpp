@@ -81,6 +81,36 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(const std::string &i
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::GetActiveNotifications(
+    std::vector<sptr<NotificationRequest>> &notifications, const std::string &instanceKey)
+{
+    ANS_LOGD("called");
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    bundleOption->SetAppInstanceKey(instanceKey);
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("null notificationSvrQueue");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("called");
+        notifications.clear();
+        for (auto record : notificationList_) {
+            if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
+                (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
+                (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey())) {
+                GetUri(record->request);
+                notifications.push_back(record->request);
+            }
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
 {
     ANS_LOGD("called");
@@ -142,6 +172,37 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(const sptr<IAnsRe
         }
         synchronizer->TransferResultData(ERR_OK, notifications);
     }));
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<Notification>> &notifications)
+{
+    ANS_LOGD("called");
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (callingUid != RSS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("AccessTokenHelper::CheckPermission failed.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("null notificationSvrQueue");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("called");
+        notifications.clear();
+        for (auto record : notificationList_) {
+            if (record->notification != nullptr && record->notification->request_ != nullptr) {
+                notifications.push_back(record->notification);
+            }
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
     return ERR_OK;
 }
 

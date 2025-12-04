@@ -46,13 +46,18 @@ public:
     MOCK_METHOD1(PublishNotificationForIndirectProxyWithMaxCapacity, ErrCode(const sptr<NotificationRequest>&));
     MOCK_METHOD4(Cancel, ErrCode(int32_t, const std::string&, const std::string&,
         const sptr<IAnsResultDataSynchronizer>&));
+    MOCK_METHOD3(Cancel, ErrCode(int32_t, const std::string&, const std::string&));
     MOCK_METHOD2(CancelAll, ErrCode(const std::string&, const sptr<IAnsResultDataSynchronizer>&));
+    MOCK_METHOD1(CancelAll, ErrCode(const std::string&));
     MOCK_METHOD4(CancelAsBundle, ErrCode(int32_t, const std::string&, int32_t,
         const sptr<IAnsResultDataSynchronizer>&));
+    MOCK_METHOD3(CancelAsBundle, ErrCode(int32_t, const std::string&, int32_t));
     MOCK_METHOD3(CancelAsBundle, ErrCode(const sptr<NotificationBundleOption>&, int32_t,
         const sptr<IAnsResultDataSynchronizer>&));
+    MOCK_METHOD2(CancelAsBundle, ErrCode(const sptr<NotificationBundleOption>&, int32_t));
     MOCK_METHOD4(CancelAsBundle, ErrCode(const sptr<NotificationBundleOption>&, int32_t, int32_t,
         const sptr<IAnsResultDataSynchronizer>&));
+    MOCK_METHOD3(CancelAsBundle, ErrCode(const sptr<NotificationBundleOption>&, int32_t, int32_t));
     MOCK_METHOD1(AddSlotByType, ErrCode(int32_t));
     MOCK_METHOD1(AddSlots, ErrCode(const std::vector<sptr<NotificationSlot>>&));
     MOCK_METHOD1(RemoveSlotByType, ErrCode(int32_t));
@@ -61,8 +66,10 @@ public:
     MOCK_METHOD1(GetSlots, ErrCode(std::vector<sptr<NotificationSlot>>&));
     MOCK_METHOD2(GetSlotNumAsBundle, ErrCode(const sptr<NotificationBundleOption>&, uint64_t&));
     MOCK_METHOD2(GetActiveNotifications, ErrCode(const std::string&, const sptr<IAnsResultDataSynchronizer>&));
+    MOCK_METHOD2(GetActiveNotifications, ErrCode(std::vector<sptr<NotificationRequest>>&, const std::string&));
     MOCK_METHOD1(GetActiveNotificationNums, ErrCode(uint64_t&));
     MOCK_METHOD1(GetAllActiveNotifications, ErrCode(const sptr<IAnsResultDataSynchronizer>&));
+    MOCK_METHOD1(GetAllActiveNotifications, ErrCode(std::vector<sptr<Notification>>&));
     MOCK_METHOD2(GetAllNotificationsBySlotType, ErrCode(std::vector<sptr<Notification>>&, int32_t));
     MOCK_METHOD2(GetSpecialActiveNotifications,
         ErrCode(const std::vector<std::string>&, std::vector<sptr<Notification>>&));
@@ -103,7 +110,9 @@ public:
     MOCK_METHOD2(SetShowBadgeEnabledForBundle, ErrCode(const sptr<NotificationBundleOption>&, bool));
     MOCK_METHOD2(GetShowBadgeEnabledForBundle, ErrCode(const sptr<NotificationBundleOption>&,
         const sptr<IAnsResultDataSynchronizer>&));
+    MOCK_METHOD2(GetShowBadgeEnabledForBundle, ErrCode(const sptr<NotificationBundleOption>&, bool&));
     MOCK_METHOD1(GetShowBadgeEnabled, ErrCode(const sptr<IAnsResultDataSynchronizer>&));
+    MOCK_METHOD1(GetShowBadgeEnabled, ErrCode(bool&));
     MOCK_METHOD2(Subscribe, ErrCode(const sptr<IAnsSubscriber>&, uint32_t));
     MOCK_METHOD3(Subscribe, ErrCode(const sptr<IAnsSubscriber>&, const sptr<NotificationSubscribeInfo>&, uint32_t));
     MOCK_METHOD2(SubscribeSelf, ErrCode(const sptr<IAnsSubscriber>&, uint32_t));
@@ -184,6 +193,7 @@ public:
         ErrCode(const sptr<NotificationBundleOption>&, const std::string&, bool&));
     MOCK_METHOD3(CancelAsBundleWithAgent, ErrCode(const sptr<NotificationBundleOption>&, int32_t,
         const sptr<IAnsResultDataSynchronizer>&));
+    MOCK_METHOD2(CancelAsBundleWithAgent, ErrCode(const sptr<NotificationBundleOption>&, int32_t));
     MOCK_METHOD3(SetTargetDeviceStatus, ErrCode(const std::string&, uint32_t, const std::string&));
     MOCK_METHOD5(SetTargetDeviceStatus, ErrCode(const std::string&, uint32_t, uint32_t, const std::string&, int32_t));
     MOCK_METHOD2(GetDoNotDisturbProfile, ErrCode(int64_t, sptr<NotificationDoNotDisturbProfile>&));

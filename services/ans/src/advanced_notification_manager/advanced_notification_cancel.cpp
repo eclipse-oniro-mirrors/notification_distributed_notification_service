@@ -51,6 +51,26 @@ ErrCode AdvancedNotificationService::Cancel(int32_t notificationId, const std::s
         NotificationConstant::APP_CANCEL_REASON_DELETE, synchronizer);
 }
 
+ErrCode AdvancedNotificationService::Cancel(int32_t notificationId,
+    const std::string &label, const std::string &instanceKey)
+{
+    ANS_LOGD("called");
+
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        std::string message = "get bundleOption is null.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 1)
+            .ErrorCode(ERR_ANS_INVALID_BUNDLE).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, NotificationConstant::APP_CANCEL_REASON_DELETE,
+            message);
+        ANS_LOGE("%{public}s", message.c_str());
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    bundleOption->SetAppInstanceKey(instanceKey);
+    return CancelPreparedNotification(notificationId, label, bundleOption,
+        NotificationConstant::APP_CANCEL_REASON_DELETE);
+}
+
 ErrCode AdvancedNotificationService::CancelAll(const std::string &instanceKey,
     const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
@@ -75,6 +95,28 @@ ErrCode AdvancedNotificationService::CancelAll(const std::string &instanceKey,
         return ERR_OK;
     }
     ErrCode result = ExcuteCancelAll(bundleOption, reason, synchronizer);
+    return result;
+}
+
+ErrCode AdvancedNotificationService::CancelAll(const std::string &instanceKey)
+{
+    ANS_LOGD("called");
+    const int reason = NotificationConstant::APP_CANCEL_ALL_REASON_DELETE;
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    bundleOption->SetAppInstanceKey(instanceKey);
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("null notifSvrQueue");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    if (isProxyForUnaware(bundleOption->GetUid())) {
+        ANS_LOGE("CacelAll proxy uid: %{public}d", bundleOption->GetUid());
+        return ERR_OK;
+    }
+    ErrCode result = ExcuteCancelAll(bundleOption, reason);
     return result;
 }
 
@@ -127,6 +169,56 @@ ErrCode AdvancedNotificationService::ExcuteCancelAll(const sptr<NotificationBund
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::ExcuteCancelAll(
+    const sptr<NotificationBundleOption>& bundleOption, const int32_t reason)
+{
+    ErrCode result = ERR_OK;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+
+        sptr<Notification> notification = nullptr;
+
+        std::vector<std::string> keys = GetNotificationKeysByBundle(bundleOption);
+        std::vector<sptr<Notification>> notifications;
+        std::vector<uint64_t> timerIds;
+        for (auto key : keys) {
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+            std::string deviceId;
+            std::string bundleName;
+            GetDistributedInfo(key, deviceId, bundleName);
+#endif
+            result = RemoveFromNotificationList(key, notification, true, reason);
+            if (result != ERR_OK) {
+                continue;
+            }
+
+            if (notification != nullptr) {
+                UpdateRecentNotification(notification, true, reason);
+                notifications.emplace_back(notification);
+                timerIds.emplace_back(notification->GetAutoDeletedTimer());
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+                DoDistributedDelete(deviceId, bundleName, notification);
+#endif
+            }
+            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                std::vector<sptr<Notification>> currNotificationList = notifications;
+                NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                    currNotificationList, nullptr, reason);
+                notifications.clear();
+            }
+        }
+
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                notifications, nullptr, reason);
+        }
+        BatchCancelTimer(timerIds);
+        result = ERR_OK;
+    }));
+    notificationSvrQueue_->wait(handler);
+    return result;
+}
+
 ErrCode AdvancedNotificationService::CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption,
     int32_t notificationId, int32_t userId, const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
@@ -171,6 +263,50 @@ ErrCode AdvancedNotificationService::CancelAsBundle(const sptr<NotificationBundl
     return CancelPreparedNotification(notificationId, "", bundle, reason, synchronizer);
 }
 
+ErrCode AdvancedNotificationService::CancelAsBundle(
+    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId)
+{
+    ANS_LOGD("called");
+    int32_t reason = NotificationConstant::APP_CANCEL_AS_BUNELE_REASON_DELETE;
+    if (bundleOption == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    int32_t errCode = ValidRightsForCancelAsBundle(notificationId, reason);
+    if (errCode != ERR_OK) {
+        return errCode;
+    }
+    errCode = CheckUserIdParams(userId);
+    if (errCode != ERR_OK) {
+        std::string message = "userId:" + std::to_string(userId);
+        HaMetaMessage haMateMessage = HaMetaMessage(EventSceneId::SCENE_13, EventBranchId::BRANCH_14)
+            .ErrorCode(errCode).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMateMessage, reason, message);
+        return errCode;
+    }
+
+    int32_t uid = -1;
+    if (bundleOption->GetUid() == DEFAULT_UID) {
+        std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+        if (bundleManager != nullptr) {
+            uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleOption->GetBundleName(), userId);
+        }
+    } else {
+        uid = bundleOption->GetUid();
+    }
+    if (uid < 0) {
+        std::string message = "uid error";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 3)
+            .ErrorCode(ERR_ANS_INVALID_UID).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
+        return ERR_ANS_INVALID_UID;
+    }
+    sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
+        bundleOption->GetBundleName(), uid);
+    return CancelPreparedNotification(notificationId, "", bundle, reason);
+}
+
 ErrCode AdvancedNotificationService::ValidRightsForCancelAsBundle(int32_t notificationId, int32_t &reason)
 {
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -208,6 +344,19 @@ ErrCode AdvancedNotificationService::CancelAsBundle(const sptr<NotificationBundl
     return CancelAsBundle(bundleOption, notificationId, userId, synchronizer);
 }
 
+ErrCode AdvancedNotificationService::CancelAsBundle(
+    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId)
+{
+    ANS_LOGD("uid = %{public}d", bundleOption->GetUid());
+    int32_t userId = -1;
+    if (bundleOption->GetUid() != 0) {
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    } else {
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
+    }
+    return CancelAsBundle(bundleOption, notificationId, userId);
+}
+
 ErrCode AdvancedNotificationService::CancelAsBundle(int32_t notificationId, const std::string &representativeBundle,
     int32_t userId, const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
@@ -219,6 +368,19 @@ ErrCode AdvancedNotificationService::CancelAsBundle(int32_t notificationId, cons
         return ERR_ANS_TASK_ERR;
     }
     return CancelAsBundle(bundleOption, notificationId, userId, synchronizer);
+}
+
+ErrCode AdvancedNotificationService::CancelAsBundle(
+    int32_t notificationId, const std::string &representativeBundle, int32_t userId)
+{
+    ANS_LOGD("called");
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(
+         representativeBundle, DEFAULT_UID);
+    if (bundleOption == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_TASK_ERR;
+    }
+    return CancelAsBundle(bundleOption, notificationId, userId);
 }
 
 ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption,
@@ -268,6 +430,62 @@ ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(const sptr<Notifica
         sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
             bundleOption->GetBundleName(), uid);
         return CancelPreparedNotification(id, "", bundle, reason, synchronizer);
+    }
+    std::string message = "no agent setting";
+    OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 6)
+        .ErrorCode(ERR_ANS_NO_AGENT_SETTING).NotificationId(id);
+    ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+    ANS_LOGE("%{public}s", message.c_str());
+    return ERR_ANS_NO_AGENT_SETTING;
+}
+
+ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(
+    const sptr<NotificationBundleOption> &bundleOption, const int32_t id)
+{
+    ANS_LOGD("Called.");
+    if (bundleOption == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    int32_t reason = NotificationConstant::APP_CANCEL_AS_BUNELE_WITH_AGENT_REASON_DELETE;
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        std::string message = "not systemApp";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 4)
+            .ErrorCode(ERR_ANS_NON_SYSTEM_APP).NotificationId(id);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (IsAgentRelationship(GetClientBundleName(), bundleOption->GetBundleName())) {
+        int32_t userId = -1;
+        if (bundleOption->GetUid() != 0) {
+            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+        } else {
+            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
+        }
+        int32_t uid = -1;
+        if (bundleOption->GetUid() == DEFAULT_UID) {
+            std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+            if (bundleManager != nullptr) {
+                uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(
+                    bundleOption->GetBundleName(), userId);
+            }
+        } else {
+            uid = bundleOption->GetUid();
+        }
+        if (uid < 0) {
+            std::string message = "uid error";
+            OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 5)
+                .ErrorCode(ERR_ANS_INVALID_UID).NotificationId(id);
+            ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+            ANS_LOGE("%{public}s", message.c_str());
+            return ERR_ANS_INVALID_UID;
+        }
+        sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
+            bundleOption->GetBundleName(), uid);
+        return CancelPreparedNotification(id, "", bundle, reason);
     }
     std::string message = "no agent setting";
     OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 6)
@@ -955,7 +1173,7 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     NotificationConstant::DistributedDeleteType deleteType =
         static_cast<NotificationConstant::DistributedDeleteType>(deleteTypeInt);
-    
+
     switch (deleteType) {
         case NotificationConstant::DistributedDeleteType::ALL:
             return RemoveAllDistributedNotifications(removeReason);

@@ -29,6 +29,7 @@ namespace Notification {
         int32_t notificationId = fuzzData->ConsumeIntegral<int32_t>();
         std::string label = fuzzData->ConsumeRandomLengthString();
         std::string instanceKey = fuzzData->ConsumeRandomLengthString();
+        service->Cancel(notificationId, label, instanceKey);
         sptr<AnsResultDataSynchronizerImpl> synchronizer = new AnsResultDataSynchronizerImpl();
         if (service->Cancel(notificationId, label, instanceKey,
             iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {

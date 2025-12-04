@@ -363,6 +363,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0100, Function | MediumTest | Level
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->Cancel(notificationId, label, "", synchronizer);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
+    result = proxy->Cancel(notificationId, label, "");
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -384,6 +386,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0200, Function | MediumTest | Level
     std::string label = "";
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->Cancel(notificationId, label, "", synchronizer);
+    EXPECT_EQ(IPC_READ_ERROR, result);
+    result = proxy->Cancel(notificationId, label, "");
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -409,6 +413,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0300, Function | MediumTest | Level
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->Cancel(notificationId, label, "", synchronizer);
     EXPECT_EQ(ERR_OK, result);
+    result = proxy->Cancel(notificationId, label, "");
+    EXPECT_EQ(ERR_OK, result);
 }
 /*
  * @tc.name: CancelTest_0400
@@ -422,7 +428,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0400, Function | MediumTest | Level
         << "AnsManagerProxyUnitTest, CancelTest_0400, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
@@ -430,6 +436,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0400, Function | MediumTest | Level
     std::string label = "label";
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->Cancel(notificationId, label, "", synchronizer);
+    EXPECT_EQ(DEAD_OBJECT, result);
+    result = proxy->Cancel(notificationId, label, "");
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -445,7 +453,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0500, Function | MediumTest | Level
         << "AnsManagerProxyUnitTest, CancelTest_0500, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
         ERR_OK, false, false, false)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
@@ -454,6 +462,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0500, Function | MediumTest | Level
     std::string label = "label";
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->Cancel(notificationId, label, "", synchronizer);
+    EXPECT_EQ(IPC_READ_ERROR, result);
+    result = proxy->Cancel(notificationId, label, "");
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -474,6 +484,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAllTest_0100, Function | MediumTest | Le
     ASSERT_NE(nullptr, proxy);
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->CancelAll("", synchronizer);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    result = proxy->CancelAll("");
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
@@ -498,6 +510,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAllTest_0200, Function | MediumTest | Le
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->CancelAll("", synchronizer);
     EXPECT_EQ(ERR_OK, result);
+    result = proxy->CancelAll("");
+    EXPECT_EQ(ERR_OK, result);
 }
 /*
  * @tc.name: CancelAllTest_0300
@@ -511,12 +525,14 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAllTest_0300, Function | MediumTest | Le
         << "AnsManagerProxyUnitTest, CancelAllTest_0300, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->CancelAll("", synchronizer);
+    EXPECT_EQ(DEAD_OBJECT, result);
+    result = proxy->CancelAll("");
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -532,13 +548,15 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAllTest_0400, Function | MediumTest | Le
         << "AnsManagerProxyUnitTest, CancelAllTest_0400, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
         ERR_OK, false, false, false)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->CancelAll("", synchronizer);
+    EXPECT_EQ(IPC_READ_ERROR, result);
+    result = proxy->CancelAll("");
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -563,6 +581,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0100, Function | MediumTest
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId, synchronizer);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
+    result = proxy->CancelAsBundle(notificationId, representativeBundle, userId);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -585,6 +605,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0200, Function | MediumTest
     int32_t userId = 0;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId, synchronizer);
+    EXPECT_EQ(IPC_READ_ERROR, result);
+    result = proxy->CancelAsBundle(notificationId, representativeBundle, userId);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -611,6 +633,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0300, Function | MediumTest
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId, synchronizer);
     EXPECT_EQ(ERR_OK, result);
+    result = proxy->CancelAsBundle(notificationId, representativeBundle, userId);
+    EXPECT_EQ(ERR_OK, result);
 }
 /*
  * @tc.name: CancelAsBundleTest_0400
@@ -624,7 +648,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0400, Function | MediumTest
         << "AnsManagerProxyUnitTest, CancelAsBundleTest_0400, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
@@ -633,6 +657,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0400, Function | MediumTest
     int32_t userId = 0;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId, synchronizer);
+    EXPECT_EQ(DEAD_OBJECT, result);
+    result = proxy->CancelAsBundle(notificationId, representativeBundle, userId);
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -648,7 +674,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0500, Function | MediumTest
         << "AnsManagerProxyUnitTest, CancelAsBundleTest_0500, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
         ERR_OK, false, false, false)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
@@ -658,6 +684,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0500, Function | MediumTest
     int32_t userId = 0;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId, synchronizer);
+    EXPECT_EQ(IPC_READ_ERROR, result);
+    result = proxy->CancelAsBundle(notificationId, representativeBundle, userId);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -681,6 +709,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0600, Function | MediumTest
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->CancelAsBundle(bundleOption, notificationId, synchronizer);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
+    result = proxy->CancelAsBundle(bundleOption, notificationId);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -703,6 +733,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0700, Function | MediumTest
     int32_t userId = 0;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->CancelAsBundle(bundleOption, notificationId, userId, synchronizer);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    result = proxy->CancelAsBundle(bundleOption, notificationId, userId);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
@@ -1875,6 +1907,9 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0100, Function | Me
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetActiveNotifications("", synchronizer);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
+    std::vector<sptr<NotificationRequest>> notifications;
+    result = proxy->GetActiveNotifications(notifications, "");
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -1898,6 +1933,10 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0200, Function | Me
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetActiveNotifications("", synchronizer);
     EXPECT_EQ(ERR_INVALID_DATA, result);
+    std::vector<sptr<NotificationRequest>> notifications;
+    result = proxy->GetActiveNotifications(notifications, "");
+    EXPECT_EQ(ERR_INVALID_DATA, result);
+    EXPECT_EQ(0, notifications.size());
 }
 /*
  * @tc.name: GetActiveNotificationsTest_0300
@@ -1911,12 +1950,15 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0300, Function | Me
         << "AnsManagerProxyUnitTest, GetActiveNotificationsTest_0300, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetActiveNotifications("", synchronizer);
+    EXPECT_EQ(DEAD_OBJECT, result);
+    std::vector<sptr<NotificationRequest>> notifications;
+    result = proxy->GetActiveNotifications(notifications, "");
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -1932,13 +1974,16 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0400, Function | Me
         << "AnsManagerProxyUnitTest, GetActiveNotificationsTest_0400, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplaceNotifications, _1, _2, _3, _4,
         ERR_OK, false, 1)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetActiveNotifications("", synchronizer);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
+    std::vector<sptr<NotificationRequest>> notifications;
+    result = proxy->GetActiveNotifications(notifications, "");
     EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
@@ -1954,13 +1999,16 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0500, Function | Me
         << "AnsManagerProxyUnitTest, GetActiveNotificationsTest_0500, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplaceNotifications, _1, _2, _3, _4,
         ERR_OK, true, 0)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetActiveNotifications("", synchronizer);
+    EXPECT_EQ(IPC_READ_ERROR, result);
+    std::vector<sptr<NotificationRequest>> notifications;
+    result = proxy->GetActiveNotifications(notifications, "");
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -2091,6 +2139,9 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0100, Function |
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetAllActiveNotifications(synchronizer);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
+    std::vector<sptr<Notification>> notifications;
+    result = proxy->GetAllActiveNotifications(notifications);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -2114,6 +2165,10 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0200, Function |
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetAllActiveNotifications(synchronizer);
     EXPECT_EQ(ERR_INVALID_DATA, result);
+    std::vector<sptr<Notification>> notifications;
+    result = proxy->GetAllActiveNotifications(notifications);
+    EXPECT_EQ(ERR_INVALID_DATA, result);
+    EXPECT_EQ(0, notifications.size());
 }
 /*
  * @tc.name: GetAllActiveNotificationsTest_0300
@@ -2127,12 +2182,15 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0300, Function |
         << "AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0300, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetAllActiveNotifications(synchronizer);
+    EXPECT_EQ(DEAD_OBJECT, result);
+    std::vector<sptr<Notification>> notifications;
+    result = proxy->GetAllActiveNotifications(notifications);
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -2148,13 +2206,16 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0400, Function |
         << "AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0400, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplaceNotifications, _1, _2, _3, _4,
         ERR_OK, false, 1)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetAllActiveNotifications(synchronizer);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
+    std::vector<sptr<Notification>> notifications;
+    result = proxy->GetAllActiveNotifications(notifications);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
@@ -2170,13 +2231,16 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0500, Function |
         << "AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0500, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplaceNotifications, _1, _2, _3, _4,
         ERR_OK, true, 0)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetAllActiveNotifications(synchronizer);
+    EXPECT_EQ(IPC_READ_ERROR, result);
+    std::vector<sptr<Notification>> notifications;
+    result = proxy->GetAllActiveNotifications(notifications);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -3827,6 +3891,9 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0100, Functio
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, synchronizer);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
+    bool enabled = false;
+    result = proxy->GetShowBadgeEnabledForBundle(bundleOption, enabled);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -3851,6 +3918,10 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0200, Functio
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, synchronizer);
     EXPECT_EQ(ERR_OK, result);
+    bool enabled = false;
+    result = proxy->GetShowBadgeEnabledForBundle(bundleOption, enabled);
+    EXPECT_EQ(ERR_OK, result);
+    EXPECT_EQ(true, enabled);
 }
 
 /*
@@ -3865,13 +3936,16 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0300, Functio
         << "AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0300, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, synchronizer);
+    EXPECT_EQ(DEAD_OBJECT, result);
+    bool enabled = false;
+    result = proxy->GetShowBadgeEnabledForBundle(bundleOption, enabled);
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -3887,7 +3961,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0400, Functio
         << "AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0400, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
         ERR_OK, false, true, true)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
@@ -3895,6 +3969,9 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0400, Functio
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, synchronizer);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
+    bool enabled = false;
+    result = proxy->GetShowBadgeEnabledForBundle(bundleOption, enabled);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
@@ -3910,7 +3987,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0500, Functio
         << "AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0500, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
         ERR_OK, true, true, false)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
@@ -3918,6 +3995,9 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0500, Functio
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, synchronizer);
+    EXPECT_EQ(IPC_READ_ERROR, result);
+    bool enabled = false;
+    result = proxy->GetShowBadgeEnabledForBundle(bundleOption, enabled);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -3938,6 +4018,9 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0100, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetShowBadgeEnabled(synchronizer);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    bool enabled = false;
+    result = proxy->GetShowBadgeEnabled(enabled);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
@@ -3962,6 +4045,10 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0200, Function | Mediu
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetShowBadgeEnabled(synchronizer);
     EXPECT_EQ(ERR_OK, result);
+    bool enabled = false;
+    result = proxy->GetShowBadgeEnabled(enabled);
+    EXPECT_EQ(ERR_OK, result);
+    EXPECT_EQ(true, enabled);
 }
 
 /*
@@ -3976,12 +4063,15 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0300, Function | Mediu
         << "AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0300, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetShowBadgeEnabled(synchronizer);
+    EXPECT_EQ(DEAD_OBJECT, result);
+    bool enabled = false;
+    result = proxy->GetShowBadgeEnabled(enabled);
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -3997,13 +4087,16 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0400, Function | Mediu
         << "AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0400, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
         ERR_OK, false, true, true)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetShowBadgeEnabled(synchronizer);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
+    bool enabled = false;
+    result = proxy->GetShowBadgeEnabled(enabled);
     EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
@@ -4019,13 +4112,16 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0500, Function | Mediu
         << "AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0500, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _))
         .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
         ERR_OK, true, true, false)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     int32_t result = proxy->GetShowBadgeEnabled(synchronizer);
+    EXPECT_EQ(IPC_READ_ERROR, result);
+    bool enabled = false;
+    result = proxy->GetShowBadgeEnabled(enabled);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 

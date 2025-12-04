@@ -37,6 +37,7 @@ namespace Notification {
             iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
             synchronizer->Wait();
         }
+        service->GetShowBadgeEnabledForBundle(bundleOption, enabled);
         return true;
     }
 }

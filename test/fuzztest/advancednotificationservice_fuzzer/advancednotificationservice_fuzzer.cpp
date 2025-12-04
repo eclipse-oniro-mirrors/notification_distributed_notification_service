@@ -185,10 +185,10 @@ namespace OHOS {
             Notification::NotificationConstant::DoNotDisturbType::DAILY;
         sptr<Notification::NotificationDoNotDisturbDate> date =
             new Notification::NotificationDoNotDisturbDate(disturbType, beginDate, endDate);
-    
+
         service->SetDoNotDisturbDate(-1, date);
         service->SetDoNotDisturbDate(uid, date);
-        
+
         service->GetDoNotDisturbDate(uid, getDate);
         service->GetDoNotDisturbDate(-1, getDate);
 
@@ -238,14 +238,17 @@ namespace OHOS {
         service->Publish(stringData, notification);
         int notificationId = fuzzData->ConsumeIntegral<int32_t>();
         int32_t userId = fuzzData->ConsumeIntegral<int32_t>();
+        service->Cancel(notificationId, stringData, fuzzData->ConsumeRandomLengthString());
         if (service->Cancel(notificationId, stringData, fuzzData->ConsumeRandomLengthString(),
             iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
             synchronizer->Wait();
         }
+        service->CancelAll(fuzzData->ConsumeRandomLengthString());
         if (service->CancelAll(fuzzData->ConsumeRandomLengthString(),
             iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
             synchronizer->Wait();
         }
+        service->CancelAsBundle(notificationId, stringData, userId);
         if (service->CancelAsBundle(notificationId, stringData, userId,
             iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
             synchronizer->Wait();
@@ -265,21 +268,25 @@ namespace OHOS {
         bundleOption->SetBundleName(fuzzData->ConsumeRandomLengthString());
         bundleOption->SetUid(fuzzData->ConsumeIntegral<int32_t>());
         uint64_t num = fuzzData->ConsumeIntegral<uint64_t>();
+        service->CancelAsBundle(bundleOption, fuzzData->ConsumeIntegral<int32_t>());
         if (service->CancelAsBundle(bundleOption, fuzzData->ConsumeIntegral<int32_t>(),
             iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
             synchronizer->Wait();
         }
+        service->CancelAsBundleWithAgent(bundleOption, fuzzData->ConsumeIntegral<int32_t>());
         if (service->CancelAsBundleWithAgent(bundleOption, fuzzData->ConsumeIntegral<int32_t>(),
             iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
             synchronizer->Wait();
         }
         service->GetSlotNumAsBundle(bundleOption, num);
+        std::vector<sptr<Notification::NotificationRequest>> notifications;
         if (service->GetActiveNotifications(fuzzData->ConsumeRandomLengthString(),
             iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
             synchronizer->Wait();
         }
         service->GetActiveNotificationNums(num);
         std::vector<sptr<Notification::Notification>> notificationss;
+        service->GetActiveNotifications(notifications, fuzzData->ConsumeRandomLengthString());
         if (service->GetAllActiveNotifications(
             iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
             synchronizer->Wait();
@@ -307,10 +314,12 @@ namespace OHOS {
         service->SetNotificationsEnabledForAllBundles(stringData, enabled);
         service->SetNotificationsEnabledForSpecialBundle(stringData, bundleOption, enabled);
         service->SetShowBadgeEnabledForBundle(bundleOption, enabled);
+        service->GetShowBadgeEnabledForBundle(bundleOption, enabled);
         if (service->GetShowBadgeEnabledForBundle(bundleOption,
             iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
             synchronizer->Wait();
         }
+        service->GetShowBadgeEnabled(enabled);
         if (service->GetShowBadgeEnabled(
             iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
             synchronizer->Wait();
@@ -374,6 +383,7 @@ namespace OHOS {
             fuzzData->ConsumeBool());
         service->IsDistributedEnableByBundle(bundleOption, enable);
         service->SetDefaultNotificationEnabled(bundleOption, enabled);
+        service->ExcuteCancelAll(bundleOption, fuzzData->ConsumeIntegral<int32_t>());
         if (service->ExcuteCancelAll(bundleOption, fuzzData->ConsumeIntegral<int32_t>(),
             iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
             synchronizer->Wait();

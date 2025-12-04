@@ -224,6 +224,24 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_225000, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.number    : AnsBranchTest_22500
+ * @tc.name      : CancelAsBundle_1000
+ * @tc.desc      : Test CancelAsBundle function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_22500, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+
+    int32_t notificationId = 1;
+    std::string representativeBundle = "RepresentativeBundle";
+    int32_t userId = 1;
+    ASSERT_EQ(advancedNotificationService_->CancelAsBundle(
+        notificationId, representativeBundle, userId), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
  * @tc.number    : AnsBranchTest_226000
  * @tc.name      : CancelAsBundle_2000
  * @tc.desc      : Test CancelAsBundle function return ERR_ANS_PERMISSION_DENIED.
@@ -247,6 +265,24 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_226000, Function | SmallTest | Level1)
     } else {
         ASSERT_EQ(ret, result);
     }
+}
+
+/**
+ * @tc.number    : AnsBranchTest_22600
+ * @tc.name      : CancelAsBundle_2000
+ * @tc.desc      : Test CancelAsBundle function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_22600, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(false);
+
+    int32_t notificationId = 1;
+    std::string representativeBundle = "RepresentativeBundle";
+    int32_t userId = 1;
+    ASSERT_EQ(advancedNotificationService_->CancelAsBundle(
+        notificationId, representativeBundle, userId), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -436,6 +472,22 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_237000, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.number    : AnsBranchTest_2370001
+ * @tc.name      : GetShowBadgeEnabledForBundle_1000
+ * @tc.desc      : Test GetShowBadgeEnabledForBundle function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_2370001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+
+    bool allow = false;
+    ASSERT_EQ(advancedNotificationService_->GetShowBadgeEnabledForBundle(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), allow), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
  * @tc.number    : AnsBranchTest_238000
  * @tc.name      : GetShowBadgeEnabledForBundle_2000
  * @tc.desc      : Test GetShowBadgeEnabledForBundle function return ERR_ANS_PERMISSION_DENIED.
@@ -457,6 +509,22 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_238000, Function | SmallTest | Level1)
     } else {
         ASSERT_EQ(ret, result);
     }
+}
+
+/**
+ * @tc.number    : AnsBranchTest_2380001
+ * @tc.name      : GetShowBadgeEnabledForBundle_2000
+ * @tc.desc      : Test GetShowBadgeEnabledForBundle function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_2380001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(false);
+
+    bool allow = false;
+    ASSERT_EQ(advancedNotificationService_->GetShowBadgeEnabledForBundle(
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), allow), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -569,6 +637,21 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_242000, Function | SmallTest | Level1)
     } else {
         ASSERT_EQ(ret, result);
     }
+}
+
+/**
+ * @tc.number    : AnsBranchTest_2420001
+ * @tc.name      : GetAllActiveNotifications_1000
+ * @tc.desc      : Test GetAllActiveNotifications function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_2420001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(false);
+
+    std::vector<sptr<Notification>> allNotifications;
+    ASSERT_EQ(advancedNotificationService_->GetAllActiveNotifications(allNotifications), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**

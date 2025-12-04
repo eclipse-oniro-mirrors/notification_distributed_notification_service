@@ -455,6 +455,48 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notificationId,
+    const std::string &label, const sptr<NotificationBundleOption> &bundleOption, int32_t reason)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (bundleOption == nullptr) {
+        std::string message = "bundleOption is null";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 2)
+            .ErrorCode(ERR_ANS_INVALID_BUNDLE).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    if (notificationSvrQueue_ == nullptr) {
+        std::string message = "notificationSvrQueue is null";
+        ANS_LOGE("%{public}s", message.c_str());
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode result = ERR_OK;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        sptr<Notification> notification = nullptr;
+        NotificationKey notificationKey;
+        notificationKey.id = notificationId;
+        notificationKey.label = label;
+        result = RemoveFromNotificationList(bundleOption, notificationKey, notification, reason, true);
+        if (result != ERR_OK) {
+            return;
+        }
+        if (notification != nullptr) {
+            UpdateRecentNotification(notification, true, reason);
+            CancelTimer(notification->GetAutoDeletedTimer());
+            NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+            DoDistributedDelete("", "", notification);
+#endif
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+    SendCancelHiSysEvent(notificationId, label, bundleOption, result);
+    return result;
+}
+
 ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption)
 {

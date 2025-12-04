@@ -648,6 +648,37 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04700,
 }
 
 /**
+ * @tc.number    : AdvancedNotificationServiceTest_14700
+ * @tc.name      : ANS_Cancel_0100
+ * @tc.desc      : public two notification to cancel one of them
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14700, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::OTHER);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+
+    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), true), (int)ERR_OK);
+    std::string label = "testLabel";
+    {
+        sptr<NotificationRequest> req = new NotificationRequest(1);
+        req->SetSlotType(NotificationConstant::OTHER);
+        req->SetLabel(label);
+        req->SetCreatorUid(1);
+        ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
+    }
+    {
+        sptr<NotificationRequest> req = new NotificationRequest(2);
+        req->SetSlotType(NotificationConstant::OTHER);
+        req->SetLabel(label);
+        req->SetCreatorUid(1);
+        ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
+    }
+    ASSERT_EQ(advancedNotificationService_->Cancel(1, label, ""), (int)ERR_OK);
+}
+
+/**
  * @tc.number    : AdvancedNotificationServiceTest_04800
  * @tc.name      : ANS_Cancel_0200
  * @tc.desc      : Test Cancel function when notification no exists
@@ -666,6 +697,19 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04800,
     } else {
         ASSERT_EQ(ret, result);
     }
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_14800
+ * @tc.name      : ANS_Cancel_0200
+ * @tc.desc      : Test Cancel function when notification no exists
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14800, Function | SmallTest | Level1)
+{
+    int32_t notificationId = 0;
+    std::string label = "testLabel";
+    ASSERT_EQ((int)advancedNotificationService_->Cancel(
+        notificationId, label, ""), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -688,6 +732,19 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04900,
     } else {
         ASSERT_EQ(ret, result);
     }
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_14900
+ * @tc.name      : ANS_CancelAll_0100
+ * @tc.desc      : Test CancelAll function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14900, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::OTHER);
+    sptr<NotificationRequest> req = new NotificationRequest(1);
+    req->SetSlotType(NotificationConstant::OTHER);
+    ASSERT_EQ(advancedNotificationService_->CancelAll(""), (int)ERR_OK);
 }
 
 /**
@@ -723,6 +780,28 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_05000,
     }
 }
 
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_15000
+ * @tc.name      : ANS_Cancel_0100
+ * @tc.desc      : Test Cancel function when unremovable is true
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15000, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::OTHER);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), true), (int)ERR_OK);
+    int32_t notificationId = 2;
+    std::string label = "testLabel";
+    sptr<NotificationRequest> req = new NotificationRequest(notificationId);
+    req->SetSlotType(NotificationConstant::OTHER);
+    req->SetLabel(label);
+    req->SetUnremovable(true);
+    req->SetCreatorUid(1);
+    ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->Cancel(notificationId, label, ""), (int)ERR_OK);
+}
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_10000
@@ -1010,7 +1089,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12300,
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
     EXPECT_NE(content, nullptr);
     req->SetContent(content);
-    
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     ASSERT_EQ(advancedNotificationService_->Publish(label, req), ERR_ANS_INVALID_UID);
     SleepForFC();
@@ -1260,6 +1339,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04100,
     ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
 
     std::vector<sptr<Notification>> allNotifications;
+    ASSERT_EQ(advancedNotificationService_->GetAllActiveNotifications(allNotifications), (int)ERR_OK);
     int32_t result = ERR_OK;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     auto ret = advancedNotificationService_->GetAllActiveNotifications(
@@ -1377,6 +1457,22 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12600,
 }
 
 /**
+ * @tc.number    : AdvancedNotificationServiceTest_112600
+ * @tc.name      : ANS_CancelAsBundle_0100
+ * @tc.desc      : Test CancelAsBundle function when the result is ERR_ANS_NOTIFICATION_NOT_EXISTS
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_112600, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::OTHER);
+    int32_t notificationId = 1;
+    std::string representativeBundle = "RepresentativeBundle";
+    int32_t userId = 1;
+    int result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    ASSERT_EQ(advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId), result);
+}
+
+/**
  * @tc.number    : AdvancedNotificationServiceTest_12700
  * @tc.name      : ANS_CanPublishAsBundle_0100
  * @tc.desc      : Test CanPublishAsBundle function when the result is ERR_INVALID_OPERATION
@@ -1448,7 +1544,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19000,
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(pictureContent);
     EXPECT_NE(content, nullptr);
     req->SetContent(content);
-    
+
     req->SetLittleIcon(nullptr);
     EXPECT_EQ(nullptr, req->GetLittleIcon());
     req->SetBigIcon(nullptr);
@@ -1595,7 +1691,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_0600, Function | SmallT
     data.SetWant(want);
     data.SetCode(0);
     advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data);
-    
+
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
     SleepForFC();
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
@@ -1620,7 +1716,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_0700, Function | SmallT
     data.SetWant(want);
     data.SetCode(0);
     advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data);
-    
+
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
     SleepForFC();
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
@@ -1695,7 +1791,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_1000, Function | SmallT
     data.SetCode(0);
     advancedNotificationService.systemEventObserver_->callbacks_.onBundleAdd = nullptr;
     advancedNotificationService.systemEventObserver_->OnReceiveEvent(data);
-    
+
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
     SleepForFC();
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
@@ -1722,7 +1818,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_1100, Function | SmallT
     data.SetCode(0);
     advancedNotificationService.systemEventObserver_->callbacks_.onBundleUpdate = nullptr;
     advancedNotificationService.systemEventObserver_->OnReceiveEvent(data);
-    
+
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
     SleepForFC();
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
