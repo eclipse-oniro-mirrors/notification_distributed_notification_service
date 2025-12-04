@@ -42,6 +42,12 @@ bool StsLiveViewStatusUtils::StsToC(const STSLiveViewStatus inType, LiveViewStat
         case STSLiveViewStatus::LIVE_VIEW_FULL_UPDATE:
             outType = LiveViewStatus::LIVE_VIEW_FULL_UPDATE;
             break;
+        case STSLiveViewStatus::LIVE_VIEW_PENDING_CREATE:
+            outType = LiveViewStatus::LIVE_VIEW_PENDING_CREATE;
+            break;
+        case STSLiveViewStatus::LIVE_VIEW_PENDING_END:
+            outType = LiveViewStatus::LIVE_VIEW_PENDING_END;
+            break;
         default:
             ANS_LOGE("LiveViewStatus %{public}d is an invalid value", inType);
             return false;
@@ -64,6 +70,12 @@ bool StsLiveViewStatusUtils::CToSts(const LiveViewStatus inType, STSLiveViewStat
             break;
         case LiveViewStatus::LIVE_VIEW_FULL_UPDATE:
             outType = STSLiveViewStatus::LIVE_VIEW_FULL_UPDATE;
+            break;
+        case LiveViewStatus::LIVE_VIEW_PENDING_CREATE:
+            outType = STSLiveViewStatus::LIVE_VIEW_PENDING_CREATE;
+            break;
+        case LiveViewStatus::LIVE_VIEW_PENDING_END:
+            outType = STSLiveViewStatus::LIVE_VIEW_PENDING_END;
             break;
         default:
             ANS_LOGE("LiveViewStatus %{public}d is an invalid value", inType);

@@ -44,7 +44,9 @@ enum STSLiveViewStatus {
     LIVE_VIEW_CREATE = 0,
     LIVE_VIEW_INCREMENTAL_UPDATE = 1,
     LIVE_VIEW_END = 2,
-    LIVE_VIEW_FULL_UPDATE = 3
+    LIVE_VIEW_FULL_UPDATE = 3,
+    LIVE_VIEW_PENDING_CREATE = 4,
+    LIVE_VIEW_PENDING_END = 6
 };
 
 class StsLiveViewStatusUtils {

@@ -188,6 +188,12 @@ bool AnsEnumUtil::LiveViewStatusJSToC(
         case LiveViewStatus::LIVE_VIEW_FULL_UPDATE:
             outType = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE;
             break;
+        case LiveViewStatus::LIVE_VIEW_PENDING_CREATE:
+            outType = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE;
+            break;
+        case LiveViewStatus::LIVE_VIEW_PENDING_END:
+            outType = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END;
+            break;
         default:
             ANS_LOGE("LiveViewStatus %{public}d", inType);
             return false;
@@ -533,6 +539,12 @@ bool AnsEnumUtil::LiveViewStatusCToJS(const NotificationLiveViewContent::LiveVie
             break;
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE:
             outType = LiveViewStatus::LIVE_VIEW_FULL_UPDATE;
+            break;
+        case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE:
+            outType = LiveViewStatus::LIVE_VIEW_PENDING_CREATE;
+            break;
+        case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END:
+            outType = LiveViewStatus::LIVE_VIEW_PENDING_END;
             break;
         default:
             ANS_LOGD("LiveViewStatus %{public}d", inType);

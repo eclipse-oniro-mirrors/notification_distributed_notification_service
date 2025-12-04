@@ -103,6 +103,7 @@ ohos_source_set("ans_service_sources") {
     "src/clone/notification_clone_priority_info.cpp",
     "src/clone/notification_clone_priority_service.cpp",
     "src/clone/notification_clone_disturb_service.cpp",
+    "src/clone/notification_clone_geofence_switch.cpp",
     "src/clone/notification_clone_manager.cpp",
     "src/clone/notification_clone_util.cpp",
     "src/common/aes_gcm_helper.cpp",
