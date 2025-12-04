@@ -44,7 +44,7 @@ ErrCode AdvancedNotificationService::SetPriorityEnabledInner(const bool enabled)
         NotificationSubscriberManager::GetInstance()->NotifyEnabledPriorityChanged(bundleData);
     }
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_25);
-    message.Message(" en:" + std::to_string(enabled));
+    message.Message("en:" + std::to_string(enabled));
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     ANS_LOGI("SetPriorityEnabled enabled: %{public}d, result: %{public}d", enabled, result);
@@ -82,8 +82,8 @@ ErrCode AdvancedNotificationService::SetPriorityEnabledByBundleInner(
     auto result = NotificationPreferences::GetInstance()->SetPriorityEnabledByBundle(bundle,
         static_cast<NotificationConstant::PriorityEnableStatus>(enableStatusInt));
     sptr<EnabledPriorityNotificationByBundleCallbackData> bundleData =
-        new (std::nothrow) EnabledPriorityNotificationByBundleCallbackData(bundleOption->GetBundleName(),
-        bundleOption->GetUid(), static_cast<NotificationConstant::PriorityEnableStatus>(enableStatusInt));
+        new (std::nothrow) EnabledPriorityNotificationByBundleCallbackData(bundle->GetBundleName(),
+        bundle->GetUid(), static_cast<NotificationConstant::PriorityEnableStatus>(enableStatusInt));
     if (bundleData == nullptr) {
         ANS_LOGE("Failed to create EnabledPriorityNotificationByBundleCallbackData instance");
         result = ERR_NO_MEMORY;
@@ -91,7 +91,7 @@ ErrCode AdvancedNotificationService::SetPriorityEnabledByBundleInner(
         NotificationSubscriberManager::GetInstance()->NotifyEnabledPriorityByBundleChanged(bundleData);
     }
     ANS_LOGI("SetPriorityEnabledByBundle %{public}s_%{public}d, enableStatus: %{public}d, result: %{public}d",
-        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), enableStatusInt, result);
+        bundle->GetBundleName().c_str(), bundle->GetUid(), enableStatusInt, result);
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
@@ -128,7 +128,7 @@ ErrCode AdvancedNotificationService::IsPriorityEnabledByBundle(
     result = NotificationPreferences::GetInstance()->IsPriorityEnabledByBundle(bundle, enableStatus);
     enableStatusInt = static_cast<int32_t>(enableStatus);
     ANS_LOGI("IsPriorityEnabledByBundle %{public}s_%{public}d, enableStatus: %{public}d, result: %{public}d",
-        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), enableStatusInt, result);
+        bundle->GetBundleName().c_str(), bundle->GetUid(), enableStatusInt, result);
     return result;
 }
 
@@ -156,9 +156,9 @@ ErrCode AdvancedNotificationService::SetBundlePriorityConfigInner(
         return ERR_ANS_INVALID_BUNDLE;
     }
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-    int32_t aiResult = NOTIFICATION_AI_EXTENSION_WRAPPER->SyncBundleKeywords(bundleOption, value);
+    int32_t aiResult = NOTIFICATION_AI_EXTENSION_WRAPPER->SyncBundleKeywords(bundle, value);
     ANS_LOGI("SyncBundleKeywords %{public}s_%{public}d result: %{public}d",
-        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), aiResult);
+        bundle->GetBundleName().c_str(), bundle->GetUid(), aiResult);
     message.ErrorCode(aiResult).Append(" Sync keyword fail");
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     if (aiResult == NOTIFICATION_AI_EXTENSION_WRAPPER->ErrorCode::ERR_FAIL) {
@@ -167,7 +167,7 @@ ErrCode AdvancedNotificationService::SetBundlePriorityConfigInner(
     if (aiResult != ERR_OK) {
         return ERR_ANS_INVALID_PARAM;
     }
-    result = NotificationPreferences::GetInstance()->SetBundlePriorityConfig(bundleOption, value);
+    result = NotificationPreferences::GetInstance()->SetBundlePriorityConfig(bundle, value);
 #endif
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
@@ -186,7 +186,7 @@ ErrCode AdvancedNotificationService::GetBundlePriorityConfig(
         ANS_LOGE("bundle is nullptr");
         return ERR_ANS_INVALID_BUNDLE;
     }
-    return NotificationPreferences::GetInstance()->GetBundlePriorityConfig(bundleOption, value);
+    return NotificationPreferences::GetInstance()->GetBundlePriorityConfig(bundle, value);
 }
 }  // namespace Notification
 }  // namespa OHOS

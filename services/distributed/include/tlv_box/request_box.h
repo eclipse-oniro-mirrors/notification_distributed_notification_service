@@ -60,7 +60,6 @@ public:
     bool SetActionButtonsLength(const int32_t length);
     bool SetActionButtonsTitle(const std::vector<std::string>& buttonsTitle);
     bool SetNotificationBasicInfo(const std::string& basicInfo);
-    bool SetPriorityNotificationType(const std::string& priorityNotificationType);
 #else
     bool GetNotificationHashCode(std::string& hasdCode) const;
     bool GetSlotType(int32_t& type) const;
@@ -92,7 +91,6 @@ public:
     bool GetActionButtonsLength(int32_t& length) const;
     bool GetActionButtonsTitle(std::vector<std::string>& buttonsTitle) const;
     bool GetNotificationBasicInfo(std::string& basicInfo) const;
-    bool GetPriorityNotificationType(std::string& priorityNotificationType) const;
 #endif
 };
 }  // namespace Notification

@@ -17,6 +17,7 @@
 
 #define private public
 #define protected public
+#include "distributed_device_service.h"
 #include "distributed_operation_service.h"
 #undef private
 #undef protected
@@ -45,6 +46,22 @@ HWTEST_F(DistributedOperationServiceTest, OnOperationResponse_0100, Function | S
     std::shared_ptr<NotificationOperationInfo> operationInfo = std::make_shared<NotificationOperationInfo>();
     DistributedDeviceInfo device;
     device.deviceType_ = DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1;
+    auto result = DistributedOperationService::GetInstance().OnOperationResponse(operationInfo, device);
+    EXPECT_EQ(result, ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: OnOperationResponse_0200
+ * @tc.desc: Test OnOperationResponse with invalid param.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedOperationServiceTest, OnOperationResponse_0200, Function | SmallTest | Level1)
+{
+    std::shared_ptr<NotificationOperationInfo> operationInfo = std::make_shared<NotificationOperationInfo>();
+    DistributedDeviceService::GetInstance().InitLocalDevice(
+        "deviceId", DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD);
+    DistributedDeviceInfo device;
+    device.deviceType_ = DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE;
     auto result = DistributedOperationService::GetInstance().OnOperationResponse(operationInfo, device);
     EXPECT_EQ(result, ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
 }

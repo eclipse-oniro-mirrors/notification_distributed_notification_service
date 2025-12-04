@@ -51,6 +51,7 @@ const uint32_t FILTETYPE_IM = 1 << 0;
 const uint32_t FILTETYPE_QUICK_REPLY_IM = 2 << 0;
 static const std::string EXTENDINFO_INFO_PRE = "notification_collaboration_";
 static const std::string EXTENDINFO_DEVICE_ID = "deviceId";
+constexpr static const char* DELAY_PRIORITY_TARGET_SUBSCRIBER = "com.ohos.sceneboard";
 
 NotificationSubscriberManager::NotificationSubscriberManager()
 {
@@ -568,6 +569,11 @@ void NotificationSubscriberManager::NotifyConsumedInner(
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d> BundleName  = <%{public}s deviceType = %{public}s",
             __FUNCTION__, record->userId, notification->GetBundleName().c_str(), record->deviceType.c_str());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+        if (IsDelayPriorityTargetSubscriber(record, notification->GetNotificationRequestPoint())) {
+            continue;
+        }
+#endif
         if (IsSubscribedBysubscriber(record, notification) && ConsumeRecordFilter(record, notification) &&
             (record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONSUMED)) {
             if (!record->subscriber->AsObject()->IsProxyObject()) {
@@ -598,6 +604,25 @@ void NotificationSubscriberManager::NotifyConsumedInner(
     }
     NotificationSubscriberManager::TrackCodeLog(notification);
 }
+
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+bool NotificationSubscriberManager::IsDelayPriorityTargetSubscriber(
+    const std::shared_ptr<SubscriberRecord> &subscriberRecord, const sptr<NotificationRequest> &request)
+{
+    if (request == nullptr || subscriberRecord->subscriberBundleName_ == DELAY_PRIORITY_TARGET_SUBSCRIBER) {
+        return false;
+    }
+    auto extendInfo = request->GetExtendInfo();
+    if (extendInfo != nullptr) {
+        bool hasUpdated = false;
+        AAFwk::IBoolean* ao = AAFwk::IBoolean::Query(extendInfo->GetParam(DELAY_UPDATE_PRIORITY_KEY));
+        if (ao != nullptr && AAFwk::Boolean::Unbox(ao)) {
+            return true;
+        }
+    }
+    return false;
+}
+#endif
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 bool NotificationSubscriberManager::GetIsEnableEffectedRemind()
@@ -677,6 +702,11 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<s
         if (notification == nullptr) {
             continue;
         }
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+        if (IsDelayPriorityTargetSubscriber(record, notification->GetNotificationRequestPoint())) {
+            continue;
+        }
+#endif
         bool wearableFlag = false;
         bool headsetFlag = false;
         bool keyNodeFlag = false;

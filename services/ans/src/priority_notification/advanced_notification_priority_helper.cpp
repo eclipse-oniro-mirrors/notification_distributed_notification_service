@@ -82,15 +82,8 @@ bool AdvancedNotificationPriorityHelper::IsNeedUpdatePriorityType(const sptr<Not
         ANS_LOGI("GetPriorityEnabledByBundle Preferences fail");
         return false;
     }
-    if (enableStatus == NotificationConstant::PriorityEnableStatus::ENABLE) {
-        ANS_LOGI("Priority enabled for bundle is enabled");
-        return false;
-    }
-    if (enableStatus == NotificationConstant::PriorityEnableStatus::DISABLE) {
-        ANS_LOGI("Priority enabled for bundle is disabled");
-        return false;
-    }
-    return true;
+    ANS_LOGI("Priority enableStatus for bundle: %{public}d", static_cast<int32_t>(enableStatus));
+    return enableStatus == NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT;
 }
 
 bool AdvancedNotificationPriorityHelper::HasUpdatedPriorityType(const sptr<NotificationRequest> &request)
@@ -107,13 +100,12 @@ bool AdvancedNotificationPriorityHelper::HasUpdatedPriorityType(const sptr<Notif
             ANS_LOGI("delay update priorityNotificationType");
             return true;
         }
+        hasUpdated = false;
         ao = AAFwk::IBoolean::Query(extendInfo->GetParam(ANS_EXTENDINFO_INFO_PRE + EXTENDINFO_FLAG));
         if (ao != nullptr) {
             hasUpdated = AAFwk::Boolean::Unbox(ao);
         }
-        if (hasUpdated) {
-            return true;
-        }
+        return hasUpdated;
     }
     return false;
 }

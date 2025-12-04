@@ -170,12 +170,6 @@ napi_value ParsePriorityParameters(const napi_env &env, const napi_callback_info
     char commonStr[COMMON_TEXT_SIZE] = {0};
     size_t strLen = 0;
     napi_get_value_string_utf8(env, argv[PARAM1], commonStr, COMMON_TEXT_SIZE - 1, &strLen);
-    if (std::strlen(commonStr) == 0) {
-        ANS_LOGE("Property value is empty");
-        std::string msg = "Incorrect parameter. The content of param must be valid string.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-        return nullptr;
-    }
     params.configValue = commonStr;
     return Common::NapiGetNull(env);
 }

@@ -71,18 +71,6 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     size_t keyStrLen = 0;
     NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM0], keyStr, STR_MAX_SIZE - 1, &keyStrLen));
     params.key = keyStr;
-    if (std::strlen(keyStr) == 0 ||
-        (strcmp(keyStr, KEY_NAME) != 0 &&
-        strcmp(keyStr, RING_LIST_KEY_NAME) != 0 &&
-        strcmp(keyStr, CTRL_LIST_KEY_NAME) != 0 &&
-        strcmp(keyStr, CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG) != 0 &&
-        strcmp(keyStr, HEALTH_BUNDLE_WHITE_LIST) != 0 &&
-        strcmp(keyStr, PRIORITY_RULE_CONFIG_KEY_NAME) != 0)) {
-        ANS_LOGE("Argument type error. String expected.");
-        std::string msg = "Incorrect parameter types.The type of param must be string.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-        return nullptr;
-    }
 
     // argv[1]: value: string
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
@@ -119,6 +107,18 @@ void AsyncSetConfigComplete(napi_env env, napi_status status, void *data)
     }
     ANS_LOGD("end");
 }
+
+bool CheckAdditionalConfigKey(const std::string &key)
+{
+    if (key.empty() || (key != KEY_NAME && key != RING_LIST_KEY_NAME &&
+        key != CTRL_LIST_KEY_NAME && key != HEALTH_BUNDLE_WHITE_LIST && key != PRIORITY_RULE_CONFIG_KEY_NAME &&
+        key != CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG)) {
+        ANS_LOGW("Argument param error. not allow key: %{public}s.", key.c_str());
+        return false;
+    }
+    return true;
+}
+
 napi_value NapiSetAdditionConfig(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("called");
@@ -148,7 +148,7 @@ napi_value NapiSetAdditionConfig(napi_env env, napi_callback_info info)
         [](napi_env env, void *data) {
             ANS_LOGD("NapiSetAdditionConfig work excute.");
             AsyncCallbackInfoConfig *asynccallbackinfo = static_cast<AsyncCallbackInfoConfig *>(data);
-            if (asynccallbackinfo) {
+            if (asynccallbackinfo && CheckAdditionalConfigKey(asynccallbackinfo->params.key)) {
                     asynccallbackinfo->info.errorCode = NotificationHelper::SetAdditionConfig(
                         asynccallbackinfo->params.key, asynccallbackinfo->params.value);
             }

@@ -49,9 +49,9 @@ void AniSetBundlePriorityConfig(ani_env* env, ani_object obj, ani_string value)
 
 ani_string AniGetBundlePriorityConfig(ani_env* env, ani_object obj)
 {
-    Notification::NotificationBundleOption option;
     ani_string outAniStr;
     std::string config = "";
+    Notification::NotificationBundleOption option;
     if (!NotificationSts::UnwrapBundleOption(env, obj, option)) {
         ANS_LOGE("sts getBundlePriorityConfig failed cause invalid bundle");
         OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID,

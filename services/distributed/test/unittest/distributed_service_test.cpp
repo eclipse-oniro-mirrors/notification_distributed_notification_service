@@ -18,9 +18,12 @@
 #include "gtest/gtest.h"
 #define private public
 #include "batch_remove_box.h"
-#include "distributed_service.h"
 #include "distributed_publish_service.h"
+#include "distributed_send_adapter.h"
+#include "distributed_service.h"
+#include "tlv_box.h"
 #undef private
+#include "mock_invoke_counting.h"
 #include "remove_box.h"
 
 using namespace testing::ext;
@@ -253,6 +256,24 @@ HWTEST_F(DistributedServiceTest, CollaborationAbilityTest_01000, Function | Smal
     extraData = "[\"OS_VERSION\":\"OpenHarmony\"]";
     result = DistributedService::GetInstance().CheckCollaborationAbility(peerDevice, extraData);
     ASSERT_EQ(result, true);
+}
+
+/**
+ * @tc.name      : HandleMatchSync_0100
+ * @tc.number    : HandleMatchSync_0100
+ * @tc.desc      : Test the HandleMatchSync function with a valid notification.
+ */
+HWTEST_F(DistributedServiceTest, HandleMatchSync_0100, Function | SmallTest | Level1)
+{
+    MockInvokeCounting::GetInstance().MockReSetCount();
+    std::shared_ptr<TlvBox> box = std::make_shared<TlvBox>();
+    box->PutValue(std::make_shared<TlvItem>(TlvType::MATCH_TYPE, MatchType::MATCH_SYN));
+    box->PutValue(std::make_shared<TlvItem>(TlvType::LOCAL_DEVICE_ID, "deviceId"));
+    DistributedDeviceInfo deviceItem;
+    deviceItem.deviceId_ = "deviceId";
+    DistributedDeviceService::GetInstance().AddDeviceInfo(deviceItem);
+    DistributedService::GetInstance().HandleMatchSync(box);
+    EXPECT_EQ(0, MockInvokeCounting::GetInstance().MockGetCount());
 }
 } // namespace Notification
 } // namespace OHOS
