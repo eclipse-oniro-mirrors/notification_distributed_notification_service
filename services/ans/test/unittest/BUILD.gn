@@ -571,6 +571,10 @@ ohos_unittest("notification_publish_service_test") {
     "${services_path}/ans:libans",
   ]
 
+  if (distributed_notification_service_feature_priority_notification) {
+    defines += [ "ANS_FEATURE_PRIORITY_NOTIFICATION" ]
+  }
+
   if (distributed_notification_service_feature_distributed_db) {
     defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
