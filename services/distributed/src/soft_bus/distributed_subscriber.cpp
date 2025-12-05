@@ -186,6 +186,35 @@ void DistribuedSubscriber::SetPeerDevice(DistributedDeviceInfo peerDevice)
     peerDevice_ = peerDevice;
 }
 
+bool DistribuedSubscriber::CheckCollaborationNotification(const sptr<NotificationRequest> request)
+{
+    if (peerDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
+        return true;
+    }
+
+    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW) {
+        return true;
+    }
+
+    std::shared_ptr<AAFwk::WantParams> extendInfo = request->GetExtendInfo();
+    if (extendInfo == nullptr) {
+        return true;
+    }
+    int32_t deviceList = extendInfo->GetIntParam("collaboration_device_list", -1);
+    if (deviceList == -1) {
+        return true;
+    }
+    int32_t index = 0;
+    std::string device = DistributedDeviceService::DeviceTypeToTypeString(peerDevice_.deviceType_);
+    for (std::string deviceType : NotificationConstant::DEVICESTYPES) {
+        if (deviceType == device) {
+            return (((uint32_t)deviceList) & (1 << index));
+        }
+        index++;
+    }
+    return true;
+}
+
 bool DistribuedSubscriber::CheckNeedCollaboration(const std::shared_ptr<Notification>& notification)
 {
     if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
@@ -194,6 +223,11 @@ bool DistribuedSubscriber::CheckNeedCollaboration(const std::shared_ptr<Notifica
     }
     if (!CheckCollaborativeRemoveType(notification->GetNotificationRequestPoint()->GetSlotType())) {
         ANS_LOGE("CheckCollaborativeRemoveType failed");
+        return false;
+    }
+
+    if (!CheckCollaborationNotification(notification->GetNotificationRequestPoint())) {
+        ANS_LOGE("CheckCollaborationNotification failed");
         return false;
     }
     return true;

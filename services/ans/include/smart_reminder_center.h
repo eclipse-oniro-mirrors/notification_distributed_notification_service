@@ -101,6 +101,7 @@ private:
     bool IsSmartRemindBySwitch(
         const string &deviceType, const DeviceStatus &deviceStatus, const sptr<NotificationRequest> &request) const;
 #endif
+    void SetSyncDevice(const sptr<NotificationRequest> &request, set<string> syncDevices) const;
     void CheckScreenOffForCollaboration(const set<string>& syncDevices,
         map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap) const;
     void FillRequestExtendInfo(const string &deviceType, DeviceStatus &deviceStatus,

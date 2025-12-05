@@ -54,6 +54,7 @@ public:
     {
         return true;
     }
+    bool CheckCollaborationNotification(const sptr<NotificationRequest> request);
 
 private:
     bool IsDistributedRemoveReason(const int32_t deleteReason);
