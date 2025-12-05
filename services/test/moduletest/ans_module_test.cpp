@@ -160,6 +160,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_002, Function | SmallTest | Level1)
     EXPECT_EQ((int)g_advancedNotificationService->Publish(label, req), (int)ERR_OK);
     EXPECT_EQ((int)g_advancedNotificationService->Publish(label, req1), (int)ERR_OK);
     EXPECT_EQ((int)g_advancedNotificationService->Publish("testLabel1", req2), (int)ERR_OK);
+    EXPECT_EQ((int)g_advancedNotificationService->GetActiveNotifications(notificationsReqs, ""), (int)ERR_OK);
     auto result = ERR_OK;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     auto ret = g_advancedNotificationService->GetActiveNotifications("",
@@ -185,6 +186,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_002, Function | SmallTest | Level1)
         ASSERT_EQ(ret, result);
     }
 
+    EXPECT_EQ((int)g_advancedNotificationService->GetAllActiveNotifications(notifications), (int)ERR_OK);
     result = ERR_OK;
     synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     ret = g_advancedNotificationService->GetAllActiveNotifications(

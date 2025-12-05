@@ -30,6 +30,7 @@ namespace Notification {
         service->CreateDialogManager();
         sptr<NotificationBundleOption> bundleOption = ObjectBuilder<NotificationBundleOption>::Build(fuzzData);
         int32_t intData = fuzzData->ConsumeIntegral<uint32_t>();
+        service->CancelAsBundleWithAgent(bundleOption, intData);
         sptr<AnsResultDataSynchronizerImpl> synchronizer = new AnsResultDataSynchronizerImpl();
         if (service->CancelAsBundleWithAgent(bundleOption, intData,
             iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {

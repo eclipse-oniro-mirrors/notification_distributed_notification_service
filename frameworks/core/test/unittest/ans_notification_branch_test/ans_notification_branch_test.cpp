@@ -67,7 +67,17 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode Cancel(int notificationId, const std::string &label, const std::string &instanceKey) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode CancelAll(const std::string &instanceKey, const sptr<IAnsResultDataSynchronizer> &synchronizer) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode CancelAll(const std::string &instanceKey) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -78,14 +88,32 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode CancelAsBundle(
+        int32_t notificationId, const std::string &representativeBundle, int32_t userId) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId,
         const sptr<IAnsResultDataSynchronizer> &synchronizer) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode CancelAsBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode CancelAsBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId,
         const sptr<IAnsResultDataSynchronizer> &synchronizer) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode CancelAsBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -131,12 +159,23 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications,
+        const std::string &instanceKey) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode GetActiveNotificationNums(uint64_t &num) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
     ErrCode GetAllActiveNotifications(const sptr<IAnsResultDataSynchronizer> &synchronizer) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetAllActiveNotifications(std::vector<sptr<Notification>> &notifications) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -276,7 +315,17 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetShowBadgeEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode GetShowBadgeEnabled(const sptr<IAnsResultDataSynchronizer> &synchronizer) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetShowBadgeEnabled(bool &enabled) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -717,6 +766,11 @@ public:
 
     ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id,
         const sptr<IAnsResultDataSynchronizer> &synchronizer) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

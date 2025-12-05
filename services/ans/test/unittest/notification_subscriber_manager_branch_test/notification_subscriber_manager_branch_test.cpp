@@ -453,6 +453,24 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
 }
 
 /**
+ * @tc.number  : AdvancedNotificationService_11500
+ * @tc.name    : AdvancedNotificationService_11500
+ * @tc.desc    : Test CancelAsBundle function and CheckPermission is false
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_11500, Function | SmallTest | Level1)
+{
+    int32_t notificationId = 1;
+    std::string representativeBundle = "<representativeBundle>";
+    int32_t userId = 2;
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    AdvancedNotificationService advancedNotificationService;
+    ASSERT_EQ(advancedNotificationService.CancelAsBundle(notificationId, representativeBundle, userId),
+        ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
  * @tc.number  : AdvancedNotificationService_01600
  * @tc.name    : AdvancedNotificationService_01600
  * @tc.desc    : Test AddSlots function and CheckPermission is false
@@ -593,6 +611,25 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
 }
 
 /**
+ * @tc.number  : AdvancedNotificationService_023001
+ * @tc.name    : AdvancedNotificationService_023001
+ * @tc.desc    : Test GetShowBadgeEnabledForBundle function and CheckPermission is false
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_023001, Function | SmallTest | Level1)
+{
+    IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
+
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    bool enabled = true;
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    AdvancedNotificationService advancedNotificationService;
+    ASSERT_EQ(advancedNotificationService.GetShowBadgeEnabledForBundle(bundleOption, enabled),
+        ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
  * @tc.number  : AdvancedNotificationService_02400
  * @tc.name    : AdvancedNotificationService_02400
  * @tc.desc    : Test Unsubscribe function and CheckPermission is false
@@ -620,6 +657,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
+    ASSERT_EQ(advancedNotificationService.GetAllActiveNotifications(notifications), ERR_ANS_NON_SYSTEM_APP);
     int32_t result = ERR_ANS_NON_SYSTEM_APP;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     auto ret = advancedNotificationService.GetAllActiveNotifications(

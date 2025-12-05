@@ -327,22 +327,22 @@ HWTEST_F(AnsPublishServiceTest, DeleteByBundle_00004, Function | SmallTest | Lev
     MockIsSystemApp(false);
     auto result = advancedNotificationService_->DeleteByBundle(bundle);
     ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
-  
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     result = advancedNotificationService_->DeleteByBundle(bundle);
     ASSERT_EQ(result, ERR_OK);
- 
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(false);
     result = advancedNotificationService_->DeleteByBundle(bundle);
     ASSERT_EQ(result, ERR_OK);
- 
+
     MockIsSystemApp(true);
     result = advancedNotificationService_->DeleteByBundle(bundle);
     ASSERT_EQ(result, ERR_OK);
 }
- 
+
 /**
  * @tc.name: DeleteAll_00001
  * @tc.desc: Test DeleteAll
@@ -365,7 +365,7 @@ HWTEST_F(AnsPublishServiceTest, DeleteAll_00001, Function | SmallTest | Level1)
 HWTEST_F(AnsPublishServiceTest, RemoveDistributedNotifications_00001, Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    
+
     MockIsSystemApp(false);
     std::vector<std::string> hashcodes;
     auto ret = advancedNotificationService_->RemoveDistributedNotifications(
@@ -396,7 +396,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveDistributedNotifications_00001, Function |
 HWTEST_F(AnsPublishServiceTest, RemoveDistributedNotifications_00002, Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    
+
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
     std::vector<std::string> hashcodes;
@@ -583,12 +583,12 @@ HWTEST_F(AnsPublishServiceTest, ExecuteDeleteDistributedNotification_00001, Func
     request->SetDistributedCollaborate(true);
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     sptr<Notification> notification(new (std::nothrow) Notification(request));
-    
+
     record->request = request;
     record->notification = notification;
     advancedNotificationService_->notificationList_.push_back(record);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
-    
+
     res = advancedNotificationService_->ExecuteDeleteDistributedNotification(
         record, notifications, 99);
     ASSERT_TRUE(res);
@@ -633,17 +633,17 @@ HWTEST_F(AnsPublishServiceTest, DeleteAll_00002, Function | SmallTest | Level1)
     MockIsSystemApp(false);
     auto result = advancedNotificationService_->DeleteAll();
     ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
-   
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     result = advancedNotificationService_->DeleteAll();
     ASSERT_EQ(result, ERR_OK);
- 
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(false);
     result = advancedNotificationService_->DeleteAll();
     ASSERT_EQ(result, ERR_OK);
- 
+
     MockIsSystemApp(true);
     result = advancedNotificationService_->DeleteAll();
     ASSERT_EQ(result, ERR_OK);
@@ -687,6 +687,23 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_00001, Function | S
 }
 
 /**
+ * @tc.name: SetShowBadgeEnabledForBundle_100001
+ * @tc.desc: Test SetShowBadgeEnabledForBundle
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_100001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundleOption, true);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+
+    bool enabled = false;
+    ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundleOption, enabled);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
  * @tc.name: SetShowBadgeEnabledForBundle_00002
  * @tc.desc: Test SetShowBadgeEnabledForBundle
  * @tc.type: FUNC
@@ -709,6 +726,24 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_00002, Function | S
     } else {
         ASSERT_EQ(ret, result);
     }
+}
+
+/**
+ * @tc.name: SetShowBadgeEnabledForBundle_100002
+ * @tc.desc: Test SetShowBadgeEnabledForBundle
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_100002, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, true);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    bool enabled = false;
+    ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle, enabled);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -787,6 +822,46 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_00003, Function | S
 }
 
 /**
+ * @tc.name: SetShowBadgeEnabledForBundle_100003
+ * @tc.desc: Test SetShowBadgeEnabledForBundle,
+ *  1. Non-subsystem (HAP token) and non-system app -> return ERR_ANS_NON_SYSTEM_APP
+ *  2. Non-subsystem (HAP token) and system app -> return ERR_OK
+ *  3. Subsystem (Native token) and non-system app -> return ERR_OK
+ *  4. Subsystem (Native token) and system app -> return ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_100003, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    bool enabled = true;
+    auto result = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, enabled);
+    ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+    result = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle, enabled);
+    ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    result = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, enabled);
+    ASSERT_EQ(result, ERR_OK);
+    result = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle, enabled);
+    ASSERT_EQ(result, ERR_OK);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(false);
+    result = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, enabled);
+    ASSERT_EQ(result, ERR_OK);
+    result = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle, enabled);
+    ASSERT_EQ(result, ERR_OK);
+    MockIsSystemApp(true);
+    result = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, enabled);
+    ASSERT_EQ(result, ERR_OK);
+    result = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle, enabled);
+    ASSERT_EQ(result, ERR_OK);
+}
+
+/**
  * @tc.name: GetShowBadgeEnabled_00001
  * @tc.desc: Test GetShowBadgeEnabled
  * @tc.type: FUNC
@@ -805,6 +880,20 @@ HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_00001, Function | SmallTest 
     } else {
         ASSERT_EQ(ret, result);
     }
+}
+
+/**
+ * @tc.name: GetShowBadgeEnabled_100001
+ * @tc.desc: Test GetShowBadgeEnabled
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_100001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    bool enabled = false;
+    auto ret = advancedNotificationService_->GetShowBadgeEnabled(enabled);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -828,6 +917,23 @@ HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_00002, Function | SmallTest 
     } else {
         ASSERT_EQ(ret, result);
     }
+}
+
+/**
+ * @tc.name: GetShowBadgeEnabled_100002
+ * @tc.desc: Test GetShowBadgeEnabled
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_100002, Function | SmallTest | Level1)
+{
+    bool enabled = true;
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    auto ret = advancedNotificationService_->GetShowBadgeEnabled(enabled);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(enabled, true);
 }
 
 /**
@@ -1028,17 +1134,17 @@ HWTEST_F(AnsPublishServiceTest, SetNotificationsEnabledForAllBundles_00002, Func
     MockIsSystemApp(false);
     auto result = advancedNotificationService_->SetNotificationsEnabledForAllBundles(deviceId, enabled);
     ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
-   
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     result = advancedNotificationService_->SetNotificationsEnabledForAllBundles(deviceId, enabled);
     ASSERT_EQ(result, ERR_OK);
-  
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(false);
     result = advancedNotificationService_->SetNotificationsEnabledForAllBundles(deviceId, enabled);
     ASSERT_EQ(result, ERR_OK);
- 
+
     MockIsSystemApp(true);
     result = advancedNotificationService_->SetNotificationsEnabledForAllBundles(deviceId, enabled);
     ASSERT_EQ(result, ERR_OK);
@@ -1086,17 +1192,17 @@ HWTEST_F(AnsPublishServiceTest, SetNotificationsEnabledForSpecialBundle_00002, F
     MockIsSystemApp(false);
     auto result = advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(deviceId, bundle, enabled);
     ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
-   
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     result = advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(deviceId, bundle, enabled);
     ASSERT_EQ(result, ERR_OK);
-   
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(false);
     result = advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(deviceId, bundle, enabled);
     ASSERT_EQ(result, ERR_OK);
-  
+
     MockIsSystemApp(true);
     result = advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(deviceId, bundle, enabled);
     ASSERT_EQ(result, ERR_OK);
@@ -1122,17 +1228,17 @@ HWTEST_F(AnsPublishServiceTest, SetNotificationsEnabledForSpecialBundle_00003, F
     IPCSkeleton::SetCallingUid(12345);
     auto result = advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(deviceId, bundle, enabled);
     ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
-    
+
     MockIsVerfyPermisson(true);
     IPCSkeleton::SetCallingUid(12345);
     result = advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(deviceId, bundle, enabled);
     ASSERT_EQ(result, ERR_OK);
-    
+
     MockIsVerfyPermisson(false);
     IPCSkeleton::SetCallingUid(ansUid);
     result = advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(deviceId, bundle, enabled);
     ASSERT_EQ(result, ERR_OK);
-   
+
     MockIsSystemApp(true);
     result = advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(deviceId, bundle, enabled);
     ASSERT_EQ(result, ERR_OK);
@@ -1161,16 +1267,16 @@ HWTEST_F(AnsPublishServiceTest, IsAllowedNotify_00001, Function | SmallTest | Le
     MockIsSystemApp(false);
     auto result = advancedNotificationService_->IsAllowedNotify(enabled);
     ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
-    
+
     MockIsSystemApp(true);
     result = advancedNotificationService_->IsAllowedNotify(enabled);
     ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
-   
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(false);
     result = advancedNotificationService_->IsAllowedNotify(enabled);
     ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
-  
+
     MockIsSystemApp(true);
     result = advancedNotificationService_->IsAllowedNotify(enabled);
     ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
@@ -1179,7 +1285,7 @@ HWTEST_F(AnsPublishServiceTest, IsAllowedNotify_00001, Function | SmallTest | Le
     MockQueryForgroundOsAccountId(false, 1);
     result = advancedNotificationService_->IsAllowedNotify(enabled);
     ASSERT_EQ(result, ERR_ANS_GET_ACTIVE_USER_FAILED);
- 
+
     MockQueryForgroundOsAccountId(true, 1);
     result = advancedNotificationService_->IsAllowedNotify(enabled);
     ASSERT_EQ(result, ERR_ANS_GET_ACTIVE_USER_FAILED);
@@ -1368,6 +1474,8 @@ HWTEST_F(AnsPublishServiceTest, NotificationSvrQueue_00001, Function | SmallTest
         ASSERT_EQ(ret, result);
     }
 
+    ret = advancedNotificationService_->CancelAll("");
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
     ret = advancedNotificationService_->Delete("", 1);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
@@ -2105,6 +2213,36 @@ HWTEST_F(AnsPublishServiceTest, CancelAsBundle_00001, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: CancelAsBundle_10000
+ * @tc.desc: Test CancelAsBundle,
+ *  1. Non-subsystem (HAP token) and non-system app -> return ERR_ANS_NON_SYSTEM_APP
+ *  2. Non-subsystem (HAP token) and system app -> return ERR_ANS_NOTIFICATION_NOT_EXISTS
+ *  3. Subsystem (Native token) and non-system app -> return ERR_ANS_NOTIFICATION_NOT_EXISTS
+ *  4. Subsystem (Native token) and system app -> return ERR_ANS_NOTIFICATION_NOT_EXISTS
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CancelAsBundle_10000, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", 1);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    auto result = advancedNotificationService_->CancelAsBundle(bundle, 1, 1);
+    ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    result = advancedNotificationService_->CancelAsBundle(bundle, 1, 1);
+    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(false);
+    result = advancedNotificationService_->CancelAsBundle(bundle, 1, 1);
+    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    MockIsSystemApp(true);
+    result = advancedNotificationService_->CancelAsBundle(bundle, 1, 1);
+    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
  * @tc.name: CancelAsBundle_00002
  * @tc.desc: Test CancelAsBundle,
  *  bundleOption is valid, userId is -2, checkUserIdParams faild, except is ERR_ANS_INVALID_UID
@@ -2128,6 +2266,21 @@ HWTEST_F(AnsPublishServiceTest, CancelAsBundle_00002, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: CancelAsBundle_20000
+ * @tc.desc: Test CancelAsBundle,
+ *  bundleOption is valid, userId is -2, checkUserIdParams faild, except is ERR_ANS_INVALID_UID
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CancelAsBundle_20000, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", 1);
+    MockIsOsAccountExists(false);
+    auto result = advancedNotificationService_->CancelAsBundle(bundle, 1, -2);
+    ASSERT_EQ(result, (int)ERROR_USER_NOT_EXIST);
+}
+
+/**
  * @tc.name: CancelAsBundle_00003
  * @tc.desc: Test CancelAsBundle,
  *  uid is 0, except is ERR_ANS_NOTIFICATION_NOT_EXISTS
@@ -2148,6 +2301,21 @@ HWTEST_F(AnsPublishServiceTest, CancelAsBundle_00003, Function | SmallTest | Lev
     } else {
         ASSERT_EQ(ret, result);
     }
+}
+
+/**
+ * @tc.name: CancelAsBundle_30000
+ * @tc.desc: Test CancelAsBundle,
+ *  uid is 0, except is ERR_ANS_NOTIFICATION_NOT_EXISTS
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CancelAsBundle_30000, Function | SmallTest | Level1)
+{
+    MockIsOsAccountExists(true);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", 0);
+    auto result = advancedNotificationService_->CancelAsBundle(bundle, 1);
+    ASSERT_EQ(result, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -2225,6 +2393,40 @@ HWTEST_F(AnsPublishServiceTest, CancelAsBundleWithAgent_00001, Function | SmallT
 }
 
 /**
+ * @tc.name: CancelAsBundleWithAgent_10000
+ * @tc.desc: Test CancelAsBundleWithAgent,
+ *  1. Non-subsystem (HAP token) and non-system app -> return ERR_ANS_NON_SYSTEM_APP
+ *  2. Non-subsystem (HAP token) and system app -> return ERR_ANS_NOTIFICATION_NOT_EXISTS
+ *  3. Subsystem (Native token) and non-system app -> return ERR_ANS_NOTIFICATION_NOT_EXISTS
+ *  4. Subsystem (Native token) and system app -> return ERR_ANS_NOTIFICATION_NOT_EXISTS
+ *  5. Subsystem (Native token) and system app, uid < 0 -> return ERR_ANS_NOTIFICATION_NOT_EXISTS
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CancelAsBundleWithAgent_10000, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", 1);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    auto result = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1);
+    ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    result = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1);
+    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(false);
+    result = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1);
+    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    MockIsSystemApp(true);
+    result = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1);
+    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    bundle->SetUid(-1);
+    result = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1);
+    ASSERT_EQ(result, ERR_ANS_INVALID_UID);
+}
+
+/**
  * @tc.name: Delete_00001
  * @tc.desc: Test Delete,
  *  1. Non-subsystem (HAP token) and non-system app -> return ERR_ANS_NON_SYSTEM_APP
@@ -2240,7 +2442,7 @@ HWTEST_F(AnsPublishServiceTest, Delete_00001, Function | SmallTest | Level1)
     MockIsSystemApp(false);
     auto result = advancedNotificationService_->Delete("key", 1);
     ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
- 
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     result = advancedNotificationService_->Delete("key", 1);
@@ -2579,13 +2781,13 @@ HWTEST_F(AnsPublishServiceTest, CollaborateFilter_00002, Function | SmallTest | 
     extendInfo->SetParam("notification_collaboration_localType", AAFwk::String::Box(localType));
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     NotificationPreferences::GetInstance()->SetDistributedAuthStatus(deviceType, deviceId, userId, true);
-    
+
     NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
     NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(
         NotificationConstant::SlotType::LIVE_VIEW, localType, enableStatus);
     auto ret = advancedNotificationService_->CollaborateFilter(request);
     ASSERT_EQ(ret, (int)ERR_OK);
-    
+
     enableStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(
         NotificationConstant::SlotType::LIVE_VIEW, localType, enableStatus);

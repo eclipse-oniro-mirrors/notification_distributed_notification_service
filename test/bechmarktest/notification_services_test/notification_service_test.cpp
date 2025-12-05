@@ -330,6 +330,11 @@ BENCHMARK_F(BenchmarkNotificationService, GetShowBadgeEnabledForBundleTestCase)(
         } else {
             state.SkipWithError("GetShowBadgeEnabledForBundleTestCase get failed.");
         }
+        bool allow = false;
+        errCode = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundleOption, allow);
+        if (!allow || errCode != ERR_OK) {
+            state.SkipWithError("GetShowBadgeEnabledForBundleTestCase get failed.");
+        }
     }
 }
 
@@ -349,6 +354,10 @@ BENCHMARK_F(BenchmarkNotificationService, GetAllActiveNotificationsTestCase)(ben
         if (ret == ERR_OK) {
             synchronizer->Wait();
         } else {
+            state.SkipWithError("GetAllActiveNotificationsTestCase failed.");
+        }
+        ErrCode errCode = advancedNotificationService_->GetAllActiveNotifications(notifications);
+        if (errCode != ERR_OK) {
             state.SkipWithError("GetAllActiveNotificationsTestCase failed.");
         }
     }

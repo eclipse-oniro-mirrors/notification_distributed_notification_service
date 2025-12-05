@@ -1604,7 +1604,7 @@ public:
      */
     ErrCode SetUserGrantedBundleState(const NotificationBundleOption& targetBundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled);
-    
+
     /**
      * @brief Obtains all bundles that are available for notification extension subscription.
      *
@@ -1619,7 +1619,7 @@ public:
      * @return Returns ERR_OK if allowed; otherwise returns the specific error code.
      */
     ErrCode CanOpenSubscribeSettings();
-    
+
     /**
      * @brief Obtains reminder info of application list.
      *
@@ -1732,6 +1732,102 @@ private:
         sptr<SubscriberListener> &listener);
     void CreateBadgeQueryListener(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback,
         sptr<BadgeQueryListener> &listener);
+
+private:
+    /**
+     * @brief No blocking IPC to cancel a published notification.
+     *
+     * @param notificationId Indicates the unique notification ID in the application.
+     *                       The value must be the ID of a published notification.
+     *                       Otherwise, this method does not take effect.
+     * @return Returns cancel notification result.
+     */
+    ErrCode CancelNotificationNoBlockIPC(int32_t notificationId, const std::string &instanceKey = "");
+
+    /**
+     * @brief No blocking IPC to cancel a published notification matching the specified label and notificationId.
+     *
+     * @param label Indicates the label of the notification to cancel.
+     * @param notificationId Indicates the ID of the notification to cancel.
+     * @return Returns cancel notification result.
+     */
+    ErrCode CancelNotificationNoBlockIPC(const std::string &label, int32_t notificationId,
+        const std::string &instanceKey = "");
+
+    /**
+     * @brief No blocking IPC to cancel all the published notifications.
+     * @note To cancel a specified notification, see CancelNotification(int32_t).
+     *
+     * @return Returns cancel all notifications result.
+     */
+    ErrCode CancelAllNotificationsNoBlockIPC(const std::string &instanceKey = "");
+
+    /**
+     * @brief No blocking IPC to cancel a published agent notification.
+     *
+     * @param notificationId Indicates the unique notification ID in the application.
+     *                       The value must be the ID of a published notification.
+     *                       Otherwise, this method does not take effect.
+     * @param representativeBundle Indicates the name of application bundle your application is representing.
+     * @param userId Indicates the specific user.
+     * @return Returns cancel notification result.
+     */
+    ErrCode CancelAsBundleNoBlockIPC(int32_t notificationId, const std::string &representativeBundle, int32_t userId);
+
+    /**
+     * @brief No blocking IPC to cancel a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle of application your application is representing.
+     * @param notificationId Indicates the unique notification ID in the application.
+     *                       The value must be the ID of a published notification.
+     *                       Otherwise, this method does not take effect.
+     * @return Returns cancel notification result.
+     */
+    ErrCode CancelAsBundleNoBlockIPC(const NotificationBundleOption &bundleOption, int32_t notificationId);
+
+    /**
+     * @brief No blocking IPC to obtain active notifications of the current application in the system.
+     *
+     * @param  request Indicates active NotificationRequest objects of the current application.
+     * @return Returns get active notifications result.
+     */
+    ErrCode GetActiveNotificationsNoBlockIPC(std::vector<sptr<NotificationRequest>> &request,
+        const std::string &instanceKey = "");
+
+    /**
+     * @brief No blocking IPC to obtain all active notifications in the current system. The caller must
+     * have system permissions to call this method.
+     *
+     * @param notification Indicates all active notifications of this application.
+     * @return Returns get all active notifications
+     */
+    ErrCode GetAllActiveNotificationsNoBlockIPC(std::vector<sptr<Notification>> &notification);
+
+    /**
+     * @brief No blocking IPC to obtain the flag that whether to allow a specified application to show badge.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param enabled Specifies whether to allow the given application to show badge.
+     * @return Returns get result.
+     */
+    ErrCode GetShowBadgeEnabledForBundleNoBlockIPC(const NotificationBundleOption &bundleOption, bool &enabled);
+
+    /**
+     * @brief No blocking IPC to obtain the flag that whether to allow the current application to show badge.
+     *
+     * @param enabled Specifies whether to allow the given application to show badge.
+     * @return Returns get result.
+     */
+    ErrCode GetShowBadgeEnabledNoBlockIPC(bool &enabled);
+
+    /**
+     * @brief No blocking IPC to cancel a published agent notification.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param id Indicates the unique notification ID in the application.
+     * @return Returns cancel result.
+     */
+    ErrCode CancelAsBundleWithAgentNoBlockIPC(const NotificationBundleOption &bundleOption, const int32_t id);
 
 private:
     std::mutex subscriberMutex_;

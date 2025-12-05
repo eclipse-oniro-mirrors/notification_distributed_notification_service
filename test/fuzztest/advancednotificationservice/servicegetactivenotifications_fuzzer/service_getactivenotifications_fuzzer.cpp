@@ -34,6 +34,8 @@ namespace Notification {
             iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
             synchronizer->Wait();
         }
+        std::vector<sptr<NotificationRequest>> notifications = { request };
+        service->GetActiveNotifications(notifications, stringData);
         return true;
     }
 }
