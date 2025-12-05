@@ -508,6 +508,22 @@ public:
     int64_t GetFinishDeadLine() const;
 
     /**
+     * @brief Sets the geofence trigger deadline time before deleting a notification.
+     *
+     * @param geofenceTriggerDeadLine Indicates the time in milliseconds.
+     * The default value is 0, indicating that the notification will not be automatically deleted.
+     * To enable the notification to be automatically deleted, set this parameter to an integer greater than 0.
+     */
+    void SetGeofenceTriggerDeadLine(int64_t triggerDeadLine);
+
+    /**
+     * @brief Obtains the time point which a notification must be finished.
+     *
+     * @return Returns the time point in milliseconds.
+     */
+    int64_t GetGeofenceTriggerDeadLine() const;
+
+    /**
      * @brief Sets the finish deadline time before deleting a notification.
      *
      * @param finishDeadLine Indicates the time in milliseconds.
@@ -1281,7 +1297,7 @@ public:
 
     bool IsSystemLiveView() const;
 
-    bool IsGeofenceLiveView() const;
+    bool IsTriggerLiveView() const;
 
     bool IsUpdateLiveView() const;
 
@@ -1570,6 +1586,10 @@ public:
 
     uint32_t GetPriorityNotificationSign() const;
 
+    NotificationLiveViewContent::LiveViewStatus GetLiveViewStatus() const;
+
+    bool SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus status);
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).
@@ -1654,6 +1674,7 @@ private:
     int64_t autoDeletedTime_ {NotificationConstant::INVALID_AUTO_DELETE_TIME};
     int64_t updateDeadLine_ {0};
     int64_t finishDeadLine_ {0};
+    int64_t triggerDeadLine_ {0};
     int64_t archiveDeadLine_ {0};
     pid_t creatorPid_ {0};
     int32_t creatorUid_ {DEFAULT_UID};

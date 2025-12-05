@@ -99,6 +99,9 @@ enum ErrorCode : uint32_t {
     ERR_ANS_LOCAL_SUBSCRIBE_CHECK_FAILED,
     ERR_ANS_CHECK_WEAK_NETWORK,
     ERR_ANS_NO_CUSTOM_RINGTONE_INFO,
+    ERR_ANS_GEOFENCE_ENABLED,
+    ERR_ANS_GEOFENCE_EXCEEDED,
+    ERR_ANS_DEVICE_NOT_SUPPORT,
     ERR_ANS_INVALID_BUNDLE_OPTION,
     ERR_ANS_NOT_IMPL_EXTENSIONABILITY,
 };
@@ -169,6 +172,9 @@ const int32_t ERROR_NOT_IMPL_EXTENSIONABILITY    =
     1600023;    // App Not Implement NotificationSubscriberExtensionAbility.
 const int32_t ERROR_NO_CUSTOM_RINGTONE_INFO      =
     1600024;    // The specified bundle has no custom ringtone information.
+const int32_t ERROR_GEOFENCE_ENABLED             = 1600025;    // Geofencing disabled.
+const int32_t ERROR_DEVICE_NOT_SUPPORT           = 1600026;    // The device does not support geofencing.
+
 const int32_t ERROR_NETWORK_UNREACHABLE          = 2300007;    // Network unreachable.
 const int32_t ERROR_BUNDLE_NOT_FOUND             = 17700001;   // The specified bundle name was not found.
 

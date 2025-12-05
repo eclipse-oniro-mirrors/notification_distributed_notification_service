@@ -1655,6 +1655,24 @@ public:
     ErrCode IsGeofenceEnabled(bool &enabled);
 
     /**
+     * @brief Clear delayed release notification.
+     *
+     * @param triggerKeys Unique ID of the notifications.
+     * @param userIds Indicates the specific users.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ClearDelayNotification(const std::vector<std::string> &triggerKeys, const std::vector<int32_t> &userIds);
+
+    /**
+     * @brief Publish delayed release notification.
+     *
+     * @param triggerKey Unique ID of the notification.
+     * @param userId Indicates the specific user.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode PublishDelayedNotification(const std::string &triggerKey, int32_t userId);
+
+    /**
      * @brief Background unaware proxy.
      *
      * @param uidList List of uid applications.

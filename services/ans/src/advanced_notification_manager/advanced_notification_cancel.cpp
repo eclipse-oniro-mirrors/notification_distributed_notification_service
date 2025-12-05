@@ -294,6 +294,19 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("called");
+        {
+            std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+            for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+                if (((*it)->bundleOption->GetBundleName().empty()) && ((*it)->bundleOption->GetUid() == uid) &&
+                    ((*it)->notification->GetId() == notificationId) && ((*it)->notification->GetLabel() == label)) {
+                    ProcForDeleteGeofenceLiveView(*it);
+                    it = triggerNotificationList_.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+        }
+
         sptr<Notification> notification = nullptr;
         for (auto record : notificationList_) {
             if ((record->bundleOption->GetBundleName().empty()) && (record->bundleOption->GetUid() == uid) &&
@@ -376,6 +389,8 @@ ErrCode AdvancedNotificationService::ExcuteRemoveNotification(const sptr<Notific
     std::string deviceId;
     std::string bundleName;
 #endif
+    ExecuteRemoveNotificationFromTriggerNotificationList(bundle, notificationId, label);
+
     for (auto record : notificationList_) {
         if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
             (record->bundleOption->GetUid() == bundle->GetUid()) &&
@@ -521,6 +536,19 @@ void AdvancedNotificationService::ExcuteRemoveAllNotificationsInner(const sptr<N
 void AdvancedNotificationService::GetRemoveListForRemoveAll(const sptr<NotificationBundleOption> &bundleOption,
     const sptr<NotificationBundleOption> &bundle, std::vector<std::shared_ptr<NotificationRecord>> &removeList)
 {
+    {
+        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+        for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+            if ((*it)->bundleOption->GetBundleName() != bundle->GetBundleName() ||
+                (*it)->bundleOption->GetUid() != bundle->GetUid()) {
+                ProcForDeleteGeofenceLiveView(*it);
+                it = triggerNotificationList_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
     for (auto record : notificationList_) {
         bool isAllowedNotification = true;
         if (IsAllowedNotifyForBundle(bundleOption, isAllowedNotification) != ERR_OK) {
@@ -669,6 +697,24 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
 void AdvancedNotificationService::GetRemoveListForRemoveNtfBySlot(const sptr<NotificationBundleOption> &bundle,
     const sptr<NotificationSlot> &slot, std::vector<std::shared_ptr<NotificationRecord>> &removeList)
 {
+    {
+        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+        for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+            if ((*it) == nullptr) {
+                ANS_LOGE("null record");
+                continue;
+            }
+            if (((*it)->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
+                ((*it)->bundleOption->GetUid() == bundle->GetUid()) &&
+                ((*it)->request->GetSlotType() == slot->GetType())) {
+                ProcForDeleteGeofenceLiveView(*it);
+                it = triggerNotificationList_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
     for (auto record : notificationList_) {
         if (record == nullptr) {
             ANS_LOGE("null record");

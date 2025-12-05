@@ -3217,6 +3217,37 @@ ErrCode AnsNotification::IsGeofenceEnabled(bool &enabled)
     return proxy->IsGeofenceEnabled(enabled);
 }
 
+ErrCode AnsNotification::ClearDelayNotification(const std::vector<std::string> &triggerKeys,
+    const std::vector<int32_t> &userIds)
+{
+    if (triggerKeys.empty() || userIds.empty()) {
+        ANS_LOGE("Input parameters triggerKeys or userIds are empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (triggerKeys.size() != userIds.size()) {
+        ANS_LOGE("TriggerKeys size not equal userIds size.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->ClearDelayNotification(triggerKeys, userIds);
+}
+
+ErrCode AnsNotification::PublishDelayedNotification(const std::string &triggerKey, int32_t userId)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->PublishDelayedNotification(triggerKey, userId);
+}
+
 ErrCode AnsNotification::ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy)
 {
     sptr<IAnsManager> proxy = GetAnsManagerProxy();

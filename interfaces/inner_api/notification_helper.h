@@ -24,6 +24,7 @@
 #include "notification_do_not_disturb_profile.h"
 #include "enabled_notification_callback_data.h"
 #include "notification_extension_subscription_info.h"
+#include "notification_live_view_content.h"
 #include "notification_request.h"
 #include "notification_slot.h"
 #include "notification_sorting_map.h"
@@ -1614,6 +1615,25 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     static ErrCode IsGeofenceEnabled(bool &enabled);
+
+    /**
+     * @brief Clear delayed release notification.
+     *
+     * @param triggerKeys Unique ID of the notifications.
+     * @param userIds Indicates the specific users.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode ClearDelayNotification(const std::vector<std::string> &triggerKeys,
+        const std::vector<int32_t> &userIds);
+
+    /**
+     * @brief Publish delayed release notification.
+     *
+     * @param triggerKey Unique ID of the notification.
+     * @param userId Indicates the specific user.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode PublishDelayedNotification(const std::string &triggerKey, int32_t userId);
 
     /**
      * @brief Obtains the list of bundleOption which subscribed by targetBundle

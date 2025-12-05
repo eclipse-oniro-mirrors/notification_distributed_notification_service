@@ -129,10 +129,15 @@ void AdvancedNotificationService::UpdateCollaborateTimerInfo(const std::shared_p
     auto content = record->request->GetContent()->GetNotificationContent();
     auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
     auto status = liveViewContent->GetLiveViewStatus();
+    auto trigger = record->request->GetNotificationTrigger();
     switch (status) {
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE: {
             if (record->notification->GetFinishTimer() == NotificationConstant::INVALID_TIMER_ID) {
                 SetFinishTimer(record);
+            }
+            if (trigger != nullptr &&
+                record->notification->GetGeofenceTriggerTimer() == NotificationConstant::INVALID_TIMER_ID) {
+                SetGeofenceTriggerTimer(record);
             }
             if (record->notification->GetUpdateTimer() == NotificationConstant::INVALID_TIMER_ID) {
                 SetUpdateTimer(record);
@@ -155,6 +160,7 @@ void AdvancedNotificationService::UpdateCollaborateTimerInfo(const std::shared_p
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END:
             CancelUpdateTimer(record);
             CancelFinishTimer(record);
+            CancelGeofenceTriggerTimer(record);
             StartArchiveTimer(record);
             break;
         default:
@@ -506,6 +512,7 @@ void AdvancedNotificationService::ExcuteCancelGroupCancel(
 {
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
+        ExecuteCancelGroupCancelFromTriggerNotificationList(bundleOption, groupName);
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
         for (auto record : notificationList_) {
             ANS_LOGD("ExcuteCancelGroupCancel instanceKey(%{public}s, %{public}s).",
@@ -601,6 +608,7 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
         ANS_LOGD("ffrt enter!");
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
         int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
+        RemoveGroupByBundleFromTriggerNotificationList(bundle, groupName);
         for (auto record : notificationList_) {
             if (!record->notification->IsRemoveAllowed()) {
                 continue;
@@ -1306,6 +1314,18 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(const st
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
         ANS_LOGD("ffrt enter!");
+        {
+            std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+            for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+                if (((*it)->bundleOption->GetBundleName() == bundleName)) {
+                    ProcForDeleteGeofenceLiveView(*it);
+                    it = triggerNotificationList_.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+        }
+
         for (auto record : notificationList_) {
             if (record == nullptr) {
                 ANS_LOGE("record is nullptr");

@@ -1562,7 +1562,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287002, Function | SmallTest | Level1)
     ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
     bool enabled = false;
     result = advancedNotificationService_->IsGeofenceEnabled(enabled);
-    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(result, ERR_ANS_SERVICE_NOT_READY);
 }
 }  // namespace Notification
 }  // namespace OHOS

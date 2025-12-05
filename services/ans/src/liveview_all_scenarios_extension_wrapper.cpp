@@ -77,6 +77,12 @@ void LiveviewAllScenariosExtensionWrapper::InitExtentionWrapper()
         ANS_LOGE("liveview notify config %{public}s.", dlerror());
         return;
     }
+
+    onNotifyDelayedNotification_ =
+        (ON_NOTIFY_DELAYED_NOTIFICATION)dlsym(ExtensionHandle_, "OnNotifyDelayedNotification");
+
+    onNotifyClearNotification_ =
+        (ON_NOTIFY_CLEAR_NOTIFICATION)dlsym(ExtensionHandle_, "OnNotifyClearNotification");
     ANS_LOGI("liveview all scenarios extension wrapper init success");
 }
 
@@ -153,5 +159,25 @@ ErrCode LiveviewAllScenariosExtensionWrapper::NotifyLiveViewEvent(const std::str
     }
 
     return notifyLiveViewEvent_(event, bundleInfo);
+}
+
+ErrCode LiveviewAllScenariosExtensionWrapper::OnNotifyDelayedNotification(
+    const sptr<NotificationRequest> &request)
+{
+    if (onNotifyDelayedNotification_ == nullptr) {
+        ANS_LOGE("OnNotifyDelayedNotification wrapper symbol failed");
+        return -1;
+    }
+    return onNotifyDelayedNotification_(request);
+}
+
+ErrCode LiveviewAllScenariosExtensionWrapper::OnNotifyClearNotification(
+    const std::vector<std::string> &triggerKeys)
+{
+    if (onNotifyClearNotification_ == nullptr) {
+        ANS_LOGE("OnNotifyClearNotification wrapper symbol failed");
+        return -1;
+    }
+    return onNotifyClearNotification_(triggerKeys);
 }
 }

@@ -27,6 +27,7 @@ constexpr const char* CLASSNAME_BOOLEAN = "std.core.Boolean";
 constexpr const char* CLASSNAME_DOUBLE = "std.core.Double";
 constexpr const char* CLASSNAME_INT = "std.core.Int";
 constexpr const char* CLASSNAME_LONG = "std.core.Long";
+constexpr double DOUBLE_ZERO = 0.0;
 ani_object GetNullObject(ani_env *env)
 {
     ani_ref nullRef;
@@ -247,7 +248,7 @@ ani_status GetPropertyValueDouble(ani_env *env, ani_object param, const char *na
         return ANI_INVALID_ARGS;
     }
     ani_status status = ANI_ERROR;
-    ani_double res = 0.0;
+    ani_double res = DOUBLE_ZERO;
     if ((status = env->Object_GetPropertyByName_Double(param, name, &res)) != ANI_OK) {
         ANS_LOGE("Object_GetPropertyByName_Double failed, status : %{public}d", status);
         return status;

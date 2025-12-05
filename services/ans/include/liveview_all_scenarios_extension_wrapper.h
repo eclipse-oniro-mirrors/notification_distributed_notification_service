@@ -44,6 +44,11 @@ public:
     typedef ErrCode (*NOTIFY_LIVEVIEW_EVENT)(const std::string& event,
         const sptr<NotificationBundleOption>& bundleInfo);
     ErrCode NotifyLiveViewEvent(const std::string& event, const sptr<NotificationBundleOption>& bundleInfo);
+    typedef ErrCode (*ON_NOTIFY_DELAYED_NOTIFICATION)(const sptr<NotificationRequest> &request);
+    typedef ErrCode (*ON_NOTIFY_CLEAR_NOTIFICATION)(const std::vector<std::string> &triggerKey);
+    ErrCode OnNotifyDelayedNotification(const sptr<NotificationRequest> &request);
+    ErrCode OnNotifyClearNotification(const std::vector<std::string> &triggerKeys);
+
 private:
     void* ExtensionHandle_ = nullptr;
     CHECK_LIVEVIEW_CONFIG checkLiveViewConfig_ = nullptr;
@@ -52,6 +57,8 @@ private:
     GET_LIVEVIEW_CONFIG_VERSION getLiveViewConfigVersion_ = nullptr;
     UPDATE_LIVEVIEW_REMINDER_FLAGS updateLiveviewReminderFlags_ = nullptr;
     UPDATE_LIVEVIEW_VOICE_CONTENT updateLiveviewVoiceContent_ = nullptr;
+    ON_NOTIFY_DELAYED_NOTIFICATION onNotifyDelayedNotification_ = nullptr;
+    ON_NOTIFY_CLEAR_NOTIFICATION onNotifyClearNotification_ = nullptr;
 };
 
 #define LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER \

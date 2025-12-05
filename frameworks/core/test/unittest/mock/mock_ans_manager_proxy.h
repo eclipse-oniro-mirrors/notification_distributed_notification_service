@@ -224,6 +224,8 @@ public:
     MOCK_METHOD1(SetReminderInfoByBundles, ErrCode(const std::vector<sptr<NotificationReminderInfo>>&));
     MOCK_METHOD1(SetGeofenceEnabled, ErrCode(bool));
     MOCK_METHOD1(IsGeofenceEnabled, ErrCode(bool &));
+    MOCK_METHOD2(ClearDelayNotification, ErrCode(const std::vector<std::string> &, const std::vector<int32_t> &));
+    MOCK_METHOD2(PublishDelayedNotification, ErrCode(const std::string &, int32_t));
     MOCK_METHOD2(GetUserGrantedEnabledBundles, ErrCode(const sptr<NotificationBundleOption>& bundleOption,
         std::vector<sptr<NotificationBundleOption>>& enabledBundles));
     MOCK_METHOD1(GetUserGrantedEnabledBundlesForSelf, ErrCode(std::vector<sptr<NotificationBundleOption>>& bundles));
