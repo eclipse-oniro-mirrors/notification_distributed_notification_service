@@ -1100,7 +1100,7 @@ ErrCode AdvancedNotificationService::PublishExtensionServiceStateChange(
     commonData.SetWant(want);
     commonData.SetCode(static_cast<int32_t>(eventCode));
     commonData.SetData(bundleOption->GetBundleName());
-    std::vector<std::string> permission { OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER };
+    std::vector<std::string> permission { OHOS_PERMISSION_NOTIFICATION_CONTROLLER };
     EventFwk::CommonEventPublishInfo publishInfo;
     publishInfo.SetSubscriberPermissions(permission);
     bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(commonData, publishInfo);
