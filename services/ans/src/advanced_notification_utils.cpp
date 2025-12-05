@@ -2212,7 +2212,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
         }
         UpdateCloneBundleInfoFoSilentReminder(cloneBundleInfo, bundle);
         NotificationAnalyticsUtil::ReportCloneInfo(cloneBundleInfo);
-        EnsureExtensionServiceLoadedAndSubscribed(bundle, cloneBundleInfo.GetExtensionSubscriptionBundles());
+        EnsureBundlesCanSubscribeOrUnsubscribe(bundle);
     }));
 }
 

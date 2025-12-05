@@ -18,6 +18,7 @@
 #include "advanced_notification_service.h"
 #include "aes_gcm_helper.h"
 #include "ans_log_wrapper.h"
+#include "distributed_data_define.h"
 
 namespace OHOS {
 namespace Notification {
@@ -99,17 +100,9 @@ bool NotificationBluetoothHelper::CheckHfpState(const std::string &bluetoothAddr
     OHOS::Bluetooth::BluetoothRemoteDevice remoteDevice(bluetoothAddress, OHOS::Bluetooth::BT_TRANSPORT_NONE);
     int32_t btConnectState = static_cast<int32_t>(Bluetooth::BTConnectState::DISCONNECTED);
     int32_t ret = OHOS::Bluetooth::HandsFreeAudioGateway::GetProfile()->GetDeviceState(remoteDevice, btConnectState);
-    std::string encryptedAddr;
-    if (AesGcmHelper::Encrypt(bluetoothAddress, encryptedAddr) != ERR_OK) {
-        ANS_LOGW("CheckHfpState Encrypt failed");
-    }
-    if (ret == ERR_OK && btConnectState == static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED)) {
-        ANS_LOGI("Bluetooth HFP device connected: %{public}s", encryptedAddr.c_str());
-        return true;
-    } else {
-        ANS_LOGW("Bluetooth HFP device disconnected: %{public}s", encryptedAddr.c_str());
-    }
-    return false;
+    ANS_LOGI("Bluetooth HFP device: %{public}s, connect state: %{public}d", StringAnonymous(bluetoothAddress).c_str(),
+        btConnectState);
+    return ret == ERR_OK && btConnectState == static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED);
 }
 
 bool NotificationBluetoothHelper::CheckBluetoothConditions(const std::string& addr)
@@ -118,26 +111,14 @@ bool NotificationBluetoothHelper::CheckBluetoothConditions(const std::string& ad
         std::make_shared<OHOS::Bluetooth::BluetoothRemoteDevice>(addr, OHOS::Bluetooth::BT_TRANSPORT_NONE);
     int32_t state = OHOS::Bluetooth::PAIR_NONE;
     remoteDevice->GetPairState(state);
-    std::string encryptedAddr;
-    if (AesGcmHelper::Encrypt(addr, encryptedAddr) != ERR_OK) {
-        ANS_LOGW("CheckBluetoothConditions Encrypt failed");
-    }
-    if (state == OHOS::Bluetooth::PAIR_PAIRED) {
-        ANS_LOGI("Bluetooth device paired: %{public}s, state: %{public}d", encryptedAddr.c_str(), state);
-        return true;
-    } else {
-        ANS_LOGW("Bluetooth device not paired: %{public}s, state: %{public}d", encryptedAddr.c_str(), state);
-    }
-    return false;
+    ANS_LOGI("Bluetooth device: %{public}s, paired state: %{public}d", StringAnonymous(addr).c_str(), state);
+    return state == OHOS::Bluetooth::PAIR_PAIRED;
 }
 
 bool NotificationBluetoothHelper::CheckBluetoothSwitchState()
 {
     Bluetooth::BluetoothState state = Bluetooth::BluetoothHost::GetDefaultHost().GetBluetoothState();
-    if (state != Bluetooth::BluetoothState::STATE_ON) {
-        return false;
-    }
-    return true;
+    return state == Bluetooth::BluetoothState::STATE_ON;
 }
 
 }  // namespace Notification

@@ -2227,16 +2227,19 @@ private:
         const sptr<NotificationBundleOption> &bundleOption, const AppExecFwk::BundleInfo &bundleInfo);
     ErrCode DistributeOperationInner(const sptr<NotificationOperationInfo>& operationInfo);
 
-    void CheckExtensionServiceCondition(
+    void CheckExtensionServiceCondition(std::vector<sptr<NotificationBundleOption>> &bundles,
         std::vector<std::pair<sptr<NotificationBundleOption>,
-        std::vector<sptr<NotificationBundleOption>>>> &extensionBundleInfos,
-        std::vector<sptr<NotificationBundleOption>> &bundles);
+        std::vector<sptr<NotificationBundleOption>>>> &subscribedBundleInfos,
+        std::vector<sptr<NotificationBundleOption>> &unsubscribedBundles);
     bool CheckBluetoothConnectionInInfos(
         const sptr<NotificationBundleOption> &bundleOption,
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos, bool &updateHfp);
-    void FilterPermissionBundles(std::vector<sptr<NotificationBundleOption>> &bundles);
-    void FilterGrantedBundles(std::vector<sptr<NotificationBundleOption>> &bundles);
-    void FilterBundlesByBluetoothConnection(std::vector<sptr<NotificationBundleOption>> &bundles);
+    void FilterPermissionBundles(std::vector<sptr<NotificationBundleOption>> &bundles,
+        std::vector<sptr<NotificationBundleOption>> &mismatchedBundles);
+    void FilterGrantedBundles(std::vector<sptr<NotificationBundleOption>> &bundles,
+        std::vector<sptr<NotificationBundleOption>> &mismatchedBundles);
+    void FilterBundlesByBluetoothConnection(std::vector<sptr<NotificationBundleOption>> &bundles,
+        std::vector<sptr<NotificationBundleOption>> &mismatchedBundles);
     bool HasExtensionSubscriptionStateChanged(const sptr<NotificationBundleOption> &bundle, bool enabled);
     ErrCode PreReminderInfoCheck();
     ErrCode SyncAdditionConfig(const std::string &key, const std::string &value, HaMetaMessage &message);
@@ -2248,9 +2251,8 @@ private:
         const std::vector<sptr<NotificationBundleOption>> &bundles);
     int32_t UnSubscribeExtensionService(const sptr<NotificationBundleOption> &bundleOption);
     int32_t ShutdownExtensionService();
-    bool EnsureExtensionServiceLoadedAndSubscribed(const sptr<NotificationBundleOption> &bundle);
-    bool EnsureExtensionServiceLoadedAndSubscribed(const sptr<NotificationBundleOption> &bundle,
-        const std::vector<sptr<NotificationBundleOption>> &subscribeBundles);
+    bool EnsureBundlesCanSubscribeOrUnsubscribe(const sptr<NotificationBundleOption> &bundle);
+    bool EnsureBundlesCanSubscribeOrUnsubscribe(const std::vector<sptr<NotificationBundleOption>> &bundles);
     bool ShutdownExtensionServiceAndUnSubscribed(const sptr<NotificationBundleOption> &bundle);
     ErrCode GetNotificationExtensionEnabledBundles(std::vector<sptr<NotificationBundleOption>>  &bundles);
     bool GetCloneBundleList(const sptr<NotificationBundleOption>& bundleOption,
@@ -2269,9 +2271,6 @@ private:
     void ProcessBluetoothStateChanged(const int status);
     void ProcessBluetoothPairedStatusChange(int state);
     void CheckBleAndHfpStateChange(bool filterHfpOnly);
-    void ProcessSubscriptionInfoForStateChange(
-        const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos,
-        const sptr<NotificationBundleOption> &bundle, bool filterHfpOnly);
     ErrCode GetUri(sptr<NotificationRequest> &request);
 private:
     static sptr<AdvancedNotificationService> instance_;
