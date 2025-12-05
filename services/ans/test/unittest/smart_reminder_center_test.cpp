@@ -1015,6 +1015,26 @@ HWTEST_F(SmartReminderCenterTest, CheckScreenOffForCollaboration_400, Function |
     smartReminderCenter_->CheckScreenOffForCollaboration(syncDevices, statusMap);
     EXPECT_TRUE(statusMap.count(NotificationConstant::CURRENT_DEVICE_TYPE));
 }
+
+/**
+ * @tc.name: SetSyncDevice_100
+ * @tc.desc: Test status map without current
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, SetSyncDevice_100, Function | SmallTest | Level1)
+{
+    SmartReminderCenter center;
+    sptr<NotificationRequest> request = new NotificationRequest(100);
+    std::set<std::string> syncDevices = {"headset", "wearable"};
+
+    smartReminderCenter_->SetSyncDevice(request, syncDevices);
+
+    auto extendInfo = request->GetExtendInfo();
+    ASSERT_NE(extendInfo, nullptr);
+
+    auto deviceList = extendInfo->GetIntParam("collaboration_device_list", -1);
+    ASSERT_EQ(deviceList, 5); // 5 = 1 << 0 | 1 << 2
+}
 }   //namespace Notification
 }   //namespace OHOS
 #endif

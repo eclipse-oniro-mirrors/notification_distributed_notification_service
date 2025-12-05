@@ -258,6 +258,25 @@ bool SmartReminderCenter::IsCollaborationAllowed(const sptr<NotificationRequest>
         request->GetOwnerBundleName(), request->GetCreatorUid());
 }
 
+void SmartReminderCenter::SetSyncDevice(const sptr<NotificationRequest> &request, set<string> syncDevices) const
+{
+    int32_t index = 0;
+    uint32_t deviceList = 0;
+    for (std::string deviceType : NotificationConstant::DEVICESTYPES) {
+        if (syncDevices.count(deviceType)) {
+            deviceList = deviceList | (1 << index);
+        }
+        index++;
+    }
+    std::shared_ptr<AAFwk::WantParams> extendInfo = request->GetExtendInfo();
+    if (extendInfo == nullptr) {
+        extendInfo = std::make_shared<AAFwk::WantParams>();
+    }
+    ANS_LOGW("SetSyncDevice %{public}zu, %{public}u.", syncDevices.size(), deviceList);
+    extendInfo->SetParam("collaboration_device_list", AAFwk::Integer::Box(deviceList));
+    request->SetExtendInfo(extendInfo);
+}
+
 void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest> &request) const
 {
     shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
@@ -302,6 +321,8 @@ void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest
             syncDevices, smartDevices, defaultFlag, statusMap,
             notificationFlagsOfDevices);
     }
+
+    SetSyncDevice(request, syncDevices);
     request->SetDeviceFlags(notificationFlagsOfDevices);
 }
 
