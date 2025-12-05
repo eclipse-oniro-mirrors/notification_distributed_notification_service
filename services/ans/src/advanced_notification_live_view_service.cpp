@@ -50,6 +50,9 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         ANS_LOGI("Start recover live view. userId:%{public}d", userId);
+        if (RecoverGeofenceLiveViewFromDb(userId) != ERR_OK) {
+            ANS_LOGE("Recover delay live view from db failed.");
+        }
         std::vector<NotificationRequestDb> requestsdb;
         if (GetBatchNotificationRequestsFromDb(requestsdb, userId) != ERR_OK) {
             ANS_LOGE("Get liveView from db failed.");
@@ -122,6 +125,7 @@ ErrCode AdvancedNotificationService::UpdateNotificationTimerInfo(const std::shar
     auto content = record->request->GetContent()->GetNotificationContent();
     auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
     auto status = liveViewContent->GetLiveViewStatus();
+    auto trigger = record->request->GetNotificationTrigger();
     switch (status) {
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE:
             result = SetFinishTimer(record);
@@ -130,6 +134,14 @@ ErrCode AdvancedNotificationService::UpdateNotificationTimerInfo(const std::shar
             }
 
             result = SetUpdateTimer(record);
+            if (result != ERR_OK) {
+                return result;
+            }
+
+            if (trigger != nullptr) {
+                result = SetGeofenceTriggerTimer(record);
+            }
+
             return result;
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE:
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE:
@@ -141,6 +153,7 @@ ErrCode AdvancedNotificationService::UpdateNotificationTimerInfo(const std::shar
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END:
             CancelUpdateTimer(record);
             CancelFinishTimer(record);
+            CancelGeofenceTriggerTimer(record);
             StartArchiveTimer(record);
             break;
         default:
@@ -164,6 +177,7 @@ void AdvancedNotificationService::ProcForDeleteLiveView(const std::shared_ptr<No
 
     CancelUpdateTimer(record);
     CancelFinishTimer(record);
+    CancelGeofenceTriggerTimer(record);
     CancelArchiveTimer(record);
 }
 
@@ -688,6 +702,7 @@ void AdvancedNotificationService::UpdateRecordByOwner(
     uint64_t timerId = 0;
     uint64_t process = NotificationConstant::DEFAULT_FINISH_STATUS;
     CancelTimer(oldRecord->notification->GetFinishTimer());
+    CancelTimer(oldRecord->notification->GetGeofenceTriggerTimer());
     if (isSystemApp) {
         record->request->SetContent(content);
     } else {

@@ -1293,6 +1293,7 @@ void AdvancedNotificationService::DeleteAllByUserStopped(int32_t userId)
         std::string bundleName;
         GetDistributedInfo(key, deviceId, bundleName);
 #endif
+        DeleteAllByUserStoppedFromTriggerNotificationList(key, userId);
         sptr<Notification> notification = nullptr;
         for (auto record : notificationList_) {
             if ((record->notification->GetKey() == key) &&

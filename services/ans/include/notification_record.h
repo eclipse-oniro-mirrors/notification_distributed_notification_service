@@ -36,6 +36,7 @@ struct NotificationRecord {
     bool isThirdparty {true};
     bool isNeedFlowCtrl {true};
     bool isAtomicService {false};
+    bool isUpdateByOwner {false};
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     std::string deviceId;
     std::string bundleName;

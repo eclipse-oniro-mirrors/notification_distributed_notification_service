@@ -71,6 +71,12 @@ public:
         sptr<NotificationBundleOption> bundleOption {nullptr};
     };
 
+    struct GeofencePublishNotificationRequestDb {
+        sptr<NotificationRequest> request {nullptr};
+        sptr<NotificationBundleOption> bundleOption {nullptr};
+        bool isUpdateByOwner = false;
+    };
+
     struct RecentNotification {
         sptr<Notification> notification = nullptr;
         bool isActive = false;
@@ -1303,6 +1309,25 @@ public:
     ErrCode IsGeofenceEnabled(bool &enabled) override;
 
     /**
+     * @brief Clear delayed release notification.
+     *
+     * @param triggerKeys Unique ID of the notifications.
+     * @param userIds Indicates the specific users.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ClearDelayNotification(const std::vector<std::string> &triggerKeys,
+        const std::vector<int32_t> &userIds) override;
+
+    /**
+     * @brief Publish delayed release notification.
+     *
+     * @param triggerKey Unique ID of the notification.
+     * @param userId Indicates the specific user.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode PublishDelayedNotification(const std::string &triggerKey, int32_t userId) override;
+
+    /**
      * @brief configuring Whether to Synchronize Common Notifications to Target Devices.
      *
      * @param deviceType Target device type.
@@ -1883,6 +1908,46 @@ private:
         std::vector<std::string> &dumpInfo);
     ErrCode RecentNotificationDump(const std::string& bundle, int32_t userId, int32_t recvUserId,
         std::vector<std::string> &dumpInfo);
+    void AddToTriggerNotificationList(const std::shared_ptr<NotificationRecord> &record);
+    void ProcForDeleteGeofenceLiveView(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode OnNotifyDelayedNotification(const sptr<NotificationRequest> &request,
+        const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner);
+    ErrCode UpdateTriggerNotification(const sptr<NotificationRequest> &request,
+        const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner,
+        std::vector<std::shared_ptr<NotificationRecord>> &records);
+    ErrCode ParseGeofenceNotificationFromDb(const std::string &value, GeofencePublishNotificationRequestDb &requestDb);
+    ErrCode ClearAllGeofenceNotificationRequests(const int32_t &userId);
+    void FindGeofenceNotificationRecordByKey(const std::string &key,
+        std::vector<std::shared_ptr<NotificationRecord>> &outRecord);
+    void FindGeofenceNotificationRecordByTriggerKey(const std::string &key,
+        std::shared_ptr<NotificationRecord> &outRecord);
+    void FindNotificationRecordByKey(const std::string &key, std::shared_ptr<NotificationRecord> &outRecord);
+    ErrCode RecoverGeofenceLiveViewFromDb(int32_t userId);
+    ErrCode SetGeofenceTriggerTimer(const std::shared_ptr<NotificationRecord> &record);
+    void CancelGeofenceTriggerTimer(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode StartGeofenceTriggerTimer(const std::shared_ptr<NotificationRecord> &record,
+        int64_t expiredTimePoint, const int32_t reason);
+    ErrCode CheckGeofenceNotificationRequest(const sptr<NotificationRequest> &request);
+    void ConvertTriggerLiveviewStatus(sptr<NotificationRequest> &request);
+    void RemoveTriggerNotificationListByTriggerKey(std::string triggerKey);
+    ErrCode CheckTriggerNotificationRequest(const sptr<NotificationRequest> &request);
+    int32_t SetTriggerNotificationRequestToDb(const GeofencePublishNotificationRequestDb &requestDb);
+    int32_t GetBatchNotificationRequestsFromDb(std::vector<GeofencePublishNotificationRequestDb> &requests,
+        int32_t userId = -1);
+    ErrCode TriggerNotificationRecordFilter(const std::shared_ptr<NotificationRecord> &record);
+    void ExecuteCancelGroupCancelFromTriggerNotificationList(const sptr<NotificationBundleOption>& bundleOption,
+        const std::string &groupName);
+    ErrCode PublishPreparedNotificationInner(const sptr<NotificationRequest> &request,
+        const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner);
+    void RemoveFromTriggerNotificationList(const sptr<NotificationBundleOption> &bundleOption,
+        NotificationKey notificationKey);
+    ErrCode CheckSwitchStatus(const sptr<NotificationRequest> &request);
+    ErrCode CheckGeofenceNotificationRequestLiveViewStatus(const sptr<NotificationRequest> &request);
+    void DeleteAllByUserStoppedFromTriggerNotificationList(std::string key, int32_t userId);
+    void ExecuteRemoveNotificationFromTriggerNotificationList(const sptr<NotificationBundleOption> &bundle,
+        int32_t notificationId, const std::string &label);
+    void RemoveGroupByBundleFromTriggerNotificationList(const sptr<NotificationBundleOption> &bundle,
+        const std::string &groupName);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     ErrCode DistributedNotificationDump(const std::string& bundle, int32_t userId, int32_t recvUserId,
         std::vector<std::string> &dumpInfo);
@@ -2221,6 +2286,7 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ = nullptr;
     std::list<std::shared_ptr<NotificationRecord>> notificationList_;
+    std::list<std::shared_ptr<NotificationRecord>> triggerNotificationList_;
     std::shared_ptr<RecentInfo> recentInfo_ = nullptr;
     std::shared_ptr<SystemEventObserver> systemEventObserver_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> pushRecipient_ = nullptr;
@@ -2241,6 +2307,7 @@ private:
     std::list<std::pair<std::chrono::system_clock::time_point, std::string>> localUniqueKeyList_;
     std::list<std::pair<std::shared_ptr<NotificationRecord>, uint64_t>> delayNotificationList_;
     ffrt::mutex delayNotificationMutext_;
+    ffrt::mutex triggerNotificationMutex_;
     static ffrt::mutex doNotDisturbMutex_;
     std::map<int32_t, std::string> doNotDisturbEnableRecord_;
     bool isCachedAppAndDeviceRelationMap_ = false;

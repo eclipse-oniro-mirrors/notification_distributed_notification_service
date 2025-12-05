@@ -924,6 +924,17 @@ ErrCode NotificationHelper::IsGeofenceEnabled(bool &enabled)
     return DelayedSingleton<AnsNotification>::GetInstance()->IsGeofenceEnabled(enabled);
 }
 
+ErrCode NotificationHelper::ClearDelayNotification(const std::vector<std::string> &triggerKeys,
+    const std::vector<int32_t> &userIds)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->ClearDelayNotification(triggerKeys, userIds);
+}
+
+ErrCode NotificationHelper::PublishDelayedNotification(const std::string &triggerKey, int32_t userId)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->PublishDelayedNotification(triggerKey, userId);
+}
+
 ErrCode NotificationHelper::ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->ProxyForUnaware(uidList, isProxy);

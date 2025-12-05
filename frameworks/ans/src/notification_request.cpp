@@ -323,6 +323,16 @@ int64_t NotificationRequest::GetFinishDeadLine() const
     return finishDeadLine_;
 }
 
+void NotificationRequest::SetGeofenceTriggerDeadLine(int64_t triggerDeadLine)
+{
+    triggerDeadLine_ = triggerDeadLine;
+}
+
+int64_t NotificationRequest::GetGeofenceTriggerDeadLine() const
+{
+    return triggerDeadLine_;
+}
+
 void NotificationRequest::SetArchiveDeadLine(int64_t archiveDeadLine)
 {
     archiveDeadLine_ = archiveDeadLine;
@@ -2926,44 +2936,16 @@ bool NotificationRequest::IsSystemLiveView() const
         (notificationContentType_ == NotificationContent::Type::LOCAL_LIVE_VIEW);
 }
 
-bool NotificationRequest::IsGeofenceLiveView() const
+bool NotificationRequest::IsTriggerLiveView() const
 {
-    if (!IsCommonLiveView()) {
-        return false;
-    }
-    if (notificationContent_ == nullptr) {
-        ANS_LOGE("null notificationContent_");
-        return false;
-    }
-    auto content = notificationContent_->GetNotificationContent();
-    if (content == nullptr) {
-        ANS_LOGE("null content");
-        return false;
-    }
-
-    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
-    auto status = liveViewContent->GetLiveViewStatus();
+    auto status = GetLiveViewStatus();
     return status == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE ||
         status == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END;
 }
 
 bool NotificationRequest::IsUpdateLiveView() const
 {
-    if (!IsCommonLiveView()) {
-        return false;
-    }
-    if (notificationContent_ == nullptr) {
-        ANS_LOGE("null notificationContent_");
-        return false;
-    }
-    auto content = notificationContent_->GetNotificationContent();
-    if (content == nullptr) {
-        ANS_LOGE("null content");
-        return false;
-    }
-
-    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
-    auto status = liveViewContent->GetLiveViewStatus();
+    auto status = GetLiveViewStatus();
     return status == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE ||
         status == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE;
 }
@@ -3232,9 +3214,58 @@ std::string NotificationRequest::GetLiveViewStatusKey()
     const char *keySpliter = "_";
     std::stringstream stream;
     auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    if (liveViewContent == nullptr) {
+        ANS_LOGE("null liveViewContent");
+        return "";
+    }
     auto status = liveViewContent->GetLiveViewStatus();
     stream << keySpliter << static_cast<int32_t>(status);
     return stream.str();
+}
+
+NotificationLiveViewContent::LiveViewStatus NotificationRequest::GetLiveViewStatus() const
+{
+    if (!IsCommonLiveView()) {
+        return NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BUTT;
+    }
+    if (notificationContent_ == nullptr) {
+        ANS_LOGE("null notificationContent_");
+        return NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BUTT;
+    }
+    auto content = notificationContent_->GetNotificationContent();
+    if (content == nullptr) {
+        ANS_LOGE("null content");
+        return NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BUTT;
+    }
+    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    if (liveViewContent == nullptr) {
+        ANS_LOGE("null liveViewContent");
+        return NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BUTT;
+    }
+    return liveViewContent->GetLiveViewStatus();
+}
+
+bool NotificationRequest::SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus status)
+{
+    if (!IsCommonLiveView()) {
+        return false;
+    }
+    if (notificationContent_ == nullptr) {
+        ANS_LOGE("null notificationContent_");
+        return false;
+    }
+    auto content = notificationContent_->GetNotificationContent();
+    if (content == nullptr) {
+        ANS_LOGE("null content");
+        return false;
+    }
+    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    if (liveViewContent == nullptr) {
+        ANS_LOGE("null liveViewContent");
+        return false;
+    }
+    liveViewContent->SetLiveViewStatus(status);
+    return true;
 }
 
 bool NotificationRequest::CheckImageOverSizeForPixelMap(

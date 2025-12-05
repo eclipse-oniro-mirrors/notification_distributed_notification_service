@@ -395,6 +395,10 @@ interface OHOS.Notification.IAnsManager {
 
     void IsGeofenceEnabled([out] boolean enabled);
 
+    void ClearDelayNotification([in] String[] triggerKeys, [in] int[] userIds);
+
+    void PublishDelayedNotification([in] String triggerKey, [in] int userId);
+
     void GetUserGrantedEnabledBundles([in] sptr<NotificationBundleOption> targetBundle, [out] sptr<NotificationBundleOption>[] enabledBundles);
 
     void GetUserGrantedEnabledBundlesForSelf([out] sptr<NotificationBundleOption>[] bundles);

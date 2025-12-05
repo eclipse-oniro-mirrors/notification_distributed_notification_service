@@ -102,12 +102,12 @@ export interface Geofence {
 }
 
 class GeofenceInner implements Geofence {
-    longitude: double;
-    latitude: double;
-    radius: double;
-    delayTime?: int | undefined;
-    coordinateSystemType: CoordinateSystemType = CoordinateSystemType.COORDINATE_TYPE_WGS84;
-    monitorEvent: MonitorEvent = MonitorEvent.MONITOR_TYPE_ENTRY;
+    public longitude: double;
+    public latitude: double;
+    public radius: double;
+    public delayTime?: int | undefined;
+    public coordinateSystemType: CoordinateSystemType = CoordinateSystemType.COORDINATE_TYPE_WGS84;
+    public monitorEvent: MonitorEvent = MonitorEvent.MONITOR_TYPE_ENTRY;
 }
 
 export interface Trigger {
@@ -117,9 +117,9 @@ export interface Trigger {
 }
 
 class TriggerInner implements Trigger {
-    type: TriggerType = TriggerType.TRIGGER_TYPE_GEOFENCE;
-    condition: Geofence = {};
-    displayTime?: int | undefined;
+    public type: TriggerType = TriggerType.TRIGGER_TYPE_GEOFENCE;
+    public condition: Geofence = new GeofenceInner();
+    public displayTime?: int | undefined;
 }
 
 export interface NotificationRequest {

@@ -296,6 +296,20 @@ public:
     void SetFinishTimer(uint64_t finishTimerId);
 
     /**
+     * @brief Obtains the trigger timer id of notification.
+     *
+     * @return Returns the id of the notification trigger timer.
+     */
+    uint64_t GetGeofenceTriggerTimer() const;
+
+    /**
+     * @brief Obtains the trigger timer id.
+     *
+     * @param triggerTimerId the id of the notification trigger timer.
+     */
+    void SetGeofenceTriggerTimer(uint64_t triggerTimerId);
+
+    /**
      * @brief Obtains the archive timer id of notification.
      *
      * @return Returns the id of the notification archive timer.
@@ -365,6 +379,7 @@ private:
     int64_t postTime_ {0};
     uint64_t updateTimerId_ {0};
     uint64_t finishTimerId_ {0};
+    uint64_t triggerTimerId_ {0};
     uint64_t archiveTimerId_ {0};
     std::shared_ptr<Uri> sound_ {nullptr};
     std::vector<int64_t> vibrationStyle_ {};

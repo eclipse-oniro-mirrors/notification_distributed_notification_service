@@ -963,6 +963,17 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode ClearDelayNotification(const std::vector<std::string> &triggerKeys,
+        const std::vector<int32_t> &userIds) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode PublishDelayedNotification(const std::string &triggerKey, int32_t userId) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode SetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundle,
         const sptr<NotificationRingtoneInfo> &ringtoneInfo) override
     {

@@ -712,6 +712,28 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::MakeNotificatio
 ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<NotificationRequest> &request,
     const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner)
 {
+    auto result = CheckTriggerNotificationRequest(request);
+    if (result != ERR_OK) {
+        return result;
+    }
+    if (request->GetNotificationTrigger() != nullptr) {
+        return OnNotifyDelayedNotification(request, bundleOption, isUpdateByOwner);
+    }
+    std::vector<std::shared_ptr<NotificationRecord>> records;
+    FindGeofenceNotificationRecordByKey(request->GetSecureKey(), records);
+    if (!records.empty() &&
+        request->GetLiveViewStatus() == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE) {
+        return ERR_ANS_REPEAT_CREATE;
+    }
+    if (!records.empty() && request->IsUpdateLiveView()) {
+        return UpdateTriggerNotification(request, bundleOption, isUpdateByOwner, records);
+    }
+    return PublishPreparedNotificationInner(request, bundleOption, isUpdateByOwner);
+}
+
+ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(const sptr<NotificationRequest> &request,
+    const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner)
+{
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("called");
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
@@ -1072,6 +1094,11 @@ ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRe
     if (!isRecover) {
         auto oldRecord = GetFromNotificationList(record->notification->GetKey());
         result = record->request->CheckNotificationRequest((oldRecord == nullptr) ? nullptr : oldRecord->request);
+        if (result == ERR_ANS_NOTIFICATION_NOT_EXISTS && record->request->IsCommonLiveView() &&
+            record->request->GetLiveViewStatus() ==
+            NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END) {
+            result = TriggerNotificationRecordFilter(record);
+        }
         if (result != ERR_OK) {
             bool liveView = record->request->IsCommonLiveView();
             int32_t slotType = liveView ? NotificationConstant::SlotType::LIVE_VIEW :
@@ -1247,6 +1274,7 @@ ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_
             record->notification->SetUpdateTimer((*iter)->notification->GetUpdateTimer());
             if (!record->request->IsSystemLiveView()) {
                 record->notification->SetFinishTimer((*iter)->notification->GetFinishTimer());
+                record->notification->SetGeofenceTriggerTimer((*iter)->notification->GetGeofenceTriggerTimer());
             }
             *iter = record;
             break;
@@ -1351,6 +1379,17 @@ std::vector<std::string> AdvancedNotificationService::GetNotificationKeys(
         keys.push_back(record->notification->GetKey());
     }
 
+    {
+        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+        for (const auto &record : triggerNotificationList_) {
+            if ((bundleOption != nullptr) &&
+                (record->bundleOption->GetUid() != bundleOption->GetUid())) {
+                continue;
+            }
+            keys.push_back(record->notification->GetKey());
+        }
+    }
+
     std::lock_guard<ffrt::mutex> lock(delayNotificationMutext_);
     for (auto delayNotification : delayNotificationList_) {
         auto delayRequest = delayNotification.first->notification->GetNotificationRequest();
@@ -1450,6 +1489,7 @@ void AdvancedNotificationService::CancelWantAgent(const sptr<Notification> &noti
 ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption,
     NotificationKey notificationKey, sptr<Notification> &notification, int32_t removeReason, bool isCancel)
 {
+    RemoveFromTriggerNotificationList(bundleOption, notificationKey);
     for (auto record : notificationList_) {
         if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
             (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
@@ -1498,6 +1538,18 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
 ErrCode AdvancedNotificationService::RemoveFromNotificationList(
     const std::string &key, sptr<Notification> &notification, bool isCancel, int32_t removeReason)
 {
+    {
+        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+        for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+            if ((*it)->notification->GetKey() == key) {
+                ProcForDeleteGeofenceLiveView(*it);
+                it = triggerNotificationList_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
     for (auto record : notificationList_) {
         if (record->notification->GetKey() != key) {
             continue;
@@ -1529,6 +1581,19 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
 ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
     const std::string &key, const int32_t &userId, sptr<Notification> &notification, bool removeAll)
 {
+    {
+        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+        for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+            if (((*it)->notification->GetKey() == key) &&
+                ((*it)->notification->GetUserId() == userId)) {
+                ProcForDeleteGeofenceLiveView(*it);
+                it = triggerNotificationList_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
     for (auto record : notificationList_) {
         if ((record->notification->GetKey() == key) &&
             (record->notification->GetUserId() == userId)) {
@@ -1607,6 +1672,31 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetFromDelayedN
 std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetRecordFromNotificationList(
     int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName, int32_t userId)
 {
+    std::vector<std::shared_ptr<NotificationRecord>> records;
+    {
+        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+        for (auto &record : triggerNotificationList_) {
+            if ((record->notification->GetLabel() == label) &&
+                (record->notification->GetId() == notificationId) &&
+                (record->bundleOption->GetUid() == uid) &&
+                (record->bundleOption->GetBundleName() == bundleName) &&
+                (record->notification->GetRecvUserId() == userId || userId == -1)) {
+                records.push_back(record);
+            }
+        }
+        if (records.size() == 1) {
+            return records.front();
+        }
+        if (records.size() > 1) {
+            for (auto &record : records) {
+                if (record->request->GetLiveViewStatus() ==
+                    NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END) {
+                    return record;
+                }
+            }
+        }
+    }
+
     for (auto &record : notificationList_) {
         if ((record->notification->GetLabel() == label) &&
             (record->notification->GetId() == notificationId) &&
@@ -1841,8 +1931,9 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
         std::shared_ptr<NotificationContent> content = request->GetContent();
         auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content->GetNotificationContent());
         auto status = liveViewContent->GetLiveViewStatus();
-        if (status != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE) {
-            ANS_LOGD("Status of common live view is not create, no need to check.");
+        if (status != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE &&
+            status != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE) {
+            ANS_LOGD("Status of common live view is not create or pending create, no need to check.");
             return false;
         }
 
@@ -1980,6 +2071,17 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
 void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode, int32_t reason)
 {
     ANS_LOGD("called");
+    {
+        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+        for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+            if ((*it)->notification->GetKey() == hashCode) {
+                ProcForDeleteGeofenceLiveView(*it);
+                it = triggerNotificationList_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
 
     for (const auto &record : notificationList_) {
         if (!record->request) {
@@ -2057,6 +2159,15 @@ bool AdvancedNotificationService::IsNeedNotifyConsumed(const sptr<NotificationRe
     auto status = liveViewContent->GetLiveViewStatus();
     if (status != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END) {
         return true;
+    }
+
+    std::vector<std::shared_ptr<NotificationRecord>> records;
+    FindGeofenceNotificationRecordByKey(request->GetSecureKey(), records);
+    for (const auto &record : records) {
+        if (record->request->GetLiveViewStatus() ==
+            NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE) {
+            return false;
+        }
     }
 
     auto deleteTime = request->GetAutoDeletedTime();

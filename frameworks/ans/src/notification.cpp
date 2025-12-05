@@ -588,6 +588,16 @@ void Notification::SetFinishTimer(uint64_t finishTimerId)
     finishTimerId_ = finishTimerId;
 }
 
+uint64_t Notification::GetGeofenceTriggerTimer() const
+{
+    return triggerTimerId_;
+}
+
+void Notification::SetGeofenceTriggerTimer(uint64_t triggerTimerId)
+{
+    triggerTimerId_ = triggerTimerId;
+}
+
 void Notification::SetArchiveTimer(uint64_t archiveTimerId)
 {
     archiveTimerId_ = archiveTimerId;

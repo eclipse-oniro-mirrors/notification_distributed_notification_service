@@ -50,6 +50,8 @@ static const std::unordered_map<int32_t, std::string> ANS_ERROR_CODE_MESSAGE_MAP
         "The application is not allowed to send notifications due to permission settings"},
     {ERROR_DISTRIBUTED_OPERATION_TIMEOUT, "Distributed operation timeout"},
     {ERROR_NO_CUSTOM_RINGTONE_INFO, "The specified bundle has no custom ringtone information"},
+    {ERROR_GEOFENCE_ENABLED, "Geofencing disabled"},
+    {ERROR_DEVICE_NOT_SUPPORT, "The device does not support geofencing"},
     {ERROR_BUNDLE_INVALID, "The specified bundle is invalid"},
     {ERROR_NOT_IMPL_EXTENSIONABILITY,
         "The application does not implement the NotificationSubscriberExtensionAbility"},
@@ -99,6 +101,9 @@ static std::vector<std::pair<uint32_t, int32_t>> errorsConvert = {
     {ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION, ERROR_REJECTED_WITH_DISABLE_NOTIFICATION},
     {ERR_ANS_OPERATION_TIMEOUT, ERROR_DISTRIBUTED_OPERATION_TIMEOUT},
     {ERR_ANS_NO_CUSTOM_RINGTONE_INFO, ERROR_NO_CUSTOM_RINGTONE_INFO},
+    {ERR_ANS_GEOFENCE_EXCEEDED, ERROR_PARAM_INVALID},
+    {ERR_ANS_GEOFENCE_ENABLED, ERROR_GEOFENCE_ENABLED},
+    {ERR_ANS_DEVICE_NOT_SUPPORT, ERROR_DEVICE_NOT_SUPPORT},
     {ERR_ANS_INVALID_BUNDLE_OPTION, ERROR_BUNDLE_INVALID},
     {ERR_ANS_NOT_IMPL_EXTENSIONABILITY, ERROR_NOT_IMPL_EXTENSIONABILITY},
 };

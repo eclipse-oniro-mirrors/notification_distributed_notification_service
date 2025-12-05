@@ -1581,7 +1581,7 @@ HWTEST_F(NotificationHelperTest, IsGeofenceEnabled_0100, Function | SmallTest | 
     NotificationHelper notificationHelper;
     bool enabled = false;
     ErrCode ret = notificationHelper.IsGeofenceEnabled(enabled);
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }
 }
