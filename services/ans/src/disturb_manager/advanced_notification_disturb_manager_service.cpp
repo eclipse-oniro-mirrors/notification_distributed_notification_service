@@ -266,6 +266,34 @@ ErrCode AdvancedNotificationService::AddDoNotDisturbProfiles(
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::AddDoNotDisturbProfiles(
+    const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, const int32_t userId)
+{
+    ANS_LOGD("Called.");
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("Check user exists failed.");
+        return ERROR_USER_NOT_EXIST;
+    }
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler =
+        notificationSvrQueue_->submit_h(std::bind([copyUserId = userId, copyProfiles = profiles]() {
+            ANS_LOGD("The ffrt enter.");
+            NotificationPreferences::GetInstance()->AddDoNotDisturbProfiles(copyUserId, copyProfiles);
+        }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::RemoveDoNotDisturbProfiles(
     const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
 {
@@ -295,6 +323,34 @@ ErrCode AdvancedNotificationService::RemoveDoNotDisturbProfiles(
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::RemoveDoNotDisturbProfiles(
+    const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, const int32_t userId)
+{
+    ANS_LOGD("Called.");
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("Check user exists failed.");
+        return ERROR_USER_NOT_EXIST;
+    }
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler =
+        notificationSvrQueue_->submit_h(std::bind([copyUserId = userId, copyProfiles = profiles]() {
+            ANS_LOGD("The ffrt enter.");
+            NotificationPreferences::GetInstance()->RemoveDoNotDisturbProfiles(copyUserId, copyProfiles);
+        }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile)
 {
     ANS_LOGD("Called.");
@@ -309,6 +365,30 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbProfile(int64_t id, sptr<Not
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGE("No active user found.");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+
+    profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    ErrCode result = NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(id, userId, profile);
+    if (result != ERR_OK) {
+        ANS_LOGE("profile failed id: %{public}s, userid: %{public}d", std::to_string(id).c_str(), userId);
+    }
+    return result;
+}
+
+ErrCode AdvancedNotificationService::GetDoNotDisturbProfile(
+    int64_t id, sptr<NotificationDoNotDisturbProfile> &profile, const int32_t userId)
+{
+    ANS_LOGD("Called.");
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("Check user exists failed.");
+        return ERROR_USER_NOT_EXIST;
+    }
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
     }
 
     profile = new (std::nothrow) NotificationDoNotDisturbProfile();

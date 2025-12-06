@@ -1227,6 +1227,31 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_0
 }
 
 /**
+ * @tc.name      : GetAllNotificationEnabledBundles_00300
+ * @tc.number    : GetAllNotificationEnabledBundles
+ * @tc.desc      : Check func GetAllNotificationEnabledBundles, return true
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_00300, Function | SmallTest | Level1)
+{
+    std::vector<NotificationBundleOption> bundleOption;
+    int32_t userId = 100;
+    ASSERT_EQ(true, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption, userId));
+}
+
+/**
+ * @tc.name      : GetAllNotificationEnabledBundles_00400
+ * @tc.number    : GetAllNotificationEnabledBundles
+ * @tc.desc      : Check func GetAllNotificationEnabledBundles, return false
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_00400, Function | SmallTest | Level1)
+{
+    preferncesDB_->rdbDataManager_ = nullptr;
+    std::vector<NotificationBundleOption> bundleOption;
+    int32_t userId = 100;
+    ASSERT_EQ(false, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption, userId));
+}
+
+/**
  * @tc.number    : RemoveAnsBundleDbInfo_00200
  * @tc.name      :
  * @tc.desc      : Test RemoveAnsBundleDbInfo function.
@@ -2939,6 +2964,24 @@ HWTEST_F(NotificationPreferencesDatabaseTest, IsGeofenceEnabled_0100, TestSize.L
     bool ret = preferncesDB_->IsGeofenceEnabled(enabled);
     EXPECT_FALSE(ret);
     MockOsAccountManager::MockGetForegroundOsAccountLocalId(100);
+}
+
+/**
+ * @tc.name: HandleDataBaseMap_0100
+ * @tc.desc: test HandleDataBaseMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, HandleDataBaseMap_0100, TestSize.Level1)
+{
+    NotificationBundleOption bundle1 = NotificationBundleOption("ohos.example.demo", 10000);
+    NotificationBundleOption bundle2 = NotificationBundleOption("ohos.example.demo", 10001);
+    std::unordered_map<std::string, std::string> datas;
+    std::vector<NotificationBundleOption> bundleOption;
+    bundleOption.push_back(bundle1);
+    bundleOption.push_back(bundle2);
+    int32_t userId = 100;
+    auto ret = preferncesDB_->HandleDataBaseMap(datas, bundleOption, userId);
+    ASSERT_EQ(ret, true);
 }
 }  // namespace Notification
 }  // namespace OHOS

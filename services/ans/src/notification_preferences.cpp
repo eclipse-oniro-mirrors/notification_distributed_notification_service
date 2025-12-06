@@ -958,6 +958,20 @@ ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(std::vector<No
     return ERR_OK;
 }
 
+ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(
+    std::vector<NotificationBundleOption> &bundleOption, const int32_t userId)
+{
+    ANS_LOGD("called");
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    if (!preferncesDB_->GetAllNotificationEnabledBundles(bundleOption, userId)) {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    return ERR_OK;
+}
+
 ErrCode NotificationPreferences::GetAllLiveViewEnabledBundles(const int32_t userId,
     std::vector<NotificationBundleOption> &bundleOption)
 {

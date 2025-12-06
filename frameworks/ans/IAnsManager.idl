@@ -191,7 +191,11 @@ interface OHOS.Notification.IAnsManager {
 
     [ipcincapacity 520] void AddDoNotDisturbProfiles([in] sptr<NotificationDoNotDisturbProfile>[] profiles);
 
+    [ipcincapacity 520] void AddDoNotDisturbProfiles([in] sptr<NotificationDoNotDisturbProfile>[] profiles, [in] int userId);
+
     [ipcincapacity 520] void RemoveDoNotDisturbProfiles([in] sptr<NotificationDoNotDisturbProfile>[] profiles);
+
+    [ipcincapacity 520] void RemoveDoNotDisturbProfiles([in] sptr<NotificationDoNotDisturbProfile>[] profiles, [in] int userId);
 
     void DoesSupportDoNotDisturbMode([out] boolean doesSupport);
 
@@ -279,6 +283,8 @@ interface OHOS.Notification.IAnsManager {
 
     void GetAllNotificationEnabledBundles([out] NotificationBundleOption[] bundleOption);
 
+    void GetAllNotificationEnabledBundles([out] NotificationBundleOption[] bundleOption, [in] int userId);
+
     void GetAllLiveViewEnabledBundles([out] NotificationBundleOption[] bundleOption);
 
     void GetAllLiveViewEnabledBundles([out] NotificationBundleOption[] bundleOption, [in] int userId);
@@ -343,6 +349,8 @@ interface OHOS.Notification.IAnsManager {
     void SetTargetDeviceStatus([in] String deviceType, [in] unsigned int status, [in] unsigned int controlFlag, [in] String deviceId, [in] int userId);
 
     void GetDoNotDisturbProfile([in] long id, [out] sptr<NotificationDoNotDisturbProfile> profile);
+
+    void GetDoNotDisturbProfile([in] long id, [out] sptr<NotificationDoNotDisturbProfile> profile, [in] int userId);
 
     void AllowUseReminder([in] String bundleName, [out] boolean isAllowUseReminder);
 

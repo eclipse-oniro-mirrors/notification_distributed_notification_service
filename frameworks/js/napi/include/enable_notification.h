@@ -64,6 +64,7 @@ struct AsyncCallbackInfoEnableStatus {
     napi_async_work asyncWork = nullptr;
     CallbackPromiseInfo info;
     std::vector<NotificationBundleOption> bundleOptionVector {};
+    int32_t userId = SUBSCRIBE_USER_INIT;
 };
 
 napi_value EnableNotification(napi_env env, napi_callback_info info);
@@ -72,6 +73,7 @@ napi_value IsNotificationEnabledSelf(napi_env env, napi_callback_info info);
 napi_value RequestEnableNotification(napi_env env, napi_callback_info info);
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnableParams &params);
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, IsEnableParams &params);
+bool ParseUserIdParameters(const napi_env &env, const napi_callback_info &info, int32_t &userId);
 
 }  // namespace NotificationNapi
 }  // namespace OHOS

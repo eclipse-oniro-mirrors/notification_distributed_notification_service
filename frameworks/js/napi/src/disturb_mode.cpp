@@ -290,6 +290,68 @@ bool ParseProfilesParameters(
     return true;
 }
 
+bool ParseProfilesParameters(const napi_env &env, const napi_callback_info &info,
+    std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, int32_t &userId)
+{
+    size_t argc = GET_DISTURB_MAX_PARA;
+    napi_value argv[GET_DISTURB_MAX_PARA] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL_BASE(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL), false);
+    if (argc < DISTURB_PROFILES_PARA) {
+        ANS_LOGE("Wrong number of arguments.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        return false;
+    }
+    napi_valuetype valuetype = napi_undefined;
+    bool isArray = false;
+    napi_is_array(env, argv[PARAM0], &isArray);
+    if (!isArray) {
+        ANS_LOGE("Wrong argument type. Array expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be array.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return false;
+    }
+    uint32_t length = 0;
+    napi_get_array_length(env, argv[PARAM0], &length);
+    if (length == 0) {
+        ANS_LOGD("The array is empty.");
+        std::string msg = "Mandatory parameters are left unspecified. The array is empty.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return false;
+    }
+    for (size_t index = 0; index < length; index++) {
+        napi_value nProfile = nullptr;
+        napi_get_element(env, argv[PARAM0], index, &nProfile);
+        NAPI_CALL_BASE(env, napi_typeof(env, nProfile, &valuetype), false);
+        if (valuetype != napi_object) {
+            ANS_LOGE("Wrong argument type. Object expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be object.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return false;
+        }
+        sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+        if (profile == nullptr) {
+            ANS_LOGE("Failed to create NotificationDoNotDisturbProfile.");
+            return false;
+        }
+        if (!GetDoNotDisturbProfile(env, nProfile, profile)) {
+            return false;
+        }
+        profiles.emplace_back(profile);
+    }
+    if (argc == GET_DISTURB_MAX_PARA) {
+        NAPI_CALL_BASE(env, napi_typeof(env, argv[PARAM1], &valuetype), false);
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return false;
+        }
+        NAPI_CALL_BASE(env, napi_get_value_int32(env, argv[PARAM1], &userId), false);
+    }
+    return true;
+}
+
 napi_value SetDoNotDisturbDate(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("enter");
@@ -565,6 +627,40 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
             return Common::NapiGetNull(env);
         }
         NAPI_CALL(env, napi_get_value_int64(env, argv[PARAM0], &params.profileId));
+    }
+
+    return Common::NapiGetNull(env);
+}
+
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
+    GetDoNotDisturbProfileParams &params, int32_t &userId)
+{
+    ANS_LOGD("ParseParameters");
+
+    size_t argc = GET_DISTURB_MAX_PARA;
+    napi_value argv[GET_DISTURB_MAX_PARA] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+
+    // argv[0]: profileId
+    napi_valuetype valuetype = napi_undefined;
+    if (argc >= DISTURB_PROFILES_PARA) {
+        NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGW("Wrong argument type Excute promise.");
+            return Common::NapiGetNull(env);
+        }
+        NAPI_CALL(env, napi_get_value_int64(env, argv[PARAM0], &params.profileId));
+    }
+
+    if (argc == GET_DISTURB_MAX_PARA) {
+        valuetype = napi_undefined;
+        NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGW("Wrong argument type Excute promise.");
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM1], &userId));
     }
 
     return Common::NapiGetNull(env);

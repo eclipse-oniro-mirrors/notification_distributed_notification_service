@@ -436,10 +436,22 @@ ErrCode NotificationHelper::AddDoNotDisturbProfiles(const std::vector<sptr<Notif
     return DelayedSingleton<AnsNotification>::GetInstance()->AddDoNotDisturbProfiles(profiles);
 }
 
+ErrCode NotificationHelper::AddDoNotDisturbProfiles(
+    const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, const int32_t userId)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->AddDoNotDisturbProfiles(profiles, userId);
+}
+
 ErrCode NotificationHelper::RemoveDoNotDisturbProfiles(
     const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->RemoveDoNotDisturbProfiles(profiles);
+}
+
+ErrCode NotificationHelper::RemoveDoNotDisturbProfiles(
+    const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, const int32_t userId)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->RemoveDoNotDisturbProfiles(profiles, userId);
 }
 
 ErrCode NotificationHelper::DoesSupportDoNotDisturbMode(bool &doesSupport)
@@ -580,6 +592,12 @@ ErrCode NotificationHelper::SetBadgeNumberForDhByBundle(
 ErrCode NotificationHelper::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetAllNotificationEnabledBundles(bundleOption);
+}
+
+ErrCode NotificationHelper::GetAllNotificationEnabledBundles(
+    std::vector<NotificationBundleOption> &bundleOption, const int32_t userId)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetAllNotificationEnabledBundles(bundleOption, userId);
 }
 
 ErrCode NotificationHelper::GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
@@ -778,6 +796,12 @@ ErrCode NotificationHelper::RegisterSwingCallback(const std::function<void(bool,
 ErrCode NotificationHelper::GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbProfile(id, profile);
+}
+
+ErrCode NotificationHelper::GetDoNotDisturbProfile(
+    int64_t id, sptr<NotificationDoNotDisturbProfile> &profile, const int32_t userId)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbProfile(id, profile, userId);
 }
 
 ErrCode NotificationHelper::DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
