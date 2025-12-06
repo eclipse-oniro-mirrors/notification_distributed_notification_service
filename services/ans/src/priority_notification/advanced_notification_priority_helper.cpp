@@ -88,26 +88,27 @@ bool AdvancedNotificationPriorityHelper::IsNeedUpdatePriorityType(const sptr<Not
 
 bool AdvancedNotificationPriorityHelper::HasUpdatedPriorityType(const sptr<NotificationRequest> &request)
 {
-    auto extendInfo = request->GetExtendInfo();
-    if (extendInfo != nullptr) {
-        bool hasUpdated = false;
-        AAFwk::IBoolean* ao = AAFwk::IBoolean::Query(extendInfo->GetParam(DELAY_UPDATE_PRIORITY_KEY));
-        if (ao != nullptr) {
-            hasUpdated = AAFwk::Boolean::Unbox(ao);
-        }
-        if (hasUpdated) {
-            // publish by notification ai for delay updating priority, no need to update again
-            ANS_LOGI("delay update priorityNotificationType");
-            return true;
-        }
-        hasUpdated = false;
-        ao = AAFwk::IBoolean::Query(extendInfo->GetParam(ANS_EXTENDINFO_INFO_PRE + EXTENDINFO_FLAG));
-        if (ao != nullptr) {
-            hasUpdated = AAFwk::Boolean::Unbox(ao);
-        }
-        return hasUpdated;
+    if (DelayUpdatePriority(request)) {
+        // publish by notification ai for delay updating priority, no need to update again
+        ANS_LOGI("delay update priorityNotificationType");
+        return true;
     }
-    return false;
+    auto extendInfo = request->GetExtendInfo();
+    AAFwk::IBoolean* ao = nullptr;
+    if (extendInfo != nullptr) {
+        ao = AAFwk::IBoolean::Query(extendInfo->GetParam(ANS_EXTENDINFO_INFO_PRE + EXTENDINFO_FLAG));
+    }
+    return ao != nullptr && AAFwk::Boolean::Unbox(ao);
+}
+
+bool AdvancedNotificationPriorityHelper::DelayUpdatePriority(const sptr<NotificationRequest> &request)
+{
+    auto extendInfo = request->GetExtendInfo();
+    AAFwk::IBoolean* ao = nullptr;
+    if (extendInfo != nullptr) {
+        ao = AAFwk::IBoolean::Query(extendInfo->GetParam(DELAY_UPDATE_PRIORITY_KEY));
+    }
+    return ao != nullptr && AAFwk::Boolean::Unbox(ao);
 }
 #endif
 }  // namespace Notification

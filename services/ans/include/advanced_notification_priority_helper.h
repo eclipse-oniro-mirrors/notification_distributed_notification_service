@@ -27,6 +27,7 @@ class AdvancedNotificationPriorityHelper : public DelayedSingleton<AdvancedNotif
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
 public:
     void UpdatePriorityType(const sptr<NotificationRequest> &request);
+    bool DelayUpdatePriority(const sptr<NotificationRequest> &request);
 
 private:
     bool IsNeedUpdatePriorityType(const sptr<NotificationRequest> &request);

@@ -21,6 +21,7 @@
 #include "gtest/gtest.h"
 
 #define private public
+#include "advanced_notification_priority_helper.h"
 #include "advanced_notification_service.h"
 #include "advanced_datashare_helper.h"
 #include "ability_manager_errors.h"
@@ -2977,6 +2978,25 @@ HWTEST_F(AnsPublishServiceTest, AtomicServicePublish_0200, Function | MediumTest
     request->SetExtendInfo(extendInfo);
     auto ret = advancedNotificationService_->Publish("", request);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: PublishNotificationBySa_001
+ * @tc.desc: Test PublishNotificationBySa
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishNotificationBySa_001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest(1000);
+    request->SetIsAgentNotification(true);
+    request->SetOwnerBundleName("test.com");
+    request->SetOwnerUserId(-1);
+    std::shared_ptr<AAFwk::WantParams> extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam(DELAY_UPDATE_PRIORITY_KEY, AAFwk::Boolean::Box(true));
+    request->SetExtendInfo(extendInfo);
+    advancedNotificationService_->PublishNotificationBySa(request);
+    EXPECT_TRUE(request->IsAgentNotification());
 }
 }  // namespace Notification
 }  // namespace OHOS

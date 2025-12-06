@@ -49,6 +49,7 @@
 #include "notification_analytics_util.h"
 #include "advanced_datashare_helper.h"
 #include "advanced_datashare_helper_ext.h"
+#include "advanced_notification_priority_helper.h"
 #include "datashare_result_set.h"
 #include "parameter.h"
 #include "parameters.h"
@@ -740,7 +741,13 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 
     if (request->IsAgentNotification()) {
         uid = request->GetOwnerUid();
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+        if (!AdvancedNotificationPriorityHelper::GetInstance()->DelayUpdatePriority(request)) {
+            request->SetIsAgentNotification(false);
+        }
+#else
         request->SetIsAgentNotification(false);
+#endif
         directAgency = true;
     }
     if (uid <= 0) {
