@@ -1564,7 +1564,18 @@ bool NotificationAnalyticsUtil::ReportAllBundlesSlotEnabled()
     if (!CheckSlotNeedReport()) {
         return false;
     }
-
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+    bool isSuccess = true;
+    std::vector<int32_t> userIds;
+    OsAccountManagerHelper::GetInstance().GetForegroundUserIds(userIds);
+    for (auto userId : userIds) {
+        if (!CreateSlotTimerExecute(userId)) {
+            isSuccess = false;
+            continue;
+        }
+    }
+    return isSuccess;
+#endif
     int32_t userId = SUBSCRIBE_USER_INIT;
     OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
 

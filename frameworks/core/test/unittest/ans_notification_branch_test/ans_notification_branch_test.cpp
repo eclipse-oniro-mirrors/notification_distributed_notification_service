@@ -912,6 +912,12 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+        int32_t slotTypeInt, int32_t userId) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode PublishWithMaxCapacity(const std::string& label, const sptr<NotificationRequest>& notification) override
     {
         return ERR_ANS_INVALID_PARAM;

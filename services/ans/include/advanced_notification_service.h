@@ -363,6 +363,8 @@ public:
      */
     ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
         int32_t slotTypeInt) override;
+    ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+        int32_t slotTypeInt, int32_t userId) override;
 
     /**
      * @brief Obtains all active notifications in the current system. The caller must have system permissions to
@@ -1742,7 +1744,7 @@ public:
     bool IsNeedToControllerByDisableNotification(const sptr<NotificationRequest> &request);
 
     void SetAndPublishSubscriberExistFlag(const std::string& deviceType, bool existFlag);
-    ErrCode RemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason);
+    ErrCode RemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason, int32_t userId = -1);
 
     void UpdateCloneBundleInfoForRingtone(NotificationRingtoneInfo ringtoneInfo, int32_t userId,
         const sptr<NotificationBundleOption> bundle, const NotificationCloneBundleInfo cloneBundleInfo);

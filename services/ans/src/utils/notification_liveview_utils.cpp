@@ -74,6 +74,18 @@ bool NotificationLiveViewUtils::CheckLiveViewConfigByBundle(const std::string& b
     return configEnable;
 }
 
+bool NotificationLiveViewUtils::CheckLiveViewConfigByBundle(const std::string& bundleName,
+    const std::string& event, int32_t userId)
+{
+    bool configEnable = false;
+    if (LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->CheckLiveViewConfig(bundleName, event,
+        userId, configEnable) != ERR_OK) {
+        ANS_LOGE("Get config failed %{public}s", bundleName.c_str());
+        return true;
+    }
+    return configEnable;
+}
+
 bool NotificationLiveViewUtils::CheckLiveViewForBundle(const sptr<NotificationRequest>& request)
 {
     if (request == nullptr || !request->IsCommonLiveView()) {
