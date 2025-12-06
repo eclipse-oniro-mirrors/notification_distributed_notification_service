@@ -174,6 +174,110 @@ HWTEST_F(AdvancedDatashareHelperTest, QueryContact_0004, Function | SmallTest | 
     EXPECT_EQ(ret, 1);
 }
 
+HWTEST_F(AdvancedDatashareHelperTest, QueryContact_0005, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    MockSetRowCount(0);
+    MockIsFailedToCreateDataShareHelper(true);
+    MockIsFailedGoToFirstRow(0);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+    Uri contactUri(uri);
+    std::string phoneNumber = "11111111111";
+    int32_t userId = 100;
+
+    bool ret = advancedDatashareHelper.QueryContact(
+        contactUri, phoneNumber, "6", "1", "true", userId);
+    EXPECT_EQ(ret, 1);
+
+    MockIsFailedToCreateDataShareHelper(false);
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+    ret = advancedDatashareHelper.QueryContact(
+        contactUri, phoneNumber, "6", "1", "true", userId);
+    EXPECT_EQ(ret, 1);
+}
+
+HWTEST_F(AdvancedDatashareHelperTest, QueryContact_0006, Function | SmallTest | Level1)
+{
+    std::string str = "0";
+    MockGetStringValue(str);
+    MockGetSystemAbilityManager(false);
+    MockIsFailedToQueryDataShareResultSet(false);
+    MockIsFailedToCreateDataShareHelper(false);
+    MockSetRowCount(1);
+    MockGoToGetNextRow(-1);
+    MockIsFailedGoToFirstRow(0);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = advancedDatashareHelper.GetFocusModeRepeatCallUri(0);
+    Uri contactUri(uri);
+    std::string phoneNumber = "1111";
+    int32_t userId = 100;
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+
+    bool ret = advancedDatashareHelper.QueryContact(
+        contactUri, phoneNumber, "5", "1", "true", userId);
+    EXPECT_EQ(ret, 0);
+
+    str = "1";
+    MockGetStringValue(str);
+    ret = advancedDatashareHelper.QueryContact(
+        contactUri, phoneNumber, "5", "1", "true", userId);
+    EXPECT_EQ(ret, 1);
+
+    str = "2";
+    MockGetStringValue(str);
+    ret = advancedDatashareHelper.QueryContact(
+        contactUri, phoneNumber, "5", "1", "true", userId);
+    EXPECT_EQ(ret, 0);
+
+    ret = advancedDatashareHelper.QueryContact(
+        contactUri, phoneNumber, "10", "1", "true", userId);
+    EXPECT_EQ(ret, 1);
+}
+
+HWTEST_F(AdvancedDatashareHelperTest, QueryContact_0007, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    MockIsFailedToCreateDataShareHelper(true);
+    MockIsFailedToQueryDataShareResultSet(true);
+    MockIsFailedGoToFirstRow(0);
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = advancedDatashareHelper.GetIntelligentExperienceUri(0);
+    Uri contactUri(uri);
+    std::string phoneNumber = "11111111111";
+    int32_t userId = 100;
+
+    int ret = advancedDatashareHelper.QueryContact(
+        contactUri, phoneNumber, "10", "1", "true", userId);
+    EXPECT_EQ(ret, -1);
+
+    MockIsFailedToCreateDataShareHelper(false);
+    ret = advancedDatashareHelper.QueryContact(
+        contactUri, phoneNumber, "10", "1", "true", userId);
+    EXPECT_EQ(ret, -1);
+}
+
+HWTEST_F(AdvancedDatashareHelperTest, QueryContact_0008, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    MockSetRowCount(1);
+    MockIsFailedToCreateDataShareHelper(false);
+    MockIsFailedGoToFirstRow(0);
+    MockGoToGetNextRow(-1);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+    Uri contactUri(uri);
+    std::string phoneNumber = "1111";
+    int32_t userId = 100;
+
+    bool ret = advancedDatashareHelper.QueryContact(
+        contactUri, phoneNumber, "4", "1", "true", userId);
+    EXPECT_EQ(ret, 1);
+}
+
 HWTEST_F(AdvancedDatashareHelperTest, isRepeatCall_0001, Function | SmallTest | Level1)
 {
     MockGetSystemAbilityManager(false);

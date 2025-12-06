@@ -378,6 +378,25 @@ ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(
     return CheckNeedSilent(phoneNumber, callerType, userId);
 }
 
+ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(
+    const std::string &phoneNumber, int32_t callerType, const int32_t userId)
+{
+    ANS_LOGD("called");
+
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("Check user exists failed.");
+        return ERROR_USER_NOT_EXIST;
+    }
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (callingUid != NotificationConstant::ANS_UID &&
+        !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("IsNeedSilentInDoNotDisturbMode CheckPermission failed.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    return CheckNeedSilent(phoneNumber, callerType, userId);
+}
+
 ErrCode AdvancedNotificationService::CheckNeedSilent(
     const std::string &phoneNumber, int32_t callerType, int32_t userId)
 {
@@ -456,7 +475,11 @@ ErrCode AdvancedNotificationService::QueryContactByProfileId(const std::string &
     if (isSupportIntelligentScene == SUPPORT_INTEGELLIGENT_SCENE &&
         (atoi(policy.c_str()) == ContactPolicy::ALLOW_SPECIFIED_CONTACTS ||
         atoi(policy.c_str()) == ContactPolicy::FORBID_SPECIFIED_CONTACTS)) {
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+        uri = datashareHelper->GetIntelligentUri(userId);
+#else
         uri = datashareHelper->GetIntelligentUri();
+#endif
     }
     ANS_LOGI("QueryContactByProfileId uri is %{public}s", uri.c_str());
 
@@ -469,7 +492,11 @@ ErrCode AdvancedNotificationService::QueryContactByProfileId(const std::string &
     }
 
     Uri contactUri(uri);
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+    return datashareHelper->QueryContact(contactUri, phoneNumber, policy, profileId, isSupportIntelligentScene, userId);
+#else
     return datashareHelper->QueryContact(contactUri, phoneNumber, policy, profileId, isSupportIntelligentScene);
+#endif
 }
 
 ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName, const std::string &instanceKey)

@@ -452,6 +452,13 @@ ErrCode NotificationHelper::IsNeedSilentInDoNotDisturbMode(const std::string &ph
     return DelayedSingleton<AnsNotification>::GetInstance()->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
 }
 
+ErrCode NotificationHelper::IsNeedSilentInDoNotDisturbMode(
+    const std::string &phoneNumber, int32_t callerType, const int32_t userId)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsNeedSilentInDoNotDisturbMode(
+        phoneNumber, callerType, userId);
+}
+
 ErrCode NotificationHelper::IsDistributedEnabled(bool &enabled)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabled(enabled);

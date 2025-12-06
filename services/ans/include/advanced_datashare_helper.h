@@ -42,12 +42,16 @@ public:
     bool isRepeatCall(const std::string &phoneNumber);
     ErrCode QueryContact(Uri &uri, const std::string &phoneNumber,
         const std::string &policy, const std::string &profileId, const std::string isSupportIntelligentScene);
+    ErrCode QueryContact(Uri &uri, const std::string &phoneNumber,
+        const std::string &policy, const std::string &profileId,
+        const std::string isSupportIntelligentScene, const int32_t userId);
     std::string GetFocusModeEnableUri(const int32_t &userId) const;
     std::string GetFocusModeProfileUri(const int32_t &userId) const;
     std::string GetIntelligentExperienceUri(const int32_t &userId) const;
     std::string GetFocusModeCallPolicyUri(const int32_t &userId) const;
     std::string GetFocusModeRepeatCallUri(const int32_t &userId) const;
     std::string GetIntelligentUri();
+    std::string GetIntelligentUri(const int32_t userId);
     std::string GetUnifiedGroupEnableUri() const;
     static void SetIsDataShareReady(bool isDataShareReady);
 
@@ -60,10 +64,15 @@ private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
     std::shared_ptr<DataShare::DataShareHelper> CreateContactDataShareHelper(std::string uri);
     std::shared_ptr<DataShare::DataShareHelper> CreateIntelligentDataShareHelper(std::string uri);
+    std::shared_ptr<DataShare::DataShareHelper> CreateIntelligentDataShareHelper(std::string uri, const int32_t userId);
     std::shared_ptr<DataShare::DataShareResultSet> GetContactResultSet(Uri &uri, const std::string &phoneNumber,
         const std::string &policy, const std::string &profileId, const std::string isSupportIntelligentScene);
+    std::shared_ptr<DataShare::DataShareResultSet> GetContactResultSet(Uri &uri, const std::string &phoneNumber,
+        const std::string &policy, const std::string &profileId,
+        const std::string isSupportIntelligentScene, const int32_t userId);
     bool dealWithContactResult(std::shared_ptr<DataShare::DataShareResultSet> resultSet, const std::string &policy);
     std::string GetIntelligentData(const std::string &uri, const std::string &key);
+    std::string GetIntelligentData(const std::string &uri, const std::string &key, const int32_t userId);
     void SetPhoneNumQueryCondition(DataShare::DataSharePredicates &predicates, const std::string &phoneNumber);
 private:
     static bool isDataShareReady_;

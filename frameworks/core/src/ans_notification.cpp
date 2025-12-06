@@ -1627,6 +1627,18 @@ ErrCode AnsNotification::IsNeedSilentInDoNotDisturbMode(const std::string &phone
     return proxy->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
 }
 
+ErrCode AnsNotification::IsNeedSilentInDoNotDisturbMode(
+    const std::string &phoneNumber, int32_t callerType, const int32_t userId)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType, userId);
+}
+
 ErrCode AnsNotification::PublishContinuousTaskNotification(const NotificationRequest &request)
 {
     if (request.GetContent() == nullptr || request.GetNotificationType() == NotificationContent::Type::NONE) {
