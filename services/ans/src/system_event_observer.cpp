@@ -106,8 +106,9 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
     ANS_LOGD("OnReceiveEvent action is %{public}s.", action.c_str());
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
         sptr<NotificationBundleOption> bundleOption = GetBundleOption(want);
-        if (bundleOption != nullptr && callbacks_.onBundleRemoved != nullptr) {
-            callbacks_.onBundleRemoved(bundleOption);
+        if (bundleOption != nullptr && callbacks_.onBundleRemovedByUserId != nullptr) {
+            int32_t userId = data.GetCode();
+            callbacks_.onBundleRemovedByUserId(bundleOption, userId);
         }
         if (bundleOption != nullptr) {
             NotificationLiveViewUtils::GetInstance().NotifyLiveViewEvent(action, bundleOption);

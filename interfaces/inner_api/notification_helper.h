@@ -1071,6 +1071,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     static ErrCode GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
+    static ErrCode GetAllLiveViewEnabledBundles(
+        std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
 
     /**
      * @brief Obtains allow distribued application list.
@@ -1434,6 +1436,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     static ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder);
+    static ErrCode AllowUseReminder(const std::string& bundleName, const int32_t userId, bool& isAllowUseReminder);
 
     /**
      * @brief Set switch and bundle list of disable notification feature.

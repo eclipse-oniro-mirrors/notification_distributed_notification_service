@@ -279,6 +279,8 @@ interface OHOS.Notification.IAnsManager {
 
     void GetAllLiveViewEnabledBundles([out] NotificationBundleOption[] bundleOption);
 
+    void GetAllLiveViewEnabledBundles([out] NotificationBundleOption[] bundleOption, [in] int userId);
+
     void GetAllDistribuedEnabledBundles([in] String deviceType, [out] NotificationBundleOption[] bundleOption);
 
     void RegisterPushCallback([in] IRemoteObject pushCallback, [in] sptr<NotificationCheckRequest> notificationCheckRequest);
@@ -341,6 +343,8 @@ interface OHOS.Notification.IAnsManager {
     void GetDoNotDisturbProfile([in] long id, [out] sptr<NotificationDoNotDisturbProfile> profile);
 
     void AllowUseReminder([in] String bundleName, [out] boolean isAllowUseReminder);
+
+    void AllowUseReminder([in] String bundleName, [in] int userId, [out] boolean isAllowUseReminder);
 
     [oneway] void UpdateNotificationTimerByUid([in] int uid, [in] boolean isPaused);
 

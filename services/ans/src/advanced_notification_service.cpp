@@ -342,7 +342,8 @@ AdvancedNotificationService::AdvancedNotificationService()
     RecoverLiveViewFromDb();
 
     ISystemEvent iSystemEvent = {
-        std::bind(&AdvancedNotificationService::OnBundleRemoved, this, std::placeholders::_1),
+        std::bind(&AdvancedNotificationService::onBundleRemovedByUserId,
+            this, std::placeholders::_1, std::placeholders::_2),
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
         std::bind(&AdvancedNotificationService::OnScreenOn, this),
         std::bind(&AdvancedNotificationService::OnScreenOff, this),

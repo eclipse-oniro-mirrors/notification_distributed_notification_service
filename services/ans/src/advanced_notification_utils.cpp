@@ -549,6 +549,81 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
     }
 }
 
+void AdvancedNotificationService::onBundleRemovedByUserId(
+    const sptr<NotificationBundleOption> &bundleOption, const int32_t userId)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("Check user exists failed.");
+        return;
+    }
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
+    notificationSvrQueue_->submit(std::bind([this, bundleOption, userId]() {
+        ANS_LOGD("ffrt enter!");
+        ErrCode result = NotificationPreferences::GetInstance()->RemoveNotificationForBundle(bundleOption);
+        if (result != ERR_OK) {
+            ANS_LOGE("NotificationPreferences::RemoveNotificationForBundle failed: %{public}d", result);
+        }
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+        DistributedPreferences::GetInstance()->DeleteDistributedBundleInfo(bundleOption);
+        std::vector<std::string> keys = GetLocalNotificationKeys(bundleOption);
+#else
+        std::vector<std::string> keys = GetNotificationKeys(bundleOption);
+#endif
+        std::vector<sptr<Notification>> notifications;
+        std::vector<uint64_t> timerIds;
+        for (auto key : keys) {
+            sptr<Notification> notification = nullptr;
+            result = RemoveFromNotificationList(key, notification, true,
+                NotificationConstant::PACKAGE_REMOVE_REASON_DELETE);
+            if (result != ERR_OK) {
+                continue;
+            }
+
+            if (notification != nullptr) {
+                int32_t reason = NotificationConstant::PACKAGE_REMOVE_REASON_DELETE;
+                UpdateRecentNotification(notification, true, reason);
+                notifications.emplace_back(notification);
+                timerIds.emplace_back(notification->GetAutoDeletedTimer());
+                ExecBatchCancel(notifications, reason);
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+                DoDistributedDelete("", "", notification);
+#endif
+            }
+        }
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                notifications, nullptr, NotificationConstant::PACKAGE_REMOVE_REASON_DELETE);
+        }
+        BatchCancelTimer(timerIds);
+        NotificationPreferences::GetInstance()->RemoveAnsBundleDbInfo(bundleOption);
+        RemoveDoNotDisturbProfileTrustList(bundleOption, userId);
+        DeleteDuplicateMsgs(bundleOption);
+    }));
+    NotificationPreferences::GetInstance()->RemoveEnabledDbByBundle(bundleOption);
+    NotificationPreferences::GetInstance()->RemoveSilentEnabledDbByBundle(bundleOption);
+#ifdef ENABLE_ANS_AGGREGATION
+    EXTENTION_WRAPPER->UpdateByBundle(bundleOption->GetBundleName(),
+        NotificationConstant::PACKAGE_REMOVE_REASON_DELETE);
+#endif
+
+    if (!isCachedAppAndDeviceRelationMap_) {
+        if (!DelayedSingleton<NotificationConfigParse>::GetInstance()->GetAppAndDeviceRelationMap(
+            appAndDeviceRelationMap_)) {
+            ANS_LOGE("GetAppAndDeviceRelationMap failed");
+            return;
+        }
+        isCachedAppAndDeviceRelationMap_ = true;
+    }
+    auto appAndDeviceRelation = appAndDeviceRelationMap_.find(bundleOption->GetBundleName());
+    if (appAndDeviceRelation != appAndDeviceRelationMap_.end()) {
+        SetAndPublishSubscriberExistFlag(appAndDeviceRelation->second, false);
+    }
+}
+
 void AdvancedNotificationService::ExecBatchCancel(std::vector<sptr<Notification>> &notifications,
     int32_t &reason)
 {
@@ -567,6 +642,17 @@ void AdvancedNotificationService::RemoveDoNotDisturbProfileTrustList(
     int32_t userId = 0;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGE("Failed to get active user id.");
+        return;
+    }
+    NotificationPreferences::GetInstance()->RemoveDoNotDisturbProfileTrustList(userId, bundleOption);
+}
+
+void AdvancedNotificationService::RemoveDoNotDisturbProfileTrustList(
+    const sptr<NotificationBundleOption> &bundleOption, const int32_t userId)
+{
+    ANS_LOGD("Called.");
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("Check user exists failed.");
         return;
     }
     NotificationPreferences::GetInstance()->RemoveDoNotDisturbProfileTrustList(userId, bundleOption);
@@ -2000,9 +2086,37 @@ bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName
 #endif
 }
 
+bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName, const int32_t userId)
+{
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("Check user exists failed.");
+        return false;
+    }
+    int32_t uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, userId);
+    if (VerifyCloudCapability(uid, REMINDER_CAPABILITY)) {
+        return true;
+    }
+    if (DelayedSingleton<NotificationConfigParse>::GetInstance()->IsReminderEnabled(bundleName)) {
+        return true;
+    }
+#ifdef ENABLE_ANS_ADDITIONAL_CONTROL
+    int32_t ctrlResult = EXTENTION_WRAPPER->ReminderControl(bundleName);
+    return ctrlResult == ERR_OK;
+#else
+    return true;
+#endif
+}
+
 ErrCode AdvancedNotificationService::AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder)
 {
     isAllowUseReminder = AllowUseReminder(bundleName);
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::AllowUseReminder(
+    const std::string& bundleName, const int32_t userId, bool& isAllowUseReminder)
+{
+    isAllowUseReminder = AllowUseReminder(bundleName, userId);
     return ERR_OK;
 }
 

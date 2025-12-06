@@ -1083,6 +1083,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
+    ErrCode GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
 
     /**
      * @brief Obtains allow distributed application list.
@@ -1419,6 +1420,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder);
+    ErrCode AllowUseReminder(const std::string& bundleName, const int32_t userId, bool& isAllowUseReminder);
 
     /**
      * @brief Ans service died, OnRemoteDied called.

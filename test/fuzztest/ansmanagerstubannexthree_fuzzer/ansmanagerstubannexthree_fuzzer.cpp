@@ -268,6 +268,7 @@ namespace OHOS {
         service->DistributeOperation(operationInfo, nullptr);
         service->SetHashCodeRule(hashCodeType);
         service->GetAllLiveViewEnabledBundles(bundleOptions);
+        service->GetAllLiveViewEnabledBundles(bundleOptions, userId);
         service->DisableNotificationFeature(notificationDisable);
         service->ReplyDistributeOperation(stringData, result);
         service->UpdateNotificationTimerByUid(uid, isPaused);
