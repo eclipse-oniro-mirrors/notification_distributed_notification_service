@@ -2186,6 +2186,18 @@ HWTEST_F(NotificationPreferencesTest, SetHashCodeRule_00100, Function | SmallTes
 }
 
 /**
+ * @tc.number    : SetHashCodeRule_00200
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, SetHashCodeRule_00200, Function | SmallTest | Level1)
+{
+    int32_t userId = 100;
+    auto res = NotificationPreferences::GetInstance()->SetHashCodeRule(100, 1, userId);
+    ASSERT_EQ(res, ERR_OK);
+}
+
+/**
  * @tc.name: AddDoNotDisturbProfiles_0400
  * @tc.desc:
  * @tc.type:

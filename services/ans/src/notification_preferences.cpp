@@ -2500,12 +2500,40 @@ ErrCode NotificationPreferences::SetHashCodeRule(const int32_t uid, const uint32
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
+ErrCode NotificationPreferences::SetHashCodeRule(const int32_t uid, const uint32_t type, const int32_t userId)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("Check user exists failed.");
+        return ERROR_USER_NOT_EXIST;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->SetHashCodeRule(uid, type, userId);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
 uint32_t NotificationPreferences::GetHashCodeRule(const int32_t uid)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     uint32_t result = 0;
     result = preferncesDB_->GetHashCodeRule(uid);
+    ANS_LOGD("uid = %{public}d result = %{public}d", uid, result);
+    return result;
+}
+
+uint32_t NotificationPreferences::GetHashCodeRule(const int32_t uid, const int32_t userId)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("Check user exists failed.");
+        return 0;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    uint32_t result = 0;
+    result = preferncesDB_->GetHashCodeRule(uid, userId);
     ANS_LOGD("uid = %{public}d result = %{public}d", uid, result);
     return result;
 }

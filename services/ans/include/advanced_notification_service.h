@@ -1737,6 +1737,10 @@ public:
 
     bool IsDisableNotification(const std::string &bundleName);
 
+    bool IsDisableNotification(const sptr<NotificationBundleOption> &bundleOption);
+
+    bool IsDisableNotification(const std::string &bundleName, const int32_t userId);
+
     bool IsDisableNotificationByKiosk(const std::string &bundleName);
 
     bool IsDisableNotificationForSaByKiosk(const std::string &bundleName, bool directAgency);
@@ -1756,6 +1760,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode SetHashCodeRule(const uint32_t type) override;
+    ErrCode SetHashCodeRule(const uint32_t type, const int32_t userId) override;
 
     ErrCode AtomicServicePublish(const sptr<NotificationRequest> &request);
 

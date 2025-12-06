@@ -2983,5 +2983,19 @@ HWTEST_F(NotificationPreferencesDatabaseTest, HandleDataBaseMap_0100, TestSize.L
     auto ret = preferncesDB_->HandleDataBaseMap(datas, bundleOption, userId);
     ASSERT_EQ(ret, true);
 }
+
+/**
+ * @tc.name: SetHashCodeRule_0200
+ * @tc.desc: test SetHashCodeRule.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetHashCodeRule_0200, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
+        std::make_shared<NotificationPreferencesDatabase>();
+    int32_t userId = 100;
+
+    EXPECT_TRUE(notificationPreferencesDatabase->SetHashCodeRule(100, 1, userId));
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -1487,6 +1487,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode SetHashCodeRule(const uint32_t type);
+    ErrCode SetHashCodeRule(const uint32_t type, const int32_t userId);
 
     /**
      * @brief get distributed device list.

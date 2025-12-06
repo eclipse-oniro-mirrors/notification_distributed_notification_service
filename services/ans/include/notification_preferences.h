@@ -603,6 +603,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode SetHashCodeRule(const int32_t uid, const uint32_t type);
+    ErrCode SetHashCodeRule(const int32_t uid, const uint32_t type, const int32_t userId);
 
     /**
      * @brief get rule of generate hashCode.
@@ -611,6 +612,7 @@ public:
      * @return  generate hashCode type.
      */
     uint32_t GetHashCodeRule(const int32_t uid);
+    uint32_t GetHashCodeRule(const int32_t uid, const int32_t userId);
 
     bool GetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, int32_t sourceType);

@@ -855,6 +855,11 @@ ErrCode NotificationHelper::SetHashCodeRule(const uint32_t type)
     return DelayedSingleton<AnsNotification>::GetInstance()->SetHashCodeRule(type);
 }
 
+ErrCode NotificationHelper::SetHashCodeRule(const uint32_t type, const int32_t userId)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetHashCodeRule(type, userId);
+}
+
 ErrCode NotificationHelper::GetDistributedDevicelist(std::vector<std::string> &deviceTypes)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetDistributedDevicelist(deviceTypes);
