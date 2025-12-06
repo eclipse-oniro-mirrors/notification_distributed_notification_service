@@ -334,10 +334,17 @@ ErrCode AdvancedNotificationService::IsAllowedNotifyForBundle(const sptr<Notific
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK) {
+        ANS_LOGD("GetOsAccountLocalIdFromUid is false");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+#else
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGD("GetActiveUserId is false");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
+#endif
 
     ErrCode result = ERR_OK;
     allowed = false;
@@ -822,14 +829,20 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         return ERR_ANS_NO_MEMORY;
     }
     record->bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
-    int32_t ipcUid = IPCSkeleton::GetCallingUid();
-    uint32_t hashCodeGeneratetype = NotificationPreferences::GetInstance()->GetHashCodeRule(ipcUid);
-    request->SetHashCodeGenerateType(hashCodeGeneratetype);
     record->notification = new (std::nothrow) Notification(request);
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification");
         return ERR_ANS_NO_MEMORY;
     }
+
+    int32_t ipcUid = IPCSkeleton::GetCallingUid();
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+    uint32_t hashCodeGeneratetype = NotificationPreferences::GetInstance()->GetHashCodeRule(
+        ipcUid, record->notification->GetRecvUserId());
+#else
+    uint32_t hashCodeGeneratetype = NotificationPreferences::GetInstance()->GetHashCodeRule(ipcUid);
+#endif
+    request->SetHashCodeGenerateType(hashCodeGeneratetype);
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
@@ -842,11 +855,19 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 #endif
 
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+        if (!bundle.empty() && IsDisableNotification(bundle, record->notification->GetRecvUserId())) {
+            ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
+            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            return;
+        }
+#else
         if (!bundle.empty() && IsDisableNotification(bundle)) {
             ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
             return;
         }
+#endif
         if (IsDisableNotificationForSaByKiosk(bundle, directAgency)) {
             ANS_LOGE("bundle not in kiosk trust list, bundleName=%{public}s", bundle.c_str());
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
@@ -1211,6 +1232,75 @@ bool AdvancedNotificationService::IsDisableNotification(const std::string &bundl
     return false;
 }
 
+bool AdvancedNotificationService::IsDisableNotification(const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (system::GetBoolParameter(PERSIST_EDM_NOTIFICATION_DISABLE, false)) {
+        return true;
+    }
+    NotificationDisable notificationDisable;
+    if (NotificationPreferences::GetInstance()->GetDisableNotificationInfo(notificationDisable)) {
+        if (notificationDisable.GetDisabled()) {
+            ANS_LOGD("get disabled is open");
+            std::vector<std::string> bundleList = notificationDisable.GetBundleList();
+            auto it = std::find(bundleList.begin(), bundleList.end(), bundleOption->GetBundleName());
+            if (it != bundleList.end()) {
+                return true;
+            }
+        }
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK) {
+        ANS_LOGD("GetOsAccountLocalIdFromUid failed");
+        return false;
+    }
+    if (NotificationPreferences::GetInstance()->GetUserDisableNotificationInfo(userId, notificationDisable)) {
+        if (notificationDisable.GetDisabled()) {
+            ANS_LOGD("get disabled is open");
+            std::vector<std::string> bundleList = notificationDisable.GetBundleList();
+            auto it = std::find(bundleList.begin(), bundleList.end(), bundleOption->GetBundleName());
+            if (it != bundleList.end()) {
+                return true;
+            }
+        }
+    } else {
+        ANS_LOGD("no disabled has been set up or set disabled to close");
+    }
+    return false;
+}
+
+bool AdvancedNotificationService::IsDisableNotification(const std::string &bundleName, const int32_t userId)
+{
+    if (system::GetBoolParameter(PERSIST_EDM_NOTIFICATION_DISABLE, false)) {
+        return true;
+    }
+    NotificationDisable notificationDisable;
+    if (NotificationPreferences::GetInstance()->GetDisableNotificationInfo(notificationDisable)) {
+        if (notificationDisable.GetDisabled()) {
+            ANS_LOGD("get disabled is open");
+            std::vector<std::string> bundleList = notificationDisable.GetBundleList();
+            auto it = std::find(bundleList.begin(), bundleList.end(), bundleName);
+            if (it != bundleList.end()) {
+                return true;
+            }
+        }
+    }
+
+    if (NotificationPreferences::GetInstance()->GetUserDisableNotificationInfo(userId, notificationDisable)) {
+        if (notificationDisable.GetDisabled()) {
+            ANS_LOGD("get disabled is open");
+            std::vector<std::string> bundleList = notificationDisable.GetBundleList();
+            auto it = std::find(bundleList.begin(), bundleList.end(), bundleName);
+            if (it != bundleList.end()) {
+                return true;
+            }
+        }
+    } else {
+        ANS_LOGD("no disabled has been set up or set disabled to close");
+    }
+    return false;
+}
+
 bool AdvancedNotificationService::IsDisableNotificationByKiosk(const std::string &bundleName)
 {
     bool isKioskMode = NotificationPreferences::GetInstance()->IsKioskMode();
@@ -1440,6 +1530,37 @@ ErrCode AdvancedNotificationService::SetHashCodeRule(const uint32_t type)
         return ERR_ANS_PERMISSION_DENIED;
     }
     ErrCode result = NotificationPreferences::GetInstance()->SetHashCodeRule(uid, type);
+    ANS_LOGI("SetHashCodeRule uid=%{public}d,type=%{public}d,result=%{public}d", uid, type, result);
+    message.ErrorCode(result);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
+
+    return result;
+}
+
+ErrCode AdvancedNotificationService::SetHashCodeRule(const uint32_t type, const int32_t userId)
+{
+    ANS_LOGD("called");
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("Check user exists failed.");
+        return ERROR_USER_NOT_EXIST;
+    }
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_8);
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("IsSystemApp is false.");
+        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append("Not SystemApp");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    if (uid != AVSEESAION_PID) {
+        ANS_LOGE("Permission Denied.");
+        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append("No permission");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    ErrCode result = NotificationPreferences::GetInstance()->SetHashCodeRule(uid, type, userId);
     ANS_LOGI("SetHashCodeRule uid=%{public}d,type=%{public}d,result=%{public}d", uid, type, result);
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);

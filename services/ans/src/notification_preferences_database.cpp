@@ -3844,6 +3844,15 @@ bool NotificationPreferencesDatabase::SetHashCodeRule(const int32_t uid, const u
     return (result == NativeRdb::E_OK);
 }
 
+bool NotificationPreferencesDatabase::SetHashCodeRule(const int32_t uid, const uint32_t type, const int32_t userId)
+{
+    ANS_LOGD("%{public}s, %{public}d,", __FUNCTION__, type);
+    std::string key = GenerateHashCodeGenerate(uid);
+    ANS_LOGD("%{public}s, key:%{public}s,type = %{public}d", __FUNCTION__, key.c_str(), type);
+    int32_t result = PutDataToDB(key, type, userId);
+    return (result == NativeRdb::E_OK);
+}
+
 uint32_t NotificationPreferencesDatabase::GetHashCodeRule(const int32_t uid)
 {
     ANS_LOGD("%{public}s, %{public}d,", __FUNCTION__, uid);
@@ -3854,6 +3863,28 @@ uint32_t NotificationPreferencesDatabase::GetHashCodeRule(const int32_t uid)
         return 0;
     }
 
+    std::string key = GenerateHashCodeGenerate(uid);
+    ANS_LOGD("%{public}s, key:%{public}s", __FUNCTION__, key.c_str());
+    uint32_t result = 0;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = StringToInt(value);
+                break;
+            }
+            default:
+                break;
+        }
+    });
+    return result;
+}
+
+uint32_t NotificationPreferencesDatabase::GetHashCodeRule(const int32_t uid, const int32_t userId)
+{
+    ANS_LOGD("%{public}s, %{public}d,", __FUNCTION__, uid);
     std::string key = GenerateHashCodeGenerate(uid);
     ANS_LOGD("%{public}s, key:%{public}s", __FUNCTION__, key.c_str());
     uint32_t result = 0;
@@ -3896,7 +3927,11 @@ bool NotificationPreferencesDatabase::SetBundleRemoveFlag(const sptr<Notificatio
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+#else
     OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+#endif
     if (userId == SUBSCRIBE_USER_INIT) {
         ANS_LOGE("Current user acquisition failed");
         return false;
@@ -3920,7 +3955,11 @@ bool NotificationPreferencesDatabase::GetBundleRemoveFlag(const sptr<Notificatio
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+#else
     OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+#endif
     if (userId == SUBSCRIBE_USER_INIT) {
         ANS_LOGW("Current user acquisition failed");
         return true;

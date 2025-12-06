@@ -383,6 +383,8 @@ interface OHOS.Notification.IAnsManager {
 
     void SetHashCodeRule([in] unsigned int type);
 
+    void SetHashCodeRule([in] unsigned int type, [in] int userId);
+
     void GetMutilDeviceStatus([in] String deviceType, [in] unsigned int status, [out] String deviceId, [out] int userId);
 
     void GetTargetDeviceBundleList([in] String deviceType, [in] String deviceId, [out] String[] bundleList, [out] String[] labelList);

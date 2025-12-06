@@ -285,6 +285,15 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
 
     const int32_t ipcUid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+        if (IsDisableNotification(bundle, record->notification->GetRecvUserId())) {
+            ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
+            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            message.BranchId(EventBranchId::BRANCH_1)
+                .ErrorCode(result).Message("bundle in Disable Notification list, bundleName=" + bundle);
+            return;
+        }
+#else
         if (IsDisableNotification(bundle)) {
             ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
@@ -292,6 +301,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
                 .ErrorCode(result).Message("bundle in Disable Notification list, bundleName=" + bundle);
             return;
         }
+#endif
         if (IsDisableNotificationByKiosk(bundle)) {
             ANS_LOGE("bundle not in kiosk trust list, bundleName=%{public}s", bundle.c_str());
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;

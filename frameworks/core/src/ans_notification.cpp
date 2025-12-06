@@ -3099,6 +3099,19 @@ ErrCode AnsNotification::SetHashCodeRule(
     return proxy->SetHashCodeRule(type);
 }
 
+ErrCode AnsNotification::SetHashCodeRule(const uint32_t type, const int32_t userId)
+{
+    ANS_LOGI("setHashCodeRule type:%{public}d", type);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->SetHashCodeRule(type, userId);
+}
+
 ErrCode AnsNotification::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
     const NotificationConstant::SlotType slotType)
 {

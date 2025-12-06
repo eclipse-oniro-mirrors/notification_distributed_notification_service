@@ -2727,6 +2727,43 @@ HWTEST_F(AnsPublishServiceTest, SetHashCodeRule_00001, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: SetHashCodeRule_00002
+ * @tc.desc: Test SetHashCodeRule
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, SetHashCodeRule_00002, Function | SmallTest | Level1)
+{
+    int32_t avseesaionPid = 6700;
+    int32_t userId = 100;
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    IPCSkeleton::SetCallingUid(12345);
+    auto result = advancedNotificationService_->SetHashCodeRule(1, userId);
+    ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    IPCSkeleton::SetCallingUid(12345);
+    result = advancedNotificationService_->SetHashCodeRule(1, userId);
+    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+
+    IPCSkeleton::SetCallingUid(avseesaionPid);
+    result = advancedNotificationService_->SetHashCodeRule(1, userId);
+    ASSERT_EQ(result, ERR_OK);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(false);
+    IPCSkeleton::SetCallingUid(12345);
+    result = advancedNotificationService_->SetHashCodeRule(1, userId);
+    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+
+    IPCSkeleton::SetCallingUid(avseesaionPid);
+    result = advancedNotificationService_->SetHashCodeRule(1, userId);
+    ASSERT_EQ(result, ERR_OK);
+}
+
+/**
  * @tc.name: CollaborateFilter_00001
  * @tc.desc: Test CollaborateFilter
  * 1.extendInfo is null return ok

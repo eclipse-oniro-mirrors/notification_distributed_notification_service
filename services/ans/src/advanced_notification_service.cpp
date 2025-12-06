@@ -794,11 +794,19 @@ ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(const sptr
     const int32_t uid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+        if (isDisableNotification && IsDisableNotification(bundleOption)) {
+            ANS_LOGE("bundle: %{public}s in disable notification list", (request->GetOwnerBundleName()).c_str());
+            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            return;
+        }
+#else
         if (isDisableNotification && IsDisableNotification(ownerBundleName)) {
             ANS_LOGE("bundle: %{public}s in disable notification list", (request->GetOwnerBundleName()).c_str());
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
             return;
         }
+#endif
         if (IsDisableNotificationByKiosk(ownerBundleName)) {
             ANS_LOGE("bundle: %{public}s not in kiosk trust list", (request->GetOwnerBundleName()).c_str());
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
@@ -952,7 +960,11 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
     }
     int32_t userId = record->notification->GetRecvUserId();
     if (userId == FIRST_USERID) {
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(record->bundleOption->GetUid(), userId);
+#else
         OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+#endif
     }
     std::string enable;
     std::string profileId;

@@ -442,6 +442,7 @@ public:
      * @return result true:success.
      */
     bool SetHashCodeRule(const int32_t uid, const uint32_t type);
+    bool SetHashCodeRule(const int32_t uid, const uint32_t type, const int32_t userId);
 
     /**
      * @brief set rule of generate hashCode.
@@ -450,6 +451,7 @@ public:
      * @return type generate hashCode.
      */
     uint32_t GetHashCodeRule(const int32_t uid);
+    uint32_t GetHashCodeRule(const int32_t uid, const int32_t userId);
 
     bool SetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, int32_t sourceType);

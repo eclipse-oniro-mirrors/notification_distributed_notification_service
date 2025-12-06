@@ -1493,6 +1493,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     static ErrCode SetHashCodeRule(const uint32_t type);
+    static ErrCode SetHashCodeRule(const uint32_t type, const int32_t userId);
 
     /**
      * @brief get distributed device list.

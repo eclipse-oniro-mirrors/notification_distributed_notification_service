@@ -221,6 +221,7 @@ public:
         const std::vector<std::string>&, const std::vector<std::string>&));
     MOCK_METHOD4(SetTargetDeviceSwitch, ErrCode(const std::string&, const std::string&, bool, bool));
     MOCK_METHOD1(SetHashCodeRule, ErrCode(uint32_t));
+    MOCK_METHOD2(SetHashCodeRule, ErrCode(uint32_t, const int32_t userId));
     MOCK_METHOD5(RemoveDistributedNotifications, ErrCode(const std::vector<std::string>& hashcodes,
         const int32_t, const int32_t, const int32_t, const std::string&));
     MOCK_METHOD2(SetSilentReminderEnabled, ErrCode(const sptr<NotificationBundleOption> &bundleOption,
