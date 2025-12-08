@@ -69,7 +69,8 @@ HWTEST_F(NotificationFlagsTest, SetVibrationEnabled_00001, Function | SmallTest 
 HWTEST_F(NotificationFlagsTest, Dump_00001, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<NotificationFlags>();
-    std::string ret = "soundEnabled = 0, vibrationEnabled = 0, reminderFlags = 0";
+    std::string ret =
+        "soundEnabled = 0, vibrationEnabled = 0, lockScreenEnabled = 0, bannerEnabled = 0, reminderFlags = 0";
     EXPECT_EQ(rrc->Dump(), ret);
 }
 
