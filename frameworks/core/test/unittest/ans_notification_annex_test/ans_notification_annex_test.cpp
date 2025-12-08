@@ -19,7 +19,6 @@
 #define protected public
 #include "ans_manager_proxy.h"
 #include "ans_notification.h"
-#include "ans_subscriber_proxy.h"
 #undef private
 #undef protected
 #include "ans_inner_errors.h"

@@ -256,19 +256,6 @@ ErrCode NotificationShellCommand::RunAsSettingCommand()
 ErrCode NotificationShellCommand::RunDumpCmd(const std::string& cmd, const std::string& bundle,
     int32_t userId, int32_t recvUserId, std::vector<std::string> &infos)
 {
-    if (ans_ != nullptr) {
-        ErrCode ret = ans_->ShellDump(cmd, bundle, userId, recvUserId, infos);
-        if (strncmp(cmd.c_str(), COMMAND_SET_RECENT_COUNT, strlen(COMMAND_SET_RECENT_COUNT)) == 0) {
-            if (ret == ERR_OK) {
-                resultReceiver_.append("set recent count success\n");
-            } else {
-                resultReceiver_.append("set recent count failed\n");
-            }
-        } else {
-            resultReceiver_.append("Total:" + std::to_string(infos.size()) + "\n");
-        }
-        return ret;
-    }
     return ERR_ANS_SERVICE_NOT_CONNECTED;
 }
 

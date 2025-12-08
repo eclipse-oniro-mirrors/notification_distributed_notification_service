@@ -1105,28 +1105,6 @@ HWTEST_F(AnsNotificationUnitTest, SetEnabledForBundleSlot_0100, Function | Mediu
 }
 
 /*
- * @tc.name: ShellDump_0100
- * @tc.desc: test ShellDump ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsNotificationUnitTest, ShellDump_0100, Function | MediumTest | Level1)
-{
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    ans_->GetAnsManagerProxy();
-    std::string cmd = "this is cmd";
-    std::string bundle = "this is bundle";
-    int32_t userId = 1;
-    std::vector<std::string> dumpInfo;
-    ErrCode ret1 = ans_->ShellDump(cmd, bundle, userId, 0, dumpInfo);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
-}
-
-/*
  * @tc.name: SetSyncNotificationEnabledWithoutApp_0100
  * @tc.desc: test SetSyncNotificationEnabledWithoutApp ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC

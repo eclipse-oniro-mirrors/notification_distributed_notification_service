@@ -65,13 +65,11 @@ namespace OHOS {
         req->SetOwnerUserId(ownerId);
         record->notification = new Notification::Notification(req);
         service->notificationList_.push_back(record);
-        service->ActiveNotificationDump(bundleName, creatorUserId, recvUserId, dumpInfo);
 
         auto recentNotification = std::make_shared<Notification::AdvancedNotificationService::RecentNotification>();
         recentNotification->isActive = true;
         recentNotification->notification = new Notification::Notification(req);
         service->recentInfo_->list.emplace_front(recentNotification);
-        service->RecentNotificationDump(bundleName, ownerId, recvUserId, dumpInfo);
 
         std::vector<std::string> keys;
         keys.push_back(recentNotification->notification->GetKey());
@@ -89,7 +87,6 @@ namespace OHOS {
     bool DoTestForAdvancedNotificationUtilsV2(std::shared_ptr<Notification::AdvancedNotificationService> service,
         FuzzedDataProvider *fuzzData)
     {
-        service->TimeToString(fuzzData->ConsumeIntegralInRange<int64_t>(0, 10000));
         int64_t beginDate = fuzzData->ConsumeIntegralInRange<int64_t>(0, 10000);
         int64_t endDate = fuzzData->ConsumeIntegralInRange<int64_t>(10000, 100000);
         service->AdjustDateForDndTypeOnce(beginDate, endDate);
@@ -98,11 +95,6 @@ namespace OHOS {
         service->OnUserRemoved(userId);
         service->OnUserStopped(userId);
         service->DeleteAllByUserStopped(userId);
-
-        std::vector<std::u16string> args;
-        args.push_back(Str8ToStr16("args"));
-        std::string result = fuzzData->ConsumeRandomLengthString();
-        service->GetDumpInfo(args, result);
 
         std::string oldKey = fuzzData->ConsumeRandomLengthString();
         std::string oldKey1 = fuzzData->ConsumeRandomLengthString();
@@ -358,7 +350,6 @@ namespace OHOS {
         service->SetEnabledForBundleSlot(bundleOption, slotType, enabled, false);
         service->GetEnabledForBundleSlot(bundleOption, slotType, enabled);
         std::vector<std::string> dumpInfo;
-        service->ShellDump(stringData, stringData, userId, userId, dumpInfo);
         service->SetSyncNotificationEnabledWithoutApp(userId, enabled);
         service->GetSyncNotificationEnabledWithoutApp(userId, enabled);
         int32_t badgeNum = fuzzData->ConsumeIntegral<int32_t>();
@@ -437,8 +428,6 @@ namespace OHOS {
         std::vector<std::string> infos;
         infos.emplace_back(randomString);
         service->SetAgentNotification(request, randomString);
-        service->ActiveNotificationDump(randomString, randomInt32, randomInt32, infos);
-        service->RecentNotificationDump(randomString, randomInt32, randomInt32, infos);
         service->OnBundleRemoved(bundleOption);
         service->OnBundleDataAdd(bundleOption);
         service->OnBundleDataUpdate(bundleOption);

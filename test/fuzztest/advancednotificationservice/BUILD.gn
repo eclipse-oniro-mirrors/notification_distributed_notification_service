@@ -75,7 +75,6 @@ group("fuzztest") {
     "servicesetusergrantedbundlestate_fuzzer:ServiceSetUserGrantedBundleStateFuzzTest",
     "servicesetenabledforbundleslot_fuzzer:ServiceSetEnabledForBundleSlotFuzzTest",
     "serviceremovedonotdisturbprofiles_fuzzer:ServiceRemoveDoNotDisturbProfilesFuzzTest",
-    "serviceshelldump_fuzzer:ServiceShellDumpFuzzTest",
     "servicegetbundleimportance_fuzzer:ServiceGetBundleImportanceFuzzTest",
     "servicegetactivenotifications_fuzzer:ServiceGetActiveNotificationsFuzzTest",
     "servicesetnotificationsenabledforallbundles_fuzzer:ServiceSetNotificationsEnabledForAllBundlesFuzzTest",
