@@ -301,6 +301,31 @@ napi_value Common::SetNotificationRequestByCustom(
         return NapiGetBoolean(env, false);
     }
 
+    if (!SetNotificationRequestByCustomInnerFirst(env, request, result)) {
+        return NapiGetBoolean(env, false);
+    }
+
+    if (!SetNotificationRequestByCustomInnerSecond(env, request, result)) {
+        return NapiGetBoolean(env, false);
+    }
+
+    if (!SetNotificationRequestByCustomInnerThird(env, request, result)) {
+        return NapiGetBoolean(env, false);
+    }
+
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetNotificationRequestByCustomInnerFirst(
+    const napi_env &env, const OHOS::Notification::NotificationRequest *request, napi_value &result)
+{
+    ANS_LOGD("called");
+
+    if (request == nullptr) {
+        ANS_LOGE("null request");
+        return NapiGetBoolean(env, false);
+    }
+
     // content: NotificationContent
     std::shared_ptr<NotificationContent> content = request->GetContent();
     if (content) {
@@ -350,6 +375,19 @@ napi_value Common::SetNotificationRequestByCustom(
         napi_set_named_property(env, result, "actionButtons", arr);
     }
 
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetNotificationRequestByCustomInnerSecond(
+    const napi_env &env, const OHOS::Notification::NotificationRequest *request, napi_value &result)
+{
+    ANS_LOGD("called");
+
+    if (request == nullptr) {
+        ANS_LOGE("null request");
+        return NapiGetBoolean(env, false);
+    }
+
     // template?: NotificationTemplate
     std::shared_ptr<NotificationTemplate> templ = request->GetTemplate();
     if (templ) {
@@ -396,6 +434,31 @@ napi_value Common::SetNotificationRequestByCustom(
             return NapiGetBoolean(env, false);
         }
         napi_set_named_property(env, result, "unifiedGroupInfo", groupInfoResult);
+    }
+
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetNotificationRequestByCustomInnerThird(
+    const napi_env &env, const OHOS::Notification::NotificationRequest *request, napi_value &result)
+{
+    ANS_LOGD("called");
+
+    if (request == nullptr) {
+        ANS_LOGE("null request");
+        return NapiGetBoolean(env, false);
+    }
+
+    // trigger?: Trigger
+    std::shared_ptr<NotificationTrigger> notificationTrigger = request->GetNotificationTrigger();
+    if (notificationTrigger) {
+        napi_value notificationTriggerResult = nullptr;
+        napi_create_object(env, &notificationTriggerResult);
+        if (!SetNotificationTrigger(env, notificationTrigger, notificationTriggerResult)) {
+            ANS_LOGE("SetNotificationTrigger call failed");
+            return NapiGetBoolean(env, false);
+        }
+        napi_set_named_property(env, result, "trigger", notificationTriggerResult);
     }
 
     return NapiGetBoolean(env, true);
