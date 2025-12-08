@@ -139,31 +139,33 @@ int32_t AdvancedNotificationService::ShutdownExtensionService()
 }
 
 void AdvancedNotificationService::CheckExtensionServiceCondition(
+    std::vector<sptr<NotificationBundleOption>> &bundles,
     std::vector<std::pair<sptr<NotificationBundleOption>,
-    std::vector<sptr<NotificationBundleOption>>>> &extensionBundleInfos,
-    std::vector<sptr<NotificationBundleOption>> &bundles)
+    std::vector<sptr<NotificationBundleOption>>>> &subscribedBundleInfos,
+    std::vector<sptr<NotificationBundleOption>> &unsubscribedBundles)
 {
-    extensionBundleInfos.clear();
+    subscribedBundleInfos.clear();
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_7);
     std::string isPCMode = OHOS::system::GetParameter("persist.sceneboard.ispcmode", "false");
     if (isPCMode == "true") {
         ANS_LOGW("PC Mode, skip loading ExtensionService");
         NotificationAnalyticsUtil::ReportModifyEvent(message.Message("cannot subscribe, due to PC Mode"));
+        unsubscribedBundles = bundles;
         return;
     }
 
-    FilterPermissionBundles(bundles);
+    FilterPermissionBundles(bundles, unsubscribedBundles);
     if (bundles.empty()) {
         ANS_LOGW("User has no permission, skip loading ExtensionService");
         return;
     }
 
-    FilterGrantedBundles(bundles);
+    FilterGrantedBundles(bundles, unsubscribedBundles);
     if (bundles.empty()) {
         ANS_LOGW("No bundle is granted, skip loading ExtensionService");
         return;
     }
-    FilterBundlesByBluetoothConnection(bundles);
+    FilterBundlesByBluetoothConnection(bundles, unsubscribedBundles);
     if (bundles.empty()) {
         ANS_LOGW("No valid bluetooth connections found, skip loading ExtensionService");
         return;
@@ -173,12 +175,13 @@ void AdvancedNotificationService::CheckExtensionServiceCondition(
     for (auto it = bundles.begin(); it != bundles.end(); ++it) {
         if (NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(*it, enableBundles) == ERR_OK &&
             !enableBundles.empty()) {
-            extensionBundleInfos.emplace_back(*it, enableBundles);
+            subscribedBundleInfos.emplace_back(*it, enableBundles);
         }
     }
 }
 
-void AdvancedNotificationService::FilterPermissionBundles(std::vector<sptr<NotificationBundleOption>> &bundles)
+void AdvancedNotificationService::FilterPermissionBundles(std::vector<sptr<NotificationBundleOption>> &bundles,
+    std::vector<sptr<NotificationBundleOption>> &mismatchedBundles)
 {
     std::string noPermissionBundles = "";
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_7);
@@ -199,6 +202,7 @@ void AdvancedNotificationService::FilterPermissionBundles(std::vector<sptr<Notif
                 .append(":")
                 .append(std::to_string((*it)->GetUid()))
                 .append(",");
+            mismatchedBundles.emplace_back(*it);
             it = bundles.erase(it);
         }
     }
@@ -209,7 +213,8 @@ void AdvancedNotificationService::FilterPermissionBundles(std::vector<sptr<Notif
     }
 }
 
-void AdvancedNotificationService::FilterGrantedBundles(std::vector<sptr<NotificationBundleOption>> &bundles)
+void AdvancedNotificationService::FilterGrantedBundles(std::vector<sptr<NotificationBundleOption>> &bundles,
+    std::vector<sptr<NotificationBundleOption>> &mismatchedBundles)
 {
     std::string noGrantedBundles = "";
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_7);
@@ -223,6 +228,7 @@ void AdvancedNotificationService::FilterGrantedBundles(std::vector<sptr<Notifica
                 .append(":")
                 .append(std::to_string((*it)->GetUid()))
                 .append(",");
+            mismatchedBundles.emplace_back(*it);
             it = bundles.erase(it);
         }
     }
@@ -234,7 +240,8 @@ void AdvancedNotificationService::FilterGrantedBundles(std::vector<sptr<Notifica
 }
 
 void AdvancedNotificationService::FilterBundlesByBluetoothConnection(
-    std::vector<sptr<NotificationBundleOption>> &bundles)
+    std::vector<sptr<NotificationBundleOption>> &bundles,
+    std::vector<sptr<NotificationBundleOption>> &mismatchedBundles)
 {
     std::string noBluetoothBundles = "";
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_7);
@@ -242,6 +249,7 @@ void AdvancedNotificationService::FilterBundlesByBluetoothConnection(
         std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
         ErrCode result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionInfos(*it, infos);
         if (result != ERR_OK || infos.empty()) {
+            mismatchedBundles.emplace_back(*it);
             it = bundles.erase(it);
             continue;
         }
@@ -257,6 +265,7 @@ void AdvancedNotificationService::FilterBundlesByBluetoothConnection(
                 .append(":")
                 .append(std::to_string((*it)->GetUid()))
                 .append(",");
+            mismatchedBundles.emplace_back(*it);
             it = bundles.erase(it);
         }
     }
@@ -320,45 +329,36 @@ bool AdvancedNotificationService::HasExtensionSubscriptionStateChanged(
     return (oldEnabled != enabled);
 }
 
-bool AdvancedNotificationService::EnsureExtensionServiceLoadedAndSubscribed(
+bool AdvancedNotificationService::EnsureBundlesCanSubscribeOrUnsubscribe(
     const sptr<NotificationBundleOption> &bundle)
 {
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
-    std::vector<sptr<NotificationBundleOption>> subscribeBundles;
-    if (NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundle, subscribeBundles) != ERR_OK) {
-        return false;
-    }
-    EnsureExtensionServiceLoadedAndSubscribed(bundle, subscribeBundles);
+    std::vector<sptr<NotificationBundleOption>> bundles{bundle};
+    EnsureBundlesCanSubscribeOrUnsubscribe(bundles);
     return true;
 #else
     return true;
 #endif
 }
 
-bool AdvancedNotificationService::EnsureExtensionServiceLoadedAndSubscribed(
-    const sptr<NotificationBundleOption> &bundle, const std::vector<sptr<NotificationBundleOption>> &subscribeBundles)
+bool AdvancedNotificationService::EnsureBundlesCanSubscribeOrUnsubscribe(
+    const std::vector<sptr<NotificationBundleOption>> &bundles)
 {
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     std::vector<std::pair<sptr<NotificationBundleOption>,
-        std::vector<sptr<NotificationBundleOption>>>> extensionBundleInfos;
-    std::vector<sptr<NotificationBundleOption>> bundles{bundle};
-
-    if (!isExtensionServiceExist()) {
-        CheckExtensionServiceCondition(extensionBundleInfos, bundles);
-        if (extensionBundleInfos.size() == 0) {
-            ANS_LOGW("No extension bundle info found, skip subscribe.");
-            return false;
-        }
-        if (LoadExtensionService() != 0) {
-            return false;
-        }
-        if (SubscribeExtensionService(bundle, subscribeBundles) != 0) {
-            return false;
-        }
-    } else {
-        if (SubscribeExtensionService(bundle, subscribeBundles) != 0) {
-            return false;
-        }
+        std::vector<sptr<NotificationBundleOption>>>> subscribedBundleInfos;
+    std::vector<sptr<NotificationBundleOption>> unsubscribedBundles;
+    std::vector<sptr<NotificationBundleOption>> checkedBundles{bundles};
+    CheckExtensionServiceCondition(checkedBundles, subscribedBundleInfos, unsubscribedBundles);
+    if (subscribedBundleInfos.size() > 0 && !isExtensionServiceExist() && LoadExtensionService() != 0) {
+        ANS_LOGW("No extension bundle info found, skip subscribe.");
+        return false;
+    }
+    for (const auto& extensionBundleInfo : subscribedBundleInfos) {
+        SubscribeExtensionService(extensionBundleInfo.first, extensionBundleInfo.second);
+    }
+    for (const auto& bundle : unsubscribedBundles) {
+        UnSubscribeExtensionService(bundle);
     }
     return true;
 #else
@@ -445,7 +445,7 @@ void AdvancedNotificationService::HandleBundleUpdate(const sptr<NotificationBund
         std::vector<sptr<NotificationBundleOption>> enabledBundles;
         ErrCode result = ERR_OK;
         bool enabled = false;
-        EnsureExtensionServiceLoadedAndSubscribed(bundleOption);
+        EnsureBundlesCanSubscribeOrUnsubscribe(bundleOption);
         NotificationConstant::SWITCH_STATE state;
         result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionEnabled(bundleOption, state);
         if (result != ERR_OK) {
@@ -565,31 +565,6 @@ void AdvancedNotificationService::OnBluetoothPairedStatusChanged(
     }));
 }
 
-void AdvancedNotificationService::ProcessSubscriptionInfoForStateChange(
-    const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos,
-    const sptr<NotificationBundleOption> &bundle, bool filterHfpOnly)
-{
-    for (const auto& info : infos) {
-        if (info == nullptr) {
-            continue;
-        }
-        std::string bluetoothAddress = info->GetAddr();
-        if (filterHfpOnly && info->IsHfp()) {
-            if (NotificationBluetoothHelper::GetInstance().CheckHfpState(bluetoothAddress)) {
-                EnsureExtensionServiceLoadedAndSubscribed(bundle);
-                return;
-            }
-        }
-        if (!filterHfpOnly && !info->IsHfp()) {
-            if (NotificationBluetoothHelper::GetInstance().CheckBluetoothConditions(bluetoothAddress)) {
-                EnsureExtensionServiceLoadedAndSubscribed(bundle);
-                return;
-            }
-        }
-    }
-    ShutdownExtensionServiceAndUnSubscribed(bundle);
-}
-
 void AdvancedNotificationService::CheckBleAndHfpStateChange(bool filterHfpOnly)
 {
     std::vector<sptr<NotificationBundleOption>> bundles;
@@ -598,19 +573,12 @@ void AdvancedNotificationService::CheckBleAndHfpStateChange(bool filterHfpOnly)
     } else {
         GetNotificationExtensionEnabledBundles(bundles);
     }
-    for (const auto& bundle : bundles) {
-        std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
-        ErrCode result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionInfos(bundle, infos);
-        if (result != ERR_OK || infos.empty()) {
-            continue;
-        }
-        ProcessSubscriptionInfoForStateChange(infos, bundle, filterHfpOnly);
-    }
+    EnsureBundlesCanSubscribeOrUnsubscribe(bundles);
 }
 
 void AdvancedNotificationService::ProcessHfpDeviceStateChange(int state)
 {
-    ANS_LOGI("ProcessHfpDeviceStateChange: state: %{public}d", state);
+    ANS_LOGD("ProcessHfpDeviceStateChange: state: %{public}d", state);
     if (state == static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED) ||
         state == static_cast<int32_t>(Bluetooth::BTConnectState::DISCONNECTED)) {
         CheckBleAndHfpStateChange(true);
@@ -631,15 +599,7 @@ void AdvancedNotificationService::ProcessBluetoothStateChanged(const int status)
             ANS_LOGD("No bundle match conditon");
             return;
         }
-    
-        std::vector<std::pair<sptr<NotificationBundleOption>,
-            std::vector<sptr<NotificationBundleOption>>>> extensionBundleInfos;
-        CheckExtensionServiceCondition(extensionBundleInfos, bundles);
-        if (extensionBundleInfos.size() > 0 && LoadExtensionService() == 0) {
-            for (const auto& extensionBundleInfo : extensionBundleInfos) {
-                SubscribeExtensionService(extensionBundleInfo.first, extensionBundleInfo.second);
-            }
-        }
+        EnsureBundlesCanSubscribeOrUnsubscribe(bundles);
     }
     if (status == OHOS::Bluetooth::BTStateID::STATE_TURN_OFF) {
         ShutdownExtensionService();
@@ -648,7 +608,7 @@ void AdvancedNotificationService::ProcessBluetoothStateChanged(const int status)
 
 void AdvancedNotificationService::ProcessBluetoothPairedStatusChange(int state)
 {
-    ANS_LOGI("ProcessBluetoothPairedStatusChange: state: %{public}d", state);
+    ANS_LOGD("ProcessBluetoothPairedStatusChange: state: %{public}d", state);
     if (state == OHOS::Bluetooth::PAIR_PAIRED || state == OHOS::Bluetooth::PAIR_NONE) {
         CheckBleAndHfpStateChange(false);
     }
@@ -662,8 +622,6 @@ bool AdvancedNotificationService::TryStartExtensionSubscribeService()
         ANS_LOGD("ffrt enter!");
         NotificationBluetoothHelper::GetInstance().RegisterHfpObserver();
         NotificationBluetoothHelper::GetInstance().RegisterBluetoothPairedDeviceObserver();
-        std::vector<std::pair<sptr<NotificationBundleOption>,
-            std::vector<sptr<NotificationBundleOption>>>> extensionBundleInfos;
         std::vector<sptr<NotificationBundleOption>> bundles;
         if (!NotificationBluetoothHelper::GetInstance().CheckBluetoothSwitchState()) {
             ANS_LOGW("Bluetooth is not enabled, skip checking extension service condition");
@@ -674,12 +632,7 @@ bool AdvancedNotificationService::TryStartExtensionSubscribeService()
             ANS_LOGW("No bundle has extensionAbility, skip loading ExtensionService");
             return;
         }
-        CheckExtensionServiceCondition(extensionBundleInfos, bundles);
-        if (extensionBundleInfos.size() > 0 && LoadExtensionService() == 0) {
-            for (const auto& extensionBundleInfo : extensionBundleInfos) {
-                SubscribeExtensionService(extensionBundleInfo.first, extensionBundleInfo.second);
-            }
-        }
+        EnsureBundlesCanSubscribeOrUnsubscribe(bundles);
     }));
     return true;
 #else
@@ -707,7 +660,7 @@ ErrCode AdvancedNotificationService::GetNotificationExtensionEnabledBundles(
         AppExecFwk::BundleInfo bundleInfo;
         int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
         if (!BundleManagerHelper::GetInstance()->GetBundleInfoV9(extensionInfo.bundleName, flags, bundleInfo, userId)) {
-            ANS_LOGW("CheckExtensionServiceCondition GetBundleInfoV9 faild");
+            ANS_LOGW("GetNotificationExtensionEnabledBundles GetBundleInfoV9 faild");
             continue;
         }
 
@@ -799,17 +752,7 @@ void AdvancedNotificationService::ProcessExtensionSubscriptionInfos(
         ANS_LOGE("Failed to insert subscription info into db, ret: %{public}d", result);
         return;
     }
-    std::vector<sptr<NotificationBundleOption>> bundles = {bundleOption};
-    FilterBundlesByBluetoothConnection(bundles);
-    if (bundles.size() > 0) {
-        if (!EnsureExtensionServiceLoadedAndSubscribed(bundleOption)) {
-            return;
-        }
-    } else {
-        if (!ShutdownExtensionServiceAndUnSubscribed(bundleOption)) {
-            return;
-        }
-    }
+    EnsureBundlesCanSubscribeOrUnsubscribe(bundleOption);
 }
 
 ErrCode AdvancedNotificationService::NotificationExtensionUnsubscribe()
@@ -1252,15 +1195,7 @@ void AdvancedNotificationService::ProcessSetUserGrantedState(
             bundle->GetBundleName().c_str(), result);
     }
     PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_STATE, bundle, enabled, {});
-    if (enabled) {
-        if (!EnsureExtensionServiceLoadedAndSubscribed(bundle)) {
-            return;
-        }
-    } else {
-        if (!ShutdownExtensionServiceAndUnSubscribed(bundle)) {
-            return;
-        }
-    }
+    EnsureBundlesCanSubscribeOrUnsubscribe(bundle);
 }
 
 void AdvancedNotificationService::ProcessSetUserGrantedBundleState(
@@ -1276,21 +1211,7 @@ void AdvancedNotificationService::ProcessSetUserGrantedBundleState(
     }
     PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_BUNDLE_STATE, bundle, enabled,
         enabledBundles);
-    std::vector<sptr<NotificationBundleOption>> existBundles;
-    result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundle, existBundles);
-    if (result != ERR_OK) {
-        ANS_LOGE("Failed to get enabled bundles from database, ret: %{public}d", result);
-        return;
-    }
-    if (existBundles.size() > 0) {
-        if (!EnsureExtensionServiceLoadedAndSubscribed(bundle)) {
-            return;
-        }
-    } else {
-        if (!ShutdownExtensionServiceAndUnSubscribed(bundle)) {
-            return;
-        }
-    }
+    EnsureBundlesCanSubscribeOrUnsubscribe(bundle);
 }
 
 bool AdvancedNotificationService::GetCloneBundleList(
