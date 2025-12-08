@@ -700,6 +700,11 @@ private:
      */
     void CheckAndCloseShareReminder(const sptr<ReminderRequest>& reminder);
 
+    /**
+     * @brief Collapse the notification panel, send event to sceneboard.
+     */
+    void CollapseNotificationPanel();
+
    /**
     * Single instance.
     */

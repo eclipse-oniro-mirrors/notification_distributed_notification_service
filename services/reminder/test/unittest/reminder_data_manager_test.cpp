@@ -1310,6 +1310,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_044, Level1)
     manager->alertingReminderId_ = 1;
     ret = manager->CancelReminderOnDisplay(1, 1);
     EXPECT_EQ(ret, ERR_OK);
+    manager->CollapseNotificationPanel();
 }
 }  // namespace Notification
 }  // namespace OHOS
