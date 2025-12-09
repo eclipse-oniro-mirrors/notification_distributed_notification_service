@@ -23,6 +23,15 @@ namespace OHOS {
         constexpr uint8_t SLOT_TYPE_NUM = 5;
         constexpr uint8_t FLAG_STATUS = 3;
     }
+    void SetNotificationFlags(const Notification::NotificationConstant::FlagStatus flag,
+        std::shared_ptr<Notification::NotificationFlags> &notificationFlages)
+    {
+        notificationFlages->SetSoundEnabled(flag);
+        notificationFlages->SetVibrationEnabled(flag);
+        notificationFlages->SetLockScreenEnabled(flag);
+        notificationFlages->SetBannerEnabled(flag);
+    }
+
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
         std::string stringData = fdp->ConsumeRandomLengthString();
@@ -57,8 +66,7 @@ namespace OHOS {
         int32_t soundEnabled = static_cast<int32_t>(fdp->ConsumeIntegral<uint8_t>() % FLAG_STATUS);
         Notification::NotificationConstant::FlagStatus sound =
             Notification::NotificationConstant::FlagStatus(soundEnabled);
-        notificationFlages->SetSoundEnabled(sound);
-        notificationFlages->SetVibrationEnabled(sound);
+        SetNotificationFlags(sound, notificationFlages);
         request.SetFlags(notificationFlages);
 
         Notification::NotificationRequest::GroupAlertType groupAlertType =

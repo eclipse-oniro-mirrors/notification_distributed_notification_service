@@ -851,7 +851,9 @@ napi_value Common::GetNotificationRequestByCustomInnerSecond(
         return nullptr;
     }
 
-    GetNotificationFlags(env, value, request);
+    if (GetNotificationFlags(env, value, request) == nullptr) {
+        return nullptr;
+    }
     return NapiGetNull(env);
 }
 

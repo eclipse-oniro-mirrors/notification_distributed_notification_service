@@ -59,6 +59,8 @@ namespace OHOS {
             Notification::NotificationConstant::FlagStatus(soundEnabled);
         notificationFlages->SetSoundEnabled(sound);
         notificationFlages->SetVibrationEnabled(sound);
+        notificationFlages->SetLockScreenEnabled(sound);
+        notificationFlages->SetBannerEnabled(sound);
         request.SetFlags(notificationFlages);
 
         Notification::NotificationRequest::GroupAlertType groupAlertType =

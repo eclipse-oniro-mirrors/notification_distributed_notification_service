@@ -804,20 +804,24 @@ void GetNotificationFlags(ani_env *env, ani_object obj,
     std::shared_ptr<NotificationFlags> flags = std::make_shared<NotificationFlags>();
     NotificationFlagStatus soundEnabled = NotificationFlagStatus::NONE;
     GetNotificationFlagStatus(env, static_cast<ani_object>(flagsRef), "soundEnabled", soundEnabled);
-    flags->SetSoundEnabled(soundEnabled);
-
+    if (soundEnabled == NotificationFlagStatus::CLOSE) {
+        flags->SetSoundEnabled(soundEnabled);
+    }
     NotificationFlagStatus vibrationEnabled = NotificationFlagStatus::NONE;
     GetNotificationFlagStatus(env, static_cast<ani_object>(flagsRef), "vibrationEnabled", vibrationEnabled);
-    flags->SetVibrationEnabled(vibrationEnabled);
-
+    if (vibrationEnabled == NotificationFlagStatus::CLOSE) {
+        flags->SetVibrationEnabled(vibrationEnabled);
+    }
     NotificationFlagStatus bannerEnabled = NotificationFlagStatus::NONE;
     GetNotificationFlagStatus(env, static_cast<ani_object>(flagsRef), "bannerEnabled", bannerEnabled);
-    flags->SetBannerEnabled(bannerEnabled);
-
+    if (bannerEnabled == NotificationFlagStatus::CLOSE) {
+        flags->SetBannerEnabled(bannerEnabled);
+    }
     NotificationFlagStatus lockScreenEnabled = NotificationFlagStatus::NONE;
     GetNotificationFlagStatus(env, static_cast<ani_object>(flagsRef), "lockScreenEnabled", lockScreenEnabled);
-    flags->SetLockScreenEnabled(lockScreenEnabled);
-
+    if (lockScreenEnabled == NotificationFlagStatus::CLOSE) {
+        flags->SetLockScreenEnabled(lockScreenEnabled);
+    }
     request->SetFlags(flags);
 }
 
