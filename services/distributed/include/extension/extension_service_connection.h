@@ -63,7 +63,6 @@ private:
     void GetPid();
     void DoFreezeUnfreeze(bool isFreeze);
     void HandleDisconnectedState();
-    void OnRemoteDied(const wptr<IRemoteObject> &remote);
     static void AppendMessage(std::string& message, ErrCode callResult, int32_t retResult);
 
 private:
