@@ -15,6 +15,7 @@
 
 #include "system_event_observer.h"
 
+#include "advanced_datashare_helper.h"
 #include "advanced_notification_service.h"
 #include "ans_const_define.h"
 #include "bundle_constants.h"
@@ -138,6 +139,7 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         NotificationPreferences::GetInstance()->InitSettingFromDisturbDB(userId);
         AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb(userId);
         NotificationCloneManager::GetInstance().OnUserSwitch(userId);
+        DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->OnUserSwitch(userId);
         AdvancedNotificationService::GetInstance()->TriggerLiveViewSwitchCheck(userId);
         AdvancedNotificationService::GetInstance()->RecoverAncoApplicationUserId(userId);
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED

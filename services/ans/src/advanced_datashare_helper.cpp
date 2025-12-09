@@ -78,23 +78,65 @@ AdvancedDatashareHelper::AdvancedDatashareHelper()
     CreateDataShareHelper();
 }
 
-std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelper::CreateDataShareHelper()
+AdvancedDatashareHelper::~AdvancedDatashareHelper()
+{
+    if (!CreateDataShareHelper()) {
+        ANS_LOGE("UnRegister advanced datashare observer failed by nullptr");
+        return;
+    }
+    UnregisterObserver();
+    dataShareHelper_->Release();
+}
+
+void AdvancedDatashareHelper::Init()
+{
+    if (!CreateDataShareHelper()) {
+        ANS_LOGE("RegisterObserver fail by nullptr");
+        return;
+    }
+    std::vector<int32_t> userIds;
+    if (OsAccountManagerHelper::GetInstance().GetAllActiveOsAccount(userIds) != ERR_OK) {
+        ANS_LOGE("RegisterObserver fail by non-userId");
+        return;
+    }
+    for (auto userId : userIds) {
+        bool hasRegister = false;
+        for (auto &dataObserver : dataObservers_) {
+            if (dataObserver.first == userId) {
+                hasRegister = true;
+                break;
+            }
+        }
+        if (hasRegister) {
+            continue;
+        }
+        RegisterObserver(userId, GetFocusModeEnableUri(userId), { KEY_FOCUS_MODE_ENABLE });
+        RegisterObserver(userId, GetFocusModeProfileUri(userId), { KEY_FOCUS_MODE_PROFILE });
+        RegisterObserver(userId, GetIntelligentExperienceUri(userId), { KEY_INTELLIGENT_EXPERIENCE });
+    }
+}
+
+bool AdvancedDatashareHelper::CreateDataShareHelper()
 {
     if (!isDataShareReady_) {
         ANS_LOGE("dataShare is not ready");
-        return nullptr;
+        return false;
+    }
+    if (dataShareHelper_ != nullptr) {
+        return true;
     }
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
         ANS_LOGE("The sa manager is nullptr.");
-        return nullptr;
+        return false;
     }
     sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
     if (remoteObj == nullptr) {
         ANS_LOGE("The remoteObj is nullptr.");
-        return nullptr;
+        return false;
     }
-    return DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
+    dataShareHelper_ = DataShare::DataShareHelper::Creator(remoteObj, SETTINGS_DATASHARE_URI, SETTINGS_DATA_EXT_URI);
+    return dataShareHelper_ != nullptr;
 }
 
 std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelper::CreateContactDataShareHelper(std::string uri)
@@ -155,33 +197,61 @@ std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelper::CreateIntel
 
 bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::string &value)
 {
-    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = CreateDataShareHelper();
-    if (dataShareHelper == nullptr) {
-        ANS_LOGE("The data share helper is nullptr.");
+    return QuerydataShareItems(uri, key, value) || QueryByDataShare(uri, key, value);
+}
+
+bool AdvancedDatashareHelper::QuerydataShareItems(Uri &uri, const std::string &key, std::string &value)
+{
+    std::lock_guard<ffrt::mutex> lock(dataShareItemMutex_);
+    for (auto& dataShareItem : dataShareItems_) {
+        if (dataShareItem.uri.ToString() == uri.ToString() && dataShareItem.key == key) {
+            value = dataShareItem.value;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool AdvancedDatashareHelper::QueryByDataShare(Uri &uri, const std::string &key, std::string &value)
+{
+    if (!CreateDataShareHelper()) {
+        ANS_LOGE("QueryByDataShare fail cause data share is nullptr.");
         return false;
     }
     DataShare::DataSharePredicates predicates;
     std::vector<std::string> columns;
     predicates.EqualTo(ADVANCED_DATA_COLUMN_KEYWORD, key);
-    auto result = dataShareHelper->Query(uri, predicates, columns);
+    auto result = dataShareHelper_->Query(uri, predicates, columns);
     if (result == nullptr) {
         ANS_LOGE("Query error, result is null.");
-        dataShareHelper->Release();
         return false;
     }
     if (result->GoToFirstRow() != DataShare::E_OK) {
         ANS_LOGE("Query failed, go to first row error.");
         result->Close();
-        dataShareHelper->Release();
+        AddDataShareItems(uri, key, value);
         return false;
     }
     int32_t columnIndex;
     result->GetColumnIndex(ADVANCED_DATA_COLUMN_VALUE, columnIndex);
     result->GetString(columnIndex, value);
     result->Close();
-    ANS_LOGD("Query success, value[%{public}s]", value.c_str());
-    dataShareHelper->Release();
+    ANS_LOGI("Query success key:%{public}s,value:%{public}s", key.c_str(), value.c_str());
+    AddDataShareItems(uri, key, value);
     return true;
+}
+
+void AdvancedDatashareHelper::AddDataShareItems(Uri &uri, const std::string &key, const std::string &value)
+{
+    std::lock_guard<ffrt::mutex> lock(dataShareItemMutex_);
+    for (auto& dataShareItem : dataShareItems_) {
+        if (dataShareItem.uri.ToString() == uri.ToString() && dataShareItem.key == key) {
+            dataShareItem.value = value;
+            return;
+        }
+    }
+    DatashareItem dataShareItem = { uri, key, value };
+    dataShareItems_.push_back(dataShareItem);
 }
 
 ErrCode AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNumber, const std::string &policy,
@@ -510,6 +580,45 @@ std::string AdvancedDatashareHelper::GetIntelligentUri(const int32_t userId)
 void AdvancedDatashareHelper::SetIsDataShareReady(bool isDataShareReady)
 {
     isDataShareReady_ = isDataShareReady;
+}
+
+void AdvancedDatashareHelper::UnregisterObserver()
+{
+    for (auto &dataObserver : dataObservers_) {
+        dataShareHelper_->UnregisterObserver(dataObserver.second->GetUri(), dataObserver.second);
+    }
+    dataObservers_.clear();
+}
+
+void AdvancedDatashareHelper::RegisterObserver(
+    const int32_t userId, const std::string &strUri, const std::vector<std::string> &keys)
+{
+    Uri uri(strUri);
+    sptr<AdvancedDatashareHelperDataObserver> advancedDatashareHelperDataObserver =
+        new (std::nothrow) AdvancedDatashareHelperDataObserver(uri, keys);
+    if (advancedDatashareHelperDataObserver == nullptr) {
+        ANS_LOGE("RegisterObserver fail uri: %{public}s", strUri.c_str());
+        return;
+    }
+    dataShareHelper_->RegisterObserver(uri, advancedDatashareHelperDataObserver);
+    dataObservers_.push_back(std::make_pair(userId, advancedDatashareHelperDataObserver));
+}
+
+void AdvancedDatashareHelper::OnUserSwitch(const int32_t userId)
+{
+    for (auto &dataObserver : dataObservers_) {
+        if (dataObserver.first == userId) {
+            return;
+        }
+    }
+    if (!CreateDataShareHelper()) {
+        ANS_LOGE("Datashare userSwitch fail by nullptr.");
+        return;
+    }
+    ANS_LOGE("Datashare userSwitch id:%{public}d", userId);
+    RegisterObserver(userId, GetFocusModeEnableUri(userId), { KEY_FOCUS_MODE_ENABLE });
+    RegisterObserver(userId, GetFocusModeProfileUri(userId), { KEY_FOCUS_MODE_PROFILE });
+    RegisterObserver(userId, GetIntelligentExperienceUri(userId), { KEY_INTELLIGENT_EXPERIENCE });
 }
 } // namespace Notification
 } // namespace OHOS

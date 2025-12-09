@@ -15,9 +15,9 @@
 
 #include "gtest/gtest.h"
 #include "advanced_aggregation_data_roaming_observer.h"
+#define private public
 #include "advanced_datashare_helper.h"
-#include "datashare_helper.h"
-#include "advanced_datashare_helper.h"
+#undef private
 #include "mock_datashare.h"
 
 using namespace testing::ext;
@@ -45,9 +45,23 @@ HWTEST_F(AdvancedDatashareHelperTest, Query_0001, Function | SmallTest | Level1)
     int32_t userId = 100;
     Uri enableUri(advancedDatashareHelper.GetFocusModeEnableUri(userId));
     std::string enable;
+    size_t dataShareItemSize = advancedDatashareHelper.dataShareItems_.size();
     bool ret = advancedDatashareHelper.Query(enableUri, KEY_FOCUS_MODE_ENABLE, enable);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(advancedDatashareHelper.dataShareItems_.size(), dataShareItemSize + 1);
+}
 
-    EXPECT_EQ(ret, true);
+HWTEST_F(AdvancedDatashareHelperTest, UnregisterObserver_0001, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+    AdvancedDatashareHelper advancedDatashareHelper;
+    int32_t userId = 101;
+    size_t dataObserversSize = advancedDatashareHelper.dataObservers_.size();
+    advancedDatashareHelper.OnUserSwitch(userId);
+    EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), dataObserversSize + 3);
+    advancedDatashareHelper.UnregisterObserver();
+    EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), 0);
 }
 
 HWTEST_F(AdvancedDatashareHelperTest, Query_0002, Function | SmallTest | Level1)

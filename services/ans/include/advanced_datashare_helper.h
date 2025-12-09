@@ -16,7 +16,11 @@
 #ifndef NOTIFICATION_ADVANCED_DATASHAER_HELPER_H
 #define NOTIFICATION_ADVANCED_DATASHAER_HELPER_H
 
+#include <vector>
+
+#include "advanced_datashare_helper_data_observer.h"
 #include "datashare_helper.h"
+#include "ffrt.h"
 #include "iremote_broker.h"
 #include "singleton.h"
 #include "system_ability_definition.h"
@@ -37,7 +41,7 @@ constexpr const char *KEY_INTELLIGENT_URI = "intelligent_uri";
 class AdvancedDatashareHelper : DelayedSingleton<AdvancedDatashareHelper> {
 public:
     AdvancedDatashareHelper();
-    ~AdvancedDatashareHelper() = default;
+    ~AdvancedDatashareHelper();
     bool Query(Uri &uri, const std::string &key, std::string &value);
     bool isRepeatCall(const std::string &phoneNumber);
     ErrCode QueryContact(Uri &uri, const std::string &phoneNumber,
@@ -54,6 +58,15 @@ public:
     std::string GetIntelligentUri(const int32_t userId);
     std::string GetUnifiedGroupEnableUri() const;
     static void SetIsDataShareReady(bool isDataShareReady);
+    bool QueryByDataShare(Uri &uri, const std::string &key, std::string &value);
+    void OnUserSwitch(const int32_t userId);
+    void Init();
+
+    struct DatashareItem {
+        Uri uri;
+        std::string key;
+        std::string value;
+    };
 
 private:
     enum ContactPolicy {
@@ -61,7 +74,7 @@ private:
         ALLOW_SPECIFIED_CONTACTS = 5,
         FORBID_SPECIFIED_CONTACTS = 6,
     };
-    std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
+    bool CreateDataShareHelper();
     std::shared_ptr<DataShare::DataShareHelper> CreateContactDataShareHelper(std::string uri);
     std::shared_ptr<DataShare::DataShareHelper> CreateIntelligentDataShareHelper(std::string uri);
     std::shared_ptr<DataShare::DataShareHelper> CreateIntelligentDataShareHelper(std::string uri, const int32_t userId);
@@ -74,8 +87,16 @@ private:
     std::string GetIntelligentData(const std::string &uri, const std::string &key);
     std::string GetIntelligentData(const std::string &uri, const std::string &key, const int32_t userId);
     void SetPhoneNumQueryCondition(DataShare::DataSharePredicates &predicates, const std::string &phoneNumber);
+    void RegisterObserver(const int32_t userId, const std::string &uri, const std::vector<std::string> &keys);
+    void UnregisterObserver();
+    void AddDataShareItems(Uri &uri, const std::string &key, const std::string &value);
+    bool QuerydataShareItems(Uri &uri, const std::string &key, std::string &value);
 private:
     static bool isDataShareReady_;
+    ffrt::mutex dataShareItemMutex_;
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper_;
+    std::vector<DatashareItem> dataShareItems_;
+    std::vector<std::pair<int32_t, sptr<AdvancedDatashareHelperDataObserver>>> dataObservers_;
 };
 } // namespace Notification
 } // namespace OHOS
