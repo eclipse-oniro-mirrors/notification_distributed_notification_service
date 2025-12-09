@@ -59,7 +59,9 @@ napi_value Common::GetNotificationFlagsInfo(const napi_env &env, const napi_valu
     NAPI_CALL(env, napi_has_named_property(env, value, "soundEnabled", &hasProperty));
     if (hasProperty) {
         NotificationConstant::FlagStatus soundEnabled = NotificationConstant::FlagStatus::NONE;
-        GetNotificationFlagsStatus(env, value, "soundEnabled", soundEnabled);
+        if (GetNotificationFlagsStatus(env, value, "soundEnabled", soundEnabled) == nullptr) {
+            return nullptr;
+        }
         if (soundEnabled == NotificationConstant::FlagStatus::CLOSE) {
             result->SetSoundEnabled(soundEnabled);
         }
@@ -67,7 +69,9 @@ napi_value Common::GetNotificationFlagsInfo(const napi_env &env, const napi_valu
     NAPI_CALL(env, napi_has_named_property(env, value, "vibrationEnabled", &hasProperty));
     if (hasProperty) {
         NotificationConstant::FlagStatus vibrationEnabled = NotificationConstant::FlagStatus::NONE;
-        GetNotificationFlagsStatus(env, value, "vibrationEnabled", vibrationEnabled);
+        if (GetNotificationFlagsStatus(env, value, "vibrationEnabled", vibrationEnabled) == nullptr) {
+            return nullptr;
+        }
         if (vibrationEnabled == NotificationConstant::FlagStatus::CLOSE) {
             result->SetVibrationEnabled(vibrationEnabled);
         }
@@ -75,7 +79,9 @@ napi_value Common::GetNotificationFlagsInfo(const napi_env &env, const napi_valu
     NAPI_CALL(env, napi_has_named_property(env, value, "bannerEnabled", &hasProperty));
     if (hasProperty) {
         NotificationConstant::FlagStatus bannerEnabled = NotificationConstant::FlagStatus::NONE;
-        GetNotificationFlagsStatus(env, value, "bannerEnabled", bannerEnabled);
+        if (GetNotificationFlagsStatus(env, value, "bannerEnabled", bannerEnabled) == nullptr) {
+            return nullptr;
+        }
         if (bannerEnabled == NotificationConstant::FlagStatus::CLOSE) {
             result->SetBannerEnabled(bannerEnabled);
         }
@@ -83,7 +89,9 @@ napi_value Common::GetNotificationFlagsInfo(const napi_env &env, const napi_valu
     NAPI_CALL(env, napi_has_named_property(env, value, "lockScreenEnabled", &hasProperty));
     if (hasProperty) {
         NotificationConstant::FlagStatus lockScreenEnabled = NotificationConstant::FlagStatus::NONE;
-        GetNotificationFlagsStatus(env, value, "lockScreenEnabled", lockScreenEnabled);
+        if (GetNotificationFlagsStatus(env, value, "lockScreenEnabled", lockScreenEnabled) == nullptr) {
+            return nullptr;
+        }
         if (lockScreenEnabled == NotificationConstant::FlagStatus::CLOSE) {
             result->SetLockScreenEnabled(lockScreenEnabled);
         }
@@ -109,11 +117,6 @@ napi_value Common::GetNotificationFlags(const napi_env &env, const napi_value &v
         }
 
         std::shared_ptr<NotificationFlags> flags = std::make_shared<NotificationFlags>();
-        if (flags == nullptr) {
-            ANS_LOGE("flags is null");
-            return nullptr;
-        }
-
         if (GetNotificationFlagsInfo(env, result, flags) == nullptr) {
             return nullptr;
         }
