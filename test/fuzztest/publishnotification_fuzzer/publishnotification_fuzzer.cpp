@@ -24,7 +24,8 @@ namespace OHOS {
         constexpr uint8_t FLAG_STATUS = 3;
     }
     void SetNotificationFlags(const Notification::NotificationConstant::FlagStatus flag,
-        std::shared_ptr<Notification::NotificationFlags> &notificationFlages) {
+        std::shared_ptr<Notification::NotificationFlags> &notificationFlages)
+    {
         notificationFlages->SetSoundEnabled(flag);
         notificationFlages->SetVibrationEnabled(flag);
         notificationFlages->SetLockScreenEnabled(flag);
