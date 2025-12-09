@@ -191,7 +191,8 @@ HWTEST_F(NotificationSubscriberStubTest, ConvertNotificationRequest_0300, Functi
     auto content = std::make_shared<NotificationContent>(normalContent);
     request->SetContent(content);
     request->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
-    request->SetCreatorBundleName("TestBundleName");
+    request->SetCreatorBundleName("CreatorBundleName");
+    request->SetOwnerBundleName("OwnerBundleName");
     request->SetAppName("TestAppName");
     request->SetDeliveryTime(1);
     request->SetGroupName("TestGroupName");
@@ -204,7 +205,7 @@ HWTEST_F(NotificationSubscriberStubTest, ConvertNotificationRequest_0300, Functi
     EXPECT_EQ(notificationInfo->GetNotificationExtensionContent()->GetTitle(), "TestTitle");
     EXPECT_NE(notificationInfo->GetHashCode(), "");
     EXPECT_EQ(notificationInfo->GetNotificationSlotType(), NotificationConstant::SlotType::CONTENT_INFORMATION);
-    EXPECT_EQ(notificationInfo->GetBundleName(), "TestBundleName");
+    EXPECT_EQ(notificationInfo->GetBundleName(), "OwnerBundleName");
     EXPECT_EQ(notificationInfo->GetAppName(), "TestAppName");
     EXPECT_EQ(notificationInfo->GetDeliveryTime(), 1);
     EXPECT_EQ(notificationInfo->GetGroupName(), "TestGroupName");
