@@ -620,6 +620,12 @@ void AdvancedNotificationService::CancelUpdateTimer(const std::shared_ptr<Notifi
 
 void AdvancedNotificationService::StartArchiveTimer(const std::shared_ptr<NotificationRecord> &record)
 {
+    std::vector<std::shared_ptr<NotificationRecord>> records;
+    FindGeofenceNotificationRecordByKey(record->request->GetSecureKey(), records);
+    if (records.size() != 0) {
+        record->request->SetAutoDeletedTime(NotificationConstant::NO_DELAY_DELETE_TIME);
+    }
+
     auto deleteTime = record->request->GetAutoDeletedTime();
     if (deleteTime == NotificationConstant::NO_DELAY_DELETE_TIME) {
         TriggerAutoDelete(record->notification->GetKey(),

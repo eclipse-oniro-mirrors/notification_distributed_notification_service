@@ -27,6 +27,7 @@
 #include "notification_config_parse.h"
 #include "notification_preferences.h"
 #include "os_account_manager_helper.h"
+#include "int_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -36,12 +37,16 @@ constexpr int32_t ZERO_USER_ID = 0;
 }  // namespace
 ErrCode AdvancedNotificationService::SetGeofenceEnabled(bool enabled)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_32, EventBranchId::BRANCH_0);
+    message.Message("geofenceEnabled:" + std::to_string(enabled));
     auto result = SystemPermissionCheck();
     if (result != ERR_OK) {
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED));
         return result;
     }
 
     result = NotificationPreferences::GetInstance()->SetGeofenceEnabled(enabled);
+    NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_1));
     if (result != ERR_OK) {
         ANS_LOGE("Set GeofenceEnabled failed, errCode=%{public}d", result);
         return result;
@@ -66,14 +71,20 @@ ErrCode AdvancedNotificationService::OnNotifyDelayedNotification(const sptr<Noti
     const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner)
 {
     ANS_LOGD("Called OnNotifyDelayedNotification, delayRecords size %{public}zu", triggerNotificationList_.size());
+    uint32_t configPath = static_cast<uint32_t>(request->GetNotificationTrigger()->GetConfigPath());
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_32, EventBranchId::BRANCH_2);
+    message.Message("Ntf TriggerKey:" + request->GetTriggerSecureKey() + "_" +
+        "_TriggerPath:" + std::to_string(configPath));
     auto result = CheckGeofenceNotificationRequest(request);
     if (result != ERR_OK) {
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result));
         ANS_LOGE("CheckGeofenceNotificationRequest failed, errCode=%{public}d", result);
         return result;
     }
 
     auto record = MakeNotificationRecord(request, bundleOption);
     if (record == nullptr) {
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NO_MEMORY).BranchId(BRANCH_3));
         ANS_LOGE("Make notification record failed.");
         return ERR_ANS_NO_MEMORY;
     }
@@ -82,6 +93,7 @@ ErrCode AdvancedNotificationService::OnNotifyDelayedNotification(const sptr<Noti
 
     ANS_LOGD("Invoke ext OnNotifyDelayedNotification");
     result = LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->OnNotifyDelayedNotification(request);
+    NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_4));
     if (result == ERR_OK) {
         GeofencePublishNotificationRequestDb requestDb = { .request = request, .bundleOption = bundleOption,
             .isUpdateByOwner = isUpdateByOwner };
@@ -100,9 +112,6 @@ ErrCode AdvancedNotificationService::OnNotifyDelayedNotification(const sptr<Noti
         return ERR_OK;
     }
     ANS_LOGE("Notify delayed notification failed, err %{public}d.", result);
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_15, EventBranchId::BRANCH_0);
-    message.ErrorCode(result);
-    NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
     {
         std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
         auto it = std::find(triggerNotificationList_.begin(), triggerNotificationList_.end(), record);
@@ -117,8 +126,11 @@ ErrCode AdvancedNotificationService::ClearDelayNotification(const std::vector<st
     const std::vector<int32_t> &userIds)
 {
     ANS_LOGD("Called ClearDelayNotification");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_32, EventBranchId::BRANCH_5);
+    message.Message("Clr delay Ntf");
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED));
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -128,6 +140,7 @@ ErrCode AdvancedNotificationService::ClearDelayNotification(const std::vector<st
     }
 
     if (triggerKeys.size() != userIds.size()) {
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_6));
         ANS_LOGE("TriggerKeys size not equal userIds size.");
         return ERR_ANS_INVALID_PARAM;
     }
@@ -135,6 +148,7 @@ ErrCode AdvancedNotificationService::ClearDelayNotification(const std::vector<st
     for (size_t i = 0; i < triggerKeys.size(); ++i) {
         auto result = NotificationPreferences::GetInstance()->DeleteKvFromDb(triggerKeys[i], userIds[i]);
         if (result != ERR_OK) {
+            NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_7));
             ANS_LOGW("DeleteKvFromDb failed, errCode=%{public}d, key: %{public}s, userId: %{public}d",
                 result, triggerKeys[i].c_str(), userIds[i]);
             dbOptionFlag = false;
@@ -151,24 +165,18 @@ ErrCode AdvancedNotificationService::ClearDelayNotification(const std::vector<st
 ErrCode AdvancedNotificationService::PublishDelayedNotification(const std::string &triggerKey, int32_t userId)
 {
     ANS_LOGD("Called PublishDelayedNotification");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_32, EventBranchId::BRANCH_8);
+    message.Message("Publish Ntf TriggerKey:" + triggerKey);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED));
         return ERR_ANS_PERMISSION_DENIED;
     }
-
     std::shared_ptr<NotificationRecord> record;
-    {
-        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
-        for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
-            if ((*it)->request->GetTriggerSecureKey() != triggerKey) {
-                ++it;
-                continue;
-            }
-            record = *it;
-            break;
-        }
-    }
+    FindGeofenceNotificationRecordByTriggerKey(triggerKey, record);
     if (record == nullptr) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_NOTIFICATION_NOT_EXISTS).BranchId(BRANCH_9));
         ANS_LOGE("Notification record not found");
         return ERR_ANS_NOTIFICATION_NOT_EXISTS;
     }
@@ -177,12 +185,14 @@ ErrCode AdvancedNotificationService::PublishDelayedNotification(const std::strin
     auto isUpdateByOwner = record->isUpdateByOwner;
     ConvertTriggerLiveviewStatus(request);
     auto result = PublishPreparedNotificationInner(request, bundleOption, isUpdateByOwner);
+    NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_10));
     if (result != ERR_OK) {
         ANS_LOGE("PublishPreparedNotificationInner failed, errCode=%{public}d", result);
         return result;
     }
     result = NotificationPreferences::GetInstance()->DeleteKvFromDb(triggerKey, userId);
     if (result != ERR_OK) {
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_11));
         ANS_LOGE("DeleteKvFromDb failed, errCode=%{public}d", result);
         return result;
     }
@@ -207,6 +217,12 @@ void AdvancedNotificationService::ConvertTriggerLiveviewStatus(sptr<Notification
     }
     auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content->GetNotificationContent());
     auto status = liveViewContent->GetLiveViewStatus();
+    std::shared_ptr<AAFwk::WantParams> extroInfo = nullptr;
+    extroInfo = liveViewContent->GetExtraInfo();
+    if (extroInfo != nullptr && request->GetNotificationTrigger() != nullptr) {
+        uint32_t configPath = static_cast<uint32_t>(request->GetNotificationTrigger()->GetConfigPath());
+        extroInfo->SetParam("TriggerPath", AAFwk::Integer::Box(configPath));
+    }
     if (status == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE) {
         liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
     }
@@ -390,6 +406,9 @@ ErrCode AdvancedNotificationService::ClearAllGeofenceNotificationRequests(const 
         ANS_LOGD("Invoke ext OnNotifyClearNotification");
         result = LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->OnNotifyClearNotification(triggerKeys);
         if (result != ERR_OK) {
+            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_32, EventBranchId::BRANCH_12);
+            message.Message("OnNotifyClearNotification");
+            NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result));
             ANS_LOGE("Notify clear notification request failed, err %{public}d.", result);
             return result;
         }
@@ -476,7 +495,12 @@ void AdvancedNotificationService::ProcForDeleteGeofenceLiveView(const std::share
         record->request->GetReceiverUserId());
     std::vector<std::string> triggerKeys;
     triggerKeys.push_back(record->request->GetTriggerSecureKey());
-    LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->OnNotifyClearNotification(triggerKeys);
+    auto result = LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->OnNotifyClearNotification(triggerKeys);
+    if (result != ERR_OK) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_32, EventBranchId::BRANCH_13);
+        message.Message("Clear Ntf");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result));
+    }
 }
 
 ErrCode AdvancedNotificationService::SetGeofenceTriggerTimer(const std::shared_ptr<NotificationRecord> &record)
@@ -523,6 +547,8 @@ ErrCode AdvancedNotificationService::UpdateTriggerNotification(const sptr<Notifi
     const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner,
     std::vector<std::shared_ptr<NotificationRecord>> &records)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_32, EventBranchId::BRANCH_14);
+    message.Message("Update Trigger Ntf");
     if (records.size() != GEOFENCE_RECORDS_SIZE_ONE) {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -564,6 +590,7 @@ ErrCode AdvancedNotificationService::UpdateTriggerNotification(const sptr<Notifi
     GeofencePublishNotificationRequestDb requestDb = { .request = newRecord->request,
         .bundleOption = newRecord->bundleOption, .isUpdateByOwner = newRecord->isUpdateByOwner };
     result = SetTriggerNotificationRequestToDb(requestDb);
+    NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result));
     if (result != ERR_OK) {
         ANS_LOGE("SetTriggerNotificationRequestToDb failed, errCode=%{public}d", result);
         return result;
