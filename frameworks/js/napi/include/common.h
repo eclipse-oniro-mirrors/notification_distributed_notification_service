@@ -2014,6 +2014,16 @@ private:
         NotificationRequest &request);
     static napi_value GetNotificationRequestByCustomInnerSecond(const napi_env &env, const napi_value &value,
         NotificationRequest &request);
+    static napi_value SetNotificationRequestByCustomInnerFirst(
+        const napi_env &env, const OHOS::Notification::NotificationRequest *request, napi_value &result);
+    static napi_value SetNotificationRequestByCustomInnerSecond(
+        const napi_env &env, const OHOS::Notification::NotificationRequest *request, napi_value &result);
+    static napi_value SetNotificationRequestByCustomInnerThird(
+        const napi_env &env, const OHOS::Notification::NotificationRequest *request, napi_value &result);
+    static napi_value SetNotificationTrigger(
+        const napi_env &env, const std::shared_ptr<NotificationTrigger> &trigger, napi_value &result);
+    static napi_value SetNotificationGeofence(
+        const napi_env &env, const std::shared_ptr<NotificationGeofence> &condition, napi_value &result);
     static napi_value GetRingtoneStringInfo(const napi_env &env, const napi_value &value,
         NotificationRingtoneInfo &ringtoneInfo);
     static napi_value GetNotificationGeofenceByCoordinateSystemType(const napi_env &env, const napi_value &value,

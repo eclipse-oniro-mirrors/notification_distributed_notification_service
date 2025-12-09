@@ -48,6 +48,7 @@ ohos_shared_library("reminderagent") {
     "../common_convert_liveview.cpp",
     "../common_convert_notification.cpp",
     "../common_convert_request.cpp",
+    "../common_convert_trigger.cpp",
     "../common_utils.cpp",
     "../slot.cpp",
     "native_module.cpp",

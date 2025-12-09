@@ -49,7 +49,10 @@ ErrCode AdvancedNotificationService::SetGeofenceEnabled(bool enabled)
     if (!enabled) {
         int32_t userId = SUBSCRIBE_USER_INIT;
         OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
-        return ClearAllGeofenceNotificationRequests(userId);
+        result = ClearAllGeofenceNotificationRequests(userId);
+        if (result != ERR_OK) {
+            ANS_LOGW("ClearAllGeofenceNotificationRequests failed, errCode=%{public}d", result);
+        }
     }
     return ERR_OK;
 }
@@ -62,6 +65,7 @@ ErrCode AdvancedNotificationService::IsGeofenceEnabled(bool &enabled)
 ErrCode AdvancedNotificationService::OnNotifyDelayedNotification(const sptr<NotificationRequest> &request,
     const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner)
 {
+    ANS_LOGD("Called OnNotifyDelayedNotification, delayRecords size %{public}zu", triggerNotificationList_.size());
     auto result = CheckGeofenceNotificationRequest(request);
     if (result != ERR_OK) {
         ANS_LOGE("CheckGeofenceNotificationRequest failed, errCode=%{public}d", result);
@@ -76,6 +80,7 @@ ErrCode AdvancedNotificationService::OnNotifyDelayedNotification(const sptr<Noti
     record->isUpdateByOwner = isUpdateByOwner;
     AddToTriggerNotificationList(record);
 
+    ANS_LOGD("Invoke ext OnNotifyDelayedNotification");
     result = LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->OnNotifyDelayedNotification(request);
     if (result == ERR_OK) {
         GeofencePublishNotificationRequestDb requestDb = { .request = request, .bundleOption = bundleOption,
@@ -83,22 +88,27 @@ ErrCode AdvancedNotificationService::OnNotifyDelayedNotification(const sptr<Noti
         result = SetTriggerNotificationRequestToDb(requestDb);
         if (result != ERR_OK) {
             ANS_LOGE("SetTriggerNotificationRequestToDb failed, errCode=%{public}d", result);
-            std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
-            auto it = std::find(triggerNotificationList_.begin(), triggerNotificationList_.end(), record);
-            if (it != triggerNotificationList_.end()) {
-                triggerNotificationList_.erase(it);
+            {
+                std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+                auto it = std::find(triggerNotificationList_.begin(), triggerNotificationList_.end(), record);
+                if (it != triggerNotificationList_.end()) {
+                    triggerNotificationList_.erase(it);
+                }
             }
             return result;
         }
         return ERR_OK;
     }
+    ANS_LOGE("Notify delayed notification failed, err %{public}d.", result);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_15, EventBranchId::BRANCH_0);
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-    std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
-    auto it = std::find(triggerNotificationList_.begin(), triggerNotificationList_.end(), record);
-    if (it != triggerNotificationList_.end()) {
-        triggerNotificationList_.erase(it);
+    {
+        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+        auto it = std::find(triggerNotificationList_.begin(), triggerNotificationList_.end(), record);
+        if (it != triggerNotificationList_.end()) {
+            triggerNotificationList_.erase(it);
+        }
     }
     return result;
 }
@@ -106,6 +116,7 @@ ErrCode AdvancedNotificationService::OnNotifyDelayedNotification(const sptr<Noti
 ErrCode AdvancedNotificationService::ClearDelayNotification(const std::vector<std::string> &triggerKeys,
     const std::vector<int32_t> &userIds)
 {
+    ANS_LOGD("Called ClearDelayNotification");
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied.");
         return ERR_ANS_PERMISSION_DENIED;
@@ -120,47 +131,69 @@ ErrCode AdvancedNotificationService::ClearDelayNotification(const std::vector<st
         ANS_LOGE("TriggerKeys size not equal userIds size.");
         return ERR_ANS_INVALID_PARAM;
     }
+    bool dbOptionFlag = true;
     for (size_t i = 0; i < triggerKeys.size(); ++i) {
-        RemoveTriggerNotificationListByTriggerKey(triggerKeys[i]);
-        auto result = NotificationPreferences::GetInstance()->DeleteKvFromDb(triggerKeys[i],  userIds[i]);
+        auto result = NotificationPreferences::GetInstance()->DeleteKvFromDb(triggerKeys[i], userIds[i]);
         if (result != ERR_OK) {
-            return result;
+            ANS_LOGW("DeleteKvFromDb failed, errCode=%{public}d, key: %{public}s, userId: %{public}d",
+                result, triggerKeys[i].c_str(), userIds[i]);
+            dbOptionFlag = false;
+            continue;
         }
+        RemoveTriggerNotificationListByTriggerKey(triggerKeys[i]);
+    }
+    if (!dbOptionFlag) {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::PublishDelayedNotification(const std::string &triggerKey, int32_t userId)
 {
+    ANS_LOGD("Called PublishDelayedNotification");
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
-    for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
-        if ((*it)->request->GetTriggerSecureKey() != triggerKey) {
-            ++it;
-            continue;
+    std::shared_ptr<NotificationRecord> record;
+    {
+        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+        for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+            if ((*it)->request->GetTriggerSecureKey() != triggerKey) {
+                ++it;
+                continue;
+            }
+            record = *it;
+            break;
         }
-        auto request = (*it)->request;
-        auto bundleOption = (*it)->bundleOption;
-        auto isUpdateByOwner = (*it)->isUpdateByOwner;
-        ConvertTriggerLiveviewStatus(request);
-        auto result = PublishPreparedNotificationInner(request, bundleOption, isUpdateByOwner);
-        if (result != ERR_OK) {
-            ANS_LOGE("PublishPreparedNotificationInner failed, errCode=%{public}d", result);
-            return result;
-        }
-        result = NotificationPreferences::GetInstance()->DeleteKvFromDb(request->GetTriggerSecureKey(), userId);
-        if (result != ERR_OK) {
-            return result;
-        }
-        it = triggerNotificationList_.erase(it);
-        return ERR_OK;
     }
-
-    return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    if (record == nullptr) {
+        ANS_LOGE("Notification record not found");
+        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    }
+    auto request = record->request;
+    auto bundleOption = record->bundleOption;
+    auto isUpdateByOwner = record->isUpdateByOwner;
+    ConvertTriggerLiveviewStatus(request);
+    auto result = PublishPreparedNotificationInner(request, bundleOption, isUpdateByOwner);
+    if (result != ERR_OK) {
+        ANS_LOGE("PublishPreparedNotificationInner failed, errCode=%{public}d", result);
+        return result;
+    }
+    result = NotificationPreferences::GetInstance()->DeleteKvFromDb(triggerKey, userId);
+    if (result != ERR_OK) {
+        ANS_LOGE("DeleteKvFromDb failed, errCode=%{public}d", result);
+        return result;
+    }
+    {
+        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+        auto it = std::find(triggerNotificationList_.begin(), triggerNotificationList_.end(), record);
+        if (it != triggerNotificationList_.end()) {
+            triggerNotificationList_.erase(it);
+        }
+    }
+    return ERR_OK;
 }
 
 void AdvancedNotificationService::ConvertTriggerLiveviewStatus(sptr<NotificationRequest> &request)
@@ -295,6 +328,7 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
             return result;
         }
     }
+    bool dbOptionFlag = true;
     for (const auto &iter : dbRecords) {
         std::string decryptValue = iter.second;
         if (iter.first.rfind(REQUEST_STORAGE_SECURE_TRIGGER_LIVE_VIEW_PREFIX, 0) != 0) {
@@ -302,49 +336,66 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
         }
         ErrCode errorCode = AesGcmHelper::Decrypt(decryptValue, iter.second);
         if (errorCode != ERR_OK) {
-            ANS_LOGE("GetBatchNotificationRequestsFromDb decrypt error");
-            return static_cast<int>(errorCode);
+            ANS_LOGW("GetBatchNotificationRequestsFromDb decrypt failed, errCode=%{public}d",
+                static_cast<int>(errorCode));
+            dbOptionFlag = false;
+            continue;
         }
         GeofencePublishNotificationRequestDb requestDb;
         errorCode = ParseGeofenceNotificationFromDb(decryptValue, requestDb);
         if (errorCode != ERR_OK) {
-            ANS_LOGE("ParseGeofenceNotificationFromDb error");
-            return static_cast<int>(errorCode);
+            ANS_LOGW("ParseGeofenceNotificationFromDb failed, errCode=%{public}d", errorCode);
+            dbOptionFlag = false;
+            continue;
         }
         requestsDb.emplace_back(requestDb);
+    }
+    if (!dbOptionFlag) {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::ClearAllGeofenceNotificationRequests(const int32_t &userId)
 {
+    ANS_LOGD("Called ClearAllGeofenceNotificationRequests");
     std::unordered_map<std::string, std::string> dbRecords;
     auto result = NotificationPreferences::GetInstance()->GetBatchKvsFromDb(
         REQUEST_STORAGE_SECURE_TRIGGER_LIVE_VIEW_PREFIX, dbRecords, userId);
+    ANS_LOGD("dbRecords size %{public}zu", dbRecords.size());
     std::vector<std::string> triggerKeys;
+    bool dbOptionFlag = true;
     for (const auto &iter : dbRecords) {
         if (iter.first.rfind(REQUEST_STORAGE_SECURE_TRIGGER_LIVE_VIEW_PREFIX, 0) != 0) {
             continue;
         }
         result = NotificationPreferences::GetInstance()->DeleteKvFromDb(iter.first, userId);
         if (result != ERR_OK) {
-            ANS_LOGE("Delete notification request failed, key %{public}s.", iter.first.c_str());
-            return result;
+            ANS_LOGW("DeleteKvFromDb failed, errCode=%{public}d", result);
+            dbOptionFlag = false;
+            continue;
         }
         std::shared_ptr<NotificationRecord> record;
         FindGeofenceNotificationRecordByTriggerKey(iter.first, record);
-        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
-        auto it = std::find(triggerNotificationList_.begin(), triggerNotificationList_.end(), record);
-        if (it != triggerNotificationList_.end()) {
-            triggerNotificationList_.erase(it);
+        {
+            std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+            auto it = std::find(triggerNotificationList_.begin(), triggerNotificationList_.end(), record);
+            if (it != triggerNotificationList_.end()) {
+                triggerNotificationList_.erase(it);
+            }
         }
         triggerKeys.push_back(iter.first);
     }
-
-    result = LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->OnNotifyClearNotification(triggerKeys);
-    if (result != ERR_OK) {
-        ANS_LOGE("Notify clear notification request failed, err %{public}d.", result);
-        return result;
+    if (!triggerKeys.empty()) {
+        ANS_LOGD("Invoke ext OnNotifyClearNotification");
+        result = LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->OnNotifyClearNotification(triggerKeys);
+        if (result != ERR_OK) {
+            ANS_LOGE("Notify clear notification request failed, err %{public}d.", result);
+            return result;
+        }
+    }
+    if (!dbOptionFlag) {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     return ERR_OK;
 }
@@ -398,7 +449,7 @@ ErrCode AdvancedNotificationService::RecoverGeofenceLiveViewFromDb(int32_t userI
 {
     std::vector<GeofencePublishNotificationRequestDb> requestsDb;
     auto result = GetBatchNotificationRequestsFromDb(requestsDb, userId);
-    if (result != ERR_OK) {
+    if (result != ERR_OK && requestsDb.empty()) {
         ANS_LOGE("Get geofence liveView from db failed.");
         return result;
     }

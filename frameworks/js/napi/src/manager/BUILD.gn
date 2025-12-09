@@ -62,6 +62,7 @@ ohos_shared_library("notificationmanager") {
     "../common_convert_liveview.cpp",
     "../common_convert_notification.cpp",
     "../common_convert_request.cpp",
+    "../common_convert_trigger.cpp",
     "../common_utils.cpp",
     "../constant.cpp",
     "../disable_notification.cpp",

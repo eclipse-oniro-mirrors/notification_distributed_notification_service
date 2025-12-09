@@ -1697,16 +1697,17 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetRecordFromNo
                 records.push_back(record);
             }
         }
-        if (records.size() == 1) {
-            return records.front();
-        }
-        if (records.size() > 1) {
-            for (auto &record : records) {
-                if (record->request->GetLiveViewStatus() ==
-                    NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END) {
-                    return record;
-                }
-            }
+    }
+    if (records.size() == 1) {
+        return records.front();
+    }
+    if (records.size() > 1) {
+        auto it = std::find_if(records.begin(), records.end(), [](const auto& record) {
+            return record->request->GetLiveViewStatus() ==
+                NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END;
+        });
+        if (it != records.end()) {
+            return *it;
         }
     }
 
