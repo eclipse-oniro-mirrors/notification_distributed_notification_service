@@ -2997,5 +2997,40 @@ HWTEST_F(NotificationPreferencesDatabaseTest, SetHashCodeRule_0200, TestSize.Lev
 
     EXPECT_TRUE(notificationPreferencesDatabase->SetHashCodeRule(100, 1, userId));
 }
+
+/**
+ * @tc.name: HandleDataBaseMap_0200
+ * @tc.desc: test HandleDataBaseMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, HandleDataBaseMap_0200, TestSize.Level1)
+{
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(101);
+    std::unordered_map<std::string, std::string> datas;
+    std::vector<NotificationBundleOption> bundleOption;
+    datas.insert({"ans_bundle_ohos_test_demo12410001_name", "ohos_test_demo"});
+    datas.insert({"ans_bundle_ohos_test_demo12410001_enabledNotification", "1"});
+    datas.insert({"ans_bundle_ohos_test_demo12410001_uid", "12410001"});
+
+    datas.insert({"ans_bundle_oh_test_demo10001_name", "oh_test_demo"});
+    datas.insert({"ans_bundle_oh_test_demo10001_enabledNotification", "1"});
+    datas.insert({"ans_bundle_oh_test_demo10001_uid", "10001"});
+
+    datas.insert({"ans_bundle_oho_test_demo20220018_name", "oho_test_demo"});
+    datas.insert({"ans_bundle_oho_test_demo20220018_enabledNotification", "1"});
+    datas.insert({"ans_bundle_oho_test_demo20220018_uid", "20220018"});
+
+    preferncesDB_->HandleDataBaseMap(datas, bundleOption);
+    ASSERT_EQ(bundleOption.size(), 2);
+
+    datas.clear();
+    bundleOption.clear();
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(100);
+    datas.insert({"ans_bundle_oh_test_demo10001_name", "oh_test_demo"});
+    datas.insert({"ans_bundle_oh_test_demo10001_enabledNotification", "1"});
+    datas.insert({"ans_bundle_oh_test_demo10001_uid", "10001"});
+    preferncesDB_->HandleDataBaseMap(datas, bundleOption);
+    ASSERT_EQ(bundleOption.size(), 1);
+}
 }  // namespace Notification
 }  // namespace OHOS

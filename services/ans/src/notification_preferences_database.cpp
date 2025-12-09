@@ -1060,11 +1060,11 @@ bool NotificationPreferencesDatabase::HandleDataBaseMap(
             if (result != ERR_OK) {
                 return false;
             }
-            if (userid != currentUserId && !(currentUserId == DEFAULT_USER_ID && userid == ZERO_USER_ID)) {
-                continue;
+            if (userid == currentUserId || (currentUserId == DEFAULT_USER_ID && userid == ZERO_USER_ID) ||
+                (currentUserId > DEFAULT_USER_ID && userid > ZERO_USER_ID && userid < DEFAULT_USER_ID)) {
+                NotificationBundleOption obj(value, StringToInt(uidItem->second));
+                bundleOption.emplace_back(obj);
             }
-            NotificationBundleOption obj(value, StringToInt(uidItem->second));
-            bundleOption.emplace_back(obj);
         }
     }
     return true;
