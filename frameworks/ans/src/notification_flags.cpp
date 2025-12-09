@@ -54,12 +54,12 @@ NotificationFlags::NotificationFlags(uint32_t reminderFlags): reminderFlags_(rem
 
 void NotificationFlags::SetSoundEnabled(NotificationConstant::FlagStatus soundEnabled)
 {
-    if (soundEnabled == NotificationConstant::FlagStatus::CLOSE) {
-        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::SOUND_FLAG);
-        soundEnabled_ = NotificationConstant::FlagStatus::CLOSE;
-    } else {
+    if (soundEnabled == NotificationConstant::FlagStatus::OPEN) {
         reminderFlags_ |= NotificationConstant::ReminderFlag::SOUND_FLAG;
         soundEnabled_ = NotificationConstant::FlagStatus::OPEN;
+    } else {
+        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::SOUND_FLAG);
+        soundEnabled_ = NotificationConstant::FlagStatus::CLOSE;
     }
 }
 
@@ -70,12 +70,12 @@ NotificationConstant::FlagStatus NotificationFlags::IsSoundEnabled() const
 
 void NotificationFlags::SetVibrationEnabled(NotificationConstant::FlagStatus vibrationEnabled)
 {
-    if (vibrationEnabled == NotificationConstant::FlagStatus::CLOSE) {
-        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::VIBRATION_FLAG);
-        vibrationEnabled_ = NotificationConstant::FlagStatus::CLOSE;
-    } else {
+    if (vibrationEnabled == NotificationConstant::FlagStatus::OPEN) {
         reminderFlags_ |= NotificationConstant::ReminderFlag::VIBRATION_FLAG;
         vibrationEnabled_ = NotificationConstant::FlagStatus::OPEN;
+    } else {
+        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::VIBRATION_FLAG);
+        vibrationEnabled_ = NotificationConstant::FlagStatus::CLOSE;
     }
 }
 
@@ -86,12 +86,12 @@ NotificationConstant::FlagStatus NotificationFlags::IsVibrationEnabled() const
 
 void NotificationFlags::SetLockScreenEnabled(NotificationConstant::FlagStatus lockScreenEnabled)
 {
-    if (lockScreenEnabled == NotificationConstant::FlagStatus::CLOSE) {
-        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG);
-        lockScreenEnabled_ = NotificationConstant::FlagStatus::CLOSE;
-    } else {
+    if (lockScreenEnabled == NotificationConstant::FlagStatus::OPEN) {
         reminderFlags_ |= NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG;
         lockScreenEnabled_ = NotificationConstant::FlagStatus::OPEN;
+    } else {
+        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG);
+        lockScreenEnabled_ = NotificationConstant::FlagStatus::CLOSE;
     }
 }
 
@@ -102,12 +102,12 @@ NotificationConstant::FlagStatus NotificationFlags::IsLockScreenEnabled() const
 
 void NotificationFlags::SetBannerEnabled(NotificationConstant::FlagStatus bannerEnabled)
 {
-    if (bannerEnabled == NotificationConstant::FlagStatus::CLOSE) {
-        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::BANNER_FLAG);
-        bannerEnabled_ = NotificationConstant::FlagStatus::CLOSE;
-    } else {
+    if (bannerEnabled == NotificationConstant::FlagStatus::OPEN) {
         reminderFlags_ |= NotificationConstant::ReminderFlag::BANNER_FLAG;
         bannerEnabled_ = NotificationConstant::FlagStatus::OPEN;
+    } else {
+        reminderFlags_ &= ~(NotificationConstant::ReminderFlag::BANNER_FLAG);
+        bannerEnabled_ = NotificationConstant::FlagStatus::CLOSE;
     }
 }
 
