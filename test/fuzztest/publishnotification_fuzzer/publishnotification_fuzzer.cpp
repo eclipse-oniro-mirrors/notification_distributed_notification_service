@@ -23,20 +23,31 @@ namespace OHOS {
         constexpr uint8_t SLOT_TYPE_NUM = 5;
         constexpr uint8_t FLAG_STATUS = 3;
     }
+    void SetNotificationFlags(const Notification::NotificationConstant::FlagStatus flag,
+        std::shared_ptr<Notification::NotificationFlags> &notificationFlages) {
+        notificationFlages->SetSoundEnabled(flag);
+        notificationFlages->SetVibrationEnabled(flag);
+        notificationFlages->SetLockScreenEnabled(flag);
+        notificationFlages->SetBannerEnabled(flag);
+    }
+
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
         std::string stringData = fdp->ConsumeRandomLengthString();
         Notification::NotificationRequest request;
         request.SetAlertOneTime(fdp->ConsumeBool());
+
         int32_t style = fdp->ConsumeIntegral<int32_t>();
         Notification::NotificationRequest::BadgeStyle badgeStyle =
             Notification::NotificationRequest::BadgeStyle(style);
         request.SetBadgeIconStyle(badgeStyle);
         request.SetBadgeNumber(style);
         request.SetClassification(stringData);
+
         uint32_t color = fdp->ConsumeIntegral<uint32_t>();
         request.SetColor(color);
         request.SetColorEnabled(fdp->ConsumeBool());
+
         std::shared_ptr<Notification::NotificationNormalContent> contentType =
             std::make_shared<Notification::NotificationNormalContent>();
         contentType->SetText(stringData);
@@ -48,32 +59,36 @@ namespace OHOS {
         request.SetCountdownTimer(fdp->ConsumeBool());
         request.SetCreatorBundleName(stringData);
         request.SetDeliveryTime(style);
+
         std::shared_ptr<Notification::NotificationFlags> notificationFlages =
             std::make_shared<Notification::NotificationFlags>();
         int32_t soundEnabled = static_cast<int32_t>(fdp->ConsumeIntegral<uint8_t>() % FLAG_STATUS);
         Notification::NotificationConstant::FlagStatus sound =
             Notification::NotificationConstant::FlagStatus(soundEnabled);
-        notificationFlages->SetSoundEnabled(sound);
-        notificationFlages->SetVibrationEnabled(sound);
-        notificationFlages->SetLockScreenEnabled(sound);
-        notificationFlages->SetBannerEnabled(sound);
+        SetNotificationFlags(sound, notificationFlages);
         request.SetFlags(notificationFlages);
+
         Notification::NotificationRequest::GroupAlertType groupAlertType =
             Notification::NotificationRequest::GroupAlertType(color);
         request.SetGroupAlertType(groupAlertType);
+
         request.SetGroupName(stringData);
         request.SetGroupOverview(fdp->ConsumeBool());
         request.SetLabel(stringData);
         request.SetNotificationId(style);
         request.SetOwnerBundleName(stringData);
+
         uint8_t types = fdp->ConsumeIntegral<uint8_t>() % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(types);
         request.SetSlotType(slotType);
+
         Notification::NotificationHelper::PublishNotification(request);
+        // test GetActiveNotifications function
         sptr<Notification::NotificationRequest> requester = new Notification::NotificationRequest(request);
         std::vector<sptr<Notification::NotificationRequest>> requested;
         requested.emplace_back(requester);
         Notification::NotificationHelper::GetActiveNotifications(requested);
+        // test PublishNotification function
         return Notification::NotificationHelper::PublishNotification(stringData, request) == ERR_OK;
     }
 }
