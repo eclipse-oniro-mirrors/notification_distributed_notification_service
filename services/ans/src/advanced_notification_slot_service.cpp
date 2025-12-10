@@ -1360,8 +1360,8 @@ ErrCode AdvancedNotificationService::GetLiveViewConfig(const std::vector<std::st
     return result;
 }
 
-ErrCode AdvancedNotificationService::GetAllLiveViewEnabledBundles(
-    std::vector<NotificationBundleOption> &bundleOption)
+ErrCode AdvancedNotificationService::GetAllLiveViewEnabledBundlesInner(
+    std::vector<NotificationBundleOption> &bundleOption, const int32_t userId)
 {
     ANS_LOGD("Called.");
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
@@ -1372,8 +1372,6 @@ ErrCode AdvancedNotificationService::GetAllLiveViewEnabledBundles(
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
     }
-    int32_t userId = 100;
-    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&, userId]() {
         ANS_LOGD("ffrt enter!");
@@ -1389,35 +1387,21 @@ ErrCode AdvancedNotificationService::GetAllLiveViewEnabledBundles(
 }
 
 ErrCode AdvancedNotificationService::GetAllLiveViewEnabledBundles(
+    std::vector<NotificationBundleOption> &bundleOption)
+{
+    int32_t userId = 100;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    return GetAllLiveViewEnabledBundlesInner(bundleOption, userId);
+}
+
+ErrCode AdvancedNotificationService::GetAllLiveViewEnabledBundles(
     std::vector<NotificationBundleOption> &bundleOption, const int32_t userId)
 {
-    ANS_LOGD("Called.");
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGE("Permission denied.");
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
     if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
         ANS_LOGE("Check user exists failed.");
-        return ERROR_USER_NOT_EXIST;
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&, userId]() {
-        ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance()->GetAllLiveViewEnabledBundles(userId, bundleOption);
-        if (result != ERR_OK) {
-            ANS_LOGE("Get all notification enable status failed");
-            return;
-        }
-    }));
-    notificationSvrQueue_->wait(handler);
-
-    return result;
+    return GetAllLiveViewEnabledBundlesInner(bundleOption, userId);
 }
 
 bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<NotificationBundleOption> &bundleOption)

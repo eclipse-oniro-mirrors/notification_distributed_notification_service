@@ -943,27 +943,7 @@ bool NotificationPreferencesDatabase::RemoveSlotFromDisturbeDB(
     return true;
 }
 
-bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(
-    std::vector<NotificationBundleOption> &bundleOption)
-{
-    ANS_LOGD("called");
-    if (!CheckRdbStore()) {
-        ANS_LOGE("null RdbStore");
-        return false;
-    }
-    std::unordered_map<std::string, std::string> datas;
-    const std::string ANS_BUNDLE_BEGIN = "ans_bundle_";
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
-    int32_t errCode = rdbDataManager_->QueryDataBeginWithKey(ANS_BUNDLE_BEGIN, datas, userId);
-    if (errCode != NativeRdb::E_OK) {
-        ANS_LOGE("Query data begin with ans_bundle_ from db error");
-        return false;
-    }
-    return HandleDataBaseMap(datas, bundleOption);
-}
-
-bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(
+bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundlesInner(
     std::vector<NotificationBundleOption> &bundleOption, const int32_t userId)
 {
     ANS_LOGD("called");
@@ -978,7 +958,26 @@ bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(
         ANS_LOGE("Query data begin with ans_bundle_ from db error");
         return false;
     }
-    return HandleDataBaseMap(datas, bundleOption, userId);
+    return HandleDataBaseMap(datas, bundleOption);
+}
+
+bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(
+    std::vector<NotificationBundleOption> &bundleOption)
+{
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    return GetAllNotificationEnabledBundlesInner(bundleOption, userId);
+}
+
+bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(
+    std::vector<NotificationBundleOption> &bundleOption, const int32_t userId)
+{
+    ANS_LOGD("called");
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("Check user exists failed.");
+        return false;
+    }
+    return GetAllNotificationEnabledBundlesInner(bundleOption, userId);
 }
 
 bool NotificationPreferencesDatabase::GetAllDistribuedEnabledBundles(int32_t userId,
@@ -1027,58 +1026,7 @@ void NotificationPreferencesDatabase::StringSplit(const std::string content, cha
     }
 }
 
-bool NotificationPreferencesDatabase::HandleDataBaseMap(
-    const std::unordered_map<std::string, std::string> &datas, std::vector<NotificationBundleOption> &bundleOption)
-{
-    std::regex matchBundlenamePattern("^ans_bundle_(.*)_name$");
-    std::smatch match;
-    int32_t currentUserId = SUBSCRIBE_USER_INIT;
-    ErrCode result = ERR_OK;
-    result = OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(currentUserId);
-    if (result != ERR_OK) {
-        ANS_LOGE("Get account id fail");
-        return false;
-    }
-    constexpr int MIDDLE_KEY = 1;
-    for (const auto &dataMapItem : datas) {
-        const std::string &key = dataMapItem.first;
-        const std::string &value = dataMapItem.second;
-        if (!std::regex_match(key, match, matchBundlenamePattern)) {
-            continue;
-        }
-        std::string matchKey = match[MIDDLE_KEY].str();
-        std::string matchUid = "ans_bundle_" + matchKey + "_uid";
-        std::string matchEnableNotification = "ans_bundle_" + matchKey + "_enabledNotification";
-        auto enableNotificationItem = datas.find(matchEnableNotification);
-        if (enableNotificationItem == datas.end()) {
-            continue;
-        }
-        NotificationConstant::SWITCH_STATE state = static_cast<NotificationConstant::SWITCH_STATE>(
-            StringToInt(enableNotificationItem->second));
-        bool enabled = (state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
-            state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
-        if (enabled) {
-            auto uidItem = datas.find(matchUid);
-            if (uidItem == datas.end()) {
-                continue;
-            }
-            int userid = -1;
-            result =
-                OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(StringToInt(uidItem->second), userid);
-            if (result != ERR_OK) {
-                return false;
-            }
-            if (userid == currentUserId || (currentUserId == DEFAULT_USER_ID && userid == ZERO_USER_ID) ||
-                (currentUserId > DEFAULT_USER_ID && userid > ZERO_USER_ID && userid < DEFAULT_USER_ID)) {
-                NotificationBundleOption obj(value, StringToInt(uidItem->second));
-                bundleOption.emplace_back(obj);
-            }
-        }
-    }
-    return true;
-}
-
-bool NotificationPreferencesDatabase::HandleDataBaseMap(
+bool NotificationPreferencesDatabase::HandleDataBaseMapInner(
     const std::unordered_map<std::string, std::string> &datas,
     std::vector<NotificationBundleOption> &bundleOption, const int32_t currentUserId)
 {
@@ -1108,19 +1056,43 @@ bool NotificationPreferencesDatabase::HandleDataBaseMap(
                 continue;
             }
             int userid = -1;
-            auto result =
+            ErrCode result =
                 OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(StringToInt(uidItem->second), userid);
             if (result != ERR_OK) {
                 return false;
             }
-            if (userid != currentUserId && !(currentUserId == DEFAULT_USER_ID && userid == ZERO_USER_ID)) {
-                continue;
+            if (userid == currentUserId || (currentUserId == DEFAULT_USER_ID && userid == ZERO_USER_ID) ||
+                (currentUserId > DEFAULT_USER_ID && userid > ZERO_USER_ID && userid < DEFAULT_USER_ID)) {
+                NotificationBundleOption obj(value, StringToInt(uidItem->second));
+                bundleOption.emplace_back(obj);
             }
-            NotificationBundleOption obj(value, StringToInt(uidItem->second));
-            bundleOption.emplace_back(obj);
         }
     }
     return true;
+}
+
+bool NotificationPreferencesDatabase::HandleDataBaseMap(
+    const std::unordered_map<std::string, std::string> &datas, std::vector<NotificationBundleOption> &bundleOption)
+{
+    int32_t currentUserId = SUBSCRIBE_USER_INIT;
+    ErrCode result = ERR_OK;
+    result = OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(currentUserId);
+    if (result != ERR_OK) {
+        ANS_LOGE("Get account id fail");
+        return false;
+    }
+    return HandleDataBaseMapInner(datas, bundleOption, currentUserId);
+}
+
+bool NotificationPreferencesDatabase::HandleDataBaseMap(
+    const std::unordered_map<std::string, std::string> &datas,
+    std::vector<NotificationBundleOption> &bundleOption, const int32_t currentUserId)
+{
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(currentUserId)) {
+        ANS_LOGE("Check user exists failed.");
+        return false;
+    }
+    return HandleDataBaseMapInner(datas, bundleOption, currentUserId);
 }
 
 bool NotificationPreferencesDatabase::RemoveAllSlotsFromDisturbeDB(
@@ -3944,16 +3916,9 @@ bool NotificationPreferencesDatabase::SetHashCodeRule(const int32_t uid, const u
     return (result == NativeRdb::E_OK);
 }
 
-uint32_t NotificationPreferencesDatabase::GetHashCodeRule(const int32_t uid)
+uint32_t NotificationPreferencesDatabase::GetHashCodeRuleInner(const int32_t uid, int32_t userId)
 {
     ANS_LOGD("%{public}s, %{public}d,", __FUNCTION__, uid);
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
-    if (userId == SUBSCRIBE_USER_INIT) {
-        ANS_LOGE("Current user acquisition failed");
-        return 0;
-    }
-
     std::string key = GenerateHashCodeGenerate(uid);
     ANS_LOGD("%{public}s, key:%{public}s", __FUNCTION__, key.c_str());
     uint32_t result = 0;
@@ -3973,26 +3938,25 @@ uint32_t NotificationPreferencesDatabase::GetHashCodeRule(const int32_t uid)
     return result;
 }
 
+uint32_t NotificationPreferencesDatabase::GetHashCodeRule(const int32_t uid)
+{
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return 0;
+    }
+    return GetHashCodeRuleInner(uid, userId);
+}
+
 uint32_t NotificationPreferencesDatabase::GetHashCodeRule(const int32_t uid, const int32_t userId)
 {
     ANS_LOGD("%{public}s, %{public}d,", __FUNCTION__, uid);
-    std::string key = GenerateHashCodeGenerate(uid);
-    ANS_LOGD("%{public}s, key:%{public}s", __FUNCTION__, key.c_str());
-    uint32_t result = 0;
-    GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
-        switch (status) {
-            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
-                break;
-            }
-            case NativeRdb::E_OK: {
-                result = StringToInt(value);
-                break;
-            }
-            default:
-                break;
-        }
-    });
-    return result;
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("Check user exists failed.");
+        return 0;
+    }
+    return GetHashCodeRuleInner(uid, userId);
 }
 
 static std::string GetBundleRemoveFlagKey(const sptr<NotificationBundleOption> &bundleOption,

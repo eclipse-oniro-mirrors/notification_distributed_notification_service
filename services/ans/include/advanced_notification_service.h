@@ -2298,6 +2298,23 @@ private:
     void ProcessBluetoothPairedStatusChange(int state);
     void CheckBleAndHfpStateChange(bool filterHfpOnly);
     ErrCode GetUri(sptr<NotificationRequest> &request);
+    ErrCode GetAllNotificationsBySlotTypeInner(std::vector<sptr<Notification>> &notifications,
+        int32_t slotTypeInt, const int32_t userId);
+    ErrCode AddDoNotDisturbProfilesInner(
+        const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, const int32_t userId);
+    ErrCode RemoveDoNotDisturbProfilesInner(
+        const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, const int32_t userId);
+    ErrCode IsNeedSilentInDoNotDisturbModeInner(
+        const std::string &phoneNumber, int32_t callerType, const int32_t userId);
+    void OnBundleRemovedInner(const sptr<NotificationBundleOption> &bundleOption, int32_t userId = -1);
+    ErrCode GetAllNotificationEnabledBundlesInner(
+        std::vector<NotificationBundleOption> &bundleOption, int32_t userId = -1);
+    ErrCode GetAllLiveViewEnabledBundlesInner(
+        std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
+    ErrCode GetDoNotDisturbProfileInner(
+        int64_t id, sptr<NotificationDoNotDisturbProfile> &profile, const int32_t userId);
+    bool IsDisableNotificationInner(const std::string &bundleName, const int32_t userId);
+    ErrCode SetHashCodeRuleInner(const uint32_t type, int32_t userId = -1);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;

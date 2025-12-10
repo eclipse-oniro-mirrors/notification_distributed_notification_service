@@ -23,8 +23,12 @@
 #include "notification_preferences_database.h"
 #include "advanced_notification_service.h"
 #include "notification_ringtone_info.h"
+#include "os_account_manager.h"
+#include "os_account_manager_helper.h"
 #undef private
 #undef protected
+
+extern void MockIsOsAccountExists(bool mockRet);
 
 using namespace testing::ext;
 namespace OHOS {
@@ -2389,6 +2393,54 @@ HWTEST_F(NotificationPreferencesTest, SetHashCodeRule_00200, Function | SmallTes
     int32_t userId = 100;
     auto res = NotificationPreferences::GetInstance()->SetHashCodeRule(100, 1, userId);
     EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.number    : SetHashCodeRule_00300
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, SetHashCodeRule_00300, Function | SmallTest | Level1)
+{
+    bool isOsAccountExists = false;
+    OHOS::AccountSA::OsAccountManager::IsOsAccountExists(0, isOsAccountExists);
+    MockIsOsAccountExists(false);
+    int32_t userId = -99;
+    auto res = NotificationPreferences::GetInstance()->SetHashCodeRule(100, 1, userId);
+    ASSERT_EQ(res, ERR_ANS_GET_ACTIVE_USER_FAILED);
+    MockIsOsAccountExists(isOsAccountExists);
+}
+
+/**
+ * @tc.number    : GetHashCodeRule_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, GetHashCodeRule_00100, Function | SmallTest | Level1)
+{
+    int32_t userId = -1;
+    EXPECT_EQ(OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId), ERR_OK);
+
+    uint32_t type = 1;
+    auto res = NotificationPreferences::GetInstance()->SetHashCodeRule(100, 1, userId);
+    ASSERT_EQ(res, ERR_OK);
+    auto ret = NotificationPreferences::GetInstance()->GetHashCodeRule(100, userId);
+    ASSERT_EQ(ret, type);
+}
+
+/**
+ * @tc.number    : GetHashCodeRule_00200
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, GetHashCodeRule_00200, Function | SmallTest | Level1)
+{
+    bool isOsAccountExists = false;
+    OHOS::AccountSA::OsAccountManager::IsOsAccountExists(0, isOsAccountExists);
+    MockIsOsAccountExists(false);
+    auto ret = NotificationPreferences::GetInstance()->GetHashCodeRule(100, -99);
+    ASSERT_EQ(ret, 0);
+    MockIsOsAccountExists(isOsAccountExists);
 }
 
 /**

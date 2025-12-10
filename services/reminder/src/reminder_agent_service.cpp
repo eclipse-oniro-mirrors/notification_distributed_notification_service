@@ -76,7 +76,13 @@ ErrCode ReminderAgentService::PublishReminder(const ReminderRequest& reminder, i
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     std::string bundleName = ReminderBundleManagerHelper::GetInstance().GetBundleNameByUid(callingUid);
     bool isAllowUseReminder = false;
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
+    NotificationHelper::AllowUseReminder(bundleName, userId, isAllowUseReminder);
+#else
     NotificationHelper::AllowUseReminder(bundleName, isAllowUseReminder);
+#endif
     if (!isAllowUseReminder) {
         ANSR_LOGW("The number of reminders exceeds the limit[0].");
         return ERR_REMINDER_NUMBER_OVERLOAD;

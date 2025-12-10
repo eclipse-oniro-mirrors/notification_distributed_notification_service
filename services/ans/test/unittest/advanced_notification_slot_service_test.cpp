@@ -30,9 +30,12 @@
 #include "notification_constant.h"
 #include "notification_config_parse.h"
 #include "ipc_skeleton.h"
+#include "os_account_manager.h"
 
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
+
+extern void MockIsOsAccountExists(bool mockRet);
 
 namespace OHOS {
 namespace Notification {
@@ -377,6 +380,15 @@ HWTEST_F(AnsSlotServiceTest, GetAllLiveViewEnabledBundles_00002, Function | Smal
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
     ret = advancedNotificationService_->GetAllLiveViewEnabledBundles(bundleOptions, userId);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    bool isOsAccountExists = false;
+    OHOS::AccountSA::OsAccountManager::IsOsAccountExists(0, isOsAccountExists);
+    MockIsOsAccountExists(false);
+    ret = advancedNotificationService_->GetAllLiveViewEnabledBundles(bundleOptions, -99);
+    EXPECT_EQ(ret, (int)ERROR_USER_NOT_EXIST);
+    MockIsOsAccountExists(isOsAccountExists);
 }
 
 /**

@@ -480,84 +480,10 @@ std::string AdvancedNotificationService::TimeToString(int64_t time)
     return stream.str();
 }
 
-void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleOption> &bundleOption)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return;
-    }
-    notificationSvrQueue_->submit(std::bind([this, bundleOption]() {
-        ANS_LOGD("ffrt enter!");
-        ErrCode result = NotificationPreferences::GetInstance()->RemoveNotificationForBundle(bundleOption);
-        if (result != ERR_OK) {
-            ANS_LOGE("NotificationPreferences::RemoveNotificationForBundle failed: %{public}d", result);
-        }
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-        DistributedPreferences::GetInstance()->DeleteDistributedBundleInfo(bundleOption);
-        std::vector<std::string> keys = GetLocalNotificationKeys(bundleOption);
-#else
-        std::vector<std::string> keys = GetNotificationKeys(bundleOption);
-#endif
-        std::vector<sptr<Notification>> notifications;
-        std::vector<uint64_t> timerIds;
-        for (auto key : keys) {
-            sptr<Notification> notification = nullptr;
-            result = RemoveFromNotificationList(key, notification, true,
-                NotificationConstant::PACKAGE_REMOVE_REASON_DELETE);
-            if (result != ERR_OK) {
-                continue;
-            }
-
-            if (notification != nullptr) {
-                int32_t reason = NotificationConstant::PACKAGE_REMOVE_REASON_DELETE;
-                UpdateRecentNotification(notification, true, reason);
-                notifications.emplace_back(notification);
-                timerIds.emplace_back(notification->GetAutoDeletedTimer());
-                ExecBatchCancel(notifications, reason);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-                DoDistributedDelete("", "", notification);
-#endif
-            }
-        }
-        if (!notifications.empty()) {
-            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
-                notifications, nullptr, NotificationConstant::PACKAGE_REMOVE_REASON_DELETE);
-        }
-        BatchCancelTimer(timerIds);
-        NotificationPreferences::GetInstance()->RemoveAnsBundleDbInfo(bundleOption);
-        RemoveDoNotDisturbProfileTrustList(bundleOption);
-        DeleteDuplicateMsgs(bundleOption);
-    }));
-    NotificationPreferences::GetInstance()->RemoveEnabledDbByBundle(bundleOption);
-    NotificationPreferences::GetInstance()->RemoveSilentEnabledDbByBundle(bundleOption);
-#ifdef ENABLE_ANS_AGGREGATION
-    EXTENTION_WRAPPER->UpdateByBundle(bundleOption->GetBundleName(),
-        NotificationConstant::PACKAGE_REMOVE_REASON_DELETE);
-#endif
-
-    if (!isCachedAppAndDeviceRelationMap_) {
-        if (!DelayedSingleton<NotificationConfigParse>::GetInstance()->GetAppAndDeviceRelationMap(
-            appAndDeviceRelationMap_)) {
-            ANS_LOGE("GetAppAndDeviceRelationMap failed");
-            return;
-        }
-        isCachedAppAndDeviceRelationMap_ = true;
-    }
-    auto appAndDeviceRelation = appAndDeviceRelationMap_.find(bundleOption->GetBundleName());
-    if (appAndDeviceRelation != appAndDeviceRelationMap_.end()) {
-        SetAndPublishSubscriberExistFlag(appAndDeviceRelation->second, false);
-    }
-}
-
-void AdvancedNotificationService::onBundleRemovedByUserId(
+void AdvancedNotificationService::OnBundleRemovedInner(
     const sptr<NotificationBundleOption> &bundleOption, const int32_t userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
-        ANS_LOGE("Check user exists failed.");
-        return;
-    }
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
         return;
@@ -601,7 +527,11 @@ void AdvancedNotificationService::onBundleRemovedByUserId(
         }
         BatchCancelTimer(timerIds);
         NotificationPreferences::GetInstance()->RemoveAnsBundleDbInfo(bundleOption);
-        RemoveDoNotDisturbProfileTrustList(bundleOption, userId);
+        if (userId == SUBSCRIBE_USER_INIT) {
+            RemoveDoNotDisturbProfileTrustList(bundleOption);
+        } else {
+            RemoveDoNotDisturbProfileTrustList(bundleOption, userId);
+        }
         DeleteDuplicateMsgs(bundleOption);
     }));
     NotificationPreferences::GetInstance()->RemoveEnabledDbByBundle(bundleOption);
@@ -623,6 +553,21 @@ void AdvancedNotificationService::onBundleRemovedByUserId(
     if (appAndDeviceRelation != appAndDeviceRelationMap_.end()) {
         SetAndPublishSubscriberExistFlag(appAndDeviceRelation->second, false);
     }
+}
+
+void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleOption> &bundleOption)
+{
+    OnBundleRemovedInner(bundleOption);
+}
+
+void AdvancedNotificationService::onBundleRemovedByUserId(
+    const sptr<NotificationBundleOption> &bundleOption, const int32_t userId)
+{
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("Check user exists failed.");
+        return;
+    }
+    OnBundleRemovedInner(bundleOption, userId);
 }
 
 void AdvancedNotificationService::ExecBatchCancel(std::vector<sptr<Notification>> &notifications,

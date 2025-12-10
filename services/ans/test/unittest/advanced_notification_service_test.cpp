@@ -43,6 +43,7 @@
 #include "notification_subscriber_manager.h"
 #include "mock_push_callback_stub.h"
 #include "os_account_manager_helper.h"
+#include "os_account_manager.h"
 #include "system_event_observer.h"
 #include "notification_constant.h"
 #include "want_agent_info.h"
@@ -549,6 +550,50 @@ HWTEST_F(AdvancedNotificationServiceTest, ANS_AddDoNotDisturbProfiles_0500, Func
     int32_t userId = 100;
     auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles, userId);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name      : ANS_AddDoNotDisturbProfiles_0600
+ * @tc.desc      : Test AddDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ANS_AddDoNotDisturbProfiles_0600, Function | SmallTest | Level1)
+{
+    bool isOsAccountExists = false;
+    OHOS::AccountSA::OsAccountManager::IsOsAccountExists(0, isOsAccountExists);
+    MockIsOsAccountExists(false);
+    int32_t userId = -99;
+    sptr<NotificationDoNotDisturbProfile> date = nullptr;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
+    auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles, userId);
+    EXPECT_EQ(ret, (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
+    MockIsOsAccountExists(isOsAccountExists);
+}
+
+/**
+ * @tc.name      : ANS_AddDoNotDisturbProfiles_0700
+ * @tc.desc      : Test AddDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ANS_AddDoNotDisturbProfiles_0700, Function | SmallTest | Level1)
+{
+    MockQueryForgroundOsAccountId(true, 100);
+    sptr<NotificationDoNotDisturbProfile> date = nullptr;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
+    auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name      : ANS_AddDoNotDisturbProfiles_0800
+ * @tc.desc      : Test AddDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ANS_AddDoNotDisturbProfiles_0800, Function | SmallTest | Level1)
+{
+    MockQueryForgroundOsAccountId(false, 0);
+    sptr<NotificationDoNotDisturbProfile> date = nullptr;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
+    auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles);
+    EXPECT_EQ(ret, (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
+    MockQueryForgroundOsAccountId(true, 0);
 }
 
 /**
@@ -5026,6 +5071,27 @@ HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0005,
 }
 
 /**
+ * @tc.number    : GetAllNotificationEnabledBundles_0006
+ * @tc.name      : GetAllNotificationEnabledBundles
+ * @tc.desc      : Test GetAllNotificationEnabledBundles function.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0006, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0006 test start";
+
+    bool isOsAccountExists = false;
+    OHOS::AccountSA::OsAccountManager::IsOsAccountExists(0, isOsAccountExists);
+    MockIsOsAccountExists(false);
+    int32_t userId = -99;
+    std::vector<NotificationBundleOption> vec;
+    EXPECT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec, userId),
+        ERR_ANS_GET_ACTIVE_USER_FAILED);
+    MockIsOsAccountExists(isOsAccountExists);
+
+    GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0006 test end";
+}
+
+/**
  * @tc.number    : IsNeedNotifyConsumed_00003
  * @tc.name      : IsNeedNotifyConsumed
  * @tc.desc      : Test IsNeedNotifyConsumed function.
@@ -6124,6 +6190,27 @@ HWTEST_F(AdvancedNotificationServiceTest, ANS_RemoveDoNotDisturbProfiles_0400, F
 }
 
 /**
+ * @tc.name      : ANS_RemoveDoNotDisturbProfiles_0500
+ * @tc.desc      : Test RemoveDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ANS_RemoveDoNotDisturbProfiles_0500, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    bool isOsAccountExists = false;
+    OHOS::AccountSA::OsAccountManager::IsOsAccountExists(0, isOsAccountExists);
+    MockIsOsAccountExists(false);
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    sptr<NotificationDoNotDisturbProfile> date = nullptr;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
+    int32_t userId = -99;
+    auto ret = advancedNotificationService_->RemoveDoNotDisturbProfiles(profiles, userId);
+    EXPECT_EQ(ret, (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
+    MockIsOsAccountExists(isOsAccountExists);
+}
+
+/**
  * @tc.name: GetDoNotDisturbProfile_0100
  * @tc.desc: Test GetDoNotDisturbProfile function.
  * @tc.type: FUNC
@@ -6175,6 +6262,48 @@ HWTEST_F(AdvancedNotificationServiceTest, GetDoNotDisturbProfile_0300, Function 
     int32_t userId = 100;
     ErrCode result = advancedNotificationService_->GetDoNotDisturbProfile(id, profile, userId);
     EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: GetDoNotDisturbProfile_0400
+ * @tc.desc: Test GetDoNotDisturbProfile function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetDoNotDisturbProfile_0400, Function | SmallTest | Level1)
+{
+    bool isOsAccountExists = false;
+    OHOS::AccountSA::OsAccountManager::IsOsAccountExists(0, isOsAccountExists);
+    MockIsOsAccountExists(false);
+    int32_t userId = -99;
+    int64_t id = 101;
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    EXPECT_NE(profile, nullptr);
+    ErrCode result = advancedNotificationService_->GetDoNotDisturbProfile(id, profile, userId);
+    EXPECT_EQ(result, ERR_ANS_GET_ACTIVE_USER_FAILED);
+    MockIsOsAccountExists(isOsAccountExists);
+}
+
+/**
+ * @tc.name: GetDoNotDisturbProfile_0500
+ * @tc.desc: Test GetDoNotDisturbProfile function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetDoNotDisturbProfile_0500, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    int64_t id = 101;
+    int32_t userId = 100;
+    sptr<NotificationDoNotDisturbProfile> savedProfile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    ASSERT_NE(savedProfile, nullptr);
+    savedProfile->SetProfileId(id);
+    auto& preferencesInfo = NotificationPreferences::GetInstance()->preferencesInfo_;
+    std::string key = std::to_string(userId) + "_" + std::to_string(id);
+    preferencesInfo.doNotDisturbProfiles_[key] = savedProfile;
+    sptr<NotificationDoNotDisturbProfile> profile = nullptr;
+    ErrCode result = advancedNotificationService_->GetDoNotDisturbProfile(id, profile, userId);
+    EXPECT_EQ(result, ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS

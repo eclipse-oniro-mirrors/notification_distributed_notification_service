@@ -445,8 +445,8 @@ ErrCode AdvancedNotificationService::RemoveEnableNotificationDialog(const sptr<N
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::GetAllNotificationEnabledBundles(
-    std::vector<NotificationBundleOption> &bundleOption)
+ErrCode AdvancedNotificationService::GetAllNotificationEnabledBundlesInner(
+    std::vector<NotificationBundleOption> &bundleOption, const int32_t userId)
 {
     ANS_LOGD("Called.");
     if (!AccessTokenHelper::IsSystemApp()) {
@@ -464,7 +464,11 @@ ErrCode AdvancedNotificationService::GetAllNotificationEnabledBundles(
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance()->GetAllNotificationEnabledBundles(bundleOption);
+        if (userId == SUBSCRIBE_USER_INIT) {
+            result = NotificationPreferences::GetInstance()->GetAllNotificationEnabledBundles(bundleOption);
+        } else {
+            result = NotificationPreferences::GetInstance()->GetAllNotificationEnabledBundles(bundleOption, userId);
+        }
         if (result != ERR_OK) {
             ANS_LOGE("Get all notification enable status failed");
             return;
@@ -476,37 +480,20 @@ ErrCode AdvancedNotificationService::GetAllNotificationEnabledBundles(
 }
 
 ErrCode AdvancedNotificationService::GetAllNotificationEnabledBundles(
+    std::vector<NotificationBundleOption> &bundleOption)
+{
+    return GetAllNotificationEnabledBundlesInner(bundleOption);
+}
+
+ErrCode AdvancedNotificationService::GetAllNotificationEnabledBundles(
     std::vector<NotificationBundleOption> &bundleOption, const int32_t userId)
 {
     ANS_LOGD("Called.");
     if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
         ANS_LOGE("Check user exists failed.");
-        return ERROR_USER_NOT_EXIST;
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
-    if (!AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGE("Is not system app.");
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGE("Permission denied.");
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance()->GetAllNotificationEnabledBundles(bundleOption, userId);
-        if (result != ERR_OK) {
-            ANS_LOGE("Get all notification enable status failed");
-            return;
-        }
-    }));
-    notificationSvrQueue_->wait(handler);
-
-    return result;
+    return GetAllNotificationEnabledBundlesInner(bundleOption, userId);
 }
 
 ErrCode AdvancedNotificationService::SetNotificationsEnabledByUser(int32_t userId, bool enabled)

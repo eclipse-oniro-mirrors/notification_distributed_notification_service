@@ -945,20 +945,7 @@ void NotificationPreferences::GetDoNotDisturbProfileListByUserId(int32_t userId,
     preferencesInfo_.GetAllDoNotDisturbProfiles(userId, profiles);
 }
 
-ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
-{
-    ANS_LOGD("called");
-    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
-    if (preferncesDB_ == nullptr) {
-        return ERR_ANS_SERVICE_NOT_READY;
-    }
-    if (!preferncesDB_->GetAllNotificationEnabledBundles(bundleOption)) {
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
-    }
-    return ERR_OK;
-}
-
-ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(
+ErrCode NotificationPreferences::GetAllNotificationEnabledBundlesInner(
     std::vector<NotificationBundleOption> &bundleOption, const int32_t userId)
 {
     ANS_LOGD("called");
@@ -966,10 +953,32 @@ ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(
     if (preferncesDB_ == nullptr) {
         return ERR_ANS_SERVICE_NOT_READY;
     }
-    if (!preferncesDB_->GetAllNotificationEnabledBundles(bundleOption, userId)) {
+    bool Isuccess = false;
+    if (userId == SUBSCRIBE_USER_INIT) {
+        Isuccess = preferncesDB_->GetAllNotificationEnabledBundles(bundleOption);
+    } else {
+        Isuccess = preferncesDB_->GetAllNotificationEnabledBundles(bundleOption, userId);
+    }
+    if (!Isuccess) {
         return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     return ERR_OK;
+}
+
+ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
+{
+    return GetAllNotificationEnabledBundlesInner(bundleOption);
+}
+
+ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(
+    std::vector<NotificationBundleOption> &bundleOption, const int32_t userId)
+{
+    ANS_LOGD("called");
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("Check user exists failed.");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+    return GetAllNotificationEnabledBundlesInner(bundleOption, userId);
 }
 
 ErrCode NotificationPreferences::GetAllLiveViewEnabledBundles(const int32_t userId,
@@ -2626,7 +2635,7 @@ ErrCode NotificationPreferences::SetHashCodeRule(const int32_t uid, const uint32
 
     if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
         ANS_LOGE("Check user exists failed.");
-        return ERROR_USER_NOT_EXIST;
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
