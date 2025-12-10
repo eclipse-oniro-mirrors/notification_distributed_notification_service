@@ -44,8 +44,8 @@ export interface NotificationFilter {
 }
 
 class NotificationFilterInner implements NotificationFilter {
-    public bundle: BundleOption = {};
-    public notificationKey: notificationSubscribe.NotificationKey = {};
+    public bundle: BundleOption = {bundle: 'undefined'};
+    public notificationKey: notificationSubscribe.NotificationKey = {id: 0};
     public extraInfoKeys?: Array<string> | undefined;
 }
 

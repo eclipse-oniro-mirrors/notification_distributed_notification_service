@@ -547,11 +547,11 @@ bool GetAniStringArrayByVectorStringV2(ani_env *env, std::vector<std::string> st
         ANS_LOGE("FindClass failed. status : %{public}d", status);
         return false;
     }
-    ani_array_ref array = nullptr;
+    ani_array array = nullptr;
     size_t size = strs.size();
-    status = env->Array_New_Ref(cls, size, nullptr, &array);
+    status = env->Array_New(size, nullptr, &array);
     if (status != ANI_OK) {
-        ANS_LOGE("Array_New_Ref failed. status : %{public}d", status);
+        ANS_LOGE("Array_New failed. status : %{public}d", status);
         return false;
     }
     int32_t index = 0;
@@ -561,9 +561,9 @@ bool GetAniStringArrayByVectorStringV2(ani_env *env, std::vector<std::string> st
             ANS_LOGE("GetAniStringByString failed");
             return false;
         }
-        status = env->Array_Set_Ref(array, index, aniStr);
+        status = env->Array_Set(array, index, aniStr);
         if (status != ANI_OK) {
-            ANS_LOGE("Array_Set_Ref Failed. index = %{public}d, status = %{public}d", index, status);
+            ANS_LOGE("Array_Set Failed. index = %{public}d, status = %{public}d", index, status);
             return false;
         }
         index++;

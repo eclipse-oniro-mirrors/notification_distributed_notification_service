@@ -31,7 +31,7 @@ class NotificationInfoInner implements NotificationInfo {
   public readonly hashCode: string = '';
   public readonly notificationSlotType: notificationManager.SlotType = 
       notificationManager.SlotType.UNKNOWN_TYPE;
-  public readonly content: NotificationExtensionContent = {};
+  public readonly content: NotificationExtensionContent = { title: '', text: '' }
   public readonly bundleName: string = '';
   public readonly appName?: string | undefined;
   public readonly deliveryTime?: long | undefined;
