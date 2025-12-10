@@ -23,12 +23,12 @@ constexpr int32_t APP_TYPE_TWO = 2;
 
 std::string BundleManagerRepositoryImpl::GetBundleNameByUid(int32_t uid)
 {
+    std::string bundle;
     auto bundleMgr = connector_->GetBundleManager();
     if (bundleMgr == nullptr) {
         return bundle;
     }
 
-    std::string bundle;
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     bundleMgr->GetNameForUid(uid, bundle);
     IPCSkeleton::SetCallingIdentity(identity);
