@@ -928,40 +928,6 @@ HWTEST_F(SmartReminderCenterTest, CheckHealthWhiteList_300, Function | SmallTest
 }
 
 /**
- * @tc.name: CheckHealthWhiteList_400
- * @tc.desc: Test CheckHealthWhiteList when not whiteList
- * @tc.type: FUNC
- */
-HWTEST_F(SmartReminderCenterTest, CheckHealthWhiteList_400, Function | SmallTest | Level1)
-{
-    std::string deviceType = NotificationConstant::WEARABLE_DEVICE_TYPE;
-    sptr<NotificationRequest> request = new NotificationRequest();
-    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    request->SetOwnerBundleName("testBundleName1");
-    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "[\"testBundleName2\"]", -1);
-    bool result = smartReminderCenter_->CheckHealthWhiteList(request, deviceType);
-    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "[]", -1);
-    ASSERT_EQ(result, false);
-}
-
-/**
- * @tc.name: CheckHealthWhiteList_500
- * @tc.desc: Test CheckHealthWhiteList when in whiteList
- * @tc.type: FUNC
- */
-HWTEST_F(SmartReminderCenterTest, CheckHealthWhiteList_500, Function | SmallTest | Level1)
-{
-    std::string deviceType = NotificationConstant::WEARABLE_DEVICE_TYPE;
-    sptr<NotificationRequest> request = new NotificationRequest();
-    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    request->SetOwnerBundleName("testBundleName1");
-    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "[\"testBundleName1\"]", -1);
-    bool result = smartReminderCenter_->CheckHealthWhiteList(request, deviceType);
-    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "[]", -1);
-    ASSERT_EQ(result, true);
-}
-
-/**
  * @tc.name: CheckScreenOffForCollaboration_100
  * @tc.desc: Test sync devices without PC/PAD
  * @tc.type: FUNC

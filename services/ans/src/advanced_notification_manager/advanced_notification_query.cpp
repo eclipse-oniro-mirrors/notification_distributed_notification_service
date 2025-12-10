@@ -24,6 +24,7 @@
 #include "os_account_manager_helper.h"
 #include "string_wrapper.h"
 #include "want_agent_helper.h"
+#include "health_white_list_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -251,6 +252,7 @@ ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<s
             }
             notifications.push_back(record->notification);
         }
+        DelayedSingleton<HealthWhiteListUtil>::GetInstance()->AddExtendFlagForRequest(notifications);
     }));
     notificationSvrQueue_->wait(handler);
     return ERR_OK;

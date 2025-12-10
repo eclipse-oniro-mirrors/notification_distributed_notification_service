@@ -36,6 +36,7 @@
 #include "distributed_data_define.h"
 #include "nlohmann/json.hpp"
 #include "screen_manager.h"
+#include "health_white_list_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -897,30 +898,7 @@ bool SmartReminderCenter::CheckHealthWhiteList(const sptr<NotificationRequest> &
         deviceType.compare(NotificationConstant::LITEWEARABLE_DEVICE_TYPE) != 0) {
             return true;
     }
-
-    std::string value;
-    NotificationPreferences::GetInstance()->GetKvFromDb(NotificationConstant::HEALTH_BUNDLE_WHITE_LIST,
-        value, SUBSCRIBE_USER_INIT);
-    if (value.empty()) {
-        return true;
-    }
-
-    std::string bundleName = request->GetOwnerBundleName();
-    if (bundleName.empty()) {
-        return true;
-    }
-    nlohmann::json jsonArrayBundles = nlohmann::json::parse(value, nullptr, false);
-    if (jsonArrayBundles.is_null() || !jsonArrayBundles.is_array() || jsonArrayBundles.size() <= 0) {
-        ANS_LOGE("json data error, %{public}s", value.c_str());
-        return true;
-    }
-    for (const auto& item : jsonArrayBundles) {
-        if (item == bundleName) {
-            return true;
-        }
-    }
-    ANS_LOGI("not in white list. bundleName = %{public}s", bundleName.c_str());
-    return false;
+    return DelayedSingleton<HealthWhiteListUtil>::GetInstance()->CheckInLiveViewList(request->GetOwnerBundleName());
 }
 }  // namespace Notification
 }  // namespace OHOS
