@@ -137,6 +137,7 @@ void AdvancedNotificationServiceAbility::OnReceiveEvent(const EventFwk::CommonEv
     }
     if (action == "usual.event.DATA_SHARE_READY") {
         AdvancedDatashareHelper::SetIsDataShareReady(true);
+        DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->Init();
         isDatashaReready_ = true;
 #ifdef ENABLE_ANS_AGGREATION
         EXTENTION_WRAPPER->CheckIfSetlocalSwitch();

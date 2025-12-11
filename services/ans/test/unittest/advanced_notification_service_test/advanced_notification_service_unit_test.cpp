@@ -991,6 +991,25 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, QueryDoNotDisturbProfile_100, Func
 }
 
 /**
+ * @tc.name: QueryIntelligentExperienceEnable_100
+ * @tc.desc: Test QueryIntelligentExperienceEnable when dataShareHelper failed to be created.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, QueryIntelligentExperienceEnable_100, Function | SmallTest | Level1)
+{
+    int32_t userId = 100;
+    std::string enable = "";
+    DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->SetIsDataShareReady(true);
+    MockIsFailedToCreateDataShareHelper(true);
+    MockGetStringValue("1");
+
+    advancedNotificationService_->QueryIntelligentExperienceEnable(userId, enable);
+
+    ASSERT_EQ(enable, "");
+    DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->SetIsDataShareReady(false);
+}
+
+/**
  * @tc.name: QueryDoNotDisturbProfile_200
  * @tc.desc: Test QueryDoNotDisturbProfile when dataShareHelper failed to Query.
  * @tc.type: FUNC
@@ -1023,33 +1042,17 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, QueryDoNotDisturbProfile_300, Func
     std::string enable;
     std::string profileId;
     DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->SetIsDataShareReady(true);
+    DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->Init();
     MockIsFailedToCreateDataShareHelper(false);
     MockIsFailedToQueryDataShareResultSet(false);
     MockIsFailedGoToFirstRow(0);
     MockGetStringValue("1");
-
+    for (auto dataObserver : DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->dataObservers_) {
+        dataObserver.second->OnChange();
+    }
     advancedNotificationService_->QueryDoNotDisturbProfile(userId, enable, profileId);
 
     ASSERT_EQ(enable, "1");
-    DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->SetIsDataShareReady(false);
-}
-
-/**
- * @tc.name: QueryIntelligentExperienceEnable_100
- * @tc.desc: Test QueryIntelligentExperienceEnable when dataShareHelper failed to be created.
- * @tc.type: FUNC
- */
-HWTEST_F(AdvancedNotificationServiceUnitTest, QueryIntelligentExperienceEnable_100, Function | SmallTest | Level1)
-{
-    int32_t userId = 100;
-    std::string enable = "";
-    DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->SetIsDataShareReady(true);
-    MockIsFailedToCreateDataShareHelper(true);
-    MockGetStringValue("1");
-
-    advancedNotificationService_->QueryIntelligentExperienceEnable(userId, enable);
-
-    ASSERT_EQ(enable, "");
     DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->SetIsDataShareReady(false);
 }
 

@@ -1785,6 +1785,7 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/access_token_helper.cpp",
     "${services_path}/ans/src/advanced_aggregation_data_roaming_observer.cpp",
     "${services_path}/ans/src/advanced_datashare_helper.cpp",
+    "${services_path}/ans/src/advanced_datashare_helper_data_observer.cpp",
     "${services_path}/ans/src/advanced_datashare_helper_ext.cpp",
     "${services_path}/ans/src/advanced_datashare_observer.cpp",
     "${services_path}/ans/src/advanced_notification_manager/advanced_notification_cancel.cpp",
