@@ -1141,6 +1141,19 @@ std::vector<std::string> AdvancedNotificationService::GetLocalNotificationKeys(
         keys.push_back(record->notification->GetKey());
     }
 
+    {
+        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+        for (const auto &record : triggerNotificationList_) {
+            if ((bundleOption != nullptr) &&
+                ((record->bundleOption->GetBundleName() != bundleOption->GetBundleName()) ||
+                (record->bundleOption->GetUid() != bundleOption->GetUid())) &&
+                record->deviceId.empty()) {
+                continue;
+            }
+            keys.push_back(record->notification->GetKey());
+        }
+    }
+
     return keys;
 }
 

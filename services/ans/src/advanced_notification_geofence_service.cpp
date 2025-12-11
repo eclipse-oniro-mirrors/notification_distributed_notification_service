@@ -22,12 +22,12 @@
 #include "ans_log_wrapper.h"
 #include "ans_permission_def.h"
 #include "ans_trace_wrapper.h"
+#include "int_wrapper.h"
 #include "ipc_skeleton.h"
 #include "liveview_all_scenarios_extension_wrapper.h"
 #include "notification_config_parse.h"
 #include "notification_preferences.h"
 #include "os_account_manager_helper.h"
-#include "int_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -180,11 +180,19 @@ ErrCode AdvancedNotificationService::PublishDelayedNotification(const std::strin
         ANS_LOGE("Notification record not found");
         return ERR_ANS_NOTIFICATION_NOT_EXISTS;
     }
-    auto request = record->request;
-    auto bundleOption = record->bundleOption;
-    auto isUpdateByOwner = record->isUpdateByOwner;
-    ConvertTriggerLiveviewStatus(request);
-    auto result = PublishPreparedNotificationInner(request, bundleOption, isUpdateByOwner);
+    auto status = record->request->GetLiveViewStatus();
+    if (status == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END) {
+        std::shared_ptr<NotificationRecord> notificationRecord = nullptr;
+        FindNotificationRecordByKey(record->request->GetSecureKey(), notificationRecord);
+        if (notificationRecord == nullptr) {
+            NotificationAnalyticsUtil::ReportModifyEvent(
+                message.ErrorCode(ERR_ANS_NOTIFICATION_NOT_EXISTS).BranchId(BRANCH_15));
+            ANS_LOGE("Notification record not found");
+            return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+        }
+    }
+    ConvertTriggerLiveviewStatus(record->request);
+    auto result = PublishPreparedNotificationInner(record->request, record->bundleOption, record->isUpdateByOwner);
     NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_10));
     if (result != ERR_OK) {
         ANS_LOGE("PublishPreparedNotificationInner failed, errCode=%{public}d", result);
@@ -217,11 +225,11 @@ void AdvancedNotificationService::ConvertTriggerLiveviewStatus(sptr<Notification
     }
     auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content->GetNotificationContent());
     auto status = liveViewContent->GetLiveViewStatus();
-    std::shared_ptr<AAFwk::WantParams> extroInfo = nullptr;
-    extroInfo = liveViewContent->GetExtraInfo();
-    if (extroInfo != nullptr && request->GetNotificationTrigger() != nullptr) {
+    std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
+    extraInfo = liveViewContent->GetExtraInfo();
+    if (extraInfo != nullptr && request->GetNotificationTrigger() != nullptr) {
         uint32_t configPath = static_cast<uint32_t>(request->GetNotificationTrigger()->GetConfigPath());
-        extroInfo->SetParam("TriggerPath", AAFwk::Integer::Box(configPath));
+        extraInfo->SetParam("TriggerPath", AAFwk::Integer::Box(configPath));
     }
     if (status == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE) {
         liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
@@ -562,7 +570,7 @@ ErrCode AdvancedNotificationService::UpdateTriggerNotification(const sptr<Notifi
     auto status = oldRecord->request->GetLiveViewStatus();
     if (status != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE) {
         ANS_LOGE("Invalid live view status %{public}d", static_cast<int>(status));
-        return ERR_ANS_EXPIRED_NOTIFICATION;
+        return ERR_ANS_INVALID_PARAM;
     }
 
     auto newRecord = MakeNotificationRecord(request, bundleOption);
