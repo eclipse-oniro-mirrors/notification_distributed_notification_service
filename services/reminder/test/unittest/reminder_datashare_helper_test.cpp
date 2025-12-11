@@ -154,7 +154,8 @@ HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_003, Level1)
         .Times(1).WillOnce(testing::Return(resultSet));
     EXPECT_CALL(*mockResultSet, GoToNextRow()).Times(2).WillOnce(testing::Return(0))
         .WillOnce(testing::Return(-1));
-    EXPECT_CALL(*mockResultSet, GetColumnIndex(testing::_, testing::_)).Times(10)
+    EXPECT_CALL(*mockResultSet, GetColumnIndex(testing::_, testing::_)).Times(11)
+        .WillOnce(testing::DoAll(testing::SetArgReferee<1>(-1), testing::Return(0)))
         .WillOnce(testing::DoAll(testing::SetArgReferee<1>(-1), testing::Return(0)))
         .WillRepeatedly(testing::DoAll(testing::SetArgReferee<1>(0), testing::Return(0)));
     EXPECT_CALL(*mockResultSet, GetLong(testing::_, testing::_)).Times(1)
@@ -423,18 +424,47 @@ HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_010, Level1)
 
 /**
  * @tc.name: ReminderDataShareHelper_011
- * @tc.desc: test ReminderDataShareHelper::GetColumns function
+ * @tc.desc: test ReminderDataShareHelper::Query function
  * @tc.type: FUNC
  * @tc.require: issueI5YTF3
  */
 HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_011, Level1)
 {
-    ReminderDataShareHelper::GetInstance().rdbVersion_ = 1;
-    auto result = ReminderDataShareHelper::GetInstance().GetColumns();
-    EXPECT_EQ(result.size(), 19);
+    MockDataShareHelper* mockHelper = new MockDataShareHelper;
+
+    // helper is nullptr
+    std::map<std::string, sptr<ReminderRequest>> reminders;
+    std::shared_ptr<DataShare::DataShareHelper> helper;
+    helper.reset(mockHelper);
+    MockDataShareHelper::MockCreate(0, helper);
+
+    // GoToNextRow nok
+    MockDataShareResultSet* mockResultSet = new MockDataShareResultSet;
+    std::shared_ptr<DataShare::DataShareResultSet> resultSet;
+    resultSet.reset(mockResultSet);
     ReminderDataShareHelper::GetInstance().rdbVersion_ = 0;
-    result = ReminderDataShareHelper::GetInstance().GetColumns();
-    EXPECT_EQ(result.size(), 11);
+
+    // GoToNextRow ok
+    EXPECT_CALL(*mockHelper, Release()).Times(1).WillOnce(testing::Return(true));
+    EXPECT_CALL(*mockHelper, Query(testing::_, testing::_, testing::_, testing::_))
+        .Times(1).WillOnce(testing::Return(resultSet));
+    EXPECT_CALL(*mockResultSet, GoToNextRow()).Times(3)
+        .WillOnce(testing::Return(0))
+        .WillOnce(testing::Return(0))
+        .WillOnce(testing::Return(-1));
+    EXPECT_CALL(*mockResultSet, GetColumnIndex(testing::_, testing::_)).Times(11)
+        .WillRepeatedly(testing::DoAll(testing::SetArgReferee<1>(0), testing::Return(0)));
+    EXPECT_CALL(*mockResultSet, GetLong(testing::_, testing::_)).Times(1)
+        .WillOnce(testing::DoAll(testing::SetArgReferee<1>(1761817241000), testing::Return(0)));
+    EXPECT_CALL(*mockResultSet, GetInt(testing::_, testing::_)).Times(5)
+        .WillOnce(testing::DoAll(testing::SetArgReferee<1>(0), testing::Return(0)))
+        .WillRepeatedly(testing::DoAll(testing::SetArgReferee<1>(1), testing::Return(0)));
+    EXPECT_CALL(*mockResultSet, GetString(testing::_, testing::_)).Times(5)
+        .WillRepeatedly(testing::DoAll(testing::SetArgReferee<1>("test"), testing::Return(0)));
+    bool ret = ReminderDataShareHelper::GetInstance().Query(reminders);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(reminders.size(), 1);
+    MockDataShareHelper::MockCreate(-1, nullptr);
 }
 
 /**

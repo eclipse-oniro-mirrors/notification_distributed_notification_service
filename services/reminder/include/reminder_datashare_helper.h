@@ -227,6 +227,13 @@ private:
         sptr<ReminderRequest>& reminder);
     void BuildReminderV1(const DataShare::DataShareObserver::ChangeInfo::VBucket& info,
         sptr<ReminderRequest>& reminder);
+
+    /**
+     * @brief Build query predicates conditions.
+     *
+     * Create predicates for querying valid alerts.
+     */
+    DataShare::DataSharePredicates BuildQueryPredicates(int64_t timestamp, int64_t targetTimestamp);
 private:
     // Singleton
     ReminderDataShareHelper();
