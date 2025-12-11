@@ -78,6 +78,9 @@ void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject, std::s
     std::unique_lock lock(lock_);
     if (!bundlesInfo_.empty()) {
         NotificationPreferences::GetInstance()->DelBatchCloneBundleInfo(userId, bundlesInfo_);
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+        NotificationPreferences::GetInstance()->ClearExtensionSubscriptionClonedInvalidBundles(userId);
+#endif
         bundlesInfo_.clear();
     }
     for (const auto &profile : jsonObject) {

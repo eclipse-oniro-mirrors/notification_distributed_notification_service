@@ -1714,10 +1714,12 @@ public:
     ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
 
     void UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo, int32_t userId);
-
-    void UpdateCloneBundleInfoForExtensionSubscription(const NotificationCloneBundleInfo &cloneBundleInfo,
-        const sptr<NotificationBundleOption> &bundle,
-        NotificationConstant::SWITCH_STATE state);
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+    sptr<NotificationBundleOption> GenerateCloneValidBundleOption(const sptr<NotificationBundleOption> &bundleOption);
+    void UpdateCloneBundleInfoForExtensionSubscription(int32_t userId,
+        const NotificationCloneBundleInfo &cloneBundleInfo, const sptr<NotificationBundleOption> &bundle);
+    void DelNormalCloneBundleForExtensionSubscription(const sptr<NotificationBundleOption> &bundle);
+#endif
 
     void UpdateCloneBundleInfoForEnable(
         const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle);
@@ -2105,7 +2107,6 @@ private:
     void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool enabled);
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
     sptr<NotificationBundleOption> GenerateValidBundleOptionV2(const sptr<NotificationBundleOption> &bundleOption);
-    sptr<NotificationBundleOption> GenerateCloneValidBundleOption(const sptr<NotificationBundleOption> &bundleOption);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
     ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record,
         bool isSystemApp, bool isUpdateByOwner, const bool isAgentController);

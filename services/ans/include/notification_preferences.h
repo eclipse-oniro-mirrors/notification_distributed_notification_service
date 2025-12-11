@@ -672,6 +672,15 @@ public:
         const sptr<NotificationBundleOption>& bundleOption, std::vector<sptr<NotificationBundleOption>>& bundles);
     ErrCode SetExtensionSubscriptionBundles(
         const sptr<NotificationBundleOption>& bundleOption, const std::vector<sptr<NotificationBundleOption>>& bundles);
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+    ErrCode SetExtensionSubscriptionClonedInvalidBundles(int32_t userId,
+        const sptr<NotificationBundleOption>& bundleOption, const std::vector<sptr<NotificationBundleOption>>& bundles);
+    ErrCode GetExtensionSubscriptionCloneUpdatedBundles(int32_t userId,
+        const sptr<NotificationBundleOption>& bundleOption, std::vector<sptr<NotificationBundleOption>>& bundles);
+    ErrCode RemoveExtensionSubscriptionCloneUpdatedBundles(int32_t userId,
+        const sptr<NotificationBundleOption>& bundleOption);
+    ErrCode ClearExtensionSubscriptionClonedInvalidBundles(int32_t userId);
+#endif
     ErrCode AddExtensionSubscriptionBundles(
         const sptr<NotificationBundleOption>& bundleOption, const std::vector<sptr<NotificationBundleOption>>& bundles);
     ErrCode RemoveExtensionSubscriptionBundles(

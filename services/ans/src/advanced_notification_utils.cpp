@@ -28,6 +28,7 @@
 #include "errors.h"
 #include "ipc_skeleton.h"
 #include "notification_bundle_option.h"
+#include "notification_clone_util.h"
 #include "notification_config_parse.h"
 #include "notification_constant.h"
 #include "os_account_manager.h"
@@ -2008,7 +2009,7 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleO
     validBundleOption->SetAppIndex(BundleManagerHelper::GetInstance()->GetAppIndexByUid(validBundleOption->GetUid()));
     return validBundleOption;
 }
-
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 sptr<NotificationBundleOption> AdvancedNotificationService::GenerateCloneValidBundleOption(
     const sptr<NotificationBundleOption> &bundleOption)
 {
@@ -2024,11 +2025,20 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateCloneValidBu
     }
     int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_DEFAULT);
     AppExecFwk::BundleInfo bundleInfo = {};
-    if (!BundleManagerHelper::GetInstance()->GetCloneBundleInfo(
-        bundleOption->GetBundleName(), flags, bundleOption->GetAppIndex(), bundleInfo, activeUserId)) {
-        ANS_LOGE("Failed to clone bundle info, name: %{public}s, userId: %{public}d, appIndex: %{public}d",
-            bundleOption->GetBundleName().c_str(), activeUserId, bundleOption->GetAppIndex());
-        return nullptr;
+    if (bundleOption->GetAppIndex() > 0) {
+        if (!BundleManagerHelper::GetInstance()->GetCloneBundleInfo(bundleOption->GetBundleName(), flags,
+            bundleOption->GetAppIndex(), bundleInfo, activeUserId)) {
+            ANS_LOGE("Failed to get clone bundle info, name: %{public}s, userId: %{public}d, appIndex: %{public}d",
+                bundleOption->GetBundleName().c_str(), activeUserId, bundleOption->GetAppIndex());
+            return nullptr;
+        }
+    } else {
+        if (!BundleManagerHelper::GetInstance()->GetBundleInfoV9(bundleOption->GetBundleName(), flags,
+            bundleInfo, activeUserId)) {
+            ANS_LOGE("Failed to get bundle info, name: %{public}s, userId: %{public}d",
+                bundleOption->GetBundleName().c_str(), activeUserId);
+            return nullptr;
+        }
     }
     sptr<NotificationBundleOption> validBundleOption =
         new (std::nothrow) NotificationBundleOption(bundleOption->GetBundleName(), bundleInfo.uid);
@@ -2040,7 +2050,7 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateCloneValidBu
     validBundleOption->SetInstanceKey(bundleOption->GetInstanceKey());
     return validBundleOption;
 }
-
+#endif
 std::vector<AppExecFwk::BundleInfo> AdvancedNotificationService::GetBundlesOfActiveUser()
 {
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
@@ -2333,49 +2343,82 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
             bundle, cloneBundleInfo.GetHasPoppedDialog()) != ERR_OK) {
             ANS_LOGW("Set hasPoped failed.");
         }
-        NotificationConstant::SWITCH_STATE state = cloneBundleInfo.GetEnabledExtensionSubscription();
-        if (state != NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF) {
-            UpdateCloneBundleInfoForExtensionSubscription(cloneBundleInfo, bundle, state);
-        }
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+        UpdateCloneBundleInfoForExtensionSubscription(userId, cloneBundleInfo, bundle);
+#endif
         UpdateCloneBundleInfoFoSilentReminder(cloneBundleInfo, bundle);
         NotificationAnalyticsUtil::ReportCloneInfo(cloneBundleInfo);
-        EnsureBundlesCanSubscribeOrUnsubscribe(bundle);
     }));
 }
-
-void AdvancedNotificationService::UpdateCloneBundleInfoForExtensionSubscription(
-    const NotificationCloneBundleInfo &cloneBundleInfo,
-    const sptr<NotificationBundleOption> &bundle,
-    NotificationConstant::SWITCH_STATE state)
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+void AdvancedNotificationService::DelNormalCloneBundleForExtensionSubscription(
+    const sptr<NotificationBundleOption> &processBundle)
 {
-    sptr<NotificationBundleOption> processBundle = GenerateCloneValidBundleOption(bundle);
-    if (processBundle == nullptr) {
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(processBundle->GetUid(), userId);
+    if (!OsAccountManagerHelper::IsSystemAccount(userId)) {
+        userId = NotificationCloneUtil::GetActiveUserId();
+    }
+    std::vector<sptr<NotificationBundleOption>> updatedBundles;
+    NotificationPreferences::GetInstance()->GetExtensionSubscriptionCloneUpdatedBundles(userId,
+        processBundle, updatedBundles);
+    if (updatedBundles.empty()) {
         return;
     }
-
-    if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionEnabled(processBundle, state) != ERR_OK) {
-        ANS_LOGW("Set subscription enabled failed.");
+    ANS_LOGI("Process %{public}s update total %{public}zu third-party wearable granted bundles",
+        processBundle->GetBundleName().c_str(), updatedBundles.size());
+    for (auto &item : updatedBundles) {
+        std::vector<sptr<NotificationBundleOption>> insertBundles {processBundle};
+        NotificationPreferences::GetInstance()->AddExtensionSubscriptionBundles(item, insertBundles);
     }
+    NotificationPreferences::GetInstance()->RemoveExtensionSubscriptionCloneUpdatedBundles(userId, processBundle);
+}
 
+void AdvancedNotificationService::UpdateCloneBundleInfoForExtensionSubscription(int32_t userId,
+    const NotificationCloneBundleInfo &cloneBundleInfo, const sptr<NotificationBundleOption> &bundle)
+{
+    DelNormalCloneBundleForExtensionSubscription(bundle);
+    if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundle)) {
+        ANS_LOGE("App %{public}s isn't a third-party wearable app, skip clone extension subscription",
+            bundle->GetBundleName().c_str());
+        return;
+    }
     if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionInfos(
-        processBundle, cloneBundleInfo.GetExtensionSubscriptionInfos()) != ERR_OK) {
+        bundle, cloneBundleInfo.GetExtensionSubscriptionInfos()) != ERR_OK) {
         ANS_LOGW("Set subscription infos failed.");
     }
 
+    NotificationConstant::SWITCH_STATE state = cloneBundleInfo.GetEnabledExtensionSubscription();
+    if (state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF) {
+        return;
+    }
+    if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionEnabled(bundle, state) != ERR_OK) {
+        ANS_LOGW("Set subscription enabled failed.");
+    }
+
     std::vector<sptr<NotificationBundleOption>> grantBundles;
-    for (const auto grantBundle : cloneBundleInfo.GetExtensionSubscriptionBundles()) {
+    std::vector<sptr<NotificationBundleOption>> unvaliableBundles;
+    for (const auto &grantBundle : cloneBundleInfo.GetExtensionSubscriptionBundles()) {
         sptr<NotificationBundleOption> processGrantBundle = GenerateCloneValidBundleOption(grantBundle);
         if (processGrantBundle == nullptr) {
+            unvaliableBundles.emplace_back(grantBundle);
             continue;
         }
         grantBundles.emplace_back(processGrantBundle);
     }
+    ANS_LOGI("%{public}s has invalid granted bundles, size %{public}zu", bundle->GetBundleName().c_str(),
+        unvaliableBundles.size());
+    if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionClonedInvalidBundles(userId,
+        bundle, unvaliableBundles) != ERR_OK) {
+        ANS_LOGW("Set subscription clone invalid failed.");
+    }
     if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionBundles(
-        processBundle, grantBundles) != ERR_OK) {
+        bundle, grantBundles) != ERR_OK) {
         ANS_LOGW("Set subscription bundles failed.");
     }
+    EnsureBundlesCanSubscribeOrUnsubscribe(bundle);
 }
-
+#endif
 void AdvancedNotificationService::UpdateCloneBundleInfoForEnable(
     const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle)
 {

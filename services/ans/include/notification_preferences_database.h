@@ -397,6 +397,13 @@ public:
     bool PutExtensionSubscriptionInfos(const NotificationPreferencesInfo::BundleInfo& bundleInfo);
     bool PutExtensionSubscriptionEnabled(const NotificationPreferencesInfo::BundleInfo& bundleInfo);
     bool PutExtensionSubscriptionBundles(const NotificationPreferencesInfo::BundleInfo& bundleInfo);
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+    bool PutExtensionSubscriptionClonedInvalidBundles(int32_t userId,
+        const std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>>& data);
+    bool GetExtensionSubscriptionClonedInvalidBundles(int32_t userId,
+        std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>>& data);
+    bool ClearExtensionSubscriptionClonedInvalidBundles(int32_t userId);
+#endif
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
     int32_t GetKvFromDb(const std::string &key, std::string &value, const int32_t &userId, int32_t &retCode);
 #endif
