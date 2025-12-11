@@ -27,39 +27,55 @@ namespace {
     const char* IS_PCMODE_PARAM_DEFALT_VALUE = "false";
 }
 
-ExtensionServiceSubscriber::ExtensionServiceSubscriber(const NotificationBundleOption& bundle)
+bool ExtensionServiceSubscriber::Init(const sptr<NotificationBundleOption> &bundle)
 {
+    if (messageQueue_ != nullptr) {
+        return true;
+    }
     messageQueue_ = std::make_shared<ffrt::queue>("extension service subscriber");
     if (messageQueue_ == nullptr) {
         ANS_LOGW("ffrt create failed!");
-        return;
+        return false;
     }
 
-    std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
     int32_t bundleUserId = -1;
-    auto result = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundle.GetUid(), bundleUserId);
+    auto result = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundle->GetUid(), bundleUserId);
     if (result != ERR_OK) {
         ANS_LOGE("Failed to GetOsAccountLocalIdFromUid for bundle, uid: %{public}d, ret: %{public}d",
-            bundle.GetUid(), result);
-        return;
+            bundle->GetUid(), result);
+        return false;
     }
-    if (!BundleManagerHelper::GetInstance()->QueryExtensionInfos(extensionInfos, bundleUserId)) {
-        ANS_LOGE("Failed to QueryExtensionInfos, bundleUserId: %{public}d", bundleUserId);
-        return;
+    auto flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION)
+        | static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE)
+        | static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY);
+    std::string bundleName = bundle->GetBundleName();
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!BundleManagerHelper::GetInstance()->GetBundleInfoV9(bundleName, flags, bundleInfo, bundleUserId)) {
+        ANS_LOGE("GetBundleInfoV9 error, bundleName = %{public}s, userId = %{public}d",
+            bundleName.c_str(), bundleUserId);
+        return false;
     }
-    if (extensionInfos.size() > 0) {
-        auto extension = extensionInfos.front();
-        auto info = std::make_shared<ExtensionSubscriberInfo>();
-        info->bundleName = extension.bundleName;
-        info->extensionName = extension.name;
-        info->uid = extension.applicationInfo.uid;
-        info->userId = bundleUserId;
-        extensionSubscriberInfo_ = info;
+    for (const auto& hapmodule : bundleInfo.hapModuleInfos) {
+        for (const auto& extInfo : hapmodule.extensionInfos) {
+            if (extInfo.type == AppExecFwk::ExtensionAbilityType::NOTIFICATION_SUBSCRIBER) {
+                auto info = std::make_shared<ExtensionSubscriberInfo>();
+                info->bundleName = bundleName;
+                info->extensionName = extInfo.name;
+                info->uid = bundle->GetUid();
+                info->userId = bundleUserId;
+                extensionSubscriberInfo_ = info;
+                return true;
+            }
+        }
     }
+    return false;
 }
 
 ExtensionServiceSubscriber::~ExtensionServiceSubscriber()
 {
+    if (messageQueue_ == nullptr) {
+        return;
+    }
     ffrt::task_handle handler = messageQueue_->submit_h([this]() {
         if (extensionSubscriberInfo_ == nullptr) {
             ANS_LOGE("null extension subsciber info");

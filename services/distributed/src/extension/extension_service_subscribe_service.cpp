@@ -43,7 +43,12 @@ void ExtensionServiceSubscribeService::SubscribeNotification(
     const std::string bundleKey = MakeBundleKey(*bundle);
     auto iter = subscriberMap_.find(bundleKey);
     std::shared_ptr<ExtensionServiceSubscriber> subscriber =
-        iter == subscriberMap_.end() ? std::make_shared<ExtensionServiceSubscriber>(*bundle) : iter->second;
+        iter == subscriberMap_.end() ? std::make_shared<ExtensionServiceSubscriber>() : iter->second;
+    if (!subscriber->Init(bundle)) {
+        ANS_LOGE("Failed to init notification subscriber for %{public}s_%{public}d", bundle->GetBundleName().c_str(),
+            bundle->GetUid());
+        return;
+    }
     sptr<NotificationSubscribeInfo> subscribeInfo = new (std::nothrow) NotificationSubscribeInfo();
     subscribeInfo->AddDeviceType(NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE);
     

@@ -50,9 +50,11 @@ static std::shared_ptr<Notification> CreateNotification(int32_t id)
 HWTEST_F(
     ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_Constructor_NoQueue_0100, Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleCtor", 2000);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleCtor", 2000);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     EXPECT_NE(subscriber.messageQueue_, nullptr);
+    EXPECT_TRUE(subscriber.Init(bundle));
 }
 
 /**
@@ -62,8 +64,9 @@ HWTEST_F(
  */
 HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnDied_0100, Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleDied", 2001);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleDied", 2001);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     auto beforeSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnDied();
     EXPECT_EQ(beforeSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
@@ -77,8 +80,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnDied_0100,
 HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnConnected_OnDisconnected_0100,
     Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleConn", 2002);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleConn", 2002);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     auto beforeSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnConnected();
     subscriber.OnDisconnected();
@@ -92,8 +96,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnConnected_
  */
 HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnUpdate_0100, Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleUpd", 2003);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleUpd", 2003);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     auto beforeConnSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnUpdate(nullptr);
     EXPECT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
@@ -107,8 +112,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnUpdate_010
 HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnDoNotDisturbDateChange_0100,
     Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleDnd", 2004);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleDnd", 2004);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     auto beforeConnSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnDoNotDisturbDateChange(nullptr);
     EXPECT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
@@ -122,8 +128,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnDoNotDistu
 HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnEnabledNotificationChanged_0100,
     Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleEn", 2005);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleEn", 2005);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     auto beforeConnSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnEnabledNotificationChanged(nullptr);
     EXPECT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
@@ -136,8 +143,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnEnabledNot
  */
 HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnBadgeChanged_0100, Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleBadge", 2006);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleBadge", 2006);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     auto beforeConnSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnBadgeChanged(nullptr);
     EXPECT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
@@ -151,8 +159,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnBadgeChang
 HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnBadgeEnabledChanged_0100,
     Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleBadgeEn", 2007);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleBadgeEn", 2007);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     auto beforeConnSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnBadgeEnabledChanged(nullptr);
     EXPECT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
@@ -165,8 +174,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnBadgeEnabl
  */
 HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnBatchCanceled_0100, Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleBatch", 2008);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleBatch", 2008);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     std::vector<std::shared_ptr<Notification>> emptyList;
     auto beforeConnSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnBatchCanceled(emptyList, nullptr, 0);
@@ -181,8 +191,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnBatchCance
 HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnApplicationInfoNeedChanged_0100,
     Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleAppNeed", 2009);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleAppNeed", 2009);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     auto beforeConnSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
     subscriber.OnApplicationInfoNeedChanged("bundleAppNeed");
     EXPECT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
@@ -196,8 +207,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnApplicatio
 HWTEST_F(
     ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnOperationResponse_0100, Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleOp", 2010);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleOp", 2010);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     auto ret = subscriber.OnOperationResponse(nullptr);
     EXPECT_EQ(ret, ERR_OK);
 }
@@ -210,8 +222,9 @@ HWTEST_F(
 HWTEST_F(
     ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnConsumed_Normal_0100, Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleA", 1000);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleA", 1000);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     auto info = std::make_shared<ExtensionSubscriberInfo>();
     info->bundleName = "bundleA";
     info->extensionName = "extA";
@@ -242,8 +255,9 @@ HWTEST_F(
 HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnConsumed_NullRequest_0100,
     Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleB", 1001);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleB", 1001);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     auto info = std::make_shared<ExtensionSubscriberInfo>();
     info->bundleName = "bundleB";
     info->extensionName = "extB";
@@ -261,8 +275,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnConsumed_N
 HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnConsumed_NullSubscribeInfo_0100,
     Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleB", 1001);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleB", 1001);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     auto info = std::make_shared<ExtensionSubscriberInfo>();
     info->bundleName = "bundleC";
     info->extensionName = "extC";
@@ -287,8 +302,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnConsumed_N
 HWTEST_F(
     ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnCanceled_Normal_0100, Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleC", 1002);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleC", 1002);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     auto info = std::make_shared<ExtensionSubscriberInfo>();
     info->bundleName = "bundleC";
     info->extensionName = "extC";
@@ -317,8 +333,9 @@ HWTEST_F(
 HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnCanceled_NullRequest_0100,
     Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleD", 1003);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleD", 1003);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     auto info = std::make_shared<ExtensionSubscriberInfo>();
     info->bundleName = "bundleD";
     info->extensionName = "extD";
@@ -336,8 +353,9 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnCanceled_N
 HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnCanceled_NullSubscribeInfo_0100,
     Function | SmallTest | Level1)
 {
-    NotificationBundleOption bundle("bundleD", 1003);
-    ExtensionServiceSubscriber subscriber(bundle);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleD", 1003);
+    ExtensionServiceSubscriber subscriber;
+    subscriber.Init(bundle);
     auto info = std::make_shared<ExtensionSubscriberInfo>();
     info->bundleName = "bundleC";
     info->extensionName = "extC";

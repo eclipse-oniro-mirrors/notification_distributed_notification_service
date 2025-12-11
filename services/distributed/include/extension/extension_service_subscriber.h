@@ -25,8 +25,11 @@ namespace OHOS {
 namespace Notification {
 class ExtensionServiceSubscriber : public NotificationSubscriber {
 public:
-    ExtensionServiceSubscriber(const NotificationBundleOption& bundle);
+    ExtensionServiceSubscriber() = default;
     ~ExtensionServiceSubscriber() override;
+
+    bool Init(const sptr<NotificationBundleOption> &bundle);
+
     void OnDied() override;
     void OnConnected() override;
     void OnDisconnected() override;

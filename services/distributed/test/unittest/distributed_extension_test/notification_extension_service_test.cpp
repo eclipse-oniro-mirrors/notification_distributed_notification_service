@@ -26,6 +26,7 @@
 #include "extension_service.h"
 #include "notification_request.h"
 #include "notification_bundle_option.h"
+#include "mock_bundle_mgr.h"
 
 using namespace testing::ext;
 
@@ -33,7 +34,11 @@ namespace OHOS {
 namespace Notification {
 class NotificationExtensionServiceTest : public testing::Test {
 protected:
-    void SetUp() override {}
+    void SetUp() override
+    {
+        MockIsNeedHapModuleInfos(true);
+        MockSetBundleInfoFailed(false);
+    }
     void TearDown() override {}
 };
 
@@ -83,12 +88,12 @@ HWTEST_F(NotificationExtensionServiceTest, GetConnectionTest_0100, Function | Sm
 
     auto connection = extensionServiceConnectionService.GetConnection(
         std::make_shared<ExtensionSubscriberInfo>(subscriberInfo));
-    ASSERT_NE(connection, nullptr);
+    EXPECT_NE(connection, nullptr);
     auto& connectionMap = extensionServiceConnectionService.connectionMap_;
-    ASSERT_TRUE(connectionMap.find("testBundle_testExtension_1_1") != connectionMap.end());
+    EXPECT_TRUE(connectionMap.find("testBundle_testExtension_1_1") != connectionMap.end());
 
     extensionServiceConnectionService.RemoveConnection(subscriberInfo);
-    ASSERT_TRUE(connectionMap.find("testBundle_testExtension_1_1") == connectionMap.end());
+    EXPECT_TRUE(connectionMap.find("testBundle_testExtension_1_1") == connectionMap.end());
 }
 
 /**
@@ -106,15 +111,15 @@ HWTEST_F(NotificationExtensionServiceTest, GetConnectionTest_0200, Function | Sm
 
     auto connection = extensionServiceConnectionService.GetConnection(
         std::make_shared<ExtensionSubscriberInfo>(subscriberInfo));
-    ASSERT_NE(connection, nullptr);
+    EXPECT_NE(connection, nullptr);
 
     auto connection2 = extensionServiceConnectionService.GetConnection(
         std::make_shared<ExtensionSubscriberInfo>(subscriberInfo));
     auto& connectionMap = extensionServiceConnectionService.connectionMap_;
-    ASSERT_TRUE(connectionMap.size() == 1);
+    EXPECT_TRUE(connectionMap.size() == 1);
 
     extensionServiceConnectionService.RemoveConnection(subscriberInfo);
-    ASSERT_TRUE(connectionMap.empty());
+    EXPECT_TRUE(connectionMap.empty());
 }
 
 /**
@@ -132,10 +137,10 @@ HWTEST_F(NotificationExtensionServiceTest, CloseConnectionTest_0100, Function | 
 
     auto connection = extensionServiceConnectionService.GetConnection(
         std::make_shared<ExtensionSubscriberInfo>(subscriberInfo));
-    ASSERT_NE(connection, nullptr);
+    EXPECT_NE(connection, nullptr);
 
     extensionServiceConnectionService.RemoveConnection(subscriberInfo);
-    ASSERT_TRUE(extensionServiceConnectionService.connectionMap_.empty());
+    EXPECT_TRUE(extensionServiceConnectionService.connectionMap_.empty());
 }
 
 /**
@@ -158,14 +163,14 @@ HWTEST_F(NotificationExtensionServiceTest, CloseConnectionTest_0200, Function | 
 
     auto connection = extensionServiceConnectionService.GetConnection(
         std::make_shared<ExtensionSubscriberInfo>(subscriberInfo));
-    ASSERT_NE(connection, nullptr);
+    EXPECT_NE(connection, nullptr);
 
     extensionServiceConnectionService.CloseConnection(subscriberInfo2);
     auto& connectionMap = extensionServiceConnectionService.connectionMap_;
-    ASSERT_FALSE(connectionMap.empty());
+    EXPECT_FALSE(connectionMap.empty());
 
     extensionServiceConnectionService.RemoveConnection(subscriberInfo);
-    ASSERT_TRUE(connectionMap.empty());
+    EXPECT_TRUE(connectionMap.empty());
 }
 
 /**
@@ -184,7 +189,7 @@ HWTEST_F(NotificationExtensionServiceTest, CloseConnectionTest_0300, Function | 
     std::string connectionKey = subscriberInfo.GetKey();
     extensionServiceConnectionService.connectionMap_.emplace(connectionKey, nullptr);
     extensionServiceConnectionService.CloseConnection(subscriberInfo);
-    ASSERT_TRUE(extensionServiceConnectionService.connectionMap_.empty());
+    EXPECT_TRUE(extensionServiceConnectionService.connectionMap_.empty());
 }
 
 /**
@@ -204,10 +209,10 @@ HWTEST_F(NotificationExtensionServiceTest, NotifyOnReceiveMessageTest_0100, Func
     extensionServiceConnectionService.NotifyOnReceiveMessage(
         std::make_shared<ExtensionSubscriberInfo>(subscriberInfo), request);
     auto& connectionMap = extensionServiceConnectionService.connectionMap_;
-    ASSERT_TRUE(connectionMap.find("testBundle_testExtension_-1_1") != connectionMap.end());
+    EXPECT_TRUE(connectionMap.find("testBundle_testExtension_-1_1") != connectionMap.end());
 
     extensionServiceConnectionService.RemoveConnection(subscriberInfo);
-    ASSERT_TRUE(connectionMap.empty());
+    EXPECT_TRUE(connectionMap.empty());
 }
 
 /**
@@ -229,10 +234,10 @@ HWTEST_F(NotificationExtensionServiceTest, NotifyOnCancelMessagesTest_0100, Func
     extensionServiceConnectionService.NotifyOnCancelMessages(
         std::make_shared<ExtensionSubscriberInfo>(subscriberInfo), hashCodes);
     auto& connectionMap = extensionServiceConnectionService.connectionMap_;
-    ASSERT_TRUE(connectionMap.find("testBundle_testExtension_-1_1") != connectionMap.end());
+    EXPECT_TRUE(connectionMap.find("testBundle_testExtension_-1_1") != connectionMap.end());
 
     extensionServiceConnectionService.RemoveConnection(subscriberInfo);
-    ASSERT_TRUE(connectionMap.empty());
+    EXPECT_TRUE(connectionMap.empty());
 }
 
 /**
@@ -258,13 +263,13 @@ HWTEST_F(NotificationExtensionServiceTest, NotificationExtensionServiceTest_0100
     notificationExtensionService.SubscribeNotification(bundle2, subscribedBundles2);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     auto& subscriberMap = ExtensionServiceSubscribeService::GetInstance().subscriberMap_;
-    ASSERT_TRUE(subscriberMap.find(key) != subscriberMap.end());
-    ASSERT_TRUE(subscriberMap.find(key2) != subscriberMap.end());
+    EXPECT_TRUE(subscriberMap.find(key) != subscriberMap.end());
+    EXPECT_TRUE(subscriberMap.find(key2) != subscriberMap.end());
 
     notificationExtensionService.UnsubscribeNotification(bundle);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    ASSERT_TRUE(subscriberMap.find(key) == subscriberMap.end());
-    ASSERT_TRUE(subscriberMap.find(key2) != subscriberMap.end());
+    EXPECT_TRUE(subscriberMap.find(key) == subscriberMap.end());
+    EXPECT_TRUE(subscriberMap.find(key2) != subscriberMap.end());
     notificationExtensionService.DestroyService();
 }
 
@@ -292,10 +297,10 @@ HWTEST_F(NotificationExtensionServiceTest, NotificationExtensionService_SendHaRe
     int32_t errorCode = -33;
     std::string message = "ha_test_msg";
     service.SendHaReport(scene, branchId, errorCode, message);
-    ASSERT_EQ(gotScene.load(), scene);
-    ASSERT_EQ(gotBranch.load(), branchId);
-    ASSERT_EQ(gotError.load(), errorCode);
-    ASSERT_EQ(gotMsg, message);
+    EXPECT_EQ(gotScene.load(), scene);
+    EXPECT_EQ(gotBranch.load(), branchId);
+    EXPECT_EQ(gotError.load(), errorCode);
+    EXPECT_EQ(gotMsg, message);
     service.DestroyService();
 }
 
@@ -311,11 +316,11 @@ HWTEST_F(NotificationExtensionServiceTest, NotificationExtensionService_SendHaRe
     std::atomic<int> flag { 0 };
     service.InitService(nullptr, [&](uint32_t, uint32_t, int32_t, std::string) { flag = 1; });
     service.SendHaReport(1, 2, 3, "msg1");
-    ASSERT_EQ(flag.load(), 1);
+    EXPECT_EQ(flag.load(), 1);
     service.InitService(nullptr, nullptr);
     flag = 0;
     service.SendHaReport(9, 9, 9, "unused");
-    ASSERT_EQ(flag.load(), 0);
+    EXPECT_EQ(flag.load(), 0);
     service.DestroyService();
 }
 
@@ -330,7 +335,7 @@ HWTEST_F(
     ExtensionServiceConnectionTimerInfo info([]() {});
     int type = 123;
     info.SetType(type);
-    ASSERT_EQ(info.type, type);
+    EXPECT_EQ(info.type, type);
 }
 
 /**
@@ -343,9 +348,9 @@ HWTEST_F(
 {
     ExtensionServiceConnectionTimerInfo info([]() {});
     info.SetRepeat(true);
-    ASSERT_TRUE(info.repeat);
+    EXPECT_TRUE(info.repeat);
     info.SetRepeat(false);
-    ASSERT_FALSE(info.repeat);
+    EXPECT_FALSE(info.repeat);
 }
 
 /**
@@ -359,7 +364,7 @@ HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnectionTimerInfo_S
     ExtensionServiceConnectionTimerInfo info([]() {});
     uint64_t interval = 99999;
     info.SetInterval(interval);
-    ASSERT_EQ(info.interval, interval);
+    EXPECT_EQ(info.interval, interval);
 }
 
 /**
@@ -373,7 +378,7 @@ HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnectionTimerInfo_S
     ExtensionServiceConnectionTimerInfo info([]() {});
     auto wantAgent = std::make_shared<OHOS::AbilityRuntime::WantAgent::WantAgent>();
     info.SetWantAgent(wantAgent);
-    ASSERT_EQ(info.wantAgent, wantAgent);
+    EXPECT_EQ(info.wantAgent, wantAgent);
 }
 
 /**
@@ -387,7 +392,7 @@ HWTEST_F(
     bool called = false;
     ExtensionServiceConnectionTimerInfo info([&called]() { called = true; });
     info.OnTrigger();
-    ASSERT_TRUE(called);
+    EXPECT_TRUE(called);
 }
 
 /**
@@ -406,16 +411,16 @@ HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnection_OnAbilityC
     info.uid = 10;
     sptr<ExtensionServiceConnection> connection = new (std::nothrow)
         ExtensionServiceConnection(info, [&](const ExtensionSubscriberInfo &) { disconnectedCalled = true; });
-    ASSERT_NE(connection, nullptr);
+    EXPECT_NE(connection, nullptr);
     sptr<NotificationRequest> request = new NotificationRequest(1);
     connection->state_ = ExtensionServiceConnectionState::CONNECTING;
     connection->NotifyOnReceiveMessage(request);
     sptr<IRemoteObject> remote = new DummyRemote();
     AppExecFwk::ElementName element("device", info.bundleName, info.extensionName);
     connection->OnAbilityConnectDone(element, remote, 0);
-    ASSERT_EQ(connection->state_, ExtensionServiceConnectionState::CONNECTED);
-    ASSERT_TRUE(connection->messages_.empty());
-    ASSERT_EQ(connection->remoteObject_, remote);
+    EXPECT_EQ(connection->state_, ExtensionServiceConnectionState::CONNECTED);
+    EXPECT_TRUE(connection->messages_.empty());
+    EXPECT_EQ(connection->remoteObject_, remote);
     for (int i = 0; i < 50; ++i) {
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
@@ -440,14 +445,14 @@ HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnection_OnAbilityD
     info.uid = 11;
     sptr<ExtensionServiceConnection> connection = new (std::nothrow)
         ExtensionServiceConnection(info, [&](const ExtensionSubscriberInfo &) { disconnectedCalled = true; });
-    ASSERT_NE(connection, nullptr);
+    EXPECT_NE(connection, nullptr);
     sptr<IRemoteObject> remote = new DummyRemote();
     AppExecFwk::ElementName element("device", info.bundleName, info.extensionName);
     connection->OnAbilityConnectDone(element, remote, 0);
-    ASSERT_EQ(connection->state_, ExtensionServiceConnectionState::CONNECTED);
+    EXPECT_EQ(connection->state_, ExtensionServiceConnectionState::CONNECTED);
     connection->OnAbilityDisconnectDone(element, 0);
-    ASSERT_EQ(connection->state_, ExtensionServiceConnectionState::DISCONNECTED);
-    ASSERT_TRUE(disconnectedCalled);
+    EXPECT_EQ(connection->state_, ExtensionServiceConnectionState::DISCONNECTED);
+    EXPECT_TRUE(disconnectedCalled);
     connection->Close();
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     connection = nullptr;
@@ -463,9 +468,9 @@ HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnection_SetExtensi
 {
     uint32_t original = ExtensionServiceConnection::DISCONNECT_DELAY_TIME;
     ExtensionServiceConnection::SetExtensionLifecycleDestroyTime(1);
-    ASSERT_EQ(ExtensionServiceConnection::DISCONNECT_DELAY_TIME, 1800u);
+    EXPECT_EQ(ExtensionServiceConnection::DISCONNECT_DELAY_TIME, 1800u);
     ExtensionServiceConnection::SetExtensionLifecycleDestroyTime(4000);
-    ASSERT_EQ(ExtensionServiceConnection::DISCONNECT_DELAY_TIME, 4000u);
+    EXPECT_EQ(ExtensionServiceConnection::DISCONNECT_DELAY_TIME, 4000u);
     ExtensionServiceConnection::DISCONNECT_DELAY_TIME = original;
 }
 
@@ -478,13 +483,13 @@ HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnection_AppendMess
 {
     std::string msg1 = "base";
     ExtensionServiceConnection::AppendMessage(msg1, ERR_OK, ERR_OK);
-    ASSERT_TRUE(msg1.find(" OK") != std::string::npos);
+    EXPECT_TRUE(msg1.find(" OK") != std::string::npos);
     std::string msg2 = "base";
     ExtensionServiceConnection::AppendMessage(msg2, ERR_INVALID_DATA, ERR_OK);
-    ASSERT_TRUE(msg2.find("callResult") != std::string::npos);
+    EXPECT_TRUE(msg2.find("callResult") != std::string::npos);
     std::string msg3 = "base";
     ExtensionServiceConnection::AppendMessage(msg3, ERR_OK, ERR_INVALID_DATA);
-    ASSERT_TRUE(msg3.find("retResult") != std::string::npos);
+    EXPECT_TRUE(msg3.find("retResult") != std::string::npos);
 }
 
 /**
@@ -503,40 +508,11 @@ HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnection_HandleDisc
     info.uid = 12;
     sptr<ExtensionServiceConnection> connection = new (std::nothrow)
         ExtensionServiceConnection(info, [&](const ExtensionSubscriberInfo &) { disconnectedCalled = true; });
-    ASSERT_NE(connection, nullptr);
+    EXPECT_NE(connection, nullptr);
     connection->remoteObject_ = new DummyRemote();
     connection->HandleDisconnectedState();
-    ASSERT_EQ(connection->remoteObject_, nullptr);
-    ASSERT_TRUE(disconnectedCalled);
-    connection = nullptr;
-}
-
-/**
- * @tc.name   : ExtensionServiceConnection_OnRemoteDied_0100
- * @tc.number : ExtensionServiceConnection_OnRemoteDied_0100
- * @tc.desc   : Test OnRemoteDied changes state to DISCONNECTED and triggers Close path.
- */
-HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnection_OnRemoteDied_0100, Function | SmallTest | Level1)
-{
-    bool disconnectedCalled = false;
-    ExtensionSubscriberInfo info;
-    info.bundleName = "bundleD";
-    info.extensionName = "extD";
-    info.userId = 4;
-    info.uid = 13;
-    sptr<ExtensionServiceConnection> connection = new (std::nothrow)
-        ExtensionServiceConnection(info, [&](const ExtensionSubscriberInfo &) { disconnectedCalled = true; });
-    ASSERT_NE(connection, nullptr);
-    sptr<IRemoteObject> remote = new DummyRemote();
-    AppExecFwk::ElementName element("device", info.bundleName, info.extensionName);
-    connection->OnAbilityConnectDone(element, remote, 0);
-    ASSERT_EQ(connection->state_, ExtensionServiceConnectionState::CONNECTED);
-    wptr<IRemoteObject> wRemote = remote;
-    connection->OnRemoteDied(wRemote);
-    ASSERT_EQ(connection->state_, ExtensionServiceConnectionState::DISCONNECTED);
-    ASSERT_TRUE(disconnectedCalled);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    remote = nullptr;
+    EXPECT_EQ(connection->remoteObject_, nullptr);
+    EXPECT_TRUE(disconnectedCalled);
     connection = nullptr;
 }
 
@@ -557,8 +533,8 @@ HWTEST_F(
     connection.state_ = ExtensionServiceConnectionState::CONNECTED;
     connection.Freeze();
     connection.Unfreeze();
-    ASSERT_EQ(connection.state_, ExtensionServiceConnectionState::CONNECTED);
-    ASSERT_EQ(connection.remoteObject_, nullptr);
+    EXPECT_EQ(connection.state_, ExtensionServiceConnectionState::CONNECTED);
+    EXPECT_EQ(connection.remoteObject_, nullptr);
 }
 
 /**
@@ -578,8 +554,8 @@ HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnection_PrepareFre
     connection.state_ = ExtensionServiceConnectionState::CONNECTED;
     connection.PrepareFreeze();
     connection.PrepareDisconnect();
-    ASSERT_EQ(connection.state_, ExtensionServiceConnectionState::CONNECTED);
-    ASSERT_EQ(connection.remoteObject_, nullptr);
+    EXPECT_EQ(connection.state_, ExtensionServiceConnectionState::CONNECTED);
+    EXPECT_EQ(connection.remoteObject_, nullptr);
 }
 
 /**
@@ -596,17 +572,124 @@ HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnection_Disconnect
     info.uid = 16;
     sptr<ExtensionServiceConnection> connection =
         new (std::nothrow) ExtensionServiceConnection(info, [](const ExtensionSubscriberInfo &) {});
-    ASSERT_NE(connection, nullptr);
+    EXPECT_NE(connection, nullptr);
     connection->state_ = ExtensionServiceConnectionState::CONNECTED;
     connection->remoteObject_ = new DummyRemote();
-    ASSERT_NE(connection->remoteObject_, nullptr);
+    EXPECT_NE(connection->remoteObject_, nullptr);
     connection->Disconnect();
     for (int i = 0; i < 50 && connection->remoteObject_ != nullptr; ++i) {
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
-    ASSERT_EQ(connection->remoteObject_, nullptr);
+    EXPECT_EQ(connection->remoteObject_, nullptr);
     connection->Close();
     connection = nullptr;
+}
+
+HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnection_NotifyOnReceiveMessage_0200,
+    Function | SmallTest | Level1)
+{
+    bool disconnectedCalled = false;
+    ExtensionSubscriberInfo info;
+    info.bundleName = "bundleA";
+    info.extensionName = "extA";
+    info.userId = 1;
+    info.uid = 10;
+    sptr<ExtensionServiceConnection> connection = new (std::nothrow)
+        ExtensionServiceConnection(info, [&](const ExtensionSubscriberInfo &) { disconnectedCalled = true; });
+    EXPECT_NE(connection, nullptr);
+    sptr<NotificationRequest> request = new NotificationRequest(1);
+    connection->state_ = ExtensionServiceConnectionState::DISCONNECTED;
+    connection->NotifyOnReceiveMessage(request);
+    connection->NotifyOnReceiveMessage(nullptr);
+    sptr<IRemoteObject> remote = new DummyRemote();
+    AppExecFwk::ElementName element("device", info.bundleName, info.extensionName);
+    connection->OnAbilityConnectDone(element, remote, 0);
+    EXPECT_EQ(connection->state_, ExtensionServiceConnectionState::CONNECTED);
+}
+
+HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnection_NotifyOnCancelMessage_0100,
+    Function | SmallTest | Level1)
+{
+    bool disconnectedCalled = false;
+    ExtensionSubscriberInfo info;
+    info.bundleName = "bundleA";
+    info.extensionName = "extA";
+    info.userId = 1;
+    info.uid = 10;
+    sptr<ExtensionServiceConnection> connection = new (std::nothrow)
+        ExtensionServiceConnection(info, [&](const ExtensionSubscriberInfo &) { disconnectedCalled = true; });
+    EXPECT_NE(connection, nullptr);
+    std::shared_ptr<std::vector<std::string>> cancelHashCodes = std::make_shared<std::vector<std::string>>();
+    connection->state_ = ExtensionServiceConnectionState::DISCONNECTED;
+    connection->NotifyOnCancelMessages(cancelHashCodes);
+    connection->NotifyOnCancelMessages(nullptr);
+    sptr<IRemoteObject> remote = new DummyRemote();
+    AppExecFwk::ElementName element("device", info.bundleName, info.extensionName);
+    connection->OnAbilityConnectDone(element, remote, 0);
+    EXPECT_EQ(connection->state_, ExtensionServiceConnectionState::CONNECTED);
+}
+
+HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnection_NotifyOnCancelMessage_0200,
+    Function | SmallTest | Level1)
+{
+    bool disconnectedCalled = false;
+    ExtensionSubscriberInfo info;
+    info.bundleName = "bundleA";
+    info.extensionName = "extA";
+    info.userId = 1;
+    info.uid = 10;
+    sptr<ExtensionServiceConnection> connection = new (std::nothrow)
+        ExtensionServiceConnection(info, [&](const ExtensionSubscriberInfo &) { disconnectedCalled = true; });
+    EXPECT_NE(connection, nullptr);
+    std::shared_ptr<std::vector<std::string>> cancelHashCodes = std::make_shared<std::vector<std::string>>();
+    connection->state_ = ExtensionServiceConnectionState::CREATED;
+    connection->NotifyOnCancelMessages(cancelHashCodes);
+    sptr<IRemoteObject> remote = new DummyRemote();
+    AppExecFwk::ElementName element("device", info.bundleName, info.extensionName);
+    connection->OnAbilityConnectDone(element, remote, 0);
+    EXPECT_EQ(connection->state_, ExtensionServiceConnectionState::CONNECTED);
+}
+
+HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnection_NotifyOnCancelMessage_0300,
+    Function | SmallTest | Level1)
+{
+    bool disconnectedCalled = false;
+    ExtensionSubscriberInfo info;
+    info.bundleName = "bundleA";
+    info.extensionName = "extA";
+    info.userId = 1;
+    info.uid = 10;
+    sptr<ExtensionServiceConnection> connection = new (std::nothrow)
+        ExtensionServiceConnection(info, [&](const ExtensionSubscriberInfo &) { disconnectedCalled = true; });
+    EXPECT_NE(connection, nullptr);
+    std::shared_ptr<std::vector<std::string>> cancelHashCodes = std::make_shared<std::vector<std::string>>();
+    connection->state_ = ExtensionServiceConnectionState::CONNECTING;
+    connection->NotifyOnCancelMessages(cancelHashCodes);
+    sptr<IRemoteObject> remote = new DummyRemote();
+    AppExecFwk::ElementName element("device", info.bundleName, info.extensionName);
+    connection->OnAbilityConnectDone(element, remote, 0);
+    EXPECT_EQ(connection->state_, ExtensionServiceConnectionState::CONNECTED);
+}
+
+HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnection_NotifyOnCancelMessage_0400,
+    Function | SmallTest | Level1)
+{
+    bool disconnectedCalled = false;
+    ExtensionSubscriberInfo info;
+    info.bundleName = "bundleA";
+    info.extensionName = "extA";
+    info.userId = 1;
+    info.uid = 10;
+    sptr<ExtensionServiceConnection> connection = new (std::nothrow)
+        ExtensionServiceConnection(info, [&](const ExtensionSubscriberInfo &) { disconnectedCalled = true; });
+    EXPECT_NE(connection, nullptr);
+    std::shared_ptr<std::vector<std::string>> cancelHashCodes = std::make_shared<std::vector<std::string>>();
+    connection->state_ = ExtensionServiceConnectionState::CONNECTED;
+    connection->NotifyOnCancelMessages(cancelHashCodes);
+    sptr<IRemoteObject> remote = new DummyRemote();
+    AppExecFwk::ElementName element("device", info.bundleName, info.extensionName);
+    connection->OnAbilityDisconnectDone(element, 0);
+    EXPECT_EQ(connection->state_, ExtensionServiceConnectionState::DISCONNECTED);
 }
 } // namespace Notification
 } // namespace OHOS
