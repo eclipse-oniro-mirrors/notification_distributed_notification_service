@@ -1391,7 +1391,7 @@ export default namespace notificationManager {
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeRemoveDoNotDisturbProfileByUserId(
                 templates, userId); });
-            p.then((data: NullishType): void => {
+            p.then((data: Any): void => {
                 resolve(undefined);
             }, (error: Error): void => {
                 reject(error);
@@ -1421,7 +1421,7 @@ export default namespace notificationManager {
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeAddDoNotDisturbProfileByUserId(templates, userId); });
-            p.then((data: NullishType): void => {
+            p.then((data: Any): void => {
                 resolve(undefined);
             }, (error: Error): void => {
                 reject(error);
@@ -1822,7 +1822,7 @@ export default namespace notificationManager {
             (resolve: ResolveCallback<Array<BundleOption>>, reject: RejectCallback): void => {
             let p = taskpool.execute((): Array<BundleOption> => { return nativeGetAllNotificationEnabledBundlesByUserId(
                 userId); });
-            p.then((data: NullishType): void => {
+            p.then((data: Any): void => {
                 let options : Array<BundleOption> = data as Array<BundleOption>;
                 resolve(options);
             }, (error: Error): void => {
@@ -2347,7 +2347,7 @@ export default namespace notificationManager {
     {
         let pPromise = new Promise<DoNotDisturbProfile>((resolve: ResolveCallback<DoNotDisturbProfile>, reject: RejectCallback): void => {
             let p = taskpool.execute((): DoNotDisturbProfile => { return nativeGetDoNotDisturbProfileByUserId(id, userId); });
-            p.then((data: NullishType): void => {
+            p.then((data: Any): void => {
                 let ret : DoNotDisturbProfile = data as DoNotDisturbProfile;
                 resolve(ret);
             }, (error: Error): void => {
