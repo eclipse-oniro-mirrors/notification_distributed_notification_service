@@ -829,20 +829,19 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         return ERR_ANS_NO_MEMORY;
     }
     record->bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
+    int32_t ipcUid = IPCSkeleton::GetCallingUid();
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+    uint32_t hashCodeGeneratetype = NotificationPreferences::GetInstance()->GetHashCodeRule(
+        ipcUid, request->GetReceiverUserId());
+#else
+    uint32_t hashCodeGeneratetype = NotificationPreferences::GetInstance()->GetHashCodeRule(ipcUid);
+#endif
+    request->SetHashCodeGenerateType(hashCodeGeneratetype);
     record->notification = new (std::nothrow) Notification(request);
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification");
         return ERR_ANS_NO_MEMORY;
     }
-
-    int32_t ipcUid = IPCSkeleton::GetCallingUid();
-#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
-    uint32_t hashCodeGeneratetype = NotificationPreferences::GetInstance()->GetHashCodeRule(
-        ipcUid, record->notification->GetRecvUserId());
-#else
-    uint32_t hashCodeGeneratetype = NotificationPreferences::GetInstance()->GetHashCodeRule(ipcUid);
-#endif
-    request->SetHashCodeGenerateType(hashCodeGeneratetype);
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
