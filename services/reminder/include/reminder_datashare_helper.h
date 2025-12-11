@@ -164,13 +164,6 @@ private:
      */
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper(const std::string& uriStr);
 
-    /**
-     * @brief Get the projection column names required for DataShare queries.
-     *
-     * @return Vector of column names used when querying the reminder share table.
-     */
-    std::vector<std::string> GetColumns() const;
-
 private:
     /**
      * @brief Build a ReminderRequest from a DataShare result row.
