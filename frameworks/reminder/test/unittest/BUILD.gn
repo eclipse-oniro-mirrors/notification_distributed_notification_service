@@ -34,6 +34,7 @@ ohos_unittest("reminder_test") {
     "${frameworks_module_reminder_path}/test/unittest/reminder_request_alarm_test.cpp",
     "${frameworks_module_reminder_path}/test/unittest/reminder_request_calendar_test.cpp",
     "${frameworks_module_reminder_path}/test/unittest/reminder_request_timer_test.cpp",
+    "${frameworks_module_reminder_path}/test/unittest/reminder_state_test.cpp",
   ]
 
   deps = [

@@ -274,6 +274,20 @@ public:
     static std::string ADD_COLUMNS;
     static std::string SELECT_COLUMNS;
 };
+
+class ReminderStateTable {
+public:
+    static constexpr const char* TABLE_NAME = "reminder_state";
+
+    static constexpr const char* REMINDER_ID = "reminder_id";
+    static constexpr const char* ACTION_BUTTON_TYPE = "action_button_type";
+    static constexpr const char* UID = "uid";
+    static constexpr const char* IS_RESEND = "is_resend";
+    static constexpr const char* TIMESTAMP = "timestamp";
+
+public:
+    static std::string GetCreateColumns();
+};
 }  // namespace Notification
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_TABLE_H

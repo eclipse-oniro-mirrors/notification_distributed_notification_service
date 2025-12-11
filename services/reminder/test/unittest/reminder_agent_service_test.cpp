@@ -487,4 +487,54 @@ HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_017, Function | Smal
     MockReminderDataManager::MockCancelReminderOnDisplay(0);
     EXPECT_EQ(reminderAgentService_->CancelReminderOnDisplay(0), 0);
 }
+
+/**
+ * @tc.name: ReminderAgentServiceTest_018
+ * @tc.desc: Test RegisterReminderState function
+ * @tc.type: FUNC
+ * @tc.require: issueI5S4VP
+ */
+HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_018, Function | SmallTest | Level1)
+{
+    // test CheckReminderPermission
+    MockAccesstokenKit::MockIsVerifyPermisson(false);
+    EXPECT_EQ(reminderAgentService_->RegisterReminderState(nullptr), ERR_REMINDER_PERMISSION_DENIED);
+    MockAccesstokenKit::MockIsVerifyPermisson(true);
+
+    // test ReminderDataManager::GetInstance()
+    ReminderDataManager::REMINDER_DATA_MANAGER = nullptr;
+    EXPECT_EQ(reminderAgentService_->RegisterReminderState(nullptr), ERR_NO_INIT);
+    ReminderDataManager::InitInstance();
+
+    // test ReminderDataManager::RegisterReminderState
+    MockReminderDataManager::MockRegisterReminderState(1);
+    EXPECT_EQ(reminderAgentService_->RegisterReminderState(nullptr), 1);
+    MockReminderDataManager::MockRegisterReminderState(0);
+    EXPECT_EQ(reminderAgentService_->RegisterReminderState(nullptr), 0);
+}
+
+/**
+ * @tc.name: ReminderAgentServiceTest_019
+ * @tc.desc: Test UnRegisterReminderState function
+ * @tc.type: FUNC
+ * @tc.require: issueI5S4VP
+ */
+HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_019, Function | SmallTest | Level1)
+{
+    // test CheckReminderPermission
+    MockAccesstokenKit::MockIsVerifyPermisson(false);
+    EXPECT_EQ(reminderAgentService_->UnRegisterReminderState(), ERR_REMINDER_PERMISSION_DENIED);
+    MockAccesstokenKit::MockIsVerifyPermisson(true);
+
+    // test ReminderDataManager::GetInstance()
+    ReminderDataManager::REMINDER_DATA_MANAGER = nullptr;
+    EXPECT_EQ(reminderAgentService_->UnRegisterReminderState(), ERR_NO_INIT);
+    ReminderDataManager::InitInstance();
+
+    // test ReminderDataManager::UnRegisterReminderState
+    MockReminderDataManager::MockUnRegisterReminderState(1);
+    EXPECT_EQ(reminderAgentService_->UnRegisterReminderState(), 1);
+    MockReminderDataManager::MockUnRegisterReminderState(0);
+    EXPECT_EQ(reminderAgentService_->UnRegisterReminderState(), 0);
+}
 }  // namespace OHOS::Notification

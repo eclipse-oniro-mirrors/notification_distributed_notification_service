@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+sequenceable OHOS.IRemoteObject;
 sequenceable OHOS.Notification.ReminderRequest;
 sequenceable OHOS.Notification.ReminderRequestAdaptation;
 interface OHOS.Notification.IReminderAgentService {
@@ -25,4 +26,6 @@ interface OHOS.Notification.IReminderAgentService {
     void AddExcludeDate([in] int reminderId, [in] long date);
     void DelExcludeDates([in] int reminderId);
     void GetExcludeDates([in] int reminderId, [out] long[] dates);
+    void RegisterReminderState([in] IRemoteObject object);
+    void UnRegisterReminderState();
 }

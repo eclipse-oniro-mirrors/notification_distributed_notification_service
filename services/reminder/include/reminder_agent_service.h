@@ -110,6 +110,21 @@ public:
     ErrCode GetExcludeDates(const int32_t reminderId, std::vector<int64_t>& dates) override;
 
     /**
+     * @brief Register reminder state.
+     *
+     * @param object Identifies the callback.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RegisterReminderState(const sptr<IRemoteObject>& object) override;
+
+    /**
+     * @brief UnRegister reminder state.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode UnRegisterReminderState() override;
+
+    /**
      * @brief Post unload services task.
      */
     void TryPostDelayUnloadTask(const int64_t delayTime);

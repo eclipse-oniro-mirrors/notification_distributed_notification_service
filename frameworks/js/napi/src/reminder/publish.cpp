@@ -14,6 +14,7 @@
  */
 
 #include "reminder/publish.h"
+#include "reminder/reminder_state_listener.h"
 
 #include "ans_log_wrapper.h"
 #include "common.h"
@@ -1551,6 +1552,18 @@ napi_value CancelReminderOnDisplay(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
     callbackPtr.release();
     return isCallback ? NotificationNapi::Common::NapiGetNull(env) : promise;
+}
+
+napi_value SubscribeReminderState(napi_env env, napi_callback_info info)
+{
+    ANSR_LOGD("called");
+    return JsReminderStateListener::GetInstance().RegisterReminderStateCallback(env, info);
+}
+
+napi_value UnSubscribeReminderState(napi_env env, napi_callback_info info)
+{
+    ANSR_LOGD("called");
+    return JsReminderStateListener::GetInstance().UnRegisterReminderStateCallback(env, info);
 }
 }
 }

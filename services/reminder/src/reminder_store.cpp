@@ -42,7 +42,8 @@ constexpr int32_t REMINDER_RDB_VERSION_V6 = 6;
 constexpr int32_t REMINDER_RDB_VERSION_V7 = 7;
 constexpr int32_t REMINDER_RDB_VERSION_V8 = 8;
 constexpr int32_t REMINDER_RDB_VERSION_V9 = 9;
-constexpr int32_t REMINDER_RDB_VERSION = 10;
+constexpr int32_t REMINDER_RDB_VERSION_V10 = 10;
+constexpr int32_t REMINDER_RDB_VERSION = 11;
 constexpr int64_t DURATION_PRELOAD_TIME = 10 * 60 * 60 * 1000;  // 10h, millisecond
 }
 
@@ -54,13 +55,16 @@ const std::string ReminderStore::REMINDER_DB_NAME = "notification.db";
 int32_t ReminderStore::ReminderStoreDataCallBack::OnCreate(NativeRdb::RdbStore& store)
 {
     ANSR_LOGI("Create table");
-    return CreateTable(store);
+    int32_t ret = CreateTable(store);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    return CreateStateTable(store);
 }
 
 int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
     NativeRdb::RdbStore& store, int32_t oldVersion, int32_t newVersion)
 {
-    ANSR_LOGI("OnUpgrade oldVersion is %{public}d, newVersion is %{public}d", oldVersion, newVersion);
     if (oldVersion < newVersion && newVersion == REMINDER_RDB_VERSION) {
         switch (oldVersion) {
             case REMINDER_RDB_VERSION_V1:
@@ -86,8 +90,7 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
                 [[fallthrough]];
             case REMINDER_RDB_VERSION_V7:
                 AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::TITLE_RESOURCE_ID, "INT", "0");
-                AddRdbColum(store, ReminderBaseTable::TABLE_NAME,
-                    ReminderBaseTable::CONTENT_RESOURCE_ID, "INT", "0");
+                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::CONTENT_RESOURCE_ID, "INT", "0");
                 AddRdbColum(store, ReminderBaseTable::TABLE_NAME,
                     ReminderBaseTable::SNOOZE_CONTENT_RESOURCE_ID, "INT", "0");
                 AddRdbColum(store, ReminderBaseTable::TABLE_NAME,
@@ -100,6 +103,9 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
                 AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::FORCE_DISTRIBUTED,
                     "TEXT", "false");
                 AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::NOT_DISTRIBUTED, "TEXT", "false");
+                [[fallthrough]];
+            case REMINDER_RDB_VERSION_V10:
+                CreateStateTable(store);
                 [[fallthrough]];
             default:
                 break;
@@ -158,6 +164,18 @@ int32_t ReminderStore::ReminderStoreDataCallBack::CreateTable(NativeRdb::RdbStor
     if (ret != NativeRdb::E_OK) {
         ANSR_LOGE("Create reminder_timer table failed:%{public}d", ret);
         return ret;
+    }
+    return ret;
+}
+
+int32_t ReminderStore::ReminderStoreDataCallBack::CreateStateTable(NativeRdb::RdbStore& store)
+{
+    std::string createSql;
+    createSql.append("CREATE TABLE IF NOT EXISTS ").append(ReminderStateTable::TABLE_NAME)
+        .append(" (").append(ReminderStateTable::GetCreateColumns()).append(")");
+    int32_t ret = store.ExecuteSql(createSql);
+    if (ret != NativeRdb::E_OK) {
+        ANSR_LOGE("Create reminder_state table failed:%{public}d", ret);
     }
     return ret;
 }
@@ -890,5 +908,78 @@ int32_t ReminderStore::QueryActiveReminderCount()
     return baseTableNum + calenderTableNum;
 }
 
+int32_t ReminderStore::InsertState(const int32_t uid, const ReminderState& state)
+{
+    if (rdbStore_ == nullptr) {
+        ANSR_LOGE("Rdb store is not initialized.");
+        return STATE_FAIL;
+    }
+    int64_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    int64_t rowId = STATE_FAIL;
+    NativeRdb::ValuesBucket values;
+    values.PutInt(ReminderStateTable::REMINDER_ID, state.reminderId_);
+    values.PutInt(ReminderStateTable::ACTION_BUTTON_TYPE, static_cast<int32_t>(state.buttonType_));
+    values.PutInt(ReminderStateTable::UID, uid);
+    values.PutString(ReminderStateTable::IS_RESEND, state.isResend_ ? "true" : "false");
+    values.PutLong(ReminderStateTable::TIMESTAMP, timestamp);
+
+    int32_t ret = rdbStore_->Insert(rowId, ReminderStateTable::TABLE_NAME, values);
+    if (ret != NativeRdb::E_OK) {
+        ANSR_LOGE("Insert reminder_state operation failed[%{public}d]", ret);
+    }
+    return ret;
+}
+
+int32_t ReminderStore::DeleteState(const int32_t uid, const int64_t timestamp)
+{
+    if (rdbStore_ == nullptr) {
+        ANSR_LOGE("Rdb store is not initialized.");
+        return STATE_FAIL;
+    }
+    std::string condition;
+    if (timestamp != 0) {
+        condition.append(ReminderStateTable::TIMESTAMP).append(" < ").append(std::to_string(timestamp));
+    } else {
+        condition.append(ReminderStateTable::UID).append(" = ").append(std::to_string(uid));
+    }
+    int32_t delRows = STATE_FAIL;
+    std::vector<std::string> whereArgs;
+    int32_t ret = rdbStore_->Delete(delRows, ReminderStateTable::TABLE_NAME, condition, whereArgs);
+    if (ret != NativeRdb::E_OK) {
+        ANSR_LOGE("Delete from reminder_state failed[%{public}d]", ret);
+    }
+    return ret;
+}
+
+std::vector<ReminderState> ReminderStore::QueryState(const int32_t uid)
+{
+    std::vector<ReminderState> states;
+    if (rdbStore_ == nullptr) {
+        ANSR_LOGE("Rdb store is not initialized.");
+        return states;
+    }
+    std::string querySql;
+    querySql.append("SELECT * FROM ").append(ReminderStateTable::TABLE_NAME);
+    querySql.append(" WHERE ");
+    querySql.append(ReminderStateTable::UID).append(" = ").append(std::to_string(uid));
+    std::vector<std::string> whereArgs;
+    auto resultSet = rdbStore_->QuerySql(querySql, whereArgs);
+    if (resultSet == nullptr) {
+        return states;
+    }
+    while (resultSet->GoToNextRow() == NativeRdb::E_OK) {
+        ReminderState state;
+        GetInt32Val(resultSet, ReminderStateTable::REMINDER_ID, state.reminderId_);
+        int32_t buttonType = static_cast<int32_t>(ReminderRequest::ActionButtonType::CLOSE);
+        GetInt32Val(resultSet, ReminderStateTable::ACTION_BUTTON_TYPE, buttonType);
+        state.buttonType_ = static_cast<ReminderRequest::ActionButtonType>(buttonType);
+        std::string isResend;
+        GetStringVal(resultSet, ReminderStateTable::IS_RESEND, isResend);
+        state.isResend_ = isResend == "true" ? true : false;
+        states.push_back(state);
+    }
+    return states;
+}
 }  // namespace Notification
 }  // namespace OHOS

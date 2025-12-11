@@ -14,25 +14,26 @@
  */
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_REMINDER_REQUEST_CLIENT_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_REMINDER_REQUEST_CLIENT_H
-#include <list>
-#include <memory>
 
 #include "reminder_request.h"
+#include "reminder_state_callback.h"
+#include "ireminder_agent_service.h"
 #include "reminder_request_adaptation.h"
+#include "reminder_state_callback_stub.h"
+
+#include "ffrt.h"
+#include "ians_manager.h"
 #include "notification_slot.h"
 #include "notification_constant.h"
-#include "ians_manager.h"
-#include "ireminder_agent_service.h"
-#include "ffrt.h"
 
-namespace OHOS {
-namespace Notification {
+namespace OHOS::Notification {
 class ReminderRequestClient {
 public:
     /**
      * @brief Publishes a scheduled reminder.
      *
      * @param reminder Indicates a reminder.
+     * @param reminderId Indicates the reminder Id.
      * @return Returns publish result.
      */
     ErrCode PublishReminder(const ReminderRequest& reminder, int32_t& reminderId);
@@ -42,7 +43,7 @@ public:
      *
      * @param reminderId Indicates reminder Id.
      * @param reminder Indicates a reminder.
-     * @return Returns publish result.
+     * @return Returns update result.
      */
     ErrCode UpdateReminder(const int32_t reminderId, const ReminderRequest& reminder);
 
@@ -64,6 +65,7 @@ public:
     /**
      * @brief Dismiss the currently displayed alert and only remove it from the Notification Center.
      *
+     * @param reminderId Indicates the reminder Id.
      * @return Returns cancel reminder result.
      */
     ErrCode CancelReminderOnDisplay(const int32_t reminderId);
@@ -74,7 +76,7 @@ public:
      * @param[out] validReminders Indicates the vector to store the result.
      * @return Returns get valid reminders result.
      */
-    ErrCode GetValidReminders(std::vector<ReminderRequestAdaptation> &validReminders);
+    ErrCode GetValidReminders(std::vector<ReminderRequestAdaptation>& validReminders);
 
     /**
      * @brief Add exclude date for reminder
@@ -115,7 +117,7 @@ public:
      *             This parameter must be specified.
      * @return Returns add notification slot result.
      */
-    ErrCode AddNotificationSlot(const NotificationSlot &slot);
+    ErrCode AddNotificationSlot(const NotificationSlot& slot);
 
     /**
      * @brief Deletes a created notification slot based on the slot ID.
@@ -124,7 +126,23 @@ public:
      *                This parameter must be specified.
      * @return Returns remove notification slot result.
      */
-    ErrCode RemoveNotificationSlot(const NotificationConstant::SlotType &slotType);
+    ErrCode RemoveNotificationSlot(const NotificationConstant::SlotType& slotType);
+
+    /**
+     * @brief Register reminder state callback.
+     *
+     * @param object Indicates the reminder state callback
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RegisterReminderState(const sptr<ReminderStateCallback>& object);
+
+    /**
+     * @brief UnRegister reminder state callback.
+     *
+     * @param object Indicates the reminder state callback
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode UnRegisterReminderState(const sptr<ReminderStateCallback>& object);
 
     void LoadSystemAbilitySuccess(const sptr<IRemoteObject> &remoteObject);
 
@@ -133,7 +151,6 @@ public:
     void StartReminderAgentService();
 
 private:
-
     /**
      * @brief Adds a notification slot by type.
      *
@@ -148,13 +165,32 @@ private:
 
     bool LoadReminderService();
 
-    ffrt::mutex serviceLock_;
+private:
+class ReminderStateListener : public ReminderStateCallbackStub {
+public:
+    ReminderStateListener() = default;
+    ~ReminderStateListener() = default;
 
-    ffrt::condition_variable proxyConVar_;
+    void RegisterReminderState(const sptr<ReminderStateCallback>& object);
+    void UnRegisterReminderState(const sptr<ReminderStateCallback>& object);
 
-    sptr<IReminderAgentService> proxy_;
+    bool IsEmpty();
+
+    ErrCode OnReminderState(const std::vector<ReminderState>& states) override;
+
+private:
+    std::mutex mutex_;
+    std::list<sptr<ReminderStateCallback>> reminderStateCbs_;
 };
-}  // namespace Notification
-}  // namespace OHOS
+
+private:
+    ffrt::mutex serviceLock_;
+    ffrt::condition_variable proxyConVar_;
+    sptr<IReminderAgentService> proxy_;
+    std::mutex listenMutex_;  // for reminderStateListener_
+    sptr<ReminderStateListener> reminderStateListener_;
+    bool listenerRegistered_ {false};
+};
+}  // namespace OHOS::Notification
 #endif // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_REMINDER_REQUEST_CLIENT_H
 

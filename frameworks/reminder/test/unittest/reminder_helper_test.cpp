@@ -209,5 +209,31 @@ HWTEST_F(ReminderHelperTest, CancelReminderOnDisplay_00001, Function | SmallTest
     ErrCode ret = reminderHelper.CancelReminderOnDisplay(reminderId);
     EXPECT_NE(ret, (int)ERR_OK);
 }
+
+/**
+ * @tc.name: RegisterReminderState_00001
+ * @tc.desc: Test RegisterReminderState parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(ReminderHelperTest, RegisterReminderState_00001, Function | SmallTest | Level1)
+{
+    ReminderHelper reminderHelper;
+    ErrCode ret = reminderHelper.RegisterReminderState(nullptr);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: UnRegisterReminderState_00001
+ * @tc.desc: Test UnRegisterReminderState parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(ReminderHelperTest, UnRegisterReminderState_00001, Function | SmallTest | Level1)
+{
+    ReminderHelper reminderHelper;
+    ErrCode ret = reminderHelper.UnRegisterReminderState(nullptr);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
 }
 }

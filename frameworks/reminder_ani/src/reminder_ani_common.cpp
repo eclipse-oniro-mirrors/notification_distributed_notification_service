@@ -73,13 +73,34 @@ static bool IsValidateString(const std::string& str)
     return true;
 }
 
-std::string Common::getErrCodeMsg(const int32_t errorCode)
+void AniReminderStateCallback::OnReminderState(const std::vector<Notification::ReminderState>& states)
+{
+    if (callback_ == nullptr) {
+        return;
+    }
+    std::vector<reminderAgentManager::manager::ReminderState> aniStates;
+    for (const auto& state : states) {
+        reminderAgentManager::manager::ReminderState aniState {
+            .reminderId = state.reminderId_,
+            .buttonType = static_cast<reminderAgentManager::manager::ActionButtonType::key_t>(state.buttonType_),
+            .isMessageResend = state.isResend_
+        };
+        aniStates.push_back(aniState);
+    }
+    auto result = ::taihe::array<reminderAgentManager::manager::ReminderState>(aniStates);
+    (*callback_)(result);
+}
+
+std::list<Common::CallbackPair> Common::callbackList_;
+std::mutex Common::callbackMutex_;
+
+std::string Common::GetErrCodeMsg(const int32_t errorCode, const std::string& extraInfo)
 {
     switch (errorCode) {
         case ERR_REMINDER_PERMISSION_DENIED:
             return "Permission denied.";
         case ERR_REMINDER_INVALID_PARAM:
-            return "Parameter error.";
+            return "Parameter error." + extraInfo;
         case ERR_REMINDER_NOTIFICATION_NOT_ENABLE:
             return "Notification not enable.";
         case ERR_REMINDER_NUMBER_OVERLOAD:
@@ -92,6 +113,10 @@ std::string Common::getErrCodeMsg(const int32_t errorCode)
             return "The caller token invalid.";
         case ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED:
             return "The data share permission denied.";
+        case ERR_REMINDER_PARAM_ERROR:
+            return "Parameter error." + extraInfo;
+        case ERR_REMINDER_NOTIFICATION_NO_SHOWING:
+            return "Notification not showing.";
         default:
             return "Inner error";
     }
@@ -236,6 +261,7 @@ bool Common::ParseIntParam(const reminderAgentManager::manager::ReminderRequest&
         if (ringDuration < 0 || ringDuration > static_cast<int64_t>(
             Notification::ReminderRequest::MAX_RING_DURATION / Notification::ReminderRequest::MILLI_SECONDS)) {
             ANSR_LOGE("Param[ringDuration] out of range.");
+            lastErrorMsg_ = " Param[ringDuration] out of range.";
             return false;
         }
         reminder->SetRingDuration(static_cast<uint64_t>(ringDuration));
@@ -296,12 +322,40 @@ void Common::ParseStringParam(const reminderAgentManager::manager::ReminderReque
     }
 }
 
+bool Common::ParseBoolParam(const ::ohos::reminderAgentManager::manager::ReminderRequest& reminderReq,
+    std::shared_ptr<Notification::ReminderRequest>& reminder)
+{
+    if (reminderReq.tapDismissed.has_value()) {
+        reminder->SetTapDismissed(reminderReq.tapDismissed.value());
+    }
+    bool isSystemApp = IsSelfSystemApp();
+    if (reminderReq.notDistributed.has_value()) {
+        if (!isSystemApp) {
+            ANSR_LOGE("Not system app, notDistributed not supported.");
+            lastErrorMsg_ = " Not system app, notDistributed not supported.";
+            return false;
+        }
+        reminder->SetNotDistributed(reminderReq.notDistributed.value());
+    }
+
+    if (reminderReq.forceDistributed.has_value()) {
+        if (!isSystemApp) {
+            ANSR_LOGE("Not system app, forceDistributed not supported.");
+            lastErrorMsg_ = " Not system app, forceDistributed not supported.";
+            return false;
+        }
+        reminder->SetForceDistributed(reminderReq.forceDistributed.value());
+    }
+    return true;
+}
+
 bool Common::ParseLocalDateTime(const reminderAgentManager::manager::LocalDateTime& dateTimeReq,
     struct tm& dateTime)
 {
     int32_t year = static_cast<int32_t>(dateTimeReq.year);
     if (year < 0 || year > UINT16_MAX) {
         ANSR_LOGE("Param[year] out of range[0, %{public}d]", UINT16_MAX);
+        lastErrorMsg_ = " Param[year] out of range.";
         return false;
     }
     dateTime.tm_year = Notification::ReminderRequest::GetCTime(
@@ -311,6 +365,7 @@ bool Common::ParseLocalDateTime(const reminderAgentManager::manager::LocalDateTi
     if (month < 1 || month > Notification::ReminderRequestCalendar::MAX_MONTHS_OF_YEAR) {
         ANSR_LOGE("Param[month] out of range[1, %{public}hhu]",
             Notification::ReminderRequestCalendar::MAX_MONTHS_OF_YEAR);
+        lastErrorMsg_ = " Param[month] out of range.";
         return false;
     }
     dateTime.tm_mon = Notification::ReminderRequest::GetCTime(
@@ -321,18 +376,21 @@ bool Common::ParseLocalDateTime(const reminderAgentManager::manager::LocalDateTi
     int32_t day = static_cast<int32_t>(dateTimeReq.day);
     if ((day < 1) || (day > maxDaysOfMonth)) {
         ANSR_LOGW("Param[day] out of range[1, %{public}hhu]", maxDaysOfMonth);
+        lastErrorMsg_ = " Param[day] out of range.";
         return false;
     }
     dateTime.tm_mday = day;
 
     if (dateTimeReq.hour < 0 || dateTimeReq.hour > MAX_HOUR) {
         ANSR_LOGW("Param[hour] out of range[0, %{public}d]", MAX_HOUR);
+        lastErrorMsg_ = " Param[hour] out of range.";
         return false;
     }
     dateTime.tm_hour = dateTimeReq.hour;
 
     if (dateTimeReq.minute < 0 || dateTimeReq.minute > MAX_MINUTE) {
         ANSR_LOGW("Param[minute] out of range[0, %{public}d]", MAX_MINUTE);
+        lastErrorMsg_ = " Param[minute] out of range.";
         return false;
     }
     dateTime.tm_min = dateTimeReq.minute;
@@ -457,6 +515,7 @@ bool Common::ParseActionButton(
             case reminderAgentManager::manager::ActionButtonType::key_t::ACTION_BUTTON_TYPE_CUSTOM: {
                 if (!IsSelfSystemApp()) {
                     ANSR_LOGW("Not system app, ACTION_BUTTON_TYPE_CUSTOM not supported.");
+                    lastErrorMsg_ = " Not system app, ACTION_BUTTON_TYPE_CUSTOM not supported.";
                     return false;
                 }
                 buttonType = Notification::ReminderRequest::ActionButtonType::CUSTOM;
@@ -482,19 +541,40 @@ bool Common::ParseActionButton(
     return true;
 }
 
+void Common::ParseRingChannel(const ::ohos::reminderAgentManager::manager::RingChannel channel,
+    std::shared_ptr<Notification::ReminderRequest>& reminder)
+{
+    switch (channel.get_key()) {
+        case reminderAgentManager::manager::RingChannel::key_t::RING_CHANNEL_ALARM:
+            reminder->SetRingChannel(Notification::ReminderRequest::RingChannel::ALARM);
+            break;
+        case reminderAgentManager::manager::RingChannel::key_t::RING_CHANNEL_MEDIA:
+            reminder->SetRingChannel(Notification::ReminderRequest::RingChannel::MEDIA);
+            break;
+        case reminderAgentManager::manager::RingChannel::key_t::RING_CHANNEL_NOTIFICATION:
+            reminder->SetRingChannel(Notification::ReminderRequest::RingChannel::NOTIFICATION);
+            break;
+        default:
+            break;
+    }
+}
+
 bool Common::ParseCalendarParam(const ::ohos::reminderAgentManager::manager::ReminderRequestCalendar& calendarReq,
     std::vector<uint8_t>& repeatMonths, std::vector<uint8_t>& repeatDays, std::vector<uint8_t>& daysOfWeek)
 {
     if (calendarReq.repeatMonths.has_value() && !ParseIntArray(calendarReq.repeatMonths.value(),
         repeatMonths, Notification::ReminderRequestCalendar::MAX_MONTHS_OF_YEAR)) {
+        lastErrorMsg_ = " Param[repeatMonths] out of range.";
         return false;
     }
     if (calendarReq.repeatDays.has_value() && !ParseIntArray(calendarReq.repeatDays.value(),
         repeatDays, Notification::ReminderRequestCalendar::MAX_DAYS_OF_MONTH)) {
+        lastErrorMsg_ = " Param[repeatDays] out of range.";
         return false;
     }
     if (calendarReq.daysOfWeek.has_value() && !ParseIntArray(calendarReq.daysOfWeek.value(),
         daysOfWeek, MAX_DAYS_OF_WEEK)) {
+        lastErrorMsg_ = " Param[daysOfWeek] out of range.";
         return false;
     }
     return true;
@@ -507,8 +587,11 @@ bool Common::CreateReminderBase(const reminderAgentManager::manager::ReminderReq
         return false;
     }
     ParseStringParam(reminderReq, reminder);
-    if (reminderReq.tapDismissed.has_value()) {
-        reminder->SetTapDismissed(reminderReq.tapDismissed.value());
+    if (reminderReq.ringChannel.has_value()) {
+        ParseRingChannel(reminderReq.ringChannel.value(), reminder);
+    }
+    if (!ParseBoolParam(reminderReq, reminder)) {
+        return false;
     }
     if (reminderReq.wantAgent.has_value()) {
         std::shared_ptr<Notification::ReminderRequest::WantAgentInfo> wantAgent;
@@ -526,6 +609,7 @@ bool Common::CreateReminderBase(const reminderAgentManager::manager::ReminderReq
     if (reminderReq.slotType.has_value()) {
         Notification::NotificationConstant::SlotType slotType;
         if (!UnWarpSlotType(reminderReq.slotType.value(), slotType)) {
+            lastErrorMsg_ = " Param[slotType] parse failed.";
             return false;
         }
         reminder->SetSlotType(slotType);
@@ -533,6 +617,7 @@ bool Common::CreateReminderBase(const reminderAgentManager::manager::ReminderReq
     if (reminderReq.snoozeSlotType.has_value()) {
         Notification::NotificationConstant::SlotType slotType;
         if (!UnWarpSlotType(reminderReq.snoozeSlotType.value(), slotType)) {
+            lastErrorMsg_ = " Param[snoozeSlotType] parse failed.";
             return false;
         }
         reminder->SetSnoozeSlotType(slotType);
@@ -546,6 +631,7 @@ bool Common::CreateReminderTimer(const reminderAgentManager::manager::ReminderRe
     uint64_t triggerTimeInSeconds = static_cast<uint64_t>(timerReq.triggerTimeInSeconds);
     if (triggerTimeInSeconds >= (UINT64_MAX / Notification::ReminderRequest::MILLI_SECONDS)) {
         ANSR_LOGE("Param[triggerTimeInSeconds] out of range.");
+        lastErrorMsg_ = " Param[triggerTimeInSeconds] out of range.";
         return false;
     }
     auto timer = std::make_shared<Notification::ReminderRequestTimer>(triggerTimeInSeconds);
@@ -564,15 +650,18 @@ bool Common::CreateReminderAlarm(const reminderAgentManager::manager::ReminderRe
     int32_t minute = static_cast<int32_t>(alarmReq.minute);
     if (hour < 0 || hour > MAX_HOUR) {
         ANSR_LOGE("Param[hour] out of range[0, 23].");
+        lastErrorMsg_ = " Param[hour] out of range.";
         return false;
     }
     if (minute < 0 || minute > MAX_MINUTE) {
         ANSR_LOGE("Param[minute] out of range[0, 59].");
+        lastErrorMsg_ = " Param[minute] out of range.";
         return false;
     }
     std::vector<uint8_t> daysOfWeek;
     if (alarmReq.daysOfWeek.has_value() &&
         !ParseIntArray(alarmReq.daysOfWeek.value(), daysOfWeek, MAX_DAYS_OF_WEEK)) {
+        lastErrorMsg_ = " Param[daysOfWeek] out of range.";
         return false;
     }
     auto alarm = std::make_shared<Notification::ReminderRequestAlarm>(static_cast<uint8_t>(hour),
@@ -605,6 +694,7 @@ bool Common::CreateReminderCalendar(const reminderAgentManager::manager::Reminde
     }
     if (!IsSelfSystemApp() && rruleWantAgent != nullptr) {
         ANS_LOGE("Not system app, rruleWantAgent not supported.");
+        lastErrorMsg_ = " Not system app, rruleWantAgent not supported.";
         return false;
     }
     auto calendar =
@@ -616,15 +706,17 @@ bool Common::CreateReminderCalendar(const reminderAgentManager::manager::Reminde
         }
         time_t endTime = mktime(&endDateTime);
         if (endTime == -1) {
-            ANS_LOGE("Param[endDateTime] not a valid value.");
+            lastErrorMsg_ = " Param[endDateTime] not a valid value.";
             return false;
         }
         if (!calendar->SetEndDateTime(Notification::ReminderRequest::GetDurationSinceEpochInMilli(endTime))) {
-            ANSR_LOGW("The endDateTime must be greater than dateTime");
+            ANSR_LOGW("The endDateTime must be greater than dateTime.");
+            lastErrorMsg_ = " The endDateTime must be greater than dateTime.";
             return false;
         }
     }
     if (!calendar->InitTriggerTime()) {
+        lastErrorMsg_ = " Param[dateTime] not a valid value.";
         return false;
     }
     calendar->SetRRuleWantAgentInfo(rruleWantAgent);
@@ -721,12 +813,35 @@ void Common::GenAniActionButton(const sptr<Notification::ReminderRequest>& remin
     aniActionButtons = ::taihe::optional<::taihe::array<reminderAgentManager::manager::ActionButton>>::make(aniButtons);
 }
 
+void Common::GenAniRingChannel(const sptr<Notification::ReminderRequest>& reminder,
+    ::taihe::optional<::ohos::reminderAgentManager::manager::RingChannel>& aniRingChannel)
+{
+    reminderAgentManager::manager::RingChannel::key_t type;
+    switch (reminder->GetRingChannel()) {
+        case Notification::ReminderRequest::RingChannel::ALARM:
+            type = reminderAgentManager::manager::RingChannel::key_t::RING_CHANNEL_ALARM;
+            break;
+        case Notification::ReminderRequest::RingChannel::MEDIA:
+            type = reminderAgentManager::manager::RingChannel::key_t::RING_CHANNEL_MEDIA;
+            break;
+        case Notification::ReminderRequest::RingChannel::NOTIFICATION:
+            type = reminderAgentManager::manager::RingChannel::key_t::RING_CHANNEL_NOTIFICATION;
+            break;
+        default:
+            type = reminderAgentManager::manager::RingChannel::key_t::RING_CHANNEL_ALARM;
+            break;
+    }
+    reminderAgentManager::manager::RingChannel aniChannel(type);
+    aniRingChannel = ::taihe::optional<reminderAgentManager::manager::RingChannel>::make(aniChannel);
+}
+
 void Common::GenAniReminderBase(const sptr<Notification::ReminderRequest>& reminder,
     reminderAgentManager::manager::ReminderRequest& base)
 {
     GenAniIntResult(reminder, base);
     GenAniStringResult(reminder, base);
     base.tapDismissed = ::taihe::optional<bool>::make(reminder->IsTapDismissed());
+    GenAniRingChannel(reminder, base.ringChannel);
     GenAniWantAgent(reminder, base.wantAgent);
     GenAniMaxScreenWantAgent(reminder, base.maxScreenWantAgent);
     GenAniActionButton(reminder, base.actionButton);

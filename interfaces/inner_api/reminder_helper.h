@@ -20,6 +20,7 @@
 
 #include "notification_slot.h"
 #include "reminder_request.h"
+#include "reminder_state_callback.h"
 #include "reminder_request_adaptation.h"
 
 namespace OHOS {
@@ -139,6 +140,22 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     static ErrCode GetExcludeDates(const int32_t reminderId, std::vector<int64_t>& dates);
+
+    /**
+     * @brief Register reminder state callback.
+     *
+     * @param object Indicates the reminder state callback
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode RegisterReminderState(const sptr<ReminderStateCallback>& object);
+
+    /**
+     * @brief UnRegister reminder state callback.
+     *
+     * @param object Indicates the reminder state callback
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode UnRegisterReminderState(const sptr<ReminderStateCallback>& object);
 
     static void StartReminderAgentService();
 

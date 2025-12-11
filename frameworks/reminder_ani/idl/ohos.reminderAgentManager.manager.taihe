@@ -31,6 +31,12 @@ enum ActionButtonType: i32 {
     ACTION_BUTTON_TYPE_CUSTOM = 2,
 }
 
+enum RingChannel: i32 {
+    RING_CHANNEL_ALARM = 0,
+    RING_CHANNEL_MEDIA = 1,
+    RING_CHANNEL_NOTIFICATION = 2
+}
+
 union ParamType {
     string_t: String;
     double_t: f64;
@@ -48,7 +54,7 @@ struct WantAgent {
     pkgName: String;
     abilityName: String;
     uri: Optional<String>;
-    parameters: Optional<Opaque>;
+    parameters: Optional<@sts_type("RecordData") Opaque>;
 }
 
 struct MaxScreenWantAgent {
@@ -79,6 +85,7 @@ struct ReminderRequest {
     wantAgent: Optional<WantAgent>;
     maxScreenWantAgent: Optional<MaxScreenWantAgent>;
     ringDuration: Optional<i64>;
+    ringChannel: Optional<RingChannel>;
     snoozeTimes: Optional<i32>;
     timeInterval: Optional<i64>;
     title: Optional<String>;
@@ -96,6 +103,8 @@ struct ReminderRequest {
     autoDeletedTime: Optional<i64>;
     snoozeSlotType: Optional<@sts_type("notification.SlotType") Opaque>;
     customRingUri: Optional<String>;
+    notDistributed: Optional<bool>;
+    forceDistributed: Optional<bool>;
 }
 
 struct ReminderRequestCalendar {
@@ -130,6 +139,12 @@ union ParamReminder {
 struct ReminderInfo {
     reminderId: i32;
     reminderReq: ParamReminder;
+}
+
+struct ReminderState {
+    reminderId: i32;
+    buttonType: ActionButtonType;
+    isMessageResend: bool;
 }
 
 @gen_async("publishReminder")
@@ -167,3 +182,15 @@ function GetExcludeDatesSync(reminderId: i32): Array<@sts_type("Date") Opaque>;
 
 @gen_promise("getAllValidReminders")
 function GetAllValidRemindersSync(): Array<ReminderInfo>;
+
+@gen_promise("updateReminder")
+function UpdateReminderSync(reminderId: i32, reminderReq: ParamReminder): void;
+
+@gen_promise("cancelReminderOnDisplay")
+function CancelReminderOnDisplaySync(reminderId: i32): void;
+
+@gen_promise("subscribeReminderState")
+function subscribeReminderStateSync(callback: (states: Array<ReminderState>) => void) : void;
+
+@gen_promise("unsubscribeReminderState")
+function unsubscribeReminderStateSync(callback: Optional<(states: Array<ReminderState>) => void>) : void;

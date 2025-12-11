@@ -39,6 +39,8 @@ napi_value ReminderAgentManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getExcludeDates", GetExcludeDates),
         DECLARE_NAPI_FUNCTION("updateReminder", UpdateReminder),
         DECLARE_NAPI_FUNCTION("cancelReminderOnDisplay", CancelReminderOnDisplay),
+        DECLARE_NAPI_FUNCTION("subscribeReminderState", SubscribeReminderState),
+        DECLARE_NAPI_FUNCTION("unsubscribeReminderState", UnSubscribeReminderState),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;

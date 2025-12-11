@@ -87,6 +87,18 @@ ErrCode ReminderHelper::GetExcludeDates(const int32_t reminderId, std::vector<in
     return DelayedSingleton<ReminderRequestClient>::GetInstance()->GetExcludeDates(reminderId, dates);
 }
 
+ErrCode ReminderHelper::RegisterReminderState(const sptr<ReminderStateCallback>& object)
+{
+    ANSR_LOGD("called");
+    return DelayedSingleton<ReminderRequestClient>::GetInstance()->RegisterReminderState(object);
+}
+
+ErrCode ReminderHelper::UnRegisterReminderState(const sptr<ReminderStateCallback>& object)
+{
+    ANSR_LOGD("called");
+    return DelayedSingleton<ReminderRequestClient>::GetInstance()->UnRegisterReminderState(object);
+}
+
 void ReminderHelper::StartReminderAgentService()
 {
     ANSR_LOGD("called");

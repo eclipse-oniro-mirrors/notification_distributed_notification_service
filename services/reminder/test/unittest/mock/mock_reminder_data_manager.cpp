@@ -28,6 +28,8 @@ int32_t g_mockAddExcludeDateRet = 0;
 int32_t g_mockDelExcludeDatesRet = 0;
 int32_t g_mockGetExcludeDatesRet = 0;
 int32_t g_mockQueryActiveReminderCountRet = 0;
+int32_t g_mockRegisterReminderStateRet = 0;
+int32_t g_mockUnRegisterReminderStateRet = 0;
 }
 
 bool MockReminderDataManager::callCancelAllReminders_ = false;
@@ -92,6 +94,16 @@ void MockReminderDataManager::MockGetExcludeDates(const int32_t ret)
 void MockReminderDataManager::MockQueryActiveReminderCount(const int32_t ret)
 {
     g_mockQueryActiveReminderCountRet = ret;
+}
+
+void MockReminderDataManager::MockRegisterReminderState(const int32_t ret)
+{
+    g_mockRegisterReminderStateRet = ret;
+}
+
+void MockReminderDataManager::MockUnRegisterReminderState(const int32_t ret)
+{
+    g_mockUnRegisterReminderStateRet = ret;
 }
 
 void MockReminderDataManager::ResetFlag()
@@ -184,6 +196,16 @@ ErrCode ReminderDataManager::GetExcludeDates(const int32_t reminderId, const int
     std::vector<int64_t>& dates)
 {
     return g_mockGetExcludeDatesRet;
+}
+ 
+ErrCode ReminderDataManager::RegisterReminderState(const int32_t uid, const sptr<IRemoteObject>& object)
+{
+    return g_mockRegisterReminderStateRet;
+}
+
+ErrCode ReminderDataManager::UnRegisterReminderState(const int32_t uid)
+{
+    return g_mockUnRegisterReminderStateRet;
 }
 
 int32_t ReminderDataManager::QueryActiveReminderCount()

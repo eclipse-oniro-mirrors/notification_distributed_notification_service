@@ -26,12 +26,12 @@
 using namespace OHOS;
 
 namespace {
-static bool CheckReminderId(int32_t reminderId)
+static bool CheckReminderId(int32_t reminderId,
+    int32_t ret = ReminderAgentManagerNapi::Common::ERR_REMINDER_INVALID_PARAM)
 {
     if (reminderId < 0) {
         ANSR_LOGW("Param reminder id is illegal.");
-        int32_t ret = ReminderAgentManagerNapi::Common::ERR_REMINDER_INVALID_PARAM;
-        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
         return false;
     }
     return true;
@@ -99,8 +99,8 @@ static bool UnWarpNotificationSlot(uintptr_t slot, OHOS::Notification::Notificat
         return false;
     }
     outSlot = OHOS::Notification::NotificationConstant::SlotType::OTHER;
-    ReminderAgentManagerNapi::Common::ConvertSlotType(
-        static_cast<ReminderAgentManagerNapi::Common::AniSlotType>(intValue), outSlot);
+    ReminderAgentManagerNapi::Common helper;
+    helper.ConvertSlotType(static_cast<ReminderAgentManagerNapi::Common::AniSlotType>(intValue), outSlot);
     return true;
 }
 
@@ -138,15 +138,16 @@ static bool WarpDate(int64_t time, ani_object &outObj)
 int32_t PublishReminderSync(::ohos::reminderAgentManager::manager::ParamReminder const& reminderReq)
 {
     std::shared_ptr<OHOS::Notification::ReminderRequest> reminder;
-    if (!ReminderAgentManagerNapi::Common::CreateReminder(reminderReq, reminder)) {
+    ReminderAgentManagerNapi::Common helper;
+    if (!helper.CreateReminder(reminderReq, reminder)) {
         int32_t ret = ReminderAgentManagerNapi::Common::ERR_REMINDER_INVALID_PARAM;
-        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret, helper.GetErrorMsg()));
         return -1;
     }
     int32_t reminderId = -1;
     int32_t ret = OHOS::Notification::ReminderHelper::PublishReminder(*reminder, reminderId);
     if (ret != ERR_OK) {
-        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
         return -1;
     }
     return reminderId;
@@ -159,7 +160,7 @@ void CancelReminderSync(int32_t reminderId)
     }
     int32_t ret = OHOS::Notification::ReminderHelper::CancelReminder(reminderId);
     if (ret != ERR_OK) {
-        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
     }
 }
 
@@ -169,14 +170,15 @@ void CancelReminderSync(int32_t reminderId)
     int32_t ret = OHOS::Notification::ReminderHelper::GetValidReminders(reminders);
     std::vector<::ohos::reminderAgentManager::manager::ParamReminder> aniReminders;
     if (ret != ERR_OK) {
-        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
         return ::taihe::array<::ohos::reminderAgentManager::manager::ParamReminder>(aniReminders);
     }
+    ReminderAgentManagerNapi::Common helper;
     for (const auto& reminder : reminders) {
         if (reminder.reminderRequest_ == nullptr) {
             continue;
         }
-        auto result = ReminderAgentManagerNapi::Common::GenAniReminder(reminder.reminderRequest_);
+        auto result = helper.GenAniReminder(reminder.reminderRequest_);
         if (result.has_value()) {
             aniReminders.push_back(result.value());
         }
@@ -188,7 +190,7 @@ void CancelAllRemindersSync()
 {
     int32_t ret = OHOS::Notification::ReminderHelper::CancelAllReminders();
     if (ret != ERR_OK) {
-        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
     }
 }
 
@@ -197,12 +199,12 @@ void AddNotificationSlotSync(uintptr_t slot)
     OHOS::Notification::NotificationConstant::SlotType notificationSlot;
     int32_t ret = ReminderAgentManagerNapi::Common::ERR_REMINDER_INVALID_PARAM;
     if (!UnWarpNotificationSlot(slot, notificationSlot)) {
-        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
         return;
     }
     ret = OHOS::Notification::NotificationHelper::AddSlotByType(notificationSlot);
     if (ret != ERR_OK) {
-        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
     }
 }
 
@@ -210,13 +212,14 @@ void RemoveNotificationSlotSync(uintptr_t slotType)
 {
     int32_t ret = ReminderAgentManagerNapi::Common::ERR_REMINDER_INVALID_PARAM;
     OHOS::Notification::NotificationConstant::SlotType slot;
-    if (!ReminderAgentManagerNapi::Common::UnWarpSlotType(slotType, slot)) {
-        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+    ReminderAgentManagerNapi::Common helper;
+    if (!helper.UnWarpSlotType(slotType, slot)) {
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
         return;
     }
     ret = OHOS::Notification::ReminderHelper::RemoveNotificationSlot(slot);
     if (ret != ERR_OK) {
-        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
     }
 }
 
@@ -229,18 +232,18 @@ void AddExcludeDateSync(int32_t reminderId, uintptr_t date)
     int32_t ret = ERR_OK;
     if (!UnWarpDate(date, dateValue)) {
         ret = ReminderAgentManagerNapi::Common::ERR_REMINDER_INVALID_PARAM;
-        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
         return;
     }
     if (dateValue <= 0) {
         ANSR_LOGW("Param exclude date is illegal.");
         ret = ReminderAgentManagerNapi::Common::ERR_REMINDER_INVALID_PARAM;
-        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
         return;
     }
     ret = OHOS::Notification::ReminderHelper::AddExcludeDate(reminderId, static_cast<int64_t>(dateValue));
     if (ret != ERR_OK) {
-        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
     }
 }
 
@@ -251,7 +254,7 @@ void DeleteExcludeDatesSync(int32_t reminderId)
     }
     int32_t ret = OHOS::Notification::ReminderHelper::DelExcludeDates(reminderId);
     if (ret != ERR_OK) {
-        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
     }
 }
 
@@ -264,7 +267,7 @@ void DeleteExcludeDatesSync(int32_t reminderId)
     std::vector<int64_t> dates;
     int32_t ret = OHOS::Notification::ReminderHelper::GetExcludeDates(reminderId, dates);
     if (ret != ERR_OK) {
-        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
         return ::taihe::array<uintptr_t>(results);
     }
     for (const auto date : dates) {
@@ -283,14 +286,15 @@ void DeleteExcludeDatesSync(int32_t reminderId)
     int32_t ret = OHOS::Notification::ReminderHelper::GetValidReminders(reminders);
     std::vector<::ohos::reminderAgentManager::manager::ReminderInfo> aniReminders;
     if (ret != ERR_OK) {
-        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
         return ::taihe::array<::ohos::reminderAgentManager::manager::ReminderInfo>(aniReminders);
     }
+    ReminderAgentManagerNapi::Common helper;
     for (const auto& reminder : reminders) {
         if (reminder.reminderRequest_ == nullptr) {
             continue;
         }
-        auto result = ReminderAgentManagerNapi::Common::GenAniReminder(reminder.reminderRequest_);
+        auto result = helper.GenAniReminder(reminder.reminderRequest_);
         if (!result.has_value()) {
             continue;
         }
@@ -301,6 +305,78 @@ void DeleteExcludeDatesSync(int32_t reminderId)
         aniReminders.push_back(reminderInfo);
     }
     return ::taihe::array<::ohos::reminderAgentManager::manager::ReminderInfo>(aniReminders);
+}
+
+void UpdateReminderSync(int32_t reminderId, ::ohos::reminderAgentManager::manager::ParamReminder const& reminderReq)
+{
+    if (!CheckReminderId(reminderId, ReminderAgentManagerNapi::Common::ERR_REMINDER_PARAM_ERROR)) {
+        return;
+    }
+    std::shared_ptr<OHOS::Notification::ReminderRequest> reminder;
+    ReminderAgentManagerNapi::Common helper;
+    if (!helper.CreateReminder(reminderReq, reminder)) {
+        int32_t ret = ReminderAgentManagerNapi::Common::ERR_REMINDER_INVALID_PARAM;
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret, helper.GetErrorMsg()));
+        return;
+    }
+    int32_t ret = OHOS::Notification::ReminderHelper::UpdateReminder(reminderId, *reminder);
+    if (ret != ERR_OK) {
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
+        return;
+    }
+}
+
+void CancelReminderOnDisplaySync(int32_t reminderId)
+{
+    if (!CheckReminderId(reminderId, ReminderAgentManagerNapi::Common::ERR_REMINDER_PARAM_ERROR)) {
+        return;
+    }
+    int32_t ret = OHOS::Notification::ReminderHelper::CancelReminderOnDisplay(reminderId);
+    if (ret != ERR_OK) {
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
+    }
+}
+
+void subscribeReminderStateSync(::taihe::callback_view<
+    void(::taihe::array_view<::ohos::reminderAgentManager::manager::ReminderState> states)> callback)
+{
+    std::lock_guard<std::mutex> locker(ReminderAgentManagerNapi::Common::callbackMutex_);
+    ReminderAgentManagerNapi::CallbackType stateCb = ReminderAgentManagerNapi::CallbackType(callback);
+    auto iter = ReminderAgentManagerNapi::Common::callbackList_.begin();
+    for (; iter != ReminderAgentManagerNapi::Common::callbackList_.end(); iter++) {
+        if (iter->first == stateCb) {
+            ANSR_LOGI("Register a exist callback");
+            return;
+        }
+    }
+    std::shared_ptr<ReminderAgentManagerNapi::CallbackType> taiheCallback =
+        std::make_shared<ReminderAgentManagerNapi::CallbackType>(callback);
+    sptr<ReminderAgentManagerNapi::AniReminderStateCallback> listener =
+        new (std::nothrow)ReminderAgentManagerNapi::AniReminderStateCallback(taiheCallback);
+    OHOS::Notification::ReminderHelper::RegisterReminderState(listener);
+    ReminderAgentManagerNapi::Common::callbackList_.emplace_back(stateCb, listener);
+}
+
+void unsubscribeReminderStateSync(::taihe::optional_view<::taihe::callback<
+    void(::taihe::array_view<::ohos::reminderAgentManager::manager::ReminderState> states)>> callback)
+{
+    std::lock_guard<std::mutex> locker(ReminderAgentManagerNapi::Common::callbackMutex_);
+    if (callback.has_value()) {
+        auto iter = ReminderAgentManagerNapi::Common::callbackList_.begin();
+        for (; iter != ReminderAgentManagerNapi::Common::callbackList_.end(); iter++) {
+            if (iter->first == callback.value()) {
+                OHOS::Notification::ReminderHelper::UnRegisterReminderState(iter->second);
+                ReminderAgentManagerNapi::Common::callbackList_.erase(iter);
+                break;
+            }
+        }
+    } else {
+        auto iter = ReminderAgentManagerNapi::Common::callbackList_.begin();
+        for (; iter != ReminderAgentManagerNapi::Common::callbackList_.end(); iter++) {
+            OHOS::Notification::ReminderHelper::UnRegisterReminderState(iter->second);
+        }
+        ReminderAgentManagerNapi::Common::callbackList_.clear();
+    }
 }
 }  // namespace
 
@@ -316,4 +392,8 @@ TH_EXPORT_CPP_API_AddExcludeDateSync(AddExcludeDateSync);
 TH_EXPORT_CPP_API_DeleteExcludeDatesSync(DeleteExcludeDatesSync);
 TH_EXPORT_CPP_API_GetExcludeDatesSync(GetExcludeDatesSync);
 TH_EXPORT_CPP_API_GetAllValidRemindersSync(GetAllValidRemindersSync);
+TH_EXPORT_CPP_API_UpdateReminderSync(UpdateReminderSync);
+TH_EXPORT_CPP_API_CancelReminderOnDisplaySync(CancelReminderOnDisplaySync);
+TH_EXPORT_CPP_API_subscribeReminderStateSync(subscribeReminderStateSync);
+TH_EXPORT_CPP_API_unsubscribeReminderStateSync(unsubscribeReminderStateSync);
 // NOLINTEND

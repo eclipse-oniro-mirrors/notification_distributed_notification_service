@@ -54,6 +54,7 @@ ohos_shared_library("reminderagent") {
     "native_module.cpp",
     "publish.cpp",
     "reminder_common.cpp",
+    "reminder_state_listener.cpp",
   ]
   cflags_cc = [ "-fstack-protector-strong" ]
   deps = [
@@ -112,6 +113,7 @@ ohos_shared_library("reminderagentmanager") {
     "native_module_manager.cpp",
     "publish.cpp",
     "reminder_common.cpp",
+    "reminder_state_listener.cpp",
   ]
   cflags_cc = [ "-fstack-protector-strong" ]
   deps = [

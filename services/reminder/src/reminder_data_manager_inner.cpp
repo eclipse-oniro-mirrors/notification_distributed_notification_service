@@ -383,6 +383,27 @@ ErrCode ReminderDataManager::CancelReminderOnDisplay(const int32_t reminderId, c
     return ERR_OK;
 }
 
+ErrCode ReminderDataManager::RegisterReminderState(const int32_t uid, const sptr<IRemoteObject>& object)
+{
+    if (notifyManager_ == nullptr) {
+        return ERR_NO_INIT;
+    }
+    notifyManager_->RegisterNotify(uid, object);
+    queue_->submit([uid]() {
+        ReminderDataManager::GetInstance()->NotifyReminderState(uid);
+    });
+    return ERR_OK;
+}
+
+ErrCode ReminderDataManager::UnRegisterReminderState(const int32_t uid)
+{
+    if (notifyManager_ == nullptr) {
+        return ERR_NO_INIT;
+    }
+    notifyManager_->UnRegisterNotify(uid);
+    return ERR_OK;
+}
+
 void ReminderDataManager::UpdateAndSaveReminderLocked(const sptr<ReminderRequest>& reminder, const bool isInMemory)
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
@@ -617,6 +638,21 @@ void ReminderDataManager::CollapseNotificationPanel()
     want.SetParam("Code", 0);
     EventFwk::CommonEventData eventData(want);
     EventFwk::CommonEventManager::PublishCommonEvent(eventData);
+}
+
+std::shared_ptr<ReminderNotifyManager> ReminderDataManager::GetNotifyManager()
+{
+    return notifyManager_;
+}
+
+void ReminderDataManager::NotifyReminderState(const int32_t uid)
+{
+    if (notifyManager_ == nullptr) {
+        return;
+    }
+    std::vector<ReminderState> states = store_->QueryState(uid);
+    notifyManager_->NotifyReminderState(uid, states);
+    store_->DeleteState(uid);
 }
 }
 }

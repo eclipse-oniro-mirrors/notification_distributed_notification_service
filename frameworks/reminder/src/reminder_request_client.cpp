@@ -14,57 +14,53 @@
  */
 
 #include "reminder_request_client.h"
-#include "reminder_service_load_callback.h"
-#include "ans_manager_proxy.h"
-#include "reminder_agent_service_proxy.h"
-#include "ans_const_define.h"
-#include "ans_inner_errors.h"
+
 #include "ans_log_wrapper.h"
+#include "ans_inner_errors.h"
+#include "reminder_agent_service_proxy.h"
+#include "reminder_service_load_callback.h"
 
 #include "ipc_skeleton.h"
+#include "ans_manager_proxy.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
-#include <memory>
-#include <thread>
+namespace OHOS::Notification {
+static constexpr int32_t REMINDER_SERVICE_LOADSA_TIMEOUT_MS = 10000;
+static constexpr int32_t REMINDER_AGENT_SERVICE_ID = 3204;
 
-namespace OHOS {
-namespace Notification {
-constexpr int32_t REMINDER_SERVICE_LOADSA_TIMEOUT_MS = 10000;
-constexpr int32_t REMINDER_AGENT_SERVICE_ID = 3204;
-ErrCode ReminderRequestClient::AddSlotByType(const NotificationConstant::SlotType &slotType)
+ErrCode ReminderRequestClient::AddSlotByType(const NotificationConstant::SlotType& slotType)
 {
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
+        ANSR_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->AddSlotByType(slotType);
 }
 
-ErrCode ReminderRequestClient::AddNotificationSlot(const NotificationSlot &slot)
+ErrCode ReminderRequestClient::AddNotificationSlot(const NotificationSlot& slot)
 {
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
+        ANSR_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     std::vector<sptr<NotificationSlot>> slotsSptr;
     sptr<NotificationSlot> slotSptr = new (std::nothrow) NotificationSlot(slot);
     if (slotSptr == nullptr) {
-        ANS_LOGE("null slotSptr");
+        ANSR_LOGE("slotSptr is nullptr.");
         return ERR_ANS_NO_MEMORY;
     }
     slotsSptr.emplace_back(slotSptr);
     return proxy->AddSlots(slotsSptr);
 }
 
-ErrCode ReminderRequestClient::RemoveNotificationSlot(const NotificationConstant::SlotType &slotType)
+ErrCode ReminderRequestClient::RemoveNotificationSlot(const NotificationConstant::SlotType& slotType)
 {
-    ANS_LOGD("called, slotType:%{public}d", slotType);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
+        ANSR_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->RemoveSlotByType(slotType);
@@ -75,7 +71,7 @@ ErrCode ReminderRequestClient::PublishReminder(const ReminderRequest& reminder, 
     AddSlotByType(reminder.GetSlotType());
     sptr<IReminderAgentService> proxy = GetReminderServiceProxy();
     if (!proxy) {
-        ANS_LOGE("GetReminderServiceProxy fail.");
+        ANSR_LOGE("GetReminderServiceProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->PublishReminder(reminder, reminderId);
@@ -86,7 +82,7 @@ ErrCode ReminderRequestClient::UpdateReminder(const int32_t reminderId, const Re
     AddSlotByType(reminder.GetSlotType());
     sptr<IReminderAgentService> proxy = GetReminderServiceProxy();
     if (!proxy) {
-        ANS_LOGE("GetReminderServiceProxy fail.");
+        ANSR_LOGE("GetReminderServiceProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->UpdateReminder(reminderId, reminder);
@@ -96,7 +92,7 @@ ErrCode ReminderRequestClient::CancelReminder(const int32_t reminderId)
 {
     sptr<IReminderAgentService> proxy = GetReminderServiceProxy();
     if (!proxy) {
-        ANS_LOGE("GetReminderServiceProxy fail.");
+        ANSR_LOGE("GetReminderServiceProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->CancelReminder(reminderId);
@@ -106,7 +102,7 @@ ErrCode ReminderRequestClient::CancelAllReminders()
 {
     sptr<IReminderAgentService> proxy = GetReminderServiceProxy();
     if (!proxy) {
-        ANS_LOGE("GetReminderServiceProxy fail.");
+        ANSR_LOGE("GetReminderServiceProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->CancelAllReminders();
@@ -116,17 +112,17 @@ ErrCode ReminderRequestClient::CancelReminderOnDisplay(const int32_t reminderId)
 {
     sptr<IReminderAgentService> proxy = GetReminderServiceProxy();
     if (!proxy) {
-        ANS_LOGE("GetReminderServiceProxy fail.");
+        ANSR_LOGE("GetReminderServiceProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->CancelReminderOnDisplay(reminderId);
 }
 
-ErrCode ReminderRequestClient::GetValidReminders(std::vector<ReminderRequestAdaptation> &validReminders)
+ErrCode ReminderRequestClient::GetValidReminders(std::vector<ReminderRequestAdaptation>& validReminders)
 {
     sptr<IReminderAgentService> proxy = GetReminderServiceProxy();
     if (!proxy) {
-        ANS_LOGE("GetReminderServiceProxy fail.");
+        ANSR_LOGE("GetReminderServiceProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->GetValidReminders(validReminders);
@@ -136,7 +132,7 @@ ErrCode ReminderRequestClient::AddExcludeDate(const int32_t reminderId, const in
 {
     sptr<IReminderAgentService> proxy = GetReminderServiceProxy();
     if (!proxy) {
-        ANS_LOGE("GetReminderServiceProxy fail.");
+        ANSR_LOGE("GetReminderServiceProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->AddExcludeDate(reminderId, date);
@@ -146,7 +142,7 @@ ErrCode ReminderRequestClient::DelExcludeDates(const int32_t reminderId)
 {
     sptr<IReminderAgentService> proxy = GetReminderServiceProxy();
     if (!proxy) {
-        ANS_LOGE("GetReminderServiceProxy fail.");
+        ANSR_LOGE("GetReminderServiceProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->DelExcludeDates(reminderId);
@@ -156,10 +152,57 @@ ErrCode ReminderRequestClient::GetExcludeDates(const int32_t reminderId, std::ve
 {
     sptr<IReminderAgentService> proxy = GetReminderServiceProxy();
     if (!proxy) {
-        ANS_LOGE("GetReminderServiceProxy fail.");
+        ANSR_LOGE("GetReminderServiceProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->GetExcludeDates(reminderId, dates);
+}
+
+ErrCode ReminderRequestClient::RegisterReminderState(const sptr<ReminderStateCallback>& object)
+{
+    sptr<IReminderAgentService> proxy = GetReminderServiceProxy();
+    if (!proxy) {
+        ANSR_LOGE("GetReminderServiceProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    {
+        std::lock_guard<std::mutex> locker(listenMutex_);
+        if (reminderStateListener_ == nullptr) {
+            reminderStateListener_ = new (std::nothrow) ReminderStateListener();
+        }
+        if (reminderStateListener_ == nullptr) {
+            ANSR_LOGE("reminderStateListener_ is nullptr.");
+            return ERR_ANS_NO_MEMORY;
+        }
+        reminderStateListener_->RegisterReminderState(object);
+        if (!listenerRegistered_ && !reminderStateListener_->IsEmpty()) {
+            proxy->RegisterReminderState(reminderStateListener_);
+            listenerRegistered_ = true;
+        }
+    }
+    return ERR_OK;
+}
+
+ErrCode ReminderRequestClient::UnRegisterReminderState(const sptr<ReminderStateCallback>& object)
+{
+    sptr<IReminderAgentService> proxy = GetReminderServiceProxy();
+    if (!proxy) {
+        ANSR_LOGE("GetReminderServiceProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    {
+        std::lock_guard<std::mutex> locker(listenMutex_);
+        if (reminderStateListener_ == nullptr) {
+            return ERR_OK;
+        }
+        reminderStateListener_->UnRegisterReminderState(object);
+        if (!reminderStateListener_->IsEmpty() || !listenerRegistered_) {
+            return ERR_OK;
+        }
+        proxy->UnRegisterReminderState();
+        listenerRegistered_ = false;
+    }
+    return ERR_OK;
 }
 
 sptr<IAnsManager> ReminderRequestClient::GetAnsManagerProxy()
@@ -167,20 +210,20 @@ sptr<IAnsManager> ReminderRequestClient::GetAnsManagerProxy()
     sptr<ISystemAbilityManager> systemAbilityManager =
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityManager) {
-        ANS_LOGE("Failed to get system ability mgr.");
+        ANSR_LOGE("Failed to get system ability mgr.");
         return nullptr;
     }
 
     sptr<IRemoteObject> remoteObject =
         systemAbilityManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
     if (!remoteObject) {
-        ANS_LOGE("Failed to get notification Manager.");
+        ANSR_LOGE("Failed to get notification Manager.");
         return nullptr;
     }
 
     sptr<IAnsManager> proxy = iface_cast<IAnsManager>(remoteObject);
     if ((!proxy) || (!proxy->AsObject())) {
-        ANS_LOGE("Failed to get notification Manager's proxy");
+        ANSR_LOGE("Failed to get notification Manager's proxy");
         return nullptr;
     }
     return proxy;
@@ -195,28 +238,24 @@ sptr<IReminderAgentService> ReminderRequestClient::GetReminderServiceProxy()
         }
         auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (samgrProxy == nullptr) {
-            ANS_LOGE("null samgrProxy");
+            ANSR_LOGE("GetSystemAbilityManager failed.");
             return nullptr;
         }
         auto object = samgrProxy->CheckSystemAbility(REMINDER_AGENT_SERVICE_ID);
         if (object != nullptr) {
-            ANS_LOGD("get service succeeded");
+            ANSR_LOGD("Get service succeeded.");
             proxy_ = iface_cast<IReminderAgentService>(object);
             return proxy_;
         }
     }
 
-    ANS_LOGE("null object");
     if (LoadReminderService()) {
         std::lock_guard<ffrt::mutex> lock(serviceLock_);
         if (proxy_ != nullptr) {
             return proxy_;
-        } else {
-            ANS_LOGE("load reminder service failed");
-            return nullptr;
         }
     }
-    ANS_LOGE("load reminder service failed");
+    ANSR_LOGE("Load reminder service failed.");
     return nullptr;
 }
 
@@ -225,34 +264,33 @@ bool ReminderRequestClient::LoadReminderService()
     std::unique_lock<ffrt::mutex> lock(serviceLock_);
     sptr<ReminderServiceCallback> loadCallback = sptr<ReminderServiceCallback>(new ReminderServiceCallback());
     if (loadCallback == nullptr) {
-        ANS_LOGE("null loadCallback");
+        ANSR_LOGE("loadCallback is nullptr.");
         return false;
     }
 
     auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgrProxy == nullptr) {
-        ANS_LOGE("null samgrProxy");
+        ANSR_LOGE("GetSystemAbilityManager failed.");
         return false;
     }
 
     int32_t ret = samgrProxy->LoadSystemAbility(REMINDER_AGENT_SERVICE_ID, loadCallback);
     if (ret != ERR_OK) {
-        ANS_LOGE("Failed to Load systemAbility");
+        ANSR_LOGE("Failed to Load systemAbility.");
         return false;
     }
 
     auto waitStatus = proxyConVar_.wait_for(lock, std::chrono::milliseconds(REMINDER_SERVICE_LOADSA_TIMEOUT_MS),
         [this]() { return proxy_ != nullptr; });
     if (!waitStatus) {
-        ANS_LOGE("reminder service load sa timeout");
+        ANSR_LOGE("Load reminder service timeout.");
         return false;
     }
     return true;
 }
 
-void ReminderRequestClient::LoadSystemAbilitySuccess(const sptr<IRemoteObject> &remoteObject)
+void ReminderRequestClient::LoadSystemAbilitySuccess(const sptr<IRemoteObject>& remoteObject)
 {
-    ANS_LOGD("called");
     std::lock_guard<ffrt::mutex> lock(serviceLock_);
     if (remoteObject != nullptr) {
         proxy_ = iface_cast<IReminderAgentService>(remoteObject);
@@ -270,11 +308,53 @@ void ReminderRequestClient::StartReminderAgentService()
 {
     auto reminderServiceProxy = GetReminderServiceProxy();
     if (reminderServiceProxy == nullptr) {
-        ANS_LOGE("null reminderServiceProxy");
+        ANSR_LOGE("GetReminderServiceProxy fail.");
         return;
     }
-    ANS_LOGD("StartReminderService success");
+    ANSR_LOGD("StartReminderService success");
 }
 
-}  // namespace Notification
-}  // namespace OHOS
+void ReminderRequestClient::ReminderStateListener::RegisterReminderState(const sptr<ReminderStateCallback>& object)
+{
+    if (object == nullptr) {
+        return;
+    }
+    {
+        std::lock_guard<std::mutex> locker(mutex_);
+        for (auto& item : reminderStateCbs_) {
+            if (item == object) {
+                ANSR_LOGW("Register an exist callback.");
+                return;
+            }
+        }
+        reminderStateCbs_.emplace_back(object);
+    }
+}
+
+void ReminderRequestClient::ReminderStateListener::UnRegisterReminderState(const sptr<ReminderStateCallback>& object)
+{
+    std::lock_guard<std::mutex> locker(mutex_);
+    reminderStateCbs_.remove(object);
+}
+
+bool ReminderRequestClient::ReminderStateListener::IsEmpty()
+{
+    std::lock_guard<std::mutex> locker(mutex_);
+    return reminderStateCbs_.empty();
+}
+
+ErrCode ReminderRequestClient::ReminderStateListener::OnReminderState(const std::vector<ReminderState>& states)
+{
+    std::list<sptr<ReminderStateCallback>> lists;
+    {
+        std::lock_guard<std::mutex> locker(mutex_);
+        lists = reminderStateCbs_;
+    }
+    for (auto& item : lists) {
+        if (item != nullptr) {
+            item->OnReminderState(states);
+        }
+    }
+    return ERR_OK;
+}
+}  // namespace OHOS::Notification

@@ -30,6 +30,8 @@ public:
     static void MockDelExcludeDates(const int32_t ret);
     static void MockGetExcludeDates(const int32_t ret);
     static void MockQueryActiveReminderCount(const int32_t ret);
+    static void MockRegisterReminderState(const int32_t ret);
+    static void MockUnRegisterReminderState(const int32_t ret);
 
     static void ResetFlag();
 
