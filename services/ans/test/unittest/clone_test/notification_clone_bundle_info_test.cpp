@@ -14,8 +14,12 @@
  */
 
 #include <gtest/gtest.h>
+#define private public
+#define protected public
 #include "notification_clone_bundle_info.h"
 #include "ans_inner_errors.h"
+#undef private
+#undef protected
 
 using namespace testing::ext;
 namespace OHOS {
@@ -34,6 +38,8 @@ constexpr const char *BUNDLE_INFO_SLOT_CONTROL = "slotControl";
 constexpr const char *BUNDLE_INFO_POP_DIALOG = "popDialog";
 constexpr const char *BUNDLE_INFO_RINGTONE_INFO = "ringtone";
 constexpr const char *BUNDLE_INFO_SILENT_REMINDER = "enabledSilentReminder";
+constexpr const char *BUNDLE_INFO_SUBSCRIPTION_INFO = "extensionSubscriptionInfo";
+constexpr const char *BUNDLE_INFO_SUBSCRIPTION_ENABLED = "enableExtensionSubscription";
 class NotificationCloneBundleInfoTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -624,6 +630,262 @@ HWTEST_F(NotificationCloneBundleInfoTest, RingtoneFromJson_00001, Function | Sma
     ASSERT_NE(rrc, nullptr);
     rrc->RingtoneFromJson(jsonObject);
     EXPECT_NE(rrc->GetRingtoneInfo(), nullptr);
+}
+
+/**
+ * @tc.name: CloneSlotInfoJson_00001
+ * @tc.desc: Test Json contain json object keys.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, CloneSlotInfoJson_00001, Function | SmallTest | Level1)
+{
+    NotificationCloneBundleInfo bundleInfo;
+    nlohmann::json emptyJson;
+    bundleInfo.SlotsFromJson(emptyJson);
+    EXPECT_TRUE(bundleInfo.slotsInfo_.empty());
+}
+
+/**
+ * @tc.name: CloneSlotInfoJson_00002
+ * @tc.desc: Test Json contain json object keys.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, CloneSlotInfoJson_00002, Function | SmallTest | Level1)
+{
+    NotificationCloneBundleInfo bundleInfo;
+    nlohmann::json invalidJson = {
+        {BUNDLE_INFO_SLOT_LIST, "not an array"}
+    };
+    bundleInfo.SlotsFromJson(invalidJson);
+    EXPECT_TRUE(bundleInfo.slotsInfo_.empty());
+}
+
+/**
+ * @tc.name: CloneSlotInfoJson_00003
+ * @tc.desc: Test Json contain json object keys.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, CloneSlotInfoJson_00003, Function | SmallTest | Level1)
+{
+    NotificationCloneBundleInfo bundleInfo;
+    nlohmann::json validJson = {
+        {BUNDLE_INFO_SLOT_LIST, {
+            {
+                {BUNDLE_INFO_SLOT_TYPE, 1},
+                {BUNDLE_INFO_SLOT_ENABLE, 1},
+                {BUNDLE_INFO_SLOT_CONTROL, 1},
+                {BUNDLE_INFO_SLOT_AUTHSTATUS, 1}
+            }
+        }}
+    };
+    bundleInfo.SlotsFromJson(validJson);
+    ASSERT_EQ(bundleInfo.slotsInfo_.size(), 1);
+    EXPECT_EQ(bundleInfo.slotsInfo_[0].slotType_, static_cast<NotificationConstant::SlotType>(1));
+    EXPECT_TRUE(bundleInfo.slotsInfo_[0].enable_);
+    EXPECT_TRUE(bundleInfo.slotsInfo_[0].isForceControl_);
+    EXPECT_TRUE(bundleInfo.slotsInfo_[0].authorizedStatus_);
+}
+
+/**
+ * @tc.name: CloneSlotInfoJson_00004
+ * @tc.desc: Test Json contain json object keys.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, CloneSlotInfoJson_00004, Function | SmallTest | Level1)
+{
+    NotificationCloneBundleInfo bundleInfo;
+    nlohmann::json nonNumberFieldsJson = {
+        {BUNDLE_INFO_SLOT_LIST, {
+            {
+                {BUNDLE_INFO_SLOT_TYPE, "not a number"},
+                {BUNDLE_INFO_SLOT_ENABLE, "not a number"},
+                {BUNDLE_INFO_SLOT_CONTROL, "not a number"},
+                {BUNDLE_INFO_SLOT_AUTHSTATUS, "not a number"}
+            }
+        }}
+    };
+    bundleInfo.SlotsFromJson(nonNumberFieldsJson);
+    ASSERT_EQ(bundleInfo.slotsInfo_.size(), 1);
+    EXPECT_EQ(bundleInfo.slotsInfo_[0].slotType_, static_cast<NotificationConstant::SlotType>(0));
+    EXPECT_FALSE(bundleInfo.slotsInfo_[0].enable_);
+    EXPECT_FALSE(bundleInfo.slotsInfo_[0].isForceControl_);
+    EXPECT_TRUE(bundleInfo.slotsInfo_[0].authorizedStatus_);
+}
+
+/**
+ * @tc.name: CloneInfoJson_00001
+ * @tc.desc: Test Json contain json object keys.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, CloneInfoJson_00001, Function | SmallTest | Level1)
+{
+    NotificationCloneBundleInfo bundleInfo;
+    bundleInfo.slotsInfo_.push_back({NotificationConstant::SlotType::CUSTOMER_SERVICE, true, false, true});
+    bundleInfo.slotsInfo_.push_back({NotificationConstant::SlotType::LIVE_VIEW, false, true, false});
+
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
+    bundleInfo.ringtoneInfo_ = ringtoneInfo;
+
+    sptr<NotificationExtensionSubscriptionInfo> extension = new NotificationExtensionSubscriptionInfo();
+    bundleInfo.extensionSubscriptionInfos_.push_back(extension);
+
+    bundleInfo.bundleName_ = "TestBundle";
+    bundleInfo.appIndex_ = 1;
+    bundleInfo.slotFlags_ = 0x1F;
+    bundleInfo.isShowBadge_ = true;
+    bundleInfo.hasPoppedDialog_ = false;
+    bundleInfo.isEnabledNotification_ = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    bundleInfo.silentReminderEnabled_ = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    bundleInfo.enabledExtensionSubscription_ = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+
+    nlohmann::json jsonObject;
+    bundleInfo.ToJson(jsonObject);
+
+    // check slotsInfo
+    ASSERT_TRUE(jsonObject.contains(BUNDLE_INFO_SLOT_LIST));
+    auto slotList = jsonObject[BUNDLE_INFO_SLOT_LIST];
+    ASSERT_EQ(slotList.size(), 2);
+    ASSERT_EQ(slotList[0][BUNDLE_INFO_SLOT_TYPE],
+        static_cast<int32_t>(NotificationConstant::SlotType::CUSTOMER_SERVICE));
+    ASSERT_EQ(slotList[0][BUNDLE_INFO_SLOT_ENABLE], 1);
+    ASSERT_EQ(slotList[0][BUNDLE_INFO_SLOT_CONTROL], 0);
+    ASSERT_EQ(slotList[0][BUNDLE_INFO_SLOT_AUTHSTATUS], 1);
+    ASSERT_EQ(slotList[1][BUNDLE_INFO_SLOT_TYPE], static_cast<int32_t>(NotificationConstant::SlotType::LIVE_VIEW));
+    ASSERT_EQ(slotList[1][BUNDLE_INFO_SLOT_ENABLE], 0);
+    ASSERT_EQ(slotList[1][BUNDLE_INFO_SLOT_CONTROL], 1);
+    ASSERT_EQ(slotList[1][BUNDLE_INFO_SLOT_AUTHSTATUS], 0);
+
+    // check ringtoneInfo
+    ASSERT_TRUE(jsonObject.contains(BUNDLE_INFO_RINGTONE_INFO));
+
+    // check extensionSubscriptionInfos
+    ASSERT_TRUE(jsonObject.contains(BUNDLE_INFO_SUBSCRIPTION_INFO));
+
+    // check item
+    ASSERT_EQ(jsonObject[BUNDLE_INFO_NAME], "TestBundle");
+    ASSERT_EQ(jsonObject[BUNDLE_INFO_APP_INDEX], 1);
+    ASSERT_EQ(jsonObject[BUNDLE_INFO_SLOT_FLAGS], 0x1F);
+    ASSERT_EQ(jsonObject[BUNDLE_INFO_SHOW_BADGE], 1);
+    ASSERT_EQ(jsonObject[BUNDLE_INFO_POP_DIALOG], 0);
+    ASSERT_EQ(jsonObject[BUNDLE_INFO_ENABLE_NOTIFICATION], 1);
+    ASSERT_EQ(jsonObject[BUNDLE_INFO_ENABLEDSTATE_NOTIFICATION], 1);
+    ASSERT_EQ(jsonObject[BUNDLE_INFO_SILENT_REMINDER], 1);
+    ASSERT_EQ(jsonObject[BUNDLE_INFO_SUBSCRIPTION_ENABLED], 1);
+}
+
+
+/**
+ * @tc.name: CloneInfoJson_00002
+ * @tc.desc: Test Json contain json object keys.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, CloneInfoJson_00002, Function | SmallTest | Level1) {
+    // lost some item
+    nlohmann::json jsonObject = {
+        {"name", "com.example.app"},
+        {"index", 1},
+        {"slotFlags", 2},
+        {"badge", 1},
+        {"popDialog", 1},
+        {"enable", 1},
+        {"enabledState", 1},
+        {"enabledSilentReminder", 1}
+    };
+
+    NotificationCloneBundleInfo bundleInfo;
+    bundleInfo.FromJson(jsonObject);
+
+    // check item
+    EXPECT_EQ(bundleInfo.bundleName_, "com.example.app");
+    EXPECT_EQ(bundleInfo.appIndex_, 1);
+    EXPECT_EQ(bundleInfo.slotFlags_, 2);
+    EXPECT_TRUE(bundleInfo.isShowBadge_);
+    EXPECT_TRUE(bundleInfo.hasPoppedDialog_);
+    EXPECT_TRUE(bundleInfo.ishasPoppedSupportClone_);
+    EXPECT_EQ(bundleInfo.isEnabledNotification_, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    EXPECT_EQ(bundleInfo.silentReminderEnabled_, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+}
+
+/**
+ * @tc.name: CloneInfoJson_00003
+ * @tc.desc: Test Json contain json object keys.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, CloneInfoJson_00003, Function | SmallTest | Level1) {
+    // lost some item
+    nlohmann::json jsonObject = nullptr;
+
+    NotificationCloneBundleInfo bundleInfo;
+    bundleInfo.FromJson(jsonObject);
+
+    // check item
+    EXPECT_TRUE(bundleInfo.bundleName_.empty());
+    EXPECT_EQ(bundleInfo.appIndex_, -1);
+    EXPECT_EQ(bundleInfo.slotFlags_, 0);
+    EXPECT_FALSE(bundleInfo.isShowBadge_);
+    EXPECT_FALSE(bundleInfo.hasPoppedDialog_);
+    EXPECT_FALSE(bundleInfo.ishasPoppedSupportClone_);
+    EXPECT_EQ(bundleInfo.isEnabledNotification_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    EXPECT_EQ(bundleInfo.silentReminderEnabled_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+}
+
+/**
+ * @tc.name: CloneInfoJson_00004
+ * @tc.desc: Test Json contain json object keys.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, CloneInfoJson_00004, Function | SmallTest | Level1) {
+    // lost some item
+    nlohmann::json jsonObject;
+
+    NotificationCloneBundleInfo bundleInfo;
+    bundleInfo.FromJson(jsonObject);
+
+    // check item
+    EXPECT_TRUE(bundleInfo.bundleName_.empty());
+    EXPECT_EQ(bundleInfo.appIndex_, -1);
+    EXPECT_EQ(bundleInfo.slotFlags_, 0);
+    EXPECT_FALSE(bundleInfo.isShowBadge_);
+    EXPECT_FALSE(bundleInfo.hasPoppedDialog_);
+    EXPECT_FALSE(bundleInfo.ishasPoppedSupportClone_);
+    EXPECT_EQ(bundleInfo.isEnabledNotification_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    EXPECT_EQ(bundleInfo.silentReminderEnabled_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+}
+
+
+/**
+ * @tc.name: CloneInfoJson_00005
+ * @tc.desc: Test Json contain json object keys.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, CloneInfoJson_00005, Function | SmallTest | Level1) {
+    // lost some item
+    nlohmann::json jsonObject = {
+        {"name", "com.example.app"},
+        {"index", 1}
+    };
+
+    NotificationCloneBundleInfo bundleInfo;
+    bundleInfo.FromJson(jsonObject);
+
+    // check item
+    EXPECT_EQ(bundleInfo.bundleName_, "com.example.app");
+    EXPECT_EQ(bundleInfo.appIndex_, 1);
+    EXPECT_EQ(bundleInfo.slotFlags_, 0);
+    EXPECT_FALSE(bundleInfo.isShowBadge_);
+    EXPECT_FALSE(bundleInfo.hasPoppedDialog_);
+    EXPECT_FALSE(bundleInfo.ishasPoppedSupportClone_);
+    EXPECT_EQ(bundleInfo.isEnabledNotification_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    EXPECT_EQ(bundleInfo.silentReminderEnabled_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
 }
 }
 }
