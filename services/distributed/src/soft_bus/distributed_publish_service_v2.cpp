@@ -446,6 +446,10 @@ void DistributedPublishService::SyncLiveViewNotification(const DistributedDevice
         return;
     }
 
+    if (deviceType == DistributedService::WEARABLE_DEVICE_TYPE ||
+        deviceType == DistributedService::LITEWEARABLE_DEVICE_TYPE) {
+        HealthWhiteListFilter(notifications);
+    }
     SyncLiveViewList(device, notifications);
     SyncLiveViewContent(device, notifications);
     DistributedDeviceService::GetInstance().SetDeviceSyncData(device.deviceId_,
@@ -541,6 +545,23 @@ bool DistributedPublishService::MakeRequestBox(
         return false;
     }
     return true;
+}
+
+void DistributedPublishService::HealthWhiteListFilter(std::vector<sptr<Notification>>& notifications)
+{
+    if (notifications.empty()) {
+        return;
+    }
+    for (auto it = notifications.begin(); it != notifications.end();) {
+        sptr<Notification> notification = *it;
+        if (notification != nullptr && notification->GetNotificationRequestPoint() != nullptr &&
+            notification->GetNotificationRequestPoint()->GetExtendInfo() != nullptr &&
+            notification->GetNotificationRequestPoint()->GetExtendInfo()->HasParam("out_health_white_list")) {
+            it = notifications.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 bool DistributedPublishService::IsInterceptNotification(

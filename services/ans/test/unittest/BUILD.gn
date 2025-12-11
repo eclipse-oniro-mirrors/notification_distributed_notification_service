@@ -36,6 +36,7 @@ ohos_unittest("ans_unit_test") {
 
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
+    "health_white_list_util_test.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_access_token_helper.cpp",
@@ -1823,6 +1824,7 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/common/file_utils.cpp",
     "${services_path}/ans/src/common/notification_analytics_util.cpp",
     "${services_path}/ans/src/common/ans_status.cpp",
+    "${services_path}/ans/src/common/health_white_list_util.cpp",
     "${services_path}/ans/src/common/notification_app_privileges.cpp",
     "${services_path}/ans/src/common/system_sound_helper.cpp",
     "${services_path}/ans/src/distributed_device_status.cpp",

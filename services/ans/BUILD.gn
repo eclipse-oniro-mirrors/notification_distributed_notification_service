@@ -108,6 +108,7 @@ ohos_source_set("ans_service_sources") {
     "src/clone/notification_clone_util.cpp",
     "src/common/aes_gcm_helper.cpp",
     "src/common/file_utils.cpp",
+    "src/common/health_white_list_util.cpp",
     "src/common/notification_analytics_util.cpp",
     "src/common/ans_status.cpp",
     "src/common/notification_app_privileges.cpp",

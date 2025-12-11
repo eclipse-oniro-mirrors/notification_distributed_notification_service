@@ -72,6 +72,7 @@ private:
     bool MakeRequestBox(
         bool isSyncNotification, const DistributedDeviceInfo& peerDevice, const std::shared_ptr<Notification> request,
         const sptr<NotificationRequest> requestPoint, std::shared_ptr<NotificationRequestBox>& requestBox);
+    void HealthWhiteListFilter(std::vector<sptr<Notification>>& notifications);
 #else
     void PublishNotification(const std::shared_ptr<TlvBox>& boxMessage);
     void PublishSynchronousLiveView(const std::shared_ptr<TlvBox>& boxMessage);
