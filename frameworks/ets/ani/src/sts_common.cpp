@@ -787,8 +787,8 @@ ani_array newArrayClass(ani_env *env, int length)
         return nullptr;
     }
     ani_class arrayCls = nullptr;
-    if (ANI_OK != env->FindClass("escompat.Array", &arrayCls)) {
-        ANS_LOGE("FindClass escompat.Array Failed");
+    if (ANI_OK != env->FindClass("std.core.Array", &arrayCls)) {
+        ANS_LOGE("FindClass std.core.Array Failed");
         return nullptr;
     }
     ani_method arrayCtor;
@@ -889,8 +889,8 @@ bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
     }
     ani_class cls;
     ani_status status;
-    if (ANI_OK != (status = env->FindClass("escompat.Date", &cls))) {
-        ANS_LOGE("error. not find class name 'escompat.Date'. status %{public}d", status);
+    if (ANI_OK != (status = env->FindClass("std.core.Date", &cls))) {
+        ANS_LOGE("error. not find class name 'std.core.Date'. status %{public}d", status);
         return false;
     }
     ani_method ctor;
