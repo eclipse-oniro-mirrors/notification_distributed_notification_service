@@ -1954,6 +1954,7 @@ group("unittest") {
     ":notification_subscriber_manager_test",
     ":os_account_manager_helper_test",
     ":push_callback_stub_test",
-    "advanced_notification_service_test:unittest"
+    "advanced_notification_service_test:unittest",
+    "badge_manager_test:unittest"
   ]
 }
