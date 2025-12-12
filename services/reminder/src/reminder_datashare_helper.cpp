@@ -33,6 +33,8 @@ static constexpr int64_t CYCLE_DATASHARE_TASK = 1;  // 1s
 static constexpr int64_t DURATION_ONE_SECOND = 1000;  // 1s, millisecond
 static constexpr int8_t CALENDAR_RDB_V1 = 1;
 static constexpr int8_t CALENDAR_RDB_V2 = 2;
+static constexpr int8_t FLAG_COLUMN_INDEX_NOT_FETCH = -2;
+static constexpr int8_t FLAG_COLUMN_INDEX_NOT_EXIST = -1;
 
 template<typename T>
 void GetRdbValue(const std::shared_ptr<DataShare::DataShareResultSet>& resultSet,
@@ -109,6 +111,27 @@ bool ReminderDataShareHelper::UnRegisterObserver()
     return true;
 }
 
+DataShare::DataSharePredicates ReminderDataShareHelper::BuildQueryPredicates(int64_t timestamp, int64_t targetTimestamp)
+{
+    DataShare::DataSharePredicates predicates;
+    predicates.NotEqualTo(ReminderCalendarShareTable::STATE, ReminderCalendarShareTable::STATE_DISMISSED);
+    predicates.And();
+    predicates.BeginWrap();
+    predicates.BeginWrap();
+    predicates.LessThanOrEqualTo(ReminderCalendarShareTable::ALARM_TIME, timestamp);
+    predicates.And();
+    predicates.GreaterThanOrEqualTo(ReminderCalendarShareTable::END, timestamp);
+    predicates.EndWrap();
+    predicates.Or();
+    predicates.BeginWrap();
+    predicates.GreaterThanOrEqualTo(ReminderCalendarShareTable::ALARM_TIME, timestamp);
+    predicates.And();
+    predicates.LessThanOrEqualTo(ReminderCalendarShareTable::ALARM_TIME, targetTimestamp);
+    predicates.EndWrap();
+    predicates.EndWrap();
+    return predicates;
+}
+
 bool ReminderDataShareHelper::Query(std::map<std::string, sptr<ReminderRequest>>& reminders)
 {
     auto helper = CreateDataShareHelper(ReminderCalendarShareTable::PROXY);
@@ -123,42 +146,42 @@ bool ReminderDataShareHelper::Query(std::map<std::string, sptr<ReminderRequest>>
     std::string proxy = ReminderCalendarShareTable::PROXY;
     proxy.append("?user=").append(std::to_string(userId_));
     Uri uri(proxy);
-    std::vector<std::string> columns = GetColumns();
-    DataShare::DataSharePredicates predicates;
-    predicates.NotEqualTo(ReminderCalendarShareTable::STATE, ReminderCalendarShareTable::STATE_DISMISSED);
-    predicates.And();
-    if (rdbVersion_ == CALENDAR_RDB_V2) {
-        predicates.NotEqualTo(ReminderCalendarShareTable::NEED_AGENT, 0);
-        predicates.And();
-    }
-    predicates.BeginWrap();
-    predicates.BeginWrap();
-    predicates.LessThanOrEqualTo(ReminderCalendarShareTable::ALARM_TIME, timestamp);
-    predicates.And();
-    predicates.GreaterThanOrEqualTo(ReminderCalendarShareTable::END, timestamp);
-    predicates.EndWrap();
-    predicates.Or();
-    predicates.BeginWrap();
-    predicates.GreaterThanOrEqualTo(ReminderCalendarShareTable::ALARM_TIME, timestamp);
-    predicates.And();
-    predicates.LessThanOrEqualTo(ReminderCalendarShareTable::ALARM_TIME, targetTimestamp);
-    predicates.EndWrap();
-    predicates.EndWrap();
+    std::vector<std::string> columns;
+    DataShare::DataSharePredicates predicates = BuildQueryPredicates(timestamp, targetTimestamp);
     auto resultSet = helper->Query(uri, predicates, columns);
     if (resultSet == nullptr) {
         helper->Release();
         return false;
     }
-
+    int32_t totalCount = 0;
+    int32_t needAgentColumnIndex = FLAG_COLUMN_INDEX_NOT_FETCH;
+    resultSet->GetRowCount(totalCount);
     while (resultSet->GoToNextRow() == NativeRdb::E_OK) {
+        // use cache if column index is fetched
+        if (needAgentColumnIndex == FLAG_COLUMN_INDEX_NOT_FETCH) {
+            resultSet->GetColumnIndex(ReminderCalendarShareTable::NEED_AGENT, needAgentColumnIndex);
+        }
+        // needAgent column exist
+        if (needAgentColumnIndex != FLAG_COLUMN_INDEX_NOT_EXIST) {
+            int32_t needAgent = 0;
+            GetRdbValue<int32_t>(resultSet, ReminderCalendarShareTable::NEED_AGENT, needAgent);
+            // send by calendar
+            if (needAgent == 0) {
+                continue;
+            }
+        }
         sptr<ReminderRequest> reminder = CreateReminder(resultSet);
         if (reminder == nullptr) {
             continue;
         }
+        // send by reminder agent
         reminders[reminder->GetIdentifier()] = reminder;
     }
     helper->Release();
-    ANSR_LOGD("Query size: %{public}d.", static_cast<int32_t>(reminders.size()));
+    ANSR_LOGI("total: %{public}d, with agent: %{public}d, needAgent column index: %{public}d",
+        totalCount,
+        static_cast<int32_t>(reminders.size()),
+        needAgentColumnIndex);
     return true;
 }
 
@@ -348,33 +371,6 @@ std::shared_ptr<DataShare::DataShareHelper> ReminderDataShareHelper::CreateDataS
     } else {
         ANSR_LOGE("Create DataShareHelper failed.");
         return nullptr;
-    }
-}
-
-std::vector<std::string> ReminderDataShareHelper::GetColumns() const
-{
-    if (rdbVersion_ != 0) {
-        return std::vector<std::string> {
-            ReminderCalendarShareTable::ID, ReminderCalendarShareTable::EVENT_ID,
-            ReminderCalendarShareTable::END, ReminderCalendarShareTable::ALARM_TIME,
-            ReminderCalendarShareTable::STATE, ReminderCalendarShareTable::TITLE,
-            ReminderCalendarShareTable::CONTENT, ReminderCalendarShareTable::WANT_AGENT,
-            ReminderCalendarShareTable::BUTTONS, ReminderCalendarShareTable::SLOT_TYPE,
-            ReminderCalendarShareTable::IDENTIFIER, ReminderCalendarShareTable::TIME_INTERVAL,
-            ReminderCalendarShareTable::SNOOZE_TIMES, ReminderCalendarShareTable::RING_DURATION,
-            ReminderCalendarShareTable::SNOOZE_SLOT_TYPE, ReminderCalendarShareTable::SNOOZE_CONTENT,
-            ReminderCalendarShareTable::EXPIRED_CONTENT, ReminderCalendarShareTable::MAX_SCREEN_WANT_AGENT,
-            ReminderCalendarShareTable::CUSTOM_RING_URI
-        };
-    } else {
-        return std::vector<std::string> {
-            ReminderCalendarShareTable::ID, ReminderCalendarShareTable::EVENT_ID,
-            ReminderCalendarShareTable::END, ReminderCalendarShareTable::ALARM_TIME,
-            ReminderCalendarShareTable::STATE, ReminderCalendarShareTable::TITLE,
-            ReminderCalendarShareTable::CONTENT, ReminderCalendarShareTable::WANT_AGENT,
-            ReminderCalendarShareTable::BUTTONS, ReminderCalendarShareTable::SLOT_TYPE,
-            ReminderCalendarShareTable::IDENTIFIER
-        };
     }
 }
 
