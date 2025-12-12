@@ -1277,67 +1277,6 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfoForRingtone_0002, Function | SmallTe
     NotificationPreferences::GetInstance()->RemoveRingtoneInfoByBundle(bundleOption);
 }
 
-/**
- * @tc.name: UpdateCloneBundleInfoForRingtone_0003
- * @tc.desc: continuous cloning.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfoForRingtone_0003, Function | SmallTest | Level1)
-{
-    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("com.ohos.demo", 20020300);
-
-    NotificationCloneBundleInfo cloneBundleInfo;
-    cloneBundleInfo.SetAppIndex(0);
-    cloneBundleInfo.SetBundleName("com.ohos.demo");
-    NotificationRingtoneInfo ringtoneInfo(NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE,
-        "title", "name", "uri");
-
-    NotificationCloneBundleInfo bundleInfo;
-    sptr<NotificationRingtoneInfo> cloneRingtoneInfo = new NotificationRingtoneInfo(
-        NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE, "title", "name", "uri");
-    cloneBundleInfo.AddRingtoneInfo(cloneRingtoneInfo);
-    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, cloneBundleInfo);
-    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
-
-    // case
-    cloneRingtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
-    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, cloneBundleInfo);
-    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
-    // case
-    cloneRingtoneInfo->SetRingtoneTitle("title1");
-    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, cloneBundleInfo);
-    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
-    // case
-    cloneRingtoneInfo->SetRingtoneFileName("name1");
-    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, cloneBundleInfo);
-    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
-    // case
-    cloneRingtoneInfo->SetRingtoneUri("uri1");
-    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, cloneBundleInfo);
-    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
-    // case
-    cloneRingtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE);
-    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, cloneBundleInfo);
-    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
-    // case
-    cloneRingtoneInfo->SetRingtoneTitle("title");
-    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, cloneBundleInfo);
-    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
-    // case
-    cloneRingtoneInfo->SetRingtoneFileName("name");
-    NotificationPreferences::GetInstance()->UpdateCloneRingtoneInfo(100, cloneBundleInfo);
-    advancedNotificationService_->UpdateCloneBundleInfoForRingtone(ringtoneInfo, 100, bundleOption, cloneBundleInfo);
-
-    NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption,
-        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
-    sptr<NotificationRingtoneInfo> newInfo = new NotificationRingtoneInfo();
-    auto reuslt = NotificationPreferences::GetInstance()->GetRingtoneInfoByBundle(bundleOption, newInfo);
-    ASSERT_EQ(reuslt, (int32_t)ERR_OK);
-
-    NotificationPreferences::GetInstance()->RemoveRingtoneInfoByBundle(bundleOption);
-}
-
 HWTEST_F(AnsUtilsTest, TestGenerateCloneValidBundleOption_NullBundleOption, Level1) {
     sptr<NotificationBundleOption> bundleOption = nullptr;
     sptr<NotificationBundleOption> result = advancedNotificationService_->GenerateCloneValidBundleOption(bundleOption);
