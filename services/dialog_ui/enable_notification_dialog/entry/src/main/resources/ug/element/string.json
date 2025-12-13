@@ -67,6 +67,13 @@
             "attr":{
                 "priority":"LT"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"چەكلىسىڭىز، بۇ ئەپنىڭ ئۇچۇرلىرى ئۈچۈن ئۇقتۇرۇش كەلمەيدۇ.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

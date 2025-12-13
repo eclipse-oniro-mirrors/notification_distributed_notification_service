@@ -55,6 +55,13 @@
             "attr":{
                 "priority":"LT"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"\nإذا حددت \"رفض\"، فلن تتلقى إشعارات برسائل الدردشة من هذا التطبيق.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

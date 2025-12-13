@@ -55,6 +55,13 @@
             "attr":{
                 "priority":"LT"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"\nNếu chọn Từ chối, bạn sẽ không nhận được thông báo tin nhắn trò chuyện từ ứng dụng này.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

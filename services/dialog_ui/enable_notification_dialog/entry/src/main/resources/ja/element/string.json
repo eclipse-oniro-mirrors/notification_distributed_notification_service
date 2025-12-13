@@ -55,6 +55,13 @@
             "attr":{
                 "priority":"LT"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"\n[拒否]を選択すると、このアプリからのチャットメッセージ通知は受信されなくなります。",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

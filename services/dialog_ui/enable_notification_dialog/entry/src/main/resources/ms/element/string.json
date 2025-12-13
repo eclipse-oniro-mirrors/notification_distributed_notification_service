@@ -55,6 +55,13 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"\nJika anda memilih Tolak, anda tidak akan menerima pemberitahuan mesej sembang daripada aplikasi ini.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

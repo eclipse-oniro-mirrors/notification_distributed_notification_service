@@ -55,6 +55,13 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"\nหากคุณเลือกปฏิเสธ คุณจะไม่ได้รับการแจ้งเตือนข้อความแชทจากแอปนี้",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

@@ -55,6 +55,13 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"\nSi vous sélectionnez Refuser, vous n'allez plus recevoir de notifications des messages du chat de cette application.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

@@ -67,6 +67,13 @@
             "attr":{
                 "priority":"LT"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"༼མི་ཆོག་༽བདམས་ཚེ། གླེང་མོལ་བརྡ་འཕྲིན་བརྡ་ཐོ་འབྱོར་མི་ཐུབ།",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

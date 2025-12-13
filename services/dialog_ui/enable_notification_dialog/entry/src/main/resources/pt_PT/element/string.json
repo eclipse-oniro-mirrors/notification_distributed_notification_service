@@ -55,6 +55,13 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"\nSe selecionar Negar, não receberá notificações de mensagens da conversa a partir desta aplicação.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

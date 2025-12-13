@@ -55,6 +55,13 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"\nWenn Sie Verweigern auswählen, erhalten Sie keine Chat-Benachrichtigungen von dieser App.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

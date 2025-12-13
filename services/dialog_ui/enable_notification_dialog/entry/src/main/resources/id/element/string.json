@@ -55,6 +55,13 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"\nJika Anda memilih Tolak, Anda tidak akan menerima notifikasi pesan obrolan dari aplikasi ini.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

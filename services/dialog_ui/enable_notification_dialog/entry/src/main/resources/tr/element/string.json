@@ -55,6 +55,13 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"\nReddet düğmesine dokunursanız bu uygulamadan sohbet mesajı bildirimleri alınmayacaktır.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }
