@@ -128,7 +128,7 @@ ani_status GetBadgesFromAni(ani_env *env, ani_object obj,
     }
 
     ani_class mapClass;
-    if (env->FindClass("Lstd/core/Map;", &mapClass) != ANI_OK) {
+    if (env->FindClass("std.core.Map", &mapClass) != ANI_OK) {
         ANS_LOGE("Find Map class failed.");
         return ANI_ERROR;
     }
@@ -171,7 +171,7 @@ bool WrapBadges(ani_env *env, ani_object &outAniObj,
 {
     ANS_LOGD("WrapBadges enter");
     outAniObj = nullptr;
-    outAniObj = NotificationSts::CreateMapObject(env, "Lstd/core/Map;", ":V");
+    outAniObj = NotificationSts::CreateMapObject(env, "std.core.Map", ":");
     if (outAniObj == nullptr) {
         return false;
     }
@@ -185,7 +185,7 @@ bool WrapBadges(ani_env *env, ani_object &outAniObj,
         }
         ani_object enable = NotificationSts::CreateBoolean(env, v);
         status = env->Object_CallMethodByName_Ref(outAniObj, "set",
-            "Lstd/core/Object;Lstd/core/Object;:Lstd/core/Map;", &mapRef,
+            "YY:C{std.core.Map}", &mapRef,
             static_cast<ani_object>(bundleObj), static_cast<ani_object>(enable));
         if (status != ANI_OK) {
             ANS_LOGE("Faild to set bundleEnable map, status : %{public}d", status);

@@ -54,14 +54,14 @@ ani_object CreateNotificationSubscriberExtensionContext(ani_env *env,
         return nullptr;
     }
     std::array functions = {
-        ani_native_function { "", "L@ohos/app/ability/Want/Want;:V",
+        ani_native_function { "", "C{@ohos.app.ability.Want.Want}:",
             reinterpret_cast<void*>(StartAbility) },
     };
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
         ANS_LOGE("bind method status : %{public}d", status);
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
         ANS_LOGE("find Method status: %{public}d", status);
         return nullptr;
     }

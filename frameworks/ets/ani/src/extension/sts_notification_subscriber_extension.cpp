@@ -132,7 +132,7 @@ void StsNotificationSubscriberExtension::OnDestroy()
     }
 
     ani_object ani_data {};
-    const char* signature  = "V:V";
+    const char* signature  = ":";
     CallObjectMethod("onDestroy", signature, ani_data);
 }
 
