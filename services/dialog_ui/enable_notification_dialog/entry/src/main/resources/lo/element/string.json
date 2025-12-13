@@ -55,6 +55,13 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"\nຖ້າທ່ານເລືອກ ປະຕິເສດ, ທ່ານຈະບໍ່ໄດ້ຮັບການແຈ້ງເຕືອນຂໍ້ຄວາມແຊັດຈາກແອັບນີ້.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

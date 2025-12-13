@@ -55,6 +55,13 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"\nSe selezioni Rifiuta, non riceverai notifiche sui messaggi di chat da questa app.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

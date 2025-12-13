@@ -69,6 +69,13 @@ let storage = LocalStorage.getShared();
   .width('100%')
 }
 
+@Extend(Text) function contentText() {
+  .fontSize(Constants.DIALOG_DESP_FONT_SIZE)
+  .fontWeight(FontWeight.Regular)
+  .fontColor($r('app.color.text_primary'))
+  .lineHeight(Constants.DIALOG_DESP_LINE_HEIGHT)
+}
+
 @Entry(storage)
 @Component
 struct NotificationDialogPage {
@@ -164,7 +171,7 @@ struct PermissionDialog {
                 })
               }
               Row() {
-                Flex({ justifyContent: FlexAlign.Center }) {
+                Flex({ justifyContent: FlexAlign.Center, direction: FlexDirection.Column }) {
                   Text() {
                     if (this.dialog.easyAbroad) {
                       Span($r('app.string.reason_cjy'))
@@ -174,10 +181,13 @@ struct PermissionDialog {
                       Span(permission.reason)
                     }
                   }
-                  .fontSize(Constants.DIALOG_DESP_FONT_SIZE)
-                  .fontWeight(FontWeight.Regular)
-                  .fontColor($r('app.color.text_primary'))
-                  .lineHeight(Constants.DIALOG_DESP_LINE_HEIGHT)
+                  .contentText()
+                  if(this.dialog.banAffectContent) {
+                    Text() {
+                      Span($r('app.string.ban_affect'))
+                    }
+                    .contentText()
+                  }
                 }
                 .margin({
                   top: Constants.DIALOG_DESP_MARGIN_TOP,

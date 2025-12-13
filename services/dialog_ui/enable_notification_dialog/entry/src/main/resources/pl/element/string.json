@@ -55,6 +55,13 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"\nJeśli wybierzesz opcję Odmów, nie będziesz otrzymywać powiadomień o wiadomościach na czacie z tej aplikacji.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

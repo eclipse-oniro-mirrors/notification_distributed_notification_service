@@ -67,6 +67,13 @@
             "attr":{
                 "priority":"LT"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"若選取「不允許」，將無法收到聊天訊息通知。",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

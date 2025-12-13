@@ -65,6 +65,15 @@ let storage = LocalStorage.getShared();
   .flexGrow(Constants.FLEX_GROW)
 }
 
+@Extend(Text) function contentText() {
+  .fontSize(
+    getLimitFontSize(sourceToVp($r('sys.float.Body_L')),
+      getFontSizeScale(getContext(this) as common.UIAbilityContext))
+  )
+  .fontWeight(FontWeight.Medium)
+  .fontColor($r('sys.color.font_primary'))
+}
+
 @Entry(storage)
 @Component
 struct NotificationDialogPage {
@@ -170,16 +179,18 @@ struct PermissionDialog {
                   })
               }
               Row() {
-                Flex({ justifyContent: FlexAlign.Center }) {
+                Flex({ justifyContent: FlexAlign.Center, direction: FlexDirection.Column }) {
                   Text() {
                     Span(permission.reason)
                   }
-                  .fontSize(
-                    getLimitFontSize(sourceToVp($r('sys.float.Body_L')),
-                      getFontSizeScale(getContext(this) as common.UIAbilityContext))
-                  )
-                  .fontWeight(FontWeight.Medium)
-                  .fontColor($r('sys.color.font_primary'))
+                  .contentText()
+
+                  if(this.dialog.banAffectContent) {
+                    Text() {
+                      Span($r('app.string.ban_affect'))
+                    }
+                    .contentText()
+                  }
                 }
                 .margin({
                   left: Constants.PC_CONTENT_MARGIN_SIDE,

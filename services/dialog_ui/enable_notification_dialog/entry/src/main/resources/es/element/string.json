@@ -55,6 +55,13 @@
             "attr":{
                 "priority":"LT"
             }
+        },
+        {
+            "name":"ban_affect",
+            "value":"\nSi seleccionas Denegar, no recibirás notificaciones de mensajes de chat de esta aplicación.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }
