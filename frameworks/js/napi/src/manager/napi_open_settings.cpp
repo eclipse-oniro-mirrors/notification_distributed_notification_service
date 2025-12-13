@@ -35,6 +35,12 @@ void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
     }
     auto* asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings*>(data);
     napi_value result = nullptr;
+    napi_handle_scope scope;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok || scope == nullptr) {
+        ANS_LOGE("status: %{public}d", status);
+        return;
+    }
     napi_get_undefined(env, &result);
     int32_t errorCode = ERR_OK;
     if (asynccallbackinfo->info.errorCode == ERROR_SETTING_WINDOW_EXIST) {
@@ -48,6 +54,7 @@ void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
     } else {
         Common::SetPromise(env, asynccallbackinfo->info.deferred, errorCode, result, true);
     }
+    napi_close_handle_scope(env, scope);
     if (asynccallbackinfo->info.callback != nullptr) {
         napi_delete_reference(env, asynccallbackinfo->info.callback);
     }
