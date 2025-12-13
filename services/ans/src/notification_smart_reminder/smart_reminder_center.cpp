@@ -311,6 +311,7 @@ void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest
     set<string> smartDevices;
     map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> statusMap;
     InitValidDevices(syncDevices, smartDevices, statusMap, request);
+    SetSyncDevice(request, syncDevices);
     if (syncDevices.size() <= 1) {
         request->SetDeviceFlags(notificationFlagsOfDevices);
         return;
@@ -323,7 +324,6 @@ void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest
             notificationFlagsOfDevices);
     }
 
-    SetSyncDevice(request, syncDevices);
     request->SetDeviceFlags(notificationFlagsOfDevices);
 }
 
