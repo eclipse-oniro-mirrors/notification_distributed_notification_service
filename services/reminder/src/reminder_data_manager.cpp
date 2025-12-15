@@ -138,10 +138,14 @@ ErrCode ReminderDataManager::CancelReminder(
 }
 
 ErrCode ReminderDataManager::CancelAllReminders(const std::string& bundleName,
-    const int32_t userId, const int32_t callingUid)
+    const int32_t userId, const int32_t callingUid, const bool isUninstallApp)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
     CancelRemindersImplLocked(bundleName, userId, callingUid);
+    if (isUninstallApp && bundleName.compare(ReminderCalendarShareTable::NAME) == 0) {
+        ANSR_LOGI("%{public}s uninstall.", ReminderCalendarShareTable::NAME);
+        ReminderDataShareHelper::GetInstance().ResetUid();
+    }
     return ERR_OK;
 }
 
@@ -1015,7 +1019,8 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, co
     int32_t reminderId = reminder->GetReminderId();
     bool isShare = reminder->IsShare();
     if (!IsAllowedNotify(reminder)) {
-        ANSR_LOGE("Not allow to notify[%{public}s].", reminder->GetBundleName().c_str());
+        ANSR_LOGE("Not allow to notify[%{public}s](%{public}d).",
+            reminder->GetBundleName().c_str(), reminder->GetUid());
         reminder->OnShow(false, isSysTimeChanged, false);
         store_->UpdateOrInsert(reminder);
         return;

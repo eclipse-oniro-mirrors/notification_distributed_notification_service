@@ -643,4 +643,22 @@ HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_017, Level1)
     sleep(2);
     EXPECT_EQ(MockReminderDataManager::callOnDataShareInsertOrDelete_, true);
 }
+
+/**
+ * @tc.name: ReminderDataShareHelper_018
+ * @tc.desc: test ReminderDataObserver::InitNormalInfo function
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_018, Level1)
+{
+    sptr<ReminderRequest> reminder = sptr<ReminderRequestCalendar>::MakeSptr();
+    ReminderDataShareHelper::GetInstance().uid_ = 200200100;
+    ReminderDataShareHelper::GetInstance().InitNormalInfo(reminder);
+    EXPECT_EQ(reminder->GetUid(), 200200100);
+    ReminderDataShareHelper::GetInstance().uid_ = -1;
+    MockReminderBundleManagerHelper::MockGetDefaultUidByBundleName(100100100);
+    ReminderDataShareHelper::GetInstance().InitNormalInfo(reminder);
+    EXPECT_EQ(reminder->GetUid(), 100100100);
+}
 }

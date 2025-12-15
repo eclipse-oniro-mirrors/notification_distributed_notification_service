@@ -32,6 +32,7 @@
 #include "reminder_config_change_observer.h"
 #include "reminder_timer_info.h"
 #include "reminder_utils.h"
+#include "reminder_calendar_share_table.h"
 #include "ans_convert_enum.h"
 
 using namespace testing::ext;
@@ -137,6 +138,8 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_001, Level1)
     manager->CancelReminder(reminderId, -1);
     manager->CancelAllReminders("", -1, -1);
     manager->CancelAllReminders(-1);
+    manager->CancelAllReminders("", -1, -1, true);
+    manager->CancelAllReminders(ReminderCalendarShareTable::NAME, -1, -1, true);
     manager->IsMatched(reminder, -1, -1, true);
     remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);

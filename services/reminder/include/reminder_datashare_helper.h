@@ -105,6 +105,14 @@ public:
     }
 
     /**
+     * @brief Reset ReminderCalendarShareTable::NAME uid. because app uninstall.
+     */
+    void ResetUid()
+    {
+        uid_ = -1;
+    }
+
+    /**
      * @brief Update cached calendar provider UIDs (calendar and calendardata).
      *
      * This method refreshes `uid_` and `dataUid_` based on system/provider discovery.
@@ -240,7 +248,7 @@ private:
 private:
     int8_t rdbVersion_ {0};  // calendar rdb version
     int32_t userId_ {0};
-    int32_t uid_ {0};  // calendar
+    int32_t uid_ {-1};  // calendar
     int32_t dataUid_ {0};  // calendardata
     std::atomic<bool> insertTask_ {false};
     std::atomic<bool> updateTask_ {false};

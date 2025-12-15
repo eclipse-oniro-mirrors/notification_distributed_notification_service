@@ -154,7 +154,7 @@ ErrCode ReminderDataManager::CancelReminder(const int32_t& reminderId, const int
 }
 
 ErrCode ReminderDataManager::CancelAllReminders(const std::string& packageName, const int32_t userId,
-    const int32_t uid)
+    const int32_t uid, const bool isUninstallApp)
 {
     MockReminderDataManager::callCancelAllReminders_ = true;
     return g_mockCancelAllRemindersRet;

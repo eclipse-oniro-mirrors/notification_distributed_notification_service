@@ -50,9 +50,11 @@ public:
      * @param packageName Indicates the package name.
      * @param userId Indicates the user id which the bundle belong to.
      * @param uid Indicates the uid which the bundle belong to.
+     * @param isUninstallApp Is it an app uninstall event.
      * @return ERR_OK if success, else not.
      */
-    ErrCode CancelAllReminders(const std::string& packageName, const int32_t userId, const int32_t uid);
+    ErrCode CancelAllReminders(const std::string& packageName, const int32_t userId, const int32_t uid,
+        const bool isUninstallApp = false);
 
     /**
      * @brief Cancels the target reminder relative to the reminder id and bundle option.
