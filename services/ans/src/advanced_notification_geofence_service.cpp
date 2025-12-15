@@ -558,7 +558,7 @@ ErrCode AdvancedNotificationService::UpdateTriggerNotification(const sptr<Notifi
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_32, EventBranchId::BRANCH_14);
     message.Message("Update Trigger Ntf");
     if (records.size() != GEOFENCE_RECORDS_SIZE_ONE) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_END_NOTIFICATION;
     }
 
     auto oldRecord = records.front();
@@ -570,7 +570,7 @@ ErrCode AdvancedNotificationService::UpdateTriggerNotification(const sptr<Notifi
     auto status = oldRecord->request->GetLiveViewStatus();
     if (status != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE) {
         ANS_LOGE("Invalid live view status %{public}d", static_cast<int>(status));
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_END_NOTIFICATION;
     }
 
     auto newRecord = MakeNotificationRecord(request, bundleOption);

@@ -622,7 +622,11 @@ void AdvancedNotificationService::StartArchiveTimer(const std::shared_ptr<Notifi
 {
     std::vector<std::shared_ptr<NotificationRecord>> records;
     FindGeofenceNotificationRecordByKey(record->request->GetSecureKey(), records);
-    if (records.size() != 0) {
+    std::shared_ptr<NotificationRecord> records1;
+    FindNotificationRecordByKey(record->request->GetSecureKey(), records1);
+    // When the geofence has a delayed end state that has not been triggered,
+    // the keepTime for ending live updates should be set to 0.
+    if (records.size() != 0 && records1 == nullptr) {
         record->request->SetAutoDeletedTime(NotificationConstant::NO_DELAY_DELETE_TIME);
     }
 
