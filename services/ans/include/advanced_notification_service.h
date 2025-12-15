@@ -1956,6 +1956,8 @@ private:
     int32_t SetTriggerNotificationRequestToDb(const GeofencePublishNotificationRequestDb &requestDb);
     int32_t GetBatchNotificationRequestsFromDb(std::vector<GeofencePublishNotificationRequestDb> &requests,
         int32_t userId = -1);
+    void UpdateTriggerRecord(std::shared_ptr<NotificationRecord> oldRecord,
+        std::shared_ptr<NotificationRecord> newRecord);
     ErrCode TriggerNotificationRecordFilter(const std::shared_ptr<NotificationRecord> &record);
     void ExecuteCancelGroupCancelFromTriggerNotificationList(const sptr<NotificationBundleOption>& bundleOption,
         const std::string &groupName);

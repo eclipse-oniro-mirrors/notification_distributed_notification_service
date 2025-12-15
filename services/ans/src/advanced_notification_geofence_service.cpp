@@ -586,15 +586,11 @@ ErrCode AdvancedNotificationService::UpdateTriggerNotification(const sptr<Notifi
     newRecord->isUpdateByOwner = isUpdateByOwner;
     newRecord->request->FillMissingParameters(oldRecord->request);
     newRecord->request->SetLiveViewStatus(status);
-    {
-        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
-        for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end(); ++it) {
-            if ((*it)->request->GetTriggerSecureKey() == oldRecord->request->GetTriggerSecureKey()) {
-                *it = newRecord;
-                break;
-            }
-        }
+    if (oldRecord->request->GetNotificationTrigger() != nullptr) {
+        newRecord->request->SetNotificationTrigger(oldRecord->request->GetNotificationTrigger());
     }
+
+    UpdateTriggerRecord(oldRecord, newRecord);
     GeofencePublishNotificationRequestDb requestDb = { .request = newRecord->request,
         .bundleOption = newRecord->bundleOption, .isUpdateByOwner = newRecord->isUpdateByOwner };
     result = SetTriggerNotificationRequestToDb(requestDb);
@@ -604,6 +600,20 @@ ErrCode AdvancedNotificationService::UpdateTriggerNotification(const sptr<Notifi
         return result;
     }
     return ERR_OK;
+}
+
+void AdvancedNotificationService::UpdateTriggerRecord(std::shared_ptr<NotificationRecord> oldRecord,
+    std::shared_ptr<NotificationRecord> newRecord)
+{
+    {
+        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+        for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end(); ++it) {
+            if ((*it)->request->GetTriggerSecureKey() == oldRecord->request->GetTriggerSecureKey()) {
+                *it = newRecord;
+                break;
+            }
+        }
+    }
 }
 
 ErrCode AdvancedNotificationService::CheckGeofenceNotificationRequest(const sptr<NotificationRequest> &request)
