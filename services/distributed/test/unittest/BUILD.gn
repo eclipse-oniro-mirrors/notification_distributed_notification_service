@@ -114,8 +114,6 @@ ohos_unittest("distributed_base_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gmock_main",
@@ -134,6 +132,12 @@ ohos_unittest("distributed_base_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [
+      "device_manager:devicemanagersdk",
+      "dsoftbus:softbus_client",
+    ]
+  }
 
   defines = []
   if (screenlock_mgr_enable) {
@@ -220,8 +224,6 @@ ohos_unittest("distributed_device_service_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gmock_main",
@@ -240,6 +242,12 @@ ohos_unittest("distributed_device_service_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [
+      "device_manager:devicemanagersdk",
+      "dsoftbus:softbus_client",
+    ]
+  }
 
   defines = []
   if (screenlock_mgr_enable) {
@@ -290,7 +298,6 @@ ohos_unittest("ans_distributed_unit_test") {
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gtest_main",
@@ -301,6 +308,9 @@ ohos_unittest("ans_distributed_unit_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -336,7 +346,6 @@ ohos_unittest("distributed_preferences_database_test") {
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gtest_main",
@@ -347,6 +356,9 @@ ohos_unittest("distributed_preferences_database_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -383,7 +395,6 @@ ohos_unittest("distributed_screen_status_manager_branch_test") {
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gtest_main",
@@ -394,6 +405,9 @@ ohos_unittest("distributed_screen_status_manager_branch_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -430,7 +444,6 @@ ohos_unittest("distributed_database_branch_test") {
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gtest_main",
@@ -441,6 +454,9 @@ ohos_unittest("distributed_database_branch_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -471,7 +487,6 @@ ohos_unittest("distributed_preferences_branch_test") {
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gtest_main",
@@ -482,6 +497,9 @@ ohos_unittest("distributed_preferences_branch_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -509,7 +527,6 @@ ohos_unittest("distributed_device_callback_test") {
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gtest_main",
@@ -520,6 +537,9 @@ ohos_unittest("distributed_device_callback_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -624,7 +644,6 @@ ohos_unittest("distributed_notification_manager_branch_test") {
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gtest_main",
@@ -635,6 +654,9 @@ ohos_unittest("distributed_notification_manager_branch_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -711,8 +733,6 @@ ohos_unittest("distributed_service_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gmock_main",
@@ -731,6 +751,12 @@ ohos_unittest("distributed_service_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [
+      "device_manager:devicemanagersdk",
+      "dsoftbus:softbus_client",
+    ]
+  }
 
   defines = []
   if (screenlock_mgr_enable) {
@@ -812,8 +838,6 @@ ohos_unittest("distributed_subscriber_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gmock_main",
@@ -832,6 +856,12 @@ ohos_unittest("distributed_subscriber_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [
+      "device_manager:devicemanagersdk",
+      "dsoftbus:softbus_client",
+    ]
+  }
 
   defines = []
   if (screenlock_mgr_enable) {
@@ -862,8 +892,6 @@ ohos_unittest("distributed_library_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_core",
@@ -875,6 +903,12 @@ ohos_unittest("distributed_library_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [
+      "device_manager:devicemanagersdk",
+      "dsoftbus:softbus_client",
+    ]
+  }
 
   defines = []
   if (screenlock_mgr_enable) {
@@ -960,8 +994,6 @@ ohos_unittest("distributed_tlvbox_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gmock_main",
@@ -980,6 +1012,12 @@ ohos_unittest("distributed_tlvbox_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [
+      "device_manager:devicemanagersdk",
+      "dsoftbus:softbus_client",
+    ]
+  }
 
   defines = []
   if (screenlock_mgr_enable) {
@@ -1067,8 +1105,6 @@ ohos_unittest("distributed_helper_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gmock_main",
@@ -1087,6 +1123,12 @@ ohos_unittest("distributed_helper_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [
+      "device_manager:devicemanagersdk",
+      "dsoftbus:softbus_client",
+    ]
+  }
 
   defines = []
   if (screenlock_mgr_enable) {
@@ -1157,8 +1199,6 @@ ohos_unittest("distributed_soft_bus_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "ffrt:libffrt",
     "hilog:libhilog",
     "kv_store:distributeddata_inner",
@@ -1169,6 +1209,12 @@ ohos_unittest("distributed_soft_bus_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [
+      "device_manager:devicemanagersdk",
+      "dsoftbus:softbus_client",
+    ]
+  }
 
   defines = []
   if (screenlock_mgr_enable) {
@@ -1242,8 +1288,6 @@ ohos_unittest("distributed_soft_bus_non_master_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "ffrt:libffrt",
     "hilog:libhilog",
     "kv_store:distributeddata_inner",
@@ -1254,6 +1298,12 @@ ohos_unittest("distributed_soft_bus_non_master_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [
+      "device_manager:devicemanagersdk",
+      "dsoftbus:softbus_client",
+    ]
+  }
 
   defines = []
   if (screenlock_mgr_enable) {
@@ -1315,8 +1365,6 @@ ohos_unittest("notification_extension_service_test") {
     "bundle_framework:appexecfwk_core",
     "background_task_mgr:bgtaskmgr_innerkits",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "ffrt:libffrt",
     "googletest:gmock_main",
     "googletest:gtest_main",
@@ -1330,6 +1378,12 @@ ohos_unittest("notification_extension_service_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [
+      "device_manager:devicemanagersdk",
+      "dsoftbus:softbus_client",
+    ]
+  }
 
   defines = []
   if (screenlock_mgr_enable) {

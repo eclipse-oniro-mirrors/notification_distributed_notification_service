@@ -74,7 +74,6 @@ ohos_fuzztest("AdvancedNotificationServiceFuzzTest") {
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "data_share:datashare_permission",
-    "device_manager:devicemanagersdk",
     "ffrt:libffrt",
     "hilog:libhilog",
     "i18n:intl_util",
@@ -90,6 +89,9 @@ ohos_fuzztest("AdvancedNotificationServiceFuzzTest") {
     "time_service:time_client",
     "bluetooth:btframework",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
   external_deps += component_external_deps
 
   if (device_usage) {

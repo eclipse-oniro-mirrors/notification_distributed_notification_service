@@ -58,13 +58,15 @@ ohos_shared_library("libans_distributed") {
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_single",
     "kv_store:distributeddata_inner",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   if (ans_hitrace_usage) {
     external_deps += [ "hitrace:hitrace_meter" ]
@@ -157,8 +159,6 @@ ohos_shared_library("libdans") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_core",
@@ -170,6 +170,12 @@ ohos_shared_library("libdans") {
     "time_service:time_client",
     "zlib:libz",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [
+      "device_manager:devicemanagersdk",
+      "dsoftbus:softbus_client",
+    ]
+  }
 
   if (screenlock_mgr_enable) {
     external_deps += [ "screenlock_mgr:screenlock_client" ]
@@ -252,8 +258,6 @@ ohos_shared_library("libans_extension_service") {
     "bundle_framework:appexecfwk_core",
     "background_task_mgr:bgtaskmgr_innerkits",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_core",
@@ -265,6 +269,12 @@ ohos_shared_library("libans_extension_service") {
     "time_service:time_client",
     "zlib:libz",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [
+      "device_manager:devicemanagersdk",
+      "dsoftbus:softbus_client",
+    ]
+  }
 
   if (ans_config_policy_enable) {
     external_deps += [ "config_policy:configpolicy_util" ]
