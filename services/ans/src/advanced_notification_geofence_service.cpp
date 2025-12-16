@@ -191,7 +191,7 @@ ErrCode AdvancedNotificationService::PublishDelayedNotification(const std::strin
             return ERR_ANS_NOTIFICATION_NOT_EXISTS;
         }
     }
-    ConvertTriggerLiveviewStatus(record->request);
+    UpdateTriggerRequest(record->request);
     auto result = PublishPreparedNotificationInner(record->request, record->bundleOption, record->isUpdateByOwner);
     NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_10));
     if (result != ERR_OK) {
@@ -214,7 +214,7 @@ ErrCode AdvancedNotificationService::PublishDelayedNotification(const std::strin
     return ERR_OK;
 }
 
-void AdvancedNotificationService::ConvertTriggerLiveviewStatus(sptr<NotificationRequest> &request)
+void AdvancedNotificationService::UpdateTriggerRequest(sptr<NotificationRequest> &request)
 {
     if (request == nullptr || !request->IsCommonLiveView()) {
         return;
@@ -237,6 +237,8 @@ void AdvancedNotificationService::ConvertTriggerLiveviewStatus(sptr<Notification
     if (status == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END) {
         liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END);
     }
+
+    request->SetDeliveryTime(GetCurrentTime());
 }
 
 ErrCode AdvancedNotificationService::ParseGeofenceNotificationFromDb(const std::string &value,
