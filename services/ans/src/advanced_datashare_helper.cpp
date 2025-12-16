@@ -84,7 +84,7 @@ AdvancedDatashareHelper::~AdvancedDatashareHelper()
         ANS_LOGE("UnRegister advanced datashare observer failed by nullptr");
         return;
     }
-    UnregisterObserver();
+    dataObservers_.clear();
     dataShareHelper_->Release();
 }
 

@@ -30,6 +30,11 @@ public:
     void OnRestoreStart(const std::string bundleName, int32_t appIndex, int32_t userId, int32_t uid) override;
     void OnRestore(const nlohmann::json &jsonObject, std::set<std::string> systemApps) override;
     void OnUserSwitch(int32_t userId) override;
+
+private:
+    void RestoreBundlePriorityInfo(const int32_t uid, const NotificationClonePriorityInfo &priorityInfo);
+    void SetDefaultPriorityInfo(const int32_t uid, const std::string &bundleName);
+    void BatchSetDefaultPriorityInfo(const std::set<std::string> &bundleNames);
 private:
     std::vector<NotificationClonePriorityInfo> priorityInfo_;
     ffrt::mutex lock_;

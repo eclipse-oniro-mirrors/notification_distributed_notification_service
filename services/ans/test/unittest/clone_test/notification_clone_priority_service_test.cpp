@@ -46,11 +46,12 @@ protected:
 HWTEST_F(NotificationClonePriorityTest, OnBackUp_00001, Function | SmallTest | Level1)
 {
     nlohmann::json jsonObject;
-    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 10);
+    sptr<NotificationBundleOption> bundleOption =
+        new (std::nothrow) NotificationBundleOption("bundleName", 1000);
     AdvancedNotificationService::GetInstance()->SetBundlePriorityConfigInner(bundleOption, "test1\\ntest2\\ntest3");
     AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundleInner(bundleOption, 2);
     EXPECT_EQ(NotificationClonePriority::GetInstance()->OnBackup(jsonObject), ERR_OK);
-    std::set<std::string> systemApps;
+    std::set<std::string> systemApps = {"bundleName"};
     NotificationClonePriority::GetInstance()->OnRestore(jsonObject, systemApps);
     NotificationConstant::PriorityEnableStatus enableStatus =
         NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT;
@@ -82,6 +83,39 @@ HWTEST_F(NotificationClonePriorityTest, OnRestoreStart_00001, Function | SmallTe
     NotificationClonePriority::GetInstance()->OnUserSwitch(userId);
     NotificationClonePriority::GetInstance()->OnRestoreStart("bundleName", 0, userId, 10);
     EXPECT_EQ(NotificationClonePriority::GetInstance()->priorityInfo_.size(), 1);
+}
+
+/**
+ * @tc.name: OnRestoreStart_00001
+ * @tc.desc: Test clone OnRestore with systemApp priorityInfo success.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationClonePriorityTest, OnRestore_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption =
+        new (std::nothrow) NotificationBundleOption("bundleName", 1000);
+    AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundleInner(bundleOption, 2);
+    std::vector<NotificationClonePriorityInfo> cloneInfos;
+    NotificationClonePriorityInfo priorityInfo;
+    priorityInfo.bundleName_ = "bundleName";
+    priorityInfo.appIndex_ = 0;
+    priorityInfo.enableStatus_ = 0;
+    priorityInfo.clonePriorityType_ = NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE::PRIORITY_ENABLE_FOR_BUNDLE;
+    cloneInfos.push_back(priorityInfo);
+    nlohmann::json jsonObject;
+    jsonObject = nlohmann::json::array();
+    for (auto &cloneInfo : cloneInfos) {
+        nlohmann::json jsonNode;
+        cloneInfo.ToJson(jsonNode);
+        jsonObject.emplace_back(jsonNode);
+    }
+    std::set<std::string> systemApps = {"bundleName"};
+    NotificationClonePriority::GetInstance()->OnRestore(jsonObject, systemApps);
+    NotificationConstant::PriorityEnableStatus enableStatus =
+        NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT;
+    EXPECT_EQ(NotificationPreferences::GetInstance()->IsPriorityEnabledByBundle(bundleOption, enableStatus), ERR_OK);
+    EXPECT_EQ(enableStatus, NotificationConstant::PriorityEnableStatus::DISABLE);
 }
 }
 }

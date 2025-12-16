@@ -64,10 +64,10 @@ ErrCode AdvancedNotificationService::SetPriorityEnabledByBundle(
 ErrCode AdvancedNotificationService::SetPriorityEnabledByBundleInner(
     const sptr<NotificationBundleOption> &bundleOption, const int32_t enableStatusInt)
 {
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_26);
-    message.Message("bundle: " + bundleOption->GetBundleName() + ", id: " +
-        std::to_string(bundleOption->GetUid()) + ", en:" + std::to_string(enableStatusInt));
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_26);
+    message.Message("bundle: " + bundle->GetBundleName() + ", id: " +
+        std::to_string(bundle->GetUid()) + ", en:" + std::to_string(enableStatusInt));
     if (bundle == nullptr) {
         ANS_LOGE("bundle is nullptr");
         message.ErrorCode(ERR_ANS_INVALID_BUNDLE).Append(" bundle name is empty");

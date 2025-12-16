@@ -23,6 +23,8 @@
 
 namespace OHOS {
 namespace Notification {
+constexpr int32_t INVALID_APP_INDEX = -1;
+
 std::shared_ptr<NotificationClonePriority> NotificationClonePriority::GetInstance()
 {
     static std::shared_ptr<NotificationClonePriority> instance =
@@ -71,6 +73,7 @@ void NotificationClonePriority::OnRestore(const nlohmann::json &jsonObject, std:
         ANS_LOGE("Clone priority is invalidated or empty.");
         return;
     }
+    BatchSetDefaultPriorityInfo(systemApps);
     for (auto iter = priorityInfo_.begin(); iter != priorityInfo_.end();) {
         if (iter->GetClonePriorityType() == NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE::PRIORITY_ENABLE) {
             AdvancedNotificationService::GetInstance()->SetPriorityEnabledInner(
@@ -79,26 +82,59 @@ void NotificationClonePriority::OnRestore(const nlohmann::json &jsonObject, std:
             iter = priorityInfo_.erase(iter);
             continue;
         }
+        if (systemApps.find(iter->GetBundleName()) == systemApps.end()) {
+            iter++;
+            continue;
+        }
         int32_t uid = NotificationCloneUtil::GetBundleUid(iter->GetBundleName(), userId, iter->GetAppIndex());
         if (uid == INVALID_USER_ID) {
             iter++;
             continue;
         }
-        sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption(iter->GetBundleName(), uid);
-        if (bo == nullptr) {
-            ANS_LOGE("null bundleOption");
-            iter++;
-            continue;
-        }
-        if (iter->GetClonePriorityType() ==
-            NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE::PRIORITY_ENABLE_FOR_BUNDLE) {
-            AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundleInner(bo, iter->GetSwitchState());
-        } else {
-            AdvancedNotificationService::GetInstance()->SetBundlePriorityConfigInner(bo, iter->GetPriorityConfig());
-        }
+        RestoreBundlePriorityInfo(uid, *iter);
         iter = priorityInfo_.erase(iter);
     }
     NotificationPreferences::GetInstance()->UpdateClonePriorityInfos(userId, priorityInfo_);
+}
+
+void NotificationClonePriority::BatchSetDefaultPriorityInfo(const std::set<std::string> &bundleNames)
+{
+    for (std::string bundleName : bundleNames) {
+        int32_t uid = INVALID_USER_ID;
+        NotificationCloneUtil::GetBundleUid(bundleName, uid, INVALID_APP_INDEX);
+        if (uid == INVALID_USER_ID) {
+            continue;
+        }
+        SetDefaultPriorityInfo(uid, bundleName);
+    }
+}
+
+void NotificationClonePriority::SetDefaultPriorityInfo(const int32_t uid, const std::string &bundleName)
+{
+    sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+    if (bo == nullptr) {
+        ANS_LOGW("null bundleOption");
+        return;
+    }
+    AdvancedNotificationService::GetInstance()->SetBundlePriorityConfigInner(bo, "");
+        AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundleInner(
+            bo, static_cast<int32_t>(NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT));
+}
+
+void NotificationClonePriority::RestoreBundlePriorityInfo(
+    const int32_t uid, const NotificationClonePriorityInfo &priorityInfo)
+{
+    sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption(priorityInfo.GetBundleName(), uid);
+    if (bo == nullptr) {
+        ANS_LOGW("null bundleOption");
+        return;
+    }
+    if (priorityInfo.GetClonePriorityType() ==
+        NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE::PRIORITY_ENABLE_FOR_BUNDLE) {
+        AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundleInner(bo, priorityInfo.GetSwitchState());
+    } else {
+        AdvancedNotificationService::GetInstance()->SetBundlePriorityConfigInner(bo, priorityInfo.GetPriorityConfig());
+    }
 }
 
 void NotificationClonePriority::OnRestoreStart(const std::string bundleName, int32_t appIndex,
@@ -107,24 +143,14 @@ void NotificationClonePriority::OnRestoreStart(const std::string bundleName, int
     ANS_LOGI("Handle bundle event: %{public}s, %{public}d, %{public}d, %{public}d, priorityInfoSize: %{public}zu.",
         bundleName.c_str(), appIndex, userId, uid, priorityInfo_.size());
     std::unique_lock lock(lock_);
+    SetDefaultPriorityInfo(uid, bundleName);
     for (auto iter = priorityInfo_.begin(); iter != priorityInfo_.end();) {
         if (iter->GetClonePriorityType() == NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE::PRIORITY_ENABLE ||
             iter->GetBundleName() != bundleName || iter->GetAppIndex() != appIndex) {
             iter++;
             continue;
         }
-        sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption(iter->GetBundleName(), uid);
-        if (bo == nullptr) {
-            ANS_LOGE("null bundleOption");
-            iter++;
-            continue;
-        }
-        if (iter->GetClonePriorityType() ==
-            NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE::PRIORITY_ENABLE_FOR_BUNDLE) {
-            AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundleInner(bo, iter->GetSwitchState());
-        } else {
-            AdvancedNotificationService::GetInstance()->SetBundlePriorityConfigInner(bo, iter->GetPriorityConfig());
-        }
+        RestoreBundlePriorityInfo(uid, *iter);
         NotificationPreferences::GetInstance()->DelClonePriorityInfo(userId, *iter);
         iter = priorityInfo_.erase(iter);
     }
