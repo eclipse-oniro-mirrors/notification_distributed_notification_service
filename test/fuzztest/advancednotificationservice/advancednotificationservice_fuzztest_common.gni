@@ -73,7 +73,6 @@ template("advancednotificationservice_fuzztest_target") {
       "data_share:datashare_common",
       "data_share:datashare_consumer",
       "data_share:datashare_permission",
-      "device_manager:devicemanagersdk",
       "ffrt:libffrt",
       "hilog:libhilog",
       "i18n:intl_util",
@@ -87,6 +86,9 @@ template("advancednotificationservice_fuzztest_target") {
       "time_service:time_client",
       "bluetooth:btframework",
     ]
+    if (distributed_notification_supported) {
+      external_deps += [ "device_manager:devicemanagersdk" ]
+    }
     external_deps += component_external_deps
 
     # 条件编译标志

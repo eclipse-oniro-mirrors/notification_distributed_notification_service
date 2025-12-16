@@ -53,9 +53,11 @@ ohos_fuzztest("NotificationExtensionFuzzTest") {
     "hilog:libhilog",
     "image_framework:image_native",
     "relational_store:native_rdb",
-    "device_manager:devicemanagersdk",
     "ffrt:libffrt",
   ]
+  if (distributed_notification_supported) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 }
 
 ###############################################################################
