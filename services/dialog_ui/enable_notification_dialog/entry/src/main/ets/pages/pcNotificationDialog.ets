@@ -124,6 +124,7 @@ struct PermissionDialog {
   session?: UIExtensionContentSession;
   controller?: CustomDialogController;
   @State titleContainerWidth: string | number = 'auto';
+  @State maxWidth: number = Constants.PC_DIALOG_WIDTH;
 
   build() {
     Row() {
@@ -230,6 +231,7 @@ struct PermissionDialog {
               this.contentComW = vp2px(newValue.width as number);
               this.contentComH = vp2px(newValue.height as number);
               console.info(TAG, `content onSizeChange size ${this.contentComW} ${this.contentComH}`);
+              this.updateMaxWidth();
               if (!this.contentSizeChangeUpdated) {
                 this.updateContentCompoment();
                 this.contentSizeChangeUpdated = true;
@@ -239,8 +241,7 @@ struct PermissionDialog {
         }
         .borderRadius(Constants.PC_RDIUS_12)
         .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
-        .width(Constants.PC_DIALOG_WIDTH)
-        .constraintSize({minWidth:Constants.PC_DIALOG_WIDTH})
+        .width(Constants.PC_DIALOG_WIDTH > this.maxWidth ? this.maxWidth : Constants.PC_DIALOG_WIDTH)
         .outline({
             width: 1,
             color: Constants.PC_OUTLINE_COLOR,
@@ -280,9 +281,17 @@ struct PermissionDialog {
       this.isUpdate = 0;
     }
     if (this.uecRectChangeNum > 0) {
+      await this.updateMaxWidth();
       await this.updateContentCompoment();
       this.uecRectChangeNum = 0;
     }
+  }
+
+  async updateMaxWidth(): Promise<void> {
+    let windowRect = this.dialog?.extensionWindow.properties?.uiExtensionHostWindowProxyRect;
+      if (windowRect && windowRect.width > 0) {
+        this.maxWidth = px2vp(windowRect.width) - 32;
+      }
   }
 
   async updateStatus(): Promise<void> {
