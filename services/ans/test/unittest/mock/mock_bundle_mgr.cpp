@@ -139,6 +139,7 @@ ErrCode BundleMgrProxy::GetBundleInfoV9(
     if (Notification::g_getBundleInfoFailed) {
         return -1;
     }
+    bundleInfo.uid = Notification::MOCK_UID;
     if (Notification::g_isNeedHapModuleInfos) {
         HapModuleInfo hapModuleInfo;
         ExtensionAbilityInfo extensionInfo;

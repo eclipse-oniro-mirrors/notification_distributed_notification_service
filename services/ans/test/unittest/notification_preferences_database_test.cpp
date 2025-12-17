@@ -1250,7 +1250,91 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_0
     int32_t userId = 100;
     ASSERT_EQ(false, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption, userId));
 }
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+HWTEST_F(NotificationPreferencesDatabaseTest, PutExtensionSubscriptionClonedInvalidBundles_0100, TestSize.Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    preferncesDB_->rdbDataManager_ = std::make_shared<NotificationDataMgr>(notificationRdbConfig);
+    std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> data;
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    bundles.push_back(new NotificationBundleOption("bundle1", 1001));
+    bundles.push_back(new NotificationBundleOption("bundle2", 1002));
+    data.insert(std::make_pair(new NotificationBundleOption("targetBundle", 1002), bundles));
+    
+    bool result = preferncesDB_->PutExtensionSubscriptionClonedInvalidBundles(100, data);
+    EXPECT_EQ(result, true);
+}
 
+HWTEST_F(NotificationPreferencesDatabaseTest, PutExtensionSubscriptionClonedInvalidBundles_0200, TestSize.Level1)
+{
+    preferncesDB_->rdbDataManager_ = nullptr;
+    std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> data;
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    bundles.push_back(new NotificationBundleOption("bundle1", 1001));
+    bundles.push_back(new NotificationBundleOption("bundle2", 1002));
+    data.insert(std::make_pair(new NotificationBundleOption("targetBundle", 1002), bundles));
+
+    bool result = preferncesDB_->PutExtensionSubscriptionClonedInvalidBundles(100, data);
+    EXPECT_EQ(result, false);
+}
+
+HWTEST_F(NotificationPreferencesDatabaseTest, ClearExtensionSubscriptionClonedInvalidBundles_0100, TestSize.Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    preferncesDB_->rdbDataManager_ = std::make_shared<NotificationDataMgr>(notificationRdbConfig);
+    std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> data;
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    bundles.push_back(new NotificationBundleOption("bundle1", 1001));
+    bundles.push_back(new NotificationBundleOption("bundle2", 1002));
+    data.insert(std::make_pair(new NotificationBundleOption("targetBundle", 1002), bundles));
+    
+    bool result = preferncesDB_->PutExtensionSubscriptionClonedInvalidBundles(100, data);
+    EXPECT_EQ(result, true);
+    result = preferncesDB_->ClearExtensionSubscriptionClonedInvalidBundles(100);
+    EXPECT_EQ(result, true);
+}
+
+HWTEST_F(NotificationPreferencesDatabaseTest, ClearExtensionSubscriptionClonedInvalidBundles_0200, TestSize.Level1)
+{
+    preferncesDB_->rdbDataManager_ = nullptr;
+
+    bool result = preferncesDB_->ClearExtensionSubscriptionClonedInvalidBundles(100);
+    EXPECT_EQ(result, false);
+}
+
+HWTEST_F(NotificationPreferencesDatabaseTest, GetExtensionSubscriptionClonedInvalidBundles_0100, TestSize.Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    preferncesDB_->rdbDataManager_ = std::make_shared<NotificationDataMgr>(notificationRdbConfig);
+    std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> data;
+
+    bool result = preferncesDB_->GetExtensionSubscriptionClonedInvalidBundles(100, data);
+    EXPECT_EQ(result, false);
+}
+
+HWTEST_F(NotificationPreferencesDatabaseTest, GetExtensionSubscriptionClonedInvalidBundles_0200, TestSize.Level1)
+{
+    std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> data;
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    bundles.push_back(new NotificationBundleOption("bundle1", 1001));
+    bundles.push_back(new NotificationBundleOption("bundle2", 1002));
+    data.insert(std::make_pair(new NotificationBundleOption("targetBundle", 1002), bundles));
+    preferncesDB_->PutExtensionSubscriptionClonedInvalidBundles(100, data);
+
+    std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> queriedData;
+    bool result = preferncesDB_->GetExtensionSubscriptionClonedInvalidBundles(100, queriedData);
+    EXPECT_EQ(result, true);
+}
+
+HWTEST_F(NotificationPreferencesDatabaseTest, GetExtensionSubscriptionClonedInvalidBundles_0300, TestSize.Level1)
+{
+    preferncesDB_->rdbDataManager_ = nullptr;
+    std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> data;
+
+    bool result = preferncesDB_->GetExtensionSubscriptionClonedInvalidBundles(100, data);
+    EXPECT_EQ(result, false);
+}
+#endif
 /**
  * @tc.number    : RemoveAnsBundleDbInfo_00200
  * @tc.name      :

@@ -218,6 +218,9 @@ ohos_unittest("notification_preferences_database_test") {
     external_deps += [ "player_framework:media_client" ]
     defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
   }
+  if (distributed_notification_service_feature_notification_extension_subscription) {
+    defines += [ "NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED" ]
+  }
 
   cflags = []
   if (hisysevent_usage) {
@@ -427,6 +430,9 @@ ohos_unittest("notification_service_test") {
   if (hisysevent_usage) {
     external_deps += [ "hisysevent:libhisysevent" ]
     cflags += [ "-DHAS_HISYSEVENT_PART" ]
+  }
+  if (distributed_notification_service_feature_notification_extension_subscription) {
+    defines += [ "NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED" ]
   }
 
   subsystem_name = "${subsystem_name}"
@@ -865,6 +871,9 @@ ohos_unittest("notification_preferences_test") {
   if (player_framework) {
     external_deps += [ "player_framework:media_client" ]
     defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
+  if (distributed_notification_service_feature_notification_extension_subscription) {
+    defines += [ "NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED" ]
   }
 
   cflags = []

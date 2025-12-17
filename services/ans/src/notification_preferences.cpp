@@ -2364,7 +2364,127 @@ ErrCode NotificationPreferences::SetExtensionSubscriptionBundles(
         return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 }
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+ErrCode NotificationPreferences::SetExtensionSubscriptionClonedInvalidBundles(int32_t userId,
+    const sptr<NotificationBundleOption>& bundleOption, const std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    ANS_LOGD("called");
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle option");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    if (bundles.empty()) {
+        return ERR_OK;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> data;
+    preferncesDB_->GetExtensionSubscriptionClonedInvalidBundles(userId, data);
+    bool exists = false;
+    auto invalidBundlesDataIter = data.begin();
+    while (invalidBundlesDataIter != data.end()) {
+        if (invalidBundlesDataIter->first->GetBundleName() == bundleOption->GetBundleName() &&
+            invalidBundlesDataIter->first->GetUid() == bundleOption->GetUid()) {
+            invalidBundlesDataIter->second = bundles;
+            exists = true;
+            break;
+        }
+        invalidBundlesDataIter++;
+    }
+    if (!exists) {
+        data.insert(std::make_pair(bundleOption, bundles));
+    }
+    ANS_LOGI("Has invalid granted bundles size %{public}zu", data.size());
+    if (!preferncesDB_->PutExtensionSubscriptionClonedInvalidBundles(userId, data)) {
+        ANS_LOGE("Failed to set invalid granted bundles for user:%{public}d", userId);
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    return ERR_OK;
+}
 
+ErrCode NotificationPreferences::ClearExtensionSubscriptionClonedInvalidBundles(int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    if (!preferncesDB_->ClearExtensionSubscriptionClonedInvalidBundles(userId)) {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode NotificationPreferences::GetExtensionSubscriptionCloneUpdatedBundles(int32_t userId,
+    const sptr<NotificationBundleOption>& bundleOption, std::vector<sptr<NotificationBundleOption>>& bundles)
+{
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle option");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> data;
+    if (!preferncesDB_->GetExtensionSubscriptionClonedInvalidBundles(userId, data)) {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    for (auto &item : data) {
+        for (auto &invalidBundle: item.second) {
+            if (invalidBundle->GetBundleName() == bundleOption->GetBundleName()) {
+                bundles.emplace_back(item.first);
+                break;
+            }
+        }
+    }
+    return ERR_OK;
+}
+
+ErrCode NotificationPreferences::RemoveExtensionSubscriptionCloneUpdatedBundles(int32_t userId,
+    const sptr<NotificationBundleOption>& bundleOption)
+{
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle option");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> data;
+    if (!preferncesDB_->GetExtensionSubscriptionClonedInvalidBundles(userId, data)) {
+        ANS_LOGE("Failed to get invalid granted bundles for user:%{public}d", userId);
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    auto dataItem = data.begin();
+    while (dataItem != data.end()) {
+        auto invalidBundleIter = dataItem->second.begin();
+        while (invalidBundleIter != dataItem->second.end()) {
+            if ((*invalidBundleIter)->GetBundleName() == bundleOption->GetBundleName()) {
+                invalidBundleIter = dataItem->second.erase(invalidBundleIter);
+                continue;
+            }
+            invalidBundleIter++;
+        }
+        if (dataItem->second.empty()) {
+            dataItem = data.erase(dataItem);
+            continue;
+        }
+        dataItem++;
+    }
+    if (!preferncesDB_->PutExtensionSubscriptionClonedInvalidBundles(userId, data)) {
+        ANS_LOGE("Failed to update invalid granted bundles for user:%{public}d", userId);
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    return ERR_OK;
+}
+#endif
 ErrCode NotificationPreferences::AddExtensionSubscriptionBundles(
     const sptr<NotificationBundleOption>& bundleOption, const std::vector<sptr<NotificationBundleOption>>& bundles)
 {

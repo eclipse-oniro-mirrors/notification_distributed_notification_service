@@ -246,6 +246,14 @@ const static std::string KEY_REMINDER_MODE = "reminderMode";
 const static std::string KEY_EXTENSION_SUBSCRIPTION_INFO = "extensionSubscriptionInfo";
 const static std::string KEY_EXTENSION_SUBSCRIPTION_ENABLED = "enableExtensionSubscription";
 const static std::string KEY_EXTENSION_SUBSCRIPTION_BUNDLES = "extensionSubscriptionBundles";
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+const static std::string KEY_EXTENSION_SUBSCRIPTION_CLONEDATA =
+    "extension_subscription_clone_invalidGrantedBundles";
+const static std::string KEY_EXTENSION_SUBSCRIPTION_CLONEDATA_TARGET_BUNDLE_PROPERTY =
+    "targetBundle";
+const static std::string KEY_EXTENSION_SUBSCRIPTION_CLONEDATA_INVALID_BUNDLE_PROPERTY =
+    "invalidBundles";
+#endif
 
 constexpr char RELATIONSHIP_JSON_KEY_SERVICE[] = "service";
 constexpr char RELATIONSHIP_JSON_KEY_APP[] = "app";
@@ -3109,7 +3117,90 @@ bool NotificationPreferencesDatabase::PutExtensionSubscriptionBundles(
         bundleInfo.GetExtensionSubscriptionBundlesJson(), userId);
     return (result == NativeRdb::E_OK);
 }
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+bool NotificationPreferencesDatabase::PutExtensionSubscriptionClonedInvalidBundles(int32_t userId,
+    const std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> &data)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+    std::string value;
+    nlohmann::json jsonNodes = nlohmann::json::array();
+    for (const auto& item : data) {
+        nlohmann::json itemNode;
+        nlohmann::json targetBundleNode;
+        item.first->ToJson(targetBundleNode);
+        nlohmann::json invalidBundlesNode = nlohmann::json::array();
+        for (const auto& invalidBundle : item.second) {
+            nlohmann::json jsonNode;
+            invalidBundle->ToJson(jsonNode);
+            invalidBundlesNode.emplace_back(jsonNode);
+        }
+        itemNode[KEY_EXTENSION_SUBSCRIPTION_CLONEDATA_TARGET_BUNDLE_PROPERTY] = targetBundleNode;
+        itemNode[KEY_EXTENSION_SUBSCRIPTION_CLONEDATA_INVALID_BUNDLE_PROPERTY] = invalidBundlesNode;
+        jsonNodes.emplace_back(itemNode);
+    }
+    
+    int32_t result = rdbDataManager_->InsertData(KEY_EXTENSION_SUBSCRIPTION_CLONEDATA,
+        jsonNodes.dump(), userId);
+    return (result == NativeRdb::E_OK);
+}
 
+bool NotificationPreferencesDatabase::ClearExtensionSubscriptionClonedInvalidBundles(int32_t userId)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+
+    int32_t result = rdbDataManager_->DeleteData(KEY_EXTENSION_SUBSCRIPTION_CLONEDATA, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::GetExtensionSubscriptionClonedInvalidBundles(int32_t userId,
+    std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> &data)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+    std::string value;
+    int32_t result = rdbDataManager_->QueryData(KEY_EXTENSION_SUBSCRIPTION_CLONEDATA, value, userId);
+    if (result != NativeRdb::E_OK || value.empty() || !nlohmann::json::accept(value)) {
+        ANS_LOGE("Invalid json or empty data");
+        return false;
+    }
+    nlohmann::json jsonNodes = nlohmann::json::parse(value);
+    if (jsonNodes.is_null() || jsonNodes.is_discarded() || !jsonNodes.is_array()) {
+        return false;
+    }
+    for (auto &infoJson : jsonNodes) {
+        if (!infoJson.contains(KEY_EXTENSION_SUBSCRIPTION_CLONEDATA_TARGET_BUNDLE_PROPERTY) ||
+            !infoJson.contains(KEY_EXTENSION_SUBSCRIPTION_CLONEDATA_INVALID_BUNDLE_PROPERTY) ||
+            !infoJson.at(KEY_EXTENSION_SUBSCRIPTION_CLONEDATA_INVALID_BUNDLE_PROPERTY).is_array()) {
+            continue;
+        }
+        auto targetBundle = NotificationBundleOption::FromJson(
+            infoJson.at(KEY_EXTENSION_SUBSCRIPTION_CLONEDATA_TARGET_BUNDLE_PROPERTY));
+        if (targetBundle == nullptr) {
+            ANS_LOGW("Failed to parse subscription info from JSON, skipping");
+            continue;
+        }
+        std::vector<sptr<NotificationBundleOption>> invalidBundles;
+        for (auto &invalidBundleNode : infoJson.at(KEY_EXTENSION_SUBSCRIPTION_CLONEDATA_INVALID_BUNDLE_PROPERTY)) {
+            auto bundle = NotificationBundleOption::FromJson(invalidBundleNode);
+            if (bundle == nullptr) {
+                ANS_LOGW("Failed to parse subscription info from JSON, skipping");
+                continue;
+            }
+            invalidBundles.emplace_back(bundle);
+        }
+        data.insert(std::make_pair(targetBundle, invalidBundles));
+    }
+    return true;
+}
+#endif
 bool NotificationPreferencesDatabase::SetDistributedEnabledBySlot(const NotificationConstant::SlotType &slotType,
     const std::string &deviceType, const NotificationConstant::SWITCH_STATE &enabled)
 {
