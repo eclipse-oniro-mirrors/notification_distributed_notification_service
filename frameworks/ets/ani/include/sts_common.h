@@ -91,6 +91,7 @@ bool SetOptionalFieldArrayLong(ani_env *env, ani_class cls, ani_object &object, 
 // property
 bool SetPropertyOptionalByBoolean(ani_env *env, ani_object &object, const char *name, bool value);
 bool SetPropertyOptionalByDouble(ani_env *env, ani_object &object, const char *name, double value);
+bool SetPropertyValueDouble(ani_env *env, ani_object param, const char *name, double value);
 bool SetPropertyOptionalByLong(ani_env *env, ani_object &object, const char *name, int64_t value);
 bool SetPropertyOptionalByString(ani_env *env, ani_object &object, const char *name, const std::string value);
 bool SetPropertyOptionalByInt(ani_env *env, ani_object &object, const char *name, int32_t value);

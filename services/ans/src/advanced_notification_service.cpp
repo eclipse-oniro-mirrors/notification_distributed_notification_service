@@ -727,8 +727,14 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     if (result != ERR_OK) {
         return result;
     }
+    PublishNotificationParameter parameter;
+    parameter.request = request;
+    parameter.bundleOption = bundleOption;
+    parameter.isUpdateByOwner = isUpdateByOwner;
+    parameter.tokenCaller = IPCSkeleton::GetCallingTokenID();
+    parameter.uid = IPCSkeleton::GetCallingUid();
     if (request->GetNotificationTrigger() != nullptr) {
-        return OnNotifyDelayedNotification(request, bundleOption, isUpdateByOwner);
+        return OnNotifyDelayedNotification(parameter);
     }
     std::vector<std::shared_ptr<NotificationRecord>> records;
     FindGeofenceNotificationRecordByKey(request->GetSecureKey(), records);
@@ -737,17 +743,20 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         return ERR_ANS_REPEAT_CREATE;
     }
     if (!records.empty() && request->IsUpdateLiveView()) {
-        return UpdateTriggerNotification(request, bundleOption, isUpdateByOwner, records);
+        return UpdateTriggerNotification(parameter, records);
     }
-    return PublishPreparedNotificationInner(request, bundleOption, isUpdateByOwner);
+    return PublishPreparedNotificationInner(parameter);
 }
 
-ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(const sptr<NotificationRequest> &request,
-    const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner)
+ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(
+    const PublishNotificationParameter &parameter)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("called");
-    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    const sptr<NotificationRequest> &request = parameter.request;
+    const sptr<NotificationBundleOption> &bundleOption = parameter.bundleOption;
+    bool isUpdateByOwner = parameter.isUpdateByOwner;
+    Security::AccessToken::AccessTokenID tokenCaller = parameter.tokenCaller;
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
@@ -801,7 +810,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(const sptr
 #ifdef ENABLE_ANS_AGGREGATION
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
 #endif
-    const int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t uid = parameter.uid;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER

@@ -499,17 +499,17 @@ bool WrapGeofence(ani_env *env,
     }
 
     // longitude: double
-    if (!SetPropertyOptionalByDouble(env, object, "longitude", geofence->GetLongitude())) {
+    if (!SetPropertyValueDouble(env, object, "longitude", geofence->GetLongitude())) {
         ANS_LOGE("WrapGeofence: set longitude failed");
         return false;
     }
     // latitude: double
-    if (!SetPropertyOptionalByDouble(env, object, "latitude", geofence->GetLatitude())) {
+    if (!SetPropertyValueDouble(env, object, "latitude", geofence->GetLatitude())) {
         ANS_LOGE("WrapGeofence: set latitude failed");
         return false;
     }
     // radius: double
-    if (!SetPropertyOptionalByDouble(env, object, "radius", geofence->GetRadius())) {
+    if (!SetPropertyValueDouble(env, object, "radius", geofence->GetRadius())) {
         ANS_LOGE("WrapGeofence: set radius failed");
         return false;
     }

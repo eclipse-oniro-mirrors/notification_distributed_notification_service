@@ -132,34 +132,34 @@ napi_value Common::GetNotificationTriggerDisplayTime(const napi_env &env, const 
 
     // displayTime?: int
     NAPI_CALL(env, napi_has_named_property(env, value, "displayTime", &hasProperty));
-    if (!hasProperty) {
-        ANS_LOGW("Property displayTime expected.");
+    if (hasProperty) {
+        NAPI_CALL(env, napi_get_named_property(env, value, "displayTime", &result));
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types. The type of displayTime must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        int32_t displayTime = NotificationConstant::MIN_GEOFENCE_DISPLAY_TIME_S - 1;
+        napi_get_value_int32(env, result, &displayTime);
+        if (displayTime < NotificationConstant::MIN_GEOFENCE_DISPLAY_TIME_S) {
+            ANS_LOGE("displayTime is invalid.");
+            std::string msg = std::string("Invalid displayTime. The displayTime must be in range ") +
+                std::to_string(NotificationConstant::MIN_GEOFENCE_DISPLAY_TIME_S) + "s to " +
+                std::to_string(NotificationConstant::MAX_GEOFENCE_DISPLAY_TIME_S) + "s.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        if (displayTime > NotificationConstant::MAX_GEOFENCE_DISPLAY_TIME_S) {
+            ANS_LOGW("displayTime is invalid.");
+            displayTime = NotificationConstant::MAX_GEOFENCE_DISPLAY_TIME_S;
+        }
+        notificationTrigger->SetDisplayTime(displayTime);
+    } else {
+        ANS_LOGD("Property displayTime expected.");
         notificationTrigger->SetDisplayTime(NotificationConstant::DEFAULT_GEOFENCE_DISPLAY_TIME_S);
-        return NapiGetNull(env);
     }
-    NAPI_CALL(env, napi_get_named_property(env, value, "displayTime", &result));
-    NAPI_CALL(env, napi_typeof(env, result, &valuetype));
-    if (valuetype != napi_number) {
-        ANS_LOGE("Wrong argument type. Number expected.");
-        std::string msg = "Incorrect parameter types. The type of displayTime must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-        return nullptr;
-    }
-    int32_t displayTime = NotificationConstant::MIN_GEOFENCE_DISPLAY_TIME_S - 1;
-    napi_get_value_int32(env, result, &displayTime);
-    if (displayTime < NotificationConstant::MIN_GEOFENCE_DISPLAY_TIME_S) {
-        ANS_LOGE("displayTime is invalid.");
-        std::string msg = std::string("Invalid displayTime. The displayTime must be in range ") +
-            std::to_string(NotificationConstant::MIN_GEOFENCE_DISPLAY_TIME_S) + "s to " +
-            std::to_string(NotificationConstant::MAX_GEOFENCE_DISPLAY_TIME_S) + "s.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-        return nullptr;
-    }
-    if (displayTime > NotificationConstant::MAX_GEOFENCE_DISPLAY_TIME_S) {
-        ANS_LOGW("displayTime is invalid.");
-        displayTime = NotificationConstant::MAX_GEOFENCE_DISPLAY_TIME_S;
-    }
-    notificationTrigger->SetDisplayTime(displayTime);
     return NapiGetNull(env);
 }
 
@@ -358,32 +358,31 @@ napi_value Common::GetNotificationGeofenceByNumber(const napi_env &env, const na
 
     // delayTime?: int
     NAPI_CALL(env, napi_has_named_property(env, value, "delayTime", &hasProperty));
-    if (!hasProperty) {
-        ANS_LOGW("Property delayTime expected.");
+    if (hasProperty) {
+        int32_t delayTime = NotificationConstant::MIN_GEOFENCE_DELAY_TIME_S - 1;
+        NAPI_CALL(env, napi_get_named_property(env, value, "delayTime", &result));
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types. The type of delayTime must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        napi_get_value_int32(env, result, &delayTime);
+        if (delayTime < NotificationConstant::MIN_GEOFENCE_DELAY_TIME_S ||
+            delayTime > NotificationConstant::MAX_GEOFENCE_DELAY_TIME_S) {
+            ANS_LOGE("delayTime is invalid.");
+            std::string msg = std::string("Invalid delayTime. The delayTime must be in range ") +
+                std::to_string(NotificationConstant::MIN_GEOFENCE_DELAY_TIME_S) + "s to " +
+                std::to_string(NotificationConstant::MAX_GEOFENCE_DELAY_TIME_S) + "s.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        geofence->SetDelayTime(delayTime);
+    } else {
+        ANS_LOGD("Property delayTime expected.");
         geofence->SetDelayTime(NotificationConstant::DEFAULT_GEOFENCE_DELAY_TIME_S);
-        return NapiGetNull(env);
     }
-    int32_t delayTime = NotificationConstant::MIN_GEOFENCE_DELAY_TIME_S - 1;
-    NAPI_CALL(env, napi_get_named_property(env, value, "delayTime", &result));
-    NAPI_CALL(env, napi_typeof(env, result, &valuetype));
-    if (valuetype != napi_number) {
-        ANS_LOGE("Wrong argument type. Number expected.");
-        std::string msg = "Incorrect parameter types. The type of delayTime must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-        return nullptr;
-    }
-    napi_get_value_int32(env, result, &delayTime);
-    if (delayTime < NotificationConstant::MIN_GEOFENCE_DELAY_TIME_S ||
-        delayTime > NotificationConstant::MAX_GEOFENCE_DELAY_TIME_S) {
-        ANS_LOGE("delayTime is invalid.");
-        std::string msg = std::string("Invalid delayTime. The delayTime must be in range ") +
-            std::to_string(NotificationConstant::MIN_GEOFENCE_DELAY_TIME_S) + "s to " +
-            std::to_string(NotificationConstant::MAX_GEOFENCE_DELAY_TIME_S) + "s.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-        return nullptr;
-    }
-    geofence->SetDelayTime(delayTime);
-
     return NapiGetNull(env);
 }
 

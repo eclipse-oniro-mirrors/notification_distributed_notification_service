@@ -27,7 +27,6 @@ constexpr const char* CLASSNAME_BOOLEAN = "std.core.Boolean";
 constexpr const char* CLASSNAME_DOUBLE = "std.core.Double";
 constexpr const char* CLASSNAME_INT = "std.core.Int";
 constexpr const char* CLASSNAME_LONG = "std.core.Long";
-constexpr double DOUBLE_ZERO = 0.0;
 ani_object GetNullObject(ani_env *env)
 {
     ani_ref nullRef;
@@ -248,7 +247,7 @@ ani_status GetPropertyValueDouble(ani_env *env, ani_object param, const char *na
         return ANI_INVALID_ARGS;
     }
     ani_status status = ANI_ERROR;
-    ani_double res = DOUBLE_ZERO;
+    ani_double res = value;
     if ((status = env->Object_GetPropertyByName_Double(param, name, &res)) != ANI_OK) {
         ANS_LOGE("Object_GetPropertyByName_Double failed, status : %{public}d", status);
         return status;
@@ -979,6 +978,22 @@ bool SetPropertyOptionalByDouble(ani_env *env, ani_object &object, const char *n
         return false;
     }
     return SetPropertyByRef(env, object, name, doubleObj);
+}
+
+bool SetPropertyValueDouble(ani_env *env, ani_object param, const char *name, double value)
+{
+    ANS_LOGD("enter SetPropertyValueDouble");
+    if (env == nullptr) {
+        ANS_LOGE("The parameter is invalid.");
+        return false;
+    }
+
+    ani_status status = ANI_ERROR;
+    if ((status = env->Object_SetPropertyByName_Double(param, name, value)) != ANI_OK) {
+        ANS_LOGE("Object_SetPropertyByName_Double, status: %{public}d", status);
+        return false;
+    }
+    return true;
 }
 
 bool SetPropertyOptionalByLong(ani_env *env, ani_object &object, const char *name, int64_t value)
