@@ -204,7 +204,8 @@ void ReminderEventManager::ReminderEventSubscriber::OnReceiveEvent(const EventFw
         std::string bundleName = ele.GetBundleName();
         int32_t userId = want.GetIntParam(AppExecFwk::Constants::USER_ID, -1);
         int32_t uid = want.GetIntParam(AppExecFwk::Constants::UID, -1);
-        manager->CancelAllReminders(bundleName, userId, uid);
+        manager->CancelAllReminders(bundleName, userId, uid,
+            action == CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
         return;
     }
     if (action == CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED) {

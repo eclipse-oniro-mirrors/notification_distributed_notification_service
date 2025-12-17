@@ -472,6 +472,11 @@ void ReminderDataShareHelper::InitNormalInfo(sptr<ReminderRequest>& reminder)
     reminder->SetRingLoop(false);
     reminder->SetRingChannel(ReminderRequest::RingChannel::NOTIFICATION);
     reminder->InitUserId(userId_);
+    if (uid_ <= 0) {
+        ANSR_LOGI("Get the calendar's UID again.");
+        uid_ = ReminderBundleManagerHelper::GetInstance().GetDefaultUidByBundleName(
+            ReminderCalendarShareTable::NAME, userId_);
+    }
     reminder->InitUid(uid_);
     reminder->InitCreatorUid(dataUid_);
     reminder->SetShare(true);
