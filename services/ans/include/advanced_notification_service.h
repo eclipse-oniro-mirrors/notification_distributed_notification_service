@@ -1950,7 +1950,7 @@ private:
     ErrCode StartGeofenceTriggerTimer(const std::shared_ptr<NotificationRecord> &record,
         int64_t expiredTimePoint, const int32_t reason);
     ErrCode CheckGeofenceNotificationRequest(const sptr<NotificationRequest> &request);
-    void ConvertTriggerLiveviewStatus(sptr<NotificationRequest> &request);
+    void UpdateTriggerRequest(sptr<NotificationRequest> &request);
     void RemoveTriggerNotificationListByTriggerKey(std::string triggerKey);
     ErrCode CheckTriggerNotificationRequest(const sptr<NotificationRequest> &request);
     int32_t SetTriggerNotificationRequestToDb(const GeofencePublishNotificationRequestDb &requestDb);
