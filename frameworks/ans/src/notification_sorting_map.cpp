@@ -43,13 +43,11 @@ void NotificationSortingMap::SetKey(const std::string &key)
 
 bool NotificationSortingMap::GetNotificationSorting(const std::string &key, NotificationSorting &sorting) const
 {
-    for (auto item : sortings_) {
-        if (item.first == key) {
-            sorting = item.second;
-            return true;
-        }
+    const auto sortingIter = sortings_.find(key);
+    if (sortingIter != sortings_.cend()) {
+        sorting = sortingIter->second;
+        return true;
     }
-
     return false;
 }
 
