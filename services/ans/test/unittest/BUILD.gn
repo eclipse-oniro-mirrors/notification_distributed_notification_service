@@ -232,6 +232,88 @@ ohos_unittest("notification_preferences_database_test") {
   part_name = "${component_name}"
 }
 
+ohos_unittest("notification_preferences_database_two_test") {
+  module_out_path = module_output_path
+  include_dirs = [
+    ".",
+    "include",
+    "/${services_path}/ans/include",
+    "/${services_path}/ans/include/utils/",
+    "${services_path}/ans/test/unittest/mock/include",
+    "${services_path}/../framworks/core/include",
+    "/${services_path}/ans/include/utils/",
+  ]
+
+  defines = []
+
+  sources = [
+    "${test_path}/mock/mock_tokenid_kit.cpp",
+    "mock/blob.cpp",
+    "notification_preferences_database_two_test.cpp",
+    "notification_dialog_test/mock_os_account_manager_annex.cpp",
+  ]
+
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/ans:libans",
+  ]
+
+  if (distributed_notification_service_feature_distributed_db) {
+    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+    deps += [ "${services_path}/distributed:libans_distributed" ]
+    include_dirs += [ "${services_path}/distributed/include" ]
+  }
+
+  external_deps = [
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_manager",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "device_manager:devicemanagersdk",
+    "eventhandler:libeventhandler",
+    "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
+    "image_framework:image_native",
+    "ipc:ipc_core",
+    "kv_store:distributeddata_inner",
+    "os_account:os_account_innerkits",
+    "relational_store:native_rdb",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "time_service:time_client",
+    "bluetooth:btframework",
+  ]
+
+  if (device_usage) {
+    external_deps += [ "device_usage_statistics:usagestatsinner" ]
+    defines += [ "DEVICE_USAGE_STATISTICS_ENABLE" ]
+  }
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
+
+  cflags = []
+  if (hisysevent_usage) {
+    external_deps += [ "hisysevent:libhisysevent" ]
+    cflags += [ "-DHAS_HISYSEVENT_PART" ]
+  }
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
 ohos_unittest("notification_subscriber_manager_test") {
   module_out_path = module_output_path
   include_dirs = [
@@ -813,6 +895,7 @@ ohos_unittest("notification_preferences_test") {
     "mock/mock_single_kv_store.cpp",
     "notification_preferences_info_test.cpp",
     "notification_preferences_test.cpp",
+    "notification_dialog_test/mock_os_account_manager_annex.cpp",
   ]
 
   if (distributed_notification_service_feature_all_scenario_collaboration) {
@@ -1690,6 +1773,7 @@ ohos_unittest("advanced_notification_service_unit_test") {
     "mock/mock_notification_helper.cpp",
     "mock/mock_push_callback_stub.cpp",
     "mock/mock_time_service_client.cpp",
+    "notification_dialog_test/mock_os_account_manager_annex.cpp",
   ]
 
   defines = []
@@ -1725,6 +1809,7 @@ ohos_unittest("advanced_notification_service_unit_test") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
+    "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "time_service:time_client",
     "bluetooth:btframework",
@@ -1972,6 +2057,7 @@ group("unittest") {
     ":notification_extension_wrapper_unit_test",
     ":notification_preferences_database_branch_test",
     ":notification_preferences_database_test",
+    ":notification_preferences_database_two_test",
     ":notification_preferences_second_test",
     ":notification_preferences_test",
     ":notification_publish_service_test",

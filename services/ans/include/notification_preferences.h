@@ -707,6 +707,8 @@ private:
     std::string GenerateBundleKey(const sptr<NotificationBundleOption> &bundleOption) const;
     bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption) const;
     void SetDistributedEnabledForBundle(const NotificationPreferencesInfo::BundleInfo& bundleInfo);
+    ErrCode GetAllNotificationEnabledBundlesInner(
+        std::vector<NotificationBundleOption> &bundleOption, int32_t userId = -1);
 
 private:
     std::map<int32_t, int64_t> cloneTimestamp;

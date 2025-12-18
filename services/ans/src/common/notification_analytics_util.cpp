@@ -1564,33 +1564,15 @@ bool NotificationAnalyticsUtil::ReportAllBundlesSlotEnabled()
     if (!CheckSlotNeedReport()) {
         return false;
     }
-#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
-    bool isSuccess = true;
     std::vector<int32_t> userIds;
     OsAccountManagerHelper::GetInstance().GetForegroundUserIds(userIds);
-    for (auto userId : userIds) {
-        if (!CreateSlotTimerExecute(userId)) {
-            isSuccess = false;
-            continue;
-        }
-    }
-    return isSuccess;
-#endif
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
-
-    if (userId == SUBSCRIBE_USER_INIT) {
-        ANS_LOGE("userId is failed");
-        return false;
-    }
-
-    if (!CreateSlotTimerExecute(userId)) {
+    if (!CreateSlotTimerExecute(userIds)) {
         return false;
     }
     return true;
 }
 
-bool NotificationAnalyticsUtil::CreateSlotTimerExecute(const int32_t &userId)
+bool NotificationAnalyticsUtil::CreateSlotTimerExecute(const std::vector<int32_t> &userIds)
 {
     std::lock_guard<ffrt::mutex> lock(reportSlotEnabledMutex_);
     if (g_reportSlotFlag) {
@@ -1609,9 +1591,10 @@ bool NotificationAnalyticsUtil::CreateSlotTimerExecute(const int32_t &userId)
         reportSlotEnabledTimerId_ = timer->CreateTimer(slotTimeInfo);
     }
 
-    auto triggerFunc = [userId] {
-        ANS_LOGI("trigger is arrived, userid:%{public}d", userId);
-        GetAllSlotMessageCache(userId);
+    auto triggerFunc = [userIds] {
+        for (const auto userId : userIds) {
+            GetAllSlotMessageCache(userId);
+        }
         ExecuteSlotReportList();
     };
 

@@ -2874,6 +2874,19 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetHashCodeRule_0100, TestSize.Lev
     EXPECT_EQ(notificationPreferencesDatabase->GetHashCodeRule(userId), 0);
 }
 
+HWTEST_F(NotificationPreferencesDatabaseTest, GetHashCodeRule_0200, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
+        std::make_shared<NotificationPreferencesDatabase>();
+    int32_t uid = 100;
+    int32_t userId = 100;
+    uint32_t type = 0;
+    auto ret = notificationPreferencesDatabase->SetHashCodeRule(uid, type, userId);
+    EXPECT_TRUE(ret);
+    auto res = notificationPreferencesDatabase->GetHashCodeRule(uid, userId);
+    EXPECT_EQ(res, type);
+}
+
 HWTEST_F(NotificationPreferencesDatabaseTest, PutDistributedBundleOption_001, TestSize.Level0)
 {
     std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =

@@ -207,58 +207,7 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
-    int32_t slotTypeInt)
-{
-    ANS_LOGD("called");
-
-    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGE("AccessTokenHelper::CheckPermission failed.");
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
-        ANS_LOGD("GetActiveUserId is false");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
-    }
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notificationSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("called");
-        notifications.clear();
-        for (auto record : notificationList_) {
-            if (record->notification == nullptr || record->notification->request_ == nullptr) {
-                continue;
-            }
-            if (record->notification->request_->GetSlotType() != slotType) {
-                continue;
-            }
-
-            int32_t receiver = record->notification->request_->GetReceiverUserId();
-            if (receiver == SUBSCRIBE_USER_INIT || (receiver != 0 && receiver != userId)) {
-                ANS_LOGI("Userid %{public}d %{public}d %{public}s.", receiver, userId,
-                    record->notification->GetKey().c_str());
-                continue;
-            }
-            notifications.push_back(record->notification);
-        }
-        DelayedSingleton<HealthWhiteListUtil>::GetInstance()->AddExtendFlagForRequest(notifications);
-    }));
-    notificationSvrQueue_->wait(handler);
-    return ERR_OK;
-}
-
-ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+ErrCode AdvancedNotificationService::GetAllNotificationsBySlotTypeInner(std::vector<sptr<Notification>> &notifications,
     int32_t slotTypeInt, int32_t userId)
 {
     ANS_LOGD("called");
@@ -300,6 +249,28 @@ ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<s
     }));
     notificationSvrQueue_->wait(handler);
     return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+    int32_t slotTypeInt)
+{
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+        ANS_LOGD("GetActiveUserId is false");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+    return GetAllNotificationsBySlotTypeInner(notifications, slotTypeInt, userId);
+}
+
+ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+    int32_t slotTypeInt, int32_t userId)
+{
+    ANS_LOGD("called");
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("Check user exists failed.");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+    return GetAllNotificationsBySlotTypeInner(notifications, slotTypeInt, userId);
 }
 
 ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(

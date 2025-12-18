@@ -42,12 +42,14 @@
 #include "bundle_manager_helper.h"
 #include "mock_bundle_mgr.h"
 #include "notification_extension_wrapper.h"
+#include "os_account_manager.h"
 #include "os_account_manager_helper.h"
 
 using namespace testing::ext;
 using namespace OHOS::Media;
 using namespace OHOS::Security::AccessToken;
 
+extern void MockIsOsAccountExists(bool mockRet);
 extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
 
 namespace OHOS {
@@ -557,6 +559,44 @@ HWTEST_F(AnsUtilsTest, OnBundleRemoved_00002, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: onBundleRemovedByUserId_00001
+ * @tc.desc: Test onBundleRemovedByUserId
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, onBundleRemovedByUserId_00001, Function | SmallTest | Level1)
+{
+    int notificationId = 1;
+    int32_t userId = 100;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    TestAddNotification(notificationId, bundle);
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+
+    advancedNotificationService_->onBundleRemovedByUserId(bundle, userId);
+    SleepForFC();
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+}
+
+/**
+ * @tc.name: onBundleRemovedByUserId_00002
+ * @tc.desc: Test onBundleRemovedByUserId
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, onBundleRemovedByUserId_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    int32_t userId = 100;
+    request->SetNotificationId(1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    auto ret = advancedNotificationService_->AssignToNotificationList(record);
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->onBundleRemovedByUserId(bundle, userId);
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
  * @tc.name: OnBundleDataAdd_00001
  * @tc.desc: Test OnBundleDataAdd
  * @tc.type: FUNC
@@ -997,7 +1037,57 @@ HWTEST_F(AnsUtilsTest, AllowUseReminder_00003, Function | SmallTest | Level1)
     
     EXPECT_FALSE(advancedNotificationService_->AllowUseReminder(str););
 }
+
+HWTEST_F(AnsUtilsTest, AllowUseReminder_00004, Function | SmallTest | Level1)
+{
+    EXTENTION_WRAPPER->reminderControl_ = [](const std::string &bundleName) { return ERR_OK; };
+    std::string str = "test1";
+    int32_t userId = 100;
+    
+    EXPECT_TRUE(advancedNotificationService_->AllowUseReminder(str, userId););
+}
+
+HWTEST_F(AnsUtilsTest, AllowUseReminder_00005, Function | SmallTest | Level1)
+{
+    EXTENTION_WRAPPER->reminderControl_ = [](const std::string &bundleName) { return ERR_ANS_INVALID_BUNDLE; };
+    std::string str = "test1";
+    int32_t userId = 100;
+    
+    EXPECT_FALSE(advancedNotificationService_->AllowUseReminder(str, userId););
+}
 #endif // ENABLE_ANS_ADDITIONAL_CONTROL
+
+/**
+ * @tc.name: AllowUseReminder_00006
+ * @tc.desc: Test AllowUseReminder
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, AllowUseReminder_00006, Function | SmallTest | Level1)
+{
+    std::string str = "test1";
+    bool b = false;
+    int32_t userId = 100;
+    ASSERT_EQ(advancedNotificationService_->AllowUseReminder(str, userId, b), (int)ERR_OK);
+}
+
+/**
+ * @tc.name: AllowUseReminder_00008
+ * @tc.desc: Test AllowUseReminder
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, AllowUseReminder_00008, Function | SmallTest | Level1)
+{
+    bool isOsAccountExists = false;
+    OHOS::AccountSA::OsAccountManager::IsOsAccountExists(0, isOsAccountExists);
+    MockIsOsAccountExists(false);
+    std::string str = "test1";
+    int32_t userId = -99;
+    auto ret = advancedNotificationService_->AllowUseReminder(str, userId);
+    EXPECT_FALSE(ret);
+    MockIsOsAccountExists(isOsAccountExists);
+}
 
 /**
  * @tc.name: CloseAlert_00001
@@ -1323,5 +1413,47 @@ HWTEST_F(AnsUtilsTest, TestGenerateCloneValidBundleOption_GetBundleInfoV9Failed,
     EXPECT_EQ(result, nullptr);
 }
 #endif
+
+/**
+ * @tc.name: RemoveDoNotDisturbProfileTrustList_00001
+ * @tc.desc: Test RemoveDoNotDisturbProfileTrustList
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, RemoveDoNotDisturbProfileTrustList_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    int32_t userId = 100;
+    NotificationPreferences::GetInstance()->RemoveDoNotDisturbProfileTrustList(userId, bundle);
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+
+    sptr<NotificationDoNotDisturbProfile> profile;
+    preferencesInfo->doNotDisturbProfiles_["2_100_3"] = profile;
+
+    preferencesInfo->GetAllDoNotDisturbProfiles(userId, profiles);
+    EXPECT_EQ(profiles.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveDoNotDisturbProfileTrustList_00002
+ * @tc.desc: Test RemoveDoNotDisturbProfileTrustList
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, RemoveDoNotDisturbProfileTrustList_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    int32_t userId = 100;
+    NotificationPreferences::GetInstance()->RemoveDoNotDisturbProfileTrustList(userId, bundle);
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+
+    sptr<NotificationDoNotDisturbProfile> profile;
+    preferencesInfo->doNotDisturbProfiles_["2_99_3"] = profile;
+
+    preferencesInfo->GetAllDoNotDisturbProfiles(userId, profiles);
+    EXPECT_EQ(profiles.size(), 0);
+}
 }  // namespace Notification
 }  // namespace OHOS

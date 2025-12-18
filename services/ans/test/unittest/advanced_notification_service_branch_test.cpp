@@ -37,12 +37,14 @@
 #include "notification_constant.h"
 #include "notification_record.h"
 #include "notification_subscriber.h"
+#include "os_account_manager.h"
 #include "refbase.h"
 
 extern void MockVerifyNativeToken(bool mockRet);
 extern void MockVerifyShellToken(bool mockRet);
 extern void MockGetDistributedEnableInApplicationInfo(bool mockRet, uint8_t mockCase = 0);
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
+extern void MockIsOsAccountExists(bool mockRet);
 
 using namespace testing::ext;
 using namespace OHOS::Media;
@@ -1491,6 +1493,28 @@ HWTEST_F(AnsBranchTest, IsNeedSilentInDoNotDisturbMode_4000, Function | SmallTes
     int32_t userId = 100;
     ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(
         phoneNumber, callerType, userId), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number  : IsNeedSilentInDoNotDisturbMode_5000
+ * @tc.name : IsNeedSilentInDoNotDisturbMode
+ * @tc.desc : Test IsNeedSilentInDoNotDisturbMode.
+ */
+HWTEST_F(AnsBranchTest, IsNeedSilentInDoNotDisturbMode_5000, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    bool isOsAccountExists = false;
+    OHOS::AccountSA::OsAccountManager::IsOsAccountExists(0, isOsAccountExists);
+    MockIsOsAccountExists(false);
+
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    int32_t userId = -99;
+    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(
+        phoneNumber, callerType, userId), ERR_ANS_GET_ACTIVE_USER_FAILED);
+    MockIsOsAccountExists(isOsAccountExists);
 }
 
 /**

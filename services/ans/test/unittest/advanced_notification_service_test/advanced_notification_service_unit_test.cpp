@@ -33,6 +33,8 @@
 #include "string_wrapper.h"
 #include "mock_push_callback_stub.h"
 
+extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
+
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
 
@@ -1470,6 +1472,35 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetAllNotificationsBySlotType_500,
 
     ASSERT_EQ(res, (int)ERR_OK);
     ASSERT_EQ(notifications.size(), 1);
+}
+
+/**
+ * @tc.name: GetAllNotificationsBySlotType_600
+ * @tc.desc: test GetAllNotificationsBySlotType when caller has no permission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, GetAllNotificationsBySlotType_600, Function | SmallTest | Level1)
+{
+    MockQueryForgroundOsAccountId(true, 100);
+    std::vector<sptr<Notification>> notifications;
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    auto res = advancedNotificationService_->GetAllNotificationsBySlotType(notifications, slotType);
+    ASSERT_EQ(res, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: GetAllNotificationsBySlotType_700
+ * @tc.desc: test GetAllNotificationsBySlotType when caller has no permission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, GetAllNotificationsBySlotType_700, Function | SmallTest | Level1)
+{
+    MockQueryForgroundOsAccountId(false, 0);
+    std::vector<sptr<Notification>> notifications;
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    auto res = advancedNotificationService_->GetAllNotificationsBySlotType(notifications, slotType);
+    ASSERT_EQ(res, (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
+    MockQueryForgroundOsAccountId(true, 0);
 }
 
 /**

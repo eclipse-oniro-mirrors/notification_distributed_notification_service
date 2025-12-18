@@ -307,7 +307,7 @@ private:
     static bool GetReportSlotMessage(std::string& budleEntryKey, std::string& budleEntryValue,
         ReportSlotMessage& reportSlotMessage, const int32_t &userId);
 
-    static bool CreateSlotTimerExecute(const int32_t &userId);
+    static bool CreateSlotTimerExecute(const std::vector<int32_t> &userIds);
 
     static void ExecuteSlotReportList();
 

@@ -78,11 +78,16 @@ private:
     std::shared_ptr<DataShare::DataShareHelper> CreateContactDataShareHelper(std::string uri);
     std::shared_ptr<DataShare::DataShareHelper> CreateIntelligentDataShareHelper(std::string uri);
     std::shared_ptr<DataShare::DataShareHelper> CreateIntelligentDataShareHelper(std::string uri, const int32_t userId);
+    std::shared_ptr<DataShare::DataShareHelper> CreateIntelligentDataShareHelperInner(
+        std::string uri, int32_t userId = -1);
     std::shared_ptr<DataShare::DataShareResultSet> GetContactResultSet(Uri &uri, const std::string &phoneNumber,
         const std::string &policy, const std::string &profileId, const std::string isSupportIntelligentScene);
     std::shared_ptr<DataShare::DataShareResultSet> GetContactResultSet(Uri &uri, const std::string &phoneNumber,
         const std::string &policy, const std::string &profileId,
         const std::string isSupportIntelligentScene, const int32_t userId);
+    std::shared_ptr<DataShare::DataShareResultSet> GetContactResultSetInner(Uri &uri, const std::string &phoneNumber,
+        const std::string &policy, const std::string &profileId,
+        const std::string isSupportIntelligentScene, int32_t userId = -1);
     bool dealWithContactResult(std::shared_ptr<DataShare::DataShareResultSet> resultSet, const std::string &policy);
     std::string GetIntelligentData(const std::string &uri, const std::string &key);
     std::string GetIntelligentData(const std::string &uri, const std::string &key, const int32_t userId);
@@ -91,6 +96,9 @@ private:
     void UnregisterObserver();
     void AddDataShareItems(Uri &uri, const std::string &key, const std::string &value);
     bool QuerydataShareItems(Uri &uri, const std::string &key, std::string &value);
+    ErrCode QueryContactInner(Uri &uri, const std::string &phoneNumber,
+        const std::string &policy, const std::string &profileId,
+        const std::string isSupportIntelligentScene, int32_t userId = -1);
 private:
     static bool isDataShareReady_;
     ffrt::mutex dataShareItemMutex_;

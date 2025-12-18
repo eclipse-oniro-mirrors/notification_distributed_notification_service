@@ -551,6 +551,10 @@ private:
         const std::unordered_map<std::string, std::string> &datas,
         std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
 
+    bool HandleDataBaseMapInner(
+        const std::unordered_map<std::string, std::string> &datas,
+        std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
+
     void GetValueFromDisturbeDB(const std::string &key, const int &userId,
         std::function<void(std::string &)> function);
     void GetValueFromDisturbeDB(const std::string &key, const int &userId,
@@ -648,6 +652,9 @@ private:
     bool isCachedSmartReminderEnableList_ = false;
     std::vector<std::string> smartReminderEnableList_ = {};
     std::string GenerateHashCodeGenerate(int32_t uid);
+    uint32_t GetHashCodeRuleInner(const int32_t uid, const int32_t userId);
+    bool GetAllNotificationEnabledBundlesInner(
+        std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
 };
 } // namespace Notification
 } // namespace OHOS
