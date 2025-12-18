@@ -23,6 +23,8 @@
 
 namespace OHOS {
 namespace NotificationManagerSts {
+constexpr int32_t MAX_TEXT_SIZE = 3072;
+
 void AniSetBundlePriorityConfig(ani_env* env, ani_object obj, ani_string value)
 {
     std::string valueStr = "";
@@ -31,6 +33,9 @@ void AniSetBundlePriorityConfig(ani_env* env, ani_object obj, ani_string value)
         OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID,
             NotificationSts::FindAnsErrMsg(Notification::ERROR_PARAM_INVALID));
         return;
+    }
+    if (valueStr.size() > MAX_TEXT_SIZE) {
+        valueStr = valueStr.substr(0, MAX_TEXT_SIZE);
     }
     Notification::NotificationBundleOption option;
     if (!NotificationSts::UnwrapBundleOption(env, obj, option)) {

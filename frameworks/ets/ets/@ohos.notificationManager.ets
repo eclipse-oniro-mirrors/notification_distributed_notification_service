@@ -373,7 +373,7 @@ export default namespace notificationManager {
             error = errorParamInvalid
             return error;
         }
-        if (bundle.bundle == null || bundle.bundle?.length === 0) {
+        if (bundle.bundle == null || bundle.bundle === undefined || bundle.bundle?.length === 0) {
             error = errorParamInvalid
             return error;
         }
