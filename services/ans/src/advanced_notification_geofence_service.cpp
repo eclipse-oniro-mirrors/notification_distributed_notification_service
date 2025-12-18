@@ -192,6 +192,12 @@ ErrCode AdvancedNotificationService::PublishDelayedNotification(const std::strin
     NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_10));
     if (result != ERR_OK) {
         ANS_LOGE("PublishPreparedNotificationInner failed, errCode=%{public}d", result);
+        auto status = record->request->GetLiveViewStatus();
+        if (status == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE) {
+            record->request->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE);
+        } else if (status == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END) {
+            record->request->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END);
+        }
         return result;
     }
     result = NotificationPreferences::GetInstance()->DeleteKvFromDb(triggerKey, userId);
@@ -629,6 +635,7 @@ ErrCode AdvancedNotificationService::UpdateTriggerNotification(PublishNotificati
     newRecord->uid = parameter.uid;
     newRecord->request->FillMissingParameters(oldRecord->request);
     newRecord->request->SetLiveViewStatus(status);
+    newRecord->request->SetUpdateOnly(oldRecord->request->IsUpdateOnly());
     if (oldRecord->request->GetNotificationTrigger() != nullptr) {
         newRecord->request->SetNotificationTrigger(oldRecord->request->GetNotificationTrigger());
     }
@@ -765,6 +772,11 @@ void AdvancedNotificationService::RemoveFromTriggerNotificationList(const sptr<N
 ErrCode AdvancedNotificationService::CheckSwitchStatus(const sptr<NotificationRequest> &request,
     const sptr<NotificationBundleOption> &bundleOption)
 {
+    if (request == nullptr || bundleOption == nullptr) {
+        ANS_LOGE("Request or bundleOption is null.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     bool isGeofenceEnabled = false;
     auto result = NotificationPreferences::GetInstance()->IsGeofenceEnabled(isGeofenceEnabled);
     if (result != ERR_OK) {
@@ -781,13 +793,7 @@ ErrCode AdvancedNotificationService::CheckSwitchStatus(const sptr<NotificationRe
     result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slot);
     if ((result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) ||
         (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST)) {
-        slot = new (std::nothrow) NotificationSlot(slotType);
-        if (slot == nullptr) {
-            ANS_LOGE("Failed to create NotificationSlot instance");
-            return ERR_NO_MEMORY;
-        }
-
-        GenerateSlotReminderMode(slot, bundleOption);
+        return ERR_OK;
     }
     if (result == ERR_OK) {
         std::string bundleName = bundleOption->GetBundleName();

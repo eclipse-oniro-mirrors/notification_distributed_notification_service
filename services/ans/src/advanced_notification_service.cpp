@@ -392,7 +392,9 @@ ErrCode AdvancedNotificationService::AssignToNotificationList(const std::shared_
             return ERR_ANS_NOTIFICATION_NOT_EXISTS;
         }
         record->request->SetCreateTime(GetCurrentTime());
-        result = PublishInNotificationList(record);
+        if (record->request->GetLiveViewStatus() != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END) {
+            result = PublishInNotificationList(record);
+        }
     } else {
         if (record->request->IsAlertOneTime()) {
             CloseAlert(record);

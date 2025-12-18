@@ -983,8 +983,8 @@ bool SetPropertyOptionalByDouble(ani_env *env, ani_object &object, const char *n
 bool SetPropertyValueDouble(ani_env *env, ani_object param, const char *name, double value)
 {
     ANS_LOGD("enter SetPropertyValueDouble");
-    if (env == nullptr) {
-        ANS_LOGE("The parameter is invalid.");
+    if (env == nullptr || param == nullptr || name == nullptr) {
+        ANS_LOGE("SetPropertyValueDouble fail, has nullptr");
         return false;
     }
 
