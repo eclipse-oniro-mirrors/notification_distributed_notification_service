@@ -459,3 +459,21 @@ HWTEST_F(NotificationCloneDisturbTest, CheckBundleInfo_Test_003, Function | Smal
     EXPECT_EQ(bundleList.size(), 0);
     EXPECT_EQ(trustList.size(), 0);
 }
+
+/**
+ * @tc.name: OnRestoreEnd_Test_001
+ * @tc.desc: Test that clear restore info.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneDisturbTest, OnRestoreEnd_Test_001, Function | SmallTest | Level1)
+{
+    notificationCloneDisturb->profiles_.clear();
+    notificationCloneDisturb->OnRestoreEnd(100);
+
+    sptr<NotificationDoNotDisturbProfile> disturbProfile = new NotificationDoNotDisturbProfile();
+    notificationCloneDisturb->profiles_.push_back(disturbProfile);
+    notificationCloneDisturb->OnRestoreEnd(100);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    EXPECT_EQ(notificationCloneDisturb->profiles_.empty(), true);
+}

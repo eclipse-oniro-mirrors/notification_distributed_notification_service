@@ -49,6 +49,7 @@ public:
     int32_t OnBackup(MessageParcel& data, MessageParcel& reply);
     int32_t OnRestore(MessageParcel& data, MessageParcel& reply);
     void OnUserSwitch(int32_t userId);
+    void OnRestoreEnd();
     void OnRestoreStart(EventFwk::Want want);
     void OnDhRestoreStart(const std::string bundleName, const int32_t uid);
 

@@ -27,6 +27,7 @@ class NotificationClonePriority final : public NotificationCloneTemplate {
 public:
     static std::shared_ptr<NotificationClonePriority> GetInstance();
     ErrCode OnBackup(nlohmann::json &jsonObject) override;
+    void OnRestoreEnd(int32_t userId) override;
     void OnRestoreStart(const std::string bundleName, int32_t appIndex, int32_t userId, int32_t uid) override;
     void OnRestore(const nlohmann::json &jsonObject, std::set<std::string> systemApps) override;
     void OnUserSwitch(int32_t userId) override;

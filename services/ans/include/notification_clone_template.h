@@ -28,6 +28,7 @@ public:
     NotificationCloneTemplate() = default;
     virtual ~NotificationCloneTemplate() = default;
     virtual ErrCode OnBackup(nlohmann::json &jsonObject) = 0;
+    virtual void OnRestoreEnd(int32_t userId) { };
     virtual void OnRestore(const nlohmann::json &jsonObject, std::set<std::string> systemApps) = 0;
     virtual void OnUserSwitch(int32_t userId) = 0;
     virtual void OnRestoreStart(const std::string bundleName, int32_t appIndex,

@@ -67,6 +67,16 @@ ErrCode DhNotificationCloneBundle::OnBackup(nlohmann::json &jsonObject)
     return ERR_OK;
 }
 
+void DhNotificationCloneBundle::OnRestoreEnd(int32_t userId)
+{
+    std::unique_lock lock(lock_);
+    if (!bundlesInfo_.empty()) {
+        NotificationPreferences::GetInstance()->DelBatchCloneBundleInfo(ZERO_USERID, bundlesInfo_);
+        bundlesInfo_.clear();
+    }
+    ANS_LOGW("Dh On clear Restore");
+}
+
 void DhNotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject, std::set<std::string> systemApps)
 {
     ANS_LOGI("DhNotificationCloneBundle OnRestore");

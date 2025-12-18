@@ -51,6 +51,16 @@ ErrCode NotificationClonePriority::OnBackup(nlohmann::json &jsonObject)
     return ERR_OK;
 }
 
+void NotificationClonePriority::OnRestoreEnd(int32_t userId)
+{
+    std::unique_lock lock(lock_);
+    if (!priorityInfo_.empty()) {
+        NotificationPreferences::GetInstance()->DelClonePriorityInfos(userId, priorityInfo_);
+        priorityInfo_.clear();
+    }
+    ANS_LOGW("Priority on clear Restore");
+}
+
 void NotificationClonePriority::OnRestore(const nlohmann::json &jsonObject, std::set<std::string> systemApps)
 {
     if (jsonObject.is_null() || !jsonObject.is_array()) {

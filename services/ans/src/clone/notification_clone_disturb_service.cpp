@@ -61,6 +61,17 @@ ErrCode NotificationCloneDisturb::OnBackup(nlohmann::json &jsonObject)
     return ERR_OK;
 }
 
+void NotificationCloneDisturb::OnRestoreEnd(int32_t userId)
+{
+    cloneDisturbQueue_->submit_h(std::bind([&, userId]() {
+        if (!profiles_.empty()) {
+            NotificationPreferences::GetInstance()->DelBatchCloneProfileInfo(userId, profiles_);
+            profiles_.clear();
+        }
+        ANS_LOGW("Disturb on clear Restore");
+    }));
+}
+
 void NotificationCloneDisturb::OnRestore(const nlohmann::json &jsonObject, std::set<std::string> systemApps)
 {
     if (jsonObject.is_null() || !jsonObject.is_array()) {

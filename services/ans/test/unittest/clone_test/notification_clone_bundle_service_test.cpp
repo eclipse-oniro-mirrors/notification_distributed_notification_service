@@ -295,3 +295,20 @@ HWTEST_F(NotificationCloneBundleTest, OnUserSwitch_Test_001, Function | SmallTes
     // Verify that the profile is deleted
     EXPECT_EQ(notificationCloneBundle->cloneBundleQueue_, nullptr);
 }
+
+/**
+ * @tc.name: OnRestoreEnd_Test_001
+ * @tc.desc: Test that clear restore info.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleTest, OnRestoreEnd_Test_001, Function | SmallTest | Level1)
+{
+    notificationCloneBundle->bundlesInfo_.clear();
+    notificationCloneBundle->OnRestoreEnd(100);
+
+    NotificationCloneBundleInfo cloneBundleInfo;
+    notificationCloneBundle->bundlesInfo_.push_back(cloneBundleInfo);
+    notificationCloneBundle->OnRestoreEnd(100);
+    EXPECT_EQ(notificationCloneBundle->bundlesInfo_.empty(), true);
+}
