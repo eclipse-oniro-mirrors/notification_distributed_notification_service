@@ -242,3 +242,20 @@ HWTEST_F(DhNotificationCloneBundleTest, OnUserSwitch_Test_001, Function | SmallT
 
     EXPECT_EQ(dhNotificationCloneBundle->dhCloneBundleQueue_, nullptr);
 }
+
+/**
+ * @tc.name: OnRestoreEnd_Test_001
+ * @tc.desc: Test that clear restore info.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(DhNotificationCloneBundleTest, OnRestoreEnd_Test_001, Function | SmallTest | Level1)
+{
+    dhNotificationCloneBundle->bundlesInfo_.clear();
+    dhNotificationCloneBundle->OnRestoreEnd(100);
+
+    NotificationCloneBundleInfo cloneBundleInfo;
+    dhNotificationCloneBundle->bundlesInfo_.push_back(cloneBundleInfo);
+    dhNotificationCloneBundle->OnRestoreEnd(100);
+    EXPECT_EQ(dhNotificationCloneBundle->bundlesInfo_.empty(), true);
+}

@@ -66,6 +66,19 @@ ErrCode NotificationCloneBundle::OnBackup(nlohmann::json &jsonObject)
     return ERR_OK;
 }
 
+void NotificationCloneBundle::OnRestoreEnd(int32_t userId)
+{
+    std::unique_lock lock(lock_);
+    if (!bundlesInfo_.empty()) {
+        NotificationPreferences::GetInstance()->DelBatchCloneBundleInfo(userId, bundlesInfo_);
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+        NotificationPreferences::GetInstance()->ClearExtensionSubscriptionClonedInvalidBundles(userId);
+#endif
+        bundlesInfo_.clear();
+    }
+    ANS_LOGW("Bundle On clear Restore %{public}d", userId);
+}
+
 void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject, std::set<std::string> systemApps)
 {
     ANS_LOGI("NotificationCloneBundle OnRestore");

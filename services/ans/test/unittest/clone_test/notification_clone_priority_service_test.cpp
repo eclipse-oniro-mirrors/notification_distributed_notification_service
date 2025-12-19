@@ -117,5 +117,22 @@ HWTEST_F(NotificationClonePriorityTest, OnRestore_00001, Function | SmallTest | 
     EXPECT_EQ(NotificationPreferences::GetInstance()->IsPriorityEnabledByBundle(bundleOption, enableStatus), ERR_OK);
     EXPECT_EQ(enableStatus, NotificationConstant::PriorityEnableStatus::DISABLE);
 }
+
+/**
+ * @tc.name: OnRestoreEnd_Test_001
+ * @tc.desc: Test that clear priority info.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationClonePriorityTest, OnRestoreEnd_Test_001, Function | SmallTest | Level1)
+{
+    NotificationClonePriority::GetInstance()->priorityInfo_.clear();
+    NotificationClonePriority::GetInstance()->OnRestoreEnd(100);
+
+    NotificationClonePriorityInfo priorityInfo;
+    NotificationClonePriority::GetInstance()->priorityInfo_.push_back(priorityInfo);
+    NotificationClonePriority::GetInstance()->OnRestoreEnd(100);
+    EXPECT_EQ(NotificationClonePriority::GetInstance()->priorityInfo_.empty(), true);
+}
 }
 }

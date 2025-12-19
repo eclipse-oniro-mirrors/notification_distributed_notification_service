@@ -242,6 +242,17 @@ int32_t NotificationCloneManager::OnRestore(MessageParcel& data, MessageParcel& 
     return ERR_OK;
 }
 
+void NotificationCloneManager::OnRestoreEnd()
+{
+    int32_t userId = NotificationCloneUtil::GetActiveUserId();
+    ANS_LOGW("Clone start transfer %{public}d.", userId);
+    for (auto iter = cloneTemplates.begin(); iter != cloneTemplates.end(); ++iter) {
+        if (iter->second != nullptr) {
+            iter->second->OnRestoreEnd(userId);
+        }
+    }
+}
+
 NotificationCloneManager::NotificationCloneManager()
 {
     ANS_LOGD("start");

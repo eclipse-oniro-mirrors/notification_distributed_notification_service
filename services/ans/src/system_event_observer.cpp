@@ -31,9 +31,11 @@
 
 namespace OHOS {
 namespace Notification {
+static const std::string CLONE_EVENT_START = "usual.event.clone.startTransfer";
 SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callbacks_(callbacks)
 {
     EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(CLONE_EVENT_START);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
@@ -176,6 +178,8 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         }
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_RESTORE_START) {
         NotificationCloneManager::GetInstance().OnRestoreStart(want);
+    } else if (action == CLONE_EVENT_START) {
+        NotificationCloneManager::GetInstance().OnRestoreEnd();
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_KIOSK_MODE_ON) {
         NotificationPreferences::GetInstance()->SetKioskModeStatus(true);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_KIOSK_MODE_OFF) {
