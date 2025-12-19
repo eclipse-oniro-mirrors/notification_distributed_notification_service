@@ -1707,5 +1707,134 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287002, Function | SmallTest | Level1)
     result = advancedNotificationService_->IsGeofenceEnabled(enabled);
     ASSERT_EQ(result, ERR_ANS_SERVICE_NOT_READY);
 }
+
+/**
+ * @tc.number    : AnsBranchTest_287004
+ * @tc.name      : ClearDelayNotification
+ * @tc.desc      : Test ClearDelayNotification function return ERR_ANS_PERMISSION_DENIED.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287004, Function | SmallTest | Level1)
+{
+    std::vector<std::string> triggerKeys;
+    std::vector<int32_t> userIds;
+    auto result = advancedNotificationService_->ClearDelayNotification(triggerKeys, userIds);
+    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287005
+ * @tc.name      : ClearDelayNotification
+ * @tc.desc      : Test ClearDelayNotification function return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287005, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(true);
+    MockIsVerfyPermisson(true);
+    std::vector<std::string> triggerKeys;
+    std::vector<int32_t> userIds;
+    auto result = advancedNotificationService_->ClearDelayNotification(triggerKeys, userIds);
+    ASSERT_EQ(result, ERR_ANS_INVALID_PARAM);
+
+    triggerKeys.push_back("triggerKey1");
+    triggerKeys.push_back("triggerKey2");
+    result = advancedNotificationService_->ClearDelayNotification(triggerKeys, userIds);
+    ASSERT_EQ(result, ERR_ANS_INVALID_PARAM);
+
+    userIds.push_back(100);
+    result = advancedNotificationService_->ClearDelayNotification(triggerKeys, userIds);
+    ASSERT_EQ(result, ERR_ANS_INVALID_PARAM);
+
+    userIds.push_back(101);
+    result = advancedNotificationService_->ClearDelayNotification(triggerKeys, userIds);
+    ASSERT_EQ(result, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287006
+ * @tc.name      : PublishDelayedNotification
+ * @tc.desc      : Test PublishDelayedNotification function return ERR_ANS_PERMISSION_DENIED.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287006, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(false);
+    std::string triggerKey;
+    int32_t userId = 100;
+    auto result = advancedNotificationService_->PublishDelayedNotification(triggerKey, userId);
+    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287007
+ * @tc.name      : PublishDelayedNotification
+ * @tc.desc      : Test PublishDelayedNotification function return ERR_ANS_NOTIFICATION_NOT_EXISTS.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287007, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(true);
+    MockIsVerfyPermisson(true);
+    std::string triggerKey;
+    int32_t userId = 100;
+    auto result = advancedNotificationService_->PublishDelayedNotification(triggerKey, userId);
+    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287008
+ * @tc.name      : ParseGeofenceNotificationFromDb
+ * @tc.desc      : Test ParseGeofenceNotificationFromDb function return ERR_ANS_NOTIFICATION_NOT_EXISTS and ERR_OK.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287008, Function | SmallTest | Level1)
+{
+    std::string value;
+    AdvancedNotificationService::PublishNotificationParameter requestDb;
+    auto result = advancedNotificationService_->ParseGeofenceNotificationFromDb(value, requestDb);
+    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+
+    value = R"({"name": "test"})";
+    result = advancedNotificationService_->ParseGeofenceNotificationFromDb(value, requestDb);
+    ASSERT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287009
+ * @tc.name      : SetTriggerNotificationRequestToDb
+ * @tc.desc      : Test SetTriggerNotificationRequestToDb function return ERR_OK.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287009, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService::PublishNotificationParameter requestDb;
+    requestDb.request = sptr<NotificationRequest>(new (std::nothrow) NotificationRequest());
+    auto result = advancedNotificationService_->SetTriggerNotificationRequestToDb(requestDb);
+    ASSERT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287010
+ * @tc.name      : GetBatchNotificationRequestsFromDb
+ * @tc.desc      : Test GetBatchNotificationRequestsFromDb function return ERR_ANS_SERVICE_NOT_READY.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287010, Function | SmallTest | Level1)
+{
+    std::vector<AdvancedNotificationService::PublishNotificationParameter> requestsDb;
+    int32_t userId = -1;
+    auto result = advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsDb, userId);
+    ASSERT_EQ(result, ERR_ANS_SERVICE_NOT_READY);
+
+    userId = 100;
+    result = advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsDb, userId);
+    ASSERT_EQ(result, ERR_ANS_SERVICE_NOT_READY);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287011
+ * @tc.name      : ClearAllGeofenceNotificationRequests
+ * @tc.desc      : Test ClearAllGeofenceNotificationRequests function return ERR_OK.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287011, Function | SmallTest | Level1)
+{
+    int32_t userId = 1000;
+    auto result = advancedNotificationService_->ClearAllGeofenceNotificationRequests(userId);
+    ASSERT_EQ(result, ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS
