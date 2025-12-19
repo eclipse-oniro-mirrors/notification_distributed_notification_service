@@ -20,6 +20,10 @@
 
 namespace OHOS {
 namespace Notification {
+std::string MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED = "Mandatory parameters are left unspecified.";
+std::string INCORRECT_PARAMETER_TYPES                = "Incorrect parameter types.";
+std::string PARAMETER_VERIFICATION_FAILED            = "Parameter verification failed.";
+
 static const std::unordered_map<int32_t, std::string> ANS_ERROR_CODE_MESSAGE_MAP = {
     {ERROR_PERMISSION_DENIED, "Permission denied"},
     {ERROR_NOT_SYSTEM_APP, "Not system application to call the interface"},

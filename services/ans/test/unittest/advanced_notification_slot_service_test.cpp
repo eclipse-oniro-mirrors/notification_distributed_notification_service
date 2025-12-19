@@ -280,7 +280,7 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00001, Function | SmallTest | Lev
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     MockIsVerfyPermisson(false);
-    std::string key = RING_TRUST_PKG_KEY;
+    std::string key = "RING_TRUSTLIST_PKG";
     std::string value = "";
     auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
     ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);

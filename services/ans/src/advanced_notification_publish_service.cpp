@@ -1324,17 +1324,18 @@ void AdvancedNotificationService::SetAndPublishSubscriberExistFlag(const std::st
 
     bool headsetExistFlag = false;
     bool wearableExistFlag = false;
-    if (deviceType == DEVICE_TYPE_HEADSET) {
+    if (deviceType == NotificationConstant::HEADSET_DEVICE_TYPE) {
         headsetExistFlag = existFlag;
-        result =
-            NotificationPreferences::GetInstance()->GetSubscriberExistFlag(DEVICE_TYPE_WEARABLE, wearableExistFlag);
+        result = NotificationPreferences::GetInstance()->GetSubscriberExistFlag(
+            NotificationConstant::WEARABLE_DEVICE_TYPE, wearableExistFlag);
         if (result != ERR_OK) {
             ANS_LOGE("GetSubscriberExistFlag failed");
             return;
         }
-    } else if (deviceType == DEVICE_TYPE_WEARABLE) {
+    } else if (deviceType == NotificationConstant::WEARABLE_DEVICE_TYPE) {
         wearableExistFlag = existFlag;
-        result = NotificationPreferences::GetInstance()->GetSubscriberExistFlag(DEVICE_TYPE_HEADSET, headsetExistFlag);
+        result = NotificationPreferences::GetInstance()->GetSubscriberExistFlag(
+            NotificationConstant::HEADSET_DEVICE_TYPE, headsetExistFlag);
         if (result != ERR_OK) {
             ANS_LOGE("GetSubscriberExistFlag failed");
             return;

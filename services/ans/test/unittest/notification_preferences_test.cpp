@@ -1980,10 +1980,10 @@ HWTEST_F(NotificationPreferencesTest, RemoveExtensionSubscriptionCloneUpdatedBun
 HWTEST_F(NotificationPreferencesTest, SetSubscriberExistFlag_0100, TestSize.Level1)
 {
     NotificationPreferences notificationPreferences;
-    auto ret = notificationPreferences.SetSubscriberExistFlag(DEVICE_TYPE_HEADSET, false);
+    auto ret = notificationPreferences.SetSubscriberExistFlag(NotificationConstant::HEADSET_DEVICE_TYPE, false);
     EXPECT_EQ(ret, ERR_OK);
     bool existFlag = true;
-    ret = notificationPreferences.GetSubscriberExistFlag(DEVICE_TYPE_HEADSET, existFlag);
+    ret = notificationPreferences.GetSubscriberExistFlag(NotificationConstant::HEADSET_DEVICE_TYPE, existFlag);
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_FALSE(existFlag);
 }
@@ -1996,10 +1996,10 @@ HWTEST_F(NotificationPreferencesTest, SetSubscriberExistFlag_0100, TestSize.Leve
 HWTEST_F(NotificationPreferencesTest, GetSubscriberExistFlag_0100, TestSize.Level1)
 {
     NotificationPreferences notificationPreferences;
-    auto ret = notificationPreferences.SetSubscriberExistFlag(DEVICE_TYPE_HEADSET, true);
+    auto ret = notificationPreferences.SetSubscriberExistFlag(NotificationConstant::HEADSET_DEVICE_TYPE, true);
     EXPECT_EQ(ret, ERR_OK);
     bool existFlag = false;
-    ret = notificationPreferences.GetSubscriberExistFlag(DEVICE_TYPE_HEADSET, existFlag);
+    ret = notificationPreferences.GetSubscriberExistFlag(NotificationConstant::HEADSET_DEVICE_TYPE, existFlag);
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_TRUE(existFlag);
 }
@@ -2830,10 +2830,10 @@ HWTEST_F(NotificationPreferencesTest, NullPreferncesDBTest_002, TestSize.Level1)
     res = notificationPreferences.SetDisableNotificationInfo(notificationDisable);
     EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
 
-    res = notificationPreferences.SetSubscriberExistFlag(DEVICE_TYPE_HEADSET, flag);
+    res = notificationPreferences.SetSubscriberExistFlag(NotificationConstant::HEADSET_DEVICE_TYPE, flag);
     EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
 
-    res = notificationPreferences.GetSubscriberExistFlag(DEVICE_TYPE_HEADSET, flag);
+    res = notificationPreferences.GetSubscriberExistFlag(NotificationConstant::HEADSET_DEVICE_TYPE, flag);
     EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
 
     res = notificationPreferences.GetBundleRemoveFlag(bundleOption, slotType, 0);

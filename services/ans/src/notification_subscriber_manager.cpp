@@ -519,12 +519,14 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
         onSubscriberAddCallback_(record);
     }
 
-    if (subscribeInfo->GetDeviceType() == DEVICE_TYPE_WEARABLE ||
-        subscribeInfo->GetDeviceType() == DEVICE_TYPE_LITE_WEARABLE) {
-        AdvancedNotificationService::GetInstance()->SetAndPublishSubscriberExistFlag(DEVICE_TYPE_WEARABLE, true);
+    if (subscribeInfo->GetDeviceType() == NotificationConstant::WEARABLE_DEVICE_TYPE ||
+        subscribeInfo->GetDeviceType() == NotificationConstant::LITEWEARABLE_DEVICE_TYPE) {
+        AdvancedNotificationService::GetInstance()->SetAndPublishSubscriberExistFlag(
+            NotificationConstant::WEARABLE_DEVICE_TYPE, true);
     }
-    if (subscribeInfo->GetDeviceType() == DEVICE_TYPE_HEADSET) {
-        AdvancedNotificationService::GetInstance()->SetAndPublishSubscriberExistFlag(DEVICE_TYPE_HEADSET, true);
+    if (subscribeInfo->GetDeviceType() == NotificationConstant::HEADSET_DEVICE_TYPE) {
+        AdvancedNotificationService::GetInstance()->SetAndPublishSubscriberExistFlag(
+            NotificationConstant::HEADSET_DEVICE_TYPE, true);
     }
     return ERR_OK;
 }
@@ -833,7 +835,7 @@ bool NotificationSubscriberManager::ConsumeRecordFilter(
             return false;
         }
         std::string bundleName = notification->GetBundleName();
-        if (isQuickReply && record->deviceType == DEVICE_TYPE_WEARABLE &&
+        if (isQuickReply && record->deviceType == NotificationConstant::WEARABLE_DEVICE_TYPE &&
             !DelayedSingleton<NotificationConfigParse>::GetInstance()->IsDistributedReplyEnabled(bundleName)) {
             ANS_LOGI("ConsumeRecordFilter-filterType-im bundle %{public}s", bundleName.c_str());
             return false;

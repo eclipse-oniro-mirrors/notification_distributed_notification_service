@@ -30,6 +30,11 @@ extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
 using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
+namespace {
+constexpr const char* NOTIFICATION_DIALOG_SERVICE_BUNDLE = "com.ohos.notificationdialog";
+constexpr const char* NOTIFICATION_DIALOG_SERVICE_ABILITY = "EnableNotificationDialog";
+}
+
 class NotificationDialogTest : public testing::Test {
 public:
     static void SetUpTestCase() {};

@@ -46,7 +46,7 @@ public:
         std::set<int32_t> uidList_ {};
         bool subscribedAll {false};
         int32_t userId {SUBSCRIBE_USER_INIT};
-        std::string deviceType {CURRENT_DEVICE_TYPE};
+        std::string deviceType {NotificationConstant::CURRENT_DEVICE_TYPE};
         int32_t subscriberUid {DEFAULT_UID};
         std::string subscriberBundleName_;
         bool needNotifyApplicationChanged = false;

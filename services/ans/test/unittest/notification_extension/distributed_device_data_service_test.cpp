@@ -18,6 +18,7 @@
 #define private public
 
 #include "ans_inner_errors.h"
+#include "ans_log_wrapper.h"
 #include "distributed_data_define.h"
 #include "distributed_device_data_service.h"
 
