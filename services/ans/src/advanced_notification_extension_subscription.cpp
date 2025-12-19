@@ -176,6 +176,8 @@ void AdvancedNotificationService::CheckExtensionServiceCondition(
         if (NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(*it, enableBundles) == ERR_OK &&
             !enableBundles.empty()) {
             subscribedBundleInfos.emplace_back(*it, enableBundles);
+        } else {
+            unsubscribedBundles.emplace_back(*it);
         }
     }
 }

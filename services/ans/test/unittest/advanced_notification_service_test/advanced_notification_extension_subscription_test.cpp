@@ -1325,7 +1325,7 @@ HWTEST_F(
     advancedNotificationService_->CheckExtensionServiceCondition(bundles, extensionBundleInfos, unsubscribedBundles);
     EXPECT_FALSE(bundles.empty());
     EXPECT_TRUE(extensionBundleInfos.empty());
-    EXPECT_TRUE(unsubscribedBundles.empty());
+    EXPECT_FALSE(unsubscribedBundles.empty());
     MockIsVerfyPermisson(false);
     MockBluetoothRemoteDeviceGetPairStateEnabled(false);
 }
