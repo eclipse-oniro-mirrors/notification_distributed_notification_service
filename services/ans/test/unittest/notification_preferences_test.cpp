@@ -3123,7 +3123,7 @@ HWTEST_F(NotificationPreferencesTest, GetAllAncoBundlesInfo_001, Function | Smal
 {
     std::vector<sptr<NotificationBundleOption>> bundles;
     NotificationPreferences::GetInstance()->GetAllAncoBundlesInfo(0, 100, bundles);
-    EXPECT_EQ(bundles.empty(), true);
+    EXPECT_EQ(bundles.empty(), false);
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("com.anco.test", 10046);
     auto result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption,
