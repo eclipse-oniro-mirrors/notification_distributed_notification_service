@@ -18,6 +18,7 @@
 #include "extension_service_connection_service.h"
 #include "extension_service_connection_timer_info.h"
 #include "extension_service.h"
+#include "in_process_call_wrapper.h"
 #include "notification_analytics_util.h"
 #include "notification_helper.h"
 #include "time_service_client.h"
@@ -56,7 +57,7 @@ ExtensionServiceConnection::ExtensionServiceConnection(const ExtensionSubscriber
         if (!sThis) {
             return;
         }
-        sThis->Freeze();
+        IN_PROCESS_CALL_WITHOUT_RET(sThis->Freeze());
     });
     timerIdFreeze_ = timerClient->CreateTimer(timerInfoFreeze);
     auto timerInfoDisconnect = std::make_shared<ExtensionServiceConnectionTimerInfo>([wThis] {
@@ -64,7 +65,7 @@ ExtensionServiceConnection::ExtensionServiceConnection(const ExtensionSubscriber
         if (!sThis) {
             return;
         }
-        sThis->Disconnect();
+        IN_PROCESS_CALL_WITHOUT_RET(sThis->Disconnect());
     });
     timerIdDisconnect_ = timerClient->CreateTimer(timerInfoDisconnect);
 }
@@ -192,7 +193,7 @@ void ExtensionServiceConnection::OnAbilityConnectDone(
             return;
         }
         std::lock_guard<ffrt::recursive_mutex> lock(sThis->mutex_);
-        ANS_LOGD("OnRemoteDied %{public}s", sThis->subscriberInfo_.GetKey().c_str());
+        ANS_LOGI("OnRemoteDied %{public}s", sThis->subscriberInfo_.GetKey().c_str());
         sThis->state_ = ExtensionServiceConnectionState::DISCONNECTED;
         sThis->Close();
     });
@@ -293,7 +294,7 @@ void ExtensionServiceConnection::PrepareDisconnect()
 {
     std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
 
-    ANS_LOGD("PrepareDisconnect %{public}s", subscriberInfo_.GetKey().c_str());
+    ANS_LOGI("PrepareDisconnect %{public}s", subscriberInfo_.GetKey().c_str());
     auto timerClient = MiscServices::TimeServiceClient::GetInstance();
     if (timerClient == nullptr) {
         ANS_LOGE("null TimeServiceClient");
