@@ -725,28 +725,45 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::MakeNotificatio
 ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<NotificationRequest> &request,
     const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner)
 {
-    auto result = CheckTriggerNotificationRequest(request);
-    if (result != ERR_OK) {
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        return ERR_ANS_NO_MEMORY;
+    }
+
+    PublishNotificationParameter parameter;
+    GeneratePublishNotificationParameter(request, bundleOption, isUpdateByOwner, parameter);
+
+    ErrCode result = ERR_OK;
+    if (IsGeofenceNotificationRequest(request)) {
+        ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+            ANS_LOGD("ffrt enter!");
+            result = OnNotifyDelayedNotification(parameter);
+        }));
+        notificationSvrQueue_->wait(handler);
         return result;
     }
-    PublishNotificationParameter parameter;
-    parameter.request = request;
-    parameter.bundleOption = bundleOption;
-    parameter.isUpdateByOwner = isUpdateByOwner;
-    parameter.tokenCaller = IPCSkeleton::GetCallingTokenID();
-    parameter.uid = IPCSkeleton::GetCallingUid();
-    if (request->GetNotificationTrigger() != nullptr) {
-        return OnNotifyDelayedNotification(parameter);
+
+    bool isExecuted = false;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        if (IsExistsGeofence(request)) {
+            if (request->GetLiveViewStatus() == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE) {
+                isExecuted = true;
+                result = ERR_ANS_REPEAT_CREATE;
+                return;
+            }
+            if (request->IsUpdateLiveView()) {
+                isExecuted = true;
+                result = UpdateTriggerNotification(parameter);
+                return;
+            }
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+    if (isExecuted) {
+        return result;
     }
-    std::vector<std::shared_ptr<NotificationRecord>> records;
-    FindGeofenceNotificationRecordByKey(request->GetSecureKey(), records);
-    if (!records.empty() &&
-        request->GetLiveViewStatus() == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE) {
-        return ERR_ANS_REPEAT_CREATE;
-    }
-    if (!records.empty() && request->IsUpdateLiveView()) {
-        return UpdateTriggerNotification(parameter, records);
-    }
+
     return PublishPreparedNotificationInner(parameter);
 }
 

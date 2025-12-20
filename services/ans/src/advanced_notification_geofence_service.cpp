@@ -38,6 +38,7 @@ constexpr char CALL_UI_BUNDLE[] = "com.ohos.callui";
 }  // namespace
 ErrCode AdvancedNotificationService::SetGeofenceEnabled(bool enabled)
 {
+    ANS_LOGD("Called SetGeofenceEnabled");
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_32, EventBranchId::BRANCH_0);
     message.Message("geofenceEnabled:" + std::to_string(enabled));
     auto result = SystemPermissionCheck();
@@ -46,37 +47,62 @@ ErrCode AdvancedNotificationService::SetGeofenceEnabled(bool enabled)
         return result;
     }
 
-    result = NotificationPreferences::GetInstance()->SetGeofenceEnabled(enabled);
-    NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_1));
-    if (result != ERR_OK) {
-        ANS_LOGE("Set GeofenceEnabled failed, errCode=%{public}d", result);
-        return result;
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        return ERR_ANS_NO_MEMORY;
     }
-    if (!enabled) {
-        int32_t userId = SUBSCRIBE_USER_INIT;
-        OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
-        result = ClearAllGeofenceNotificationRequests(userId);
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = NotificationPreferences::GetInstance()->SetGeofenceEnabled(enabled);
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_1));
         if (result != ERR_OK) {
-            ANS_LOGW("ClearAllGeofenceNotificationRequests failed, errCode=%{public}d", result);
+            ANS_LOGE("Set GeofenceEnabled failed, errCode=%{public}d", result);
+            return;
         }
-    }
-    return ERR_OK;
+        if (!enabled) {
+            int32_t userId = SUBSCRIBE_USER_INIT;
+            OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+            result = ClearAllGeofenceNotificationRequests(userId);
+            if (result != ERR_OK) {
+                ANS_LOGW("ClearAllGeofenceNotificationRequests failed, errCode=%{public}d", result);
+                result = ERR_OK;
+            }
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+    return result;
 }
 
 ErrCode AdvancedNotificationService::IsGeofenceEnabled(bool &enabled)
 {
-    return NotificationPreferences::GetInstance()->IsGeofenceEnabled(enabled);
+    ANS_LOGD("Called IsGeofenceEnabled");
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        return ERR_ANS_NO_MEMORY;
+    }
+    ErrCode result = ERR_OK;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = NotificationPreferences::GetInstance()->IsGeofenceEnabled(enabled);
+    }));
+    notificationSvrQueue_->wait(handler);
+    return result;
 }
 
 ErrCode AdvancedNotificationService::OnNotifyDelayedNotification(const PublishNotificationParameter &parameter)
 {
     ANS_LOGD("Called OnNotifyDelayedNotification, delayRecords size %{public}zu", triggerNotificationList_.size());
+    if (parameter.request == nullptr || parameter.request->GetNotificationTrigger() == nullptr) {
+        ANS_LOGE("Request or trigger is null.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     const sptr<NotificationRequest> &request = parameter.request;
     const sptr<NotificationBundleOption> &bundleOption = parameter.bundleOption;
     uint32_t configPath = static_cast<uint32_t>(request->GetNotificationTrigger()->GetConfigPath());
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_32, EventBranchId::BRANCH_2);
     message.Message("Ntf TriggerKey:" + request->GetTriggerSecureKey() + "_" +
         "_TriggerPath:" + std::to_string(configPath));
+
     auto result = CheckGeofenceNotificationRequest(request, bundleOption);
     if (result != ERR_OK) {
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result));
@@ -143,32 +169,45 @@ ErrCode AdvancedNotificationService::ClearDelayNotification(const std::vector<st
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (triggerKeys.empty() || userIds.empty()) {
-        ANS_LOGE("Input parameters triggerKeys or userIds are empty.");
-        return ERR_ANS_INVALID_PARAM;
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
+        return ERR_ANS_NO_MEMORY;
     }
-
-    if (triggerKeys.size() != userIds.size()) {
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_6));
-        ANS_LOGE("TriggerKeys size not equal userIds size.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    bool dbOptionFlag = true;
-    for (size_t i = 0; i < triggerKeys.size(); ++i) {
-        auto result = NotificationPreferences::GetInstance()->DeleteKvFromDb(triggerKeys[i], userIds[i]);
-        if (result != ERR_OK) {
-            NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_7));
-            ANS_LOGW("DeleteKvFromDb failed, errCode=%{public}d, key: %{public}s, userId: %{public}d",
-                result, triggerKeys[i].c_str(), userIds[i]);
-            dbOptionFlag = false;
-            continue;
+    ErrCode result = ERR_OK;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        if (triggerKeys.empty() || userIds.empty()) {
+            ANS_LOGE("Input parameters triggerKeys or userIds are empty.");
+            result = ERR_ANS_INVALID_PARAM;
+            return;
         }
-        RemoveTriggerNotificationListByTriggerKey(triggerKeys[i]);
-    }
-    if (!dbOptionFlag) {
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
-    }
-    return ERR_OK;
+
+        if (triggerKeys.size() != userIds.size()) {
+            NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_6));
+            ANS_LOGE("TriggerKeys size not equal userIds size.");
+            result = ERR_ANS_INVALID_PARAM;
+            return;
+        }
+        bool dbOptionFlag = true;
+        for (size_t i = 0; i < triggerKeys.size(); ++i) {
+            result = NotificationPreferences::GetInstance()->DeleteKvFromDb(triggerKeys[i], userIds[i]);
+            if (result != ERR_OK) {
+                NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_7));
+                ANS_LOGW("DeleteKvFromDb failed, errCode=%{public}d, key: %{public}s, userId: %{public}d",
+                    result, triggerKeys[i].c_str(), userIds[i]);
+                dbOptionFlag = false;
+                continue;
+            }
+            RemoveTriggerNotificationListByTriggerKey(triggerKeys[i]);
+        }
+        if (!dbOptionFlag) {
+            result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+            return;
+        }
+        result = ERR_OK;
+    }));
+    notificationSvrQueue_->wait(handler);
+    return result;
 }
 
 ErrCode AdvancedNotificationService::PublishDelayedNotification(const std::string &triggerKey, int32_t userId)
@@ -274,6 +313,7 @@ void AdvancedNotificationService::UpdateTriggerRequest(sptr<NotificationRequest>
     }
 
     request->SetDeliveryTime(GetCurrentTime());
+    request->SetCreateTime(GetCurrentTime());
 }
 
 ErrCode AdvancedNotificationService::ParseGeofenceNotificationFromDb(const std::string &value,
@@ -599,11 +639,13 @@ void AdvancedNotificationService::CancelGeofenceTriggerTimer(const std::shared_p
     record->notification->SetGeofenceTriggerTimer(NotificationConstant::INVALID_TIMER_ID);
 }
 
-ErrCode AdvancedNotificationService::UpdateTriggerNotification(PublishNotificationParameter parameter,
-    std::vector<std::shared_ptr<NotificationRecord>> &records)
+ErrCode AdvancedNotificationService::UpdateTriggerNotification(PublishNotificationParameter parameter)
 {
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_32, EventBranchId::BRANCH_14);
     message.Message("Update Trigger Ntf");
+
+    std::vector<std::shared_ptr<NotificationRecord>> records;
+    FindGeofenceNotificationRecordByKey(parameter.request->GetSecureKey(), records);
     if (records.size() != GEOFENCE_RECORDS_SIZE_ONE) {
         return ERR_ANS_END_NOTIFICATION;
     }
@@ -668,20 +710,12 @@ void AdvancedNotificationService::UpdateTriggerRecord(std::shared_ptr<Notificati
 ErrCode AdvancedNotificationService::CheckGeofenceNotificationRequest(const sptr<NotificationRequest> &request,
     const sptr<NotificationBundleOption> &bundleOption)
 {
-    if (request == nullptr) {
-        ANS_LOGE("null request.");
+    if (request == nullptr || request->GetNotificationTrigger() == nullptr) {
+        ANS_LOGE("Request or trigger is null.");
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode result = ERR_OK;
-    if (IsNeedPushCheck(request)) {
-        result = PushCheck(request);
-    }
-    if (result != ERR_OK) {
-        return result;
-    }
-
-    result = CheckSwitchStatus(request, bundleOption);
+    auto result = CheckSwitchStatus(request, bundleOption);
     if (result != ERR_OK) {
         return result;
     }
@@ -928,6 +962,48 @@ void AdvancedNotificationService::RemoveGroupByBundleFromTriggerNotificationList
             ++it;
         }
     }
+}
+
+void AdvancedNotificationService::GeneratePublishNotificationParameter(const sptr<NotificationRequest> &request,
+    const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner, PublishNotificationParameter &parameter)
+{
+    parameter.request = request;
+    parameter.bundleOption = bundleOption;
+    parameter.isUpdateByOwner = isUpdateByOwner;
+    parameter.tokenCaller = IPCSkeleton::GetCallingTokenID();
+    parameter.uid = IPCSkeleton::GetCallingUid();
+}
+
+bool AdvancedNotificationService::IsGeofenceNotificationRequest(const sptr<NotificationRequest> &request)
+{
+    if (request == nullptr) {
+        ANS_LOGE("Request is null.");
+        return false;
+    }
+
+    if (request->IsTriggerLiveView()) {
+        return true;
+    }
+    return false;
+}
+
+bool AdvancedNotificationService::IsExistsGeofence(const sptr<NotificationRequest> &request)
+{
+    if (request == nullptr) {
+        ANS_LOGE("Request is null.");
+        return false;
+    }
+
+    std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+    for (const auto &record : triggerNotificationList_) {
+        if (record == nullptr || record->notification == nullptr || record->request == nullptr) {
+            continue;
+        }
+        if ((record->request->GetSecureKey() == request->GetSecureKey())) {
+            return true;
+        }
+    }
+    return false;
 }
 }  // namespace Notification
 }  // namespace OHOS
