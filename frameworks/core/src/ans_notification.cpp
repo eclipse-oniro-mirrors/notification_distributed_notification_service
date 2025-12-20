@@ -2151,18 +2151,6 @@ ErrCode AnsNotification::GetEnabledForBundleSlotSelf(const NotificationConstant:
     return proxy->GetEnabledForBundleSlotSelf(slotType, enabled);
 }
 
-ErrCode AnsNotification::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
-    int32_t recvUserId, std::vector<std::string> &dumpInfo)
-{
-    sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-
-    return proxy->ShellDump(cmd, bundle, userId, recvUserId, dumpInfo);
-}
-
 ErrCode AnsNotification::SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled)
 {
     if (userId <= SUBSCRIBE_USER_INIT) {

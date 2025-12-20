@@ -176,7 +176,6 @@ ohos_shared_library("ans_innerkits") {
     "bundle_framework:appexecfwk_core",
     "cJSON:cjson_static",
     "c_utils:utils",
-    "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hicollie:libhicollie",
     "hilog:libhilog",
@@ -234,17 +233,15 @@ ohos_source_set("ans_manager_stub") {
   sources = filter_include(output_values, [ "*_stub.cpp" ])
   deps = [ ":ans_manager_interface" ]
   external_deps = [
+    "ability_runtime:wantagent_innerkits",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "hicollie:libhicollie",
     "hilog:libhilog",
     "i18n:intl_util",
+    "image_framework:image_native",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
-  ]
-  public_external_deps = [
-    "ability_runtime:wantagent_innerkits",
-    "image_framework:image_native",
   ]
   subsystem_name = "notification"
   part_name = "distributed_notification_service"

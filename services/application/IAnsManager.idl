@@ -34,12 +34,5 @@ sequenceable OHOS.IRemoteObject;
 interface OHOS.Notification.IAnsManager {
     void IsSupportTemplate([in] String templateName, [out] boolean support);
 
-    void ShellDump(
-        [in] String cmd,
-        [in] String bundle,
-        [in] int userId,
-        [in] int recvUserId,
-        [out] String[] dumpInfo);
-
     void SetAdditionConfig([in] String key, [in] String value);
 }

@@ -70,19 +70,5 @@ HWTEST_F(AnsDumpTest, AnsDumpTest_GetServiceObject_0100, Function | MediumTest |
         systemAbilityManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
     EXPECT_NE(remoteObject, nullptr);
 }
-
-/*
- * @tc.number: AnsDumpTest_ShellDump_0100
- * @tc.name: Shell Dump
- * @tc.desc:
- */
-HWTEST_F(AnsDumpTest, AnsDumpTest_ShellDump_0100, Function | MediumTest | Level0)
-{
-    std::vector<std::string> infos;
-    if (ans_) {
-        auto ret = ans_->ShellDump("active", infos);
-        EXPECT_EQ(ret, 0);
-    }
-}
 }  // namespace Notification
 }  // namespace OHOS

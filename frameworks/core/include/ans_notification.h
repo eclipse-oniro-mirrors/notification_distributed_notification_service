@@ -1019,19 +1019,6 @@ public:
     ErrCode GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled);
 
     /**
-     * @brief Obtains specific datas via specified dump option.
-     *
-     * @param cmd Indicates the specified dump command.
-     * @param bundle Indicates the specified bundle name.
-     * @param userId Indicates the specified userId.
-     * @param recvUserId Indicates the specified receiver userId.
-     * @param dumpInfo Indicates the container containing datas.
-     * @return Returns check result.
-     */
-    ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId, int32_t recvUserId,
-        std::vector<std::string> &dumpInfo);
-
-    /**
      * @brief Set whether to sync notifications to devices that do not have the app installed.
      *
      * @param userId Indicates the specific user.

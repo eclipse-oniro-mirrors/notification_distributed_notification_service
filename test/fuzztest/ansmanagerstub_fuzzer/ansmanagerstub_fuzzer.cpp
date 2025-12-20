@@ -180,7 +180,6 @@ namespace OHOS {
         service->SetEnabledForBundleSlot(bundleOption, slotType, enabled, false);
         service->GetEnabledForBundleSlot(bundleOption, slotType, enabled);
         std::vector<std::string> dumpInfo;
-        service->ShellDump(stringData, stringData, userId, userId, dumpInfo);
         service->SetSyncNotificationEnabledWithoutApp(userId, enabled);
         service->GetSyncNotificationEnabledWithoutApp(userId, enabled);
         int32_t badgeNum = fuzzData->ConsumeIntegral<int32_t>();
