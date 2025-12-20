@@ -59,6 +59,7 @@ ohos_source_set("reminder_service_sources") {
     "src/reminder_data_manager_inner.cpp",
     "src/reminder_datashare_helper.cpp",
     "src/reminder_event_manager.cpp",
+    "src/reminder_notify_manager.cpp",
     "src/reminder_store.cpp",
     "src/reminder_store_strategy.cpp",
     "src/reminder_table.cpp",

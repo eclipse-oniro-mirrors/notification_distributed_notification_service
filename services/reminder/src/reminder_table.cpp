@@ -185,5 +185,16 @@ void ReminderTimerTable::InitDbColumns()
     AddColumn(START_DATE_TIME, "BIGINT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
     AddColumnEnd(END_DATE_TIME, "BIGINT NOT NULL", ADD_COLUMNS, SELECT_COLUMNS);
 }
+
+std::string ReminderStateTable::GetCreateColumns()
+{
+    std::string addColumns;
+    addColumns.append(REMINDER_ID).append(" ").append("INTEGER NOT NULL").append(", ");
+    addColumns.append(ACTION_BUTTON_TYPE).append(" ").append("INT NOT NULL").append(", ");
+    addColumns.append(UID).append(" ").append("INT NOT NULL").append(", ");
+    addColumns.append(IS_RESEND).append(" ").append("TEXT NOT NULL").append(", ");
+    addColumns.append(TIMESTAMP).append(" ").append("BIGINT NOT NULL");  // end column
+    return addColumns;
+}
 }
 }

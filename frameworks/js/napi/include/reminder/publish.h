@@ -171,6 +171,24 @@ napi_value GetExcludeDates(napi_env env, napi_callback_info info);
  * @return opaque pointer that is used to represent a JavaScript value
  */
 napi_value CancelReminderOnDisplay(napi_env env, napi_callback_info info);
+
+/**
+ * @brief Subscribe reminder state.
+ *
+ * @param env Indicates the context.
+ * @param info Indicates the opaque datatype about the context.
+ * @return opaque pointer that is used to represent a JavaScript value
+ */
+napi_value SubscribeReminderState(napi_env env, napi_callback_info info);
+
+/**
+ * @brief UnSubscribe reminder state.
+ *
+ * @param env Indicates the context.
+ * @param info Indicates the opaque datatype about the context.
+ * @return opaque pointer that is used to represent a JavaScript value
+ */
+napi_value UnSubscribeReminderState(napi_env env, napi_callback_info info);
 }  // namespace ReminderAgentNapi
 }  // namespace OHOS
 

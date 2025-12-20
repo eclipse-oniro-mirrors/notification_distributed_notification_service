@@ -23,6 +23,7 @@
 #include "reminder_store.h"
 #include "reminder_request.h"
 #include "reminder_timer_info.h"
+#include "reminder_notify_manager.h"
 #include "reminder_request_adaptation.h"
 
 #include "app_mgr_interface.h"
@@ -104,6 +105,23 @@ public:
      */
     ErrCode GetExcludeDates(const int32_t reminderId, const int32_t callingUid,
         std::vector<int64_t>& dates);
+
+    /**
+     * @brief Register reminder state.
+     *
+     * @param uid Identifies the uid
+     * @param object Identifies the callback.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RegisterReminderState(const int32_t uid, const sptr<IRemoteObject>& object);
+
+    /**
+     * @brief UnRegister reminder state.
+     *
+     * @param uid Identifies the uid
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode UnRegisterReminderState(const int32_t uid);
 
     /**
      * @brief Close the target reminder which is showing on panel.
@@ -301,6 +319,16 @@ public:
      * then load the reminder.
      */
     void InitShareReminders(const bool registerObserver);
+
+    /**
+     * @brief Get notify manager.
+     */
+    std::shared_ptr<ReminderNotifyManager> GetNotifyManager();
+
+    /**
+     * @brief After the application registration callback, send all data.
+     */
+    void NotifyReminderState(const int32_t uid);
 
     static constexpr uint8_t TIME_ZONE_CHANGE = 0;
     static constexpr uint8_t DATE_TIME_CHANGE = 1;
@@ -815,6 +843,7 @@ private:
 
     // Last time the calendardata was launched.
     std::atomic<int64_t> lastStartTime_ {0};
+    std::shared_ptr<ReminderNotifyManager> notifyManager_;
 };
 }  // namespace OHOS
 }  // namespace Notification

@@ -32,6 +32,10 @@ idl_gen_interface("reminder_service_interface") {
   log_tag = "ReminderAgentService"
 }
 
+idl_gen_interface("reminder_state_callback_interface") {
+  src_idl = rebase_path("IReminderStateCallback.idl")
+}
+
 config("reminder_innerkits_public_config") {
   visibility = [ "./../../*" ]
 
@@ -60,6 +64,7 @@ ohos_shared_library("reminder_innerkits") {
     "${frameworks_path}/ans:ans_innerkits_config",
   ]
   output_values = get_target_outputs(":reminder_service_interface")
+  reminder_state_output_values = get_target_outputs(":reminder_state_callback_interface")
   sources = [
     "${frameworks_module_reminder_path}/src/reminder_helper.cpp",
     "${frameworks_module_reminder_path}/src/reminder_request.cpp",
@@ -70,12 +75,16 @@ ohos_shared_library("reminder_innerkits") {
     "${frameworks_module_reminder_path}/src/reminder_request_factory.cpp",
     "${frameworks_module_reminder_path}/src/reminder_request_timer.cpp",
     "${frameworks_module_reminder_path}/src/reminder_service_load_callback.cpp",
+    "${frameworks_module_reminder_path}/src/reminder_state.cpp",
+    "${frameworks_module_reminder_path}/src/reminder_state_callback_proxy_ext.cpp",
   ]
   sources += filter_include(output_values, [ "*.cpp" ])
+  sources += filter_include(reminder_state_output_values, [ "*.cpp" ])
   defines = []
   cflags_cc = [ "-fstack-protector-strong" ]
   deps = [
     ":reminder_service_interface",
+    ":reminder_state_callback_interface",
     "${frameworks_path}/ans:ans_client",
   ]
 

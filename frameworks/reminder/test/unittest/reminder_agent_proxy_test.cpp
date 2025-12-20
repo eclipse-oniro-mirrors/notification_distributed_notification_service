@@ -269,5 +269,43 @@ HWTEST_F(ReminderAgentServiceProxyTest, CancelReminderOnDisplay_0100, Function |
     ErrCode res = proxy->CancelReminderOnDisplay(reminderId);
     EXPECT_EQ(ERR_OK, res);
 }
+
+/*
+ * @tc.name: RegisterReminderState_0100
+ * @tc.desc: test ReminderAgentServiceProxy's RegisterReminderState function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(ReminderAgentServiceProxyTest, RegisterReminderState_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "ReminderAgentServiceProxyTest, RegisterReminderState_0100, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<ReminderAgentServiceProxy> proxy = std::make_shared<ReminderAgentServiceProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+
+    ErrCode res = proxy->RegisterReminderState(nullptr);
+    EXPECT_NE(ERR_OK, res);
+}
+
+/*
+ * @tc.name: UnRegisterReminderState_0100
+ * @tc.desc: test ReminderAgentServiceProxy's UnRegisterReminderState function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(ReminderAgentServiceProxyTest, UnRegisterReminderState_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "ReminderAgentServiceProxyTest, UnRegisterReminderState_0100, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<ReminderAgentServiceProxy> proxy = std::make_shared<ReminderAgentServiceProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+
+    ErrCode res = proxy->UnRegisterReminderState();
+    EXPECT_EQ(ERR_OK, res);
+}
 }
 }

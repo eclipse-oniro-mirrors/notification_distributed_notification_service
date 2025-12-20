@@ -18,6 +18,7 @@
 #include "reminder_data_manager.h"
 #include "reminder_request_alarm.h"
 #include "reminder_request_timer.h"
+#include "reminder_notify_manager.h"
 #include "reminder_request_calendar.h"
 #include "reminder_bundle_manager_helper.h"
 
@@ -253,6 +254,36 @@ ErrCode ReminderAgentService::GetExcludeDates(const int32_t reminderId, std::vec
     }
     ErrCode ret = rdm->GetExcludeDates(reminderId, IPCSkeleton::GetCallingUid(), dates);
     return ret;
+}
+
+ErrCode ReminderAgentService::RegisterReminderState(const sptr<IRemoteObject>& object)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
+    ANSR_LOGD("called");
+    if (!CheckReminderPermission()) {
+        ANSR_LOGE("Failed to check permission: ohos.permission.PUBLISH_AGENT_REMINDER.");
+        return ERR_REMINDER_PERMISSION_DENIED;
+    }
+    auto rdm = ReminderDataManager::GetInstance();
+    if (rdm == nullptr) {
+        return ERR_NO_INIT;
+    }
+    return rdm->RegisterReminderState(IPCSkeleton::GetCallingUid(), object);
+}
+
+ErrCode ReminderAgentService::UnRegisterReminderState()
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
+    ANSR_LOGD("called");
+    if (!CheckReminderPermission()) {
+        ANSR_LOGE("Failed to check permission: ohos.permission.PUBLISH_AGENT_REMINDER.");
+        return ERR_REMINDER_PERMISSION_DENIED;
+    }
+    auto rdm = ReminderDataManager::GetInstance();
+    if (rdm == nullptr) {
+        return ERR_NO_INIT;
+    }
+    return rdm->UnRegisterReminderState(IPCSkeleton::GetCallingUid());
 }
 
 void ReminderAgentService::TryPostDelayUnloadTask(const int64_t delayTime)

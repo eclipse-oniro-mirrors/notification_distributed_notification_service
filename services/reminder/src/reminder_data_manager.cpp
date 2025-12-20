@@ -1298,6 +1298,9 @@ void ReminderDataManager::Init()
         ANSR_LOGW("Db init fail.");
         return;
     }
+    if (notifyManager_ == nullptr) {
+        notifyManager_ = std::make_shared<ReminderNotifyManager>();
+    }
     InitServiceHandler();
     ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_BOOT_COMPLETE);
     lastStartTime_ = GetCurrentTime();
@@ -1441,6 +1444,10 @@ void ReminderDataManager::OnLoadReminderInFfrt()
     }
     StartRecentReminder();
     StartLoadTimer();
+    if (store_ != nullptr) {
+        constexpr int64_t timePeriod = (int64_t)30 * 24 * 60 * 60 * 1000;  // 30 day
+        store_->DeleteState(0, now - timePeriod);
+    }
 }
 
 void ReminderDataManager::LoadReminderFromDb()
@@ -1980,9 +1987,6 @@ void ReminderDataManager::CheckNeedNotifyStatus(const sptr<ReminderRequest> &rem
     const ReminderRequest::ActionButtonType buttonType)
 {
     const std::string bundleName = reminder->GetBundleName();
-    if (bundleName.empty()) {
-        return;
-    }
     bool isRunning = false;
     {
         std::lock_guard<std::mutex> lock(appMgrMutex_);
@@ -1991,7 +1995,12 @@ void ReminderDataManager::CheckNeedNotifyStatus(const sptr<ReminderRequest> &rem
         }
         isRunning = appMgrProxy_->GetAppRunningStateByBundleName(bundleName);
     }
+    ReminderState state;
+    state.reminderId_ = reminder->GetReminderId();
+    state.buttonType_ = buttonType;
     if (!isRunning) {
+        // save
+        store_->InsertState(reminder->GetUid(), state);
         return;
     }
 
@@ -2012,6 +2021,12 @@ void ReminderDataManager::CheckNeedNotifyStatus(const sptr<ReminderRequest> &rem
     if (EventFwk::CommonEventManager::PublishCommonEventAsUser(eventData, info, userId)) {
         ANSR_LOGI("notify reminder status change %{public}s", bundleName.c_str());
     }
+    if (notifyManager_ != nullptr) {
+        std::vector<ReminderState> states;
+        states.push_back(state);
+        state.isResend_ = notifyManager_->NotifyReminderState(reminder->GetUid(), states);
+    }
+    store_->InsertState(reminder->GetUid(), state);
 }
 int32_t ReminderDataManager::QueryActiveReminderCount()
 {

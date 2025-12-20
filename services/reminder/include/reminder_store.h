@@ -19,8 +19,9 @@
 #include <vector>
 #include <mutex>
 
-#include "notification_bundle_option.h"
+#include "reminder_state.h"
 #include "reminder_request.h"
+
 #include "rdb_errno.h"
 #include "rdb_helper.h"
 #include "rdb_open_callback.h"
@@ -44,6 +45,11 @@ public:
     bool IsReminderExist(const int32_t reminderId, const int32_t uid);
     std::vector<sptr<ReminderRequest>> GetHalfHourReminders();
     std::vector<sptr<ReminderRequest>> GetAllValidReminders();
+
+public:
+    int32_t InsertState(const int32_t uid, const ReminderState& state);
+    int32_t DeleteState(const int32_t uid, const int64_t timestamp = 0);
+    std::vector<ReminderState> QueryState(const int32_t uid);
 
 public:
     static void GetUInt8Val(const std::shared_ptr<NativeRdb::ResultSet>& resultSet,
@@ -103,6 +109,7 @@ public:
 
 private:
     int32_t CreateTable(NativeRdb::RdbStore& store);
+    int32_t CreateStateTable(NativeRdb::RdbStore& store);
     int32_t CopyData(NativeRdb::RdbStore& store);
     std::vector<sptr<ReminderRequest>> GetOldReminders(NativeRdb::RdbStore& store);
     void InsertNewReminders(NativeRdb::RdbStore& store, const std::vector<sptr<ReminderRequest>>& reminders);

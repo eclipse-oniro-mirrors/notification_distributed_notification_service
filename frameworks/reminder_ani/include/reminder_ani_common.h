@@ -18,10 +18,31 @@
 
 #include "ohos.reminderAgentManager.manager.proj.hpp"
 
+#include "taihe/callback.hpp"
 #include "reminder_request.h"
+#include "reminder_state_callback.h"
 
 namespace OHOS::ReminderAgentManagerNapi {
+using CallbackType = ::taihe::callback<
+    void(::taihe::array_view<::ohos::reminderAgentManager::manager::ReminderState>)>;
+class AniReminderStateCallback : public Notification::ReminderStateCallback {
+public:
+    explicit AniReminderStateCallback(std::shared_ptr<CallbackType> callback)
+        : callback_(callback) {}
+    ~AniReminderStateCallback() = default;
+
+    void OnReminderState(const std::vector<Notification::ReminderState>& states) override;
+
+private:
+    std::shared_ptr<CallbackType> callback_;
+};
+
 class Common {
+public:
+    using CallbackPair = std::pair<CallbackType, sptr<AniReminderStateCallback>>;
+    static std::list<CallbackPair> callbackList_;
+    static std::mutex callbackMutex_;
+
 public:
     enum ErrorCode : int32_t {
         ERR_REMINDER_PERMISSION_DENIED = 201,
@@ -32,6 +53,8 @@ public:
         ERR_REMINDER_PACKAGE_NOT_EXIST,
         ERR_REMINDER_CALLER_TOKEN_INVALID,
         ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED,
+        ERR_REMINDER_PARAM_ERROR,
+        ERR_REMINDER_NOTIFICATION_NO_SHOWING,
     };
     
     enum AniSlotType {
@@ -45,82 +68,96 @@ public:
         OTHER_TYPES = 0xFFFF,
     };
 
-    static std::string getErrCodeMsg(const int32_t errorCode);
+    static std::string GetErrCodeMsg(const int32_t errorCode, const std::string& extraInfo = "");
 
-    static bool CreateReminder(const ::ohos::reminderAgentManager::manager::ParamReminder& reminderReq,
+    bool CreateReminder(const ::ohos::reminderAgentManager::manager::ParamReminder& reminderReq,
         std::shared_ptr<Notification::ReminderRequest>& reminder);
 
-    static ::taihe::optional<::ohos::reminderAgentManager::manager::ParamReminder> GenAniReminder(
+    ::taihe::optional<::ohos::reminderAgentManager::manager::ParamReminder> GenAniReminder(
         const sptr<Notification::ReminderRequest>& reminder);
 
-    static void ConvertSlotType(AniSlotType aniSlotType, Notification::NotificationConstant::SlotType& slotType);
+    void ConvertSlotType(AniSlotType aniSlotType, Notification::NotificationConstant::SlotType& slotType);
 
-    static bool UnWarpSlotType(uintptr_t slotType, Notification::NotificationConstant::SlotType& outSlot);
+    bool UnWarpSlotType(uintptr_t slotType, Notification::NotificationConstant::SlotType& outSlot);
+
+    std::string GetErrorMsg() const
+    {
+        return lastErrorMsg_;
+    }
 
 private:
-    static bool ParseIntArray(const ::taihe::array<int32_t>& values, std::vector<uint8_t>& result, uint8_t maxLen);
+    bool ParseIntArray(const ::taihe::array<int32_t>& values, std::vector<uint8_t>& result, uint8_t maxLen);
 
-    static bool ParseIntParam(const ::ohos::reminderAgentManager::manager::ReminderRequest& reminderReq,
+    bool ParseIntParam(const ::ohos::reminderAgentManager::manager::ReminderRequest& reminderReq,
         std::shared_ptr<Notification::ReminderRequest>& reminder);
-    static void ParseStringParam(const ::ohos::reminderAgentManager::manager::ReminderRequest& reminderReq,
+    void ParseStringParam(const ::ohos::reminderAgentManager::manager::ReminderRequest& reminderReq,
+        std::shared_ptr<Notification::ReminderRequest>& reminder);
+    bool ParseBoolParam(const ::ohos::reminderAgentManager::manager::ReminderRequest& reminderReq,
         std::shared_ptr<Notification::ReminderRequest>& reminder);
 
-    static bool ParseLocalDateTime(const ::ohos::reminderAgentManager::manager::LocalDateTime& dateTimeReq,
+    bool ParseLocalDateTime(const ::ohos::reminderAgentManager::manager::LocalDateTime& dateTimeReq,
         struct tm& dateTime);
-    static void ParseWantAgent(const ::ohos::reminderAgentManager::manager::WantAgent& wantAgentReq,
+    void ParseWantAgent(const ::ohos::reminderAgentManager::manager::WantAgent& wantAgentReq,
         std::shared_ptr<Notification::ReminderRequest::WantAgentInfo>& wantAgent);
-    static void ParseMaxScreenWantAgent(const ::ohos::reminderAgentManager::manager::MaxScreenWantAgent& wantAgentReq,
+    void ParseMaxScreenWantAgent(const ::ohos::reminderAgentManager::manager::MaxScreenWantAgent& wantAgentReq,
         std::shared_ptr<Notification::ReminderRequest>& reminder);
-    static void ParseButtonWantAgent(const ::ohos::reminderAgentManager::manager::WantAgent& wantAgentReq,
+    void ParseButtonWantAgent(const ::ohos::reminderAgentManager::manager::WantAgent& wantAgentReq,
         std::shared_ptr<Notification::ReminderRequest::ButtonWantAgent>& buttonWantAgent,
         std::shared_ptr<Notification::ReminderRequest>& reminder);
-    static void ParseDataShareUpdateEqualTo(
+    void ParseDataShareUpdateEqualTo(
         const ::taihe::map<::taihe::string, ::ohos::reminderAgentManager::manager::ParamType>& aniEqualTo,
         std::string& equalTo);
-    static void ParseButtonDataShareUpdate(
+    void ParseButtonDataShareUpdate(
         const ::ohos::reminderAgentManager::manager::DataShareUpdate& aniDataShareUpdate,
         std::shared_ptr<Notification::ReminderRequest::ButtonDataShareUpdate>& dataShareUpdate);
-    static bool ParseActionButton(
+    bool ParseActionButton(
         const ::taihe::array<::ohos::reminderAgentManager::manager::ActionButton>& actionButtons,
         std::shared_ptr<Notification::ReminderRequest>& reminder);
+    void ParseRingChannel(const ::ohos::reminderAgentManager::manager::RingChannel channel,
+        std::shared_ptr<Notification::ReminderRequest>& reminder);
 
-    static bool ParseCalendarParam(const ::ohos::reminderAgentManager::manager::ReminderRequestCalendar& calendarReq,
+    bool ParseCalendarParam(const ::ohos::reminderAgentManager::manager::ReminderRequestCalendar& calendarReq,
         std::vector<uint8_t>& repeatMonths, std::vector<uint8_t>& repeatDays, std::vector<uint8_t>& daysOfWeek);
 
-    static bool CreateReminderBase(const ::ohos::reminderAgentManager::manager::ReminderRequest& reminderReq,
+    bool CreateReminderBase(const ::ohos::reminderAgentManager::manager::ReminderRequest& reminderReq,
         std::shared_ptr<Notification::ReminderRequest>& reminder);
-    static bool CreateReminderTimer(const ::ohos::reminderAgentManager::manager::ReminderRequestTimer& timerReq,
+    bool CreateReminderTimer(const ::ohos::reminderAgentManager::manager::ReminderRequestTimer& timerReq,
         std::shared_ptr<Notification::ReminderRequest>& reminder);
-    static bool CreateReminderAlarm(const ::ohos::reminderAgentManager::manager::ReminderRequestAlarm& alarmReq,
+    bool CreateReminderAlarm(const ::ohos::reminderAgentManager::manager::ReminderRequestAlarm& alarmReq,
         std::shared_ptr<Notification::ReminderRequest>& reminder);
-    static bool CreateReminderCalendar(
+    bool CreateReminderCalendar(
         const ::ohos::reminderAgentManager::manager::ReminderRequestCalendar& calendarReq,
         std::shared_ptr<Notification::ReminderRequest>& reminder);
 
 private:
-    static void GenAniIntResult(const sptr<Notification::ReminderRequest>& reminder,
+    void GenAniIntResult(const sptr<Notification::ReminderRequest>& reminder,
         ::ohos::reminderAgentManager::manager::ReminderRequest& base);
-    static void GenAniStringResult(const sptr<Notification::ReminderRequest>& reminder,
+    void GenAniStringResult(const sptr<Notification::ReminderRequest>& reminder,
         ::ohos::reminderAgentManager::manager::ReminderRequest& base);
 
-    static void GenAniWantAgent(const sptr<Notification::ReminderRequest>& reminder,
+    void GenAniWantAgent(const sptr<Notification::ReminderRequest>& reminder,
         ::taihe::optional<::ohos::reminderAgentManager::manager::WantAgent>& aniWantAgent);
-    static void GenAniMaxScreenWantAgent(const sptr<Notification::ReminderRequest>& reminder,
+    void GenAniMaxScreenWantAgent(const sptr<Notification::ReminderRequest>& reminder,
         ::taihe::optional<::ohos::reminderAgentManager::manager::MaxScreenWantAgent>& aniWantAgent);
-    static void GenAniActionButton(const sptr<Notification::ReminderRequest>& reminder,
+    void GenAniActionButton(const sptr<Notification::ReminderRequest>& reminder,
         ::taihe::optional<::taihe::array<::ohos::reminderAgentManager::manager::ActionButton>>& aniActionButtons);
+    void GenAniRingChannel(const sptr<Notification::ReminderRequest>& reminder,
+        ::taihe::optional<::ohos::reminderAgentManager::manager::RingChannel>& aniRingChannel);
 
-    static void GenAniReminderBase(const sptr<Notification::ReminderRequest>& reminder,
+    void GenAniReminderBase(const sptr<Notification::ReminderRequest>& reminder,
         ::ohos::reminderAgentManager::manager::ReminderRequest& base);
-    static void GenAniReminderTimer(const sptr<Notification::ReminderRequest>& reminder,
+    void GenAniReminderTimer(const sptr<Notification::ReminderRequest>& reminder,
         ::ohos::reminderAgentManager::manager::ReminderRequestTimer& timer);
-    static void GenAniReminderAlarm(const sptr<Notification::ReminderRequest>& reminder,
+    void GenAniReminderAlarm(const sptr<Notification::ReminderRequest>& reminder,
         ::ohos::reminderAgentManager::manager::ReminderRequestAlarm& alarm);
-    static void GenAniReminderCalendar(const sptr<Notification::ReminderRequest>& reminder,
+    void GenAniReminderCalendar(const sptr<Notification::ReminderRequest>& reminder,
         ::ohos::reminderAgentManager::manager::ReminderRequestCalendar& calendar);
 
 private:
-    static bool IsSelfSystemApp();
+    bool IsSelfSystemApp();
+
+private:
+    std::string lastErrorMsg_;
 };
 } // namespace OHOS::ReminderAgentManagerNapi
 
