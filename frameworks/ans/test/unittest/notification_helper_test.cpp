@@ -1583,5 +1583,51 @@ HWTEST_F(NotificationHelperTest, IsGeofenceEnabled_0100, Function | SmallTest | 
     ErrCode ret = notificationHelper.IsGeofenceEnabled(enabled);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: ClearDelayNotification_0100
+ * @tc.desc: Test ClearDelayNotification.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, ClearDelayNotification_0100, Function | SmallTest | Level1)
+{
+    std::vector<std::string> triggerKeys;
+    std::vector<int32_t> userIds;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.ClearDelayNotification(triggerKeys, userIds);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+
+    triggerKeys.push_back("keyForTest");
+    ret = notificationHelper.ClearDelayNotification(triggerKeys, userIds);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+
+    triggerKeys.clear();
+    userIds.push_back(201);
+    ret = notificationHelper.ClearDelayNotification(triggerKeys, userIds);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+
+    triggerKeys.push_back("keyForTest");
+    userIds.push_back(202);
+    ret = notificationHelper.ClearDelayNotification(triggerKeys, userIds);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+
+    userIds.pop_back();
+    ret = notificationHelper.ClearDelayNotification(triggerKeys, userIds);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: PublishDelayedNotification_0100
+ * @tc.desc: Test PublishDelayedNotification.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, PublishDelayedNotification_0100, Function | SmallTest | Level1)
+{
+    std::string triggerKey;
+    int32_t userId = 100;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.PublishDelayedNotification(triggerKey, userId);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
 }
 }

@@ -1895,5 +1895,371 @@ HWTEST_F(AdvancedNotificationServiceTest, CheckNotificationRequestLineWantAgents
 
     ASSERT_EQ(advancedNotificationService.CheckNotificationRequestLineWantAgents(content, true, true), ERR_OK);
 }
+
+/**
+ * @tc.number    : PublishPreparedNotificationInner_0100
+ * @tc.name      : PublishPreparedNotificationInner_0100
+ * @tc.desc      : Test PublishPreparedNotificationInner method when bundleOption is nullptr
+ */
+HWTEST_F(AdvancedNotificationServiceTest, PublishPreparedNotificationInner_0100, Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    AdvancedNotificationService::PublishNotificationParameter parameter;
+    parameter.request = sptr<NotificationRequest>(new (std::nothrow) NotificationRequest());
+    auto ret = advancedNotificationService.PublishPreparedNotificationInner(parameter);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : Filter_0100
+ * @tc.name      : Filter_0100
+ * @tc.desc      : Test Filter method return ERR_ANS_INVALID_PARAM
+ */
+HWTEST_F(AdvancedNotificationServiceTest, Filter_0100, Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto record = advancedNotificationService.MakeNotificationRecord(request, bundle);
+    ASSERT_NE(record, nullptr);
+
+    advancedNotificationService.notificationSlotFilter_ = nullptr;
+    bool isRecover = false;
+    auto ret = advancedNotificationService.Filter(record, isRecover);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : Filter_0200
+ * @tc.name      : Filter_0200
+ * @tc.desc      : Test Filter method return ERR_ANS_NOTIFICATION_NOT_EXISTS
+ */
+HWTEST_F(AdvancedNotificationServiceTest, Filter_0200, Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    ASSERT_NE(record, nullptr);
+
+    advancedNotificationService_->notificationSlotFilter_ = nullptr;
+    bool isRecover = false;
+    auto ret = advancedNotificationService_->Filter(record, isRecover);
+    EXPECT_EQ(ret, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
+ * @tc.number    : IsNeedPushCheck_0100
+ * @tc.name      : IsNeedPushCheck_0100
+ * @tc.desc      : Test IsNeedPushCheck method return false
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheck_0100, Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    auto ret = advancedNotificationService_->IsNeedPushCheck(request);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.number    : IsNeedPushCheck_0200
+ * @tc.name      : IsNeedPushCheck_0200
+ * @tc.desc      : Test IsNeedPushCheck method return true
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheck_0200, Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    auto ret = advancedNotificationService_->IsNeedPushCheck(request);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.number    : TriggerAutoDelete_0100
+ * @tc.name      : TriggerAutoDelete_0100
+ * @tc.desc      : Test TriggerAutoDelete method when triggerNotificationList_ is empty
+ */
+HWTEST_F(AdvancedNotificationServiceTest, TriggerAutoDelete_0100, Level1)
+{
+    std::string hashCode = "hashCode";
+    int32_t reason = 0;
+    advancedNotificationService_->TriggerAutoDelete(hashCode, reason);
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : TriggerAutoDelete_0200
+ * @tc.name      : TriggerAutoDelete_0200
+ * @tc.desc      : Test TriggerAutoDelete when the notification key_ does not equal the hashCode
+ */
+HWTEST_F(AdvancedNotificationServiceTest, TriggerAutoDelete_0200, Level1)
+{
+    std::string hashCode = "hashCode";
+    int32_t reason = 0;
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    record->notification = notificationOne;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    advancedNotificationService_->TriggerAutoDelete(hashCode, reason);
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 1);
+}
+
+/**
+ * @tc.number    : TriggerAutoDelete_0300
+ * @tc.name      : TriggerAutoDelete_0300
+ * @tc.desc      : Test TriggerAutoDelete method when the notification key_ equals the hashCode
+ */
+HWTEST_F(AdvancedNotificationServiceTest, TriggerAutoDelete_0300, Level1)
+{
+    std::string hashCode = "hashCode";
+    int32_t reason = 0;
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    notificationOne->SetKey(hashCode);
+    record->notification = notificationOne;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    advancedNotificationService_->TriggerAutoDelete(hashCode, reason);
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : IsNeedNotifyConsumed_0100
+ * @tc.name      : IsNeedNotifyConsumed_0100
+ * @tc.desc      : Test IsNeedNotifyConsumed method return true
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsNeedNotifyConsumed_0100, Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    auto ret = advancedNotificationService_->IsNeedNotifyConsumed(request);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.number    : IsNeedNotifyConsumed_0200
+ * @tc.name      : IsNeedNotifyConsumed_0200
+ * @tc.desc      : Test IsNeedNotifyConsumed method return true
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsNeedNotifyConsumed_0200, Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetDistributedCollaborate(true);
+    request->SetDistributedHashCode("distributedHashCode");
+
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    ASSERT_NE(reqOne, nullptr);
+    reqOne->SetDistributedCollaborate(true);
+    reqOne->SetDistributedHashCode("distributedHashCode");
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(nullptr));
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+    record->request = reqOne;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    auto ret = advancedNotificationService_->IsNeedNotifyConsumed(request);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.number    : IsNeedNotifyConsumed_0300
+ * @tc.name      : IsNeedNotifyConsumed_0300
+ * @tc.desc      : Test IsNeedNotifyConsumed method return false
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsNeedNotifyConsumed_0300, Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContentOne = std::make_shared<NotificationLiveViewContent>();
+    liveViewContentOne->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END);
+    std::shared_ptr<NotificationContent> contentOne = std::make_shared<NotificationContent>(liveViewContentOne);
+    request->SetContent(contentOne);
+    request->SetDistributedCollaborate(true);
+    request->SetDistributedHashCode("distributedHashCode");
+
+    sptr<NotificationRequest> reqOne = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(reqOne, nullptr);
+    auto liveViewContentTwo = std::make_shared<NotificationLiveViewContent>();
+    liveViewContentTwo->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE);
+    std::shared_ptr<NotificationContent> contentTwo = std::make_shared<NotificationContent>(liveViewContentTwo);
+    reqOne->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    reqOne->SetContent(contentTwo);
+    reqOne->SetDistributedCollaborate(true);
+    reqOne->SetDistributedHashCode("distributedHashCode");
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(nullptr));
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+    record->request = reqOne;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    auto ret = advancedNotificationService_->IsNeedNotifyConsumed(request);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.number    : GetRecordFromNotificationList_0100
+ * @tc.name      : GetRecordFromNotificationList_0100
+ * @tc.desc      : Test GetRecordFromNotificationList method when triggerNotificationList_ is empty
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetRecordFromNotificationList_0100, Level1)
+{
+    int32_t notificationId = 0;
+    int32_t uid = 1001;
+    std::string label = "";
+    std::string bundleName = "";
+    int32_t userId = 100;
+    auto ret =
+        advancedNotificationService_->GetRecordFromNotificationList(notificationId, uid, label, bundleName, userId);
+    ASSERT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.number    : GetRecordFromNotificationList_0200
+ * @tc.name      : GetRecordFromNotificationList_0200
+ * @tc.desc      : Test GetRecordFromNotificationList method when triggerNotificationList_ is not empty
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetRecordFromNotificationList_0200, Level1)
+{
+    int32_t notificationId = 0;
+    int32_t uid = 1001;
+    std::string label = "label";
+    std::string bundleName = "bundleName";
+    int32_t userId = 100;
+
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    ASSERT_NE(reqOne, nullptr);
+    reqOne->SetLabel(label);
+    reqOne->SetNotificationId(notificationId);
+    reqOne->SetReceiverUserId(userId);
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(bundleName, uid);
+    record->bundleOption = bundle;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    auto ret =
+        advancedNotificationService_->GetRecordFromNotificationList(notificationId, uid, label, bundleName, userId);
+    ASSERT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.number    : RemoveFromNotificationList_0100
+ * @tc.name      : RemoveFromNotificationList_0100
+ * @tc.desc      : Test RemoveFromNotificationList method when the notification key_ does not equal the key
+ */
+HWTEST_F(AdvancedNotificationServiceTest, RemoveFromNotificationList_0100, Level1)
+{
+    std::string key = "notificationKey";
+    sptr<Notification> notification;
+    bool isCancel = false;
+    int32_t removeReason = -1;
+
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+
+    auto ret =
+        advancedNotificationService_->RemoveFromNotificationList(key, notification, isCancel, removeReason);
+    EXPECT_EQ(ret, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
+ * @tc.number    : RemoveFromNotificationList_0200
+ * @tc.name      : RemoveFromNotificationList_0200
+ * @tc.desc      : Test RemoveFromNotificationList method when the notification key_ equals the key
+ */
+HWTEST_F(AdvancedNotificationServiceTest, RemoveFromNotificationList_0200, Level1)
+{
+    std::string key = "notificationKey";
+    sptr<Notification> notification;
+    bool isCancel = false;
+    int32_t removeReason = -1;
+
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    ASSERT_NE(notificationOne, nullptr);
+    notificationOne->SetKey(key);
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+
+    auto ret =
+        advancedNotificationService_->RemoveFromNotificationList(key, notification, isCancel, removeReason);
+    EXPECT_EQ(ret, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
+ * @tc.number    : RemoveFromNotificationListForDeleteAll_0100
+ * @tc.name      : RemoveFromNotificationListForDeleteAll_0100
+ * @tc.desc      : Test RemoveFromNotificationListForDeleteAll method when request has local wantAgent
+ */
+HWTEST_F(AdvancedNotificationServiceTest, RemoveFromNotificationListForDeleteAll_0100, Level1)
+{
+    std::string key = "";
+    int32_t userId = 100;
+    sptr<Notification> notification = nullptr;
+    bool removeAll = false;
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(nullptr));
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    auto ret =
+        advancedNotificationService_->RemoveFromNotificationListForDeleteAll(key, userId, notification, removeAll);
+    EXPECT_EQ(ret, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
+ * @tc.number    : RemoveFromNotificationListForDeleteAll_0200
+ * @tc.name      : RemoveFromNotificationListForDeleteAll_0200
+ * @tc.desc      : Test RemoveFromNotificationListForDeleteAll method when the notification key_ does not equal the key
+ */
+HWTEST_F(AdvancedNotificationServiceTest, RemoveFromNotificationListForDeleteAll_0200, Level1)
+{
+    std::string key = "key";
+    int32_t userId = 0;
+    sptr<Notification> notification = nullptr;
+    bool removeAll = false;
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(nullptr));
+    ASSERT_NE(notificationOne, nullptr);
+    notificationOne->SetKey(key);
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+
+    auto ret =
+        advancedNotificationService_->RemoveFromNotificationListForDeleteAll(key, userId, notification, removeAll);
+    EXPECT_EQ(ret, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
 }  // namespace Notification
 }  // namespace OHOS

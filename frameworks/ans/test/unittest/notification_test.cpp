@@ -628,5 +628,21 @@ HWTEST_F(NotificationTest, Dump_00002, Function | SmallTest | Level1)
     auto it = dump.find("999");
     ASSERT_NE(it, std::string::npos);
 }
+
+/**
+ * @tc.name: GetGeofenceTriggerTimer_00001
+ * @tc.desc: Test GetGeofenceTriggerTimer_00001
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, GetGeofenceTriggerTimer_00001, Function | SmallTest | Level1)
+{
+    std::string deviceId = "DeviceId";
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto notification = std::make_shared<Notification>(deviceId, request);
+    uint64_t triggerTimerId = 10;
+    notification->SetGeofenceTriggerTimer(triggerTimerId);
+    EXPECT_EQ(notification->GetGeofenceTriggerTimer(), 10);
+}
 } // namespace Notification
 } // namespace OHOS

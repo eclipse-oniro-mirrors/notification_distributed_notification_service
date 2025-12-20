@@ -1318,5 +1318,84 @@ HWTEST_F(NotificationRequestTest, SetAppIndex_0001, Level1)
     notificationRequest.SetAppIndex(10);
     EXPECT_EQ(notificationRequest.GetAppIndex(), 10);
 }
+
+/**
+ * @tc.name: GetGeofenceTriggerDeadLine_0100
+ * @tc.desc: Test GetGeofenceTriggerDeadLine
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, GetGeofenceTriggerDeadLine_0100, Level1)
+{
+    int32_t notificationId = 10;
+    NotificationRequest notificationRequest(notificationId);
+    int64_t triggerDeadLine = 100;
+    notificationRequest.SetGeofenceTriggerDeadLine(triggerDeadLine);
+    EXPECT_EQ(notificationRequest.GetGeofenceTriggerDeadLine(), 100);
+}
+
+/**
+ * @tc.name: GetLiveViewStatus_0100
+ * @tc.desc: Test GetLiveViewStatus
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, GetLiveViewStatus_0100, Level1)
+{
+    int32_t notificationId = 10;
+    NotificationRequest notificationRequest(notificationId);
+    EXPECT_EQ(notificationRequest.GetLiveViewStatus(), NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BUTT);
+}
+
+/**
+ * @tc.name: GetLiveViewStatus_0200
+ * @tc.desc: Test GetLiveViewStatus
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, GetLiveViewStatus_0200, Level1)
+{
+    int32_t notificationId = 10;
+    NotificationRequest notificationRequest(notificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContentOne = std::make_shared<NotificationLiveViewContent>();
+    std::shared_ptr<NotificationContent> contentOne = std::make_shared<NotificationContent>(liveViewContentOne);
+    notificationRequest.SetContent(contentOne);
+    EXPECT_EQ(notificationRequest.GetLiveViewStatus(), NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
+}
+
+/**
+ * @tc.name: SetLiveViewStatus_0100
+ * @tc.desc: Test SetLiveViewStatus
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, SetLiveViewStatus_0100, Level1)
+{
+    int32_t notificationId = 10;
+    NotificationRequest notificationRequest(notificationId);
+    NotificationLiveViewContent::LiveViewStatus status =
+        NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE;
+    EXPECT_EQ(notificationRequest.SetLiveViewStatus(status), false);
+}
+
+/**
+ * @tc.name: SetLiveViewStatus_0200
+ * @tc.desc: Test SetLiveViewStatus
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, SetLiveViewStatus_0200, Level1)
+{
+    int32_t notificationId = 10;
+    NotificationRequest notificationRequest(notificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContentOne = std::make_shared<NotificationLiveViewContent>();
+    std::shared_ptr<NotificationContent> contentOne = std::make_shared<NotificationContent>(liveViewContentOne);
+    notificationRequest.SetContent(contentOne);
+    NotificationLiveViewContent::LiveViewStatus status =
+        NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE;
+    EXPECT_EQ(notificationRequest.SetLiveViewStatus(status), true);
+}
 } // namespace Notification
 } // namespace OHOS
