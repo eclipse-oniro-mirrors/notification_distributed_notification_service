@@ -125,7 +125,7 @@ ErrCode AdvancedNotificationService::UpdateNotificationTimerInfo(const std::shar
     auto content = record->request->GetContent()->GetNotificationContent();
     auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
     auto status = liveViewContent->GetLiveViewStatus();
-    auto trigger = record->request->GetNotificationTrigger();
+    auto extraInfo = liveViewContent->GetExtraInfo();
     switch (status) {
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE:
             result = SetFinishTimer(record);
@@ -138,7 +138,7 @@ ErrCode AdvancedNotificationService::UpdateNotificationTimerInfo(const std::shar
                 return result;
             }
 
-            if (trigger != nullptr) {
+            if (extraInfo != nullptr && extraInfo->HasParam("TriggerPath")) {
                 result = SetGeofenceTriggerTimer(record);
             }
 

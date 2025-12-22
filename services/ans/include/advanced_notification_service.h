@@ -1919,8 +1919,7 @@ private:
     void AddToTriggerNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void ProcForDeleteGeofenceLiveView(const std::shared_ptr<NotificationRecord> &record);
     ErrCode OnNotifyDelayedNotification(const PublishNotificationParameter &parameter);
-    ErrCode UpdateTriggerNotification(PublishNotificationParameter parameter,
-        std::vector<std::shared_ptr<NotificationRecord>> &records);
+    ErrCode UpdateTriggerNotification(PublishNotificationParameter parameter);
     ErrCode ParseGeofenceNotificationFromDb(const std::string &value, PublishNotificationParameter &requestDb);
     ErrCode ClearAllGeofenceNotificationRequests(const int32_t &userId);
     void FindGeofenceNotificationRecordByKey(const std::string &key,
@@ -1963,6 +1962,11 @@ private:
     ErrCode CheckLiveViewPendingEndLiveViewStatus(const sptr<NotificationRequest> &request);
     ErrCode OnNotifyDelayedNotificationInner(const PublishNotificationParameter &parameter,
         const std::shared_ptr<NotificationRecord> &record);
+    void GeneratePublishNotificationParameter(const sptr<NotificationRequest> &request,
+        const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner,
+        PublishNotificationParameter &parameter);
+    bool IsGeofenceNotificationRequest(const sptr<NotificationRequest> &request);
+    bool IsExistsGeofence(const sptr<NotificationRequest> &request);
     void UpdateRecentNotification(sptr<Notification> &notification, bool isDelete, int32_t reason);
 
     void AdjustDateForDndTypeOnce(int64_t &beginDate, int64_t &endDate);

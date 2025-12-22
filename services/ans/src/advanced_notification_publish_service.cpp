@@ -130,13 +130,13 @@ void AdvancedNotificationService::UpdateCollaborateTimerInfo(const std::shared_p
     auto content = record->request->GetContent()->GetNotificationContent();
     auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
     auto status = liveViewContent->GetLiveViewStatus();
-    auto trigger = record->request->GetNotificationTrigger();
+    auto extraInfo = liveViewContent->GetExtraInfo();
     switch (status) {
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE: {
             if (record->notification->GetFinishTimer() == NotificationConstant::INVALID_TIMER_ID) {
                 SetFinishTimer(record);
             }
-            if (trigger != nullptr &&
+            if (extraInfo != nullptr && extraInfo->HasParam("TriggerPath") &&
                 record->notification->GetGeofenceTriggerTimer() == NotificationConstant::INVALID_TIMER_ID) {
                 SetGeofenceTriggerTimer(record);
             }
