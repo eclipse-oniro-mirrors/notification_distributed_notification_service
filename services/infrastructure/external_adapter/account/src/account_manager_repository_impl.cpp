@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "account_manager_repository_impl.h"
+
 #include <vector>
 #include "errors.h"
 #include "ipc_skeleton.h"
 #include "ans_log_wrapper.h"
 #include "ans_inner_errors.h"
-#include "account_manager_repository_impl.h"
 #include "os_account_constants.h"
 #include "os_account_info.h"
 #include "os_account_manager.h"
@@ -29,10 +31,9 @@ ErrCode AccountManagerRepositoryImpl::GetOsAccountLocalIdFromUid(const int32_t u
 {
     int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
     if (ret != ERR_OK) {
-        ANS_LOGE("Get userId failed, uid = <%{public}d>, code is %{public}d", uid, ret);
-        return ret;
+        ANS_LOGE("Get user id from uid %{public}d, %{public}d failed.", uid, ret);
     }
-    ANS_LOGD("Get userId Success, uid = <%{public}d> userId = <%{public}d>", uid, userId);
+    ANS_LOGD("Get user id from uid %{public}d, %{public}d failed.", uid, userId);
     return ret;
 }
 
@@ -55,9 +56,23 @@ ErrCode AccountManagerRepositoryImpl::GetCurrentActiveUserId(int32_t &id)
 #endif
     int32_t ret = OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(id);
     if (ret != ERR_OK) {
-        ANS_LOGE("Failed to call OsAccountManager::GetForegroundOsAccountLocalId, code is %{public}d", ret);
+        ANS_LOGE("Failed to get userid %{public}d.", ret);
     }
     return ret;
+}
+
+int32_t AccountManagerRepositoryImpl::GetCurrentActiveUserIdWithDefault(int32_t defaultUserId)
+{
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+    ANS_LOGE("multi foreground user is not supported this function");
+#endif
+    int32_t userId = defaultUserId;
+    int32_t ret = OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Failed to get userid with default %{public}d, %{public}d.", defaultUserId, ret);
+        return defaultUserId;
+    }
+    return userId;
 }
 
 ErrCode AccountManagerRepositoryImpl::GetAllOsAccount(std::vector<int32_t> &userIds)
@@ -65,7 +80,7 @@ ErrCode AccountManagerRepositoryImpl::GetAllOsAccount(std::vector<int32_t> &user
     std::vector<AccountSA::OsAccountInfo> accounts;
     int32_t ret = OHOS::AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
     if (ret != ERR_OK) {
-        ANS_LOGE("Failed to call OsAccountManager::QueryAllCreatedOsAccounts, code is %{public}d", ret);
+        ANS_LOGE("Failed to get all account %{public}d.", ret);
         return ret;
     }
     for (auto item : accounts) {
@@ -78,20 +93,20 @@ ErrCode AccountManagerRepositoryImpl::GetAllActiveOsAccount(std::vector<int32_t>
 {
     int32_t ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
     if (ret != ERR_OK) {
-        ANS_LOGE("Failed to call OsAccountManager::QueryActiveOsAccountIds, code is %{public}d", ret);
+        ANS_LOGE("Failed to get all active account %{public}d", ret);
     }
     return ret;
 }
 
-bool AccountManagerRepositoryImpl::CheckUserExists(const int32_t &userId)
+bool AccountManagerRepositoryImpl::CheckUserIdExists(const int32_t &userId, bool defaultValue)
 {
-    bool isAccountExists = false;
+    bool isAccountExists = defaultValue;
     int32_t ret = OHOS::AccountSA::OsAccountManager::IsOsAccountExists(userId, isAccountExists);
     if (ret != ERR_OK) {
-        ANS_LOGE("Failed to call OsAccountManager::IsOsAccountExists, code is %{public}d", ret);
-        return false;
+        ANS_LOGE("Failed to call check userid %{public}d, %{public}d.", userId, ret);
+        return defaultValue;
     }
-    ANS_LOGD("Call IsOsAccountExists Success, user = %{public}d userExists = %{public}d", userId, isAccountExists);
+    ANS_LOGD("Call check userid %{public}d, %{public}d.", userId, isAccountExists);
     return isAccountExists;
 }
 
@@ -117,6 +132,16 @@ ErrCode AccountManagerRepositoryImpl::GetOsAccountPrivateStatus(bool &isPrivate)
     ANS_LOGI("GetOsAccountTypef, type: %{public}d", type);
     isPrivate = type == AccountSA::OsAccountType::PRIVATE;
     return queryRes;
+}
+
+bool AccountManagerRepositoryImpl::IsOsAccountVerified(int32_t userId, bool defaultValue)
+{
+    bool verified = defaultValue;
+    ErrCode result = OHOS::AccountSA::OsAccountManager::IsOsAccountVerified(userId, verified);
+    if (result != ERR_OK) {
+        ANS_LOGE("Account varified fail %{public}d.", userId);
+    }
+    return verified;
 }
 } // Infra
 } // Notification

@@ -36,6 +36,9 @@ const uint32_t BANNER_OPNE = 1 << 2;
 const uint32_t LIGHTSCREEN_OPNE = 1 << 3;
 const uint32_t VIBRATION_OPNE = 1 << 4;
 const uint32_t STATUSBAR_ICON_OPNE = 1 << 5;
+// Default sound for notification
+const static std::vector<int64_t> DEFAULT_NOTIFICATION_VIBRATION = {200};
+const static Uri DEFAULT_NOTIFICATION_SOUND("file://system/etc/Light.ogg");
 
 NotificationSlot::NotificationSlot(NotificationConstant::SlotType type) : sound_("")
 {

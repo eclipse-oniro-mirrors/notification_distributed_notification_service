@@ -16,16 +16,23 @@
 #ifndef ANS_ACCOUNT_MANAGER_REPOSITORY_IMPL_H
 #define ANS_ACCOUNT_MANAGER_REPOSITORY_IMPL_H
 
-#include "iaccount_manager_repository.h"
+#include <vector>
+#include "ans_inner_errors.h"
 
 namespace OHOS {
 namespace Notification {
 namespace Infra {
-class AccountManagerRepositoryImpl : public Domain::IAccountManagerRepository {
-/**
+
+class AccountManagerRepositoryImpl {
+public:
+    static constexpr int32_t INVALID_USER_ID = -1;
+    static constexpr int32_t DEFAULT_USER_ID = 100;
+    static constexpr int32_t ZERO_USER_ID = 0;
+public:
+    /**
     * @brief check is system account
     */
-    bool IsSystemAccount(int32_t userId) override;
+    static bool IsSystemAccount(int32_t userId);
 
     /**
      * Gets operating system account local ID from uid.
@@ -34,7 +41,7 @@ class AccountManagerRepositoryImpl : public Domain::IAccountManagerRepository {
      * @param id Indicates the account ID.
      * @return Returns result code.
      */
-    ErrCode GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id) override;
+    static ErrCode GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id);
 
     /**
      * Gets operating system account local ID from current calling.
@@ -42,7 +49,7 @@ class AccountManagerRepositoryImpl : public Domain::IAccountManagerRepository {
      * @param id Indicates the current calling account ID.
      * @return Returns result code.
      */
-    ErrCode GetCurrentCallingUserId(int32_t &id) override;
+    static ErrCode GetCurrentCallingUserId(int32_t &id);
 
     /**
      * Gets operating system account local ID from current active.
@@ -50,7 +57,12 @@ class AccountManagerRepositoryImpl : public Domain::IAccountManagerRepository {
      * @param id Indicates the current active account ID.
      * @return Returns result code.
      */
-    ErrCode GetCurrentActiveUserId(int32_t &id) override;
+    static ErrCode GetCurrentActiveUserId(int32_t &id);
+
+    /**
+     * Gets operating system account local ID with default value from current active.
+     */
+    static int32_t GetCurrentActiveUserIdWithDefault(int32_t defaultUserId);
 
     /**
      * Check the userId whether exists in OsAccount service.
@@ -58,7 +70,7 @@ class AccountManagerRepositoryImpl : public Domain::IAccountManagerRepository {
      * @param userId Indicates the current active account ID.
      * @return Returns result.
      */
-    bool CheckUserExists(const int32_t &userId) override;
+    static bool CheckUserIdExists(const int32_t &userId, bool defaultValue = false);
 
     /**
      * Get All os account userIds.
@@ -66,7 +78,7 @@ class AccountManagerRepositoryImpl : public Domain::IAccountManagerRepository {
      * @param userIds Indicates the current created account ID.
      * @return Returns result.
      */
-    ErrCode GetAllOsAccount(std::vector<int32_t> &userIds) override;
+    static ErrCode GetAllOsAccount(std::vector<int32_t> &userIds);
 
     /**
      * Get All active account userIds.
@@ -74,14 +86,20 @@ class AccountManagerRepositoryImpl : public Domain::IAccountManagerRepository {
      * @param userIds Indicates the current active account ID.
      * @return Returns result.
      */
-    ErrCode GetAllActiveOsAccount(std::vector<int32_t> &userIds) override;
+    static ErrCode GetAllActiveOsAccount(std::vector<int32_t> &userIds);
 
     /**
      * Get private status from osAccount.
      */
-    ErrCode GetOsAccountPrivateStatus(bool &isPrivate) override;
+    static ErrCode GetOsAccountPrivateStatus(bool &isPrivate);
+
+    /**
+     * Check user id is verified.
+     */
+    static bool IsOsAccountVerified(int32_t userId, bool defaultValue = false);
 };
 } // namespace Infra
 } // namespace Notification
 } // namespace OHOS
 #endif
+

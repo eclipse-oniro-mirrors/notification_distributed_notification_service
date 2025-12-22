@@ -72,6 +72,22 @@ namespace Notification {
     ((void)HILOG_IMPL(LOG_CORE, LOG_DEBUG, ANS_LOG_DOMAIN, ANS_REMINDER_LOG_TAG, \
     "[%{public}s(%{public}s:%{public}d)]" fmt, CUR_FILENAME, __FUNCTION__, __LINE__, ##__VA_ARGS__))
 
+#define ANS_COND_DO_ERR(cond, expr, format, ...)          \
+    if (cond) {                                           \
+        ANS_LOGE(format, ##__VA_ARGS__);                  \
+        {                                                 \
+            expr;                                         \
+        }                                                 \
+    }
+
+#define ANS_COND_DO_WARN(cond, expr, format, ...)         \
+    if (cond) {                                           \
+        ANS_LOGW(format, ##__VA_ARGS__);                  \
+        {                                                 \
+            expr;                                         \
+        }                                                 \
+    }
+
 #define ANS_PRINT_LIMIT(type, level, intervals, canPrint)                               \
 do {                                                                                    \
     static auto last = std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds>();   \

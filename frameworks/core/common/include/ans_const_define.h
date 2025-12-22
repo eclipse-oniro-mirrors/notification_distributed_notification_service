@@ -59,10 +59,6 @@ constexpr int32_t NOTIFICATION_MAX_COUNT = 1024;
 constexpr int32_t DO_NOT_DISTURB_PROFILE_MIN_ID = 1;
 constexpr int32_t DO_NOT_DISTURB_PROFILE_MAX_ID = 10;
 
-// Default sound for notification
-const static Uri DEFAULT_NOTIFICATION_SOUND("file://system/etc/Light.ogg");
-const static std::vector<int64_t> DEFAULT_NOTIFICATION_VIBRATION = {200};
-
 // Default path for template
 const static std::string DEFAULT_TEMPLATE_PATH("/system/etc/notification_template/external.json");
 const std::string CURRENT_DEVICE_TYPE = "current";
