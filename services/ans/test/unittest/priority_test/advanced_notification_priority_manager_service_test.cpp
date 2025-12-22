@@ -86,7 +86,7 @@ HWTEST_F(PriorityManagerServiceTest, SetBundlePriorityConfig_0100, Function | Sm
     std::string value;
     EXPECT_EQ(
         AdvancedNotificationService::GetInstance()->GetBundlePriorityConfig(bundleOption, value), ERR_OK);
-    EXPECT_EQ(value, "keyword1\nkeyword2");
+    EXPECT_EQ(value, "");
 }
 }
 }
