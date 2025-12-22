@@ -72,7 +72,7 @@ export default namespace notificationExtensionSubscription {
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): Promise<int> => { return nativeOpenSubscriptionSettings(context); });
-            p.then((data: NullishType): void => {
+            p.then((data: Any): void => {
                 if (data == undefined) {
                     reject(rejectInternalError);
                 } else {
@@ -94,7 +94,7 @@ export default namespace notificationExtensionSubscription {
         let pPromise = new Promise<void>((
             resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeSubscribe(info); });
-            p.then((data: NullishType): void => {
+            p.then((data: Any): void => {
                 resolve(undefined);
             }, (error: Error): void => {
                 reject(error);
@@ -107,7 +107,7 @@ export default namespace notificationExtensionSubscription {
         let pPromise = new Promise<void>((
             resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeUnsubscribe(); });
-            p.then((data: NullishType): void => {
+            p.then((data: Any): void => {
                 resolve(undefined);
             }, (error: Error): void => {
                 reject(error);
@@ -121,7 +121,7 @@ export default namespace notificationExtensionSubscription {
             resolve: ResolveCallback<NotificationExtensionSubscriptionInfo[]>, reject: RejectCallback): void => {
             let p = taskpool.execute((): NotificationExtensionSubscriptionInfo[] => { 
                 return nativeGetSubscribeInfo(); });
-            p.then((data: NullishType): void => {
+            p.then((data: Any): void => {
                 let infos : NotificationExtensionSubscriptionInfo[] = 
                     data as NotificationExtensionSubscriptionInfo[];
                 resolve(infos);
@@ -136,7 +136,7 @@ export default namespace notificationExtensionSubscription {
         let pPromise = new Promise<BundleOption[]>(
             (resolve: ResolveCallback<BundleOption[]>, reject: RejectCallback): void => {
             let p = taskpool.execute((): BundleOption[] => { return nativeGetAllSubscriptionBundles(); });
-            p.then((data: NullishType): void => {
+            p.then((data: Any): void => {
                 let options : BundleOption[] = data as BundleOption[];
                 resolve(options);
             }, (error: Error): void => {
@@ -149,7 +149,7 @@ export default namespace notificationExtensionSubscription {
     function isUserGranted(): Promise<boolean> {
         let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
             let p = taskpool.execute((): boolean => { return nativeIsUserGranted(); });
-            p.then((data: NullishType): void => {
+            p.then((data: Any): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
             }, (error: Error): void => {
@@ -166,7 +166,7 @@ export default namespace notificationExtensionSubscription {
         }
         let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
             let p = taskpool.execute((): boolean => { return nativeGetUserGrantedState(targetBundle); });
-            p.then((data: NullishType): void => {
+            p.then((data: Any): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
             }, (error: Error): void => {
@@ -183,7 +183,7 @@ export default namespace notificationExtensionSubscription {
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeSetUserGrantedState(targetBundle, enabled); });
-            p.then((data: NullishType): void => {
+            p.then((data: Any): void => {
                 resolve(undefined);
             }, (error: Error): void => {
                 reject(error);
@@ -199,7 +199,7 @@ export default namespace notificationExtensionSubscription {
         }
         let pPromise = new Promise<BundleOption[]>((resolve: ResolveCallback<BundleOption[]>, reject: RejectCallback): void => {
             let p = taskpool.execute((): BundleOption[] => { return nativeGetUserGrantedEnabledBundles(targetBundle); });
-            p.then((data: NullishType): void => {
+            p.then((data: Any): void => {
                 let bundles : BundleOption[] = data as BundleOption[];
                 resolve(bundles);
             }, (error: Error): void => {
@@ -212,7 +212,7 @@ export default namespace notificationExtensionSubscription {
     function getUserGrantedEnabledBundles(): Promise<string[]> {
         let pPromise = new Promise<string[]>((resolve: ResolveCallback<string[]>, reject: RejectCallback): void => {
             let p = taskpool.execute((): string[] => { return nativeGetUserGrantedEnabledBundlesForSelf(); });
-            p.then((data: NullishType): void => {
+            p.then((data: Any): void => {
                 let bundles : string[] = data as string[];
                 resolve(bundles);
             }, (error: Error): void => {
@@ -230,7 +230,7 @@ export default namespace notificationExtensionSubscription {
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeSetUserGrantedBundleState(targetBundle, enabledBundles, enabled); });
-            p.then((data: NullishType): void => {
+            p.then((data: Any): void => {
                 resolve(undefined);
             }, (error: Error): void => {
                 reject(error);

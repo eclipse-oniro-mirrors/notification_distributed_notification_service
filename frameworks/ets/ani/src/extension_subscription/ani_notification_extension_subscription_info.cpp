@@ -133,7 +133,7 @@ ani_status UnwarpNotificationExtensionSubscribeInfoArrayByAniObj(ani_env *env, a
     }
     ani_ref ref;
     for (ani_size i = 0; i < size; i++) {
-        status = env->Array_Get_Ref(reinterpret_cast<ani_array_ref>(arrayValue), i, &ref);
+        status = env->Array_Get(reinterpret_cast<ani_array>(arrayValue), i, &ref);
         if (status != ANI_OK) {
             ANS_LOGE("Array_Get_Ref failed. status : %{public}d", status);
             return status;
@@ -200,11 +200,11 @@ bool WrapNotificationExtensionSubscribeInfoArray(ani_env* env,
         ANS_LOGE("FindClass failed. status : %{public}d", status);
         return false;
     }
-    ani_array_ref array = nullptr;
+    ani_array array = nullptr;
     size_t size = infos.size();
-    status = env->Array_New_Ref(cls, size, nullptr, &array);
+    status = env->Array_New(size, nullptr, &array);
     if (status != ANI_OK) {
-        ANS_LOGE("Array_New_Ref failed. status : %{public}d", status);
+        ANS_LOGE("Array_New failed. status : %{public}d", status);
         return false;
     }
     int32_t index = 0;
@@ -214,9 +214,9 @@ bool WrapNotificationExtensionSubscribeInfoArray(ani_env* env,
             ANS_LOGE("WrapNotificationExtensionSubscribeInfo Failed. index = %{public}d", index);
             return false;
         }
-        status = env->Array_Set_Ref(array, index, infoObj);
+        status = env->Array_Set(array, index, infoObj);
         if (status != ANI_OK) {
-            ANS_LOGE("Array_Set_Ref Failed. index = %{public}d, status = %{public}d", index, status);
+            ANS_LOGE("Array_Set Failed. index = %{public}d, status = %{public}d", index, status);
             return false;
         }
         index++;

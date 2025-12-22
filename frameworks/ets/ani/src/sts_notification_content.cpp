@@ -789,7 +789,7 @@ ani_status GetStructuredTextFromAni(ani_env *env, ani_object obj,
     ani_class mapClass;
     ani_object mapObj = static_cast<ani_object>(structuredTextRef);
  
-    if (env->FindClass("Lescompat/Map;", &mapClass) != ANI_OK) {
+    if (env->FindClass("std.core.Map", &mapClass) != ANI_OK) {
         ANS_LOGE("Find Map class failed.");
         return ANI_OK;
     }
@@ -1228,7 +1228,7 @@ bool WrapStructuredText(ani_env *env, ani_object &object, const NotificationBasi
     ANS_LOGD("WrapStructuredText enter");
     const auto& texts = basicContent->GetStructuredText();
     ani_object structuredTextObj = nullptr;
-    structuredTextObj = CreateMapObject(env, "Lescompat/Map;", ":V");
+    structuredTextObj = CreateMapObject(env, "std.core.Map", ":");
     if (structuredTextObj == nullptr) {
         return false;
     }
@@ -1243,7 +1243,7 @@ bool WrapStructuredText(ani_env *env, ani_object &object, const NotificationBasi
             continue;
         }
         status = env->Object_CallMethodByName_Ref(structuredTextObj, "set",
-            "Lstd/core/Object;Lstd/core/Object;:Lescompat/Map;", &mapRef,
+            "YY:C{std.core.Map}", &mapRef,
             static_cast<ani_object>(key), static_cast<ani_object>(val));
         if (status != ANI_OK) {
             ANS_LOGE("Faild to set structuredText map, status : %{public}d", status);

@@ -158,7 +158,7 @@ bool UnwrapArrayReminderInfo(ani_env *env, ani_ref arrayObj, std::vector<Reminde
     for (int32_t i = 0; i < static_cast<int32_t>(length); i++) {
         ani_ref reminderRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "i:C{std.core.Object}", &reminderRef, i);
+            "$_get", "i:Y", &reminderRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("UnwrapArrayReminderInfo: get bundleOptionRef failed, status = %{public}d", status);
             return false;
