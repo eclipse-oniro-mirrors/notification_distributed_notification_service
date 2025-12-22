@@ -2445,7 +2445,8 @@ ErrCode NotificationPreferences::GetExtensionSubscriptionCloneUpdatedBundles(int
     }
     for (auto &item : data) {
         for (auto &invalidBundle: item.second) {
-            if (invalidBundle->GetBundleName() == bundleOption->GetBundleName()) {
+            if (invalidBundle->GetBundleName() == bundleOption->GetBundleName() &&
+                invalidBundle->GetAppIndex() == bundleOption->GetAppIndex()) {
                 bundles.emplace_back(item.first);
                 break;
             }
@@ -2475,7 +2476,8 @@ ErrCode NotificationPreferences::RemoveExtensionSubscriptionCloneUpdatedBundles(
     while (dataItem != data.end()) {
         auto invalidBundleIter = dataItem->second.begin();
         while (invalidBundleIter != dataItem->second.end()) {
-            if ((*invalidBundleIter)->GetBundleName() == bundleOption->GetBundleName()) {
+            if ((*invalidBundleIter)->GetBundleName() == bundleOption->GetBundleName() &&
+                (*invalidBundleIter)->GetAppIndex() == bundleOption->GetAppIndex()) {
                 invalidBundleIter = dataItem->second.erase(invalidBundleIter);
                 continue;
             }

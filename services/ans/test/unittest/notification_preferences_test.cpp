@@ -1938,6 +1938,39 @@ HWTEST_F(NotificationPreferencesTest, RemoveExtensionSubscriptionCloneUpdatedBun
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_EQ(bundles.size(), 0);
 }
+
+HWTEST_F(NotificationPreferencesTest, RemoveExtensionSubscriptionCloneUpdatedBundles_005, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
+    std::vector<sptr<NotificationBundleOption>> insertBundles;
+    sptr<NotificationBundleOption> bundle1 = new NotificationBundleOption("bundle", 1001);
+    bundle1->SetAppIndex(1);
+    sptr<NotificationBundleOption> bundle2 = new NotificationBundleOption("bundle", 1002);
+    bundle2->SetAppIndex(2);
+    insertBundles.push_back(bundle1);
+    insertBundles.push_back(bundle2);
+    auto ret = notificationPreferences.SetExtensionSubscriptionClonedInvalidBundles(100, bundleOption, insertBundles);
+    EXPECT_EQ(ret, ERR_OK);
+
+    sptr<NotificationBundleOption> anotherBundleOption = new NotificationBundleOption("test.bundle.another", 100);
+    std::vector<sptr<NotificationBundleOption>> anotherBundles;
+    anotherBundles.push_back(new NotificationBundleOption("bundle2", 1002));
+    ret = notificationPreferences.SetExtensionSubscriptionClonedInvalidBundles(100,
+        anotherBundleOption, anotherBundles);
+    EXPECT_EQ(ret, ERR_OK);
+
+    sptr<NotificationBundleOption> updatedBundle = new NotificationBundleOption("bundle1", 1001);
+    updatedBundle->SetAppIndex(1);
+    ret = notificationPreferences.RemoveExtensionSubscriptionCloneUpdatedBundles(100, updatedBundle);
+    EXPECT_EQ(ret, ERR_OK);
+
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    ret = notificationPreferences.GetExtensionSubscriptionCloneUpdatedBundles(100, updatedBundle, bundles);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(bundles.size(), 0);
+}
 #endif
 /**
  * @tc.name: SetSubscriberExistFlag_0100
