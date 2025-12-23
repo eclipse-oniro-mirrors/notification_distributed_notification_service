@@ -2261,5 +2261,319 @@ HWTEST_F(AdvancedNotificationServiceTest, RemoveFromNotificationListForDeleteAll
         advancedNotificationService_->RemoveFromNotificationListForDeleteAll(key, userId, notification, removeAll);
     EXPECT_EQ(ret, ERR_ANS_NOTIFICATION_NOT_EXISTS);
 }
+
+/**
+ * @tc.number    : GetRemoveListForRemoveNtfBySlot_0100
+ * @tc.name      : GetRemoveListForRemoveNtfBySlot_0100
+ * @tc.desc      : Verify that notification with matching bundle and slot type are correctly removed
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetRemoveListForRemoveNtfBySlot_0100, Level1)
+{
+    std::string key = "key";
+    std::string bundleName = "bundleName";
+    int32_t uid = 2001001;
+    sptr<Notification> notification(new (std::nothrow) Notification(nullptr));
+    ASSERT_NE(notification, nullptr);
+    notification->SetKey(key);
+
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    ASSERT_NE(record, nullptr);
+    record->notification = notification;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(bundleName, uid);
+    record->bundleOption = bundle;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    record->request = request;
+
+    advancedNotificationService_->triggerNotificationList_.clear();
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::LIVE_VIEW);
+    ASSERT_NE(slot, nullptr);
+
+    std::vector<std::shared_ptr<NotificationRecord>> removeList;
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 1);
+    advancedNotificationService_->GetRemoveListForRemoveNtfBySlot(bundle, slot, removeList);
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : GetRemoveListForRemoveNtfBySlot_0200
+ * @tc.name      : GetRemoveListForRemoveNtfBySlot_0200
+ * @tc.desc      : Verify that notification with non-matching bundle are not removed
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetRemoveListForRemoveNtfBySlot_0200, Level1)
+{
+    std::string key = "key";
+    std::string bundleName = "bundleName";
+    std::string bundleNameOther = "bundleName.other";
+    int32_t uid = 2001001;
+    int32_t uidOther = 2001002;
+    sptr<Notification> notification(new (std::nothrow) Notification(nullptr));
+    ASSERT_NE(notification, nullptr);
+    notification->SetKey(key);
+
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    ASSERT_NE(record, nullptr);
+    record->notification = notification;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(bundleName, uid);
+    ASSERT_NE(bundle, nullptr);
+    record->bundleOption = bundle;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    record->request = request;
+
+    advancedNotificationService_->triggerNotificationList_.clear();
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::LIVE_VIEW);
+    ASSERT_NE(slot, nullptr);
+
+    std::vector<std::shared_ptr<NotificationRecord>> removeList;
+    sptr<NotificationBundleOption> bundleOther = new NotificationBundleOption(bundleNameOther, uid);
+    ASSERT_NE(bundleOther, nullptr);
+    advancedNotificationService_->GetRemoveListForRemoveNtfBySlot(bundleOther, slot, removeList);
+    EXPECT_NE(advancedNotificationService_->triggerNotificationList_.size(), 0);
+
+    bundleOther = new NotificationBundleOption(bundleName, uidOther);
+    ASSERT_NE(bundleOther, nullptr);
+    advancedNotificationService_->GetRemoveListForRemoveNtfBySlot(bundleOther, slot, removeList);
+    EXPECT_NE(advancedNotificationService_->triggerNotificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : GetRemoveListForRemoveNtfBySlot_0300
+ * @tc.name      : GetRemoveListForRemoveNtfBySlot_0300
+ * @tc.desc      : Verify that notifications with matching bundle but non-matching slot type are not removed
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetRemoveListForRemoveNtfBySlot_0300, Level1)
+{
+    std::string key = "key";
+    std::string bundleName = "bundleName";
+    int32_t uid = 2001001;
+    sptr<Notification> notification(new (std::nothrow) Notification(nullptr));
+    ASSERT_NE(notification, nullptr);
+    notification->SetKey(key);
+
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    ASSERT_NE(record, nullptr);
+    record->notification = notification;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(bundleName, uid);
+    ASSERT_NE(bundle, nullptr);
+    record->bundleOption = bundle;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    record->request = request;
+
+    advancedNotificationService_->triggerNotificationList_.clear();
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::CUSTOMER_SERVICE);
+    ASSERT_NE(slot, nullptr);
+
+    std::vector<std::shared_ptr<NotificationRecord>> removeList;
+    advancedNotificationService_->GetRemoveListForRemoveNtfBySlot(bundle, slot, removeList);
+    EXPECT_NE(advancedNotificationService_->triggerNotificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : NotificationTriggerGetTriggerType_0100
+ * @tc.name      : NotificationTriggerGetTriggerType_0100
+ * @tc.desc      : Verify the setter and getter methods for NotificationTrigger TriggerType property
+ */
+HWTEST_F(AdvancedNotificationServiceTest, NotificationTriggerGetTriggerType_0100, Level1)
+{
+    sptr<NotificationTrigger> notificationTrigger = new (std::nothrow) NotificationTrigger();
+    ASSERT_NE(notificationTrigger, nullptr);
+
+    NotificationConstant::TriggerType type = NotificationConstant::TriggerType::TRIGGER_TYPE_FENCE;
+    notificationTrigger->SetTriggerType(type);
+    EXPECT_EQ(notificationTrigger->GetTriggerType(), type);
+}
+
+/**
+ * @tc.number    : NotificationTriggerGetConfigPath_0100
+ * @tc.name      : NotificationTriggerGetConfigPath_0100
+ * @tc.desc      : Verify the setter and getter methods for NotificationTrigger ConfigPath property
+ */
+HWTEST_F(AdvancedNotificationServiceTest, NotificationTriggerGetConfigPath_0100, Level1)
+{
+    sptr<NotificationTrigger> notificationTrigger = new (std::nothrow) NotificationTrigger();
+    ASSERT_NE(notificationTrigger, nullptr);
+
+    NotificationConstant::ConfigPath configPath = NotificationConstant::ConfigPath::CONFIG_PATH_DEVICE_CONFIG;
+    notificationTrigger->SetConfigPath(configPath);
+    EXPECT_EQ(notificationTrigger->GetConfigPath(), configPath);
+}
+
+/**
+ * @tc.number    : NotificationTriggerGetGeofence_0100
+ * @tc.name      : NotificationTriggerGetGeofence_0100
+ * @tc.desc      : Verify the setter and getter methods for NotificationTrigger Geofence property
+ */
+HWTEST_F(AdvancedNotificationServiceTest, NotificationTriggerGetGeofence_0100, Level1)
+{
+    sptr<NotificationTrigger> notificationTrigger = new (std::nothrow) NotificationTrigger();
+    ASSERT_NE(notificationTrigger, nullptr);
+
+    std::shared_ptr<NotificationGeofence> condition = std::make_shared<NotificationGeofence>();
+    ASSERT_NE(condition, nullptr);
+    notificationTrigger->SetGeofence(condition);
+    EXPECT_NE(notificationTrigger->GetGeofence(), nullptr);
+}
+
+/**
+ * @tc.number    : NotificationTriggerGetDisplayTime_0100
+ * @tc.name      : NotificationTriggerGetDisplayTime_0100
+ * @tc.desc      : Verify the setter and getter methods for NotificationTrigger DisplayTime property
+ */
+HWTEST_F(AdvancedNotificationServiceTest, NotificationTriggerGetDisplayTime_0100, Level1)
+{
+    sptr<NotificationTrigger> notificationTrigger = new (std::nothrow) NotificationTrigger();
+    ASSERT_NE(notificationTrigger, nullptr);
+
+    int32_t displayTime = 1;
+    notificationTrigger->SetDisplayTime(displayTime);
+    EXPECT_EQ(notificationTrigger->GetDisplayTime(), displayTime);
+}
+
+/**
+ * @tc.number    : NotificationTriggerMarshalling_0100
+ * @tc.name      : NotificationTriggerMarshalling_0100
+ * @tc.desc      : Verify serialization and deserialization of NotificationTrigger with all properties
+ */
+HWTEST_F(AdvancedNotificationServiceTest, NotificationTriggerMarshalling_0100, Level1)
+{
+    sptr<NotificationTrigger> notificationTrigger = new (std::nothrow) NotificationTrigger();
+    ASSERT_NE(notificationTrigger, nullptr);
+
+    NotificationConstant::TriggerType type = NotificationConstant::TriggerType::TRIGGER_TYPE_FENCE;
+    notificationTrigger->SetTriggerType(type);
+    NotificationConstant::ConfigPath configPath = NotificationConstant::ConfigPath::CONFIG_PATH_DEVICE_CONFIG;
+    notificationTrigger->SetConfigPath(configPath);
+    std::shared_ptr<NotificationGeofence> condition = std::make_shared<NotificationGeofence>();
+    notificationTrigger->SetGeofence(condition);
+    int32_t displayTime = 1;
+    notificationTrigger->SetDisplayTime(displayTime);
+
+    Parcel parcel;
+    bool ret = notificationTrigger->Marshalling(parcel);
+    ASSERT_EQ(ret, true);
+    sptr<NotificationTrigger> notificationTriggerOther = notificationTrigger->Unmarshalling(parcel);
+    ASSERT_NE(notificationTriggerOther, nullptr);
+    EXPECT_EQ(notificationTriggerOther->GetTriggerType(), type);
+    EXPECT_EQ(notificationTriggerOther->GetConfigPath(), configPath);
+    EXPECT_NE(notificationTriggerOther->GetGeofence(), nullptr);
+    EXPECT_EQ(notificationTriggerOther->GetDisplayTime(), displayTime);
+}
+
+/**
+ * @tc.number    : NotificationTriggerMarshalling_0200
+ * @tc.name      : NotificationTriggerMarshalling_0200
+ * @tc.desc      : Verify serialization and deserialization of NotificationTrigger without Geofence property
+ */
+HWTEST_F(AdvancedNotificationServiceTest, NotificationTriggerMarshalling_0200, Level1)
+{
+    sptr<NotificationTrigger> notificationTrigger = new (std::nothrow) NotificationTrigger();
+    ASSERT_NE(notificationTrigger, nullptr);
+
+    NotificationConstant::TriggerType type = NotificationConstant::TriggerType::TRIGGER_TYPE_FENCE;
+    notificationTrigger->SetTriggerType(type);
+    NotificationConstant::ConfigPath configPath = NotificationConstant::ConfigPath::CONFIG_PATH_DEVICE_CONFIG;
+    notificationTrigger->SetConfigPath(configPath);
+    int32_t displayTime = 1;
+    notificationTrigger->SetDisplayTime(displayTime);
+
+    Parcel parcel;
+    bool ret = notificationTrigger->Marshalling(parcel);
+    ASSERT_EQ(ret, true);
+    sptr<NotificationTrigger> notificationTriggerOther = notificationTrigger->Unmarshalling(parcel);
+    ASSERT_NE(notificationTriggerOther, nullptr);
+    EXPECT_EQ(notificationTriggerOther->GetTriggerType(), type);
+    EXPECT_EQ(notificationTriggerOther->GetConfigPath(), configPath);
+    EXPECT_EQ(notificationTriggerOther->GetGeofence(), nullptr);
+    EXPECT_EQ(notificationTriggerOther->GetDisplayTime(), displayTime);
+}
+
+/**
+ * @tc.number    : NotificationTriggerToJson_0100
+ * @tc.name      : NotificationTriggerToJson_0100
+ * @tc.desc      : Verify JSON serialization and deserialization of NotificationTrigger with all properties
+ */
+HWTEST_F(AdvancedNotificationServiceTest, NotificationTriggerToJson_0100, Level1)
+{
+    sptr<NotificationTrigger> notificationTrigger = new (std::nothrow) NotificationTrigger();
+    ASSERT_NE(notificationTrigger, nullptr);
+
+    NotificationConstant::TriggerType type = NotificationConstant::TriggerType::TRIGGER_TYPE_FENCE;
+    notificationTrigger->SetTriggerType(type);
+    NotificationConstant::ConfigPath configPath = NotificationConstant::ConfigPath::CONFIG_PATH_DEVICE_CONFIG;
+    notificationTrigger->SetConfigPath(configPath);
+    std::shared_ptr<NotificationGeofence> condition = std::make_shared<NotificationGeofence>();
+    notificationTrigger->SetGeofence(condition);
+    int32_t displayTime = 1;
+    notificationTrigger->SetDisplayTime(displayTime);
+
+    nlohmann::json jsonObject;
+    bool ret = notificationTrigger->ToJson(jsonObject);
+    ASSERT_EQ(ret, true);
+    sptr<NotificationTrigger> notificationTriggerOther = notificationTrigger->FromJson(jsonObject);
+    ASSERT_NE(notificationTriggerOther, nullptr);
+    EXPECT_EQ(notificationTriggerOther->GetTriggerType(), type);
+    EXPECT_EQ(notificationTriggerOther->GetConfigPath(), configPath);
+    EXPECT_NE(notificationTriggerOther->GetGeofence(), nullptr);
+    EXPECT_EQ(notificationTriggerOther->GetDisplayTime(), displayTime);
+}
+
+/**
+ * @tc.number    : NotificationTriggerToJson_0200
+ * @tc.name      : NotificationTriggerToJson_0200
+ * @tc.desc      : Verify JSON serialization and deserialization of NotificationTrigger without Geofence property
+ */
+HWTEST_F(AdvancedNotificationServiceTest, NotificationTriggerToJson_0200, Level1)
+{
+    sptr<NotificationTrigger> notificationTrigger = new (std::nothrow) NotificationTrigger();
+    ASSERT_NE(notificationTrigger, nullptr);
+
+    NotificationConstant::TriggerType type = NotificationConstant::TriggerType::TRIGGER_TYPE_FENCE;
+    notificationTrigger->SetTriggerType(type);
+    NotificationConstant::ConfigPath configPath = NotificationConstant::ConfigPath::CONFIG_PATH_DEVICE_CONFIG;
+    notificationTrigger->SetConfigPath(configPath);
+    int32_t displayTime = 1;
+    notificationTrigger->SetDisplayTime(displayTime);
+
+    nlohmann::json jsonObject;
+    bool ret = notificationTrigger->ToJson(jsonObject);
+    ASSERT_EQ(ret, true);
+    sptr<NotificationTrigger> notificationTriggerOther = notificationTrigger->FromJson(jsonObject);
+    ASSERT_NE(notificationTriggerOther, nullptr);
+    EXPECT_EQ(notificationTriggerOther->GetTriggerType(), type);
+    EXPECT_EQ(notificationTriggerOther->GetConfigPath(), configPath);
+    EXPECT_EQ(notificationTriggerOther->GetGeofence(), nullptr);
+    EXPECT_EQ(notificationTriggerOther->GetDisplayTime(), displayTime);
+}
+
+/**
+ * @tc.number    : NotificationTriggerDump_0100
+ * @tc.name      : NotificationTriggerDump_0100
+ * @tc.desc      : Verify Dump method of NotificationTrigger outputs correct information including display time
+ */
+HWTEST_F(AdvancedNotificationServiceTest, NotificationTriggerDump_0100, Level1)
+{
+    sptr<NotificationTrigger> notificationTrigger = new (std::nothrow) NotificationTrigger();
+    ASSERT_NE(notificationTrigger, nullptr);
+
+    NotificationConstant::TriggerType type = NotificationConstant::TriggerType::TRIGGER_TYPE_FENCE;
+    notificationTrigger->SetTriggerType(type);
+    NotificationConstant::ConfigPath configPath = NotificationConstant::ConfigPath::CONFIG_PATH_DEVICE_CONFIG;
+    notificationTrigger->SetConfigPath(configPath);
+    int32_t displayTime = 100;
+    notificationTrigger->SetDisplayTime(displayTime);
+
+    std::string triggerDump = notificationTrigger->Dump();
+    auto it = triggerDump.find(std::to_string(displayTime));
+    bool result = it != std::string::npos ? true : false;
+    EXPECT_EQ(result, true);
+}
 }  // namespace Notification
 }  // namespace OHOS
