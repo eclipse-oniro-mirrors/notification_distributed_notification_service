@@ -39,7 +39,9 @@ extern void MockIsSystemApp(bool isSystemApp);
 const int32_t SLEEP_TIME = 1;
 static sptr<ISystemAbilityManager> systemAbilityManager =
     SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-
+// Default sound for notification
+const static std::vector<int64_t> DEFAULT_NOTIFICATION_VIBRATION = {200};
+const static Uri DEFAULT_NOTIFICATION_SOUND("file://system/etc/Light.ogg");
 class AnsInnerKitsModuleSlotTest : public testing::Test {
 public:
     static void SetUpTestCase();
