@@ -27,7 +27,11 @@
 
 namespace OHOS {
 namespace Notification {
-
+namespace {
+constexpr int32_t MAX_VECTOR_SIZE = 3;
+constexpr int32_t MIN_USER_ID = -1;
+constexpr int32_t MAX_USER_ID = 100;
+}
     bool TestAdvancedOperations(FuzzedDataProvider* fdp, NotificationHelper& notificationHelper)
     {
         constexpr uint8_t SLOT_TYPE_NUM = 5;
@@ -100,11 +104,38 @@ namespace Notification {
         return true;
     }
 
+    bool TestGeofenceOperations(FuzzedDataProvider* fdp, NotificationHelper& notificationHelper)
+    {
+        bool setEnabled = fdp->ConsumeBool();
+        notificationHelper.SetGeofenceEnabled(setEnabled);
+
+        bool isEnabled;
+        notificationHelper.IsGeofenceEnabled(isEnabled);
+
+        auto triggerKeysSize = fdp->ConsumeIntegralInRange<int32_t>(0, MAX_VECTOR_SIZE);
+        std::vector<std::string> triggerKeys;
+        for (int i = 0; i < triggerKeysSize; ++i) {
+            triggerKeys.push_back(fdp->ConsumeRandomLengthString());
+        }
+        auto userIdsSize = fdp->ConsumeIntegralInRange<int32_t>(0, MAX_VECTOR_SIZE);
+        std::vector<int32_t> userIds;
+        for (int i = 0; i < userIdsSize; ++i) {
+            userIds.push_back(fdp->ConsumeIntegralInRange<int32_t>(MIN_USER_ID, MAX_USER_ID));
+        }
+        notificationHelper.ClearDelayNotification(triggerKeys, userIds);
+
+        auto triggerKey = fdp->ConsumeRandomLengthString();
+        auto userId = fdp->ConsumeIntegralInRange<int32_t>(MIN_USER_ID, MAX_USER_ID);
+        notificationHelper.PublishDelayedNotification(triggerKey, userId);
+        return true;
+    }
+
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
         NotificationHelper notificationHelper;
         TestAdvancedOperations(fdp, notificationHelper);
         TestExtensionOperations(fdp, notificationHelper);
+        TestGeofenceOperations(fdp, notificationHelper);
         return true;
     }
 }
