@@ -833,7 +833,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, CloneInfoJson_00003, Function | SmallT
     EXPECT_FALSE(bundleInfo.hasPoppedDialog_);
     EXPECT_FALSE(bundleInfo.ishasPoppedSupportClone_);
     EXPECT_EQ(bundleInfo.isEnabledNotification_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
-    EXPECT_EQ(bundleInfo.silentReminderEnabled_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    EXPECT_EQ(bundleInfo.silentReminderEnabled_, NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
 }
 
 /**
@@ -857,7 +857,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, CloneInfoJson_00004, Function | SmallT
     EXPECT_FALSE(bundleInfo.hasPoppedDialog_);
     EXPECT_FALSE(bundleInfo.ishasPoppedSupportClone_);
     EXPECT_EQ(bundleInfo.isEnabledNotification_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
-    EXPECT_EQ(bundleInfo.silentReminderEnabled_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    EXPECT_EQ(bundleInfo.silentReminderEnabled_, NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
 }
 
 
@@ -885,7 +885,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, CloneInfoJson_00005, Function | SmallT
     EXPECT_FALSE(bundleInfo.hasPoppedDialog_);
     EXPECT_FALSE(bundleInfo.ishasPoppedSupportClone_);
     EXPECT_EQ(bundleInfo.isEnabledNotification_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
-    EXPECT_EQ(bundleInfo.silentReminderEnabled_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    EXPECT_EQ(bundleInfo.silentReminderEnabled_, NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
 }
 }
 }
