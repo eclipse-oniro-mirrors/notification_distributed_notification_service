@@ -1171,6 +1171,15 @@ public:
         const NotificationBundleOption &bundleOption, NotificationConstant::PriorityEnableStatus &enableStatus);
 
     /**
+     * @brief Update priority type of notification and notify subscriber.
+     *
+     * @param request Indicates the NotificationRequest object for setting the notification content.
+     *                This parameter must be specified.
+     * @return Returns update priority type of notification result.
+     */
+    ErrCode TriggerUpdatePriorityType(const NotificationRequest &request);
+
+    /**
      * @brief Sets whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
      *

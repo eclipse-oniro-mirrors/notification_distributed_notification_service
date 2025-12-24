@@ -1582,6 +1582,15 @@ public:
         const sptr<NotificationBundleOption> &bundleOption, int32_t &enableStatusInt) override;
 
     /**
+     * @brief Update priority type of notification and notify subscriber.
+     *
+     * @param request Indicates the NotificationRequest object for setting the notification content.
+     *                This parameter must be specified.
+     * @return Returns update priority type of notification result.
+     */
+    ErrCode TriggerUpdatePriorityType(const sptr<NotificationRequest> &request) override;
+
+    /**
      * @brief Cancels a published agent notification.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.

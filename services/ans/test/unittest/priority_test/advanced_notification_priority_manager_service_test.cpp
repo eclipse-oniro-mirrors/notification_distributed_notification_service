@@ -88,5 +88,39 @@ HWTEST_F(PriorityManagerServiceTest, SetBundlePriorityConfig_0100, Function | Sm
         AdvancedNotificationService::GetInstance()->GetBundlePriorityConfig(bundleOption, value), ERR_OK);
     EXPECT_EQ(value, "");
 }
+
+/**
+ * @tc.name: TriggerUpdatePriorityType_0100
+ * @tc.desc: Test TriggerUpdatePriorityType invalid request.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityManagerServiceTest, TriggerUpdatePriorityType_0100, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetInnerPriorityNotificationType(NotificationConstant::PriorityNotificationType::PAYMENT_DUE);
+    EXPECT_EQ(AdvancedNotificationService::GetInstance()->TriggerUpdatePriorityType(request), ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TriggerUpdatePriorityType_0200
+ * @tc.desc: Test TriggerUpdatePriorityType success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityManagerServiceTest, TriggerUpdatePriorityType_0200, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest(1);
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = new (std::nothrow) Notification(request);
+    AdvancedNotificationService::GetInstance()->AddToNotificationList(record);
+    request->SetInnerPriorityNotificationType(NotificationConstant::PriorityNotificationType::PAYMENT_DUE);
+    EXPECT_EQ(AdvancedNotificationService::GetInstance()->TriggerUpdatePriorityType(request), ERR_OK);
+}
 }
 }

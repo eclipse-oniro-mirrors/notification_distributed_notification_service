@@ -65,21 +65,6 @@ const std::vector<std::string> NotificationConstant::PriorityNotificationType::V
     NotificationConstant::PriorityNotificationType::SCHEDULE_REMINDER
 };
 
-const std::vector<std::string> NotificationConstant::PriorityNotificationType::INNER_PRIORITY_TYPE_LIST = {
-    NotificationConstant::PriorityNotificationType::PAYMENT_DUE,
-    NotificationConstant::PriorityNotificationType::TRANSACTION_ALERT,
-    NotificationConstant::PriorityNotificationType::EXPRESS_PROGRESS,
-    NotificationConstant::PriorityNotificationType::MISS_CALL,
-    NotificationConstant::PriorityNotificationType::TRAVEL_ALERT,
-    NotificationConstant::PriorityNotificationType::ACCOUNT_ALERT,
-    NotificationConstant::PriorityNotificationType::APPOINTMENT_REMINDER,
-    NotificationConstant::PriorityNotificationType::TRAFFIC_NOTICE,
-    NotificationConstant::PriorityNotificationType::KEY_PROGRESS,
-    NotificationConstant::PriorityNotificationType::PUBLIC_EVENT,
-    NotificationConstant::PriorityNotificationType::IOT_WARNING,
-    NotificationConstant::PriorityNotificationType::CUSTOM_KEYWORD
-};
-
 NotificationRequest::NotificationRequest(int32_t notificationId) : notificationId_(notificationId)
 {
     createTime_ = GetNowSysTime();
@@ -3622,7 +3607,10 @@ void NotificationRequest::SetFlagBit(
 void NotificationRequest::SetPriorityNotificationType(const std::string &priorityNotificationType)
 {
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-    if (CheckPriorityNotificationTypeValid(priorityNotificationType)) {
+    if (std::find(
+        NotificationConstant::PriorityNotificationType::VALID_PRIORITY_TYPE_LIST.cbegin(),
+        NotificationConstant::PriorityNotificationType::VALID_PRIORITY_TYPE_LIST.cend(), priorityNotificationType)
+        != NotificationConstant::PriorityNotificationType::VALID_PRIORITY_TYPE_LIST.cend()) {
         priorityNotificationType_ = priorityNotificationType;
         return;
     }
@@ -3630,33 +3618,10 @@ void NotificationRequest::SetPriorityNotificationType(const std::string &priorit
 #endif
 }
 
-bool NotificationRequest::CheckPriorityNotificationTypeValid(const std::string &priorityNotificationType)
-{
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-    auto iter = std::find(
-        NotificationConstant::PriorityNotificationType::VALID_PRIORITY_TYPE_LIST.cbegin(),
-        NotificationConstant::PriorityNotificationType::VALID_PRIORITY_TYPE_LIST.cend(), priorityNotificationType);
-    if (iter != NotificationConstant::PriorityNotificationType::VALID_PRIORITY_TYPE_LIST.cend()) {
-        return true;
-    }
-#endif
-    return false;
-}
-
 void NotificationRequest::SetInnerPriorityNotificationType(const std::string &priorityNotificationType)
 {
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-    if (CheckPriorityNotificationTypeValid(priorityNotificationType)) {
-        priorityNotificationType_ = priorityNotificationType;
-        return;
-    }
-    auto iter = std::find(NotificationConstant::PriorityNotificationType::INNER_PRIORITY_TYPE_LIST.cbegin(),
-        NotificationConstant::PriorityNotificationType::INNER_PRIORITY_TYPE_LIST.cend(), priorityNotificationType);
-    if (iter != NotificationConstant::PriorityNotificationType::INNER_PRIORITY_TYPE_LIST.cend()) {
-        priorityNotificationType_ = priorityNotificationType;
-        return;
-    }
-    ANS_LOGE("unknow inner priorityNotificationType %{public}s", priorityNotificationType.c_str());
+    priorityNotificationType_ = priorityNotificationType;
 #endif
 }
 

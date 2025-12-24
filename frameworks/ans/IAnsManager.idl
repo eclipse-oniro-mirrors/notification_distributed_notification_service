@@ -311,6 +311,8 @@ interface OHOS.Notification.IAnsManager {
 
     void IsPriorityEnabledByBundle([in] sptr<NotificationBundleOption> bundleOption, [out] int enableStatusInt);
 
+    void TriggerUpdatePriorityType([in] sptr<NotificationRequest> request);
+
     void SetDistributedBundleOption(
         [in] sptr<DistributedBundleOption>[] bundles, [in] String deviceType);
 

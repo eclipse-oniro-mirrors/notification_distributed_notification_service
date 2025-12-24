@@ -43,6 +43,7 @@ interface OHOS.Notification.IAnsSubscriber {
     [ipcincapacity 520, oneway] void OnCanceledList([in] sptr<Notification>[] notifications, [in] sptr<NotificationSortingMap> notificationMap, [in] int deleteReason);
     [ipcincapacity 520, oneway] void OnCanceledList([in] sptr<Notification>[] notifications, [in] int deleteReason);
 
+    [oneway] void OnSystemUpdate([in] sptr<Notification> notification);
     [oneway] void OnEnabledPriorityChanged([in] sptr<EnabledNotificationCallbackData> callbackData);
     [oneway] void OnEnabledPriorityByBundleChanged([in] sptr<EnabledPriorityNotificationByBundleCallbackData> callbackData);
     [oneway] void OnUpdated([in] sptr<NotificationSortingMap> notificationMap);

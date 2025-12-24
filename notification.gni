@@ -68,7 +68,7 @@ declare_args() {
   distributed_notification_service_feature_slot_manager = true
   distributed_notification_service_feature_additional_config = true
   distributed_notification_service_feature_open_notification_settings = true
-  distributed_notification_service_feature_priority_notification = true
+  distributed_notification_service_feature_priority_notification = false
   distributed_notification_service_feature_all_scenario_collaboration = true
   distributed_notification_service_feature_phone_collaboration = true
   distributed_notification_service_disable_control = false

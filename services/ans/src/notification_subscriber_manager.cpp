@@ -360,6 +360,18 @@ void NotificationSubscriberManager::NotifyEnabledPriorityByBundleChanged(
     notificationSubQueue_->submit(func);
 }
 
+void NotificationSubscriberManager::NotifySystemUpdate(const sptr<Notification> &notification)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("null queue");
+        return;
+    }
+    AppExecFwk::EventHandler::Callback func =
+        std::bind(&NotificationSubscriberManager::NotifySystemUpdateInner, this, notification);
+    notificationSubQueue_->submit(func);
+}
+
 void NotificationSubscriberManager::NotifyBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
@@ -1081,6 +1093,22 @@ void NotificationSubscriberManager::NotifyEnabledPriorityByBundleChangedInner(
     }
     NotifySubscribers(userId, uid, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLEPRIORITYBYBUNDLE_CHANGED,
         &IAnsSubscriber::OnEnabledPriorityByBundleChanged, callbackData);
+}
+
+void NotificationSubscriberManager::NotifySystemUpdateInner(const sptr<Notification> &notification)
+{
+    if (notification == nullptr) {
+        ANS_LOGE("NotifySystemUpdate fail, null notification");
+        return;
+    }
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return;
+    }
+    NotifySubscribers(userId, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_SYSTEM_UPDATE,
+        &IAnsSubscriber::OnSystemUpdate, notification);
 }
 
 void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbackData> &badgeData)
