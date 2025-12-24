@@ -246,6 +246,7 @@ ErrCode AdvancedNotificationService::GetAllNotificationsBySlotTypeInner(std::vec
             }
             notifications.push_back(record->notification);
         }
+        DelayedSingleton<HealthWhiteListUtil>::GetInstance()->AddExtendFlagForRequest(notifications);
     }));
     notificationSvrQueue_->wait(handler);
     return ERR_OK;

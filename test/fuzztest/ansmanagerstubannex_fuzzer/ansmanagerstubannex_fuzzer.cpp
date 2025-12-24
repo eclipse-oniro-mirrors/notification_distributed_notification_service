@@ -155,6 +155,7 @@ namespace OHOS {
         service->SubscribeLocalLiveView(nullptr, info, isNative);
         service->SubscribeLocalLiveView(nullptr, isNative);
         service->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
+        service->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType, userId);
         service->Publish(stringData, notificationRequest);
         service->PublishWithMaxCapacity(stringData, notificationRequest);
         service->PublishNotificationForIndirectProxy(notificationRequest);
@@ -230,12 +231,15 @@ namespace OHOS {
         service->SetBadgeNumber(badgeNum, key1);
         service->SetBadgeNumberByBundle(bundleOption, badgeNum);
         service->GetAllNotificationEnabledBundles(bundleOptions);
+        service->GetAllNotificationEnabledBundles(bundleOptions, userId);
         service->RegisterPushCallback(nullptr, notificationCheckRequest);
         service->UnregisterPushCallback();
         service->SetDistributedEnabledBySlot(slotType, deviceType, enabled);
         service->GetAllDistribuedEnabledBundles(deviceType, bundleOptions);
         service->GetAllNotificationsBySlotType(notificationsVector, slotType);
+        service->GetAllNotificationsBySlotType(notificationsVector, slotType, userId);
         service->AllowUseReminder(bundleName, allowed);
+        service->AllowUseReminder(bundleName, userId, allowed);
         service->SetTargetDeviceStatus(deviceType, status, stringData);
         service->SetTargetDeviceStatus(deviceType, status, controlFlag, stringData, userId);
         service->SetDistributedEnabledByBundle(bundleOption, deviceType, enabled);
@@ -251,18 +255,22 @@ namespace OHOS {
         service->GetTargetDeviceStatus(deviceType, deviceStatus);
 
         service->AddDoNotDisturbProfiles(profiles);
+        service->AddDoNotDisturbProfiles(profiles, userId);
         service->RemoveDoNotDisturbProfiles(profiles);
+        service->RemoveDoNotDisturbProfiles(profiles, userId);
         service->SetDoNotDisturbDate(disturbDate);
         service->GetDoNotDisturbDate(disturbDate);
         service->SetDoNotDisturbDateByUser(userId, disturbDate);
         service->GetDoNotDisturbDateByUser(userId, disturbDate);
         service->GetDoNotDisturbProfile(id, profile);
+        service->GetDoNotDisturbProfile(id, profile, userId);
         service->DoesSupportDoNotDisturbMode(support);
 
         service->SetBadgeNumberForDhByBundle(bundleOption, badgeNum);
         service->GetNotificationRequestByHashCode(stringData, notificationRequest);
         service->DistributeOperation(operationInfo, nullptr);
         service->SetHashCodeRule(hashCodeType);
+        service->SetHashCodeRule(hashCodeType, userId);
         service->GetAllLiveViewEnabledBundles(bundleOptions);
         service->GetAllLiveViewEnabledBundles(bundleOptions, userId);
         service->DisableNotificationFeature(notificationDisable);

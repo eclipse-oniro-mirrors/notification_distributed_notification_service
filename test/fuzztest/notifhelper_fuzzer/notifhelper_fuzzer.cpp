@@ -43,7 +43,9 @@ constexpr int32_t MAX_USER_ID = 100;
         bundleOption.SetUid(id);
 
         uint32_t type = fdp->ConsumeIntegralInRange<uint32_t>(0, 100);
+        int32_t userId = fdp->ConsumeIntegralInRange<int32_t>(0, 100);
         notificationHelper.SetHashCodeRule(type);
+        notificationHelper.SetHashCodeRule(type, userId);
 
         std::string str1 = fdp->ConsumeRandomLengthString();
         std::string str2 = fdp->ConsumeRandomLengthString();
