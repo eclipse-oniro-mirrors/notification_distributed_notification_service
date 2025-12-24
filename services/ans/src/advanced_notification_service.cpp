@@ -121,31 +121,29 @@ std::map<std::string, uint32_t> slotFlagsDefaultMap_;
 std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> AdvancedNotificationService::pushCallBacks_;
 std::map<NotificationConstant::SlotType, sptr<NotificationCheckRequest>> AdvancedNotificationService::checkRequests_;
 
-ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<NotificationRequest> &request)
+AnsStatus AdvancedNotificationService::PrepareNotificationRequest(const sptr<NotificationRequest> &request)
 {
     ANS_LOGD("called");
 
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_0);
     std::string bundle = GetClientBundleName();
     if (bundle.empty()) {
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_BUNDLE));
-        return ERR_ANS_INVALID_BUNDLE;
+        return AnsStatus::InvalidBundle(EventSceneId::SCENE_14, EventBranchId::BRANCH_0);
     }
     if (request == nullptr) {
         ANS_LOGE("NotificationRequest object is nullptr");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_BUNDLE).BranchId(BRANCH_1));
-        return ERR_ANS_INVALID_PARAM;
+        return AnsStatus::InvalidParam("NotificationRequest object is nullptr",
+            EventSceneId::SCENE_14, EventBranchId::BRANCH_1);
     }
 
     if (request->IsAgentNotification()) {
         bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
         if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-            return ERR_ANS_NON_SYSTEM_APP;
+            return AnsStatus(ERR_ANS_NON_SYSTEM_APP, "ERR_ANS_NON_SYSTEM_APP");
         }
 
         if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) ||
             !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
-            return ERR_ANS_PERMISSION_DENIED;
+            return AnsStatus(ERR_ANS_PERMISSION_DENIED, "ERR_ANS_PERMISSION_DENIED");
         }
 
         std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
@@ -156,16 +154,13 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 request->GetOwnerUserId());
             }
             if (uid < 0) {
-                message.ErrorCode(ERR_ANS_INVALID_UID).BranchId(BRANCH_2);
-                NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-                return ERR_ANS_INVALID_UID;
+                return AnsStatus::InvalidUid(EventSceneId::SCENE_14, EventBranchId::BRANCH_2);
             }
         } else {
             int32_t userId = SUBSCRIBE_USER_INIT;
             if (request->GetOwnerUid() < DEFAULT_UID) {
-                message.ErrorCode(ERR_ANS_GET_ACTIVE_USER_FAILED).BranchId(BRANCH_3);
-                NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-                return ERR_ANS_GET_ACTIVE_USER_FAILED;
+                return AnsStatus(ERR_ANS_GET_ACTIVE_USER_FAILED, "ERR_ANS_GET_ACTIVE_USER_FAILED",
+                    EventSceneId::SCENE_14, EventBranchId::BRANCH_3);
             }
             if (request->GetOwnerUid() == DEFAULT_UID) {
                 OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
@@ -181,9 +176,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
             bundle = GetClientBundleName();
             if (bundle.empty()) {
                 ANS_LOGE("Failed to GetClientBundleName");
-                message.ErrorCode(ERR_ANS_INVALID_BUNDLE).BranchId(BRANCH_4);
-                NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-                return ERR_ANS_INVALID_BUNDLE;
+                return AnsStatus::InvalidBundle("Failed to GetClientBundleName",
+                    EventSceneId::SCENE_14, EventBranchId::BRANCH_4);
             }
         }
 
@@ -192,7 +186,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
             std::make_shared<NotificationBundleOption>(bundle, agentUid);
         if (agentBundle == nullptr) {
             ANS_LOGE("Failed to create agentBundle instance");
-            return ERR_ANS_INVALID_BUNDLE;
+            return AnsStatus(ERR_ANS_INVALID_BUNDLE, "Failed to create agentBundle instance");
         }
         request->SetAgentBundle(agentBundle);
     } else {
@@ -203,9 +197,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
             ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
                 bundle.c_str(), sourceBundleName.c_str());
             if (request->GetBundleOption()->GetUid() < DEFAULT_UID) {
-                message.ErrorCode(ERR_ANS_INVALID_UID).BranchId(BRANCH_5);
-                NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-                return ERR_ANS_INVALID_UID;
+                return AnsStatus::InvalidUid(EventSceneId::SCENE_14, EventBranchId::BRANCH_5);
             }
             int32_t uid = -1;
             if (request->GetBundleOption()->GetUid() == DEFAULT_UID) {
@@ -222,7 +214,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 uid = request->GetBundleOption()->GetUid();
             }
             if (uid < 0) {
-                return ERR_ANS_INVALID_UID;
+                return AnsStatus(ERR_ANS_INVALID_UID, "ERR_ANS_INVALID_UID");
             }
             request->SetOwnerUid(uid);
             int32_t agentUid = IPCSkeleton::GetCallingUid();
@@ -230,7 +222,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 std::make_shared<NotificationBundleOption>(bundle, agentUid);
             if (agentBundle == nullptr) {
                 ANS_LOGE("Failed to create agentBundle instance");
-                return ERR_ANS_INVALID_BUNDLE;
+                return AnsStatus(ERR_ANS_INVALID_BUNDLE, "ERR_ANS_INVALID_BUNDLE");
             }
             request->SetAgentBundle(agentBundle);
         }
@@ -270,14 +262,14 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         }
     }
 
-    ErrCode result = CheckPictureSize(request);
+    AnsStatus ansStatus = CheckPictureSize(request);
 
     if (request->GetDeliveryTime() <= 0) {
         request->SetDeliveryTime(GetCurrentTime());
     }
 
     FillActionButtons(request);
-    return result;
+    return ansStatus;
 }
 
 sptr<AdvancedNotificationService> AdvancedNotificationService::GetInstance()
@@ -500,22 +492,22 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
     return result;
 }
 
-ErrCode AdvancedNotificationService::PrepareNotificationInfo(
+AnsStatus AdvancedNotificationService::PrepareNotificationInfo(
     const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (request == nullptr) {
         ANS_LOGE("request is invalid.");
-        return ERR_ANS_INVALID_PARAM;
+        return AnsStatus(ERR_ANS_INVALID_PARAM, "request is invalid.");
     }
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if ((request->GetSlotType() == NotificationConstant::SlotType::CUSTOM) &&
         !AccessTokenHelper::IsSystemApp() && !isSubsystem) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return AnsStatus(ERR_ANS_NON_SYSTEM_APP, "ERR_ANS_NON_SYSTEM_APP");
     }
-    ErrCode result = PrepareNotificationRequest(request);
-    if (result != ERR_OK) {
-        return result;
+    AnsStatus ansStatus = PrepareNotificationRequest(request);
+    if (!ansStatus.Ok()) {
+        return ansStatus;
     }
     std::string sourceBundleName =
         request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
@@ -537,14 +529,14 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     }
 
     if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return AnsStatus(ERR_ANS_INVALID_BUNDLE, "bundleoption null");
     }
     SetClassificationWithVoip(request);
     ANS_LOGI("prepareNotificationInfo bundleName=%{public}s,uid=%{public}d",
         bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
 
     SetRequestBySlotType(request, bundleOption);
-    return ERR_OK;
+    return AnsStatus();
 }
 
 ErrCode AdvancedNotificationService::StartFinishTimer(const std::shared_ptr<NotificationRecord> &record,
@@ -675,14 +667,12 @@ ErrCode AdvancedNotificationService::StartAutoDeletedTimer(const std::shared_ptr
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::FillNotificationRecord(
+AnsStatus AdvancedNotificationService::FillNotificationRecord(
     const NotificationRequestDb &requestdbObj, std::shared_ptr<NotificationRecord> record)
 {
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_6);
     if (requestdbObj.request == nullptr || requestdbObj.bundleOption == nullptr || record == nullptr) {
         ANS_LOGE("Invalid param.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM));
-        return ERR_ANS_INVALID_PARAM;
+        return AnsStatus::InvalidParam(EventSceneId::SCENE_14, EventBranchId::BRANCH_6);
     }
 
     record->request = requestdbObj.request;
@@ -690,18 +680,18 @@ ErrCode AdvancedNotificationService::FillNotificationRecord(
     record->isAtomicService = record->request->IsAtomicServiceNotification();
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification.");
-        return ERR_ANS_NO_MEMORY;
+        return AnsStatus(ERR_ANS_NO_MEMORY, "Failed to create notification.");
     }
     SetNotificationRemindType(record->notification, true);
 
     record->bundleOption = requestdbObj.bundleOption;
-    ErrCode ret = AssignValidNotificationSlot(record, record->bundleOption);
-    if (ret != ERR_OK) {
+    AnsStatus ansStatus = AssignValidNotificationSlot(record, record->bundleOption);
+    if (!ansStatus.Ok()) {
         ANS_LOGE("Assign valid notification slot failed!");
-        return ret;
+        return ansStatus;
     }
 
-    return ERR_OK;
+    return AnsStatus();
 }
 
 std::shared_ptr<NotificationRecord> AdvancedNotificationService::MakeNotificationRecord(
@@ -722,12 +712,12 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::MakeNotificatio
     return record;
 }
 
-ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<NotificationRequest> &request,
+AnsStatus AdvancedNotificationService::PublishPreparedNotification(const sptr<NotificationRequest> &request,
     const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner)
 {
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        return ERR_ANS_NO_MEMORY;
+        return AnsStatus(ERR_ANS_NO_MEMORY, "ERR_ANS_NO_MEMORY");
     }
 
     PublishNotificationParameter parameter;
@@ -740,7 +730,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
             result = OnNotifyDelayedNotification(parameter);
         }));
         notificationSvrQueue_->wait(handler);
-        return result;
+        return AnsStatus(result, "OnNotifyDelayedNotification");
     }
 
     bool isExecuted = false;
@@ -761,13 +751,13 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     }));
     notificationSvrQueue_->wait(handler);
     if (isExecuted) {
-        return result;
+        return AnsStatus(result, "PublishPreparedNotification");
     }
 
     return PublishPreparedNotificationInner(parameter);
 }
 
-ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(
+AnsStatus AdvancedNotificationService::PublishPreparedNotificationInner(
     const PublishNotificationParameter &parameter)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
@@ -782,7 +772,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(
     NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     ErrCode queryResult = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
     if (queryResult != ERR_OK) {
-        return queryResult;
+        return AnsStatus(queryResult, "IsSilentReminderEnabled fail");
     }
     bool isSilent = enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
         enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
@@ -795,9 +785,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(
     NotificationConstant::SlotType oldType = request->GetSlotType();
     int32_t ctrlResult = EXTENTION_WRAPPER->LocalControl(request);
     if (ctrlResult != ERR_OK) {
-        message.ErrorCode(ctrlResult);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ctrlResult;
+        return AnsStatus(ctrlResult, "LocalControl failed", EventSceneId::SCENE_5, EventBranchId::BRANCH_1);
     }
     if (request->GetSlotType() != oldType) {
         SetRequestBySlotType(request, bundleOption);
@@ -814,15 +802,15 @@ ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(
     auto record = MakeNotificationRecord(request, bundleOption);
     if (record == nullptr) {
         ANS_LOGE("Make notification record failed.");
-        return ERR_ANS_NO_MEMORY;
+        return AnsStatus(ERR_ANS_NO_MEMORY, "Make notification record failed.");
     }
     record->isThirdparty = isThirdparty;
     record->isAtomicService = request->IsAtomicServiceNotification();
+    AnsStatus ansStatus;
     ErrCode result = CheckPublishPreparedNotification(record, isSystemApp);
     if (result != ERR_OK) {
-        message.ErrorCode(result);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return result;
+        return AnsStatus(result, "CheckPublishPreparedNotification failed",
+            EventSceneId::SCENE_5, EventBranchId::BRANCH_1);
     }
     bool isDisableNotification = IsNeedToControllerByDisableNotification(request);
     auto ownerBundleName = request->GetOwnerBundleName();
@@ -835,24 +823,24 @@ ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER
         if (isDisableNotification && IsDisableNotification(bundleOption)) {
             ANS_LOGE("bundle: %{public}s in disable notification list", (request->GetOwnerBundleName()).c_str());
-            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            ansStatus = AnsStatus(ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION, "bundle in disable notification list");
             return;
         }
 #else
         if (isDisableNotification && IsDisableNotification(ownerBundleName)) {
             ANS_LOGE("bundle: %{public}s in disable notification list", (request->GetOwnerBundleName()).c_str());
-            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            ansStatus = AnsStatus(ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION, "bundle in disable notification list");
             return;
         }
 #endif
         if (IsDisableNotificationByKiosk(ownerBundleName)) {
             ANS_LOGE("bundle: %{public}s not in kiosk trust list", (request->GetOwnerBundleName()).c_str());
-            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            ansStatus = AnsStatus(ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION, "bundle not in kiosk trust list");
             return;
         }
         if (record->request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
             !LivePublishProcess::GetInstance()->CheckLocalLiveViewSubscribed(record->request, isUpdateByOwner, uid)) {
-            result = ERR_ANS_LOCAL_SUBSCRIBE_CHECK_FAILED;
+            ansStatus = AnsStatus(ERR_ANS_LOCAL_SUBSCRIBE_CHECK_FAILED, "CheckLocalLiveViewSubscribed Failed!");
             ANS_LOGE("CheckLocalLiveViewSubscribed Failed!");
             return;
         }
@@ -861,12 +849,12 @@ ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(
             return;
         }
         bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
-        result = FlowControlService::GetInstance().FlowControl(record, uid, isNotificationExists);
-        if (result != ERR_OK) {
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, isNotificationExists);
+        if (!ansStatus.Ok()) {
             return;
         }
-        result = AddRecordToMemory(record, isSystemApp, isUpdateByOwner, isAgentController);
-        if (result != ERR_OK) {
+        ansStatus = AddRecordToMemory(record, isSystemApp, isUpdateByOwner, isAgentController);
+        if (!ansStatus.Ok()) {
             return;
         }
 
@@ -886,6 +874,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(
         UpdateNotificationTimerInfo(record);
         result = SetNotificationRequestToDb(requestDb);
         if (result != ERR_OK) {
+            ansStatus = AnsStatus(result, "SetNotificationRequestToDb fail.");
             return;
         }
         NotificationAnalyticsUtil::ReportPublishWithUserInput(request);
@@ -893,7 +882,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotificationInner(
         NotificationAnalyticsUtil::ReportPublishBadge(request);
     }));
     notificationSvrQueue_->wait(handler);
-    return result;
+    return ansStatus;
 }
 
 void AdvancedNotificationService::QueryDoNotDisturbProfile(const int32_t &userId,
@@ -1138,10 +1127,10 @@ bool AdvancedNotificationService::IsNotificationExists(const std::string &key)
     return isExists;
 }
 
-ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRecord> &record, bool isRecover)
+AnsStatus AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRecord> &record, bool isRecover)
 {
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_12);
     ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
     if (!isRecover) {
         auto oldRecord = GetFromNotificationList(record->notification->GetKey());
         result = record->request->CheckNotificationRequest((oldRecord == nullptr) ? nullptr : oldRecord->request);
@@ -1151,41 +1140,35 @@ ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRe
             result = TriggerNotificationRecordFilter(record);
         }
         if (result != ERR_OK) {
-            bool liveView = record->request->IsCommonLiveView();
-            int32_t slotType = liveView ? NotificationConstant::SlotType::LIVE_VIEW :
-                NotificationConstant::SlotType::ILLEGAL_TYPE;
-            message.ErrorCode(result).SlotType(slotType);
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
             ANS_LOGE("Notification(key %{public}s) isn't ready on publish failed with %{public}d.",
                 record->notification->GetKey().c_str(), result);
-            return result;
+            return AnsStatus(result, "CheckNotificationRequest failed",
+                EventSceneId::SCENE_14, EventBranchId::BRANCH_12);
         }
     }
 
     if (record->isAtomicService) {
-        return ERR_OK;
+        return AnsStatus();
     }
 
     if (permissonFilter_ == nullptr || notificationSlotFilter_ == nullptr) {
         ANS_LOGE("Filter is invalid.");
-        message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_13);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-        return ERR_ANS_INVALID_PARAM;
+        return AnsStatus::InvalidParam("Filter is invalid.", EventSceneId::SCENE_14, EventBranchId::BRANCH_13);
     }
 
-    result = permissonFilter_->OnPublish(record);
-    if (result != ERR_OK) {
+    ansStatus = permissonFilter_->OnPublish(record);
+    if (!ansStatus.Ok()) {
         ANS_LOGE("Permission filter on publish failed with %{public}d.", result);
-        return result;
+        return ansStatus;
     }
 
-    result = notificationSlotFilter_->OnPublish(record);
-    if (result != ERR_OK) {
-        ANS_LOGE("Notification slot filter on publish failed with %{public}d.", result);
-        return result;
+    ansStatus = notificationSlotFilter_->OnPublish(record);
+    if (!ansStatus.Ok()) {
+        ANS_LOGE("Notification slot filter on publish failed with %{public}d.", ansStatus.GetErrCode());
+        return ansStatus;
     }
 
-    return ERR_OK;
+    return AnsStatus();
 }
 
 void AdvancedNotificationService::ChangeNotificationByControlFlagsFor3rdApp(
@@ -2039,7 +2022,7 @@ void AdvancedNotificationService::CreatePushCheckJson(
     }
 }
 
-ErrCode AdvancedNotificationService::HandlePushCheckFailed(const sptr<NotificationRequest> &request, int32_t result)
+AnsStatus AdvancedNotificationService::HandlePushCheckFailed(const sptr<NotificationRequest> &request, int32_t result)
 {
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_5)
         .ErrorCode(result).Message("Push OnCheckNotification failed.");
@@ -2049,31 +2032,31 @@ ErrCode AdvancedNotificationService::HandlePushCheckFailed(const sptr<Notificati
         if (!request->IsAtomicServiceNotification()) {
             NotificationAnalyticsUtil::ReportTipsEvent(request, message);
         }
-        return ERR_OK;
+        return AnsStatus();
     }
     if (result == ERR_ANS_CHECK_WEAK_NETWORK) {
         if (NotificationLiveViewUtils::GetInstance().CheckLiveViewForBundle(request)) {
-            return ERR_OK;
+            return AnsStatus();
         }
     }
-    NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-    return result;
+    return AnsStatus(result, "Push OnCheckNotification failed.",
+        EventSceneId::SCENE_2, EventBranchId::BRANCH_5);
 }
 
-ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &request)
+AnsStatus AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &request)
 {
     ANS_LOGD("start.");
     if (pushCallBacks_.find(request->GetSlotType()) == pushCallBacks_.end()) {
         if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
             AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
-            return ERR_OK;
+            return AnsStatus();
         }
-        return ERR_ANS_PUSH_CHECK_UNREGISTERED;
+        return AnsStatus(ERR_ANS_PUSH_CHECK_UNREGISTERED, "ERR_ANS_PUSH_CHECK_UNREGISTERED");
     }
     sptr<IPushCallBack> pushCallBack = pushCallBacks_[request->GetSlotType()];
     sptr<NotificationCheckRequest> checkRequest = checkRequests_[request->GetSlotType()];
     if (request->GetCreatorUid() == checkRequest->GetUid()) {
-        return ERR_OK;
+        return AnsStatus();
     }
 
     nlohmann::json jsonObject;
@@ -2092,8 +2075,9 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     }
     ErrCode result = pushCallBack->OnCheckNotification(jsonObject.dump(), pushCallBackParam);
     if (result != ERR_OK) {
-        if (HandlePushCheckFailed(request, result) != ERR_OK) {
-            return result;
+        AnsStatus ansStatus = HandlePushCheckFailed(request, result);
+        if (!ansStatus.Ok()) {
+            return ansStatus;
         }
         result = ERR_OK;
     }
@@ -2102,7 +2086,7 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     } else if (extroInfo != nullptr) {
         extroInfo->Remove("eventControl");
     }
-    return result;
+    return AnsStatus();
 }
 
 void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode, int32_t reason)
@@ -2259,21 +2243,20 @@ ErrCode AdvancedNotificationService::CheckLongTermLiveView(const sptr<Notificati
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::AddRecordToMemory(
+AnsStatus AdvancedNotificationService::AddRecordToMemory(
     const std::shared_ptr<NotificationRecord> &record, bool isSystemApp, bool isUpdateByOwner,
     const bool isAgentController)
 {
-    ErrCode result = ERR_OK;
-    result = AssignValidNotificationSlot(record, record->bundleOption);
-    if (result != ERR_OK) {
+    AnsStatus ansStatus = AssignValidNotificationSlot(record, record->bundleOption);
+    if (!ansStatus.Ok()) {
         ANS_LOGE("Can not assign valid slot!");
-        return result;
+        return ansStatus;
     }
 
-    result = Filter(record);
-    if (result != ERR_OK) {
-        ANS_LOGE("Reject by filters: %{public}d", result);
-        return result;
+    ansStatus = Filter(record);
+    if (!ansStatus.Ok()) {
+        ANS_LOGE("Reject by filters: %{public}d", ansStatus.GetErrCode());
+        return ansStatus;
     }
     if (record->isThirdparty) {
         NotificationConstant::SlotType type = record->request->GetSlotType();
@@ -2294,15 +2277,15 @@ ErrCode AdvancedNotificationService::AddRecordToMemory(
 
     // solve long term continuous update(music)
     if (!remove && CheckLongTermLiveView(record->request, record->notification->GetKey()) != ERR_OK) {
-        return ERR_ANS_INVALID_PARAM;
+        return AnsStatus(ERR_ANS_INVALID_PARAM, "ERR_ANS_INVALID_PARAM");
     }
 
-    result = AssignToNotificationList(record);
+    ErrCode result = AssignToNotificationList(record);
     if (result != ERR_OK) {
-        return result;
+        return AnsStatus(result, "AssignToNotificationList fail.");
     }
 
-    return ERR_OK;
+    return AnsStatus();
 }
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED

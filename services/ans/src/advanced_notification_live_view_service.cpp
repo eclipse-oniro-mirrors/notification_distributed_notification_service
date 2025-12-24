@@ -73,13 +73,17 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
 
             auto record = std::make_shared<NotificationRecord>();
             record->isNeedFlowCtrl = false;
-            if (FillNotificationRecord(requestObj, record) != ERR_OK) {
+            AnsStatus ansStatus = FillNotificationRecord(requestObj, record);
+            if (!ansStatus.Ok()) {
                 ANS_LOGE("Fill notification record failed.");
+                NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, ansStatus.BuildMessage(true));
                 continue;
             }
 
-            if (Filter(record, true) != ERR_OK) {
+            ansStatus = Filter(record, true);
+            if (!ansStatus.Ok()) {
                 ANS_LOGE("Filter record failed.");
+                NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, ansStatus.BuildMessage(true));
                 continue;
             }
 

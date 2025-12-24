@@ -41,7 +41,7 @@ public:
      * @param record Indicates the NotificationRecord.
      * @return Returns the filter result.
      */
-    ErrCode OnPublish(const std::shared_ptr<NotificationRecord> &record) override;
+    AnsStatus OnPublish(const std::shared_ptr<NotificationRecord> &record) override;
 };
 }  // namespace Notification
 }  // namespace OHOS

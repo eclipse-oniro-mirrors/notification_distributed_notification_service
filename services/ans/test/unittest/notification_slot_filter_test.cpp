@@ -81,8 +81,8 @@ HWTEST_F(NotificationSlotFilterTest, NotificationSlotFilterTest_00300, Function 
 {
     NotificationSlotFilter notificationSlotFilter;
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-    ErrCode result = notificationSlotFilter.OnPublish(record);
-    ASSERT_EQ(result, ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST);
+    AnsStatus ansStatus = notificationSlotFilter.OnPublish(record);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST);
 }
 
 

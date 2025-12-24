@@ -169,7 +169,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.PrepareNotificationRequest(req), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService.PrepareNotificationRequest(req).GetErrCode(), ERR_ANS_INVALID_BUNDLE);
 }
 
 /**

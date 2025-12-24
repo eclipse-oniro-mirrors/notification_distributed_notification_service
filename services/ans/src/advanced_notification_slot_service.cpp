@@ -571,19 +571,18 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
     return result;
 }
 
-ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record,
+AnsStatus AdvancedNotificationService::AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record,
     const sptr<NotificationBundleOption> &bundleOption)
 {
     sptr<NotificationSlot> slot;
     NotificationConstant::SlotType slotType = record->request->GetSlotType();
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_3).SlotType(slotType);
     ErrCode result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slot);
     if ((result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) ||
         (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST)) {
         slot = new (std::nothrow) NotificationSlot(slotType);
         if (slot == nullptr) {
             ANS_LOGE("Failed to create NotificationSlot instance");
-            return ERR_NO_MEMORY;
+            return AnsStatus(ERR_NO_MEMORY, "Failed to create NotificationSlot instance");
         }
 
         GenerateSlotReminderMode(slot, bundleOption);
@@ -609,10 +608,9 @@ ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shar
         }
     }
     if (result != ERR_OK) {
-        message.ErrorCode(result).Message("assign slot failed");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+        return AnsStatus(result, "assign slot failed", EventSceneId::SCENE_7, EventBranchId::BRANCH_3);
     }
-    return result;
+    return AnsStatus();
 }
 
 ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(

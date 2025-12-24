@@ -1515,7 +1515,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21500,
     EXPECT_NE(notification, nullptr);
     sptr<NotificationBundleOption> bundleOption = nullptr;
 
-    ASSERT_EQ(advancedNotificationService_->PublishPreparedNotification(req, bundleOption), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->PublishPreparedNotification(req, bundleOption).GetErrCode(),
+        ERR_ANS_INVALID_PARAM);
 
     GTEST_LOG_(INFO) << "PublishPreparedNotification_1000 test end";
 }
@@ -1907,7 +1908,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishPreparedNotificationInner_0100,
     AdvancedNotificationService::PublishNotificationParameter parameter;
     parameter.request = sptr<NotificationRequest>(new (std::nothrow) NotificationRequest());
     auto ret = advancedNotificationService.PublishPreparedNotificationInner(parameter);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret.GetErrCode(), ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -1926,7 +1927,7 @@ HWTEST_F(AdvancedNotificationServiceTest, Filter_0100, Level1)
     advancedNotificationService.notificationSlotFilter_ = nullptr;
     bool isRecover = false;
     auto ret = advancedNotificationService.Filter(record, isRecover);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret.GetErrCode(), ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -1951,7 +1952,7 @@ HWTEST_F(AdvancedNotificationServiceTest, Filter_0200, Level1)
     advancedNotificationService_->notificationSlotFilter_ = nullptr;
     bool isRecover = false;
     auto ret = advancedNotificationService_->Filter(record, isRecover);
-    EXPECT_EQ(ret, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(ret.GetErrCode(), ERR_ANS_NOTIFICATION_NOT_EXISTS);
 }
 
 /**

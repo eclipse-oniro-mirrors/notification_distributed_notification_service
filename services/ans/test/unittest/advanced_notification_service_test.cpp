@@ -1442,7 +1442,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15700,
 
     req->SetContent(content);
     req->SetIsAgentNotification(true);
-    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(req), ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(req).GetErrCode(), ERR_OK);
     GTEST_LOG_(INFO) << "PrepareNotificationRequest_0100 test end";
 }
 
@@ -3109,7 +3109,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21300,
 
     std::shared_ptr<BundleManagerHelper> bundleManager = nullptr;
 
-    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(req), ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(req).GetErrCode(), ERR_OK);
     GTEST_LOG_(INFO) << "PrepareNotificationRequest_0200 test end";
 }
 
@@ -3252,7 +3252,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22500,
     GTEST_LOG_(INFO) << "PushCheck_0100 test start";
     MockIsVerfyPermisson(false);
     sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest();
-    ASSERT_EQ(advancedNotificationService_->PushCheck(req), ERR_ANS_PUSH_CHECK_UNREGISTERED);
+    ASSERT_EQ(advancedNotificationService_->PushCheck(req).GetErrCode(), ERR_ANS_PUSH_CHECK_UNREGISTERED);
 
     GTEST_LOG_(INFO) << "PushCheck_0100 test end";
 }
@@ -3283,7 +3283,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22600,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00001, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00001 test start";
-    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(nullptr), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(nullptr).GetErrCode(), ERR_ANS_INVALID_PARAM);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00001 test end";
 }
 
@@ -3748,7 +3748,7 @@ HWTEST_F(AdvancedNotificationServiceTest, FillNotificationRecordTest_0001, Funct
     AdvancedNotificationService::NotificationRequestDb requestDbObj = { .request = nullptr, .bundleOption = nullptr};
     auto record = std::make_shared<NotificationRecord>();
 
-    EXPECT_NE(advancedNotificationService_->FillNotificationRecord(requestDbObj, record), ERR_OK);
+    EXPECT_NE(advancedNotificationService_->FillNotificationRecord(requestDbObj, record).GetErrCode(), ERR_OK);
     GTEST_LOG_(INFO) << "FillNotificationRecordTest_0001 test end";
 }
 
@@ -3769,7 +3769,7 @@ HWTEST_F(AdvancedNotificationServiceTest, FillNotificationRecordTest_0002, Funct
         { .request = request, .bundleOption = bundleOption };
     auto record = std::make_shared<NotificationRecord>();
 
-    ASSERT_EQ(advancedNotificationService_->FillNotificationRecord(requestDbObj, record), ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->FillNotificationRecord(requestDbObj, record).GetErrCode(), ERR_OK);
     GTEST_LOG_(INFO) << "FillNotificationRecordTest_0002 test end";
 }
 
@@ -3990,7 +3990,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PushCheckTest_0001, Function | SmallTe
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
 
-    ASSERT_EQ(advancedNotificationService_->PushCheck(request), ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->PushCheck(request).GetErrCode(), ERR_OK);
 
     advancedNotificationService_->pushCallBacks_.clear();
     advancedNotificationService_->checkRequests_.clear();
@@ -4255,7 +4255,7 @@ HWTEST_F(AdvancedNotificationServiceTest, Filter_00001, Function | SmallTest | L
 
     advancedNotificationService_->notificationSlotFilter_ = nullptr;
     auto ret = advancedNotificationService_->Filter(record, true);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -5796,8 +5796,8 @@ HWTEST_F(AdvancedNotificationServiceTest, CheckOverLayIcon_001, Function | Small
     devices.push_back("n2");
     devices.push_back("n3");
     request->SetDevicesSupportDisplay(devices);
-    ErrCode ret = CheckPictureSize(request);
-    EXPECT_EQ(ret, ERR_OK);
+    AnsStatus ansStatus = CheckPictureSize(request);
+    EXPECT_EQ(ansStatus.GetErrCode(), ERR_OK);
 }
 
 /**
@@ -5815,8 +5815,8 @@ HWTEST_F(AdvancedNotificationServiceTest, CheckOverLayIcon_002, Function | Small
     MockIsVerfyPermisson(true);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     request->SetAutoDeletedTime(0);
-    ErrCode ret = CheckPictureSize(request);
-    EXPECT_EQ(ret, ERR_OK);
+    AnsStatus ansStatus = CheckPictureSize(request);
+    EXPECT_EQ(ansStatus.GetErrCode(), ERR_OK);
 }
 
 /**
@@ -5837,8 +5837,8 @@ HWTEST_F(AdvancedNotificationServiceTest, CheckOverLayIcon_003, Function | Small
     liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END);
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
     request->SetContent(content);
-    ErrCode ret = CheckPictureSize(request);
-    EXPECT_EQ(ret, ERR_OK);
+    AnsStatus ansStatus = CheckPictureSize(request);
+    EXPECT_EQ(ansStatus.GetErrCode(), ERR_OK);
 }
 
 /**
@@ -5855,8 +5855,8 @@ HWTEST_F(AdvancedNotificationServiceTest, CheckOverLayIcon_004, Function | Small
     MockIsSystemApp(false);
     MockIsVerfyPermisson(true);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
-    ErrCode ret = CheckPictureSize(request);
-    EXPECT_EQ(ret, ERR_OK);
+    AnsStatus ansStatus = CheckPictureSize(request);
+    EXPECT_EQ(ansStatus.GetErrCode(), ERR_OK);
 }
 
 /**
@@ -5878,8 +5878,8 @@ HWTEST_F(AdvancedNotificationServiceTest, CheckOverLayIcon_005, Function | Small
     MockIsSystemApp(false);
     MockIsVerfyPermisson(false);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    ErrCode ret = CheckPictureSize(request);
-    EXPECT_EQ(ret, ERR_OK);
+    AnsStatus ansStatus = CheckPictureSize(request);
+    EXPECT_EQ(ansStatus.GetErrCode(), ERR_OK);
 }
 
 /**

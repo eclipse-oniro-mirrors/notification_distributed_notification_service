@@ -77,21 +77,18 @@ inline tm GetLocalTime(time_t time)
     return ret;
 }
 
-inline ErrCode CheckPictureSize(const sptr<NotificationRequest> &request)
+inline AnsStatus CheckPictureSize(const sptr<NotificationRequest> &request)
 {
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     auto result = request->CheckImageSizeForContent();
     if (result != ERR_OK) {
         ANS_LOGE("Check image size failed.");
-        message.ErrorCode(result).Message("Check image size failed.");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return result;
+        return AnsStatus(result, "Check image size failed.",
+            EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     }
 
     if (request->CheckImageOverSizeForPixelMap(request->GetLittleIcon(), MAX_ICON_SIZE)) {
-        message.ErrorCode(ERR_ANS_ICON_OVER_SIZE).Message("Check little image size failed.");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ERR_ANS_ICON_OVER_SIZE;
+        return AnsStatus(ERR_ANS_ICON_OVER_SIZE, "Check little image size failed.",
+            EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     }
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -102,9 +99,8 @@ inline ErrCode CheckPictureSize(const sptr<NotificationRequest> &request)
     }
 
     if (request->CheckImageOverSizeForPixelMap(request->GetOverlayIcon(), MAX_ICON_SIZE)) {
-        message.ErrorCode(ERR_ANS_ICON_OVER_SIZE).Message("Check overlay size failed.");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ERR_ANS_ICON_OVER_SIZE;
+        return AnsStatus(ERR_ANS_ICON_OVER_SIZE, "Check overlay size failed.",
+            EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     }
 
     if (request->CheckImageOverSizeForPixelMap(request->GetBigIcon(), MAX_ICON_SIZE)) {
@@ -112,7 +108,7 @@ inline ErrCode CheckPictureSize(const sptr<NotificationRequest> &request)
         ANS_LOGI("Check big image size over limit");
     }
 
-    return ERR_OK;
+    return AnsStatus();
 }
 
 inline OHOS::Notification::HaMetaMessage AddInformationInMessage(

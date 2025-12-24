@@ -47,6 +47,9 @@ std::string AnsStatus::FormatSceneBranchStr(int32_t sceneId, int32_t branchId)
 
 AnsStatus& AnsStatus::AppendSceneBranch(int32_t sceneId, int32_t branchId)
 {
+    if (sceneId == -1 && branchId == -1) {
+        return *this;
+    }
     return AppendSceneBranch(sceneId, branchId, "");
 }
 
@@ -73,9 +76,60 @@ AnsStatus AnsStatus::InvalidParam(const std::string& msg, int32_t sceneId, int32
     return AnsStatus(ERR_ANS_INVALID_PARAM, msg, sceneId, branchId);
 }
 
+AnsStatus AnsStatus::NoMemory(int32_t sceneId, int32_t branchId)
+{
+    return AnsStatus::NoMemory("No memory", sceneId, branchId);
+}
+ 
+AnsStatus AnsStatus::NoMemory(const std::string& msg, int32_t sceneId, int32_t branchId)
+{
+    return AnsStatus(ERR_ANS_NO_MEMORY, msg, sceneId, branchId);
+}
+ 
+AnsStatus AnsStatus::InvalidBundle(int32_t sceneId, int32_t branchId)
+{
+    return AnsStatus::InvalidBundle("invalid bundle", sceneId, branchId);
+}
+ 
+AnsStatus AnsStatus::InvalidBundle(const std::string& msg, int32_t sceneId, int32_t branchId)
+{
+    return AnsStatus(ERR_ANS_INVALID_BUNDLE, msg, sceneId, branchId);
+}
+ 
+AnsStatus AnsStatus::InvalidUid(int32_t sceneId, int32_t branchId)
+{
+    return AnsStatus::InvalidUid("invalid uid", sceneId, branchId);
+}
+ 
+AnsStatus AnsStatus::InvalidUid(const std::string& msg, int32_t sceneId, int32_t branchId)
+{
+    return AnsStatus(ERR_ANS_INVALID_UID, msg, sceneId, branchId);
+}
+ 
+AnsStatus AnsStatus::NonSystemApp(int32_t sceneId, int32_t branchId)
+{
+    return AnsStatus::NonSystemApp("not system app", sceneId, branchId);
+}
+ 
+AnsStatus AnsStatus::NonSystemApp(const std::string& msg, int32_t sceneId, int32_t branchId)
+{
+    return AnsStatus(ERR_ANS_NON_SYSTEM_APP, msg, sceneId, branchId);
+}
+ 
+AnsStatus AnsStatus::PermissionDeny(int32_t sceneId, int32_t branchId)
+{
+    return AnsStatus::PermissionDeny("permission denied", sceneId, branchId);
+}
+ 
+AnsStatus AnsStatus::PermissionDeny(const std::string& msg, int32_t sceneId, int32_t branchId)
+{
+    return AnsStatus(ERR_ANS_PERMISSION_DENIED, msg, sceneId, branchId);
+}
+
 HaMetaMessage AnsStatus::BuildMessage(bool isPrint)
 {
-    return HaMetaMessage(branchId_, sceneId_).Path(path_).Message(msg_, isPrint);
+    return HaMetaMessage(branchId_, sceneId_).Path(path_)
+        .ErrorCode(errCode_).Message(msg_, isPrint);
 }
 
 }  // namespace Notification

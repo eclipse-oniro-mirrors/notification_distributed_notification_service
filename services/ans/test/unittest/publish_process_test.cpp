@@ -62,7 +62,7 @@ HWTEST_F(PublishProcessTest, BaseCommonPublishCheck_00001, Function | SmallTest 
 
     CommonNotificationPublishProcess process;
     auto res = process.CommonPublishCheck(request);
-    ASSERT_EQ(res, ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(res.GetErrCode(), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -81,7 +81,7 @@ HWTEST_F(PublishProcessTest, BaseCommonPublishCheck_00002, Function | SmallTest 
 
     CommonNotificationPublishProcess process;
     auto res = process.CommonPublishCheck(request);
-    ASSERT_EQ(res, ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(res.GetErrCode(), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -97,7 +97,7 @@ HWTEST_F(PublishProcessTest, BaseCommonPublishProcess_00001, Function | SmallTes
 
     CommonNotificationPublishProcess process;
     auto res = process.CommonPublishProcess(request);
-    ASSERT_EQ(res, ERR_ANS_DLP_HAP);
+    ASSERT_EQ(res.GetErrCode(), ERR_ANS_DLP_HAP);
 }
 
 /**
@@ -114,7 +114,7 @@ HWTEST_F(PublishProcessTest, PublishNotificationByApp_00001, Function | SmallTes
 
     CommonNotificationPublishProcess progress;
     auto res = progress.PublishNotificationByApp(request);
-    ASSERT_EQ(res, ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(res.GetErrCode(), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -146,7 +146,7 @@ HWTEST_F(PublishProcessTest, PublishNotificationByApp_00003, Function | SmallTes
     
     CommonNotificationPublishProcess progress;
     auto res = progress.PublishNotificationByApp(request);
-    ASSERT_EQ(res, ERR_ANS_DLP_HAP);
+    ASSERT_EQ(res.GetErrCode(), ERR_ANS_DLP_HAP);
 }
 
 /**
@@ -233,7 +233,7 @@ HWTEST_F(PublishProcessTest, LivePublishNotificationByApp_00003, Function | Smal
     
     LivePublishProcess progress;
     auto res = progress.PublishNotificationByApp(request);
-    ASSERT_EQ(res, ERR_ANS_DLP_HAP);
+    ASSERT_EQ(res.GetErrCode(), ERR_ANS_DLP_HAP);
 }
 
 

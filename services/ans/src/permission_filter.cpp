@@ -31,12 +31,11 @@ void PermissionFilter::OnStart()
 void PermissionFilter::OnStop()
 {}
 
-ErrCode PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &record)
+AnsStatus PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &record)
 {
     bool isForceControl = false;
     bool enable = false;
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_1);
     ErrCode result =
         NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(record->bundleOption, state);
     if (result == ERR_OK) {
@@ -53,43 +52,40 @@ ErrCode PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &r
 
     if (record->request->IsSystemLiveView()) {
         ANS_LOGE("System live view no need check switch");
-        return ERR_OK;
+        return AnsStatus();
     }
 
     sptr<NotificationSlot> slot;
     NotificationConstant::SlotType slotType = record->request->GetSlotType();
-    message.SlotType(slotType);
     result = NotificationPreferences::GetInstance()->GetNotificationSlot(record->bundleOption, slotType, slot);
     if (result == ERR_OK) {
         if (slot != nullptr) {
             isForceControl = slot->GetForceControl();
         } else {
-            message.ErrorCode(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED).Message("Notification slot not enable.");
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-            result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED;
             ANS_LOGE("Notification slot not enable.");
+            return AnsStatus(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED, "Notification slot not enable.",
+                EventSceneId::SCENE_6, EventBranchId::BRANCH_1);
         }
     } else {
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST) {
-            message.ErrorCode(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST).Message("Slot type not exist.");
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
             ANS_LOGE("Slot type %{public}d not exist.", slotType);
+            return AnsStatus(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST, "Slot type not exist.",
+                EventSceneId::SCENE_6, EventBranchId::BRANCH_1);
         }
     }
 
     if (result == ERR_OK) {
         if (!enable && !isForceControl) {
-            message.ErrorCode(ERR_ANS_NOT_ALLOWED).Message("Notifications is off.");
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
             ANS_LOGE("Enable notifications for bundle is OFF");
-            return ERR_ANS_NOT_ALLOWED;
+            return AnsStatus(ERR_ANS_NOT_ALLOWED, "Notifications is off.",
+                EventSceneId::SCENE_6, EventBranchId::BRANCH_1);
         }
 
         if (record->notification->GetBundleName() != record->notification->GetCreateBundle()) {
             // Publish as bundle
         }
     }
-    return result;
+    return AnsStatus();
 }
 }  // namespace Notification
 }  // namespace OHOS

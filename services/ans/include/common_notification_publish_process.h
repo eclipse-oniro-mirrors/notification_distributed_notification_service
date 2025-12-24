@@ -24,7 +24,7 @@ namespace Notification {
 class CommonNotificationPublishProcess final : public BasePublishProcess {
 public:
     static std::shared_ptr<CommonNotificationPublishProcess> GetInstance();
-    ErrCode PublishNotificationByApp(const sptr<NotificationRequest> &request) override;
+    AnsStatus PublishNotificationByApp(const sptr<NotificationRequest> &request) override;
 
 private:
     static std::shared_ptr<CommonNotificationPublishProcess> instance_;

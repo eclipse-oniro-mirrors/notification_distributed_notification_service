@@ -26,7 +26,7 @@ class LivePublishProcess final : public BasePublishProcess {
 public:
     static std::shared_ptr<LivePublishProcess> GetInstance();
     AnsStatus PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed) override;
-    ErrCode PublishNotificationByApp(const sptr<NotificationRequest> &request) override;
+    AnsStatus PublishNotificationByApp(const sptr<NotificationRequest> &request) override;
     void EraseLiveViewSubsciber(int32_t uid);
     void AddLiveViewSubscriber(int32_t uid);
     bool CheckLocalLiveViewSubscribed(
