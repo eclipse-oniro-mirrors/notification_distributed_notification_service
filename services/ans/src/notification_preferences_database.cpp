@@ -4067,6 +4067,31 @@ bool NotificationPreferencesDatabase::SetRingtoneInfoByBundle(const Notification
     return (result == NativeRdb::E_OK);
 }
 
+bool NotificationPreferencesDatabase::GetRingtoneInfoByLabel(const int32_t userId, const std::string label,
+    sptr<NotificationRingtoneInfo> &ringtoneInfo)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (label.empty() || ringtoneInfo == nullptr) {
+        ANS_LOGE("Invalid label parameters");
+        return false;
+    }
+
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+
+    std::string value;
+    std::string bundleKey = GenerateBundleKey(label, KEY_BUNDLE_RINGTONE_NOTIFICATION);
+    int32_t result = rdbDataManager_->QueryData(bundleKey, value, userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGD("query notificationRingtoneInfo %{public}d.", result);
+        return false;
+    }
+    ringtoneInfo->FromJson(value);
+    return true;
+}
+
 bool NotificationPreferencesDatabase::GetRingtoneInfoByBundle(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
     sptr<NotificationRingtoneInfo> &ringtoneInfo)
 {
