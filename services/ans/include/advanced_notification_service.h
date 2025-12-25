@@ -2009,6 +2009,7 @@ private:
 #endif
 
     void ClearOverTimeRingToneInfo();
+    void ClearRingtoneByApplication(int32_t userId, const std::vector<NotificationRingtoneInfo> cloneRingtoneInfos);
     ErrCode SetDoNotDisturbDateByUser(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
     ErrCode GetDoNotDisturbDateByUser(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date);
     ErrCode GetHasPoppedDialog(const sptr<NotificationBundleOption> bundleOption, bool &hasPopped);

@@ -1687,6 +1687,13 @@ ErrCode NotificationPreferences::SetRingtoneInfoByBundle(const sptr<Notification
     return ERR_OK;
 }
 
+bool NotificationPreferences::GetRingtoneInfoByLabel(const int32_t userId, const std::string label,
+    sptr<NotificationRingtoneInfo> &ringtoneInfo)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    return preferncesDB_->GetRingtoneInfoByLabel(userId, label, ringtoneInfo);
+}
+
 ErrCode NotificationPreferences::GetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundleOption,
     sptr<NotificationRingtoneInfo> &ringtoneInfo)
 {
@@ -1814,6 +1821,34 @@ void NotificationPreferences::GetCloneRingtoneInfo(const int32_t& userId,
         cloneRingtoneInfos.GetRingtoneUri().c_str());
 }
 
+bool NotificationPreferences::CheckApplicationRingtone(const NotificationCloneBundleInfo& bundleInfo)
+{
+    // use current active user id, for anco application not use 0.
+    int32_t userId = DEFAULT_USER_ID;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    int32_t uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleInfo.GetBundleName(),
+        userId, bundleInfo.GetAppIndex());
+    if (uid == -1) {
+        ANS_LOGW("Get uid %{public}d %{public}d %{public}s", bundleInfo.GetAppIndex(), userId,
+            bundleInfo.GetBundleName().c_str());
+        return false;
+    }
+
+    auto cloneRingtone = bundleInfo.GetRingtoneInfo();
+    sptr<NotificationBundleOption> bundle =
+        new (std::nothrow) NotificationBundleOption(bundleInfo.GetBundleName(), uid);
+    sptr<NotificationRingtoneInfo> oldRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
+    auto result = NotificationPreferences::GetInstance()->GetRingtoneInfoByBundle(bundle, oldRingtoneInfo);
+    if (result == ERR_OK && cloneRingtone != nullptr) {
+        if (oldRingtoneInfo->GetRingtoneUri() == cloneRingtone->GetRingtoneUri()) {
+            ANS_LOGI("Double clone : %{public}s %{public}s.", bundle->GetBundleName().c_str(),
+                oldRingtoneInfo->GetRingtoneUri().c_str());
+            return true;
+        }
+    }
+    return false;
+}
+
 void NotificationPreferences::UpdateCloneRingtoneInfo(const int32_t& userId,
     const NotificationCloneBundleInfo& bundleInfo)
 {
@@ -1839,7 +1874,11 @@ void NotificationPreferences::UpdateCloneRingtoneInfo(const int32_t& userId,
         cloneRingtoneInfos.GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE) {
         SystemSoundHelper::GetInstance()->RemoveCustomizedTone(cloneRingtoneInfos.GetRingtoneUri());
     }
-
+    if (CheckApplicationRingtone(bundleInfo)) {
+        ANS_LOGW("Exist bundle info %{public}d %{public}s %{public}d %{public}s", userId,
+            bundleInfo.GetBundleName().c_str(), bundleInfo.GetAppIndex(), cloneRingtone->GetRingtoneUri().c_str());
+        return;
+    }
     std::string ringtoneNode = cloneRingtone->ToJson();
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     auto result = preferncesDB_->SetCloneRingtoneInfo(userId, bundleInfo.GetBundleName(),

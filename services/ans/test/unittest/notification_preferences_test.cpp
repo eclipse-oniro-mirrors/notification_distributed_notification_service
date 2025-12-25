@@ -3107,6 +3107,43 @@ HWTEST_F(NotificationPreferencesTest, GetCloneTimeStamp_001, Function | SmallTes
 }
 
 /**
+ * @tc.name: CheckApplicationRingtone_001
+ * @tc.desc: test CheckApplicationRingtone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, CheckApplicationRingtone_001, Function | SmallTest | Level1)
+{
+    NotificationCloneBundleInfo bundleInfo;
+    bundleInfo.SetBundleName("ohos.test.demo");
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo(
+        NotificationConstant::RingtoneType::RINGTONE_TYPE_SYSTEM, "title", "fileName", "uri");
+    bundleInfo.AddRingtoneInfo(ringtoneInfo);
+    auto result = NotificationPreferences::GetInstance()->CheckApplicationRingtone(bundleInfo);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GetRingtoneInfoByLabel_001
+ * @tc.desc: test GetRingtoneInfoByLabel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetRingtoneInfoByLabel_001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRingtoneInfo> ringtoneInfo = nullptr;
+    auto result = NotificationPreferences::GetInstance()->GetRingtoneInfoByLabel(100, "", ringtoneInfo);
+    EXPECT_EQ(result, false);
+
+    result = NotificationPreferences::GetInstance()->GetRingtoneInfoByLabel(100,
+        "ohos.test.demo20020202", ringtoneInfo);
+    EXPECT_EQ(result, false);
+
+    ringtoneInfo = new NotificationRingtoneInfo();
+    result = NotificationPreferences::GetInstance()->GetRingtoneInfoByLabel(100,
+        "ohos.test.demo20020202", ringtoneInfo);
+    EXPECT_EQ(result, false);
+}
+
+/**
  * @tc.name: CloneRingtoneInfo_001
  * @tc.desc: test CloneRingtoneInfo.
  * @tc.type: FUNC

@@ -533,6 +533,8 @@ public:
     void UpdateProfilesUtil(std::vector<NotificationBundleOption>& trustList,
         const std::vector<NotificationBundleOption> bundleList);
 
+    bool GetRingtoneInfoByLabel(const int32_t userId, const std::string label,
+        sptr<NotificationRingtoneInfo> &ringtoneInfo);
     ErrCode SetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationRingtoneInfo> &ringtoneInfo);
 
@@ -645,6 +647,7 @@ public:
 
     int64_t GetCloneTimeStamp();
     void SetCloneTimeStamp(const int32_t& userId, const int64_t& timestamp);
+    bool CheckApplicationRingtone(const NotificationCloneBundleInfo& bundleInfo);
     void UpdateCloneRingtoneInfo(const int32_t& userId, const NotificationCloneBundleInfo& bundleInfo);
     void DeleteAllCloneRingtoneInfo(const int32_t& userId);
     void GetAllCloneRingtoneInfo(const int32_t& userId, std::vector<NotificationRingtoneInfo>& cloneRingtoneInfos);
