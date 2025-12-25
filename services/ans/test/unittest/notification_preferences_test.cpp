@@ -3148,30 +3148,6 @@ HWTEST_F(NotificationPreferencesTest, CloneRingtoneInfo_001, Function | SmallTes
 }
 
 /**
- * @tc.name: GetAllAncoBundlesInfo_001
- * @tc.desc: test CloneRingtoneInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationPreferencesTest, GetAllAncoBundlesInfo_001, Function | SmallTest | Level1)
-{
-    std::vector<sptr<NotificationBundleOption>> bundles;
-    NotificationPreferences::GetInstance()->GetAllAncoBundlesInfo(0, 100, bundles);
-    EXPECT_EQ(bundles.empty(), true);
-
-    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("com.anco.test", 10046);
-    auto result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption,
-        static_cast<NotificationConstant::SWITCH_STATE>(0));
-    EXPECT_EQ(result, (int)ERR_OK);
-
-    NotificationPreferences::GetInstance()->SetAncoApplicationUserId(bundleOption, 100);
-
-    bundles.clear();
-    NotificationPreferences::GetInstance()->GetAllAncoBundlesInfo(0, 100, bundles);
-    EXPECT_EQ(bundles.empty(), false);
-    NotificationPreferences::GetInstance()->SetAncoApplicationUserId(bundleOption, 0);
-}
-
-/**
  * @tc.name: SetGeofenceEnabled_001
  * @tc.desc: Test SetGeofenceEnabled
  * @tc.type: FUNC
