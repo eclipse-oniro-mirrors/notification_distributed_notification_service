@@ -110,7 +110,7 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
         sptr<NotificationBundleOption> bundleOption = GetBundleOption(want);
         if (bundleOption != nullptr && callbacks_.onBundleRemovedByUserId != nullptr) {
-            int32_t userId = data.GetCode();
+            int32_t userId = want.GetIntParam("userId", SUBSCRIBE_USER_INIT);
             callbacks_.onBundleRemovedByUserId(bundleOption, userId);
         }
         if (bundleOption != nullptr) {
