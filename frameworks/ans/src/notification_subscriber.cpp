@@ -322,6 +322,17 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledPriorityByBundleChanged
     return ERR_OK;
 }
 
+ErrCode NotificationSubscriber::SubscriberImpl::OnSystemUpdate(const sptr<Notification> &notification)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (notification == nullptr) {
+        ANS_LOGE("OnSystemUpdate fail, null notification");
+        return ERR_INVALID_DATA;
+    }
+    subscriber_.OnSystemUpdate(std::make_shared<Notification>(*notification));
+    return ERR_OK;
+}
+
 ErrCode NotificationSubscriber::SubscriberImpl::OnBadgeEnabledChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {

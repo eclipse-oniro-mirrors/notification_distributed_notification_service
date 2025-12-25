@@ -1658,7 +1658,6 @@ private:
         const NotificationConstant::ReminderFlag &bit,
         const bool status,
         std::shared_ptr<NotificationFlags> &flag);
-    bool CheckPriorityNotificationTypeValid(const std::string &priorityNotificationType);
     std::string GetLiveViewStatusKey();
 
 private:

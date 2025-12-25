@@ -607,6 +607,20 @@ HWTEST_F(AnsNotificationUnitTest, IsPriorityEnabledByBundle_0200, Function | Med
 }
 
 /*
+ * @tc.name: TriggerUpdatePriorityType_0100
+ * @tc.desc: test TriggerUpdatePriorityType with null proxy.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, TriggerUpdatePriorityType_0100, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    request.SetInnerPriorityNotificationType(NotificationConstant::PriorityNotificationType::PAYMENT_DUE);
+    ErrCode ret = ans_->TriggerUpdatePriorityType(request);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
  * @tc.name: CancelAsBundleWithAgent_0100
  * @tc.desc: test CancelAsBundleWithAgent.
  * @tc.type: FUNC
@@ -2102,6 +2116,20 @@ HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundle_0300, Function | Me
     ret = ans_->IsPriorityEnabledByBundle(bo, enableStatus);
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_EQ(enableStatus, NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT);
+}
+
+/*
+ * @tc.name: TriggerUpdatePriorityType_0200
+ * @tc.desc: test TriggerUpdatePriorityType success.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, TriggerUpdatePriorityType_0200, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    request.SetInnerPriorityNotificationType(NotificationConstant::PriorityNotificationType::PAYMENT_DUE);
+    ErrCode ret = ans_->TriggerUpdatePriorityType(request);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**

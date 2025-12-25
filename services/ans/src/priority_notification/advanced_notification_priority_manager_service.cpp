@@ -66,14 +66,16 @@ ErrCode AdvancedNotificationService::SetPriorityEnabledByBundleInner(
 {
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_26);
-    message.Message("bundle: " + bundle->GetBundleName() + ", id: " +
-        std::to_string(bundle->GetUid()) + ", en:" + std::to_string(enableStatusInt));
     if (bundle == nullptr) {
         ANS_LOGE("bundle is nullptr");
         message.ErrorCode(ERR_ANS_INVALID_BUNDLE).Append(" bundle name is empty");
+        message.Message("bundle: " + bundleOption->GetBundleName() + ", id: " +
+            std::to_string(bundleOption->GetUid()) + ", en:" + std::to_string(enableStatusInt));
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_INVALID_BUNDLE;
     }
+    message.Message("bundle: " + bundle->GetBundleName() + ", id: " +
+            std::to_string(bundle->GetUid()) + ", en:" + std::to_string(enableStatusInt));
     if (enableStatusInt < static_cast<int32_t>(NotificationConstant::PriorityEnableStatus::DISABLE) ||
         enableStatusInt > static_cast<int32_t>(NotificationConstant::PriorityEnableStatus::ENABLE)) {
         ANS_LOGE("EnableStatus out of range %{public}d.", enableStatusInt);
@@ -132,6 +134,32 @@ ErrCode AdvancedNotificationService::IsPriorityEnabledByBundle(
     return result;
 }
 
+ErrCode AdvancedNotificationService::TriggerUpdatePriorityType(const sptr<NotificationRequest> &request)
+{
+    auto result = SystemPermissionCheck();
+    if (result != ERR_OK) {
+        return result;
+    }
+    auto record = GetFromNotificationList(request->GetBaseKey(""));
+    if (record == nullptr) {
+        ANS_LOGE("TriggerUpdatePriorityType fail, notification not exist");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    auto cacheRequest = record->notification->GetNotificationRequestPoint();
+    if (cacheRequest == nullptr) {
+        ANS_LOGE("TriggerUpdatePriorityType fail, cache request not exist");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    cacheRequest->SetInnerPriorityNotificationType(request->GetPriorityNotificationType());
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    if (notification == nullptr) {
+        ANS_LOGE("TriggerUpdatePriorityType fail, null notification");
+        return ERR_NO_MEMORY;
+    }
+    NotificationSubscriberManager::GetInstance()->NotifySystemUpdate(notification);
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::SetBundlePriorityConfig(
     const sptr<NotificationBundleOption> &bundleOption, const std::string &value)
 {
@@ -147,14 +175,15 @@ ErrCode AdvancedNotificationService::SetBundlePriorityConfigInner(
 {
     ErrCode result = ERR_OK;
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_28);
-    message.Message("bundle: " + bundleOption->GetBundleName() + ", id: " + std::to_string(bundleOption->GetUid()));
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         ANS_LOGE("bundle is nullptr");
+        message.Message("bundle: " + bundleOption->GetBundleName() + ", id: " + std::to_string(bundleOption->GetUid()));
         message.ErrorCode(ERR_ANS_INVALID_BUNDLE).Append(" bundle name is empty");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_INVALID_BUNDLE;
     }
+    message.Message("bundle: " + bundle->GetBundleName() + ", id: " + std::to_string(bundle->GetUid()));
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
     int32_t aiResult = NOTIFICATION_AI_EXTENSION_WRAPPER->SyncBundleKeywords(bundle, value);
     ANS_LOGI("SyncBundleKeywords %{public}s_%{public}d result: %{public}d",

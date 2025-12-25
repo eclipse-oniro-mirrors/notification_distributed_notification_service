@@ -653,6 +653,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode TriggerUpdatePriorityType(const sptr<NotificationRequest> &request) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode SetBundlePriorityConfig(
         const sptr<NotificationBundleOption> &bundleOption, const std::string &value) override
     {

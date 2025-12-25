@@ -137,6 +137,13 @@ public:
         const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData);
 
     /**
+     * @brief notify when the system properties of notification changed.
+     *
+     * @param notification Indicates the Notification object.
+     */
+    void NotifySystemUpdate(const sptr<Notification> &notification);
+
+    /**
      * @brief Notify all subscribers on badge enabled state changed.
      *
      * @param callbackData Indicates the EnabledNotificationCallbackData object.
@@ -221,6 +228,7 @@ private:
     void NotifyEnabledPriorityChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     void NotifyEnabledPriorityByBundleChangedInner(
         const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData);
+    void NotifySystemUpdateInner(const sptr<Notification> &notification);
     void NotifyBadgeEnabledChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     bool IsSystemUser(int32_t userId);
     bool IsSubscribedBysubscriber(

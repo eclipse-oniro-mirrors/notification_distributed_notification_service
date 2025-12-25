@@ -117,6 +117,13 @@ public:
         const std::shared_ptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData) override;
 
     /**
+     * @brief Callback when the system properties of notification changed.
+     *
+     * @param request Indicates the received NotificationRequest object.
+     */
+    void OnSystemUpdate(const std::shared_ptr<OHOS::Notification::Notification> &request) override;
+
+    /**
      * @brief The callback function on the badge number changed.
      *
      * @param badgeData Indicates the BadgeNumberCallbackData object.
@@ -202,6 +209,7 @@ private:
     void SetBatchCancelCallbackInfo(const napi_env &env, const napi_ref &ref);
     void SetEnabledPriorityCallbackInfo(const napi_env &env, const napi_ref &ref);
     void SetEnabledPriorityByBundleCallbackInfo(const napi_env &env, const napi_ref &ref);
+    void SetSystemUpdateCallbackInfo(const napi_env &env, const napi_ref &ref);
 
     CallbackInfo GetCancelCallbackInfo();
     CallbackInfo GetConsumeCallbackInfo();
@@ -218,6 +226,7 @@ private:
     CallbackInfo GetBadgeCallbackInfo();
     CallbackInfo GetBadgeEnabledCallbackInfo();
     CallbackInfo GetBatchCancelCallbackInfo();
+    CallbackInfo GetSystemUpdateCallbackInfo();
 
     void CallThreadSafeFunc(void *data);
     void SubDeleteRef();
@@ -238,6 +247,7 @@ private:
     CallbackInfo enabledNotificationCallbackInfo_;
     CallbackInfo enabledPriorityCallbackInfo_;
     CallbackInfo enabledPriorityByBundleCallbackInfo_;
+    CallbackInfo systemUpdateCallbackInfo_;
     CallbackInfo setBadgeCallbackInfo_;
     CallbackInfo setBadgeEnabledCallbackInfo_;
     CallbackInfo batchCancelCallbackInfo_;

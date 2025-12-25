@@ -101,6 +101,7 @@ public:
         SUBSCRIBE_ON_DIED = 1 << 12,
         SUBSCRIBE_ON_ENABLEPRIORITY_CHANGED = 1 << 13,
         SUBSCRIBE_ON_ENABLEPRIORITYBYBUNDLE_CHANGED = 1 << 14,
+        SUBSCRIBE_ON_SYSTEM_UPDATE = 1 << 15,
     };
 
     enum DistributedDeleteType {
@@ -626,11 +627,6 @@ public:
          * Use to verify the priority type
          */
         static const std::vector<std::string> VALID_PRIORITY_TYPE_LIST;
-
-        /**
-         * Use to verify the priority type for inner process
-         */
-        static const std::vector<std::string> INNER_PRIORITY_TYPE_LIST;
     };
 
     // maximum display time for geofence notification

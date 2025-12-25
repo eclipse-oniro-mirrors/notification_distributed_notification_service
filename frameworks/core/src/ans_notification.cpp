@@ -2447,6 +2447,22 @@ ErrCode AnsNotification::IsPriorityEnabledByBundle(
     return result;
 }
 
+ErrCode AnsNotification::TriggerUpdatePriorityType(const NotificationRequest &request)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationRequest> notificationRequest = new (std::nothrow) NotificationRequest(request);
+    if (notificationRequest == nullptr) {
+        ANS_LOGE("null notificationRequest");
+        return ERR_ANS_NO_MEMORY;
+    }
+    return proxy->TriggerUpdatePriorityType(notificationRequest);
+}
+
 ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
     const std::string &deviceType, const bool enabled)
 {

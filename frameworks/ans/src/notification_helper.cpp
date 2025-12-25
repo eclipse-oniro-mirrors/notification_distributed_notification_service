@@ -765,6 +765,11 @@ ErrCode NotificationHelper::IsPriorityEnabledByBundle(
     return DelayedSingleton<AnsNotification>::GetInstance()->IsPriorityEnabledByBundle(bundleOption, enableStatus);
 }
 
+ErrCode NotificationHelper::TriggerUpdatePriorityType(const NotificationRequest &request)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->TriggerUpdatePriorityType(request);
+}
+
 ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
     const std::string deviceId)
 {

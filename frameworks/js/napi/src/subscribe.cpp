@@ -37,6 +37,7 @@ const std::string DISTURB_CHANGED = "onDoNotDisturbChanged";
 const std::string ENABLE_NOTIFICATION_CHANGED = "OnEnabledNotificationChanged";
 const std::string ENABLE_PRIORITY_CHANGED = "OnEnabledPriorityChanged";
 const std::string ENABLE_PRIORITY_BY_BUNDLE_CHANGED = "OnEnabledPriorityByBundleChanged";
+const std::string SYSTEM_UPDATE = "OnSystemUpdate";
 const std::string BADGE_CHANGED = "OnBadgeChanged";
 const std::string BADGE_ENABLED_CHANGED = "OnBadgeEnabledChanged";
 const std::string BATCH_CANCEL = "onBatchCancel";
@@ -56,7 +57,8 @@ enum class Type {
     BADGE_CHANGED,
     BADGE_ENABLED_CHANGED,
     ENABLE_PRIORITY_CHANGED,
-    ENABLE_PRIORITY_BY_BUNDLE_CHANGED
+    ENABLE_PRIORITY_BY_BUNDLE_CHANGED,
+    SYSTEM_UPDATE
 };
 
 struct NotificationReceiveDataWorker {
@@ -85,11 +87,6 @@ napi_value SetSubscribeCallbackData(const napi_env &env,
         return Common::NapiGetBoolean(env, false);
     }
 
-    if (sortingMap == nullptr) {
-        ANS_LOGD("null sortingMap");
-        return Common::NapiGetBoolean(env, false);
-    }
-
     // request: NotificationRequest
     napi_value requestResult = nullptr;
     napi_create_object(env, &requestResult);
@@ -99,15 +96,17 @@ napi_value SetSubscribeCallbackData(const napi_env &env,
     }
     napi_set_named_property(env, result, "request", requestResult);
 
-    // sortingMap?: NotificationSortingMap
-    napi_value sortingMapResult = nullptr;
-    napi_create_object(env, &sortingMapResult);
-    if (!Common::SetNotificationSortingMap(env, sortingMap, sortingMapResult)) {
-        ANS_LOGE("SetNotificationSortingMap call failed");
-        return Common::NapiGetBoolean(env, false);
+    if (sortingMap != nullptr) {
+        // sortingMap?: NotificationSortingMap
+        napi_value sortingMapResult = nullptr;
+        napi_create_object(env, &sortingMapResult);
+        if (!Common::SetNotificationSortingMap(env, sortingMap, sortingMapResult)) {
+            ANS_LOGE("SetNotificationSortingMap call failed");
+            return Common::NapiGetBoolean(env, false);
+        }
+        napi_set_named_property(env, result, "sortingMap", sortingMapResult);
     }
-    napi_set_named_property(env, result, "sortingMap", sortingMapResult);
-
+    
     // reason?: number
     if (deleteReason != NO_DELETE_REASON) {
         napi_value value = nullptr;
@@ -176,6 +175,11 @@ void SubscriberInstance::SubDeleteRef()
     if (enabledPriorityByBundleCallbackInfo_.ref != nullptr) {
         napi_delete_reference(enabledPriorityByBundleCallbackInfo_.env, enabledPriorityByBundleCallbackInfo_.ref);
         enabledPriorityByBundleCallbackInfo_.ref = nullptr;
+    }
+
+    if (systemUpdateCallbackInfo_.ref != nullptr) {
+        napi_delete_reference(systemUpdateCallbackInfo_.env, systemUpdateCallbackInfo_.ref);
+        systemUpdateCallbackInfo_.ref = nullptr;
     }
 }
 
@@ -862,7 +866,7 @@ void ThreadSafeOnEnabledPriorityChanged(napi_env env, napi_value jsCallback, voi
     }
     napi_create_object(env, &result);
     if (!SetPriorityCallbackData(env, dataWorkerData->priorityEnable, result)) {
-        ANS_LOGE("Convert data to JS fail.");
+        result = Common::NapiGetNull(env);
     } else {
         Common::SetCallback(env, subscriber->GetCallbackInfo(ENABLE_PRIORITY_CHANGED).ref, result);
     }
@@ -935,6 +939,57 @@ void SubscriberInstance::OnEnabledPriorityByBundleChanged(
     }
     dataWorker->priorityCallbackData = *callbackData;
     dataWorker->type = Type::ENABLE_PRIORITY_BY_BUNDLE_CHANGED;
+    dataWorker->subscriber = std::static_pointer_cast<SubscriberInstance>(shared_from_this());
+    CallThreadSafeFunc(dataWorker);
+}
+
+void ThreadSafeOnSystemUpdate(napi_env env, napi_value jsCallback, void* context, void* data)
+{
+    ANS_LOGD("called");
+
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
+    if (dataWorkerData == nullptr) {
+        ANS_LOGE("null dataWorkerData");
+        return;
+    }
+    auto subscriber = dataWorkerData->subscriber.lock();
+    if (subscriber == nullptr) {
+        ANS_LOGE("null subscriber");
+        return;
+    }
+    napi_value result = nullptr;
+    napi_handle_scope scope;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok || scope == nullptr) {
+        ANS_LOGE("status: %{public}d", status);
+        return;
+    }
+    napi_create_object(env, &result);
+    if (!SetSubscribeCallbackData(env, dataWorkerData->request, nullptr, NO_DELETE_REASON, result)) {
+        ANS_LOGE("Convert data to JS fail.");
+    } else {
+        Common::SetCallback(env, subscriber->GetCallbackInfo(SYSTEM_UPDATE).ref, result);
+    }
+    napi_close_handle_scope(env, scope);
+}
+
+void SubscriberInstance::OnSystemUpdate(const std::shared_ptr<OHOS::Notification::Notification> &request)
+{
+    ANS_LOGD("called");
+    if (systemUpdateCallbackInfo_.ref == nullptr || systemUpdateCallbackInfo_.env == nullptr) {
+        return;
+    }
+    if (request == nullptr) {
+        ANS_LOGE("OnSystemUpdate fail, null request");
+        return;
+    }
+    NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
+    if (dataWorker == nullptr) {
+        ANS_LOGE("null dataWorker");
+        return;
+    }
+    dataWorker->request = request;
+    dataWorker->type = Type::SYSTEM_UPDATE;
     dataWorker->subscriber = std::static_pointer_cast<SubscriberInstance>(shared_from_this());
     CallThreadSafeFunc(dataWorker);
 }
@@ -1173,6 +1228,17 @@ SubscriberInstance::CallbackInfo SubscriberInstance::GetEnabledPriorityByBundleC
     return enabledPriorityByBundleCallbackInfo_;
 }
 
+void SubscriberInstance::SetSystemUpdateCallbackInfo(const napi_env &env, const napi_ref &ref)
+{
+    systemUpdateCallbackInfo_.env = env;
+    systemUpdateCallbackInfo_.ref = ref;
+}
+
+SubscriberInstance::CallbackInfo SubscriberInstance::GetSystemUpdateCallbackInfo()
+{
+    return systemUpdateCallbackInfo_;
+}
+
 void SubscriberInstance::SetDisturbDateCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
     disturbDateCallbackInfo_.env = env;
@@ -1261,6 +1327,8 @@ void SubscriberInstance::SetCallbackInfo(const napi_env &env, const std::string 
         SetEnabledPriorityCallbackInfo(env, ref);
     } else if (type == ENABLE_PRIORITY_BY_BUNDLE_CHANGED) {
         SetEnabledPriorityByBundleCallbackInfo(env, ref);
+    } else if (type == SYSTEM_UPDATE) {
+        SetSystemUpdateCallbackInfo(env, ref);
     } else {
         ANS_LOGW("type is error");
     }
@@ -1298,6 +1366,8 @@ SubscriberInstance::CallbackInfo SubscriberInstance::GetCallbackInfo(const std::
         return GetEnabledPriorityCallbackInfo();
     } else if (type == ENABLE_PRIORITY_BY_BUNDLE_CHANGED) {
         return GetEnabledPriorityByBundleCallbackInfo();
+    } else if (type == SYSTEM_UPDATE) {
+        return GetSystemUpdateCallbackInfo();
     } else {
         ANS_LOGW("type is error");
         return {nullptr, nullptr};
@@ -1336,6 +1406,9 @@ void SubThreadSafeCommon(napi_env env, napi_value jsCallback, void* context, voi
             break;
         case Type::ENABLE_PRIORITY_BY_BUNDLE_CHANGED:
             ThreadSafeOnEnabledPriorityByBundleChanged(env, jsCallback, context, data);
+            break;
+        case Type::SYSTEM_UPDATE:
+            ThreadSafeOnSystemUpdate(env, jsCallback, context, data);
             break;
         default:
             break;
@@ -1613,6 +1686,23 @@ napi_value GetNotificationSubscriber(
         napi_create_reference(env, nOnEnabledPriorityByBundleChanged, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, ENABLE_PRIORITY_BY_BUNDLE_CHANGED, result);
         subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLEPRIORITYBYBUNDLE_CHANGED;
+    }
+
+    // onSystemUpdate?:(data: SubscribeCallbackData) => void
+    NAPI_CALL(env, napi_has_named_property(env, value, "onSystemUpdate", &hasProperty));
+    if (hasProperty) {
+        napi_value nOnSystemUpdate = nullptr;
+        napi_get_named_property(env, value, "onSystemUpdate", &nOnSystemUpdate);
+        NAPI_CALL(env, napi_typeof(env, nOnSystemUpdate, &valuetype));
+        if (valuetype != napi_function) {
+            ANS_LOGE("Wrong argument type. Function expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be function.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        napi_create_reference(env, nOnSystemUpdate, 1, &result);
+        subscriberInfo.subscriber->SetCallbackInfo(env, SYSTEM_UPDATE, result);
+        subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_SYSTEM_UPDATE;
     }
 
     // onBadgeChanged?:(data: BadgeNumberCallbackData) => void

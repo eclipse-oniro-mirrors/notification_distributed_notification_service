@@ -111,6 +111,16 @@ public:
     };
 
     /**
+     * @brief Callback when the system properties of notification changed.
+     *
+     * @param request Indicates the received NotificationRequest object.
+     */
+    virtual void OnSystemUpdate(const std::shared_ptr<Notification> &request)
+    {
+        return;
+    };
+
+    /**
      * @brief The callback function on the badge number changed.
      *
      * @param badgeData Indicates the BadgeNumberCallbackData object.
@@ -229,6 +239,8 @@ private:
 
         ErrCode OnEnabledPriorityByBundleChanged(
             const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData) override;
+
+        ErrCode OnSystemUpdate(const sptr<Notification> &notification) override;
 
         ErrCode OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override;
 

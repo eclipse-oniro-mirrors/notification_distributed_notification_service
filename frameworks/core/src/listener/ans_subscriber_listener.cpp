@@ -261,6 +261,22 @@ ErrCode SubscriberListener::OnEnabledPriorityByBundleChanged(
     return ERR_OK;
 }
 
+ErrCode SubscriberListener::OnSystemUpdate(const sptr<Notification> &notification)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (notification == nullptr) {
+        ANS_LOGE("OnSystemUpdate fail, null notification");
+        return ERR_INVALID_DATA;
+    }
+    auto subscriber = subscriber_.lock();
+    if (subscriber == nullptr) {
+        ANS_LOGE("null subscriber");
+        return ERR_INVALID_DATA;
+    }
+    subscriber->OnSystemUpdate(std::make_shared<Notification>(*notification));
+    return ERR_OK;
+}
+
 ErrCode SubscriberListener::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
