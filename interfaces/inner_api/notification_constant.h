@@ -512,27 +512,25 @@ public:
     static constexpr uint64_t NOTIFICATION_MAX_LIVE_VIEW_SIZE = 520ULL * 1024ULL;
 
     // rdb
-    constexpr static const char* NOTIFICATION_RDB_NAME = "/notificationdb.db";
-    constexpr static const char* NOTIFICATION_RDB_TABLE_NAME = "notification_table";
-    constexpr static const char* NOTIFICATION_RDB_PATH = "/data/service/el1/public/database/notification_service";
-    constexpr static const char* NOTIFICATION_JOURNAL_MODE = "WAL";
-    constexpr static const char* NOTIFICATION_SYNC_MODE = "FULL";
+    static const char* NOTIFICATION_RDB_NAME;
+    static const char* NOTIFICATION_RDB_TABLE_NAME;
+    static const char* NOTIFICATION_RDB_PATH;
+    static const char* NOTIFICATION_JOURNAL_MODE;
+    static const char* NOTIFICATION_SYNC_MODE;
     constexpr static int32_t NOTIFICATION_RDB_VERSION = 2;
-    constexpr static const char* SLOTTYPECCMNAMES[] = {"Social_communication", "Service_reminder",
-        "Content_information", "Other", "Custom", "Live_view", "Custom_service", "Emergency_information"};
-    constexpr static const char* CURRENT_DEVICE_TYPE = "current";
-    constexpr static const char* HEADSET_DEVICE_TYPE = "headset";
-    constexpr static const char* LITEWEARABLE_DEVICE_TYPE = "liteWearable";
-    constexpr static const char* WEARABLE_DEVICE_TYPE = "wearable";
-    constexpr static const char* PAD_DEVICE_TYPE = "tablet";
-    constexpr static const char* PC_DEVICE_TYPE = "2in1";
-    constexpr static const char* SLAVE_DEVICE_TYPE = "slave";
-    constexpr static const char* THIRD_PARTY_WEARABLE_DEVICE_TYPE = "thirdPartyWearable";
-    constexpr static const char* DEVICESTYPES[] = { "headset", "liteWearable", "wearable", "2in1", "tablet",
-        "thirdPartyWearable" };
-    constexpr static const char* ANS_VOIP = "ANS_VOIP";
-    constexpr static const char* PC_PAD_VOIP_FLAG = "110101";
-    constexpr static const char* HEALTH_BUNDLE_WHITE_LIST  = "HEALTH_BUNDLE_WHITE_LIST";
+    static const char* SLOTTYPECCMNAMES[8];
+    static const char* CURRENT_DEVICE_TYPE;
+    static const char* HEADSET_DEVICE_TYPE;
+    static const char* LITEWEARABLE_DEVICE_TYPE;
+    static const char* WEARABLE_DEVICE_TYPE;
+    static const char* PAD_DEVICE_TYPE;
+    static const char* PC_DEVICE_TYPE;
+    static const char* SLAVE_DEVICE_TYPE;
+    static const char* THIRD_PARTY_WEARABLE_DEVICE_TYPE;
+    static const char* DEVICESTYPES[6];
+    static const char* ANS_VOIP;
+    static const char* PC_PAD_VOIP_FLAG;
+    static const char* HEALTH_BUNDLE_WHITE_LIST;
 
     /**
      * Indicates priority notification type
@@ -542,87 +540,87 @@ public:
         /**
          * Indicates non-priority notification
          */
-        constexpr static const char* OTHER = "OTHER";
+        static const char* OTHER;
 
         /**
          * Indicates Priority contact
          */
-        constexpr static const char* PRIMARY_CONTACT = "PRIMARY_CONTACT";
+        static const char* PRIMARY_CONTACT;
 
         /**
          * Indicates Someone @me
          */
-        constexpr static const char* AT_ME = "AT_ME";
+        static const char* AT_ME;
 
         /**
          * Indicates Urgent message
          */
-        constexpr static const char* URGENT_MESSAGE = "URGENT_MESSAGE";
+        static const char* URGENT_MESSAGE;
 
         /**
          * Indicates Schedule reminder
          */
-        constexpr static const char* SCHEDULE_REMINDER = "SCHEDULE_REMINDER";
+        static const char* SCHEDULE_REMINDER;
 
         /**
          * Indicates Payment due
          */
-        constexpr static const char* PAYMENT_DUE = "PAYMENT_DUE";
+        static const char* PAYMENT_DUE;
 
         /**
          * Indicates Transaction alert
          */
-        constexpr static const char* TRANSACTION_ALERT = "TRANSACTION_ALERT";
+        static const char* TRANSACTION_ALERT;
 
         /**
          * Indicates Express progress
          */
-        constexpr static const char* EXPRESS_PROGRESS = "EXPRESS_PROGRESS";
+        static const char* EXPRESS_PROGRESS;
 
         /**
          * Indicates Miss call
          */
-        constexpr static const char* MISS_CALL = "MISS_CALL";
+        static const char* MISS_CALL;
 
         /**
          * Indicates Travel alert
          */
-        constexpr static const char* TRAVEL_ALERT = "TRAVEL_ALERT";
+        static const char* TRAVEL_ALERT;
 
         /**
          * Indicates Account alert
          */
-        constexpr static const char* ACCOUNT_ALERT = "ACCOUNT_ALERT";
+        static const char* ACCOUNT_ALERT;
 
         /**
          * Indicates Appointment reminder
          */
-        constexpr static const char* APPOINTMENT_REMINDER = "APPOINTMENT_REMINDER";
+        static const char* APPOINTMENT_REMINDER;
 
         /**
          * Indicates Traffic notice
          */
-        constexpr static const char* TRAFFIC_NOTICE = "TRAFFIC_NOTICE";
+        static const char* TRAFFIC_NOTICE;
 
         /**
          * Indicates Key progress
          */
-        constexpr static const char* KEY_PROGRESS = "KEY_PROGRESS";
+        static const char* KEY_PROGRESS;
 
         /**
          * Indicates Public event
          */
-        constexpr static const char* PUBLIC_EVENT = "PUBLIC_EVENT";
+        static const char* PUBLIC_EVENT;
 
         /**
          * Indicates Iot warning
          */
-        constexpr static const char* IOT_WARNING = "IOT_WARNING";
+        static const char* IOT_WARNING;
 
         /**
          * custom keyword
          */
-        constexpr static const char* CUSTOM_KEYWORD = "CUSTOM_KEYWORD";
+        static const char* CUSTOM_KEYWORD;
 
         /**
          * Use to verify the priority type

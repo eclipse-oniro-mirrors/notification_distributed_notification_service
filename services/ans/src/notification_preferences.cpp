@@ -41,6 +41,7 @@ namespace {
 const static std::string KEY_BUNDLE_LABEL = "label_ans_bundle_";
 constexpr static const char* KEY_PRIORITY_NOTIFICATION_SWITCH_FOR_BUNDLE = "priorityNotificationSwitchForBundle";
 constexpr static const char* KEY_PRIORITY_CONFIG_FOR_BUNDLE = "priorityConfigForBundle";
+const static std::string DEFAULT_TEMPLATE_PATH("/system/etc/notification_template/external.json");
 }
 ffrt::mutex NotificationPreferences::instanceMutex_;
 std::shared_ptr<NotificationPreferences> NotificationPreferences::instance_;

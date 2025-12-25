@@ -156,6 +156,8 @@ do {                                                                    \
         ANS_LOGD(fmt, ##__VA_ARGS__);                                   \
     }                                                                   \
 } while (0)
+
+std::string StringAnonymous(const std::string& data);
 }  // namespace Notification
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_ANS_STANDARD_INNERKITS_BASE_INCLUDE_ANS_LOG_HELPER_H

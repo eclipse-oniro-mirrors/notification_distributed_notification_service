@@ -26,8 +26,6 @@ namespace OHOS {
 namespace Notification {
 
 namespace {
-constexpr const int32_t MIN_DATA_LENGTH = 4;
-constexpr char const AnonymousString[] = "******";
 constexpr int32_t DEFAULT_REPLY_TIMEOUT = 3;
 }
 
@@ -73,18 +71,6 @@ struct DistributedDeviceConfig {
     std::unordered_set<std::string> collaborativeDeleteTypes;
     std::map<std::string, std::map<std::string, std::unordered_set<std::string>>> collaborativeDeleteTypesByDevice;
 };
-
-static std::string StringAnonymous(const std::string& data)
-{
-    std::string result;
-    if (data.length() <= MIN_DATA_LENGTH) {
-        result = data + AnonymousString + data;
-    } else {
-        result = data.substr(0, MIN_DATA_LENGTH) + AnonymousString +
-            data.substr(data.length() - MIN_DATA_LENGTH, MIN_DATA_LENGTH);
-    }
-    return result;
-}
 
 }  // namespace Notification
 }  // namespace OHOS

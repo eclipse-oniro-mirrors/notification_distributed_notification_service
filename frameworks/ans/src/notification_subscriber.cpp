@@ -52,9 +52,10 @@ bool NotificationSubscriber::SyncLiveViewVoip(
     }
     if (request->GetClassification() == NotificationConstant::ANS_VOIP &&
         request->GetSlotType() == NotificationConstant::LIVE_VIEW &&
-        (deviceType == CURRENT_DEVICE_TYPE || deviceType == NotificationConstant::LITEWEARABLE_DEVICE_TYPE ||
-        deviceType == NotificationConstant::HEADSET_DEVICE_TYPE || deviceType ==
-        NotificationConstant::WEARABLE_DEVICE_TYPE)) {
+        (deviceType == NotificationConstant::CURRENT_DEVICE_TYPE ||
+            deviceType == NotificationConstant::LITEWEARABLE_DEVICE_TYPE ||
+            deviceType == NotificationConstant::HEADSET_DEVICE_TYPE ||
+            deviceType ==NotificationConstant::WEARABLE_DEVICE_TYPE)) {
         return true;
     }
     return false;

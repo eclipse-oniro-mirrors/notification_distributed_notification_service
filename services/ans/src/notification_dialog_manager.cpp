@@ -33,13 +33,18 @@
 
 namespace OHOS::Notification {
 using DialogInfo = NotificationDialogManager::DialogInfo;
+namespace {
+constexpr const char* EVENT_NAME = "OnNotificationServiceDialogClicked";
+constexpr const char* NOTIFICATION_DIALOG_SERVICE_BUNDLE = "com.ohos.notificationdialog";
+constexpr const char* NOTIFICATION_DIALOG_SERVICE_ABILITY = "EnableNotificationDialog";
+}
 
 std::shared_ptr<NotificationDialogEventSubscriber> NotificationDialogEventSubscriber::Create(
     NotificationDialogManager& dialogManager)
 {
     ANS_LOGD("enter");
     EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(NotificationDialogEventSubscriber::EVENT_NAME);
+    matchingSkills.AddEvent(EVENT_NAME);
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     subscriberInfo.SetPublisherBundleName(NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_BUNDLE);
     return std::make_shared<NotificationDialogEventSubscriber>(dialogManager, subscriberInfo);

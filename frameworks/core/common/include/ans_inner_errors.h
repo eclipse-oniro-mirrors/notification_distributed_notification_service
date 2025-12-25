@@ -120,23 +120,10 @@ enum ReminderErrorCode : uint32_t {
     ERR_REMINDER_NOTIFICATION_NO_SHOWING,
 };
 
-static std::map<uint32_t, std::string> reminderErrCodeMsgMap = {
-    { ERR_REMINDER_PERMISSION_DENIED, "Permission denied." },
-    { ERR_REMINDER_INVALID_PARAM, "Parameter error." },
-    { ERR_REMINDER_NOTIFICATION_NOT_ENABLE, "Notification not enable." },
-    { ERR_REMINDER_NUMBER_OVERLOAD, "The number of reminders exceeds the limit." },
-    { ERR_REMINDER_NOT_EXIST, "The reminder not exist." },
-    { ERR_REMINDER_PACKAGE_NOT_EXIST, "The package name not exist." },
-    { ERR_REMINDER_CALLER_TOKEN_INVALID, "The caller token invalid." },
-    { ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED, "The data share permission denied." },
-    { ERR_REMINDER_PARAM_ERROR, "Parameter error." },
-    { ERR_REMINDER_NOTIFICATION_NO_SHOWING, "Notification not showing." }
-};
-
 // Notification error msg
-static inline std::string MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED = "Mandatory parameters are left unspecified.";
-static inline std::string INCORRECT_PARAMETER_TYPES                = "Incorrect parameter types.";
-static inline std::string PARAMETER_VERIFICATION_FAILED            = "Parameter verification failed.";
+extern std::string MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED;
+extern std::string INCORRECT_PARAMETER_TYPES;
+extern std::string PARAMETER_VERIFICATION_FAILED;
 
 // Common error code
 const uint32_t ERROR_PERMISSION_DENIED = 201;          // No permission to call the interface.
