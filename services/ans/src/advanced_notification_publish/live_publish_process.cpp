@@ -71,11 +71,11 @@ AnsStatus LivePublishProcess::PublishPreWork(const sptr<NotificationRequest> &re
     return AnsStatus();
 }
 
-ErrCode LivePublishProcess::PublishNotificationByApp(const sptr<NotificationRequest> &request)
+AnsStatus LivePublishProcess::PublishNotificationByApp(const sptr<NotificationRequest> &request)
 {
-    ErrCode result = CommonPublishCheck(request);
-    if (result != ERR_OK) {
-        return result;
+    AnsStatus ansStatus = CommonPublishCheck(request);
+    if (!ansStatus.Ok()) {
+        return ansStatus;
     }
 
     if (request->IsInProgress() &&
@@ -84,11 +84,11 @@ ErrCode LivePublishProcess::PublishNotificationByApp(const sptr<NotificationRequ
         request->SetInProgress(false);
     }
 
-    result = CommonPublishProcess(request);
-    if (result != ERR_OK) {
-        return result;
+    ansStatus = CommonPublishProcess(request);
+    if (!ansStatus.Ok()) {
+        return ansStatus;
     }
-    return ERR_OK;
+    return AnsStatus();
 }
 
 bool LivePublishProcess::CheckLocalLiveViewSubscribed(

@@ -26,9 +26,9 @@ public:
     BasePublishProcess() = default;
     ~BasePublishProcess() = default;
     virtual AnsStatus PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed);
-    virtual ErrCode PublishNotificationByApp(const sptr<NotificationRequest> &request) = 0;
-    ErrCode CommonPublishCheck(const sptr<NotificationRequest> &request);
-    ErrCode CommonPublishProcess(const sptr<NotificationRequest> &request);
+    virtual AnsStatus PublishNotificationByApp(const sptr<NotificationRequest> &request) = 0;
+    AnsStatus CommonPublishCheck(const sptr<NotificationRequest> &request);
+    AnsStatus CommonPublishProcess(const sptr<NotificationRequest> &request);
 };
 }  // namespace Notification
 }  // namespace OHOS

@@ -77,8 +77,8 @@ HWTEST_F(FlowControlServiceTest, FlowControl_100, Function | SmallTest | Level1)
 {
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->isNeedFlowCtrl = false;
-    auto result = FlowControlService::GetInstance().FlowControl(record, DEFAULT_UID, false);
-    ASSERT_EQ(result, ERR_OK);
+    auto ansStatus = FlowControlService::GetInstance().FlowControl(record, DEFAULT_UID, false);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 }
 
 /**
@@ -93,11 +93,11 @@ HWTEST_F(FlowControlServiceTest, FlowControl_200, Function | SmallTest | Level1)
     record->isThirdparty = false;
     int32_t uid = 1000;
     int32_t index = 1;
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
     uint32_t totalCreate = 0;
     while (totalCreate + MAX_CREATE_NUM_PERSECOND_PERAPP < MAX_CREATE_NUM_PERSECOND) {
         for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
-            result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+            ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
         }
         totalCreate += MAX_CREATE_NUM_PERSECOND_PERAPP;
         index++;
@@ -105,12 +105,12 @@ HWTEST_F(FlowControlServiceTest, FlowControl_200, Function | SmallTest | Level1)
 
     int gap = MAX_CREATE_NUM_PERSECOND - totalCreate;
     for (int i = 0; i < gap; i++) {
-        result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
     }
-    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
-    result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
-    ASSERT_EQ(result, ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -126,11 +126,11 @@ HWTEST_F(FlowControlServiceTest, FlowControl_300, Function | SmallTest | Level1)
     record->isThirdparty = false;
     int32_t uid = 1000;
     int32_t index = 1;
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
     uint32_t totalCreate = 0;
     while (totalCreate + MAX_UPDATE_NUM_PERSECOND_PERAPP < MAX_UPDATE_NUM_PERSECOND) {
         for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
-            result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+            ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
         }
         totalCreate += MAX_UPDATE_NUM_PERSECOND_PERAPP;
         index++;
@@ -138,12 +138,12 @@ HWTEST_F(FlowControlServiceTest, FlowControl_300, Function | SmallTest | Level1)
 
     int gap = MAX_UPDATE_NUM_PERSECOND - totalCreate;
     for (int i = 0; i < gap; i++) {
-        result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
     }
-    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
-    result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
-    ASSERT_EQ(result, ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -159,11 +159,11 @@ HWTEST_F(FlowControlServiceTest, FlowControl_400, Function | SmallTest | Level1)
     record->isThirdparty = false;
     int32_t uid = 1000;
     int32_t index = 1;
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
     uint32_t totalCreate = 0;
     while (totalCreate + MAX_CREATE_NUM_PERSECOND_PERAPP < MAX_CREATE_NUM_PERSECOND) {
         for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
-            result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+            ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
         }
         totalCreate += MAX_CREATE_NUM_PERSECOND_PERAPP;
         index++;
@@ -171,12 +171,12 @@ HWTEST_F(FlowControlServiceTest, FlowControl_400, Function | SmallTest | Level1)
 
     int gap = MAX_CREATE_NUM_PERSECOND - totalCreate;
     for (int i = 0; i < gap; i++) {
-        result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
     }
-    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
-    result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
-    ASSERT_EQ(result, ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -192,11 +192,11 @@ HWTEST_F(FlowControlServiceTest, FlowControl_500, Function | SmallTest | Level1)
     record->isThirdparty = false;
     int32_t uid = 1000;
     int32_t index = 1;
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
     uint32_t totalCreate = 0;
     while (totalCreate + MAX_UPDATE_NUM_PERSECOND_PERAPP < MAX_UPDATE_NUM_PERSECOND) {
         for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
-            result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+            ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
         }
         totalCreate += MAX_UPDATE_NUM_PERSECOND_PERAPP;
         index++;
@@ -204,12 +204,12 @@ HWTEST_F(FlowControlServiceTest, FlowControl_500, Function | SmallTest | Level1)
 
     int gap = MAX_UPDATE_NUM_PERSECOND - totalCreate;
     for (int i = 0; i < gap; i++) {
-        result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
     }
-    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
-    result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
-    ASSERT_EQ(result, ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -225,11 +225,11 @@ HWTEST_F(FlowControlServiceTest, FlowControl_600, Function | SmallTest | Level1)
     record->isThirdparty = true;
     int32_t uid = 1000;
     int32_t index = 1;
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
     uint32_t totalCreate = 0;
     while (totalCreate + MAX_CREATE_NUM_PERSECOND_PERAPP < MAX_CREATE_NUM_PERSECOND) {
         for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
-            result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+            ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
         }
         totalCreate += MAX_CREATE_NUM_PERSECOND_PERAPP;
         index++;
@@ -237,12 +237,12 @@ HWTEST_F(FlowControlServiceTest, FlowControl_600, Function | SmallTest | Level1)
 
     int gap = MAX_CREATE_NUM_PERSECOND - totalCreate;
     for (int i = 0; i < gap; i++) {
-        result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
     }
-    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
-    result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
-    ASSERT_EQ(result, ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -258,11 +258,11 @@ HWTEST_F(FlowControlServiceTest, FlowControl_700, Function | SmallTest | Level1)
     record->isThirdparty = true;
     int32_t uid = 1000;
     int32_t index = 1;
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
     uint32_t totalCreate = 0;
     while (totalCreate + MAX_UPDATE_NUM_PERSECOND_PERAPP < MAX_UPDATE_NUM_PERSECOND) {
         for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
-            result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+            ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
         }
         totalCreate += MAX_UPDATE_NUM_PERSECOND_PERAPP;
         index++;
@@ -270,12 +270,12 @@ HWTEST_F(FlowControlServiceTest, FlowControl_700, Function | SmallTest | Level1)
 
     int gap = MAX_UPDATE_NUM_PERSECOND - totalCreate;
     for (int i = 0; i < gap; i++) {
-        result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
     }
-    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
-    result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
-    ASSERT_EQ(result, ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -291,11 +291,11 @@ HWTEST_F(FlowControlServiceTest, FlowControl_800, Function | SmallTest | Level1)
     record->isThirdparty = true;
     int32_t uid = 1000;
     int32_t index = 1;
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
     uint32_t totalCreate = 0;
     while (totalCreate + MAX_CREATE_NUM_PERSECOND_PERAPP < MAX_CREATE_NUM_PERSECOND) {
         for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
-            result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+            ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
         }
         totalCreate += MAX_CREATE_NUM_PERSECOND_PERAPP;
         index++;
@@ -303,12 +303,12 @@ HWTEST_F(FlowControlServiceTest, FlowControl_800, Function | SmallTest | Level1)
 
     int gap = MAX_CREATE_NUM_PERSECOND - totalCreate;
     for (int i = 0; i < gap; i++) {
-        result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
     }
-    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
-    result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
-    ASSERT_EQ(result, ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -324,11 +324,11 @@ HWTEST_F(FlowControlServiceTest, FlowControl_900, Function | SmallTest | Level1)
     record->isThirdparty = true;
     int32_t uid = 1000;
     int32_t index = 1;
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
     uint32_t totalCreate = 0;
     while (totalCreate + MAX_UPDATE_NUM_PERSECOND_PERAPP < MAX_UPDATE_NUM_PERSECOND) {
         for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
-            result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+            ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
         }
         totalCreate += MAX_UPDATE_NUM_PERSECOND_PERAPP;
         index++;
@@ -336,12 +336,12 @@ HWTEST_F(FlowControlServiceTest, FlowControl_900, Function | SmallTest | Level1)
 
     int gap = MAX_UPDATE_NUM_PERSECOND - totalCreate;
     for (int i = 0; i < gap; i++) {
-        result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
     }
-    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
-    result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
-    ASSERT_EQ(result, ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -356,15 +356,15 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1000, Function | SmallTest | Level1
     auto record = GetCommonNotificationRecord();
     record->isThirdparty = false;
     int32_t uid = 1000;
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
 
     for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
-        result = FlowControlService::GetInstance().FlowControl(record, uid, false);
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, false);
     }
-    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
-    result = FlowControlService::GetInstance().FlowControl(record, uid, false);
-    ASSERT_EQ(result, ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, false);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -379,15 +379,15 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1100, Function | SmallTest | Level1
     auto record = GetCommonNotificationRecord();
     record->isThirdparty = false;
     int32_t uid = 1000;
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
 
     for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
-        result = FlowControlService::GetInstance().FlowControl(record, uid, true);
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, true);
     }
-    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
-    result = FlowControlService::GetInstance().FlowControl(record, uid, true);
-    ASSERT_EQ(result, ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, true);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -402,15 +402,15 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1200, Function | SmallTest | Level1
     auto record = GetLiveviewNotificationRecord();
     record->isThirdparty = false;
     int32_t uid = 1000;
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
 
     for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
-        result = FlowControlService::GetInstance().FlowControl(record, uid, false);
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, false);
     }
-    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
-    result = FlowControlService::GetInstance().FlowControl(record, uid, false);
-    ASSERT_EQ(result, ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, false);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -425,15 +425,15 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1300, Function | SmallTest | Level1
     auto record = GetLiveviewNotificationRecord();
     record->isThirdparty = false;
     int32_t uid = 1000;
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
 
     for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
-        result = FlowControlService::GetInstance().FlowControl(record, uid, true);
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, true);
     }
-    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
-    result = FlowControlService::GetInstance().FlowControl(record, uid, true);
-    ASSERT_EQ(result, ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, true);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -448,15 +448,15 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1400, Function | SmallTest | Level1
     auto record = GetCommonNotificationRecord();
     record->isThirdparty = true;
     int32_t uid = 1000;
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
 
     for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
-        result = FlowControlService::GetInstance().FlowControl(record, uid, false);
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, false);
     }
-    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
-    result = FlowControlService::GetInstance().FlowControl(record, uid, false);
-    ASSERT_EQ(result, ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, false);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -471,15 +471,15 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1500, Function | SmallTest | Level1
     auto record = GetCommonNotificationRecord();
     record->isThirdparty = true;
     int32_t uid = 1000;
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
 
     for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
-        result = FlowControlService::GetInstance().FlowControl(record, uid, true);
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, true);
     }
-    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
-    result = FlowControlService::GetInstance().FlowControl(record, uid, true);
-    ASSERT_EQ(result, ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, true);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -494,15 +494,15 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1600, Function | SmallTest | Level1
     auto record = GetLiveviewNotificationRecord();
     record->isThirdparty = true;
     int32_t uid = 1000;
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
 
     for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
-        result = FlowControlService::GetInstance().FlowControl(record, uid, false);
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, false);
     }
-    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
-    result = FlowControlService::GetInstance().FlowControl(record, uid, false);
-    ASSERT_EQ(result, ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, false);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -517,15 +517,15 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1700, Function | SmallTest | Level1
     auto record = GetLiveviewNotificationRecord();
     record->isThirdparty = true;
     int32_t uid = 1000;
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
 
     for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
-        result = FlowControlService::GetInstance().FlowControl(record, uid, true);
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, true);
     }
-    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
-    result = FlowControlService::GetInstance().FlowControl(record, uid, true);
-    ASSERT_EQ(result, ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, true);
+    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 }  // namespace Notification

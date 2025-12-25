@@ -37,11 +37,11 @@ std::shared_ptr<CommonNotificationPublishProcess> CommonNotificationPublishProce
     return instance_;
 }
 
-ErrCode CommonNotificationPublishProcess::PublishNotificationByApp(const sptr<NotificationRequest> &request)
+AnsStatus CommonNotificationPublishProcess::PublishNotificationByApp(const sptr<NotificationRequest> &request)
 {
-    ErrCode result = CommonPublishCheck(request);
-    if (result != ERR_OK) {
-        return result;
+    AnsStatus ansStatus = CommonPublishCheck(request);
+    if (!ansStatus.Ok()) {
+        return ansStatus;
     }
 
     if (request->IsInProgress() &&
@@ -49,11 +49,11 @@ ErrCode CommonNotificationPublishProcess::PublishNotificationByApp(const sptr<No
         request->SetInProgress(false);
     }
 
-    result = CommonPublishProcess(request);
-    if (result != ERR_OK) {
-        return result;
+    ansStatus = CommonPublishProcess(request);
+    if (!ansStatus.Ok()) {
+        return ansStatus;
     }
-    return ERR_OK;
+    return AnsStatus();
 }
 }  // namespace Notification
 }  // namespace OHOS

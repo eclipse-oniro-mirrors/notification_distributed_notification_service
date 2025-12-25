@@ -453,6 +453,9 @@ void NotificationAnalyticsUtil::ReportPublishFailedEvent(const sptr<Notification
     if (request == nullptr) {
         return;
     }
+    if (message.sceneId_ == -1 || message.branchId_ == -1) {
+        return;
+    }
     MakeRequestBundle(request);
     CommonNotificationEvent(request, PUBLISH_ERROR_EVENT_CODE, message);
     ReportLiveViewNumber(request, PUBLISH_ERROR_EVENT_CODE);
@@ -1061,6 +1064,9 @@ std::string NotificationAnalyticsUtil::BuildExtraInfoWithReq(const HaMetaMessage
     reason["branch"] = message.branchId_;
     reason["innerErr"] = message.errorCode_;
     reason["detail"] = message.message_;
+    if (!message.path_.empty()) {
+        reason["path"] = message.path_;
+    }
 
     auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();

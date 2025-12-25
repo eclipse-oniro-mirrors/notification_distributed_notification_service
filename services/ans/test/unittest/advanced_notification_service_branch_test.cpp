@@ -167,7 +167,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_222000, Function | SmallTest | Level1)
     MockIsSystemApp(false);
     MockIsVerfyPermisson(false);
 
-    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(req), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(req).GetErrCode(), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -184,7 +184,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_223000, Function | SmallTest | Level1)
     req->SetIsAgentNotification(true);
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
-    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(req), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(req).GetErrCode(), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**

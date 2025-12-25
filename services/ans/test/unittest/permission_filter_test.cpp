@@ -97,7 +97,7 @@ HWTEST_F(PermissionFilterTest, PermissionFilterTest_00200, Function | SmallTest 
     record->notification = new Notification(record->request);
     record->slot = slot;
 
-    ASSERT_EQ((int)permissionFilter.OnPublish(record), (int)ERR_ANS_NOT_ALLOWED);
+    ASSERT_EQ((int)permissionFilter.OnPublish(record).GetErrCode(), (int)ERR_ANS_NOT_ALLOWED);
 }
 }  // namespace Notification
 }  // namespace OHOS

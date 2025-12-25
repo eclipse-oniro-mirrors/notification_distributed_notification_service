@@ -981,7 +981,7 @@ HWTEST_F(AnsSlotServiceTest, AssignValidNotificationSlot_00001, Function | Small
 
     uint32_t flag;
     auto ret = advancedNotificationService_->AssignValidNotificationSlot(record, bundleOption);
-    ASSERT_EQ(ret, ERR_OK);
+    ASSERT_EQ(ret.GetErrCode(), ERR_OK);
 }
 
 /**
