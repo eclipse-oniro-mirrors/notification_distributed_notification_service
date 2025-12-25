@@ -115,8 +115,6 @@ std::string Common::GetErrCodeMsg(const int32_t errorCode, const std::string& ex
             return "The data share permission denied.";
         case ERR_REMINDER_PARAM_ERROR:
             return "Parameter error." + extraInfo;
-        case ERR_REMINDER_NOTIFICATION_NO_SHOWING:
-            return "Notification not showing.";
         default:
             return "Inner error";
     }

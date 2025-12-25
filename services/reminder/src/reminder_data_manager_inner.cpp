@@ -366,7 +366,7 @@ ErrCode ReminderDataManager::CancelReminderOnDisplay(const int32_t reminderId, c
         }
     }
     if (target == nullptr) {
-        return ERR_REMINDER_NOTIFICATION_NO_SHOWING;
+        return ERR_REMINDER_NOT_EXIST;
     }
     std::lock_guard<std::mutex> locker(cancelMutex_);
     if (activeReminderId_ == reminderId) {
