@@ -258,6 +258,8 @@ public:
         std::map<sptr<NotificationBundleOption>, bool> &bundleEnable));
     MOCK_METHOD1(GetAllSubscriptionBundles, ErrCode(std::vector<sptr<NotificationBundleOption>>& bundles));
     MOCK_METHOD0(CanOpenSubscribeSettings, ErrCode());
+    MOCK_METHOD2(IsDoNotDisturbEnabled, ErrCode(int32_t, bool&));
+    MOCK_METHOD2(IsNotifyAllowedInDoNotDisturb, ErrCode(int32_t, bool&));
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     MOCK_METHOD1(RegisterSwingCallback, ErrCode(const sptr<IRemoteObject>&));
 #endif

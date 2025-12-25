@@ -3561,5 +3561,25 @@ ErrCode AnsNotification::UnRegisterBadgeQueryCallback(const std::shared_ptr<IBad
     }
     return proxy->UnRegisterBadgeQueryCallback();
 }
+
+ErrCode AnsNotification::IsDoNotDisturbEnabled(int32_t userId, bool& isEnabled)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->IsDoNotDisturbEnabled(userId, isEnabled);
+}
+
+ErrCode AnsNotification::IsNotifyAllowedInDoNotDisturb(int32_t userId, bool& isAllowed)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->IsNotifyAllowedInDoNotDisturb(userId, isAllowed);
+}
 }  // namespace Notification
 }  // namespace OHOS

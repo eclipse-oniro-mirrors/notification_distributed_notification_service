@@ -1019,5 +1019,15 @@ ErrCode NotificationHelper::UnRegisterBadgeQueryCallback(const std::shared_ptr<I
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->UnRegisterBadgeQueryCallback(badgeQueryCallback);
 }
+
+ErrCode NotificationHelper::IsDoNotDisturbEnabled(int32_t userId, bool& isEnabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsDoNotDisturbEnabled(userId, isEnabled);
+}
+
+ErrCode NotificationHelper::IsNotifyAllowedInDoNotDisturb(int32_t userId, bool& isAllowed)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsNotifyAllowedInDoNotDisturb(userId, isAllowed);
+}
 }  // namespace Notification
 }  // namespace OHOS

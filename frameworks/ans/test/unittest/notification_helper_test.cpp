@@ -1629,5 +1629,33 @@ HWTEST_F(NotificationHelperTest, PublishDelayedNotification_0100, Function | Sma
     ErrCode ret = notificationHelper.PublishDelayedNotification(triggerKey, userId);
     EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
+
+/**
+ * @tc.name: IsDoNotDisturbEnabled_0100
+ * @tc.desc: Test IsDoNotDisturbEnabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsDoNotDisturbEnabled_0100, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    int32_t uid = 100;
+    bool isEnabled = true;
+    ErrCode ret = notificationHelper.IsDoNotDisturbEnabled(uid, isEnabled);
+    EXPECT_EQ(ret, ERROR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: IsNotifyAllowedInDoNotDisturb_0100
+ * @tc.desc: Test IsNotifyAllowedInDoNotDisturb.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsNotifyAllowedInDoNotDisturb_0100, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    int32_t uid = 100;
+    bool isAllowed = true;
+    ErrCode ret = notificationHelper.IsNotifyAllowedInDoNotDisturb(uid, isAllowed);
+    EXPECT_EQ(ret, ERROR_PERMISSION_DENIED);
+}
 }
 }

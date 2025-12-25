@@ -70,6 +70,8 @@ ohos_source_set("ans_service_sources") {
   sources = [
     "src/access_token_helper.cpp",
     "src/advanced_aggregation_data_roaming_observer.cpp",
+    "src/advanced_notdisturb_enabled_observer.cpp",
+    "src/advanced_notdisturb_white_list_observer.cpp",
     "src/advanced_datashare_helper.cpp",
     "src/advanced_datashare_helper_data_observer.cpp",
     "src/advanced_datashare_helper_ext.cpp",

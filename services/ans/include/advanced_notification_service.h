@@ -797,6 +797,24 @@ public:
     ErrCode GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> &date) override;
 
     /**
+     * @brief Is Do Not Disturb currently enabled
+     *
+     * @param userId The userid of the target device.
+     * @param enabled True if Do Not Disturb currently enabled
+     * @return Returns get result.
+     */
+    ErrCode IsDoNotDisturbEnabled(int32_t userId, bool &isDoNotDisturbEnabled) override;
+
+    /**
+     * @brief Check if the current app does not allow interruptions
+     *
+     * @param userId The userid of the target device.
+     * @param enabled True if current app does not allow interruptions
+     * @return Returns get result.
+     */
+    ErrCode IsNotifyAllowedInDoNotDisturb(int32_t userId, bool &isAllowed) override;
+
+    /**
      * @brief Add Do Not Disturb profiles.
      *
      * @param profiles Indicates the list of NotificationDoNotDisturbProfile objects to add.
@@ -1836,6 +1854,10 @@ public:
     ErrCode SetPriorityEnabledByBundleInner(
         const sptr<NotificationBundleOption> &bundleOption, const int32_t enableStatusInt);
     ErrCode SetPriorityEnabledInner(const bool enabled);
+    ErrCode SetNotDisturbEnableState(int32_t userId, bool& isDoNotDisturbEnabled);
+    ErrCode SetNotDisturbWhiteList(int32_t userId);
+    void RefreshNotDisturbEnableState();
+    void RefreshNotDisturbWhiteList();
 
 private:
     struct RecentInfo {
@@ -2283,6 +2305,7 @@ private:
     void ProcessBluetoothStateChanged(const int status);
     void ProcessBluetoothPairedStatusChange(int state);
     void CheckBleAndHfpStateChange(bool filterHfpOnly);
+    void RegisterNotDisturbEnableListener();
     ErrCode GetUri(sptr<NotificationRequest> &request);
     ErrCode GetAllNotificationsBySlotTypeInner(std::vector<sptr<Notification>> &notifications,
         int32_t slotTypeInt, const int32_t userId);
@@ -2346,6 +2369,10 @@ private:
     std::shared_ptr<NotificationLoadUtils> notificationExtensionHandler_;
     bool supportHfp_ = false;
     std::vector<sptr<NotificationBundleOption>> cacheNotificationExtensionBundles_;
+    ffrt::mutex notDisturbEnableStateMutex_;
+    int32_t notDisturbEnableState_ = -1;
+    std::string soundWhiteListString_ = "";
+    std::atomic<bool> hasRegisterNotDisturbEnableListener_ = false;
 };
 
 /**
