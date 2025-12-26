@@ -765,6 +765,11 @@ ErrCode NotificationHelper::IsPriorityEnabledByBundle(
     return DelayedSingleton<AnsNotification>::GetInstance()->IsPriorityEnabledByBundle(bundleOption, enableStatus);
 }
 
+ErrCode NotificationHelper::TriggerUpdatePriorityType(const NotificationRequest &request)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->TriggerUpdatePriorityType(request);
+}
+
 ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
     const std::string deviceId)
 {
@@ -1018,6 +1023,16 @@ ErrCode NotificationHelper::RegisterBadgeQueryCallback(const std::shared_ptr<IBa
 ErrCode NotificationHelper::UnRegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->UnRegisterBadgeQueryCallback(badgeQueryCallback);
+}
+
+ErrCode NotificationHelper::IsDoNotDisturbEnabled(int32_t userId, bool& isEnabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsDoNotDisturbEnabled(userId, isEnabled);
+}
+
+ErrCode NotificationHelper::IsNotifyAllowedInDoNotDisturb(int32_t userId, bool& isAllowed)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsNotifyAllowedInDoNotDisturb(userId, isAllowed);
 }
 }  // namespace Notification
 }  // namespace OHOS

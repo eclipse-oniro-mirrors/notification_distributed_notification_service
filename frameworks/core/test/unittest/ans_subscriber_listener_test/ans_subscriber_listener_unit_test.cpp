@@ -659,6 +659,45 @@ HWTEST_F(SubscriberListenerTest, OnEnabledPriorityByBundleChanged_0200, Function
 }
 
 /**
+ * @tc.name      : OnSystemUpdate_0100
+ * @tc.desc      : Test OnSystemUpdate null subscriber
+ */
+HWTEST_F(SubscriberListenerTest, OnSystemUpdate_0100, Function | MediumTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest(1);
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(nullptr);
+    ErrCode result = listener->OnSystemUpdate(notification);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name      : OnSystemUpdate_0200
+ * @tc.desc      : Test OnSystemUpdate success
+ */
+HWTEST_F(SubscriberListenerTest, OnSystemUpdate_0200, Function | MediumTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest(1);
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    ErrCode result = listener->OnSystemUpdate(notification);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name      : OnSystemUpdate_0300
+ * @tc.desc      : Test OnSystemUpdate null notification
+ */
+HWTEST_F(SubscriberListenerTest, OnSystemUpdate_0300, Function | MediumTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    ErrCode result = listener->OnSystemUpdate(nullptr);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
  * @tc.name      : OnApplicationInfoNeedChanged_0100
  * @tc.desc      : Test OnApplicationInfoNeedChanged invalid data
  */

@@ -38,18 +38,15 @@ void RemoveExpiredTimestamp(std::list<TimePoint> &list, const TimePoint &now)
     }
 }
 
-ErrCode GlobalFlowController::FlowControl(const std::shared_ptr<NotificationRecord> record, const TimePoint &now)
+AnsStatus GlobalFlowController::FlowControl(const std::shared_ptr<NotificationRecord> record, const TimePoint &now)
 {
     std::lock_guard<ffrt::mutex> lock(globalFlowControllerMutex_);
     RemoveExpiredTimestamp(globalFlowControllerList_, now);
     if (globalFlowControllerList_.size() >= threshold_) {
         ANS_LOGE("%{public}s", errMsg_.msg.c_str());
-        HaMetaMessage message = HaMetaMessage(errMsg_.sceneId, errMsg_.EventBranchId)
-            .ErrorCode(errMsg_.errCode).Message(errMsg_.msg);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-        return errMsg_.errCode;
+        return AnsStatus(errMsg_.errCode, errMsg_.msg, errMsg_.sceneId, errMsg_.EventBranchId);
     }
-    return ERR_OK;
+    return AnsStatus();
 }
 
 void GlobalFlowController::RecordTimestamp(const TimePoint &now)
@@ -58,23 +55,20 @@ void GlobalFlowController::RecordTimestamp(const TimePoint &now)
     globalFlowControllerList_.push_back(now);
 }
 
-ErrCode CallerFlowController::FlowControl(
+AnsStatus CallerFlowController::FlowControl(
     const std::shared_ptr<NotificationRecord> record, const int32_t callingUid, const TimePoint &now)
 {
     std::lock_guard<ffrt::mutex> lock(callerFlowControllerMutex_);
     auto callerFlowControlIter = callerFlowControllerMapper_.find(callingUid);
     if (callerFlowControlIter == callerFlowControllerMapper_.end()) {
-        return ERR_OK;
+        return AnsStatus();
     }
     RemoveExpiredTimestamp(*(callerFlowControlIter->second), now);
     if (callerFlowControlIter->second->size() >= threshold_) {
         ANS_LOGE("%{public}s", errMsg_.msg.c_str());
-        HaMetaMessage message = HaMetaMessage(errMsg_.sceneId, errMsg_.EventBranchId)
-            .ErrorCode(errMsg_.errCode).Message(errMsg_.msg);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-        return errMsg_.errCode;
+        return AnsStatus(errMsg_.errCode, errMsg_.msg, errMsg_.sceneId, errMsg_.EventBranchId);
     }
-    return ERR_OK;
+    return AnsStatus();
 }
 
 void CallerFlowController::RecordTimestamp(
@@ -299,26 +293,26 @@ void FlowControlService::InitCallerFlowControl()
     }
 }
 
-ErrCode FlowControlService::FlowControl(
+AnsStatus FlowControlService::FlowControl(
     const std::shared_ptr<NotificationRecord> record, const int32_t callingUid, bool isNotificationExists)
 {
     if (record->isNeedFlowCtrl == false) {
-        return ERR_OK;
+        return AnsStatus();
     }
     TimePoint now = std::chrono::system_clock::now();
 
     auto sceneTypePair = GetSceneTypePair(record, isNotificationExists);
-    ErrCode result = ERR_OK;
+    AnsStatus ansStatus;
     auto globalFlowController = globalFlowControllerMapper_[sceneTypePair.first];
-    result = globalFlowController->FlowControl(record, now);
-    if (result != ERR_OK) {
-        return result;
+    ansStatus = globalFlowController->FlowControl(record, now);
+    if (!ansStatus.Ok()) {
+        return ansStatus;
     }
 
     auto callerFlowController = callerFlowControllerMapper_[sceneTypePair.second];
-    result = callerFlowController->FlowControl(record, callingUid, now);
-    if (result != ERR_OK) {
-        return result;
+    ansStatus = callerFlowController->FlowControl(record, callingUid, now);
+    if (!ansStatus.Ok()) {
+        return ansStatus;
     }
 
     globalFlowController->RecordTimestamp(now);
@@ -329,7 +323,7 @@ ErrCode FlowControlService::FlowControl(
     for (auto it = begin; it != end; ++it) {
         it->second->RemoveExpired(now);
     }
-    return result;
+    return ansStatus;
 }
 
 std::pair<FlowControlSceneType, FlowControlSceneType> FlowControlService::GetSceneTypePair(

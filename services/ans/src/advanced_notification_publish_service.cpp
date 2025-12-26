@@ -739,7 +739,7 @@ void AdvancedNotificationService::ClearSlotTypeData(const sptr<NotificationReque
         NotificationConstant::SlotType::LIVE_VIEW, sourceType);
 }
 
-ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<NotificationRequest> &request)
+AnsStatus AdvancedNotificationService::PublishNotificationBySa(const sptr<NotificationRequest> &request)
 {
     ANS_LOGD("called");
 
@@ -754,7 +754,6 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     }
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_1);
     int32_t uid = request->GetCreatorUid();
     if (request->GetOwnerUid() != DEFAULT_UID) {
         std::shared_ptr<NotificationBundleOption> agentBundle =
@@ -775,12 +774,11 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         directAgency = true;
     }
     if (uid <= 0) {
-        message.ErrorCode(ERR_ANS_INVALID_UID).Message("createUid failed" + std::to_string(uid), true);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ERR_ANS_INVALID_UID;
+        return AnsStatus::InvalidUid("createUid failed" + std::to_string(uid),
+            EventSceneId::SCENE_4, EventBranchId::BRANCH_1);
     }
     std::string bundle = "";
-    ErrCode result = PrePublishNotificationBySa(request, uid, bundle);
+    AnsStatus ansStatus = PrePublishNotificationBySa(request, uid, bundle);
     if (request->GetCreatorUid() == RSS_PID && request->IsSystemLiveView() &&
         (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
         request->GetContent()->GetNotificationContent())->GetType() != TYPE_CODE_DOWNLOAD)) {
@@ -789,8 +787,8 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         request->SetUnremovable(true);
         request->SetTapDismissed(false);
     }
-    if (result != ERR_OK) {
-        return result;
+    if (!ansStatus.Ok()) {
+        return ansStatus;
     }
 
     // SA not support sound
@@ -806,9 +804,8 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 #ifdef ENABLE_ANS_ADDITIONAL_CONTROL
         int32_t ctrlResult = EXTENTION_WRAPPER->LocalControl(request);
         if (ctrlResult != ERR_OK) {
-            message.ErrorCode(ctrlResult);
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-            return ctrlResult;
+            return AnsStatus(ctrlResult, "LocalControl fail.",
+                EventSceneId::SCENE_4, EventBranchId::BRANCH_1);
         }
 #endif
         record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
@@ -816,7 +813,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     if (record->bundleOption == nullptr || bundleOption == nullptr) {
         ANS_LOGE("Failed to create bundleOption");
-        return ERR_ANS_NO_MEMORY;
+        return AnsStatus(ERR_ANS_NO_MEMORY, "Failed to create bundleOption");
     }
     record->bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
     int32_t ipcUid = IPCSkeleton::GetCallingUid();
@@ -830,12 +827,12 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     record->notification = new (std::nothrow) Notification(request);
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification");
-        return ERR_ANS_NO_MEMORY;
+        return AnsStatus(ERR_ANS_NO_MEMORY, "Failed to create notification");
     }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
+        return AnsStatus(ERR_ANS_INVALID_PARAM, "Serial queue is invalid.");
     }
 
     SetRequestBySlotType(record->request, bundleOption);
@@ -847,31 +844,32 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER
         if (!bundle.empty() && IsDisableNotification(bundle, record->notification->GetRecvUserId())) {
             ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
-            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            ansStatus = AnsStatus(ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION, "bundle in Disable Notification list");
             return;
         }
 #else
         if (!bundle.empty() && IsDisableNotification(bundle)) {
             ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
-            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            ansStatus = AnsStatus(ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION, "bundle in Disable Notification list");
             return;
         }
 #endif
         if (IsDisableNotificationForSaByKiosk(bundle, directAgency)) {
             ANS_LOGE("bundle not in kiosk trust list, bundleName=%{public}s", bundle.c_str());
-            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            ansStatus = AnsStatus(ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION, "bundle not in kiosk trust list");
             return;
         }
         if (!bundleOption->GetBundleName().empty() &&
             !(request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW && directAgency)) {
-            ErrCode ret = AssignValidNotificationSlot(record, bundleOption);
-            if (ret != ERR_OK) {
+            AnsStatus status = AssignValidNotificationSlot(record, bundleOption);
+            if (!status.Ok()) {
                 ANS_LOGE("PublishNotificationBySA Can not assign valid slot!");
+                NotificationAnalyticsUtil::ReportPublishFailedEvent(request, status.BuildMessage(true));
             }
             if (!directAgency) {
-                result = Filter(record);
-                if (result != ERR_OK) {
-                    ANS_LOGE("PublishNotificationBySA Reject by filters: %{public}d", result);
+                ansStatus = Filter(record);
+                if (!ansStatus.Ok()) {
+                    ANS_LOGE("PublishNotificationBySA Reject by filters: %{public}d", ansStatus.GetErrCode());
                     return;
                 }
             }
@@ -885,7 +883,8 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid) &&
         (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
         record->request->GetContent()->GetNotificationContent())->GetType() == TYPE_CODE_DOWNLOAD)) {
-            result = SaPublishSystemLiveViewAsBundle(record);
+            ErrCode result = SaPublishSystemLiveViewAsBundle(record);
+            ansStatus = AnsStatus(result, "SaPublishSystemLiveViewAsBundle");
             if (result == ERR_OK) {
                 SendLiveViewUploadHiSysEvent(record, UploadStatus::CREATE);
             }
@@ -893,8 +892,8 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             return;
         }
         bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
-        result = FlowControlService::GetInstance().FlowControl(record, ipcUid, isNotificationExists);
-        if (result != ERR_OK) {
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, ipcUid, isNotificationExists);
+        if (!ansStatus.Ok()) {
             return;
         }
         if (AssignToNotificationList(record) != ERR_OK) {
@@ -911,10 +910,10 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         }
     });
     notificationSvrQueue_->wait(handler);
-    if (result != ERR_OK) {
-        return result;
+    if (!ansStatus.Ok()) {
+        return ansStatus;
     }
-    return ERR_OK;
+    return AnsStatus();
 }
 
 ErrCode AdvancedNotificationService::DuplicateMsgControl(const sptr<NotificationRequest> &request)
@@ -1324,17 +1323,18 @@ void AdvancedNotificationService::SetAndPublishSubscriberExistFlag(const std::st
 
     bool headsetExistFlag = false;
     bool wearableExistFlag = false;
-    if (deviceType == DEVICE_TYPE_HEADSET) {
+    if (deviceType == NotificationConstant::HEADSET_DEVICE_TYPE) {
         headsetExistFlag = existFlag;
-        result =
-            NotificationPreferences::GetInstance()->GetSubscriberExistFlag(DEVICE_TYPE_WEARABLE, wearableExistFlag);
+        result = NotificationPreferences::GetInstance()->GetSubscriberExistFlag(
+            NotificationConstant::WEARABLE_DEVICE_TYPE, wearableExistFlag);
         if (result != ERR_OK) {
             ANS_LOGE("GetSubscriberExistFlag failed");
             return;
         }
-    } else if (deviceType == DEVICE_TYPE_WEARABLE) {
+    } else if (deviceType == NotificationConstant::WEARABLE_DEVICE_TYPE) {
         wearableExistFlag = existFlag;
-        result = NotificationPreferences::GetInstance()->GetSubscriberExistFlag(DEVICE_TYPE_HEADSET, headsetExistFlag);
+        result = NotificationPreferences::GetInstance()->GetSubscriberExistFlag(
+            NotificationConstant::HEADSET_DEVICE_TYPE, headsetExistFlag);
         if (result != ERR_OK) {
             ANS_LOGE("GetSubscriberExistFlag failed");
             return;

@@ -36,10 +36,6 @@ public:
     ~AncoRestoreStartEventSubscriber() override;
     void OnReceiveEvent(const EventFwk::CommonEventData& data) override;
     static std::shared_ptr<AncoRestoreStartEventSubscriber> create();
-
-private:
-    inline static const std::string EVENT_NAME = "usual.event.ANCO_RESTORE_START";
-    inline static const std::string EVENT_PUBLISHER_PERMISSION = "ohos.permission.RECEIVE_BMS_BROKER_MESSAGES";
 };
 
 class NotificationCloneManager {

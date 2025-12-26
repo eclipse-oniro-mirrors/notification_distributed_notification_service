@@ -1171,6 +1171,15 @@ public:
         const NotificationBundleOption &bundleOption, NotificationConstant::PriorityEnableStatus &enableStatus);
 
     /**
+     * @brief Update priority type of notification and notify subscriber.
+     *
+     * @param request Indicates the NotificationRequest object for setting the notification content.
+     *                This parameter must be specified.
+     * @return Returns update priority type of notification result.
+     */
+    ErrCode TriggerUpdatePriorityType(const NotificationRequest &request);
+
+    /**
      * @brief Sets whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
      *
@@ -1703,6 +1712,24 @@ public:
      * @return Returns unregister Badge Query Callback result.
      */
     ErrCode UnRegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback);
+
+    /**
+     * @brief Is Do Not Disturb currently enabled
+     *
+     * @param userId The userid of the target device.
+     * @param enabled True if Do Not Disturb currently enabled
+     * @return Returns get result.
+     */
+    ErrCode IsDoNotDisturbEnabled(int32_t userId, bool& enabled);
+
+    /**
+     * @brief Check if the current app does not allow interruptions
+     *
+     * @param userId The userid of the target device.
+     * @param enabled True if current app does not allow interruptions
+     * @return Returns get result.
+     */
+    ErrCode IsNotifyAllowedInDoNotDisturb(int32_t userId, bool& isAllowed);
 private:
     /**
      * @brief Gets Ans Manager proxy.

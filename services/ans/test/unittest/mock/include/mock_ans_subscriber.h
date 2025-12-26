@@ -78,6 +78,8 @@ public:
     ErrCode OnEnabledPriorityChanged(
         const sptr<EnabledNotificationCallbackData> &callbackData) override { return ERR_OK; };
 
+    ErrCode OnSystemUpdate(const sptr<Notification> &notification) override { return ERR_OK; };
+
     ErrCode OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override { return ERR_OK; };
 
     ErrCode OnBadgeEnabledChanged(

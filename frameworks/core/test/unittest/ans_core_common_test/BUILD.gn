@@ -22,7 +22,10 @@ ohos_unittest("ans_core_common_unit_test") {
   module_out_path = module_output_path
   include_dirs = []
 
-  sources = [ "ans_inner_errors_test.cpp" ]
+  sources = [
+    "ans_inner_errors_test.cpp",
+    "ans_log_wrapper_test.cpp",
+  ]
 
   deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 

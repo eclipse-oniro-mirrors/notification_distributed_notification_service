@@ -34,36 +34,33 @@
 namespace OHOS {
 namespace Notification {
 
-ErrCode AdvancedNotificationService::AtomicServicePublish(const sptr<NotificationRequest> &request)
+AnsStatus AdvancedNotificationService::AtomicServicePublish(const sptr<NotificationRequest> &request)
 {
     ErrCode result = PermissionVerification();
     if (result != ERR_OK) {
-        return result;
+        return AnsStatus(result, "PermissionVerification fail.");
     }
 
     AnsStatus ansStatus = ExecutePublishProcess(request, true);
     if (!ansStatus.Ok()) {
         ansStatus.AppendSceneBranch(EventSceneId::SCENE_1, EventBranchId::BRANCH_0, "Execute PublishProcess failed");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
-        return ansStatus.GetErrCode();
+        return ansStatus;
     }
 
     sptr<NotificationBundleOption> bundleOption;
-    ansStatus = CheckAndPrepareNotificationInfoWithAtomicService(request, bundleOption);
     if (!ansStatus.Ok()) {
         ansStatus.AppendSceneBranch(EventSceneId::SCENE_1, EventBranchId::BRANCH_0,
             "CheckAndPrepareNotificationInfoWithAtomicService failed");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
         SendPublishHiSysEvent(request, result);
-        return ansStatus.GetErrCode();
+        return ansStatus;
     }
 
-    result = PublishPreparedNotification(request, bundleOption, false);
-    if (result != ERR_OK) {
+    ansStatus = PublishPreparedNotification(request, bundleOption, false);
+    if (!ansStatus.Ok()) {
         SendPublishHiSysEvent(request, result);
-        return result;
+        return ansStatus;
     }
-    return result;
+    return AnsStatus();
 }
 
 ErrCode AdvancedNotificationService::SetCreatorInfoWithAtomicService(const sptr<NotificationRequest> &request)
@@ -114,8 +111,10 @@ AnsStatus AdvancedNotificationService::CheckAndPrepareNotificationInfoWithAtomic
     if (request->GetDeliveryTime() <= 0) {
         request->SetDeliveryTime(GetCurrentTime());
     }
-    result = CheckPictureSize(request);
-
+    AnsStatus ansStatus = CheckPictureSize(request);
+    if (!ansStatus.Ok()) {
+        return ansStatus;
+    }
     SetCreatorInfoWithAtomicService(request);
     request->SetOwnerUid(0);
 
@@ -135,9 +134,9 @@ AnsStatus AdvancedNotificationService::CheckAndPrepareNotificationInfoWithAtomic
         return AnsStatus(result, "CheckSoundPermission failed");
     }
     if (IsNeedPushCheck(request)) {
-        result = PushCheck(request);
-        if (result != ERR_OK) {
-            return AnsStatus(result, "PushCheck failed");
+        AnsStatus ansStatus = PushCheck(request);
+        if (!ansStatus.Ok()) {
+            return ansStatus;
         }
     }
     return AnsStatus();
@@ -155,9 +154,9 @@ AnsStatus AdvancedNotificationService::ExecutePublishProcess(
         return ansStatus;
     }
 
-    ErrCode result = publishProcess_[request->GetSlotType()]->PublishNotificationByApp(request);
-    if (result != ERR_OK) {
-        return AnsStatus(result, "PublishNotificationByApp failed");
+    ansStatus = publishProcess_[request->GetSlotType()]->PublishNotificationByApp(request);
+    if (!ansStatus.Ok()) {
+        return ansStatus;
     }
     return AnsStatus();
 }

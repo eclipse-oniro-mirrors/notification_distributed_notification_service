@@ -1311,6 +1311,21 @@ HWTEST_F(NotificationHelperTest, SetPriorityEnabledByBundle_0100, TestSize.Level
 }
 
 /**
+ * @tc.name: TriggerUpdatePriorityType_0100
+ * @tc.desc: test TriggerUpdatePriorityType success
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, TriggerUpdatePriorityType_0100, TestSize.Level1)
+{
+    NotificationRequest request;
+    request.SetPriorityNotificationType(NotificationConstant::PriorityNotificationType::PAYMENT_DUE);
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.TriggerUpdatePriorityType(request);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(request.GetPriorityNotificationType(), NotificationConstant::PriorityNotificationType::OTHER);
+}
+
+/**
  * @tc.name: IsNeedSilentInDoNotDisturbMode_00001
  * @tc.desc: Test IsNeedSilentInDoNotDisturbMode parameters.
  * @tc.type: FUNC
@@ -1628,6 +1643,34 @@ HWTEST_F(NotificationHelperTest, PublishDelayedNotification_0100, Function | Sma
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.PublishDelayedNotification(triggerKey, userId);
     EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: IsDoNotDisturbEnabled_0100
+ * @tc.desc: Test IsDoNotDisturbEnabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsDoNotDisturbEnabled_0100, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    int32_t uid = 100;
+    bool isEnabled = true;
+    ErrCode ret = notificationHelper.IsDoNotDisturbEnabled(uid, isEnabled);
+    EXPECT_EQ(ret, ERROR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: IsNotifyAllowedInDoNotDisturb_0100
+ * @tc.desc: Test IsNotifyAllowedInDoNotDisturb.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsNotifyAllowedInDoNotDisturb_0100, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    int32_t uid = 100;
+    bool isAllowed = true;
+    ErrCode ret = notificationHelper.IsNotifyAllowedInDoNotDisturb(uid, isAllowed);
+    EXPECT_EQ(ret, ERROR_PERMISSION_DENIED);
 }
 }
 }

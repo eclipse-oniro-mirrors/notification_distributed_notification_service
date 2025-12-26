@@ -129,8 +129,9 @@ int32_t DistributedDeviceDataService::GetTargetDeviceBundleList(const std::strin
             for (auto bundleInfo : item.installedBundles) {
                 bundleList.push_back(bundleInfo.first);
                 labelList.push_back(bundleInfo.second);
-                return ERR_OK;
             }
+            ANS_LOGI("Get bundle %{public}zu %{public}s", labelList.size(), StringAnonymous(deviceId).c_str());
+            return ERR_OK;
         }
     }
     ANS_LOGW("Get bundle %{public}s %{public}s", deviceType.c_str(), StringAnonymous(deviceId).c_str());

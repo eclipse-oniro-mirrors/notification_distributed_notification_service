@@ -1340,6 +1340,15 @@ public:
         const NotificationBundleOption &bundleOption, NotificationConstant::PriorityEnableStatus &enableStatus);
 
     /**
+     * @brief Update priority type of notification and notify subscriber.
+     *
+     * @param request Indicates the NotificationRequest object for setting the notification content.
+     *                This parameter must be specified.
+     * @return Returns update priority type of notification result.
+     */
+    static ErrCode TriggerUpdatePriorityType(const NotificationRequest &request);
+
+    /**
      * @brief Cancels a published agent notification.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
@@ -1722,6 +1731,24 @@ public:
      * @return Returns unregister Badge Query Callback result.
      */
     static ErrCode UnRegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback);
+
+    /**
+     * @brief Is Do Not Disturb currently enabled
+     *
+     * @param userId The userid of the target device.
+     * @param enabled True if Do Not Disturb currently enabled
+     * @return Returns get result.
+     */
+    static ErrCode IsDoNotDisturbEnabled(int32_t userId, bool& enabled);
+
+    /**
+     * @brief Check if the current app does not allow interruptions
+     *
+     * @param userId The userid of the target device.
+     * @param enabled True if current app does not allow interruptions
+     * @return Returns get result.
+     */
+    static ErrCode IsNotifyAllowedInDoNotDisturb(int32_t userId, bool& isAllowed);
 };
 }  // namespace Notification
 }  // namespace OHOS

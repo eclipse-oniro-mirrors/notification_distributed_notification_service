@@ -55,8 +55,6 @@ public:
     void OnReceiveEvent(const EventFwk::CommonEventData& data) override;
 
 private:
-    inline static const std::string EVENT_NAME = "OnNotificationServiceDialogClicked";
-
     NotificationDialogManager& dialogManager_;
 };
 

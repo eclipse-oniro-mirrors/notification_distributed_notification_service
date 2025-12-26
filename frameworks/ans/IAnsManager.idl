@@ -311,6 +311,8 @@ interface OHOS.Notification.IAnsManager {
 
     void IsPriorityEnabledByBundle([in] sptr<NotificationBundleOption> bundleOption, [out] int enableStatusInt);
 
+    void TriggerUpdatePriorityType([in] sptr<NotificationRequest> request);
+
     void SetDistributedBundleOption(
         [in] sptr<DistributedBundleOption>[] bundles, [in] String deviceType);
 
@@ -422,6 +424,10 @@ interface OHOS.Notification.IAnsManager {
     void GetAllSubscriptionBundles([out] sptr<NotificationBundleOption>[] bundles);
 
     void CanOpenSubscribeSettings();
+
+    void IsDoNotDisturbEnabled([in] int userId, [out] boolean isEnabled);
+
+    void IsNotifyAllowedInDoNotDisturb([in] int userId, [out] boolean isAllowed);    
 
     [macrodef NOTIFICATION_SMART_REMINDER_SUPPORTED] void RegisterSwingCallback([in] IRemoteObject swingCallback);
 }

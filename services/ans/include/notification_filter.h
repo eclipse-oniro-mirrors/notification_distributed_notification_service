@@ -21,6 +21,7 @@
 #include "errors.h"
 
 #include "notification_record.h"
+#include "ans_status.h"
 
 namespace OHOS {
 namespace Notification {
@@ -45,7 +46,7 @@ public:
      * @param record Indicates the NotificationRecord.
      * @return Returns the filter result.
      */
-    virtual ErrCode OnPublish(const std::shared_ptr<NotificationRecord> &record) = 0;
+    virtual AnsStatus OnPublish(const std::shared_ptr<NotificationRecord> &record) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS

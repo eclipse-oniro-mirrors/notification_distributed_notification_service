@@ -85,7 +85,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_100, Fu
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(nullptr);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -100,7 +100,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_200, Fu
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(nullptr);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -119,7 +119,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_300, Fu
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -141,7 +141,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_400, Fu
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -164,7 +164,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_500, Fu
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_UID);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INVALID_UID);
 }
 
 /**
@@ -188,7 +188,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_600, Fu
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
 }
 
 /**
@@ -212,7 +212,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_700, Fu
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
-    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_OK);
 }
 
 /**
@@ -236,7 +236,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_800, Fu
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
-    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_OK);
 }
 
 /**
@@ -259,7 +259,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_900, Fu
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_UID);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INVALID_UID);
 }
 
 /**
@@ -283,7 +283,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_1000, F
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_UID);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INVALID_UID);
 }
 
 /**
@@ -307,7 +307,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_1100, F
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
-    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_OK);
 }
 
 /**
@@ -331,7 +331,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_1200, F
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
-    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_OK);
 }
 
 /**
@@ -417,7 +417,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationInfoTest_100, F
     sptr<NotificationBundleOption> bundleOption = nullptr;
     auto ret = advancedNotificationService_->PrepareNotificationInfo(nullptr, bundleOption);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -436,7 +436,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationInfoTest_200, F
 
     auto ret = advancedNotificationService_->PrepareNotificationInfo(request, bundleOption);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -453,7 +453,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationInfoTest_300, F
 
     auto ret = advancedNotificationService_->PrepareNotificationInfo(request, bundleOption);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INVALID_BUNDLE);
 }
 
 /**
@@ -475,7 +475,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationInfoTest_400, F
 
     auto ret = advancedNotificationService_->PrepareNotificationInfo(request, bundleOption);
 
-    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_OK);
 }
 
 /**
@@ -497,7 +497,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationInfoTest_500, F
 
     auto ret = advancedNotificationService_->PrepareNotificationInfo(request, bundle);
 
-    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_OK);
 }
 
 /**
@@ -1747,11 +1747,11 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PushCheck_100, Function | SmallTes
     MockOnCheckNotification(ERR_INVALID_STATE);
 
     auto ret = advancedNotificationService_->PushCheck(request);
-    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_OK);
 
     MockIsVerfyPermisson(false);
     ret = advancedNotificationService_->PushCheck(request);
-    ASSERT_EQ(ret, (int)ERR_INVALID_STATE);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_INVALID_STATE);
     MockOnCheckNotification(ERR_OK);
 }
 

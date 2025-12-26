@@ -106,7 +106,11 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     }
 
     if (request->IsAtomicServiceNotification()) {
-        return AtomicServicePublish(request);
+        AnsStatus ansStatus = AtomicServicePublish(request);
+        if (!ansStatus.Ok()) {
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
+        }
+        return ansStatus.GetErrCode();
     }
 
     if (!InitPublishProcess()) {
@@ -133,20 +137,26 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     request->SetIsSystemApp(AccessTokenHelper::IsSystemApp() || isSubsystem);
     if (isSubsystem) {
-        return PublishNotificationBySa(request);
+        ansStatus = PublishNotificationBySa(request);
+        if (!ansStatus.Ok()) {
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
+        }
+        return ansStatus.GetErrCode();
     }
     CheckRemovalWantAgent(request);
     do {
-        result = publishProcess_[request->GetSlotType()]->PublishNotificationByApp(request);
-        if (result != ERR_OK) {
+        ansStatus = publishProcess_[request->GetSlotType()]->PublishNotificationByApp(request);
+        if (!ansStatus.Ok()) {
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
             break;
         }
 
         sptr<NotificationBundleOption> bundleOption;
-        result = PrepareNotificationInfo(request, bundleOption);
-        if (result != ERR_OK) {
-            message.ErrorCode(result).Message("PrepareNotificationInfo failed.");
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        ansStatus = PrepareNotificationInfo(request, bundleOption);
+        if (!ansStatus.Ok()) {
+            ansStatus.AppendSceneBranch(EventSceneId::SCENE_1, EventBranchId::BRANCH_1,
+                "PrepareNotificationInfo failed.");
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
             break;
         }
 
@@ -154,27 +164,30 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         if (result != ERR_OK) {
             message.ErrorCode(result).Message("Check sound failed.");
             NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+            ansStatus = AnsStatus(result, "CheckSoundPermission fail.");
             break;
         }
 
 #ifndef IS_EMULATOR
         if (IsNeedPushCheck(request)) {
-            result = PushCheck(request);
+            ansStatus = PushCheck(request);
         }
 #endif
 
-        if (result != ERR_OK) {
+        if (!ansStatus.Ok()) {
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
             break;
         }
-        result = PublishPreparedNotification(request, bundleOption, isUpdateByOwnerAllowed);
-        if (result != ERR_OK) {
+        ansStatus = PublishPreparedNotification(request, bundleOption, isUpdateByOwnerAllowed);
+        if (!ansStatus.Ok()) {
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
             break;
         }
     } while (0);
 
     NotificationAnalyticsUtil::ReportAllBundlesSlotEnabled();
-    SendPublishHiSysEvent(request, result);
-    return result;
+    SendPublishHiSysEvent(request, ansStatus.GetErrCode());
+    return ansStatus.GetErrCode();
 }
 
 void AdvancedNotificationService::SetIsFromSAToExtendInfo(const sptr<NotificationRequest> &request)
@@ -234,9 +247,11 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         return ERR_ANS_INVALID_PARAM;
     }
     SetChainIdToExtraInfo(request, traceId);
-    ErrCode result = PrePublishRequest(request);
-    if (result != ERR_OK) {
-        return result;
+    ErrCode result = ERR_OK;
+    AnsStatus ansStatus = PrePublishRequest(request);
+    if (!ansStatus.Ok()) {
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
+        return ansStatus.GetErrCode();
     }
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
     bool isSystemApp = AccessTokenHelper::IsSystemApp();
@@ -307,13 +322,10 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
             return;
         }
-        if (AssignValidNotificationSlot(record, bundleOption) != ERR_OK) {
+        AnsStatus status = AssignValidNotificationSlot(record, bundleOption);
+        if (!status.Ok()) {
             ANS_LOGE("Can not assign valid slot!");
-        }
-        result = Filter(record);
-        if (result != ERR_OK) {
-            ANS_LOGE("Reject by filters: %{public}d", result);
-            return;
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, status.BuildMessage(true));
         }
 
         if (!request->IsDoNotDisturbByPassed()) {
@@ -331,9 +343,10 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         }
 
         bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
-        result = FlowControlService::GetInstance().FlowControl(record, ipcUid, isNotificationExists);
-        if (result != ERR_OK) {
-            message.BranchId(EventBranchId::BRANCH_5).ErrorCode(result).Message("publish failed with FlowControl");
+        ansStatus= FlowControlService::GetInstance().FlowControl(record, ipcUid, isNotificationExists);
+        if (!ansStatus.Ok()) {
+            ansStatus.AppendSceneBranch(EventSceneId::SCENE_9,
+                EventBranchId::BRANCH_5, "publish failed with FlowControl");
             return;
         }
         result = AssignToNotificationList(record);
@@ -350,6 +363,10 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         }
     });
     notificationSvrQueue_->wait(handler);
+    if (!ansStatus.Ok()) {
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
+        return ansStatus.GetErrCode();
+    }
     if (result != ERR_OK) {
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
@@ -400,9 +417,10 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
         return ERR_NO_MEMORY;
     }
 
-    ErrCode result = PrepareContinuousTaskNotificationRequest(request, uid);
-    if (result != ERR_OK) {
-        return result;
+    AnsStatus ansStatus = PrepareContinuousTaskNotificationRequest(request, uid);
+    if (!ansStatus.Ok()) {
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
+        return ansStatus.GetErrCode();
     }
     request->SetUnremovable(true);
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
@@ -436,7 +454,7 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
     }));
     notificationSvrQueue_->wait(handler);
 
-    return result;
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused)

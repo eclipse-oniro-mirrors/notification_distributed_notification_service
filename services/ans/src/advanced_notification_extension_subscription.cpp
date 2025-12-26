@@ -416,7 +416,7 @@ void AdvancedNotificationService::HandleBundleInstall(const sptr<NotificationBun
             }
         }
 
-        result = NotificationPreferences::GetInstance()->AddExtensionSubscriptionBundles(bundleOption, insertBundles);
+        ProcessSetUserGrantedBundleState(bundleOption, insertBundles, true, result);
         if (result != ERR_OK) {
             ANS_LOGE("Failed to set enabled bundles into database, ret: %{public}d", result);
             return;
@@ -485,10 +485,10 @@ void AdvancedNotificationService::HandleBundleUninstall(const sptr<NotificationB
         std::vector<sptr<NotificationBundleOption>> extensionBundles;
         GetCachedNotificationExtensionBundles(extensionBundles);
         for (auto bundle : extensionBundles) {
-            ErrCode result =
-                NotificationPreferences::GetInstance()->RemoveExtensionSubscriptionBundles(bundle, insertBundles);
+            ErrCode result = ERR_OK;
+            ProcessSetUserGrantedBundleState(bundle, insertBundles, false, result);
             if (result != ERR_OK) {
-                ANS_LOGE("Failed to RemoveExtensionSubscriptionBundles: %{public}d", result);
+                ANS_LOGE("Failed to ProcessSetUserGrantedBundleState: %{public}d", result);
                 continue;
             }
         }
@@ -510,9 +510,9 @@ void AdvancedNotificationService::HandleNewWhitelistBundle(const sptr<Notificati
     std::vector<sptr<NotificationBundleOption>> extensionBundles;
     GetCachedNotificationExtensionBundles(extensionBundles);
     for (auto bundle : extensionBundles) {
-        result = NotificationPreferences::GetInstance()->AddExtensionSubscriptionBundles(bundle, insertBundles);
+        ProcessSetUserGrantedBundleState(bundle, insertBundles, true, result);
         if (result != ERR_OK) {
-            ANS_LOGE("Failed to AddExtensionSubscriptionBundles: %{public}d", result);
+            ANS_LOGE("Failed to ProcessSetUserGrantedBundleState true: %{public}d", result);
             continue;
         }
     }

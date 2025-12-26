@@ -74,8 +74,11 @@ ohos_shared_library("ans_innerkits") {
   include_dirs = [ "${inner_api_path}" ]
 
   sources = [
+    "${core_path}/common/src/ans_const_define.cpp",
     "${core_path}/common/src/ans_convert_enum.cpp",
     "${core_path}/common/src/ans_inner_errors.cpp",
+    "${core_path}/common/src/ans_log_wrapper.cpp",
+    "${core_path}/common/src/ans_permission_def.cpp",
     "${core_path}/src/ans_image_util.cpp",
     "${core_path}/src/ans_notification.cpp",
     "${core_path}/src/ans_result_data_synchronizer.cpp",

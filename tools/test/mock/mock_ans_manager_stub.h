@@ -653,6 +653,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode TriggerUpdatePriorityType(const sptr<NotificationRequest> &request) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode SetBundlePriorityConfig(
         const sptr<NotificationBundleOption> &bundleOption, const std::string &value) override
     {
@@ -1027,6 +1032,16 @@ public:
     }
 
     ErrCode UnRegisterBadgeQueryCallback() override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode IsDoNotDisturbEnabled(int32_t userId, bool &isEnabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode IsNotifyAllowedInDoNotDisturb(int32_t userId, bool &isAllowed) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

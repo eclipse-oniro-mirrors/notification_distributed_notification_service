@@ -182,6 +182,7 @@ public:
     MOCK_METHOD2(SetPriorityEnabledByBundle, ErrCode(const sptr<NotificationBundleOption> &, const int32_t));
     MOCK_METHOD1(IsPriorityEnabled, ErrCode(bool &));
     MOCK_METHOD2(IsPriorityEnabledByBundle, ErrCode(const sptr<NotificationBundleOption> &, int32_t &));
+    MOCK_METHOD1(TriggerUpdatePriorityType, ErrCode(const sptr<NotificationRequest> &));
     MOCK_METHOD2(SetBundlePriorityConfig, ErrCode(const sptr<NotificationBundleOption> &, const std::string &));
     MOCK_METHOD2(GetBundlePriorityConfig, ErrCode(const sptr<NotificationBundleOption> &, std::string &));
     MOCK_METHOD3(SetDistributedEnabledByBundle,
@@ -258,6 +259,8 @@ public:
         std::map<sptr<NotificationBundleOption>, bool> &bundleEnable));
     MOCK_METHOD1(GetAllSubscriptionBundles, ErrCode(std::vector<sptr<NotificationBundleOption>>& bundles));
     MOCK_METHOD0(CanOpenSubscribeSettings, ErrCode());
+    MOCK_METHOD2(IsDoNotDisturbEnabled, ErrCode(int32_t, bool&));
+    MOCK_METHOD2(IsNotifyAllowedInDoNotDisturb, ErrCode(int32_t, bool&));
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     MOCK_METHOD1(RegisterSwingCallback, ErrCode(const sptr<IRemoteObject>&));
 #endif

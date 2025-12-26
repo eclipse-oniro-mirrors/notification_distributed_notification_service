@@ -31,8 +31,25 @@ public:
     AnsStatus& AppendSceneBranch(int32_t sceneId, int32_t branchId);
     AnsStatus& AppendSceneBranch(int32_t sceneId, int32_t branchId, const std::string& msg);
     int32_t GetErrCode();
+    
     static AnsStatus InvalidParam(int32_t sceneId, int32_t branchId);
     static AnsStatus InvalidParam(const std::string& msg, int32_t sceneId, int32_t branchId);
+
+    static AnsStatus NoMemory(int32_t sceneId, int32_t branchId);
+    static AnsStatus NoMemory(const std::string& msg, int32_t sceneId, int32_t branchId);
+ 
+    static AnsStatus InvalidBundle(int32_t sceneId, int32_t branchId);
+    static AnsStatus InvalidBundle(const std::string& msg, int32_t sceneId, int32_t branchId);
+ 
+    static AnsStatus InvalidUid(int32_t sceneId, int32_t branchId);
+    static AnsStatus InvalidUid(const std::string& msg, int32_t sceneId, int32_t branchId);
+ 
+    static AnsStatus NonSystemApp(int32_t sceneId, int32_t branchId);
+    static AnsStatus NonSystemApp(const std::string& msg, int32_t sceneId, int32_t branchId);
+ 
+    static AnsStatus PermissionDeny(int32_t sceneId, int32_t branchId);
+    static AnsStatus PermissionDeny(const std::string& msg, int32_t sceneId, int32_t branchId);
+
     HaMetaMessage BuildMessage(bool isPrint);
 private:
     std::string FormatSceneBranchStr(int32_t sceneId, int32_t branchId);

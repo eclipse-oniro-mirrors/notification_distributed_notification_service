@@ -797,6 +797,24 @@ public:
     ErrCode GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> &date) override;
 
     /**
+     * @brief Is Do Not Disturb currently enabled
+     *
+     * @param userId The userid of the target device.
+     * @param enabled True if Do Not Disturb currently enabled
+     * @return Returns get result.
+     */
+    ErrCode IsDoNotDisturbEnabled(int32_t userId, bool &isDoNotDisturbEnabled) override;
+
+    /**
+     * @brief Check if the current app does not allow interruptions
+     *
+     * @param userId The userid of the target device.
+     * @param enabled True if current app does not allow interruptions
+     * @return Returns get result.
+     */
+    ErrCode IsNotifyAllowedInDoNotDisturb(int32_t userId, bool &isAllowed) override;
+
+    /**
      * @brief Add Do Not Disturb profiles.
      *
      * @param profiles Indicates the list of NotificationDoNotDisturbProfile objects to add.
@@ -1111,9 +1129,9 @@ public:
     ErrCode CancelPreparedNotification(int32_t notificationId, const std::string &label,
         const sptr<NotificationBundleOption> &bundleOption, const int32_t reason);
 
-    ErrCode PrepareNotificationInfo(
+    AnsStatus PrepareNotificationInfo(
         const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption);
-    ErrCode PublishPreparedNotification(const sptr<NotificationRequest> &request,
+    AnsStatus PublishPreparedNotification(const sptr<NotificationRequest> &request,
         const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner = false);
 
     /**
@@ -1582,6 +1600,15 @@ public:
         const sptr<NotificationBundleOption> &bundleOption, int32_t &enableStatusInt) override;
 
     /**
+     * @brief Update priority type of notification and notify subscriber.
+     *
+     * @param request Indicates the NotificationRequest object for setting the notification content.
+     *                This parameter must be specified.
+     * @return Returns update priority type of notification result.
+     */
+    ErrCode TriggerUpdatePriorityType(const sptr<NotificationRequest> &request) override;
+
+    /**
      * @brief Cancels a published agent notification.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
@@ -1754,7 +1781,7 @@ public:
     ErrCode SetHashCodeRule(const uint32_t type) override;
     ErrCode SetHashCodeRule(const uint32_t type, const int32_t userId) override;
 
-    ErrCode AtomicServicePublish(const sptr<NotificationRequest> &request);
+    AnsStatus AtomicServicePublish(const sptr<NotificationRequest> &request);
 
     ErrCode SetDefaultSlotForBundle(const sptr<NotificationBundleOption> &bundleOption,
         int32_t slotTypeInt, bool enabled, bool isForceControl) override;
@@ -1836,6 +1863,10 @@ public:
     ErrCode SetPriorityEnabledByBundleInner(
         const sptr<NotificationBundleOption> &bundleOption, const int32_t enableStatusInt);
     ErrCode SetPriorityEnabledInner(const bool enabled);
+    ErrCode SetNotDisturbEnableState(int32_t userId, bool& isDoNotDisturbEnabled);
+    ErrCode SetNotDisturbWhiteList(int32_t userId);
+    void RefreshNotDisturbEnableState();
+    void RefreshNotDisturbWhiteList();
 
 private:
     struct RecentInfo {
@@ -1884,7 +1915,7 @@ private:
 
     void StartFilters();
     void StopFilters();
-    ErrCode Filter(const std::shared_ptr<NotificationRecord> &record, bool isRecover = false);
+    AnsStatus Filter(const std::shared_ptr<NotificationRecord> &record, bool isRecover = false);
     void ChangeNotificationByControlFlags(const std::shared_ptr<NotificationRecord> &record,
         const bool isAgentController);
     void ChangeNotificationByControlFlagsFor3rdApp(const std::shared_ptr<NotificationRecord> &record);
@@ -1945,7 +1976,7 @@ private:
     ErrCode TriggerNotificationRecordFilter(const std::shared_ptr<NotificationRecord> &record);
     void ExecuteCancelGroupCancelFromTriggerNotificationList(const sptr<NotificationBundleOption>& bundleOption,
         const std::string &groupName);
-    ErrCode PublishPreparedNotificationInner(const PublishNotificationParameter &parameter);
+    AnsStatus PublishPreparedNotificationInner(const PublishNotificationParameter &parameter);
     void RemoveFromTriggerNotificationList(const sptr<NotificationBundleOption> &bundleOption,
         NotificationKey notificationKey);
     ErrCode CheckSwitchStatus(const sptr<NotificationRequest> &request,
@@ -1970,8 +2001,8 @@ private:
     void UpdateRecentNotification(sptr<Notification> &notification, bool isDelete, int32_t reason);
 
     void AdjustDateForDndTypeOnce(int64_t &beginDate, int64_t &endDate);
-    ErrCode PrepareNotificationRequest(const sptr<NotificationRequest> &request);
-    ErrCode PrepareContinuousTaskNotificationRequest(const sptr<NotificationRequest> &request, const int32_t &uid);
+    AnsStatus PrepareNotificationRequest(const sptr<NotificationRequest> &request);
+    AnsStatus PrepareContinuousTaskNotificationRequest(const sptr<NotificationRequest> &request, const int32_t &uid);
 
     void TriggerRemoveWantAgent(const sptr<NotificationRequest> &request, int32_t removeReason, bool isThirdParty);
 
@@ -2000,6 +2031,7 @@ private:
 #endif
 
     void ClearOverTimeRingToneInfo();
+    void ClearRingtoneByApplication(int32_t userId, const std::vector<NotificationRingtoneInfo> cloneRingtoneInfos);
     ErrCode SetDoNotDisturbDateByUser(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
     ErrCode GetDoNotDisturbDateByUser(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date);
     ErrCode GetHasPoppedDialog(const sptr<NotificationBundleOption> bundleOption, bool &hasPopped);
@@ -2023,15 +2055,15 @@ private:
     void SendLiveViewUploadHiSysEvent(const std::shared_ptr<NotificationRecord> &record, int32_t uploadStatus);
 
     ErrCode SetRequestBundleInfo(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
-    ErrCode PrePublishNotificationBySa(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
-    ErrCode PrePublishRequest(const sptr<NotificationRequest> &request);
-    ErrCode PublishNotificationBySa(const sptr<NotificationRequest> &request);
+    AnsStatus PrePublishNotificationBySa(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
+    AnsStatus PrePublishRequest(const sptr<NotificationRequest> &request);
+    AnsStatus PublishNotificationBySa(const sptr<NotificationRequest> &request);
     bool IsNeedPushCheck(const sptr<NotificationRequest> &request);
     void FillExtraInfoToJson(const sptr<NotificationRequest> &request,
         sptr<NotificationCheckRequest> &checkRequest, nlohmann::json &jsonObject);
     void CreatePushCheckJson(const sptr<NotificationRequest> &request,
         sptr<NotificationCheckRequest> &checkRequest, nlohmann::json &jsonObject);
-    ErrCode PushCheck(const sptr<NotificationRequest> &request);
+    AnsStatus PushCheck(const sptr<NotificationRequest> &request);
     uint64_t StartAutoDelete(const std::shared_ptr<NotificationRecord> &record,
         int64_t deleteTimePoint, int32_t reason);
     void TriggerAutoDelete(const std::string &hashCode, int32_t reason);
@@ -2049,7 +2081,7 @@ private:
     ErrCode OnSubscriberAdd(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record,
         const int32_t userId);
     bool IsLiveViewCanRecover(const sptr<NotificationRequest> request);
-    ErrCode FillNotificationRecord(const NotificationRequestDb &requestdbObj,
+    AnsStatus FillNotificationRecord(const NotificationRequestDb &requestdbObj,
         std::shared_ptr<NotificationRecord> record);
     static int32_t SetNotificationRequestToDb(const NotificationRequestDb &requestDb);
     static int32_t GetBatchNotificationRequestsFromDb(std::vector<NotificationRequestDb> &requests,
@@ -2094,7 +2126,7 @@ private:
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
     sptr<NotificationBundleOption> GenerateValidBundleOptionV2(const sptr<NotificationBundleOption> &bundleOption);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
-    ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record,
+    AnsStatus AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record,
         bool isSystemApp, bool isUpdateByOwner, const bool isAgentController);
     ErrCode DuplicateMsgControl(const sptr<NotificationRequest> &request);
     void RemoveExpiredUniqueKey();
@@ -2128,7 +2160,7 @@ private:
     void ExcuteDeleteAll(ErrCode &result, const int32_t reason);
     ErrCode GetNotificationById(const sptr<NotificationBundleOption> &bundle,
         const int32_t notificationId, sptr<Notification> &notification);
-    ErrCode AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record,
+    AnsStatus AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record,
         const sptr<NotificationBundleOption> &bundleOption);
     ErrCode UpdateSlotReminderModeBySlotFlags(const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags);
         bool VerifyCloudCapability(const int32_t &uid, const std::string &capability);
@@ -2202,7 +2234,7 @@ private:
     void InvockLiveViewSwitchCheck(const std::vector<sptr<NotificationBundleOption>>& bundles,
         int32_t userId, uint32_t index);
     void InvokeCheckConfig(const std::string& requestId);
-    ErrCode HandlePushCheckFailed(const sptr<NotificationRequest> &request, int32_t result);
+    AnsStatus HandlePushCheckFailed(const sptr<NotificationRequest> &request, int32_t result);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data)
@@ -2283,6 +2315,7 @@ private:
     void ProcessBluetoothStateChanged(const int status);
     void ProcessBluetoothPairedStatusChange(int state);
     void CheckBleAndHfpStateChange(bool filterHfpOnly);
+    void RegisterNotDisturbEnableListener();
     ErrCode GetUri(sptr<NotificationRequest> &request);
     ErrCode GetAllNotificationsBySlotTypeInner(std::vector<sptr<Notification>> &notifications,
         int32_t slotTypeInt, const int32_t userId);
@@ -2346,6 +2379,10 @@ private:
     std::shared_ptr<NotificationLoadUtils> notificationExtensionHandler_;
     bool supportHfp_ = false;
     std::vector<sptr<NotificationBundleOption>> cacheNotificationExtensionBundles_;
+    ffrt::mutex notDisturbEnableStateMutex_;
+    int32_t notDisturbEnableState_ = -1;
+    std::string soundWhiteListString_ = "";
+    std::atomic<bool> hasRegisterNotDisturbEnableListener_ = false;
 };
 
 /**

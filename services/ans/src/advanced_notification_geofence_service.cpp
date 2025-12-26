@@ -227,7 +227,7 @@ ErrCode AdvancedNotificationService::PublishDelayedNotification(const std::strin
         ANS_LOGE("GetDelayedNotificationParameterByTriggerKey failed, errCode=%{public}d", result);
         return result;
     }
-    result = PublishPreparedNotificationInner(parameter);
+    result = PublishPreparedNotificationInner(parameter).GetErrCode();
     NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_10));
     if (result != ERR_OK) {
         ANS_LOGE("PublishPreparedNotificationInner failed, errCode=%{public}d", result);

@@ -39,39 +39,29 @@ AnsStatus BasePublishProcess::PublishPreWork(const sptr<NotificationRequest> &re
     return AnsStatus();
 }
 
-ErrCode BasePublishProcess::CommonPublishCheck(const sptr<NotificationRequest> &request)
+AnsStatus BasePublishProcess::CommonPublishCheck(const sptr<NotificationRequest> &request)
 {
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_1);
     if (request->GetReceiverUserId() != SUBSCRIBE_USER_INIT) {
         if (!AccessTokenHelper::IsSystemApp()) {
-            message.Message("Not SystemApp");
-            message.ErrorCode(ERR_ANS_NON_SYSTEM_APP);
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-            return ERR_ANS_NON_SYSTEM_APP;
+            return AnsStatus::NonSystemApp("Not SystemApp", EventSceneId::SCENE_2, EventBranchId::BRANCH_1);
         }
         if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)
             && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SEND_NOTIFICATION_CROSS_USER)) {
-            message.BranchId(EventBranchId::BRANCH_3);
-            message.Message("CheckPermission denied");
-            message.ErrorCode(ERR_ANS_NON_SYSTEM_APP);
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-            return ERR_ANS_PERMISSION_DENIED;
+            return AnsStatus::PermissionDeny("CheckPermission denied", EventSceneId::SCENE_2, EventBranchId::BRANCH_3);
         }
     }
-    return ERR_OK;
+    return AnsStatus();
 }
 
-ErrCode BasePublishProcess::CommonPublishProcess(const sptr<NotificationRequest> &request)
+AnsStatus BasePublishProcess::CommonPublishProcess(const sptr<NotificationRequest> &request)
 {
     Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
     if (AccessTokenHelper::IsDlpHap(callerToken)) {
         ANS_LOGE("DLP hap not allowed to send notifications");
-        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_5)
-            .ErrorCode(ERR_ANS_DLP_HAP).Message("CommonPublishProcess failed");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ERR_ANS_DLP_HAP;
+        return AnsStatus(ERR_ANS_DLP_HAP, "CommonPublishProcess failed",
+            EventSceneId::SCENE_2, EventBranchId::BRANCH_5);
     }
-    return ERR_OK;
+    return AnsStatus();
 }
 }  // namespace Notification
 }  // namespace OHOS

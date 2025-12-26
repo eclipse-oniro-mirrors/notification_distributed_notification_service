@@ -52,9 +52,10 @@ bool NotificationSubscriber::SyncLiveViewVoip(
     }
     if (request->GetClassification() == NotificationConstant::ANS_VOIP &&
         request->GetSlotType() == NotificationConstant::LIVE_VIEW &&
-        (deviceType == CURRENT_DEVICE_TYPE || deviceType == NotificationConstant::LITEWEARABLE_DEVICE_TYPE ||
-        deviceType == NotificationConstant::HEADSET_DEVICE_TYPE || deviceType ==
-        NotificationConstant::WEARABLE_DEVICE_TYPE)) {
+        (deviceType == NotificationConstant::CURRENT_DEVICE_TYPE ||
+            deviceType == NotificationConstant::LITEWEARABLE_DEVICE_TYPE ||
+            deviceType == NotificationConstant::HEADSET_DEVICE_TYPE ||
+            deviceType ==NotificationConstant::WEARABLE_DEVICE_TYPE)) {
         return true;
     }
     return false;
@@ -318,6 +319,17 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledPriorityByBundleChanged
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     subscriber_.OnEnabledPriorityByBundleChanged(
         std::make_shared<EnabledPriorityNotificationByBundleCallbackData>(*callbackData));
+    return ERR_OK;
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnSystemUpdate(const sptr<Notification> &notification)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (notification == nullptr) {
+        ANS_LOGE("OnSystemUpdate fail, null notification");
+        return ERR_INVALID_DATA;
+    }
+    subscriber_.OnSystemUpdate(std::make_shared<Notification>(*notification));
     return ERR_OK;
 }
 

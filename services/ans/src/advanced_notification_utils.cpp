@@ -645,24 +645,27 @@ void AdvancedNotificationService::OnDistributedPublish(
         record->bundleName = bundleName;
         SetNotificationRemindType(record->notification, false);
 
-        ErrCode result = AssignValidNotificationSlot(record, bundleOption);
-        if (result != ERR_OK) {
+        AnsStatus ansStatus = AssignValidNotificationSlot(record, bundleOption);
+        if (!ansStatus.Ok()) {
             ANS_LOGE("Can not assign valid slot!");
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, ansStatus.BuildMessage(true));
             return;
         }
 
-        result = Filter(record);
-        if (result != ERR_OK) {
-            ANS_LOGE("Reject by filters: %{public}d", result);
+        ansStatus = Filter(record);
+        if (!ansStatus.Ok()) {
+            ANS_LOGE("Reject by filters: %{public}d", ansStatus.GetErrCode());
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, ansStatus.BuildMessage(true));
             return;
         }
 
         bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
-        result = FlowControlService::GetInstance().FlowControl(record, callingUid, isNotificationExists);
-        if (result != ERR_OK) {
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, callingUid, isNotificationExists);
+        if (!ansStatus.Ok()) {
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, ansStatus.BuildMessage(true));
             return;
         }
-        result = PublishInNotificationList(record);
+        ErrCode result = PublishInNotificationList(record);
         if (result != ERR_OK) {
             return;
         }
@@ -725,20 +728,23 @@ void AdvancedNotificationService::OnDistributedUpdate(
         record->bundleName = bundleName;
         SetNotificationRemindType(record->notification, false);
 
-        ErrCode result = AssignValidNotificationSlot(record, bundleOption);
-        if (result != ERR_OK) {
+        AnsStatus ansStatus = AssignValidNotificationSlot(record, bundleOption);
+        if (!ansStatus.Ok()) {
             ANS_LOGE("Can not assign valid slot!");
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
             return;
         }
 
-        result = Filter(record);
-        if (result != ERR_OK) {
-            ANS_LOGE("Reject by filters: %{public}d", result);
+        ansStatus = Filter(record);
+        if (!ansStatus.Ok()) {
+            ANS_LOGE("Reject by filters: %{public}d", ansStatus.GetErrCode());
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
             return;
         }
         bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
-        result = FlowControlService::GetInstance().FlowControl(record, callingUid, isNotificationExists);
-        if (result != ERR_OK) {
+        ansStatus = FlowControlService::GetInstance().FlowControl(record, callingUid, isNotificationExists);
+        if (!ansStatus.Ok()) {
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
             return;
         }
         if (IsNotificationExists(record->notification->GetKey())) {
@@ -961,7 +967,7 @@ ErrCode AdvancedNotificationService::DoDistributedDelete(
 }
 #endif
 
-ErrCode AdvancedNotificationService::PrepareContinuousTaskNotificationRequest(
+AnsStatus AdvancedNotificationService::PrepareContinuousTaskNotificationRequest(
     const sptr<NotificationRequest> &request, const int32_t &uid)
 {
     int32_t pid = IPCSkeleton::GetCallingPid();
@@ -971,8 +977,8 @@ ErrCode AdvancedNotificationService::PrepareContinuousTaskNotificationRequest(
         request->SetDeliveryTime(GetCurrentTime());
     }
 
-    ErrCode result = CheckPictureSize(request);
-    return result;
+    AnsStatus ansStatus = CheckPictureSize(request);
+    return ansStatus;
 }
 
 ErrCode AdvancedNotificationService::IsSupportTemplate(const std::string& templateName, bool &support)
@@ -1298,21 +1304,18 @@ ErrCode AdvancedNotificationService::SetRequestBundleInfo(const sptr<Notificatio
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<NotificationRequest> &request,
+AnsStatus AdvancedNotificationService::PrePublishNotificationBySa(const sptr<NotificationRequest> &request,
     int32_t uid, std::string &bundle)
 {
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_2);
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     if (bundleManager == nullptr) {
         ANS_LOGE("failed to get bundleManager!");
-        return ERR_ANS_INVALID_BUNDLE;
+        return AnsStatus(ERR_ANS_INVALID_BUNDLE, "failed to get bundleManager!");
     }
     bundle = bundleManager->GetBundleNameByUid(uid);
     ErrCode result = SetRequestBundleInfo(request, uid, bundle);
     if (result != ERR_OK) {
-        message.ErrorCode(result);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return result;
+        return AnsStatus(result, "SetRequestBundleInfo fail.", EventSceneId::SCENE_4, EventBranchId::BRANCH_2);
     }
 
     request->SetCreatorPid(IPCSkeleton::GetCallingPid());
@@ -1337,11 +1340,10 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
     if (request->GetDeliveryTime() <= 0) {
         request->SetDeliveryTime(GetCurrentTime());
     }
-    result = CheckPictureSize(request);
-    if (result != ERR_OK) {
-        message.ErrorCode(result).Message("Failed to check picture size", true);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return result;
+    AnsStatus ansStatus = CheckPictureSize(request);
+    if (!ansStatus.Ok()) {
+        ansStatus.AppendSceneBranch(EventSceneId::SCENE_4, EventBranchId::BRANCH_2, "Failed to check picture size");
+        return ansStatus;
     }
     if (request->GetOwnerUid() == DEFAULT_UID) {
         request->SetOwnerUid(request->GetCreatorUid());
@@ -1351,39 +1353,34 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
     }
     request->SetAppName(BundleManagerHelper::GetInstance()->GetBundleLabel(request->GetOwnerBundleName()));
     request->SetAppIndex(BundleManagerHelper::GetInstance()->GetAppIndexByUid(request->GetOwnerUid()));
-    return ERR_OK;
+    return AnsStatus();
 }
 
-ErrCode AdvancedNotificationService::PrePublishRequest(const sptr<NotificationRequest> &request)
+AnsStatus AdvancedNotificationService::PrePublishRequest(const sptr<NotificationRequest> &request)
 {
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_0);
+    ErrCode result = ERR_OK;
     if (!InitPublishProcess()) {
-        return ERR_ANS_NO_MEMORY;
+        return AnsStatus(ERR_ANS_NO_MEMORY, "ERR_ANS_NO_MEMORY");
     }
     AnsStatus ansStatus = publishProcess_[request->GetSlotType()]->PublishPreWork(request, false);
-    ErrCode result = ansStatus.GetErrCode();
-    if (result != ERR_OK) {
-        message.BranchId(EventBranchId::BRANCH_0).ErrorCode(result).Message("publish prework failed", true);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return result;
+    if (!ansStatus.Ok()) {
+        ansStatus.AppendSceneBranch(EventSceneId::SCENE_9, EventBranchId::BRANCH_0, "publish prework failed");
+        return ansStatus;
     }
     result = CheckUserIdParams(request->GetReceiverUserId());
     if (result != ERR_OK) {
-        message.BranchId(EventBranchId::BRANCH_1).ErrorCode(result).Message("User is invalid", true);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return result;
+        return AnsStatus(result, "User is invalid",
+            EventSceneId::SCENE_9, EventBranchId::BRANCH_1);
     }
 
     if (request->GetCreatorUid() <= 0) {
-        message.BranchId(EventBranchId::BRANCH_2).ErrorCode(ERR_ANS_INVALID_UID)
-            .Message("createUid failed" + std::to_string(request->GetCreatorUid()), true);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ERR_ANS_INVALID_UID;
+        return AnsStatus(ERR_ANS_INVALID_UID, "createUid failed" + std::to_string(request->GetCreatorUid()),
+            EventSceneId::SCENE_9, EventBranchId::BRANCH_2);
     }
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     if (bundleManager == nullptr) {
         ANS_LOGE("failed to get bundleManager!");
-        return ERR_ANS_INVALID_BUNDLE;
+        return AnsStatus(ERR_ANS_INVALID_BUNDLE, "failed to get bundleManager!");
     }
     request->SetCreatorPid(IPCSkeleton::GetCallingPid());
     int32_t userId = SUBSCRIBE_USER_INIT;
@@ -1395,13 +1392,11 @@ ErrCode AdvancedNotificationService::PrePublishRequest(const sptr<NotificationRe
     if (request->GetDeliveryTime() <= 0) {
         request->SetDeliveryTime(GetCurrentTime());
     }
-    result = CheckPictureSize(request);
-    if (result != ERR_OK) {
-        message.ErrorCode(result).Message("Failed to check picture size", true);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return result;
+    ansStatus = CheckPictureSize(request);
+    if (!ansStatus.Ok()) {
+        ansStatus.AppendSceneBranch(EventSceneId::SCENE_9, EventBranchId::BRANCH_0, "Failed to check picture size");
     }
-    return ERR_OK;
+    return ansStatus;
 }
 
 uint64_t AdvancedNotificationService::StartAutoDelete(const std::shared_ptr<NotificationRecord> &record,

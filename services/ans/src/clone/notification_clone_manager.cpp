@@ -44,20 +44,22 @@ const int32_t DEFAULT_APP_INDEX = -1;
 constexpr int32_t DEFAULT_ANCO_APP_INDEX = 0;
 constexpr uint64_t NOTIFICATION_FDSAN_TAG = 0xD001203;
 constexpr uint64_t COMMON_FDSAN_TAG = 0;
-constexpr const char *CLONE_ITEM_BUNDLE_INFO = "notificationBundle";
-constexpr const char *DH_CLONE_ITEM_BUNDLE_INFO = "dhNotificationBundle";
-constexpr const char *CLONE_ITEM_DISTURB = "notificationDisturb";
-constexpr const char *CLONE_GEOFENCE = "notificationGeofence";
-constexpr const char *CLONE_ITEM_PRIORITY_INFO = "notificationPriority";
-constexpr const char *BACKUP_CONFIG_FILE_PATH = "/data/service/el1/public/notification/backup_config.conf";
+constexpr const char* CLONE_ITEM_BUNDLE_INFO = "notificationBundle";
+constexpr const char* DH_CLONE_ITEM_BUNDLE_INFO = "dhNotificationBundle";
+constexpr const char* CLONE_ITEM_DISTURB = "notificationDisturb";
+constexpr const char* CLONE_GEOFENCE = "notificationGeofence";
+constexpr const char* CLONE_ITEM_PRIORITY_INFO = "notificationPriority";
+constexpr const char* BACKUP_CONFIG_FILE_PATH = "/data/service/el1/public/notification/backup_config.conf";
+constexpr const char* EVENT_NAME = "usual.event.ANCO_RESTORE_START";
+constexpr const char* EVENT_PUBLISHER_PERMISSION = "ohos.permission.RECEIVE_BMS_BROKER_MESSAGES";
 
 std::shared_ptr<AncoRestoreStartEventSubscriber> AncoRestoreStartEventSubscriber::create()
 {
     ANS_LOGD("start");
     EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(AncoRestoreStartEventSubscriber::EVENT_NAME);
+    matchingSkills.AddEvent(EVENT_NAME);
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
-    subscriberInfo.SetPermission(AncoRestoreStartEventSubscriber::EVENT_PUBLISHER_PERMISSION);
+    subscriberInfo.SetPermission(EVENT_PUBLISHER_PERMISSION);
     return std::make_shared<AncoRestoreStartEventSubscriber>(subscriberInfo);
     ANS_LOGD("end");
 }

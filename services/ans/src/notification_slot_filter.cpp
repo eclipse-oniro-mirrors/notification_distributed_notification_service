@@ -27,7 +27,7 @@ void NotificationSlotFilter::OnStart()
 void NotificationSlotFilter::OnStop()
 {}
 
-ErrCode NotificationSlotFilter::OnPublish(const std::shared_ptr<NotificationRecord> &record)
+AnsStatus NotificationSlotFilter::OnPublish(const std::shared_ptr<NotificationRecord> &record)
 {
     if (record->slot != nullptr) {
         if (record->slot->CanEnableLight()) {
@@ -57,10 +57,10 @@ ErrCode NotificationSlotFilter::OnPublish(const std::shared_ptr<NotificationReco
         }
     } else {
         ANS_LOGE("Non valid slot!");
-        return ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST;
+        return AnsStatus(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST, "Non valid slot!");
     }
 
-    return ERR_OK;
+    return AnsStatus();
 }
 }  // namespace Notification
 }  // namespace OHOS

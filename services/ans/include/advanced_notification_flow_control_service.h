@@ -27,6 +27,7 @@
 #include "notification_record.h"
 #include "notification_analytics_util.h"
 #include "ffrt.h"
+#include "ans_status.h"
 
 namespace OHOS {
 namespace Notification {
@@ -76,7 +77,7 @@ public:
      * @param now Current time.
      * @return Returns ERR_OK when the call frequency doesn't reach the threshold.
      */
-    ErrCode FlowControl(const std::shared_ptr<NotificationRecord> record, const TimePoint &now);
+    AnsStatus FlowControl(const std::shared_ptr<NotificationRecord> record, const TimePoint &now);
 
     /**
      * @brief Add a timestamp to flow control list.
@@ -106,7 +107,7 @@ public:
      * @param now Current time.
      * @return Returns ERR_OK when the call frequency doesn't reach the threshold.
      */
-    ErrCode FlowControl(
+    AnsStatus FlowControl(
         const std::shared_ptr<NotificationRecord> record, const int32_t callingUid, const TimePoint &now);
 
     /**
@@ -144,7 +145,7 @@ public:
      * @param callingUid Uid of caller.
      * @param isNotificationExists true when update notification and false when create notification.
      */
-    ErrCode FlowControl(
+    AnsStatus FlowControl(
         const std::shared_ptr<NotificationRecord> record, const int32_t callingUid, bool isNotificationExists);
 
 private:

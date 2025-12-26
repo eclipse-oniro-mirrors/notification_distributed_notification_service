@@ -1828,10 +1828,10 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GenerateSubscriberExistFlagKey_010
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, SetSubscriberExistFlag_0100, TestSize.Level1)
 {
-    auto ret = preferncesDB_->SetSubscriberExistFlag(DEVICE_TYPE_HEADSET, false);
+    auto ret = preferncesDB_->SetSubscriberExistFlag(NotificationConstant::HEADSET_DEVICE_TYPE, false);
     EXPECT_TRUE(ret);
     bool enabled = true;
-    ret = preferncesDB_->GetSubscriberExistFlag(DEVICE_TYPE_HEADSET, enabled);
+    ret = preferncesDB_->GetSubscriberExistFlag(NotificationConstant::HEADSET_DEVICE_TYPE, enabled);
     EXPECT_TRUE(ret);
     EXPECT_FALSE(enabled);
 }
@@ -1839,7 +1839,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, SetSubscriberExistFlag_0100, TestS
 HWTEST_F(NotificationPreferencesDatabaseTest, SetSubscriberExistFlag_0200, TestSize.Level1)
 {
     MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1);
-    auto ret = preferncesDB_->SetSubscriberExistFlag(DEVICE_TYPE_HEADSET, false);
+    auto ret = preferncesDB_->SetSubscriberExistFlag(NotificationConstant::HEADSET_DEVICE_TYPE, false);
     EXPECT_FALSE(ret);
 }
 
@@ -1850,10 +1850,10 @@ HWTEST_F(NotificationPreferencesDatabaseTest, SetSubscriberExistFlag_0200, TestS
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, GetSubscriberExistFlag_0100, TestSize.Level1)
 {
-    auto ret = preferncesDB_->SetSubscriberExistFlag(DEVICE_TYPE_HEADSET, true);
+    auto ret = preferncesDB_->SetSubscriberExistFlag(NotificationConstant::HEADSET_DEVICE_TYPE, true);
     EXPECT_TRUE(ret);
     bool enabled = false;
-    ret = preferncesDB_->GetSubscriberExistFlag(DEVICE_TYPE_HEADSET, enabled);
+    ret = preferncesDB_->GetSubscriberExistFlag(NotificationConstant::HEADSET_DEVICE_TYPE, enabled);
     EXPECT_TRUE(ret);
     EXPECT_TRUE(enabled);
 }
@@ -1862,7 +1862,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetSubscriberExistFlag_0200, TestS
 {
     MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1);
     bool enabled = false;
-    EXPECT_FALSE(preferncesDB_->GetSubscriberExistFlag(DEVICE_TYPE_HEADSET, enabled));
+    EXPECT_FALSE(preferncesDB_->GetSubscriberExistFlag(NotificationConstant::HEADSET_DEVICE_TYPE, enabled));
 }
 
 /**

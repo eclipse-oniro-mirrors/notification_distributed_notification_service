@@ -466,6 +466,8 @@ public:
     bool GetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, int32_t sourceType);
 
+    bool GetRingtoneInfoByLabel(const int32_t userId, const std::string label,
+        sptr<NotificationRingtoneInfo> &ringtoneInfo);
     bool SetRingtoneInfoByBundle(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
         const sptr<NotificationRingtoneInfo> &ringtoneInfo);
     bool GetRingtoneInfoByBundle(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
