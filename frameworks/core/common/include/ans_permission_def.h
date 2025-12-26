@@ -28,7 +28,6 @@ constexpr char OHOS_PERMISSION_SEND_NOTIFICATION_CROSS_USER[] = "ohos.permission
 constexpr char OHOS_PERMISSION_MANAGE_EDM_POLICY[] = "ohos.permission.MANAGE_EDM_POLICY";
 constexpr char OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION[] = "ohos.permission.SUBSCRIBE_NOTIFICATION";
 constexpr char OHOS_PERMISSION_ACCESS_BLUETOOTH[] = "ohos.permission.ACCESS_BLUETOOTH";
-constexpr char OHOS_PERMISSION_GET_DONOTDISTURB_STATE[] = "ohos.permission.GET_DONOTDISTURB_STATE";
 }  // namespace Notification
 }  // namespace OHOS
 

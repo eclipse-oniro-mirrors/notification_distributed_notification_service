@@ -1008,7 +1008,7 @@ ErrCode AdvancedNotificationService::SetNotDisturbEnableState(int32_t userId, bo
 
 ErrCode AdvancedNotificationService::IsDoNotDisturbEnabled(int32_t userId, bool& isDoNotDisturbEnabled)
 {
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_GET_DONOTDISTURB_STATE)) {
+    if (!AccessTokenHelper::CheckPermission("ohos.permission.GET_DONOTDISTURB_STATE")) {
         ANS_LOGE("Permission GET_DONOTDISTURB_STATE denied for uid=%{public}d, pid=%{public}d",
             IPCSkeleton::GetCallingUid(), IPCSkeleton::GetCallingPid());
         return ERROR_PERMISSION_DENIED;
@@ -1031,7 +1031,7 @@ ErrCode AdvancedNotificationService::IsDoNotDisturbEnabled(int32_t userId, bool&
 
 ErrCode AdvancedNotificationService::IsNotifyAllowedInDoNotDisturb(int32_t userId, bool& isAllowed)
 {
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_GET_DONOTDISTURB_STATE)) {
+    if (!AccessTokenHelper::CheckPermission("ohos.permission.GET_DONOTDISTURB_STATE")) {
         ANS_LOGE("Permission GET_DONOTDISTURB_STATE denied for uid=%{public}d, pid=%{public}d",
             IPCSkeleton::GetCallingUid(), IPCSkeleton::GetCallingPid());
         return ERROR_PERMISSION_DENIED;
