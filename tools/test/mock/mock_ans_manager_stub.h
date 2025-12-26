@@ -1035,6 +1035,16 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ErrCode IsDoNotDisturbEnabled(int32_t userId, bool &isEnabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode IsNotifyAllowedInDoNotDisturb(int32_t userId, bool &isAllowed) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 private:
     std::string cmd_;
     std::string bundle_;

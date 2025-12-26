@@ -425,5 +425,9 @@ interface OHOS.Notification.IAnsManager {
 
     void CanOpenSubscribeSettings();
 
+    void IsDoNotDisturbEnabled([in] int userId, [out] boolean isEnabled);
+
+    void IsNotifyAllowedInDoNotDisturb([in] int userId, [out] boolean isAllowed);    
+
     [macrodef NOTIFICATION_SMART_REMINDER_SUPPORTED] void RegisterSwingCallback([in] IRemoteObject swingCallback);
 }

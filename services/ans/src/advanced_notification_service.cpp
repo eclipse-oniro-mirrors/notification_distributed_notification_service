@@ -84,6 +84,9 @@
 #include "notification_operation_service.h"
 #include "string_wrapper.h"
 #include "notification_liveview_utils.h"
+#include "advanced_notdisturb_enabled_observer.h"
+#include "advanced_notdisturb_white_list_observer.h"
+#include "advanced_datashare_observer.h"
 
 namespace OHOS {
 namespace Notification {
@@ -909,6 +912,147 @@ void AdvancedNotificationService::QueryDoNotDisturbProfile(const int32_t &userId
         ANS_LOGE("Query focus mode id fail.");
         return;
     }
+}
+
+void AdvancedNotificationService::RegisterNotDisturbEnableListener()
+{
+    ANS_LOGE("Register notdisturb enabled state listener start.");
+    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
+    if (datashareHelper == nullptr) {
+        ANS_LOGE("datashareHelper is null");
+        return;
+    }
+    sptr<AdvancedNotdisturbEnabledObserver> observer = new (std::nothrow) AdvancedNotdisturbEnabledObserver();
+    if (observer != nullptr) {
+        Uri enableUri(datashareHelper->GetFocusModeEnableUri(DEFAULT_USER_ID));
+        AdvancedDatashareObserver::GetInstance().RegisterSettingsObserver(enableUri, observer);
+    } else {
+        ANS_LOGE("Register not disturb listener failed.");
+    }
+    sptr<AdvancedNotdisturbWhiteListObserver> whiteListObserver =
+        new (std::nothrow) AdvancedNotdisturbWhiteListObserver();
+    if (whiteListObserver != nullptr) {
+        Uri whiteListUri(datashareHelper->GetNodistubrSoundWhiteListUri(DEFAULT_USER_ID));
+        AdvancedDatashareObserver::GetInstance().RegisterSettingsObserver(whiteListUri, whiteListObserver);
+    } else {
+        ANS_LOGE("Register white list listener failed.");
+    }
+    ANS_LOGE("Register notdisturb enabled state listener end.");
+}
+
+void AdvancedNotificationService::RefreshNotDisturbEnableState()
+{
+    std::lock_guard<ffrt::mutex> lock(notDisturbEnableStateMutex_);
+    bool isDoNotDisturbEnabled = false;
+    AdvancedNotificationService::SetNotDisturbEnableState(DEFAULT_USER_ID, isDoNotDisturbEnabled);
+}
+
+void AdvancedNotificationService::RefreshNotDisturbWhiteList()
+{
+    std::lock_guard<ffrt::mutex> lock(notDisturbEnableStateMutex_);
+    AdvancedNotificationService::SetNotDisturbWhiteList(DEFAULT_USER_ID);
+}
+
+ErrCode AdvancedNotificationService::SetNotDisturbWhiteList(int32_t userId)
+{
+    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
+    if (datashareHelper == nullptr) {
+        ANS_LOGE("null datashareHelper");
+        return ERROR_INTERNAL_ERROR;
+    }
+    Uri whiteListUri(datashareHelper->GetNodistubrSoundWhiteListUri(userId));
+    bool isSuccess = datashareHelper->Query(whiteListUri, KEY_FOCUS_MODE_SOUND_WHITE_LIST, soundWhiteListString_);
+    if (!isSuccess) {
+        ANS_LOGE("Query sound white list failed");
+        return ERROR_INTERNAL_ERROR;
+    }
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::SetNotDisturbEnableState(int32_t userId, bool& isDoNotDisturbEnabled)
+{
+    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
+    if (datashareHelper == nullptr) {
+        ANS_LOGE("null datashareHelper");
+        return ERROR_INTERNAL_ERROR;
+    }
+    Uri enableUri(datashareHelper->GetFocusModeEnableUri(userId));
+    std::string doNotDisturbEnabledState;
+    bool ret = datashareHelper->Query(enableUri, KEY_FOCUS_MODE_ENABLE, doNotDisturbEnabledState);
+    if (!ret) {
+        ANS_LOGE("Query focus mode enable failed");
+        return ERROR_INTERNAL_ERROR;
+    }
+    if (doNotDisturbEnabledState == DO_NOT_DISTURB_MODE) {
+        ANS_LOGI("Currently is focus mode.");
+        isDoNotDisturbEnabled = true;
+        notDisturbEnableState_ = 1;
+    } else {
+        ANS_LOGI("Currently is not focus mode.");
+        isDoNotDisturbEnabled = false;
+        notDisturbEnableState_ = 0;
+    }
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::IsDoNotDisturbEnabled(int32_t userId, bool& isDoNotDisturbEnabled)
+{
+    if (!AccessTokenHelper::CheckPermission("ohos.permission.GET_DONOTDISTURB_STATE")) {
+        ANS_LOGE("Permission GET_DONOTDISTURB_STATE denied for uid=%{public}d, pid=%{public}d",
+            IPCSkeleton::GetCallingUid(), IPCSkeleton::GetCallingPid());
+        return ERROR_PERMISSION_DENIED;
+    }
+    std::lock_guard<ffrt::mutex> lock(notDisturbEnableStateMutex_);
+    if (notDisturbEnableState_ != -1) {
+        isDoNotDisturbEnabled = notDisturbEnableState_ == 1;
+        ANS_LOGI("not disturb state is: %{public}d", notDisturbEnableState_);
+        return ERR_OK;
+    }
+    if (!hasRegisterNotDisturbEnableListener_) {
+        hasRegisterNotDisturbEnableListener_ = true;
+        RegisterNotDisturbEnableListener();
+    }
+    if (SetNotDisturbEnableState(userId, isDoNotDisturbEnabled) != ERR_OK) {
+        return ERROR_INTERNAL_ERROR;
+    }
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::IsNotifyAllowedInDoNotDisturb(int32_t userId, bool& isAllowed)
+{
+    if (!AccessTokenHelper::CheckPermission("ohos.permission.GET_DONOTDISTURB_STATE")) {
+        ANS_LOGE("Permission GET_DONOTDISTURB_STATE denied for uid=%{public}d, pid=%{public}d",
+            IPCSkeleton::GetCallingUid(), IPCSkeleton::GetCallingPid());
+        return ERROR_PERMISSION_DENIED;
+    }
+    std::lock_guard<ffrt::mutex> lock(notDisturbEnableStateMutex_);
+    if (!hasRegisterNotDisturbEnableListener_) {
+        hasRegisterNotDisturbEnableListener_ = true;
+        RegisterNotDisturbEnableListener();
+    }
+    bool isDoNotDisturbEnabled;
+    if (notDisturbEnableState_ == -1 && SetNotDisturbEnableState(userId, isDoNotDisturbEnabled) != ERR_OK) {
+        return ERROR_INTERNAL_ERROR;
+    }
+    if (notDisturbEnableState_ == 0) {
+        isAllowed = false;
+        return ERR_OK;
+    }
+    if (soundWhiteListString_ == "" && SetNotDisturbWhiteList(userId) != ERR_OK) {
+        return ERROR_INTERNAL_ERROR;
+    }
+    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+    if (bundleManager == nullptr) {
+        return ERROR_INTERNAL_ERROR;
+    }
+    if (soundWhiteListString_.find(":" + std::to_string(IPCSkeleton::GetCallingUid()) + ",") != std::string::npos) {
+        isAllowed = true;
+        ANS_LOGI("Currently app is in white list.");
+    } else {
+        isAllowed = false;
+        ANS_LOGI("Currently app is not in white list.");
+    }
+    return ERR_OK;
 }
 
 void AdvancedNotificationService::QueryIntelligentExperienceEnable(const int32_t &userId, std::string &enable)

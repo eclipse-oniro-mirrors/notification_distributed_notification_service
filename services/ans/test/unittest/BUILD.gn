@@ -1895,6 +1895,8 @@ ohos_unittest("notification_extension_test") {
     "notification_extension/notification_load_utils_mock.cpp",
     "notification_extension/notification_operation_service_test.cpp",
     "${services_path}/ans/src/access_token_helper.cpp",
+    "${services_path}/ans/src/advanced_notdisturb_enabled_observer.cpp",
+    "${services_path}/ans/src/advanced_notdisturb_white_list_observer.cpp",
     "${services_path}/ans/src/advanced_aggregation_data_roaming_observer.cpp",
     "${services_path}/ans/src/advanced_datashare_helper.cpp",
     "${services_path}/ans/src/advanced_datashare_helper_data_observer.cpp",

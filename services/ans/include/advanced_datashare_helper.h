@@ -36,6 +36,7 @@ constexpr const char *KEY_FOCUS_MODE_CALL_MESSAGE_POLICY = "focus_mode_call_mess
 constexpr const char *KEY_FOCUS_MODE_REPEAT_CALLERS_ENABLE = "focus_mode_repeate_callers_enable";
 constexpr const char *KEY_INTELLIGENT_SCENE_DATA = "intelligent_scene_data";
 constexpr const char *KEY_INTELLIGENT_URI = "intelligent_uri";
+constexpr const char *KEY_FOCUS_MODE_SOUND_WHITE_LIST = "intelligent_scene_notification_white_list";
 } // namespace
 
 class AdvancedDatashareHelper : DelayedSingleton<AdvancedDatashareHelper> {
@@ -57,6 +58,7 @@ public:
     std::string GetIntelligentUri();
     std::string GetIntelligentUri(const int32_t userId);
     std::string GetUnifiedGroupEnableUri() const;
+    std::string GetNodistubrSoundWhiteListUri(const int32_t &userId) const;
     static void SetIsDataShareReady(bool isDataShareReady);
     bool QueryByDataShare(Uri &uri, const std::string &key, std::string &value);
     void OnUserSwitch(const int32_t userId);
