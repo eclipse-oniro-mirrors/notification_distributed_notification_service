@@ -1258,24 +1258,24 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_043, Level1)
         manager->showedReminderVector_.clear();
     }
     int32_t ret = manager->CancelReminderOnDisplay(1, 1);
-    EXPECT_EQ(ret, ERR_REMINDER_NOTIFICATION_NO_SHOWING);
+    EXPECT_EQ(ret, ERR_REMINDER_NOT_EXIST);
     {
         std::lock_guard<std::mutex> locker(ReminderDataManager::SHOW_MUTEX);
         manager->showedReminderVector_.push_back(reminder);
     }
     reminder->SetShare(true);
     ret = manager->CancelReminderOnDisplay(1, 1);
-    EXPECT_EQ(ret, ERR_REMINDER_NOTIFICATION_NO_SHOWING);
+    EXPECT_EQ(ret, ERR_REMINDER_NOT_EXIST);
 
     reminder->SetShare(false);
     reminder->SetReminderId(2);
     ret = manager->CancelReminderOnDisplay(1, 1);
-    EXPECT_EQ(ret, ERR_REMINDER_NOTIFICATION_NO_SHOWING);
+    EXPECT_EQ(ret, ERR_REMINDER_NOT_EXIST);
 
     reminder->SetReminderId(1);
     reminder->InitCreatorUid(2);
     ret = manager->CancelReminderOnDisplay(1, 1);
-    EXPECT_EQ(ret, ERR_REMINDER_NOTIFICATION_NO_SHOWING);
+    EXPECT_EQ(ret, ERR_REMINDER_NOT_EXIST);
 
     reminder->InitCreatorUid(1);
     ret = manager->CancelReminderOnDisplay(1, 1);

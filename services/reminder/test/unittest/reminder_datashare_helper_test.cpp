@@ -452,10 +452,10 @@ HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_011, Level1)
         .WillOnce(testing::Return(0))
         .WillOnce(testing::Return(0))
         .WillOnce(testing::Return(-1));
-    EXPECT_CALL(*mockResultSet, GetColumnIndex(testing::_, testing::_)).Times(11)
+    EXPECT_CALL(*mockResultSet, GetColumnIndex(testing::_, testing::_)).Times(13)
         .WillRepeatedly(testing::DoAll(testing::SetArgReferee<1>(0), testing::Return(0)));
-    EXPECT_CALL(*mockResultSet, GetLong(testing::_, testing::_)).Times(1)
-        .WillOnce(testing::DoAll(testing::SetArgReferee<1>(1761817241000), testing::Return(0)));
+    EXPECT_CALL(*mockResultSet, GetLong(testing::_, testing::_)).Times(2)
+        .WillRepeatedly(testing::DoAll(testing::SetArgReferee<1>(1761817241000), testing::Return(0)));
     EXPECT_CALL(*mockResultSet, GetInt(testing::_, testing::_)).Times(5)
         .WillOnce(testing::DoAll(testing::SetArgReferee<1>(0), testing::Return(0)))
         .WillRepeatedly(testing::DoAll(testing::SetArgReferee<1>(1), testing::Return(0)));

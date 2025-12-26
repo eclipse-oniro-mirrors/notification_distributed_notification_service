@@ -1500,6 +1500,34 @@ napi_value UpdateReminder(napi_env env, napi_callback_info info)
     return isCallback ? NotificationNapi::Common::NapiGetNull(env) : promise;
 }
 
+napi_value ParseCanCelOnDisplayParameter(const napi_env& env, const napi_callback_info& info, Parameters& params)
+{
+    ANSR_LOGD("called");
+    size_t argc = CANCEL_PARAM_LEN;
+    napi_value argv[CANCEL_PARAM_LEN] = {nullptr};
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    if (argc < 1) {
+        ANSR_LOGE("Wrong number of arguments");
+        ReminderCommon::HandleErrCode(env, ERR_REMINDER_PARAM_ERROR);
+        return nullptr;
+    }
+
+    // argv[0]: reminder id
+    int32_t reminderId = -1;
+    if (!ReminderCommon::GetInt32(env, argv[0], nullptr, reminderId, true)) {
+        ReminderCommon::HandleErrCode(env, ERR_REMINDER_PARAM_ERROR);
+        return nullptr;
+    }
+    if (reminderId < 0) {
+        ANSR_LOGE("Param id of cancels Reminder is illegal.");
+        ReminderCommon::HandleErrCode(env, ERR_REMINDER_PARAM_ERROR);
+        return nullptr;
+    }
+    params.reminderId = reminderId;
+
+    return NotificationNapi::Common::NapiGetNull(env);
+}
+
 napi_value CancelReminderOnDisplay(napi_env env, napi_callback_info info)
 {
     ANSR_LOGD("called");
@@ -1511,7 +1539,7 @@ napi_value CancelReminderOnDisplay(napi_env env, napi_callback_info info)
     std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
     // param
     Parameters params;
-    if (ParseCanCelParameter(env, info, params, *asynccallbackinfo, true) == nullptr) {
+    if (ParseCanCelOnDisplayParameter(env, info, params) == nullptr) {
         return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env), true);
     }
 
