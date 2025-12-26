@@ -3517,11 +3517,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00014,
     record->request = new NotificationRequest();
     record->bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     const int32_t uid = 0;
+    const int32_t pid = 0;
     auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
     auto contentType = NotificationContent::Type::LOCAL_LIVE_VIEW;
     advancedNotificationService_->notificationList_.clear();
     std::vector<std::shared_ptr<NotificationRecord>> recordList;
-    ASSERT_EQ(advancedNotificationService_->GetTargetRecordList(uid, slotType, contentType, recordList),
+    ASSERT_EQ(advancedNotificationService_->GetTargetRecordList(uid, pid, slotType, contentType, recordList),
         ERR_ANS_NOTIFICATION_NOT_EXISTS);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00014 test end";
 }
@@ -3537,6 +3538,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00015,
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00015 test start";
     std::string bundleName = "testBundle";
     const int32_t uid = 0;
+    const int32_t pid = 0;
     auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
     auto contentType = NotificationContent::Type::LOCAL_LIVE_VIEW;
 
@@ -3547,6 +3549,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00015,
     auto content = std::make_shared<NotificationContent>(liveContent);
     request->SetContent(content);
     request->SetCreatorUid(uid);
+    request->SetCreatorPid(pid);
     sptr<Notification> notification = new (std::nothrow) Notification(request);
     EXPECT_NE(notification, nullptr);
     auto record = std::make_shared<NotificationRecord>();
@@ -3554,7 +3557,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00015,
     record->notification = notification;
     advancedNotificationService_->notificationList_.push_back(record);
     std::vector<std::shared_ptr<NotificationRecord>> recordList;
-    ASSERT_EQ(advancedNotificationService_->GetTargetRecordList(uid, slotType, contentType, recordList),
+    ASSERT_EQ(advancedNotificationService_->GetTargetRecordList(uid, pid, slotType, contentType, recordList),
         ERR_OK);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00015 test end";
 }
@@ -3616,7 +3619,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00017,
     record->notification = notification;
     advancedNotificationService_->notificationList_.push_back(record);
     int32_t uid = 0;
-    ASSERT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName, uid), ERR_OK);
+    int32_t pid = 0;
+    ASSERT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName, uid, pid), ERR_OK);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00017 test end";
 }
 
@@ -3631,7 +3635,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00018,
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00018 test start";
     std::string bundleName = "testBundle";
     int32_t uid = 0;
-    ASSERT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName, uid),
+    int32_t pid = 0;
+    ASSERT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName, uid, pid),
         ERR_ANS_NOTIFICATION_NOT_EXISTS);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00018 test end";
 }
@@ -3662,7 +3667,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00019,
     advancedNotificationService_->notificationList_.push_back(record);
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
     int32_t uid = 0;
-    ASSERT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName, uid), ERR_ANS_INVALID_PARAM);
+    int32_t pid = 0;
+    ASSERT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName, uid, pid),
+        ERR_ANS_INVALID_PARAM);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00019 test end";
 }
 /**

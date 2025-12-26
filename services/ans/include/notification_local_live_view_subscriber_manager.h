@@ -89,10 +89,10 @@ private:
         const sptr<IAnsSubscriberLocalLiveView> &subscriber);
     std::shared_ptr<LocalLiveViewSubscriberRecord> CreateSubscriberRecord(
         const sptr<IAnsSubscriberLocalLiveView> &subscriber,
-        const sptr<NotificationBundleOption> &bundleOption);
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t pid);
     
     ErrCode AddSubscriberInner(const sptr<IAnsSubscriberLocalLiveView> &subscriber,
-        const sptr<NotificationBundleOption> &bundleOption);
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t pid);
     ErrCode RemoveSubscriberInner(const sptr<IAnsSubscriberLocalLiveView> &subscriber,
         const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
