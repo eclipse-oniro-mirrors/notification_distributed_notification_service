@@ -1397,5 +1397,24 @@ HWTEST_F(NotificationRequestTest, SetLiveViewStatus_0200, Level1)
         NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE;
     EXPECT_EQ(notificationRequest.SetLiveViewStatus(status), true);
 }
+
+/**
+ * @tc.name:ConvertObjectsToJson_0001
+ * @tc.desc: Check return true when notificationTrigger_ is not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, ConvertObjectsToJson_0001, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    std::shared_ptr<NotificationTrigger> notificationTrigger = std::make_shared<NotificationTrigger>();
+    notificationTrigger->SetConfigPath(NotificationConstant::ConfigPath::CONFIG_PATH_CLOUD_CONFIG);
+    notificationRequest.SetNotificationTrigger(notificationTrigger);
+    nlohmann::json jsonObject;
+    auto result = notificationRequest.ConvertObjectsToJson(jsonObject);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(jsonObject["notificationTrigger"]["triggerConfigPath"],
+        NotificationConstant::ConfigPath::CONFIG_PATH_CLOUD_CONFIG);
+}
 } // namespace Notification
 } // namespace OHOS
