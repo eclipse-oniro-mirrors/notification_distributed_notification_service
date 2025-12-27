@@ -59,8 +59,12 @@ constexpr int32_t NOTIFICATION_MAX_COUNT = 1024;
 constexpr int32_t DO_NOT_DISTURB_PROFILE_MIN_ID = 1;
 constexpr int32_t DO_NOT_DISTURB_PROFILE_MAX_ID = 10;
 
+extern const std::string AGGREGATE_KEY;
 extern const std::string RING_TRUST_PKG_KEY;
 extern const std::string PRIORITY_RULE_CONFIG_KEY;
+extern const std::string CTRL_LIST_KEY;
+extern const std::string CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY;
+extern const std::string HEALTH_BUNDLE_WHITE_LIST_KEY;
 extern const std::string DELAY_UPDATE_PRIORITY_KEY;
 extern const std::string DOWNLOAD_TEMPLATE_NAME;
 extern const std::string ANS_EXTENDINFO_INFO_PRE;

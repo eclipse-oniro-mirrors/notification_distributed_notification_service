@@ -58,6 +58,7 @@ void NotificationClonePriority::OnRestoreEnd(int32_t userId)
         NotificationPreferences::GetInstance()->DelClonePriorityInfos(userId, priorityInfo_);
         priorityInfo_.clear();
     }
+    clonedSystemApps_.clear();
     ANS_LOGW("Priority on clear Restore");
 }
 
@@ -83,7 +84,8 @@ void NotificationClonePriority::OnRestore(const nlohmann::json &jsonObject, std:
         ANS_LOGE("Clone priority is invalidated or empty.");
         return;
     }
-    BatchSetDefaultPriorityInfo(systemApps);
+    clonedSystemApps_.clear();
+    BatchSetDefaultPriorityInfo(systemApps, userId);
     for (auto iter = priorityInfo_.begin(); iter != priorityInfo_.end();) {
         if (iter->GetClonePriorityType() == NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE::PRIORITY_ENABLE) {
             AdvancedNotificationService::GetInstance()->SetPriorityEnabledInner(
@@ -98,20 +100,22 @@ void NotificationClonePriority::OnRestore(const nlohmann::json &jsonObject, std:
         }
         int32_t uid = NotificationCloneUtil::GetBundleUid(iter->GetBundleName(), userId, iter->GetAppIndex());
         if (uid == INVALID_USER_ID) {
+            ANS_LOGW("OnRestore systemApps priorityInfo fail, GetBundleUid fail");
             iter++;
             continue;
         }
+        clonedSystemApps_.insert(iter->GetBundleName());
         RestoreBundlePriorityInfo(uid, *iter);
         iter = priorityInfo_.erase(iter);
     }
     NotificationPreferences::GetInstance()->UpdateClonePriorityInfos(userId, priorityInfo_);
 }
 
-void NotificationClonePriority::BatchSetDefaultPriorityInfo(const std::set<std::string> &bundleNames)
+void NotificationClonePriority::BatchSetDefaultPriorityInfo(
+    const std::set<std::string> &bundleNames, const int32_t userId)
 {
     for (std::string bundleName : bundleNames) {
-        int32_t uid = INVALID_USER_ID;
-        NotificationCloneUtil::GetBundleUid(bundleName, uid, INVALID_APP_INDEX);
+        int32_t uid = NotificationCloneUtil::GetBundleUid(bundleName, userId, INVALID_APP_INDEX);
         if (uid == INVALID_USER_ID) {
             continue;
         }
@@ -153,7 +157,9 @@ void NotificationClonePriority::OnRestoreStart(const std::string bundleName, int
     ANS_LOGI("Handle bundle event: %{public}s, %{public}d, %{public}d, %{public}d, priorityInfoSize: %{public}zu.",
         bundleName.c_str(), appIndex, userId, uid, priorityInfo_.size());
     std::unique_lock lock(lock_);
-    SetDefaultPriorityInfo(uid, bundleName);
+    if (clonedSystemApps_.find(bundleName) == clonedSystemApps_.end()) {
+        SetDefaultPriorityInfo(uid, bundleName);
+    }
     for (auto iter = priorityInfo_.begin(); iter != priorityInfo_.end();) {
         if (iter->GetClonePriorityType() == NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE::PRIORITY_ENABLE ||
             iter->GetBundleName() != bundleName || iter->GetAppIndex() != appIndex) {

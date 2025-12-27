@@ -102,9 +102,9 @@ void ExtensionWrapper::InitExtentionWrapper()
         return;
     }
 
-    std::string ctrlConfig = NotificationPreferences::GetInstance()->GetAdditionalConfig("NOTIFICATION_CTL_LIST_PKG");
+    std::string ctrlConfig = NotificationPreferences::GetInstance()->GetAdditionalConfig(CTRL_LIST_KEY);
     if (!ctrlConfig.empty()) {
-        syncAdditionConfig_("NOTIFICATION_CTL_LIST_PKG", ctrlConfig);
+        syncAdditionConfig_(CTRL_LIST_KEY, ctrlConfig);
     }
     subscribeControl_ = (SUBSCRIBE_CONTROL)dlsym(extensionWrapperHandle_, "SubscribeControl");
 #endif
@@ -138,15 +138,15 @@ void ExtensionWrapper::InitExtentionWrapper()
         return;
     }
     std::string config = NotificationPreferences::GetInstance()->GetAdditionalConfig(
-        "CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG");
+        CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY);
     if (!config.empty() && syncAdditionConfig_ != nullptr) {
-        syncAdditionConfig_("CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG", config);
+        syncAdditionConfig_(CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY, config);
     }
 #endif
 #ifdef ENABLE_ANS_AGGREGATION
-    std::string aggregateConfig = NotificationPreferences::GetInstance()->GetAdditionalConfig("AGGREGATE_CONFIG");
+    std::string aggregateConfig = NotificationPreferences::GetInstance()->GetAdditionalConfig(AGGREGATE_KEY);
     if (!aggregateConfig.empty()) {
-        syncAdditionConfig_("AGGREGATE_CONFIG", aggregateConfig);
+        syncAdditionConfig_(AGGREGATE_KEY, aggregateConfig);
     }
     if (initSummary_ != nullptr) {
         initSummary_(UpdateUnifiedGroupInfo);

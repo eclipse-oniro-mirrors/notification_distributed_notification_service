@@ -23,10 +23,6 @@
 
 namespace OHOS {
 namespace NotificationManagerSts {
-const char KEY_NAME[] = "AGGREGATE_CONFIG";
-const char RING_LIST_KEY_NAME[] = "RING_TRUSTLIST_PKG";
-const char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
-const char PRIORITY_RULE_CONFIG_KEY_NAME[] = "notificationRuleConfig";
 const ani_int RESULT_OK = 0;
 const ani_int RESULT_FAILED = 1;
 const std::string msg = "Parameter verification failed";
@@ -45,15 +41,6 @@ ani_int AniSetAdditionalConfig(ani_env *env, ani_string key, ani_string value)
         return RESULT_FAILED;
     }
     std::string keyStr = NotificationSts::GetResizeStr(tempKey, NotificationSts::STR_MAX_SIZE);
-    if (std::strlen(keyStr.c_str()) == 0 ||
-        (strcmp(keyStr.c_str(), KEY_NAME) != 0 &&
-        strcmp(keyStr.c_str(), RING_LIST_KEY_NAME) != 0 &&
-        strcmp(keyStr.c_str(), CTRL_LIST_KEY_NAME) != 0 &&
-        strcmp(keyStr.c_str(), PRIORITY_RULE_CONFIG_KEY_NAME) != 0)) {
-        ANS_LOGW("Parse key failed. msg: %{public}s", msg.c_str());
-        return RESULT_OK;
-    }
-
     std::string tempValue;
     if (NotificationSts::GetStringByAniString(env, value, tempValue) != ANI_OK) {
         ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());

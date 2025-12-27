@@ -81,8 +81,7 @@ void HealthWhiteListUtil::AddExtendFlagForRequest(std::vector<sptr<Notification>
  bool HealthWhiteListUtil::ParseDbDate(nlohmann::json& bundles)
 {
     std::string dBvalue;
-    NotificationPreferences::GetInstance()->GetKvFromDb(NotificationConstant::HEALTH_BUNDLE_WHITE_LIST,
-        dBvalue, SUBSCRIBE_USER_INIT);
+    NotificationPreferences::GetInstance()->GetKvFromDb(HEALTH_BUNDLE_WHITE_LIST_KEY, dBvalue, SUBSCRIBE_USER_INIT);
     if (dBvalue.empty()) {
         return false;
     }

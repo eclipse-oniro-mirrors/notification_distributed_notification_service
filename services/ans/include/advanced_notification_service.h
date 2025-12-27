@@ -2334,6 +2334,7 @@ private:
         int64_t id, sptr<NotificationDoNotDisturbProfile> &profile, const int32_t userId);
     bool IsDisableNotificationInner(const std::string &bundleName, const int32_t userId);
     ErrCode SetHashCodeRuleInner(const uint32_t type, int32_t userId = -1);
+    bool CheckAdditionalConfigKey(const std::string &key);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;

@@ -45,9 +45,6 @@
 namespace OHOS {
 namespace Notification {
 namespace {
-    constexpr char KEY_NAME[] = "AGGREGATE_CONFIG";
-    constexpr char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
-    constexpr char SWITCH_LIST_KEY_NAME[] = "CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG";
     constexpr char CALL_UI_BUNDLE[] = "com.ohos.callui";
     constexpr char LIVEVIEW_CONFIG_KEY[] = "APP_LIVEVIEW_CONFIG";
     constexpr uint32_t NOTIFICATION_SETTING_FLAG_BASE = 0x11;
@@ -1425,6 +1422,17 @@ bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<Notifi
     return true;
 }
 
+bool AdvancedNotificationService::CheckAdditionalConfigKey(const std::string &key)
+{
+    if (key.empty() || (key != CTRL_LIST_KEY && key != AGGREGATE_KEY &&
+        key != RING_TRUST_PKG_KEY && key != HEALTH_BUNDLE_WHITE_LIST_KEY &&
+        key != PRIORITY_RULE_CONFIG_KEY && key != CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY)) {
+        ANS_LOGW("Argument param error. not allow key: %{public}s.", key.c_str());
+        return false;
+    }
+    return true;
+}
+
 ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, const std::string &value)
 {
     ANS_LOGD("SetAdditionConfig called (%{public}s, %{public}s).", key.c_str(), value.c_str());
@@ -1437,7 +1445,9 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PERMISSION_DENIED;
     }
-
+    if (!CheckAdditionalConfigKey(key)) {
+        return ERR_OK;
+    }
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
@@ -1467,8 +1477,8 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
 ErrCode AdvancedNotificationService::SyncAdditionConfig(
     const std::string &key, const std::string &value, HaMetaMessage &message)
 {
-    bool isSyncConfig = (strcmp(key.c_str(), KEY_NAME) == 0 ||
-        strcmp(key.c_str(), CTRL_LIST_KEY_NAME) == 0 || strcmp(key.c_str(), SWITCH_LIST_KEY_NAME) == 0);
+    bool isSyncConfig = (key == AGGREGATE_KEY ||
+        key == CTRL_LIST_KEY || key == CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY);
     if (isSyncConfig) {
 #if defined(ENABLE_ANS_EXT_WRAPPER) || defined(ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER)
     ErrCode sync_result = EXTENTION_WRAPPER->SyncAdditionConfig(key, value);

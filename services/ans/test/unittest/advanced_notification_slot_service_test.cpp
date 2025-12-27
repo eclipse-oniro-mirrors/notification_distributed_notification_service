@@ -280,7 +280,7 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00001, Function | SmallTest | Lev
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     MockIsVerfyPermisson(false);
-    std::string key = "RING_TRUSTLIST_PKG";
+    std::string key = RING_TRUST_PKG_KEY;
     std::string value = "";
     auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
     ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
@@ -305,7 +305,7 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00002, Function | SmallTest | Lev
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    std::string key = "NOTIFICATION_CTL_LIST_PKG";
+    std::string key = CTRL_LIST_KEY;
     std::string value = "";
 
     auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
@@ -322,11 +322,28 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00003, Function | SmallTest | Lev
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    std::string key = "CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG";
+    std::string key = CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY;
     std::string value = "";
 
     auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetAdditionConfig_00004
+ * @tc.desc: Test SetAdditionConfig with invalid key
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00004, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    std::string key = "";
+    std::string value = "";
+
+    auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**

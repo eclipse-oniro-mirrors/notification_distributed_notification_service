@@ -37,7 +37,6 @@ const char* NotificationConstant::DEVICESTYPES[] = { "headset", "liteWearable", 
     "thirdPartyWearable" };
 const char* NotificationConstant::ANS_VOIP = "ANS_VOIP";
 const char* NotificationConstant::PC_PAD_VOIP_FLAG = "110101";
-const char* NotificationConstant::HEALTH_BUNDLE_WHITE_LIST  = "HEALTH_BUNDLE_WHITE_LIST";
 
 const char* NotificationConstant::PriorityNotificationType::OTHER = "OTHER";
 const char* NotificationConstant::PriorityNotificationType::PRIMARY_CONTACT = "PRIMARY_CONTACT";

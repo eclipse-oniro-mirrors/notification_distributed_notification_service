@@ -1625,7 +1625,7 @@ bool NotificationPreferences::GetBundleSoundPermission(bool &allPackage, std::se
     std::string value = "";
     int32_t userId = -1;
     OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
-    if (GetKvFromDb("RING_TRUSTLIST_PKG", value, userId) != ERR_OK) {
+    if (GetKvFromDb(RING_TRUST_PKG_KEY, value, userId) != ERR_OK) {
         ANS_LOGD("Get bundle sound permission failed.");
         return false;
     }

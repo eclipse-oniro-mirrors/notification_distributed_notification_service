@@ -502,26 +502,6 @@ HWTEST_F(AnsNotificationUnitTest, SetAdditionConfig_0100, Function | MediumTest 
 }
 
 /*
- * @tc.name: SetAdditionConfig_0200
- * @tc.desc: test SetAdditionConfig.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsNotificationUnitTest, SetAdditionConfig_0200, Function | MediumTest | Level1)
-{
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObjects);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
-    ASSERT_NE(nullptr, proxy);
-    ans_->GetAnsManagerProxy();
-    std::string key = "";
-    std::string value = "value";
-    ErrCode ret1 = ans_->SetAdditionConfig(key, value);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
-}
-
-/*
  * @tc.name: SetPriorityEnabled_0100
  * @tc.desc: test SetPriorityEnabled with null proxy.
  * @tc.type: FUNC
