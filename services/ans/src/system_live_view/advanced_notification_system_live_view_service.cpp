@@ -128,8 +128,9 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
     } while (0);
     if (errCode == ERR_OK) {
         int32_t callingUid = IPCSkeleton::GetCallingUid();
+        int32_t callingPid = IPCSkeleton::GetCallingPid();
         ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-            LivePublishProcess::GetInstance()->AddLiveViewSubscriber(callingUid);
+            LivePublishProcess::GetInstance()->AddLiveViewSubscriber(callingUid, callingPid);
         }));
         notificationSvrQueue_->wait(handler);
     }
@@ -138,7 +139,7 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
 }
 
 ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(
-    const std::string& bundleName, const int32_t uid)
+    const std::string& bundleName, const int32_t uid, const int32_t pid)
 {
     std::vector<std::shared_ptr<NotificationRecord>> recordList;
     if (notificationSvrQueue_ == nullptr) {
@@ -147,8 +148,8 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(
     }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        LivePublishProcess::GetInstance()->EraseLiveViewSubsciber(uid);
-        GetTargetRecordList(uid,  NotificationConstant::SlotType::LIVE_VIEW,
+        LivePublishProcess::GetInstance()->EraseLiveViewSubscriber(uid, pid);
+        GetTargetRecordList(uid, pid, NotificationConstant::SlotType::LIVE_VIEW,
             NotificationContent::Type::LOCAL_LIVE_VIEW, recordList);
         GetCommonTargetRecordList(uid,  NotificationConstant::SlotType::LIVE_VIEW,
             NotificationContent::Type::LIVE_VIEW, recordList);
@@ -180,7 +181,7 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotificationsOfSa(int32
 
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        LivePublishProcess::GetInstance()->EraseLiveViewSubsciber(uid);
+        LivePublishProcess::GetInstance()->EraseLiveViewSubscriber(uid);
         std::vector<std::shared_ptr<NotificationRecord>> recordList;
         for (auto item : notificationList_) {
             if (item->notification->GetNotificationRequest().GetCreatorUid() == uid &&

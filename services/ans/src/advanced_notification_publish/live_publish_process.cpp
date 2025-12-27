@@ -125,24 +125,29 @@ bool LivePublishProcess::CheckLocalLiveViewAllowed(
     return true;
 }
 
-void LivePublishProcess::AddLiveViewSubscriber(int32_t uid)
-{
-    localLiveViewSubscribedList_.emplace(uid);
-}
-
-void LivePublishProcess::EraseLiveViewSubsciber(int32_t uid)
+void LivePublishProcess::AddLiveViewSubscriber(int32_t uid, int32_t pid)
 {
     std::lock_guard<ffrt::mutex> lock(liveViewMutext_);
-    localLiveViewSubscribedList_.erase(uid);
+    localLiveViewSubscribedMap_[uid].insert(pid);
+}
+
+void LivePublishProcess::EraseLiveViewSubscriber(int32_t uid, int32_t pid)
+{
+    std::lock_guard<ffrt::mutex> lock(liveViewMutext_);
+    auto it = localLiveViewSubscribedMap_.find(uid);
+    if (it != localLiveViewSubscribedMap_.end()) {
+        it->second.erase(pid);
+        if (it->second.empty()) {
+            localLiveViewSubscribedMap_.erase(it);
+        }
+    }
 }
 
 bool LivePublishProcess::GetLiveViewSubscribeState(int32_t uid)
 {
     std::lock_guard<ffrt::mutex> lock(liveViewMutext_);
-    if (localLiveViewSubscribedList_.find(uid) == localLiveViewSubscribedList_.end()) {
-        return false;
-    }
-    return true;
+    auto it = localLiveViewSubscribedMap_.find(uid);
+    return it != localLiveViewSubscribedMap_.end() && !it->second.empty();
 }
 }  // namespace Notification
 }  // namespace OHOS

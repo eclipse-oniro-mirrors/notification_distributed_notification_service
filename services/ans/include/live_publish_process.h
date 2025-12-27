@@ -19,6 +19,7 @@
 #include "base_publish_process.h"
 #include "ans_status.h"
 #include "ffrt.h"
+#include "ans_const_define.h"
 
 namespace OHOS {
 namespace Notification {
@@ -27,8 +28,8 @@ public:
     static std::shared_ptr<LivePublishProcess> GetInstance();
     AnsStatus PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed) override;
     AnsStatus PublishNotificationByApp(const sptr<NotificationRequest> &request) override;
-    void EraseLiveViewSubsciber(int32_t uid);
-    void AddLiveViewSubscriber(int32_t uid);
+    void EraseLiveViewSubscriber(int32_t uid, int32_t pid = SUBSCRIBE_PID_INIT);
+    void AddLiveViewSubscriber(int32_t uid, int32_t pid = SUBSCRIBE_PID_INIT);
     bool CheckLocalLiveViewSubscribed(
         const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed, int32_t uid);
 
@@ -36,7 +37,7 @@ private:
     bool CheckLocalLiveViewAllowed(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed);
     bool GetLiveViewSubscribeState(int32_t uid);
 
-    std::set<int32_t> localLiveViewSubscribedList_;
+    std::unordered_map<int32_t, std::unordered_set<int32_t>> localLiveViewSubscribedMap_;
     ffrt::mutex liveViewMutext_;
     static std::shared_ptr<LivePublishProcess> instance_;
     static ffrt::mutex instanceMutex_;

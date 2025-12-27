@@ -498,14 +498,15 @@ void AdvancedNotificationService::OnDistributedKvStoreDeathRecipient()
     }));
 }
 
-ErrCode AdvancedNotificationService::GetTargetRecordList(const int32_t uid,
+ErrCode AdvancedNotificationService::GetTargetRecordList(const int32_t uid, const int32_t pid,
     NotificationConstant::SlotType slotType, NotificationContent::Type contentType,
     std::vector<std::shared_ptr<NotificationRecord>>& recordList)
 {
     for (auto& notification : notificationList_) {
         if (notification->request != nullptr && notification->request->GetSlotType()== slotType &&
             notification->request->GetNotificationType() == contentType &&
-            notification->request->GetCreatorUid() == uid) {
+            notification->request->GetCreatorUid() == uid &&
+            notification->request->GetCreatorPid() == pid) {
             recordList.emplace_back(notification);
         }
     }

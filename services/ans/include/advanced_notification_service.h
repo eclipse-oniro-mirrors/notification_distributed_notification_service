@@ -1516,7 +1516,7 @@ public:
     /**
      * @brief Remove Local Live Notifications
      */
-    ErrCode RemoveSystemLiveViewNotifications(const std::string& bundleName, const int32_t uid);
+    ErrCode RemoveSystemLiveViewNotifications(const std::string& bundleName, const int32_t uid, const int32_t pid);
 
     /**
      * @brief Remove Local Live Notifications created by sa.
@@ -2073,7 +2073,7 @@ private:
     static bool GetBundleInfoByNotificationBundleOption(
         const sptr<NotificationBundleOption> &bundleOption, AppExecFwk::BundleInfo &bundleInfo);
 
-    ErrCode GetTargetRecordList(const int32_t uid, NotificationConstant::SlotType slotType,
+    ErrCode GetTargetRecordList(const int32_t uid, const int32_t pid, NotificationConstant::SlotType slotType,
         NotificationContent::Type contentType, std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     ErrCode GetCommonTargetRecordList(const int32_t uid, NotificationConstant::SlotType slotType,
         NotificationContent::Type contentType, std::vector<std::shared_ptr<NotificationRecord>>& recordList);

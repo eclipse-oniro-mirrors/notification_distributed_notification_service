@@ -37,6 +37,7 @@ struct NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscriberRecord
     sptr<IAnsSubscriberLocalLiveView> subscriber {nullptr};
     std::string bundleName {};
     int32_t userId {SUBSCRIBE_USER_INIT};
+    int32_t pid {SUBSCRIBE_PID_INIT};
 };
 
 NotificationLocalLiveViewSubscriberManager::NotificationLocalLiveViewSubscriberManager()
@@ -76,6 +77,7 @@ ErrCode NotificationLocalLiveViewSubscriberManager::AddLocalLiveViewSubscriber(
     sptr<NotificationBundleOption> bundleOption;
     std::string bundle;
     int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingPid = IPCSkeleton::GetCallingPid();
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     if (bundleManager != nullptr) {
         bundle = bundleManager->GetBundleNameByUid(callingUid);
@@ -86,16 +88,17 @@ ErrCode NotificationLocalLiveViewSubscriberManager::AddLocalLiveViewSubscriber(
         ANS_LOGE("null bundleOption");
         return ERR_ANS_NO_MEMORY;
     }
-    ANS_LOGD("Get userId succeeded, callingUid = <%{public}d> bundleName = <%{public}s>", callingUid, bundle.c_str());
+    ANS_LOGD("Get userId succeeded, callingUid = <%{public}d> callingPid = <%{public}d> bundleName = <%{public}s>",
+        callingUid, callingPid, bundle.c_str());
     if (notificationButtonQueue_ == nullptr) {
         ANS_LOGE("null queue");
         return result;
     }
     ANS_LOGD("start");
     ffrt::task_handle handler =
-        notificationButtonQueue_->submit_h(std::bind([this, &subscriber, &bundleOption, &result]() {
+        notificationButtonQueue_->submit_h(std::bind([this, &subscriber, &bundleOption, &result, &callingPid]() {
             ANS_LOGD("called");
-            result = this->AddSubscriberInner(subscriber, bundleOption);
+            result = this->AddSubscriberInner(subscriber, bundleOption, callingPid);
     }));
     notificationButtonQueue_->wait(handler);
     ANS_LOGD("end");
@@ -155,9 +158,9 @@ void NotificationLocalLiveViewSubscriberManager::OnRemoteDied(const wptr<IRemote
         ANS_LOGD("called");
         std::shared_ptr<LocalLiveViewSubscriberRecord> record = FindSubscriberRecord(object);
         if (record != nullptr) {
-            ANS_LOGI("OnRemoteDied, uid=%{public}d", record->userId);
+            ANS_LOGI("OnRemoteDied, uid=%{public}d, pid=%{public}d", record->userId, record->pid);
             AdvancedNotificationService::GetInstance()->RemoveSystemLiveViewNotifications(
-                record->bundleName, record->userId);
+                record->bundleName, record->userId, record->pid);
             buttonRecordList_.remove(record);
         }
     }));
@@ -194,7 +197,7 @@ std::shared_ptr<NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscri
 
 std::shared_ptr<NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscriberRecord> NotificationLocalLiveViewSubscriberManager::CreateSubscriberRecord(
     const sptr<IAnsSubscriberLocalLiveView> &subscriber,
-    const sptr<NotificationBundleOption> &bundleOption)
+    const sptr<NotificationBundleOption> &bundleOption, const int32_t pid)
 {
     std::shared_ptr<LocalLiveViewSubscriberRecord> record = std::make_shared<LocalLiveViewSubscriberRecord>();
     // set bundleName and uid
@@ -202,20 +205,21 @@ std::shared_ptr<NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscri
         record->subscriber = subscriber;
         record->bundleName = bundleOption->GetBundleName();
         record->userId = bundleOption->GetUid();
-        ANS_LOGD("Get userId succeeded, callingUid = <%{public}d> bundleName = <%{public}s>",
-            record->userId, record->bundleName.c_str());
+        record->pid = pid;
+        ANS_LOGD("Get userId succeeded, callingUid = <%{public}d> callingPid = <%{public}d> bundleName = <%{public}s>",
+            record->userId, record->pid, record->bundleName.c_str());
     }
     return record;
 }
 
-
 ErrCode NotificationLocalLiveViewSubscriberManager::AddSubscriberInner(
-    const sptr<IAnsSubscriberLocalLiveView> &subscriber, const sptr<NotificationBundleOption> &bundleOption)
+    const sptr<IAnsSubscriberLocalLiveView> &subscriber,
+    const sptr<NotificationBundleOption> &bundleOption, const int32_t pid)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     std::shared_ptr<LocalLiveViewSubscriberRecord> record = FindSubscriberRecord(subscriber);
     if (record == nullptr) {
-        record = CreateSubscriberRecord(subscriber, bundleOption);
+        record = CreateSubscriberRecord(subscriber, bundleOption, pid);
         if (record == nullptr) {
             ANS_LOGE("null record");
             return ERR_ANS_NO_MEMORY;

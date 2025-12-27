@@ -381,7 +381,8 @@ namespace OHOS {
         }
         service->ExcuteDelete(stringData, fuzzData->ConsumeIntegral<int32_t>());
         service->HandleBadgeEnabledChanged(bundleOption, enabled);
-        service->RemoveSystemLiveViewNotifications(bundleName, fuzzData->ConsumeIntegral<int32_t>());
+        service->RemoveSystemLiveViewNotifications(bundleName,
+            fuzzData->ConsumeIntegral<int32_t>(), fuzzData->ConsumeIntegral<int32_t>());
         service->RemoveSystemLiveViewNotificationsOfSa(fuzzData->ConsumeIntegral<int32_t>());
         service->TriggerLocalLiveView(bundleOption, fuzzData->ConsumeIntegral<int32_t>(), buttonOption);
         service->RemoveNotificationBySlot(bundleOption, slot, fuzzData->ConsumeIntegral<int32_t>());
