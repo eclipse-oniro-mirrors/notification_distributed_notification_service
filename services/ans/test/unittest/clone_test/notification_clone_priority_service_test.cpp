@@ -61,7 +61,7 @@ HWTEST_F(NotificationClonePriorityTest, OnBackUp_00001, Function | SmallTest | L
 
 /**
  * @tc.name: OnRestoreStart_00001
- * @tc.desc: Test clone OnBackUp.
+ * @tc.desc: Test clone OnRestoreStart success.
  * @tc.type: FUNC
  * @tc.require: issue
  */
