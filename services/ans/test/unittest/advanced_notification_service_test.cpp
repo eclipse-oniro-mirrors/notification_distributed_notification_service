@@ -5211,6 +5211,21 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00008, Function | SmallTest | L
 }
 
 /**
+ * @tc.name : Dialog_00009
+ * @tc.number : Dialog_00009
+ * @tc.desc : test dialogEventSubscriber.RemoveDialogInfoByUserId
+*/
+HWTEST_F(AdvancedNotificationServiceTest, Dialog_00009, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->CreateDialogManager();
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("test", 2002000);
+    auto size = advancedNotificationService_->dialogManager_->dialogsOpening_.size();
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfoIfNotExist(bundleOption, nullptr), true);
+    advancedNotificationService_->dialogManager_->RemoveDialogInfoByUserId(100);
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->dialogsOpening_.size(), size);
+}
+
+/**
  * @tc.name: SetRingtoneInfoByBundle_0100
  * @tc.desc: Test SetRingtoneInfoByBundle with valid parameters from not system app.
  * @tc.type: FUNC

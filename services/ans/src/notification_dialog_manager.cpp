@@ -21,9 +21,11 @@
 #include "advanced_notification_service.h"
 #include "ans_const_define.h"
 #include "ans_log_wrapper.h"
+#include "bundle_manager_helper.h"
 #include "notification_bundle_option.h"
 #include "notification_dialog.h"
 #include "notification_preferences.h"
+#include "os_account_manager_helper.h"
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
 #include "os_account_manager_helper.h"
 #include "notification_extension_wrapper.h"
@@ -215,6 +217,26 @@ void NotificationDialogManager::RemoveDialogInfoByBundleOption(const sptr<Notifi
     }
     dialogInfoRemoved = std::move(*dialogIter);
     dialogsOpening_.erase(dialogIter);
+}
+
+void NotificationDialogManager::RemoveDialogInfoByUserId(const int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> lock(dialogsMutex_);
+    dialogsOpening_.remove_if([userId](const std::unique_ptr<DialogInfo>& dialogInfo) {
+        std::string bundleName = dialogInfo->bundleOption->GetBundleName();
+        int32_t uid = dialogInfo->bundleOption->GetUid();
+        if (BundleManagerHelper::GetInstance()->IsAncoApp(bundleName, uid)) {
+            // Anco app is not supported on user stopped case currently
+            return false;
+        } else {
+            int32_t bundleUserId = SUBSCRIBE_USER_INIT;
+            auto ret = OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, bundleUserId);
+            if (ret != ERR_OK) {
+                return false;
+            }
+            return bundleUserId == userId;
+        }
+    });
 }
 
 void NotificationDialogManager::RemoveAllDialogInfos(std::list<std::unique_ptr<DialogInfo>>& dialogInfosRemoved)
