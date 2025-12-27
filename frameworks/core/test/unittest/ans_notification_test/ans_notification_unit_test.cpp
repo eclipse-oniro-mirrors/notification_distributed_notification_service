@@ -642,7 +642,7 @@ HWTEST_F(AnsNotificationUnitTest, CancelAsBundleWithAgent_0100, Function | Mediu
 
 /*
  * @tc.name: SetTargetDeviceStatus_0100
- * @tc.desc: test SetAdditionConfig.
+ * @tc.desc: test SetTargetDeviceStatus service not connect.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
