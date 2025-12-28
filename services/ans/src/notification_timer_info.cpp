@@ -40,16 +40,15 @@ void NotificationTimerInfo::SetWantAgent(std::shared_ptr<OHOS::AbilityRuntime::W
 void NotificationTimerInfo::OnTrigger()
 {
     ANSR_LOGI("Timing is arrived.");
-    std::shared_ptr<ffrt::queue> notificationSvrQueue_ =
+    Infra::FfrtQueueImpl notificationSvrQueue_ =
         OHOS::Notification::AdvancedNotificationService::GetInstance()->GetNotificationSvrQueue();
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         if (callBack_ != nullptr) {
             callBack_();
             callBack_ = nullptr;
         }
     }));
-    notificationSvrQueue_->wait(handler);
 }
 
 void NotificationTimerInfo::SetCallbackInfo(const std::function<void()> &callBack)

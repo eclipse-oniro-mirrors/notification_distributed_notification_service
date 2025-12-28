@@ -388,7 +388,7 @@ void AdvancedNotificationService::HandleBundleInstall(const sptr<NotificationBun
         return;
     }
 
-    notificationSvrQueue_->submit_h(std::bind([=]() {
+    notificationSvrQueue_.Submit(std::bind([=]() {
         HandleNewWhitelistBundle(bundleOption);
         if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
             return;
@@ -432,7 +432,7 @@ void AdvancedNotificationService::HandleBundleUpdate(const sptr<NotificationBund
         ANS_LOGE("HandleBundleUpdate bundleOption is nullptr");
         return;
     }
-    notificationSvrQueue_->submit_h(std::bind([=]() {
+    notificationSvrQueue_.Submit(std::bind([=]() {
         if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
             auto it = FindBundleInCache(bundleOption);
             if (it != cacheNotificationExtensionBundles_.end()) {
@@ -472,7 +472,7 @@ void AdvancedNotificationService::HandleBundleUninstall(const sptr<NotificationB
         ANS_LOGE("HandleBundleUninstall bundleOption is nullptr");
         return;
     }
-    notificationSvrQueue_->submit_h(std::bind([=]() {
+    notificationSvrQueue_.Submit(std::bind([=]() {
         auto it = FindBundleInCache(bundleOption);
         if (it != cacheNotificationExtensionBundles_.end()) {
             cacheNotificationExtensionBundles_.erase(it);
@@ -532,11 +532,7 @@ void AdvancedNotificationService::GetCachedNotificationExtensionBundles(
 void AdvancedNotificationService::OnHfpDeviceConnectChanged(
     const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state)
 {
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        return;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         ProcessHfpDeviceStateChange(state);
     }));
@@ -544,11 +540,7 @@ void AdvancedNotificationService::OnHfpDeviceConnectChanged(
 
 void AdvancedNotificationService::OnBluetoothStateChanged(int status)
 {
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        return;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         ProcessBluetoothStateChanged(status);
     }));
@@ -557,11 +549,7 @@ void AdvancedNotificationService::OnBluetoothStateChanged(int status)
 void AdvancedNotificationService::OnBluetoothPairedStatusChanged(
     const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state)
 {
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        return;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         ProcessBluetoothPairedStatusChange(state);
     }));
@@ -620,7 +608,7 @@ bool AdvancedNotificationService::TryStartExtensionSubscribeService()
 {
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     NotificationConfigParse::GetInstance()->IsNotificationExtensionSubscribeSupportHfp(supportHfp_);
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         NotificationBluetoothHelper::GetInstance().RegisterHfpObserver();
         NotificationBluetoothHelper::GetInstance().RegisterBluetoothPairedDeviceObserver();
@@ -709,13 +697,6 @@ ErrCode AdvancedNotificationService::NotificationExtensionSubscribe(
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
         ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NOT_IMPL_EXTENSIONABILITY).Message(
@@ -730,12 +711,12 @@ ErrCode AdvancedNotificationService::NotificationExtensionSubscribe(
     }
 
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ProcessExtensionSubscriptionInfos(bundleOption, infos, result);
         NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_12).Message(bundleOption->GetBundleName() +
             ":" + std::to_string(bundleOption->GetUid()) + " subscribe"));
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Notification extension subscribe.");
     return result;
 }
 
@@ -774,14 +755,8 @@ ErrCode AdvancedNotificationService::NotificationExtensionUnsubscribe()
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->ClearExtensionSubscriptionInfos(bundleOption);
         if (result != ERR_OK) {
@@ -794,7 +769,7 @@ ErrCode AdvancedNotificationService::NotificationExtensionUnsubscribe()
             return;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Notification extension unsubscribe.");
 
     return result;
 }
@@ -816,14 +791,8 @@ ErrCode AdvancedNotificationService::GetSubscribeInfo(std::vector<sptr<Notificat
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionInfos(bundleOption, infos);
         if (result != ERR_OK) {
@@ -831,7 +800,7 @@ ErrCode AdvancedNotificationService::GetSubscribeInfo(std::vector<sptr<Notificat
             return;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get subscribe info.");
 
     return result;
 }
@@ -873,15 +842,9 @@ ErrCode AdvancedNotificationService::IsUserGranted(bool& isEnabled)
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
     NotificationConstant::SWITCH_STATE state;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionEnabled(bundleOption, state);
         if (result != ERR_OK) {
@@ -890,7 +853,7 @@ ErrCode AdvancedNotificationService::IsUserGranted(bool& isEnabled)
         }
         isEnabled = ((state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) ? true : false);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Is user granted.");
 
     return result;
 }
@@ -927,16 +890,9 @@ ErrCode AdvancedNotificationService::GetUserGrantedState(
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     ErrCode result = ERR_OK;
     NotificationConstant::SWITCH_STATE state;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionEnabled(bundle, state);
         if (result != ERR_OK) {
@@ -946,7 +902,7 @@ ErrCode AdvancedNotificationService::GetUserGrantedState(
         }
         enabled = ((state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) ? true : false);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get user granted state.");
 
     return result;
 }
@@ -983,18 +939,11 @@ ErrCode AdvancedNotificationService::SetUserGrantedState(
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ProcessSetUserGrantedState(bundle, enabled, result);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set user granted state.");
     return result;
 }
 
@@ -1030,15 +979,8 @@ ErrCode AdvancedNotificationService::GetUserGrantedEnabledBundles(
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter GetUserGrantedEnabledBundles!");
         result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundle, enabledBundles);
         if (result != ERR_OK) {
@@ -1046,7 +988,7 @@ ErrCode AdvancedNotificationService::GetUserGrantedEnabledBundles(
             return;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get user granted enabled bundles.");
     return result;
 }
 
@@ -1068,14 +1010,8 @@ ErrCode AdvancedNotificationService::GetUserGrantedEnabledBundlesForSelf(
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter GetUserGrantedEnabledBundlesForSelf!");
         result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundleOption, bundles);
         if (result != ERR_OK) {
@@ -1086,7 +1022,7 @@ ErrCode AdvancedNotificationService::GetUserGrantedEnabledBundlesForSelf(
             bundle->SetAppName(BundleManagerHelper::GetInstance()->GetBundleLabel(bundle->GetBundleName()));
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get user granted enabled for self.");
 
     return result;
 }
@@ -1135,18 +1071,11 @@ ErrCode AdvancedNotificationService::SetUserGrantedBundleState(
         return ERR_ANS_INVALID_BUNDLE_OPTION;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Serial queue is invalid").BranchId(BRANCH_2));
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ProcessSetUserGrantedBundleState(bundle, enabledBundlesProcessed, enabled, result);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set user granted bundle state.");
     return result;
 }
 

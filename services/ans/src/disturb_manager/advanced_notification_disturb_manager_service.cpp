@@ -86,11 +86,7 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDateByUser(const int32_t &us
     sptr<NotificationDoNotDisturbDate> &date)
 {
     ErrCode result = ERR_OK;
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<NotificationDoNotDisturbDate> currentConfig = nullptr;
         result = NotificationPreferences::GetInstance()->GetDoNotDisturbDate(userId, currentConfig);
@@ -119,7 +115,7 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDateByUser(const int32_t &us
                 break;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get donot disturb date by user.");
     return ERR_OK;
 }
 
@@ -221,18 +217,14 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDateByUser(const int32_t &us
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->SetDoNotDisturbDate(userId, newConfig);
         if (result == ERR_OK) {
             NotificationSubscriberManager::GetInstance()->NotifyDoNotDisturbDateChanged(userId, newConfig, bundle);
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set donot disturb date by user.");
 
     return ERR_OK;
 }
@@ -248,16 +240,12 @@ ErrCode AdvancedNotificationService::AddDoNotDisturbProfilesInner(
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler =
-        notificationSvrQueue_->submit_h(std::bind([copyUserId = userId, copyProfiles = profiles]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(
+        std::bind([copyUserId = userId, copyProfiles = profiles]() {
             ANS_LOGD("The ffrt enter.");
             NotificationPreferences::GetInstance()->AddDoNotDisturbProfiles(copyUserId, copyProfiles);
         }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Add donot disturb prifile.");
     return ERR_OK;
 }
 
@@ -294,16 +282,12 @@ ErrCode AdvancedNotificationService::RemoveDoNotDisturbProfilesInner(
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler =
-        notificationSvrQueue_->submit_h(std::bind([copyUserId = userId, copyProfiles = profiles]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(
+        std::bind([copyUserId = userId, copyProfiles = profiles]() {
             ANS_LOGD("The ffrt enter.");
             NotificationPreferences::GetInstance()->RemoveDoNotDisturbProfiles(copyUserId, copyProfiles);
         }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove donot disturb prifile.");
     return ERR_OK;
 }
 

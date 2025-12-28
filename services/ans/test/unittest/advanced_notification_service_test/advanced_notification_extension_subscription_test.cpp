@@ -129,13 +129,23 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSub
 HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSubscribe_0400,
     Function | SmallTest | Level1)
 {
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
     MockIsVerfyPermisson(true);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetDistributedCollaborate(true);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->DeleteAll();
+    advancedNotificationService_->AddToNotificationList(record);
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
     infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo());
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    MockIsVerfyPermisson(true);
+    MockIsNeedHapModuleInfos(true);
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->NotificationExtensionSubscribe(infos);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    MockIsVerfyPermisson(false);
+    MockIsNeedHapModuleInfos(false);
 }
 
 /**
@@ -309,7 +319,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionUns
 {
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     MockIsVerfyPermisson(true);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->NotificationExtensionUnsubscribe();
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
@@ -376,7 +386,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetSubscribeInfo_0300, F
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     MockIsVerfyPermisson(true);
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->GetSubscribeInfo(infos);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
@@ -441,7 +451,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, IsUserGranted_00300, Fun
     bool isEnabled = false;
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     MockIsVerfyPermisson(true);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->IsUserGranted(isEnabled);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
@@ -531,7 +541,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedState_0400
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
     MockIsNeedHapModuleInfos(true);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
 
     ErrCode ret = advancedNotificationService_->GetUserGrantedState(targetBundle, enabled);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
@@ -646,7 +656,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedState_0400
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
     MockIsNeedHapModuleInfos(true);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
 
     ErrCode ret = advancedNotificationService_->SetUserGrantedState(targetBundle, enabled);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
@@ -744,7 +754,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedEnabledBun
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
     MockIsNeedHapModuleInfos(true);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     ErrCode ret = advancedNotificationService_->GetUserGrantedEnabledBundles(bundle, enabledBundles);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
     MockIsNeedHapModuleInfos(false);
@@ -815,7 +825,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedEnabledBun
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
 
     auto ret = advancedNotificationService_->GetUserGrantedEnabledBundlesForSelf(bundles);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
@@ -896,7 +906,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedBundleStat
     MockIsVerfyPermisson(true);
     MockIsNeedHapModuleInfos(true);
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", NON_SYSTEM_APP_UID);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     ErrCode ret = advancedNotificationService_->SetUserGrantedBundleState(bundle, extensionBundles, true);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
     MockIsNeedHapModuleInfos(false);
@@ -1854,7 +1864,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, OnHfpDeviceConnectChange
     Function | SmallTest | Level1)
 {
     advancedNotificationService_->notificationExtensionLoaded_.store(false);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     Bluetooth::BluetoothRemoteDevice device;
     advancedNotificationService_->OnHfpDeviceConnectChanged(
         device, static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED));
@@ -1870,7 +1880,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, OnBluetoothStateChanged_
     Function | SmallTest | Level1)
 {
     advancedNotificationService_->notificationExtensionLoaded_.store(false);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     advancedNotificationService_->OnBluetoothStateChanged(static_cast<int32_t>(Bluetooth::BTStateID::STATE_TURN_ON));
     EXPECT_FALSE(advancedNotificationService_->notificationExtensionLoaded_.load());
 }
@@ -1884,7 +1894,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, OnBluetoothPairedStatusC
     Function | SmallTest | Level1)
 {
     advancedNotificationService_->notificationExtensionLoaded_.store(false);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     Bluetooth::BluetoothRemoteDevice device;
     advancedNotificationService_->OnBluetoothPairedStatusChanged(
         device, static_cast<int32_t>(OHOS::Bluetooth::PAIR_PAIRED));

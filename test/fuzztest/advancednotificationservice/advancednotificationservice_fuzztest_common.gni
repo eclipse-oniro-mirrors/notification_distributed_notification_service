@@ -27,7 +27,8 @@ template("advancednotificationservice_fuzztest_target") {
     fuzz_config_file = invoker.fuzz_config_file_value
     include_dirs = [ 
       "${services_path}/ans/include",
-      "${services_path}/ans/include/utils"
+      "${services_path}/ans/include/utils",
+      "${services_path}/infrastructure/external_adapter/ffrt/include",
     ]
     cflags = [
       "-fno-math-errno",

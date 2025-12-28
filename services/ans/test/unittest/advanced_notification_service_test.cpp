@@ -544,7 +544,7 @@ HWTEST_F(AdvancedNotificationServiceTest, ANS_AddDoNotDisturbProfiles_0500, Func
 {
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     sptr<NotificationDoNotDisturbProfile> date = nullptr;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
     int32_t userId = 100;
@@ -2345,7 +2345,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19900,
     ASSERT_EQ(advancedNotificationService.notificationList_.size(), 1);
 
     sptr<NotificationRequest> request1 = new NotificationRequest();
-    advancedNotificationService.notificationSvrQueue_ = nullptr;
+    advancedNotificationService.notificationSvrQueue_.Reset();
     advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
     ASSERT_EQ(advancedNotificationService.notificationList_.size(), 1);
 }
@@ -2730,7 +2730,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20000,
     SleepForFC();
     ASSERT_EQ(advancedNotificationService.notificationList_.size(), 1);
 
-    advancedNotificationService.notificationSvrQueue_ = nullptr;
+    advancedNotificationService.notificationSvrQueue_.Reset();
     sptr<NotificationRequest> request2 = new NotificationRequest(101);
     request2->SetSlotType(slotType);
     request2->SetOwnerBundleName("test");
@@ -2848,7 +2848,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedDelete_0200, Function | S
     advancedNotificationService.OnDistributedDelete(deviceId, bundleName, label, id);
     SleepForFC();
     MockQueryForgroundOsAccountId(true, 100);
-    advancedNotificationService.notificationSvrQueue_ = nullptr;
+    advancedNotificationService.notificationSvrQueue_.Reset();
     advancedNotificationService.OnDistributedDelete(deviceId, bundleName, label, id);
 
     ASSERT_EQ(advancedNotificationService.notificationList_.size(), 1);
@@ -3665,7 +3665,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00019,
     record->request = request;
     record->notification = notification;
     advancedNotificationService_->notificationList_.push_back(record);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     int32_t uid = 0;
     int32_t pid = 0;
     ASSERT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName, uid, pid),
@@ -4112,7 +4112,7 @@ HWTEST_F(AdvancedNotificationServiceTest, IsAllowedRemoveSlot_0005, Function | S
  */
 HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00001, Function | SmallTest | Level1)
 {
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     auto request = new (std::nothrow) NotificationRequest();
 
@@ -4177,7 +4177,7 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00001, Function |
  */
 HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_100001, Function | SmallTest | Level1)
 {
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     auto request = new (std::nothrow) NotificationRequest();
 
@@ -4207,7 +4207,7 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_100001, Function 
  */
 HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00002, Function | SmallTest | Level1)
 {
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     sptr<NotificationBundleOption> bundle1 = nullptr;
     auto request = new (std::nothrow) NotificationRequest();
@@ -4768,7 +4768,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0002,
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    advancedNotificationService_->notificationSvrQueue_ = std::make_shared<ffrt::queue>("NotificationSvrMain");
+    advancedNotificationService_->notificationSvrQueue_ = Infra::FfrtQueueImpl("NotificationSvrMain");
     std::vector<NotificationBundleOption> vec;
     int32_t userId = 100;
     ASSERT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec, userId),
@@ -4807,7 +4807,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0004,
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
-    advancedNotificationService_->notificationSvrQueue_ = std::make_shared<ffrt::queue>("NotificationSvrMain");
+    advancedNotificationService_->notificationSvrQueue_ = Infra::FfrtQueueImpl("NotificationSvrMain");
     std::vector<NotificationBundleOption> vec;
     int32_t userId = 100;
     ASSERT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec, userId), ERR_ANS_PERMISSION_DENIED);
@@ -4827,7 +4827,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0005,
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     std::vector<NotificationBundleOption> vec;
     int32_t userId = 100;
     ASSERT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec, userId), ERR_ANS_INVALID_PARAM);
@@ -5028,7 +5028,7 @@ HWTEST_F(AdvancedNotificationServiceTest, SetAndPublishSubscriberExistFlag_0100,
 HWTEST_F(AdvancedNotificationServiceTest, OnBundleRemoved_0100, Function | SmallTest | Level1)
 {
     std::string bundleName = "testBundleName01";
-    advancedNotificationService_->notificationSvrQueue_ = std::make_shared<ffrt::queue>("NotificationSvrMain");
+    advancedNotificationService_->notificationSvrQueue_ = Infra::FfrtQueueImpl("NotificationSvrMain");
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, SYSTEM_APP_UID);
     advancedNotificationService_->OnBundleRemoved(bundleOption);
     bool isExist = true;
@@ -5465,7 +5465,7 @@ HWTEST_F(AdvancedNotificationServiceTest, SetSilentReminderEnabled_00001, Functi
     ASSERT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
 
     MockQueryForgroundOsAccountId(true, 100);
-    advancedNotificationService.notificationSvrQueue_ = nullptr;
+    advancedNotificationService.notificationSvrQueue_.Reset();
     ret = advancedNotificationService.SetSilentReminderEnabled(bo, true);
     ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
@@ -5534,7 +5534,7 @@ HWTEST_F(AdvancedNotificationServiceTest, IsSilentReminderEnabled_00001, Functio
     ASSERT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
 
     MockQueryForgroundOsAccountId(true, 100);
-    advancedNotificationService.notificationSvrQueue_ = nullptr;
+    advancedNotificationService.notificationSvrQueue_.Reset();
     ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
     ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
@@ -5960,7 +5960,7 @@ HWTEST_F(AdvancedNotificationServiceTest, ANS_RemoveDoNotDisturbProfiles_0400, F
 {
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     sptr<NotificationDoNotDisturbProfile> date = nullptr;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
@@ -5980,7 +5980,7 @@ HWTEST_F(AdvancedNotificationServiceTest, ANS_RemoveDoNotDisturbProfiles_0500, F
     bool isOsAccountExists = false;
     OHOS::AccountSA::OsAccountManager::IsOsAccountExists(0, isOsAccountExists);
     MockIsOsAccountExists(false);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     sptr<NotificationDoNotDisturbProfile> date = nullptr;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };

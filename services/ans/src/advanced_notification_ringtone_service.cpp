@@ -104,11 +104,11 @@ ErrCode AdvancedNotificationService::GetRingtoneInfoByBundle(const sptr<Notifica
 void AdvancedNotificationService::ClearRingtoneByApplication(int32_t userId,
     const std::vector<NotificationRingtoneInfo> cloneRingtoneInfos)
 {
-    if (notificationSvrQueue_ == nullptr || cloneRingtoneInfos.empty()) {
+    if (cloneRingtoneInfos.empty()) {
         ANS_LOGE("Invalid ffrt queue %{public}zu.", cloneRingtoneInfos.size());
         return;
     }
-    notificationSvrQueue_->submit_h(std::bind([&, userId, cloneRingtoneInfos]() {
+    notificationSvrQueue_.Submit(std::bind([&, userId, cloneRingtoneInfos]() {
         std::unordered_map<std::string, std::string> bundlesMap;
         if (NotificationPreferences::GetInstance()->InitBundlesInfo(userId, bundlesMap) != ERR_OK) {
             return;
@@ -142,7 +142,7 @@ void AdvancedNotificationService::ClearRingtoneByApplication(int32_t userId,
         }
         SystemSoundHelper::GetInstance()->RemoveCustomizedTones(delRingtoneInfos);
     }),
-        ffrt::task_attr().name("delRingtone").delay(DEL_TASK_DELAY));
+        DEL_TASK_DELAY, "delRingtone");
 }
 
 void AdvancedNotificationService::ClearOverTimeRingToneInfo()
@@ -151,12 +151,8 @@ void AdvancedNotificationService::ClearOverTimeRingToneInfo()
     int64_t cloneTime = NotificationPreferences::GetInstance()->GetCloneTimeStamp();
     if (cloneTime != 0 && cloneTime < curTime && (curTime - cloneTime) >=
         NotificationConstant::MAX_CLONE_TIME) {
-        if (notificationSvrQueue_ == nullptr) {
-            ANS_LOGE("Invalid ffrt queue.");
-            return;
-        }
         ANS_LOGI("Start clear overtime ringinfo.");
-        notificationSvrQueue_->submit_h(std::bind([&]() {
+        notificationSvrQueue_.Submit(std::bind([&]() {
             int32_t userId = -1;
             if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
                 ANS_LOGE("Failed to get active user id!");
@@ -175,7 +171,7 @@ void AdvancedNotificationService::ClearOverTimeRingToneInfo()
             NotificationPreferences::GetInstance()->SetCloneTimeStamp(userId, 0);
             ANS_LOGI("Clear overtime ringinfo %{public}d", userId);
         }),
-            ffrt::task_attr().name("ringtone").delay(DEL_TASK_DELAY));
+            DEL_TASK_DELAY, "ringtone");
     }
 }
 }  // namespace Notification

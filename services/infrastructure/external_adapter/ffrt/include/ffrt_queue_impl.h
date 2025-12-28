@@ -22,8 +22,9 @@ namespace OHOS {
 namespace Notification {
 namespace Infra {
 class FfrtQueueImpl {
-
-    explicit FfrtQueueImpl(const std::string queueName);
+public:
+    FfrtQueueImpl() = default;
+    FfrtQueueImpl(const std::string queueName);
 
     ~FfrtQueueImpl();
 
@@ -46,6 +47,16 @@ class FfrtQueueImpl {
      * @brief Submits a task with a specified attribute to ffrt queue.
      */
     static void PostTask(const std::function<void()>&& func, const int64_t delayTime, const std::string taskName);
+
+    /**
+     * @brief reset this queue.
+     */
+    void Reset();
+
+    /**
+     * @brief run task at this queue.
+     */
+    void RunOnce(const std::function<void()>& func);
 
     /**
      * @brief Submits a task to this queue.

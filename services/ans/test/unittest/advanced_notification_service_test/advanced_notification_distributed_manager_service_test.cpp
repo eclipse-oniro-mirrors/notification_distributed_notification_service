@@ -209,7 +209,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperation_100, Functi
     sptr<NotificationOperationInfo> operationInfo = new (std::nothrow) NotificationOperationInfo();
     operationInfo->SetHashCode("testHashCode");
     sptr<IAnsOperationCallback> callback = nullptr;
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
 
     auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
 
@@ -688,7 +688,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetAllDistribuedEnabledBundles_
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     const std::string deviceType = "";
     std::vector<NotificationBundleOption> bundleOptions;
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
 
     auto ret = advancedNotificationService_->GetAllDistribuedEnabledBundles(deviceType, bundleOptions);
 
@@ -956,7 +956,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, UpdateDistributedDeviceList_100
     auto ret = advancedNotificationService_->UpdateDistributedDeviceList("testDeviceType");
     ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 }
- 
+
 /**
  * @tc.name: UpdateDistributedDeviceList_200
  * @tc.desc: Test UpdateDistributedDeviceList when succeed to call.
@@ -973,7 +973,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, UpdateDistributedDeviceList_200
     ret = advancedNotificationService_->UpdateDistributedDeviceList("testDeviceType");
     ASSERT_EQ(ret, (int)ERR_OK);
 }
- 
+
 /**
  * @tc.name: UpdateDistributedDeviceList_300
  * @tc.desc: Test UpdateDistributedDeviceList when caller has no permission.

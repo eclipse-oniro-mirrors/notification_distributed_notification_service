@@ -292,7 +292,7 @@ HWTEST_F(AnsPublishServiceTest, DeleteByBundle_00001, Function | SmallTest | Lev
 HWTEST_F(AnsPublishServiceTest, DeleteByBundle_00002, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();;
     auto ret = advancedNotificationService_->DeleteByBundle(bundle);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
@@ -353,7 +353,7 @@ HWTEST_F(AnsPublishServiceTest, DeleteByBundle_00004, Function | SmallTest | Lev
  */
 HWTEST_F(AnsPublishServiceTest, DeleteAll_00001, Function | SmallTest | Level1)
 {
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->DeleteAll();
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
@@ -382,9 +382,10 @@ HWTEST_F(AnsPublishServiceTest, RemoveDistributedNotifications_00001, Function |
 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
+    int32_t deleteType = static_cast<int32_t>(NotificationConstant::DistributedDeleteType::ALL);
     ret = advancedNotificationService_->RemoveDistributedNotifications(
-        hashcodes, 99, 99, 99);
+        hashcodes, 99, deleteType, 99);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -714,7 +715,7 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_100001, Function | 
 HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_00002, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, true);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
@@ -739,7 +740,7 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_00002, Function | S
 HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_100002, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, true);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
@@ -871,7 +872,7 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_100003, Function | 
  */
 HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_00001, Function | SmallTest | Level1)
 {
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     auto result = ERR_ANS_INVALID_PARAM;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     auto ret = advancedNotificationService_->GetShowBadgeEnabled(
@@ -892,7 +893,7 @@ HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_00001, Function | SmallTest 
  */
 HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_100001, Function | SmallTest | Level1)
 {
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     bool enabled = false;
     auto ret = advancedNotificationService_->GetShowBadgeEnabled(enabled);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
@@ -1110,7 +1111,7 @@ HWTEST_F(AnsPublishServiceTest, CommonRequestEnableNotification_00003, Function 
  */
 HWTEST_F(AnsPublishServiceTest, SetNotificationsEnabledForAllBundles_00001, Function | SmallTest | Level1)
 {
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     bool enabled = false;
     auto ret = advancedNotificationService_->SetNotificationsEnabledForAllBundles("", enabled);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
@@ -1263,7 +1264,7 @@ HWTEST_F(AnsPublishServiceTest, SetNotificationsEnabledForSpecialBundle_00003, F
 HWTEST_F(AnsPublishServiceTest, IsAllowedNotify_00001, Function | SmallTest | Level1)
 {
     bool enabled = true;
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     MockIsVerfyPermisson(false);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
@@ -1343,7 +1344,7 @@ HWTEST_F(AnsPublishServiceTest, TriggerLocalLiveView_00001, Function | SmallTest
  */
 HWTEST_F(AnsPublishServiceTest, RemoveNotification_00001, Function | SmallTest | Level1)
 {
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     std::string label = "label";
     int notificationId = 1;
@@ -1372,7 +1373,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveNotifications_00001, Function | SmallTest 
     ret = advancedNotificationService_->RemoveNotifications(keys, removeReason);
     ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     MockIsVerfyPermisson(true);
     ret = advancedNotificationService_->RemoveNotifications(keys, removeReason);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
@@ -1462,7 +1463,7 @@ HWTEST_F(AnsPublishServiceTest, NotificationSvrQueue_00001, Function | SmallTest
 {
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
 
     int32_t result = ERR_ANS_INVALID_PARAM;

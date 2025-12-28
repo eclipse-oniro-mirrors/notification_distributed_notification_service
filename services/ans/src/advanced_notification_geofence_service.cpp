@@ -47,11 +47,7 @@ ErrCode AdvancedNotificationService::SetGeofenceEnabled(bool enabled)
         return result;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        return ERR_ANS_NO_MEMORY;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->SetGeofenceEnabled(enabled);
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_1));
@@ -69,23 +65,19 @@ ErrCode AdvancedNotificationService::SetGeofenceEnabled(bool enabled)
             }
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set geofence enabled.");
     return result;
 }
 
 ErrCode AdvancedNotificationService::IsGeofenceEnabled(bool &enabled)
 {
     ANS_LOGD("Called IsGeofenceEnabled");
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        return ERR_ANS_NO_MEMORY;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->IsGeofenceEnabled(enabled);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Is geofence enabled.");
     return result;
 }
 
@@ -172,12 +164,8 @@ ErrCode AdvancedNotificationService::ClearDelayNotification(const std::vector<st
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        return ERR_ANS_NO_MEMORY;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         if (triggerKeys.empty() || userIds.empty()) {
             ANS_LOGE("Input parameters triggerKeys or userIds are empty.");
@@ -209,7 +197,7 @@ ErrCode AdvancedNotificationService::ClearDelayNotification(const std::vector<st
         }
         result = ERR_OK;
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Clear delay notification.");
     return result;
 }
 

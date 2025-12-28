@@ -86,12 +86,8 @@ ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<Notificatio
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         std::vector<sptr<NotificationSlot>> addSlots;
         for (auto slot : slots) {
@@ -112,7 +108,7 @@ ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<Notificatio
             result = NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption, addSlots);
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Add slots.");
     return result;
 }
 
@@ -126,12 +122,8 @@ ErrCode AdvancedNotificationService::GetSlots(std::vector<sptr<NotificationSlot>
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->GetNotificationAllSlots(bundleOption, slots);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
@@ -150,7 +142,7 @@ ErrCode AdvancedNotificationService::GetSlots(std::vector<sptr<NotificationSlot>
             slots =  slots_temp;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get slots.");
     return result;
 }
 
@@ -176,12 +168,8 @@ ErrCode AdvancedNotificationService::GetSlotsByBundle(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->GetNotificationAllSlots(bundle, slots);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
@@ -201,7 +189,7 @@ ErrCode AdvancedNotificationService::GetSlotsByBundle(
         }
     }));
 
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get slots by bundle.");
     return result;
 }
 
@@ -227,13 +215,9 @@ ErrCode AdvancedNotificationService::GetSlotByBundle(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
     sptr<NotificationSlot> slotFromDb = nullptr;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundle, slotType, slotFromDb);
         if (slotFromDb != nullptr) {
@@ -245,7 +229,7 @@ ErrCode AdvancedNotificationService::GetSlotByBundle(
             slot->SetReminderMode(slot->GetSilentReminderMode());
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get slots by bundle.");
     if (slot != nullptr) {
         ANS_LOGD("GetSlotByBundle, authStatus: %{public}d), authHintCnt: %{public}d",
             slot->GetAuthorizedStatus(), slot->GetAuthHintCnt());
@@ -279,12 +263,8 @@ ErrCode AdvancedNotificationService::UpdateSlots(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("notificationSvrQueue_ is nullptr.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->UpdateNotificationSlots(bundle, slots);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
@@ -294,7 +274,7 @@ ErrCode AdvancedNotificationService::UpdateSlots(
             ANS_LOGE("Slot type not exist.");
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Update slots by bundle.");
 
     if (result == ERR_OK) {
         PublishSlotChangeCommonEvent(bundle);
@@ -313,14 +293,10 @@ ErrCode AdvancedNotificationService::RemoveAllSlots()
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_24);
     message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()));
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<NotificationSlot> liveViewSlot;
 
@@ -348,7 +324,7 @@ ErrCode AdvancedNotificationService::RemoveAllSlots()
             (void)NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption, slots);
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove all slots.");
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
@@ -369,12 +345,8 @@ ErrCode AdvancedNotificationService::AddSlotByType(int32_t slotTypeInt)
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<NotificationSlot> slot;
         result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slot);
@@ -393,7 +365,7 @@ ErrCode AdvancedNotificationService::AddSlotByType(int32_t slotTypeInt)
         slots.push_back(slot);
         result = NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption, slots);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Add slot by type.");
     return result;
 }
 
@@ -409,12 +381,8 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlotSelf(int32_t slotTyp
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<NotificationSlot> slot;
         result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slot);
@@ -430,7 +398,7 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlotSelf(int32_t slotTyp
         }
         enabled = slot->GetEnable();
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get enabled for bundle slot.");
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
@@ -454,12 +422,8 @@ ErrCode AdvancedNotificationService::GetSlotFlagsAsBundle(const sptr<Notificatio
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundle, slotFlags);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
@@ -467,7 +431,7 @@ ErrCode AdvancedNotificationService::GetSlotFlagsAsBundle(const sptr<Notificatio
             slotFlags = DEFAULT_SLOT_FLAGS;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get slot flags as bundle.");
 
     return result;
 }
@@ -481,12 +445,8 @@ ErrCode AdvancedNotificationService::GetNotificationSettings(uint32_t &slotFlags
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundleOption, slotFlags);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
@@ -501,7 +461,7 @@ ErrCode AdvancedNotificationService::GetNotificationSettings(uint32_t &slotFlags
             slotFlags = NOTIFICATION_SETTING_SILENT;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get notification settings.");
 
     return result;
 }
@@ -539,13 +499,9 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     uint32_t setFlags = slotFlags;
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(
+    auto submitResult = notificationSvrQueue_.SyncSubmit(
         std::bind([&]() {
             uint32_t savedFlags = 0;
             NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundle, savedFlags);
@@ -560,7 +516,7 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
                 std::to_string(slotFlags), true);
             result = UpdateSlotReminderModeBySlotFlags(bundle, slotFlags);
         }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set slot flags as bundle.");
     ANS_LOGI("%{public}s_%{public}d, slotFlags: %{public}d %{public}d, SetSlotFlagsAsBundle result: %{public}d",
         bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), slotFlags, setFlags, result);
     message.ErrorCode(result);
@@ -815,12 +771,8 @@ ErrCode AdvancedNotificationService::GetSlotByType(int32_t slotTypeInt, sptr<Not
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     sptr<NotificationSlot> slotFromDb = nullptr;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slotFromDb);
         if (slotFromDb != nullptr) {
@@ -833,7 +785,7 @@ ErrCode AdvancedNotificationService::GetSlotByType(int32_t slotTypeInt, sptr<Not
             slot->SetReminderMode(slot->GetSilentReminderMode());
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get slot by type.");
     // if get slot failed, it still return ok.
     return ERR_OK;
 }
@@ -848,17 +800,12 @@ ErrCode AdvancedNotificationService::RemoveSlotByType(int32_t slotTypeInt)
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("notificationSvrQueue_ is nullptr.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_23);
     message.Message(bundleOption->GetBundleName() +
         "_" + std::to_string(bundleOption->GetUid()) + " slotType: " + std::to_string(slotTypeInt));
     ErrCode result = ERR_OK;
     ErrCode dbResult = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = IsAllowedRemoveSlot(bundleOption, slotType);
         if (result != ERR_OK) {
@@ -868,7 +815,7 @@ ErrCode AdvancedNotificationService::RemoveSlotByType(int32_t slotTypeInt)
 
         dbResult = NotificationPreferences::GetInstance()->RemoveNotificationSlot(bundleOption, slotType);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove slot by type.");
     // if remove slot failed, it still return ok.
     message.ErrorCode(dbResult);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
@@ -895,12 +842,8 @@ ErrCode AdvancedNotificationService::GetSlotNumAsBundle(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->GetNotificationSlotsNumForBundle(bundle, num);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
@@ -908,7 +851,7 @@ ErrCode AdvancedNotificationService::GetSlotNumAsBundle(
             num = 0;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get slot num as bundle.");
 
     return result;
 }
@@ -1007,14 +950,14 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
     message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
         " slotType: " + std::to_string(static_cast<uint32_t>(slotType)) +
         " enabled: " +std::to_string(enabled) + "isForceControl" + std::to_string(isForceControl));
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         NotificationSlot slotInfo = NotificationSlot(slotType);
         slotInfo.SetEnable(enabled);
         slotInfo.SetForceControl(isForceControl);
         slotInfo.SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
         result = SetEnabledForBundleSlotInner(bundleOption, bundle, slotType, slotInfo);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set enabled for bundle slot.");
 
     SendEnableNotificationSlotHiSysEvent(bundleOption, slotType, enabled, result);
     message.ErrorCode(result);
@@ -1045,12 +988,8 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<NotificationSlot> slot;
         result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundle, slotType, slot);
@@ -1066,7 +1005,7 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
         }
         enabled = slot->GetEnable();
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get enabled for bundle slot.");
 
     return result;
 }
@@ -1091,7 +1030,7 @@ ErrCode AdvancedNotificationService::SetDefaultSlotForBundle(const sptr<Notifica
     message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
         " slotType: " + std::to_string(static_cast<uint32_t>(slotType)) +
         " enabled: " +std::to_string(enabled) + "isForceControl" + std::to_string(isForceControl));
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         sptr<NotificationSlot> slot;
         result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slot);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST ||
@@ -1108,7 +1047,7 @@ ErrCode AdvancedNotificationService::SetDefaultSlotForBundle(const sptr<Notifica
             return;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set default slot for bundle.");
 
     SendEnableNotificationSlotHiSysEvent(bundleOption, slotType, enabled, result);
     message.ErrorCode(result);
@@ -1193,32 +1132,20 @@ void AdvancedNotificationService::InvockLiveViewSwitchCheck(
         return;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        NotificationLiveViewUtils::GetInstance().SetLiveViewRebuild(userId,
-            NotificationLiveViewUtils::ERASE_FLAG_INIT);
-        return;
-    }
-
-    notificationSvrQueue_->submit_h(std::bind([&, bundles, userId, index]() {
+    notificationSvrQueue_.Submit(std::bind([&, bundles, userId, index]() {
         InvockLiveViewSwitchCheck(bundles, userId, index);
     }),
-        ffrt::task_attr().delay(INTERVAL_CHECK_LIVEVIEW).name("doTriggerLiveView"));
+        INTERVAL_CHECK_LIVEVIEW, "doTriggerLiveView");
 }
 
 void AdvancedNotificationService::TriggerLiveViewSwitchCheck(int32_t userId)
 {
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return;
-    }
-
     if (!NotificationLiveViewUtils::GetInstance().CheckLiveViewRebuild(userId)) {
         return;
     }
 
     ANS_LOGD("Trigger live view start.");
-    notificationSvrQueue_->submit_h(std::bind([&, userId]() {
+    notificationSvrQueue_.Submit(std::bind([&, userId]() {
         std::map<std::string, sptr<NotificationBundleOption>> bundleOptions;
         if (BundleManagerHelper::GetInstance()->GetAllBundleInfo(bundleOptions, userId) != ERR_OK) {
             NotificationLiveViewUtils::GetInstance().SetLiveViewRebuild(userId,
@@ -1244,7 +1171,7 @@ void AdvancedNotificationService::TriggerLiveViewSwitchCheck(int32_t userId)
             bundlesMap.size());
         InvockLiveViewSwitchCheck(checkBundles, userId, 0);
     }),
-        ffrt::task_attr().name("triggerLiveView").delay(DELAY_TIME_TRIGGER_LIVEVIEW));
+        DELAY_TIME_TRIGGER_LIVEVIEW, "triggerLiveView");
 }
 
 ErrCode AdvancedNotificationService::SetCheckConfig(int32_t response, const std::string& requestId,
@@ -1260,12 +1187,7 @@ ErrCode AdvancedNotificationService::SetCheckConfig(int32_t response, const std:
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    notificationSvrQueue_->submit_h(std::bind([&, response, requestId, value]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&, response, requestId, value]() {
         if (response == ERR_OK) {
             LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveViewConfig(value);
             return;
@@ -1295,14 +1217,11 @@ ErrCode AdvancedNotificationService::SetCheckConfig(int32_t response, const std:
             return;
         }
 
-        if (notificationSvrQueue_ == nullptr) {
-            ANS_LOGE("Check handler is null.");
-            return;
-        }
         ANS_LOGI("Push request retry %{public}s %{public}d.", requestId.c_str(), checkParam->retryTime);
-        notificationSvrQueue_->submit_h([&, requestId]() { InvokeCheckConfig(requestId); },
-            ffrt::task_attr().name("checkLiveView").delay(DELAY_TIME_CHECK_LIVEVIEW));
+        notificationSvrQueue_.Submit([&, requestId]() { InvokeCheckConfig(requestId); },
+            DELAY_TIME_CHECK_LIVEVIEW, "checkLiveView");
     }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set check config.");
 
     return ERR_OK;
 }
@@ -1319,13 +1238,8 @@ ErrCode AdvancedNotificationService::GetLiveViewConfig(const std::vector<std::st
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     int32_t result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         sptr<IPushCallBack> pushCallBack = nullptr;
         {
             std::lock_guard<ffrt::mutex> lock(pushMutex_);
@@ -1351,7 +1265,7 @@ ErrCode AdvancedNotificationService::GetLiveViewConfig(const std::vector<std::st
         }
         ANS_LOGI("Get liveViewConfig %{public}s %{public}zu.", requestId.c_str(), bundleList.size());
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get live view config.");
     return result;
 }
 
@@ -1363,12 +1277,8 @@ ErrCode AdvancedNotificationService::GetAllLiveViewEnabledBundlesInner(
         ANS_LOGE("Permission denied.");
         return ERR_ANS_PERMISSION_DENIED;
     }
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&, userId]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&, userId]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->GetAllLiveViewEnabledBundles(userId, bundleOption);
         if (result != ERR_OK) {
@@ -1376,7 +1286,7 @@ ErrCode AdvancedNotificationService::GetAllLiveViewEnabledBundlesInner(
             return;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get all live view enabled bundles.");
 
     return result;
 }
@@ -1448,10 +1358,6 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     if (!CheckAdditionalConfigKey(key)) {
         return ERR_OK;
     }
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
 
     if (key == RING_TRUST_PKG_KEY) {
         std::lock_guard<ffrt::mutex> lock(soundPermissionInfo_->dbMutex_);
@@ -1462,11 +1368,11 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     if (result != ERR_OK) {
         return result;
     }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->SetKvToDb(key, value, SUBSCRIBE_USER_INIT);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set addition config.");
     ANS_LOGI("Set addition config result: %{public}d, key: %{public}s, value: %{public}s",
         result, key.c_str(), value.c_str());
     message.ErrorCode(result);

@@ -24,6 +24,7 @@ ohos_benchmarktest("Benchmark_Notification_Servece_Test") {
     "mock/include",
     "${services_path}/ans/include",
     "${services_path}/ans/include/utils",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   sources = [

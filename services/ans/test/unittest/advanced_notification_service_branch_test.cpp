@@ -1403,7 +1403,7 @@ HWTEST_F(AnsBranchTest, GetDeviceRemindType_3000, Function | SmallTest | Level1)
     MockIsVerfyPermisson(true);
     MockIsVerfyPermisson(true);
     AdvancedNotificationService ans;
-    ans.notificationSvrQueue_ = nullptr;
+    ans.notificationSvrQueue_.Reset();
     int32_t remindType = -1;
     ASSERT_EQ(ans.GetDeviceRemindType(remindType), ERR_ANS_INVALID_PARAM);
 }
@@ -1529,7 +1529,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_286001, Function | SmallTest | Level1)
     result = advancedNotificationService_->SetCheckConfig(7, requestId, key, value);
     ASSERT_EQ(result, ERR_OK);
 
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     result = advancedNotificationService_->SetCheckConfig(8, requestId, key, value);
     ASSERT_EQ(result, ERR_ANS_INVALID_PARAM);
 }
@@ -1611,7 +1611,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_286004, Function | SmallTest | Level1)
     auto ret = advancedNotificationService_->GetLiveViewConfig(bundle_list);
     ASSERT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_UNREGISTERED);
 
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     ret = advancedNotificationService_->GetLiveViewConfig(bundle_list);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
@@ -1627,7 +1627,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_286004, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_286005, Function | SmallTest | Level1)
 {
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     advancedNotificationService_->TriggerLiveViewSwitchCheck(0);
 }
 
@@ -3097,7 +3097,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287061, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_287062, Function | SmallTest | Level1)
 {
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     bool enabled = false;
     auto result = advancedNotificationService_->IsGeofenceEnabled(enabled);
     ASSERT_EQ(result, ERR_ANS_NO_MEMORY);
@@ -3114,7 +3114,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287063, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     bool enabled = false;
     auto result = advancedNotificationService_->SetGeofenceEnabled(enabled);
     ASSERT_EQ(result, ERR_ANS_NO_MEMORY);
@@ -3149,7 +3149,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287065, Function | SmallTest | Level1)
     triggerKeys.push_back("testKey");
     std::vector<int32_t> userIds;
     userIds.push_back(100);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     auto result = advancedNotificationService_->ClearDelayNotification(triggerKeys, userIds);
     ASSERT_EQ(result, ERR_ANS_NO_MEMORY);
 }

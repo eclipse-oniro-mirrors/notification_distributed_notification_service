@@ -61,12 +61,7 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(const std::string &i
         return ERR_ANS_INVALID_BUNDLE;
     }
     bundleOption->SetAppInstanceKey(instanceKey);
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notificationSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGD("called");
         std::vector<sptr<NotificationRequest>> requests;
         for (auto record : notificationList_) {
@@ -79,6 +74,7 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(const std::string &i
         }
         synchronizer->TransferResultData(ERR_OK, requests);
     }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get active notifications.");
     return ERR_OK;
 }
 
@@ -91,12 +87,7 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(
         return ERR_ANS_INVALID_BUNDLE;
     }
     bundleOption->SetAppInstanceKey(instanceKey);
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notificationSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("called");
         notifications.clear();
         for (auto record : notificationList_) {
@@ -108,7 +99,7 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(
             }
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get active notifications.");
     return ERR_OK;
 }
 
@@ -122,11 +113,7 @@ ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notificationSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("called");
         size_t count = 0;
         for (auto record : notificationList_) {
@@ -137,7 +124,7 @@ ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
         }
         num = static_cast<uint64_t>(count);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get active notifications num.");
     return ERR_OK;
 }
 
@@ -159,11 +146,7 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(const sptr<IAnsRe
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notificationSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGD("called");
         std::vector<sptr<Notification>> notifications;
         for (auto record : notificationList_) {
@@ -173,6 +156,7 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(const sptr<IAnsRe
         }
         synchronizer->TransferResultData(ERR_OK, notifications);
     }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get all active notifications.");
     return ERR_OK;
 }
 
@@ -190,11 +174,7 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notificationSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("called");
         notifications.clear();
         for (auto record : notificationList_) {
@@ -203,7 +183,7 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
             }
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get all active notifications.");
     return ERR_OK;
 }
 
@@ -223,11 +203,7 @@ ErrCode AdvancedNotificationService::GetAllNotificationsBySlotTypeInner(std::vec
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notificationSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("called");
         notifications.clear();
         for (auto record : notificationList_) {
@@ -247,7 +223,7 @@ ErrCode AdvancedNotificationService::GetAllNotificationsBySlotTypeInner(std::vec
             notifications.push_back(record->notification);
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get all active notifications inner.");
     return ERR_OK;
 }
 
@@ -288,11 +264,7 @@ ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notificationSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("called");
         for (auto record : notificationList_) {
             if (IsContained(key, record->notification->GetKey())) {
@@ -300,7 +272,7 @@ ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
             }
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get special notifications.");
     return ERR_OK;
 }
 
@@ -326,13 +298,8 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
         }
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notificationSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("called");
 
         auto record = GetRecordFromNotificationList(
@@ -355,7 +322,7 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
             return;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get filter notifications.");
 
     return result;
 }
@@ -373,18 +340,13 @@ ErrCode AdvancedNotificationService::GetNotificationRequestByHashCode(
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notificationSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         auto record = GetFromNotificationList(hashCode);
         if (record != nullptr) {
             notificationRequest = record->request;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get notifications by hashcode.");
     return ERR_OK;
 }
 

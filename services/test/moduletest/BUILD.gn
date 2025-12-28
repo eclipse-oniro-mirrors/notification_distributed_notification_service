@@ -27,6 +27,7 @@ ohos_moduletest("ans_module_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "${services_path}/test/moduletest/mock/include",
     "${services_path}/ans/include/utils",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   sources = [

@@ -55,6 +55,7 @@ ohos_source_set("ans_service_sources") {
     "${services_path}/ans/include/notification_extension",
     "${services_path}/ans/include/utils",
     "${services_path}/ans/src",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   defines = []
@@ -158,6 +159,7 @@ ohos_source_set("ans_service_sources") {
     "${frameworks_module_ans_path}:ans_innerkits",
     "${frameworks_module_ans_path}:ans_manager_stub",
     "${frameworks_module_reminder_path}:reminder_innerkits",
+    "${services_path}/infrastructure:ans_base",
     "../ans:ans.para",
     "../ans:ans.para.dac",
     "../ans:external.json",

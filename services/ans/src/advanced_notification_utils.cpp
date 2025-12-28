@@ -84,20 +84,9 @@ constexpr int32_t MIN_VERSION = 1;
 constexpr int32_t OPERATION_TYPE_COMMON_EVENT = 4;
 }
 
-std::shared_ptr<ffrt::queue> AdvancedNotificationService::GetNotificationSvrQueue()
+Infra::FfrtQueueImpl AdvancedNotificationService::GetNotificationSvrQueue()
 {
     return notificationSvrQueue_;
-}
-
-void AdvancedNotificationService::SubmitAsyncTask(const std::function<void()>& func)
-{
-    notificationSvrQueue_->submit_h(func);
-}
-
-void AdvancedNotificationService::SubmitSyncTask(const std::function<void()>& func)
-{
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(func);
-    notificationSvrQueue_->wait(handler);
 }
 
 sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption()
@@ -174,11 +163,6 @@ sptr<NotificationSortingMap> AdvancedNotificationService::GenerateSortingMap()
 
 ErrCode AdvancedNotificationService::CheckCommonParams()
 {
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
@@ -279,11 +263,7 @@ void AdvancedNotificationService::OnBundleRemovedInner(
     const sptr<NotificationBundleOption> &bundleOption, const int32_t userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return;
-    }
-    notificationSvrQueue_->submit(std::bind([this, bundleOption, userId]() {
+    auto submitResult = notificationSvrQueue_.Submit(std::bind([this, bundleOption, userId]() {
         ANS_LOGD("ffrt enter!");
         ErrCode result = NotificationPreferences::GetInstance()->RemoveNotificationForBundle(bundleOption);
         if (result != ERR_OK) {
@@ -329,6 +309,7 @@ void AdvancedNotificationService::OnBundleRemovedInner(
         }
         DeleteDuplicateMsgs(bundleOption);
     }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return, "On bundle removed inner.");
     NotificationPreferences::GetInstance()->RemoveEnabledDbByBundle(bundleOption);
     NotificationPreferences::GetInstance()->RemoveSilentEnabledDbByBundle(bundleOption);
 #ifdef ENABLE_ANS_AGGREGATION
@@ -424,7 +405,7 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
         }
     };
 
-    notificationSvrQueue_ != nullptr ? notificationSvrQueue_->submit(bundleInstall) : bundleInstall();
+    notificationSvrQueue_.RunOnce(bundleInstall);
 }
 
 void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBundleOption> &bundleOption)
@@ -446,7 +427,7 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
             OnBundleDataAdd(bundleOption);
             return;
         }
-        
+
         bool isSystemDefault = (state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF ||
                                 state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
         if (isSystemDefault) {
@@ -457,7 +438,7 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
         }
     };
 
-    notificationSvrQueue_ != nullptr ? notificationSvrQueue_->submit(bundleUpdate) : bundleUpdate();
+    notificationSvrQueue_.RunOnce(bundleUpdate);
 }
 
 void AdvancedNotificationService::OnBootSystemCompleted()
@@ -486,11 +467,7 @@ void AdvancedNotificationService::OnScreenOff()
 void AdvancedNotificationService::OnDistributedKvStoreDeathRecipient()
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    notificationSvrQueue_.Submit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
         DistributedNotificationManager::GetInstance()->OnDistributedKvStoreDeathRecipient();
@@ -603,12 +580,8 @@ void AdvancedNotificationService::OnDistributedPublish(
         return;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("notificationSvrQueue_ is nullptr.");
-        return;
-    }
     const int32_t callingUid = IPCSkeleton::GetCallingUid();
-    notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, request, activeUserId, callingUid]() {
+    notificationSvrQueue_.Submit(std::bind([this, deviceId, bundleName, request, activeUserId, callingUid]() {
         ANS_LOGD("ffrt enter!");
         if (!CheckDistributedNotificationType(request)) {
             ANS_LOGD("CheckDistributedNotificationType is false.");
@@ -687,12 +660,8 @@ void AdvancedNotificationService::OnDistributedUpdate(
         return;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return;
-    }
     const int32_t callingUid = IPCSkeleton::GetCallingUid();
-    notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, request, activeUserId, callingUid]() {
+    notificationSvrQueue_.Submit(std::bind([this, deviceId, bundleName, request, activeUserId, callingUid]() {
         ANS_LOGD("ffrt enter!");
         if (!CheckDistributedNotificationType(request)) {
             ANS_LOGD("device type not support display.");
@@ -765,11 +734,7 @@ void AdvancedNotificationService::OnDistributedDelete(
     const std::string &deviceId, const std::string &bundleName, const std::string &label, int32_t id)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return;
-    }
-    notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, label, id]() {
+    notificationSvrQueue_.Submit(std::bind([this, deviceId, bundleName, label, id]() {
         ANS_LOGD("ffrt enter!");
         int32_t activeUserId = -1;
         if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
@@ -985,17 +950,13 @@ AnsStatus AdvancedNotificationService::PrepareContinuousTaskNotificationRequest(
 ErrCode AdvancedNotificationService::IsSupportTemplate(const std::string& templateName, bool &support)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         support = false;
         result = NotificationPreferences::GetInstance()->GetTemplateSupported(templateName, support);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Is support template.");
     return result;
 }
 
@@ -1023,15 +984,11 @@ void AdvancedNotificationService::OnResourceRemove(int32_t userId)
 {
     OnUserRemoved(userId);
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         NotificationPreferences::GetInstance()->RemoveSettings(userId);
     }));
-    notificationSvrQueue_->submit_h(std::bind([=]() {
+    notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGI("Resource remove %{public}d", userId);
         std::vector<sptr<NotificationBundleOption>> bundles;
         NotificationPreferences::GetInstance()->GetAllAncoBundlesInfo(ZERO_USER_ID, userId, bundles);
@@ -1043,11 +1000,7 @@ void AdvancedNotificationService::OnResourceRemove(int32_t userId)
 
 void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBundleOption> &bundleOption)
 {
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::string> keys = GetNotificationKeys(bundleOption);
         std::vector<sptr<Notification>> notifications;
@@ -1119,11 +1072,6 @@ void AdvancedNotificationService::OnUserRemoved(const int32_t &userId)
 
 void AdvancedNotificationService::OnUserStopped(int32_t userId)
 {
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return;
-    }
- 
     // erase cached dialog info
     if (!CreateDialogManager()) {
         ANS_LOGE("Create dialog manager failed while user stopped. user id: %{public}d", userId);
@@ -1131,7 +1079,7 @@ void AdvancedNotificationService::OnUserStopped(int32_t userId)
         dialogManager_->RemoveDialogInfoByUserId(userId);
     }
 
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    notificationSvrQueue_.Submit(std::bind([=]() {
         DeleteAllByUserStopped(userId);
     }));
 }
@@ -1159,7 +1107,7 @@ void AdvancedNotificationService::DeleteAllByUserStopped(int32_t userId)
                 break;
             }
         }
- 
+
         if (notification == nullptr) {
             continue;
         }
@@ -1175,7 +1123,7 @@ void AdvancedNotificationService::DeleteAllByUserStopped(int32_t userId)
             SendNotificationsOnCanceled(notifications, nullptr, NotificationConstant::USER_LOGOUT_REASON_DELETE);
         }
     }
- 
+
     if (!notifications.empty()) {
         NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
             notifications, nullptr, NotificationConstant::USER_LOGOUT_REASON_DELETE);
@@ -1215,13 +1163,8 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        std::string message = "Serial queue is invalid.";
-        ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_INVALID_PARAM;
-    }
     std::shared_ptr<ErrCode> result = std::make_shared<ErrCode>(ERR_OK);
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    std::function<void()> task = std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::string> keys = GetNotificationKeys(nullptr);
         std::vector<sptr<Notification>> notifications;
@@ -1258,12 +1201,15 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
         }
         BatchCancelTimer(timerIds);
         *result = ERR_OK;
-    }));
+    });
 
     if (!isAsync) {
-        notificationSvrQueue_->wait(handler);
+        auto submitResult = notificationSvrQueue_.SyncSubmit(task);
+        ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Delete all by user.");
         return *result;
     }
+    auto submitResult = notificationSvrQueue_.Submit(task);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Delete all by user.");
     return ERR_OK;
 }
 
@@ -1552,7 +1498,7 @@ void AdvancedNotificationService::InitNotificationEnableList()
             }
         }
     };
-    notificationSvrQueue_ != nullptr ? notificationSvrQueue_->submit(task) : task();
+    notificationSvrQueue_.RunOnce(task);
 }
 
 bool AdvancedNotificationService::GetBundleInfoByNotificationBundleOption(
@@ -1579,12 +1525,8 @@ bool AdvancedNotificationService::GetBundleInfoByNotificationBundleOption(
 
 void AdvancedNotificationService::RecoverAncoApplicationUserId(int32_t userId)
 {
-    if (notificationSvrQueue_ == nullptr) {
-        return;
-    }
-
     ANS_LOGI("Recover anco application userId %{public}d.", userId);
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&, userId]() {
+    notificationSvrQueue_.Submit(std::bind([&, userId]() {
         ANS_LOGI("Start Recover anco userId %{public}d.", userId);
         NotificationPreferences::GetInstance()->SetAncoApplicationUserId(userId);
     }));
@@ -1810,11 +1752,7 @@ ErrCode AdvancedNotificationService::AllowUseReminder(
 
 void AdvancedNotificationService::ResetDistributedEnabled()
 {
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("notificationSvrQueue is nullptr");
-        return;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    notificationSvrQueue_.Submit(std::bind([=]() {
         std::string value;
         NotificationPreferences::GetInstance()->GetKvFromDb(KEY_TABLE_VERSION, value, ZERO_USER_ID);
         if (!value.empty()) {
@@ -1865,12 +1803,6 @@ ErrCode AdvancedNotificationService::OnRecoverLiveView(
     const std::vector<std::string> &keys)
 {
     ANS_LOGD("called");
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue is nullptr.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     std::vector<sptr<Notification>> notifications;
     int32_t removeReason = NotificationConstant::RECOVER_LIVE_VIEW_DELETE;
     std::vector<uint64_t> timerIds;
@@ -1979,16 +1911,12 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
     int32_t userId)
 {
     ANS_LOGI("Event bundle update %{public}s.", cloneBundleInfo.Dump().c_str());
-    if (notificationSvrQueue_ == nullptr) {
-        return;
-    }
-
     NotificationRingtoneInfo ringtoneInfo;
     if (cloneBundleInfo.GetRingtoneInfo() != nullptr) {
         ringtoneInfo = (*cloneBundleInfo.GetRingtoneInfo());
     }
 
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&, userId, ringtoneInfo, cloneBundleInfo]() {
+    notificationSvrQueue_.Submit(std::bind([&, userId, ringtoneInfo, cloneBundleInfo]() {
         sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
             cloneBundleInfo.GetBundleName(), cloneBundleInfo.GetUid());
         if (bundle == nullptr) {

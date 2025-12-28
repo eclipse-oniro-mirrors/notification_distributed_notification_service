@@ -44,11 +44,7 @@ constexpr int32_t BGTASK_UID = 1096;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
 {
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("notificationSvrQueue_ is nullptr.");
-        return;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGI("Start recover live view. userId:%{public}d", userId);
         if (RecoverGeofenceLiveViewFromDb(userId) != ERR_OK) {
             ANS_LOGE("Recover delay live view from db failed.");
@@ -645,15 +641,10 @@ bool AdvancedNotificationService::IsUpdateSystemLiveviewByOwner(const sptr<Notif
         return true;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return false;
-    }
-
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit([&]() {
         oldRecord = GetFromNotificationList(ownerUid, request->GetNotificationId());
     });
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return false, "Is update system liveview by owner.");
 
     return oldRecord != nullptr;
 }

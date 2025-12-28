@@ -777,21 +777,6 @@ HWTEST_F(AdvancedNotificationServiceUnitTest,
 }
 
 /**
- * @tc.name: CheckPublishPreparedNotification_100
- * @tc.desc: Test CheckPublishPreparedNotification when notificationSvrQueue_ is nullptr.
- * @tc.type: FUNC
- */
-HWTEST_F(AdvancedNotificationServiceUnitTest, CheckPublishPreparedNotification_100, Function | SmallTest | Level1)
-{
-    std::shared_ptr<NotificationRecord> record = nullptr;
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
-
-    auto ret = advancedNotificationService_->CheckPublishPreparedNotification(record, false);
-
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
-}
-
-/**
  * @tc.name: CheckPublishPreparedNotification_200
  * @tc.desc: Test CheckPublishPreparedNotification when record is nullptr.
  * @tc.type: FUNC
@@ -946,7 +931,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetNotificationRequestByHashCode_3
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
 
     auto ret = advancedNotificationService_->GetNotificationRequestByHashCode(hashCode, request);
 
@@ -1412,7 +1397,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetAllNotificationsBySlotType_300,
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
 
     auto res = advancedNotificationService_->GetAllNotificationsBySlotType(notifications, slotType);
 
@@ -1913,7 +1898,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, UpdateNotificationTimerByUid_200, 
     bool isPaused = false;
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     IPCSkeleton::SetCallingUid(1096); // RESSCHED_UID
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
 
     auto ret = advancedNotificationService_->UpdateNotificationTimerByUid(uid, isPaused);
 
@@ -1983,7 +1968,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, DisableNotificationFeature_300, Fu
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
 
     auto ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
 

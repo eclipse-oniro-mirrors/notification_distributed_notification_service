@@ -323,11 +323,7 @@ void AdvancedNotificationService::InitDistributeCallBack()
 AdvancedNotificationService::AdvancedNotificationService()
 {
     ANS_LOGD("called");
-    notificationSvrQueue_ = std::make_shared<ffrt::queue>("NotificationSvrMain");
-    if (!notificationSvrQueue_) {
-        ANS_LOGE("ffrt create failed!");
-        return;
-    }
+    notificationSvrQueue_ = Infra::FfrtQueueImpl("NotificationSvrMain");
     soundPermissionInfo_ = std::make_shared<SoundPermissionInfo>();
     recentInfo_ = std::make_shared<RecentInfo>();
     permissonFilter_ = std::make_shared<PermissionFilter>();
@@ -367,10 +363,7 @@ AdvancedNotificationService::~AdvancedNotificationService()
 
 void AdvancedNotificationService::SelfClean()
 {
-    if (notificationSvrQueue_ != nullptr) {
-        notificationSvrQueue_.reset();
-    }
-
+    notificationSvrQueue_.Reset();
     NotificationSubscriberManager::GetInstance()->ResetFfrtQueue();
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     DistributedNotificationManager::GetInstance()->ResetFfrtQueue();
@@ -422,12 +415,7 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
         return ERR_ANS_INVALID_PARAM;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        std::string message = "notificationSvrQueue is null";
-        ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
         NotificationKey notificationKey;
@@ -450,6 +438,7 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
         synchronizer->TransferResultData(result);
         SendCancelHiSysEvent(notificationId, label, bundleOption, result);
     }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Cancel prepared notification.");
     return ERR_OK;
 }
 
@@ -465,13 +454,8 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_BUNDLE;
     }
-    if (notificationSvrQueue_ == nullptr) {
-        std::string message = "notificationSvrQueue is null";
-        ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
         NotificationKey notificationKey;
@@ -490,7 +474,7 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
 #endif
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Cancel prepared notification.");
     SendCancelHiSysEvent(notificationId, label, bundleOption, result);
     return result;
 }
@@ -718,26 +702,22 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::MakeNotificatio
 AnsStatus AdvancedNotificationService::PublishPreparedNotification(const sptr<NotificationRequest> &request,
     const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner)
 {
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        return AnsStatus(ERR_ANS_NO_MEMORY, "ERR_ANS_NO_MEMORY");
-    }
-
     PublishNotificationParameter parameter;
     GeneratePublishNotificationParameter(request, bundleOption, isUpdateByOwner, parameter);
 
     ErrCode result = ERR_OK;
     if (IsGeofenceNotificationRequest(request)) {
-        ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
             ANS_LOGD("ffrt enter!");
             result = OnNotifyDelayedNotification(parameter);
         }));
-        notificationSvrQueue_->wait(handler);
+        ANS_COND_DO_ERR(submitResult != ERR_OK, return AnsStatus(submitResult, "Serial queue is valid"),
+            "Publish prepared notification.");
         return AnsStatus(result, "OnNotifyDelayedNotification");
     }
 
     bool isExecuted = false;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         if (IsExistsGeofence(request)) {
             if (request->GetLiveViewStatus() == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE) {
@@ -752,7 +732,8 @@ AnsStatus AdvancedNotificationService::PublishPreparedNotification(const sptr<No
             }
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return AnsStatus(submitResult, "Serial queue is valid"),
+        "Publish prepared notification.");
     if (isExecuted) {
         return AnsStatus(result, "PublishPreparedNotification");
     }
@@ -821,7 +802,7 @@ AnsStatus AdvancedNotificationService::PublishPreparedNotificationInner(
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
 #endif
     int32_t uid = parameter.uid;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER
         if (isDisableNotification && IsDisableNotification(bundleOption)) {
@@ -884,7 +865,8 @@ AnsStatus AdvancedNotificationService::PublishPreparedNotificationInner(
         NotificationAnalyticsUtil::ReportPublishSuccessEvent(request, message);
         NotificationAnalyticsUtil::ReportPublishBadge(request);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return AnsStatus(submitResult, "Serial queue is valid"),
+        "Publish prepared notification inner.");
     return ansStatus;
 }
 
@@ -1413,11 +1395,6 @@ void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::sh
 ErrCode AdvancedNotificationService::CheckPublishPreparedNotification(
     const std::shared_ptr<NotificationRecord> &record, bool isSystemApp)
 {
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     if (record == nullptr || record->request == nullptr) {
         ANS_LOGE("Make notification record failed.");
         return ERR_ANS_NO_MEMORY;
@@ -1508,17 +1485,13 @@ ErrCode AdvancedNotificationService::GetBundleImportance(int32_t &importance)
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(
+    auto submitResult = notificationSvrQueue_.SyncSubmit(
         std::bind([&]() {
             ANS_LOGD("ffrt enter!");
             result = NotificationPreferences::GetInstance()->GetImportance(bundleOption, importance);
         }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get bundle importance.");
     return result;
 }
 
@@ -1948,15 +1921,11 @@ ErrCode AdvancedNotificationService::GetHasPoppedDialog(
     const sptr<NotificationBundleOption> bundleOption, bool &hasPopped)
 {
     ANS_LOGD("called");
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         result = NotificationPreferences::GetInstance()->GetHasPoppedDialog(bundleOption, hasPopped);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get has popped dialog.");
     return result;
 }
 
@@ -2286,12 +2255,7 @@ void AdvancedNotificationService::FillActionButtons(const sptr<NotificationReque
         return;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return;
-    }
-
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         auto iter = notificationList_.begin();
         while (iter != notificationList_.end()) {
@@ -2310,7 +2274,6 @@ void AdvancedNotificationService::FillActionButtons(const sptr<NotificationReque
             request->AddActionButton(actionButton);
         }
     }));
-    notificationSvrQueue_->wait(handler);
 }
 
 bool AdvancedNotificationService::IsNeedNotifyConsumed(const sptr<NotificationRequest> &request)
@@ -2490,10 +2453,6 @@ ErrCode AdvancedNotificationService::DisableNotificationFeature(const sptr<Notif
         ANS_LOGE("notificationDisable is permission denied");
         return ERR_ANS_PERMISSION_DENIED;
     }
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("serial queue is invalid");
-        return ERR_ANS_INVALID_PARAM;
-    }
     int32_t userId = notificationDisable->GetUserId();
     if (userId != SUBSCRIBE_USER_INIT) {
         std::vector<int32_t> userIds;
@@ -2504,12 +2463,12 @@ ErrCode AdvancedNotificationService::DisableNotificationFeature(const sptr<Notif
             }
         }
     }
-    ffrt::task_handle handler =
-        notificationSvrQueue_->submit_h(std::bind([copyNotificationDisable = notificationDisable]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(
+        std::bind([copyNotificationDisable = notificationDisable]() {
             ANS_LOGD("the ffrt enter");
             NotificationPreferences::GetInstance()->SetDisableNotificationInfo(copyNotificationDisable);
         }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Disable notification feature.");
     if (notificationDisable->GetDisabled()) {
         if (userId != SUBSCRIBE_USER_INIT) {
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER
