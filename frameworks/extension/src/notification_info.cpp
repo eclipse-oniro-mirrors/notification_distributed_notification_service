@@ -248,6 +248,8 @@ NotificationInfo *NotificationInfo::FromJson(const nlohmann::json &jsonObject)
                 NotificationJsonConverter::ConvertFromJson<NotificationExtensionContent>(contentOptionObj);
             if (pExtensionContent == nullptr) {
                 ANS_LOGE("null pExtensionContent");
+                delete pInfo;
+                pInfo = nullptr;
                 return nullptr;
             }
 
