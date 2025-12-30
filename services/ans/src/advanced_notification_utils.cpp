@@ -1124,6 +1124,13 @@ void AdvancedNotificationService::OnUserStopped(int32_t userId)
         return;
     }
  
+    // erase cached dialog info
+    if (!CreateDialogManager()) {
+        ANS_LOGE("Create dialog manager failed while user stopped. user id: %{public}d", userId);
+    } else {
+        dialogManager_->RemoveDialogInfoByUserId(userId);
+    }
+
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         DeleteAllByUserStopped(userId);
     }));

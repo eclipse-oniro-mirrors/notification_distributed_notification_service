@@ -111,6 +111,14 @@ public:
     void RemoveDialogInfoByBundleOption(const sptr<NotificationBundleOption>& bundle,
         std::unique_ptr<DialogInfo>& dialogInfoRemoved);
 
+    /**
+    * @brief Remove dialog info while stopping system user.
+    *
+    * @param userId The user id of stopped user.
+    * @return void.
+    */
+    void RemoveDialogInfoByUserId(const int32_t userId);
+
     inline static const std::string NOTIFICATION_DIALOG_SERVICE_BUNDLE = "com.ohos.notificationdialog";
     inline static const std::string NOTIFICATION_DIALOG_SERVICE_ABILITY = "EnableNotificationDialog";
 
