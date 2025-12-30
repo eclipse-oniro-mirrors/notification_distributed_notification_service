@@ -618,7 +618,7 @@ ani_status GetMapByAniMap(ani_env *env, ani_object &mapObj,
         }
         ani_boolean anivalue = ANI_FALSE;
         if ((status = env->Object_CallMethodByName_Boolean(
-            reinterpret_cast<ani_object>(val), "unboxed", nullptr, &anivalue)) != ANI_OK) {
+            reinterpret_cast<ani_object>(val), "toBoolean", nullptr, &anivalue)) != ANI_OK) {
             ANS_LOGE("Failed to get bool, status: %{public}d", status);
             return ANI_ERROR;
         }
