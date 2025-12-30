@@ -23,12 +23,6 @@ namespace OHOS {
 namespace NotificationNapi {
 namespace {
     constexpr int8_t SETADDITION_CONFIG_NUM = 2;
-    constexpr char KEY_NAME[] = "AGGREGATE_CONFIG";
-    constexpr char RING_LIST_KEY_NAME[] = "RING_TRUSTLIST_PKG";
-    constexpr char PRIORITY_RULE_CONFIG_KEY_NAME[] = "notificationRuleConfig";
-    constexpr char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
-    constexpr char CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG[] = "CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG";
-    constexpr char HEALTH_BUNDLE_WHITE_LIST[]  = "HEALTH_BUNDLE_WHITE_LIST";
 }
 
 struct ConfigParams {
@@ -108,17 +102,6 @@ void AsyncSetConfigComplete(napi_env env, napi_status status, void *data)
     ANS_LOGD("end");
 }
 
-bool CheckAdditionalConfigKey(const std::string &key)
-{
-    if (key.empty() || (key != KEY_NAME && key != RING_LIST_KEY_NAME &&
-        key != CTRL_LIST_KEY_NAME && key != HEALTH_BUNDLE_WHITE_LIST && key != PRIORITY_RULE_CONFIG_KEY_NAME &&
-        key != CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG)) {
-        ANS_LOGW("Argument param error. not allow key: %{public}s.", key.c_str());
-        return false;
-    }
-    return true;
-}
-
 napi_value NapiSetAdditionConfig(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("called");
@@ -148,7 +131,7 @@ napi_value NapiSetAdditionConfig(napi_env env, napi_callback_info info)
         [](napi_env env, void *data) {
             ANS_LOGD("NapiSetAdditionConfig work excute.");
             AsyncCallbackInfoConfig *asynccallbackinfo = static_cast<AsyncCallbackInfoConfig *>(data);
-            if (asynccallbackinfo && CheckAdditionalConfigKey(asynccallbackinfo->params.key)) {
+            if (asynccallbackinfo) {
                     asynccallbackinfo->info.errorCode = NotificationHelper::SetAdditionConfig(
                         asynccallbackinfo->params.key, asynccallbackinfo->params.value);
             }

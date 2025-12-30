@@ -35,9 +35,10 @@ public:
 private:
     void RestoreBundlePriorityInfo(const int32_t uid, const NotificationClonePriorityInfo &priorityInfo);
     void SetDefaultPriorityInfo(const int32_t uid, const std::string &bundleName);
-    void BatchSetDefaultPriorityInfo(const std::set<std::string> &bundleNames);
+    void BatchSetDefaultPriorityInfo(const std::set<std::string> &bundleNames, const int32_t userId);
 private:
     std::vector<NotificationClonePriorityInfo> priorityInfo_;
+    std::set<std::string> clonedSystemApps_;
     ffrt::mutex lock_;
 };
 } // namespace Notification

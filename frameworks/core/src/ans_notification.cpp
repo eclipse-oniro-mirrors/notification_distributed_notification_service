@@ -2317,10 +2317,6 @@ ErrCode AnsNotification::UnregisterPushCallback()
 
 ErrCode AnsNotification::SetAdditionConfig(const std::string &key, const std::string &value)
 {
-    if (key.empty()) {
-        ANS_LOGE("Set package config fail: key is empty.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("Get ans manager proxy fail.");

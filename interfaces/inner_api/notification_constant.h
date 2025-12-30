@@ -531,7 +531,6 @@ public:
     static const char* DEVICESTYPES[6];
     static const char* ANS_VOIP;
     static const char* PC_PAD_VOIP_FLAG;
-    static const char* HEALTH_BUNDLE_WHITE_LIST;
 
     /**
      * Indicates priority notification type

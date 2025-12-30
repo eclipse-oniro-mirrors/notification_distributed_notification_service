@@ -17,8 +17,12 @@
 
 namespace OHOS {
 namespace Notification {
+const std::string AGGREGATE_KEY = "AGGREGATE_CONFIG";
 const std::string RING_TRUST_PKG_KEY = "RING_TRUSTLIST_PKG";
 const std::string PRIORITY_RULE_CONFIG_KEY = "notificationRuleConfig";
+const std::string CTRL_LIST_KEY = "NOTIFICATION_CTL_LIST_PKG";
+const std::string CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY = "CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG";
+const std::string HEALTH_BUNDLE_WHITE_LIST_KEY = "HEALTH_BUNDLE_WHITE_LIST";
 const std::string DELAY_UPDATE_PRIORITY_KEY = "delay_update_priority";
 const std::string DOWNLOAD_TEMPLATE_NAME = "downloadTemplate";
 const std::string ANS_EXTENDINFO_INFO_PRE = "notification_collaboration_";

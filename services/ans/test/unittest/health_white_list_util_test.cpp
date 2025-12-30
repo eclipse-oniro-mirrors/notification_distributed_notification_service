@@ -53,7 +53,7 @@ void HealthWhiteListUtilTest::SetUp(void)
  */
 HWTEST_F(HealthWhiteListUtilTest, ParseDbDate_100, Function | SmallTest | Level1)
 {
-    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "", -1);
+    NotificationPreferences::GetInstance()->SetKvToDb(HEALTH_BUNDLE_WHITE_LIST_KEY, "", -1);
     nlohmann::json bundles;
     bool result = healthWhiteListUtil_->ParseDbDate(bundles);
     ASSERT_EQ(result, false);
@@ -66,7 +66,7 @@ HWTEST_F(HealthWhiteListUtilTest, ParseDbDate_100, Function | SmallTest | Level1
  */
 HWTEST_F(HealthWhiteListUtilTest, ParseDbDate_200, Function | SmallTest | Level1)
 {
-    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "invalidJson", -1);
+    NotificationPreferences::GetInstance()->SetKvToDb(HEALTH_BUNDLE_WHITE_LIST_KEY, "invalidJson", -1);
     nlohmann::json bundles;
     bool result = healthWhiteListUtil_->ParseDbDate(bundles);
     ASSERT_EQ(result, false);
@@ -79,7 +79,7 @@ HWTEST_F(HealthWhiteListUtilTest, ParseDbDate_200, Function | SmallTest | Level1
  */
 HWTEST_F(HealthWhiteListUtilTest, ParseDbDate_300, Function | SmallTest | Level1)
 {
-    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "[\"testBundleName\"]", -1);
+    NotificationPreferences::GetInstance()->SetKvToDb(HEALTH_BUNDLE_WHITE_LIST_KEY, "[\"testBundleName\"]", -1);
     nlohmann::json bundles;
     bool result = healthWhiteListUtil_->ParseDbDate(bundles);
     ASSERT_EQ(result, true);
@@ -105,7 +105,7 @@ HWTEST_F(HealthWhiteListUtilTest, CheckInLiveViewList_100, Function | SmallTest 
 HWTEST_F(HealthWhiteListUtilTest, CheckInLiveViewList_200, Function | SmallTest | Level1)
 {
     nlohmann::json bundles;
-    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "invalidJson", -1);
+    NotificationPreferences::GetInstance()->SetKvToDb(HEALTH_BUNDLE_WHITE_LIST_KEY, "invalidJson", -1);
     bool result = healthWhiteListUtil_->CheckInLiveViewList("bundleName");
     ASSERT_EQ(result, true);
 }
@@ -118,7 +118,7 @@ HWTEST_F(HealthWhiteListUtilTest, CheckInLiveViewList_200, Function | SmallTest 
 HWTEST_F(HealthWhiteListUtilTest, CheckInLiveViewList_300, Function | SmallTest | Level1)
 {
     nlohmann::json bundles;
-    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "[\"testBundleName\"]", -1);
+    NotificationPreferences::GetInstance()->SetKvToDb(HEALTH_BUNDLE_WHITE_LIST_KEY, "[\"testBundleName\"]", -1);
     bool result = healthWhiteListUtil_->CheckInLiveViewList("testBundleName");
     ASSERT_EQ(result, true);
 }
@@ -131,7 +131,7 @@ HWTEST_F(HealthWhiteListUtilTest, CheckInLiveViewList_300, Function | SmallTest 
 HWTEST_F(HealthWhiteListUtilTest, CheckInLiveViewList_400, Function | SmallTest | Level1)
 {
     nlohmann::json bundles;
-    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "[\"testBundleName\"]", -1);
+    NotificationPreferences::GetInstance()->SetKvToDb(HEALTH_BUNDLE_WHITE_LIST_KEY, "[\"testBundleName\"]", -1);
     bool result = healthWhiteListUtil_->CheckInLiveViewList("outList");
     ASSERT_EQ(result, false);
 }
@@ -159,7 +159,7 @@ HWTEST_F(HealthWhiteListUtilTest, AddExtendFlagForRequest_200, Function | SmallT
     sptr<Notification> notification = new Notification();
     notifications.push_back(notification);
 
-    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "invalidJson", -1);
+    NotificationPreferences::GetInstance()->SetKvToDb(HEALTH_BUNDLE_WHITE_LIST_KEY, "invalidJson", -1);
     healthWhiteListUtil_->AddExtendFlagForRequest(notifications);
     EXPECT_EQ(notifications.size(), 1);
 }
@@ -176,7 +176,7 @@ HWTEST_F(HealthWhiteListUtilTest, AddExtendFlagForRequest_300, Function | SmallT
     sptr<Notification> notification = new Notification(request);
     notifications.push_back(notification);
 
-    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "[\"testBundleName\"]", -1);
+    NotificationPreferences::GetInstance()->SetKvToDb(HEALTH_BUNDLE_WHITE_LIST_KEY, "[\"testBundleName\"]", -1);
     healthWhiteListUtil_->AddExtendFlagForRequest(notifications);
     EXPECT_EQ(notifications.size(), 1);
 }
@@ -194,7 +194,7 @@ HWTEST_F(HealthWhiteListUtilTest, AddExtendFlagForRequest_400, Function | SmallT
     sptr<Notification> notification = new Notification(request);
     notifications.push_back(notification);
 
-    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "[\"testBundleName\"]", -1);
+    NotificationPreferences::GetInstance()->SetKvToDb(HEALTH_BUNDLE_WHITE_LIST_KEY, "[\"testBundleName\"]", -1);
     healthWhiteListUtil_->AddExtendFlagForRequest(notifications);
     EXPECT_EQ(notifications.size(), 1);
 }
@@ -215,7 +215,7 @@ HWTEST_F(HealthWhiteListUtilTest, AddExtendFlagForRequest_500, Function | SmallT
     sptr<Notification> notification = new Notification(request);
     notifications.push_back(notification);
 
-    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "[\"testBundleName\"]", -1);
+    NotificationPreferences::GetInstance()->SetKvToDb(HEALTH_BUNDLE_WHITE_LIST_KEY, "[\"testBundleName\"]", -1);
     healthWhiteListUtil_->AddExtendFlagForRequest(notifications);
     EXPECT_EQ(notifications.size(), 1);
 }
@@ -234,7 +234,7 @@ HWTEST_F(HealthWhiteListUtilTest, AddExtendFlagForRequest_600, Function | SmallT
     sptr<Notification> notification = new Notification(request);
     notifications.push_back(notification);
 
-    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "[\"testBundleName\"]", -1);
+    NotificationPreferences::GetInstance()->SetKvToDb(HEALTH_BUNDLE_WHITE_LIST_KEY, "[\"testBundleName\"]", -1);
     healthWhiteListUtil_->AddExtendFlagForRequest(notifications);
     std::shared_ptr<AAFwk::WantParams> extendInfo = request->GetExtendInfo();
     EXPECT_TRUE(extendInfo != nullptr);
