@@ -37,7 +37,7 @@ static bool CheckReminderId(int32_t reminderId,
     return true;
 }
 
-static bool UnWarpDate(uintptr_t date, ani_double& outValue)
+static bool UnWarpDate(uintptr_t date, ani_long& outValue)
 {
     ani_object value = reinterpret_cast<ani_object>(date);
     ani_env* env = ::taihe::get_env();
@@ -56,7 +56,7 @@ static bool UnWarpDate(uintptr_t date, ani_double& outValue)
         ANSR_LOGE("Failed to find method valueOf.");
         return false;
     }
-    if (ANI_OK != env->Object_CallMethod_Double(value, get, &outValue)) {
+    if (ANI_OK != env->Object_CallMethod_Long(value, get, &outValue)) {
         ANSR_LOGE("Failed to call method valueOf.");
         return false;
     }
@@ -126,10 +126,10 @@ static bool WarpDate(int64_t time, ani_object &outObj)
         ANSR_LOGE("Object_New faild.");
         return false;
     }
-    ani_double msObj = 0;
-    if ((status = env->Object_CallMethodByName_Double(outObj, "setTime", "d:d", &msObj, static_cast<double>(time)))
+    ani_long msObj = 0;
+    if ((status = env->Object_CallMethodByName_Long(outObj, "setTime", "l:l", &msObj, time))
         != ANI_OK) {
-        ANSR_LOGE("Object_CallMethodByName_Double setDate faild.");
+        ANSR_LOGE("Object_CallMethodByName_Long setTime faild.");
         return false;
     }
     return true;
@@ -228,7 +228,7 @@ void AddExcludeDateSync(int32_t reminderId, uintptr_t date)
     if (!CheckReminderId(reminderId)) {
         return;
     }
-    ani_double dateValue;
+    ani_long dateValue;
     int32_t ret = ERR_OK;
     if (!UnWarpDate(date, dateValue)) {
         ret = ReminderAgentManagerNapi::Common::ERR_REMINDER_INVALID_PARAM;
