@@ -2576,5 +2576,351 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationTriggerDump_0100, Level1)
     bool result = it != std::string::npos ? true : false;
     EXPECT_EQ(result, true);
 }
+
+/**
+ * @tc.number    : GetRecordFromNotificationList_0300
+ * @tc.name      : GetRecordFromNotificationList_0300
+ * @tc.desc      : Test GetRecordFromNotificationList method when triggerNotificationList_ is not empty
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetRecordFromNotificationList_0300, Level1)
+{
+    std::string bundleName = "test";
+    int bundleUid = 2;
+    int notificationId = 1;
+    std::string label = "";
+    int32_t userId = -1;
+    sptr<NotificationBundleOption> bundleOne = new (std::nothrow) NotificationBundleOption(bundleName, bundleUid);
+    ASSERT_NE(bundleOne, nullptr);
+    sptr<NotificationRequest> requestOne = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(requestOne, nullptr);
+    requestOne->SetNotificationId(notificationId);
+    auto recordOne = advancedNotificationService_->MakeNotificationRecord(requestOne, bundleOne);
+    advancedNotificationService_->triggerNotificationList_.push_back(recordOne);
+
+    sptr<NotificationBundleOption> bundleTwo = new (std::nothrow) NotificationBundleOption(bundleName, bundleUid);
+    ASSERT_NE(bundleTwo, nullptr);
+    sptr<NotificationRequest> requestTwo = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(requestTwo, nullptr);
+    requestTwo->SetNotificationId(notificationId);
+    auto recordTwo = advancedNotificationService_->MakeNotificationRecord(requestTwo, bundleTwo);
+    advancedNotificationService_->triggerNotificationList_.push_back(recordTwo);
+    auto ret = advancedNotificationService_->GetRecordFromNotificationList(
+        notificationId, bundleUid, label, bundleName, userId);
+    ASSERT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.number    : GetRecordFromNotificationList_0400
+ * @tc.name      : GetRecordFromNotificationList_0400
+ * @tc.desc      : Test GetRecordFromNotificationList method when triggerNotificationList_ is not empty
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetRecordFromNotificationList_0400, Level1)
+{
+    std::string bundleName = "test";
+    int bundleUid = 2;
+    int notificationId = 1;
+    std::string label = "";
+    int32_t userId = -1;
+    sptr<NotificationBundleOption> bundleOne = new NotificationBundleOption(bundleName, bundleUid);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END);
+    std::shared_ptr<NotificationContent> contentOne = std::make_shared<NotificationContent>(liveViewContent);
+    sptr<NotificationRequest> requestOne = new (std::nothrow) NotificationRequest();
+    requestOne->SetContent(contentOne);
+    requestOne->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    requestOne->SetNotificationId(notificationId);
+    auto recordOne = advancedNotificationService_->MakeNotificationRecord(requestOne, bundleOne);
+    advancedNotificationService_->triggerNotificationList_.push_back(recordOne);
+
+    sptr<NotificationBundleOption> bundleTwo = new NotificationBundleOption(bundleName, bundleUid);
+    sptr<NotificationRequest> requestTwo = new (std::nothrow) NotificationRequest();
+    requestTwo->SetNotificationId(notificationId);
+    auto recordTwo = advancedNotificationService_->MakeNotificationRecord(requestTwo, bundleTwo);
+    advancedNotificationService_->triggerNotificationList_.push_back(recordTwo);
+    auto ret = advancedNotificationService_->GetRecordFromNotificationList(
+        notificationId, bundleUid, label, bundleName, userId);
+    ASSERT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.number    : GetRecordFromNotificationList_0500
+ * @tc.name      : GetRecordFromNotificationList_0500
+ * @tc.desc      : Test GetRecordFromNotificationList method when notificationList_ is not empty
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetRecordFromNotificationList_0500, Level1)
+{
+    std::string bundleName = "test";
+    int bundleUid = 2;
+    int notificationId = 1;
+    std::string label = "";
+    int32_t userId = -1;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(bundleName, bundleUid);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(notificationId);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    auto ret = advancedNotificationService_->GetRecordFromNotificationList(
+        notificationId, bundleUid, label, bundleName, userId);
+    ASSERT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.number    : GetLongitude_0100
+ * @tc.name      : GetLongitude_0100
+ * @tc.desc      : Test the SetLongitude and GetLongitude methods for NotificationGeofence
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetLongitude_0100, Level1)
+{
+    sptr<NotificationGeofence> notificationGeofence = new (std::nothrow) NotificationGeofence();
+    ASSERT_NE(notificationGeofence, nullptr);
+    double longitude = 10.0;
+    notificationGeofence->SetLongitude(longitude);
+    ASSERT_EQ(notificationGeofence->GetLongitude(), longitude);
+}
+
+/**
+ * @tc.number    : GetLatitude_0100
+ * @tc.name      : GetLatitude_0100
+ * @tc.desc      : Test the SetLatitude and GetLatitude methods for NotificationGeofence
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetLatitude_0100, Level1)
+{
+    sptr<NotificationGeofence> notificationGeofence = new (std::nothrow) NotificationGeofence();
+    ASSERT_NE(notificationGeofence, nullptr);
+    double latitude = 10.0;
+    notificationGeofence->SetLatitude(latitude);
+    ASSERT_EQ(notificationGeofence->GetLatitude(), latitude);
+}
+
+/**
+ * @tc.number    : GetRadius_0100
+ * @tc.name      : GetRadius_0100
+ * @tc.desc      : Test the SetRadius and GetRadius methods for NotificationGeofence
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetRadius_0100, Level1)
+{
+    sptr<NotificationGeofence> notificationGeofence = new (std::nothrow) NotificationGeofence();
+    ASSERT_NE(notificationGeofence, nullptr);
+    double radius = 10.0;
+    notificationGeofence->SetRadius(radius);
+    ASSERT_EQ(notificationGeofence->GetRadius(), radius);
+}
+
+/**
+ * @tc.number    : GetDelayTime_0100
+ * @tc.name      : GetDelayTime_0100
+ * @tc.desc      : Test the SetDelayTime and GetDelayTime methods for NotificationGeofence
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetDelayTime_0100, Level1)
+{
+    sptr<NotificationGeofence> notificationGeofence = new (std::nothrow) NotificationGeofence();
+    ASSERT_NE(notificationGeofence, nullptr);
+    int32_t delayTime = 10;
+    notificationGeofence->SetDelayTime(delayTime);
+    ASSERT_EQ(notificationGeofence->GetDelayTime(), delayTime);
+}
+
+/**
+ * @tc.number    : GetCoordinateSystemType_0100
+ * @tc.name      : GetCoordinateSystemType_0100
+ * @tc.desc      : Test the SetCoordinateSystemType and GetCoordinateSystemType methods for NotificationGeofence
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetCoordinateSystemType_0100, Level1)
+{
+    sptr<NotificationGeofence> notificationGeofence = new (std::nothrow) NotificationGeofence();
+    ASSERT_NE(notificationGeofence, nullptr);
+    NotificationConstant::CoordinateSystemType coordinateSystemType =
+        NotificationConstant::CoordinateSystemType::COORDINATE_TYPE_GCJ02;
+    notificationGeofence->SetCoordinateSystemType(coordinateSystemType);
+    ASSERT_EQ(notificationGeofence->GetCoordinateSystemType(), coordinateSystemType);
+}
+
+/**
+ * @tc.number    : GetMonitorEvent_0100
+ * @tc.name      : GetMonitorEvent_0100
+ * @tc.desc      : Test the SetMonitorEvent and GetMonitorEvent methods for NotificationGeofence
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetMonitorEvent_0100, Level1)
+{
+    sptr<NotificationGeofence> notificationGeofence = new (std::nothrow) NotificationGeofence();
+    ASSERT_NE(notificationGeofence, nullptr);
+    NotificationConstant::MonitorEvent monitorEvent = NotificationConstant::MonitorEvent::MONITOR_TYPE_LEAVE;
+    notificationGeofence->SetMonitorEvent(monitorEvent);
+    ASSERT_EQ(notificationGeofence->GetMonitorEvent(), monitorEvent);
+}
+
+/**
+ * @tc.number    : Marshalling_0100
+ * @tc.name      : Marshalling_0100
+ * @tc.desc      : Test the Marshalling methods for NotificationGeofence
+ */
+HWTEST_F(AdvancedNotificationServiceTest, Marshalling_0100, Level1)
+{
+    sptr<NotificationGeofence> notificationGeofence = new (std::nothrow) NotificationGeofence();
+    ASSERT_NE(notificationGeofence, nullptr);
+    double longitude = 10.0;
+    double latitude = 11.0;
+    double radius = 12.0;
+    int32_t delayTime = 11;
+    NotificationConstant::CoordinateSystemType coordinateSystemType =
+        NotificationConstant::CoordinateSystemType::COORDINATE_TYPE_GCJ02;
+    NotificationConstant::MonitorEvent monitorEvent = NotificationConstant::MonitorEvent::MONITOR_TYPE_LEAVE;
+    notificationGeofence->SetLongitude(longitude);
+    notificationGeofence->SetLatitude(latitude);
+    notificationGeofence->SetRadius(radius);
+    notificationGeofence->SetDelayTime(delayTime);
+    notificationGeofence->SetCoordinateSystemType(coordinateSystemType);
+    notificationGeofence->SetMonitorEvent(monitorEvent);
+    Parcel parcel;
+    auto ret = notificationGeofence->Marshalling(parcel);
+    ASSERT_EQ(ret, true);
+    sptr<NotificationGeofence> notificationGeofenceByUnmarshalling = notificationGeofence->Unmarshalling(parcel);
+    ASSERT_NE(notificationGeofenceByUnmarshalling, nullptr);
+    ASSERT_EQ(notificationGeofenceByUnmarshalling->GetLongitude(), longitude);
+    ASSERT_EQ(notificationGeofenceByUnmarshalling->GetLatitude(), latitude);
+    ASSERT_EQ(notificationGeofenceByUnmarshalling->GetRadius(), radius);
+    ASSERT_EQ(notificationGeofenceByUnmarshalling->GetDelayTime(), delayTime);
+    ASSERT_EQ(notificationGeofenceByUnmarshalling->GetCoordinateSystemType(), coordinateSystemType);
+    ASSERT_EQ(notificationGeofenceByUnmarshalling->GetMonitorEvent(), monitorEvent);
+}
+
+/**
+ * @tc.number    : ToJson_0100
+ * @tc.name      : ToJson_0100
+ * @tc.desc      : Test the ToJson methods for NotificationGeofence
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ToJson_0100, Level1)
+{
+    sptr<NotificationGeofence> notificationGeofence = new (std::nothrow) NotificationGeofence();
+    ASSERT_NE(notificationGeofence, nullptr);
+    double longitude = 10.0;
+    double latitude = 11.0;
+    double radius = 12.0;
+    int32_t delayTime = 11;
+    NotificationConstant::CoordinateSystemType coordinateSystemType =
+        NotificationConstant::CoordinateSystemType::COORDINATE_TYPE_GCJ02;
+    NotificationConstant::MonitorEvent monitorEvent = NotificationConstant::MonitorEvent::MONITOR_TYPE_LEAVE;
+    notificationGeofence->SetLongitude(longitude);
+    notificationGeofence->SetLatitude(latitude);
+    notificationGeofence->SetRadius(radius);
+    notificationGeofence->SetDelayTime(delayTime);
+    notificationGeofence->SetCoordinateSystemType(coordinateSystemType);
+    notificationGeofence->SetMonitorEvent(monitorEvent);
+    nlohmann::json jsonObject;
+    notificationGeofence->ToJson(jsonObject);
+    ASSERT_EQ(jsonObject["fenceLongitude"], longitude);
+    ASSERT_EQ(jsonObject["fenceLatitude"], latitude);
+    ASSERT_EQ(jsonObject["fenceRadius"], radius);
+    ASSERT_EQ(jsonObject["fenceDelayTime"], delayTime);
+    ASSERT_EQ(jsonObject["fenceCoordinateSystemType"], coordinateSystemType);
+    ASSERT_EQ(jsonObject["fenceMonitorEvent"], monitorEvent);
+}
+
+/**
+ * @tc.number    : FromJson_0100
+ * @tc.name      : FromJson_0100
+ * @tc.desc      : Test the FromJson methods for NotificationGeofence
+ */
+HWTEST_F(AdvancedNotificationServiceTest, FromJson_0100, Level1)
+{
+    nlohmann::json jsonObject = nullptr;
+    sptr<NotificationGeofence> notificationGeofence = new (std::nothrow) NotificationGeofence();
+    ASSERT_NE(notificationGeofence, nullptr);
+    sptr<NotificationGeofence> notificationGeofenceTwo = notificationGeofence->FromJson(jsonObject);
+    ASSERT_EQ(notificationGeofenceTwo, nullptr);
+
+    double longitude = 10.0;
+    double latitude = 11.0;
+    double radius = 12.0;
+    int32_t delayTime = 11;
+    NotificationConstant::CoordinateSystemType coordinateSystemType =
+        NotificationConstant::CoordinateSystemType::COORDINATE_TYPE_GCJ02;
+    NotificationConstant::MonitorEvent monitorEvent = NotificationConstant::MonitorEvent::MONITOR_TYPE_LEAVE;
+
+    nlohmann::json jsonObjectTwo;
+    jsonObjectTwo["fenceLongitude"] = longitude;
+    notificationGeofenceTwo = notificationGeofence->FromJson(jsonObjectTwo);
+    ASSERT_NE(notificationGeofenceTwo, nullptr);
+    ASSERT_EQ(notificationGeofenceTwo->GetLongitude(), longitude);
+
+    jsonObjectTwo["fenceLatitude"] = latitude;
+    notificationGeofenceTwo = notificationGeofence->FromJson(jsonObjectTwo);
+    ASSERT_NE(notificationGeofenceTwo, nullptr);
+    ASSERT_EQ(notificationGeofenceTwo->GetLatitude(), latitude);
+
+    jsonObjectTwo["fenceRadius"] = radius;
+    notificationGeofenceTwo = notificationGeofence->FromJson(jsonObjectTwo);
+    ASSERT_NE(notificationGeofenceTwo, nullptr);
+    ASSERT_EQ(notificationGeofenceTwo->GetRadius(), radius);
+
+
+    jsonObjectTwo["fenceDelayTime"] = delayTime;
+    notificationGeofenceTwo = notificationGeofence->FromJson(jsonObjectTwo);
+    ASSERT_NE(notificationGeofenceTwo, nullptr);
+    ASSERT_EQ(notificationGeofenceTwo->GetDelayTime(), delayTime);
+
+    jsonObjectTwo["fenceCoordinateSystemType"] = static_cast<int32_t>(coordinateSystemType);
+    notificationGeofenceTwo = notificationGeofence->FromJson(jsonObjectTwo);
+    ASSERT_NE(notificationGeofenceTwo, nullptr);
+    ASSERT_EQ(notificationGeofenceTwo->GetCoordinateSystemType(), coordinateSystemType);
+
+    jsonObjectTwo["fenceMonitorEvent"] = static_cast<int32_t>(monitorEvent);
+    notificationGeofenceTwo = notificationGeofence->FromJson(jsonObjectTwo);
+    ASSERT_NE(notificationGeofenceTwo, nullptr);
+    ASSERT_EQ(notificationGeofenceTwo->GetMonitorEvent(), monitorEvent);
+
+    nlohmann::json jsonObjectThree;
+    jsonObjectThree["testName"] = "test";
+    notificationGeofenceTwo = notificationGeofence->FromJson(jsonObjectThree);
+    ASSERT_NE(notificationGeofenceTwo, nullptr);
+}
+
+/**
+ * @tc.number    : FromJson_0200
+ * @tc.name      : FromJson_0200
+ * @tc.desc      : Test the FromJson methods for NotificationGeofence
+ */
+HWTEST_F(AdvancedNotificationServiceTest, FromJson_0200, Level1)
+{
+    nlohmann::json jsonObject;
+    jsonObject["fenceLongitude"] = "fenceLongitudeTest";
+    jsonObject["fenceLatitude"] = "fenceLatitudeTest";
+    jsonObject["fenceRadius"] = "fenceRadiusTest";
+    jsonObject["fenceDelayTime"] = "fenceDelayTimeTest";
+    jsonObject["fenceCoordinateSystemType"] = "fenceCoordinateSystemTypeTest";
+    jsonObject["fenceMonitorEvent"] = "fenceMonitorEventTest";
+
+    sptr<NotificationGeofence> notificationGeofence = new (std::nothrow) NotificationGeofence();
+    ASSERT_NE(notificationGeofence, nullptr);
+    sptr<NotificationGeofence> notificationGeofenceTwo = notificationGeofence->FromJson(jsonObject);
+    ASSERT_NE(notificationGeofenceTwo, nullptr);
+}
+
+/**
+ * @tc.number    : Dump_0100
+ * @tc.name      : Dump_0100
+ * @tc.desc      : Test the Dump methods for NotificationGeofence
+ */
+HWTEST_F(AdvancedNotificationServiceTest, Dump_0100, Level1)
+{
+    sptr<NotificationGeofence> notificationGeofence = new (std::nothrow) NotificationGeofence();
+    ASSERT_NE(notificationGeofence, nullptr);
+    double longitude = 10.0;
+    double latitude = 11.0;
+    double radius = 12.0;
+    int32_t delayTime = 11;
+    NotificationConstant::CoordinateSystemType coordinateSystemType =
+        NotificationConstant::CoordinateSystemType::COORDINATE_TYPE_GCJ02;
+    NotificationConstant::MonitorEvent monitorEvent = NotificationConstant::MonitorEvent::MONITOR_TYPE_LEAVE;
+    notificationGeofence->SetLongitude(longitude);
+    notificationGeofence->SetLatitude(latitude);
+    notificationGeofence->SetRadius(radius);
+    notificationGeofence->SetDelayTime(delayTime);
+    notificationGeofence->SetCoordinateSystemType(coordinateSystemType);
+    notificationGeofence->SetMonitorEvent(monitorEvent);
+    std::string str = notificationGeofence->Dump();
+    std::string targetStr = "10.000000 11.000000 12.000000 11 2 2";
+    ASSERT_EQ(str, targetStr);
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -1854,6 +1854,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287013, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_287014, Function | SmallTest | Level1)
 {
+    advancedNotificationService_->triggerNotificationList_.clear();
     AdvancedNotificationService::PublishNotificationParameter parameter;
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     advancedNotificationService_->triggerNotificationList_.push_back(record);
@@ -2049,6 +2050,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287022, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_287023, Function | SmallTest | Level1)
 {
+    advancedNotificationService_->triggerNotificationList_.clear();
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     advancedNotificationService_->AddToTriggerNotificationList(record);
     ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 1);
@@ -2251,6 +2253,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287031, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_287032, Function | SmallTest | Level1)
 {
+    advancedNotificationService_->triggerNotificationList_.clear();
     sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
     reqOne->SetDistributedCollaborate(true);
     sptr<NotificationRequest> reqTwo(new (std::nothrow) NotificationRequest());
@@ -2300,6 +2303,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287033, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_287034, Function | SmallTest | Level1)
 {
+    advancedNotificationService_->triggerNotificationList_.clear();
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
     reqOne->SetDistributedCollaborate(true);
@@ -2423,6 +2427,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287037, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_287038, Function | SmallTest | Level1)
 {
+    advancedNotificationService_->triggerNotificationList_.clear();
     sptr<NotificationBundleOption> bundleOptionOne = new NotificationBundleOption();
     bundleOptionOne->SetBundleName("testName");
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
@@ -2452,6 +2457,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287038, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_287039, Function | SmallTest | Level1)
 {
+    advancedNotificationService_->triggerNotificationList_.clear();
     sptr<NotificationBundleOption> bundleOptionOne = new NotificationBundleOption();
     bundleOptionOne->SetBundleName("testName");
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
@@ -2508,6 +2514,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287040, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_287041, Function | SmallTest | Level1)
 {
+    advancedNotificationService_->triggerNotificationList_.clear();
     sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
     auto ret = advancedNotificationService_->CheckGeofenceNotificationRequestLiveViewStatus(reqOne);
     ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
@@ -2529,6 +2536,656 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287041, Function | SmallTest | Level1)
     reqThree->SetContent(contentTwo);
     ret = advancedNotificationService_->CheckGeofenceNotificationRequestLiveViewStatus(reqThree);
     ASSERT_EQ(ret, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287042
+ * @tc.name      : CheckLiveViewPendingCreateLiveViewStatus
+ * @tc.desc      : Test CheckLiveViewPendingCreateLiveViewStatus function return ERR_OK.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287042, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    ASSERT_NE(reqOne, nullptr);
+    auto ret = advancedNotificationService_->CheckLiveViewPendingCreateLiveViewStatus(reqOne);
+    ASSERT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287043
+ * @tc.name      : CheckLiveViewPendingCreateLiveViewStatus
+ * @tc.desc      : Test CheckLiveViewPendingCreateLiveViewStatus function return ERR_ANS_REPEAT_CREATE.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287043, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+    sptr<NotificationRequest> reqTwo(new (std::nothrow) NotificationRequest());
+    reqTwo->SetDistributedCollaborate(true);
+    reqTwo->SetDistributedHashCode("hashCodeTest");
+    record->request = reqTwo;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    sptr<NotificationRequest> reqThree(new (std::nothrow) NotificationRequest());
+    reqThree->SetDistributedCollaborate(true);
+    reqThree->SetDistributedHashCode("hashCodeTest");
+    auto ret = advancedNotificationService_->CheckLiveViewPendingCreateLiveViewStatus(reqThree);
+    ASSERT_EQ(ret, ERR_ANS_REPEAT_CREATE);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287044
+ * @tc.name      : CheckLiveViewPendingCreateLiveViewStatus
+ * @tc.desc      : Test CheckLiveViewPendingCreateLiveViewStatus function return ERR_ANS_REPEAT_CREATE.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287044, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+    sptr<NotificationRequest> reqTwo(new (std::nothrow) NotificationRequest());
+    reqTwo->SetDistributedCollaborate(true);
+    reqTwo->SetDistributedHashCode("hashCodeTest");
+    record->request = reqTwo;
+    advancedNotificationService_->notificationList_.push_back(record);
+    sptr<NotificationRequest> reqThree(new (std::nothrow) NotificationRequest());
+    reqThree->SetDistributedCollaborate(true);
+    reqThree->SetDistributedHashCode("hashCodeTest");
+    auto ret = advancedNotificationService_->CheckLiveViewPendingCreateLiveViewStatus(reqThree);
+    ASSERT_EQ(ret, ERR_ANS_REPEAT_CREATE);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287045
+ * @tc.name      : CheckLiveViewPendingEndLiveViewStatus
+ * @tc.desc      : Test CheckLiveViewPendingEndLiveViewStatus function return ERR_ANS_NOTIFICATION_NOT_EXISTS.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287045, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->triggerNotificationList_.clear();
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    auto ret = advancedNotificationService_->CheckLiveViewPendingEndLiveViewStatus(reqOne);
+    ASSERT_EQ(ret, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287046
+ * @tc.name      : CheckLiveViewPendingEndLiveViewStatus
+ * @tc.desc      : Test CheckLiveViewPendingEndLiveViewStatus function return ERR_OK.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287046, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+    sptr<NotificationRequest> reqTwo(new (std::nothrow) NotificationRequest());
+    reqTwo->SetDistributedCollaborate(true);
+    reqTwo->SetDistributedHashCode("hashCodeTest");
+    record->request = reqTwo;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    sptr<NotificationRequest> reqThree(new (std::nothrow) NotificationRequest());
+    reqThree->SetDistributedCollaborate(true);
+    reqThree->SetDistributedHashCode("hashCodeTest");
+    auto ret = advancedNotificationService_->CheckLiveViewPendingEndLiveViewStatus(reqThree);
+    ASSERT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287047
+ * @tc.name      : CheckLiveViewPendingEndLiveViewStatus
+ * @tc.desc      : Test CheckLiveViewPendingEndLiveViewStatus function return ERR_ANS_END_NOTIFICATION.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287047, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+
+    sptr<NotificationRequest> reqTwo(new (std::nothrow) NotificationRequest());
+    reqTwo->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    reqTwo->SetContent(content);
+    reqTwo->SetDistributedCollaborate(true);
+    reqTwo->SetDistributedHashCode("hashCodeTest");
+    record->request = reqTwo;
+
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    sptr<NotificationRequest> reqThree(new (std::nothrow) NotificationRequest());
+    reqThree->SetDistributedCollaborate(true);
+    reqThree->SetDistributedHashCode("hashCodeTest");
+    auto ret = advancedNotificationService_->CheckLiveViewPendingEndLiveViewStatus(reqThree);
+    ASSERT_EQ(ret, ERR_ANS_END_NOTIFICATION);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287048
+ * @tc.name      : CheckLiveViewPendingEndLiveViewStatus
+ * @tc.desc      : Test CheckLiveViewPendingEndLiveViewStatus function return ERR_ANS_INVALID_PARAM.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287048, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+
+    sptr<NotificationRequest> reqTwo(new (std::nothrow) NotificationRequest());
+    reqTwo->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    reqTwo->SetContent(content);
+    reqTwo->SetDistributedCollaborate(true);
+    reqTwo->SetDistributedHashCode("hashCodeTest");
+    record->request = reqTwo;
+
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    sptr<NotificationRequest> reqThree(new (std::nothrow) NotificationRequest());
+    reqThree->SetDistributedCollaborate(true);
+    reqThree->SetDistributedHashCode("hashCodeTest");
+    auto ret = advancedNotificationService_->CheckLiveViewPendingEndLiveViewStatus(reqThree);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287049
+ * @tc.name      : CheckLiveViewPendingEndLiveViewStatus
+ * @tc.desc      : Test CheckLiveViewPendingEndLiveViewStatus function return ERR_ANS_INVALID_PARAM.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287049, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+
+    sptr<NotificationRequest> reqTwo(new (std::nothrow) NotificationRequest());
+    reqTwo->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    reqTwo->SetContent(content);
+    reqTwo->SetDistributedCollaborate(true);
+    reqTwo->SetDistributedHashCode("hashCodeTest");
+    record->request = reqTwo;
+
+    advancedNotificationService_->notificationList_.push_back(record);
+    sptr<NotificationRequest> reqThree(new (std::nothrow) NotificationRequest());
+    reqThree->SetDistributedCollaborate(true);
+    reqThree->SetDistributedHashCode("hashCodeTest");
+    auto ret = advancedNotificationService_->CheckLiveViewPendingEndLiveViewStatus(reqThree);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287050
+ * @tc.name      : CheckLiveViewPendingEndLiveViewStatus
+ * @tc.desc      : Test CheckLiveViewPendingEndLiveViewStatus function return ERR_ANS_END_NOTIFICATION.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287050, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+
+    sptr<NotificationRequest> reqTwo(new (std::nothrow) NotificationRequest());
+    reqTwo->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    reqTwo->SetContent(content);
+    reqTwo->SetDistributedCollaborate(true);
+    reqTwo->SetDistributedHashCode("hashCodeTest");
+    record->request = reqTwo;
+
+    advancedNotificationService_->notificationList_.push_back(record);
+    sptr<NotificationRequest> reqThree(new (std::nothrow) NotificationRequest());
+    reqThree->SetDistributedCollaborate(true);
+    reqThree->SetDistributedHashCode("hashCodeTest");
+    auto ret = advancedNotificationService_->CheckLiveViewPendingEndLiveViewStatus(reqThree);
+    ASSERT_EQ(ret, ERR_ANS_END_NOTIFICATION);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287051
+ * @tc.name      : CheckLiveViewPendingEndLiveViewStatus
+ * @tc.desc      : Test CheckLiveViewPendingEndLiveViewStatus function return ERR_OK.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287051, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+
+    sptr<NotificationRequest> reqTwo(new (std::nothrow) NotificationRequest());
+    reqTwo->SetDistributedCollaborate(true);
+    reqTwo->SetDistributedHashCode("hashCodeTest");
+    record->request = reqTwo;
+
+    advancedNotificationService_->notificationList_.push_back(record);
+    sptr<NotificationRequest> reqThree(new (std::nothrow) NotificationRequest());
+    reqThree->SetDistributedCollaborate(true);
+    reqThree->SetDistributedHashCode("hashCodeTest");
+    auto ret = advancedNotificationService_->CheckLiveViewPendingEndLiveViewStatus(reqThree);
+    ASSERT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287052
+ * @tc.name      : DeleteAllByUserStoppedFromTriggerNotificationList
+ * @tc.desc      : Test DeleteAllByUserStoppedFromTriggerNotificationList function.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287052, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->triggerNotificationList_.clear();
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    notificationOne->SetKey("key");
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    std::string key = "";
+    int32_t userId = 100;
+    advancedNotificationService_->DeleteAllByUserStoppedFromTriggerNotificationList(key, userId);
+    ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 1);
+    key = "key";
+    advancedNotificationService_->DeleteAllByUserStoppedFromTriggerNotificationList(key, userId);
+    ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 1);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287053
+ * @tc.name      : DeleteAllByUserStoppedFromTriggerNotificationList
+ * @tc.desc      : Test DeleteAllByUserStoppedFromTriggerNotificationList function.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287053, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->triggerNotificationList_.clear();
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    int32_t userId = 100;
+    reqOne->SetCreatorUserId(userId);
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    std::string key = "key";
+    notificationOne->SetKey(key);
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    advancedNotificationService_->DeleteAllByUserStoppedFromTriggerNotificationList(key, userId);
+    ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287054
+ * @tc.name      : DeleteAllByUserStoppedFromTriggerNotificationList
+ * @tc.desc      : Test DeleteAllByUserStoppedFromTriggerNotificationList function.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287054, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->triggerNotificationList_.clear();
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    int32_t creatorUserId = 0;
+    reqOne->SetCreatorUserId(creatorUserId);
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    std::string key = "key";
+    notificationOne->SetKey(key);
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    int32_t userId = 100;
+    advancedNotificationService_->DeleteAllByUserStoppedFromTriggerNotificationList(key, userId);
+    ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287055
+ * @tc.name      : ExecuteRemoveNotificationFromTriggerNotificationList
+ * @tc.desc      : Test ExecuteRemoveNotificationFromTriggerNotificationList function.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287055, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->triggerNotificationList_.clear();
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    int32_t notificationId = 1;
+    std::string label = "label";
+    reqOne->SetNotificationId(notificationId);
+    reqOne->SetLabel(label);
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    sptr<NotificationBundleOption> bundleOptionOne = new NotificationBundleOption();
+    std::string bundleName = "bundleName";
+    int32_t uid = 100;
+    bundleOptionOne->SetBundleName(bundleName);
+    bundleOptionOne->SetUid(uid);
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+    record->bundleOption = bundleOptionOne;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption();
+    int32_t id = 0;
+    std::string labelTest = "labelTest";
+    advancedNotificationService_->ExecuteRemoveNotificationFromTriggerNotificationList(bundle, id, labelTest);
+    ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 1);
+
+    bundle->SetBundleName(bundleName);
+    advancedNotificationService_->ExecuteRemoveNotificationFromTriggerNotificationList(bundle, id, labelTest);
+    ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 1);
+
+    bundle->SetUid(uid);
+    advancedNotificationService_->ExecuteRemoveNotificationFromTriggerNotificationList(bundle, id, labelTest);
+    ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 1);
+
+    id = 1;
+    advancedNotificationService_->ExecuteRemoveNotificationFromTriggerNotificationList(bundle, id, labelTest);
+    ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 1);
+
+    labelTest = label;
+    advancedNotificationService_->ExecuteRemoveNotificationFromTriggerNotificationList(bundle, id, labelTest);
+    ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287056
+ * @tc.name      : RemoveGroupByBundleFromTriggerNotificationList
+ * @tc.desc      : Test RemoveGroupByBundleFromTriggerNotificationList function.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287056, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->triggerNotificationList_.clear();
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    std::string groupName = "groupName";
+    reqOne->SetGroupName(groupName);
+    sptr<NotificationBundleOption> bundleOptionOne = new NotificationBundleOption();
+    std::string bundleName = "bundleName";
+    int32_t uid = 100;
+    bundleOptionOne->SetBundleName(bundleName);
+    bundleOptionOne->SetUid(uid);
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->request = reqOne;
+    record->bundleOption = bundleOptionOne;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption();
+    std::string groupNameTest = "name";
+    advancedNotificationService_->RemoveGroupByBundleFromTriggerNotificationList(bundle, groupNameTest);
+    ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 1);
+
+    bundle->SetBundleName(bundleName);
+    advancedNotificationService_->RemoveGroupByBundleFromTriggerNotificationList(bundle, groupNameTest);
+    ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 1);
+
+    bundle->SetUid(uid);
+    advancedNotificationService_->RemoveGroupByBundleFromTriggerNotificationList(bundle, groupNameTest);
+    ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 1);
+
+    groupNameTest = groupName;
+    advancedNotificationService_->RemoveGroupByBundleFromTriggerNotificationList(bundle, groupNameTest);
+    ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287057
+ * @tc.name      : GeneratePublishNotificationParameter
+ * @tc.desc      : Test GeneratePublishNotificationParameter function.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287057, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> req(new (std::nothrow) NotificationRequest());
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    bool isUpdateByOwner = false;
+    AdvancedNotificationService::PublishNotificationParameter parameter;
+    advancedNotificationService_->GeneratePublishNotificationParameter(req, bundleOption, isUpdateByOwner, parameter);
+    ASSERT_EQ(parameter.request, req);
+    ASSERT_EQ(parameter.bundleOption, bundleOption);
+    ASSERT_EQ(parameter.isUpdateByOwner, isUpdateByOwner);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287058
+ * @tc.name      : IsGeofenceNotificationRequest
+ * @tc.desc      : Test IsGeofenceNotificationRequest function.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287058, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> reqOne = nullptr;
+    auto ret = advancedNotificationService_->IsGeofenceNotificationRequest(reqOne);
+    ASSERT_EQ(ret, false);
+
+    sptr<NotificationRequest> reqTwo(new (std::nothrow) NotificationRequest());
+    ret = advancedNotificationService_->IsGeofenceNotificationRequest(reqTwo);
+    ASSERT_EQ(ret, false);
+
+    sptr<NotificationRequest> reqThree(new (std::nothrow) NotificationRequest());
+    reqThree->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    reqThree->SetContent(content);
+    ret = advancedNotificationService_->IsGeofenceNotificationRequest(reqThree);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287059
+ * @tc.name      : IsExistsGeofence
+ * @tc.desc      : Test IsExistsGeofence function.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287059, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->triggerNotificationList_.clear();
+    sptr<NotificationRequest> reqOne = nullptr;
+    auto ret = advancedNotificationService_->IsExistsGeofence(reqOne);
+    ASSERT_EQ(ret, false);
+
+    sptr<NotificationRequest> reqTwo(new (std::nothrow) NotificationRequest());
+    ret = advancedNotificationService_->IsExistsGeofence(reqTwo);
+    ASSERT_EQ(ret, false);
+
+    std::shared_ptr<NotificationRecord> record = nullptr;
+    advancedNotificationService_->AddToTriggerNotificationList(record);
+    ret = advancedNotificationService_->IsExistsGeofence(reqTwo);
+    ASSERT_EQ(ret, false);
+    advancedNotificationService_->triggerNotificationList_.clear();
+
+    record = std::make_shared<NotificationRecord>();
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    ret = advancedNotificationService_->IsExistsGeofence(reqTwo);
+    ASSERT_EQ(ret, false);
+    advancedNotificationService_->triggerNotificationList_.clear();
+
+    sptr<NotificationRequest> reqThree(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqThree));
+    record->notification = notificationOne;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    ret = advancedNotificationService_->IsExistsGeofence(reqTwo);
+    ASSERT_EQ(ret, false);
+    advancedNotificationService_->triggerNotificationList_.clear();
+
+    sptr<NotificationRequest> reqFour(new (std::nothrow) NotificationRequest());
+    record->request = reqFour;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    ret = advancedNotificationService_->IsExistsGeofence(reqTwo);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287060
+ * @tc.name      : FindGeofenceNotificationRecordByKey
+ * @tc.desc      : Test FindGeofenceNotificationRecordByKey function.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287060, Function | SmallTest | Level1)
+{
+    std::string triggerKey = "secure_live_view_ans_distributedhashCodeTest";
+    std::vector<std::shared_ptr<NotificationRecord>> outRecordVector;
+    advancedNotificationService_->FindGeofenceNotificationRecordByKey(triggerKey, outRecordVector);
+    ASSERT_EQ(outRecordVector.size(), 0);
+
+    std::shared_ptr<NotificationRecord> record = nullptr;
+    advancedNotificationService_->AddToTriggerNotificationList(record);
+    advancedNotificationService_->FindGeofenceNotificationRecordByKey(triggerKey, outRecordVector);
+    ASSERT_EQ(outRecordVector.size(), 0);
+    advancedNotificationService_->triggerNotificationList_.clear();
+
+    record = std::make_shared<NotificationRecord>();
+    advancedNotificationService_->AddToTriggerNotificationList(record);
+    advancedNotificationService_->FindGeofenceNotificationRecordByKey(triggerKey, outRecordVector);
+    ASSERT_EQ(outRecordVector.size(), 0);
+    advancedNotificationService_->triggerNotificationList_.clear();
+
+    sptr<NotificationRequest> req(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notification(new (std::nothrow) Notification(req));
+    record->notification = notification;
+    advancedNotificationService_->AddToTriggerNotificationList(record);
+    advancedNotificationService_->FindGeofenceNotificationRecordByKey(triggerKey, outRecordVector);
+    ASSERT_EQ(outRecordVector.size(), 0);
+    advancedNotificationService_->triggerNotificationList_.clear();
+
+    sptr<NotificationRequest> reqTwo(new (std::nothrow) NotificationRequest());
+    reqTwo->SetDistributedCollaborate(true);
+    reqTwo->SetDistributedHashCode("hashCodeTest");
+    record->request = reqTwo;
+    advancedNotificationService_->AddToTriggerNotificationList(record);
+    advancedNotificationService_->FindGeofenceNotificationRecordByKey(triggerKey, outRecordVector);
+    ASSERT_EQ(outRecordVector.size(), 1);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287061
+ * @tc.name      : FindNotificationRecordByKey
+ * @tc.desc      : Test FindNotificationRecordByKey function.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287061, Function | SmallTest | Level1)
+{
+    std::string triggerKey = "secure_live_view_ans_distributedhashCodeTest";
+    std::shared_ptr<NotificationRecord> outRecord = nullptr;
+    advancedNotificationService_->FindNotificationRecordByKey(triggerKey, outRecord);
+    ASSERT_EQ(outRecord, nullptr);
+
+    std::shared_ptr<NotificationRecord> record = nullptr;
+    advancedNotificationService_->AddToNotificationList(record);
+    advancedNotificationService_->FindNotificationRecordByKey(triggerKey, outRecord);
+    ASSERT_EQ(outRecord, nullptr);
+    advancedNotificationService_->notificationList_.clear();
+
+    record = std::make_shared<NotificationRecord>();
+    advancedNotificationService_->AddToNotificationList(record);
+    advancedNotificationService_->FindNotificationRecordByKey(triggerKey, outRecord);
+    ASSERT_EQ(outRecord, nullptr);
+    advancedNotificationService_->notificationList_.clear();
+
+    sptr<NotificationRequest> req(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notification(new (std::nothrow) Notification(req));
+    record->notification = notification;
+    advancedNotificationService_->AddToNotificationList(record);
+    advancedNotificationService_->FindNotificationRecordByKey(triggerKey, outRecord);
+    ASSERT_EQ(outRecord, nullptr);
+    advancedNotificationService_->notificationList_.clear();
+
+    sptr<NotificationRequest> reqTwo(new (std::nothrow) NotificationRequest());
+    reqTwo->SetDistributedCollaborate(true);
+    reqTwo->SetDistributedHashCode("hashCodeTest");
+    record->request = reqTwo;
+    advancedNotificationService_->AddToNotificationList(record);
+    advancedNotificationService_->FindNotificationRecordByKey(triggerKey, outRecord);
+    ASSERT_NE(outRecord, nullptr);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287062
+ * @tc.name      : IsGeofenceEnabled
+ * @tc.desc      : Test IsGeofenceEnabled function return ERR_ANS_NO_MEMORY.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287062, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    bool enabled = false;
+    auto result = advancedNotificationService_->IsGeofenceEnabled(enabled);
+    ASSERT_EQ(result, ERR_ANS_NO_MEMORY);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287063
+ * @tc.name      : SetGeofenceEnabled
+ * @tc.desc      : Test SetGeofenceEnabled function return ERR_ANS_NO_MEMORY.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287063, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    bool enabled = false;
+    auto result = advancedNotificationService_->SetGeofenceEnabled(enabled);
+    ASSERT_EQ(result, ERR_ANS_NO_MEMORY);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287064
+ * @tc.name      : OnNotifyDelayedNotification
+ * @tc.desc      : Test OnNotifyDelayedNotification function return ERR_ANS_INVALID_PARAM.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287064, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService::PublishNotificationParameter parameter;
+    auto result = advancedNotificationService_->OnNotifyDelayedNotification(parameter);
+    ASSERT_EQ(result, ERR_ANS_INVALID_PARAM);
+
+    auto req = new (std::nothrow) NotificationRequest();
+    parameter.request = req;
+    result = advancedNotificationService_->OnNotifyDelayedNotification(parameter);
+    ASSERT_EQ(result, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287065
+ * @tc.name      : ClearDelayNotification
+ * @tc.desc      : Test ClearDelayNotification function return ERR_ANS_NO_MEMORY.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287065, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    std::vector<std::string> triggerKeys;
+    triggerKeys.push_back("testKey");
+    std::vector<int32_t> userIds;
+    userIds.push_back(100);
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    auto result = advancedNotificationService_->ClearDelayNotification(triggerKeys, userIds);
+    ASSERT_EQ(result, ERR_ANS_NO_MEMORY);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287066
+ * @tc.name      : GetDelayedNotificationParameterByTriggerKey
+ * @tc.desc      : Test GetDelayedNotificationParameterByTriggerKey function return ERR_ANS_NOTIFICATION_NOT_EXISTS.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287066, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetDistributedCollaborate(true);
+    request->SetDistributedHashCode("hashCodeTest");
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    record->notification = notificationOne;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    std::string triggerKey = "secure_trigger_live_view_ans_distributedhashCodeTest_";
+    AdvancedNotificationService::PublishNotificationParameter parameter;
+    std::shared_ptr<NotificationRecord> recordTwo = std::make_shared<NotificationRecord>();
+    auto result =
+        advancedNotificationService_->GetDelayedNotificationParameterByTriggerKey(triggerKey, parameter, recordTwo);
+    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -1435,5 +1435,39 @@ HWTEST_F(AnsNotificationBranchTest, IsGeofenceEnabled_0200, Function | MediumTes
     ErrCode ret = notification->IsGeofenceEnabled(enabled);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
+
+/*
+ * @tc.name: ClearDelayNotification_0100
+ * @tc.desc: ClearDelayNotification
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationBranchTest, ClearDelayNotification_0100, Function | MediumTest | Level1)
+{
+    MockGetAnsManagerProxy(nullptr);
+    std::vector<std::string> triggerKeys;
+    triggerKeys.push_back("testKey");
+    std::vector<int32_t> userIds;
+    userIds.push_back(100);
+    auto notification = std::make_shared<AnsNotification>();
+    ASSERT_NE(notification, nullptr);
+    ErrCode ret = notification->ClearDelayNotification(triggerKeys, userIds);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: PublishDelayedNotification_0100
+ * @tc.desc: PublishDelayedNotification
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationBranchTest, PublishDelayedNotification_0100, Function | MediumTest | Level1)
+{
+    MockGetAnsManagerProxy(nullptr);
+    auto notification = std::make_shared<AnsNotification>();
+    ASSERT_NE(notification, nullptr);
+    std::string triggerKey = "key";
+    int32_t userId = 1000;
+    ErrCode ret = notification->PublishDelayedNotification(triggerKey, userId);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
 }  // namespace Notification
 }  // namespace OHOS
