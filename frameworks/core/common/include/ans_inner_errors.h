@@ -105,6 +105,8 @@ enum ErrorCode : uint32_t {
     ERR_ANS_INVALID_BUNDLE_OPTION,
     ERR_ANS_NOT_IMPL_EXTENSIONABILITY,
     ERR_ANS_GEOFENCING_OPERATION_TIMEOUT,
+    ERR_ANS_ERROR_LOCATION_CLOSED,
+    ERR_ANS_AWARNESS_SUGGESTIONS_CLOSED,
 };
 
 enum ReminderErrorCode : uint32_t {
@@ -160,7 +162,9 @@ const int32_t ERROR_NOT_IMPL_EXTENSIONABILITY    =
 const int32_t ERROR_NO_CUSTOM_RINGTONE_INFO      =
     1600024;    // The specified bundle has no custom ringtone information.
 const int32_t ERROR_GEOFENCE_ENABLED             = 1600025;    // Geofencing disabled.
-const int32_t ERROR_DEVICE_NOT_SUPPORT           = 1600026;    // The device does not support geofencing.
+const int32_t ERROR_LOCATION_CLOSED              = 1600026;    // The location switch is off.
+const int32_t ERROR_AWARNESS_SUGGESTIONS_CLOSED  =
+    1600027;    // The "Awareness & suggestions" switch of the location-based service is off.
 
 const int32_t ERROR_NETWORK_UNREACHABLE          = 2300007;    // Network unreachable.
 const int32_t ERROR_BUNDLE_NOT_FOUND             = 17700001;   // The specified bundle name was not found.

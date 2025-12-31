@@ -43,7 +43,7 @@ ErrCode AdvancedNotificationService::SetGeofenceEnabled(bool enabled)
     message.Message("geofenceEnabled:" + std::to_string(enabled));
     auto result = SystemPermissionCheck();
     if (result != ERR_OK) {
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED));
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result));
         return result;
     }
 
@@ -130,6 +130,9 @@ ErrCode AdvancedNotificationService::OnNotifyDelayedNotificationInner(const Publ
     ANS_LOGD("Invoke ext OnNotifyDelayedNotification");
     auto result = LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->OnNotifyDelayedNotification(parameter.request);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_32, EventBranchId::BRANCH_4);
+    uint32_t configPath = static_cast<uint32_t>(parameter.request->GetNotificationTrigger()->GetConfigPath());
+    message.Message("Ntf TriggerKey:" + parameter.request->GetTriggerSecureKey() + "_" +
+        "_TriggerPath:" + std::to_string(configPath));
     NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result));
     if (result == ERR_OK) {
         result = SetTriggerNotificationRequestToDb(parameter);

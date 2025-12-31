@@ -55,10 +55,11 @@ static const std::unordered_map<int32_t, std::string> ANS_ERROR_CODE_MESSAGE_MAP
     {ERROR_DISTRIBUTED_OPERATION_TIMEOUT, "Distributed operation timeout"},
     {ERROR_NO_CUSTOM_RINGTONE_INFO, "The specified bundle has no custom ringtone information"},
     {ERROR_GEOFENCE_ENABLED, "Geofencing disabled"},
-    {ERROR_DEVICE_NOT_SUPPORT, "The device does not support geofencing"},
+    {ERROR_LOCATION_CLOSED, "The location switch is off"},
     {ERROR_BUNDLE_INVALID, "The specified bundle is invalid"},
     {ERROR_NOT_IMPL_EXTENSIONABILITY,
         "The application does not implement the NotificationSubscriberExtensionAbility"},
+    {ERROR_AWARNESS_SUGGESTIONS_CLOSED, "The Awareness & suggestions switch of the location-based service is off"},
 };
 
 static std::vector<std::pair<uint32_t, int32_t>> errorsConvert = {
@@ -111,6 +112,8 @@ static std::vector<std::pair<uint32_t, int32_t>> errorsConvert = {
     {ERR_ANS_INVALID_BUNDLE_OPTION, ERROR_BUNDLE_INVALID},
     {ERR_ANS_NOT_IMPL_EXTENSIONABILITY, ERROR_NOT_IMPL_EXTENSIONABILITY},
     {ERR_ANS_GEOFENCING_OPERATION_TIMEOUT, ERROR_SERVICE_CONNECT_ERROR},
+    {ERR_ANS_ERROR_LOCATION_CLOSED, ERROR_LOCATION_CLOSED},
+    {ERR_ANS_AWARNESS_SUGGESTIONS_CLOSED, ERROR_AWARNESS_SUGGESTIONS_CLOSED},
 };
 
 int32_t ErrorToExternal(uint32_t errCode)
