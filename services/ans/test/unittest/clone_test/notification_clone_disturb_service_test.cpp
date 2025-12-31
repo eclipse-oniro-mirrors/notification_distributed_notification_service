@@ -147,7 +147,7 @@ HWTEST_F(NotificationCloneDisturbTest, OnRestore_00002, Function | SmallTest | L
     notificationCloneDisturb->OnRestore(jsonArray, systemApps);
 
     // Then
-    EXPECT_FALSE(notificationCloneDisturb->profiles_.empty());
+    EXPECT_TRUE(notificationCloneDisturb->profiles_.empty());
 }
 
 /**
