@@ -43,6 +43,7 @@ public:
     void OnUserSwitch(int32_t userId) override;
 
 private:
+    ffrt::mutex lock_;
     std::atomic<int32_t> userId_ = -1;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles_;
     std::shared_ptr<ffrt::queue> cloneDisturbQueue_ = nullptr;

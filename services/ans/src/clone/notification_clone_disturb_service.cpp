@@ -63,13 +63,12 @@ ErrCode NotificationCloneDisturb::OnBackup(nlohmann::json &jsonObject)
 
 void NotificationCloneDisturb::OnRestoreEnd(int32_t userId)
 {
-    cloneDisturbQueue_->submit_h(std::bind([&, userId]() {
+        std::unique_lock lock(lock_);
         if (!profiles_.empty()) {
             NotificationPreferences::GetInstance()->DelBatchCloneProfileInfo(userId, profiles_);
             profiles_.clear();
         }
         ANS_LOGW("Disturb on clear Restore");
-    }));
 }
 
 void NotificationCloneDisturb::OnRestore(const nlohmann::json &jsonObject, std::set<std::string> systemApps)
@@ -80,6 +79,7 @@ void NotificationCloneDisturb::OnRestore(const nlohmann::json &jsonObject, std::
     }
 
     int32_t userId = NotificationCloneUtil::GetActiveUserId();
+    std::unique_lock lock(lock_);
     if (!profiles_.empty()) {
         NotificationPreferences::GetInstance()->DelBatchCloneProfileInfo(userId, profiles_);
         profiles_.clear();
@@ -98,15 +98,12 @@ void NotificationCloneDisturb::OnRestore(const nlohmann::json &jsonObject, std::
         return;
     }
 
-    cloneDisturbQueue_->submit_h(std::bind([&, userId, systemApps]() {
-        int64_t profileId = -1;
-        std::string name;
         std::map<std::string, int32_t> uidMap;
         for (auto profile = profiles_.begin(); profile != profiles_.end();) {
             std::vector<NotificationBundleOption> exitBunldleList;
             std::vector<NotificationBundleOption> notExitBunldleList;
-            name = (*profile)->GetProfileName();
-            profileId = (*profile)->GetProfileId();
+            std::string name = (*profile)->GetProfileName();
+            int64_t profileId = (*profile)->GetProfileId();
             ANS_LOGI("Disturb %{public}s.", std::to_string(profileId).c_str());
             GetProfileUid(userId, systemApps, (*profile)->GetProfileTrustList(), exitBunldleList, notExitBunldleList);
             NotificationPreferences::GetInstance()->UpdateDoNotDisturbProfiles(userId,
@@ -117,15 +114,9 @@ void NotificationCloneDisturb::OnRestore(const nlohmann::json &jsonObject, std::
                 (*profile)->SetProfileTrustList(notExitBunldleList);
                 profile++;
             }
-            name.clear();
-            profileId = -1;
         }
 
         NotificationPreferences::GetInstance()->UpdateBatchCloneProfileInfo(userId, profiles_);
-        for (auto profile = profiles_.begin(); profile != profiles_.end(); profile++) {
-            ANS_LOGI("Clone queue left %{public}s.", std::to_string((*profile)->GetProfileId()).c_str());
-        }
-    }));
 }
 
 void NotificationCloneDisturb::GetProfileUid(int32_t userId, const std::set<std::string>& systemApps,
@@ -157,6 +148,7 @@ void NotificationCloneDisturb::OnUserSwitch(int32_t userId)
         return;
     }
     cloneDisturbQueue_->submit_h(std::bind([&, userId]() {
+        std::unique_lock lock(lock_);
         profiles_.clear();
         NotificationPreferences::GetInstance()->GetAllCloneProfileInfo(userId, profiles_);
         for (auto profile = profiles_.begin(); profile != profiles_.end(); profile++) {
@@ -170,6 +162,7 @@ void NotificationCloneDisturb::OnUserSwitch(int32_t userId)
 void NotificationCloneDisturb::OnRestoreStart(const std::string bundleName, int32_t appIndex,
     int32_t userId, int32_t uid)
 {
+    std::unique_lock lock(lock_);
     ANS_LOGI("Handler bundle event %{public}s %{public}d %{public}d %{public}d %{public}zu.",
         bundleName.c_str(), appIndex, userId, uid, profiles_.size());
     if (profiles_.empty()) {
@@ -182,12 +175,10 @@ void NotificationCloneDisturb::OnRestoreStart(const std::string bundleName, int3
         ANS_LOGW("null cloneDisturbQueue");
         return;
     }
-    cloneDisturbQueue_->submit_h(std::bind([&, bundle, userId]() {
-        int64_t profileId = -1;
-        std::string name;
+
         for (auto profile = profiles_.begin(); profile != profiles_.end();) {
-            name = (*profile)->GetProfileName();
-            profileId = (*profile)->GetProfileId();
+            std::string name = (*profile)->GetProfileName();
+            int64_t profileId = (*profile)->GetProfileId();
             std::vector<NotificationBundleOption> bundleList;
             auto trustList = (*profile)->GetProfileTrustList();
             CheckBundleInfo(trustList, bundleList, bundle);
@@ -204,11 +195,6 @@ void NotificationCloneDisturb::OnRestoreStart(const std::string bundleName, int3
             profileId = -1;
         }
         NotificationPreferences::GetInstance()->UpdateBatchCloneProfileInfo(userId, profiles_);
-        for (auto profile = profiles_.begin(); profile != profiles_.end(); profile++) {
-            ANS_LOGI("Event queue left %{public}s %{public}zu.", std::to_string((*profile)->GetProfileId()).c_str(),
-                (*profile)->GetProfileTrustList().size());
-        }
-    }));
 }
 
 void NotificationCloneDisturb::CheckBundleInfo(std::vector<NotificationBundleOption>& trustList,
