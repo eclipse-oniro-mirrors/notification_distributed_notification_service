@@ -39,6 +39,7 @@ group("fuzztest") {
     "servicedistributeoperation_fuzzer:ServiceDistributeOperationFuzzTest",
     "servicedeleteallbyuser_fuzzer:ServiceDeleteAllByUserFuzzTest",
     "serviceenabledistributedbybundle_fuzzer:ServiceEnableDistributedByBundleFuzzTest",
+    "servicegeofencefunctions_fuzzer:ServiceGeofenceFunctionsFuzzTest",
     "servicesubscribelocalliveview_fuzzer:ServiceSubscribeLocalLiveViewFuzzTest",
     "serviceremovegroupbybundle_fuzzer:ServiceRemoveGroupByBundleFuzzTest",
     "serviceadddonotdisturbprofiles_fuzzer:ServiceAddDoNotDisturbProfilesFuzzTest",
