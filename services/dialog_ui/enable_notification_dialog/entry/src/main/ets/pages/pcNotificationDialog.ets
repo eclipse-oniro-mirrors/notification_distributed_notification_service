@@ -252,6 +252,10 @@ struct PermissionDialog {
       .width(Constants.FULL_WIDTH)
       .height(Constants.FULL_HEIGHT)
     }
+    .margin({
+      left: Constants.DIALOG_MARGIN,
+      right: Constants.DIALOG_MARGIN
+    })
   }
 
   async aboutToAppear(): Promise<void> {
