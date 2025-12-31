@@ -67,7 +67,6 @@ public:
         sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
 
         sptr<NotificationSubscribeInfo> subscribeInfo = ObjectBuilder<NotificationSubscribeInfo>::Build(fuzzData);
-        service->Unsubscribe(listener, subscribeInfo);
         return true;
     }
 }

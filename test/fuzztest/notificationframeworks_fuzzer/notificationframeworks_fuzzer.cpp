@@ -301,6 +301,91 @@ public:
         return true;
     }
 
+    bool TestAnsNotification5(FuzzedDataProvider* fdp)
+    {
+        NotificationConstant::SubscribeType type = NotificationConstant::SubscribeType::BLUETOOTH;
+        std::string str = fdp->ConsumeRandomLengthString();
+        bool enabled = fdp->ConsumeBool();
+
+        auto subscriptionInfo = std::make_shared<NotificationExtensionSubscriptionInfo>(str, type);
+        subscriptionInfo->SetAddr(str);
+        subscriptionInfo->GetAddr();
+
+        subscriptionInfo->SetType(type);
+        subscriptionInfo->GetType();
+
+        subscriptionInfo->SetHfp(enabled);
+        subscriptionInfo->IsHfp();
+
+        subscriptionInfo->Dump();
+
+        std::string addr = fdp->ConsumeRandomLengthString();
+        nlohmann::json jsonObject = nlohmann::json{{"addr", addr}, {"isHfp", enabled}, {"type", 0}};
+        sptr<NotificationExtensionSubscriptionInfo> subscriptionInfo2 =
+            NotificationExtensionSubscriptionInfo::FromJson(jsonObject);
+        subscriptionInfo2->ToJson(jsonObject);
+
+        Parcel parcel;
+        subscriptionInfo->Marshalling(parcel);
+        subscriptionInfo->Unmarshalling(parcel);
+
+        return true;
+    }
+
+    bool TestAnsNotification6(FuzzedDataProvider* fdp)
+    {
+        std::string str = fdp->ConsumeRandomLengthString();
+        int32_t id = fdp->ConsumeIntegral<int32_t>();
+        bool enabled = fdp->ConsumeBool();
+
+        auto bundle = std::make_shared<NotificationBundleOption>(str, id);
+        auto distriBundle = std::make_shared<DistributedBundleOption>(bundle, enabled);
+        distriBundle->SetBundle(bundle);
+        distriBundle->GetBundle();
+        distriBundle->SetEnable(enabled);
+        distriBundle->isEnable();
+        distriBundle->Dump();
+
+        Parcel parcel;
+        distriBundle->Marshalling(parcel);
+        distriBundle->Unmarshalling(parcel);
+        
+        nlohmann::json jsonObject;
+        distriBundle->ToJson(jsonObject);
+        distriBundle->FromJson(jsonObject);
+        return true;
+    }
+
+    bool TestAnsNotification7(FuzzedDataProvider* fdp)
+    {
+        std::string str = fdp->ConsumeRandomLengthString();
+        int32_t id = fdp->ConsumeIntegral<int32_t>();
+        int32_t flag = fdp->ConsumeIntegral<int32_t>();
+        bool enabled = fdp->ConsumeBool();
+
+        auto bundle = std::make_shared<NotificationBundleOption>(str, id);
+        auto reminderInfo = std::make_shared<NotificationReminderInfo>();
+
+        reminderInfo->SetBundleOption(*bundle);
+        reminderInfo->GetBundleOption();
+
+        reminderInfo->SetReminderFlags(flag);
+        reminderInfo->GetReminderFlags();
+
+        reminderInfo->SetSilentReminderEnabled(enabled);
+        reminderInfo->GetSilentReminderEnabled();
+
+        Parcel parcel;
+        reminderInfo->Marshalling(parcel);
+        reminderInfo->Unmarshalling(parcel);
+        
+        nlohmann::json jsonObject;
+        reminderInfo->ToJson(jsonObject);
+        reminderInfo->FromJson(jsonObject);
+
+        return true;
+    }
+
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
         TestSubscribeListener(fdp);
@@ -308,6 +393,9 @@ public:
         TestAnsNotification2(fdp);
         TestAnsNotification3(fdp);
         TestAnsNotification4(fdp);
+        TestAnsNotification5(fdp);
+        TestAnsNotification6(fdp);
+        TestAnsNotification7(fdp);
         return true;
     }
 }
