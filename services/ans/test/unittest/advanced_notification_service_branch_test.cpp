@@ -1835,19 +1835,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287012, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.number    : AnsBranchTest_287013
- * @tc.name      : OnNotifyDelayedNotificationInner
- * @tc.desc      : Test OnNotifyDelayedNotificationInner function return ERR_OK.
- */
-HWTEST_F(AnsBranchTest, AnsBranchTest_287013, Function | SmallTest | Level1)
-{
-    AdvancedNotificationService::PublishNotificationParameter parameter;
-    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-    auto result = advancedNotificationService_->OnNotifyDelayedNotificationInner(parameter, record);
-    ASSERT_NE(result, ERR_OK);
-}
-
-/**
  * @tc.number    : AnsBranchTest_287014
  * @tc.name      : OnNotifyDelayedNotificationInner
  * @tc.desc      : Test OnNotifyDelayedNotificationInner function.
@@ -1855,10 +1842,18 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287013, Function | SmallTest | Level1)
 HWTEST_F(AnsBranchTest, AnsBranchTest_287014, Function | SmallTest | Level1)
 {
     advancedNotificationService_->triggerNotificationList_.clear();
+    sptr<NotificationRequest> req(new (std::nothrow) NotificationRequest());
+    ASSERT_NE(req, nullptr);
+    req->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    req->SetContent(content);
     AdvancedNotificationService::PublishNotificationParameter parameter;
+    parameter.request = req;
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     advancedNotificationService_->triggerNotificationList_.push_back(record);
     auto result = advancedNotificationService_->OnNotifyDelayedNotificationInner(parameter, record);
+    ASSERT_NE(result, ERR_OK);
     ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 0);
 }
 
