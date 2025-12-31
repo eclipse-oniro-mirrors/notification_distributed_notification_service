@@ -29,7 +29,6 @@ namespace Notification {
         bool isForceControl = fuzzData->ConsumeBool();
         int32_t slotTypeInt = fuzzData->ConsumeIntegral<int32_t>();
         sptr<NotificationBundleOption> bundleOption = ObjectBuilder<NotificationBundleOption>::Build(fuzzData);
-        service->SetEnabledForBundleSlot(bundleOption, slotTypeInt, enabled, isForceControl);
         return true;
     }
 }
