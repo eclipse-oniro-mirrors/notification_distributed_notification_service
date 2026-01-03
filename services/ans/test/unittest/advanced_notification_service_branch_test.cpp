@@ -3100,7 +3100,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287062, Function | SmallTest | Level1)
     advancedNotificationService_->notificationSvrQueue_.Reset();
     bool enabled = false;
     auto result = advancedNotificationService_->IsGeofenceEnabled(enabled);
-    ASSERT_EQ(result, ERR_ANS_NO_MEMORY);
+    ASSERT_EQ(result, ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -3117,7 +3117,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287063, Function | SmallTest | Level1)
     advancedNotificationService_->notificationSvrQueue_.Reset();
     bool enabled = false;
     auto result = advancedNotificationService_->SetGeofenceEnabled(enabled);
-    ASSERT_EQ(result, ERR_ANS_NO_MEMORY);
+    ASSERT_EQ(result, ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -3151,7 +3151,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287065, Function | SmallTest | Level1)
     userIds.push_back(100);
     advancedNotificationService_->notificationSvrQueue_.Reset();
     auto result = advancedNotificationService_->ClearDelayNotification(triggerKeys, userIds);
-    ASSERT_EQ(result, ERR_ANS_NO_MEMORY);
+    ASSERT_EQ(result, ERR_ANS_INVALID_PARAM);
 }
 
 /**
