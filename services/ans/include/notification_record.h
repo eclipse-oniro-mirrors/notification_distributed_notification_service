@@ -39,6 +39,7 @@ struct NotificationRecord {
     bool isUpdateByOwner {false};
     uint32_t tokenCaller = 0;
     int32_t uid = -1;
+    bool isSystemApp {false};
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     std::string deviceId;
     std::string bundleName;

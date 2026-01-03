@@ -111,6 +111,7 @@ ErrCode AdvancedNotificationService::OnNotifyDelayedNotification(const PublishNo
     record->isUpdateByOwner = parameter.isUpdateByOwner;
     record->tokenCaller = parameter.tokenCaller;
     record->uid = parameter.uid;
+    record->isSystemApp = parameter.isSystemApp;
     AddToTriggerNotificationList(record);
 
     return OnNotifyDelayedNotificationInner(parameter, record);
@@ -274,7 +275,8 @@ ErrCode AdvancedNotificationService::GetDelayedNotificationParameterByTriggerKey
         .bundleOption = record->bundleOption,
         .isUpdateByOwner = record->isUpdateByOwner,
         .tokenCaller = record->tokenCaller,
-        .uid = record->uid
+        .uid = record->uid,
+ 	    .isSystemApp = record->isSystemApp
     };
     return ERR_OK;
 }
@@ -338,6 +340,9 @@ ErrCode AdvancedNotificationService::ParseGeofenceNotificationFromDb(const std::
     if (jsonObject.find("triggerUid") != jsonObject.end() && jsonObject.at("triggerUid").is_number_integer()) {
         requestDb.uid = jsonObject.at("triggerUid").get<int32_t>();
     }
+    if (jsonObject.find("isSystemApp") != jsonObject.end() && jsonObject.at("isSystemApp").is_boolean()) {
+        requestDb.isSystemApp = jsonObject.at("isSystemApp").get<bool>();
+    }
 
     return ERR_OK;
 }
@@ -378,6 +383,7 @@ ErrCode AdvancedNotificationService::SetTriggerNotificationRequestToDb(
     jsonObject["isUpdateByOwner"] = requestDb.isUpdateByOwner;
     jsonObject["triggerTokenCaller"] = requestDb.tokenCaller;
     jsonObject["triggerUid"] = requestDb.uid;
+    jsonObject["isSystemApp"] = requestDb.isSystemApp;
 
     std::string encryptValue;
     ErrCode errorCode = AesGcmHelper::Encrypt(jsonObject.dump(), encryptValue);
@@ -568,6 +574,7 @@ ErrCode AdvancedNotificationService::RecoverGeofenceLiveViewFromDb(int32_t userI
         record->isUpdateByOwner = requestObj.isUpdateByOwner;
         record->tokenCaller = requestObj.tokenCaller;
         record->uid = requestObj.uid;
+        record->isSystemApp = requestObj.isSystemApp;
         AddToTriggerNotificationList(record);
     }
     return ERR_OK;
@@ -963,6 +970,7 @@ void AdvancedNotificationService::GeneratePublishNotificationParameter(const spt
     parameter.isUpdateByOwner = isUpdateByOwner;
     parameter.tokenCaller = IPCSkeleton::GetCallingTokenID();
     parameter.uid = IPCSkeleton::GetCallingUid();
+    parameter.isSystemApp = AccessTokenHelper::IsSystemApp();
 }
 
 bool AdvancedNotificationService::IsGeofenceNotificationRequest(const sptr<NotificationRequest> &request)
