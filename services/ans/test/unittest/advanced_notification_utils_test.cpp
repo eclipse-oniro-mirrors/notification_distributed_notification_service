@@ -209,7 +209,7 @@ HWTEST_F(AnsUtilsTest, IsAllowedGetNotificationByFilter_00001, Function | SmallT
 HWTEST_F(AnsUtilsTest, GetActiveNotificationByFilter_00001, Function | SmallTest | Level1)
 {
     AdvancedNotificationService ans;
-    ans.notificationSvrQueue_ = nullptr;
+    ans.notificationSvrQueue_.Reset();
     std::string label = "testLabel";
     std::vector<std::string> keys = {"key1"};
     sptr<NotificationRequest> newRequest;
@@ -351,7 +351,7 @@ HWTEST_F(AnsUtilsTest, OnBundleDataCleared_00002, Function | SmallTest | Level1)
     request->SetNotificationId(notificationId);
     auto record = advancedNotificationService.MakeNotificationRecord(request, bundle);
     advancedNotificationService.AssignToNotificationList(record);
-    advancedNotificationService.notificationSvrQueue_ = nullptr;
+    advancedNotificationService.notificationSvrQueue_.Reset();
     advancedNotificationService.OnBundleDataCleared(bundle);
     EXPECT_EQ(advancedNotificationService.notificationList_.size(), 1);
 }
@@ -437,7 +437,7 @@ HWTEST_F(AnsUtilsTest, OnBundleRemoved_00002, Function | SmallTest | Level1)
     request->SetNotificationId(1);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     auto ret = advancedNotificationService_->AssignToNotificationList(record);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     advancedNotificationService_->OnBundleRemoved(bundle);
     EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 }
@@ -475,7 +475,7 @@ HWTEST_F(AnsUtilsTest, onBundleRemovedByUserId_00002, Function | SmallTest | Lev
     request->SetNotificationId(1);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     auto ret = advancedNotificationService_->AssignToNotificationList(record);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     advancedNotificationService_->onBundleRemovedByUserId(bundle, userId);
     EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 }
@@ -619,7 +619,7 @@ HWTEST_F(AnsUtilsTest, ResetDistributedEnabled_00001, Function | SmallTest | Lev
     AdvancedNotificationService ans;
     std::string oldKey = "enabledNotificationDistributed-test-88-aaa";
     NotificationPreferences::GetInstance()->SetKvToDb(oldKey, "1", 0);
-    ans.notificationSvrQueue_ = nullptr;
+    ans.notificationSvrQueue_.Reset();
     ans.ResetDistributedEnabled();
     SleepForFC();
     std::string value;
@@ -691,7 +691,7 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00002, Function | SmallTest | Level
     info.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
     info.enable_ = true;
     cloneBundleInfo.AddSlotInfo(info);
-    ans.notificationSvrQueue_ = nullptr;
+    ans.notificationSvrQueue_.Reset();
     ans.UpdateCloneBundleInfo(cloneBundleInfo, 0);
     SleepForFC();
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("UpdateCloneBundleInfo_00002", 1);
@@ -803,7 +803,7 @@ HWTEST_F(AnsUtilsTest, OnDistributedKvStoreDeathRecipient_00001, Function | Smal
 {
     advancedNotificationService_->OnDistributedKvStoreDeathRecipient();
     AdvancedNotificationService ans;
-    ans.notificationSvrQueue_ = nullptr;
+    ans.notificationSvrQueue_.Reset();
     ans.OnDistributedKvStoreDeathRecipient();
 }
 
@@ -1011,21 +1011,6 @@ HWTEST_F(AnsUtilsTest, IsSupportTemplate_00001, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: CheckCommonParams_00001
- * @tc.desc: Test CheckCommonParams
- * @tc.name: CheckCommonParams_00001
- * @tc.desc: Test CheckCommonParams
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsUtilsTest, CheckCommonParams_00001, Function | SmallTest | Level1)
-{
-    AdvancedNotificationService ans;
-    ans.notificationSvrQueue_ = nullptr;
-    EXPECT_EQ(ans.CheckCommonParams(), (int)ERR_ANS_INVALID_PARAM);
-}
-
-/**
  * @tc.name: CheckCommonParams_00002
  * @tc.desc: Test CheckCommonParams
  * @tc.type: FUNC
@@ -1074,7 +1059,7 @@ HWTEST_F(AnsUtilsTest, DeleteAllByUser_0002, Function | SmallTest | Level1)
 HWTEST_F(AnsUtilsTest, DeleteAllByUserInner_0001, Function | SmallTest | Level1)
 {
     AdvancedNotificationService ans;
-    ans.notificationSvrQueue_ = nullptr;
+    ans.notificationSvrQueue_.Reset();
     EXPECT_EQ(ans.DeleteAllByUserInner(0, 0, true), (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -1109,22 +1094,6 @@ HWTEST_F(AnsUtilsTest, CheckBundleOptionValid_0001, Function | SmallTest | Level
     sptr<NotificationBundleOption> bundle3 = new (std::nothrow) NotificationBundleOption("test", 0);
     MockQueryForgroundOsAccountId(true, 0);
     EXPECT_EQ(advancedNotificationService_->CheckBundleOptionValid(bundle3), (int)ERR_OK);
-}
-
-/**
- * @tc.name: SubmitAsyncTask_0001
- * @tc.desc: Test SubmitAsyncTask_0001
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsUtilsTest, SubmitAsyncTask_0001, Function | SmallTest | Level1)
-{
-    ErrCode result = ERR_OK;
-    advancedNotificationService_->SubmitAsyncTask(std::bind([&]() {
-        result = ERR_ANS_INVALID_PARAM;
-    }));
-    SleepForFC();
-    EXPECT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**

@@ -61,6 +61,26 @@ void FfrtQueueImpl::PostTask(const std::function<void()>&& func, const int64_t d
     ffrt::submit(std::move(func), ffrt::task_attr().name(taskName.c_str()).delay(delayTime));
 }
 
+void FfrtQueueImpl::Reset()
+{
+    ANS_LOGE("Reset ffrt %{public}s", name_.c_str());
+    if (queue_ == nullptr) {
+        return;
+    }
+    queue_.reset();
+}
+
+void FfrtQueueImpl::RunOnce(const std::function<void()>& func)
+{
+    if (queue_ == nullptr) {
+        func();
+        ANS_LOGE("Invalid queue %{public}s", name_.c_str());
+        return;
+    }
+
+    queue_->submit(func);
+}
+
 int32_t FfrtQueueImpl::Submit(const std::function<void()>& func)
 {
     if (queue_ == nullptr) {
@@ -83,11 +103,10 @@ int32_t FfrtQueueImpl::Submit(const std::function<void()>&& func)
     return ERR_OK;
 }
 
-
 int32_t FfrtQueueImpl::Submit(const std::function<void()>& func, const int64_t delayTime, const std::string taskName)
 {
     if (queue_ == nullptr) {
-        ANS_LOGE("Invalid queue %{public}s", name_.c_str());
+        ANS_LOGE("Invalid queue %{public}s %{public}s", name_.c_str(), taskName.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -98,7 +117,7 @@ int32_t FfrtQueueImpl::Submit(const std::function<void()>& func, const int64_t d
 int32_t FfrtQueueImpl::Submit(const std::function<void()>&& func, const int64_t delayTime, const std::string taskName)
 {
     if (queue_ == nullptr) {
-        ANS_LOGE("Invalid queue %{public}s", name_.c_str());
+        ANS_LOGE("Invalid queue %{public}s %{public}s", name_.c_str(), taskName.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
 

@@ -121,10 +121,10 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<IAnsSubscriber> &s
     } while (0);
 
     if (errCode == ERR_OK) {
-        ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
             LivePublishProcess::GetInstance()->AddLiveViewSubscriber(callingUid);
         }));
-        notificationSvrQueue_->wait(handler);
+        ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Subscribe self.");
     }
     SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), sptrInfo, errCode);
     return errCode;

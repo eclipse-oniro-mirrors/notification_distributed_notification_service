@@ -28,6 +28,7 @@ ohos_unittest("ans_unit_test") {
     "${services_path}/../framworks/core/include",
     "/${services_path}/ans/include/utils",
     "/${services_path}/ans/include/notification_extension",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   defines = []
@@ -146,6 +147,7 @@ ohos_unittest("notification_preferences_database_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "${services_path}/../framworks/core/include",
     "/${services_path}/ans/include/utils/",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   defines = []
@@ -242,6 +244,7 @@ ohos_unittest("notification_preferences_database_two_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "${services_path}/../framworks/core/include",
     "/${services_path}/ans/include/utils/",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   defines = []
@@ -324,6 +327,7 @@ ohos_unittest("notification_subscriber_manager_test") {
     "${services_path}/../frameworks/core/test/unittest/mock",
     "${services_path}/../framworks/core/include",
     "/${services_path}/ans/include/utils",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   defines = []
@@ -430,6 +434,7 @@ ohos_unittest("notification_service_test") {
     "/${services_path}/ans/include/utils",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   defines = []
@@ -457,6 +462,7 @@ ohos_unittest("notification_service_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
+    "${services_path}/infrastructure:ans_base",
   ]
 
   if (distributed_notification_service_feature_distributed_db) {
@@ -538,6 +544,7 @@ ohos_unittest("notification_clone_test") {
     "/${services_path}/ans/include/utils/",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   defines = []
@@ -642,6 +649,7 @@ ohos_unittest("notification_publish_service_test") {
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   defines = []
@@ -668,6 +676,7 @@ ohos_unittest("notification_publish_service_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
+    "${services_path}/infrastructure:ans_base",
   ]
 
   if (distributed_notification_service_feature_priority_notification) {
@@ -750,6 +759,7 @@ ohos_unittest("notification_service_publish_test") {
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   defines = []
@@ -839,6 +849,7 @@ ohos_unittest("notification_preferences_second_test") {
     ".",
     "/${services_path}/ans/include",
     "/${services_path}/ans/include/utils/",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   defines = []
@@ -877,6 +888,7 @@ ohos_unittest("notification_preferences_test") {
     "/${services_path}/ans/include/utils/",
     "${services_path}/ans/include/notification_extension",
     "${services_path}/ans/test/unittest/mock/include",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   defines = []
@@ -1032,6 +1044,7 @@ ohos_unittest("bundle_manager_helper_branch_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   sources = [
@@ -1145,6 +1158,7 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   defines = []
@@ -1216,6 +1230,7 @@ ohos_unittest("advanced_notification_ringtone_service_test") {
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   defines = []
@@ -1239,6 +1254,7 @@ ohos_unittest("advanced_notification_ringtone_service_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
+    "${services_path}/infrastructure:ans_base",
   ]
 
   if (distributed_notification_service_feature_distributed_db) {
@@ -1307,6 +1323,7 @@ ohos_unittest("advanced_notification_service_branch_test") {
     "/${services_path}/ans/include",
     "/${services_path}/ans/include/utils/",
     "${services_path}/ans/test/unittest/mock/include",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   defines = []
@@ -1330,6 +1347,7 @@ ohos_unittest("advanced_notification_service_branch_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
+    "${services_path}/infrastructure:ans_base",
   ]
 
   if (distributed_notification_service_feature_distributed_db) {
@@ -1382,6 +1400,7 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   sources = [
@@ -1399,7 +1418,10 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "notification_preferences_database_branch_test/notification_preferences_database_branch_test.cpp",
   ]
 
-  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/infrastructure:ans_base",
+  ]
 
   external_deps = [
     "ability_base:want",
@@ -1445,6 +1467,7 @@ ohos_unittest("push_callback_stub_test") {
     ".",
     "include",
     "/${services_path}/ans/include",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   sources = [ "push_callback_stub_test.cpp" ]
@@ -1497,6 +1520,7 @@ ohos_unittest("notification_rdb_data_mgr_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   sources = [
@@ -1554,6 +1578,7 @@ ohos_unittest("notification_config_parse_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   sources = [
@@ -1757,6 +1782,7 @@ ohos_unittest("advanced_notification_service_unit_test") {
     "mock/include",
     "/${services_path}/ans/include",
     "/${services_path}/ans/include/utils/",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   sources = [
@@ -1784,6 +1810,7 @@ ohos_unittest("advanced_notification_service_unit_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
+    "${services_path}/infrastructure:ans_base",
   ]
 
   if (distributed_notification_service_feature_distributed_db) {
@@ -1881,6 +1908,7 @@ ohos_unittest("notification_extension_test") {
     "/${services_path}/ans/include",
     "/${services_path}/ans/include/utils",
     "/${services_path}/ans/include/notification_extension",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
   sources = [
@@ -1988,6 +2016,7 @@ ohos_unittest("notification_extension_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${frameworks_module_reminder_path}:reminder_innerkits",
+    "${services_path}/infrastructure:ans_base",
   ]
 
   external_deps = [

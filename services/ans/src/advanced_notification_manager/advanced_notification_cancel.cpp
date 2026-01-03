@@ -85,11 +85,6 @@ ErrCode AdvancedNotificationService::CancelAll(const std::string &instanceKey,
         return ERR_ANS_INVALID_BUNDLE;
     }
     bundleOption->SetAppInstanceKey(instanceKey);
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notifSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
     if (isProxyForUnaware(bundleOption->GetUid())) {
         ANS_LOGE("CacelAll proxy uid: %{public}d", bundleOption->GetUid());
         return ERR_OK;
@@ -107,11 +102,6 @@ ErrCode AdvancedNotificationService::CancelAll(const std::string &instanceKey)
         return ERR_ANS_INVALID_BUNDLE;
     }
     bundleOption->SetAppInstanceKey(instanceKey);
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notifSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
     if (isProxyForUnaware(bundleOption->GetUid())) {
         ANS_LOGE("CacelAll proxy uid: %{public}d", bundleOption->GetUid());
         return ERR_OK;
@@ -123,7 +113,7 @@ ErrCode AdvancedNotificationService::CancelAll(const std::string &instanceKey)
 ErrCode AdvancedNotificationService::ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption,
     const int32_t reason, const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         ErrCode result = ERR_OK;
         sptr<Notification> notification = nullptr;
@@ -166,6 +156,7 @@ ErrCode AdvancedNotificationService::ExcuteCancelAll(const sptr<NotificationBund
         result = ERR_OK;
         synchronizer->TransferResultData(result);
     }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Excute cancel all.");
     return ERR_OK;
 }
 
@@ -173,7 +164,7 @@ ErrCode AdvancedNotificationService::ExcuteCancelAll(
     const sptr<NotificationBundleOption>& bundleOption, const int32_t reason)
 {
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
 
         sptr<Notification> notification = nullptr;
@@ -215,7 +206,7 @@ ErrCode AdvancedNotificationService::ExcuteCancelAll(
         BatchCancelTimer(timerIds);
         result = ERR_OK;
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Excute cancel all.");
     return result;
 }
 
@@ -504,13 +495,9 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
         return ERR_ANS_NOT_SYSTEM_SERVICE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notificationSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
     int32_t uid = IPCSkeleton::GetCallingUid();
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("called");
         {
             std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
@@ -542,7 +529,7 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "CancelContinuousTaskNotification.");
     return result;
 }
 
@@ -576,16 +563,11 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        std::string message = "NotifSvrQueue_ is null.";
-        ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         result = ExcuteRemoveNotification(bundle, notificationId, label, removeReason);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Excute remove notification.");
     if (result != ERR_OK) {
         std::string message = "remove notificaiton error";
         ANS_LOGE("%{public}s %{public}d", message.c_str(), result);
@@ -706,15 +688,10 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<Noti
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        std::string message = "Serial queue is nullptr.";
-        ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ExcuteRemoveAllNotificationsInner(bundleOption, bundle, reason);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove all notifications inner.");
 
     return ERR_OK;
 }
@@ -815,14 +792,11 @@ ErrCode AdvancedNotificationService::RemoveNotifications(
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notificationSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ExcuteRemoveNotifications(keys, removeReason);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove notifications.");
 
     return ERR_OK;
 }
@@ -1016,19 +990,13 @@ ErrCode AdvancedNotificationService::Delete(const std::string &key, int32_t remo
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        std::string message = "Serial queue is invalidated. key:" + key + ".";
-        ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     return ExcuteDelete(key, removeReason);
 }
 
 ErrCode AdvancedNotificationService::ExcuteDelete(const std::string &key, const int32_t removeReason)
 {
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("called");
         sptr<Notification> notification = nullptr;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -1050,7 +1018,7 @@ ErrCode AdvancedNotificationService::ExcuteDelete(const std::string &key, const 
 #endif
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Excute delete.");
 
     return result;
 }
@@ -1075,12 +1043,8 @@ ErrCode AdvancedNotificationService::DeleteByBundle(const sptr<NotificationBundl
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notificationSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::string> keys = GetNotificationKeys(bundle);
         for (auto key : keys) {
@@ -1109,7 +1073,7 @@ ErrCode AdvancedNotificationService::DeleteByBundle(const sptr<NotificationBundl
 
         result = ERR_OK;
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Delete by bundle.");
 
     return result;
 }
@@ -1138,16 +1102,11 @@ ErrCode AdvancedNotificationService::DeleteAll()
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        std::string message = "Serial queue is invalidity.";
-        ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ExcuteDeleteAll(result, reason);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Delete all.");
 
     return result;
 }
@@ -1211,11 +1170,6 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("notifSvrQueue is null");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     NotificationConstant::DistributedDeleteType deleteType =
         static_cast<NotificationConstant::DistributedDeleteType>(deleteTypeInt);
@@ -1240,7 +1194,7 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
 ErrCode AdvancedNotificationService::RemoveDistributedNotificationsByDeviceId(
     const std::string& deviceId, const int32_t removeReason)
 {
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
         std::vector<sptr<Notification>> notifications;
         std::list<std::shared_ptr<NotificationRecord>> deleteRecords;
         for (auto record : notificationList_) {
@@ -1284,13 +1238,14 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotificationsByDeviceId(
             notificationList_.remove(deleteRecord);
         }
     }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove notifications by deviceId.");
     return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
     const std::vector<std::string>& hashcodes, const int32_t removeReason)
 {
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
         std::vector<sptr<Notification>> notifications;
         std::list<std::shared_ptr<NotificationRecord>> deleteRecords;
         for (auto record : notificationList_) {
@@ -1322,6 +1277,7 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
             notificationList_.remove(deleteRecord);
         }
     }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove distributed notifications.");
     return ERR_OK;
 }
 
@@ -1329,7 +1285,7 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
     const NotificationConstant::SlotType& slotType, const int32_t removeReason,
     const NotificationConstant::DistributedDeleteType& deleteType)
 {
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
         std::vector<sptr<Notification>> notifications;
         std::list<std::shared_ptr<NotificationRecord>> deleteRecords;
         for (auto record : notificationList_) {
@@ -1371,13 +1327,14 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
             notificationList_.remove(deleteRecord);
         }
     }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove distributed notifications.");
     return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::RemoveAllDistributedNotifications(
     const int32_t removeReason)
 {
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
         std::vector<sptr<Notification>> notifications;
         std::list<std::shared_ptr<NotificationRecord>> deleteRecords;
         for (auto record : notificationList_) {
@@ -1401,6 +1358,7 @@ ErrCode AdvancedNotificationService::RemoveAllDistributedNotifications(
             notificationList_.remove(deleteRecord);
         }
     }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove all distributed notifications.");
     return ERR_OK;
 }
 

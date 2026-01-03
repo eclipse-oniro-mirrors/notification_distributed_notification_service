@@ -58,12 +58,8 @@ ErrCode AdvancedNotificationService::IsDistributedEnabled(bool &enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = DistributedPreferences::GetInstance()->GetDistributedEnable(enabled);
         if (result != ERR_OK) {
@@ -71,7 +67,7 @@ ErrCode AdvancedNotificationService::IsDistributedEnabled(bool &enabled)
             enabled = false;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Is distributed enabled.");
     return result;
 #else
     return ERR_INVALID_OPERATION;
@@ -175,17 +171,13 @@ ErrCode AdvancedNotificationService::EnableDistributed(bool enabled)
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(
+    auto submitResult = notificationSvrQueue_.SyncSubmit(
         std::bind([&]() {
             result = DistributedPreferences::GetInstance()->SetDistributedEnable(enabled);
             ANS_LOGE("ffrt enter!");
         }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Enable distributed.");
     return result;
 #else
     return ERR_INVALID_OPERATION;
@@ -221,12 +213,8 @@ ErrCode AdvancedNotificationService::EnableDistributedByBundle(
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = DistributedPreferences::GetInstance()->SetDistributedBundleEnable(bundle, enabled);
         if (result != ERR_OK) {
@@ -234,7 +222,7 @@ ErrCode AdvancedNotificationService::EnableDistributedByBundle(
             enabled = false;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Enable distributed bundle.");
     return result;
 #else
     return ERR_INVALID_OPERATION;
@@ -257,17 +245,13 @@ ErrCode AdvancedNotificationService::EnableDistributedSelf(const bool enabled)
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("notificationSvrQueue_ is nullptr.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind(
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind(
         [&]() {
             ANS_LOGD("ffrt enter!");
             result = DistributedPreferences::GetInstance()->SetDistributedBundleEnable(bundleOption, enabled);
         }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Enable distributed self.");
     return result;
 #else
     return ERR_INVALID_OPERATION;
@@ -303,12 +287,8 @@ ErrCode AdvancedNotificationService::IsDistributedEnableByBundle(
         return ERR_OK;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = DistributedPreferences::GetInstance()->GetDistributedBundleEnable(bundle, enabled);
         if (result != ERR_OK) {
@@ -316,7 +296,7 @@ ErrCode AdvancedNotificationService::IsDistributedEnableByBundle(
             enabled = false;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Is distributed bundle enable.");
     return result;
 #else
     return ERR_INVALID_OPERATION;
@@ -380,11 +360,6 @@ ErrCode AdvancedNotificationService::DistributeOperation(const sptr<Notification
         return result;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidated");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     OperationType operationType = operationInfo->GetOperationType();
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_21);
     message.Message("key:" + operationInfo->GetHashCode(), false);
@@ -397,10 +372,10 @@ ErrCode AdvancedNotificationService::DistributeOperation(const sptr<Notification
             ", index: " + std::to_string(operationInfo->GetBtnIndex()));
     }
     ANS_LOGI("DistributeOperation trigger hashcode %{public}s.", operationInfo->GetHashCode().c_str());
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         result = DistributeOperationInner(operationInfo);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Distribute operation.");
     if (result != ERR_OK && operationType == OperationType::DISTRIBUTE_OPERATION_REPLY) {
         std::string key = operationInfo->GetHashCode() + operationInfo->GetEventId();
         DistributedOperationService::GetInstance().RemoveOperationResponse(key);
@@ -589,15 +564,11 @@ ErrCode AdvancedNotificationService::GetAllDistribuedEnabledBundles(
         ANS_LOGE("Permission denied.");
         return ERR_ANS_PERMISSION_DENIED;
     }
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
 
     int32_t userId = 100;
     OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&, userId, deviceType]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&, userId, deviceType]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->GetAllDistribuedEnabledBundles(userId,
             deviceType, bundleOption);
@@ -606,7 +577,7 @@ ErrCode AdvancedNotificationService::GetAllDistribuedEnabledBundles(
             return;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get all distribued bundles.");
 
     return result;
 }
@@ -1018,13 +989,9 @@ ErrCode AdvancedNotificationService::GetDeviceRemindType(int32_t& remindTypeInt)
     }
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler =
-        notificationSvrQueue_->submit_h(std::bind([&]() { remindTypeInt = static_cast<int32_t>(GetRemindType()); }));
-    notificationSvrQueue_->wait(handler);
+    auto submitResult = notificationSvrQueue_.SyncSubmit(
+        std::bind([&]() { remindTypeInt = static_cast<int32_t>(GetRemindType()); }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get device remind type.");
     return ERR_OK;
 #else
     return ERR_INVALID_OPERATION;
@@ -1046,17 +1013,13 @@ ErrCode AdvancedNotificationService::SetSyncNotificationEnabledWithoutApp(const 
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(
+    auto submitResult = notificationSvrQueue_.SyncSubmit(
         std::bind([&]() {
             ANS_LOGD("ffrt enter!");
             result = DistributedPreferences::GetInstance()->SetSyncEnabledWithoutApp(userId, enabled);
         }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set sync enable app.");
     return result;
 #else
     return ERR_INVALID_OPERATION;
@@ -1077,17 +1040,13 @@ ErrCode AdvancedNotificationService::GetSyncNotificationEnabledWithoutApp(const 
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(
+    auto submitResult = notificationSvrQueue_.SyncSubmit(
         std::bind([&]() {
             ANS_LOGD("ffrt enter!");
             result = DistributedPreferences::GetInstance()->GetSyncEnabledWithoutApp(userId, enabled);
         }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get sync enable app.");
     return result;
 #else
     return ERR_INVALID_OPERATION;

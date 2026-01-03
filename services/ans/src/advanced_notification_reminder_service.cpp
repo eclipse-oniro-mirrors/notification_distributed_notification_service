@@ -145,12 +145,6 @@ ErrCode AdvancedNotificationService::PreReminderInfoCheck()
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_1));
         return ERR_ANS_PERMISSION_DENIED;
     }
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        message.Message("Serial queue is invalid.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_2));
-        return ERR_ANS_INVALID_PARAM;
-    }
     return ERR_OK;
 }
 
@@ -163,7 +157,7 @@ ErrCode AdvancedNotificationService::GetReminderInfoByBundles(
         return result;
     }
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_26, EventBranchId::BRANCH_3);
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         for (const auto &bundle : bundles) {
             uint32_t flags = DEFAULT_SLOT_FLAGS;
@@ -210,7 +204,7 @@ ErrCode AdvancedNotificationService::GetReminderInfoByBundles(
         }
     }));
 
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get reminder info by bundles.");
     ANS_LOGI("GetReminderInfoByBundles end");
     NotificationAnalyticsUtil::ReportModifyEvent(
         message.ErrorCode(result).Message("GetReminderInfoByBundles end.").BranchId(BRANCH_5));
@@ -226,7 +220,7 @@ ErrCode AdvancedNotificationService::SetReminderInfoByBundles(
         return result;
     }
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_26, EventBranchId::BRANCH_6);
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         for (const auto &reminder : reminderInfo) {
             sptr< NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
@@ -273,7 +267,7 @@ ErrCode AdvancedNotificationService::SetReminderInfoByBundles(
         }
     }));
 
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set reminder info by bundles.");
     ANS_LOGI("SetReminderInfoByBundles end");
     NotificationAnalyticsUtil::ReportModifyEvent(
         message.ErrorCode(result).Message("SetReminderInfoByBundles end.").BranchId(BRANCH_9));

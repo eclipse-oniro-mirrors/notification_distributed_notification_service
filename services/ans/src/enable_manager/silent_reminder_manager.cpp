@@ -65,15 +65,11 @@ ErrCode AdvancedNotificationService::SetSilentReminderEnabled(const sptr<Notific
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         result = NotificationPreferences::GetInstance()->SetSilentReminderEnabled(bundle, enabled);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set silent reminder enabled.");
     ANS_LOGI("%{public}s_%{public}d, enabled: %{public}s, "
         "SetSilentReminderEnabled result: %{public}d", bundleOption->GetBundleName().c_str(),
         bundleOption->GetUid(), std::to_string(enabled).c_str(), result);
@@ -108,17 +104,12 @@ ErrCode AdvancedNotificationService::IsSilentReminderEnabled(const sptr<Notifica
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         result = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundle, enableStatus);
         enableStatusInt = static_cast<int32_t>(enableStatus);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get silent reminder enabled.");
     return result;
 }
 

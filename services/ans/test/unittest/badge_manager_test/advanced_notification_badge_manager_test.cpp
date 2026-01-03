@@ -80,7 +80,7 @@ HWTEST_F(AdvancedNotificationBadgeManagerTest, SetNotificationBadgeNum_0100, Fun
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     auto ret = advancedNotificationService_->SetNotificationBadgeNum(num);
     EXPECT_EQ(ret, ERR_OK);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     ret = advancedNotificationService_->SetNotificationBadgeNum(num);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
@@ -162,7 +162,7 @@ HWTEST_F(AdvancedNotificationBadgeManagerTest, SetShowBadgeEnabledForBundles_050
     bundleOptions[bundleOption] = true;
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundles(bundleOptions);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
@@ -221,7 +221,7 @@ HWTEST_F(AdvancedNotificationBadgeManagerTest, GetShowBadgeEnabledForBundles_040
     std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }

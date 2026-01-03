@@ -214,12 +214,8 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForAllBundles(const 
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         if (deviceId.empty()) {
             // Local device
@@ -228,7 +224,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForAllBundles(const 
             // Remote device
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set enabled for all.");
     return result;
 }
 
@@ -457,12 +453,8 @@ ErrCode AdvancedNotificationService::GetAllNotificationEnabledBundlesInner(
         ANS_LOGE("Permission denied.");
         return ERR_ANS_PERMISSION_DENIED;
     }
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         if (userId == SUBSCRIBE_USER_INIT) {
             result = NotificationPreferences::GetInstance()->GetAllNotificationEnabledBundles(bundleOption);
@@ -474,7 +466,7 @@ ErrCode AdvancedNotificationService::GetAllNotificationEnabledBundlesInner(
             return;
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set enabled for all inner.");
 
     return result;
 }
@@ -509,16 +501,12 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledByUser(int32_t userI
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is ineffectiveness.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->SetNotificationsEnabled(userId, enabled);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set enabled by user.");
     return result;
 }
 
@@ -541,17 +529,13 @@ ErrCode AdvancedNotificationService::IsAllowedNotify(bool &allowed)
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         allowed = false;
         result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Is allowed notify.");
     return result;
 }
 
@@ -623,17 +607,13 @@ ErrCode AdvancedNotificationService::IsSpecialUserAllowedNotify(int32_t userId, 
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is nullptr.");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         allowed = false;
         result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Is special allowed notify.");
     return result;
 }
 

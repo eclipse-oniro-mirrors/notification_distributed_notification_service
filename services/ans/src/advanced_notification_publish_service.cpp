@@ -265,10 +265,7 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
     if (CollaborateFilter(request) != ERR_OK) {
         return ERR_ANS_NOT_ALLOWED;
     }
-    if (notificationSvrQueue_ == nullptr) {
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit([&]() {
         if (DuplicateMsgControl(record->request) == ERR_ANS_DUPLICATE_MSG) {
             (void)PublishRemoveDuplicateEvent(record);
             return;
@@ -285,7 +282,7 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
         UpdateCollaborateTimerInfo(record);
     });
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Collaborate publish.");
     return ERR_OK;
 }
 
@@ -520,22 +517,14 @@ ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName, c
         return ERR_ANS_INVALID_BUNDLE;
     }
     bundleOption->SetAppInstanceKey(instanceKey);
-
-    if (notificationSvrQueue_ == nullptr) {
-        std::string message = "Serial queue is invalid.";
-        ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ExcuteCancelGroupCancel(bundleOption, groupName, reason);
-    return ERR_OK;
+    return ExcuteCancelGroupCancel(bundleOption, groupName, reason);
 }
 
-void AdvancedNotificationService::ExcuteCancelGroupCancel(
+ErrCode AdvancedNotificationService::ExcuteCancelGroupCancel(
     const sptr<NotificationBundleOption>& bundleOption,
     const std::string &groupName, const int32_t reason)
 {
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         ExecuteCancelGroupCancelFromTriggerNotificationList(bundleOption, groupName);
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
@@ -579,6 +568,8 @@ void AdvancedNotificationService::ExcuteCancelGroupCancel(
         }
         BatchCancelTimer(timerIds);
     }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Excute cancel group cancel.");
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::RemoveGroupByBundle(
@@ -624,12 +615,7 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        std::string message = "Serial queue is invalid.";
-        ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+    auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
         int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
@@ -673,6 +659,7 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
         }
         BatchCancelTimer(timerIds);
     }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove group by bundle.");
 
     return ERR_OK;
 }
@@ -680,12 +667,7 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
 void AdvancedNotificationService::UpdateUnifiedGroupInfo(const std::string &key,
     std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo)
 {
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return;
-    }
-
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h([=]() {
+    notificationSvrQueue_.Submit([=]() {
         for (const auto& item : notificationList_) {
             if (item->notification->GetKey() == key) {
                 ANS_LOGD("update group info matched key %s", key.c_str());
@@ -830,17 +812,12 @@ AnsStatus AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifi
         return AnsStatus(ERR_ANS_NO_MEMORY, "Failed to create notification");
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return AnsStatus(ERR_ANS_INVALID_PARAM, "Serial queue is invalid.");
-    }
-
     SetRequestBySlotType(record->request, bundleOption);
 #ifdef ENABLE_ANS_AGGREGATION
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
 #endif
 
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit([&]() {
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER
         if (!bundle.empty() && IsDisableNotification(bundle, record->notification->GetRecvUserId())) {
             ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
@@ -909,7 +886,8 @@ AnsStatus AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifi
             StartAutoDeletedTimer(record);
         }
     });
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return AnsStatus(submitResult, "serial queue is valid."),
+        "Get granted self queue is null.");
     if (!ansStatus.Ok()) {
         return ansStatus;
     }
@@ -1143,7 +1121,7 @@ ErrCode AdvancedNotificationService::PublishExtensionServiceStateChange(
         }
         want.SetParam("enabledBundles", enabledBundlesJson.dump());
     }
-    
+
     nlohmann::json targetBundle = {{"bundle", bundleOption->GetBundleName()}, {"uid", bundleOption->GetUid()}};
     want.SetParam("targetBundle", targetBundle.dump());
 
@@ -1169,12 +1147,7 @@ void AdvancedNotificationService::ClearAllNotificationGroupInfo(std::string loca
 {
     ANS_LOGD("ClearNotification enter.");
     bool status = (localSwitch == "true");
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("ClearNotification Serial queue is invalid.");
-        return;
-    }
-
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h([=]() {
+    notificationSvrQueue_.Submit([=]() {
         if (aggregateLocalSwitch_ && !status) {
             for (const auto& item : notificationList_) {
                 item->notification->GetNotificationRequestPoint()->SetUnifiedGroupInfo(nullptr);
@@ -1379,12 +1352,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        std::string message = "Serial queue is nullptr.";
-        ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
         ANS_LOGD("ffrt enter!");
         {
@@ -1453,7 +1421,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(
         }
         BatchCancelTimer(timerIds);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove all notifications by bundle.");
 
     return ERR_OK;
 }

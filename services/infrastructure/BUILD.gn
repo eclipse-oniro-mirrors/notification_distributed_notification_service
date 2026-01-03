@@ -22,7 +22,7 @@ config("ans_base_config") {
   ]
 }
 
-ohos_shared_library("libans_base") {
+ohos_shared_library("ans_base") {
   sanitize = {
     integer_overflow = true
     ubsan = true

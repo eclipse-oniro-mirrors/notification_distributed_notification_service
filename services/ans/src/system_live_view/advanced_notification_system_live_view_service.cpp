@@ -52,7 +52,7 @@ ErrCode AdvancedNotificationService::TriggerLocalLiveView(const sptr<Notificatio
     }
 
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
         result = GetNotificationById(bundle, notificationId, notification);
@@ -61,7 +61,7 @@ ErrCode AdvancedNotificationService::TriggerLocalLiveView(const sptr<Notificatio
                 buttonOption);
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Trigger local live view.");
     return result;
 }
 
@@ -129,10 +129,10 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
     if (errCode == ERR_OK) {
         int32_t callingUid = IPCSkeleton::GetCallingUid();
         int32_t callingPid = IPCSkeleton::GetCallingPid();
-        ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
             LivePublishProcess::GetInstance()->AddLiveViewSubscriber(callingUid, callingPid);
         }));
-        notificationSvrQueue_->wait(handler);
+        ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Subscribe live view.");
     }
     SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info, errCode);
     return errCode;
@@ -142,12 +142,8 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(
     const std::string& bundleName, const int32_t uid, const int32_t pid)
 {
     std::vector<std::shared_ptr<NotificationRecord>> recordList;
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue is nullptr");
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         LivePublishProcess::GetInstance()->EraseLiveViewSubscriber(uid, pid);
         GetTargetRecordList(uid, pid, NotificationConstant::SlotType::LIVE_VIEW,
             NotificationContent::Type::LOCAL_LIVE_VIEW, recordList);
@@ -160,7 +156,7 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(
         }
         result = RemoveNotificationFromRecordList(recordList);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove live view.");
     return result;
 }
 
@@ -180,7 +176,7 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotificationsOfSa(int32
     }
 
     ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         LivePublishProcess::GetInstance()->EraseLiveViewSubscriber(uid);
         std::vector<std::shared_ptr<NotificationRecord>> recordList;
         for (auto item : notificationList_) {
@@ -194,7 +190,7 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotificationsOfSa(int32
             result = RemoveNotificationFromRecordList(recordList);
         }
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove sa live view.");
     return result;
 }
 }  // namespace Notification

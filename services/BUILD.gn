@@ -14,7 +14,10 @@
 import("//base/notification/distributed_notification_service/notification.gni")
 
 group("ans_service") {
-  deps = [ "ans:ans_targets" ]
+  deps = [
+    "ans:ans_targets",
+    "infrastructure:ans_base"
+  ]
 
   if (distributed_notification_service_feature_distributed_db) {
     deps += [ "distributed:libans_distributed" ]

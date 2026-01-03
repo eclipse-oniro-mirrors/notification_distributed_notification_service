@@ -289,17 +289,10 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         return ERR_ANS_NO_MEMORY;
     }
 
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notificationSvrQueue");
-        message.ErrorCode(ERR_ANS_NO_MEMORY).Message("Serial queue is invalid.");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     SetRequestBySlotType(record->request, bundleOption);
 
     const int32_t ipcUid = IPCSkeleton::GetCallingUid();
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit([&]() {
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER
         if (IsDisableNotification(bundle, record->notification->GetRecvUserId())) {
             ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
@@ -362,7 +355,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
             StartAutoDeletedTimer(record);
         }
     });
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Publish for indirect proxy.");
     if (!ansStatus.Ok()) {
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
         return ansStatus.GetErrCode();
@@ -432,12 +425,7 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
         return ERR_NO_MEMORY;
     }
     record->notification->SetSourceType(NotificationConstant::SourceType::TYPE_CONTINUOUS);
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notificationSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("called");
         if (!IsNotificationExists(record->notification->GetKey())) {
             AddToNotificationList(record);
@@ -452,7 +440,7 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Publish continuous task.");
 
     return ERR_OK;
 }
@@ -466,14 +454,10 @@ ErrCode AdvancedNotificationService::UpdateNotificationTimerByUid(const int32_t 
         return ERR_ANS_NOT_SYSTEM_SERVICE;
     }
 
-    if (!notificationSvrQueue_) {
-        ANS_LOGE("null notificationSvrQueue");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         HandleUpdateLiveViewNotificationTimer(uid, isPaused);
     }));
-    notificationSvrQueue_->wait(handler);
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Update notification timer by uid.");
     return ERR_OK;
 }
 

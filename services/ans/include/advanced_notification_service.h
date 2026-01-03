@@ -54,6 +54,7 @@
 #endif
 #include "notification_clone_bundle_info.h"
 #include "ibadge_query_callback.h"
+#include "ffrt_queue_impl.h"
 
 namespace OHOS {
 namespace Notification {
@@ -106,20 +107,7 @@ public:
      *
      * @return Returns the queue.
      */
-    std::shared_ptr<ffrt::queue> GetNotificationSvrQueue();
-
-    /**
-     * @brief Submit an async task into notification_svr_queue.
-     *
-     * @param func Indicates the function.
-     */
-    void SubmitAsyncTask(const std::function<void()>& func);
-    /**
-     * @brief Submit a sync task into notification_svr_queue.
-     *
-     * @param func Indicates the function.
-     */
-    void SubmitSyncTask(const std::function<void()>& func);
+    Infra::FfrtQueueImpl GetNotificationSvrQueue();
 
     // AnsManagerStub
 
@@ -2179,7 +2167,7 @@ private:
     void UpdateRecordByOwner(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
     void StartFinishTimerForUpdate(const std::shared_ptr<NotificationRecord> &record, uint64_t process);
     ErrCode CheckLongTermLiveView(const sptr<NotificationRequest> &request, const std::string &key);
-    void ExcuteCancelGroupCancel(const sptr<NotificationBundleOption>& bundleOption,
+    ErrCode ExcuteCancelGroupCancel(const sptr<NotificationBundleOption>& bundleOption,
         const std::string &groupName, const int32_t reason);
     ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason,
         const sptr<IAnsResultDataSynchronizer> &synchronizer);
@@ -2352,7 +2340,7 @@ private:
     std::shared_ptr<RecentInfo> recentInfo_ = nullptr;
     std::shared_ptr<SystemEventObserver> systemEventObserver_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> pushRecipient_ = nullptr;
-    std::shared_ptr<ffrt::queue> notificationSvrQueue_ = nullptr;
+    Infra::FfrtQueueImpl notificationSvrQueue_;
     std::map<NotificationConstant::SlotType, std::shared_ptr<BasePublishProcess>> publishProcess_;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;

@@ -36,6 +36,7 @@ ohos_unittest("advanced_notification_badge_manager_test") {
     "../mock/include",
     "${services_path}/ans/include",
     "${services_path}/ans/include/utils/",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
   version_script = "../libans_test.map"
 
@@ -60,6 +61,7 @@ ohos_unittest("advanced_notification_badge_manager_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
+    "${services_path}/infrastructure:ans_base",
   ]
 
   external_deps = [
