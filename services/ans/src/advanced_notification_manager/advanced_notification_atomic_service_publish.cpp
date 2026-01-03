@@ -48,6 +48,7 @@ AnsStatus AdvancedNotificationService::AtomicServicePublish(const sptr<Notificat
     }
 
     sptr<NotificationBundleOption> bundleOption;
+    ansStatus = CheckAndPrepareNotificationInfoWithAtomicService(request, bundleOption);
     if (!ansStatus.Ok()) {
         ansStatus.AppendSceneBranch(EventSceneId::SCENE_1, EventBranchId::BRANCH_0,
             "CheckAndPrepareNotificationInfoWithAtomicService failed");
