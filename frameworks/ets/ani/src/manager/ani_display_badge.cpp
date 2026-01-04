@@ -172,7 +172,7 @@ ani_object AniDisplayBadge(ani_env *env, ani_object obj, ani_boolean enable, ani
         NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOption failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
-    } 
+    }
     env->GetVM(&asyncCallbackInfo->vm);
     asyncCallbackInfo->isEnable = NotificationSts::AniBooleanToBool(enable);
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
