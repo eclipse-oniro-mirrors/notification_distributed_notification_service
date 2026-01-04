@@ -28,6 +28,8 @@ const char KEY_NAME[] = "AGGREGATE_CONFIG";
 const char RING_LIST_KEY_NAME[] = "RING_TRUSTLIST_PKG";
 const char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
 const char PRIORITY_RULE_CONFIG_KEY_NAME[] = "notificationRuleConfig";
+const char CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG[] = "CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG";
+const char HEALTH_BUNDLE_WHITE_LIST[]  = "HEALTH_BUNDLE_WHITE_LIST";
 
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackConfigInfo* asyncCallbackInfo)
 {
@@ -74,7 +76,8 @@ bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackConfigInf
     return true;
 }
 
-bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackConfigInfo* asyncCallbackInfo) {
+bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackConfigInfo* asyncCallbackInfo)
+{
     if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         return false;
@@ -114,14 +117,12 @@ bool ParsePraramForAdditionalConfig(ani_env *env,
         return false;
     }
     std::string keyStr = NotificationSts::GetResizeStr(tempKey, NotificationSts::STR_MAX_SIZE);
-    if (std::strlen(keyStr.c_str()) == 0 ||
-        (strcmp(keyStr.c_str(), KEY_NAME) != 0 &&
-        strcmp(keyStr.c_str(), RING_LIST_KEY_NAME) != 0 &&
-        strcmp(keyStr.c_str(), CTRL_LIST_KEY_NAME) != 0 &&
-        strcmp(keyStr.c_str(), PRIORITY_RULE_CONFIG_KEY_NAME) != 0)) {
-        ANS_LOGW("Parameter verification failed");
-        asyncCallbackInfo->result = ERR_OK;
-        return true;
+    if (keyStr.empty() || (keyStr != KEY_NAME && keyStr != RING_LIST_KEY_NAME &&
+        keyStr != CTRL_LIST_KEY_NAME && keyStr != HEALTH_BUNDLE_WHITE_LIST &&
+        keyStr != PRIORITY_RULE_CONFIG_KEY_NAME &&
+        keyStr != CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG)) {
+        ANS_LOGW("Argument param error. not allow key: %{public}s.", key.c_str());
+        return false;
     }
     std::string tempValue;
     if (NotificationSts::GetStringByAniString(env, value, tempValue) != ANI_OK) {

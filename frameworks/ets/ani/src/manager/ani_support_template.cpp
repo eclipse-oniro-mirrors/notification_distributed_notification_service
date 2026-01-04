@@ -69,7 +69,8 @@ bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackSupportIn
     return true;
 }
 
-bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackSupportInfo* asyncCallbackInfo) {
+bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackSupportInfo* asyncCallbackInfo)
+{
     if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         return false;
