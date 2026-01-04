@@ -185,12 +185,27 @@ void NotificationSubscriberManager::NotifyConsumed(
         return;
     }
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-    AdvancedNotificationPriorityHelper::GetInstance()->UpdatePriorityType(notification->GetNotificationRequestPoint());
-#endif
+    MessageParcel parcel;
+    if (!parcel.WriteParcelable(notification)) {
+        ANS_LOGE("NotifyConsumed writeParcelable failed.");
+        return;
+    }
+    sptr<Notification> newNotification = parcel.ReadParcelable<Notification>();
+    if (newNotification == nullptr) {
+        ANS_LOGE("NotifyConsumed null notification");
+        return;
+    }
     AppExecFwk::EventHandler::Callback NotifyConsumedFunc =
-        std::bind(&NotificationSubscriberManager::NotifyConsumedInner, this, notification, notificationMap);
+        std::bind(&NotificationSubscriberManager::NotifyConsumedInner,
+        this, newNotification, notificationMap, notification);
+    notificationSubQueue_->submit(NotifyConsumedFunc);
+#else
+    AppExecFwk::EventHandler::Callback NotifyConsumedFunc =
+        std::bind(&NotificationSubscriberManager::NotifyConsumedInner,
+        this, notification, notificationMap, notification);
 
     notificationSubQueue_->submit(NotifyConsumedFunc);
+#endif
 }
 
 void NotificationSubscriberManager::NotifyApplicationInfoNeedChanged(const std::string& bundleName)
@@ -240,18 +255,30 @@ void NotificationSubscriberManager::BatchNotifyConsumed(const std::vector<sptr<N
     }
 #endif
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    std::vector<sptr<Notification>> newNotifications;
     for (auto notification : notifications) {
-        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+        if (notification == nullptr) {
+            newNotifications.emplace_back(nullptr);
             continue;
         }
-        AdvancedNotificationPriorityHelper::GetInstance()->UpdatePriorityType(
-            notification->GetNotificationRequestPoint());
+        MessageParcel parcel;
+        if (!parcel.WriteParcelable(notification)) {
+            ANS_LOGE("BatchNotifyConsumed writeParcelable failed.");
+            newNotifications.emplace_back(nullptr);
+            continue;
+        }
+        newNotifications.emplace_back(parcel.ReadParcelable<Notification>());
     }
-#endif
     AppExecFwk::EventHandler::Callback batchNotifyConsumedFunc = std::bind(
-        &NotificationSubscriberManager::BatchNotifyConsumedInner, this, notifications, notificationMap, record);
+        &NotificationSubscriberManager::BatchNotifyConsumedInner,
+        this, newNotifications, notificationMap, record, notifications);
+#else
+    AppExecFwk::EventHandler::Callback batchNotifyConsumedFunc = std::bind(
+        &NotificationSubscriberManager::BatchNotifyConsumedInner,
+        this, notifications, notificationMap, record, notifications);
 
     notificationSubQueue_->submit(batchNotifyConsumedFunc);
+#endif
 }
 
 void NotificationSubscriberManager::NotifyCanceled(
@@ -592,15 +619,15 @@ ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
     return ERR_OK;
 }
 
-void NotificationSubscriberManager::NotifyConsumedInner(
-    const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
+void NotificationSubscriberManager::NotifyConsumedInner(const sptr<Notification> &notification,
+    const sptr<NotificationSortingMap> &notificationMap, const sptr<Notification> &originNotification)
 {
     if (notification == nullptr) {
         ANS_LOGE("null notification");
         return;
     }
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
+    UpdatePriorityType(notification, originNotification);
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d> BundleName  = <%{public}s deviceType = %{public}s",
             __FUNCTION__, record->userId, notification->GetBundleName().c_str(), record->deviceType.c_str());
@@ -717,8 +744,9 @@ ErrCode NotificationSubscriberManager::IsDeviceTypeAffordConsume(
 }
 #endif
 
-void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<sptr<Notification>> &notifications,
-    const sptr<NotificationSortingMap> &notificationMap, const std::shared_ptr<SubscriberRecord> &record)
+void NotificationSubscriberManager::BatchNotifyConsumedInner(
+    const std::vector<sptr<Notification>> &notifications, const sptr<NotificationSortingMap> &notificationMap,
+    const std::shared_ptr<SubscriberRecord> &record, const std::vector<sptr<Notification>> &originNotifications)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notifications.empty() || notificationMap == nullptr || record == nullptr) {
@@ -737,6 +765,7 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<s
         if (notification == nullptr) {
             continue;
         }
+        UpdatePriorityType(notification, originNotifications[i]);
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
         if (IsDelayPriorityTargetSubscriber(record, notification->GetNotificationRequestPoint())) {
             continue;
@@ -762,6 +791,18 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<s
             }
         }
     }
+}
+
+void NotificationSubscriberManager::UpdatePriorityType(
+    const sptr<Notification> &notification, const sptr<Notification> &originNotification)
+{
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    AdvancedNotificationPriorityHelper::GetInstance()->UpdatePriorityType(notification->GetNotificationRequestPoint());
+    if (originNotification != nullptr && originNotification->GetNotificationRequestPoint() != nullptr) {
+        originNotification->GetNotificationRequestPoint()->SetInnerPriorityNotificationType(
+            notification->GetNotificationRequestPoint()->GetPriorityNotificationType());
+    }
+#endif
 }
 
 void NotificationSubscriberManager::NotifyCanceledInner(

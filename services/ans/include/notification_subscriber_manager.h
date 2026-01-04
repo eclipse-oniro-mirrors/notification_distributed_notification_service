@@ -220,10 +220,13 @@ private:
     ErrCode RemoveSubscriberInner(
         const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
-    void NotifyConsumedInner(
-        const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap);
+    void UpdatePriorityType(const sptr<Notification> &notification, const sptr<Notification> &originNotification);
+    void NotifyConsumedInner(const sptr<Notification> &notification,
+        const sptr<NotificationSortingMap> &notificationMap, const sptr<Notification> &originNotification);
     void BatchNotifyConsumedInner(const std::vector<sptr<Notification>> &notifications,
-        const sptr<NotificationSortingMap> &notificationMap, const std::shared_ptr<SubscriberRecord> &record);
+        const sptr<NotificationSortingMap> &notificationMap,
+        const std::shared_ptr<SubscriberRecord> &record,
+        const std::vector<sptr<Notification>> &originNotifications);
     void NotifyCanceledInner(const sptr<Notification> &notification,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
     void BatchNotifyCanceledInner(const std::vector<sptr<Notification>> &notifications,
