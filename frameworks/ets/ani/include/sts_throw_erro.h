@@ -37,12 +37,6 @@ void ThrowError(ani_env *env, int32_t errCode, const std::string &errorMsg);
 
 ani_object CreateError(ani_env *env, int32_t code, const std::string &msg);
 
-inline void ThrowErrorWithMsg(ani_env *env, std::string logMsg)
-{
-    ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
-        FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-}
-
 inline void ThrowErrorWithCode(ani_env *env, const int32_t errCode, std::string msg = "")
 {
     if (env == nullptr) return;
@@ -52,6 +46,12 @@ inline void ThrowErrorWithCode(ani_env *env, const int32_t errCode, std::string 
 inline void ThrowErrorWithInvalidParam(ani_env *env)
 {
     ThrowErrorWithCode(env, ERROR_PARAM_INVALID);
+}
+
+inline void ThrowInternerErrorWithLogE(ani_env *env, std::string logMsg = "")
+{
+    ANS_LOGE("ERROR_INTERNAL_ERROR : %{public}s", logMsg.c_str());
+    ThrowErrorWithCode(env, OHOS::Notification::ERROR_INTERNAL_ERROR);
 }
 
 } // namespace NotificationSts

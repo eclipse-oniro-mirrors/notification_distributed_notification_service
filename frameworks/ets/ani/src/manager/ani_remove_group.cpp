@@ -24,29 +24,128 @@
 
 namespace OHOS {
 namespace NotificationManagerSts {
-
-void AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_string groupName)
+using namespace arkts::concurrency_helpers;
+void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackGroupInfo* asyncCallbackInfo)
 {
-    ANS_LOGD("AniRemoveGroupByBundle call");
-    OHOS::Notification::NotificationBundleOption option;
-    if (!OHOS::NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
-        NotificationSts::ThrowErrorWithMsg(env, "sts AniRemoveGroupByBundle ERROR_INTERNAL_ERROR");
-        return ;
+    ANS_LOGD("Delete AsyncCallbackGroupInfo Without Promise");
+    if (!asyncCallbackInfo) {
+        return;
     }
-    std::string tempStr = "";
-    ani_status status = NotificationSts::GetStringByAniString(env, groupName, tempStr);
-    if (status !=  ANI_OK) {
-        NotificationSts::ThrowErrorWithMsg(env, "sts AniRemoveGroupByBundle ERROR_INTERNAL_ERROR");
-        return ;
+    if (asyncCallbackInfo->info.callback != nullptr) {
+        ANS_LOGD("Delete callback reference");
+        env->GlobalReference_Delete(asyncCallbackInfo->info.callback);
     }
-    std::string groupNameStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);
-    int returncode = OHOS::Notification::NotificationHelper::RemoveGroupByBundle(option, groupNameStr);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniRemoveGroupByBundle error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    if (asyncCallbackInfo->asyncWork != nullptr) {
+        ANS_LOGD("DeleteAsyncWork");
+        DeleteAsyncWork(env, asyncCallbackInfo->asyncWork);
+        asyncCallbackInfo->asyncWork = nullptr;
     }
-    ANS_LOGD("AniRemoveGroupByBundle end");
+    delete asyncCallbackInfo;
+    asyncCallbackInfo = nullptr;
+}
+
+void DeleteCallBackInfo(ani_env* env, AsyncCallbackGroupInfo* asyncCallbackInfo)
+{
+    ANS_LOGD("Delete AsyncCallbackGroupInfo");
+    if (!asyncCallbackInfo) {
+        return;
+    }
+    if (asyncCallbackInfo->info.resolve != nullptr) {
+        ANS_LOGD("Delete resolve reference");
+        env->GlobalReference_Delete(reinterpret_cast<ani_ref>(asyncCallbackInfo->info.resolve));
+    }
+    DeleteCallBackInfoWithoutPromise(env, asyncCallbackInfo);
+}
+
+bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackGroupInfo* asyncCallbackInfo)
+{
+    if (!NotificationSts::IsUndefine(env, callback)) {
+        ani_ref globalRef;
+        if (env->GlobalReference_Create(static_cast<ani_ref>(callback), &globalRef) != ANI_OK) {
+            NotificationSts::ThrowInternerErrorWithLogE(env, "create callback ref failed");
+            return false;
+        }
+        asyncCallbackInfo->info.callback = globalRef;
+    }
+    return true;
+}
+
+bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackGroupInfo* asyncCallbackInfo)
+{
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+        ANS_LOGE("GetEnv failed");
+        return false;
+    }
+    if (asyncCallbackInfo->info.returnCode != ERR_OK) {
+        ANS_LOGE("return ErrCode: %{public}d", asyncCallbackInfo->info.returnCode);
+        NotificationSts::CreateReturnData(*envCurr, asyncCallbackInfo->info);
+        DeleteCallBackInfoWithoutPromise(*envCurr, asyncCallbackInfo);
+        return false;
+    }
+    return true;
+}
+
+void HandleRemoveGroupCallbackComplete(ani_env* env, WorkStatus status, void* data)
+{
+    auto asyncCallbackInfo = static_cast<AsyncCallbackGroupInfo*>(data);
+    if (!asyncCallbackInfo) {
+        ANS_LOGE("asyncCallbackInfo is nullptr");
+        return;
+    }
+    ani_env *envCurr = nullptr;
+    if (!CheckCompleteEnvironment(&envCurr, asyncCallbackInfo)) {
+        return;
+    }
+    NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
+    DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
+}
+
+ani_object AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_string groupName, ani_object callback)
+{
+    ANS_LOGD("AniRemoveGroupByBundle called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackGroupInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
+    }
+    if (!NotificationSts::UnwrapBundleOption(env, bundleOption, asyncCallbackInfo->option)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOption failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (NotificationSts::GetStringByAniString(env, groupName, asyncCallbackInfo->groupNameStr) !=  ANI_OK) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse groupName failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    asyncCallbackInfo->groupNameStr =
+        NotificationSts::GetResizeStr(asyncCallbackInfo->groupNameStr, NotificationSts::STR_MAX_SIZE);
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackGroupInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::RemoveGroupByBundle(
+                    asyncCallbackInfo->option, asyncCallbackInfo->groupNameStr);
+            }
+        },
+        HandleRemoveGroupCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 }
 }

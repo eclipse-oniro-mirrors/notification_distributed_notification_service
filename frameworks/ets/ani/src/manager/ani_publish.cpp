@@ -19,113 +19,255 @@
 #include "sts_bundle_option.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
-#include "sts_request.h"
-#include "notification_request.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
-using namespace OHOS::Notification;
-
-void AniPublish(ani_env *env, ani_object obj)
+using namespace arkts::concurrency_helpers;
+void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackPublishInfo* asyncCallbackInfo)
 {
-    ANS_LOGD("AniPublish call");
-    std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
-    int32_t ret = NotificationSts::UnWarpNotificationRequest(env, obj, notificationRequest);
-    if (ret != ERR_OK) {
-        ANS_LOGE("AniPublish UnWarpNotificationRequest failed");
-        int externalCode = NotificationSts::GetExternalCode(ret);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    ANS_LOGD("Delete AsyncCallbackPublishInfo Without Promise");
+    if (!asyncCallbackInfo) {
         return;
     }
-    int returncode = NotificationHelper::PublishNotification(*notificationRequest);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    if (asyncCallbackInfo->info.callback != nullptr) {
+        ANS_LOGD("Delete callback reference");
+        env->GlobalReference_Delete(asyncCallbackInfo->info.callback);
     }
-    ANS_LOGD("AniPublish end");
+    if (asyncCallbackInfo->asyncWork != nullptr) {
+        ANS_LOGD("DeleteAsyncWork");
+        DeleteAsyncWork(env, asyncCallbackInfo->asyncWork);
+        asyncCallbackInfo->asyncWork = nullptr;
+    }
+    delete asyncCallbackInfo;
+    asyncCallbackInfo = nullptr;
 }
 
-void AniPublishWithId(ani_env *env, ani_object obj, ani_int userId)
+void DeleteCallBackInfo(ani_env* env, AsyncCallbackPublishInfo* asyncCallbackInfo)
 {
-    ANS_LOGD("AniPublishWithId start");
-    //NotificationRequest request;
-    std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
-    int32_t ret = NotificationSts::UnWarpNotificationRequest(env, obj, notificationRequest);
-    if (ret != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(ret);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    ANS_LOGD("Delete AsyncCallbackPublishInfo");
+    if (!asyncCallbackInfo) {
         return;
     }
-    notificationRequest->SetOwnerUserId(userId);
-    int returncode = NotificationHelper::PublishNotification(*notificationRequest);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniPublishWithId error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    if (asyncCallbackInfo->info.resolve != nullptr) {
+        ANS_LOGD("Delete resolve reference");
+        env->GlobalReference_Delete(reinterpret_cast<ani_ref>(asyncCallbackInfo->info.resolve));
     }
-    ANS_LOGD("AniPublishWithId end");
+    DeleteCallBackInfoWithoutPromise(env, asyncCallbackInfo);
 }
 
-void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representativeBundle, ani_int userId)
+bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackPublishInfo* asyncCallbackInfo)
 {
-    ANS_LOGD("AniPublishAsBundle enter");
+    if (!NotificationSts::IsUndefine(env, callback)) {
+        ani_ref globalRef;
+        if (env->GlobalReference_Create(static_cast<ani_ref>(callback), &globalRef) != ANI_OK) {
+            NotificationSts::ThrowInternerErrorWithLogE(env, "create callback ref failed");
+            return false;
+        }
+        asyncCallbackInfo->info.callback = globalRef;
+    }
+    return true;
+}
+
+bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackPublishInfo* asyncCallbackInfo) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+        ANS_LOGE("GetEnv failed");
+        return false;
+    }
+    if (asyncCallbackInfo->info.returnCode != ERR_OK) {
+        ANS_LOGE("return ErrCode: %{public}d", asyncCallbackInfo->info.returnCode);
+        NotificationSts::CreateReturnData(*envCurr, asyncCallbackInfo->info);
+        DeleteCallBackInfoWithoutPromise(*envCurr, asyncCallbackInfo);
+        return false;
+    }
+    return true;
+}
+
+void HandlePublishFunctionCallbackComplete(ani_env* env, WorkStatus status, void* data)
+{
+    auto asyncCallbackInfo = static_cast<AsyncCallbackPublishInfo*>(data);
+    if (!asyncCallbackInfo) {
+        ANS_LOGE("asyncCallbackInfo is nullptr");
+        return;
+    }
+    ani_env *envCurr = nullptr;
+    if (!CheckCompleteEnvironment(&envCurr, asyncCallbackInfo)) {
+        return;
+    }
+    NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
+    DeleteCallBackInfo(envCurr, asyncCallbackInfo);
+}
+
+void ExecutePublishWork(ani_env* env, void* data)
+{
+    auto asyncCallbackInfo = static_cast<AsyncCallbackPublishInfo*>(data);
+    if (asyncCallbackInfo) {
+        asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::PublishNotification(
+            *(asyncCallbackInfo->notificationRequest));
+    }
+}
+
+ani_object AniPublish(ani_env *env, ani_object obj, ani_object callback)
+{
+    ANS_LOGD("AniPublish called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackPublishInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    int32_t ret = NotificationSts::UnWarpNotificationRequest(env, obj, asyncCallbackInfo->notificationRequest);
+    if (ret != ERR_OK) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnWarpNotificationRequest failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+
+    env->GetVM(&asyncCallbackInfo->vm);
+
+    WorkStatus status = CreateAsyncWork(env, ExecutePublishWork,
+        HandlePublishFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniPublishWithId(ani_env *env, ani_object obj, ani_int userId, ani_object callback)
+{
+    ANS_LOGD("AniPublishWithId called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackPublishInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    int32_t ret = NotificationSts::UnWarpNotificationRequest(env, obj, asyncCallbackInfo->notificationRequest);
+    if (ret != ERR_OK) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnWarpNotificationRequest failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    asyncCallbackInfo->notificationRequest->SetOwnerUserId(userId);
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env, ExecutePublishWork,
+        HandlePublishFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniPublishAsBundle(ani_env *env, ani_object request, ani_string representativeBundle,
+    ani_int userId, ani_object callback)
+{
+    ANS_LOGD("AniPublishAsBundle called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackPublishInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    int32_t ret = NotificationSts::UnWarpNotificationRequest(env, request, asyncCallbackInfo->notificationRequest);
+    if (ret != ERR_OK) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnWarpNotificationRequest failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
     std::string bundleStr;
     if (ANI_OK != NotificationSts::GetStringByAniString(env, representativeBundle, bundleStr)) {
-        NotificationSts::ThrowErrorWithMsg(env, "AniPublishAsBundle ERROR_INTERNAL_ERROR");
-        return;
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse representativeBundle failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-
-    std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
-    int32_t ret = NotificationSts::UnWarpNotificationRequest(env, request, notificationRequest);
-    if (ret != ERR_OK) {
-        ANS_LOGE("AniPublishAsBundle failed");
-        int externalCode = NotificationSts::GetExternalCode(ret);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return;
+    asyncCallbackInfo->notificationRequest->SetOwnerUserId(userId);
+    asyncCallbackInfo->notificationRequest->SetOwnerBundleName(bundleStr);
+    asyncCallbackInfo->notificationRequest->SetIsAgentNotification(true);
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    notificationRequest->SetOwnerUserId(userId);
-    notificationRequest->SetOwnerBundleName(bundleStr);
-    notificationRequest->SetIsAgentNotification(true);
-    int returncode =  NotificationHelper::PublishNotification(*notificationRequest);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniPublishAsBundle: PublishNotificationerror, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env, ExecutePublishWork,
+        HandlePublishFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-
-    ANS_LOGD("AniPublishAsBundle end");
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 
-void AniPublishAsBundleWithBundleOption(ani_env *env, ani_object representativeBundle, ani_object request)
+ani_object AniPublishAsBundleWithBundleOption(ani_env *env, ani_object representativeBundle,
+    ani_object request, ani_object callback)
 {
-    ANS_LOGE("AniPublishAsBundleWithBundleOption enter");
-    std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
-    int32_t ret = NotificationSts::UnWarpNotificationRequest(env, request, notificationRequest);
+    ANS_LOGD("AniPublishAsBundleWithBundleOption called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackPublishInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    int32_t ret = NotificationSts::UnWarpNotificationRequest(env, request, asyncCallbackInfo->notificationRequest);
     if (ret != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(ret);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return;
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnWarpNotificationRequest failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-
     BundleOption option;
-    if (NotificationSts::UnwrapBundleOption(env, representativeBundle, option) != true) {
-        NotificationSts::ThrowErrorWithMsg(env, "UnwrapBundleOption ERROR_INTERNAL_ERROR");
-        return;
+    if (!NotificationSts::UnwrapBundleOption(env, representativeBundle, option)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOption failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
+    asyncCallbackInfo->notificationRequest->SetOwnerBundleName(option.GetBundleName());
+    asyncCallbackInfo->notificationRequest->SetOwnerUid(option.GetUid());
+    asyncCallbackInfo->notificationRequest->SetIsAgentNotification(true);
 
-    ANS_LOGD("AniPublishAsBundleWithBundleOption: bundle %{public}s  uid: %{public}d",
-        option.GetBundleName().c_str(), option.GetUid());
-    notificationRequest->SetOwnerBundleName(option.GetBundleName());
-    notificationRequest->SetOwnerUid(option.GetUid());
-    notificationRequest->SetIsAgentNotification(true);
-
-    int returncode = NotificationHelper::PublishNotification(*notificationRequest);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniPublishAsBundleWithBundleOption error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    ANS_LOGD("AniPublishAsBundleWithBundleOption end");
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env, ExecutePublishWork,
+        HandlePublishFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 } // namespace NotificationManagerSts
 } // namespace OHOS

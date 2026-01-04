@@ -64,14 +64,14 @@ ani_int AniOn(ani_env *env, ani_string type, ani_fn_object fn, ani_object checkR
     ANS_LOGD("enter");
 #ifdef ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW
     std::string typeStr = "";
-    ani_status status = OHOS::NotificationSts::GetStringByAniString(env, type, typeStr);
+    ani_status status = NotificationSts::GetStringByAniString(env, type, typeStr);
     if (status != ANI_OK || typeStr.compare(TYPE_STRING)) {
         ANS_LOGE("InvalidParam 'type'");
         int32_t errCode = OHOS::Notification::ERROR_PARAM_INVALID;
         OHOS::NotificationSts::ThrowErrorWithInvalidParam(env);
         return errCode;
     }
-    if (OHOS::NotificationSts::IsUndefine(env, checkRequestObj)) {
+    if (NotificationSts::IsUndefine(env, checkRequestObj)) {
         ANS_LOGI("Old function param, don't need register.");
         return ERR_OK;
     }
@@ -115,7 +115,7 @@ ani_int AniOff(ani_env *env, ani_string type, ani_fn_object fn)
     ANS_LOGD("enter");
 #ifdef ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW
     std::string typeStr = "";
-    ani_status status = OHOS::NotificationSts::GetStringByAniString(env, type, typeStr);
+    ani_status status = NotificationSts::GetStringByAniString(env, type, typeStr);
     if (status != ANI_OK || typeStr.compare(TYPE_STRING)) {
         ANS_LOGE("InvalidParam 'type'");
         int32_t errCode = OHOS::Notification::ERROR_PARAM_INVALID;
@@ -126,7 +126,7 @@ ani_int AniOff(ani_env *env, ani_string type, ani_fn_object fn)
         OHOS::NotificationSts::ThrowErrorWithCode(env, ERROR_NOT_SYSTEM_APP);
         return ERROR_NOT_SYSTEM_APP;
     }
-    if (!OHOS::NotificationSts::IsUndefine(env, fn)) {
+    if (!NotificationSts::IsUndefine(env, fn)) {
         int32_t errCode = OHOS::Notification::ERROR_PARAM_INVALID;
         OHOS::NotificationSts::ThrowErrorWithInvalidParam(env);
         return errCode;

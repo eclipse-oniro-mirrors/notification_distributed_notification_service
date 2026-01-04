@@ -351,7 +351,7 @@ void StsBadgeQueryCallBackManager::AniHandleBadgeNumberPromise(ani_env *env, ani
     int32_t badgeNumber = static_cast<int32_t>(num);
     NotificationBundleOption bundleOption;
     if (UnwrapBundleOption(env, bundle, bundleOption) != true) {
-        NotificationSts::ThrowErrorWithMsg(env, "UnwrapBundleOption ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOption failed");
         return;
     }
     int32_t uid = bundleOption.GetUid();

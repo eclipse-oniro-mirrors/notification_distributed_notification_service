@@ -16,12 +16,28 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_LOCAL_LIVE_VIEW_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_LOCAL_LIVE_VIEW_H
 #include "ani.h"
+#include "concurrency_helpers.h"
+#include "sts_bundle_option.h"
+#include "sts_callback_promise.h"
+#include "sts_notification_manager.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
-void AniTriggerSystemLiveView(
-    ani_env *env, ani_object bundleOptionObj, ani_int notificationId, ani_object buttonOptionsObj);
-void AniSubscribeSystemLiveView(ani_env *env, ani_object subscriberObj);
+struct AsyncCallbackLiveViewInfo {
+    ani_vm* vm = nullptr;
+    arkts::concurrency_helpers::AsyncWork* asyncWork = nullptr;
+    OHOS::NotificationSts::CallbackPromiseInfo info;
+    BundleOption bundleOption;
+    NotificationSts::ButtonOption buttonOption;
+    ani_int notificationId;
+    NotificationSts::StsNotificationLocalLiveViewSubscriber *localLiveViewSubscriber = nullptr;
+};
+
+void HandleLiveViewFunctionCallbackComplete(ani_env* env, arkts::concurrency_helpers::WorkStatus status, void* data);
+
+ani_object AniTriggerSystemLiveView(ani_env *env, ani_object bundleOptionObj, ani_int notificationId,
+    ani_object buttonOptionsObj, ani_object callback);
+ani_object AniSubscribeSystemLiveView(ani_env *env, ani_object subscriberObj, ani_object callback);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 #endif

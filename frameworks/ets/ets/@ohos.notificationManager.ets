@@ -201,131 +201,216 @@ export default namespace notificationManager {
         SYSTEM_DEFAULT_ON = 3,
     }
 
-    export native function nativeCancelAll(): void;
-    export native function nativeCancelWithId(id: int): void;
-    export native function nativeCancelWithIdLabel(id: int, label: string): void;
-    export native function nativeCancelWithIdOptionalLabel(id: int, label?: string): void;
-    export native function nativeCancelWithBundle(bundle: BundleOption, id: int): void;
+    interface EnableSlotParameter {
+        bundle: BundleOption;
+        type: SlotType;
+        enable: boolean;
+        isForceControl: boolean;
+    }
 
-    export native function nativeDisplayBadge(bundle: BundleOption, enable: boolean): void;
-    export native function nativeIsBadgeDisplayed(bundle: BundleOption): boolean;
-    export native function nativeGetBadgeNumber(): long;
-    export native function nativeSetBadgeNumber(badgeNumber: int): void;
-    export native function nativeSetBadgeNumberByBundle(bundle: BundleOption, badgeNumber: int): void;
+    export native function nativeCancelAll(callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeCancelWithId(id: int, callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeCancelWithIdLabel(id: int, label: string,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeCancelWithBundle(bundle: BundleOption, id: int,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeDisplayBadge(bundle: BundleOption, enable: boolean,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeIsBadgeDisplayed(bundle: BundleOption,
+        callback?: AsyncCallback<boolean>): Promise<boolean>;
+
+    export native function nativeGetBadgeNumber(callback?: AsyncCallback<long>): Promise<long>;
+    export native function nativeSetBadgeNumber(badgeNumber: int,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeSetBadgeNumberByBundle(bundle: BundleOption, badgeNumber: int,
+        callback?: AsyncCallback<void>): Promise<void>;
     export native function nativeOnBadgeNumberQuery(callback: CallbackForBadgeQuery): void;
     export native function nativeOffBadgeNumberQuery(): void;
     export native function nativeHandleBadgeNumberPromise(bundle: BundleOption, badgeNumber: long): void;
 
-    export native function nativeGetActiveNotificationCount(): long;
-    export native function nativeGetActiveNotifications():Array<NotificationRequest>;
-    export native function nativeGetAllActiveNotifications():Array<NotificationRequest>;
-    export native function nativeGetActiveNotificationByFilter(filter: NotificationFilter): NotificationRequest|null;
+    export native function nativeGetActiveNotificationCount(callback?: AsyncCallback<long>): Promise<long>;
+    export native function nativeGetActiveNotifications(
+        callback?: AsyncCallback<Array<NotificationRequest>>): Promise<Array<NotificationRequest>>;
+    export native function nativeGetAllActiveNotifications(
+        callback?: AsyncCallback<Array<NotificationRequest>>): Promise<Array<NotificationRequest>>;
+    export native function nativeGetActiveNotificationByFilter(filter: NotificationFilter,
+        callback?: AsyncCallback<NotificationRequest|null>): Promise<NotificationRequest|null>;
+    export native function nativeAddDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeAddDoNotDisturbProfileByUserId(templates: Array<DoNotDisturbProfile>, userId : int,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeRemoveDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeRemoveDoNotDisturbProfileByUserId(templates: Array<DoNotDisturbProfile>, userId: int,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeSubscribeSystemLiveView(subscriber: SystemLiveViewSubscriber,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeTriggerSystemLiveView(bundle: BundleOption, notificationId: int,
+        buttonOptions: ButtonOptions, callback?: AsyncCallback<void>): Promise<void>;
 
-    export native function nativeAddDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): void;
-    export native function nativeAddDoNotDisturbProfileByUserId(
-        templates: Array<DoNotDisturbProfile>, userId : int): void;
-    export native function nativeRemoveDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): void;
-    export native function nativeRemoveDoNotDisturbProfileByUserId(
-        templates: Array<DoNotDisturbProfile>, userId: int): void;
+    export native function nativePublishWithUserId(request: NotificationRequest, userId: int,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativePublish(request: NotificationRequest, callback?: AsyncCallback<void>): Promise<void>;
 
-    export native function nativeSubscribeSystemLiveView(subscriber: SystemLiveViewSubscriber): void;
-    export native function nativeTriggerSystemLiveView(
-        bundle: BundleOption, notificationId: int, buttonOptions: ButtonOptions): void;
+    export native function nativeGetSlotFlagsByBundle(bundle: BundleOption,
+        callback?: AsyncCallback<long>): Promise<long>;
 
-    export native function nativePublishWithUserId(request: NotificationRequest, userId: int):void;
-    export native function nativePublish(request: NotificationRequest):void;
+    export native function nativeSetSlotFlagsByBundle(bundle: BundleOption, slotFlags: long,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeGetSlotsByBundle(bundle: BundleOption,
+        callback?: AsyncCallback<Array<NotificationSlot>>): Promise<Array<NotificationSlot>>;
+    export native function nativeGetSlotByBundle(bundle: BundleOption, type: SlotType,
+         callback?: AsyncCallback<NotificationSlot|null>): Promise<NotificationSlot|null>;
 
-    export native function nativeGetSlotFlagsByBundle(bundle: BundleOption): long;
-    export native function nativeSetSlotFlagsByBundle(bundle: BundleOption, slotFlags: long): void;
-    export native function nativeGetSlotsByBundle(bundle: BundleOption): Array<NotificationSlot>;
-    export native function nativeGetSlotByBundle(bundle: BundleOption, type: SlotType): NotificationSlot|null;
+    export native function nativeIsNotificationSlotEnabled(bundle: BundleOption, type: SlotType,
+        callback?: AsyncCallback<boolean>): Promise<boolean>;
+    export native function nativeSetNotificationEnableSlot(bundle: BundleOption, type: SlotType, enable: boolean,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeSetNotificationEnableSlotWithForce(enableSlotParameter: EnableSlotParameter,
+        callback?: AsyncCallback<void>): Promise<void>;
 
-    export native function nativeIsNotificationSlotEnabled(bundle: BundleOption, type: SlotType): boolean;
-    export native function nativeSetNotificationEnableSlot(
-        bundle: BundleOption, type: SlotType, enable: boolean): void;
-    export native function nativeSetNotificationEnableSlotWithForce(
-        bundle: BundleOption, type: SlotType, enable: boolean, isForceControl: boolean): void;
-
-    export native function nativeIsNotificationEnabled(): boolean;
-    export native function nativeIsNotificationEnabledWithId(userId : int): boolean;
-    export native function nativeIsNotificationEnabledWithBundleOption(bundleOption: BundleOption): boolean;
-    export native function nativeSetNotificationEnable(bundle: BundleOption, enable: boolean): void;
+    export native function nativeIsNotificationEnabled(callback?: AsyncCallback<boolean>): Promise<boolean>;
+    export native function nativeIsNotificationEnabledWithId(userId : int,
+        callback?: AsyncCallback<boolean>): Promise<boolean>;
+    export native function nativeIsNotificationEnabledWithBundleOption(bundleOption: BundleOption,
+        callback?: AsyncCallback<boolean>): Promise<boolean>;
+    export native function nativeSetNotificationEnable(bundle: BundleOption, enable: boolean,
+        callback?: AsyncCallback<void>): Promise<void>;
     export native function nativeRequestEnableNotification(content: UIAbilityContext): Promise<int>;
-    export native function nativeGetAllNotificationEnabledBundles(): Array<BundleOption>;
-    export native function nativeGetAllNotificationEnabledBundlesByUserId(userId : int): Array<BundleOption>;
+    export native function nativeGetAllNotificationEnabledBundles(
+        callback?: AsyncCallback<Array<BundleOption>>): Promise<Array<BundleOption>>;
+    export native function nativeGetAllNotificationEnabledBundlesByUserId(userId : int,
+        callback?: AsyncCallback<Array<BundleOption>>): Promise<Array<BundleOption>>;
     export native function nativeIsNotificationEnabledSync(): boolean;
 
-    export native function  nativeRemoveGroupByBundle(bundle: BundleOption, groupName: string): void;
+    export native function  nativeRemoveGroupByBundle(bundle: BundleOption, groupName: string,
+        callback?: AsyncCallback<void>): Promise<void>;
 
-    export native function nativeAddSlotByNotificationSlot(slot: NotificationSlot): void;
-    export native function nativeAddSlotBySlotType(type: SlotType): void;
-    export native function nativeAddSlots(slots: Array<NotificationSlot>): void;
-    export native function nativeGetSlot(slotType: SlotType): NotificationSlot|null;
-    export native function nativeGetSlots(): Array<NotificationSlot>;
-    export native function nativeRemoveSlot(slotType: SlotType): void;
-    export native function nativeRemoveAllSlots(): void;
-    export native function nativeSetSlotByBundle(bundle: BundleOption, slot: NotificationSlot): void;
-    export native function nativeGetSlotNumByBundle(bundle: BundleOption): long;
-    export native function nativeIsSupportTemplate(templateName: string): boolean;
-    export native function nativeSetDistributedEnable(enable: boolean): void;
-    export native function nativeIsDistributedEnabled(): boolean;
-    export native function nativeIsDistributedEnabledByBundle(bundle: BundleOption): boolean;
-    export native function nativeIsDistributedEnabledByBundleType(bundle: BundleOption, deviceType: string): boolean;
-    export native function nativeGetDeviceRemindType(): DeviceRemindType;
-    export native function nativeSetSyncNotificationEnabledWithoutApp(userId: int, enable: boolean): void;
-    export native function nativeGetSyncNotificationEnabledWithoutApp(userId: int): boolean;
+    export native function nativeAddSlotByNotificationSlot(slot: NotificationSlot,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeAddSlotBySlotType(type: SlotType,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeAddSlots(slots: Array<NotificationSlot>,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeGetSlot(slotType: SlotType,
+        callback?: AsyncCallback<NotificationSlot|null>): Promise<NotificationSlot|null>;
+    export native function nativeGetSlots(
+        callback?: AsyncCallback<Array<NotificationSlot>>): Promise<Array<NotificationSlot>>;
+    export native function nativeRemoveSlot(slotType: SlotType, callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeRemoveAllSlots(callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeSetSlotByBundle(bundle: BundleOption, slot: NotificationSlot,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeGetSlotNumByBundle(bundle: BundleOption,
+        callback?: AsyncCallback<long>): Promise<long>;
+    export native function nativeIsSupportTemplate(templateName: string,
+        callback?: AsyncCallback<boolean>): Promise<boolean>;
 
-    export native function nativePublishAsBundle(request: NotificationRequest, representativeBundle: string, userId: int): void;
-    export native function nativePublishAsBundleWithBundleOption(representativeBundle: BundleOption, request: NotificationRequest): void;
-    export native function nativeCancelAsBundle(id: int, representativeBundle: string, userId: int): void;
-    export native function nativeCancelAsBundleWithBundleOption(representativeBundle: BundleOption, id: int): void;
-    export native function nativeCancelGroup(groupName: string): void;
-    export native function nativeSetDoNotDisturbDate(date: DoNotDisturbDate): void;
-    export native function nativeSetDoNotDisturbDateWithId(date: DoNotDisturbDate, userId: int): void;
-    export native function nativeGetDoNotDisturbDate(): DoNotDisturbDate;
-    export native function nativeGetDoNotDisturbDateWithId(userId: int): DoNotDisturbDate;
-    export native function nativeIsSupportDoNotDisturbMode(): boolean;
-    export native function nativeGetDoNotDisturbProfile(id: long): DoNotDisturbProfile;
-    export native function nativeGetDoNotDisturbProfileByUserId(id: long, userId: int): DoNotDisturbProfile;
+    export native function nativeSetDistributedEnable(enable: boolean, callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeIsDistributedEnabled(callback?: AsyncCallback<boolean>): Promise<boolean>;
+    export native function nativeIsDistributedEnabledByBundle(bundle: BundleOption,
+        callback?: AsyncCallback<boolean>): Promise<boolean>;
+    export native function nativeIsDistributedEnabledByBundleType(bundle: BundleOption, deviceType: string,
+        callback?: AsyncCallback<boolean>): Promise<boolean>;
+
+    export native function nativeGetDeviceRemindType(
+        callback?: AsyncCallback<DeviceRemindType>): Promise<DeviceRemindType>;
+    export native function nativeSetSyncNotificationEnabledWithoutApp(userId: int, enable: boolean,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeGetSyncNotificationEnabledWithoutApp(userId: int,
+        callback?: AsyncCallback<boolean>): Promise<boolean>;
+
+    export native function nativePublishAsBundle(request: NotificationRequest, representativeBundle: string,
+        userId: int, callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativePublishAsBundleWithBundleOption(representativeBundle: BundleOption,
+        request: NotificationRequest, callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeCancelAsBundle(id: int, representativeBundle: string, userId: int,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeCancelAsBundleWithBundleOption(representativeBundle: BundleOption,
+        userId: int, callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeCancelGroup(groupName: string, callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeSetDoNotDisturbDate(date: DoNotDisturbDate, callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeSetDoNotDisturbDateWithId(date: DoNotDisturbDate, userId: int,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeGetDoNotDisturbDate(
+        callback?: AsyncCallback<DoNotDisturbDate>): Promise<DoNotDisturbDate>;
+    export native function nativeGetDoNotDisturbDateWithId(userId: int,
+        callback?: AsyncCallback<DoNotDisturbDate>): Promise<DoNotDisturbDate>;
+    export native function nativeIsSupportDoNotDisturbMode(callback?: AsyncCallback<boolean>): Promise<boolean>;
+
+    export native function nativeGetDoNotDisturbProfile(id: long,
+        callback?: AsyncCallback<DoNotDisturbProfile>): Promise<DoNotDisturbProfile>;
+    export native function nativeGetDoNotDisturbProfileByUserId(id: long, userId: int,
+        callback?: AsyncCallback<DoNotDisturbProfile>): Promise<DoNotDisturbProfile>;
 
     export native function nativeOpenNotificationSettings(content: UIAbilityContext): Promise<int>;
 
-    export native function nativesetTargetDeviceStatus(deviceType: string, status: long): void;
-    export native function nativesetDistributedEnabledByBundle(bundle: BundleOption, deviceType: string, enable: boolean): void;
-    export native function nativesetSmartReminderEnabled(deviceType: string, enable: boolean): void;
-    export native function nativeisSmartReminderEnabled(deviceType: string): boolean;
-    export native function nativesetDistributedEnabledBySlot(slot: SlotType, deviceType: string, enabled: boolean): void;
-    export native function nativeisDistributedEnabledBySlot(slot: SlotType, deviceType: string): boolean;
-    export native function nativesetAdditionalConfig(key: string, value: string): int;
-    export native function nativesetDistributedEnableByBundle(bundle: BundleOption, enable: boolean):void;
-    export native function nativedisableNotificationFeature(disabled:boolean, bundleList: Array<string>):void;
+    export native function nativesetTargetDeviceStatus(deviceType: string, status: long,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativesetDistributedEnabledByBundle(bundle: BundleOption, deviceType: string, enable: boolean,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativesetSmartReminderEnabled(deviceType: string, enable: boolean,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeisSmartReminderEnabled(deviceType: string,
+        callback?: AsyncCallback<boolean>): Promise<boolean>;
+    export native function nativesetDistributedEnabledBySlot(slot: SlotType, deviceType: string, enabled: boolean,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeisDistributedEnabledBySlot(slot: SlotType, deviceType: string,
+        callback?: AsyncCallback<boolean>): Promise<boolean>;
+    export native function nativesetAdditionalConfig(key: string, value: string,
+        callback?: AsyncCallback<int>): Promise<int>;
+
+    export native function nativesetDistributedEnableByBundle(bundle: BundleOption, enable: boolean,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativedisableNotificationFeature(disabled:boolean, bundleList: Array<string>,
+        callback?: AsyncCallback<void>): Promise<void>;
     export native function nativeOn(
         type: 'checkNotification', callback: CallbackForCheckInfo, checkRequest?: NotificationCheckRequest): int;
     export native function nativeOff(
         type: 'checkNotification', callback?: CallbackForCheckInfo): int;
-    export native function nativeGetNotificationSetting(): NotificationSetting;
-    export native function nativeSetRingtoneInfoByBundle(bundle: BundleOption, ringtoneInfo: RingtoneInfo): void;
-    export native function nativeGetRingtoneInfoByBundle(bundle: BundleOption): RingtoneInfo;
-    export native function nativeSetGeofenceEnabled(enabled: boolean): void;
-    export native function nativeIsGeofenceEnabled(): boolean;
+    export native function nativeGetNotificationSetting(
+        callback?: AsyncCallback<NotificationSetting>): Promise<NotificationSetting>;
+    export native function nativeSetRingtoneInfoByBundle(bundle: BundleOption, ringtoneInfo: RingtoneInfo,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeGetRingtoneInfoByBundle(bundle: BundleOption,
+        callback?: AsyncCallback<RingtoneInfo>): Promise<RingtoneInfo>;
 
-    export native function nativeIsDistributedEnabledByDeviceType(deviceType: string): boolean;
-    export native function nativeSetDistributedEnabled(enable: boolean, deviceType: string): void;
-    export native function nativeSetDistributedEnableByBundles(bundleEnableInfos: Array<DistributedBundleEnableInfo>, deviceType: string): void;
-    export native function nativeGetDistributedDeviceList(): Array<string>;
-    export native function nativeDisableNotificationFeatureWithId(disabled:boolean, bundleList: Array<string>, userId: int): void;
-    export native function nativeSetSilentReminderEnabled(bundle: BundleOption, enable: boolean): void;
-    export native function nativeIsSilentReminderEnabled(bundle: BundleOption): SwitchState;
-    export native function nativeSetReminderInfoByBundles(reminderInfos: Array<NotificationReminderInfo>) : void;
-    export native function nativeGetReminderInfoByBundles(bundles: Array<BundleOption>) : Array<NotificationReminderInfo>;
-    export native function nativeGetBadgeDisplayStatusByBundles(bundles: Array<BundleOption>): Map<BundleOption, boolean>;
-    export native function nativeSetBadgeDisplayStatusByBundles(badges: Map<BundleOption, boolean>): void;
-    export native function nativeSetBundlePriorityConfig(bundle: BundleOption, value: string): void;
-    export native function nativeGetBundlePriorityConfig(bundle: BundleOption): string;
-    export native function nativeSetPriorityEnabledByBundle(bundle: BundleOption, enableStatus: PriorityEnableStatus): void;
-    export native function nativeIsPriorityEnabledByBundle(bundle: BundleOption): PriorityEnableStatus;
-    export native function nativeSetPriorityEnabled(enable: boolean): void;
-    export native function nativeIsPriorityEnabled(): boolean;
+    export native function nativeSetGeofenceEnabled(enabled: boolean, callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeIsGeofenceEnabled(callback?: AsyncCallback<boolean>): Promise<boolean>;
+
+    export native function nativeIsDistributedEnabledByDeviceType(deviceType: string,
+        callback?: AsyncCallback<boolean>): Promise<boolean>;
+    export native function nativeSetDistributedEnabledByDeviceType(enable: boolean, deviceType: string,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeSetDistributedEnableByBundles(bundleEnableInfos: Array<DistributedBundleEnableInfo>,
+        deviceType: string, callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeGetDistributedDeviceList(
+        callback?: AsyncCallback<Array<string>>): Promise<Array<string>>;
+
+    export native function nativeDisableNotificationFeatureWithId(disabled:boolean, bundleList: Array<string>, userId: int,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeSetSilentReminderEnabled(bundle: BundleOption, enable: boolean,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeIsSilentReminderEnabled(bundle: BundleOption,
+        callback?: AsyncCallback<SwitchState>): Promise<SwitchState>;
+    export native function nativeSetReminderInfoByBundles(reminderInfos: Array<NotificationReminderInfo>,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeGetReminderInfoByBundles(bundles: Array<BundleOption>,
+        callback?: AsyncCallback<Array<NotificationReminderInfo>>): Promise<Array<NotificationReminderInfo>>;
+    export native function nativeGetBadgeDisplayStatusByBundles(bundles: Array<BundleOption>,
+        callback?: AsyncCallback<Map<BundleOption, boolean>>): Promise<Map<BundleOption, boolean>>;
+    export native function nativeSetBadgeDisplayStatusByBundles(badges: Map<BundleOption, boolean>,
+        callback?: AsyncCallback<void>): Promise<void>;
+
+    export native function nativeSetBundlePriorityConfig(bundle: BundleOption, value: string,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeGetBundlePriorityConfig(bundle: BundleOption,
+        callback?: AsyncCallback<string>): Promise<string>;
+    export native function nativeSetPriorityEnabledByBundle(bundle: BundleOption, enableStatus: PriorityEnableStatus,
+        callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeIsPriorityEnabledByBundle(bundle: BundleOption,
+        callback?: AsyncCallback<PriorityEnableStatus>): Promise<PriorityEnableStatus>;
+    export native function nativeSetPriorityEnabled(enable: boolean, callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeIsPriorityEnabled(callback?: AsyncCallback<boolean>): Promise<boolean>;
 
     function isInvalidParameter(doNotDisturbDate: DoNotDisturbDate): BusinessError
     {
@@ -342,13 +427,13 @@ export default namespace notificationManager {
         if (slot == null) {
             return errorParamInvalid;
         }
-        if (slot.lockscreenVisibility !== undefined && typeof slot.lockscreenVisibility === 'int') {
+        if (slot.lockscreenVisibility !== undefined && typeof slot.lockscreenVisibility === 'number') {
             const num = slot.lockscreenVisibility ?? -1;
             if (num < 0) {
                 return errorParamInvalid;
             }
         }
-        if (slot.lightColor !== undefined && typeof slot.lightColor === 'int') {
+        if (slot.lightColor !== undefined && typeof slot.lightColor === 'number') {
             const num = slot.lightColor ?? -1;
             if (num < 0) {
                 return errorParamInvalid;
@@ -657,13 +742,13 @@ export default namespace notificationManager {
         if (request?.agentBundle !== undefined && !isInvalidBundleOption(request.agentBundle)) {
             return errorParamInvalid;
         }
-        if (request?.color !== undefined && typeof request.color === 'long') {
+        if (request?.color !== undefined && typeof request.color === 'number') {
             const num = request.color ?? -1;
             if (num < 0) {
                 return errorParamInvalid;
             }
         }
-        if (request?.badgeNumber !== undefined && typeof request.badgeNumber === 'long') {
+        if (request?.badgeNumber !== undefined && typeof request.badgeNumber === 'number') {
             const num = request.badgeNumber ?? -1;
             if (num < 0) {
                 return errorParamInvalid;
@@ -677,16 +762,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<long>((resolve: ResolveCallback<long>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): long => { return nativeGetSlotNumByBundle(bundle); });
-            p.then((data: Any): void => {
-                let ret : long = data as long;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<long>;
+        try {
+            result = nativeGetSlotNumByBundle(bundle, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getSlotNumByBundle(bundle: BundleOption, callback: AsyncCallback<long>): void {
@@ -697,14 +780,12 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): long => { return nativeGetSlotNumByBundle(bundle); });
-        p.then((data: Any): void => {
-            let ret : long = data as long;
-            callback(null, ret);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativeGetSlotNumByBundle(bundle, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function setSlotByBundle(bundle: BundleOption, slot: NotificationSlot, callback: AsyncCallback<void>): void {
@@ -719,13 +800,12 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativeSetSlotByBundle(bundle, slot); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativeSetSlotByBundle(bundle, slot, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function setSlotByBundle(bundle: BundleOption, slot: NotificationSlot): Promise<void> {
@@ -737,117 +817,106 @@ export default namespace notificationManager {
         if (slotError.code !== ERROR_OK) {
             throw slotError;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetSlotByBundle(bundle, slot); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetSlotByBundle(bundle, slot, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function removeAllSlots(callback: AsyncCallback<void>): void {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativeRemoveAllSlots(); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativeRemoveAllSlots(callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function removeAllSlots(): Promise<void> {
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeRemoveAllSlots(); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeRemoveAllSlots(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function removeSlot(slotType: SlotType, callback: AsyncCallback<void>): void {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativeRemoveSlot(slotType); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativeRemoveSlot(slotType, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function removeSlot(slotType: SlotType): Promise<void> {
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeRemoveSlot(slotType); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeRemoveSlot(slotType, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getSlots(): Promise<Array<NotificationSlot>> {
-        let pPromise = new Promise<Array<NotificationSlot>>((resolve: ResolveCallback<Array<NotificationSlot>>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): Array<NotificationSlot> => { return nativeGetSlots(); });
-            p.then((data: Any): void => {
-                let ret : Array<NotificationSlot> = data as Array<NotificationSlot>;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<Array<NotificationSlot>>;
+        try {
+            result = nativeGetSlots(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getSlots(callback: AsyncCallback<Array<NotificationSlot>>): void {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): Array<NotificationSlot> => { return nativeGetSlots(); });
-        p.then((data: Any): void => {
-            let ret : Array<NotificationSlot> = data as Array<NotificationSlot>;
-            callback(null, ret);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativeGetSlots(callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function getSlot(slotType: SlotType): Promise<NotificationSlot|null> {
-        let pPromise = new Promise<NotificationSlot|null>((resolve: ResolveCallback<NotificationSlot|null>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): NotificationSlot|null => { return nativeGetSlot(slotType); });
-            p.then((data: Any): void => {
-                resolve(data as NotificationSlot|null);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<NotificationSlot|null>;
+        try {
+            result = nativeGetSlot(slotType, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getSlot(slotType: SlotType, callback: AsyncCallback<NotificationSlot|null>): void {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): NotificationSlot|null => { return nativeGetSlot(slotType); });
-        p.then((data: Any): void => {
-            callback(null, data as NotificationSlot|null);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativeGetSlot(slotType, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function getSlotByBundle(bundle: BundleOption, slotType: SlotType): Promise<NotificationSlot|null> {
@@ -855,30 +924,28 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<NotificationSlot|null>((resolve: ResolveCallback<NotificationSlot|null>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): NotificationSlot|null => { return nativeGetSlotByBundle(bundle, slotType); });
-            p.then((data: Any): void => {
-                resolve(data as NotificationSlot|null);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<NotificationSlot|null>;
+        try {
+            result = nativeGetSlotByBundle(bundle, slotType, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function addSlots(slots: Array<NotificationSlot>): Promise<void> {
         if (!slots || slots.length === 0) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeAddSlots(slots); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeAddSlots(slots, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function addSlots(slots: Array<NotificationSlot>, callback: AsyncCallback<void>): void {
@@ -888,13 +955,12 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativeAddSlots(slots); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativeAddSlots(slots, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function addSlot(slot: NotificationSlot): Promise<void> {
@@ -902,15 +968,14 @@ export default namespace notificationManager {
         if (slotError.code !== ERROR_OK) {
             throw slotError;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeAddSlotByNotificationSlot(slot); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeAddSlotByNotificationSlot(slot, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function addSlot(slot: NotificationSlot, callback: AsyncCallback<void>): void {
@@ -921,38 +986,35 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativeAddSlotByNotificationSlot(slot); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativeAddSlotByNotificationSlot(slot, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function addSlot(type: SlotType, callback: AsyncCallback<void>): void {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativeAddSlotBySlotType(type); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativeAddSlotBySlotType(type, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function addSlot(type: SlotType): Promise<void> {
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeAddSlotBySlotType(type); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeAddSlotBySlotType(type, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setNotificationEnable(bundle: BundleOption, enable: boolean): Promise<void>
@@ -961,15 +1023,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetNotificationEnable(bundle, enable); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetNotificationEnable(bundle, enable, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setNotificationEnable(bundle: BundleOption, enable: boolean, callback: AsyncCallback<void>): void
@@ -981,13 +1042,12 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativeSetNotificationEnable(bundle, enable); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativeSetNotificationEnable(bundle, enable, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function isNotificationEnabled(bundleOption: BundleOption, callback: AsyncCallback<boolean>): void
@@ -999,14 +1059,12 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): boolean => { return nativeIsNotificationEnabledWithBundleOption(bundleOption); });
-        p.then((data: Any): void => {
-            let ret : boolean = data as boolean;
-            callback(null, ret);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeIsNotificationEnabledWithBundleOption(bundleOption, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function isNotificationEnabled(bundleOption: BundleOption): Promise<boolean>
@@ -1015,18 +1073,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute(
-                (): boolean => { return nativeIsNotificationEnabledWithBundleOption(bundleOption);
-                });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeIsNotificationEnabledWithBundleOption(bundleOption, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isNotificationEnabled(userId: int, callback: AsyncCallback<boolean>): void
@@ -1034,28 +1088,24 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): boolean => { return nativeIsNotificationEnabledWithId(userId); });
-        p.then((data: Any): void => {
-            let ret : boolean = data as boolean;
-            callback(null, ret);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeIsNotificationEnabledWithId(userId, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function isNotificationEnabled(userId: int): Promise<boolean>
     {
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeIsNotificationEnabledWithId(userId); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeIsNotificationEnabledWithId(userId, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isNotificationEnabled(callback: AsyncCallback<boolean>): void
@@ -1063,28 +1113,24 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): boolean => { return nativeIsNotificationEnabled(); });
-        p.then((data: Any): void => {
-            let ret : boolean = data as boolean;
-            callback(null, ret);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeIsNotificationEnabled(callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function isNotificationEnabled(): Promise<boolean>
     {
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeIsNotificationEnabled(); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeIsNotificationEnabled(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setNotificationEnableSlot(
@@ -1098,18 +1144,18 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        if (callback == null) {
-            throw errorParamInvalid;
+        let enableSlotParameter: EnableSlotParameter = {
+            bundle: bundle,
+            type: type,
+            enable: enable,
+            isForceControl: isForceControl,
+        } as EnableSlotParameter;
+        try {
+            nativeSetNotificationEnableSlotWithForce(enableSlotParameter, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
         }
-        let p = taskpool.execute(
-            (): void => { return nativeSetNotificationEnableSlotWithForce(bundle, type, enable, isForceControl);
-        });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
     }
 
     export function setNotificationEnableSlot(
@@ -1119,21 +1165,30 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let forceControl: boolean = false;
-        if (isForceControl != undefined) {
-            forceControl = isForceControl;
+        let result: Promise<void>;
+        let enableSlotParameter: EnableSlotParameter;
+        if (isForceControl == undefined) {
+            enableSlotParameter = {
+                bundle: bundle,
+                type: type,
+                enable: enable,
+                isForceControl: false,
+            } as EnableSlotParameter;
+        } else {
+            enableSlotParameter = {
+                bundle: bundle,
+                type: type,
+                enable: enable,
+                isForceControl: isForceControl as boolean,
+            } as EnableSlotParameter;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute(
-                (): void => { return nativeSetNotificationEnableSlotWithForce(bundle, type, enable, forceControl);
-                });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        try {
+            result = nativeSetNotificationEnableSlotWithForce(enableSlotParameter, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setNotificationEnableSlot(
@@ -1143,16 +1198,12 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        if (callback == null) {
-            throw errorParamInvalid;
+        try {
+            nativeSetNotificationEnableSlot(bundle, type, enable, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
         }
-        let p = taskpool.execute((): void => { return nativeSetNotificationEnableSlot(bundle, type, enable); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
     }
 
     export function isNotificationSlotEnabled(bundle: BundleOption, type: SlotType): Promise<boolean>
@@ -1161,16 +1212,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeIsNotificationSlotEnabled(bundle, type); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeIsNotificationSlotEnabled(bundle, type, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isNotificationSlotEnabled(bundle: BundleOption, type: SlotType, callback: AsyncCallback<boolean>): void
@@ -1182,14 +1231,12 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): boolean => { return nativeIsNotificationSlotEnabled(bundle, type); });
-        p.then((data: Any): void => {
-            let ret : boolean = data as boolean;
-            callback(null, ret);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeIsNotificationSlotEnabled(bundle, type, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function getSlotsByBundle(bundle: BundleOption, callback: AsyncCallback<Array<NotificationSlot>>): void
@@ -1201,14 +1248,12 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): Array<NotificationSlot> => { return nativeGetSlotsByBundle(bundle); });
-        p.then((data: Any): void => {
-            let slots : Array<NotificationSlot> = data as Array<NotificationSlot>;
-            callback(null, slots);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeGetSlotsByBundle(bundle, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function getSlotsByBundle(bundle: BundleOption): Promise<Array<NotificationSlot>>
@@ -1217,17 +1262,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<Array<NotificationSlot>>(
-            (resolve: ResolveCallback<Array<NotificationSlot>>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): Array<NotificationSlot> => { return nativeGetSlotsByBundle(bundle); });
-            p.then((data: Any): void => {
-                let slots : Array<NotificationSlot> = data as Array<NotificationSlot>;
-                resolve(slots);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<Array<NotificationSlot>>;
+        try {
+            result = nativeGetSlotsByBundle(bundle, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setSlotFlagsByBundle(bundle: BundleOption, slotFlags: long): Promise<void> {
@@ -1235,15 +1277,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetSlotFlagsByBundle(bundle, slotFlags); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetSlotFlagsByBundle(bundle, slotFlags, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getSlotFlagsByBundle(bundle: BundleOption): Promise<long> {
@@ -1251,16 +1292,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<long>((resolve: ResolveCallback<long>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): long => { return nativeGetSlotFlagsByBundle(bundle); });
-            p.then((data: Any): void => {
-                let ret : long = data as long;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<long>;
+        try {
+            result = nativeGetSlotFlagsByBundle(bundle, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function publish(request: NotificationRequest, callback: AsyncCallback<void>): void {
@@ -1271,13 +1310,12 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativePublish(request); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativePublish(request, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function publish(request: NotificationRequest): Promise<void> {
@@ -1285,15 +1323,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativePublish(request); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativePublish(request, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function publish(request: NotificationRequest, userId: int, callback: AsyncCallback<void>): void {
@@ -1304,13 +1341,12 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativePublishWithUserId(request, userId); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativePublishWithUserId(request, userId, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function publish(request: NotificationRequest, userId: int): Promise<void> {
@@ -1318,15 +1354,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativePublishWithUserId(request, userId); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativePublishWithUserId(request, userId, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function triggerSystemLiveView(
@@ -1340,17 +1375,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => {
-                return nativeTriggerSystemLiveView(bundle, notificationId, buttonOptions);
-            });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeTriggerSystemLiveView(bundle, notificationId, buttonOptions, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function subscribeSystemLiveView(subscriber: SystemLiveViewSubscriber): Promise<void>
@@ -1358,132 +1390,115 @@ export default namespace notificationManager {
         if(subscriber === null) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSubscribeSystemLiveView(subscriber); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSubscribeSystemLiveView(subscriber, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function removeDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): Promise<void> {
         if (!templates || templates.length === 0) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeRemoveDoNotDisturbProfile(templates); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeRemoveDoNotDisturbProfile(templates, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function removeDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>, userId: int): Promise<void> {
         if (!templates || templates.length === 0) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeRemoveDoNotDisturbProfileByUserId(
-                templates, userId); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeRemoveDoNotDisturbProfileByUserId(templates, userId, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function addDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): Promise<void> {
         if (!templates || templates.length === 0) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeAddDoNotDisturbProfile(templates); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeAddDoNotDisturbProfile(templates, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function addDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>, userId : int): Promise<void> {
         if (!templates || templates.length === 0) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeAddDoNotDisturbProfileByUserId(templates, userId); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeAddDoNotDisturbProfileByUserId(templates, userId, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function getAllActiveNotifications(callback: AsyncCallback<Array<NotificationRequest>>): void {
         if (!callback) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): Array<NotificationRequest> => { return nativeGetAllActiveNotifications(); });
-        p.then((data: Any): void => {
-            let ret : Array<NotificationRequest> = data as Array<NotificationRequest>;
-            callback(null, ret);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeGetAllActiveNotifications(callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function getAllActiveNotifications(): Promise<Array<NotificationRequest>> {
-        let pPromise
-        = new Promise<Array<NotificationRequest>>(
-            (resolve: ResolveCallback<Array<NotificationRequest>>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): Array<NotificationRequest> => { return nativeGetAllActiveNotifications(); });
-            p.then((data: Any): void => {
-		    	let ret : Array<NotificationRequest> = data as Array<NotificationRequest>;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<Array<NotificationRequest>>;
+        try {
+            result = nativeGetAllActiveNotifications(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getActiveNotifications(): Promise<Array<NotificationRequest>> {
-        let pPromise = new Promise<Array<NotificationRequest>>((resolve: ResolveCallback<Array<NotificationRequest>>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): Array<NotificationRequest> => { return nativeGetActiveNotifications(); });
-            p.then((data: Any): void => {
-		    	let ret : Array<NotificationRequest> = data as Array<NotificationRequest>;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<Array<NotificationRequest>>;
+        try {
+            result = nativeGetActiveNotifications(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getActiveNotifications(callback: AsyncCallback<Array<NotificationRequest>>): void {
         if (!callback) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): Array<NotificationRequest> => { return nativeGetActiveNotifications(); });
-        p.then((data: Any): void => {
-            let ret : Array<NotificationRequest> = data as Array<NotificationRequest>;
-            callback(null, ret);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeGetActiveNotifications(callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function getActiveNotificationCount(callback: AsyncCallback<long>): void
@@ -1491,27 +1506,23 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): long => { return nativeGetActiveNotificationCount(); });
-        p.then((data: Any): void => {
-            let ret : long = data as long;
-            callback(null, ret);
-        }, (error: Object): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeGetActiveNotificationCount(callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function getActiveNotificationCount(): Promise<long> {
-        let pPromise = new Promise<long>((resolve: ResolveCallback<long>, reject: RejectCallback):void => {
-            let p = taskpool.execute((): long => { return nativeGetActiveNotificationCount(); });
-            p.then((data :Any): void => {
-                let ret : long = data as long;
-                resolve(ret);
-            }, (err:Error): void => {
-                reject(err);
-            });
-        });
-        return pPromise;
+        let result: Promise<long>;
+        try {
+            result = nativeGetActiveNotificationCount(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function displayBadge(bundle: BundleOption, enable: boolean, callback: AsyncCallback<void>): void {
@@ -1522,13 +1533,12 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativeDisplayBadge(bundle, enable); });
-        p.then((e: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeDisplayBadge(bundle, enable, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function displayBadge(bundle: BundleOption, enable: boolean): Promise<void> {
@@ -1536,15 +1546,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeDisplayBadge(bundle, enable); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeDisplayBadge(bundle, enable, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isBadgeDisplayed(bundle: BundleOption, callback: AsyncCallback<boolean>): void {
@@ -1552,14 +1561,12 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let p = taskpool.execute((): boolean => { return nativeIsBadgeDisplayed(bundle); });
-        p.then((data: Any): void => {
-            let ret : boolean = data as boolean;
-            callback(null, ret);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeIsBadgeDisplayed(bundle, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function isBadgeDisplayed(bundle: BundleOption): Promise<boolean> {
@@ -1567,16 +1574,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeIsBadgeDisplayed(bundle); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeIsBadgeDisplayed(bundle, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function cancel(bundle: BundleOption, id: int): Promise<void> {
@@ -1584,81 +1589,96 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeCancelWithBundle(bundle, id); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeCancelWithBundle(bundle, id, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function cancel(id: int, label?: string): Promise<void> {
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeCancelWithIdOptionalLabel(id, label); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            if (label == undefined) {
+                result = nativeCancelWithId(id, undefined);
+            } else if (label?.length === 0) {
+                throw errorParamInvalid;
+            } else {
+                result = nativeCancelWithIdLabel(id, label as string, undefined);
+            }
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        } catch (err: BusinessError) {
+            throw err;
+        }
+        return result;
     }
 
     export function cancel(id: int, label: string, callback: AsyncCallback<void>): void {
         if (label == null || label?.length === 0) {
             throw errorParamInvalid;
+            return;
         }
         if (callback == null) {
             throw errorParamInvalid;
+            return;
         }
-        let p = taskpool.execute((): void => { return nativeCancelWithIdLabel(id, label); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeCancelWithIdLabel(id, label, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function cancel(id: int, callback: AsyncCallback<void>): void {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativeCancelWithId(id); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeCancelWithId(id, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+    }
+
+    export function cancel(id: int): Promise<void> {
+        let result: Promise<void>;
+        try {
+            result = nativeCancelWithId(id, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function cancelAll(): Promise<void> {
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeCancelAll(); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeCancelAll(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function cancelAll(callback: AsyncCallback<void>): void {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativeCancelAll(); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-    	    let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeCancelAll(callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function requestEnableNotification(context: UIAbilityContext): Promise<void>
@@ -1803,33 +1823,26 @@ export default namespace notificationManager {
 
     export function getAllNotificationEnabledBundles(): Promise<Array<BundleOption>>
     {
-        let pPromise = new Promise<Array<BundleOption>>(
-            (resolve: ResolveCallback<Array<BundleOption>>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): Array<BundleOption> => { return nativeGetAllNotificationEnabledBundles(); });
-            p.then((data: Any): void => {
-                let options : Array<BundleOption> = data as Array<BundleOption>;
-                resolve(options);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<Array<BundleOption>>;
+        try {
+            result = nativeGetAllNotificationEnabledBundles(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getAllNotificationEnabledBundles(userId : int): Promise<Array<BundleOption>>
     {
-        let pPromise = new Promise<Array<BundleOption>>(
-            (resolve: ResolveCallback<Array<BundleOption>>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): Array<BundleOption> => { return nativeGetAllNotificationEnabledBundlesByUserId(
-                userId); });
-            p.then((data: Any): void => {
-                let options : Array<BundleOption> = data as Array<BundleOption>;
-                resolve(options);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<Array<BundleOption>>;
+        try {
+            result = nativeGetAllNotificationEnabledBundlesByUserId(userId, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isNotificationEnabledSync(): boolean
@@ -1838,16 +1851,14 @@ export default namespace notificationManager {
     }
 
     export function getBadgeNumber(): Promise<long> {
-        let pPromise = new Promise<long>((resolve: ResolveCallback<long>, reject: RejectCallback):void => {
-            let p = taskpool.execute((): long => { return nativeGetBadgeNumber(); });
-            p.then((data :Any): void => {
-                let ret : long = data as long;
-                resolve(ret);
-            }, (err:Error): void => {
-                reject(err);
-            });
-        });
-        return pPromise;
+        let result: Promise<long>;
+        try {
+            result = nativeGetBadgeNumber(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function onBadgeNumberQuery(callback: (bundle: BundleOption) => Promise<long>): void {
@@ -1882,25 +1893,23 @@ export default namespace notificationManager {
         if (callback == null) {
            throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativeSetBadgeNumber(badgeNumber); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Object): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeSetBadgeNumber(badgeNumber, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function setBadgeNumber(badgeNumber: int): Promise<void> {
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetBadgeNumber(badgeNumber); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetBadgeNumber(badgeNumber, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setBadgeNumberByBundle(bundle: BundleOption, badgeNumber: int): Promise<void>
@@ -1909,15 +1918,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetBadgeNumberByBundle(bundle, badgeNumber); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetBadgeNumberByBundle(bundle, badgeNumber, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getActiveNotificationByFilter(filter: NotificationFilter, callback: AsyncCallback<NotificationRequest|null>): void
@@ -1929,13 +1937,12 @@ export default namespace notificationManager {
         if (callback === null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): NotificationRequest|null => { return nativeGetActiveNotificationByFilter(filter); });
-        p.then((data: Any): void => {
-            callback(null, data as NotificationRequest|null);
-        }, (error: Object): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeGetActiveNotificationByFilter(filter, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function getActiveNotificationByFilter(filter: NotificationFilter): Promise<NotificationRequest|null>
@@ -1944,29 +1951,26 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<NotificationRequest|null>((resolve: ResolveCallback<NotificationRequest|null>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): NotificationRequest|null => { return nativeGetActiveNotificationByFilter(filter); });
-            p.then((data: Any): void => {
-                resolve(data as NotificationRequest|null);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<NotificationRequest|null>;
+        try {
+            result = nativeGetActiveNotificationByFilter(filter, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isSupportTemplate(templateName: string): Promise<boolean>
     {
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeIsSupportTemplate(templateName); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeIsSupportTemplate(templateName, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function removeGroupByBundle(bundle: BundleOption, groupName: string, callback: AsyncCallback<void>): void
@@ -1981,13 +1985,12 @@ export default namespace notificationManager {
         if (!callback) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativeRemoveGroupByBundle(bundle, groupName); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeRemoveGroupByBundle(bundle, groupName, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function removeGroupByBundle(bundle: BundleOption, groupName: string): Promise<void>
@@ -1999,15 +2002,14 @@ export default namespace notificationManager {
         if (groupName === '') {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeRemoveGroupByBundle(bundle, groupName); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeRemoveGroupByBundle(bundle, groupName, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function publishAsBundle(request: NotificationRequest, representativeBundle: string, userId: int, callback: AsyncCallback<void>): void
@@ -2023,13 +2025,12 @@ export default namespace notificationManager {
         if (representativeBundle == null || representativeBundle?.length === 0) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativePublishAsBundle(request, representativeBundle, userId); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Object): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativePublishAsBundle(request, representativeBundle, userId, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function publishAsBundle(request: NotificationRequest, representativeBundle: string, userId: int): Promise<void>
@@ -2041,15 +2042,14 @@ export default namespace notificationManager {
         if (representativeBundle == null || representativeBundle?.length === 0) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativePublishAsBundle(request, representativeBundle, userId); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativePublishAsBundle(request, representativeBundle, userId, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function publishAsBundle(representativeBundle: BundleOption, request: NotificationRequest): Promise<void>
@@ -2062,15 +2062,14 @@ export default namespace notificationManager {
         if (err.code !== ERROR_OK) {
             throw err;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativePublishAsBundleWithBundleOption(representativeBundle, request); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativePublishAsBundleWithBundleOption(representativeBundle, request, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function cancelAsBundle(id: int, representativeBundle: string, userId: int, callback: AsyncCallback<void>): void
@@ -2081,13 +2080,12 @@ export default namespace notificationManager {
         if (representativeBundle == null || representativeBundle?.length === 0) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativeCancelAsBundle(id, representativeBundle, userId); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativeCancelAsBundle(id, representativeBundle, userId, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function cancelAsBundle(id: int, representativeBundle: string, userId: int): Promise<void>
@@ -2095,33 +2093,30 @@ export default namespace notificationManager {
         if (representativeBundle == null || representativeBundle?.length === 0) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeCancelAsBundle(id, representativeBundle, userId); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeCancelAsBundle(id, representativeBundle, userId, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
-    export function cancelAsBundle(representativeBundle: BundleOption, id: int): Promise<void>
+    export function cancelAsBundle(representativeBundle: BundleOption, userId: int): Promise<void>
     {
         let error: BusinessError = isInvalidParameter(representativeBundle);
         if (error.code !== ERROR_OK) {
             throw error;
         }
-
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeCancelAsBundleWithBundleOption(representativeBundle, id); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeCancelAsBundleWithBundleOption(representativeBundle, userId, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function cancelGroup(groupName: string, callback: AsyncCallback<void>): void
@@ -2132,13 +2127,12 @@ export default namespace notificationManager {
         if (groupName == null || groupName?.length === 0) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativeCancelGroup(groupName); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Object): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativeCancelGroup(groupName, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function cancelGroup(groupName: string): Promise<void>
@@ -2146,15 +2140,14 @@ export default namespace notificationManager {
         if (groupName == null || groupName?.length === 0) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeCancelGroup(groupName); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeCancelGroup(groupName, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setDoNotDisturbDate(date: DoNotDisturbDate, callback: AsyncCallback<void>): void
@@ -2166,13 +2159,12 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let p = taskpool.execute((): void => { return nativeSetDoNotDisturbDate(date); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Object): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativeSetDoNotDisturbDate(date, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function setDoNotDisturbDate(date: DoNotDisturbDate): Promise<void>
@@ -2181,15 +2173,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetDoNotDisturbDate(date); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetDoNotDisturbDate(date, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setDoNotDisturbDate(date: DoNotDisturbDate, userId: int, callback: AsyncCallback<void>): void
@@ -2201,13 +2192,12 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let p = taskpool.execute((): void => { return nativeSetDoNotDisturbDateWithId(date, userId); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Object): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativeSetDoNotDisturbDateWithId(date, userId, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function setDoNotDisturbDate(date: DoNotDisturbDate, userId: int): Promise<void>
@@ -2216,15 +2206,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetDoNotDisturbDateWithId(date, userId); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetDoNotDisturbDateWithId(date, userId, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getDoNotDisturbDate(callback: AsyncCallback<DoNotDisturbDate>): void
@@ -2232,28 +2221,24 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): DoNotDisturbDate => { return nativeGetDoNotDisturbDate(); });
-        p.then((data: Any): void => {
-            let doNotDisturbDate : DoNotDisturbDate = data as DoNotDisturbDate;
-            callback(null, doNotDisturbDate);
-        }, (error: Object): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeGetDoNotDisturbDate(callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function getDoNotDisturbDate(): Promise<DoNotDisturbDate>
     {
-        let pPromise = new Promise<DoNotDisturbDate>((resolve: ResolveCallback<DoNotDisturbDate>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): DoNotDisturbDate => { return nativeGetDoNotDisturbDate(); });
-            p.then((data: Any): void => {
-                let doNotDisturbDate : DoNotDisturbDate = data as DoNotDisturbDate;
-                resolve(doNotDisturbDate);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<DoNotDisturbDate>;
+        try {
+            result = nativeGetDoNotDisturbDate(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getDoNotDisturbDate(userId: int, callback: AsyncCallback<DoNotDisturbDate>): void
@@ -2261,28 +2246,24 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): DoNotDisturbDate => { return nativeGetDoNotDisturbDateWithId(userId); });
-        p.then((data: Any): void => {
-            let doNotDisturbDate : DoNotDisturbDate = data as DoNotDisturbDate;
-            callback(null, doNotDisturbDate);
-        }, (error: Object): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativeGetDoNotDisturbDateWithId(userId, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function getDoNotDisturbDate(userId: int): Promise<DoNotDisturbDate>
     {
-        let pPromise = new Promise<DoNotDisturbDate>((resolve: ResolveCallback<DoNotDisturbDate>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): DoNotDisturbDate => { return nativeGetDoNotDisturbDateWithId(userId); });
-            p.then((data: Any): void => {
-                let doNotDisturbDate : DoNotDisturbDate = data as DoNotDisturbDate;
-                resolve(doNotDisturbDate);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<DoNotDisturbDate>;
+        try {
+            result = nativeGetDoNotDisturbDateWithId(userId, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isSupportDoNotDisturbMode(callback: AsyncCallback<boolean>): void
@@ -2290,14 +2271,12 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): boolean => { return nativeIsSupportDoNotDisturbMode(); });
-        p.then((data: Any): void => {
-            let ret : boolean = data as boolean;
-            callback(null, ret);
-        }, (error: Object): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeIsSupportDoNotDisturbMode(callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function isSupportTemplate(templateName: string, callback: AsyncCallback<boolean>): void
@@ -2305,56 +2284,48 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): boolean => { return nativeIsSupportTemplate(templateName); });
-        p.then((data: Any): void => {
-            let ret : boolean = data as boolean;
-            callback(null, ret);
-        }, (error: Object): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeIsSupportTemplate(templateName, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function isSupportDoNotDisturbMode(): Promise<boolean>
     {
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeIsSupportDoNotDisturbMode(); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeIsSupportDoNotDisturbMode(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getDoNotDisturbProfile(id: long): Promise<DoNotDisturbProfile>
     {
-        let pPromise = new Promise<DoNotDisturbProfile>((resolve: ResolveCallback<DoNotDisturbProfile>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): DoNotDisturbProfile => { return nativeGetDoNotDisturbProfile(id); });
-            p.then((data: Any): void => {
-                let ret : DoNotDisturbProfile = data as DoNotDisturbProfile;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<DoNotDisturbProfile>;
+        try {
+            result = nativeGetDoNotDisturbProfile(id, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getDoNotDisturbProfile(id: long, userId: int): Promise<DoNotDisturbProfile>
     {
-        let pPromise = new Promise<DoNotDisturbProfile>((resolve: ResolveCallback<DoNotDisturbProfile>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): DoNotDisturbProfile => { return nativeGetDoNotDisturbProfileByUserId(id, userId); });
-            p.then((data: Any): void => {
-                let ret : DoNotDisturbProfile = data as DoNotDisturbProfile;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<DoNotDisturbProfile>;
+        try {
+            result = nativeGetDoNotDisturbProfileByUserId(id, userId, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function openNotificationSettings(context: UIAbilityContext): Promise<void>
@@ -2386,15 +2357,14 @@ export default namespace notificationManager {
     }
 
     export function setTargetDeviceStatus(deviceType: string, status: long): Promise<void> {
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-        let p = taskpool.execute((): void => { return nativesetTargetDeviceStatus(deviceType,status); });
-        p.then((data: Any): void => {
-            resolve(undefined);
-        }, (error: Error): void => {
-            reject(error);
-        });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativesetTargetDeviceStatus(deviceType,status, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setDistributedEnabledByBundle(bundle: BundleOption, deviceType: string, enable: boolean): Promise<void>
@@ -2403,15 +2373,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativesetDistributedEnabledByBundle(bundle, deviceType, enable); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativesetDistributedEnabledByBundle(bundle, deviceType, enable, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setDistributedEnableByBundle(bundle: BundleOption, enable: boolean): Promise<void>
@@ -2420,84 +2389,73 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativesetDistributedEnableByBundle(bundle, enable); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativesetDistributedEnableByBundle(bundle, enable, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setSmartReminderEnabled(deviceType: string, enable: boolean): Promise<void>
     {
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativesetSmartReminderEnabled(deviceType, enable); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativesetSmartReminderEnabled(deviceType, enable, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isSmartReminderEnabled(deviceType: string): Promise<boolean>
     {
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeisSmartReminderEnabled(deviceType); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeisSmartReminderEnabled(deviceType, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setDistributedEnabledBySlot(slot: SlotType, deviceType: string, enabled: boolean): Promise<void>
     {
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => {
-                return nativesetDistributedEnabledBySlot(slot, deviceType, enabled); 
-            });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativesetDistributedEnabledBySlot(slot, deviceType, enabled, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isDistributedEnabledBySlot(slot: SlotType, deviceType: string): Promise<boolean>
     {
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeisDistributedEnabledBySlot(slot, deviceType); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeisDistributedEnabledBySlot(slot, deviceType, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setAdditionalConfig(key: string, value: string): Promise<int>{
-        let pPromise = new Promise<int>((resolve: ResolveCallback<int>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): int => { return nativesetAdditionalConfig(key,value); });
-            p.then((data: Any): void => {
-                let ret : int = data as int;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<int>;
+        try {
+            result = nativesetAdditionalConfig(key, value, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function disableNotificationFeature(disabled:boolean, bundleList: Array<string>): Promise<void> {
@@ -2509,35 +2467,24 @@ export default namespace notificationManager {
                 throw errorParamInvalid;
             }
         });
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => {
-                return nativedisableNotificationFeature(disabled,bundleList);
-            });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativedisableNotificationFeature(disabled, bundleList, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setDistributedEnableByBundle(bundle: BundleOption, enable: boolean, callback: AsyncCallback<void>): void
     {
-        let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== ERROR_OK) {
+        try {
+            nativesetDistributedEnableByBundle(bundle, enable, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
             throw error;
         }
-        if (callback == null) {
-            throw errorParamInvalid;
-        }
-        let p = taskpool.execute((): void => { return nativesetDistributedEnableByBundle(bundle, enable); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Object): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
     }
 
     export function setDistributedEnable(enable: boolean, callback: AsyncCallback<void>): void
@@ -2545,40 +2492,36 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void => { return nativeSetDistributedEnable(enable); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Object): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        });
+        try {
+            nativeSetDistributedEnable(enable, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function setDistributedEnable(enable: boolean): Promise<void>
     {
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetDistributedEnable(enable); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetDistributedEnable(enable, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isDistributedEnabled(): Promise<boolean>
     {
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeIsDistributedEnabled(); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeIsDistributedEnabled(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isDistributedEnabled(callback: AsyncCallback<boolean>): void
@@ -2586,14 +2529,12 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): boolean => { return nativeIsDistributedEnabled(); });
-        p.then((data: Any): void => {
-            let ret : boolean = data as boolean;
-            callback(null, ret);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeIsDistributedEnabled(callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function isDistributedEnabledByBundle(bundle: BundleOption): Promise<boolean>
@@ -2602,16 +2543,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeIsDistributedEnabledByBundle(bundle); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeIsDistributedEnabledByBundle(bundle, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isDistributedEnabledByBundle(bundle: BundleOption, callback: AsyncCallback<boolean>): void
@@ -2624,14 +2563,12 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): boolean => { return nativeIsDistributedEnabledByBundle(bundle); });
-        p.then((data: Any): void => {
-            let ret : boolean = data as boolean;
-            callback(null, ret);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeIsDistributedEnabledByBundle(bundle, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function isDistributedEnabledByBundle(bundle: BundleOption, deviceType: string): Promise<boolean>
@@ -2640,31 +2577,26 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeIsDistributedEnabledByBundleType(bundle, deviceType); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeIsDistributedEnabledByBundleType(bundle, deviceType, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getDeviceRemindType(): Promise<DeviceRemindType>
     {
-        let pPromise = new Promise<DeviceRemindType>(
-            (resolve: ResolveCallback<DeviceRemindType>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): DeviceRemindType => { return nativeGetDeviceRemindType(); });
-            p.then((data: Any): void => {
-                let ret : DeviceRemindType = data as DeviceRemindType;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<DeviceRemindType>;
+        try {
+            result = nativeGetDeviceRemindType(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getDeviceRemindType(callback: AsyncCallback<DeviceRemindType>): void
@@ -2672,14 +2604,12 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): DeviceRemindType => { return nativeGetDeviceRemindType(); });
-        p.then((data: Any): void => {
-            let ret : DeviceRemindType = data as DeviceRemindType;
-            callback(null, ret);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeGetDeviceRemindType(callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function setSyncNotificationEnabledWithoutApp
@@ -2688,42 +2618,35 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): void =>
-            { return nativeSetSyncNotificationEnabledWithoutApp(userId, enable); });
-        p.then((data: Any): void => {
-            callback(null, undefined);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeSetSyncNotificationEnabledWithoutApp(userId, enable, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function setSyncNotificationEnabledWithoutApp(userId: int, enable: boolean): Promise<void>
     {
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void =>
-                { return nativeSetSyncNotificationEnabledWithoutApp(userId, enable); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetSyncNotificationEnabledWithoutApp(userId, enable, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getSyncNotificationEnabledWithoutApp(userId: int): Promise<boolean> {
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean =>
-                { return nativeGetSyncNotificationEnabledWithoutApp(userId); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeGetSyncNotificationEnabledWithoutApp(userId, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getSyncNotificationEnabledWithoutApp(userId: int, callback: AsyncCallback<boolean>): void
@@ -2731,29 +2654,23 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): boolean => { return nativeGetSyncNotificationEnabledWithoutApp(userId); });
-        p.then((data: Any): void => {
-            let ret : boolean = data as boolean;
-            callback(null, ret);
-        }, (error: Error): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
-        })
+        try {
+            nativeGetSyncNotificationEnabledWithoutApp(userId, callback);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
     }
 
     export function getNotificationSetting(): Promise<NotificationSetting> {
-        let pPromise = new Promise<NotificationSetting>(
-            (resolve: ResolveCallback<NotificationSetting>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): NotificationSetting =>
-                { return nativeGetNotificationSetting(); });
-            p.then((data: Any): void => {
-                let ret : NotificationSetting = data as NotificationSetting;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<NotificationSetting>;
+        try {
+            result = nativeGetNotificationSetting(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export interface RingtoneInfo {
@@ -2779,16 +2696,7 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void =>
-                { return nativeSetRingtoneInfoByBundle(bundle, ringtoneInfo); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        return nativeSetRingtoneInfoByBundle(bundle, ringtoneInfo, undefined);
     }
 
     export function getRingtoneInfoByBundle(bundle: BundleOption): Promise<RingtoneInfo> {
@@ -2796,45 +2704,38 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<RingtoneInfo>(
-            (resolve: ResolveCallback<RingtoneInfo>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): RingtoneInfo =>
-                { return nativeGetRingtoneInfoByBundle(bundle); });
-            p.then((data: Any): void => {
-                let ret : RingtoneInfo = data as RingtoneInfo;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<RingtoneInfo>;
+        try {
+            result = nativeGetRingtoneInfoByBundle(bundle, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setGeofenceEnabled(enable: boolean): Promise<void>
     {
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetGeofenceEnabled(enable); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetGeofenceEnabled(enable, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isGeofenceEnabled(): Promise<boolean>
     {
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeIsGeofenceEnabled(); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeIsGeofenceEnabled(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export interface NotificationReminderInfo {
@@ -2853,50 +2754,40 @@ export default namespace notificationManager {
         if (!bundles || bundles.length == 0) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<Array<NotificationReminderInfo>>((resolve: ResolveCallback<Array<NotificationReminderInfo>>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): Array<NotificationReminderInfo> => { return nativeGetReminderInfoByBundles(bundles); });
-            p.then((data: Any): void => {
-                let ret : Array<NotificationReminderInfo> = data as Array<NotificationReminderInfo>;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<Array<NotificationReminderInfo>>;
+        try {
+            result = nativeGetReminderInfoByBundles(bundles, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setReminderInfoByBundles(reminderInfos: Array<NotificationReminderInfo>): Promise<void> {
         if (!reminderInfos || reminderInfos.length == 0) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetReminderInfoByBundles(reminderInfos); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetReminderInfoByBundles(reminderInfos, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isDistributedEnabled(deviceType: string): Promise<boolean>
     {
-        if (deviceType.trim().isEmpty()) {
-            throw errorParamInvalid;
+        let result: Promise<boolean>;
+        try {
+            result = nativeIsDistributedEnabledByDeviceType(deviceType, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
         }
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => {
-                return nativeIsDistributedEnabledByDeviceType(deviceType); 
-            });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        return result;
     }
 
     export function disableNotificationFeature(disabled: boolean, bundleList: Array<string>, userId: int): Promise<void>
@@ -2912,17 +2803,14 @@ export default namespace notificationManager {
         if (userId < 0 || userId > MAX_USER_ID) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => {
-                nativeDisableNotificationFeatureWithId(disabled, bundleList, userId);
-            });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeDisableNotificationFeatureWithId(disabled, bundleList, userId, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setDistributedEnabled(enabled: boolean, deviceType: string): Promise<void>
@@ -2930,17 +2818,14 @@ export default namespace notificationManager {
         if (deviceType.trim().isEmpty()) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => {
-                return nativeSetDistributedEnabled(enabled, deviceType); 
-            });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetDistributedEnabledByDeviceType(enabled, deviceType, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setDistributedEnableByBundles(bundleEnableInfos: Array<DistributedBundleEnableInfo>, deviceType: string): Promise<void>
@@ -2953,31 +2838,26 @@ export default namespace notificationManager {
                 throw errorParamInvalid;
             }
         });
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => {
-                return nativeSetDistributedEnableByBundles(bundleEnableInfos, deviceType); 
-            });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetDistributedEnableByBundles(bundleEnableInfos, deviceType, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getDistributedDeviceList(): Promise<Array<string>>
     {
-        let pPromise = new Promise<Array<string>>((resolve: ResolveCallback<Array<string>>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): Array<string> => { return nativeGetDistributedDeviceList(); });
-            p.then((data: Any): void => {
-                let ret : Array<string> = data as Array<string>;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<Array<string>>;
+        try {
+            result = nativeGetDistributedDeviceList(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setBundlePriorityConfig(bundle: BundleOption, value: string): Promise<void>
@@ -2986,15 +2866,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetBundlePriorityConfig(bundle, value); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetBundlePriorityConfig(bundle, value, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getBundlePriorityConfig(bundle: BundleOption): Promise<string>
@@ -3003,16 +2882,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<string>((resolve: ResolveCallback<string>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): string => { return nativeGetBundlePriorityConfig(bundle); });
-            p.then((data: Any): void => {
-                let ret : string = data as string;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<string>;
+        try {
+            result = nativeGetBundlePriorityConfig(bundle, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setPriorityEnabledByBundle(bundle: BundleOption, enableStatus: PriorityEnableStatus): Promise<void>
@@ -3021,15 +2898,14 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetPriorityEnabledByBundle(bundle, enableStatus); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetPriorityEnabledByBundle(bundle, enableStatus, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isPriorityEnabledByBundle(bundle: BundleOption): Promise<PriorityEnableStatus>
@@ -3038,43 +2914,38 @@ export default namespace notificationManager {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<PriorityEnableStatus>((resolve: ResolveCallback<PriorityEnableStatus>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): PriorityEnableStatus => { return nativeIsPriorityEnabledByBundle(bundle); });
-            p.then((data: Any): void => {
-                let ret : PriorityEnableStatus = data as PriorityEnableStatus;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<PriorityEnableStatus>;
+        try {
+            result = nativeIsPriorityEnabledByBundle(bundle, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setPriorityEnabled(enable: boolean): Promise<void>
     {
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetPriorityEnabled(enable); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetPriorityEnabled(enable, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isPriorityEnabled(): Promise<boolean>
     {
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeIsPriorityEnabled(); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeIsPriorityEnabled(undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setSilentReminderEnabled(bundle: BundleOption, enabled: boolean): Promise<void>
@@ -3082,17 +2953,14 @@ export default namespace notificationManager {
         if (bundle.bundle.trim().isEmpty()) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => {
-                return nativeSetSilentReminderEnabled(bundle, enabled); 
-            });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetSilentReminderEnabled(bundle, enabled, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result; 
     }
 
     export function isSilentReminderEnabled(bundle: BundleOption): Promise<SwitchState>
@@ -3100,47 +2968,41 @@ export default namespace notificationManager {
         if (bundle.bundle.trim().isEmpty()) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<SwitchState>((resolve: ResolveCallback<SwitchState>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): SwitchState => { return nativeIsSilentReminderEnabled(bundle); });
-            p.then((data: Any): void => {
-                let ret : SwitchState = data as SwitchState;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<SwitchState>;
+        try {
+            result = nativeIsSilentReminderEnabled(bundle, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setBadgeDisplayStatusByBundles(badges: Map<BundleOption, boolean>): Promise<void> {
         if (!badges || badges.size == 0) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetBadgeDisplayStatusByBundles(badges); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetBadgeDisplayStatusByBundles(badges, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getBadgeDisplayStatusByBundles(bundles: Array<BundleOption>): Promise<Map<BundleOption, boolean>> {
         if (!bundles || bundles.length == 0) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<Map<BundleOption, boolean>>(
-            (resolve: ResolveCallback<Map<BundleOption, boolean>>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): Map<BundleOption, boolean> => { return nativeGetBadgeDisplayStatusByBundles(bundles); });
-            p.then((data: Any): void => {
-                let ret : Map<BundleOption, boolean> = data as Map<BundleOption, boolean>;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<Map<BundleOption, boolean>>;
+        try {
+            result = nativeGetBadgeDisplayStatusByBundles(bundles, undefined);
+        } catch (err: Error) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 }

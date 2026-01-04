@@ -16,28 +16,70 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_SLOT_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_SLOT_H
 #include "ani.h"
+#include "concurrency_helpers.h"
+#include "notification_bundle_option.h"
+#include "notification_slot.h"
+#include "sts_callback_promise.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
-ani_long AniGetSlotFlagsByBundle(ani_env *env, ani_object obj);
-void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_long slotFlags);
+using BundleOption = OHOS::Notification::NotificationBundleOption;
 
-ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption);
-ani_boolean AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, ani_enum_item  type);
-void AniSetNotificationEnableSlot(ani_env *env, ani_object bundleOption, ani_enum_item  type, ani_boolean enable);
-void AniSetNotificationEnableSlotWithForce(ani_env *env, ani_object bundleOption, ani_enum_item  type,
-    ani_boolean enable, ani_boolean isForceControl);
-void AniAddSlotByNotificationSlot(ani_env *env, ani_object notificationSlotObj);
-void AniAddSlotBySlotType(ani_env *env, ani_enum_item enumObj);
-void AniAddSlots(ani_env *env, ani_object notificationSlotArrayObj);
-ani_object AniGetSlot(ani_env *env, ani_enum_item enumObj);
-ani_object AniGetSlots(ani_env *env);
-ani_object AniGetSlotByBundle(ani_env *env, ani_object bundleOption, ani_enum_item type);
-void AniRemoveSlot(ani_env *env, ani_enum_item enumObj);
-void AniRemoveAllSlots(ani_env *env);
-void AniSetSlotByBundle(ani_env *env, ani_object bundleOptionObj, ani_object slotObj);
-ani_long AniGetSlotNumByBundle(ani_env *env, ani_object bundleOption);
-ani_object AniGetNotificationSetting(ani_env *env);
+enum SlotFunction {
+    SLOT_NONE,
+    GET_SLOT_FLAGS_BY_BUNDLE,
+    GET_SLOTS_BY_BUNDLE,
+    IS_NOTIFICATION_SLOT_ENABLED,
+    GET_SLOT,
+    GET_SLOTS,
+    GET_SLOT_BY_BUNDLE,
+    GET_SLOT_NUM_BY_BUNDLE,
+    GET_NOTIFICATION_SETTING,
+};
+
+struct EnableSlotParameter {
+    bool isEnabled = false;
+    bool isForceControl = false;
+    Notification::NotificationBundleOption option;
+    Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
+    Notification::NotificationSlot slot;
+    std::vector<Notification::NotificationSlot> slots;
+};
+
+struct AsyncCallbackSlotInfo {
+    ani_vm* vm = nullptr;
+    arkts::concurrency_helpers::AsyncWork* asyncWork = nullptr;
+    OHOS::NotificationSts::CallbackPromiseInfo info;
+    SlotFunction functionType = SLOT_NONE;
+    EnableSlotParameter param;
+    std::vector<sptr<Notification::NotificationSlot>> slots;
+    sptr<Notification::NotificationSlot> slot;
+    uint64_t slotNum = 0;
+    uint32_t slotFlags = 0;
+};
+
+void HandleSlotFunctionCallbackComplete(ani_env* env, arkts::concurrency_helpers::WorkStatus status, void* data);
+void HandleSlotFunctionCallbackComplete1(ani_env* env, arkts::concurrency_helpers::WorkStatus status, void* data);
+
+ani_object AniGetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_object callback);
+ani_object AniSetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_long slotFlags, ani_object callback);
+ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption, ani_object callback);
+ani_object AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, ani_enum_item type,
+    ani_object callback);
+ani_object AniSetNotificationEnableSlot(ani_env *env, ani_object bundleOption, ani_enum_item  type,
+    ani_boolean enable, ani_object callback);
+ani_object AniSetNotificationEnableSlotWithForce(ani_env *env, ani_object parameterObj, ani_object callback);
+ani_object AniAddSlotByNotificationSlot(ani_env *env, ani_object notificationSlotObj, ani_object callback);
+ani_object AniAddSlotBySlotType(ani_env *env, ani_enum_item enumObj, ani_object callback);
+ani_object AniAddSlots(ani_env *env, ani_object notificationSlotArrayObj, ani_object callback);
+ani_object AniGetSlot(ani_env *env, ani_enum_item enumObj, ani_object callback);
+ani_object AniGetSlots(ani_env *env, ani_object callback);
+ani_object AniGetSlotByBundle(ani_env *env, ani_object bundleOption, ani_enum_item type, ani_object callback);
+ani_object AniRemoveSlot(ani_env *env, ani_enum_item enumObj, ani_object callback);
+ani_object AniRemoveAllSlots(ani_env *env, ani_object callback);
+ani_object AniSetSlotByBundle(ani_env *env, ani_object bundleOptionObj, ani_object slotObj, ani_object callback);
+ani_object AniGetSlotNumByBundle(ani_env *env, ani_object bundleOption, ani_object callback);
+ani_object AniGetNotificationSetting(ani_env *env, ani_object callback);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 #endif

@@ -23,39 +23,159 @@
 
 namespace OHOS {
 namespace NotificationManagerSts {
-const ani_int RESULT_OK = 0;
-const ani_int RESULT_FAILED = 1;
-const std::string msg = "Parameter verification failed";
+using namespace arkts::concurrency_helpers;
+const char KEY_NAME[] = "AGGREGATE_CONFIG";
+const char RING_LIST_KEY_NAME[] = "RING_TRUSTLIST_PKG";
+const char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
+const char PRIORITY_RULE_CONFIG_KEY_NAME[] = "notificationRuleConfig";
 
-ani_int AniSetAdditionalConfig(ani_env *env, ani_string key, ani_string value)
+void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackConfigInfo* asyncCallbackInfo)
 {
-    ANS_LOGD("sts setAdditionalConfig call");
-    if (env == nullptr || key == nullptr) {
-        ANS_LOGE("Invalid env or key is null");
-        return RESULT_FAILED;
+    ANS_LOGD("Delete AsyncCallbackConfigInfo Without Promise");
+    if (!asyncCallbackInfo) {
+        return;
     }
+    if (asyncCallbackInfo->info.callback != nullptr) {
+        ANS_LOGD("Delete callback reference");
+        env->GlobalReference_Delete(asyncCallbackInfo->info.callback);
+    }
+    if (asyncCallbackInfo->asyncWork != nullptr) {
+        ANS_LOGD("DeleteAsyncWork");
+        DeleteAsyncWork(env, asyncCallbackInfo->asyncWork);
+        asyncCallbackInfo->asyncWork = nullptr;
+    }
+    delete asyncCallbackInfo;
+    asyncCallbackInfo = nullptr;
+}
+
+void DeleteCallBackInfo(ani_env* env, AsyncCallbackConfigInfo* asyncCallbackInfo)
+{
+    ANS_LOGD("Delete AsyncCallbackConfigInfo");
+    if (!asyncCallbackInfo) {
+        return;
+    }
+    if (asyncCallbackInfo->info.resolve != nullptr) {
+        ANS_LOGD("Delete resolve reference");
+        env->GlobalReference_Delete(reinterpret_cast<ani_ref>(asyncCallbackInfo->info.resolve));
+    }
+    DeleteCallBackInfoWithoutPromise(env, asyncCallbackInfo);
+}
+
+bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackConfigInfo* asyncCallbackInfo)
+{
+    if (!NotificationSts::IsUndefine(env, callback)) {
+        ani_ref globalRef;
+        if (env->GlobalReference_Create(static_cast<ani_ref>(callback), &globalRef) != ANI_OK) {
+            NotificationSts::ThrowInternerErrorWithLogE(env, "create callback ref failed");
+            return false;
+        }
+        asyncCallbackInfo->info.callback = globalRef;
+    }
+    return true;
+}
+
+bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackConfigInfo* asyncCallbackInfo) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+        ANS_LOGE("GetEnv failed");
+        return false;
+    }
+    if (asyncCallbackInfo->info.returnCode != ERR_OK) {
+        ANS_LOGE("return ErrCode: %{public}d", asyncCallbackInfo->info.returnCode);
+        NotificationSts::CreateReturnData(*envCurr, asyncCallbackInfo->info);
+        DeleteCallBackInfoWithoutPromise(*envCurr, asyncCallbackInfo);
+        return false;
+    }
+    return true;
+}
+
+void HandleConfigFunctionCallbackComplete(ani_env* env, WorkStatus status, void* data)
+{
+    auto asyncCallbackInfo = static_cast<AsyncCallbackConfigInfo*>(data);
+    if (!asyncCallbackInfo) {
+        ANS_LOGE("asyncCallbackInfo  is null");
+        return;
+    }
+    ani_env *envCurr = nullptr;
+    if (!CheckCompleteEnvironment(&envCurr, asyncCallbackInfo)) {
+        return;
+    }
+    asyncCallbackInfo->info.result = OHOS::NotificationSts::CreateInt(envCurr, asyncCallbackInfo->result);
+    NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
+    DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
+}
+
+bool ParsePraramForAdditionalConfig(ani_env *env,
+    ani_string key, ani_string value, AsyncCallbackConfigInfo* asyncCallbackInfo)
+{
     std::string tempKey;
     if (NotificationSts::GetStringByAniString(env, key, tempKey) != ANI_OK) {
-        ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
-        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
-        return RESULT_FAILED;
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse key failed");
+        asyncCallbackInfo->result = RESULT_FAILED;
+        return false;
     }
     std::string keyStr = NotificationSts::GetResizeStr(tempKey, NotificationSts::STR_MAX_SIZE);
+    if (std::strlen(keyStr.c_str()) == 0 ||
+        (strcmp(keyStr.c_str(), KEY_NAME) != 0 &&
+        strcmp(keyStr.c_str(), RING_LIST_KEY_NAME) != 0 &&
+        strcmp(keyStr.c_str(), CTRL_LIST_KEY_NAME) != 0 &&
+        strcmp(keyStr.c_str(), PRIORITY_RULE_CONFIG_KEY_NAME) != 0)) {
+        ANS_LOGW("Parameter verification failed");
+        asyncCallbackInfo->result = ERR_OK;
+        return true;
+    }
     std::string tempValue;
     if (NotificationSts::GetStringByAniString(env, value, tempValue) != ANI_OK) {
-        ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
-        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
-        return RESULT_FAILED;
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse value failed");
+        asyncCallbackInfo->result = RESULT_FAILED;
+        return false;
     }
     std::string valueStr = NotificationSts::GetResizeStr(tempValue, NotificationSts::LONG_LONG_STR_MAX_SIZE);
-    int returncode = Notification::NotificationHelper::SetAdditionConfig(keyStr, valueStr);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("setAdditionalConfig -> error, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return RESULT_FAILED;
+    asyncCallbackInfo->configValue = valueStr;
+    asyncCallbackInfo->configkey = keyStr;
+    return true;
+}
+
+ani_object AniSetAdditionalConfig(ani_env *env, ani_string key, ani_string value, ani_object callback)
+{
+    ANS_LOGD("AniSetAdditionalConfig called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackConfigInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
     }
-    return RESULT_OK;
+    if (!ParsePraramForAdditionalConfig(env, key, value, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackConfigInfo*>(data);
+            if (asyncCallbackInfo) {
+                if (asyncCallbackInfo->result != ERR_OK) {
+                    asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetAdditionConfig(
+                        asyncCallbackInfo->configkey, asyncCallbackInfo->configValue);
+                    asyncCallbackInfo->result = ERR_OK;
+                }
+            }
+        },
+        HandleConfigFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 } // namespace NotificationManagerSts
 } // namespace OHOS

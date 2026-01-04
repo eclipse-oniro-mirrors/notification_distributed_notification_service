@@ -16,15 +16,44 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_PRIORITY_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_PRIORITY_H
 #include "ani.h"
+#include "concurrency_helpers.h"
+#include "sts_callback_promise.h"
+#include "sts_bundle_option.h"
+#include "notification_bundle_option.h"
+#include "notification_constant.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
-void AniSetBundlePriorityConfig(ani_env* env, ani_object obj, ani_string value);
-ani_string AniGetBundlePriorityConfig(ani_env* env, ani_object obj);
-void AniSetPriorityEnabledByBundle(ani_env* env, ani_object obj, ani_enum_item enableStatus);
-ani_object AniIsPriorityEnabledByBundle(ani_env* env, ani_object obj);
-void AniSetPriorityEnabled(ani_env* env, ani_boolean enable);
-ani_boolean AniIsPriorityEnabled(ani_env* env);
+
+enum PriorityFunction {
+    PRIORITY_NONE,
+    GET_BUNDLE_PRIORITY_CONFIG,
+    IS_PRIORITY_ENABLED_BY_BUNDLE,
+    IS_PRIORITY_ENABLED,
+};
+
+struct AsyncCallbackPriorityInfo {
+    ani_vm* vm = nullptr;
+    arkts::concurrency_helpers::AsyncWork* asyncWork = nullptr;
+    OHOS::NotificationSts::CallbackPromiseInfo info;
+    PriorityFunction funtionType = PRIORITY_NONE;
+    std::string valueStr;
+    Notification::NotificationBundleOption option;
+    OHOS::Notification::NotificationConstant::PriorityEnableStatus status =
+        OHOS::Notification::NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT;
+    bool isPriorityEnabled;
+};
+
+void HandlePriorityFunctionCallbackComplete(ani_env* env, arkts::concurrency_helpers::WorkStatus status, void* data);
+
+ani_object AniSetBundlePriorityConfig(ani_env* env,
+    ani_object obj, ani_string value, ani_object callback);
+ani_object AniGetBundlePriorityConfig(ani_env* env, ani_object obj, ani_object callback);
+ani_object AniSetPriorityEnabledByBundle(ani_env* env,
+    ani_object obj, ani_enum_item enableStatus, ani_object callback);
+ani_object AniIsPriorityEnabledByBundle(ani_env* env, ani_object obj, ani_object callback);
+ani_object AniSetPriorityEnabled(ani_env* env, ani_boolean enable, ani_object callback);
+ani_object AniIsPriorityEnabled(ani_env* env, ani_object callback);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_PRIORITY_H
