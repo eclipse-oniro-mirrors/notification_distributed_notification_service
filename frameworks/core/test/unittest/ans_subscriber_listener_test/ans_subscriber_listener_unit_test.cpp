@@ -659,6 +659,31 @@ HWTEST_F(SubscriberListenerTest, OnEnabledPriorityByBundleChanged_0200, Function
 }
 
 /**
+ * @tc.name      : OnEnabledWatchStatusChanged_0100
+ * @tc.desc      : Test OnEnabledWatchStatusChanged with invalid watchStatus
+ */
+HWTEST_F(SubscriberListenerTest, OnEnabledWatchStatusChanged_0100, Function | MediumTest | Level1)
+{
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(nullptr);
+    uint32_t invalidWatchStatus = std::numeric_limits<uint32_t>::max();
+    ErrCode result = listener->OnEnabledWatchStatusChanged(invalidWatchStatus);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name      : OnEnabledWatchStatusChanged_0200
+ * @tc.desc      : Test OnEnabledWatchStatusChanged with valid watchStatus
+ */
+HWTEST_F(SubscriberListenerTest, OnEnabledWatchStatusChanged_0200, Function | MediumTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    uint32_t validWatchStatus = 4;
+    ErrCode result = listener->OnEnabledWatchStatusChanged(validWatchStatus);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
  * @tc.name      : OnSystemUpdate_0100
  * @tc.desc      : Test OnSystemUpdate null subscriber
  */

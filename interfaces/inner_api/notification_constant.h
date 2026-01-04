@@ -102,6 +102,7 @@ public:
         SUBSCRIBE_ON_ENABLEPRIORITY_CHANGED = 1 << 13,
         SUBSCRIBE_ON_ENABLEPRIORITYBYBUNDLE_CHANGED = 1 << 14,
         SUBSCRIBE_ON_SYSTEM_UPDATE = 1 << 15,
+        SUBSCRIBE_ON_ENABL_WATCH_CHANGED = 1 << 16,
     };
 
     enum DistributedDeleteType {

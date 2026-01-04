@@ -298,6 +298,11 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledNotificationChanged(
     return ERR_OK;
 }
 
+ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledWatchStatusChanged(uint32_t watchStatus)
+{
+    return ERR_OK;
+}
+
 ErrCode NotificationSubscriber::SubscriberImpl::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
