@@ -137,6 +137,11 @@ private:
             return ERR_OK;
         }
 
+        void OnEnabledWatchStatusChanged(const uint32_t watchStatus) override
+        {
+            isCallback_ = true;
+        }
+
         bool GetCallBack()
         {
             return isCallback_;
@@ -659,6 +664,33 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyBadgeEnabledChanged_Subscribed
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
+}
+
+/**
+ * @tc.number    : NotifyEnabledWatchChanged_001
+ * @tc.name      : test notify enabled watch changed to trigger call back success
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledWatchChanged_001, Level1)
+{
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    auto isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+    std::string bundle = "com.example.test";
+    int32_t uid = 1;
+    sptr<NotificationSubscribeInfo> subscribeInfo(new NotificationSubscribeInfo());
+    subscribeInfo->AddAppName(bundle);
+    subscribeInfo->SetSubscriberUid(uid);
+    subscribeInfo->SetIsSubscribeSelf(true);
+    testAnsSubscriber->SetSubscribedFlags(
+        OHOS::Notification::NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABL_WATCH_CHANGED);
+    ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(subscriber, subscribeInfo,
+        testAnsSubscriber->subscribedFlags_), (int)ERR_OK);
+    uint32_t watchStatus = 1 << DistributedDeviceStatus::OWNER_FLAG;
+    notificationSubscriberManager_->NotifyEnabledWatchChanged(watchStatus);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_TRUE(isCallback);
 }
 
 /**

@@ -121,6 +121,13 @@ public:
     void NotifyEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData);
 
     /**
+    * @brief Notify when the watch status of the device owner changes.
+    *
+    * @param watchStatus Indicates the current owner's gaze at the screen status.
+    */
+    void NotifyEnabledWatchChanged(const uint32_t watchStatus);
+
+    /**
      * @brief Notify when the priority notification switch is changed.
      *
      * @param enable Indicates the switch state.
@@ -225,6 +232,7 @@ private:
     void NotifyDoNotDisturbDateChangedInner(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date,
         const std::string &bundle);
     void NotifyEnabledNotificationChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
+    void NotifyEnabledWatchStatusChangedInner(const uint32_t watchStatus);
     void NotifyEnabledPriorityChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     void NotifyEnabledPriorityByBundleChangedInner(
         const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData);
@@ -249,6 +257,8 @@ private:
     template <typename... Args>
     void NotifySubscribers(int32_t userId,
         NotificationConstant::SubscribedFlag flags, ErrCode (IAnsSubscriber::*func)(Args...), Args&& ... args);
+    void NotifySubscribers(int32_t userId,
+        ErrCode (IAnsSubscriber::*func)(uint32_t), uint32_t watchStatus);
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
     bool IsDelayPriorityTargetSubscriber(
         const std::shared_ptr<SubscriberRecord> &subscriberRecord, const sptr<NotificationRequest> &request);

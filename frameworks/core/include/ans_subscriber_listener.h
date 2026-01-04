@@ -79,6 +79,8 @@ public:
     ErrCode OnEnabledPriorityByBundleChanged(
         const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData) override;
 
+    ErrCode OnEnabledWatchStatusChanged(uint32_t watchStatus) override;
+
     ErrCode OnSystemUpdate(const sptr<Notification> &notification) override;
 
     ErrCode OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override;

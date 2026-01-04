@@ -360,6 +360,19 @@ void NotificationSubscriberManager::NotifyEnabledPriorityByBundleChanged(
     notificationSubQueue_->submit(func);
 }
 
+void NotificationSubscriberManager::NotifyEnabledWatchChanged(const uint32_t watchStatus)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("null queue");
+        return;
+    }
+    AppExecFwk::EventHandler::Callback func =
+        std::bind(&NotificationSubscriberManager::NotifyEnabledWatchStatusChangedInner, this, watchStatus);
+ 
+    notificationSubQueue_->submit(func);
+}
+
 void NotificationSubscriberManager::NotifySystemUpdate(const sptr<Notification> &notification)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
@@ -519,6 +532,14 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
             std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
             subscriberRecordList_.push_back(record);
         }
+
+        if (subscribeInfo->GetSubscribedFlags() &
+            NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABL_WATCH_CHANGED) {
+            int watchState = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->GetDeviceStatus(
+                NotificationConstant::CURRENT_DEVICE_TYPE) & (1 << DistributedDeviceStatus::OWNER_FLAG);
+            NotificationSubscriberManager::GetInstance()->NotifyEnabledWatchChanged(watchState);
+        }
+
         record->subscriber->AsObject()->AddDeathRecipient(recipient_);
         if (subscribeInfo->GetSubscribedFlags() & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONNECTED) {
             record->subscriber->OnConnected();
@@ -969,6 +990,16 @@ void NotificationSubscriberManager::NotifySubscribers(int32_t userId, const std:
     }
 }
 
+void NotificationSubscriberManager::NotifySubscribers(int32_t userId,
+    ErrCode (IAnsSubscriber::*func)(uint32_t), uint32_t watchStatus)
+{
+    for (auto& record : subscriberRecordList_) {
+        if (record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABL_WATCH_CHANGED) {
+            (record->subscriber->*func)(watchStatus);
+        }
+    }
+}
+
 bool NotificationSubscriberManager::IsNeedNotifySubscribers(
     const std::shared_ptr<SubscriberRecord> &record, int32_t userId)
 {
@@ -1095,6 +1126,12 @@ void NotificationSubscriberManager::NotifyEnabledPriorityByBundleChangedInner(
     }
     NotifySubscribers(userId, uid, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLEPRIORITYBYBUNDLE_CHANGED,
         &IAnsSubscriber::OnEnabledPriorityByBundleChanged, callbackData);
+}
+
+void NotificationSubscriberManager::NotifyEnabledWatchStatusChangedInner(const uint32_t watchStatus)
+{
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    NotifySubscribers(userId, &IAnsSubscriber::OnEnabledWatchStatusChanged, watchStatus);
 }
 
 void NotificationSubscriberManager::NotifySystemUpdateInner(const sptr<Notification> &notification)

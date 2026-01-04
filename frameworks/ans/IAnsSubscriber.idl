@@ -46,6 +46,7 @@ interface OHOS.Notification.IAnsSubscriber {
     [oneway] void OnSystemUpdate([in] sptr<Notification> notification);
     [oneway] void OnEnabledPriorityChanged([in] sptr<EnabledNotificationCallbackData> callbackData);
     [oneway] void OnEnabledPriorityByBundleChanged([in] sptr<EnabledPriorityNotificationByBundleCallbackData> callbackData);
+    [oneway] void OnEnabledWatchStatusChanged([in] unsigned int watchStatus);
     [oneway] void OnUpdated([in] sptr<NotificationSortingMap> notificationMap);
     [oneway] void OnDoNotDisturbDateChange([in] sptr<NotificationDoNotDisturbDate> date);
     [oneway] void OnEnabledNotificationChanged([in] sptr<EnabledNotificationCallbackData> callbackData);

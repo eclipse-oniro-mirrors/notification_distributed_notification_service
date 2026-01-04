@@ -261,6 +261,18 @@ ErrCode SubscriberListener::OnEnabledPriorityByBundleChanged(
     return ERR_OK;
 }
 
+ErrCode SubscriberListener::OnEnabledWatchStatusChanged(uint32_t watchStatus)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    auto subscriber = subscriber_.lock();
+    if (subscriber == nullptr) {
+        ANS_LOGE("null subscriber");
+        return ERR_INVALID_DATA;
+    }
+    subscriber->OnEnabledWatchStatusChanged(watchStatus);
+    return ERR_OK;
+}
+
 ErrCode SubscriberListener::OnSystemUpdate(const sptr<Notification> &notification)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);

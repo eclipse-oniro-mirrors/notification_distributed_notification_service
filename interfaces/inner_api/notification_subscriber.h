@@ -90,6 +90,16 @@ public:
     virtual void OnEnabledNotificationChanged(const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) = 0;
 
     /**
+    * @brief Callback when the watch status of the device owner changes.
+    *
+    * @param watchStatus Indicates the current owner's gaze at the screen status
+    */
+    virtual void OnEnabledWatchStatusChanged(uint32_t watchStatus)
+    {
+        return;
+    }
+
+    /**
      * @brief Callback when the priority notification switch is changed.
      *
      * @param enable Indicates the switch state.
@@ -234,6 +244,8 @@ private:
         ErrCode OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date) override;
 
         ErrCode OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
+
+        ErrCode OnEnabledWatchStatusChanged(uint32_t watchStatus) override;
 
         ErrCode OnEnabledPriorityChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 

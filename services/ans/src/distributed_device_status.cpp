@@ -20,6 +20,7 @@
 #include "distributed_extension_service.h"
 #endif
 #include "ans_inner_errors.h"
+#include "notification_subscriber_manager.h"
 
 namespace OHOS {
 namespace Notification {
@@ -59,6 +60,12 @@ ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, 
         ANS_LOGI("update lite wearable status %{public}u %{public}u", wearableStatus, status);
     }
     deviceStatus_.EnsureInsert(deviceType, oldStatus);
+
+    if (deviceType == NotificationConstant::CURRENT_DEVICE_TYPE) {
+        uint32_t watchState = oldStatus & (1 << DistributedDeviceStatus::OWNER_FLAG);
+        NotificationSubscriberManager::GetInstance()->NotifyEnabledWatchChanged(watchState);
+    }
+
     ANS_LOGI("update %{public}s status %{public}u %{public}u", deviceType.c_str(), oldStatus, status);
     return ERR_OK;
 }
