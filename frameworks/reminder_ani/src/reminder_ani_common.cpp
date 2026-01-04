@@ -83,7 +83,7 @@ void AniReminderStateCallback::OnReminderState(const std::vector<Notification::R
         reminderAgentManager::manager::ReminderState aniState {
             .reminderId = state.reminderId_,
             .buttonType = static_cast<reminderAgentManager::manager::ActionButtonType::key_t>(state.buttonType_),
-            .isMessageResend = state.isResend_
+            .isMessageResent = state.isResend_
         };
         aniStates.push_back(aniState);
     }

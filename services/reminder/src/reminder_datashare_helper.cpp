@@ -302,6 +302,7 @@ void ReminderDataShareHelper::OnDataInsertOrDelete()
         if (manager == nullptr) {
             return;
         }
+        ReminderDataShareHelper::GetInstance().ResetTaskFlag(true);
         manager->OnDataShareInsertOrDelete();
     };
     int64_t timestamp =
@@ -327,6 +328,7 @@ void ReminderDataShareHelper::OnDataUpdate(const DataShare::DataShareObserver::C
         if (manager == nullptr) {
             return;
         }
+        ReminderDataShareHelper::GetInstance().ResetTaskFlag(false);
         auto reminders = ReminderDataShareHelper::GetInstance().GetCacheReminders();
         manager->OnDataShareUpdate(reminders);
     };
@@ -346,6 +348,15 @@ void ReminderDataShareHelper::OnDataUpdate(const DataShare::DataShareObserver::C
             taskAttr.delay(DURATION_DELAY_TASK);
             queue_->submit(func, taskAttr);
         }
+    }
+}
+
+void ReminderDataShareHelper::ResetTaskFlag(const bool isInsertTask)
+{
+    if (isInsertTask) {
+        insertTask_ = false;
+    } else {
+        updateTask_ = false;
     }
 }
 

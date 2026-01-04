@@ -337,7 +337,7 @@ void CancelReminderOnDisplaySync(int32_t reminderId)
     }
 }
 
-void subscribeReminderStateSync(::taihe::callback_view<
+void SubscribeReminderStateSync(::taihe::callback_view<
     void(::taihe::array_view<::ohos::reminderAgentManager::manager::ReminderState> states)> callback)
 {
     std::lock_guard<std::mutex> locker(ReminderAgentManagerNapi::Common::callbackMutex_);
@@ -353,29 +353,38 @@ void subscribeReminderStateSync(::taihe::callback_view<
         std::make_shared<ReminderAgentManagerNapi::CallbackType>(callback);
     sptr<ReminderAgentManagerNapi::AniReminderStateCallback> listener =
         new (std::nothrow)ReminderAgentManagerNapi::AniReminderStateCallback(taiheCallback);
-    OHOS::Notification::ReminderHelper::RegisterReminderState(listener);
+    int32_t ret = OHOS::Notification::ReminderHelper::RegisterReminderState(listener);
+    if (ret != ERR_OK) {
+        ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
+    }
     ReminderAgentManagerNapi::Common::callbackList_.emplace_back(stateCb, listener);
 }
 
-void unsubscribeReminderStateSync(::taihe::optional_view<::taihe::callback<
+void UnSubscribeReminderStateSync(::taihe::optional_view<::taihe::callback<
     void(::taihe::array_view<::ohos::reminderAgentManager::manager::ReminderState> states)>> callback)
 {
     std::lock_guard<std::mutex> locker(ReminderAgentManagerNapi::Common::callbackMutex_);
-    if (callback.has_value()) {
+    if (!callback.has_value()) {
         auto iter = ReminderAgentManagerNapi::Common::callbackList_.begin();
         for (; iter != ReminderAgentManagerNapi::Common::callbackList_.end(); iter++) {
-            if (iter->first == callback.value()) {
-                OHOS::Notification::ReminderHelper::UnRegisterReminderState(iter->second);
-                ReminderAgentManagerNapi::Common::callbackList_.erase(iter);
-                break;
+            int32_t ret = OHOS::Notification::ReminderHelper::UnRegisterReminderState(iter->second);
+            if (ret != ERR_OK) {
+                ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
             }
         }
-    } else {
-        auto iter = ReminderAgentManagerNapi::Common::callbackList_.begin();
-        for (; iter != ReminderAgentManagerNapi::Common::callbackList_.end(); iter++) {
-            OHOS::Notification::ReminderHelper::UnRegisterReminderState(iter->second);
-        }
         ReminderAgentManagerNapi::Common::callbackList_.clear();
+        return;
+    }
+    auto iter = ReminderAgentManagerNapi::Common::callbackList_.begin();
+    for (; iter != ReminderAgentManagerNapi::Common::callbackList_.end(); iter++) {
+        if (iter->first == callback.value()) {
+            int32_t ret = OHOS::Notification::ReminderHelper::UnRegisterReminderState(iter->second);
+            if (ret != ERR_OK) {
+                ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
+            }
+            ReminderAgentManagerNapi::Common::callbackList_.erase(iter);
+            break;
+        }
     }
 }
 }  // namespace
@@ -394,6 +403,6 @@ TH_EXPORT_CPP_API_GetExcludeDatesSync(GetExcludeDatesSync);
 TH_EXPORT_CPP_API_GetAllValidRemindersSync(GetAllValidRemindersSync);
 TH_EXPORT_CPP_API_UpdateReminderSync(UpdateReminderSync);
 TH_EXPORT_CPP_API_CancelReminderOnDisplaySync(CancelReminderOnDisplaySync);
-TH_EXPORT_CPP_API_subscribeReminderStateSync(subscribeReminderStateSync);
-TH_EXPORT_CPP_API_unsubscribeReminderStateSync(unsubscribeReminderStateSync);
+TH_EXPORT_CPP_API_SubscribeReminderStateSync(SubscribeReminderStateSync);
+TH_EXPORT_CPP_API_UnSubscribeReminderStateSync(UnSubscribeReminderStateSync);
 // NOLINTEND
