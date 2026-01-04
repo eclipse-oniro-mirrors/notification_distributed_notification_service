@@ -121,7 +121,7 @@ bool ParsePraramForAdditionalConfig(ani_env *env,
         keyStr != CTRL_LIST_KEY_NAME && keyStr != HEALTH_BUNDLE_WHITE_LIST &&
         keyStr != PRIORITY_RULE_CONFIG_KEY_NAME &&
         keyStr != CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG)) {
-        ANS_LOGW("Argument param error. not allow key: %{public}s.", key.c_str());
+        ANS_LOGW("Argument param error. not allow key: %{public}s.", keyStr.c_str());
         return false;
     }
     std::string tempValue;
