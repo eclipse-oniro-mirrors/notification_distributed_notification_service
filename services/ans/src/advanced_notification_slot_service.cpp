@@ -1336,7 +1336,8 @@ bool AdvancedNotificationService::CheckAdditionalConfigKey(const std::string &ke
 {
     if (key.empty() || (key != CTRL_LIST_KEY && key != AGGREGATE_KEY &&
         key != RING_TRUST_PKG_KEY && key != HEALTH_BUNDLE_WHITE_LIST_KEY &&
-        key != PRIORITY_RULE_CONFIG_KEY && key != CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY)) {
+        key != PRIORITY_RULE_CONFIG_KEY && key != CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY &&
+        key != PROXY_PKG_KEY)) {
         ANS_LOGW("Argument param error. not allow key: %{public}s.", key.c_str());
         return false;
     }
