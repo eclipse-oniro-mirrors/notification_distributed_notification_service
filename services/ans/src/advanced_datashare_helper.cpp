@@ -593,10 +593,12 @@ void AdvancedDatashareHelper::OnUserSwitch(const int32_t userId)
         ANS_LOGE("Datashare userSwitch fail by nullptr.");
         return;
     }
-    ANS_LOGE("Datashare userSwitch id:%{public}d", userId);
+    ANS_LOGI("Datashare userSwitch id:%{public}d", userId);
     RegisterObserver(userId, GetFocusModeEnableUri(userId), { KEY_FOCUS_MODE_ENABLE });
     RegisterObserver(userId, GetFocusModeProfileUri(userId), { KEY_FOCUS_MODE_PROFILE });
     RegisterObserver(userId, GetIntelligentExperienceUri(userId), { KEY_INTELLIGENT_EXPERIENCE });
+    RegisterObserver(userId, GetFocusModeCallPolicyUri(userId), { KEY_FOCUS_MODE_CALL_MESSAGE_POLICY });
+    RegisterObserver(userId, GetFocusModeRepeatCallUri(userId), { KEY_FOCUS_MODE_REPEAT_CALLERS_ENABLE });
 }
 } // namespace Notification
 } // namespace OHOS
