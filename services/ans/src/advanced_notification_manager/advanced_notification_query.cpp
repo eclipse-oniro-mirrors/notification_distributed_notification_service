@@ -222,6 +222,7 @@ ErrCode AdvancedNotificationService::GetAllNotificationsBySlotTypeInner(std::vec
             }
             notifications.push_back(record->notification);
         }
+        DelayedSingleton<HealthWhiteListUtil>::GetInstance()->AddExtendFlagForRequest(notifications);
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get all active notifications inner.");
     return ERR_OK;

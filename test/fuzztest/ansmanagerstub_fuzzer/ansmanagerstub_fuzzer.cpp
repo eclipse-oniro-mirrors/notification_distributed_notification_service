@@ -218,6 +218,7 @@ namespace OHOS {
         service->TriggerLocalLiveView(bundleOption, fuzzData->ConsumeIntegral<int32_t>(), buttonOption);
         service->RemoveNotificationBySlot(bundleOption, slot, fuzzData->ConsumeIntegral<int32_t>());
         service->IsNeedSilentInDoNotDisturbMode(phoneNumber, fuzzData->ConsumeIntegral<int32_t>());
+        service->IsNeedSilentInDoNotDisturbMode(phoneNumber, fuzzData->ConsumeIntegral<int32_t>(), userId);
         service->CheckNeedSilent(phoneNumber, fuzzData->ConsumeIntegral<int32_t>(),
             fuzzData->ConsumeIntegral<int32_t>());
         service->ExcuteCancelGroupCancel(bundleOption, groupName, fuzzData->ConsumeIntegral<int32_t>());
@@ -244,12 +245,15 @@ namespace OHOS {
         service->GetSlotByBundle(bundleOption, slotType, slot);
         std::vector<Notification::NotificationBundleOption> bundleOptions;
         service->GetAllNotificationEnabledBundles(bundleOptions);
+        service->GetAllNotificationEnabledBundles(bundleOptions, userId);
         std::vector<sptr<Notification::NotificationDoNotDisturbProfile>> profiles;
         sptr<Notification::NotificationDoNotDisturbProfile> profile =
             new Notification::NotificationDoNotDisturbProfile();
         profiles.emplace_back(profile);
         service->AddDoNotDisturbProfiles(profiles);
+        service->AddDoNotDisturbProfiles(profiles, userId);
         service->RemoveDoNotDisturbProfiles(profiles);
+        service->RemoveDoNotDisturbProfiles(profiles, userId);
         std::string value = fuzzData->ConsumeRandomLengthString();
 
         sptr<Notification::NotificationCheckRequest> notificationCheckRequest =
@@ -280,7 +284,9 @@ namespace OHOS {
         service->SetDistributedEnabledBySlot(slotType, deviceType, enabled);
         std::vector<sptr<Notification::Notification>> notificationsVector;
         service->GetAllNotificationsBySlotType(notificationsVector, slotType);
+        service->GetAllNotificationsBySlotType(notificationsVector, slotType, userId);
         service->AllowUseReminder(bundleName, allowed);
+        service->AllowUseReminder(bundleName, userId, allowed);
         int32_t deviceStatus;
         service->GetTargetDeviceStatus(deviceType, deviceStatus);
         bool isPaused = fuzzData->ConsumeBool();
@@ -295,6 +301,7 @@ namespace OHOS {
         operationInfo->SetEventId(fuzzData->ConsumeRandomLengthString());
         service->DistributeOperation(operationInfo, nullptr);
         service->SetHashCodeRule(fuzzData->ConsumeIntegral<uint32_t>());
+        service->SetHashCodeRule(fuzzData->ConsumeIntegral<uint32_t>(), userId);
         service->GetAllLiveViewEnabledBundles(bundleOptions);
         service->GetAllLiveViewEnabledBundles(bundleOptions, userId);
         sptr<Notification::NotificationDisable> notificationDisable = new Notification::NotificationDisable();
