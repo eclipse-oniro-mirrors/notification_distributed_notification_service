@@ -103,6 +103,8 @@ private:
         const std::string isSupportIntelligentScene, int32_t userId = -1);
 private:
     static bool isDataShareReady_;
+    ffrt::mutex datashareHelperMutex_;
+    ffrt::mutex datashareInitMutex_;
     ffrt::mutex dataShareItemMutex_;
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper_;
     std::vector<DatashareItem> dataShareItems_;

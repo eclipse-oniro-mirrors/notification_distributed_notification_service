@@ -92,6 +92,7 @@ AdvancedDatashareHelper::~AdvancedDatashareHelper()
 
 void AdvancedDatashareHelper::Init()
 {
+    std::lock_guard<ffrt::mutex> lock(datashareInitMutex_);
     if (!CreateDataShareHelper()) {
         ANS_LOGE("RegisterObserver fail by nullptr");
         return;
@@ -115,11 +116,14 @@ void AdvancedDatashareHelper::Init()
         RegisterObserver(userId, GetFocusModeEnableUri(userId), { KEY_FOCUS_MODE_ENABLE });
         RegisterObserver(userId, GetFocusModeProfileUri(userId), { KEY_FOCUS_MODE_PROFILE });
         RegisterObserver(userId, GetIntelligentExperienceUri(userId), { KEY_INTELLIGENT_EXPERIENCE });
+        RegisterObserver(userId, GetFocusModeCallPolicyUri(userId), { KEY_FOCUS_MODE_CALL_MESSAGE_POLICY });
+        RegisterObserver(userId, GetFocusModeRepeatCallUri(userId), { KEY_FOCUS_MODE_REPEAT_CALLERS_ENABLE });
     }
 }
 
 bool AdvancedDatashareHelper::CreateDataShareHelper()
 {
+    std::lock_guard<ffrt::mutex> lock(datashareHelperMutex_);
     if (!isDataShareReady_) {
         ANS_LOGE("dataShare is not ready");
         return false;

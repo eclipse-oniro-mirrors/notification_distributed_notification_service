@@ -73,6 +73,15 @@ HWTEST_F(AdvancedDatashareHelperTest, Query_0002, Function | SmallTest | Level1)
     EXPECT_EQ(ret, false);
 }
 
+HWTEST_F(AdvancedDatashareHelperTest, Init_0001, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+    AdvancedDatashareHelper advancedDatashareHelper;
+    advancedDatashareHelper.Init();
+    EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), 5);
+}
+
 // Test cases
 HWTEST_F(AdvancedDatashareHelperTest, QueryContact_0001, Function | SmallTest | Level1)
 {
