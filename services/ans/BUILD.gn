@@ -192,6 +192,10 @@ ohos_source_set("ans_service_sources") {
     defines += [ "NOTIFICATION_MULTI_FOREGROUND_USER" ]
   }
 
+  if (distributed_notification_service_feature_support_geofence) {
+    defines += [ "NOTIFICATION_SUPPORT_GEOFENCE" ]
+  }
+
   external_deps = [
     "ability_base:configuration",
     "ability_runtime:ability_manager",
