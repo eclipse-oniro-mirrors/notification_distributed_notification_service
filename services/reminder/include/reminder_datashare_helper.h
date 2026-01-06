@@ -160,6 +160,13 @@ public:
      */
     void OnDataUpdate(const DataShare::DataShareObserver::ChangeInfo& info);
 
+    /**
+     * @brief Reset insertTask_ or updateTask_ value.
+     *
+     * @param[in] isInsertTask true: set insertTask_ value, false: set updateTask_ value.
+     */
+    void ResetTaskFlag(const bool isInsertTask);
+
 private:
     /**
      * @brief Create a DataShareHelper for the given URI string.
@@ -235,6 +242,7 @@ private:
      * Create predicates for querying valid alerts.
      */
     DataShare::DataSharePredicates BuildQueryPredicates(int64_t timestamp, int64_t targetTimestamp);
+
 private:
     // Singleton
     ReminderDataShareHelper();

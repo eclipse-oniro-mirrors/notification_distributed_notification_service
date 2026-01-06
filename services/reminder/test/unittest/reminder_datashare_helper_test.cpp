@@ -661,4 +661,20 @@ HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_018, Level1)
     ReminderDataShareHelper::GetInstance().InitNormalInfo(reminder);
     EXPECT_EQ(reminder->GetUid(), 100100100);
 }
+
+/**
+ * @tc.name: ReminderDataShareHelper_019
+ * @tc.desc: test ReminderDataObserver::ResetTaskFlag function
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_019, Level1)
+{
+    ReminderDataShareHelper::GetInstance().insertTask_ = true;
+    ReminderDataShareHelper::GetInstance().ResetTaskFlag(true);
+    EXPECT_EQ(ReminderDataShareHelper::GetInstance().insertTask_, false);
+    ReminderDataShareHelper::GetInstance().updateTask_ = true;
+    ReminderDataShareHelper::GetInstance().ResetTaskFlag(false);
+    EXPECT_EQ(ReminderDataShareHelper::GetInstance().updateTask_, false);
+}
 }

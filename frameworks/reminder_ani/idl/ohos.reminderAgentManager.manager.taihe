@@ -144,7 +144,7 @@ struct ReminderInfo {
 struct ReminderState {
     reminderId: i32;
     buttonType: ActionButtonType;
-    isMessageResend: bool;
+    isMessageResent: bool;
 }
 
 @gen_async("publishReminder")
@@ -190,7 +190,7 @@ function UpdateReminderSync(reminderId: i32, reminderReq: ParamReminder): void;
 function CancelReminderOnDisplaySync(reminderId: i32): void;
 
 @gen_promise("subscribeReminderState")
-function subscribeReminderStateSync(callback: (states: Array<ReminderState>) => void) : void;
+function SubscribeReminderStateSync(callback: (states: Array<ReminderState>) => void) : void;
 
 @gen_promise("unsubscribeReminderState")
-function unsubscribeReminderStateSync(callback: Optional<(states: Array<ReminderState>) => void>) : void;
+function UnSubscribeReminderStateSync(callback: Optional<(states: Array<ReminderState>) => void>) : void;

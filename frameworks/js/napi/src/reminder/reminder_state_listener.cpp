@@ -25,7 +25,7 @@ using namespace Notification;
 
 static constexpr const char* REMINDER_STATE_REMINDER_ID = "reminderId";
 static constexpr const char* REMINDER_STATE_BUTTON_TYPE = "buttonType";
-static constexpr const char* REMINDER_STATE_IS_RESEND = "isMessageResend";
+static constexpr const char* REMINDER_STATE_IS_RESEND = "isMessageResent";
 static constexpr size_t ARG_COUNT_ONE = 1;
 struct CallBackContext {
     napi_env env {nullptr};
@@ -141,7 +141,10 @@ napi_value JsReminderStateListener::UnRegisterReminderStateCallback(napi_env env
     std::lock_guard<std::mutex> locker(jsCallBackListMutex_);
     if (jsCallback == nullptr) {
         for (auto iter = jsCallBackList_.begin(); iter != jsCallBackList_.end(); iter++) {
-            ReminderHelper::UnRegisterReminderState(iter->second);
+            int32_t ret = ReminderHelper::UnRegisterReminderState(iter->second);
+            if (ret != ERR_OK) {
+                ReminderCommon::HandleErrCode(env, ret);
+            }
         }
         jsCallBackList_.clear();
         return NotificationNapi::Common::NapiGetNull(env);
@@ -150,11 +153,15 @@ napi_value JsReminderStateListener::UnRegisterReminderStateCallback(napi_env env
     for (auto iter = jsCallBackList_.begin(); iter != jsCallBackList_.end(); iter++) {
         isEqual = false;
         napi_strict_equals(env, jsCallback, iter->first->GetNapiValue(), &isEqual);
-        if (isEqual) {
-            ReminderHelper::UnRegisterReminderState(iter->second);
-            jsCallBackList_.erase(iter);
-            break;
+        if (!isEqual) {
+            continue;
         }
+        int32_t ret = ReminderHelper::UnRegisterReminderState(iter->second);
+        if (ret != ERR_OK) {
+            ReminderCommon::HandleErrCode(env, ret);
+        }
+        jsCallBackList_.erase(iter);
+        break;
     }
     if (!isEqual) {
         ANSR_LOGE("UnRegister reminder state callback error.");

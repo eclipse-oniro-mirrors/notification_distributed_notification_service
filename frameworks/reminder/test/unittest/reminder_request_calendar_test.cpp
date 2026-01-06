@@ -934,6 +934,20 @@ HWTEST_F(ReminderRequestCalendarTest, RecoverFromDb_00001, Function | SmallTest 
 }
 
 /**
+ * @tc.name: InitTriggerTime_00001
+ * @tc.desc: Test InitTriggerTime parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, InitTriggerTime_00001, Function | SmallTest | Level1)
+{
+    struct tm nowTime;
+    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
+    EXPECT_NE(nullptr, calendar);
+    EXPECT_EQ(calendar->InitTriggerTime(), true);
+}
+
+/**
  * @tc.name: CheckCalenderIsExpired_00001
  * @tc.desc: Test CheckCalenderIsExpired parameters.
  * @tc.type: FUNC
