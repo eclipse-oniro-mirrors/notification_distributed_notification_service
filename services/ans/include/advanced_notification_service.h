@@ -2164,7 +2164,7 @@ private:
     uint64_t StartDelayPublishTimer(const int32_t ownerUid, const int32_t notificationId, const uint32_t delayTime);
     ErrCode StartPublishDelayedNotification(const std::shared_ptr<NotificationRecord> &record);
     void StartPublishDelayedNotificationTimeOut(const int32_t ownerUid, const int32_t notificationId);
-    void UpdateRecordByOwner(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
+    AnsStatus UpdateRecordByOwner(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
     void StartFinishTimerForUpdate(const std::shared_ptr<NotificationRecord> &record, uint64_t process);
     ErrCode CheckLongTermLiveView(const sptr<NotificationRequest> &request, const std::string &key);
     ErrCode ExcuteCancelGroupCancel(const sptr<NotificationBundleOption>& bundleOption,

@@ -671,7 +671,7 @@ bool AdvancedNotificationService::IsSaCreateSystemLiveViewAsBundle(
     return false;
 }
 
-void AdvancedNotificationService::UpdateRecordByOwner(
+AnsStatus AdvancedNotificationService::UpdateRecordByOwner(
     const std::shared_ptr<NotificationRecord> &record, bool isSystemApp)
 {
     auto creatorUid = record->notification->GetNotificationRequest().GetCreatorUid();
@@ -681,18 +681,27 @@ void AdvancedNotificationService::UpdateRecordByOwner(
         oldRecord = GetFromNotificationList(creatorUid, notificationId);
     }
     if (oldRecord == nullptr) {
-        return;
+        ANS_LOGI("notification not exist when update");
+        return AnsStatus(ERR_ANS_NOTIFICATION_NOT_EXISTS, "notification not exist when update");
     }
     auto downloadTemplate = record->notification->GetNotificationRequest().GetTemplate();
     auto content = record->notification->GetNotificationRequest().GetContent();
     auto wantAgent = record->notification->GetNotificationRequest().GetWantAgent();
+    auto flags = record->request->GetFlags();
+    auto deviceFlags = record->request->GetDeviceFlags();
     record->request = new (std::nothrow) NotificationRequest(*(oldRecord->request));
     if (record->request == nullptr) {
         ANS_LOGE("request is nullptr.");
-        return;
+        return AnsStatus();
     }
     if (wantAgent != nullptr) {
         record->request->SetWantAgent(wantAgent);
+    }
+    if (flags != nullptr) {
+        record->request->SetFlags(flags);
+    }
+    if (deviceFlags != nullptr) {
+        record->request->SetDeviceFlags(deviceFlags);
     }
     uint64_t timerId = 0;
     uint64_t process = NotificationConstant::DEFAULT_FINISH_STATUS;
@@ -716,10 +725,11 @@ void AdvancedNotificationService::UpdateRecordByOwner(
     record->notification = new (std::nothrow) Notification(record->request);
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification.");
-        return;
+        return AnsStatus();
     }
     record->bundleOption = oldRecord->bundleOption;
     record->notification->SetFinishTimer(timerId);
+    return AnsStatus();
 }
 
 void AdvancedNotificationService::StartFinishTimerForUpdate(

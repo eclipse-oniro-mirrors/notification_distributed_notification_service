@@ -2378,7 +2378,10 @@ AnsStatus AdvancedNotificationService::AddRecordToMemory(
 
     bool remove = false;
     if (isUpdateByOwner) {
-        UpdateRecordByOwner(record, isSystemApp);
+        ansStatus = UpdateRecordByOwner(record, isSystemApp);
+        if (!ansStatus.Ok()) {
+            return ansStatus;
+        }
         remove = RemoveFromDelayedNotificationList(record->notification->GetKey());
     }
 
