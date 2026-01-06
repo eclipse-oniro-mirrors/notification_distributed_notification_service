@@ -1854,7 +1854,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287014, Function | SmallTest | Level1)
     advancedNotificationService_->triggerNotificationList_.push_back(record);
     auto result = advancedNotificationService_->OnNotifyDelayedNotificationInner(parameter, record);
     ASSERT_NE(result, ERR_OK);
-    ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 0);
+    ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 1);
 }
 
 /**

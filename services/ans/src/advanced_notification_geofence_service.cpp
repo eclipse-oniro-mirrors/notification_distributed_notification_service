@@ -121,6 +121,11 @@ ErrCode AdvancedNotificationService::OnNotifyDelayedNotificationInner(const Publ
     const std::shared_ptr<NotificationRecord> &record)
 {
     ANS_LOGD("Invoke ext OnNotifyDelayedNotification");
+    if (parameter.request == nullptr || parameter.request->GetNotificationTrigger() == nullptr) {
+        ANS_LOGE("Request or trigger is null.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     auto result = LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->OnNotifyDelayedNotification(parameter.request);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_32, EventBranchId::BRANCH_4);
     uint32_t configPath = static_cast<uint32_t>(parameter.request->GetNotificationTrigger()->GetConfigPath());
