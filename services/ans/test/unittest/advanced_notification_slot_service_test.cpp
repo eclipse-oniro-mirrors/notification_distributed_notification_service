@@ -283,6 +283,10 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00001, Function | SmallTest | Lev
     std::string key = RING_TRUST_PKG_KEY;
     std::string value = "";
     auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+ 
+    MockIsSystemApp(true);
+    ret = advancedNotificationService_->SetAdditionConfig(key, value);
     ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 
     MockIsSystemApp(true);

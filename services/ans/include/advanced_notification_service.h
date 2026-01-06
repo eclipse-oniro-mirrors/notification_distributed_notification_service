@@ -2324,6 +2324,8 @@ private:
     bool IsDisableNotificationInner(const std::string &bundleName, const int32_t userId);
     ErrCode SetHashCodeRuleInner(const uint32_t type, int32_t userId = -1);
     bool CheckAdditionalConfigKey(const std::string &key);
+    void DistributedEnabledBySlotChangeStrategy(const std::string &deviceType,
+        const NotificationConstant::SlotType slotType, const bool enabled, const ErrCode result);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;

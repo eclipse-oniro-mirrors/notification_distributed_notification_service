@@ -100,6 +100,20 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
         NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     ErrCode result = NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(slotType,
         deviceType, enableStatus);
+    DistributedEnabledBySlotChangeStrategy(deviceType, slotType, enabled, result);
+    ANS_LOGI("SetDistributedEnabledBySlot %{public}d, deviceType: %{public}s, enabled: %{public}s, "
+        "SetDistributedEnabledBySlot result: %{public}d",
+        slotType, deviceType.c_str(), std::to_string(enabled).c_str(), result);
+    message.ErrorCode(result).Append("st:" + std::to_string(slotTypeInt) +
+        ", device:" + deviceType + ", en:" + std::to_string(enabled));
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
+
+    return result;
+}
+
+void AdvancedNotificationService::DistributedEnabledBySlotChangeStrategy(const std::string &deviceType,
+    const NotificationConstant::SlotType slotType, const bool enabled, const ErrCode result)
+{
 #ifdef ALL_SCENARIO_COLLABORATION
     if (result == ERR_OK && slotType == NotificationConstant::SlotType::LIVE_VIEW) {
         NotificationConstant::SWITCH_STATE notification = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
@@ -112,6 +126,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
             notification == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) ? true : false;
         changeInfo.liveViewChange = enabled;
         changeInfo.changeType = DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE;
+        changeInfo.deviceType = deviceType;
         DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
     }
 
@@ -122,14 +137,6 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
             NotificationConstant::DistributedDeleteType::SLOT);
     }
 #endif
-    ANS_LOGI("SetDistributedEnabledBySlot %{public}d, deviceType: %{public}s, enabled: %{public}s, "
-        "SetDistributedEnabledBySlot result: %{public}d",
-        slotType, deviceType.c_str(), std::to_string(enabled).c_str(), result);
-    message.ErrorCode(result).Append("st:" + std::to_string(slotTypeInt) +
-        ", device:" + deviceType + ", en:" + std::to_string(enabled));
-    NotificationAnalyticsUtil::ReportModifyEvent(message);
-
-    return result;
 }
 
 ErrCode AdvancedNotificationService::IsDistributedEnabledBySlot(
@@ -808,6 +815,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
         changeInfo.liveViewChange = (liveViewEnableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
             liveViewEnableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
         changeInfo.changeType = DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE;
+        changeInfo.deviceType = deviceType;
         DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
     }
 

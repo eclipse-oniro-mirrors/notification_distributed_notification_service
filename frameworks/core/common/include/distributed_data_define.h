@@ -59,6 +59,7 @@ struct DeviceStatueChangeInfo {
     std::string deviceId;
     bool enableChange;
     bool liveViewChange;
+    std::string deviceType;
 };
 
 struct DistributedDeviceConfig {
