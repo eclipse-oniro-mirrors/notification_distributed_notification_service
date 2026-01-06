@@ -78,6 +78,7 @@ public:
         bool isUpdateByOwner = false;
         uint32_t tokenCaller = 0;
         int32_t uid = -1;
+        bool isSystemApp = false;
     };
 
     struct RecentNotification {

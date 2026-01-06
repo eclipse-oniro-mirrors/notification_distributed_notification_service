@@ -775,7 +775,7 @@ AnsStatus AdvancedNotificationService::PublishPreparedNotificationInner(
         SetRequestBySlotType(request, bundleOption);
     }
 #endif
-    bool isSystemApp = AccessTokenHelper::IsSystemApp();
+    bool isSystemApp = parameter.isSystemApp;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(tokenCaller);
     bool isThirdparty;
     if (isSystemApp || isSubsystem) {
