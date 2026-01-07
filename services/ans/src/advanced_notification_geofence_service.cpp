@@ -88,6 +88,7 @@ ErrCode AdvancedNotificationService::OnNotifyDelayedNotification(const PublishNo
         ANS_LOGE("Request or trigger is null.");
         return ERR_ANS_INVALID_PARAM;
     }
+
     const sptr<NotificationRequest> &request = parameter.request;
     const sptr<NotificationBundleOption> &bundleOption = parameter.bundleOption;
     uint32_t configPath = static_cast<uint32_t>(request->GetNotificationTrigger()->GetConfigPath());
