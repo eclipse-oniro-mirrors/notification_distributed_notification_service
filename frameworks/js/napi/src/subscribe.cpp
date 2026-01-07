@@ -1489,7 +1489,8 @@ napi_value GetNotificationSubscriber(
         ThreadFinished, nullptr, ThreadSafeCommon, &tsfn);
     subscriberInfo.subscriber->SetThreadSafeFunction(tsfn);
     subscriberInfo.subscriber->SetEnv(env);
-    uint32_t subscribedFlag = 0;
+    // default to release napi_ref callback to avoid memory-leak
+    uint32_t subscribedFlag = NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_DISCONNECTED;
 
     // onConsume?:(data: SubscribeCallbackData) => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onConsume", &hasProperty));
