@@ -560,6 +560,57 @@ HWTEST_F(NotificationPreferencesInfoTest, GetAllLiveViewEnabledBundles_0300, Tes
     auto res = preferencesInfo->GetAllLiveViewEnabledBundles(100, bundleOption);
     ASSERT_EQ(res, ERR_OK);
     ASSERT_EQ(bundleOption.size(), 1);
+    bundleOption.clear();
+    res = preferencesInfo->GetAllLiveViewEnabledBundles(101, bundleOption);
+    ASSERT_EQ(bundleOption.size(), 0);
+}
+
+/**
+ * @tc.name: GetAllLiveViewEnabledBundles_0400
+ * @tc.desc: test GetAllLiveViewEnabledBundles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetAllLiveViewEnabledBundles_0400, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    sptr<NotificationSlot> slot(new NotificationSlot(
+        NotificationConstant::SlotType::LIVE_VIEW));
+    slot->SetEnable(true);
+    bundleInfo.SetSlot(slot);
+    bundleInfo.SetBundleUserId(100);
+    preferencesInfo->SetBundleInfoFromDb(bundleInfo, "test100");
+
+    preferencesInfo->isEnabledAllNotification_[100] = true;
+    std::vector<NotificationBundleOption> bundleOption;
+    auto res = preferencesInfo->GetAllLiveViewEnabledBundles(100, bundleOption);
+    ASSERT_EQ(res, ERR_OK);
+    ASSERT_EQ(bundleOption.size(), 1);
+}
+
+/**
+ * @tc.name: GetAllLiveViewEnabledBundles_0500
+ * @tc.desc: test GetAllLiveViewEnabledBundles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetAllLiveViewEnabledBundles_0500, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    sptr<NotificationSlot> slot(new NotificationSlot(
+        NotificationConstant::SlotType::LIVE_VIEW));
+    slot->SetEnable(false);
+    bundleInfo.SetSlot(slot);
+    bundleInfo.SetBundleUserId(100);
+    preferencesInfo->SetBundleInfoFromDb(bundleInfo, "test100");
+
+    preferencesInfo->isEnabledAllNotification_[100] = true;
+    std::vector<NotificationBundleOption> bundleOption;
+    auto res = preferencesInfo->GetAllLiveViewEnabledBundles(100, bundleOption);
+    ASSERT_EQ(res, ERR_OK);
+    ASSERT_EQ(bundleOption.size(), 0);
 }
 
 /**
