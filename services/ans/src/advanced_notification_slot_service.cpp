@@ -1349,6 +1349,12 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     ANS_LOGD("SetAdditionConfig called (%{public}s, %{public}s).", key.c_str(), value.c_str());
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_1);
     message.Message("key:" + key);
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("Not system app or SA!");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER) &&
         !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_MANAGE_EDM_POLICY)) {
         ANS_LOGE("Permission denied.");

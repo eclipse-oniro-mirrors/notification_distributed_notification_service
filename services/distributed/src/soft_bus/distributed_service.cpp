@@ -250,28 +250,32 @@ void DistributedService::HandleStatusChange(const DeviceStatueChangeInfo& change
         DistributedDeviceService::GetInstance().ResetDeviceInfo(device.deviceId_, DeviceState::STATE_OFFLINE);
     }
     if (changeInfo.changeType == DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE) {
-        HandleSwitchChange(changeInfo.enableChange, changeInfo.liveViewChange);
+        HandleSwitchChange(changeInfo);
     }
 }
 
-void DistributedService::HandleSwitchChange(const bool notificationEnable, const bool liveViewEnable)
+void DistributedService::HandleSwitchChange(const DeviceStatueChangeInfo &changeInfo)
 {
     for (const auto& peer : DistributedDeviceService::GetInstance().GetDeviceList()) {
         if (peer.second.peerState_ != DeviceState::STATE_ONLINE) {
             continue;
         }
+        if (changeInfo.deviceType != NotificationConstant::CURRENT_DEVICE_TYPE &&
+            DistributedDeviceService::DeviceTypeToTypeString(peer.second.deviceType_) != changeInfo.deviceType) {
+            continue;
+        }
         ANS_LOGI(
             "Remove from Device %{public}u %{public}s, notificationEnable: %{public}d, liveViewEnable: %{public}d.",
             peer.second.deviceType_, StringAnonymous(peer.second.deviceId_).c_str(),
-            notificationEnable, liveViewEnable);
+            changeInfo.enableChange, changeInfo.liveViewChange);
         DistributedDeviceInfo deviceInfo = peer.second;
-        if (!notificationEnable) {
+        if (!changeInfo.enableChange) {
             DistributedPublishService::GetInstance().RemoveAllDistributedNotifications(deviceInfo,
                 NotificationConstant::DistributedDeleteType::EXCLUDE_ONE_SLOT,
                 NotificationConstant::DISTRIBUTED_MASTER_ENABLE_CLOSE_DELETE,
                 NotificationConstant::SlotType::LIVE_VIEW);
         }
-        if (!liveViewEnable) {
+        if (!changeInfo.liveViewChange) {
             DistributedPublishService::GetInstance().RemoveAllDistributedNotifications(deviceInfo,
                 NotificationConstant::DistributedDeleteType::SLOT,
                 NotificationConstant::DISTRIBUTED_MASTER_ENABLE_CLOSE_DELETE,

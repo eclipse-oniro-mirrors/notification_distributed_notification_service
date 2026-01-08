@@ -73,7 +73,7 @@ private:
     void HandleMatchByType(const int32_t matchType, const DistributedDeviceInfo& device);
     bool CheckCollaborationAbility(const DistributedDeviceInfo device, const std::string &extraData);
 #ifdef DISTRIBUTED_FEATURE_MASTER
-    void HandleSwitchChange(const bool notificationEnable, const bool liveViewEnable);
+    void HandleSwitchChange(const DeviceStatueChangeInfo &changeInfo);
 #endif
 
 private:
