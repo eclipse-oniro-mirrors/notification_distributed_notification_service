@@ -75,6 +75,8 @@ declare_args() {
   distributed_notification_service_feature_notification_extension_subscription = false
   distributed_notification_service_feature_notification_multi_foreground_user = false
   distributed_notification_service_feature_support_geofence = false
+  distributed_notification_service_feature_enable_pgo = false
+  pgo_profiles_base_path = "//toolchain/pgo-profiles/phone/"
   notification_smart_reminder_supported = true
   ans_config_policy_enable = true
   screenlock_mgr_enable = true

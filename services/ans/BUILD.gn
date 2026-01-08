@@ -348,6 +348,23 @@ ohos_shared_library("libans") {
     "../ans:external.json",
   ]
 
+  if (is_ohos && is_clang && enhanced_opt &&
+      (target_cpu == "arm" || target_cpu == "arm64")) {
+    if (distributed_notification_service_feature_enable_pgo) {
+      cflags += [
+        "-fprofile-use="+rebase_path("${pgo_profiles_base_path}/libans.profdata",
+                root_build_dir),
+        "-Wno-error=backend-plugin",
+        "-Wno-profile-instr-out-of-date",
+        "-Wno-profile-instr-unprofiled",
+      ]
+    }
+    if (distributed_notification_service_feature_enable_pgo && target_cpu == "arm64" &&
+        enable_enhanced_opt) {
+      ldflags = [ "-Wl,--aarch64-inline-plt" ]
+    }
+  }
+
   if (distributed_notification_service_feature_distributed_db) {
     deps += [ "${services_path}/distributed:libans_distributed" ]
   }
