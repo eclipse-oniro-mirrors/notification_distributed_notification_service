@@ -61,7 +61,8 @@
       "distributed_notification_service_feature_notification_extension_subscription",
       "distributed_notification_service_feature_notification_multi_foreground_user",
       "distributed_notification_service_feature_support_geofence",
-      "distributed_notification_service_feature_enable_pgo"
+      "distributed_notification_service_feature_enable_pgo",
+      "distributed_notification_service_feature_pgo_path"
     ],
     "adapted_system_type": [
       "standard"
