@@ -26,7 +26,7 @@
 
 namespace OHOS {
 namespace Notification {
-
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 class HfpStateObserver : public OHOS::Bluetooth::HandsFreeAudioGatewayObserver {
 public:
     HfpStateObserver() = default;
@@ -74,7 +74,7 @@ public:
     void OnRemoteBatteryChanged(const OHOS::Bluetooth::BluetoothRemoteDevice& device,
         const OHOS::Bluetooth::DeviceBatteryInfo& batteryInfo) override {};
 };
-
+#endif
 class NotificationBluetoothHelper {
 public:
     /**
@@ -83,6 +83,7 @@ public:
      * @return Returns the singleton instance.
      */
     static NotificationBluetoothHelper& GetInstance();
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 
     /**
      * @brief Register HFP observer.
@@ -98,6 +99,7 @@ public:
      * @brief Register Bluetooth paired device observer.
      */
     void RegisterBluetoothPairedDeviceObserver();
+#endif
 
     /**
      * @brief Check if HFP device is connected.
@@ -106,7 +108,7 @@ public:
      * @return Returns true if connected, false otherwise.
      */
     bool CheckHfpState(const std::string &bluetoothAddress);
-
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     /**
      * @brief Check Bluetooth connection-related conditions for the given address.
      *
@@ -137,6 +139,7 @@ private:
     std::atomic<bool> isBluetoothObserverRegistered_ = false;
     std::atomic<bool> isHfpObserverRegistered_ = false;
     std::atomic<bool> isBluetoothPairedDeviceObserverRegistered_ = false;
+#endif
 };
 
 }  // namespace Notification

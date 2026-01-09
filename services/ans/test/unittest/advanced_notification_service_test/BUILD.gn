@@ -48,6 +48,7 @@ ohos_unittest("advanced_notification_extension_subscription_test") {
     "../mock/mock_datashare.cpp",
     "../mock/mock_ipc.cpp",
     "../mock/mock_notification_helper.cpp",
+    "../mock/mock_os_account_manager.cpp",
     "../mock/mock_push_callback_stub.cpp",
     "../mock/mock_time_service_client.cpp",
   ]
@@ -86,6 +87,7 @@ ohos_unittest("advanced_notification_extension_subscription_test") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
+    "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "time_service:time_client",
     "bluetooth:btframework",

@@ -33,6 +33,7 @@
 
 namespace OHOS {
 namespace Notification {
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 
 using STARTUP = int32_t (*)(std::function<void()>, std::function<void(uint32_t, uint32_t, int32_t, std::string)>);
 using SHUTDOWN = void (*)();
@@ -53,7 +54,6 @@ bool AdvancedNotificationService::isExtensionServiceExist()
 
 int32_t AdvancedNotificationService::LoadExtensionService()
 {
-#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     if (isExtensionServiceExist()) {
         return 0;
     }
@@ -74,16 +74,12 @@ int32_t AdvancedNotificationService::LoadExtensionService()
     });
     notificationExtensionLoaded_.store(true);
     return 0;
-#else
-    return 0;
-#endif
 }
 
 int32_t AdvancedNotificationService::SubscribeExtensionService(
     const sptr<NotificationBundleOption> &bundleOption,
     const std::vector<sptr<NotificationBundleOption>> &bundles)
 {
-#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     if (!isExtensionServiceExist()) {
         return -1;
     }
@@ -95,14 +91,10 @@ int32_t AdvancedNotificationService::SubscribeExtensionService(
     }
     subscribe(bundleOption, bundles);
     return 0;
-#else
-    return 0;
-#endif
 }
 
 int32_t AdvancedNotificationService::UnSubscribeExtensionService(const sptr<NotificationBundleOption> &bundleOption)
 {
-#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     if (!isExtensionServiceExist()) {
         return -1;
     }
@@ -114,14 +106,10 @@ int32_t AdvancedNotificationService::UnSubscribeExtensionService(const sptr<Noti
     }
     unsubscribe(bundleOption);
     return 0;
-#else
-    return 0;
-#endif
 }
 
 int32_t AdvancedNotificationService::ShutdownExtensionService()
 {
-#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     if (!isExtensionServiceExist()) {
         return -1;
     }
@@ -133,9 +121,6 @@ int32_t AdvancedNotificationService::ShutdownExtensionService()
     }
     shutdown();
     return 0;
-#else
-    return 0;
-#endif
 }
 
 void AdvancedNotificationService::CheckExtensionServiceCondition(
@@ -308,6 +293,7 @@ bool AdvancedNotificationService::CheckBluetoothConnectionInInfos(
     }
     return false;
 }
+#endif
 
 bool AdvancedNotificationService::HasExtensionSubscriptionStateChanged(
     const sptr<NotificationBundleOption> &bundle, bool enabled)
@@ -330,23 +316,18 @@ bool AdvancedNotificationService::HasExtensionSubscriptionStateChanged(
 
     return (oldEnabled != enabled);
 }
-
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 bool AdvancedNotificationService::EnsureBundlesCanSubscribeOrUnsubscribe(
     const sptr<NotificationBundleOption> &bundle)
 {
-#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     std::vector<sptr<NotificationBundleOption>> bundles{bundle};
     EnsureBundlesCanSubscribeOrUnsubscribe(bundles);
     return true;
-#else
-    return true;
-#endif
 }
 
 bool AdvancedNotificationService::EnsureBundlesCanSubscribeOrUnsubscribe(
     const std::vector<sptr<NotificationBundleOption>> &bundles)
 {
-#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     std::vector<std::pair<sptr<NotificationBundleOption>,
         std::vector<sptr<NotificationBundleOption>>>> subscribedBundleInfos;
     std::vector<sptr<NotificationBundleOption>> unsubscribedBundles;
@@ -363,22 +344,15 @@ bool AdvancedNotificationService::EnsureBundlesCanSubscribeOrUnsubscribe(
         UnSubscribeExtensionService(bundle);
     }
     return true;
-#else
-    return true;
-#endif
 }
 
 bool AdvancedNotificationService::ShutdownExtensionServiceAndUnSubscribed(const sptr<NotificationBundleOption> &bundle)
 {
-#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     if (UnSubscribeExtensionService(bundle) != 0) {
         return false;
     }
 
     return true;
-#else
-    return true;
-#endif
 }
 
 void AdvancedNotificationService::HandleBundleInstall(const sptr<NotificationBundleOption> &bundleOption)
@@ -441,6 +415,14 @@ void AdvancedNotificationService::HandleBundleUpdate(const sptr<NotificationBund
                 PublishExtensionServiceStateChange(
                     NotificationConstant::EXTENSION_ABILITY_REMOVED, bundleOption, false, {});
             }
+            return;
+        }
+        int32_t installedUserId = -1;
+        int32_t currentUserId = -1;
+        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), installedUserId);
+        OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(currentUserId);
+        if (installedUserId != currentUserId) {
+            ANS_LOGE("update another user package, skip check extensionService");
             return;
         }
 
@@ -518,6 +500,7 @@ void AdvancedNotificationService::HandleNewWhitelistBundle(const sptr<Notificati
     }
     ANS_LOGD("HandleNewWhitelistBundle exit");
 }
+#endif
 
 void AdvancedNotificationService::GetCachedNotificationExtensionBundles(
     std::vector<sptr<NotificationBundleOption>>& extensionBundles)
@@ -528,7 +511,7 @@ void AdvancedNotificationService::GetCachedNotificationExtensionBundles(
         GetNotificationExtensionEnabledBundles(extensionBundles);
     }
 }
-
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 void AdvancedNotificationService::OnHfpDeviceConnectChanged(
     const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state)
 {
@@ -606,7 +589,6 @@ void AdvancedNotificationService::ProcessBluetoothPairedStatusChange(int state)
 
 bool AdvancedNotificationService::TryStartExtensionSubscribeService()
 {
-#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     NotificationConfigParse::GetInstance()->IsNotificationExtensionSubscribeSupportHfp(supportHfp_);
     notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
@@ -625,11 +607,8 @@ bool AdvancedNotificationService::TryStartExtensionSubscribeService()
         EnsureBundlesCanSubscribeOrUnsubscribe(bundles);
     }));
     return true;
-#else
-    return true;
-#endif
 }
-
+#endif
 ErrCode AdvancedNotificationService::GetNotificationExtensionEnabledBundles(
     std::vector<sptr<NotificationBundleOption>>& bundles)
 {
@@ -735,7 +714,9 @@ void AdvancedNotificationService::ProcessExtensionSubscriptionInfos(
         ANS_LOGE("Failed to insert subscription info into db, ret: %{public}d", result);
         return;
     }
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     EnsureBundlesCanSubscribeOrUnsubscribe(bundleOption);
+#endif
 }
 
 ErrCode AdvancedNotificationService::NotificationExtensionUnsubscribe()
@@ -765,9 +746,11 @@ ErrCode AdvancedNotificationService::NotificationExtensionUnsubscribe()
         }
         NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_11).Message(bundleOption->GetBundleName() +
             ":" + std::to_string(bundleOption->GetUid()) + " unsubscribe"));
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
         if (!ShutdownExtensionServiceAndUnSubscribed(bundleOption)) {
             return;
         }
+#endif
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Notification extension unsubscribe.");
 
@@ -821,7 +804,12 @@ ErrCode AdvancedNotificationService::GetAllSubscriptionBundles(std::vector<sptr<
             message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
         return ERR_ANS_PERMISSION_DENIED;
     }
-    auto result = GetNotificationExtensionEnabledBundles(bundles);
+    ErrCode result = ERR_OK;
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = GetNotificationExtensionEnabledBundles(bundles);
+    }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get AllSubscriptionBundles.");
     return result;
 }
 
@@ -1126,7 +1114,9 @@ void AdvancedNotificationService::ProcessSetUserGrantedState(
             bundle->GetBundleName().c_str(), result);
     }
     PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_STATE, bundle, enabled, {});
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     EnsureBundlesCanSubscribeOrUnsubscribe(bundle);
+#endif
 }
 
 void AdvancedNotificationService::ProcessSetUserGrantedBundleState(
@@ -1142,9 +1132,11 @@ void AdvancedNotificationService::ProcessSetUserGrantedBundleState(
     }
     PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_BUNDLE_STATE, bundle, enabled,
         enabledBundles);
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     EnsureBundlesCanSubscribeOrUnsubscribe(bundle);
+#endif
 }
-
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 bool AdvancedNotificationService::GetCloneBundleList(
     const sptr<NotificationBundleOption>& bundleOption, std::vector<sptr<NotificationBundleOption>>& cloneBundleList)
 {
@@ -1185,7 +1177,7 @@ bool AdvancedNotificationService::GetCloneBundleList(
 
     return true;
 }
-
+#endif
 void AdvancedNotificationService::ReportInvalidBundleOption(
     const sptr<NotificationBundleOption>& targetBundle, HaMetaMessage& message)
 {
@@ -1198,7 +1190,7 @@ void AdvancedNotificationService::ReportInvalidBundleOption(
     NotificationAnalyticsUtil::ReportModifyEvent(
         message.ErrorCode(ERR_ANS_INVALID_BUNDLE_OPTION).Message(msg).BranchId(BRANCH_6));
 }
-
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 std::vector<sptr<NotificationBundleOption>>::iterator AdvancedNotificationService::FindBundleInCache(
     const sptr<NotificationBundleOption> &bundleOption)
 {
@@ -1209,5 +1201,6 @@ std::vector<sptr<NotificationBundleOption>>::iterator AdvancedNotificationServic
                 option->GetUid() == bundleOption->GetUid();
         });
 }
+#endif
 }  // namespace Notification
 }  // namespace OHOS

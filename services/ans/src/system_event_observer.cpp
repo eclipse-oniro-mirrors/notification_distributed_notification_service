@@ -117,7 +117,9 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
             NotificationLiveViewUtils::GetInstance().NotifyLiveViewEvent(action, bundleOption);
             NOTIFICATION_AI_EXTENSION_WRAPPER->NotifyPriorityEvent(action, bundleOption);
         }
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
         AdvancedNotificationService::GetInstance()->HandleBundleUninstall(bundleOption);
+#endif
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
         if (callbacks_.onScreenOn != nullptr) {
@@ -202,12 +204,16 @@ void SystemEventObserver::OnReceiveEventInner(const EventFwk::CommonEventData &d
     }
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) == 0) {
         OnBundleAddEventInner(data);
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
         AdvancedNotificationService::GetInstance()->HandleBundleInstall(bundleOption);
+#endif
         return;
     }
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) == 0) {
         OnBundleUpdateEventInner(data);
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
         AdvancedNotificationService::GetInstance()->HandleBundleUpdate(bundleOption);
+#endif
     }
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) == 0) {
         return OnBootSystemCompletedEventInner(data);
