@@ -17,8 +17,11 @@ import("//build/ohos.gni")
 config("ans_base_config") {
   include_dirs = [
     "${services_path}/infrastructure/external_adapter/account/include",
+    "${services_path}/infrastructure/external_adapter/bms/include",
     "${services_path}/infrastructure/external_adapter/extension/include",
     "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/interfaces",
+    "${services_path}/infrastructure/interfaces/adapter",
   ]
 }
 
@@ -36,6 +39,8 @@ ohos_shared_library("ans_base") {
   sources = [
     "external_adapter/account/src/account_manager_repository_impl.cpp",
     "external_adapter/extension/src/all_scenarios_extension_wrapper.cpp",
+    "external_adapter/bms/src/bundle_manager_repository_impl.cpp",
+    "external_adapter/bms/src/bundle_service_connector.cpp",
     "external_adapter/ffrt/src/ffrt_queue_impl.cpp",
   ]
 
@@ -54,13 +59,14 @@ ohos_shared_library("ans_base") {
 
   external_deps = [
     "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
     "os_account:os_account_innerkits",
+    "samgr:samgr_proxy",
   ]
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }
-

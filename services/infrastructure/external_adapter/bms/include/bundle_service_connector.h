@@ -13,22 +13,32 @@
  * limitations under the License.
  */
 
-#ifndef ANS_BUNDLE_MANAGER_CONNECTOR_H
-#define ANS_BUNDLE_MANAGER_CONNECTOR_H
+#ifndef ANS_INFRA_BUNDLE_MANAGER_CONNECTOR_H
+#define ANS_INFRA_BUNDLE_MANAGER_CONNECTOR_H
 
 #include <memory>
 #include "remote_death_recipient.h"
 
+#include "bundle_mgr_interface.h"
+#include "ffrt.h"
+
 namespace OHOS {
 namespace Notification {
 namespace Infra {
-class BundleServiceConnector {
+
+class IBundleServiceConnector {
+public:
+    virtual ~IBundleServiceConnector() = default;
+    virtual sptr<AppExecFwk::IBundleMgr> GetBundleManager() = 0;
+};
+
+class BundleServiceConnector : public IBundleServiceConnector {
 public:
     explicit BundleServiceConnector();
 
-    ~BundleServiceConnector();
+    virtual ~BundleServiceConnector();
     
-    sptr<AppExecFwk::IBundleMgr> GetBundleManager();
+    sptr<AppExecFwk::IBundleMgr> GetBundleManager() override;
     
 private:
     void Connect();
@@ -36,7 +46,7 @@ private:
     void OnRemoteDied(const wptr<IRemoteObject> &object);
     
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
-    std::mutex connectionMutex_;
+    ffrt::mutex connectionMutex_;
     sptr<RemoteDeathRecipient> deathRecipient_;
 };
 } // namespace Infra

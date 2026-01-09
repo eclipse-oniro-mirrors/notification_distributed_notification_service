@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +16,12 @@
 
 #include "bundle_service_connector.h"
 
+#include "ans_log_wrapper.h"
+
+#include "if_system_ability_manager.h"
+#include "system_ability_definition.h"
+#include "iservice_registry.h"
+
 namespace OHOS {
 namespace Notification {
 namespace Infra {
@@ -27,6 +34,12 @@ BundleServiceConnector::BundleServiceConnector()
     }
 }
 
+BundleServiceConnector::~BundleServiceConnector()
+{
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
+    Disconnect();
+}
+
 sptr<AppExecFwk::IBundleMgr> BundleServiceConnector::GetBundleManager()
 {
     std::string bundle;
@@ -37,7 +50,6 @@ sptr<AppExecFwk::IBundleMgr> BundleServiceConnector::GetBundleManager()
     }
 
     Connect();
-
     return bundleMgr_;
 }
 
@@ -62,6 +74,8 @@ void BundleServiceConnector::Connect()
     if (bundleMgr_ != nullptr) {
         bundleMgr_->AsObject()->AddDeathRecipient(deathRecipient_);
     }
+
+    return;
 }
 
 void BundleServiceConnector::Disconnect()
@@ -70,12 +84,14 @@ void BundleServiceConnector::Disconnect()
         bundleMgr_->AsObject()->RemoveDeathRecipient(deathRecipient_);
         bundleMgr_ = nullptr;
     }
+    return;
 }
 
 void BundleServiceConnector::OnRemoteDied(const wptr<IRemoteObject> &object)
 {
     std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Disconnect();
+    return;
 }
 }  // namespace Infra
 }  // namespace Notification

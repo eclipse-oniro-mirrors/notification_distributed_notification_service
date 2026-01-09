@@ -15,96 +15,100 @@
 
 #include "bundle_manager_repository_impl.h"
 
+#include "bundle_manager_adapter.h"
+#include "account_manager_repository_impl.h"
+
+#include "ans_const_define.h"
+
 namespace OHOS {
 namespace Notification {
 namespace Infra {
+
+#define IN_PROCESS_CALL(theCall)                                     \
+    ([&]() {                                                         \
+        std::string identity = IPCSkeleton::ResetCallingIdentity();  \
+        auto retVal = theCall;                                       \
+        IPCSkeleton::SetCallingIdentity(identity);                   \
+        return retVal;                                               \
+    }())
+
+#define IN_PROCESS_CALL_WITHOUT_RET(theCall)                         \
+    do {                                                             \
+        std::string identity = IPCSkeleton::ResetCallingIdentity();  \
+        theCall;                                                     \
+        IPCSkeleton::SetCallingIdentity(identity);                   \
+    } while (0)
+
 constexpr int32_t APP_TYPE_ONE = 1;
 constexpr int32_t APP_TYPE_TWO = 2;
+
+bool BundleManagerRepositoryImpl::IsSystemApp(int32_t uid)
+{
+    bool isSystemApp = false;
+    auto bundleMgr = connector_->GetBundleManager();
+    if (bundleMgr == nullptr) {
+        ANS_LOGE("GetCloneBundleInfo bundle proxy failed.");
+        return false;
+    }
+    isSystemApp = bundleMgr->CheckIsSystemAppByUid(uid);
+    return isSystemApp;
+}
+
+bool BundleManagerRepositoryImpl::CheckSystemApp(const std::string& bundleName, int32_t userId)
+{
+    if (userId == SUBSCRIBE_USER_INIT) {
+        accountor_->GetCurrentActiveUserId(userId);
+    }
+    AppExecFwk::BundleInfo bundleInfo;
+    int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+    if (!GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
+        ANS_LOGE("Get installed bundle failed.");
+        return false;
+    }
+
+    ANS_LOGI("Get installed bundle %{public}s %{public}d.", bundleName.c_str(),
+        bundleInfo.applicationInfo.isSystemApp);
+    return bundleInfo.applicationInfo.isSystemApp;
+}
 
 std::string BundleManagerRepositoryImpl::GetBundleNameByUid(int32_t uid)
 {
     std::string bundle;
     auto bundleMgr = connector_->GetBundleManager();
     if (bundleMgr == nullptr) {
-        return bundle;
+        return "";
     }
 
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    bundleMgr->GetNameForUid(uid, bundle);
-    IPCSkeleton::SetCallingIdentity(identity);
-
+    if (IN_PROCESS_CALL(bundleMgr->GetNameForUid(uid, bundle)) != ERR_OK) {
+        ANS_LOGE("Get bundleName failed.");
+        return "";
+    }
     return bundle;
 }
 
 int32_t BundleManagerRepositoryImpl::GetDefaultUidByBundleName(const std::string &bundle, const int32_t userId)
 {
-    int32_t uid = -1;
-
-    auto bundleMgr = connector_->GetBundleManager();
-    if (bundleMgr == nullptr) {
-        return uid;
-    }
-
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    uid = bundleMgr->GetUidByBundleName(bundle, userId);
-    if (uid < 0) {
-        ANS_LOGW("get invalid uid of bundle %{public}s in userId %{public}d", bundle.c_str(), userId);
-    }
-    IPCSkeleton::SetCallingIdentity(identity);
-
-    return uid;
+    return GetDefaultUidByBundleName(bundle, userId, -1);
 }
 
 int32_t BundleManagerRepositoryImpl::GetDefaultUidByBundleName(const std::string &bundle, const int32_t userId,
     const int32_t appIndex)
 {
     int32_t uid = -1;
+
     auto bundleMgr = connector_->GetBundleManager();
     if (bundleMgr == nullptr) {
         return uid;
     }
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    uid = bundleMgr->GetUidByBundleName(bundle, userId, appIndex);
+    uid = (appIndex < 0)
+        ? IN_PROCESS_CALL(bundleMgr->GetUidByBundleName(bundle, userId))
+        : IN_PROCESS_CALL(bundleMgr->GetUidByBundleName(bundle, userId, appIndex));
     if (uid < 0) {
-        ANS_LOGW("get invalid uid of bundle %{public}s in userId %{public}d", bundle.c_str(), userId);
+        ANS_LOGW("Get invalid uid of bundle %{public}s in userId %{public}d", bundle.c_str(), userId);
     }
-    IPCSkeleton::SetCallingIdentity(identity);
 
     return uid;
 }
-
-bool BundleManagerRepositoryImpl::GetBundleInfoByBundleName(
-    const std::string bundle, const int32_t userId, AppExecFwk::BundleInfo &bundleInfo)
-{
-    auto bundleMgr = connector_->GetBundleManager();
-    if (bundleMgr == nullptr) {
-        return false;
-    }
-
-    bool ret = false;
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    ret = bundleMgr->GetBundleInfo(bundle, AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, userId);
-    IPCSkeleton::SetCallingIdentity(identity);
-    return ret;
-}
-
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-bool BundleManagerRepositoryImpl::GetDistributedNotificationEnabled(const std::string &bundleName, const int32_t userId)
-{
-    auto bundleMgr = connector_->GetBundleManager();
-    if (bundleMgr != nullptr) {
-        AppExecFwk::ApplicationInfo appInfo;
-        if (bundleMgr->GetApplicationInfo(
-            bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, appInfo)) {
-            ANS_LOGD("APPLICATION_INFO distributed enabled %{public}d", appInfo.distributedNotificationEnabled);
-            return appInfo.distributedNotificationEnabled;
-        }
-    }
-
-    ANS_LOGD("APPLICATION_INFO distributed enabled is default");
-    return DEFAULT_DISTRIBUTED_ENABLE_IN_APPLICATION_INFO;
-}
-#endif
 
 int32_t BundleManagerRepositoryImpl::GetAppIndexByUid(const int32_t uid)
 {
@@ -114,12 +118,81 @@ int32_t BundleManagerRepositoryImpl::GetAppIndexByUid(const int32_t uid)
         return appIndex;
     }
     std::string bundleName;
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    bundleMgr->GetNameAndIndexForUid(uid, bundleName, appIndex);
-    IPCSkeleton::SetCallingIdentity(identity);
+    if (IN_PROCESS_CALL(bundleMgr->GetNameAndIndexForUid(uid, bundleName, appIndex)) != ERR_OK) {
+        ANS_LOGE("Get appIndex failed.");
+    }
     return appIndex;
 }
 
+bool BundleManagerRepositoryImpl::GetBundleInfoByBundleName(
+    const std::string bundle, const int32_t userId, NotificationBundleManagerInfo &bundleInfo)
+{
+    auto bundleMgr = connector_->GetBundleManager();
+    if (bundleMgr == nullptr) {
+        return false;
+    }
+
+    AppExecFwk::BundleInfo externalBundle;
+    if (!IN_PROCESS_CALL(bundleMgr->GetBundleInfo(
+        bundle, AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, externalBundle, userId))) {
+        ANS_LOGE("Get bundleInfo failed.");
+        return false;
+    }
+    ConvertBundleInfo(externalBundle, bundleInfo);
+    return true;
+}
+
+bool BundleManagerRepositoryImpl::GetBundleInfo(const std::string &bundleName, const NotificationBundleManagerFlag flag,
+    int32_t uid, NotificationBundleManagerInfo &bundleInfo)
+{
+    auto bundleMgr = connector_->GetBundleManager();
+    if (bundleMgr == nullptr) {
+        return false;
+    }
+
+    int32_t callingUserId;
+    accountor_->GetOsAccountLocalIdFromUid(uid, callingUserId);
+
+    AppExecFwk::BundleInfo externalBundle;
+    if (!IN_PROCESS_CALL(bundleMgr->GetBundleInfo(
+        bundleName, static_cast<AppExecFwk::BundleFlag>(flag), externalBundle, callingUserId))) {
+        ANS_LOGE("Get bundleInfo failed.");
+        return false;
+    }
+    ConvertBundleInfo(externalBundle, bundleInfo);
+    return true;
+}
+
+bool BundleManagerRepositoryImpl::GetBundleInfos(const NotificationBundleManagerFlag flag,
+    std::vector<NotificationBundleManagerInfo> &bundleInfos, int32_t userId)
+{
+    auto bundleMgr = connector_->GetBundleManager();
+    if (bundleMgr == nullptr) {
+        return false;
+    }
+
+    std::vector<AppExecFwk::BundleInfo> externalBundles;
+    if (!IN_PROCESS_CALL(bundleMgr->GetBundleInfos(
+        static_cast<AppExecFwk::BundleFlag>(flag), externalBundles, userId))) {
+        ANS_LOGE("Get bundleInfos failed.");
+        return false;
+    }
+    ConvertBundleInfo(externalBundles, bundleInfos);
+    return true;
+}
+
+
+bool BundleManagerRepositoryImpl::GetBundleInfoV9(
+    const std::string bundle, const int32_t flag,
+    NotificationBundleManagerInfo &bundleInfo, const int32_t userId)
+{
+    AppExecFwk::BundleInfo externalBundle;
+    if (!GetBundleInfoV9(bundle, flag, externalBundle, userId)) {
+        return false;
+    }
+    ConvertBundleInfo(externalBundle, bundleInfo);
+    return true;
+}
 
 bool BundleManagerRepositoryImpl::GetBundleInfoV9(
     const std::string bundle, const int32_t flag,
@@ -129,9 +202,8 @@ bool BundleManagerRepositoryImpl::GetBundleInfoV9(
     if (bundleMgr == nullptr) {
         return false;
     }
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    int32_t ret = bundleMgr->GetBundleInfoV9(bundle, flag, bundleInfo, userId);
-    IPCSkeleton::SetCallingIdentity(identity);
+
+    ErrCode ret = IN_PROCESS_CALL(bundleMgr->GetBundleInfoV9(bundle, flag, bundleInfo, userId));
     if (ret != ERR_OK) {
         ANS_LOGE("Bundle failed %{public}s %{public}d %{public}d %{public}d.", bundle.c_str(),
             flag, userId, ret);
@@ -144,22 +216,19 @@ ErrCode BundleManagerRepositoryImpl::GetAllBundleInfo(
     std::map<std::string, sptr<NotificationBundleOption>>& bundleOptions, int32_t userId)
 {
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
-    {
-        auto bundleMgr = connector_->GetBundleManager();
-        if (bundleMgr == nullptr) {
-            ANS_LOGE("GetBundleInfo bundle proxy failed.");
-            return -1;
-        }
-
-        int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
-        std::string identity = IPCSkeleton::ResetCallingIdentity();
-        ErrCode result = bundleMgr->GetBundleInfosV9(flags, bundleInfos, userId);
-        IPCSkeleton::SetCallingIdentity(identity);
-        if (result != ERR_OK) {
-            ANS_LOGE("Get installed bundle failed %{public}d.", result);
-            return result;
-        }
+    auto bundleMgr = connector_->GetBundleManager();
+    if (bundleMgr == nullptr) {
+        ANS_LOGE("GetBundleInfo bundle proxy failed.");
+        return -1;
     }
+
+    int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+    ErrCode result = IN_PROCESS_CALL(bundleMgr->GetBundleInfosV9(flags, bundleInfos, userId));
+    if (result != ERR_OK) {
+        ANS_LOGE("Get installed bundle failed %{public}d.", result);
+        return result;
+    }
+    
     for (auto& bundle : bundleInfos) {
         if (bundle.applicationInfo.bundleType != AppExecFwk::BundleType::APP ||
             bundle.applicationInfo.codePath == std::to_string(APP_TYPE_ONE) ||
@@ -184,20 +253,45 @@ ErrCode BundleManagerRepositoryImpl::GetAllBundleInfo(
     return ERR_OK;
 }
 
+ErrCode BundleManagerRepositoryImpl::GetBundleResourceInfo(const std::string &bundleName,
+    AppExecFwk::BundleResourceInfo &bundleResourceInfo, const int32_t appIndex)
+{
+    auto bundleMgr = connector_->GetBundleManager();
+    if (bundleMgr == nullptr) {
+        return -1;
+    }
+    sptr<AppExecFwk::IBundleResource> bundleResourceProxy = bundleMgr->GetBundleResourceProxy();
+    if (!bundleResourceProxy) {
+        ANS_LOGE("Get bundle resource proxy failed.");
+        return -1;
+    }
+
+    int32_t flag = static_cast<int32_t>(AppExecFwk::ResourceFlag::GET_RESOURCE_INFO_ALL) |
+        static_cast<int32_t>(AppExecFwk::ResourceFlag::GET_RESOURCE_INFO_WITH_LABEL);
+    ErrCode result = IN_PROCESS_CALL(
+        bundleResourceProxy->GetBundleResourceInfo(bundleName, flag, bundleResourceInfo, appIndex));
+    return result;
+}
+
+std::string BundleManagerRepositoryImpl::GetBundleLabel(const std::string& bundleName)
+{
+    AppExecFwk::BundleResourceInfo bundleResourceInfo = {};
+    int32_t result = GetBundleResourceInfo(bundleName, bundleResourceInfo, 0);
+    if (result != ERR_OK) {
+        return "";
+    }
+    return bundleResourceInfo.label;
+}
+
 bool BundleManagerRepositoryImpl::GetCloneAppIndexes(
     const std::string& bundleName, std::vector<int32_t>& appIndexes, int32_t userId)
 {
     auto bundleMgr = connector_->GetBundleManager();
     if (bundleMgr == nullptr) {
-        ANS_LOGE("GetBundleInfo bundle proxy failed.");
         return false;
     }
 
-    ErrCode result = 0;
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    result = bundleMgr->GetCloneAppIndexes(bundleName, appIndexes, userId);
-    IPCSkeleton::SetCallingIdentity(identity);
-
+    ErrCode result = IN_PROCESS_CALL(bundleMgr->GetCloneAppIndexes(bundleName, appIndexes, userId));
     if (result != ERR_OK) {
         ANS_LOGE("GetCloneAppIndexes failed %{public}d.", result);
         return false;
@@ -206,8 +300,8 @@ bool BundleManagerRepositoryImpl::GetCloneAppIndexes(
     return true;
 }
 
-bool BundleManagerRepositoryImpl::GetCloneBundleInfo(
-    const std::string& bundleName, int32_t flag, int32_t appIndex, AppExecFwk::BundleInfo& bundleInfo, int32_t userId)
+bool BundleManagerRepositoryImpl::GetCloneBundleInfo(const std::string& bundleName, int32_t flag, int32_t appIndex,
+    NotificationBundleManagerInfo &bundleInfo, int32_t userId)
 {
     auto bundleMgr = connector_->GetBundleManager();
     if (bundleMgr == nullptr) {
@@ -215,60 +309,20 @@ bool BundleManagerRepositoryImpl::GetCloneBundleInfo(
         return false;
     }
 
-    ErrCode result = 0;
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    result = bundleMgr->GetCloneBundleInfo(bundleName, flag, appIndex, bundleInfo, userId);
-    IPCSkeleton::SetCallingIdentity(identity);
-
+    AppExecFwk::BundleInfo externalBundle;
+    ErrCode result = IN_PROCESS_CALL(bundleMgr->GetCloneBundleInfo(bundleName, flag, appIndex, externalBundle, userId));
     if (result != ERR_OK) {
         ANS_LOGE("GetCloneBundleInfo failed %{public}d.", result);
         return false;
     }
 
+    ConvertBundleInfo(externalBundle, bundleInfo);
     return true;
 }
 
-bool BundleManagerRepositoryImpl::IsSystemApp(int32_t uid)
+bool BundleManagerRepositoryImpl::CheckCurrentUserIdApp(
+    const std::string &bundleName, const int32_t uid, const int32_t userId)
 {
-    auto bundleMgr = connector_->GetBundleManager();
-    if (bundleMgr == nullptr) {
-        ANS_LOGE("GetCloneBundleInfo bundle proxy failed.");
-        return false;
-    }
-
-    bool isSystemApp = false;
-    if (bundleMgr != nullptr) {
-        isSystemApp = bundleMgr->CheckIsSystemAppByUid(uid);
-    }
-
-    return isSystemApp;
-}
-
-bool BundleManagerRepositoryImpl::QueryExtensionInfos(std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos,
-    int32_t userId)
-{
-    auto bundleMgr = connector_->GetBundleManager();
-    if (bundleMgr == nullptr) {
-        ANS_LOGE("GetCloneBundleInfo bundle proxy failed.");
-        return false;
-    }
-
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    bundleMgr->QueryExtensionAbilityInfos(AppExecFwk::ExtensionAbilityType::NOTIFICATION_SUBSCRIBER,
-        userId, extensionInfos);
-    IPCSkeleton::SetCallingIdentity(identity);
-    return true;
-}
-
-bool BundleManagerRepositoryImpl::IsAncoApp(const std::string &bundleName, int32_t uid)
-{
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
-    if (userId == -1 || userId >= DEFAULT_USER_ID) {
-        return false;
-    }
-
-    userId = ZERO_USERID;
     AppExecFwk::BundleInfo bundleInfo;
     int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
     if (!GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
@@ -276,36 +330,7 @@ bool BundleManagerRepositoryImpl::IsAncoApp(const std::string &bundleName, int32
         return false;
     }
 
-    return bundleInfo.applicationInfo.codePath == std::to_string(APP_TYPE_ONE);
-}
-
-bool BundleManagerRepositoryImpl::CheckSystemApp(const std::string& bundleName, int32_t userId)
-{
-    if (userId == SUBSCRIBE_USER_INIT) {
-        OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
-    }
-    AppExecFwk::BundleInfo bundleInfo;
-    int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
-    if (!GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
-        ANS_LOGE("Get installed bundle failed.");
-        return false;
-    }
-
-    ANS_LOGI("Get installed bundle %{public}s %{public}d.", bundleName.c_str(),
-        bundleInfo.applicationInfo.isSystemApp);
-    return bundleInfo.applicationInfo.isSystemApp;
-}
-
-
-bool BundleManagerRepositoryImpl::IsAtomicServiceByBundle(const std::string& bundleName, const int32_t userId)
-{
-    auto flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
-    AppExecFwk::BundleInfo bundleInfo;
-    if (!GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
-        ANS_LOGE("GetBundleInfoV9 error, bundleName = %{public}s uid = %{public}d", bundleInfo.name.c_str(),
-            bundleInfo.uid);
-    }
-    return bundleInfo.applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE;
+    return bundleInfo.uid == uid;
 }
 
 bool BundleManagerRepositoryImpl::CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption)
@@ -322,53 +347,114 @@ bool BundleManagerRepositoryImpl::CheckApiCompatibility(const std::string &bundl
 #ifdef ANS_DISABLE_FA_MODEL
     return false;
 #endif
-    AppExecFwk::BundleInfo bundleInfo;
+    NotificationBundleManagerInfo bundleInfo;
     int32_t callingUserId;
-    AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, callingUserId);
+    accountor_->GetOsAccountLocalIdFromUid(uid, callingUserId);
     if (!GetBundleInfoByBundleName(bundleName, callingUserId, bundleInfo)) {
-        ANS_LOGE("Failed to GetBundleInfoByBundleName, bundlename = %{public}s",
-            bundleName.c_str());
+        ANS_LOGE("Failed to GetBundleInfoByBundleName, bundlename = %{public}s", bundleName.c_str());
         return false;
     }
 
-    for (auto abilityInfo : bundleInfo.abilityInfos) {
-        if (abilityInfo.isStageBasedModel) {
-            return false;
-        }
-    }
-    return true;
+    return !bundleInfo.isStageBasedModel;
 }
 
-bool BundleManagerRepositoryImpl::CheckBundleImplExtensionAbility(const sptr<NotificationBundleOption> &bundleOption)
+bool BundleManagerRepositoryImpl::IsAncoApp(const std::string &bundleName, int32_t uid)
 {
     int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
-    auto flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION)
-        | static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE)
-        | static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY)
-        | static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY);
+    accountor_->GetOsAccountLocalIdFromUid(uid, userId);
+    if (userId == -1 || userId >= DEFAULT_USER_ID) {
+        return false;
+    }
 
+    userId = ZERO_USERID;
     AppExecFwk::BundleInfo bundleInfo;
-    if (!GetBundleInfoV9(bundleOption->GetBundleName(), flags, bundleInfo, userId)) {
-        ANS_LOGE("GetBundleInfoV9 error, bundleName = %{public}s, userId = %{public}d",
-            bundleOption->GetBundleName().c_str(), userId);
+    int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+    if (!GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
+        ANS_LOGW("Get Bundle bundleName %{public}s, %{public}d", bundleName.c_str(), userId);
         return false;
     }
-    if (!AccessTokenHelper::VerifyCallerPermission(
-        bundleInfo.applicationInfo.accessTokenId, OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
-        return false;
-    }
-    
-    for (const auto& hapmodule : bundleInfo.hapModuleInfos) {
-        for (const auto& extInfo : hapmodule.extensionInfos) {
-            if (extInfo.type == AppExecFwk::ExtensionAbilityType::NOTIFICATION_SUBSCRIBER) {
-                return true;
-            }
-        }
-    }
-    return false;
+
+    return bundleInfo.applicationInfo.codePath == std::to_string(APP_TYPE_ONE);
 }
 
+
+bool BundleManagerRepositoryImpl::IsAtomicServiceByBundle(const std::string& bundleName, const int32_t userId)
+{
+    auto flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
+        ANS_LOGE("GetBundleInfoV9 error, bundleName = %{public}s uid = %{public}d", bundleInfo.name.c_str(),
+            bundleInfo.uid);
+    }
+    return bundleInfo.applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE;
+}
+
+ErrCode BundleManagerRepositoryImpl::GetApplicationInfo(const std::string &bundleName, int32_t flags,
+    int32_t userId, AppExecFwk::ApplicationInfo &appInfo)
+{
+    auto bundleMgr = connector_->GetBundleManager();
+    if (bundleMgr == nullptr) {
+        ANS_LOGE("GetCloneBundleInfo bundle proxy failed.");
+        return -1;
+    }
+
+    ErrCode result = IN_PROCESS_CALL(bundleMgr->GetApplicationInfoV9(bundleName, flags, userId, appInfo));
+    return result;
+}
+
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+bool BundleManagerRepositoryImpl::GetDistributedNotificationEnabled(const std::string &bundleName, const int32_t userId)
+{
+    auto bundleMgr = connector_->GetBundleManager();
+    if (bundleMgr == nullptr) {
+        return DEFAULT_DISTRIBUTED_ENABLE_IN_APPLICATION_INFO;
+    }
+
+    AppExecFwk::ApplicationInfo appInfo;
+    if (bundleMgr->GetApplicationInfo(
+        bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, appInfo)) {
+        ANS_LOGD("APPLICATION_INFO distributed enabled %{public}d", appInfo.distributedNotificationEnabled);
+        return appInfo.distributedNotificationEnabled;
+    }
+
+    ANS_LOGD("APPLICATION_INFO distributed enabled is default");
+    return DEFAULT_DISTRIBUTED_ENABLE_IN_APPLICATION_INFO;
+}
+#endif
+
+void BundleManagerRepositoryImpl::ConvertBundleInfo(const AppExecFwk::BundleInfo &externalBundleInfo,
+    NotificationBundleManagerInfo &bundleInfo)
+{
+    bundleInfo.bundleName = externalBundleInfo.name;
+    bundleInfo.uid = externalBundleInfo.uid;
+    bundleInfo.applicationInfo.allowEnableNotification = externalBundleInfo.applicationInfo.allowEnableNotification;
+    bundleInfo.applicationInfo.isSystemApp = externalBundleInfo.applicationInfo.isSystemApp;
+    bundleInfo.applicationInfo.appIndex = externalBundleInfo.applicationInfo.appIndex;
+    bundleInfo.applicationInfo.accessTokenId = externalBundleInfo.applicationInfo.accessTokenId;
+    bundleInfo.applicationInfo.label = externalBundleInfo.applicationInfo.label;
+    bundleInfo.applicationInfo.bundleName = externalBundleInfo.applicationInfo.bundleName;
+    bundleInfo.applicationInfo.installSource = externalBundleInfo.applicationInfo.installSource;
+    for (auto abilityInfo : externalBundleInfo.abilityInfos) {
+        if (abilityInfo.isStageBasedModel) {
+            bundleInfo.isStageBasedModel = true;
+        }
+    }
+    return;
+}
+
+void BundleManagerRepositoryImpl::ConvertBundleInfo(const std::vector<AppExecFwk::BundleInfo> &externalBundleInfos,
+    std::vector<NotificationBundleManagerInfo> &bundleInfos)
+{
+    bundleInfos.clear();
+    int32_t size = externalBundleInfos.size();
+    bundleInfos.reserve(externalBundleInfos.size());
+    for (const auto& externalInfo : externalBundleInfos) {
+        NotificationBundleManagerInfo info;
+        ConvertBundleInfo(externalInfo, info);
+        bundleInfos.push_back(std::move(info));
+    }
+    return;
+}
 }  // namespace Infra
 }  // namespace Notification
 }  // namespace OHOS

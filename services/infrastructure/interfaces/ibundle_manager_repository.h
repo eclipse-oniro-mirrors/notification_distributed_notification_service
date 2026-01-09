@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,30 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef ANS_INFRA_BUNDLE_MANAGER_REPOSITORY_IMPL_H
-#define ANS_INFRA_BUNDLE_MANAGER_REPOSITORY_IMPL_H
+#ifndef ANS_IBUNDLE_MANAGER_REPOSITORY_H
+#define ANS_IBUNDLE_MANAGER_REPOSITORY_H
 
-#include "ibundle_manager_repository.h"
-#include "iaccount_manager_repository.h"
-
-#include "ipc_skeleton.h"
-#include "iremote_object.h"
-#include "remote_death_recipient.h"
-#include "bundle_service_connector.h"
-#include "bundle_mgr_interface.h"
+#include <string>
+#include "notification_bundle_option.h"
+#include "bundle_manager_adapter.h"
+#include "ans_inner_errors.h"
 
 namespace OHOS {
 namespace Notification {
 namespace Infra {
-class BundleManagerRepositoryImpl : public IBundleManagerRepository {
+class IBundleManagerRepository {
 public:
-    using ConnectorPtr = std::unique_ptr<IBundleServiceConnector>;
-    using AccountPtr = std::unique_ptr<IAccountManagerRepository>;
-
-    explicit BundleManagerRepositoryImpl(ConnectorPtr&& connector, AccountPtr&& accountor)
-        : connector_(std::move(connector)), accountor_(std::move(accountor)) {}
-
-    ~BundleManagerRepositoryImpl() override = default;
+    virtual ~IBundleManagerRepository() = default;
 
     /**
      * @brief Check whether the caller is a system application base on the specified uid.
@@ -44,7 +34,7 @@ public:
      * @param uid Indicates the specified uid.
      * @return Returns the check result.
      */
-    bool IsSystemApp(int32_t uid) override;
+    virtual bool IsSystemApp(int32_t uid) = 0;
 
     /**
      * @brief CheckSystemApp.
@@ -52,7 +42,7 @@ public:
      * @param userId userId.
      * @return Returns the query result. if systemapp, retrun true.
      */
-    bool CheckSystemApp(const std::string &bundleName, int32_t userId) override;
+    virtual bool CheckSystemApp(const std::string &bundleName, int32_t userId) = 0;
 
     /**
      * @brief Obtains the bundle name base on the specified uid.
@@ -60,7 +50,7 @@ public:
      * @param uid Indicates the specified uid.
      * @return Returns the bundle name.
      */
-    std::string GetBundleNameByUid(int32_t uid) override;
+    virtual std::string GetBundleNameByUid(int32_t uid) = 0;
 
     /**
      * @brief Obtains the default uid.
@@ -69,7 +59,7 @@ public:
      * @param userId Indicates the user id.
      * @return Returns the uid.
      */
-    int32_t GetDefaultUidByBundleName(const std::string &bundle, const int32_t userId) override;
+    virtual int32_t GetDefaultUidByBundleName(const std::string &bundle, const int32_t userId) = 0;
 
     /**
      * @brief Obtains the default uid.
@@ -79,14 +69,15 @@ public:
      * @param appIndex Indicates the app Index.
      * @return Returns the uid.
      */
-    int32_t GetDefaultUidByBundleName(const std::string &bundle, const int32_t userId, const int32_t appIndex) override;
+    virtual int32_t GetDefaultUidByBundleName(const std::string &bundle,
+        const int32_t userId, const int32_t appIndex) = 0;
 
     /**
      * @brief Obtains the app index by uid.
      * @param uid Indicates uid.
      * @return Returns the query result if succeed, retrun 0(main index) otherwise.
      */
-    int32_t GetAppIndexByUid(const int32_t uid) override;
+    virtual int32_t GetAppIndexByUid(const int32_t uid) = 0;
 
     /**
      * @brief Obtains the bundle info.
@@ -96,8 +87,8 @@ public:
      * @param bundleInfo Indicates the bundle info.
      * @return Returns the uid.
      */
-    bool GetBundleInfoByBundleName(const std::string bundle, const int32_t userId,
-        NotificationBundleManagerInfo &bundleInfo) override;
+    virtual bool GetBundleInfoByBundleName(const std::string bundle, const int32_t userId,
+        NotificationBundleManagerInfo &bundleInfo) = 0;
 
     /**
      * @brief Obtains bundle info by bundle name.
@@ -108,8 +99,8 @@ public:
      * @param userId Indicates the user id.
      * @return Returns the check result.
      */
-    bool GetBundleInfo(const std::string &bundleName, const NotificationBundleManagerFlag flag,
-        int32_t userId, NotificationBundleManagerInfo &bundleInfo) override;
+    virtual bool GetBundleInfo(const std::string &bundleName, const NotificationBundleManagerFlag flag,
+        int32_t userId, NotificationBundleManagerInfo &bundleInfo) = 0;
 
     /**
      * @brief Obtains BundleInfo of all bundles available in the system through the proxy object.
@@ -118,8 +109,8 @@ public:
      * @param userId Indicates the user ID.
      * @return Returns true if the BundleInfos is successfully obtained, returns false otherwise.
      */
-    bool GetBundleInfos(const NotificationBundleManagerFlag flag,
-        std::vector<NotificationBundleManagerInfo> &bundleInfos, int32_t userId) override;
+    virtual bool GetBundleInfos(const NotificationBundleManagerFlag flag,
+        std::vector<NotificationBundleManagerInfo> &bundleInfos, int32_t userId) = 0;
 
     /**
      * @brief GetBundleInfoV9.
@@ -129,20 +120,23 @@ public:
      * @param userId userId.
      * @return Returns the query result if succeed, retrun 0(main index) otherwise.
      */
-    bool GetBundleInfoV9(const std::string bundle, const int32_t flag,
-        NotificationBundleManagerInfo &bundleInfo, const int32_t userId) override;
+    virtual bool GetBundleInfoV9(const std::string bundle, const int32_t flag,
+        NotificationBundleManagerInfo &bundleInfo, const int32_t userId) = 0;
 
-    ErrCode GetAllBundleInfo(std::map<std::string,
-        sptr<NotificationBundleOption>> &bundleOptions, int32_t userId) override;
+    virtual ErrCode GetAllBundleInfo(std::map<std::string,
+        sptr<NotificationBundleOption>> &bundleOptions, int32_t userId) = 0;
 
-    std::string GetBundleLabel(const std::string& bundleName) override;
+    virtual std::string GetBundleLabel(const std::string& bundleName) = 0;
 
-    bool GetCloneAppIndexes(const std::string &bundleName, std::vector<int32_t> &appIndexes, int32_t userId) override;
+    virtual bool GetCloneAppIndexes(const std::string &bundleName,
+        std::vector<int32_t> &appIndexes, int32_t userId) = 0;
 
-    bool GetCloneBundleInfo(const std::string &bundleName, int32_t flag, int32_t appIndex,
-        NotificationBundleManagerInfo &bundleInfo, int32_t userId) override;
+    virtual bool GetCloneBundleInfo(const std::string &bundleName, int32_t flag, int32_t appIndex,
+        NotificationBundleManagerInfo &bundleInfo, int32_t userId) = 0;
 
-    bool CheckCurrentUserIdApp(const std::string &bundleName, const int32_t uid, const int32_t userId) override;
+    // virtual bool CheckBundleImplExtensionAbility(const sptr<NotificationBundleOption> &bundleOption) = 0;
+
+    virtual bool CheckCurrentUserIdApp(const std::string &bundleName, const int32_t uid, const int32_t userId) = 0;
 
     /**
      * @brief Check API compatibility.
@@ -150,7 +144,7 @@ public:
      * @param bundleOption Indicates the bundle option.
      * @return Returns the check result.
      */
-    bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption) override;
+    virtual bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption) = 0;
 
     /**
      * @brief Check API compatibility.
@@ -159,11 +153,11 @@ public:
      * @param uid Indicates the bundle uid.
      * @return Returns the check result.
      */
-    bool CheckApiCompatibility(const std::string &bundleName, const int32_t &uid) override;
+    virtual bool CheckApiCompatibility(const std::string &bundleName, const int32_t &uid) = 0;
 
-    bool IsAncoApp(const std::string &bundleName, int32_t uid) override;
+    virtual bool IsAncoApp(const std::string &bundleName, int32_t uid) = 0;
 
-    bool IsAtomicServiceByBundle(const std::string &bundleName, const int32_t userId) override;
+    virtual bool IsAtomicServiceByBundle(const std::string &bundleName, const int32_t userId) = 0;
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     /**
@@ -173,28 +167,11 @@ public:
      * @param userId Indicates the user id.
      * @return Returns the check result.
      */
-    bool GetDistributedNotificationEnabled(const std::string &bundleName, const int32_t userId) override;
+    virtual bool GetDistributedNotificationEnabled(const std::string &bundleName, const int32_t userId) = 0;
 #endif
 
-    static void ConvertBundleInfo(const AppExecFwk::BundleInfo &externalBundleInfo,
-        NotificationBundleManagerInfo &bundleInfo);
-
-    static void ConvertBundleInfo(const std::vector<AppExecFwk::BundleInfo> &externalBundleInfos,
-        std::vector<NotificationBundleManagerInfo> &bundleInfos);
-
-private:
-    ErrCode GetBundleResourceInfo(const std::string &bundleName,
-        AppExecFwk::BundleResourceInfo &bundleResourceInfo, const int32_t appIndex);
-    
-    bool GetBundleInfoV9(const std::string bundle, const int32_t flag,
-        AppExecFwk::BundleInfo &bundleInfo, const int32_t userId);
-
-    ErrCode GetApplicationInfo(const std::string &bundleName, int32_t flags, int32_t userId,
-        AppExecFwk::ApplicationInfo &appInfo);
-    ConnectorPtr connector_;
-    AccountPtr accountor_;
 };
-} // Infra
+} // namespace Infra
 } // namespace Notification
 } // namespace OHOS
 #endif

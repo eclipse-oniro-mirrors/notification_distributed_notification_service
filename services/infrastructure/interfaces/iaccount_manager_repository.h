@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,31 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef ANS_INFRA_ACCOUNT_MANAGER_REPOSITORY_IMPL_H
-#define ANS_INFRA_ACCOUNT_MANAGER_REPOSITORY_IMPL_H
+#ifndef ANS_IACCOUNT_MANAGER_REPOSITORY_H
+#define ANS_IACCOUNT_MANAGER_REPOSITORY_H
 
 #include <vector>
 #include "ans_inner_errors.h"
-#include "iaccount_manager_repository.h"
 
 namespace OHOS {
 namespace Notification {
 namespace Infra {
 
-class AccountManagerRepositoryImpl : public IAccountManagerRepository {
+class IAccountManagerRepository {
 public:
-    static constexpr int32_t INVALID_USER_ID = -1;
-    static constexpr int32_t DEFAULT_USER_ID = 100;
-    static constexpr int32_t ZERO_USER_ID = 0;
+    virtual ~IAccountManagerRepository() = default;
 
-    explicit AccountManagerRepositoryImpl();
-    virtual ~AccountManagerRepositoryImpl();
-
-public:
     /**
     * @brief check is system account
     */
-    bool IsSystemAccount(int32_t userId) override;
+    virtual bool IsSystemAccount(int32_t userId) = 0;
 
     /**
      * Gets operating system account local ID from uid.
@@ -46,7 +39,7 @@ public:
      * @param id Indicates the account ID.
      * @return Returns result code.
      */
-    ErrCode GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id) override;
+    virtual ErrCode GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id) = 0;
 
     /**
      * Gets operating system account local ID from current calling.
@@ -54,7 +47,7 @@ public:
      * @param id Indicates the current calling account ID.
      * @return Returns result code.
      */
-    ErrCode GetCurrentCallingUserId(int32_t &id) override;
+    virtual ErrCode GetCurrentCallingUserId(int32_t &id) = 0;
 
     /**
      * Gets operating system account local ID from current active.
@@ -62,12 +55,12 @@ public:
      * @param id Indicates the current active account ID.
      * @return Returns result code.
      */
-    ErrCode GetCurrentActiveUserId(int32_t &id) override;
+    virtual ErrCode GetCurrentActiveUserId(int32_t &id) = 0;
 
     /**
      * Gets operating system account local ID with default value from current active.
      */
-    int32_t GetCurrentActiveUserIdWithDefault(int32_t defaultUserId) override;
+    virtual int32_t GetCurrentActiveUserIdWithDefault(int32_t defaultUserId) = 0;
 
     /**
      * Check the userId whether exists in OsAccount service.
@@ -75,7 +68,7 @@ public:
      * @param userId Indicates the current active account ID.
      * @return Returns result.
      */
-    bool CheckUserIdExists(const int32_t &userId, bool defaultValue = false) override;
+    virtual bool CheckUserIdExists(const int32_t &userId, bool defaultValue = false) = 0;
 
     /**
      * Get All os account userIds.
@@ -83,7 +76,7 @@ public:
      * @param userIds Indicates the current created account ID.
      * @return Returns result.
      */
-    ErrCode GetAllOsAccount(std::vector<int32_t> &userIds) override;
+    virtual ErrCode GetAllOsAccount(std::vector<int32_t> &userIds) = 0;
 
     /**
      * Get All active account userIds.
@@ -91,17 +84,17 @@ public:
      * @param userIds Indicates the current active account ID.
      * @return Returns result.
      */
-    ErrCode GetAllActiveOsAccount(std::vector<int32_t> &userIds) override;
+    virtual ErrCode GetAllActiveOsAccount(std::vector<int32_t> &userIds) = 0;
 
     /**
      * Get private status from osAccount.
      */
-    ErrCode GetOsAccountPrivateStatus(bool &isPrivate) override;
+    virtual ErrCode GetOsAccountPrivateStatus(bool &isPrivate) = 0;
 
     /**
      * Check user id is verified.
      */
-    bool IsOsAccountVerified(int32_t userId, bool defaultValue = false) override;
+    virtual bool IsOsAccountVerified(int32_t userId, bool defaultValue = false) = 0;
 };
 } // namespace Infra
 } // namespace Notification
