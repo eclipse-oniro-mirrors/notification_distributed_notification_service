@@ -3182,5 +3182,136 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287066, Function | SmallTest | Level1)
         advancedNotificationService_->GetDelayedNotificationParameterByTriggerKey(triggerKey, parameter, recordTwo);
     ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
 }
+
+/**
+ * @tc.number    : AnsBranchTest_287067
+ * @tc.name      : PublishDelayedNotification
+ * @tc.desc      : Test PublishDelayedNotification.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287067, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(true);
+    MockIsVerfyPermisson(true);
+    std::string triggerKey = "secure_trigger_live_view_ans_distributedhashCodeTest_";
+    int32_t userId = 100;
+    sptr<NotificationRequest> reqOne(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notificationOne(new (std::nothrow) Notification(reqOne));
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = notificationOne;
+    sptr<NotificationRequest> reqTwo(new (std::nothrow) NotificationRequest());
+    reqTwo->SetDistributedCollaborate(true);
+    reqTwo->SetDistributedHashCode("hashCodeTest");
+    record->request = reqTwo;
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    AdvancedNotificationService::PublishNotificationParameter parameter;
+    std::shared_ptr<NotificationRecord> recordTwo = std::make_shared<NotificationRecord>();
+    auto result =
+        advancedNotificationService_->GetDelayedNotificationParameterByTriggerKey(triggerKey, parameter, recordTwo);
+    ASSERT_EQ(result, ERR_OK);
+    auto result1 = advancedNotificationService_->PublishDelayedNotification(triggerKey, userId);
+    ASSERT_EQ(result1, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287068
+ * @tc.name      : ParseGeofenceNotificationFromDb
+ * @tc.desc      : Test ParseGeofenceNotificationFromDb.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287068, Function | SmallTest | Level1)
+{
+    std::string value = R"({id: 1001})";
+    AdvancedNotificationService::PublishNotificationParameter requestDb;
+    auto result = advancedNotificationService_->ParseGeofenceNotificationFromDb(value, requestDb);
+    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287069
+ * @tc.name      : ParseGeofenceNotificationFromDb
+ * @tc.desc      : Test ParseGeofenceNotificationFromDb.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287069, Function | SmallTest | Level1)
+{
+    std::string value = R"({"id": 1001, "name": "test_geo_fence")";
+    AdvancedNotificationService::PublishNotificationParameter requestDb;
+    auto result = advancedNotificationService_->ParseGeofenceNotificationFromDb(value, requestDb);
+    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287070
+ * @tc.name      : ParseGeofenceNotificationFromDb
+ * @tc.desc      : Test ParseGeofenceNotificationFromDb.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287070, Function | SmallTest | Level1)
+{
+    std::string value = R"({
+        "id": 1001,
+        "name": "test_geo_fence",
+        "isUpdateByOwner": true
+    })";
+    AdvancedNotificationService::PublishNotificationParameter requestDb;
+    auto result = advancedNotificationService_->ParseGeofenceNotificationFromDb(value, requestDb);
+    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(requestDb.isUpdateByOwner, true);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287071
+ * @tc.name      : StartGeofenceTriggerTimer
+ * @tc.desc      : Test StartGeofenceTriggerTimer.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287071, Function | SmallTest | Level1)
+{
+    auto record = std::make_shared<NotificationRecord>();
+    ASSERT_NE(record, nullptr);
+
+    sptr<Notification> notification = new (std::nothrow) Notification();
+    ASSERT_NE(notification, nullptr);
+    record->notification = notification;
+
+    int64_t expiredTimePoint = NotificationAnalyticsUtil::GetCurrentTime()
+                         + 5 * NotificationConstant::SECOND_TO_MS;
+
+    auto result = advancedNotificationService_->StartGeofenceTriggerTimer(
+        record,
+        expiredTimePoint,
+        NotificationConstant::TRIGGER_GEOFENCE_REASON_DELETE
+    );
+
+    ASSERT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_287072
+ * @tc.name      : SetGeofenceTriggerTimer_Success
+ * @tc.desc      : Test SetGeofenceTriggerTimer.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_287072, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+    auto notificationTrigger = std::make_shared<NotificationTrigger>();
+    ASSERT_NE(notificationTrigger, nullptr);
+    notificationTrigger->SetDisplayTime(5);
+
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    request->SetNotificationTrigger(notificationTrigger);
+    auto retrievedTrigger = request->GetNotificationTrigger();
+    ASSERT_NE(retrievedTrigger, nullptr);
+    EXPECT_EQ(retrievedTrigger->GetDisplayTime(), 5);
+
+    auto record = std::make_shared<NotificationRecord>();
+    ASSERT_NE(record, nullptr);
+    record->request = request;
+    ASSERT_NE(record->request, nullptr);
+    record->uid = 10086;
+    record->isUpdateByOwner = false;
+    sptr<Notification> notification(new (std::nothrow) Notification(request));
+    record->notification = notification;
+    auto ret = advancedNotificationService_->SetGeofenceTriggerTimer(record);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS
