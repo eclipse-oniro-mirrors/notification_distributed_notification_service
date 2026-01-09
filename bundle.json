@@ -211,6 +211,7 @@
         "//base/notification/distributed_notification_service/services/ans/test/unittest:unittest",
         "//base/notification/distributed_notification_service/services/distributed/test/unittest:ans_unit_test",
         "//base/notification/distributed_notification_service/services/test/moduletest:moduletest",
+        "//base/notification/distributed_notification_service/services/infrastructure/test/unittest:unittest",
         "//base/notification/distributed_notification_service/frameworks/test/moduletest:moduletest",
         "//base/notification/distributed_notification_service/frameworks/reminder/test/unittest:unittest",
         "//base/notification/distributed_notification_service/frameworks/ans/test/unittest:unittest",
