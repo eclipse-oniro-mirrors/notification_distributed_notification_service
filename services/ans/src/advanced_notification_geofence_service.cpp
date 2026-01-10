@@ -89,6 +89,9 @@ ErrCode AdvancedNotificationService::OnNotifyDelayedNotification(const PublishNo
         return ERR_ANS_INVALID_PARAM;
     }
 
+#ifndef NOTIFICATION_SUPPORT_GEOFENCE
+    return ERR_ANS_DEVICE_NOT_SUPPORT;
+#endif
     const sptr<NotificationRequest> &request = parameter.request;
     const sptr<NotificationBundleOption> &bundleOption = parameter.bundleOption;
     uint32_t configPath = static_cast<uint32_t>(request->GetNotificationTrigger()->GetConfigPath());

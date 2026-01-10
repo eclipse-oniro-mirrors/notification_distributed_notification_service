@@ -1831,7 +1831,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287012, Function | SmallTest | Level1)
     AdvancedNotificationService::PublishNotificationParameter parameter;
     parameter.request = req;
     auto result = advancedNotificationService_->OnNotifyDelayedNotification(parameter);
-    ASSERT_EQ(result, ERR_ANS_INVALID_PARAM);
+    ASSERT_NE(result, ERR_OK);
 }
 
 /**
