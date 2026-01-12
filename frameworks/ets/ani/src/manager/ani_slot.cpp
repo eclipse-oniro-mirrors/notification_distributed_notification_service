@@ -114,7 +114,7 @@ void HandleSlotFunctionCallbackComplete(ani_env* env, WorkStatus status, void* d
         case GET_SLOTS:
         case GET_SLOTS_BY_BUNDLE: {
             ani_array outAniObj;
-            if (!NotificationSts::WrapNotificationSlotArray(env, asyncCallbackInfo->slots, outAniObj)) {
+            if (!NotificationSts::WrapNotificationSlotArray(envCurr, asyncCallbackInfo->slots, outAniObj)) {
                 ANS_LOGE("WrapNotificationSlotArray failed");
                 asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
             }
