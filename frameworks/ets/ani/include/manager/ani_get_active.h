@@ -30,10 +30,6 @@ enum GetActiveFunction {
     GET_ACTIVE_NOTIFICATIONS_BY_FILTER,
 };
 
-ani_object AniGetActiveNotificationCount(ani_env *env, ani_object callback);
-ani_object AniGetAllActiveNotifications(ani_env *env, ani_object callback);
-ani_object AniGetActiveNotifications(ani_env *env, ani_object callback);
-
 struct AsyncCallbackActiveInfo {
     ani_vm* vm = nullptr;
     arkts::concurrency_helpers::AsyncWork* asyncWork = nullptr;
