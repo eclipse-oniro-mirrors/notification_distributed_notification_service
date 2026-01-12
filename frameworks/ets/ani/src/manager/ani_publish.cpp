@@ -95,7 +95,7 @@ void HandlePublishFunctionCallbackComplete(ani_env* env, WorkStatus status, void
         return;
     }
     NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
-    DeleteCallBackInfo(envCurr, asyncCallbackInfo);
+    DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
 }
 
 void ExecutePublishWork(ani_env* env, void* data)
