@@ -155,7 +155,7 @@ void HandleSlotFunctionCallbackComplete1(ani_env* env, WorkStatus status, void* 
                 ANS_LOGD("slot is null");
                 break;
             }
-            if (!NotificationSts::WrapNotificationSlot(env,
+            if (!NotificationSts::WrapNotificationSlot(envCurr,
                 asyncCallbackInfo->slot, asyncCallbackInfo->info.result) ||
                 asyncCallbackInfo->info.result == nullptr) {
                 ANS_LOGE("WrapNotificationSlot failed");
@@ -173,7 +173,7 @@ void HandleSlotFunctionCallbackComplete1(ani_env* env, WorkStatus status, void* 
             break;
         }
         case GET_NOTIFICATION_SETTING:{
-            if (!NotificationSts::WrapGetNotificationSetting(env,
+            if (!NotificationSts::WrapGetNotificationSetting(envCurr,
                 asyncCallbackInfo->slotFlags, asyncCallbackInfo->info.result) ||
                 asyncCallbackInfo->info.result == nullptr) {
                 ANS_LOGE("WrapGetNotificationSetting failed");
