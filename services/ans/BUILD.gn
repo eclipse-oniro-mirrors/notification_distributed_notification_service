@@ -55,6 +55,7 @@ ohos_source_set("ans_service_sources") {
     "${services_path}/ans/include/notification_extension",
     "${services_path}/ans/include/utils",
     "${services_path}/ans/src",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
     "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
@@ -69,6 +70,10 @@ ohos_source_set("ans_service_sources") {
   }
 
   sources = [
+    "${services_path}/domain/settings/rdb_mgr_repo/src/ans_rdb_mgr_builder.cpp",
+    "${services_path}/domain/settings/rdb_mgr_repo/src/on_rdb_operation_fail_report.cpp",
+    "${services_path}/domain/settings/rdb_mgr_repo/src/on_rdb_upgrade_liveview_migrate.cpp",
+    "${services_path}/domain/settings/rdb_mgr_repo/src/on_send_user_data_size_hisysevent.cpp",
     "src/access_token_helper.cpp",
     "src/advanced_aggregation_data_roaming_observer.cpp",
     "src/advanced_notdisturb_enabled_observer.cpp",

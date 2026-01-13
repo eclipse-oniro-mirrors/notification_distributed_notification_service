@@ -1400,6 +1400,7 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
     "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
@@ -1420,6 +1421,7 @@ ohos_unittest("notification_preferences_database_branch_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/ans:libans",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -1908,6 +1910,7 @@ ohos_unittest("notification_extension_test") {
     "/${services_path}/ans/include",
     "/${services_path}/ans/include/utils",
     "/${services_path}/ans/include/notification_extension",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
     "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
@@ -2016,6 +2019,7 @@ ohos_unittest("notification_extension_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${frameworks_module_reminder_path}:reminder_innerkits",
+    "${services_path}/ans:libans",
     "${services_path}/infrastructure:ans_base",
   ]
 

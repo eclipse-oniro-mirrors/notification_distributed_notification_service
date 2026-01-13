@@ -35,14 +35,14 @@ public:
     void SetUp()
     {
         MockOsAccountManager::MockGetForegroundOsAccountLocalId(100);
+        preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
     };
     void TearDown() {};
 
     const std::string bundleName_ = "bundleName";
     const int bundleUid_ = 2001;
     int32_t userId = 100;
-    std::unique_ptr<NotificationPreferencesDatabase> preferncesDB_ =
-        std::make_unique<NotificationPreferencesDatabase>();
+    std::shared_ptr<NotificationPreferencesDatabase> preferncesDB_ = nullptr;
 };
 
 /**
@@ -1253,8 +1253,6 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_0
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 HWTEST_F(NotificationPreferencesDatabaseTest, PutExtensionSubscriptionClonedInvalidBundles_0100, TestSize.Level1)
 {
-    NotificationRdbConfig notificationRdbConfig;
-    preferncesDB_->rdbDataManager_ = std::make_shared<NotificationDataMgr>(notificationRdbConfig);
     std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> data;
     std::vector<sptr<NotificationBundleOption>> bundles;
     bundles.push_back(new NotificationBundleOption("bundle1", 1001));
@@ -1280,8 +1278,6 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutExtensionSubscriptionClonedInva
 
 HWTEST_F(NotificationPreferencesDatabaseTest, ClearExtensionSubscriptionClonedInvalidBundles_0100, TestSize.Level1)
 {
-    NotificationRdbConfig notificationRdbConfig;
-    preferncesDB_->rdbDataManager_ = std::make_shared<NotificationDataMgr>(notificationRdbConfig);
     std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> data;
     std::vector<sptr<NotificationBundleOption>> bundles;
     bundles.push_back(new NotificationBundleOption("bundle1", 1001));
@@ -1304,8 +1300,6 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ClearExtensionSubscriptionClonedIn
 
 HWTEST_F(NotificationPreferencesDatabaseTest, GetExtensionSubscriptionClonedInvalidBundles_0100, TestSize.Level1)
 {
-    NotificationRdbConfig notificationRdbConfig;
-    preferncesDB_->rdbDataManager_ = std::make_shared<NotificationDataMgr>(notificationRdbConfig);
     std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> data;
 
     bool result = preferncesDB_->GetExtensionSubscriptionClonedInvalidBundles(100, data);

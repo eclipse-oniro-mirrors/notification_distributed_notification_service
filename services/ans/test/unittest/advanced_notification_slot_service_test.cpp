@@ -69,7 +69,6 @@ void AnsSlotServiceTest::SetUp()
     GTEST_LOG_(INFO) << "SetUp start";
 
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
-    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     auto ret = advancedNotificationService_->CancelAll("",
         iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
@@ -83,6 +82,7 @@ void AnsSlotServiceTest::SetUp()
 
 void AnsSlotServiceTest::TearDown()
 {
+    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     delete advancedNotificationService_;
     advancedNotificationService_ = nullptr;
     GTEST_LOG_(INFO) << "TearDown";
