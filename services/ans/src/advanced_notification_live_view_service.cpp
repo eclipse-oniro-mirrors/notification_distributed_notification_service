@@ -337,8 +337,8 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
         if (iter.first.rfind(REQUEST_STORAGE_SECURE_KEY_PREFIX, 0) == 0) {
             ErrCode errorCode = AesGcmHelper::Decrypt(decryptValue, iter.second);
             if (errorCode != ERR_OK) {
-                ANS_LOGE("GetBatchNotificationRequestsFromDb decrypt error");
-                return static_cast<int>(errorCode);
+                ANS_LOGE("GetBatchNotificationRequestsFromDb decrypt error %{public}d", errorCode);
+                continue;
             }
         }
         if (decryptValue.empty() || !nlohmann::json::accept(decryptValue)) {
