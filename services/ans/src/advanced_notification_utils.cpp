@@ -644,7 +644,6 @@ void AdvancedNotificationService::OnDistributedPublish(
             return;
         }
 
-        UpdateRecentNotification(record->notification, false, 0);
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
     }));
