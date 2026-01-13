@@ -70,7 +70,7 @@ std::string AesGcmHelper::Hex2Byte(const std::string &hex)
 {
     if (hex.length() % STEP != 0) {
         ANS_LOGE("Length of hex is not even.");
-        return 0;
+        return std::string();
     }
     std::string bytes;
     for (int i = 0; i < static_cast<int>(hex.length()); i += STEP) {
@@ -223,6 +223,10 @@ bool AesGcmHelper::EncryptAesGcm(const std::string &plainText, std::string &ciph
 bool AesGcmHelper::DecryptAesGcm(std::string &plainText, const std::string &cipherText, std::string &key)
 {
     std::string cipherBytes = Hex2Byte(cipherText);
+    if (cipherBytes.empty()) {
+        ANS_LOGE("DecryptAesGcm hex to byte error.");
+        return false;
+    }
     const unsigned int bufferLen = cipherBytes.size() - G_AES_GCM_IV_LEN - G_AES_GCM_TAG_LEN;
     std::vector<unsigned char> buffer(bufferLen);
     std::vector<unsigned char> iv(G_AES_GCM_IV_LEN);
