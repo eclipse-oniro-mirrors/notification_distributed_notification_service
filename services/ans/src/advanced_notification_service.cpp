@@ -842,7 +842,6 @@ AnsStatus AdvancedNotificationService::PublishPreparedNotificationInner(
             return;
         }
 
-        UpdateRecentNotification(record->notification, false, 0);
         UpdateSlotAuthInfo(record);
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         ReportInfoToResourceSchedule(request->GetCreatorUserId(), bundleOption->GetBundleName());
