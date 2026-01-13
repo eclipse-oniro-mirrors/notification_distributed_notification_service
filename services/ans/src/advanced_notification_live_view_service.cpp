@@ -98,6 +98,11 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
                 NotificationConstant::TRIGGER_EIGHT_HOUR_REASON_DELETE);
             StartUpdateTimer(record, requestObj.request->GetUpdateDeadLine(),
                 NotificationConstant::TRIGGER_FOUR_HOUR_REASON_DELETE);
+            auto triggerDeadLine = requestObj.request->GetGeofenceTriggerDeadLine();
+            if (triggerDeadLine != NotificationConstant::INVALID_DISPLAY_TIME) {
+                StartGeofenceTriggerTimer(record, triggerDeadLine,
+                    NotificationConstant::TRIGGER_GEOFENCE_REASON_DELETE);
+            }
         }
 
         if (!keys.empty()) {
@@ -229,7 +234,9 @@ bool AdvancedNotificationService::IsLiveViewCanRecover(const sptr<NotificationRe
 
     auto epoch = std::chrono::system_clock::now().time_since_epoch();
     auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
-    if (curTime > request->GetUpdateDeadLine() || curTime > request->GetFinishDeadLine()) {
+    if (curTime > request->GetUpdateDeadLine() || curTime > request->GetFinishDeadLine() ||
+        (request->GetGeofenceTriggerDeadLine() != NotificationConstant::INVALID_DISPLAY_TIME &&
+        curTime > request->GetGeofenceTriggerDeadLine())) {
         ANS_LOGE("The liveView has expired.");
         return false;
     }
