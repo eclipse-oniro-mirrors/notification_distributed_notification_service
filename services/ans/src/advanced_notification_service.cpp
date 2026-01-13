@@ -2223,7 +2223,6 @@ void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode,
         }
 
         if (record->notification->GetKey() == hashCode) {
-            UpdateRecentNotification(record->notification, true, reason);
             TriggerRemoveWantAgent(record->request, reason, record->isThirdparty);
             CancelTimer(record->notification->GetAutoDeletedTimer());
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, nullptr, reason);
