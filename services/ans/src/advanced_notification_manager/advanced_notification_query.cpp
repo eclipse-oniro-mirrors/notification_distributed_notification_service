@@ -68,8 +68,8 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(const std::string &i
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
                 (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
                 (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey())) {
-                GetUri(record->request);
-                requests.push_back(record->request);
+                requests.push_back(sptr<NotificationRequest>(new NotificationRequest(*record->request)));
+                GetUri(requests.back());
             }
         }
         synchronizer->TransferResultData(ERR_OK, requests);
@@ -94,8 +94,8 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
                 (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
                 (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey())) {
-                GetUri(record->request);
-                notifications.push_back(record->request);
+                notifications.push_back(sptr<NotificationRequest>(new NotificationRequest(*record->request)));
+                GetUri(notifications.back());
             }
         }
     }));
@@ -363,6 +363,8 @@ ErrCode AdvancedNotificationService::GetUri(sptr<NotificationRequest> &request)
         ANS_LOGE("null additionalData");
         return ERROR_INTERNAL_ERROR;
     }
+    additionalData = std::make_shared<AAFwk::WantParams>(*additionalData);
+    request->SetAdditionalData(additionalData);
     if (additionalData->HasParam(NOTIFICATION_MANAGER_WANTURI)) {
         additionalData->Remove(NOTIFICATION_MANAGER_WANTURI);
     }
