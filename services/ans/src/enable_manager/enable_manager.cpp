@@ -303,6 +303,9 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundleImpl
         // Local device
         result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, state);
         if (result == ERR_OK) {
+            if(!isSystemCall && NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundle, true) != ERR_OK) {
+                ANS_LOGE("set hasPop fail when set switch");
+            }
             if (!enabled) {
                 result = RemoveAllNotificationsForDisable(bundle);
             }
