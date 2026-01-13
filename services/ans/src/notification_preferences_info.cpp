@@ -18,6 +18,7 @@
 #include "ans_log_wrapper.h"
 #include "notification_constant.h"
 #include "bundle_manager_helper.h"
+#include "os_account_manager_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -745,7 +746,12 @@ ErrCode NotificationPreferencesInfo::GetAllLiveViewEnabledBundles(const int32_t 
         if (!bundleInfo.second.GetSlot(NotificationConstant::SlotType::LIVE_VIEW, liveSlot)) {
             continue;
         }
-        if (liveSlot->GetEnable()) {
+        int32_t bundleUserId = bundleInfo.second.GetBundleUserId();
+        if (bundleUserId == SUBSCRIBE_USER_INIT) {
+            OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
+                bundleInfo.second.GetBundleUid(), bundleUserId);
+        }
+        if (liveSlot->GetEnable() && bundleUserId == userId) {
             NotificationBundleOption bundleItem(bundleInfo.second.GetBundleName(), bundleInfo.second.GetBundleUid());
             bundleOption.push_back(bundleItem);
         }
