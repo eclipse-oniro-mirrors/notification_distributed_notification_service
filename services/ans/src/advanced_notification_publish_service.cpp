@@ -879,7 +879,6 @@ AnsStatus AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifi
         }
 
         ClearSlotTypeData(record->request, ipcUid, CLEAR_SLOT_FROM_AVSEESAION);
-        UpdateRecentNotification(record->notification, false, 0);
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
         if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
