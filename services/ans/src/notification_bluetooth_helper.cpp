@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace Notification {
-
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 void HfpStateObserver::OnConnectionStateChanged(
     const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state, int cause)
 {
@@ -42,13 +42,13 @@ void BluetoothPairedDeviceObserver::OnPairStatusChanged(const OHOS::Bluetooth::B
     ANS_LOGI("Bluetooth paired device status changed: status: %{public}d", status);
     AdvancedNotificationService::GetInstance()->OnBluetoothPairedStatusChanged(device, status);
 }
-
+#endif
 NotificationBluetoothHelper& NotificationBluetoothHelper::GetInstance()
 {
     static NotificationBluetoothHelper notificationBluetoothHelper;
     return notificationBluetoothHelper;
 }
-
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 void NotificationBluetoothHelper::RegisterHfpObserver()
 {
     if (hfpObserver_ == nullptr) {
@@ -94,7 +94,7 @@ void NotificationBluetoothHelper::RegisterBluetoothPairedDeviceObserver()
     isBluetoothPairedDeviceObserverRegistered_.store(true);
     Bluetooth::BluetoothHost::GetDefaultHost().RegisterRemoteDeviceObserver(bluetoothPairedDeviceObserver_);
 }
-
+#endif
 bool NotificationBluetoothHelper::CheckHfpState(const std::string &bluetoothAddress)
 {
     OHOS::Bluetooth::BluetoothRemoteDevice remoteDevice(bluetoothAddress, OHOS::Bluetooth::BT_TRANSPORT_NONE);
@@ -104,7 +104,7 @@ bool NotificationBluetoothHelper::CheckHfpState(const std::string &bluetoothAddr
         btConnectState);
     return ret == ERR_OK && btConnectState == static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED);
 }
-
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 bool NotificationBluetoothHelper::CheckBluetoothConditions(const std::string& addr)
 {
     std::shared_ptr<OHOS::Bluetooth::BluetoothRemoteDevice> remoteDevice =
@@ -120,7 +120,7 @@ bool NotificationBluetoothHelper::CheckBluetoothSwitchState()
     Bluetooth::BluetoothState state = Bluetooth::BluetoothHost::GetDefaultHost().GetBluetoothState();
     return state == Bluetooth::BluetoothState::STATE_ON;
 }
-
+#endif
 }  // namespace Notification
 }  // namespace OHOS
 
