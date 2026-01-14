@@ -275,10 +275,6 @@ ErrCode ReminderAgentService::UnRegisterReminderState()
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
     ANSR_LOGD("called");
-    if (!CheckReminderPermission()) {
-        ANSR_LOGE("Failed to check permission: ohos.permission.PUBLISH_AGENT_REMINDER.");
-        return ERR_REMINDER_PERMISSION_DENIED;
-    }
     auto rdm = ReminderDataManager::GetInstance();
     if (rdm == nullptr) {
         return ERR_NO_INIT;

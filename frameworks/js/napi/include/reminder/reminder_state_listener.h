@@ -25,7 +25,7 @@ namespace OHOS::ReminderAgentNapi {
 using OnReminderStateCb = std::function<void(napi_env, napi_value, std::vector<Notification::ReminderState>)>;
 class JsReminderStateCallback : public Notification::ReminderStateCallback {
 public:
-    JsReminderStateCallback(napi_env env, napi_value callbackObj, OnReminderStateCb callback);
+    JsReminderStateCallback(napi_env env, napi_ref jsCallbackRef, OnReminderStateCb callback);
     ~JsReminderStateCallback() = default;
 
     void OnReminderState(const std::vector<Notification::ReminderState>& states) override;
@@ -37,7 +37,7 @@ private:
     napi_threadsafe_function threadSafeFunction_ {nullptr};
     napi_env napiEnv_ {nullptr};
     OnReminderStateCb reminderStateCb_ {nullptr};
-    std::shared_ptr<NativeReference> callbackRef_ {nullptr};
+    napi_ref callbackRef_ {nullptr};
 };
 
 class JsReminderStateListener {
@@ -66,12 +66,15 @@ public:
     };
 
 public:
-    using CallBackPair = std::pair<std::unique_ptr<NativeReference>, sptr<JsReminderStateCallback>>;
+    using CallBackPair = std::pair<napi_ref, sptr<JsReminderStateCallback>>;
 
     static JsReminderStateListener& GetInstance();
 
     napi_value RegisterReminderStateCallback(napi_env env, napi_callback_info info);
     napi_value UnRegisterReminderStateCallback(napi_env env, napi_callback_info info);
+
+    void RegisterReminderStateCallbackInner(napi_env env, void* data);
+    void UnRegisterReminderStateCallbackInner(napi_env env, void* data);
 
     void OnReminderState(napi_env env, napi_value callbackObj, const std::vector<Notification::ReminderState>& states);
 

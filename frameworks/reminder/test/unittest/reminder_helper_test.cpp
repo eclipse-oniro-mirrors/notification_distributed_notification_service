@@ -220,7 +220,7 @@ HWTEST_F(ReminderHelperTest, RegisterReminderState_00001, Function | SmallTest |
 {
     ReminderHelper reminderHelper;
     ErrCode ret = reminderHelper.RegisterReminderState(nullptr);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_NE(ret, (int)ERR_OK);
 }
 
 /**
