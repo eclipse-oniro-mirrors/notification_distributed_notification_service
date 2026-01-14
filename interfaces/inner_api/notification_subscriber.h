@@ -179,9 +179,6 @@ public:
     uint32_t GetSubscribedFlags() const;
 
     bool SyncLiveViewVoip(const std::string &deviceType, std::shared_ptr<Notification> &notification) const;
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    bool ProcessSyncDecision(const std::string &deviceType, std::shared_ptr<Notification> &notification) const;
-#endif
 
 private:
     class SubscriberImpl final : public AnsSubscriberStub {

@@ -3537,6 +3537,29 @@ const std::map<std::string, std::string> NotificationRequest::GetdeviceStatus() 
     return deviceStatus_;
 }
 
+void NotificationRequest::AddConsumedDevices(const std::string &deviceType)
+{
+    int32_t index = 0;
+    for (const std::string &device : NotificationConstant::DEVICESTYPES) {
+        if (device == deviceType) {
+            consumedDeviceFlag_ |= (1 << index);
+        }
+        index++;
+    }
+}
+
+bool NotificationRequest::IsConsumedDevices(const std::string &deviceType)
+{
+    int32_t index = 0;
+    for (const std::string &device : NotificationConstant::DEVICESTYPES) {
+        if (device == deviceType) {
+            return (consumedDeviceFlag_ & (1 << index)) != 0;
+        }
+        index++;
+    }
+    return false;
+}
+
 bool NotificationRequest::IsAtomicServiceNotification()
 {
     if (!IsCommonLiveView() || !IsAgentNotification()) {

@@ -244,6 +244,10 @@ private:
     bool IsSystemUser(int32_t userId);
     bool IsSubscribedBysubscriber(
         const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);
+    bool IsSubscribedByDeviceType(const std::shared_ptr<SubscriberRecord> &record,
+        const sptr<Notification> &notification, bool checkConsumedDevice);
+    sptr<Notification> GenerateSubscribedNotification(
+        const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);
     bool ConsumeRecordFilter(
         const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);
     bool IsNeedNotifySubscribers(const std::shared_ptr<SubscriberRecord> &record,

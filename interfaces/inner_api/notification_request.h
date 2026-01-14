@@ -1659,6 +1659,8 @@ private:
         const bool status,
         std::shared_ptr<NotificationFlags> &flag);
     std::string GetLiveViewStatusKey();
+    void AddConsumedDevices(const std::string &deviceType);
+    bool IsConsumedDevices(const std::string &deviceType);
 
 private:
     int32_t notificationId_ {0};
@@ -1685,6 +1687,7 @@ private:
     int32_t appIndex_ {0};
     uint32_t hashCodeGenerateType_ {0};
     uint32_t collaboratedReminderFlag_ {0};
+    uint32_t consumedDeviceFlag_ {0};
 
     std::string appInstanceKey_ {};
     std::string appName_ {};
@@ -1759,6 +1762,7 @@ private:
 
     uint32_t publishDelayTime_ {0};
     std::string priorityNotificationType_ {NotificationConstant::PriorityNotificationType::OTHER};
+    friend class NotificationSubscriberManager;
 };
 }  // namespace Notification
 }  // namespace OHOS

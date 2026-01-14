@@ -1553,5 +1553,491 @@ HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_subscribeSa
     ASSERT_TRUE(res);
 }
 #endif // DEBUG
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedByDeviceType_Normal, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+
+    shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
+        make_shared<map<string, shared_ptr<NotificationFlags>>>();
+    auto flags = std::make_shared<NotificationFlags>();
+    flags->SetReminderFlags(123);
+    (*notificationFlagsOfDevices)["testDevice"] = flags;
+    request->SetDeviceFlags(notificationFlagsOfDevices);
+    sptr<Notification> notification = new Notification(request);
+
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->deviceType = "testDevice";
+
+    EXPECT_TRUE(notificationSubscriberManager.IsSubscribedByDeviceType(record, notification, false));
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedByDeviceType_DeviceTypeNotMatch, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+
+    shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
+        make_shared<map<string, shared_ptr<NotificationFlags>>>();
+    (*notificationFlagsOfDevices)["testDevice"] = request->GetFlags();
+    request->SetDeviceFlags(notificationFlagsOfDevices);
+    sptr<Notification> notification(new Notification(request));
+
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = "testAnotherDevice";
+    EXPECT_FALSE(notificationSubscriberManager.IsSubscribedByDeviceType(record, notification, false));
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedByDeviceType_FlagsMapNull, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+    sptr<Notification> notification(new Notification(request));
+
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = "testDevice";
+    EXPECT_TRUE(notificationSubscriberManager.IsSubscribedByDeviceType(record, notification, false));
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedByDeviceType_FlagsMapEmpty, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+    shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
+        make_shared<map<string, shared_ptr<NotificationFlags>>>();
+    request->SetDeviceFlags(notificationFlagsOfDevices);
+    sptr<Notification> notification(new Notification(request));
+
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = "testDevice";
+    EXPECT_TRUE(notificationSubscriberManager.IsSubscribedByDeviceType(record, notification, false));
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedByDeviceType_DeviceTypeMatchedButNullDeviceFlag, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+
+    shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
+        make_shared<map<string, shared_ptr<NotificationFlags>>>();
+    (*notificationFlagsOfDevices)["testDevice"] = nullptr;
+    request->SetDeviceFlags(notificationFlagsOfDevices);
+    sptr<Notification> notification(new Notification(request));
+
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = NotificationConstant::PC_DEVICE_TYPE;
+    EXPECT_FALSE(notificationSubscriberManager.IsSubscribedByDeviceType(record, notification, false));
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedByDeviceType_CheckConsumedDeviceAndThirdPartyDevice, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+
+    shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
+        make_shared<map<string, shared_ptr<NotificationFlags>>>();
+    request->SetDeviceFlags(notificationFlagsOfDevices);
+    sptr<Notification> notification(new Notification(request));
+
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE;
+    EXPECT_TRUE(notificationSubscriberManager.IsSubscribedByDeviceType(record, notification, true));
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedByDeviceType_CheckConsumedDeviceAndUnconsumed, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+
+    shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
+        make_shared<map<string, shared_ptr<NotificationFlags>>>();
+    (*notificationFlagsOfDevices)["testDevice"] = nullptr;
+    request->SetDeviceFlags(notificationFlagsOfDevices);
+    sptr<Notification> notification(new Notification(request));
+
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = NotificationConstant::PC_DEVICE_TYPE;
+    EXPECT_FALSE(notificationSubscriberManager.IsSubscribedByDeviceType(record, notification, true));
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedByDeviceType_CheckConsumedDeviceAndConsumed, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+    request->AddConsumedDevices(NotificationConstant::PC_DEVICE_TYPE);
+
+    shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
+        make_shared<map<string, shared_ptr<NotificationFlags>>>();
+    (*notificationFlagsOfDevices)["testDevice"] = nullptr;
+    request->SetDeviceFlags(notificationFlagsOfDevices);
+    sptr<Notification> notification(new Notification(request));
+
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = NotificationConstant::PC_DEVICE_TYPE;
+    EXPECT_TRUE(notificationSubscriberManager.IsSubscribedByDeviceType(record, notification, true));
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedByDeviceType_DeviceTypeEmpty, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+    shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
+        make_shared<map<string, shared_ptr<NotificationFlags>>>();
+    (*notificationFlagsOfDevices)["testDevice"] = nullptr;
+    request->SetDeviceFlags(notificationFlagsOfDevices);
+    sptr<Notification> notification(new Notification(request));
+
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = "";
+    EXPECT_TRUE(notificationSubscriberManager.IsSubscribedByDeviceType(record, notification, false));
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedByDeviceType_CurrentDeviceType, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+    shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
+    make_shared<map<string, shared_ptr<NotificationFlags>>>();
+    (*notificationFlagsOfDevices)["testDevice"] = nullptr;
+    request->SetDeviceFlags(notificationFlagsOfDevices);
+    sptr<Notification> notification(new Notification(request));
+
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = NotificationConstant::CURRENT_DEVICE_TYPE;
+    bool result = notificationSubscriberManager.IsSubscribedByDeviceType(record, notification, false);
+    EXPECT_TRUE(result);
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedByDeviceType_RequestNull, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+    sptr<Notification> notification(new Notification(request));
+    notification->request_ = nullptr;
+
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = NotificationConstant::CURRENT_DEVICE_TYPE;
+    bool result = notificationSubscriberManager.IsSubscribedByDeviceType(record, notification, false);
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_Normal, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+
+    shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
+        make_shared<map<string, shared_ptr<NotificationFlags>>>();
+    auto flags = std::make_shared<NotificationFlags>();
+    flags->SetReminderFlags(123);
+    (*notificationFlagsOfDevices)["testDevice"] = flags;
+    request->SetDeviceFlags(notificationFlagsOfDevices);
+    sptr<Notification> notification = new Notification(request);
+
+    sptr<IAnsSubscriber> subscriber = new MockAnsSubscriber(new MockIRemoteObject());
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->deviceType = "testDevice";
+
+    sptr<Notification> result = notificationSubscriberManager.GenerateSubscribedNotification(record, notification);
+
+    EXPECT_NE(nullptr, result);
+    sptr<NotificationRequest> resultRequest = result->GetNotificationRequestPoint();
+    EXPECT_NE(nullptr, resultRequest);
+    EXPECT_EQ(123, resultRequest->GetFlags()->GetReminderFlags());
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_StubSubscriber, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+
+    shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
+        make_shared<map<string, shared_ptr<NotificationFlags>>>();
+    auto flags = std::make_shared<NotificationFlags>();
+    flags->SetReminderFlags(123);
+    (*notificationFlagsOfDevices)["testDevice"] = flags;
+    request->SetDeviceFlags(notificationFlagsOfDevices);
+    sptr<Notification> notification(new Notification(request));
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = "testDevice";
+
+    sptr<Notification> result = notificationSubscriberManager.GenerateSubscribedNotification(record, notification);
+
+    EXPECT_EQ(nullptr, result);
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_DeviceFlagsEmpty, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+    sptr<Notification> notification(new Notification(request));
+
+    sptr<IAnsSubscriber> subscriber = new MockAnsSubscriber(new MockIRemoteObject());
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = "testDevice";
+    sptr<Notification> result = notificationSubscriberManager.GenerateSubscribedNotification(record, notification);
+
+    EXPECT_NE(nullptr, result);
+    sptr<NotificationRequest> resultRequest = result->GetNotificationRequestPoint();
+    EXPECT_EQ(nullptr, resultRequest->GetFlags());
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_DeviceTypeEmpty, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+    shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
+        make_shared<map<string, shared_ptr<NotificationFlags>>>();
+    auto flags = std::make_shared<NotificationFlags>();
+    flags->SetReminderFlags(123);
+    (*notificationFlagsOfDevices)["testDevice"] = flags;
+    request->SetDeviceFlags(notificationFlagsOfDevices);
+    sptr<Notification> notification(new Notification(request));
+
+    sptr<IAnsSubscriber> subscriber = new MockAnsSubscriber(new MockIRemoteObject());
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = "";
+    sptr<Notification> result = notificationSubscriberManager.GenerateSubscribedNotification(record, notification);
+
+    EXPECT_NE(nullptr, result);
+    sptr<NotificationRequest> resultRequest = result->GetNotificationRequestPoint();
+    EXPECT_EQ(nullptr, resultRequest->GetFlags());
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_NullNotification, Level1)
+{
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = NotificationConstant::CURRENT_DEVICE_TYPE;
+    sptr<Notification> result = notificationSubscriberManager.GenerateSubscribedNotification(record, nullptr);
+
+    EXPECT_EQ(nullptr, result);
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_NullRequest, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+    sptr<Notification> notification(new Notification(request));
+    notification->request_ = nullptr;
+
+    sptr<IAnsSubscriber> subscriber = new MockAnsSubscriber(new MockIRemoteObject());
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = NotificationConstant::CURRENT_DEVICE_TYPE;
+    sptr<Notification> result = notificationSubscriberManager.GenerateSubscribedNotification(record, notification);
+
+    EXPECT_EQ(nullptr, result);
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_DeviceTypeMatchedButNullDeviceFlag, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+
+    shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
+        make_shared<map<string, shared_ptr<NotificationFlags>>>();
+    (*notificationFlagsOfDevices)["testDevice"] = nullptr;
+    request->SetDeviceFlags(notificationFlagsOfDevices);
+    sptr<Notification> notification(new Notification(request));
+
+    sptr<IAnsSubscriber> subscriber = new MockAnsSubscriber(new MockIRemoteObject());
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = "testAnotherDevice";
+
+    sptr<Notification> result = notificationSubscriberManager.GenerateSubscribedNotification(record, notification);
+
+    EXPECT_NE(nullptr, result);
+    sptr<NotificationRequest> resultRequest = result->GetNotificationRequestPoint();
+    EXPECT_EQ(nullptr, resultRequest->GetFlags());
+}
+#else
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedByDeviceType_UndefinedSmartReminderSupported, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    EXPECT_TRUE(notificationSubscriberManager.IsSubscribedByDeviceType(nullptr, nullptr, true));
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_Normal, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+    auto flags = std::make_shared<NotificationFlags>();
+    flags->SetReminderFlags(123);
+    request->SetFlags(flags);
+    sptr<Notification> notification(new Notification(request));
+    sptr<IAnsSubscriber> subscriber = new MockAnsSubscriber(new MockIRemoteObject());
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = "testDevice";
+
+    sptr<Notification> result = notificationSubscriberManager.GenerateSubscribedNotification(record, notification);
+
+    EXPECT_NE(nullptr, result);
+    sptr<NotificationRequest> resultRequest = result->GetNotificationRequestPoint();
+    EXPECT_NE(nullptr, resultRequest);
+    EXPECT_EQ(123, resultRequest->GetFlags()->GetReminderFlags());
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_StubSubscriber, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+    auto flags = std::make_shared<NotificationFlags>();
+    flags->SetReminderFlags(123);
+    request->SetFlags(flags);
+    sptr<Notification> notification(new Notification(request));
+
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+    record->deviceType = "testDevice";
+
+    sptr<Notification> result = notificationSubscriberManager.GenerateSubscribedNotification(record, notification);
+
+    EXPECT_EQ(nullptr, result);
+}
+#endif
 }  // namespace Notification
 }  // namespace OHOS
