@@ -29,20 +29,35 @@ static constexpr const char* REMINDER_STATE_IS_RESEND = "isMessageResent";
 static constexpr size_t ARG_COUNT_ONE = 1;
 struct CallBackContext {
     napi_env env {nullptr};
-    std::shared_ptr<NativeReference> callbackRef {nullptr};
+    napi_ref callbackRef {nullptr};
     OnReminderStateCb onReminderStateCb {nullptr};
     std::vector<ReminderState> states;
 };
 
-JsReminderStateCallback::JsReminderStateCallback(napi_env env, napi_value callbackObj, OnReminderStateCb callback)
+struct AsyncRegisterCallbackInfo {
+    explicit AsyncRegisterCallbackInfo(napi_env napiEnv) : env(napiEnv) {}
+    ~AsyncRegisterCallbackInfo()
+    {
+        if (asyncWork) {
+            napi_delete_async_work(env, asyncWork);
+            asyncWork = nullptr;
+        }
+    }
+
+    napi_env env {nullptr};
+    napi_async_work asyncWork {nullptr};
+    napi_ref jsCallbackRef {nullptr};
+    bool hasRef {false};  // for UnRegisterReminderStateCallback
+    CallbackPromiseInfo info;
+};
+
+JsReminderStateCallback::JsReminderStateCallback(napi_env env, napi_ref jsCallbackRef, OnReminderStateCb callback)
     : napiEnv_(env), reminderStateCb_(callback)
 {
-    if (napiEnv_ == nullptr || callbackObj == nullptr) {
+    if (napiEnv_ == nullptr || jsCallbackRef == nullptr) {
         return;
     }
-    napi_ref tmpRef = nullptr;
-    napi_create_reference(napiEnv_, callbackObj, 1, &tmpRef);
-    callbackRef_.reset(reinterpret_cast<NativeReference*>(tmpRef));
+    callbackRef_ = jsCallbackRef;
     napi_value callbackWorkName  = nullptr;
     napi_create_string_utf8(env, "ThreadSafeFunction in JsReminderStateCallback", NAPI_AUTO_LENGTH, &callbackWorkName);
     napi_create_threadsafe_function(env, nullptr, nullptr, callbackWorkName, 0, 1, nullptr, nullptr, nullptr,
@@ -72,8 +87,9 @@ void JsReminderStateCallback::ThreadSafeCallBack(napi_env env, napi_value jsCb, 
 {
     ANSR_LOGI("ThreadSafeCallBack start");
     CallBackContext* callBackContext = reinterpret_cast<CallBackContext*>(data);
-    callBackContext->onReminderStateCb(callBackContext->env,
-        callBackContext->callbackRef->GetNapiValue(), callBackContext->states);
+    napi_value jsCallback = nullptr;
+    napi_get_reference_value(env, callBackContext->callbackRef, &jsCallback);
+    callBackContext->onReminderStateCb(callBackContext->env, jsCallback, callBackContext->states);
     delete callBackContext;
 }
 
@@ -91,6 +107,13 @@ JsReminderStateListener& JsReminderStateListener::GetInstance()
 
 napi_value JsReminderStateListener::RegisterReminderStateCallback(napi_env env, napi_callback_info info)
 {
+    AsyncRegisterCallbackInfo* asyncCallbackInfo = new (std::nothrow) AsyncRegisterCallbackInfo(env);
+    if (asyncCallbackInfo == nullptr) {
+        ANSR_LOGE("Low memory.");
+        return NotificationNapi::Common::NapiGetNull(env);
+    }
+    std::unique_ptr<AsyncRegisterCallbackInfo> callbackPtr {asyncCallbackInfo};
+
     napi_value jsCallback = nullptr;
     if (!CheckCallbackParam(env, info, &jsCallback, true)) {
         ANSR_LOGE("Register reminder state callback parameter error.");
@@ -98,39 +121,45 @@ napi_value JsReminderStateListener::RegisterReminderStateCallback(napi_env env, 
         return nullptr;
     }
 
-    napi_ref tempRef = nullptr;
-    napi_create_reference(env, jsCallback, 1, &tempRef);
-    std::unique_ptr<NativeReference> callbackRef;
-    callbackRef.reset(reinterpret_cast<NativeReference*>(tempRef));
-    std::lock_guard<std::mutex> locker(jsCallBackListMutex_);
-    for (auto iter = jsCallBackList_.begin(); iter != jsCallBackList_.end(); iter++) {
-        bool isEqual = false;
-        napi_strict_equals(env, jsCallback, iter->first->GetNapiValue(), &isEqual);
-        if (isEqual) {
-            ANSR_LOGI("Register a exist callback.");
-            return NotificationNapi::Common::NapiGetNull(env);
-        }
-    }
-    auto reminderStateCb = [](napi_env env, napi_value callbackObj, std::vector<ReminderState> states) {
-        JsReminderStateListener::GetInstance().OnReminderState(env, callbackObj, states);
-    };
-    sptr<JsReminderStateCallback> callback =
-        new (std::nothrow) JsReminderStateCallback(env, jsCallback, reminderStateCb);
-    if (callback == nullptr) {
-        ANSR_LOGW("Register callback is nullptr.");
-        return NotificationNapi::Common::NapiGetNull(env);
-    }
-    int32_t ret = ReminderHelper::RegisterReminderState(callback);
-    if (ret != ERR_OK) {
-        ReminderCommon::HandleErrCode(env, ret);
-    } else {
-        jsCallBackList_.emplace_back(std::move(callbackRef), callback);
-    }
-    return NotificationNapi::Common::NapiGetNull(env);
+    // promise
+    napi_value promise = nullptr;
+    napi_deferred deferred = nullptr;
+    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
+    asyncCallbackInfo->info.deferred = deferred;
+    napi_create_reference(env, jsCallback, 1, &asyncCallbackInfo->jsCallbackRef);
+
+    // resource name
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "subscribeReminderState", NAPI_AUTO_LENGTH, &resourceName);
+
+    // create and queue async work
+    napi_create_async_work(env, nullptr, resourceName,
+        [](napi_env env, void* data) {
+            ANSR_LOGI("RegisterReminderStateCallback napi_create_async_work start");
+            JsReminderStateListener::GetInstance().RegisterReminderStateCallbackInner(env, data);
+        },
+        [](napi_env env, napi_status status, void *data) {
+            ANSR_LOGI("RegisterReminderStateCallback napi_create_async_work complete start");
+            auto asyncCallbackinfo = reinterpret_cast<AsyncRegisterCallbackInfo*>(data);
+            std::unique_ptr<AsyncRegisterCallbackInfo> callbackPtr { asyncCallbackinfo };
+            ReminderCommon::SetPromise(env, asyncCallbackinfo->info, NotificationNapi::Common::NapiGetNull(env));
+            ANSR_LOGI("RegisterReminderStateCallback napi_create_async_work complete end");
+        },
+        (void*)asyncCallbackInfo, &asyncCallbackInfo->asyncWork);
+    NAPI_CALL(env, napi_queue_async_work(env, asyncCallbackInfo->asyncWork));
+    callbackPtr.release();
+    return promise;
 }
 
 napi_value JsReminderStateListener::UnRegisterReminderStateCallback(napi_env env, napi_callback_info info)
 {
+    AsyncRegisterCallbackInfo* asyncCallbackInfo = new (std::nothrow) AsyncRegisterCallbackInfo(env);
+    if (asyncCallbackInfo == nullptr) {
+        ANSR_LOGE("Low memory.");
+        return NotificationNapi::Common::NapiGetNull(env);
+    }
+    std::unique_ptr<AsyncRegisterCallbackInfo> callbackPtr {asyncCallbackInfo};
+
     napi_value jsCallback = nullptr;
     if (!CheckCallbackParam(env, info, &jsCallback, false)) {
         ANSR_LOGE("UnRegister reminder state callback parameter error.");
@@ -138,36 +167,107 @@ napi_value JsReminderStateListener::UnRegisterReminderStateCallback(napi_env env
         return nullptr;
     }
 
+    // promise
+    napi_value promise = nullptr;
+    napi_deferred deferred = nullptr;
+    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
+    asyncCallbackInfo->info.deferred = deferred;
+    if (jsCallback != nullptr) {
+        asyncCallbackInfo->hasRef = true;
+        napi_create_reference(env, jsCallback, 1, &asyncCallbackInfo->jsCallbackRef);
+    }
+
+    // resource name
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "unsubscribeReminderState", NAPI_AUTO_LENGTH, &resourceName);
+
+    // create and queue async work
+    napi_create_async_work(env, nullptr, resourceName,
+        [](napi_env env, void* data) {
+            ANSR_LOGI("UnRegisterReminderStateCallback napi_create_async_work start");
+            JsReminderStateListener::GetInstance().UnRegisterReminderStateCallbackInner(env, data);
+        },
+        [](napi_env env, napi_status status, void *data) {
+            ANSR_LOGI("UnRegisterReminderStateCallback napi_create_async_work complete start");
+            auto asyncCallbackinfo = reinterpret_cast<AsyncRegisterCallbackInfo*>(data);
+            std::unique_ptr<AsyncRegisterCallbackInfo> callbackPtr { asyncCallbackinfo };
+            ReminderCommon::SetPromise(env, asyncCallbackinfo->info, NotificationNapi::Common::NapiGetNull(env));
+            ANSR_LOGI("UnRegisterReminderStateCallback napi_create_async_work complete end");
+        },
+        (void*)asyncCallbackInfo, &asyncCallbackInfo->asyncWork);
+    NAPI_CALL(env, napi_queue_async_work(env, asyncCallbackInfo->asyncWork));
+    callbackPtr.release();
+    return promise;
+}
+
+void JsReminderStateListener::RegisterReminderStateCallbackInner(napi_env env, void* data)
+{
+    auto asyncCallbackInfo = reinterpret_cast<AsyncRegisterCallbackInfo*>(data);
+    if (asyncCallbackInfo == nullptr) {
+        return;
+    }
+    napi_value jsCallback = nullptr;
+    NAPI_CALL_RETURN_VOID(env, napi_get_reference_value(env, asyncCallbackInfo->jsCallbackRef, &jsCallback));
     std::lock_guard<std::mutex> locker(jsCallBackListMutex_);
-    if (jsCallback == nullptr) {
+    for (auto iter = jsCallBackList_.begin(); iter != jsCallBackList_.end(); iter++) {
+        napi_value tmpCallback = nullptr;
+        napi_get_reference_value(env, iter->first, &tmpCallback);
+        bool isEqual = false;
+        napi_strict_equals(env, jsCallback, tmpCallback, &isEqual);
+        if (isEqual) {
+            ANSR_LOGI("Register a exist callback.");
+            return;
+        }
+    }
+    auto reminderStateCb = [](napi_env env, napi_value callbackObj, std::vector<ReminderState> states) {
+        JsReminderStateListener::GetInstance().OnReminderState(env, callbackObj, states);
+    };
+    sptr<JsReminderStateCallback> callback =
+        new (std::nothrow) JsReminderStateCallback(env, asyncCallbackInfo->jsCallbackRef, reminderStateCb);
+    if (callback == nullptr) {
+        ANSR_LOGW("Register callback is nullptr.");
+        return;
+    }
+    int32_t ret = ReminderHelper::RegisterReminderState(callback);
+    if (ret == ERR_OK) {
+        jsCallBackList_.emplace_back(asyncCallbackInfo->jsCallbackRef, callback);
+    }
+    asyncCallbackInfo->info.errorCode = ret;
+}
+
+void JsReminderStateListener::UnRegisterReminderStateCallbackInner(napi_env env, void* data)
+{
+    auto asyncCallbackInfo = reinterpret_cast<AsyncRegisterCallbackInfo*>(data);
+    if (asyncCallbackInfo == nullptr) {
+        return;
+    }
+    std::lock_guard<std::mutex> locker(jsCallBackListMutex_);
+    if (!asyncCallbackInfo->hasRef) {
         for (auto iter = jsCallBackList_.begin(); iter != jsCallBackList_.end(); iter++) {
-            int32_t ret = ReminderHelper::UnRegisterReminderState(iter->second);
-            if (ret != ERR_OK) {
-                ReminderCommon::HandleErrCode(env, ret);
-            }
+            ReminderHelper::UnRegisterReminderState(iter->second);
         }
         jsCallBackList_.clear();
-        return NotificationNapi::Common::NapiGetNull(env);
+        return;
     }
+    napi_value jsCallback = nullptr;
+    NAPI_CALL_RETURN_VOID(env, napi_get_reference_value(env, asyncCallbackInfo->jsCallbackRef, &jsCallback));
     bool isEqual = false;
     for (auto iter = jsCallBackList_.begin(); iter != jsCallBackList_.end(); iter++) {
+        napi_value tmpCallback = nullptr;
+        napi_get_reference_value(env, iter->first, &tmpCallback);
         isEqual = false;
-        napi_strict_equals(env, jsCallback, iter->first->GetNapiValue(), &isEqual);
+        napi_strict_equals(env, jsCallback, tmpCallback, &isEqual);
         if (!isEqual) {
             continue;
         }
-        int32_t ret = ReminderHelper::UnRegisterReminderState(iter->second);
-        if (ret != ERR_OK) {
-            ReminderCommon::HandleErrCode(env, ret);
-        }
+        ReminderHelper::UnRegisterReminderState(iter->second);
         jsCallBackList_.erase(iter);
         break;
     }
     if (!isEqual) {
         ANSR_LOGE("UnRegister reminder state callback error.");
-        ReminderCommon::HandleErrCode(env, ERR_REMINDER_PARAM_ERROR);
+        asyncCallbackInfo->info.errorCode = ERR_REMINDER_PARAM_ERROR;
     }
-    return NotificationNapi::Common::NapiGetNull(env);
 }
 
 void JsReminderStateListener::OnReminderState(napi_env env, napi_value callbackObj,
@@ -177,8 +277,10 @@ void JsReminderStateListener::OnReminderState(napi_env env, napi_value callbackO
     std::lock_guard<std::mutex> locker(jsCallBackListMutex_);
     bool isEqual = false;
     auto iter = jsCallBackList_.begin();
+    napi_value tmpCallback = nullptr;
     for (; iter != jsCallBackList_.end(); iter++) {
-        NAPI_CALL_RETURN_VOID(env, napi_strict_equals(env, callbackObj, iter->first->GetNapiValue(), &isEqual));
+        napi_get_reference_value(env, iter->first, &tmpCallback);
+        NAPI_CALL_RETURN_VOID(env, napi_strict_equals(env, callbackObj, tmpCallback, &isEqual));
         if (isEqual) {
             break;
         }
@@ -189,12 +291,8 @@ void JsReminderStateListener::OnReminderState(napi_env env, napi_value callbackO
     }
     std::unique_ptr<ReminderStateCbInfo> cbInfo = std::make_unique<ReminderStateCbInfo>(env);
     cbInfo->states = states;
-    napi_value resourceName = nullptr;
     NAPI_CALL_RETURN_VOID(env,
-        napi_create_string_latin1(env, "OnReminderState", NAPI_AUTO_LENGTH, &resourceName));
-
-    NAPI_CALL_RETURN_VOID(env,
-        napi_create_reference(env, iter->first->GetNapiValue(), 1, &cbInfo->callback));
+        napi_create_reference(env, tmpCallback, 1, &cbInfo->callback));
 
     ReminderStateCbInfo* ctx = cbInfo.get();
     auto task = [env, ctx]() {

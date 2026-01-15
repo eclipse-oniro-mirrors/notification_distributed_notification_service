@@ -174,11 +174,14 @@ ErrCode ReminderRequestClient::RegisterReminderState(const sptr<ReminderStateCal
             ANSR_LOGE("reminderStateListener_ is nullptr.");
             return ERR_ANS_NO_MEMORY;
         }
-        reminderStateListener_->RegisterReminderState(object);
-        if (!listenerRegistered_ && !reminderStateListener_->IsEmpty()) {
-            proxy->RegisterReminderState(reminderStateListener_);
+        if (!listenerRegistered_) {
+            int32_t ret = proxy->RegisterReminderState(reminderStateListener_);
+            if (ret != ERR_OK) {
+                return ret;
+            }
             listenerRegistered_ = true;
         }
+        reminderStateListener_->RegisterReminderState(object);
     }
     return ERR_OK;
 }

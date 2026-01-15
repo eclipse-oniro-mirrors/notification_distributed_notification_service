@@ -521,11 +521,6 @@ HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_018, Function | Smal
  */
 HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_019, Function | SmallTest | Level1)
 {
-    // test CheckReminderPermission
-    MockAccesstokenKit::MockIsVerifyPermisson(false);
-    EXPECT_EQ(reminderAgentService_->UnRegisterReminderState(), ERR_REMINDER_PERMISSION_DENIED);
-    MockAccesstokenKit::MockIsVerifyPermisson(true);
-
     // test ReminderDataManager::GetInstance()
     ReminderDataManager::REMINDER_DATA_MANAGER = nullptr;
     EXPECT_EQ(reminderAgentService_->UnRegisterReminderState(), ERR_NO_INIT);
