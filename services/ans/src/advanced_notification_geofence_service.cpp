@@ -1013,5 +1013,141 @@ bool AdvancedNotificationService::IsExistsGeofence(const sptr<NotificationReques
     }
     return false;
 }
+
+void AdvancedNotificationService::RemoveAllNotificationsByBundleNameFromTriggerNotificationList(
+    const std::string &bundleName)
+{
+    std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+    for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if ((*it) == nullptr || (*it)->bundleOption == nullptr) {
+            ++it;
+            continue;
+        }
+        if (((*it)->bundleOption->GetBundleName() == bundleName)) {
+            ProcForDeleteGeofenceLiveView(*it);
+            it = triggerNotificationList_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void AdvancedNotificationService::RemoveFromTriggerNotificationList(
+    const std::string &key)
+{
+    std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+    for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if ((*it) == nullptr || (*it)->notification == nullptr) {
+            ++it;
+            continue;
+        }
+        if ((*it)->notification->GetKey() == key) {
+            ProcForDeleteGeofenceLiveView(*it);
+            it = triggerNotificationList_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void AdvancedNotificationService::RemoveForDeleteAllFromTriggerNotificationList(
+    const std::string &key, int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+    for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if ((*it) == nullptr || (*it)->notification == nullptr) {
+            ++it;
+            continue;
+        }
+        if (((*it)->notification->GetKey() == key) &&
+            ((*it)->notification->GetUserId() == userId)) {
+            ProcForDeleteGeofenceLiveView(*it);
+            it = triggerNotificationList_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void AdvancedNotificationService::CancelContinuousTaskNotificationFromTriggerNotificationList(
+    const std::string &label, int32_t notificationId, int32_t uid)
+{
+    std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+    for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if ((*it) == nullptr || (*it)->bundleOption == nullptr || (*it)->notification == nullptr) {
+            ++it;
+            continue;
+        }
+        if (((*it)->bundleOption->GetBundleName().empty()) && ((*it)->bundleOption->GetUid() == uid) &&
+            ((*it)->notification->GetId() == notificationId) && ((*it)->notification->GetLabel() == label)) {
+            ProcForDeleteGeofenceLiveView(*it);
+            it = triggerNotificationList_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void AdvancedNotificationService::GetRecordFromTriggerNotificationList(const GetRecordParameter &parameter,
+    std::vector<std::shared_ptr<NotificationRecord>> &records)
+{
+    std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+    for (auto &record : triggerNotificationList_) {
+        if (record == nullptr || record->notification == nullptr || record->bundleOption == nullptr) {
+            continue;
+        }
+        if ((record->notification->GetLabel() == parameter.label) &&
+            (record->notification->GetId() == parameter.notificationId) &&
+            (record->bundleOption->GetUid() == parameter.uid) &&
+            (record->bundleOption->GetBundleName() == parameter.bundleName) &&
+            (record->notification->GetRecvUserId() == parameter.userId || parameter.userId == -1)) {
+            records.push_back(record);
+        }
+    }
+}
+
+void AdvancedNotificationService::RemoveAllFromTriggerNotificationList(const sptr<NotificationBundleOption> &bundle)
+{
+    if (bundle == nullptr) {
+        return;
+    }
+    std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+    for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if ((*it) == nullptr || (*it)->bundleOption == nullptr) {
+            ++it;
+            continue;
+        }
+        if ((*it)->bundleOption->GetBundleName() != bundle->GetBundleName() ||
+            (*it)->bundleOption->GetUid() != bundle->GetUid()) {
+            ProcForDeleteGeofenceLiveView(*it);
+            it = triggerNotificationList_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void AdvancedNotificationService::RemoveNtfBySlotFromTriggerNotificationList(
+    const sptr<NotificationBundleOption> &bundle, const sptr<NotificationSlot> &slot)
+{
+    if (bundle == nullptr || slot == nullptr) {
+        return;
+    }
+    std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+    for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if ((*it) == nullptr || (*it)->bundleOption == nullptr || (*it)->request == nullptr) {
+            ++it;
+            continue;
+        }
+        if (((*it)->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
+            ((*it)->bundleOption->GetUid() == bundle->GetUid()) &&
+            ((*it)->request->GetSlotType() == slot->GetType())) {
+            ProcForDeleteGeofenceLiveView(*it);
+            it = triggerNotificationList_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
 }  // namespace Notification
 }  // namespace OHOS
