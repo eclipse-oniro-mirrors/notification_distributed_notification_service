@@ -193,9 +193,6 @@ ErrCode AdvancedNotificationService::SetBundlePriorityConfigInner(
     if (aiResult == NOTIFICATION_AI_EXTENSION_WRAPPER->ErrorCode::ERR_FAIL) {
         return ERR_ANS_SERVICE_NOT_READY;
     }
-    if (aiResult != ERR_OK) {
-        return ERR_ANS_INVALID_PARAM;
-    }
     result = NotificationPreferences::GetInstance()->SetBundlePriorityConfig(bundle, value);
 #endif
     message.ErrorCode(result);
