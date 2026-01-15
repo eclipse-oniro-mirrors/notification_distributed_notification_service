@@ -876,6 +876,7 @@ std::string NotificationRequest::Dump()
             ", creatorUserId = " + std::to_string(creatorUserId_) + ", ownerUserId = " + std::to_string(ownerUserId_) +
             ", receiverUserId = " + std::to_string(receiverUserId_) + ", updateDeadLine = " +
             std::to_string(updateDeadLine_) + ", finishDeadLine = " + std::to_string(finishDeadLine_) +
+            ", triggerDeadLine = " + std::to_string(triggerDeadLine_) +
             ", sound = " + sound_ + ", distributed = " + std::to_string(distributedCollaborate_) + ":" +
             distributedHashCode_ + " flag: " + std::to_string(collaboratedReminderFlag_)  + ", unifiedGroupInfo_ = " +
             (unifiedGroupInfo_ ? unifiedGroupInfo_->Dump() : "null")+ " }";
@@ -1051,6 +1052,7 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["notificationControlFlags"] = notificationControlFlags_;
     jsonObject["updateDeadLine"]     = updateDeadLine_;
     jsonObject["finishDeadLine"]     = finishDeadLine_;
+    jsonObject["triggerDeadLine"]     = triggerDeadLine_;
     jsonObject["hashCodeGenerateType"]    = hashCodeGenerateType_;
     jsonObject["collaboratedReminderFlag"]    = collaboratedReminderFlag_;
     jsonObject["distributedHashCode"]    = distributedHashCode_;
@@ -1741,6 +1743,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteInt64(triggerDeadLine_)) {
+        ANS_LOGE("Failed to write max trigger time");
+        return false;
+    }
+
     return true;
 }
 
@@ -2119,6 +2126,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     updateDeadLine_ = parcel.ReadInt64();
     finishDeadLine_ = parcel.ReadInt64();
+    triggerDeadLine_ = parcel.ReadInt64();
 
     return true;
 }
@@ -2273,6 +2281,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->autoDeletedTime_ = other.autoDeletedTime_;
     this->updateDeadLine_ = other.updateDeadLine_;
     this->finishDeadLine_ = other.finishDeadLine_;
+    this->triggerDeadLine_ = other.triggerDeadLine_;
 
     this->creatorPid_ = other.creatorPid_;
     this->creatorUid_ = other.creatorUid_;
@@ -2464,6 +2473,10 @@ void NotificationRequest::ConvertJsonToNumExt(
 
     if (jsonObject.find("finishDeadLine") != jsonEnd && jsonObject.at("finishDeadLine").is_number_integer()) {
         target->finishDeadLine_ = jsonObject.at("finishDeadLine").get<int64_t>();
+    }
+
+    if (jsonObject.find("triggerDeadLine") != jsonEnd && jsonObject.at("triggerDeadLine").is_number_integer()) {
+        target->triggerDeadLine_ = jsonObject.at("triggerDeadLine").get<int64_t>();
     }
 
     if (jsonObject.find("ownerUserId") != jsonEnd && jsonObject.at("ownerUserId").is_number_integer()) {
@@ -3016,6 +3029,7 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
 
     updateDeadLine_ = oldRequest->updateDeadLine_;
     finishDeadLine_ = oldRequest->finishDeadLine_;
+    triggerDeadLine_ = oldRequest->triggerDeadLine_;
     if (autoDeletedTime_ == NotificationConstant::INVALID_AUTO_DELETE_TIME) {
         autoDeletedTime_ = oldRequest->autoDeletedTime_;
     }

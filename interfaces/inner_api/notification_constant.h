@@ -496,6 +496,8 @@ public:
 
     static constexpr uint64_t INVALID_TIMER_ID = 0ULL;
 
+    static constexpr uint64_t INVALID_DISPLAY_TIME = 0ULL;
+
     static constexpr int32_t ANS_UID = 5523;
 
     static const int32_t MAX_BTN_NUM = 3;
