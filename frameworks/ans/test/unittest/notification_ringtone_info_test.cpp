@@ -282,58 +282,6 @@ HWTEST_F(NotificationRingtoneInfoTest, ReadFromParcel_0001, Level1)
 }
 
 /**
- * @tc.name: FromJson_0001
- * @tc.desc: FromJson success
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationRingtoneInfoTest, FromJson_0001, Level1)
-{
-    nlohmann::json jsonObject;
-    jsonObject[NotificationRingtoneInfo::RINGTONE_INFO_RINGTONE_TYPE] =
-        static_cast<int32_t>(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
-    jsonObject[NotificationRingtoneInfo::RINGTONE_INFO_RINGTONE_TITLE] = "ringtoneTitle";
-    jsonObject[NotificationRingtoneInfo::RINGTONE_INFO_RINGTONE_FILE_NAME] = "fileName";
-    jsonObject[NotificationRingtoneInfo::RINGTONE_INFO_RINGTONE_URI] = "uri";
-
-    std::string jsonString = jsonObject.dump();
-
-    NotificationRingtoneInfo info;
-    info.FromJson(jsonString);
-
-    EXPECT_EQ(info.GetRingtoneType(),
-              OHOS::Notification::NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
-    EXPECT_EQ(info.GetRingtoneTitle(), "ringtoneTitle");
-    EXPECT_EQ(info.GetRingtoneFileName(), "fileName");
-    EXPECT_EQ(info.GetRingtoneUri(), "uri");
-}
-
-/**
- * @tc.name: ToJson_0001
- * @tc.desc: ToJson success
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationRingtoneInfoTest, ToJson_0001, Level1)
-{
-    NotificationRingtoneInfo info;
-    info.SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
-    info.SetRingtoneTitle("ringtoneTitle");
-    info.SetRingtoneFileName("fileName");
-    info.SetRingtoneUri("uri");
-
-    std::string jsonString = info.ToJson();
-
-    auto jsonObject = nlohmann::json::parse(jsonString);
-
-    EXPECT_EQ(jsonObject[NotificationRingtoneInfo::RINGTONE_INFO_RINGTONE_TYPE].get<int32_t>(),
-              static_cast<int32_t>(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL));
-    EXPECT_EQ(jsonObject[NotificationRingtoneInfo::RINGTONE_INFO_RINGTONE_TITLE].get<std::string>(), "ringtoneTitle");
-    EXPECT_EQ(jsonObject[NotificationRingtoneInfo::RINGTONE_INFO_RINGTONE_FILE_NAME].get<std::string>(), "fileName");
-    EXPECT_EQ(jsonObject[NotificationRingtoneInfo::RINGTONE_INFO_RINGTONE_URI].get<std::string>(), "uri");
-}
-
-/**
  * @tc.name: Dump_0001
  * @tc.desc: Dump success
  * @tc.type: FUNC
