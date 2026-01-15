@@ -22,10 +22,12 @@
 #define FUZZ_PROJECT_NAME "advancednotificationservice_fuzzer"
 
 namespace OHOS {
-    bool DoTestForAdvancedNotificationUtils(std::shared_ptr<Notification::AdvancedNotificationService> service,
+namespace Notification {
+    bool DoTestForAdvancedNotificationUtils(std::shared_ptr<AdvancedNotificationService> service,
         FuzzedDataProvider *fuzzData);
-    bool DoTestForAdvancedNotificationService(std::shared_ptr<Notification::AdvancedNotificationService> service,
+    bool DoTestForAdvancedNotificationService(std::shared_ptr<AdvancedNotificationService> service,
         FuzzedDataProvider *fuzzData);
+}
 }
 
 #endif // TEST_FUZZTEST_NOTIFICATIONUSERINPUTANNEX_FUZZER_NOTIFICATIONUSERINPUTANNEX_FUZZER_H
