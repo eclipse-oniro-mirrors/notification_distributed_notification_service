@@ -58,6 +58,7 @@ ohos_shared_library("ans_base") {
   deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
+    "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
