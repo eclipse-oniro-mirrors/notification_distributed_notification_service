@@ -128,7 +128,7 @@ AnsStatus AnsStatus::PermissionDeny(const std::string& msg, int32_t sceneId, int
 
 HaMetaMessage AnsStatus::BuildMessage(bool isPrint)
 {
-    return HaMetaMessage(branchId_, sceneId_).Path(path_)
+    return HaMetaMessage(sceneId_, branchId_).Path(path_)
         .ErrorCode(errCode_).Message(msg_, isPrint);
 }
 
