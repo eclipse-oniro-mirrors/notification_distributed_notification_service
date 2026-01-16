@@ -61,6 +61,7 @@ ohos_shared_library("notification_manager_ani") {
     "./src/sts_action_button.cpp",
     "./src/sts_badge_query_callback.cpp",
     "./src/sts_bundle_option.cpp",
+    "./src/sts_callback_promise.cpp",
     "./src/sts_common.cpp",
     "./src/sts_convert_other.cpp",
     "./src/sts_disturb_mode.cpp",

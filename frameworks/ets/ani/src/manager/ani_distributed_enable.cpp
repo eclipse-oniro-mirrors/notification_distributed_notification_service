@@ -18,368 +18,758 @@
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
-#include "sts_bundle_option.h"
 #include "sts_notification_manager.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
-void AniSetDistributedEnable(ani_env* env, ani_boolean enabled)
+using namespace arkts::concurrency_helpers;
+void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackDistributedInfo* asyncCallbackInfo)
 {
-    ANS_LOGD("AniSetDistributedEnable call,enable : %{public}d", enabled);
-    int returncode = Notification::NotificationHelper::EnableDistributed(NotificationSts::AniBooleanToBool(enabled));
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        ANS_LOGE("AniSetDistributedEnable error, errorCode: %{public}d", externalCode);
+    ANS_LOGD("Delete AsyncCallbackDistributedInfo Without Promise");
+    if (!asyncCallbackInfo) {
         return;
     }
-    ANS_LOGD("AniSetDistributedEnable end");
+    if (asyncCallbackInfo->info.callback != nullptr) {
+        ANS_LOGD("Delete callback reference");
+        env->GlobalReference_Delete(asyncCallbackInfo->info.callback);
+    }
+    if (asyncCallbackInfo->asyncWork != nullptr) {
+        ANS_LOGD("DeleteAsyncWork");
+        DeleteAsyncWork(env, asyncCallbackInfo->asyncWork);
+        asyncCallbackInfo->asyncWork = nullptr;
+    }
+    delete asyncCallbackInfo;
+    asyncCallbackInfo = nullptr;
 }
 
-ani_boolean AniIsDistributedEnabled(ani_env* env)
+void DeleteCallBackInfo(ani_env* env, AsyncCallbackDistributedInfo* asyncCallbackInfo)
 {
-    ANS_LOGD("AniIsDistributedEnabled call");
-    bool enabled = false;
-    int returncode = Notification::NotificationHelper::IsDistributedEnabled(enabled);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniIsDistributedEnabled error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return NotificationSts::BoolToAniBoolean(false);
+    ANS_LOGD("Delete AsyncCallbackDistributedInfo");
+    if (!asyncCallbackInfo) {
+        return;
     }
-    ANS_LOGD("AniIsDistributedEnabled end");
-    return NotificationSts::BoolToAniBoolean(enabled);
+    if (asyncCallbackInfo->info.resolve != nullptr) {
+        ANS_LOGD("Delete resolve reference");
+        env->GlobalReference_Delete(reinterpret_cast<ani_ref>(asyncCallbackInfo->info.resolve));
+    }
+    DeleteCallBackInfoWithoutPromise(env, asyncCallbackInfo);
 }
 
-ani_boolean AniIsDistributedEnabledByBundle(ani_env* env, ani_object obj)
+bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackDistributedInfo* asyncCallbackInfo)
 {
-    ANS_LOGD("AniIsDistributedEnabledByBundle call");
-    Notification::NotificationBundleOption option;
-    if (!NotificationSts::UnwrapBundleOption(env, obj, option)) {
-        NotificationSts::ThrowErrorWithMsg(env, "AniIsDistributedEnabledByBundle : error arguments.");
-        return NotificationSts::BoolToAniBoolean(false);
+    if (!NotificationSts::IsUndefine(env, callback)) {
+        ani_ref globalRef;
+        if (env->GlobalReference_Create(static_cast<ani_ref>(callback), &globalRef) != ANI_OK) {
+            NotificationSts::ThrowInternerErrorWithLogE(env, "create callback ref failed");
+            return false;
+        }
+        asyncCallbackInfo->info.callback = globalRef;
     }
-    bool enabled = false;
-    int returncode = Notification::NotificationHelper::IsDistributedEnableByBundle(option, enabled);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniIsDistributedEnabledByBundle error, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-    }
-    ANS_LOGD("AniIsDistributedEnabledByBundle end");
-    return NotificationSts::BoolToAniBoolean(enabled);
+    return true;
 }
 
-ani_boolean AniIsDistributedEnabledByBundleType(ani_env* env, ani_object obj, ani_string deviceType)
+bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackDistributedInfo* asyncCallbackInfo)
 {
-    ANS_LOGD("AniIsDistributedEnabledByBundleType call");
-    Notification::NotificationBundleOption option;
-    if (!NotificationSts::UnwrapBundleOption(env, obj, option)) {
-        NotificationSts::ThrowErrorWithMsg(env, "AniIsDistributedEnabledByBundleType : error arguments.");
-        return NotificationSts::BoolToAniBoolean(false);
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+        ANS_LOGE("GetEnv failed");
+        return false;
     }
-    std::string deviceTypeStr;
-    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
-        NotificationSts::ThrowErrorWithMsg(env, "deviceType parse failed!");
-        return NotificationSts::BoolToAniBoolean(false);
+    if (asyncCallbackInfo->info.returnCode != ERR_OK) {
+        ANS_LOGE("return ErrCode: %{public}d", asyncCallbackInfo->info.returnCode);
+        NotificationSts::CreateReturnData(*envCurr, asyncCallbackInfo->info);
+        DeleteCallBackInfoWithoutPromise(*envCurr, asyncCallbackInfo);
+        return false;
     }
-    ANS_LOGD("Cancel by deviceType:%{public}s", deviceTypeStr.c_str());
-
-    bool enabled = false;
-    int returncode = Notification::NotificationHelper::IsDistributedEnabledByBundle(option, deviceTypeStr, enabled);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniIsDistributedEnabledByBundle error, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-    }
-    ANS_LOGD("AniIsDistributedEnabledByBundle end");
-    return NotificationSts::BoolToAniBoolean(enabled);
+    return true;
 }
 
-void AniSetDistributedEnableByBundle(ani_env *env, ani_object obj, ani_boolean enable)
+void HandleDistribCallbackComplete(ani_env* env, WorkStatus status, void* data)
 {
-    ANS_LOGD("setDistributedEnableByBundle call");
-    int returncode = ERR_OK;
-    Notification::NotificationBundleOption option;
-    bool bFlag = NotificationSts::UnwrapBundleOption(env, obj, option);
-    if (bFlag) {
-        returncode = Notification::NotificationHelper::EnableDistributedByBundle(
-            option, NotificationSts::AniBooleanToBool(enable));
-    } else {
-        ANS_LOGE("sts setDistributedEnableByBundle ERROR_INTERNAL_ERROR");
-        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
-            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+    auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
+    if (!asyncCallbackInfo) {
+        ANS_LOGE("asyncCallbackInfo is nullptr");
         return;
     }
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("sts setDistributedEnableByBundle error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    ani_env *envCurr = nullptr;
+    if (!CheckCompleteEnvironment(&envCurr, asyncCallbackInfo)) {
         return;
     }
-    ANS_LOGD("sts setDistributedEnableByBundle end");
+    switch (asyncCallbackInfo->functionType) {
+        case IS_DISTURB_ENABLED:
+        case IS_DISTURB_ENABLED_BY_BUNDLE:
+        case IS_DISTURB_ENABLED_BY_BUNDLE_TYPE:
+        case IS_DISTURB_ENABLED_BY_SLOT:
+        case IS_DISTURB_ENABLED_BY_DEVICE_TYPE:
+        case IS_SMART_REMINDER_ENABLE: {
+            asyncCallbackInfo->info.result =
+                NotificationSts::CreateBoolean(envCurr, asyncCallbackInfo->isEnabled);
+            if (asyncCallbackInfo->info.result == nullptr) {
+                ANS_LOGE("CreateBoolean for isEnabled failed");
+                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            }
+            break;
+        }
+        case GET_DISTURB_ENABLED_DEVICE_LIST: {
+            asyncCallbackInfo->info.result = NotificationSts::GetAniStringArrayByVectorString(
+                envCurr, asyncCallbackInfo->deviceList);
+            if (asyncCallbackInfo->info.result == nullptr) {
+                ANS_LOGE("GetAniStringArrayByVectorString for deviceList failed");
+                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
+    DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
 }
 
-void AniSetDistributedEnableByBundleAndType(ani_env *env,
-    ani_object obj, ani_string deviceType, ani_boolean enable)
+ani_object AniIsDistributedEnabled(ani_env* env, ani_object callback)
 {
-    ANS_LOGD("sts setDistributedEnabledByBundle call");
-    std::string deviceTypeStr;
-    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
-        std::string msg = "Parameter verification failed";
-        ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
-        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
-        return;
-    }
-    int returncode = ERR_OK;
-    Notification::NotificationBundleOption option;
-    bool bFlag = NotificationSts::UnwrapBundleOption(env, obj, option);
-    if (bFlag) {
-        returncode = Notification::NotificationHelper::SetDistributedEnabledByBundle(option,
-            deviceTypeStr, NotificationSts::AniBooleanToBool(enable));
-    } else {
-        ANS_LOGE("sts setDistributedEnabledByBundle ERROR_INTERNAL_ERROR");
-        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
-            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-        return;
-    }
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("sts setDistributedEnabledByBundle error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return;
-    }
-    ANS_LOGD("sts setDistributedEnabledByBundle end");
-}
-
-void AniSetTargetDeviceStatus(ani_env* env, ani_string deviceType, ani_long status)
-{
-    ANS_LOGD("sts setTargetDeviceStatus call, id:%{public}lld", status);
-    std::string deviceTypeStr;
-    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
-        std::string msg = "Parameter verification failed";
-        ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
-        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
-        return;
-    }
-    ANS_LOGD("sts setTargetDeviceStatus id:%{public}lld deviceType:%{public}s", status, deviceTypeStr.c_str());
-    int32_t ret = Notification::NotificationHelper::SetTargetDeviceStatus(deviceTypeStr, status, DISTURB_DEFAULT_FLAG);
-    if (ret != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(ret);
-        ANS_LOGE("sts setTargetDeviceStatus error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return;
-    }
-    ANS_LOGD("sts setTargetDeviceStatus end");
-}
-
-ani_boolean AniIsSmartReminderEnabled(ani_env *env, ani_string deviceType)
-{
-    ANS_LOGD("isSmartReminderEnabled call");
-    bool allowed = false;
-    std::string deviceTypeStr;
-    if (env == nullptr || deviceType == nullptr) {
-        ANS_LOGE("Invalid env or deviceType is null");
-        return ANI_FALSE;
-    }
-    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
-        std::string msg = "Parameter verification failed";
-        ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
-        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
-        return ANI_FALSE;
-    }
-    int returncode = Notification::NotificationHelper::IsSmartReminderEnabled(deviceTypeStr, allowed);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("isSmartReminderEnabled error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-    }
-    ANS_LOGD("isSmartReminderEnabled end");
-    return NotificationSts::BoolToAniBoolean(allowed);
-}
-
-
-void AniSetSmartReminderEnable(ani_env *env, ani_string deviceType, ani_boolean enable)
-{
-    ANS_LOGD("setSmartReminderEnabled call");
-    std::string deviceTypeStr;
-    if (env == nullptr || deviceType == nullptr) {
-        ANS_LOGE("Invalid env or deviceType is null");
-        return;
-    }
-
-    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
-        std::string msg = "Parameter verification failed";
-        ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
-        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
-        return;
-    }
-    int returncode = Notification::NotificationHelper::SetSmartReminderEnabled(deviceTypeStr,
-        NotificationSts::AniBooleanToBool(enable));
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("setSmartReminderEnabled error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-    }
-    ANS_LOGD("setSmartReminderEnabled end");
-}
-
-void AniSetDistributedEnableBySlot(ani_env *env, ani_enum_item slot, ani_string deviceType, ani_boolean enable)
-{
-    ANS_LOGD("setDistributedEnabledBySlot enter ");
-    std::string deviceTypeStr;
-    Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
-    if (!NotificationSts::SlotTypeEtsToC(env, slot, slotType)) {
-        std::string msg = "Parameter verification failed";
-        ANS_LOGE("SlotTypeEtsToC failed. msg: %{public}s", msg.c_str());
-        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
-        return;
-    }
-    if (env == nullptr || deviceType == nullptr) {
-        ANS_LOGE("Invalid env or deviceType is null");
-        return;
-    }
-    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
-        std::string msg = "Parameter verification failed";
-        ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
-        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
-        return;
-    }
-    int returncode = ERR_OK;
-    returncode = Notification::NotificationHelper::SetDistributedEnabledBySlot(slotType,
-        deviceTypeStr, NotificationSts::AniBooleanToBool(enable));
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("setDistributedEnabledBySlot error, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-    }
-}
-
-ani_boolean AniIsDistributedEnabledBySlot(ani_env *env, ani_enum_item slot, ani_string deviceType)
-{
-    ANS_LOGD("isDistributedEnabledBySlot enter");
-    std::string deviceTypeStr;
-
-    Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
-    if (!NotificationSts::SlotTypeEtsToC(env, slot, slotType)) {
-        std::string msg = "Parameter verification failed";
-        ANS_LOGE("SlotTypeEtsToC failed. msg: %{public}s", msg.c_str());
-        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_INTERNAL_ERROR, msg);
-        return ANI_FALSE;
-    }
-    if (env == nullptr || deviceType == nullptr) {
-        ANS_LOGE("Invalid env or deviceType is null");
-        return ANI_FALSE;
-    }
-    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
-        std::string msg = "Parameter verification failed";
-        ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
-        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_INTERNAL_ERROR, msg);
-        return ANI_FALSE;
-    }
-    bool isEnable = false;
-    int returncode = Notification::NotificationHelper::IsDistributedEnabledBySlot(slotType, deviceTypeStr, isEnable);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("isDistributedEnabledBySlot error, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-    }
-    return isEnable ? ANI_TRUE : ANI_FALSE;
-}
-
-ani_boolean AniIsDistributedEnabledByDeviceType(ani_env *env, ani_string deviceType)
-{
-    ANS_LOGD("AniIsDistributedEnabledByDeviceType call");
-    bool enable = false;
-    std::string deviceTypeStr;
-    if (env == nullptr || deviceType == nullptr) {
-        ANS_LOGE("Invalid env or deviceType is null");
-        return ANI_FALSE;
-    }
-    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
-        ANS_LOGE("GetStringByAniString failed");
-        OHOS::NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERROR_INTERNAL_ERROR);
-        return ANI_FALSE;
-    }
-    int returncode = Notification::NotificationHelper::IsDistributedEnabled(deviceTypeStr, enable);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniIsDistributedEnabledByDeviceType error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-    }
-    ANS_LOGD("AniIsDistributedEnabledByDeviceType end");
-    return NotificationSts::BoolToAniBoolean(enable);
-}
-
-void AniSetDistributedEnableByBundles(ani_env *env, ani_object obj, ani_string deviceType)
-{
-    ANS_LOGD("AniSetDistributedEnableByBundles call");
-    std::string deviceTypeStr;
-    if (env == nullptr || deviceType == nullptr) {
-        ANS_LOGE("Invalid env or deviceType is null");
-        return;
-    }
-    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
-        ANS_LOGE("GetStringByAniString fail");
-        OHOS::NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERROR_INTERNAL_ERROR);
-        return;
-    }
-    std::vector<DistributedBundleOption> bundles;
-    if (!NotificationSts::UnwrapArrayDistributedBundleOption(env, obj, bundles)) {
-        ANS_LOGE("UnwrapArrayDistributedBundleOption fail");
-        OHOS::NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERROR_INTERNAL_ERROR);
-        return;
-    }
-    int returncode = Notification::NotificationHelper::SetDistributedBundleOption(bundles, deviceTypeStr);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniSetDistributedEnableByBundles error, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-    }
-    ANS_LOGD("AniSetDistributedEnableByBundles end");
-}
-
-void AniSetDistributedEnabled(ani_env *env, ani_boolean enable, ani_string deviceType)
-{
-    ANS_LOGD("AniSetDistributedEnabled call");
-    std::string deviceTypeStr;
-    if (env == nullptr || deviceType == nullptr) {
-        ANS_LOGE("Invalid env or deviceType is null");
-        return;
-    }
-    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
-        ANS_LOGE("GetStringByAniString fail");
-        OHOS::NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERROR_INTERNAL_ERROR);
-        return;
-    }
-    int returncode = Notification::NotificationHelper::SetDistributedEnabled(deviceTypeStr,
-        NotificationSts::AniBooleanToBool(enable));
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniSetDistributedEnabled error, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-    }
-    ANS_LOGD("AniSetDistributedEnabled end");
-}
-
-ani_object AniGetDistributedDeviceList(ani_env *env)
-{
-    ANS_LOGD("AniGetDistributedDeviceList call");
-    std::vector<std::string> deviceList;
-    int returncode = Notification::NotificationHelper::GetDistributedDevicelist(deviceList);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniGetDistributedDeviceList error, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-    }
-    ani_object deviceListArray = NotificationSts::GetAniStringArrayByVectorString(env, deviceList);
-    if (deviceListArray == nullptr) {
-        ANS_LOGE("deviceListArray nullptr");
-        OHOS::NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERROR_INTERNAL_ERROR);
+    ANS_LOGD("AniIsDistributedEnabled called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackDistributedInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
-    ANS_LOGD("AniGetDistributedDeviceList end");
-    return deviceListArray;
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->functionType = IS_DISTURB_ENABLED;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::IsDistributedEnabled(
+                    asyncCallbackInfo->isEnabled);
+            }
+        },
+        HandleDistribCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniIsDistributedEnabledByBundle(ani_env* env, ani_object obj, ani_object callback)
+{
+    ANS_LOGD("AniIsDistributedEnabledByBundle called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackDistributedInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    if (!NotificationSts::UnwrapBundleOption(env, obj, asyncCallbackInfo->option)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOption failed!");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->functionType = IS_DISTURB_ENABLED_BY_BUNDLE;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::IsDistributedEnableByBundle(
+                    asyncCallbackInfo->option, asyncCallbackInfo->isEnabled);
+            }
+        },
+        HandleDistribCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniIsDistributedEnabledByBundleType(ani_env* env, ani_object obj, ani_string deviceType,
+    ani_object callback)
+{
+    ANS_LOGD("AniIsDistributedEnabledByBundleType called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackDistributedInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    if (!NotificationSts::UnwrapBundleOption(env, obj, asyncCallbackInfo->option)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOption failed!");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    std::string deviceTypeStr;
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "deviceType parse failed!");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->functionType = IS_DISTURB_ENABLED_BY_BUNDLE_TYPE;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::IsDistributedEnabledByBundle(
+                    asyncCallbackInfo->option, asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->isEnabled);
+            }
+        },
+        HandleDistribCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniSetDistributedEnable(ani_env* env, ani_boolean enabled, ani_object callback)
+{
+    ANS_LOGD("AniSetDistributedEnable called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackDistributedInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    asyncCallbackInfo->isEnabled = NotificationSts::AniBooleanToBool(enabled);
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::EnableDistributed(
+                    asyncCallbackInfo->isEnabled);
+            }
+        },
+        HandleDistribCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniSetDistributedEnableByBundle(ani_env* env, ani_object obj, ani_boolean enabled, ani_object callback)
+{
+    ANS_LOGD("AniSetDistributedEnableByBundle called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackDistributedInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (!NotificationSts::UnwrapBundleOption(env, obj, asyncCallbackInfo->option)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOption failed");
+        return nullptr;
+    }
+    asyncCallbackInfo->isEnabled = NotificationSts::AniBooleanToBool(enabled);
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::EnableDistributedByBundle(
+                    asyncCallbackInfo->option, asyncCallbackInfo->isEnabled);
+            }
+        },
+        HandleDistribCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniSetDistributedEnableByBundleAndType(ani_env* env, ani_object obj, ani_string deviceType,
+    ani_boolean enabled, ani_object callback)
+{
+    ANS_LOGD("AniSetDistributedEnableByBundleAndType called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackDistributedInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse slotType failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+
+    if (!NotificationSts::UnwrapBundleOption(env, obj, asyncCallbackInfo->option)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOption failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    asyncCallbackInfo->isEnabled = NotificationSts::AniBooleanToBool(enabled);
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetDistributedEnabledByBundle(
+                    asyncCallbackInfo->option, asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->isEnabled);
+            }
+        },
+        HandleDistribCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniIsDistributedEnabledBySlot(ani_env* env, ani_enum_item slot, ani_string deviceType,
+    ani_object callback)
+{
+    ANS_LOGD("AniIsDistributedEnabledBySlot called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackDistributedInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    if (!NotificationSts::SlotTypeEtsToC(env, slot, asyncCallbackInfo->slotType)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse slotType failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse deviceType failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->functionType = IS_DISTURB_ENABLED_BY_SLOT;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::IsDistributedEnabledBySlot(
+                    asyncCallbackInfo->slotType, asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->isEnabled);
+            }
+        },
+        HandleDistribCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniSetDistributedEnableBySlot(ani_env *env, ani_enum_item slot, ani_string deviceType,
+    ani_boolean enable, ani_object callback)
+{
+    ANS_LOGD("AniSetDistributedEnableBySlot called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackDistributedInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    if (!NotificationSts::SlotTypeEtsToC(env, slot, asyncCallbackInfo->slotType)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse slotType failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse deviceType failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    asyncCallbackInfo->isEnabled = NotificationSts::AniBooleanToBool(enable);
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetDistributedEnabledBySlot(
+                    asyncCallbackInfo->slotType, asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->isEnabled);
+            }
+        },
+        HandleDistribCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniIsDistributedEnabledByDeviceType(ani_env* env, ani_string deviceType, ani_object callback)
+{
+    ANS_LOGD("AniIsDistributedEnabledByDeviceType called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackDistributedInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse deviceType failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->functionType = IS_DISTURB_ENABLED_BY_DEVICE_TYPE;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::IsDistributedEnabled(
+                    asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->isEnabled);
+            }
+        },
+        HandleDistribCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniSetDistributedEnabledByDeviceType(ani_env* env,
+    ani_boolean enable, ani_string deviceType, ani_object callback)
+{
+    ANS_LOGD("AniSetDistributedEnabledByDeviceType called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackDistributedInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse deviceType failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    asyncCallbackInfo->isEnabled = NotificationSts::AniBooleanToBool(enable);
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetDistributedEnabled(
+                    asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->isEnabled);
+            }
+        },
+        HandleDistribCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniSetDistributedEnableByBundles(ani_env* env, ani_object obj, ani_string deviceType, ani_object callback)
+{
+    ANS_LOGD("AniSetDistributedEnableByBundles called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackDistributedInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse deviceType failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (!NotificationSts::UnwrapArrayDistributedBundleOption(env, obj, asyncCallbackInfo->bundles)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapArrayDistributedBundleOption failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetDistributedBundleOption(
+                    asyncCallbackInfo->bundles, asyncCallbackInfo->deviceTypeStr);
+            }
+        },
+        HandleDistribCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniGetDistributedDeviceList(ani_env* env, ani_object callback)
+{
+    ANS_LOGD("AniGetDistributedDeviceList called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackDistributedInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->functionType = GET_DISTURB_ENABLED_DEVICE_LIST;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetDistributedDevicelist(
+                    asyncCallbackInfo->deviceList);
+            }
+        },
+        HandleDistribCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniSetTargetDeviceStatus(ani_env* env, ani_string deviceType, ani_long deviceStatus, ani_object callback)
+{
+    ANS_LOGD("AniSetTargetDeviceStatus called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackDistributedInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse deviceType failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    asyncCallbackInfo->status = static_cast<int32_t>(deviceStatus);
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetTargetDeviceStatus(
+                    asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->status, DISTURB_DEFAULT_FLAG);
+            }
+        },
+        HandleDistribCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniIsSmartReminderEnabled(ani_env* env, ani_string deviceType, ani_object callback)
+{
+    ANS_LOGD("AniIsSmartReminderEnabled called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackDistributedInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse deviceType failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->functionType = IS_SMART_REMINDER_ENABLE;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::IsSmartReminderEnabled(
+                    asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->isEnabled);
+            }
+        },
+        HandleDistribCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniSetSmartReminderEnable(ani_env* env, ani_string deviceType, ani_boolean enable, ani_object callback)
+{
+    ANS_LOGD("AniSetSmartReminderEnable called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackDistributedInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse deviceType failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    asyncCallbackInfo->isEnabled = NotificationSts::AniBooleanToBool(enable);
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetSmartReminderEnabled(
+                    asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->isEnabled);
+            }
+        },
+        HandleDistribCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 }
 }

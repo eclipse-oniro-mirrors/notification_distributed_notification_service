@@ -16,13 +16,30 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_PUBLISH_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_PUBLISH_H
 #include "ani.h"
+#include "concurrency_helpers.h"
+#include "notification_request.h"
+#include "sts_callback_promise.h"
+#include "sts_request.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
-void AniPublish(ani_env *env, ani_object obj);
-void AniPublishWithId(ani_env *env, ani_object obj, ani_int userId);
-void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representativeBundle, ani_int userId);
-void AniPublishAsBundleWithBundleOption(ani_env *env, ani_object representativeBundle, ani_object request);
+struct AsyncCallbackPublishInfo {
+    ani_vm* vm = nullptr;
+    arkts::concurrency_helpers::AsyncWork* asyncWork = nullptr;
+    OHOS::NotificationSts::CallbackPromiseInfo info;
+    std::shared_ptr<Notification::NotificationRequest> notificationRequest =
+        std::make_shared<Notification::NotificationRequest>();
+};
+
+void HandlePublishFunctionCallbackComplete(ani_env* env, arkts::concurrency_helpers::WorkStatus status, void* data);
+void ExecutePublishWork(ani_env* env, void* data);
+
+ani_object AniPublish(ani_env *env, ani_object obj, ani_object callback);
+ani_object AniPublishWithId(ani_env *env, ani_object obj, ani_int userId, ani_object callback);
+ani_object AniPublishAsBundle(ani_env *env, ani_object request, ani_string representativeBundle,
+    ani_int userId, ani_object callback);
+ani_object AniPublishAsBundleWithBundleOption(ani_env *env, ani_object representativeBundle,
+    ani_object request, ani_object callback);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 #endif

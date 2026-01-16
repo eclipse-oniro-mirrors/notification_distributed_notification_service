@@ -21,6 +21,7 @@
 #include "ani_common_util.h"
 #include "sts_throw_erro.h"
 #include "ani_ans_dialog_callback.h"
+#include "sts_common.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
@@ -126,7 +127,7 @@ bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> co
 
 void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSettingsInfo> info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("StsAsyncCompleteCallbackOpenSettings called");
     if (env == nullptr) {
         ANS_LOGE("env is null");
         return;
@@ -146,13 +147,11 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
         ANS_LOGD("Resolve. errorCode %{public}d", errorCode);
         ani_object ret = OHOS::AppExecFwk::CreateInt(env, errorCode);
         if (ret == nullptr) {
-            ANS_LOGE("createInt faild");
-            NotificationSts::ThrowErrorWithMsg(env, "");
+            NotificationSts::ThrowInternerErrorWithLogE(env, "createInt of errorCode faild.");
             return;
         }
         if (ANI_OK != (status = env->PromiseResolver_Resolve(info->resolver, static_cast<ani_ref>(ret)))) {
-            ANS_LOGE("PromiseResolver_Resolve faild. status %{public}d", status);
-            NotificationSts::ThrowErrorWithMsg(env, "");
+            NotificationSts::ThrowInternerErrorWithLogE(env, "PromiseResolver_Resolve faild.");
         }
     } else {
         std::string errMsg = OHOS::NotificationSts::FindAnsErrMsg(errorCode);
@@ -160,8 +159,7 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
         ani_error rejection =
             static_cast<ani_error>(OHOS::NotificationSts::CreateError(env, errorCode, errMsg));
         if (ANI_OK != (status = env->PromiseResolver_Reject(info->resolver, rejection))) {
-            ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
-            NotificationSts::ThrowErrorWithMsg(env, "");
+            NotificationSts::ThrowInternerErrorWithLogE(env, "PromiseResolver_Resolve faild.");
         }
     }
 }
@@ -176,7 +174,7 @@ ani_object AniOpenNotificationSettings(ani_env *env, ani_object content)
     }
     if (info->context == nullptr) {
         ANS_LOGE("sts AniOpenNotificationSettings context is null");
-        NotificationSts::ThrowErrorWithMsg(env, "");
+        NotificationSts::ThrowInternerErrorWithLogE(env, "");
         return nullptr;
     }
     std::string bundleName {""};

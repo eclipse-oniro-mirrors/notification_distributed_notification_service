@@ -57,7 +57,6 @@ std::string GetResizeStr(std::string instr, int32_t length)
             }
             endPos = i;
         }
-        
         return instr.substr(0, endPos);
     }
 }

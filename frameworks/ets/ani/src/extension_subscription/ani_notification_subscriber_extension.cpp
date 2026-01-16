@@ -71,8 +71,8 @@ ani_object AniGetSubscribeInfo(ani_env *env)
     }
     ani_object outAniObj;
     if (!NotificationSts::WrapNotificationExtensionSubscribeInfoArray(env, infos, outAniObj)) {
-        NotificationSts::ThrowErrorWithMsg(
-            env, "AniGetSubscribeInfo:failed to WrapNotificationExtensionSubscribeInfoArray");
+        NotificationSts::ThrowInternerErrorWithLogE(env,
+            "AniGetSubscribeInfo:failed to WrapNotificationExtensionSubscribeInfoArray");
         return nullptr;
     }
     ANS_LOGD("AniGetSubscribeInfo end");
@@ -94,8 +94,8 @@ ani_object AniGetAllSubscriptionBundles(ani_env *env)
 
     ani_object arrayBundles = nullptr;
     if (!NotificationSts::GetAniArrayBundleOptionV2(env, bundles, arrayBundles) || arrayBundles == nullptr) {
-        ANS_LOGE("AniGetAllSubscriptionBundles failed, arrayBundles is nullptr");
-        NotificationSts::ThrowErrorWithMsg(env, "AniGetAllSubscriptionBundles ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowInternerErrorWithLogE(env,
+            "AniGetAllSubscriptionBundles failed, arrayBundles is nullptr");
         return nullptr;
     }
     ANS_LOGD("AniGetAllSubscriptionBundles end");
@@ -184,8 +184,8 @@ ani_object AniGetUserGrantedEnabledBundles(ani_env *env, ani_object bundleOption
 
     ani_object arrayBundles = nullptr;
     if (!NotificationSts::GetAniArrayBundleOptionV2(env, bundles, arrayBundles) || arrayBundles == nullptr) {
-        ANS_LOGE("AniGetUserGrantedEnabledBundles failed, arrayBundles is nullptr");
-        NotificationSts::ThrowErrorWithMsg(env, "AniGetUserGrantedEnabledBundles ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowInternerErrorWithLogE(env,
+            "AniGetUserGrantedEnabledBundles failed, arrayBundles is nullptr");
         return nullptr;
     }
     ANS_LOGD("AniGetUserGrantedEnabledBundles end");
@@ -208,8 +208,8 @@ ani_object AniGetUserGrantedEnabledBundlesForSelf(ani_env *env)
     ani_object arrayBundles = nullptr;
     if (!NotificationSts::SetAniArrayGrantedBundleInfo(env, bundles, arrayBundles) ||
         arrayBundles == nullptr) {
-        ANS_LOGE("AniGetUserGrantedEnabledBundlesForSelf failed, arrayBundles is nullptr");
-        NotificationSts::ThrowErrorWithMsg(env, "AniGetUserGrantedEnabledBundlesForSelf ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowInternerErrorWithLogE(env,
+            "AniGetUserGrantedEnabledBundlesForSelf failed, arrayBundles is nullptr");
         return nullptr;
     }
     return arrayBundles;

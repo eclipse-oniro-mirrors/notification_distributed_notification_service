@@ -25,60 +25,171 @@
 
 namespace OHOS {
 namespace NotificationManagerSts {
-ani_object AniGetReminderInfoByBundles(ani_env *env, ani_object obj)
+using namespace arkts::concurrency_helpers;
+void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackReminderInfo* asyncCallbackInfo)
 {
-    ANS_LOGD("AniGetReminderInfoByBundles call");
-    int returncode = 0;
-    std::vector<BundleOption> bundles;
-    std::vector<ReminderInfo> reminders;
-    if (NotificationSts::UnwrapArrayBundleOption(env, obj, bundles)) {
-        returncode = Notification::NotificationHelper::GetReminderInfoByBundles(bundles, reminders);
-    } else {
-        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
-            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-        ANS_LOGE("AniGetReminderInfoByBundles failed : ERROR_INTERNAL_ERROR");
-        return nullptr;
-    }
-
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        ANS_LOGE("AniGetReminderInfoByBundles error, errorCode: %{public}d", externalCode);
-        return nullptr;
-    }
-
-    ani_object aniReminders = NotificationSts::GetAniArrayReminderInfo(env, reminders);
-    if (aniReminders == nullptr) {
-        ANS_LOGE("GetAniArrayReminderInfo failed, arrayBundles is nullptr");
-        NotificationSts::ThrowErrorWithMsg(env, "GetAniArrayReminderInfo ERROR_INTERNAL_ERROR");
-        return nullptr;
-    }
-
-    ANS_LOGD("AniGetReminderInfoByBundles end");
-    return aniReminders;
-}
-
-void AniSetReminderInfoByBundles(ani_env *env, ani_object obj)
-{
-    ANS_LOGD("AniSetReminderInfoByBundles call");
-    int returncode = 0;
-    std::vector<ReminderInfo> reminders;
-    if (NotificationSts::UnwrapArrayReminderInfo(env, obj, reminders)) {
-        returncode = Notification::NotificationHelper::SetReminderInfoByBundles(reminders);
-    } else {
-        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
-            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-        ANS_LOGE("AniSetReminderInfoByBundles failed : ERROR_INTERNAL_ERROR");
+    ANS_LOGD("Delete AsyncCallbackReminderInfo Without Promise");
+    if (!asyncCallbackInfo) {
         return;
     }
-
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        ANS_LOGE("AniSetReminderInfoByBundles error, errorCode: %{public}d", externalCode);
+    if (asyncCallbackInfo->info.callback != nullptr) {
+        ANS_LOGD("Delete callback reference");
+        env->GlobalReference_Delete(asyncCallbackInfo->info.callback);
     }
-    ANS_LOGD("AniSetReminderInfoByBundles end");
-    return;
+    if (asyncCallbackInfo->asyncWork != nullptr) {
+        ANS_LOGD("DeleteAsyncWork");
+        DeleteAsyncWork(env, asyncCallbackInfo->asyncWork);
+        asyncCallbackInfo->asyncWork = nullptr;
+    }
+    delete asyncCallbackInfo;
+    asyncCallbackInfo = nullptr;
+}
+
+void DeleteCallBackInfo(ani_env* env, AsyncCallbackReminderInfo* asyncCallbackInfo)
+{
+    ANS_LOGD("Delete AsyncCallbackReminderInfo");
+    if (!asyncCallbackInfo) {
+        return;
+    }
+    if (asyncCallbackInfo->info.resolve != nullptr) {
+        ANS_LOGD("Delete resolve reference");
+        env->GlobalReference_Delete(reinterpret_cast<ani_ref>(asyncCallbackInfo->info.resolve));
+    }
+    DeleteCallBackInfoWithoutPromise(env, asyncCallbackInfo);
+}
+
+bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackReminderInfo* asyncCallbackInfo)
+{
+    if (!NotificationSts::IsUndefine(env, callback)) {
+        ani_ref globalRef;
+        if (env->GlobalReference_Create(static_cast<ani_ref>(callback), &globalRef) != ANI_OK) {
+            NotificationSts::ThrowInternerErrorWithLogE(env, "create callback ref failed");
+            return false;
+        }
+        asyncCallbackInfo->info.callback = globalRef;
+    }
+    return true;
+}
+
+bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackReminderInfo* asyncCallbackInfo)
+{
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+        ANS_LOGE("GetEnv failed");
+        return false;
+    }
+    if (asyncCallbackInfo->info.returnCode != ERR_OK) {
+        ANS_LOGE("return ErrCode: %{public}d", asyncCallbackInfo->info.returnCode);
+        NotificationSts::CreateReturnData(*envCurr, asyncCallbackInfo->info);
+        DeleteCallBackInfoWithoutPromise(*envCurr, asyncCallbackInfo);
+        return false;
+    }
+    return true;
+}
+
+void HandleReminderFunctionCallbackComplete(ani_env* env, WorkStatus status, void* data)
+{
+    auto asyncCallbackInfo = static_cast<AsyncCallbackReminderInfo*>(data);
+    if (!asyncCallbackInfo) {
+        ANS_LOGE("asyncCallbackInfo is nullptr");
+        return;
+    }
+    ani_env *envCurr = nullptr;
+    if (!CheckCompleteEnvironment(&envCurr, asyncCallbackInfo)) {
+        return;
+    }
+    if (asyncCallbackInfo->isGetReminderInfo) {
+        asyncCallbackInfo->info.result =
+            NotificationSts::GetAniArrayReminderInfo(envCurr, asyncCallbackInfo->reminders);
+        if (asyncCallbackInfo->info.result == nullptr) {
+            ANS_LOGE("GetAniArrayReminderInfo failed");
+            asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+        }
+    }
+    NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
+    DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
+}
+
+ani_object AniGetReminderInfoByBundles(ani_env *env, ani_object obj, ani_object callback)
+{
+    ANS_LOGD("AniGetReminderInfoByBundles called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackReminderInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    if (!NotificationSts::UnwrapArrayBundleOption(env, obj, asyncCallbackInfo->bundles)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapArrayBundleOption failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->isGetReminderInfo = true;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackReminderInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetReminderInfoByBundles(
+                    asyncCallbackInfo->bundles, asyncCallbackInfo->reminders);
+            }
+        },
+        HandleReminderFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniSetReminderInfoByBundles(ani_env *env, ani_object obj, ani_object callback)
+{
+    ANS_LOGD("AniSetReminderInfoByBundles called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackReminderInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    if (!NotificationSts::UnwrapArrayReminderInfo(env, obj, asyncCallbackInfo->reminders)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapArrayReminderInfo failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackReminderInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetReminderInfoByBundles(
+                    asyncCallbackInfo->reminders);
+            }
+        },
+        HandleReminderFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 }
 }

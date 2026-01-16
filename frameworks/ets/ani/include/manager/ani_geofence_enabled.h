@@ -17,11 +17,23 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_GEOFENCE_ENABLED_H
 
 #include "ani.h"
+#include "concurrency_helpers.h"
+#include "sts_callback_promise.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
-void AniSetGeofenceEnabled(ani_env* env, ani_boolean bundleObj);
-ani_boolean AniIsGeofenceEnabled(ani_env *env);
+struct AsyncCallbackGeofenceInfo {
+    ani_vm* vm = nullptr;
+    arkts::concurrency_helpers::AsyncWork* asyncWork = nullptr;
+    OHOS::NotificationSts::CallbackPromiseInfo info;
+    bool isGeofence;
+};
+
+ani_object AniSetGeofenceEnabled(ani_env *env, ani_boolean enabled, ani_object callback);
+
+void HandleIsGeofenceEnabledComplete(ani_env* env, arkts::concurrency_helpers::WorkStatus status, void* data);
+ani_object AniIsGeofenceEnabled(ani_env *env, ani_object callback);
+
 } // namespace NotificationManagerSts
 } // namespace OHOS
 

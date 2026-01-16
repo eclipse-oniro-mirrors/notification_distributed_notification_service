@@ -16,10 +16,21 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_REMOVE_GROUP_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_REMOVE_GROUP_H
 #include "ani.h"
+#include "concurrency_helpers.h"
+#include "sts_callback_promise.h"
+#include "notification_bundle_option.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
-void AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_string groupName);
+struct AsyncCallbackGroupInfo {
+    ani_vm* vm = nullptr;
+    arkts::concurrency_helpers::AsyncWork* asyncWork = nullptr;
+    OHOS::NotificationSts::CallbackPromiseInfo info;
+    Notification::NotificationBundleOption option;
+    std::string groupNameStr;
+};
+void HandleRemoveGroupCallbackComplete(ani_env* env, arkts::concurrency_helpers::WorkStatus status, void* data);
+ani_object AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_string groupName, ani_object callback);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 #endif

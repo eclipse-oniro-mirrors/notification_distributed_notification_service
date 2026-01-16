@@ -25,390 +25,919 @@
 
 namespace OHOS {
 namespace NotificationManagerSts {
-namespace {
-constexpr int32_t RETURN_EXCEPTION_VALUE  = -1;
-} // namespace
-
-ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption)
+using namespace arkts::concurrency_helpers;
+void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackSlotInfo* asyncCallbackInfo)
 {
-    ANS_LOGD("sts GetSlotsByBundle enter");
-    int returncode = ERR_OK;
-    std::vector<sptr<Notification::NotificationSlot>> slots;
-    BundleOption option;
-    if (NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
-        returncode = Notification::NotificationHelper::GetNotificationSlotsForBundle(option, slots);
-    } else {
-        NotificationSts::ThrowErrorWithMsg(env, "sts GetSlotsByBundle ERROR_INTERNAL_ERROR");
-        return nullptr;
+    ANS_LOGD("Delete AsyncCallbackSlotInfo Without Promise");
+    if (!asyncCallbackInfo) {
+        return;
     }
-
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("sts GetSlotsByBundle error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return nullptr;
+    if (asyncCallbackInfo->info.callback != nullptr) {
+        ANS_LOGD("Delete callback reference");
+        env->GlobalReference_Delete(asyncCallbackInfo->info.callback);
     }
-    ani_array outAniObj;
-    if (!NotificationSts::WrapNotificationSlotArray(env, slots, outAniObj)) {
-        NotificationSts::ThrowErrorWithMsg(env, "GetSlotsByBundle:failed to WrapNotificationSlotArray");
-        return nullptr;
+    if (asyncCallbackInfo->asyncWork != nullptr) {
+        ANS_LOGD("DeleteAsyncWork");
+        DeleteAsyncWork(env, asyncCallbackInfo->asyncWork);
+        asyncCallbackInfo->asyncWork = nullptr;
     }
-    return outAniObj;
+    if (asyncCallbackInfo->slot) {
+        delete asyncCallbackInfo->slot;
+        asyncCallbackInfo->slot = nullptr;
+    }
+    delete asyncCallbackInfo;
+    asyncCallbackInfo = nullptr;
 }
 
-void AniAddSlots(ani_env *env, ani_object notificationSlotArrayObj)
+void DeleteCallBackInfo(ani_env* env, AsyncCallbackSlotInfo* asyncCallbackInfo)
 {
-    ANS_LOGD("AniAddSlots enter");
-    std::vector<Notification::NotificationSlot> slots;
-    if (!NotificationSts::UnwrapNotificationSlotArrayByAniObj(env, notificationSlotArrayObj, slots)) {
-        ANS_LOGE("UnwrapNotificationSlotArrayByAniObj failed");
-        NotificationSts::ThrowErrorWithMsg(env, "sts AddSlots ERROR_INTERNAL_ERROR");
+    ANS_LOGD("Delete AsyncCallbackSlotInfo");
+    if (!asyncCallbackInfo) {
         return;
     }
-    int returncode = Notification::NotificationHelper::AddNotificationSlots(slots);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniAddSlots failed, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return;
+    if (asyncCallbackInfo->info.resolve != nullptr) {
+        ANS_LOGD("Delete resolve reference");
+        env->GlobalReference_Delete(reinterpret_cast<ani_ref>(asyncCallbackInfo->info.resolve));
     }
-    ANS_LOGD("AniAddSlots leave");
+    DeleteCallBackInfoWithoutPromise(env, asyncCallbackInfo);
 }
 
-void AniAddSlotByNotificationSlot(ani_env *env, ani_object notificationSlotObj)
+bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackSlotInfo* asyncCallbackInfo)
 {
-    ANS_LOGD("AniAddSlotByNotificationSlot enter");
-    int returncode = ERR_OK;
-    Notification::NotificationSlot slot;
-    if (NotificationSts::UnwrapNotificationSlot(env, notificationSlotObj, slot)) {
-        returncode = Notification::NotificationHelper::AddNotificationSlot(slot);
-    } else {
-        NotificationSts::ThrowErrorWithMsg(env, "sts AddSlot ERROR_INTERNAL_ERROR");
-        return;
+    if (!NotificationSts::IsUndefine(env, callback)) {
+        ani_ref globalRef;
+        if (env->GlobalReference_Create(static_cast<ani_ref>(callback), &globalRef) != ANI_OK) {
+            NotificationSts::ThrowInternerErrorWithLogE(env, "create callback ref failed");
+            return false;
+        }
+        asyncCallbackInfo->info.callback = globalRef;
     }
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AddNotificationSlot failed, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return;
-    }
-    ANS_LOGD("AniAddSlotByNotificationSlot leave");
+    return true;
 }
 
-void AniAddSlotBySlotType(ani_env *env, ani_enum_item enumObj)
+bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackSlotInfo* asyncCallbackInfo)
+{
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+        ANS_LOGE("GetEnv failed");
+        return false;
+    }
+    if (asyncCallbackInfo->info.returnCode != ERR_OK) {
+        ANS_LOGE("return ErrCode: %{public}d", asyncCallbackInfo->info.returnCode);
+        NotificationSts::CreateReturnData(*envCurr, asyncCallbackInfo->info);
+        DeleteCallBackInfoWithoutPromise(*envCurr, asyncCallbackInfo);
+        return false;
+    }
+    return true;
+}
+
+void HandleSlotFunctionCallbackComplete(ani_env* env, WorkStatus status, void* data)
+{
+    auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+    if (!asyncCallbackInfo) {
+        ANS_LOGE("asyncCallbackInfo is nullptr");
+        return;
+    }
+    ani_env *envCurr = nullptr;
+    if (!CheckCompleteEnvironment(&envCurr, asyncCallbackInfo)) {
+        return;
+    }
+    switch (asyncCallbackInfo->functionType) {
+        case GET_SLOT_FLAGS_BY_BUNDLE: {
+            asyncCallbackInfo->info.result = NotificationSts::CreateLong(envCurr,
+                asyncCallbackInfo->slotFlags);
+            if (asyncCallbackInfo->info.result == nullptr) {
+                ANS_LOGE("CreateLong for slotFlags failed");
+                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            }
+            break;
+        }
+        case GET_SLOTS:
+        case GET_SLOTS_BY_BUNDLE: {
+            ani_array outAniObj;
+            if (!NotificationSts::WrapNotificationSlotArray(envCurr, asyncCallbackInfo->slots, outAniObj)) {
+                ANS_LOGE("WrapNotificationSlotArray failed");
+                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            }
+            asyncCallbackInfo->info.result = static_cast<ani_object>(outAniObj);
+            break;
+        }
+        case IS_NOTIFICATION_SLOT_ENABLED: {
+            asyncCallbackInfo->info.result =
+                NotificationSts::CreateBoolean(envCurr, asyncCallbackInfo->param.isEnabled);
+            if (asyncCallbackInfo->info.result == nullptr) {
+                ANS_LOGE("CreateBoolean for isEnabled failed");
+                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
+    DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
+}
+
+void HandleSlotFunctionCallbackComplete1(ani_env* env, WorkStatus status, void* data)
+{
+    auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+    if (!asyncCallbackInfo) {
+        ANS_LOGE("asyncCallbackInfo is nullptr");
+        return;
+    }
+    ani_env *envCurr = nullptr;
+    if (!CheckCompleteEnvironment(&envCurr, asyncCallbackInfo)) {
+        return;
+    }
+    switch (asyncCallbackInfo->functionType) {
+        case GET_SLOT:
+        case GET_SLOT_BY_BUNDLE:{
+            if (asyncCallbackInfo->slot == nullptr) {
+                ANS_LOGD("slot is null");
+                break;
+            }
+            if (!NotificationSts::WrapNotificationSlot(envCurr,
+                asyncCallbackInfo->slot, asyncCallbackInfo->info.result) ||
+                asyncCallbackInfo->info.result == nullptr) {
+                ANS_LOGE("WrapNotificationSlot failed");
+                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            }
+            break;
+        }
+        case GET_SLOT_NUM_BY_BUNDLE:{
+            asyncCallbackInfo->info.result = NotificationSts::CreateLong(envCurr,
+                asyncCallbackInfo->slotNum);
+            if (asyncCallbackInfo->info.result == nullptr) {
+                ANS_LOGE("CreateLong for slotNum failed");
+                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            }
+            break;
+        }
+        case GET_NOTIFICATION_SETTING:{
+            if (!NotificationSts::WrapGetNotificationSetting(envCurr,
+                asyncCallbackInfo->slotFlags, asyncCallbackInfo->info.result) ||
+                asyncCallbackInfo->info.result == nullptr) {
+                ANS_LOGE("WrapGetNotificationSetting failed");
+                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
+    DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
+}
+
+bool UnwrapEnableSlotParameter(ani_env* env, ani_object parameterObj, AsyncCallbackSlotInfo* asyncCallbackInfo)
+{
+    ANS_LOGD("UnwrapEnableSlotParameter called");
+    ani_ref bundleOption;
+    if (env->Object_GetPropertyByName_Ref(parameterObj, "bundle", &bundleOption) != ANI_OK) {
+        ANS_LOGE("Parse enable failed");
+        return false;
+    }
+    if (!(NotificationSts::UnwrapBundleOption(env,
+        static_cast<ani_object>(bundleOption), asyncCallbackInfo->param.option))) {
+        ANS_LOGE("UnwrapBundleOption failed");
+        return false;
+    }
+    ani_ref type;
+    if (env->Object_GetPropertyByName_Ref(parameterObj, "type", &type) != ANI_OK) {
+        ANS_LOGE("Parse enable failed");
+        return false;
+    }
+    if (!(NotificationSts::SlotTypeEtsToC(env,
+        static_cast<ani_enum_item>(type), asyncCallbackInfo->param.slotType))) {
+        ANS_LOGE("SlotTypeEtsToC failed");
+        return false;
+    }
+    ani_boolean enable = ANI_FALSE;
+    if (env->Object_GetPropertyByName_Boolean(parameterObj, "enable", &enable) != ANI_OK) {
+        ANS_LOGE("Parse enable failed");
+        return false;
+    }
+    asyncCallbackInfo->param.isEnabled = NotificationSts::AniBooleanToBool(enable);
+    ani_boolean isForceControl = ANI_FALSE;
+    if (env->Object_GetPropertyByName_Boolean(parameterObj, "isForceControl", &isForceControl) != ANI_OK) {
+        ANS_LOGE("Parse isForceControl failed");
+        return false;
+    }
+    asyncCallbackInfo->param.isForceControl = NotificationSts::AniBooleanToBool(isForceControl);
+    return true;
+}
+
+ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption, ani_object callback)
+{
+    ANS_LOGD("AniGetSlotsByBundle called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
+    }
+    if (!NotificationSts::UnwrapBundleOption(env, bundleOption, asyncCallbackInfo->param.option)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOptionfailed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->functionType = GET_SLOTS_BY_BUNDLE;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetNotificationSlotsForBundle(
+                    asyncCallbackInfo->param.option, asyncCallbackInfo->slots);
+            }
+        },
+        HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniAddSlots(ani_env *env, ani_object notificationSlotArrayObj, ani_object callback)
+{
+    ANS_LOGD("AniAddSlots called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
+    }
+    if (!NotificationSts::UnwrapNotificationSlotArrayByAniObj(env,
+        notificationSlotArrayObj, asyncCallbackInfo->param.slots)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapNotificationSlotArrayByAniObj failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::AddNotificationSlots(
+                    asyncCallbackInfo->param.slots);
+            }
+        },
+        HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniAddSlotByNotificationSlot(ani_env *env, ani_object notificationSlotObj, ani_object callback)
+{
+    ANS_LOGD("AniAddSlotByNotificationSlot called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
+    }
+    if (!NotificationSts::UnwrapNotificationSlot(env, notificationSlotObj, asyncCallbackInfo->param.slot)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapNotificationSlot failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::AddNotificationSlot(
+                    asyncCallbackInfo->param.slot);
+            }
+        },
+        HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniAddSlotBySlotType(ani_env *env, ani_enum_item enumObj, ani_object callback)
 {
     ANS_LOGD("AniAddSlotBySlotType enter");
-    Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
-    if (!NotificationSts::SlotTypeEtsToC(env, enumObj, slotType)) {
-        NotificationSts::ThrowErrorWithMsg(env, "AddSlotByType ERROR_INTERNAL_ERROR");
-        return;
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
     }
-    int returncode = Notification::NotificationHelper::AddSlotByType(slotType);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AddSlotByType failed, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return;
+    if (!NotificationSts::SlotTypeEtsToC(env, enumObj, asyncCallbackInfo->param.slotType)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "SlotTypeEtsToC failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    ANS_LOGD("AniAddSlotBySlotType leave");
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::AddSlotByType(
+                    asyncCallbackInfo->param.slotType);
+            }
+        },
+        HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 
-ani_object AniGetSlot(ani_env *env, ani_enum_item enumObj)
+ani_object AniGetSlot(ani_env *env, ani_enum_item enumObj, ani_object callback)
 {
-    ANS_LOGD("AniGetSlot enter");
-    ani_object nullObj = NotificationSts::GetNullObject(env);
-    Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
-    if (!NotificationSts::SlotTypeEtsToC(env, enumObj, slotType)) {
-        ANS_LOGE("SlotTypeEtsToC failed");
-        NotificationSts::ThrowErrorWithMsg(env, "sts GetSlot ERROR_INTERNAL_ERROR");
-        return nullObj;
+    ANS_LOGD("AniGetSlot called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
     }
-    sptr<Notification::NotificationSlot> slot = nullptr;
-    int returncode = Notification::NotificationHelper::GetNotificationSlot(slotType, slot);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("GetNotificationSlot failed, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return nullObj;
+    if (!NotificationSts::SlotTypeEtsToC(env, enumObj, asyncCallbackInfo->param.slotType)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "SlotTypeEtsToC failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    if (slot == nullptr) {
-        ANS_LOGD("AniGetSlot -> slot is nullptr");
-        return nullObj;
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    ani_object slotObj;
-    if (!NotificationSts::WrapNotificationSlot(env, slot, slotObj)) {
-        ANS_LOGE("WrapNotificationSlot faild");
-        NotificationSts::ThrowErrorWithMsg(env, "sts GetSlot ERROR_INTERNAL_ERROR");
-        return nullObj;
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->functionType = GET_SLOT;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetNotificationSlot(
+                    asyncCallbackInfo->param.slotType, asyncCallbackInfo->slot);
+            }
+        },
+        HandleSlotFunctionCallbackComplete1, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    ANS_LOGD("AniGetSlot leave");
-    return slotObj;
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 
-ani_object AniGetSlots(ani_env *env)
+ani_object AniGetSlots(ani_env *env, ani_object callback)
 {
     ANS_LOGD("AniGetSlots enter");
-    std::vector<sptr<Notification::NotificationSlot>> slots;
-    int returncode = Notification::NotificationHelper::GetNotificationSlots(slots);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniGetSlots -> error, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
         return nullptr;
     }
-    ani_array outAniObj;
-    if (!NotificationSts::WrapNotificationSlotArray(env, slots, outAniObj)) {
-        ANS_LOGE("WrapNotificationSlotArray faild");
-        NotificationSts::ThrowErrorWithMsg(env, "AniGetSlots:failed to WrapNotificationSlotArray");
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ANS_LOGD("AniGetSlots leave");
-    return outAniObj;
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->functionType = GET_SLOTS;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetNotificationSlots(
+                    asyncCallbackInfo->slots);
+            }
+        },
+        HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 
-void AniRemoveSlot(ani_env *env, ani_enum_item enumObj)
+ani_object AniRemoveSlot(ani_env *env, ani_enum_item enumObj, ani_object callback)
 {
-    ANS_LOGD("AniRemoveSlot enter");
-    Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
-    if (!NotificationSts::SlotTypeEtsToC(env, enumObj, slotType)) {
-        ANS_LOGE("SlotTypeEtsToC failed");
-        NotificationSts::ThrowErrorWithMsg(env, "sts GetSlot ERROR_INTERNAL_ERROR");
-        return;
+    ANS_LOGD("AniRemoveSlot called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
     }
-    int returncode = Notification::NotificationHelper::RemoveNotificationSlot(slotType);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniRemoveSlot failed, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return;
+    if (!NotificationSts::SlotTypeEtsToC(env, enumObj, asyncCallbackInfo->param.slotType)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "SlotTypeEtsToC failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    ANS_LOGD("AniRemoveSlot leave");
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::RemoveNotificationSlot(
+                    asyncCallbackInfo->param.slotType);
+            }
+        },
+        HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 
-void AniRemoveAllSlots(ani_env *env)
+ani_object AniRemoveAllSlots(ani_env *env, ani_object callback)
 {
-    ANS_LOGD("AniRemoveAllSlots enter");
-    int returncode = Notification::NotificationHelper::RemoveAllSlots();
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniRemoveAllSlots failed, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return;
+    ANS_LOGD("AniRemoveAllSlots called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
     }
-    ANS_LOGD("AniRemoveAllSlots leave");
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::RemoveAllSlots();
+            }
+        },
+        HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 
-void AniSetSlotByBundle(ani_env *env, ani_object bundleOptionObj, ani_object slotObj)
+ani_object AniSetSlotByBundle(ani_env *env, ani_object bundleOptionObj, ani_object slotObj, ani_object callback)
 {
     ANS_LOGD("AniSetSlotByBundle enter");
-    Notification::NotificationBundleOption option;
-    if (!NotificationSts::UnwrapBundleOption(env, bundleOptionObj, option)) {
-        ANS_LOGE("UnwrapBundleOption failed");
-        NotificationSts::ThrowErrorWithMsg(env, "sts AniSetSlotByBundle ERROR_INTERNAL_ERROR");
-        return;
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
     }
 
-    Notification::NotificationSlot slot;
-    if (!NotificationSts::UnwrapNotificationSlot(env, slotObj, slot)) {
-        ANS_LOGE("UnwrapNotificationSlot failed");
-        NotificationSts::ThrowErrorWithMsg(env, "sts SetSlotByBundle ERROR_INTERNAL_ERROR");
-        return;
+    if ((!NotificationSts::UnwrapBundleOption(env, bundleOptionObj, asyncCallbackInfo->param.option)) ||
+        (!NotificationSts::UnwrapNotificationSlot(env, slotObj, asyncCallbackInfo->param.slot))) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "AniSetSlotByBundle Unwrap param failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
 
-    std::vector<sptr<Notification::NotificationSlot>> slotsVct;
-    sptr<Notification::NotificationSlot> slotPtr = new (std::nothrow) Notification::NotificationSlot(slot);
-    if (slotPtr == nullptr) {
-        ANS_LOGE("Failed to create NotificationSlot ptr");
-        NotificationSts::ThrowErrorWithMsg(env, "sts AniSetSlotByBundle ERROR_INTERNAL_ERROR");
-        return;
+    asyncCallbackInfo->slot = new (std::nothrow) Notification::NotificationSlot(asyncCallbackInfo->param.slot);
+    if (asyncCallbackInfo->slot == nullptr) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo->slot is nullptr");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    slotsVct.emplace_back(slotPtr);
-
-    int returncode = Notification::NotificationHelper::UpdateNotificationSlots(option, slotsVct);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("UpdateNotificationSlots failed, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return;
+    asyncCallbackInfo->slots.emplace_back(asyncCallbackInfo->slot);
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    ANS_LOGD("AniSetSlotByBundle leave");
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::UpdateNotificationSlots(
+                    asyncCallbackInfo->param.option, asyncCallbackInfo->slots);
+            }
+        },
+        HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 
-ani_long AniGetSlotNumByBundle(ani_env *env, ani_object bundleOption)
+ani_object AniGetSlotNumByBundle(ani_env *env, ani_object bundleOption, ani_object callback)
 {
-    ANS_LOGD("AniGetSlotNumByBundle enter");
-    Notification::NotificationBundleOption option;
-    if (!NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
-        ANS_LOGE("UnwrapBundleOption failed");
-        NotificationSts::ThrowErrorWithMsg(env, "AniGetSlotNumByBundle ERROR_INTERNAL_ERROR");
-        return RETURN_EXCEPTION_VALUE;
+    ANS_LOGD("AniGetSlotNumByBundle called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
     }
-    uint64_t num = 0;
-    int returncode = Notification::NotificationHelper::GetNotificationSlotNumAsBundle(option, num);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("GetNotificationSlotNumAsBundle failed, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return RETURN_EXCEPTION_VALUE;
+    if (!NotificationSts::UnwrapBundleOption(env, bundleOption, asyncCallbackInfo->param.option)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOption failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    ani_long retNum = static_cast<ani_long>(num);
-    ANS_LOGD("AniGetSlotNumByBundle leave");
-    return retNum;
-}
-void AniSetNotificationEnableSlot(ani_env *env, ani_object bundleOption, ani_enum_item  type, ani_boolean enable)
-{
-    ANS_LOGD("AniSetNotificationEnableSlot enter ");
-    Notification::NotificationBundleOption option;
-    if (!NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
-        NotificationSts::ThrowErrorWithMsg(env, "AniSetNotificationEnableSlot ERROR_INTERNAL_ERROR");
-        return;
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
-    if (!NotificationSts::SlotTypeEtsToC(env, type, slotType)) {
-        NotificationSts::ThrowErrorWithMsg(env, "AniSetNotificationEnableSlot ERROR_INTERNAL_ERROR");
-        return;
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->functionType = GET_SLOT_NUM_BY_BUNDLE;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetNotificationSlotNumAsBundle(
+                    asyncCallbackInfo->param.option, asyncCallbackInfo->slotNum);
+            }
+        },
+        HandleSlotFunctionCallbackComplete1, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    bool isForceControl = false;
-    int returncode = Notification::NotificationHelper::SetEnabledForBundleSlot(option, slotType,
-        NotificationSts::AniBooleanToBool(enable), isForceControl);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("SetEnabledForBundleSlot failed, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return;
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
     }
-    ANS_LOGD("AniSetNotificationEnableSlot end");
+    return nullptr;
 }
 
-void AniSetNotificationEnableSlotWithForce(ani_env *env,
-    ani_object bundleOption, ani_enum_item  type, ani_boolean enable, ani_boolean isForceControl)
+ani_object AniSetNotificationEnableSlot(ani_env *env, ani_object bundleOption, ani_enum_item  type,
+    ani_boolean enable, ani_object callback)
 {
-    ANS_LOGD("AniSetNotificationEnableSlotWithForce enter ");
-    Notification::NotificationBundleOption option;
-    Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
-    if (!(NotificationSts::SlotTypeEtsToC(env, type, slotType))
-        || !(NotificationSts::UnwrapBundleOption(env, bundleOption, option))) {
-        NotificationSts::ThrowErrorWithMsg(env, "SetNotificationEnableSlotWithForce ERROR_INTERNAL_ERROR");
-        return;
+    ANS_LOGD("AniSetNotificationEnableSlot enter");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
     }
-    int returncode = Notification::NotificationHelper::SetEnabledForBundleSlot(option, slotType,
-        NotificationSts::AniBooleanToBool(enable), NotificationSts::AniBooleanToBool(isForceControl));
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniSetNotificationEnableSlotSync error, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    if (!NotificationSts::UnwrapBundleOption(env, bundleOption, asyncCallbackInfo->param.option)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "AniSetNotificationEnableSlot ERROR_INTERNAL_ERROR");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    ANS_LOGD("AniSetNotificationEnableSlotWithForce end");
+    if (!NotificationSts::SlotTypeEtsToC(env, type, asyncCallbackInfo->param.slotType)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "AniSetNotificationEnableSlot ERROR_INTERNAL_ERROR");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    asyncCallbackInfo->param.isEnabled = NotificationSts::AniBooleanToBool(enable);
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetEnabledForBundleSlot(
+                    asyncCallbackInfo->param.option, asyncCallbackInfo->param.slotType,
+                    asyncCallbackInfo->param.isEnabled, asyncCallbackInfo->param.isForceControl);
+            }
+        },
+        HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 
-ani_boolean AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, ani_enum_item  type)
+ani_object AniSetNotificationEnableSlotWithForce(ani_env *env, ani_object parameterObj, ani_object callback)
+{
+    ANS_LOGD("AniSetNotificationEnableSlotWithForce enter");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
+    }
+    if (!UnwrapEnableSlotParameter(env, parameterObj, asyncCallbackInfo)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapEnableSlotParameter failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetEnabledForBundleSlot(
+                    asyncCallbackInfo->param.option, asyncCallbackInfo->param.slotType,
+                    asyncCallbackInfo->param.isEnabled, asyncCallbackInfo->param.isForceControl);
+            }
+        },
+        HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, ani_enum_item type, ani_object callback)
 {
     ANS_LOGD("AniIsNotificationSlotEnabled enter");
-    Notification::NotificationBundleOption option;
-    Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
-    if (!NotificationSts::UnwrapBundleOption(env, bundleOption, option)
-        || !NotificationSts::SlotTypeEtsToC(env, type, slotType)) {
-        ANS_LOGE("UnwrapBundleOption failed");
-        NotificationSts::ThrowErrorWithMsg(env, "IsNotificationSlotEnabled : erro arguments.");
-        return ANI_FALSE;
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
     }
-
-    bool isEnable = false;
-    int returncode = Notification::NotificationHelper::GetEnabledForBundleSlot(option, slotType, isEnable);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("GetEnabledForBundleSlot failed, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    if (!NotificationSts::UnwrapBundleOption(env, bundleOption, asyncCallbackInfo->param.option)
+        || !NotificationSts::SlotTypeEtsToC(env, type, asyncCallbackInfo->param.slotType)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "IsNotificationSlotEnabled : Parse parameter failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    return isEnable ? ANI_TRUE : ANI_FALSE;
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->functionType = IS_NOTIFICATION_SLOT_ENABLED;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetEnabledForBundleSlot(
+                    asyncCallbackInfo->param.option, asyncCallbackInfo->param.slotType,
+                    asyncCallbackInfo->param.isEnabled);
+            }
+        },
+        HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 
-ani_long AniGetSlotFlagsByBundle(ani_env *env, ani_object obj)
+ani_object AniGetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_object callback)
 {
     ANS_LOGD("AniGetSlotFlagsByBundle enter");
-    Notification::NotificationBundleOption option;
-    if (!NotificationSts::UnwrapBundleOption(env, obj, option)) {
-        NotificationSts::ThrowErrorWithMsg(env, "AniGetSlotFlagsByBundle : erro arguments.");
-        return ANI_FALSE;
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
     }
-    uint32_t slotFlags = 0;
-    int returncode = Notification::NotificationHelper::GetNotificationSlotFlagsAsBundle(option, slotFlags);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("GetNotificationSlotFlagsAsBundle failed, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    if (!NotificationSts::UnwrapBundleOption(env, obj, asyncCallbackInfo->param.option)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOption failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    return slotFlags;
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->functionType = GET_SLOT_FLAGS_BY_BUNDLE;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetNotificationSlotFlagsAsBundle(
+                    asyncCallbackInfo->param.option, asyncCallbackInfo->slotFlags);
+            }
+        },
+        HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 
-void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_long slotFlags)
+ani_object AniSetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_long slotFlags, ani_object callback)
 {
     ANS_LOGD("AniSetSlotFlagsByBundle enter");
-    Notification::NotificationBundleOption option;
-    if (!NotificationSts::UnwrapBundleOption(env, obj, option)) {
-        NotificationSts::ThrowErrorWithMsg(env, "AniSetSlotFlagsByBundle : erro arguments.");
-        return;
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
     }
-    int returncode =
-        Notification::NotificationHelper::SetNotificationSlotFlagsAsBundle(option, static_cast<uint32_t>(slotFlags));
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniSetSlotFlagsByBundle -> error, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return;
+    if (!NotificationSts::UnwrapBundleOption(env, obj, asyncCallbackInfo->param.option)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOption failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
+    asyncCallbackInfo->slotFlags = static_cast<uint32_t>(slotFlags);
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetNotificationSlotFlagsAsBundle(
+                    asyncCallbackInfo->param.option, asyncCallbackInfo->slotFlags);
+            }
+        },
+        HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 
-ani_object AniGetSlotByBundle(ani_env *env, ani_object bundleOption, ani_enum_item type)
+ani_object AniGetSlotByBundle(ani_env *env, ani_object bundleOption, ani_enum_item type, ani_object callback)
 {
-    ANS_LOGD("AniGetSlotByBundle enter");
-    ani_object nullObj = NotificationSts::GetNullObject(env);
-    Notification::NotificationBundleOption option;
-    Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
-    if (!NotificationSts::UnwrapBundleOption(env, bundleOption, option)
-        || !NotificationSts::SlotTypeEtsToC(env, type, slotType)) {
-        NotificationSts::ThrowErrorWithMsg(env, "GetSlotByBundle : erro arguments.");
-        return nullObj;
+    ANS_LOGD("AniGetSlotByBundle called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
+        return nullptr;
     }
-    sptr<Notification::NotificationSlot> slot = nullptr;
-    int returncode = Notification::NotificationHelper::GetNotificationSlotForBundle(option, slotType, slot);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("GetNotificationSlotForBundle failed, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return nullObj;
+    if (!NotificationSts::UnwrapBundleOption(env, bundleOption, asyncCallbackInfo->param.option)
+        || !NotificationSts::SlotTypeEtsToC(env, type, asyncCallbackInfo->param.slotType)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "AniGetSlotByBundle : Parse parameter failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    if (slot == nullptr) {
-        return nullObj;
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    ani_object infoObj;
-    if (!NotificationSts::WrapNotificationSlot(env, slot, infoObj) || infoObj == nullptr) {
-        NotificationSts::ThrowErrorWithMsg(env, "WrapNotificationSlot Failed");
-        return nullObj;
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->functionType = GET_SLOT_BY_BUNDLE;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetNotificationSlotForBundle(
+                    asyncCallbackInfo->param.option, asyncCallbackInfo->param.slotType, asyncCallbackInfo->slot);
+            }
+        },
+        HandleSlotFunctionCallbackComplete1, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    return infoObj;
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 
-ani_object AniGetNotificationSetting(ani_env *env)
+ani_object AniGetNotificationSetting(ani_env *env, ani_object callback)
 {
     ANS_LOGD("AniGetNotificationSetting enter");
-    uint32_t slotFlags = 0;
-    int returncode = Notification::NotificationHelper::GetNotificationSettings(slotFlags);
-    ANS_LOGD("AniGetNotificationSetting slotFlags: %{public}d", slotFlags);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("GetNotificationSettings failed, errorCode: %{public}d", externalCode);
-        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
         return nullptr;
     }
-    ani_object infoObj;
-    if (!NotificationSts::WrapGetNotificationSetting(env, slotFlags, infoObj) || infoObj == nullptr) {
-        ANS_LOGE("WrapGetNotificationSetting failed");
-        NotificationSts::ThrowErrorWithMsg(env, "WrapGetNotificationSetting Failed");
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ANS_LOGD("AniGetNotificationSetting end");
-    return infoObj;
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->functionType = GET_NOTIFICATION_SETTING;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetNotificationSettings(
+                    asyncCallbackInfo->slotFlags);
+            }
+        },
+        HandleSlotFunctionCallbackComplete1, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 }
 }

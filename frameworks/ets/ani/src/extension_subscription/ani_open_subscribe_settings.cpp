@@ -146,13 +146,11 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
         ANS_LOGD("Resolve. errorCode %{public}d", errorCode);
         ani_object ret = OHOS::AppExecFwk::CreateInt(env, errorCode);
         if (ret == nullptr) {
-            ANS_LOGE("createInt faild");
-            NotificationSts::ThrowErrorWithMsg(env, "");
+            NotificationSts::ThrowInternerErrorWithLogE(env, "createInt faild");
             return;
         }
         if (ANI_OK != (status = env->PromiseResolver_Resolve(info->resolver, static_cast<ani_ref>(ret)))) {
-            ANS_LOGE("PromiseResolver_Resolve faild. status %{public}d", status);
-            NotificationSts::ThrowErrorWithMsg(env, "");
+            NotificationSts::ThrowInternerErrorWithLogE(env, "PromiseResolver_Resolve faild.");
         }
     } else {
         std::string errMsg = OHOS::NotificationSts::FindAnsErrMsg(errorCode);
@@ -160,8 +158,7 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
         ani_error rejection =
             static_cast<ani_error>(OHOS::NotificationSts::CreateError(env, errorCode, errMsg));
         if (ANI_OK != (status = env->PromiseResolver_Reject(info->resolver, rejection))) {
-            ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
-            NotificationSts::ThrowErrorWithMsg(env, "");
+            NotificationSts::ThrowInternerErrorWithLogE(env, "PromiseResolver_Resolve faild.");
         }
     }
 }

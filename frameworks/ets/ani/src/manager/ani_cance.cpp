@@ -18,173 +18,376 @@
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
-#include "sts_bundle_option.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
-void AniCancelAll(ani_env* env)
+using namespace arkts::concurrency_helpers;
+void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackCancelInfo* asyncCallbackInfo)
 {
-    ANS_LOGD("AniCancelAll notifications call");
-    int returncode = Notification::NotificationHelper::CancelAllNotifications();
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        ANS_LOGD("AniCancelAll -> error, errorCode: %{public}d", externalCode);
+    ANS_LOGD("Delete AsyncCallbackCancelInfo Without Promise");
+    if (!asyncCallbackInfo) {
+        return;
     }
-    ANS_LOGD("AniCancelAll notifications end");
+    if (asyncCallbackInfo->info.callback != nullptr) {
+        ANS_LOGD("Delete callback reference");
+        env->GlobalReference_Delete(asyncCallbackInfo->info.callback);
+    }
+    if (asyncCallbackInfo->asyncWork != nullptr) {
+        ANS_LOGD("DeleteAsyncWork");
+        DeleteAsyncWork(env, asyncCallbackInfo->asyncWork);
+        asyncCallbackInfo->asyncWork = nullptr;
+    }
+    delete asyncCallbackInfo;
+    asyncCallbackInfo = nullptr;
 }
 
-void AniCancelWithId(ani_env* env, ani_int id)
+void DeleteCallBackInfo(ani_env* env, AsyncCallbackCancelInfo* asyncCallbackInfo)
 {
-    ANS_LOGD("AniCancelWithId call,id : %{public}d", id);
-    int returncode = Notification::NotificationHelper::CancelNotification(static_cast<int32_t>(id));
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        ANS_LOGD("AniCancelWithId -> error, errorCode: %{public}d", externalCode);
+    ANS_LOGD("Delete AsyncCallbackCancelInfo");
+    if (!asyncCallbackInfo) {
+        return;
     }
-    ANS_LOGD("AniCancelWithId notifications end");
+    if (asyncCallbackInfo->info.resolve != nullptr) {
+        ANS_LOGD("Delete resolve reference");
+        env->GlobalReference_Delete(reinterpret_cast<ani_ref>(asyncCallbackInfo->info.resolve));
+    }
+    DeleteCallBackInfoWithoutPromise(env, asyncCallbackInfo);
 }
 
-void AniCancelWithIdLabel(ani_env* env, ani_int id, ani_string label)
+bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackCancelInfo* asyncCallbackInfo)
 {
-    ANS_LOGD("AniCancelWithIdLabel call");
+    if (!NotificationSts::IsUndefine(env, callback)) {
+        ani_ref globalRef;
+        if (env->GlobalReference_Create(static_cast<ani_ref>(callback), &globalRef) != ANI_OK) {
+            NotificationSts::ThrowInternerErrorWithLogE(env, "create callback ref failed");
+            return false;
+        }
+        asyncCallbackInfo->info.callback = globalRef;
+    }
+    return true;
+}
+
+bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackCancelInfo* asyncCallbackInfo)
+{
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+        ANS_LOGE("GetEnv failed");
+        return false;
+    }
+    if (asyncCallbackInfo->info.returnCode != ERR_OK) {
+        ANS_LOGE("return ErrCode: %{public}d", asyncCallbackInfo->info.returnCode);
+        NotificationSts::CreateReturnData(*envCurr, asyncCallbackInfo->info);
+        DeleteCallBackInfoWithoutPromise(*envCurr, asyncCallbackInfo);
+        return false;
+    }
+    return true;
+}
+
+void HandleCancelCallbackComplete(ani_env* env, WorkStatus status, void* data)
+{
+    auto asyncCallbackInfo = static_cast<AsyncCallbackCancelInfo*>(data);
+    if (!asyncCallbackInfo) {
+        ANS_LOGE("asyncCallbackInfo is nullptr");
+        return;
+    }
+    ani_env *envCurr = nullptr;
+    if (!CheckCompleteEnvironment(&envCurr, asyncCallbackInfo)) {
+        return;
+    }
+    NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
+    DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
+}
+
+ani_object AniCancelAll(ani_env *env, ani_object callback)
+{
+    ANS_LOGD("AniCancelAll enter");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackCancelInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncData = static_cast<AsyncCallbackCancelInfo*>(data);
+            if (asyncData) {
+                asyncData->info.returnCode = Notification::NotificationHelper::CancelAllNotifications();
+            }
+        },
+        HandleCancelCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniCancelWithId(ani_env *env, ani_int id, ani_object callback)
+{
+    ANS_LOGD("AniCancelWithId enter");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackCancelInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    };
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->notificationId = id;
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncData = static_cast<AsyncCallbackCancelInfo*>(data);
+            if (asyncData) {
+                asyncData->info.returnCode = Notification::NotificationHelper::CancelNotification(
+                    asyncData->notificationId);
+            }
+        },
+        HandleCancelCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+ani_object AniCancelWithIdLabel(ani_env *env, ani_int id, ani_string label, ani_object callback)
+{
+    ANS_LOGD("AniCancelWithIdLabel called");
     std::string tempStr;
     if (ANI_OK != NotificationSts::GetStringByAniString(env, label, tempStr)) {
-        NotificationSts::ThrowErrorWithMsg(env, "Label parse failed!");
-        return;
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse label failed!");
+        return nullptr;
     }
-    std::string labelStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);
-    ANS_LOGD("Cancel by label id:%{public}d label:%{public}s", id, labelStr.c_str());
-    int returncode = Notification::NotificationHelper::CancelNotification(labelStr, static_cast<int32_t>(id));
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        ANS_LOGD("AniCancelWithIdLabel -> error, errorCode: %{public}d", externalCode);
+    std::string labelStr = NotificationSts::GetResizeStr(tempStr, OHOS::NotificationSts::STR_MAX_SIZE);
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackCancelInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
     }
-    ANS_LOGD("AniCancelWithIdLabel end");
+    asyncCallbackInfo->notificationId = id;
+    asyncCallbackInfo->labelStr = labelStr;
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncData = static_cast<AsyncCallbackCancelInfo*>(data);
+            if (asyncData) {
+                asyncData->info.returnCode = Notification::NotificationHelper::CancelNotification(
+                    asyncData->labelStr, asyncData->notificationId);
+            }
+        },
+        HandleCancelCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 
-void AniCancelWithBundle(ani_env* env, ani_object bundleObj, ani_int id)
+ani_object AniCancelWithBundle(ani_env *env, ani_object bundleObj, ani_int id, ani_object callback)
 {
     ANS_LOGD("AniCancelWithBundle call");
-    Notification::NotificationBundleOption option;
-    if (!NotificationSts::UnwrapBundleOption(env, bundleObj, option)) {
-        NotificationSts::ThrowErrorWithMsg(env, "BundleOption parse failed!");
-        return;
+    BundleOption bundleOption;
+    if (!NotificationSts::UnwrapBundleOption(env, bundleObj, bundleOption)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOption failed!");
+        return nullptr;
     }
-    
-    ANS_LOGD("Cancel by bundle:%{public}s id:%{public}d",
-        option.GetBundleName().c_str(), id);
-    int returncode = Notification::NotificationHelper::CancelAsBundleWithAgent(option, static_cast<int32_t>(id));
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        ANS_LOGE("AniCancelWithBundle -> error, errorCode: %{public}d", externalCode);
+
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackCancelInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
     }
-    ANS_LOGD("AniCancelWithBundle end");
+    asyncCallbackInfo->bundleOption = bundleOption;
+    asyncCallbackInfo->notificationId = id;
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncData = static_cast<AsyncCallbackCancelInfo*>(data);
+            if (asyncData) {
+                asyncData->info.returnCode = Notification::NotificationHelper::CancelAsBundleWithAgent(
+                    asyncData->bundleOption, asyncData->notificationId);
+            }
+        },
+        HandleCancelCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 
-void AniCancelWithIdOptinalLabel(ani_env* env, ani_int id, ani_string label)
+ani_object AniCancelAsBundle(ani_env *env, ani_int id, ani_string representativeBundle,
+    ani_int userId, ani_object callback)
 {
-    ANS_LOGD("sts AniCancelWithIdOptinalLabel call, id:%{public}d", id);
-    ani_boolean isUndefined = ANI_FALSE;
-    env->Reference_IsUndefined(label, &isUndefined);
-    int32_t ret = -1;
-    if (isUndefined) {
-        ANS_LOGE("sts AniCancelWithIdOptinalLabel the label is undefined");
-        ret = Notification::NotificationHelper::CancelNotification(static_cast<int32_t>(id));
-    } else {
-        std::string tempStr;
-        if (ANI_OK != NotificationSts::GetStringByAniString(env, label, tempStr)) {
-            OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
-                NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-            ANS_LOGE("sts AniCancelWithIdOptinalLabel ERROR_INTERNAL_ERROR");
-            return;
-        }
-        std::string labelStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);
-        ANS_LOGD("sts AniCancelWithIdOptinalLabel id:%{public}d label:%{public}s", id, labelStr.c_str());
-        ret = Notification::NotificationHelper::CancelNotification(labelStr, id);
-    }
-    if (ret != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(ret);
-        ANS_LOGE("sts AniCancelWithIdOptinalLabel error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        return;
-    }
-    ANS_LOGD("sts AniCancelWithIdOptinalLabel end");
-}
-
-void AniCancelAsBundle(ani_env *env, ani_int id, ani_string representativeBundle, ani_int userId)
-{
-    ANS_LOGD("AniCancelAsBundle enter");
-    int32_t convertedId = static_cast<int32_t>(id);
-    int32_t UserId = static_cast<int32_t>(userId);
     std::string bundleStr;
-
     if (ANI_OK != NotificationSts::GetStringByAniString(env, representativeBundle, bundleStr)) {
-        ANS_LOGE("AniCancelAsBundle:: representativeBundle parse failed!");
-        NotificationSts::ThrowErrorWithMsg(env, "representativeBundle parse failed!");
-        return;
+        NotificationSts::ThrowInternerErrorWithLogE(env, "representativeBundle parse failed!");
+        return nullptr;
     }
-    ANS_LOGD("AniCancelAsBundle, convertedId: %{public}d, UserId: %{public}d, bundleStr: %{public}s",
-        convertedId, UserId, bundleStr.c_str());
-
-    int returncode = Notification::NotificationHelper::CancelAsBundle(convertedId, bundleStr, UserId);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGD("AniCancelAsBundle: CancelAsBundle retern erro. returncode: %{public}d, externalCode: %{public}d",
-            returncode, externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackCancelInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
     }
-
-    ANS_LOGD("AniCancelAsBundle end");
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->convertedId = id;
+    asyncCallbackInfo->userId = userId;
+    asyncCallbackInfo->bundleStr = bundleStr;
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncData = static_cast<AsyncCallbackCancelInfo*>(data);
+            if (asyncData) {
+                asyncData->info.returnCode = Notification::NotificationHelper::CancelAsBundle(
+                    asyncData->convertedId, asyncData->bundleStr, asyncData->userId);
+            }
+        },
+        HandleCancelCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 
-void AniCancelAsBundleWithBundleOption(ani_env *env, ani_object representativeBundle, ani_int id)
+ani_object AniCancelAsBundleWithBundleOption(ani_env *env, ani_object representativeBundle,
+    ani_int userId, ani_object callback)
 {
-    ANS_LOGD("AniCancelAsBundleWithBundleOption enter");
-    int32_t idTest = static_cast<int32_t>(id);
-    BundleOption option;
-    if (NotificationSts::UnwrapBundleOption(env, representativeBundle, option) != true) {
-        ANS_LOGE("AniPublishAsBundleWithBundleOption BundleOption parse failed!");
-        NotificationSts::ThrowErrorWithMsg(env, "AniPublishAsBundleWithBundleOption BundleOption parse failed!");
-        return;
+    ANS_LOGD("AniCancelAsBundleWithBundleOption called");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackCancelInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
     }
-
-    ANS_LOGD("AniPublishAsBundleWithBundleOption: bundle %{public}s, uid: %{public}d, id: %{public}d",
-        option.GetBundleName().c_str(), option.GetUid(), idTest);
-
-    int returncode =  Notification::NotificationHelper::CancelAsBundle(option, idTest);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGD("CancelAsBundle retern error. returncode: %{public}d, externalCode: %{public}d",
-            returncode, externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    if (NotificationSts::UnwrapBundleOption(env, representativeBundle, asyncCallbackInfo->bundleOption) != true) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOption failed!");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-
-    ANS_LOGD("AniCancelAsBundleWithBundleOption end");
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->userId = static_cast<int32_t>(userId);
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncData = static_cast<AsyncCallbackCancelInfo*>(data);
+            if (asyncData) {
+                asyncData->info.returnCode = Notification::NotificationHelper::CancelAsBundle(
+                    asyncData->bundleOption, asyncData->userId);
+            }
+        },
+        HandleCancelCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 
-void AniCancelGroup(ani_env *env, ani_string groupName)
+ani_object AniCancelGroup(ani_env *env, ani_string groupName, ani_object callback)
 {
-    ANS_LOGD("AniCancelGroup enter");
-
+    ANS_LOGD("AniCancelGroup called");
     std::string tempStr;
     if (ANI_OK != NotificationSts::GetStringByAniString(env, groupName, tempStr)) {
-        NotificationSts::ThrowErrorWithMsg(env, "AniCancelGroup: groupName parse failed!");
-        return;
+        NotificationSts::ThrowInternerErrorWithLogE(env, "Parse groupName failed!");
+        return nullptr;
     }
-    std::string groupNameStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);
-    ANS_LOGD("AniCancelGroup groupNameStr: %{public}s", groupNameStr.c_str());
-    int returncode = Notification::NotificationHelper::CancelGroup(groupNameStr);
-    if (returncode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGD("AniCancelGroup: CancelAsBundle retern erro. returncode: %{public}d, externalCode: %{public}d",
-            returncode, externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    std::string groupNameStr = NotificationSts::GetResizeStr(tempStr, OHOS::NotificationSts::STR_MAX_SIZE);
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackCancelInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
     }
-    ANS_LOGD("AniCancelGroup end");
+    env->GetVM(&asyncCallbackInfo->vm);
+    asyncCallbackInfo->groupNameStr = groupNameStr;
+    if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncData = static_cast<AsyncCallbackCancelInfo*>(data);
+            if (asyncData) {
+                asyncData->info.returnCode = Notification::NotificationHelper::CancelGroup(
+                    asyncData->groupNameStr);
+            }
+        },
+        HandleCancelCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 } // namespace NotificationManagerSts
 } // namespace OHOS
