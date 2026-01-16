@@ -762,7 +762,7 @@ AnsStatus AdvancedNotificationService::PublishPreparedNotificationInner(
         enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
     EXTENTION_WRAPPER->HandlePrivilegeMessage(bundleOption, request, isAgentController, isSilent);
     ANS_LOGI("SetFlags- HandlePrivilege Key = %{public}s flags = %{public}d",
-        request->GetKey().c_str(), request->GetFlags()->GetReminderFlags());
+        request->GetBaseKey("").c_str(), request->GetFlags()->GetReminderFlags());
 #endif
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1);
 #ifdef ENABLE_ANS_ADDITIONAL_CONTROL
@@ -1192,7 +1192,9 @@ void AdvancedNotificationService::DoNotDisturbUpdataReminderFlags(const std::sha
     record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
     record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
     record->notification->SetEnableVibration(false);
-    ANS_LOGI("SetFlags-DoNotDisturb, flags=%{public}d", record->request->GetFlags()->GetReminderFlags());
+    ANS_LOGI("SetFlags-DoNotDisturb, Key = %{public}s flags=%{public}d",
+        record->request->GetBaseKey("").c_str(),
+        record->request->GetFlags()->GetReminderFlags());
 }
 
 ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<NotificationRecord> &record)
@@ -1388,7 +1390,9 @@ void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::sh
         (notificationControlFlags & NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG) != 0) {
         record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG, false);
     }
-    ANS_LOGI("SetFlags-control,flags=%{public}d", record->request->GetFlags()->GetReminderFlags());
+    ANS_LOGI("SetFlags-control, Key = %{public}s flags=%{public}d",
+        record->request->GetBaseKey("").c_str(),
+        record->request->GetFlags()->GetReminderFlags());
 }
 
 ErrCode AdvancedNotificationService::CheckPublishPreparedNotification(
