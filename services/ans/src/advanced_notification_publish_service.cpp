@@ -865,7 +865,6 @@ AnsStatus AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifi
             if (result == ERR_OK) {
                 SendLiveViewUploadHiSysEvent(record, UploadStatus::CREATE);
             }
-            ClearSlotTypeData(record->request, ipcUid, CLEAR_SLOT_FROM_RSS);
             return;
         }
         bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
@@ -878,7 +877,6 @@ AnsStatus AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifi
             return;
         }
 
-        ClearSlotTypeData(record->request, ipcUid, CLEAR_SLOT_FROM_AVSEESAION);
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
         if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
