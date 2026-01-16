@@ -732,7 +732,7 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
         request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG, false);
     }
     ANS_LOGI("SetFlags-init,Key=%{public}s flags=%{public}d",
-        request->GetKey().c_str(), request->GetFlags()->GetReminderFlags());
+        request->GetBaseKey("").c_str(), request->GetFlags()->GetReminderFlags());
     HandleFlagsWithRequest(request, bundleOption);
 }
 
@@ -742,6 +742,8 @@ void AdvancedNotificationService::HandleFlagsWithRequest(const sptr<Notification
     NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     if (request->IsCommonLiveView()) {
         LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewReminderFlags(request);
+        ANS_LOGI("SetFlags- UpdateLiveviewReminderFlags Key=%{public}s flags = %{public}d",
+            request->GetBaseKey("").c_str(), request->GetFlags()->GetReminderFlags());
         LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewVoiceContent(request);
     } else if (!request->IsSystemLiveView()) {
         NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
@@ -753,8 +755,9 @@ void AdvancedNotificationService::HandleFlagsWithRequest(const sptr<Notification
             request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false, unAffectDevices);
         }
     }
-    ANS_LOGI("SetFlags- HandleFlag flags = %{public}d class = %{public}s silent = %{public}d",
-        request->GetFlags()->GetReminderFlags(), request->GetClassification().c_str(), enableStatus);
+    ANS_LOGI("SetFlags- HandleFlag Key=%{public}s flags = %{public}d class = %{public}s silent = %{public}d",
+        request->GetBaseKey("").c_str(), request->GetFlags()->GetReminderFlags(),
+        request->GetClassification().c_str(), enableStatus);
     if (request->GetClassification() == NotificationConstant::ANS_VOIP &&
         request->GetSlotType() == NotificationConstant::LIVE_VIEW) {
         return;
