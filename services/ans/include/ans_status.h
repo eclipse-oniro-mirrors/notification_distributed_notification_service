@@ -18,6 +18,7 @@
 
 #include <string>
 #include <cstdint>
+#include <climits>
 #include "notification_analytics_util.h"
 
 namespace OHOS {
@@ -55,8 +56,8 @@ private:
     std::string FormatSceneBranchStr(int32_t sceneId, int32_t branchId);
     int32_t errCode_{0};
     std::string msg_{};
-    int32_t branchId_{-1};
-    int32_t sceneId_{-1};
+    int32_t branchId_{INT32_MAX};
+    int32_t sceneId_{INT32_MAX};
     std::string path_{};
 };
 }  // namespace Notification

@@ -36,6 +36,7 @@
 #include "advanced_notification_inline.h"
 #include "hitrace_util.h"
 #include "ffrt.h"
+#include <climits>
 
 namespace OHOS {
 namespace Notification {
@@ -453,7 +454,7 @@ void NotificationAnalyticsUtil::ReportPublishFailedEvent(const sptr<Notification
     if (request == nullptr) {
         return;
     }
-    if (message.sceneId_ == -1 || message.branchId_ == -1) {
+    if (message.sceneId_ == INT32_MAX || message.branchId_ == INT32_MAX) {
         return;
     }
     MakeRequestBundle(request);
