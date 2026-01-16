@@ -1688,17 +1688,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
 ErrCode AdvancedNotificationService::RemoveFromNotificationList(
     const std::string &key, sptr<Notification> &notification, bool isCancel, int32_t removeReason)
 {
-    {
-        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
-        for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
-            if ((*it)->notification->GetKey() == key) {
-                ProcForDeleteGeofenceLiveView(*it);
-                it = triggerNotificationList_.erase(it);
-            } else {
-                ++it;
-            }
-        }
-    }
+    RemoveFromTriggerNotificationList(key);
 
     for (auto record : notificationList_) {
         if (record->notification->GetKey() != key) {
@@ -1731,18 +1721,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
 ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
     const std::string &key, const int32_t &userId, sptr<Notification> &notification, bool removeAll)
 {
-    {
-        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
-        for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
-            if (((*it)->notification->GetKey() == key) &&
-                ((*it)->notification->GetUserId() == userId)) {
-                ProcForDeleteGeofenceLiveView(*it);
-                it = triggerNotificationList_.erase(it);
-            } else {
-                ++it;
-            }
-        }
-    }
+    RemoveForDeleteAllFromTriggerNotificationList(key, userId);
 
     for (auto record : notificationList_) {
         if ((record->notification->GetKey() == key) &&
@@ -1823,18 +1802,14 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetRecordFromNo
     int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName, int32_t userId)
 {
     std::vector<std::shared_ptr<NotificationRecord>> records;
-    {
-        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
-        for (auto &record : triggerNotificationList_) {
-            if ((record->notification->GetLabel() == label) &&
-                (record->notification->GetId() == notificationId) &&
-                (record->bundleOption->GetUid() == uid) &&
-                (record->bundleOption->GetBundleName() == bundleName) &&
-                (record->notification->GetRecvUserId() == userId || userId == -1)) {
-                records.push_back(record);
-            }
-        }
-    }
+    GetRecordParameter parameter{
+        .notificationId = notificationId,
+        .uid = uid,
+        .label = label,
+        .bundleName = bundleName,
+        .userId = userId
+    };
+    GetRecordFromTriggerNotificationList(parameter, records);
     if (records.size() == 1) {
         return records.front();
     }
@@ -2204,17 +2179,7 @@ AnsStatus AdvancedNotificationService::PushCheck(const sptr<NotificationRequest>
 void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode, int32_t reason)
 {
     ANS_LOGD("called");
-    {
-        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
-        for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
-            if ((*it)->notification->GetKey() == hashCode) {
-                ProcForDeleteGeofenceLiveView(*it);
-                it = triggerNotificationList_.erase(it);
-            } else {
-                ++it;
-            }
-        }
-    }
+    RemoveFromTriggerNotificationList(hashCode);
 
     for (const auto &record : notificationList_) {
         if (!record->request) {

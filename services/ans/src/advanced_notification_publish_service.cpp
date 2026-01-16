@@ -1354,17 +1354,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
         ANS_LOGD("ffrt enter!");
-        {
-            std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
-            for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
-                if (((*it)->bundleOption->GetBundleName() == bundleName)) {
-                    ProcForDeleteGeofenceLiveView(*it);
-                    it = triggerNotificationList_.erase(it);
-                } else {
-                    ++it;
-                }
-            }
-        }
+        RemoveAllNotificationsByBundleNameFromTriggerNotificationList(bundleName);
 
         for (auto record : notificationList_) {
             if (record == nullptr) {

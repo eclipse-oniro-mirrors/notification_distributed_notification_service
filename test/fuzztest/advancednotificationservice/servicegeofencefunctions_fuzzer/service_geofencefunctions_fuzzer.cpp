@@ -31,6 +31,7 @@ namespace {
     constexpr uint8_t COORDINATE_SYSTEM_TYPE_SIZE = 2;
     constexpr uint8_t MONITOR_EVENT_SIZE = 2;
     constexpr uint8_t CONFIG_PATH_SIZE = 2;
+    constexpr uint8_t SLOT_TYPE_SIZE = 10;
     constexpr uint32_t INTEGRAL_RANGE_SIZE = 100;
 }
 
@@ -182,6 +183,95 @@ namespace {
         service->SelfClean();
         return true;
     }
+
+    void GenerateTriggerNotificationList(FuzzedDataProvider *fuzzData)
+    {
+        auto service = AdvancedNotificationService::GetInstance();
+        for (int i = 0; i < fuzzData->ConsumeIntegralInRange<int>(1, INTEGRAL_RANGE_SIZE); ++i) {
+            if (fuzzData->ConsumeBool()) {
+                service->triggerNotificationList_.emplace_back(nullptr);
+                continue;
+            }
+            auto record = std::make_shared<NotificationRecord>();
+            service->triggerNotificationList_.push_back(record);
+            if (fuzzData->ConsumeBool()) {
+                record->bundleOption = sptr<NotificationBundleOption>::MakeSptr();
+                auto bundleName = fuzzData->ConsumeRandomLengthString();
+                record->bundleOption->SetBundleName(bundleName);
+                auto uid = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE);
+                record->bundleOption->SetUid(uid);
+            } else {
+                record->bundleOption = nullptr;
+            }
+
+            if (fuzzData->ConsumeBool()) {
+                record->request = sptr<NotificationRequest>::MakeSptr();
+                auto creatorUserId = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE);
+                record->request->SetCreatorUserId(creatorUserId);
+                auto notificationId = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE);
+                record->request->SetNotificationId(notificationId);
+                auto label = fuzzData->ConsumeRandomLengthString();
+                record->request->SetLabel(label);
+                auto receiverUserId = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE);
+                record->request->SetReceiverUserId(receiverUserId);
+                record->request->SetSlotType(static_cast<NotificationConstant::SlotType>(
+                    fuzzData->ConsumeIntegralInRange<int32_t>(0, SLOT_TYPE_SIZE)));
+            } else {
+                record->request = nullptr;
+            }
+
+            if (fuzzData->ConsumeBool()) {
+                auto key = fuzzData->ConsumeRandomLengthString();
+                record->notification = sptr<Notification>::MakeSptr(record->request);
+                record->notification->SetKey(key);
+            } else {
+                record->notification = nullptr;
+            }
+        }
+    }
+
+    bool DoSomethingInterestingWithMyAPISecond(FuzzedDataProvider *fuzzData)
+    {
+        auto service = AdvancedNotificationService::GetInstance();
+        service->triggerNotificationList_.clear();
+        GenerateTriggerNotificationList(fuzzData);
+        service->RemoveAllNotificationsByBundleNameFromTriggerNotificationList(fuzzData->ConsumeRandomLengthString());
+        service->RemoveFromTriggerNotificationList(fuzzData->ConsumeRandomLengthString());
+        service->RemoveForDeleteAllFromTriggerNotificationList(fuzzData->ConsumeRandomLengthString(),
+            fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE));
+        service->CancelContinuousTaskNotificationFromTriggerNotificationList(fuzzData->ConsumeRandomLengthString(),
+            fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE),
+            fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE));
+        std::vector<std::shared_ptr<NotificationRecord>> records;
+        AdvancedNotificationService::GetRecordParameter parameter{
+            .notificationId = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE),
+            .uid = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE),
+            .label = fuzzData->ConsumeRandomLengthString(),
+            .bundleName = fuzzData->ConsumeRandomLengthString(),
+            .userId = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE)
+        };
+        service->GetRecordFromTriggerNotificationList(parameter, records);
+        sptr<NotificationBundleOption> bundle;
+        if (fuzzData->ConsumeBool()) {
+            bundle = nullptr;
+        } else {
+            bundle = sptr<NotificationBundleOption>::MakeSptr();
+            bundle->SetBundleName(fuzzData->ConsumeRandomLengthString());
+            bundle->SetUid(fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE));
+        }
+        service->RemoveAllFromTriggerNotificationList(bundle);
+        sptr<NotificationSlot> slot;
+        if (fuzzData->ConsumeBool()) {
+            slot = nullptr;
+        } else {
+            slot = sptr<NotificationSlot>::MakeSptr();
+            slot->SetType(static_cast<NotificationConstant::SlotType>(
+                fuzzData->ConsumeIntegralInRange<int32_t>(0, SLOT_TYPE_SIZE)));
+        }
+        service->RemoveNtfBySlotFromTriggerNotificationList(bundle, slot);
+        service->triggerNotificationList_.clear();
+        return true;
+    }
 }
 }
 
@@ -197,6 +287,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     };
     MockRandomToken(&fdp, requestPermission);
     OHOS::Notification::DoSomethingInterestingWithMyAPI(&fdp);
+    OHOS::Notification::DoSomethingInterestingWithMyAPISecond(&fdp);
     constexpr int sleepMs = 1000;
     std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
     return 0;

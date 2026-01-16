@@ -88,6 +88,14 @@ public:
         int64_t deleteTime = 0;
     };
 
+    struct GetRecordParameter {
+        int32_t notificationId = -1;
+        int32_t uid = -1;
+        std::string label;
+        std::string bundleName;
+        int32_t userId = -1;
+    };
+
     ~AdvancedNotificationService() override;
 
     DISALLOW_COPY_AND_MOVE(AdvancedNotificationService);
@@ -1988,6 +1996,17 @@ private:
         PublishNotificationParameter &parameter);
     bool IsGeofenceNotificationRequest(const sptr<NotificationRequest> &request);
     bool IsExistsGeofence(const sptr<NotificationRequest> &request);
+    void RemoveAllNotificationsByBundleNameFromTriggerNotificationList(
+        const std::string &bundleName);
+    void RemoveFromTriggerNotificationList(const std::string &key);
+    void RemoveForDeleteAllFromTriggerNotificationList(const std::string &key, int32_t userId);
+    void CancelContinuousTaskNotificationFromTriggerNotificationList(const std::string &label, int32_t notificationId,
+        int32_t uid);
+    void GetRecordFromTriggerNotificationList(const GetRecordParameter &parameter,
+        std::vector<std::shared_ptr<NotificationRecord>> &records);
+    void RemoveAllFromTriggerNotificationList(const sptr<NotificationBundleOption> &bundle);
+    void RemoveNtfBySlotFromTriggerNotificationList(const sptr<NotificationBundleOption> &bundle,
+        const sptr<NotificationSlot> &slot);
     void UpdateRecentNotification(sptr<Notification> &notification, bool isDelete, int32_t reason);
 
     void AdjustDateForDndTypeOnce(int64_t &beginDate, int64_t &endDate);
