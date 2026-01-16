@@ -37,7 +37,6 @@ namespace OHOS {
         auto manager = Notification::ReminderDataManager::GetInstance();
         manager->RegisterConfigurationObserver();
         manager->Init();
-        manager->CancelAllReminders(bundleName, userId, uid);
         manager->CancelReminder(reminderId, callingUid);
         manager->CheckExcludeDateParam(reminderId, callingUid);
         manager->AddExcludeDate(reminderId, date, callingUid);
@@ -67,6 +66,8 @@ namespace OHOS {
         manager->HandleCustomButtonClick(want);
         manager->ClickReminder(want);
         manager->TerminateAlerting(want);
+        manager->CancelAllReminders(bundleName, userId, uid);
+        manager->CancelAllReminders(userId);
         return true;
     }
 
@@ -84,7 +85,6 @@ namespace OHOS {
 
         manager->OnLanguageChanged();
         manager->OnRemoveAppMgr();
-        manager->CancelAllReminders(userId);
         manager->CheckUpdateConditions(reminder, Notification::ReminderRequest::ActionButtonType::INVALID,
             reminder->GetActionButtons());
         manager->CancelRemindersImplLocked(bundleName, userId, uid, value);
@@ -117,12 +117,16 @@ namespace OHOS {
         manager->IsBelongToSameApp(uid, uid);
         manager->CheckIsSameApp(reminder, uid);
         manager->ShowReminder(reminder, value, value, value, value);
+        manager->CancelAllReminders(bundleName, userId, uid);
+        manager->CancelAllReminders(userId);
         return true;
     }
 
     bool DoSomethingInteresting1(FuzzedDataProvider* fdp)
     {
         std::string bundleName = fdp->ConsumeRandomLengthString();
+        int32_t userId = fdp->ConsumeIntegral<int32_t>();
+        int32_t uid = fdp->ConsumeIntegral<int32_t>();
         int32_t id = fdp->ConsumeIntegral<int32_t>();
         int64_t ts = fdp->ConsumeIntegral<int64_t>();
         int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
@@ -160,6 +164,8 @@ namespace OHOS {
         manager->HandleSysTimeChange(reminder);
         manager->IsMatched(reminder, id, id, value);
         manager->ResetStates(t);
+        manager->CancelAllReminders(bundleName, userId, uid);
+        manager->CancelAllReminders(userId);
         return true;
     }
 
@@ -174,7 +180,6 @@ namespace OHOS {
         int64_t ts = fdp->ConsumeIntegral<int64_t>();
         int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
         bool value = fdp->ConsumeBool();
-        int32_t callingUid = fdp->ConsumeIntegral<int32_t>();
         constexpr uint64_t seconds = 1200;
         sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(seconds);
         auto manager = Notification::ReminderDataManager::GetInstance();
@@ -210,18 +215,24 @@ namespace OHOS {
         manager->CheckShowLimit(limits, totalCount, reminder);
         manager->LoadShareReminders();
         manager->LoadReminderFromDb();
-        manager->CancelReminderOnDisplay(reminderId, callingUid);
+        manager->CancelReminderOnDisplay(reminderId, id);
+        manager->CancelAllReminders(bundleName, id, id);
+        manager->CancelAllReminders(id);
         return true;
     }
 
-    bool Clear()
+    void ClearTask()
     {
         auto manager = Notification::ReminderDataManager::GetInstance();
         if (manager->queue_ != nullptr) {
             auto handler = manager->queue_->submit_h(std::bind([]() {}));
             manager->queue_->wait(handler);
         }
-        return true;
+    }
+
+    void Clear()
+    {
+        Notification::ReminderDataManager::REMINDER_DATA_MANAGER = nullptr;
     }
 }
 
@@ -234,5 +245,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DoSomethingInterestingWithReminder(&fdp);
     OHOS::DoSomethingInteresting1(&fdp);
     OHOS::DoSomethingInteresting2(&fdp);
+    constexpr int32_t WAIT_TASK = 10;
+    sleep(WAIT_TASK);
+    OHOS::ClearTask();
+    OHOS::Clear();
     return 0;
 }

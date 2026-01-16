@@ -27,6 +27,7 @@ namespace OHOS {
         std::string stringData = fdp->ConsumeRandomLengthString();
         int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
         Notification::ReminderRequest reminderRequest(reminderId);
+        Notification::ReminderRequest reminder(reminderRequest);
         reminderRequest.CanRemove();
         reminderRequest.CanShow();
         reminderRequest.Dump();
@@ -72,6 +73,28 @@ namespace OHOS {
         reminderRequest.SetSnoozeContent(stringData);
         return reminderRequest.ShouldShowImmediately();
     }
+
+    bool DoSomethingWithAPI(FuzzedDataProvider* fdp)
+    {
+        std::string stringData = fdp->ConsumeRandomLengthString();
+        int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
+        Notification::ReminderRequest reminder(reminderId);
+        reminder.RecoverActionButtonJsonMode(stringData);
+        reminder.DeserializeButtonInfoFromJson(stringData);
+        reminder.StringToDouble(stringData);
+        reminder.StringToInt(stringData);
+        uint8_t type = fdp->ConsumeIntegral<uint8_t>();
+        reminder.RecoverWantAgentByJson(stringData, type);
+        std::map<Notification::ReminderRequest::ActionButtonType,
+            Notification::ReminderRequest::ActionButtonInfo> buttons;
+        reminder.SetActionButtons(buttons);
+        reminder.IsRingLoop();
+        reminder.IsShare();
+        Notification::NotificationRequest request;
+        bool isSnooze = fdp->ConsumeIntegral<bool>();
+        reminder.UpdateNotificationRequest(request, isSnooze, 0);
+        return true;
+    }
 }
 
 /* Fuzzer entry point */
@@ -80,5 +103,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     FuzzedDataProvider fdp(data, size);
     OHOS::DoSomethingInterestingWithMyAPI(&fdp);
+    OHOS::DoSomethingWithAPI(&fdp);
     return 0;
 }
