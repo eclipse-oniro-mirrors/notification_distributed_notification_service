@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -1164,12 +1164,15 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
   defines = []
 
   sources = [
+    "${services_path}/ans/src/advanced_notification_geofence_service.cpp",
+    "${services_path}/infrastructure/external_adapter/ffrt/src/ffrt_queue_impl.cpp",
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "mock/mock_accesstoken_kit.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_ipc.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
     "notification_subscriber_manager_branch_test/mock_access_token_helper.cpp",
+    "notification_subscriber_manager_branch_test/mock_advanced_notification_service.cpp",
     "notification_subscriber_manager_branch_test/mock_notification.cpp",
     "notification_subscriber_manager_branch_test/mock_notification_preferences.cpp",
     "notification_subscriber_manager_branch_test/notification_subscriber_manager_branch_test.cpp",

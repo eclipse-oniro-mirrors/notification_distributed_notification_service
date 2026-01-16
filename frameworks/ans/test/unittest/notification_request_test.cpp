@@ -1416,5 +1416,18 @@ HWTEST_F(NotificationRequestTest, ConvertObjectsToJson_0001, Level1)
     EXPECT_EQ(jsonObject["notificationTrigger"]["triggerConfigPath"],
         NotificationConstant::ConfigPath::CONFIG_PATH_CLOUD_CONFIG);
 }
+
+/**
+ * @tc.name:ConvertJsonToNotificationGeofence_0001
+ * @tc.desc: Test ConvertJsonToNotificationGeofence
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationGeofence_0001, Level1)
+{
+    std::shared_ptr<NotificationTrigger> notificationTrigger = std::make_shared<NotificationTrigger>();
+    ASSERT_NE(notificationTrigger, nullptr);
+    nlohmann::json jsonObject;
+    EXPECT_FALSE(notificationTrigger->ConvertJsonToNotificationGeofence(nullptr, jsonObject));
+}
 } // namespace Notification
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,11 +19,17 @@
 
 namespace {
     bool g_mockGetNotificationSlotRet = true;
+    int32_t g_mockDeleteKvFromDbRet = 0;
 }
 
 void MockGetNotificationSlotRet(bool mockRet)
 {
     g_mockGetNotificationSlotRet = mockRet;
+}
+
+void MockDeleteKvFromDb(int32_t mockRet)
+{
+    g_mockDeleteKvFromDbRet = mockRet;
 }
 
 namespace OHOS {
@@ -35,6 +41,16 @@ ErrCode NotificationPreferences::GetNotificationSlot(const sptr<NotificationBund
         return ERR_ANS_INVALID_PARAM;
     }
     return ERR_OK;
+}
+
+ErrCode NotificationPreferences::SetGeofenceEnabled(bool enabled)
+{
+    return ERR_OK;
+}
+
+int32_t NotificationPreferences::DeleteKvFromDb(const std::string &key, const int32_t &userId)
+{
+    return g_mockDeleteKvFromDbRet;
 }
 }  // namespace Notification
 }  // namespace OHOS

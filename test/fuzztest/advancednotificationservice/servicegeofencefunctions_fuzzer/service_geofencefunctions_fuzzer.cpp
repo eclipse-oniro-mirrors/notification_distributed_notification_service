@@ -32,6 +32,7 @@ namespace {
     constexpr uint8_t MONITOR_EVENT_SIZE = 2;
     constexpr uint8_t CONFIG_PATH_SIZE = 2;
     constexpr uint8_t SLOT_TYPE_SIZE = 10;
+    constexpr uint8_t LIVE_VIEW_STATUS_SIZE = 6;
     constexpr uint32_t INTEGRAL_RANGE_SIZE = 100;
 }
 
@@ -82,6 +83,9 @@ namespace {
         request->SetOwnerUid(uid);
         request->SetOwnerUserId(ownerId);
         request->SetNotificationTrigger(trigger);
+        auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+        auto content = std::make_shared<NotificationContent>(liveViewContent);
+        request->SetContent(content);
         return request;
     }
 
@@ -187,7 +191,7 @@ namespace {
     void GenerateTriggerNotificationList(FuzzedDataProvider *fuzzData)
     {
         auto service = AdvancedNotificationService::GetInstance();
-        for (int i = 0; i < fuzzData->ConsumeIntegralInRange<int>(1, INTEGRAL_RANGE_SIZE); ++i) {
+        for (int32_t i = 0; i < fuzzData->ConsumeIntegralInRange<int32_t>(1, INTEGRAL_RANGE_SIZE); ++i) {
             if (fuzzData->ConsumeBool()) {
                 service->triggerNotificationList_.emplace_back(nullptr);
                 continue;
@@ -216,6 +220,9 @@ namespace {
                 record->request->SetReceiverUserId(receiverUserId);
                 record->request->SetSlotType(static_cast<NotificationConstant::SlotType>(
                     fuzzData->ConsumeIntegralInRange<int32_t>(0, SLOT_TYPE_SIZE)));
+                record->request->SetLiveViewStatus(
+                    static_cast<NotificationLiveViewContent::LiveViewStatus>(
+                    fuzzData->ConsumeIntegralInRange<int32_t>(0, LIVE_VIEW_STATUS_SIZE)));
             } else {
                 record->request = nullptr;
             }
@@ -272,6 +279,84 @@ namespace {
         service->triggerNotificationList_.clear();
         return true;
     }
+
+    bool DoSomethingInterestingWithMyAPIThird(FuzzedDataProvider *fuzzData)
+    {
+        auto service = AdvancedNotificationService::GetInstance();
+        service->triggerNotificationList_.clear();
+        for (int32_t i = 0; i < fuzzData->ConsumeIntegralInRange<int32_t>(1, INTEGRAL_RANGE_SIZE); ++i) {
+            auto record = std::make_shared<NotificationRecord>();
+            service->triggerNotificationList_.push_back(record);
+            record->bundleOption = sptr<NotificationBundleOption>::MakeSptr();
+            auto bundleName = fuzzData->ConsumeRandomLengthString();
+            record->bundleOption->SetBundleName(bundleName);
+            auto uid = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE);
+            record->bundleOption->SetUid(uid);
+            record->request = sptr<NotificationRequest>::MakeSptr();
+            auto creatorUserId = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE);
+            record->request->SetCreatorUserId(creatorUserId);
+            auto notificationId = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE);
+            record->request->SetNotificationId(notificationId);
+            auto groupName = fuzzData->ConsumeRandomLengthString();
+            record->request->SetGroupName(groupName);
+            auto receiverUserId = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE);
+            record->request->SetReceiverUserId(receiverUserId);
+            auto key = fuzzData->ConsumeRandomLengthString();
+            record->notification = sptr<Notification>::MakeSptr(record->request);
+            record->notification->SetKey(key);
+        }
+
+        service->DeleteAllByUserStoppedFromTriggerNotificationList(fuzzData->ConsumeRandomLengthString(),
+            fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE));
+        auto bundle = sptr<NotificationBundleOption>::MakeSptr();
+        bundle->SetBundleName(fuzzData->ConsumeRandomLengthString());
+        bundle->SetUid(fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE));
+        service->ExecuteRemoveNotificationFromTriggerNotificationList(bundle,
+            fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE),
+            fuzzData->ConsumeRandomLengthString());
+        service->RemoveGroupByBundleFromTriggerNotificationList(bundle,
+            fuzzData->ConsumeRandomLengthString());
+        service->triggerNotificationList_.clear();
+        service->IsGeofenceNotificationRequest(nullptr);
+        service->IsExistsGeofence(nullptr);
+        auto request = sptr<NotificationRequest>::MakeSptr();
+        if (fuzzData->ConsumeBool()) {
+            request->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE);
+            service->CheckSwitchStatus(request, nullptr);
+        } else {
+            request->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END);
+            service->CheckSwitchStatus(request, nullptr);
+        }
+        service->CheckGeofenceNotificationRequestLiveViewStatus(request);
+        service->CheckTriggerNotificationRequest(request);
+        service->CheckGeofenceNotificationRequest(nullptr, nullptr);
+        return true;
+    }
+
+    bool DoSomethingInterestingWithMyAPIFourth(FuzzedDataProvider *fuzzData)
+    {
+        auto service = AdvancedNotificationService::GetInstance();
+        auto request = sptr<NotificationRequest>::MakeSptr();
+        request->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE);
+        auto notification = sptr<Notification>::MakeSptr(request);
+        AdvancedNotificationService::PublishNotificationParameter parameter;
+        parameter.request = request;
+        parameter.bundleOption = sptr<NotificationBundleOption>::MakeSptr();
+        parameter.isUpdateByOwner = fuzzData->ConsumeBool();
+        parameter.tokenCaller = fuzzData->ConsumeIntegral<uint32_t>();
+        parameter.uid = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE);
+        service->UpdateTriggerNotification(parameter);
+
+        auto condition = GenerateGeofenceCondition(fuzzData);
+        auto trigger = GenerateNotificationTrigger(fuzzData, condition);
+        auto request1 = GenerateNotificationRequest(fuzzData, trigger);
+        std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+        record->request = request1;
+        record->notification = sptr<Notification>::MakeSptr(request1);
+        service->SetGeofenceTriggerTimer(record);
+        service->CancelGeofenceTriggerTimer(record);
+        return true;
+    }
 }
 }
 
@@ -288,6 +373,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     MockRandomToken(&fdp, requestPermission);
     OHOS::Notification::DoSomethingInterestingWithMyAPI(&fdp);
     OHOS::Notification::DoSomethingInterestingWithMyAPISecond(&fdp);
+    OHOS::Notification::DoSomethingInterestingWithMyAPIThird(&fdp);
+    OHOS::Notification::DoSomethingInterestingWithMyAPIFourth(&fdp);
     constexpr int sleepMs = 1000;
     std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
     return 0;
