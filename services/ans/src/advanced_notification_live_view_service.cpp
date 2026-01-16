@@ -87,7 +87,9 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
             // Turn off ringtone and vibration during recovery process
             record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false);
             record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
-            ANS_LOGD("SetFlags-Recovery,flags = %{public}d", record->request->GetFlags()->GetReminderFlags());
+            ANS_LOGD("SetFlags-Recovery,key=%{public}s flags = %{public}d",
+                record->request->GetBaseKey("").c_str(),
+                record->request->GetFlags()->GetReminderFlags());
             if (AssignToNotificationList(record) != ERR_OK) {
                 ANS_LOGE("Add notification to record list failed.");
                 continue;
