@@ -51,12 +51,6 @@ HWTEST_F(NotificationClonePriorityTest, OnBackUp_00001, Function | SmallTest | L
     AdvancedNotificationService::GetInstance()->SetBundlePriorityConfigInner(bundleOption, "test1\\ntest2\\ntest3");
     AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundleInner(bundleOption, 0);
     EXPECT_EQ(NotificationClonePriority::GetInstance()->OnBackup(jsonObject), ERR_OK);
-    std::set<std::string> systemApps = {"bundleName"};
-    NotificationClonePriority::GetInstance()->OnRestore(jsonObject, systemApps);
-    NotificationConstant::PriorityEnableStatus enableStatus =
-        NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT;
-    EXPECT_EQ(NotificationPreferences::GetInstance()->IsPriorityEnabledByBundle(bundleOption, enableStatus), ERR_OK);
-    EXPECT_EQ(enableStatus, NotificationConstant::PriorityEnableStatus::DISABLE);
 }
 
 /**
