@@ -376,6 +376,11 @@ void AsyncCompleteCallbackRequestEnableNotification(napi_env env, void *data)
     auto status = napi_open_handle_scope(env, &scope);
     if (status != napi_ok || scope == nullptr) {
         ANS_LOGE("status: %{public}d", status);
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
         return;
     }
     napi_get_undefined(env, &result);
