@@ -79,7 +79,7 @@ bool NotificationSubscriber::ProcessSyncDecision(
     if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
         request->SetFlags(flagIter->second);
         ANS_LOGI("SetFlags-final,key=%{public}s flags= %{public}d deviceType:%{public}s",
-            request->GetKey().c_str(), request->GetFlags()->GetReminderFlags(), deviceType.c_str());
+            request->GetBaseKey("").c_str(), request->GetFlags()->GetReminderFlags(), deviceType.c_str());
         return true;
     }
     if (deviceType.size() <= 0 || deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
