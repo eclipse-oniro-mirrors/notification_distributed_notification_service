@@ -25,35 +25,35 @@
             "name":"reason",
             "value":"Possono includere notifiche della schermata di blocco, banner, badge, suoni e vibrazioni. Puoi apportare delle modifiche in Impostazioni.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_zyt",
             "value":"Possono includere notifiche della schermata di blocco, banner, badge, suoni e vibrazioni. Puoi modificare queste impostazioni in DroiTong > Gestione app.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_cjy",
             "value":"Possono includere notifiche della schermata di blocco, banner, badge, suoni e vibrazioni. Puoi modificare queste impostazioni in EasyAbroad > Gestione app.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_simple",
             "value":"Possono includere banner, badge e suoni. Puoi apportare delle modifiche in Impostazioni.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_tv",
-            "value":"Le notifiche verranno visualizzate come banner. Puoi modificare le tue preferenze di notifica in qualsiasi momento in Impostazioni.",
+            "value":"Le notifiche verranno visualizzate come banner. Puoi modificare le preferenze di notifica in qualsiasi momento in Impostazioni.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

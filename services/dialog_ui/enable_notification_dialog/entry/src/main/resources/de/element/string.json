@@ -25,35 +25,35 @@
             "name":"reason",
             "value":"Einschließlich Sperrbildschirmbenachrichtigungen, Banner, Abzeichen, Töne und Vibrationen. Sie können dies in den Einstellungen ändern.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_zyt",
             "value":"Einschließlich Sperrbildschirmbenachrichtigungen, Banner, Abzeichen, Töne und Vibrationen. Sie können diese Einstellungen unter DroiTong > App-Verwaltung ändern.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_cjy",
             "value":"Einschließlich Sperrbildschirmbenachrichtigungen, Banner, Abzeichen, Töne und Vibrationen. Sie können diese Einstellungen unter EasyAbroad > App-Verwaltung ändern.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_simple",
             "value":"Einschließlich Banner, Abzeichen und Töne. Sie können dies in den Einstellungen ändern.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_tv",
             "value":"Benachrichtigungen werden als Banner übermittelt. Sie können Ihre Benachrichtigungspräferenzen jederzeit in den Einstellungen ändern.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
