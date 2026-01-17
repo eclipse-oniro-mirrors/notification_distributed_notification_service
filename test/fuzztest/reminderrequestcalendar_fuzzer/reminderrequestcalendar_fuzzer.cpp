@@ -40,6 +40,7 @@ namespace OHOS {
         repeatMonths.push_back(months);
         repeatDays.push_back(days);
         Notification::ReminderRequestCalendar reminderRequestCalendar(nowTime, repeatMonths, repeatDays, daysOfWeek);
+        Notification::ReminderRequestCalendar reminder(reminderRequestCalendar);
         // test SetNextTriggerTime function
         reminderRequestCalendar.SetNextTriggerTime();
         // test InitDateTime function
@@ -97,6 +98,34 @@ namespace OHOS {
         reminderRequestCalendar.ReadFromParcel(parcel);
         return reminderRequestCalendar.Marshalling(parcel);
     }
+
+    bool DoSomethingWithAPI(FuzzedDataProvider* fdp)
+    {
+        struct tm nowTime;
+        uint8_t months = fdp->ConsumeIntegral<uint8_t>() % MONTHS + 1;
+        uint8_t days = fdp->ConsumeIntegral<uint8_t>() % DAYS + 1;
+        uint8_t weeks = fdp->ConsumeIntegral<uint8_t>() % WEEK + 1;
+        std::string stringData = fdp->ConsumeRandomLengthString();
+        std::vector<uint8_t> repeatMonths;
+        std::vector<uint8_t> repeatDays;
+        std::vector<uint8_t> daysOfWeek;
+        daysOfWeek.push_back(weeks);
+        repeatMonths.push_back(months);
+        repeatDays.push_back(days);
+        Notification::ReminderRequestCalendar reminderRequestCalendar(nowTime, repeatMonths, repeatDays, daysOfWeek);
+        reminderRequestCalendar.SetRRuleWantAgentInfo(nullptr);
+        reminderRequestCalendar.DelExcludeDates();
+        reminderRequestCalendar.GetExcludeDates();
+        reminderRequestCalendar.IsInExcludeDate();
+        reminderRequestCalendar.GetRRuleWantAgentInfo();
+        reminderRequestCalendar.InitTriggerTime();
+        reminderRequestCalendar.IsRepeat();
+        reminderRequestCalendar.CheckExcludeDate();
+        reminderRequestCalendar.IsPullUpService();
+        reminderRequestCalendar.IsNeedNotification();
+        reminderRequestCalendar.DeserializationExcludeDates(stringData);
+        return true;
+    }
 }
 
 /* Fuzzer entry point */
@@ -105,5 +134,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     FuzzedDataProvider fdp(data, size);
     OHOS::DoSomethingInterestingWithMyAPI(&fdp);
+    OHOS::DoSomethingWithAPI(&fdp);
     return 0;
 }

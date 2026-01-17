@@ -28,6 +28,7 @@ namespace OHOS {
         Notification::ReminderHelper::PublishReminder(reminder, reminderId2);
         int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
         Notification::ReminderHelper::CancelReminder(reminderId);
+        Notification::ReminderHelper::UpdateReminder(reminderId, reminder);
         Notification::ReminderRequestAdaptation valid;
         std::vector<Notification::ReminderRequestAdaptation> validReminders;
         validReminders.emplace_back(valid);
@@ -38,6 +39,12 @@ namespace OHOS {
         std::vector<int64_t> dates;
         Notification::ReminderHelper::GetExcludeDates(reminderId, dates);
         Notification::ReminderHelper::CancelReminderOnDisplay(reminderId);
+        Notification::NotificationSlot slot;
+        Notification::ReminderHelper::AddNotificationSlot(slot);
+        Notification::NotificationConstant::SlotType slotType =
+            Notification::NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+        Notification::ReminderHelper::RemoveNotificationSlot(slotType);
+        Notification::ReminderHelper::StartReminderAgentService();
         return Notification::ReminderHelper::CancelAllReminders();
     }
 }
