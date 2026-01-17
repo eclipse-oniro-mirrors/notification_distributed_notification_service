@@ -25,35 +25,35 @@
             "name":"reason",
             "value":"Ini mungkin termasuk pemberitahuan skrin kunci, sepanduk, lencana, bunyi, dan getaran. Buat penukaran dalam Tetapan.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_zyt",
             "value":"Ini mungkin termasuk pemberitahuan skrin kunci, sepanduk, lencana, bunyi, dan getaran. Tukar tetapan dalam DroiTong > Pengurusan aplikasi.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_cjy",
             "value":"Ini mungkin termasuk pemberitahuan skrin kunci, sepanduk, lencana, bunyi, dan getaran. Tukar tetapan dalam EasyAbroad > Pengurusan aplikasi.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_simple",
             "value":"Ini mungkin termasuk sepanduk, lencana, dan bunyi. Buat penukaran dalam Tetapan.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_tv",
             "value":"Pemberitahuan akan dihantar sebagai sepanduk. Tukar keutamaan pemberitahuan pada bila-bila masa dalam Tetapan.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

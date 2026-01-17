@@ -25,35 +25,35 @@
             "name":"reason",
             "value":"Ini mungkin mencakup notifikasi layar kunci, banner, lencana, suara, dan getar. Anda dapat mengubah ini di Pengaturan.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_zyt",
             "value":"Ini mungkin mencakup notifikasi layar kunci, banner, lencana, suara, dan getar. Anda dapat mengubah pengaturan ini dari DroiTong > Pengelolaan aplikasi.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_cjy",
             "value":"Ini mungkin mencakup notifikasi layar kunci, banner, lencana, suara, dan getar. Anda dapat mengubah pengaturan ini dari EasyAbroad > Pengelolaan aplikasi.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_simple",
             "value":"Ini mungkin mencakup banner, lencana, dan suara. Anda dapat mengubah ini di Pengaturan.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_tv",
             "value":"Notifikasi akan dikirimkan sebagai banner. Anda dapat mengubah preferensi notifikasi Anda kapan saja di Pengaturan.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

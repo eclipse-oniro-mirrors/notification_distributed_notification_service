@@ -25,35 +25,35 @@
             "name":"reason",
             "value":"Bunlara kilit ekranı bildirimleri, bildirim başlıkları, rozetler, sesler ve titreşimler dahil olabilir. Bunu Ayarlar bölümünden değiştirebilirsiniz.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_zyt",
             "value":"Bunlara kilit ekranı bildirimleri, bildirim başlıkları, rozetler, sesler ve titreşimler dahil olabilir. Bu ayarları DroiTong > Uygulama yönetimi bölümünden değiştirebilirsiniz.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_cjy",
             "value":"Bunlara kilit ekranı bildirimleri, bildirim başlıkları, rozetler, sesler ve titreşimler dahil olabilir. Bu ayarları EasyAbroad > Uygulama yönetimi bölümünden değiştirebilirsiniz.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_simple",
             "value":"Bunlara bildirim başlıkları, rozetler ve sesler dahil olabilir. Bunu Ayarlar bölümünden değiştirebilirsiniz.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_tv",
             "value":"Bildirimler, bildirim başlıkları olarak gönderilecektir. Bildirim tercihlerinizi istediğiniz zaman Ayarlar bölümünden değiştirebilirsiniz.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {

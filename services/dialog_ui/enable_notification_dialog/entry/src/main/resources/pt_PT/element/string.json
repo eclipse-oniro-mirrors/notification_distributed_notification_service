@@ -25,35 +25,35 @@
             "name":"reason",
             "value":"Estas podem incluir notificações no ecrã de bloqueio, faixas, emblemas, sons e vibrações. Pode alterar isto nas Definições.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_zyt",
             "value":"Estas podem incluir notificações no ecrã de bloqueio, faixas, emblemas, sons e vibrações. Pode alterar estas definições em DroiTong > Gestão de aplicações.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_cjy",
             "value":"Estas podem incluir notificações no ecrã de bloqueio, faixas, emblemas, sons e vibrações. Pode alterar estas definições em EasyAbroad > Gestão de aplicações.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_simple",
             "value":"Estas podem incluir faixas, emblemas e sons. Pode alterar isto nas Definições.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"reason_tv",
             "value":"As notificações serão apresentadas na barra de notificações. Pode mudar as preferências das notificações em qualquer momento nas Definições.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
