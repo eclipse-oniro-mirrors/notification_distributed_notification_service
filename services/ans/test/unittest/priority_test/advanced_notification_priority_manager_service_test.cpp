@@ -60,8 +60,9 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabled_0100, Function | SmallTe
  */
 HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabled_0200, Function | SmallTest | Level1)
 {
-    MockIsSystemApp(false);
+    MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityEnabled(false), ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -90,8 +91,9 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundle_0100, Function |
  */
 HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundle_0200, Function | SmallTest | Level1)
 {
-    MockIsSystemApp(false);
+    MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 200202);
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundle(bundleOption, 2),
         ERR_ANS_PERMISSION_DENIED);
@@ -135,8 +137,9 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundle_0400, Function |
  */
 HWTEST_F(PriorityManagerServiceTest, IsPriorityEnabledByBundle_0100, Function | SmallTest | Level1)
 {
-    MockIsSystemApp(false);
+    MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 200202);
     int32_t enableStatusInt;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->IsPriorityEnabledByBundle(bundleOption, enableStatusInt),
@@ -185,8 +188,9 @@ HWTEST_F(PriorityManagerServiceTest, SetBundlePriorityConfig_0100, Function | Sm
  */
 HWTEST_F(PriorityManagerServiceTest, SetBundlePriorityConfig_0200, Function | SmallTest | Level1)
 {
-    MockIsSystemApp(false);
+    MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 200202);
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetBundlePriorityConfig(bundleOption, "keyword1\nkeyword2"),
         ERR_ANS_PERMISSION_DENIED);
@@ -215,8 +219,9 @@ HWTEST_F(PriorityManagerServiceTest, SetBundlePriorityConfig_0300, Function | Sm
  */
 HWTEST_F(PriorityManagerServiceTest, GetBundlePriorityConfig_0100, Function | SmallTest | Level1)
 {
-    MockIsSystemApp(false);
+    MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 200202);
     std::string value;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->GetBundlePriorityConfig(bundleOption, value),
@@ -282,8 +287,9 @@ HWTEST_F(PriorityManagerServiceTest, TriggerUpdatePriorityType_0200, Function | 
  */
 HWTEST_F(PriorityManagerServiceTest, TriggerUpdatePriorityType_0300, Function | SmallTest | Level1)
 {
-    MockIsSystemApp(false);
+    MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->TriggerUpdatePriorityType(request),
         ERR_ANS_PERMISSION_DENIED);
