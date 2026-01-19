@@ -38,8 +38,10 @@ namespace OHOS {
 namespace Notification {
 namespace {
 constexpr int32_t ALL_SA_READY_FLAG = 2;  // bundle service and ability service ready.
-// The maximum number of applications that can be displayed at a time
-constexpr int32_t ONE_HAP_MAX_NUMBER_SHOW_AT_ONCE = 10;
+// The maximum number of applications that can be displayed at a same time
+constexpr int32_t ONE_HAP_MAX_NUMBER_SHOW_AT_SAME_TIME = 10;
+// The maximum number of applications that can be displayed
+constexpr int32_t ONE_HAP_MAX_NUMBER_SHOW_AT_ONCE = 30;
 // The maximum number of system that can be displayed at a time
 constexpr int32_t TOTAL_MAX_NUMBER_SHOW_AT_ONCE = 500;
 // The maximun number of system that can be start extension count
@@ -188,26 +190,38 @@ void ReminderDataManager::ReportSysEvent(const sptr<ReminderRequest>& reminder)
 #endif
 }
 
-bool ReminderDataManager::CheckShowLimit(std::unordered_map<std::string, int32_t>& limits, int32_t& totalCount,
-    sptr<ReminderRequest>& reminder)
+bool ReminderDataManager::CheckShowLimit(std::unordered_map<std::string, int32_t>& limits,
+    std::unordered_map<int32_t, int32_t>& bundleLimits, int32_t& totalCount, sptr<ReminderRequest>& reminder)
 {
     if (totalCount > TOTAL_MAX_NUMBER_SHOW_AT_ONCE) {
-        ANSR_LOGE("The maximum number of displays that can be displayed at a time has been reached.");
+        ANSR_LOGE("The max number of displays that can be displayed at a time has been reached.");
         return false;
     }
-    ++totalCount;
-    std::string key = std::to_string(reminder->GetUid()) + "_" + std::to_string(reminder->GetTriggerTimeInMilli());
+    int32_t uid = reminder->GetUid();
+    std::string key = std::to_string(uid) + "_" + std::to_string(reminder->GetTriggerTimeInMilli());
     auto iter = limits.find(key);
     if (iter == limits.end()) {
-        limits[key] = 1;
-        return true;
+        limits.emplace(key, 1);
+    } else {
+        if (iter->second > ONE_HAP_MAX_NUMBER_SHOW_AT_SAME_TIME) {
+            ANSR_LOGE("The max number of displays that can be shown at the same time in "
+                "a single app[%{public}s] has been reached", reminder->GetBundleName().c_str());
+            return false;
+        }
+        ++iter->second;
     }
-    if (iter->second > ONE_HAP_MAX_NUMBER_SHOW_AT_ONCE) {
-        ANSR_LOGE("The maximum number of displays that can be displayed in a single app[%{public}s] has been reached",
-            reminder->GetBundleName().c_str());
-        return false;
+    auto bundleIter = bundleLimits.find(uid);
+    if (bundleIter == bundleLimits.end()) {
+        bundleLimits.emplace(uid, 1);
+    } else {
+        if (bundleIter->second > ONE_HAP_MAX_NUMBER_SHOW_AT_ONCE) {
+            ANSR_LOGE("The max number of displays that can be displayed in a single app[%{public}s] has been reached",
+                reminder->GetBundleName().c_str());
+            return false;
+        }
+        ++bundleIter->second;
     }
-    ++iter->second;
+    ++totalCount;
     return true;
 }
 

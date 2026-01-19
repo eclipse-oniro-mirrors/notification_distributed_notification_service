@@ -713,7 +713,15 @@ private:
      */
     void UpdateShareReminders(const std::map<std::string, sptr<ReminderRequest>>& reminders);
 
-    bool CheckShowLimit(std::unordered_map<std::string, int32_t>& limits, int32_t& totalCount,
+    /**
+     * @brief Single reminder display limit check.
+     *
+     * @param limits Limit on the number of single applications at the same time.
+     * @param bundleLimits Notification limit for a single app.
+     * @param totalCount Total number of notifications displayed at one time.
+     */
+    bool CheckShowLimit(std::unordered_map<std::string, int32_t>& limits,
+        std::unordered_map<int32_t, int32_t>& bundleLimits, int32_t& totalCount,
         sptr<ReminderRequest>& reminder);
 
     void UpdateReminderFromDb(const std::vector<sptr<ReminderRequest>>& remindersFromDb);

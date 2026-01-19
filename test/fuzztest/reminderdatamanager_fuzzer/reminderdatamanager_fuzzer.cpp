@@ -30,6 +30,8 @@ namespace OHOS {
         uint8_t type = fdp->ConsumeIntegral<uint8_t>();
         int32_t callingUid = fdp->ConsumeIntegral<int32_t>();
         EventFwk::Want want;
+        constexpr int32_t id = 9999;
+        want.SetParam(Notification::ReminderRequest::PARAM_REMINDER_ID, id);
         constexpr uint64_t seconds = 1200;
         sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(seconds);
 
@@ -211,12 +213,12 @@ namespace OHOS {
         std::map<std::string, sptr<ReminderRequest>> reminders;
         manager->UpdateShareReminders(reminders);
         std::unordered_map<std::string, int32_t> limits;
+        std::unordered_map<int32_t, int32_t> bundleLimits;
         int32_t totalCount = 0;
-        manager->CheckShowLimit(limits, totalCount, reminder);
+        manager->CheckShowLimit(limits, bundleLimits, totalCount, reminder);
         manager->LoadShareReminders();
         manager->LoadReminderFromDb();
         manager->CancelReminderOnDisplay(reminderId, id);
-        manager->CancelAllReminders(bundleName, id, id);
         manager->CancelAllReminders(id);
         return true;
     }

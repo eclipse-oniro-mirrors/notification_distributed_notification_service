@@ -975,6 +975,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& 
     bool isAlerting = false;
     sptr<ReminderRequest> playSoundReminder = nullptr;
     std::unordered_map<std::string, int32_t> limits;
+    std::unordered_map<int32_t, int32_t> bundleLimits;
     int32_t totalCount = 0;
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
         if ((*it)->IsExpired()) {
@@ -996,7 +997,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& 
             ANSR_LOGI("reminder[%{public}d] trigger time is in exclude date", (*it)->GetReminderId());
             continue;
         }
-        if (!CheckShowLimit(limits, totalCount, (*it))) {
+        if (!CheckShowLimit(limits, bundleLimits, totalCount, (*it))) {
             (*it)->OnShow(false, false, false);
             store_->UpdateOrInsert((*it));
             continue;
@@ -1196,13 +1197,14 @@ void ReminderDataManager::HandleImmediatelyShow(std::vector<sptr<ReminderRequest
 {
     bool isAlerting = false;
     std::unordered_map<std::string, int32_t> limits;
+    std::unordered_map<int32_t, int32_t> bundleLimits;
     int32_t totalCount = 0;
     sptr<ReminderRequest> playSoundReminder = nullptr;
     for (auto it = showImmediately.begin(); it != showImmediately.end(); ++it) {
         if ((*it)->IsShowing()) {
             continue;
         }
-        if (!CheckShowLimit(limits, totalCount, (*it))) {
+        if (!CheckShowLimit(limits, bundleLimits, totalCount, (*it))) {
             std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
             (*it)->OnShow(false, isSysTimeChanged, false);
             store_->UpdateOrInsert((*it));
