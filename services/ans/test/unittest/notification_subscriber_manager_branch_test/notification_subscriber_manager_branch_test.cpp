@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,9 @@
 #define protected public
 #include "ans_result_data_synchronizer.h"
 #include "advanced_notification_service.h"
+#include "notification_content.h"
 #include "notification_subscriber_manager.h"
+#include "notification_request.h"
 #undef private
 #undef protected
 #include "ans_inner_errors.h"
@@ -32,6 +34,7 @@ extern void MockGetUserId(bool mockRet);
 extern void MockGetBundleName(bool mockRet);
 extern void MockGetNotificationSlotRet(bool mockRet);
 extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
+extern void MockDeleteKvFromDb(int32_t mockRet);
 
 using namespace OHOS::Security::AccessToken;
 using namespace testing::ext;
@@ -1044,6 +1047,204 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     AdvancedNotificationService advancedNotificationService;
     ASSERT_EQ(advancedNotificationService.IsNeedSilentInDoNotDisturbMode(
         phoneNumber, callerType), ERR_ANS_GET_ACTIVE_USER_FAILED);
+}
+
+/**
+ * @tc.number  : AdvancedNotificationService_07000
+ * @tc.name    : AdvancedNotificationService_07000
+ * @tc.desc    : Test SetGeofenceEnabled function and result == ERR_OK
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_07000, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    AdvancedNotificationService advancedNotificationService;
+    auto result = advancedNotificationService.SetGeofenceEnabled(true);
+    EXPECT_EQ(result, ERR_OK);
+    result = advancedNotificationService.SetGeofenceEnabled(false);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.number  : AdvancedNotificationService_07100
+ * @tc.name    : AdvancedNotificationService_07100
+ * @tc.desc    : Test OnNotifyDelayedNotificationInner function and result != ERR_OK
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_07100, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    AdvancedNotificationService::PublishNotificationParameter parameter;
+    parameter.request = nullptr;
+    EXPECT_EQ(advancedNotificationService.OnNotifyDelayedNotificationInner(parameter, nullptr), ERR_ANS_INVALID_PARAM);
+    sptr<NotificationRequest> req(new (std::nothrow) NotificationRequest());
+    ASSERT_NE(req, nullptr);
+    parameter.request = req;
+    req->notificationTrigger_ = nullptr;
+    auto result = advancedNotificationService.OnNotifyDelayedNotificationInner(parameter, nullptr);
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number  : AdvancedNotificationService_07200
+ * @tc.name    : AdvancedNotificationService_07200
+ * @tc.desc    : Test ClearDelayNotification function  and result == ERR_OK
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_07200, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    std::vector<std::string> triggerKeys;
+    triggerKeys.push_back("testKey");
+    std::vector<int32_t> userIds;
+    userIds.push_back(100);
+    auto result =advancedNotificationService.ClearDelayNotification(triggerKeys, userIds);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.number  : AdvancedNotificationService_07300
+ * @tc.name    : AdvancedNotificationService_07300
+ * @tc.desc    : Test ClearDelayNotification function and ERR_ANS_INVALID_PARAM == ERR_OK
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_07300, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    std::string triggerKey = "secure_trigger_live_view_ans_distributedhashCodeTest_";
+    int32_t userId = 100;
+    sptr<NotificationRequest> req(new (std::nothrow) NotificationRequest());
+    ASSERT_NE(req, nullptr);
+    sptr<Notification> notification(new (std::nothrow) Notification(req));
+    ASSERT_NE(notification, nullptr);
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    ASSERT_NE(record, nullptr);
+    record->notification = notification;
+    req->SetDistributedCollaborate(true);
+    req->SetDistributedHashCode("hashCodeTest");
+    record->request = req;
+    advancedNotificationService.triggerNotificationList_.push_back(record);
+    MockDeleteKvFromDb(ERR_ANS_SERVICE_NOT_READY);
+    auto result = advancedNotificationService.PublishDelayedNotification(triggerKey, userId);
+    EXPECT_EQ(result, ERR_ANS_SERVICE_NOT_READY);
+    MockDeleteKvFromDb(ERR_OK);
+    result = advancedNotificationService.PublishDelayedNotification(triggerKey, userId);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.number  : AdvancedNotificationService_07400
+ * @tc.name    : AdvancedNotificationService_07400
+ * @tc.desc    : Test GetDelayedNotificationParameterByTriggerKey function  and result == ERR_OK
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_07400, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    AdvancedNotificationService::PublishNotificationParameter parameter;
+    std::string triggerKey = "secure_trigger_live_view_ans_distributedhashCodeTest_";
+    int32_t userId = 100;
+    sptr<NotificationRequest> req(new (std::nothrow) NotificationRequest());
+    ASSERT_NE(req, nullptr);
+    sptr<Notification> notification(new (std::nothrow) Notification(req));
+    ASSERT_NE(notification, nullptr);
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    ASSERT_NE(record, nullptr);
+    record->notification = notification;
+    req->SetDistributedCollaborate(true);
+    req->SetDistributedHashCode("hashCodeTest");
+    record->request = req;
+    record->request->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END);
+    advancedNotificationService.triggerNotificationList_.push_back(record);
+    auto result = advancedNotificationService.GetDelayedNotificationParameterByTriggerKey(
+        triggerKey, parameter, record);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.number  : AdvancedNotificationService_07500
+ * @tc.name    : AdvancedNotificationService_07500
+ * @tc.desc    : Test UpdateTriggerRequest function
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_07500, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    sptr<NotificationRequest> request1(new (std::nothrow) NotificationRequest());
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    ASSERT_NE(request, nullptr);
+    request->SetDeliveryTime(0);
+    request->notificationContentType_ = NotificationContent::Type::LOCAL_LIVE_VIEW;
+    request1 = nullptr;
+    advancedNotificationService.UpdateTriggerRequest(request1);
+    advancedNotificationService.UpdateTriggerRequest(request);
+    EXPECT_EQ(request->GetDeliveryTime(), 0);
+    request->SetContent(nullptr);
+    request->notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+    request->slotType_ = NotificationConstant::SlotType::LIVE_VIEW;
+    advancedNotificationService.UpdateTriggerRequest(request);
+    EXPECT_EQ(request->GetDeliveryTime(), 0);
+    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
+    ASSERT_NE(mediaContent, nullptr);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(mediaContent);
+    ASSERT_NE(content, nullptr);
+    request->SetContent(content);
+    request->notificationTrigger_ = nullptr;
+    request->notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+    request->slotType_ = NotificationConstant::SlotType::LIVE_VIEW;
+    advancedNotificationService.UpdateTriggerRequest(request);
+    EXPECT_NE(request->GetDeliveryTime(), 0);
+    content->content_ = nullptr;
+    request->SetContent(content);
+    request->SetDeliveryTime(0);
+    request->notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+    request->slotType_ = NotificationConstant::SlotType::LIVE_VIEW;
+    advancedNotificationService.UpdateTriggerRequest(request);
+    EXPECT_EQ(request->GetDeliveryTime(), 0);
+}
+
+/**
+ * @tc.number  : AdvancedNotificationService_07600
+ * @tc.name    : AdvancedNotificationService_07600
+ * @tc.desc    : Test ParseGeofenceNotificationFromDb functionand result == ERR_OK
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_07600, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    std::string value = R"({
+        "id": 1001,
+        "name": "test_geo_fence",
+        "triggerTokenCaller": 0,
+        "triggerUid": 0,
+        "isSystemApp": true
+    })";
+    AdvancedNotificationService::PublishNotificationParameter requestDb;
+    auto result = advancedNotificationService.ParseGeofenceNotificationFromDb(value, requestDb);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_TRUE(requestDb.isSystemApp);
+}
+
+/**
+ * @tc.number  : AdvancedNotificationService_07700
+ * @tc.name    : AdvancedNotificationService_07700
+ * @tc.desc    : Test SetTriggerNotificationRequestToDb function
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_07700, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    AdvancedNotificationService::PublishNotificationParameter requestDb;
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    ASSERT_NE(request, nullptr);
+    request->ownerUid_ = 1;
+    requestDb.request = request;
+    std::shared_ptr<NotificationLiveViewContent> notificationLiveViewContent =
+        std::make_shared<NotificationLiveViewContent>();
+    ASSERT_NE(notificationLiveViewContent, nullptr);
+    notificationLiveViewContent->SetIsOnlyLocalUpdate(true);
+    notificationLiveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END);
+    std::shared_ptr<NotificationContent> notificationContent = std::make_shared<NotificationContent>();
+    ASSERT_NE(notificationContent, nullptr);
+    notificationContent->content_ = notificationLiveViewContent;
+    requestDb.request->notificationContent_ = notificationContent;
+    requestDb.request->SetAutoDeletedTime(1);
+    requestDb.request->slotType_ = NotificationConstant::SlotType::LIVE_VIEW;
+    requestDb.request->notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+    auto result = advancedNotificationService.SetTriggerNotificationRequestToDb(requestDb);
+    EXPECT_EQ(result, ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS
