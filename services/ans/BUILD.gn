@@ -352,7 +352,7 @@ ohos_shared_library("libans") {
       (target_cpu == "arm" || target_cpu == "arm64")) {
     if (distributed_notification_service_feature_enable_pgo) {
       cflags += [
-        "-fprofile-use="+rebase_path("${pgo_profiles_base_path}/libans.profdata",
+        "-fprofile-use="+rebase_path("${distributed_notification_service_feature_pgo_path}/libans.profdata",
                 root_build_dir),
         "-Wno-error=backend-plugin",
         "-Wno-profile-instr-out-of-date",
