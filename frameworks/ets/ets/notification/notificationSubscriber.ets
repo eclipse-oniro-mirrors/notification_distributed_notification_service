@@ -40,6 +40,8 @@ export interface NotificationSubscriber {
 
     onEnabledNotificationChanged?: (callbackData: EnabledNotificationCallbackData) => void;
 
+    onEnabledSilentReminderChanged?: EnabledSilentReminderChangedCallback;
+
     onEnabledPriorityChanged?: (callbackData: EnabledPriorityNotificationCallbackData) => void;
 
     onEnabledPriorityByBundleChanged?: (callbackData: EnabledPriorityNotificationByBundleCallbackData) => void;
@@ -67,6 +69,8 @@ export class NotificationSubscriberInner implements NotificationSubscriber {
     public onDoNotDisturbChanged?: (mode: notificationManager.DoNotDisturbDate) => void;
 
     public onEnabledNotificationChanged?: (callbackData: EnabledNotificationCallbackData) => void;
+
+    public onEnabledSilentReminderChanged?: EnabledSilentReminderChangedCallback;
 
     public onEnabledPriorityChanged?: (callbackData: EnabledPriorityNotificationCallbackData) => void;
 
@@ -152,6 +156,12 @@ export interface EnabledNotificationCallbackData {
     readonly enable: boolean;
 }
 
+export interface EnabledSilentReminderCallbackData {
+    readonly bundle: string;
+    readonly uid: int;
+    readonly enableStatus: notificationManager.SwitchState;
+}
+
 export interface EnabledPriorityNotificationCallbackData {
     readonly enable: boolean;
 }
@@ -178,6 +188,12 @@ class EnabledNotificationCallbackDataInner implements EnabledNotificationCallbac
     public readonly enable: boolean = false;
 }
 
+class EnabledSilentReminderCallbackDataInner implements EnabledSilentReminderCallbackData {
+    public readonly bundle: string = '';
+    public readonly uid: int = -1;
+    public readonly enableStatus: notificationManager.SwitchState = notificationManager.SwitchState.SYSTEM_DEFAULT_OFF;
+}
+
 export interface BadgeNumberCallbackData {
     readonly bundle: string;
     readonly uid: int;
@@ -195,3 +211,5 @@ class BadgeNumberCallbackDataInner implements BadgeNumberCallbackData {
 }
 
 export type BadgeEnabledChangedCallback = (data: EnabledNotificationCallbackData) => void;
+
+export type EnabledSilentReminderChangedCallback = (data: EnabledSilentReminderCallbackData) => void;

@@ -2348,6 +2348,7 @@ private:
     bool CheckAdditionalConfigKey(const std::string &key);
     void DistributedEnabledBySlotChangeStrategy(const std::string &deviceType,
         const NotificationConstant::SlotType slotType, const bool enabled, const ErrCode result);
+    ErrCode SetSilentReminderEnabledInner(const sptr<NotificationBundleOption> &bundleOption, const bool enabled);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;

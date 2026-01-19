@@ -18,6 +18,7 @@
 
 #include "ians_manager.h"
 #include "ans_subscriber_stub.h"
+#include "enabled_silent_reminder_callback_data.h"
 #include "enabled_priority_notification_by_bundle_callback_data.h"
 #include "notification_request.h"
 #include "notification_sorting.h"
@@ -88,6 +89,16 @@ public:
      * @param callbackData Indicates the properties of the application that notification permission has changed.
      **/
     virtual void OnEnabledNotificationChanged(const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) = 0;
+
+    /**
+     * @brief Callback when the silent reminder switch is changed.
+     *
+     * @param enable Indicates the switch state.
+     */
+    virtual void OnEnabledSilentReminderChanged(const std::shared_ptr<EnabledSilentReminderCallbackData> &callbackData)
+    {
+        return;
+    };
 
     /**
     * @brief Callback when the watch status of the device owner changes.
@@ -244,6 +255,8 @@ private:
         ErrCode OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date) override;
 
         ErrCode OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
+
+        ErrCode OnEnabledSilentReminderChanged(const sptr<EnabledSilentReminderCallbackData> &callbackData) override;
 
         ErrCode OnEnabledWatchStatusChanged(uint32_t watchStatus) override;
 

@@ -361,6 +361,20 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChanged(
     notificationSubQueue_->submit(func);
 }
 
+void NotificationSubscriberManager::NotifyEnabledSilentReminderChanged(
+    const sptr<EnabledSilentReminderCallbackData> &callbackData)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("null queue");
+        return;
+    }
+    AppExecFwk::EventHandler::Callback func =
+        std::bind(&NotificationSubscriberManager::NotifyEnabledSilentReminderChangedInner, this, callbackData);
+
+    notificationSubQueue_->submit(func);
+}
+
 void NotificationSubscriberManager::NotifyEnabledPriorityChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
@@ -1132,6 +1146,20 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChangedInner(
     std::string bundle = callbackData->GetBundle();
     NotifySubscribers(userId, bundle, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLENOTIFICATION_CHANGED,
         &IAnsSubscriber::OnEnabledNotificationChanged, callbackData);
+}
+
+void NotificationSubscriberManager::NotifyEnabledSilentReminderChangedInner(
+    const sptr<EnabledSilentReminderCallbackData> &callbackData)
+{
+    if (callbackData == nullptr) {
+        ANS_LOGE("null callbackData");
+        return;
+    }
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    int32_t uid = callbackData->GetUid();
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
+    NotifySubscribers(userId, uid, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLEDSILENTREMINDER_CHANGED,
+        &IAnsSubscriber::OnEnabledSilentReminderChanged, callbackData);
 }
 
 void NotificationSubscriberManager::NotifyEnabledPriorityChangedInner(

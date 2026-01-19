@@ -29,6 +29,7 @@
 #include "singleton.h"
 
 #include "enabled_priority_notification_by_bundle_callback_data.h"
+#include "enabled_silent_reminder_callback_data.h"
 #include "ians_subscriber.h"
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
@@ -119,6 +120,13 @@ public:
         const std::string &bundle);
 
     void NotifyEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData);
+
+    /**
+     * @brief Notify when the silent reminder switch is changed.
+     *
+     * @param callbackData Indicates the EnabledSilentReminderCallbackData object.
+     */
+    void NotifyEnabledSilentReminderChanged(const sptr<EnabledSilentReminderCallbackData> &callbackData);
 
     /**
     * @brief Notify when the watch status of the device owner changes.
@@ -235,6 +243,7 @@ private:
     void NotifyDoNotDisturbDateChangedInner(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date,
         const std::string &bundle);
     void NotifyEnabledNotificationChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
+    void NotifyEnabledSilentReminderChangedInner(const sptr<EnabledSilentReminderCallbackData> &callbackData);
     void NotifyEnabledWatchStatusChangedInner(const uint32_t watchStatus);
     void NotifyEnabledPriorityChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     void NotifyEnabledPriorityByBundleChangedInner(

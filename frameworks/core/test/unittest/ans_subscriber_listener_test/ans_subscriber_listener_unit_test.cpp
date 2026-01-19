@@ -43,6 +43,8 @@ public:
     {}
     void OnEnabledNotificationChanged(const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
     {}
+    void OnEnabledSilentReminderChanged(
+        const std::shared_ptr<EnabledSilentReminderCallbackData> &callbackData) override {}
     void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
     {}
@@ -86,6 +88,8 @@ public:
     {}
     void OnEnabledNotificationChanged(const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override
     {}
+    void OnEnabledSilentReminderChanged(
+        const std::shared_ptr<EnabledSilentReminderCallbackData> &callbackData) override {}
     void OnCanceled(const std::shared_ptr<Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason) override
     {}
@@ -549,7 +553,34 @@ HWTEST_F(SubscriberListenerTest, OnEnabledNotificationChanged_0200, Function | M
     ErrCode result = listener->OnEnabledNotificationChanged(callbackData);
     EXPECT_EQ(result, ERR_OK);
 }
- 
+
+/**
+ * @tc.name      : OnEnabledSilentReminderChanged_0100
+ * @tc.desc      : Test OnEnabledSilentReminderChanged with invalid data
+ */
+HWTEST_F(SubscriberListenerTest, OnEnabledSilentReminderChanged_0100, Function | MediumTest | Level1)
+{
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(nullptr);
+    sptr<EnabledSilentReminderCallbackData> callbackData = new (std::nothrow) EnabledSilentReminderCallbackData(
+        "", 100, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    ErrCode result = listener->OnEnabledSilentReminderChanged(callbackData);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name      : OnEnabledSilentReminderChanged_0200
+ * @tc.desc      : Test OnEnabledSilentReminderChanged success
+ */
+HWTEST_F(SubscriberListenerTest, OnEnabledSilentReminderChanged_0200, Function | MediumTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    sptr<EnabledSilentReminderCallbackData> callbackData = new (std::nothrow) EnabledSilentReminderCallbackData(
+        "com.example.test", 100, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    ErrCode result = listener->OnEnabledSilentReminderChanged(callbackData);
+    EXPECT_EQ(result, ERR_OK);
+}
+
 /**
  * @tc.name      : OnBadgeChanged_0100
  * @tc.desc      : Test OnBadgeChanged invalid data

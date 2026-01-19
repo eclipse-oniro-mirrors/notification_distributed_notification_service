@@ -18,6 +18,7 @@
 #include "ani.h"
 #include "sts_request.h"
 #include "enabled_notification_callback_data.h"
+#include "enabled_silent_reminder_callback_data.h"
 #include "enabled_priority_notification_by_bundle_callback_data.h"
 #include "badge_number_callback_data.h"
 #include "sts_sorting_map.h"
@@ -43,6 +44,8 @@ bool WarpSubscribeCallbackDataArray(
     ani_array &outObj);
 bool WarpEnabledNotificationCallbackData(
     ani_env *env, const std::shared_ptr<EnabledNotificationCallbackData> &callbackData, ani_object &outObj);
+bool WrapEnabledSilentReminderCallbackData(
+    ani_env *env, const std::shared_ptr<EnabledSilentReminderCallbackData> &callbackData, ani_object &outObj);
 bool WrapEnabledPriorityNotificationCallbackData(
     ani_env *env, const std::shared_ptr<EnabledNotificationCallbackData> &callbackData, ani_object &outObj);
 bool WrapEnabledPriorityNotificationByBundleCallbackData(ani_env *env,
