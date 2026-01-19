@@ -249,7 +249,6 @@ namespace {
         service->CancelContinuousTaskNotificationFromTriggerNotificationList(fuzzData->ConsumeRandomLengthString(),
             fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE),
             fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE));
-        std::vector<std::shared_ptr<NotificationRecord>> records;
         AdvancedNotificationService::GetRecordParameter parameter{
             .notificationId = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE),
             .uid = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE),
@@ -257,7 +256,7 @@ namespace {
             .bundleName = fuzzData->ConsumeRandomLengthString(),
             .userId = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE)
         };
-        service->GetRecordFromTriggerNotificationList(parameter, records);
+        service->GetRecordFromTriggerNotificationList(parameter);
         sptr<NotificationBundleOption> bundle;
         if (fuzzData->ConsumeBool()) {
             bundle = nullptr;

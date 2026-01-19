@@ -1805,7 +1805,6 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetFromDelayedN
 std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetRecordFromNotificationList(
     int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName, int32_t userId)
 {
-    std::vector<std::shared_ptr<NotificationRecord>> records;
     GetRecordParameter parameter{
         .notificationId = notificationId,
         .uid = uid,
@@ -1813,18 +1812,9 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetRecordFromNo
         .bundleName = bundleName,
         .userId = userId
     };
-    GetRecordFromTriggerNotificationList(parameter, records);
-    if (records.size() == 1) {
-        return records.front();
-    }
-    if (records.size() > 1) {
-        auto it = std::find_if(records.begin(), records.end(), [](const auto& record) {
-            return record->request->GetLiveViewStatus() ==
-                NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END;
-        });
-        if (it != records.end()) {
-            return *it;
-        }
+    auto record = GetRecordFromTriggerNotificationList(parameter);
+    if (record != nullptr) {
+        return record;
     }
 
     for (auto &record : notificationList_) {
