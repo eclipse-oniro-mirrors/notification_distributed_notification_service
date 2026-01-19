@@ -21,7 +21,18 @@
 
 namespace OHOS {
 namespace Notification {
-
+std::string ConsumePrintableString(FuzzedDataProvider *fdp, size_t size = 0) {
+    if (size == 0) {
+        size = fdp->ConsumeIntegral<size_t>();
+    }
+    std::string result;
+    result.reserve(size);
+    for (size_t i = 0; i < size; i++) {
+        result += static_cast<char>(fdp->ConsumeIntegralInRange<uint32_t>(33, 126));
+    }
+    return result;
+}
+   
 template <typename T>
 struct ObjectBuilder {
     static T* Build(FuzzedDataProvider *fdp)
