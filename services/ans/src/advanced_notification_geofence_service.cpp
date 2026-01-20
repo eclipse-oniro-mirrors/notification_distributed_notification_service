@@ -895,6 +895,10 @@ ErrCode AdvancedNotificationService::CheckLiveViewPendingEndLiveViewStatus(const
         isExist = true;
     }
     for (const auto &record : records) {
+        if (record == nullptr || record->request == nullptr) {
+            return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+        }
+
         if (record->request->GetLiveViewStatus() ==
             NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END) {
             return ERR_ANS_END_NOTIFICATION;
@@ -904,6 +908,8 @@ ErrCode AdvancedNotificationService::CheckLiveViewPendingEndLiveViewStatus(const
             ANS_LOGE("CheckNotificationRequest failed, errCode=%{public}d", result);
             return result;
         }
+
+        request->FillMissingParameters(record->request);
     }
     std::shared_ptr<NotificationRecord> record = nullptr;
     FindNotificationRecordByKey(request->GetSecureKey(), record);
@@ -917,6 +923,8 @@ ErrCode AdvancedNotificationService::CheckLiveViewPendingEndLiveViewStatus(const
             ANS_LOGE("CheckNotificationRequest failed, errCode=%{public}d", result);
             return result;
         }
+
+        request->FillMissingParameters(record->request);
     }
     if (record != nullptr || isExist) {
         return ERR_OK;
