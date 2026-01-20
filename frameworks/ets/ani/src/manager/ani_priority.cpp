@@ -96,7 +96,7 @@ void HandlePriorityFunctionCallbackComplete(ani_env* env, WorkStatus status, voi
     if (!CheckCompleteEnvironment(&envCurr, asyncCallbackInfo)) {
         return;
     }
-    switch (asyncCallbackInfo->funtionType) {
+    switch (asyncCallbackInfo->functionType) {
         case GET_BUNDLE_PRIORITY_CONFIG: {
             ani_string outAniStr;
             if (NotificationSts::GetAniStringByString(envCurr, asyncCallbackInfo->valueStr, outAniStr) != ANI_OK) {
@@ -195,7 +195,7 @@ ani_object AniGetBundlePriorityConfig(ani_env* env, ani_object obj, ani_object c
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    asyncCallbackInfo->funtionType = GET_BUNDLE_PRIORITY_CONFIG;
+    asyncCallbackInfo->functionType = GET_BUNDLE_PRIORITY_CONFIG;
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
@@ -285,7 +285,7 @@ ani_object AniIsPriorityEnabledByBundle(ani_env* env, ani_object obj, ani_object
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    asyncCallbackInfo->funtionType = IS_PRIORITY_ENABLED_BY_BUNDLE;
+    asyncCallbackInfo->functionType = IS_PRIORITY_ENABLED_BY_BUNDLE;
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
@@ -360,7 +360,7 @@ ani_object AniIsPriorityEnabled(ani_env* env, ani_object callback)
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
-    asyncCallbackInfo->funtionType = IS_PRIORITY_ENABLED;
+    asyncCallbackInfo->functionType = IS_PRIORITY_ENABLED;
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;

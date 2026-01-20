@@ -41,10 +41,6 @@ void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackSlotInfo* async
         DeleteAsyncWork(env, asyncCallbackInfo->asyncWork);
         asyncCallbackInfo->asyncWork = nullptr;
     }
-    if (asyncCallbackInfo->slot) {
-        delete asyncCallbackInfo->slot;
-        asyncCallbackInfo->slot = nullptr;
-    }
     delete asyncCallbackInfo;
     asyncCallbackInfo = nullptr;
 }

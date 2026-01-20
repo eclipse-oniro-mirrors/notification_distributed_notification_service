@@ -330,7 +330,7 @@ ani_status GetBadgesFromAni(ani_env *env, ani_object obj,
     std::vector<std::pair<Notification::NotificationBundleOption, bool>> &badges)
 {
     ANS_LOGD("GetBadgesFromAni call");
-    ani_boolean isUndefined;
+    ani_boolean isUndefined = ANI_FALSE;
     ani_status status = ANI_ERROR;
 
     status = env->Reference_IsUndefined(obj, &isUndefined);
@@ -348,7 +348,7 @@ ani_status GetBadgesFromAni(ani_env *env, ani_object obj,
         return ANI_ERROR;
     }
     ani_type typeMap = mapClass;
-    ani_boolean isMap;
+    ani_boolean isMap = ANI_FALSE;
     status = env->Object_InstanceOf(obj, typeMap, &isMap);
     if (isMap != ANI_TRUE) {
         ANS_LOGE("Current obj is not map type.");
