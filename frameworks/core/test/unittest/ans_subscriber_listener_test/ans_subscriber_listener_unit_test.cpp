@@ -58,14 +58,6 @@ public:
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override
     {}
  
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    bool NotificationSubscriber::ProcessSyncDecision(
-        const std::string &deviceType, std::shared_ptr<Notification> &notification) override
-    {
-        return notification->GetNotificationRequestPoint() != nullptr;
-    }
-#endif
- 
     bool HasOnBatchCancelCallback() override
     {
         return true;

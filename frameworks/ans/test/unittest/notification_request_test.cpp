@@ -1429,5 +1429,23 @@ HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationGeofence_0001, Level1
     nlohmann::json jsonObject;
     EXPECT_FALSE(notificationTrigger->ConvertJsonToNotificationGeofence(nullptr, jsonObject));
 }
+
+HWTEST_F(NotificationRequestTest, IsConsumedDevices_0001, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest request(myNotificationId);
+
+    request.AddConsumedDevices(NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE);
+    request.AddConsumedDevices(NotificationConstant::PAD_DEVICE_TYPE);
+    request.AddConsumedDevices("testDevice");
+
+    EXPECT_TRUE(request.IsConsumedDevices(NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE));
+    EXPECT_TRUE(request.IsConsumedDevices(NotificationConstant::PAD_DEVICE_TYPE));
+    EXPECT_FALSE(request.IsConsumedDevices(NotificationConstant::PC_DEVICE_TYPE));
+    EXPECT_FALSE(request.IsConsumedDevices(NotificationConstant::WEARABLE_DEVICE_TYPE));
+    EXPECT_FALSE(request.IsConsumedDevices(NotificationConstant::LITEWEARABLE_DEVICE_TYPE));
+    EXPECT_FALSE(request.IsConsumedDevices(NotificationConstant::CURRENT_DEVICE_TYPE));
+    EXPECT_FALSE(request.IsConsumedDevices(NotificationConstant::HEADSET_DEVICE_TYPE));
+}
 } // namespace Notification
 } // namespace OHOS

@@ -71,11 +71,6 @@ ErrCode SubscriberListener::OnConsumed(
     if (subscriber->SyncLiveViewVoip(deviceType, sharedNotification)) {
         ANS_LOGI("Sync LIVE_VIEW VOIP.");
     }
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    else if (!subscriber->ProcessSyncDecision(deviceType, sharedNotification)) {
-        return ERR_INVALID_OPERATION;
-    }
-#endif
     if (deviceType.compare(NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE) == 0) {
         sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
         if (request != nullptr && request->GetClassification() == NotificationConstant::ANS_VOIP) {

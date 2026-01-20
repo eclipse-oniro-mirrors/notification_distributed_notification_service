@@ -636,32 +636,24 @@ void NotificationSubscriberManager::NotifyConsumedInner(const sptr<Notification>
             continue;
         }
 #endif
-        if (IsSubscribedBysubscriber(record, notification) && ConsumeRecordFilter(record, notification) &&
+        if (IsSubscribedBysubscriber(record, notification) &&  IsSubscribedByDeviceType(record, notification, false) &&
+            ConsumeRecordFilter(record, notification) &&
             (record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONSUMED)) {
-            if (!record->subscriber->AsObject()->IsProxyObject()) {
-                MessageParcel data;
-                if (!data.WriteParcelable(notification)) {
-                    ANS_LOGE("WriteParcelable failed.");
-                    continue;
-                }
-                sptr<Notification> notificationStub = data.ReadParcelable<Notification>();
-                if (notificationStub == nullptr) {
-                    ANS_LOGE("null notificationStub");
-                    continue;
-                }
-                record->subscriber->OnConsumed(notificationStub, notificationMap);
+            auto notificationStub = GenerateSubscribedNotification(record, notification);
+            if (notificationStub == nullptr) {
                 continue;
             }
-
-        if (notificationMap != nullptr && notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
-            record->subscriber->OnConsumedWithMaxCapacity(notification, notificationMap);
-        } else if (notificationMap != nullptr && !notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
-            record->subscriber->OnConsumed(notification, notificationMap);
-        } else if (notificationMap == nullptr && notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
-            record->subscriber->OnConsumedWithMaxCapacity(notification);
-        } else {
-            record->subscriber->OnConsumed(notification);
-        }
+            notification->GetNotificationRequestPoint()->AddConsumedDevices(record->deviceType);
+            auto request = notificationStub->GetNotificationRequestPoint();
+            if (notificationMap != nullptr && request->IsCommonLiveView()) {
+                record->subscriber->OnConsumedWithMaxCapacity(notificationStub, notificationMap);
+            } else if (notificationMap != nullptr && !request->IsCommonLiveView()) {
+                record->subscriber->OnConsumed(notificationStub, notificationMap);
+            } else if (notificationMap == nullptr && request->IsCommonLiveView()) {
+                record->subscriber->OnConsumedWithMaxCapacity(notificationStub);
+            } else {
+                record->subscriber->OnConsumed(notificationStub);
+            }
         }
     }
     NotificationSubscriberManager::TrackCodeLog(notification);
@@ -774,10 +766,16 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(
         bool wearableFlag = false;
         bool headsetFlag = false;
         bool keyNodeFlag = false;
-        if (IsSubscribedBysubscriber(record, notification) && ConsumeRecordFilter(record, notification)) {
-            currNotifications.emplace_back(notification);
+        if (IsSubscribedBysubscriber(record, notification) && IsSubscribedByDeviceType(record, notification, false) &&
+            ConsumeRecordFilter(record, notification)) {
+            auto notificationStub = GenerateSubscribedNotification(record, notification);
+            if (notificationStub == nullptr) {
+                continue;
+            }
+            notification->GetNotificationRequestPoint()->AddConsumedDevices(record->deviceType);
+            currNotifications.emplace_back(notificationStub);
             if (record->subscriber != nullptr) {
-                NotificationSubscriberManager::TrackCodeLog(notification);
+                NotificationSubscriberManager::TrackCodeLog(notificationStub);
             }
         }
     }
@@ -833,16 +831,21 @@ void NotificationSubscriberManager::NotifyCanceledInner(
     ANS_LOGI("CancelNotification key=%{public}s", notification->GetKey().c_str());
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);
-        if (IsSubscribedBysubscriber(record, notification) &&
+        if (IsSubscribedBysubscriber(record, notification) && IsSubscribedByDeviceType(record, notification, true) &&
             (record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CANCELED)) {
-            if (notificationMap != nullptr && notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
-                record->subscriber->OnCanceledWithMaxCapacity(notification, notificationMap, deleteReason);
-            } else if (notificationMap != nullptr && !notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
-                record->subscriber->OnCanceled(notification, notificationMap, deleteReason);
-            } else if (notificationMap == nullptr && notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
-                record->subscriber->OnCanceledWithMaxCapacity(notification, deleteReason);
+            auto notificationStub = GenerateSubscribedNotification(record, notification);
+            if (notificationStub == nullptr) {
+                continue;
+            }
+            auto request = notificationStub->GetNotificationRequestPoint();
+            if (notificationMap != nullptr && request->IsCommonLiveView()) {
+                record->subscriber->OnCanceledWithMaxCapacity(notificationStub, notificationMap, deleteReason);
+            } else if (notificationMap != nullptr && !request->IsCommonLiveView()) {
+                record->subscriber->OnCanceled(notificationStub, notificationMap, deleteReason);
+            } else if (notificationMap == nullptr && request->IsCommonLiveView()) {
+                record->subscriber->OnCanceledWithMaxCapacity(notificationStub, deleteReason);
             } else {
-                record->subscriber->OnCanceled(notification, deleteReason);
+                record->subscriber->OnCanceled(notificationStub, deleteReason);
             }
         }
     }
@@ -890,6 +893,77 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
     }
 
     return false;
+}
+
+sptr<Notification> NotificationSubscriberManager::GenerateSubscribedNotification(
+    const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification)
+{
+    sptr<Notification> notificationStub = nullptr;
+    if (!record->subscriber->AsObject()->IsProxyObject()) {
+        MessageParcel data;
+        if (!data.WriteParcelable(notification)) {
+            ANS_LOGE("WriteParcelable failed.");
+            return nullptr;
+        }
+        notificationStub = data.ReadParcelable<Notification>();
+    } else {
+        notificationStub = new (std::nothrow) Notification(*notification);
+    }
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    if (notificationStub == nullptr) {
+        ANS_LOGE("null notificationStub");
+        return nullptr;
+    }
+    sptr<NotificationRequest> request = notificationStub->GetNotificationRequestPoint();
+    if (request == nullptr) {
+        ANS_LOGE("null request");
+        return nullptr;
+    }
+    std::string deviceType = record->deviceType;
+    auto flagsMap = request->GetDeviceFlags();
+    if (flagsMap != nullptr) {
+        auto flagIter = flagsMap->find(deviceType);
+        if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
+            request->SetFlags(flagIter->second);
+            ANS_LOGI("SetFlags-final,key=%{public}s flags= %{public}d deviceType:%{public}s",
+                request->GetBaseKey("").c_str(), request->GetFlags()->GetReminderFlags(), deviceType.c_str());
+        }
+    }
+#endif
+    return notificationStub;
+}
+
+bool NotificationSubscriberManager::IsSubscribedByDeviceType(const std::shared_ptr<SubscriberRecord> &record,
+    const sptr<Notification> &notification, bool checkConsumedDevice)
+{
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
+    std::string deviceType = record->deviceType;
+    if (request == nullptr) {
+        ANS_LOGE("null request");
+        return false;
+    }
+    if (deviceType != NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE &&
+        checkConsumedDevice && request->IsConsumedDevices(deviceType)) {
+        return true;
+    }
+    auto flagsMap = request->GetDeviceFlags();
+    if (flagsMap == nullptr || flagsMap->size() <= 0) {
+        return true;
+    }
+    auto flagIter = flagsMap->find(deviceType);
+    if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
+        return true;
+    }
+    if (deviceType.size() <= 0 || deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
+        return true;
+    }
+    ANS_LOGE("Cannot find deviceFlags,notificationKey = %{public}s, deviceType: %{public}s, bundle:%{public}s.",
+        request->GetBaseKey("").c_str(), deviceType.c_str(), record->subscriberBundleName_.c_str());
+    return false;
+#else
+    return true;
+#endif
 }
 
 bool NotificationSubscriberManager::ConsumeRecordFilter(
@@ -967,8 +1041,13 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
                 localLiveViewContent->ClearCapsuleIcon();
                 ANS_LOGD("local live view batch delete clear picture");
             }
-            if (IsSubscribedBysubscriber(record, notification)) {
-                currNotifications.emplace_back(notification);
+            if (IsSubscribedBysubscriber(record, notification) &&
+                IsSubscribedByDeviceType(record, notification, true)) {
+                auto notificationStub = GenerateSubscribedNotification(record, notification);
+                if (notificationStub == nullptr) {
+                    continue;
+                }
+                currNotifications.emplace_back(notificationStub);
             }
         }
         if (!currNotifications.empty()) {

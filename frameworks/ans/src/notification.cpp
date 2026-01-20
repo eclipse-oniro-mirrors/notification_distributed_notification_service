@@ -52,7 +52,9 @@ Notification::Notification(const Notification &other)
     ledLightColor_ = other.ledLightColor_;
     lockscreenVisibleness_ = other.lockscreenVisibleness_;
     remindType_ = other.remindType_;
-    request_ = other.request_;
+    if (other.request_ != nullptr) {
+        request_ = new (std::nothrow) NotificationRequest(*(other.request_));
+    }
     postTime_ = other.postTime_;
     sound_ = other.sound_;
     vibrationStyle_ = other.vibrationStyle_;

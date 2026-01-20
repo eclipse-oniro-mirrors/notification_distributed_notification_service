@@ -62,34 +62,6 @@ bool NotificationSubscriber::SyncLiveViewVoip(
 }
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-bool NotificationSubscriber::ProcessSyncDecision(
-    const std::string &deviceType, std::shared_ptr<Notification> &notification) const
-{
-    sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
-    if (request == nullptr) {
-        ANS_LOGE("null request");
-        return false;
-    }
-
-    auto flagsMap = request->GetDeviceFlags();
-    if (flagsMap == nullptr || flagsMap->size() <= 0) {
-        return true;
-    }
-    auto flagIter = flagsMap->find(deviceType);
-    if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
-        request->SetFlags(flagIter->second);
-        ANS_LOGI("SetFlags-final,key=%{public}s flags= %{public}d deviceType:%{public}s",
-            request->GetBaseKey("").c_str(), request->GetFlags()->GetReminderFlags(), deviceType.c_str());
-        return true;
-    }
-    if (deviceType.size() <= 0 || deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
-        return true;
-    }
-    ANS_LOGE("Cannot find deviceFlags,notificationKey = %{public}s, deviceType: %{public}s.",
-        request->GetKey().c_str(), deviceType.c_str());
-    return false;
-}
-
 NotificationConstant::FlagStatus NotificationSubscriber::DowngradeReminder(
     const NotificationConstant::FlagStatus &oldFlags, const NotificationConstant::FlagStatus &judgeFlags) const
 {
@@ -161,11 +133,6 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnConsumed(
     if (subscriber_.SyncLiveViewVoip(deviceType, sharedNotification)) {
         ANS_LOGI("Sync LIVE_VIEW VOIP.");
     }
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    else if (!subscriber_.ProcessSyncDecision(deviceType, sharedNotification)) {
-        return ERR_OK;
-    }
-#endif
     if (deviceType.compare(NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE) == 0) {
         sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
         if (request != nullptr && request->GetClassification() == NotificationConstant::ANS_VOIP) {
