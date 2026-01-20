@@ -36,7 +36,7 @@ struct AsyncCallbackPriorityInfo {
     ani_vm* vm = nullptr;
     arkts::concurrency_helpers::AsyncWork* asyncWork = nullptr;
     OHOS::NotificationSts::CallbackPromiseInfo info;
-    PriorityFunction funtionType = PRIORITY_NONE;
+    PriorityFunction functionType = PRIORITY_NONE;
     std::string valueStr;
     Notification::NotificationBundleOption option;
     OHOS::Notification::NotificationConstant::PriorityEnableStatus status =
