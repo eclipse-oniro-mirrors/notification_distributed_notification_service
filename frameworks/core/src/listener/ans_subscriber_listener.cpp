@@ -88,17 +88,6 @@ ErrCode SubscriberListener::OnConsumed(const sptr<Notification> &notification)
     return OnConsumed(notification, nullptr);
 }
 
-ErrCode SubscriberListener::OnConsumedWithMaxCapacity(
-    const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
-{
-    return OnConsumed(notification, notificationMap);
-}
-
-ErrCode SubscriberListener::OnConsumedWithMaxCapacity(const sptr<Notification> &notification)
-{
-    return OnConsumed(notification, nullptr);
-}
-
 ErrCode SubscriberListener::OnConsumedList(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap)
 {
@@ -134,17 +123,6 @@ ErrCode SubscriberListener::OnCanceled(
 }
 
 ErrCode SubscriberListener::OnCanceled(const sptr<Notification> &notification, int32_t deleteReason)
-{
-    return OnCanceled(notification, nullptr, deleteReason);
-}
-
-ErrCode SubscriberListener::OnCanceledWithMaxCapacity(
-    const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
-{
-    return OnCanceled(notification, notificationMap, deleteReason);
-}
-
-ErrCode SubscriberListener::OnCanceledWithMaxCapacity(const sptr<Notification> &notification, int32_t deleteReason)
 {
     return OnCanceled(notification, nullptr, deleteReason);
 }

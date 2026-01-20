@@ -73,7 +73,6 @@ public:
         sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
         listener->OnConsumed(notification, notificationMap);
         listener->OnConsumed(notification);
-        listener->OnConsumedWithMaxCapacity(notification, notificationMap);
 
         std::vector<sptr<Notification>> notifications;
         notifications.emplace_back(notification);
@@ -82,8 +81,6 @@ public:
         listener->OnCanceled(notification, notificationMap, id);
         listener->OnCanceled(notification, nullptr, id);
         listener->OnCanceled(notification, id);
-        listener->OnCanceledWithMaxCapacity(notification, notificationMap, id);
-        listener->OnCanceledWithMaxCapacity(notification, id);
         listener->OnCanceledList(notifications, notificationMap, id);
         listener->OnCanceledList(notifications, id);
         listener->OnUpdated(notificationMap);

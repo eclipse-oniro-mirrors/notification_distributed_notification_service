@@ -645,12 +645,8 @@ void NotificationSubscriberManager::NotifyConsumedInner(const sptr<Notification>
             }
             notification->GetNotificationRequestPoint()->AddConsumedDevices(record->deviceType);
             auto request = notificationStub->GetNotificationRequestPoint();
-            if (notificationMap != nullptr && request->IsCommonLiveView()) {
-                record->subscriber->OnConsumedWithMaxCapacity(notificationStub, notificationMap);
-            } else if (notificationMap != nullptr && !request->IsCommonLiveView()) {
+            if (notificationMap != nullptr) {
                 record->subscriber->OnConsumed(notificationStub, notificationMap);
-            } else if (notificationMap == nullptr && request->IsCommonLiveView()) {
-                record->subscriber->OnConsumedWithMaxCapacity(notificationStub);
             } else {
                 record->subscriber->OnConsumed(notificationStub);
             }
@@ -838,12 +834,8 @@ void NotificationSubscriberManager::NotifyCanceledInner(
                 continue;
             }
             auto request = notificationStub->GetNotificationRequestPoint();
-            if (notificationMap != nullptr && request->IsCommonLiveView()) {
-                record->subscriber->OnCanceledWithMaxCapacity(notificationStub, notificationMap, deleteReason);
-            } else if (notificationMap != nullptr && !request->IsCommonLiveView()) {
+            if (notificationMap != nullptr) {
                 record->subscriber->OnCanceled(notificationStub, notificationMap, deleteReason);
-            } else if (notificationMap == nullptr && request->IsCommonLiveView()) {
-                record->subscriber->OnCanceledWithMaxCapacity(notificationStub, deleteReason);
             } else {
                 record->subscriber->OnCanceled(notificationStub, deleteReason);
             }

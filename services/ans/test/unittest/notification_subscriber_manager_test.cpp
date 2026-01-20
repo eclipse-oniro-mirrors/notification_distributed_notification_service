@@ -51,20 +51,6 @@ public:
         return ERR_OK;
     };
 
-    ErrCode OnConsumedWithMaxCapacity(
-        const sptr<Notification> &notification,
-        const sptr<NotificationSortingMap> &notificationMap) override
-    {
-        isCalled_ = true;
-        return ERR_OK;
-    };
-
-    ErrCode OnConsumedWithMaxCapacity(const sptr<Notification> &notification) override
-    {
-        isCalled_ = true;
-        return ERR_OK;
-    };
-
     bool IsCalled()
     {
         return isCalled_;
