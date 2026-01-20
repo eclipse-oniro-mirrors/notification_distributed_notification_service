@@ -297,9 +297,9 @@ HWTEST_F(AnsGeofenceServiceTest, RemoveNotificationsFromTriggerNotificationList_
         .bundleName = "testBundleName",
         .userId = TEST_VALID_ID
     };
-    std::vector<std::shared_ptr<NotificationRecord>> records;
-    advancedNotificationService_->GetRecordFromTriggerNotificationList(parameter, records);
-    EXPECT_EQ(records.size(), LIST_SIZE_ONE);
+
+    auto record = advancedNotificationService_->GetRecordFromTriggerNotificationList(parameter);
+    EXPECT_NE(record, nullptr);
 }
 
 /**
@@ -401,6 +401,52 @@ HWTEST_F(AnsGeofenceServiceTest, RemoveNotificationsFromTriggerNotificationList_
     ASSERT_EQ(advancedNotificationService_->triggerNotificationList_.size(), LIST_SIZE_SIX);
     advancedNotificationService_->RemoveNtfBySlotFromTriggerNotificationList(bundle, slot);
     EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), LIST_SIZE_FIVE);
+}
+
+/**
+ * @tc.number    : GetRecordFromTriggerNotificationList_001
+ * @tc.name      : Get record from trigger notificationList.
+ * @tc.desc      : Test GetRecordFromTriggerNotificationList.
+ */
+HWTEST_F(AnsGeofenceServiceTest, GetRecordFromTriggerNotificationList_001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    AdvancedNotificationService::GetRecordParameter parameter{
+        .notificationId = TEST_VALID_ID,
+        .uid = TEST_VALID_ID,
+        .label = "testLabel",
+        .bundleName = "testBundleName",
+        .userId = TEST_VALID_ID
+    };
+
+    advancedNotificationService_->triggerNotificationList_.clear();
+    advancedNotificationService_->triggerNotificationList_.push_back(nullptr);
+    auto result = advancedNotificationService_->GetRecordFromTriggerNotificationList(parameter);
+    EXPECT_EQ(result, nullptr);
+
+    auto record = std::make_shared<NotificationRecord>();
+    record->bundleOption = sptr<NotificationBundleOption>::MakeSptr();
+    record->bundleOption->SetBundleName("");
+    record->bundleOption->SetUid(TEST_VALID_ID);
+    record->request = sptr<NotificationRequest>::MakeSptr();
+    record->request->SetNotificationId(TEST_VALID_ID);
+    record->request->SetLabel("testLabel");
+    record->request->SetReceiverUserId(TEST_VALID_ID);
+    record->request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END);
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    record->request->SetContent(content);
+    record->notification = sptr<Notification>::MakeSptr(record->request);
+    record->bundleOption->SetUid(TEST_VALID_ID);
+    record->bundleOption->SetBundleName("testBundleName");
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    result = advancedNotificationService_->GetRecordFromTriggerNotificationList(parameter);
+    EXPECT_NE(result, nullptr);
+
+    advancedNotificationService_->triggerNotificationList_.push_back(record);
+    result = advancedNotificationService_->GetRecordFromTriggerNotificationList(parameter);
+    EXPECT_NE(result, nullptr);
 }
 }  // namespace Notification
 }  // namespace OHOS

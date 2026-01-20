@@ -2002,8 +2002,7 @@ private:
     void RemoveForDeleteAllFromTriggerNotificationList(const std::string &key, int32_t userId);
     void CancelContinuousTaskNotificationFromTriggerNotificationList(const std::string &label, int32_t notificationId,
         int32_t uid);
-    void GetRecordFromTriggerNotificationList(const GetRecordParameter &parameter,
-        std::vector<std::shared_ptr<NotificationRecord>> &records);
+    std::shared_ptr<NotificationRecord> GetRecordFromTriggerNotificationList(const GetRecordParameter &parameter);
     void RemoveAllFromTriggerNotificationList(const sptr<NotificationBundleOption> &bundle);
     void RemoveNtfBySlotFromTriggerNotificationList(const sptr<NotificationBundleOption> &bundle,
         const sptr<NotificationSlot> &slot);

@@ -1088,9 +1088,10 @@ void AdvancedNotificationService::CancelContinuousTaskNotificationFromTriggerNot
     }
 }
 
-void AdvancedNotificationService::GetRecordFromTriggerNotificationList(const GetRecordParameter &parameter,
-    std::vector<std::shared_ptr<NotificationRecord>> &records)
+std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetRecordFromTriggerNotificationList(
+    const GetRecordParameter &parameter)
 {
+    std::vector<std::shared_ptr<NotificationRecord>> records;
     std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
     for (auto &record : triggerNotificationList_) {
         if (record == nullptr || record->notification == nullptr || record->bundleOption == nullptr) {
@@ -1104,6 +1105,20 @@ void AdvancedNotificationService::GetRecordFromTriggerNotificationList(const Get
             records.push_back(record);
         }
     }
+
+    if (records.size() == 1) {
+        return records.front();
+    }
+    if (records.size() > 1) {
+        auto it = std::find_if(records.begin(), records.end(), [](const auto& record) {
+            return record->request->GetLiveViewStatus() ==
+                NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END;
+        });
+        if (it != records.end()) {
+            return *it;
+        }
+    }
+    return nullptr;
 }
 
 void AdvancedNotificationService::RemoveAllFromTriggerNotificationList(const sptr<NotificationBundleOption> &bundle)
