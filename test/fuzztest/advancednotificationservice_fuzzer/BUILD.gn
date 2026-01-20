@@ -34,7 +34,10 @@ ohos_fuzztest("AdvancedNotificationServiceFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "advancednotificationservice_fuzzer.cpp" ]
+  sources = [
+    "advancednotificationservice_fuzzer.cpp",
+    "${component_path}/test/fuzztest/fuzz_common_base/mock/mock_notification_func.cpp"
+  ]
   defines = []
   deps = [
     "${component_path}/test/fuzztest/fuzz_common_base:fuzz_common_base",

@@ -46,7 +46,7 @@ namespace Notification {
         service->GetAppTargetBundle(bundleOption, targetBundleOption);
 
         std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-        std::string bundleName = fuzzData->ConsumeRandomLengthString();
+        std::string bundleName = ConsumePrintableString(fuzzData);
         std::vector<std::string> dumpInfo;
         int32_t creatorUserId = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
         int32_t recvUserId = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
@@ -101,7 +101,7 @@ namespace Notification {
         NotificationPreferences::GetInstance()->SetKvToDb(oldKey1, "1", 0);
         service->ResetDistributedEnabled();
 
-        std::string bundleName = fuzzData->ConsumeRandomLengthString();
+        std::string bundleName = ConsumePrintableString(fuzzData);
         int32_t uid = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
         NotificationCloneBundleInfo cloneBundleInfo;
         cloneBundleInfo.SetBundleName(bundleName);
@@ -129,10 +129,8 @@ namespace Notification {
         }
 
         sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-        std::string bundleName = fuzzData->ConsumeRandomLengthString();
-        int32_t uid = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
-        auto bundle = new NotificationBundleOption(bundleName, uid);
-        request->SetNotificationId(uid);
+        sptr<NotificationBundleOption> bundle = ObjectBuilder<NotificationBundleOption>::Build(fuzzData);
+        request->SetNotificationId(fuzzData->ConsumeIntegral<int32_t>());
         auto record = service->MakeNotificationRecord(request, bundle);
         auto now = std::chrono::system_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
@@ -142,11 +140,12 @@ namespace Notification {
 
         std::string phoneNum = fuzzData->ConsumeRandomLengthString();
         std::string policy = fuzzData->ConsumeRandomLengthString();
-        service->QueryContactByProfileId(phoneNum, policy, uid);
+        service->QueryContactByProfileId(phoneNum, policy, fuzzData->ConsumeIntegral<int32_t>());
 
         service->PublishSubscriberExistFlagEvent(fuzzData->ConsumeBool(), fuzzData->ConsumeBool());
-        service->RemoveAllNotificationsByBundleName(bundleName, 0);
-        service->RemoveAllNotificationsByBundleName("", 0);
+        service->RemoveAllNotificationsByBundleName(ConsumePrintableString(fuzzData),
+            fuzzData->ConsumeIntegral<int32_t>(), fuzzData->ConsumeIntegral<int32_t>());
+        service->RemoveAllNotificationsByBundleName("", 0, 0);
 
         request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
         auto liveContent = std::make_shared<NotificationLiveViewContent>();
@@ -162,7 +161,7 @@ namespace Notification {
         FuzzedDataProvider *fuzzData)
     {
         std::string name = "com.easy.abroad";
-        std::string bundleName = fuzzData->ConsumeRandomLengthString();
+        std::string bundleName = ConsumePrintableString(fuzzData);
         int32_t uid = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
 
         service->RequestEnableNotification(name, uid);
@@ -354,7 +353,7 @@ namespace Notification {
         sptr<IAnsDialogCallback> dialogCallback = new AnsDialogCallbackProxy(nullptr);
         std::shared_ptr<NotificationUnifiedGroupInfo> groupInfo;
         bool enable = fuzzData->ConsumeBool();
-        std::string bundleName = fuzzData->ConsumeRandomLengthString();
+        std::string bundleName = ConsumePrintableString(fuzzData);
         std::string phoneNumber = fuzzData->ConsumeRandomLengthString();
         std::string groupName = fuzzData->ConsumeRandomLengthString();
         std::string deviceType = fuzzData->ConsumeRandomLengthString();

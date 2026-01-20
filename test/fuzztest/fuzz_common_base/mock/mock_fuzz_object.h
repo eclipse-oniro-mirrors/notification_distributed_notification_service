@@ -21,14 +21,19 @@
 
 namespace OHOS {
 namespace Notification {
-std::string ConsumePrintableString(FuzzedDataProvider *fdp, size_t size = 0) {
+std::string ConsumePrintableString(FuzzedDataProvider *fdp, size_t size = 0)
+{
     if (size == 0) {
-        size = fdp->ConsumeIntegral<size_t>();
+        size = fdp->ConsumeIntegralInRange<size_t>(5, 15);
     }
     std::string result;
     result.reserve(size);
     for (size_t i = 0; i < size; i++) {
-        result += static_cast<char>(fdp->ConsumeIntegralInRange<uint32_t>(33, 126));
+        char ch = static_cast<char>(fdp->ConsumeIntegralInRange<uint32_t>(33, 126));
+        while (ch == '%' || ch == '_') {
+            ch = static_cast<char>(fdp->ConsumeIntegralInRange<uint32_t>(33, 126));
+        }
+        result += ch;
     }
     return result;
 }
