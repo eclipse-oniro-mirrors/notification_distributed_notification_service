@@ -234,6 +234,32 @@ HWTEST_F(SmartReminderCenterTest, InitValidDevices_00003, Function | SmallTest |
     EXPECT_EQ(validDevices.size(), 1);
 }
 
+HWTEST_F(SmartReminderCenterTest, InitValidDevices_00004, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetClassification(NotificationConstant::ANS_VOIP);
+
+    for (std::string deviceType : NotificationConstant::DEVICESTYPES) {
+        auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+        record->subscribedAll = true;
+        record->deviceType = deviceType;
+        NotificationSubscriberManager::GetInstance()->subscriberRecordList_.push_back(record);
+    }
+
+    set<string> validDevices;
+    set<string> smartDevices;
+    map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> statusMap;
+
+    smartReminderCenter_->InitValidDevices(validDevices, smartDevices, statusMap, request);
+
+    EXPECT_EQ(validDevices.size(), 4);
+    EXPECT_NE(validDevices.find(NotificationConstant::WEARABLE_DEVICE_TYPE), validDevices.end());
+    EXPECT_NE(validDevices.find(NotificationConstant::LITEWEARABLE_DEVICE_TYPE), validDevices.end());
+    EXPECT_NE(validDevices.find(NotificationConstant::HEADSET_DEVICE_TYPE), validDevices.end());
+    EXPECT_NE(validDevices.find(NotificationConstant::WEARABLE_DEVICE_TYPE), validDevices.end());
+}
+
 #ifdef ALL_SCENARIO_COLLABORATION
 /**
  * @tc.name: InitPcPadDevices_100

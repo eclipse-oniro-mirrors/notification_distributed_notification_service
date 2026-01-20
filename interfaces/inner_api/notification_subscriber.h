@@ -178,8 +178,6 @@ public:
     void SetSubscribedFlags(const uint32_t subscribedMethod);
     uint32_t GetSubscribedFlags() const;
 
-    bool SyncLiveViewVoip(const std::string &deviceType, std::shared_ptr<Notification> &notification) const;
-
 private:
     class SubscriberImpl final : public AnsSubscriberStub {
     public:

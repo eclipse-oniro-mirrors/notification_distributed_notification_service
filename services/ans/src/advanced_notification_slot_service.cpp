@@ -661,13 +661,7 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     auto flags = std::make_shared<NotificationFlags>();
     request->SetFlags(flags);
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    bool systemVoip = (request->GetClassification() == NotificationConstant::ANS_VOIP &&
-        request->GetSlotType() == NotificationConstant::LIVE_VIEW);
-    if (!systemVoip) {
-        DelayedSingleton<SmartReminderCenter>::GetInstance()->ReminderDecisionProcess(request);
-    } else {
-        ANS_LOGI("systemVoip");
-    }
+    DelayedSingleton<SmartReminderCenter>::GetInstance()->ReminderDecisionProcess(request);
 #endif
     NotificationConstant::SlotType type = request->GetSlotType();
 
