@@ -886,7 +886,6 @@ bool NotificationRequest::CollaborationToJson(std::string& data) const
 {
     nlohmann::json jsonObject;
     jsonObject["id"]              = notificationId_;
-    jsonObject["priorityNotificationType"] = priorityNotificationType_;
     jsonObject["autoDeletedTime"] = autoDeletedTime_;
 
     jsonObject["groupName"]         = groupName_;

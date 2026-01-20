@@ -131,8 +131,8 @@ void NotificationClonePriority::SetDefaultPriorityInfo(const int32_t uid, const 
         return;
     }
     AdvancedNotificationService::GetInstance()->SetBundlePriorityConfigInner(bo, "");
-        AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundleInner(
-            bo, static_cast<int32_t>(NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT));
+    AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundleInner(
+        bo, static_cast<int32_t>(NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT));
 }
 
 void NotificationClonePriority::RestoreBundlePriorityInfo(

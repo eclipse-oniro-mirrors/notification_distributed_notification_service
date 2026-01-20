@@ -746,13 +746,7 @@ AnsStatus AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifi
 
     if (request->IsAgentNotification()) {
         uid = request->GetOwnerUid();
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-        if (!AdvancedNotificationPriorityHelper::GetInstance()->DelayUpdatePriority(request)) {
-            request->SetIsAgentNotification(false);
-        }
-#else
         request->SetIsAgentNotification(false);
-#endif
         directAgency = true;
     }
     if (uid <= 0) {

@@ -24,10 +24,10 @@ const std::string CTRL_LIST_KEY = "NOTIFICATION_CTL_LIST_PKG";
 const std::string CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY = "CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG";
 const std::string HEALTH_BUNDLE_WHITE_LIST_KEY = "HEALTH_BUNDLE_WHITE_LIST";
 const std::string PROXY_PKG_KEY = "PROXY_PKG";
-const std::string DELAY_UPDATE_PRIORITY_KEY = "delay_update_priority";
 const std::string DOWNLOAD_TEMPLATE_NAME = "downloadTemplate";
 const std::string ANS_EXTENDINFO_INFO_PRE = "notification_collaboration_";
 const std::string ANS_EXTENDINFO_DEVICE_ID = "deviceId";
 const std::string EXTENDINFO_FLAG = "flag";
+const std::string EXTENDINFO_PRIORITY_TYPE = "ExtendPriorityNotificationType";
 }
 }

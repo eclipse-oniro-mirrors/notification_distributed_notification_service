@@ -1995,5 +1995,66 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, DisableNotificationFeature_400, Fu
 
     ASSERT_EQ(ret, (int)ERR_OK);
 }
+
+/**
+ * @tc.name: GetAllNotification_100
+ * @tc.desc: test GetAllNotification success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, GetAllNotification_100, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest(10000);
+    sptr<NotificationRequest> request1 = new (std::nothrow) NotificationRequest(10001);
+    sptr<NotificationRequest> request2 = new (std::nothrow) NotificationRequest(10002);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("bundleName", -1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundleOption);
+    auto record1 = advancedNotificationService_->MakeNotificationRecord(request1, bundleOption);
+    auto record2 = advancedNotificationService_->MakeNotificationRecord(request2, bundleOption);
+    advancedNotificationService_->notificationList_.emplace_back(record);
+    advancedNotificationService_->triggerNotificationList_.emplace_back(record1);
+    advancedNotificationService_->delayNotificationList_.emplace_back(std::make_pair(record2, 0));
+    size_t notificationListSize = advancedNotificationService_->notificationList_.size() +
+    advancedNotificationService_->triggerNotificationList_.size() +
+    advancedNotificationService_->delayNotificationList_.size();
+    std::vector<sptr<Notification>> resultNotifications = advancedNotificationService_->GetAllNotification();
+    EXPECT_EQ(resultNotifications.size(), notificationListSize);
+}
+
+/**
+ * @tc.name: GetNotificationsByBundle_100
+ * @tc.desc: test GetNotificationsByBundle success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, GetNotificationsByBundle_100, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest(10003);
+    sptr<NotificationRequest> request1 = new (std::nothrow) NotificationRequest(10004);
+    sptr<NotificationRequest> request2 = new (std::nothrow) NotificationRequest(10005);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("bundleName", -1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundleOption);
+    auto record1 = advancedNotificationService_->MakeNotificationRecord(request1, bundleOption);
+    auto record2 = advancedNotificationService_->MakeNotificationRecord(request2, bundleOption);
+    advancedNotificationService_->notificationList_.emplace_back(record);
+    advancedNotificationService_->triggerNotificationList_.emplace_back(record1);
+    advancedNotificationService_->delayNotificationList_.emplace_back(std::make_pair(record2, 0));
+    std::vector<sptr<Notification>> resultNotifications =
+        advancedNotificationService_->GetNotificationsByBundle(bundleOption);
+    EXPECT_NE(resultNotifications.size(), 0);
+}
+
+/**
+ * @tc.name: GetNotificationsByBundle_200
+ * @tc.desc: test GetNotificationsByBundle fail.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, GetNotificationsByBundle_200, Function | SmallTest | Level1)
+{
+    std::vector<sptr<Notification>> resultNotifications =
+        advancedNotificationService_->GetNotificationsByBundle(nullptr);
+    EXPECT_EQ(resultNotifications.size(), 0);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("bundleName", 1001);
+    resultNotifications = advancedNotificationService_->GetNotificationsByBundle(bundleOption);
+    EXPECT_EQ(resultNotifications.size(), 0);
+}
 }
 }

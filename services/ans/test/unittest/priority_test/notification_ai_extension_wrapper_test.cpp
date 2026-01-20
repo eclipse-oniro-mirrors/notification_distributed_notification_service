@@ -92,6 +92,21 @@ HWTEST_F(NotificationAiExtensionWrapperTest, NotifyPriorityEvent_0100, Function 
 }
 
 /**
+ * @tc.name: UpdateNotification_0100
+ * @tc.desc: Test UpdateNotification when updateNotification_ nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAiExtensionWrapperTest, UpdateNotification_0100, Function | SmallTest | Level1)
+{
+    NOTIFICATION_AI_EXTENSION_WRAPPER->updateNotification_ = nullptr;
+    std::vector<sptr<NotificationRequest>> requests;
+    std::vector<int32_t> results;
+    EXPECT_EQ(NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateNotification(
+        requests, NotificationAiExtensionWrapper::REFRESH_KEYWORD_PRIORITY_TYPE, results),
+        NOTIFICATION_AI_EXTENSION_WRAPPER->ErrorCode::ERR_FAIL);
+}
+
+/**
  * @tc.name: Init_0100
  * @tc.desc: Test Init when init_ nullptr.
  * @tc.type: FUNC

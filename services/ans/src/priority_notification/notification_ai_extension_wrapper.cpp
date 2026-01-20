@@ -72,12 +72,6 @@ void NotificationAiExtensionWrapper::InitExtensionWrapper()
         return;
     }
 
-    getSupportCommands_ = (GET_SUPPORT_COMMANDS)dlsym(ExtensionHandle_, "GetSupportCommands");
-    if (getSupportCommands_ == nullptr) {
-        ANS_LOGE("failed to get support ai commands extension %{public}s.", dlerror());
-        return;
-    }
-
     ANS_LOGI("notification ai extension wrapper init success");
 }
 
@@ -89,7 +83,6 @@ void NotificationAiExtensionWrapper::CloseExtensionWrapper()
         updateNotification_ = nullptr;
         init_ = nullptr;
         syncRules_ = nullptr;
-        getSupportCommands_ = nullptr;
         syncBundleKeywords_ = nullptr;
         notifyPriorityEvent_ = nullptr;
     }
@@ -97,13 +90,14 @@ void NotificationAiExtensionWrapper::CloseExtensionWrapper()
 }
 
 int32_t NotificationAiExtensionWrapper::UpdateNotification(
-    const sptr<NotificationRequest> &request, std::unordered_map<std::string, sptr<IResult>> &results)
+    const std::vector<sptr<NotificationRequest>> &requests,
+    const std::string &command, std::vector<int32_t> &results)
 {
     if (updateNotification_ == nullptr) {
         ANS_LOGE("update priority notification wrapper symbol failed");
         return ErrorCode::ERR_FAIL;
     }
-    updateNotification_(request, { "update.priorityNotificationType" }, results);
+    updateNotification_(requests, command, results);
     return ErrorCode::ERR_OK;
 }
 
@@ -127,15 +121,6 @@ void NotificationAiExtensionWrapper::Init()
             ANS_LOGE("sync ai rules failed");
         }
     }
-}
-
-int32_t NotificationAiExtensionWrapper::GetSupportCommands(std::set<std::string> &commands)
-{
-    if (getSupportCommands_ == nullptr) {
-        ANS_LOGE("get support ai commands wrapper symbol failed");
-        return ErrorCode::ERR_FAIL;
-    }
-    return getSupportCommands_(commands);
 }
 
 int32_t NotificationAiExtensionWrapper::SyncRules(const std::string &rules)

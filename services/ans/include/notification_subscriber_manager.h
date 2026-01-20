@@ -266,10 +266,6 @@ private:
         NotificationConstant::SubscribedFlag flags, ErrCode (IAnsSubscriber::*func)(Args...), Args&& ... args);
     void NotifySubscribers(int32_t userId,
         ErrCode (IAnsSubscriber::*func)(uint32_t), uint32_t watchStatus);
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-    bool IsDelayPriorityTargetSubscriber(
-        const std::shared_ptr<SubscriberRecord> &subscriberRecord, const sptr<NotificationRequest> &request);
-#endif
 
 private:
     ffrt::mutex subscriberRecordListMutex_;

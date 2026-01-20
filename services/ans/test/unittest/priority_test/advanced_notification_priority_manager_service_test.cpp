@@ -22,6 +22,7 @@
 #undef private
 #undef protected
 #include "ans_inner_errors.h"
+#include "bool_wrapper.h"
 #include "mock_accesstoken_kit.h"
 
 using namespace testing::ext;
@@ -51,6 +52,9 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabled_0100, Function | SmallTe
     bool enable = true;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->IsPriorityEnabled(enable), ERR_OK);
     EXPECT_FALSE(enable);
+    AdvancedNotificationService::GetInstance()->SetPriorityEnabled(true);
+    EXPECT_EQ(AdvancedNotificationService::GetInstance()->IsPriorityEnabled(enable), ERR_OK);
+    EXPECT_TRUE(enable);
 }
 
 /**
@@ -82,6 +86,10 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundle_0100, Function |
     EXPECT_EQ(
         AdvancedNotificationService::GetInstance()->IsPriorityEnabledByBundle(bundleOption, enableStatusInt), ERR_OK);
     EXPECT_EQ(enableStatusInt, 2);
+    AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundle(bundleOption, 1);
+    EXPECT_EQ(
+        AdvancedNotificationService::GetInstance()->IsPriorityEnabledByBundle(bundleOption, enableStatusInt), ERR_OK);
+    EXPECT_EQ(enableStatusInt, 1);
 }
 
 /**
@@ -276,6 +284,7 @@ HWTEST_F(PriorityManagerServiceTest, TriggerUpdatePriorityType_0200, Function | 
     record->notification = new (std::nothrow) Notification(request);
     AdvancedNotificationService::GetInstance()->AddToNotificationList(record);
     request->SetInnerPriorityNotificationType(NotificationConstant::PriorityNotificationType::PAYMENT_DUE);
+    NotificationSubscriberManager::GetInstance()->NotifySystemUpdate(nullptr);
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->TriggerUpdatePriorityType(request), ERR_OK);
     AdvancedNotificationService::GetInstance()->RemoveNotificationList(record);
 }
@@ -314,6 +323,28 @@ HWTEST_F(PriorityManagerServiceTest, TriggerUpdatePriorityType_0400, Function | 
     AdvancedNotificationService::GetInstance()->AddToNotificationList(record);
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->TriggerUpdatePriorityType(request), ERR_ANS_INVALID_PARAM);
     AdvancedNotificationService::GetInstance()->RemoveNotificationList(record);
+}
+
+/**
+ * @tc.name: GetRequestsFromNotification_0100
+ * @tc.desc: Test GetRequestsFromNotification fail.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityManagerServiceTest, GetRequestsFromNotification_0100, Function | SmallTest | Level1)
+{
+    std::vector<sptr<Notification>> notifications;
+    sptr<Notification> notification = new (std::nothrow) Notification(nullptr);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest(10001);
+    std::shared_ptr<AAFwk::WantParams> extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam(ANS_EXTENDINFO_INFO_PRE + EXTENDINFO_FLAG, AAFwk::Boolean::Box(true));
+    request->SetExtendInfo(extendInfo);
+    sptr<Notification> notification1 = new (std::nothrow) Notification(request);
+    notifications.push_back(nullptr);
+    notifications.push_back(notification);
+    notifications.push_back(notification1);
+    std::vector<sptr<NotificationRequest>> requests;
+    AdvancedNotificationService::GetInstance()->GetRequestsFromNotification(notifications, requests);
+    EXPECT_EQ(requests.size(), 0);
 }
 }
 }

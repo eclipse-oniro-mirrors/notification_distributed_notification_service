@@ -1935,6 +1935,10 @@ private:
     std::shared_ptr<NotificationRecord> GetFromNotificationList(const int32_t ownerUid, const int32_t notificationId);
     std::shared_ptr<NotificationRecord> GetFromDelayedNotificationList(
         const int32_t ownerUid, const int32_t notificationId);
+    std::vector<sptr<Notification>> GetAllNotification();
+    std::vector<sptr<Notification>> GetNotificationsByBundle(const sptr<NotificationBundleOption> &bundleOption);
+    void GetRequestsFromNotification(
+        const std::vector<sptr<Notification>> &notifications, std::vector<sptr<NotificationRequest>> &requests);
     std::vector<std::string> GetNotificationKeys(const sptr<NotificationBundleOption> &bundleOption);
     std::vector<std::string> GetNotificationKeysByBundle(const sptr<NotificationBundleOption> &bundleOption);
     bool IsNotificationExists(const std::string &key);

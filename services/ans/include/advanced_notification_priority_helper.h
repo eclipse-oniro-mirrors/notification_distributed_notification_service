@@ -27,11 +27,12 @@ class AdvancedNotificationPriorityHelper : public DelayedSingleton<AdvancedNotif
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
 public:
     void UpdatePriorityType(const sptr<NotificationRequest> &request);
-    bool DelayUpdatePriority(const sptr<NotificationRequest> &request);
+    bool IsCollaborationNotification(const sptr<NotificationRequest> &request);
+    void SetPriorityTypeToExtendInfo(const sptr<NotificationRequest> &request);
+    int32_t RefreshPriorityType(std::vector<sptr<NotificationRequest>> requests);
 
 private:
     bool IsNeedUpdatePriorityType(const sptr<NotificationRequest> &request);
-    bool HasUpdatedPriorityType(const sptr<NotificationRequest> &request);
 #endif
 };
 }  // namespace Notification

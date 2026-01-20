@@ -1520,6 +1520,63 @@ ErrCode AdvancedNotificationService::GetUnifiedGroupInfoFromDb(std::string &enab
     return ERR_OK;
 }
 
+std::vector<sptr<Notification>> AdvancedNotificationService::GetAllNotification()
+{
+    std::vector<sptr<Notification>> notifications;
+    for (auto &record : notificationList_) {
+        notifications.push_back(record->notification);
+    }
+
+    {
+        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+        for (auto &record : triggerNotificationList_) {
+            notifications.push_back(record->notification);
+        }
+    }
+
+    std::lock_guard<ffrt::mutex> lock(delayNotificationMutext_);
+    for (auto &delayNotification : delayNotificationList_) {
+        notifications.push_back(delayNotification.first->notification);
+    }
+    return notifications;
+}
+
+std::vector<sptr<Notification>> AdvancedNotificationService::GetNotificationsByBundle(
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    std::vector<sptr<Notification>> notifications;
+    if (bundleOption == nullptr) {
+        return notifications;
+    }
+    for (auto record : notificationList_) {
+        if (record->bundleOption->GetUid() != bundleOption->GetUid()) {
+            continue;
+        }
+        notifications.push_back(record->notification);
+    }
+
+    {
+        std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+        for (const auto &record : triggerNotificationList_) {
+            if (record->bundleOption->GetUid() != bundleOption->GetUid()) {
+                continue;
+            }
+            notifications.push_back(record->notification);
+        }
+    }
+
+    {
+        std::lock_guard<ffrt::mutex> lock(delayNotificationMutext_);
+        for (auto delayNotification : delayNotificationList_) {
+            auto delayRequest = delayNotification.first->notification->GetNotificationRequest();
+            if (delayRequest.GetOwnerUid() == bundleOption->GetUid()) {
+                notifications.push_back(delayNotification.first->notification);
+            }
+        }
+    }
+    return notifications;
+}
+
 std::vector<std::string> AdvancedNotificationService::GetNotificationKeys(
     const sptr<NotificationBundleOption> &bundleOption)
 {

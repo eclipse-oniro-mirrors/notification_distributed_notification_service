@@ -90,6 +90,10 @@ ohos_unittest("ans_test") {
     deps += [ "${services_path}/distributed:libans_distributed" ]
   }
 
+  if (distributed_notification_service_feature_priority_notification) {
+    defines += [ "ANS_FEATURE_PRIORITY_NOTIFICATION" ]
+  }
+
   external_deps = [
     "ability_base:base",
     "ability_base:configuration",

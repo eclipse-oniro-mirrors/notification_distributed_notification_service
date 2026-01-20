@@ -67,11 +67,11 @@ extern const std::string CTRL_LIST_KEY;
 extern const std::string CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY;
 extern const std::string HEALTH_BUNDLE_WHITE_LIST_KEY;
 extern const std::string PROXY_PKG_KEY;
-extern const std::string DELAY_UPDATE_PRIORITY_KEY;
 extern const std::string DOWNLOAD_TEMPLATE_NAME;
 extern const std::string ANS_EXTENDINFO_INFO_PRE;
 extern const std::string ANS_EXTENDINFO_DEVICE_ID;
 extern const std::string EXTENDINFO_FLAG;
+extern const std::string EXTENDINFO_PRIORITY_TYPE;
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 constexpr NotificationConstant::DistributedReminderPolicy DEFAULT_DISTRIBUTED_REMINDER_POLICY =
