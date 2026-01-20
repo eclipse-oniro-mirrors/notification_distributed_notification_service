@@ -92,6 +92,8 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
 #ifdef ENABLE_ANS_AGGREATION
             EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
 #endif
+            AdvancedDatashareHelper::SetIsDataShareReady(true);
+            DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->Init();
             isDatashaReready_ = true;
         }
     } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
