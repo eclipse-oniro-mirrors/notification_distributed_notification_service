@@ -237,6 +237,36 @@ namespace {
         }
     }
 
+    std::shared_ptr<NotificationRecord> GenerateTriggerNotificationRecord(FuzzedDataProvider *fuzzData)
+    {
+        auto record = std::make_shared<NotificationRecord>();
+        record->bundleOption = sptr<NotificationBundleOption>::MakeSptr();
+        auto bundleName = fuzzData->ConsumeRandomLengthString();
+        record->bundleOption->SetBundleName(bundleName);
+        auto uid = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE);
+        record->bundleOption->SetUid(uid);
+
+        record->request = sptr<NotificationRequest>::MakeSptr();
+        auto creatorUserId = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE);
+        record->request->SetCreatorUserId(creatorUserId);
+        auto notificationId = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE);
+        record->request->SetNotificationId(notificationId);
+        auto label = fuzzData->ConsumeRandomLengthString();
+        record->request->SetLabel(label);
+        auto receiverUserId = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE);
+        record->request->SetReceiverUserId(receiverUserId);
+        record->request->SetSlotType(static_cast<NotificationConstant::SlotType>(
+            fuzzData->ConsumeIntegralInRange<int32_t>(0, SLOT_TYPE_SIZE)));
+        record->request->SetLiveViewStatus(
+            static_cast<NotificationLiveViewContent::LiveViewStatus>(
+            fuzzData->ConsumeIntegralInRange<int32_t>(0, LIVE_VIEW_STATUS_SIZE)));
+
+        auto key = fuzzData->ConsumeRandomLengthString();
+        record->notification = sptr<Notification>::MakeSptr(record->request);
+        record->notification->SetKey(key);
+        return record;
+    }
+
     bool DoSomethingInterestingWithMyAPISecond(FuzzedDataProvider *fuzzData)
     {
         auto service = AdvancedNotificationService::GetInstance();
@@ -345,15 +375,93 @@ namespace {
         parameter.tokenCaller = fuzzData->ConsumeIntegral<uint32_t>();
         parameter.uid = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE);
         service->UpdateTriggerNotification(parameter);
+        return true;
+    }
 
-        auto condition = GenerateGeofenceCondition(fuzzData);
-        auto trigger = GenerateNotificationTrigger(fuzzData, condition);
-        auto request1 = GenerateNotificationRequest(fuzzData, trigger);
-        std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-        record->request = request1;
-        record->notification = sptr<Notification>::MakeSptr(request1);
-        service->SetGeofenceTriggerTimer(record);
-        service->CancelGeofenceTriggerTimer(record);
+    bool DoSomethingInterestingWithMyAPIFive(FuzzedDataProvider *fuzzData)
+    {
+        auto service = AdvancedNotificationService::GetInstance();
+        service->triggerNotificationList_.clear();
+        auto record = GenerateTriggerNotificationRecord(fuzzData);
+        service->triggerNotificationList_.push_back(record);
+        service->RemoveTriggerNotificationListByTriggerKey(fuzzData->ConsumeRandomLengthString());
+        record = GenerateTriggerNotificationRecord(fuzzData);
+        service->triggerNotificationList_.push_back(record);
+        service->ExecuteCancelGroupCancelFromTriggerNotificationList(record->bundleOption,
+            record->request->GetGroupName());
+        record = GenerateTriggerNotificationRecord(fuzzData);
+        service->triggerNotificationList_.push_back(record);
+        service->RemoveFromTriggerNotificationList(record->bundleOption,
+            NotificationKey{
+                .id = record->request->GetNotificationId(),
+                .label = record->request->GetLabel()
+            });
+        record = GenerateTriggerNotificationRecord(fuzzData);
+        service->triggerNotificationList_.push_back(record);
+        service->DeleteAllByUserStoppedFromTriggerNotificationList(
+            record->request->GetLabel(), record->request->GetReceiverUserId());
+        record = GenerateTriggerNotificationRecord(fuzzData);
+        service->triggerNotificationList_.push_back(record);
+        service->ExecuteRemoveNotificationFromTriggerNotificationList(record->bundleOption,
+            record->request->GetNotificationId(), record->request->GetLabel());
+        record = GenerateTriggerNotificationRecord(fuzzData);
+        service->triggerNotificationList_.push_back(record);
+        service->RemoveGroupByBundleFromTriggerNotificationList(record->bundleOption,
+            record->request->GetGroupName());
+        record = GenerateTriggerNotificationRecord(fuzzData);
+        service->triggerNotificationList_.push_back(record);
+        service->RemoveAllNotificationsByBundleNameFromTriggerNotificationList(
+            record->bundleOption->GetBundleName());
+        record = GenerateTriggerNotificationRecord(fuzzData);
+        service->triggerNotificationList_.push_back(record);
+        service->RemoveFromTriggerNotificationList(record->notification->GetKey());
+        return true;
+    }
+
+    bool DoSomethingInterestingWithMyAPISix(FuzzedDataProvider *fuzzData)
+    {
+        auto service = AdvancedNotificationService::GetInstance();
+        service->triggerNotificationList_.clear();
+        auto record = GenerateTriggerNotificationRecord(fuzzData);
+        service->triggerNotificationList_.push_back(record);
+        service->RemoveForDeleteAllFromTriggerNotificationList(record->notification->GetKey(),
+            record->notification->GetUserId());
+        record = GenerateTriggerNotificationRecord(fuzzData);
+        service->triggerNotificationList_.push_back(record);
+        service->CancelContinuousTaskNotificationFromTriggerNotificationList(record->notification->GetLabel(),
+            record->notification->GetId(), record->bundleOption->GetUid());
+        record = GenerateTriggerNotificationRecord(fuzzData);
+        service->triggerNotificationList_.push_back(record);
+        AdvancedNotificationService::GetRecordParameter parameter{
+            .notificationId = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE),
+            .uid = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE),
+            .label = fuzzData->ConsumeRandomLengthString(),
+            .bundleName = fuzzData->ConsumeRandomLengthString(),
+            .userId = fuzzData->ConsumeIntegralInRange<int32_t>(0, INTEGRAL_RANGE_SIZE)
+        };
+        service->GetRecordFromTriggerNotificationList(parameter);
+        record = GenerateTriggerNotificationRecord(fuzzData);
+        service->triggerNotificationList_.push_back(record);
+        AdvancedNotificationService::GetRecordParameter parameter1{
+            .notificationId = record->notification->GetId(),
+            .uid = record->bundleOption->GetUid(),
+            .label = record->notification->GetLabel(),
+            .bundleName = record->bundleOption->GetBundleName(),
+            .userId = record->notification->GetRecvUserId()
+        };
+        service->GetRecordFromTriggerNotificationList(parameter1);
+        service->triggerNotificationList_.push_back(record);
+        service->triggerNotificationList_.push_back(record);
+        service->GetRecordFromTriggerNotificationList(parameter1);
+        record = GenerateTriggerNotificationRecord(fuzzData);
+        service->triggerNotificationList_.push_back(record);
+        service->RemoveAllFromTriggerNotificationList(record->bundleOption);
+        record = GenerateTriggerNotificationRecord(fuzzData);
+        service->triggerNotificationList_.push_back(record);
+        auto slot = sptr<NotificationSlot>::MakeSptr();
+        slot->SetType(static_cast<NotificationConstant::SlotType>(
+            fuzzData->ConsumeIntegralInRange<int32_t>(0, SLOT_TYPE_SIZE)));
+        service->RemoveNtfBySlotFromTriggerNotificationList(record->bundleOption, slot);
         return true;
     }
 }
@@ -374,6 +482,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::Notification::DoSomethingInterestingWithMyAPISecond(&fdp);
     OHOS::Notification::DoSomethingInterestingWithMyAPIThird(&fdp);
     OHOS::Notification::DoSomethingInterestingWithMyAPIFourth(&fdp);
+    OHOS::Notification::DoSomethingInterestingWithMyAPIFive(&fdp);
+    OHOS::Notification::DoSomethingInterestingWithMyAPISix(&fdp);
     constexpr int sleepMs = 1000;
     std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
     return 0;
