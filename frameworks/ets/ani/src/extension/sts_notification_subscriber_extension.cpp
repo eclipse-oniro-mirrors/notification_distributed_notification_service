@@ -277,6 +277,7 @@ NotificationSubscriberExtensionResult StsNotificationSubscriberExtension::CallOb
     va_start(args, signature);
     if ((status = env->Object_CallMethod_Void_V(stsObj_->aniObj, method, args)) != ANI_OK) {
         ANS_LOGE("status : %{public}d", status);
+        va_end(args);
         return NotificationSubscriberExtensionResult::CALL_METHOD_FAIL;
     }
     va_end(args);
