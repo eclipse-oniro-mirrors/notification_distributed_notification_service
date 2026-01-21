@@ -1123,7 +1123,7 @@ public:
         const sptr<NotificationBundleOption> &bundleOption, const int32_t reason,
         const sptr<IAnsResultDataSynchronizer> &synchronizer);
 
-    ErrCode CancelPreparedNotification(int32_t notificationId, const std::string &label,
+    AnsStatus CancelPreparedNotification(int32_t notificationId, const std::string &label,
         const sptr<NotificationBundleOption> &bundleOption, const int32_t reason);
 
     AnsStatus PrepareNotificationInfo(
@@ -2155,12 +2155,12 @@ private:
     void RemoveDoNotDisturbProfileTrustList(const sptr<NotificationBundleOption> &bundleOption);
     void RemoveDoNotDisturbProfileTrustList(const sptr<NotificationBundleOption> &bundleOption, const int32_t userId);
     ErrCode DeleteAllByUserInner(const int32_t &userId, int32_t reason, bool isAsync = false, bool removeAll = false);
-    ErrCode RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption, int32_t reason);
+    AnsStatus RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption, int32_t reason);
     void ExcuteRemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationBundleOption> &bundle, int32_t &reason);
     void GetRemoveListForRemoveAll(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationBundleOption> &bundle, std::vector<std::shared_ptr<NotificationRecord>> &removeList);
-    ErrCode ValidRightsForCancelAsBundle(int32_t notificationId, int32_t &reason);
+    AnsStatus ValidRightsForCancelAsBundle(int32_t notificationId, int32_t &reason);
     ErrCode ExcuteRemoveNotification(const sptr<NotificationBundleOption> &bundle,
         int32_t notificationId, const std::string &label, int32_t &removeReason);
     void ExcuteRemoveNotifications(const std::vector<std::string> &keys, int32_t removeReason);

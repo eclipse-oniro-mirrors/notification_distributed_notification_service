@@ -29,9 +29,11 @@ public:
     AnsStatus(int32_t errCode, const std::string& msg);
     AnsStatus(int32_t errCode, const std::string& msg, int32_t sceneId, int32_t branchId);
     bool Ok();
+    bool hasPoint();
     AnsStatus& AppendSceneBranch(int32_t sceneId, int32_t branchId);
     AnsStatus& AppendSceneBranch(int32_t sceneId, int32_t branchId, const std::string& msg);
     int32_t GetErrCode();
+    std::string GetMsg();
     
     static AnsStatus InvalidParam(int32_t sceneId, int32_t branchId);
     static AnsStatus InvalidParam(const std::string& msg, int32_t sceneId, int32_t branchId);

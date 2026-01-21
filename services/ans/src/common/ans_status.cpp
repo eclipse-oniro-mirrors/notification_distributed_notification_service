@@ -40,6 +40,14 @@ bool AnsStatus::Ok()
     return errCode_ == ERR_OK;
 }
 
+bool AnsStatus::hasPoint()
+{
+    if (sceneId_ == INT32_MAX || branchId_ == INT32_MAX) {
+        return false;
+    }
+    return true;
+}
+
 std::string AnsStatus::FormatSceneBranchStr(int32_t sceneId, int32_t branchId)
 {
     return std::to_string(sceneId) + "_" + std::to_string(branchId);
@@ -64,6 +72,11 @@ AnsStatus& AnsStatus::AppendSceneBranch(int32_t sceneId, int32_t branchId, const
 int32_t AnsStatus::GetErrCode()
 {
     return errCode_;
+}
+
+std::string AnsStatus::GetMsg()
+{
+    return msg_;
 }
 
 AnsStatus AnsStatus::InvalidParam(int32_t sceneId, int32_t branchId)
