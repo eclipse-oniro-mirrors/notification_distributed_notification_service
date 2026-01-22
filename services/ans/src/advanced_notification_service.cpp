@@ -442,19 +442,17 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notificationId,
+AnsStatus AdvancedNotificationService::CancelPreparedNotification(int32_t notificationId,
     const std::string &label, const sptr<NotificationBundleOption> &bundleOption, int32_t reason)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (bundleOption == nullptr) {
         std::string message = "bundleOption is null";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 2)
-            .ErrorCode(ERR_ANS_INVALID_BUNDLE).NotificationId(notificationId);
-        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
         ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_INVALID_BUNDLE;
+        return AnsStatus::InvalidBundle(message, EventSceneId::SCENE_1, EventBranchId::BRANCH_2);
     }
     ErrCode result = ERR_OK;
+    AnsStatus ansStatus = AnsStatus();
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
@@ -463,6 +461,7 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
         notificationKey.label = label;
         result = RemoveFromNotificationList(bundleOption, notificationKey, notification, reason, true);
         if (result != ERR_OK) {
+            ansStatus = AnsStatus(result, "RemoveFromNotificationList fail");
             return;
         }
         if (notification != nullptr) {
@@ -474,9 +473,10 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
 #endif
         }
     }));
-    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Cancel prepared notification.");
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return AnsStatus(submitResult, "Cancel prepared notification."),
+        "Cancel prepared notification.");
     SendCancelHiSysEvent(notificationId, label, bundleOption, result);
-    return result;
+    return ansStatus;
 }
 
 AnsStatus AdvancedNotificationService::PrepareNotificationInfo(
