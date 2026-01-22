@@ -40,11 +40,6 @@ public:
 
     ErrCode OnConsumed(const sptr<Notification> &notification) override;
 
-    ErrCode OnConsumedWithMaxCapacity(
-        const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap) override;
-
-    ErrCode OnConsumedWithMaxCapacity(const sptr<Notification> &notification) override;
-
     ErrCode OnConsumedList(const std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap) override;
 
@@ -54,11 +49,6 @@ public:
         int32_t deleteReason) override;
 
     ErrCode OnCanceled(const sptr<Notification> &notification, int32_t deleteReason) override;
-
-    ErrCode OnCanceledWithMaxCapacity(const sptr<Notification> &notification,
-        const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason) override;
-
-    ErrCode OnCanceledWithMaxCapacity(const sptr<Notification> &notification, int32_t deleteReason) override;
 
     ErrCode OnCanceledList(const std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason) override;

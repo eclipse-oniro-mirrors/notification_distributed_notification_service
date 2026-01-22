@@ -219,35 +219,6 @@ HWTEST_F(SubscriberListenerTest, OnConsumed_0500, Function | MediumTest | Level1
 }
 
 /**
- * @tc.name      : OnConsumedWithMaxCapacity_0100
- * @tc.desc      : Test OnConsumedWithMaxCapacity success
- */
-HWTEST_F(SubscriberListenerTest, OnConsumedWithMaxCapacity_0100, Function | MediumTest | Level1)
-{
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest(1);
-    sptr<Notification> notification = new (std::nothrow) Notification("001", request);
-    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
-    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
-    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
-    ErrCode result = listener->OnConsumedWithMaxCapacity(notification, notificationMap);
-    EXPECT_EQ(result, ERR_OK);
-}
- 
-/**
- * @tc.name      : OnConsumedWithMaxCapacity_0200
- * @tc.desc      : Test one param OnConsumedWithMaxCapacity success
- */
-HWTEST_F(SubscriberListenerTest, OnConsumedWithMaxCapacity_0200, Function | MediumTest | Level1)
-{
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest(1);
-    sptr<Notification> notification = new (std::nothrow) Notification("001", request);
-    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
-    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
-    ErrCode result = listener->OnConsumedWithMaxCapacity(notification);
-    EXPECT_EQ(result, ERR_INVALID_DATA);
-}
- 
-/**
  * @tc.name      : OnConsumedList_0100
  * @tc.desc      : Test OnConsumedList success
  */
@@ -331,34 +302,7 @@ HWTEST_F(SubscriberListenerTest, OnCanceled_0400, Function | MediumTest | Level1
     ErrCode result = listener->OnCanceled(notification, 0);
     EXPECT_EQ(result, ERR_OK);
 }
- 
-/**
- * @tc.name      : OnCanceledWithMaxCapacity_0100
- * @tc.desc      : Test OnCanceledWithMaxCapacity success
- */
-HWTEST_F(SubscriberListenerTest, OnCanceledWithMaxCapacity_0100, Function | MediumTest | Level1)
-{
-    sptr<Notification> notification = new (std::nothrow) Notification("001", nullptr);
-    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
-    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
-    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
-    ErrCode result = listener->OnCanceledWithMaxCapacity(notification, notificationMap, 0);
-    EXPECT_EQ(result, ERR_OK);
-}
- 
-/**
- * @tc.name      : OnCanceledWithMaxCapacity_0200
- * @tc.desc      : Test two params OnCanceledWithMaxCapacity
- */
-HWTEST_F(SubscriberListenerTest, OnCanceledWithMaxCapacity_0200, Function | MediumTest | Level1)
-{
-    sptr<Notification> notification = new (std::nothrow) Notification("001", nullptr);
-    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
-    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
-    ErrCode result = listener->OnCanceledWithMaxCapacity(notification, 0);
-    EXPECT_EQ(result, ERR_OK);
-}
- 
+
 /**
  * @tc.name      : OnBatchCanceled_0100
  * @tc.desc      : Test OnBatchCanceled invalid data
