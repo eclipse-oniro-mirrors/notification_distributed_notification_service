@@ -42,25 +42,6 @@ std::string NotificationSubscriber::GetDeviceType() const
     return deviceType_;
 }
 
-bool NotificationSubscriber::SyncLiveViewVoip(
-    const std::string &deviceType, std::shared_ptr<Notification> &notification) const
-{
-    sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
-    if (request == nullptr) {
-        ANS_LOGE("No need to consume cause invalid reqeuest.");
-        return false;
-    }
-    if (request->GetClassification() == NotificationConstant::ANS_VOIP &&
-        request->GetSlotType() == NotificationConstant::LIVE_VIEW &&
-        (deviceType == NotificationConstant::CURRENT_DEVICE_TYPE ||
-            deviceType == NotificationConstant::LITEWEARABLE_DEVICE_TYPE ||
-            deviceType == NotificationConstant::HEADSET_DEVICE_TYPE ||
-            deviceType ==NotificationConstant::WEARABLE_DEVICE_TYPE)) {
-        return true;
-    }
-    return false;
-}
-
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 NotificationConstant::FlagStatus NotificationSubscriber::DowngradeReminder(
     const NotificationConstant::FlagStatus &oldFlags, const NotificationConstant::FlagStatus &judgeFlags) const
@@ -129,19 +110,7 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnConsumed(
         return ERR_INVALID_DATA;
     }
     std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
-    auto deviceType = subscriber_.GetDeviceType();
-    if (subscriber_.SyncLiveViewVoip(deviceType, sharedNotification)) {
-        ANS_LOGI("Sync LIVE_VIEW VOIP.");
-    }
-    if (deviceType.compare(NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE) == 0) {
-        sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
-        if (request != nullptr && request->GetClassification() == NotificationConstant::ANS_VOIP) {
-            ANS_LOGD("skip voip");
-            return ERR_OK;
-        }
-    }
-    subscriber_.OnConsumed(
-        sharedNotification, std::make_shared<NotificationSortingMap>(*notificationMap));
+    subscriber_.OnConsumed(sharedNotification, std::make_shared<NotificationSortingMap>(*notificationMap));
     return ERR_OK;
 }
 

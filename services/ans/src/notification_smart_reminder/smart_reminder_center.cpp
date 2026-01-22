@@ -389,6 +389,14 @@ void SmartReminderCenter::InitValidDevices(
         request->AdddeviceStatu(deviceType, status.bitset<DistributedDeviceStatus::STATUS_SIZE>::to_string());
 
         if (NotificationConstant::SlotType::LIVE_VIEW == request->GetSlotType()) {
+            if (request->GetClassification() == NotificationConstant::ANS_VOIP &&
+                (deviceType == NotificationConstant::CURRENT_DEVICE_TYPE ||
+                    deviceType == NotificationConstant::LITEWEARABLE_DEVICE_TYPE ||
+                    deviceType == NotificationConstant::HEADSET_DEVICE_TYPE ||
+                    deviceType ==NotificationConstant::WEARABLE_DEVICE_TYPE)) {
+                syncDevices.insert(deviceType);
+                continue;
+            }
             NotificationConstant::SWITCH_STATE liveViewEnableStatus =
                 NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
             std::string queryDeviceType = deviceType;
@@ -639,9 +647,8 @@ void SmartReminderCenter::HandleReminderMethods(
 
     if (request->GetClassification() == NotificationConstant::ANS_VOIP) {
         ANS_LOGI("VOIP CALL");
-        if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
-            return;
-        }
+        (*notificationFlagsOfDevices)[deviceType] = request->GetFlags();
+        return;
     }
 
     auto flag = std::make_shared<NotificationFlags>(defaultFlag->GetReminderFlags());
