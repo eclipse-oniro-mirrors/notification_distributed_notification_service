@@ -85,6 +85,8 @@ public:
 
     virtual bool HasOnBatchCancelCallback() override;
 
+    virtual void OnSystemUpdate(const std::shared_ptr<OHOS::Notification::Notification> &request) override;
+
     bool SetObject(ani_env *env, ani_object obj);
     bool IsInit();
     bool Compare(ani_env *env, ani_object obj);
@@ -126,6 +128,9 @@ private:
 
     bool GetNotificationSubscriber(
         ani_env *env, ani_object value, std::shared_ptr<StsSubscriberInstance> &subscriberInfo);
+
+    void FillSubscribedFlags(
+        ani_env *env, std::shared_ptr<StsSubscriberInstance> &subscriberInfo, uint32_t &subscribedFlags);
 
 private:
     std::mutex mutex_;

@@ -451,6 +451,33 @@ void StsSubscriberInstance::OnBatchCanceled(
     }
     ANS_LOGD("done");
 }
+void StsSubscriberInstance::OnSystemUpdate(const std::shared_ptr<OHOS::Notification::Notification> &request)
+{
+    ANS_LOGD("enter");
+    std::lock_guard<std::mutex> l(lock_);
+    ani_env* etsEnv;
+    ani_status aniResult = ANI_ERROR;
+    ani_options aniArgs { 0, nullptr };
+    aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
+    if (aniResult != ANI_OK) {
+        ANS_LOGE("AttachCurrentThread error. result: %{public}d.", aniResult);
+        return;
+    }
+    std::vector<ani_ref> vec;
+    ani_object obj;
+    if (WarpSubscribeCallbackData(etsEnv, request, nullptr, -1, obj)) {
+        vec.push_back(obj);
+        CallFunction(etsEnv, "onSystemUpdate", vec);
+    } else {
+        ANS_LOGD("WarpSubscribeCallbackData faild");
+    }
+    aniResult = vm_->DetachCurrentThread();
+    if (aniResult != ANI_OK) {
+        ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
+        return;
+    }
+    ANS_LOGD("done");
+}
 bool StsSubscriberInstance::HasOnBatchCancelCallback()
 {
     ANS_LOGD("enter");
@@ -641,6 +668,14 @@ bool SubscriberInstanceManager::GetNotificationSubscriber(
         return false;
     }
     uint32_t subscribedFlags = 0;
+    FillSubscribedFlags(env, subscriberInfo, subscribedFlags);
+    subscriberInfo->SetSubscribedFlags(subscribedFlags);
+    return true;
+}
+
+void SubscriberInstanceManager::FillSubscribedFlags(
+    ani_env *env, std::shared_ptr<StsSubscriberInstance> &subscriberInfo, uint32_t &subscribedFlags)
+{
     if (subscriberInfo->HasFunctionImplemented(env, "onConsume")) {
         subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONSUMED;
     }
@@ -680,8 +715,9 @@ bool SubscriberInstanceManager::GetNotificationSubscriber(
     if (subscriberInfo->HasFunctionImplemented(env, "onEnabledPriorityByBundleChanged")) {
         subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLEPRIORITYBYBUNDLE_CHANGED;
     }
-    subscriberInfo->SetSubscribedFlags(subscribedFlags);
-    return true;
+    if (subscriberInfo->HasFunctionImplemented(env, "onSystemUpdate")) {
+        subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_SYSTEM_UPDATE;
+    }
 }
 
 bool SubscriberInstanceManager::AddDeletingSubscriber(std::shared_ptr<StsSubscriberInstance> subscriber)

@@ -134,7 +134,7 @@ bool WarpSubscribeCallbackData(
 {
     ANS_LOGD("enter");
     ani_class cls;
-    if (env == nullptr || request == nullptr || sortingMap == nullptr) {
+    if (env == nullptr || request == nullptr) {
         ANS_LOGE("invalid parameter value");
         return false;
     }
@@ -148,10 +148,12 @@ bool WarpSubscribeCallbackData(
         ANS_LOGE("SetNotificationRequest faild");
         return false;
     }
-    // sortingMap?: NotificationSortingMap
-    if (!SetNotificationSortingMap(env, sortingMap, outObj)) {
-        ANS_LOGE("SetNotificationSortingMap faild");
-        return false;
+    if (sortingMap != nullptr) {
+        // sortingMap?: NotificationSortingMap
+        if (!SetNotificationSortingMap(env, sortingMap, outObj)) {
+            ANS_LOGE("SetNotificationSortingMap faild");
+            return false;
+        }
     }
     // reason?: int
     if (deleteReason != NO_DELETE_REASON && !SetReason(env, deleteReason, outObj)) {
@@ -279,8 +281,10 @@ bool WrapEnabledPriorityNotificationByBundleCallbackData(ani_env *env,
         ANS_LOGE("uid set faild.");
         return false;
     }
-    if (env->Object_SetPropertyByName_Int(
-        outObj, "enableStatus", static_cast<int32_t>(callbackData->GetEnableStatus())) != ANI_OK) {
+    ani_enum_item statusItem {};
+    EnumConvertNativeToAni(env, "@ohos.notificationManager.notificationManager.PriorityEnableStatus",
+        callbackData->GetEnableStatus(), statusItem);
+    if (env->Object_SetPropertyByName_Ref(outObj, "enableStatus", statusItem) != ANI_OK) {
         ANS_LOGE("status set faild.");
         return false;
     }
