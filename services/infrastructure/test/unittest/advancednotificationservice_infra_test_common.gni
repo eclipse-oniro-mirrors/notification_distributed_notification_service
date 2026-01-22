@@ -31,7 +31,6 @@ template("advancednotificationservice_infra_test_target") {
       "/${services_path}/infrastructure/interfaces",
       "/${services_path}/infrastructure/interfaces/adapter",
       "/${services_path}/infrastructure/external_adapter/bms/include",
-      "/${services_path}/infrastructure/external_adapter/account/include",
     ]
 
     defines = []

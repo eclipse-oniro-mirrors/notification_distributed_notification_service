@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef ANS_IACCOUNT_MANAGER_REPOSITORY_H
-#define ANS_IACCOUNT_MANAGER_REPOSITORY_H
+#ifndef INFRASTRUCTURE_ANS_IACCOUNT_MANAGER_IMPL_H
+#define INFRASTRUCTURE_ANS_IACCOUNT_MANAGER_IMPL_H
 
 #include <vector>
 #include "ans_inner_errors.h"
@@ -23,14 +23,16 @@ namespace OHOS {
 namespace Notification {
 namespace Infra {
 
-class IAccountManagerRepository {
+class IAccountManagerImpl {
 public:
-    virtual ~IAccountManagerRepository() = default;
-
+    static constexpr int32_t INVALID_USER_ID = -1;
+    static constexpr int32_t DEFAULT_USER_ID = 100;
+    static constexpr int32_t ZERO_USER_ID = 0;
+public:
     /**
     * @brief check is system account
     */
-    virtual bool IsSystemAccount(int32_t userId) = 0;
+    static bool IsSystemAccount(int32_t userId);
 
     /**
      * Gets operating system account local ID from uid.
@@ -39,7 +41,15 @@ public:
      * @param id Indicates the account ID.
      * @return Returns result code.
      */
-    virtual ErrCode GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id) = 0;
+    static ErrCode GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id);
+
+    /**
+     * Gets operating system account local ID from uid.
+     *
+     * @param uid Indicates the uid.
+     * @return Returns result code.
+     */
+    static int32_t GetOsAccountLocalIdFromUid(const int32_t uid);
 
     /**
      * Gets operating system account local ID from current calling.
@@ -47,7 +57,7 @@ public:
      * @param id Indicates the current calling account ID.
      * @return Returns result code.
      */
-    virtual ErrCode GetCurrentCallingUserId(int32_t &id) = 0;
+    static ErrCode GetCurrentCallingUserId(int32_t &id);
 
     /**
      * Gets operating system account local ID from current active.
@@ -55,12 +65,12 @@ public:
      * @param id Indicates the current active account ID.
      * @return Returns result code.
      */
-    virtual ErrCode GetCurrentActiveUserId(int32_t &id) = 0;
+    static ErrCode GetCurrentActiveUserId(int32_t &id);
 
     /**
      * Gets operating system account local ID with default value from current active.
      */
-    virtual int32_t GetCurrentActiveUserIdWithDefault(int32_t defaultUserId) = 0;
+    static int32_t GetCurrentActiveUserIdWithDefault(int32_t defaultUserId);
 
     /**
      * Check the userId whether exists in OsAccount service.
@@ -68,7 +78,7 @@ public:
      * @param userId Indicates the current active account ID.
      * @return Returns result.
      */
-    virtual bool CheckUserIdExists(const int32_t &userId, bool defaultValue = false) = 0;
+    static bool CheckUserIdExists(const int32_t &userId, bool defaultValue = false);
 
     /**
      * Get All os account userIds.
@@ -76,7 +86,7 @@ public:
      * @param userIds Indicates the current created account ID.
      * @return Returns result.
      */
-    virtual ErrCode GetAllOsAccount(std::vector<int32_t> &userIds) = 0;
+    static ErrCode GetAllOsAccount(std::vector<int32_t> &userIds);
 
     /**
      * Get All active account userIds.
@@ -84,17 +94,22 @@ public:
      * @param userIds Indicates the current active account ID.
      * @return Returns result.
      */
-    virtual ErrCode GetAllActiveOsAccount(std::vector<int32_t> &userIds) = 0;
+    static ErrCode GetAllActiveOsAccount(std::vector<int32_t> &userIds);
 
     /**
      * Get private status from osAccount.
      */
-    virtual ErrCode GetOsAccountPrivateStatus(bool &isPrivate) = 0;
+    static ErrCode GetOsAccountPrivateStatus(bool &isPrivate);
 
     /**
      * Check user id is verified.
      */
-    virtual bool IsOsAccountVerified(int32_t userId, bool defaultValue = false) = 0;
+    static bool IsOsAccountVerified(int32_t userId, bool defaultValue = false);
+
+    /**
+     * Get foreground user id.
+     */
+    static ErrCode GetForegroundUserIds(std::vector<int32_t> &foregroundUserIds);
 };
 } // namespace Infra
 } // namespace Notification

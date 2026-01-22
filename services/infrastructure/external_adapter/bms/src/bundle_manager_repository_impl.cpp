@@ -16,7 +16,7 @@
 #include "bundle_manager_repository_impl.h"
 
 #include "bundle_manager_adapter.h"
-#include "account_manager_repository_impl.h"
+#include "iaccount_manager_impl.h"
 
 #include "ans_const_define.h"
 
@@ -57,7 +57,7 @@ bool BundleManagerRepositoryImpl::IsSystemApp(int32_t uid)
 bool BundleManagerRepositoryImpl::CheckSystemApp(const std::string& bundleName, int32_t userId)
 {
     if (userId == SUBSCRIBE_USER_INIT) {
-        accountor_->GetCurrentActiveUserId(userId);
+        IAccountManagerImpl::GetCurrentActiveUserId(userId);
     }
     AppExecFwk::BundleInfo bundleInfo;
     int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
@@ -151,7 +151,7 @@ bool BundleManagerRepositoryImpl::GetBundleInfo(const std::string &bundleName, c
     }
 
     int32_t callingUserId;
-    accountor_->GetOsAccountLocalIdFromUid(uid, callingUserId);
+    IAccountManagerImpl::GetOsAccountLocalIdFromUid(uid, callingUserId);
 
     AppExecFwk::BundleInfo externalBundle;
     if (!IN_PROCESS_CALL(bundleMgr->GetBundleInfo(
@@ -349,7 +349,7 @@ bool BundleManagerRepositoryImpl::CheckApiCompatibility(const std::string &bundl
 #endif
     NotificationBundleManagerInfo bundleInfo;
     int32_t callingUserId;
-    accountor_->GetOsAccountLocalIdFromUid(uid, callingUserId);
+    IAccountManagerImpl::GetOsAccountLocalIdFromUid(uid, callingUserId);
     if (!GetBundleInfoByBundleName(bundleName, callingUserId, bundleInfo)) {
         ANS_LOGE("Failed to GetBundleInfoByBundleName, bundlename = %{public}s", bundleName.c_str());
         return false;
@@ -361,7 +361,7 @@ bool BundleManagerRepositoryImpl::CheckApiCompatibility(const std::string &bundl
 bool BundleManagerRepositoryImpl::IsAncoApp(const std::string &bundleName, int32_t uid)
 {
     int32_t userId = -1;
-    accountor_->GetOsAccountLocalIdFromUid(uid, userId);
+    IAccountManagerImpl::GetOsAccountLocalIdFromUid(uid, userId);
     if (userId == -1 || userId >= DEFAULT_USER_ID) {
         return false;
     }

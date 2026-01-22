@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "account_manager_repository_impl.h"
+#include "iaccount_manager_impl.h"
 
 #include <vector>
 #include "errors.h"
@@ -27,7 +27,7 @@
 namespace OHOS {
 namespace Notification {
 namespace Infra {
-ErrCode AccountManagerRepositoryImpl::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &userId)
+ErrCode IAccountManagerImpl::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &userId)
 {
     int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
     if (ret != ERR_OK) {
@@ -37,7 +37,18 @@ ErrCode AccountManagerRepositoryImpl::GetOsAccountLocalIdFromUid(const int32_t u
     return ret;
 }
 
-ErrCode AccountManagerRepositoryImpl::GetCurrentCallingUserId(int32_t &userId)
+int32_t IAccountManagerImpl::GetOsAccountLocalIdFromUid(const int32_t uid)
+{
+    int32_t userId = -1;
+    int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Get user id from uid %{public}d, %{public}d failed.", uid, ret);
+    }
+    ANS_LOGD("Get user id from uid %{public}d, %{public}d failed.", uid, userId);
+    return userId;
+}
+
+ErrCode IAccountManagerImpl::GetCurrentCallingUserId(int32_t &userId)
 {
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
@@ -49,7 +60,7 @@ ErrCode AccountManagerRepositoryImpl::GetCurrentCallingUserId(int32_t &userId)
     return ERR_OK;
 }
 
-ErrCode AccountManagerRepositoryImpl::GetCurrentActiveUserId(int32_t &id)
+ErrCode IAccountManagerImpl::GetCurrentActiveUserId(int32_t &id)
 {
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER
     ANS_LOGE("multi foreground user is not supported this function");
@@ -61,7 +72,7 @@ ErrCode AccountManagerRepositoryImpl::GetCurrentActiveUserId(int32_t &id)
     return ret;
 }
 
-int32_t AccountManagerRepositoryImpl::GetCurrentActiveUserIdWithDefault(int32_t defaultUserId)
+int32_t IAccountManagerImpl::GetCurrentActiveUserIdWithDefault(int32_t defaultUserId)
 {
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER
     ANS_LOGE("multi foreground user is not supported this function");
@@ -75,7 +86,7 @@ int32_t AccountManagerRepositoryImpl::GetCurrentActiveUserIdWithDefault(int32_t 
     return userId;
 }
 
-ErrCode AccountManagerRepositoryImpl::GetAllOsAccount(std::vector<int32_t> &userIds)
+ErrCode IAccountManagerImpl::GetAllOsAccount(std::vector<int32_t> &userIds)
 {
     std::vector<AccountSA::OsAccountInfo> accounts;
     int32_t ret = OHOS::AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
@@ -89,7 +100,7 @@ ErrCode AccountManagerRepositoryImpl::GetAllOsAccount(std::vector<int32_t> &user
     return ret;
 }
 
-ErrCode AccountManagerRepositoryImpl::GetAllActiveOsAccount(std::vector<int32_t> &userIds)
+ErrCode IAccountManagerImpl::GetAllActiveOsAccount(std::vector<int32_t> &userIds)
 {
     int32_t ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
     if (ret != ERR_OK) {
@@ -98,7 +109,7 @@ ErrCode AccountManagerRepositoryImpl::GetAllActiveOsAccount(std::vector<int32_t>
     return ret;
 }
 
-bool AccountManagerRepositoryImpl::CheckUserIdExists(const int32_t &userId, bool defaultValue)
+bool IAccountManagerImpl::CheckUserIdExists(const int32_t &userId, bool defaultValue)
 {
     bool isAccountExists = defaultValue;
     int32_t ret = OHOS::AccountSA::OsAccountManager::IsOsAccountExists(userId, isAccountExists);
@@ -110,12 +121,12 @@ bool AccountManagerRepositoryImpl::CheckUserIdExists(const int32_t &userId, bool
     return isAccountExists;
 }
 
-bool AccountManagerRepositoryImpl::IsSystemAccount(int32_t userId)
+bool IAccountManagerImpl::IsSystemAccount(int32_t userId)
 {
     return userId >= AccountSA::Constants::START_USER_ID && userId <= AccountSA::Constants::MAX_USER_ID;
 }
 
-ErrCode AccountManagerRepositoryImpl::GetOsAccountPrivateStatus(bool &isPrivate)
+ErrCode IAccountManagerImpl::GetOsAccountPrivateStatus(bool &isPrivate)
 {
     int32_t userId = 0;
     ErrCode queryRes = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
@@ -134,7 +145,7 @@ ErrCode AccountManagerRepositoryImpl::GetOsAccountPrivateStatus(bool &isPrivate)
     return queryRes;
 }
 
-bool AccountManagerRepositoryImpl::IsOsAccountVerified(int32_t userId, bool defaultValue)
+bool IAccountManagerImpl::IsOsAccountVerified(int32_t userId, bool defaultValue)
 {
     bool verified = defaultValue;
     ErrCode result = OHOS::AccountSA::OsAccountManager::IsOsAccountVerified(userId, verified);
@@ -142,6 +153,19 @@ bool AccountManagerRepositoryImpl::IsOsAccountVerified(int32_t userId, bool defa
         ANS_LOGE("Account varified fail %{public}d.", userId);
     }
     return verified;
+}
+
+ErrCode IAccountManagerImpl::GetForegroundUserIds(std::vector<int32_t> &foregroundUserIds)
+{
+    std::vector<AccountSA::ForegroundOsAccount> accounts;
+    auto result = AccountSA::OsAccountManager::GetForegroundOsAccounts(accounts);
+    if (result != ERR_OK) {
+        return result;
+    }
+    for (const auto &account : accounts) {
+        foregroundUserIds.push_back(account.localId);
+    }
+    return ERR_OK;
 }
 } // Infra
 } // Notification

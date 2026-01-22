@@ -37,7 +37,7 @@ ohos_shared_library("ans_base") {
   branch_protector_ret = "pac_ret"
 
   sources = [
-    "external_adapter/account/src/account_manager_repository_impl.cpp",
+    "external_adapter/account/iaccount_manager_impl.cpp",
     "external_adapter/extension/src/all_scenarios_extension_wrapper.cpp",
     "external_adapter/bms/src/bundle_manager_repository_impl.cpp",
     "external_adapter/bms/src/bundle_service_connector.cpp",

@@ -17,7 +17,6 @@
 #include <functional>
 #include "gtest/gtest.h"
 
-#include "mock_account_manager.h"
 #include "mock_bundle_manager.h"
 #include "mock_bundle_service_connector.h"
 
@@ -39,7 +38,6 @@ public:
     void TearDown();
 protected:
     MockBundleServiceConnector* mockConnectorPtr_;
-    MockAccountMgr* mockAccountPtr_;
     sptr<MockBundleMgr> mockBundleMgrPtr_;
     std::unique_ptr<IBundleManagerRepository> repository_;
 };
@@ -52,17 +50,14 @@ void BundleManagerRepositoryImplTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp start";
     auto mockConnectorPtr = std::make_unique<MockBundleServiceConnector>();
-    auto mockAccountPtr = std::make_unique<MockAccountMgr>();
     mockBundleMgrPtr_ = new MockBundleMgr();
 
     mockConnectorPtr_ = mockConnectorPtr.get();
-    mockAccountPtr_ = mockAccountPtr.get();
 
     EXPECT_CALL(*mockConnectorPtr_, GetBundleManager())
         .WillRepeatedly(Return(mockBundleMgrPtr_));
 
-    repository_ = std::make_unique<BundleManagerRepositoryImpl>(
-        std::move(mockConnectorPtr), std::move(mockAccountPtr));
+    repository_ = std::make_unique<BundleManagerRepositoryImpl>(std::move(mockConnectorPtr));
     GTEST_LOG_(INFO) << "SetUp end";
 }
 
@@ -291,8 +286,6 @@ HWTEST_F(BundleManagerRepositoryImplTest, GetBundleInfo_0002, Function | MediumT
     EXPECT_CALL(*mockBundleMgrPtr_, GetBundleInfo(_,_,_,_))
         .WillOnce(DoAll(SetArgReferee<2>((externalBundleInfo)), Return((true))));
 
-    EXPECT_CALL(*mockAccountPtr_, GetOsAccountLocalIdFromUid(uid, _))
-        .WillOnce(DoAll(SetArgReferee<1>(userId), Return(ERR_OK)));
     NotificationBundleManagerInfo bundleInfo;
     bool ret = repository_->GetBundleInfo(name, flag, userId, bundleInfo);
     EXPECT_EQ(bundleInfo.bundleName, name);
@@ -548,8 +541,6 @@ HWTEST_F(BundleManagerRepositoryImplTest, CheckApiCompatibility_0001, Function |
     EXPECT_CALL(*mockBundleMgrPtr_, GetBundleInfo(_,_,_,_))
         .WillOnce(DoAll(SetArgReferee<2>((externalBundle)), Return((true))));
 
-    EXPECT_CALL(*mockAccountPtr_, GetOsAccountLocalIdFromUid(uid, _))
-        .WillOnce(DoAll(SetArgReferee<1>(userId), Return(ERR_OK)));
     bool ret = repository_->CheckApiCompatibility(bundleOption);
 
     EXPECT_EQ(ret, false);
@@ -576,8 +567,6 @@ HWTEST_F(BundleManagerRepositoryImplTest, CheckApiCompatibility_0002, Function |
     EXPECT_CALL(*mockBundleMgrPtr_, GetBundleInfo(_,_,_,_))
         .WillOnce(DoAll(SetArgReferee<2>((externalBundle)), Return((true))));
 
-    EXPECT_CALL(*mockAccountPtr_, GetOsAccountLocalIdFromUid(uid, _))
-        .WillOnce(DoAll(SetArgReferee<1>(userId), Return(ERR_OK)));
     bool ret = repository_->CheckApiCompatibility(bundleOption);
 
     EXPECT_EQ(ret, true);
@@ -597,8 +586,6 @@ HWTEST_F(BundleManagerRepositoryImplTest, CheckApiCompatibility_0003, Function |
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption(name, uid));
     EXPECT_CALL(*mockBundleMgrPtr_, GetBundleInfo(_,_,_,_))
         .WillOnce(Return((false)));
-    EXPECT_CALL(*mockAccountPtr_, GetOsAccountLocalIdFromUid(uid, _))
-        .WillOnce(DoAll(SetArgReferee<1>(userId), Return(ERR_OK)));
     bool ret = repository_->CheckApiCompatibility(bundleOption);
 
     EXPECT_EQ(ret, false);
@@ -622,8 +609,6 @@ HWTEST_F(BundleManagerRepositoryImplTest, IsAncoApp_0001, Function | MediumTest 
     EXPECT_CALL(*mockBundleMgrPtr_, GetBundleInfoV9(_,_,_,_))
         .WillOnce(DoAll(SetArgReferee<2>((externalBundle)), Return((ERR_OK))));
 
-    EXPECT_CALL(*mockAccountPtr_, GetOsAccountLocalIdFromUid(uid, _))
-        .WillOnce(DoAll(SetArgReferee<1>(userId), Return(ERR_OK)));
     bool ret = repository_->IsAncoApp(name, uid);
 
     EXPECT_EQ(ret, true);
@@ -647,8 +632,6 @@ HWTEST_F(BundleManagerRepositoryImplTest, IsAncoApp_0002, Function | MediumTest 
     EXPECT_CALL(*mockBundleMgrPtr_, GetBundleInfoV9(_,_,_,_))
         .WillOnce(DoAll(SetArgReferee<2>((externalBundle)), Return((ERR_OK))));
 
-    EXPECT_CALL(*mockAccountPtr_, GetOsAccountLocalIdFromUid(uid, _))
-        .WillOnce(DoAll(SetArgReferee<1>(userId), Return(ERR_OK)));
     bool ret = repository_->IsAncoApp(name, uid);
 
     EXPECT_EQ(ret, false);
@@ -668,8 +651,6 @@ HWTEST_F(BundleManagerRepositoryImplTest, IsAncoApp_0003, Function | MediumTest 
     EXPECT_CALL(*mockBundleMgrPtr_, GetBundleInfoV9(_,_,_,_))
         .WillOnce(Return((-1)));
 
-    EXPECT_CALL(*mockAccountPtr_, GetOsAccountLocalIdFromUid(uid, _))
-        .WillOnce(DoAll(SetArgReferee<1>(userId), Return(ERR_OK)));
     bool ret = repository_->IsAncoApp(name, uid);
 
     EXPECT_EQ(ret, false);

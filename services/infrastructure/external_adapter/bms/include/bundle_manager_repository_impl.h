@@ -17,7 +17,6 @@
 #define ANS_INFRA_BUNDLE_MANAGER_REPOSITORY_IMPL_H
 
 #include "ibundle_manager_repository.h"
-#include "iaccount_manager_repository.h"
 
 #include "ipc_skeleton.h"
 #include "iremote_object.h"
@@ -31,10 +30,8 @@ namespace Infra {
 class BundleManagerRepositoryImpl : public IBundleManagerRepository {
 public:
     using ConnectorPtr = std::unique_ptr<IBundleServiceConnector>;
-    using AccountPtr = std::unique_ptr<IAccountManagerRepository>;
 
-    explicit BundleManagerRepositoryImpl(ConnectorPtr&& connector, AccountPtr&& accountor)
-        : connector_(std::move(connector)), accountor_(std::move(accountor)) {}
+    explicit BundleManagerRepositoryImpl(ConnectorPtr&& connector) : connector_(std::move(connector)) {}
 
     ~BundleManagerRepositoryImpl() override = default;
 
@@ -192,7 +189,6 @@ private:
     ErrCode GetApplicationInfo(const std::string &bundleName, int32_t flags, int32_t userId,
         AppExecFwk::ApplicationInfo &appInfo);
     ConnectorPtr connector_;
-    AccountPtr accountor_;
 };
 } // Infra
 } // namespace Notification
