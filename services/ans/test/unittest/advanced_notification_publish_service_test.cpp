@@ -3319,24 +3319,5 @@ HWTEST_F(AnsPublishServiceTest, AtomicServicePublish_0200, Function | MediumTest
     auto ret = advancedNotificationService_->Publish("", request);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
-
-/**
- * @tc.name: PublishNotificationBySa_001
- * @tc.desc: Test PublishNotificationBySa
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, PublishNotificationBySa_001, Function | SmallTest | Level1)
-{
-    sptr<NotificationRequest> request = new NotificationRequest(1000);
-    request->SetIsAgentNotification(true);
-    request->SetOwnerBundleName("test.com");
-    request->SetOwnerUserId(-1);
-    std::shared_ptr<AAFwk::WantParams> extendInfo = std::make_shared<AAFwk::WantParams>();
-    extendInfo->SetParam(DELAY_UPDATE_PRIORITY_KEY, AAFwk::Boolean::Box(true));
-    request->SetExtendInfo(extendInfo);
-    advancedNotificationService_->PublishNotificationBySa(request);
-    EXPECT_TRUE(request->IsAgentNotification());
-}
 }  // namespace Notification
 }  // namespace OHOS

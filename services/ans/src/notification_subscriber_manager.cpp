@@ -51,7 +51,6 @@ const uint32_t FILTETYPE_IM = 1 << 0;
 const uint32_t FILTETYPE_QUICK_REPLY_IM = 2 << 0;
 static const std::string EXTENDINFO_INFO_PRE = "notification_collaboration_";
 static const std::string EXTENDINFO_DEVICE_ID = "deviceId";
-constexpr static const char* DELAY_PRIORITY_TARGET_SUBSCRIBER = "com.ohos.sceneboard";
 
 NotificationSubscriberManager::NotificationSubscriberManager()
 {
@@ -185,6 +184,8 @@ void NotificationSubscriberManager::NotifyConsumed(
         return;
     }
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    AdvancedNotificationPriorityHelper::GetInstance()->SetPriorityTypeToExtendInfo(
+        notification->GetNotificationRequestPoint());
     MessageParcel parcel;
     if (!parcel.WriteParcelable(notification)) {
         ANS_LOGE("NotifyConsumed writeParcelable failed.");
@@ -261,6 +262,8 @@ void NotificationSubscriberManager::BatchNotifyConsumed(const std::vector<sptr<N
             newNotifications.emplace_back(nullptr);
             continue;
         }
+        AdvancedNotificationPriorityHelper::GetInstance()->SetPriorityTypeToExtendInfo(
+            notification->GetNotificationRequestPoint());
         MessageParcel parcel;
         if (!parcel.WriteParcelable(notification)) {
             ANS_LOGE("BatchNotifyConsumed writeParcelable failed.");
@@ -631,11 +634,6 @@ void NotificationSubscriberManager::NotifyConsumedInner(const sptr<Notification>
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d> BundleName  = <%{public}s deviceType = %{public}s",
             __FUNCTION__, record->userId, notification->GetBundleName().c_str(), record->deviceType.c_str());
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-        if (IsDelayPriorityTargetSubscriber(record, notification->GetNotificationRequestPoint())) {
-            continue;
-        }
-#endif
         if (IsSubscribedBysubscriber(record, notification) &&  IsSubscribedByDeviceType(record, notification, false) &&
             ConsumeRecordFilter(record, notification) &&
             (record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONSUMED)) {
@@ -658,25 +656,6 @@ void NotificationSubscriberManager::NotifyConsumedInner(const sptr<Notification>
     }
     NotificationSubscriberManager::TrackCodeLog(notification);
 }
-
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-bool NotificationSubscriberManager::IsDelayPriorityTargetSubscriber(
-    const std::shared_ptr<SubscriberRecord> &subscriberRecord, const sptr<NotificationRequest> &request)
-{
-    if (request == nullptr || subscriberRecord->subscriberBundleName_ == DELAY_PRIORITY_TARGET_SUBSCRIBER) {
-        return false;
-    }
-    auto extendInfo = request->GetExtendInfo();
-    if (extendInfo != nullptr) {
-        bool hasUpdated = false;
-        AAFwk::IBoolean* ao = AAFwk::IBoolean::Query(extendInfo->GetParam(DELAY_UPDATE_PRIORITY_KEY));
-        if (ao != nullptr && AAFwk::Boolean::Unbox(ao)) {
-            return true;
-        }
-    }
-    return false;
-}
-#endif
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 bool NotificationSubscriberManager::GetIsEnableEffectedRemind()
@@ -758,11 +737,6 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(
             continue;
         }
         UpdatePriorityType(notification, originNotifications[i]);
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-        if (IsDelayPriorityTargetSubscriber(record, notification->GetNotificationRequestPoint())) {
-            continue;
-        }
-#endif
         bool wearableFlag = false;
         bool headsetFlag = false;
         bool keyNodeFlag = false;
@@ -1257,7 +1231,7 @@ void NotificationSubscriberManager::NotifyEnabledWatchStatusChangedInner(const u
 void NotificationSubscriberManager::NotifySystemUpdateInner(const sptr<Notification> &notification)
 {
     if (notification == nullptr) {
-        ANS_LOGE("NotifySystemUpdate fail, null notification");
+        ANS_LOGE("NotifySystemUpdateInner fail, null notification");
         return;
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
