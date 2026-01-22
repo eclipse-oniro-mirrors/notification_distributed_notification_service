@@ -49,6 +49,8 @@ export interface NotificationSubscriber {
     onBadgeEnabledChanged?: BadgeEnabledChangedCallback;
 
     onBatchCancel?: (data: Array<SubscribeCallbackData>) => void;
+
+    onSystemUpdate?: (data: SubscribeCallbackData) => void;
 }
 
 export class NotificationSubscriberInner implements NotificationSubscriber {
@@ -77,6 +79,8 @@ export class NotificationSubscriberInner implements NotificationSubscriber {
     public onBadgeEnabledChanged?: BadgeEnabledChangedCallback;
 
     public onBatchCancel?: (data: Array<SubscribeCallbackData>) => void;
+
+    public onSystemUpdate?: (data: SubscribeCallbackData) => void;
 }
 
 export interface SubscribeCallbackData {
@@ -159,7 +163,7 @@ export interface EnabledPriorityNotificationCallbackData {
 export interface EnabledPriorityNotificationByBundleCallbackData {
     readonly bundle: string;
     readonly uid: int;
-    readonly enableStatus: int;
+    readonly enableStatus: notificationManager.PriorityEnableStatus;
 }
 
 class EnabledPriorityNotificationCallbackDataInner implements EnabledPriorityNotificationCallbackData {
@@ -169,7 +173,8 @@ class EnabledPriorityNotificationCallbackDataInner implements EnabledPriorityNot
 class EnabledPriorityNotificationByBundleCallbackDataInner implements EnabledPriorityNotificationByBundleCallbackData {
     public readonly bundle: string = '';
     public readonly uid: int = -1;
-    public readonly enableStatus: int = 1;
+    public readonly enableStatus: notificationManager.PriorityEnableStatus =
+        notificationManager.PriorityEnableStatus.ENABLE_BY_INTELLIGENT;
 }
 
 class EnabledNotificationCallbackDataInner implements EnabledNotificationCallbackData {
