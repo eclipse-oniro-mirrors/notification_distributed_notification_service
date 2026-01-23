@@ -32,6 +32,8 @@
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
 #include "mock_push_callback_stub.h"
+#include "advanced_notdisturb_enabled_observer.h"
+#include "advanced_notdisturb_white_list_observer.h"
 
 extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
 
@@ -2055,6 +2057,30 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetNotificationsByBundle_200, Func
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("bundleName", 1001);
     resultNotifications = advancedNotificationService_->GetNotificationsByBundle(bundleOption);
     EXPECT_EQ(resultNotifications.size(), 0);
+}
+
+/**
+ * @tc.name: IsDoNotDisturbEnabled_100
+ * @tc.desc: Test IsDoNotDisturbEnabled_100 when caller has no permission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, IsDoNotDisturbEnabled_100, Function | SmallTest | Level1)
+{
+    int32_t userId = 100;
+    bool isEnabled = false;
+    auto ret = advancedNotificationService_->IsDoNotDisturbEnabled(userId, isEnabled);
+    sptr<AdvancedNotdisturbEnabledObserver> enabledObserver = new (std::nothrow) AdvancedNotdisturbEnabledObserver();
+    if (enabledObserver != nullptr) {
+        enabledObserver->OnChange();
+    }
+    delete enabledObserver;
+
+    sptr<AdvancedNotdisturbWhiteListObserver> observer = new (std::nothrow) AdvancedNotdisturbWhiteListObserver();
+    if (observer != nullptr) {
+        observer->OnChange();
+    }
+    delete observer;
+    ASSERT_EQ(ret, (int)ERROR_PERMISSION_DENIED);
 }
 }
 }

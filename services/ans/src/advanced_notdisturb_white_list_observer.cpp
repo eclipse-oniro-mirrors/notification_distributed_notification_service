@@ -26,8 +26,10 @@ AdvancedNotdisturbWhiteListObserver::~AdvancedNotdisturbWhiteListObserver() = de
 
 void AdvancedNotdisturbWhiteListObserver::OnChange()
 {
-    AdvancedNotificationService::GetInstance()->RefreshNotDisturbWhiteList();
-    ANS_LOGI("RefreshNotDisturbWhiteList success.");
+    if (AdvancedNotificationService::GetInstance() != nullptr) {
+        AdvancedNotificationService::GetInstance()->RefreshNotDisturbWhiteList();
+        ANS_LOGI("RefreshNotDisturbWhiteList success.");
+    }
 }
 } // namespace Notification
 } // namespace OHOS
