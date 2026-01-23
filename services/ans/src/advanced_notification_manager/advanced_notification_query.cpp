@@ -365,9 +365,7 @@ ErrCode AdvancedNotificationService::GetUri(sptr<NotificationRequest> &request)
     }
     additionalData = std::make_shared<AAFwk::WantParams>(*additionalData);
     request->SetAdditionalData(additionalData);
-    if (additionalData->HasParam(NOTIFICATION_MANAGER_WANTURI)) {
-        additionalData->Remove(NOTIFICATION_MANAGER_WANTURI);
-    }
+    additionalData->SetParam(NOTIFICATION_MANAGER_WANTURI, AAFwk::String::Box(""));
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = request->GetWantAgent();
     if (!wantAgent) {
