@@ -942,10 +942,9 @@ ErrCode AdvancedNotificationService::SetNotDisturbWhiteList(int32_t userId)
         return ERROR_INTERNAL_ERROR;
     }
     Uri whiteListUri(datashareHelper->GetNodistubrSoundWhiteListUri(userId));
-    bool isSuccess = datashareHelper->Query(whiteListUri, KEY_FOCUS_MODE_SOUND_WHITE_LIST, soundWhiteListString_);
+    bool isSuccess = datashareHelper->QueryByDataShare(whiteListUri, KEY_FOCUS_MODE_SOUND_WHITE_LIST, soundWhiteListString_);
     if (!isSuccess) {
         ANS_LOGE("Query sound white list failed");
-        return ERROR_INTERNAL_ERROR;
     }
     return ERR_OK;
 }
@@ -959,10 +958,9 @@ ErrCode AdvancedNotificationService::SetNotDisturbEnableState(int32_t userId, bo
     }
     Uri enableUri(datashareHelper->GetFocusModeEnableUri(userId));
     std::string doNotDisturbEnabledState;
-    bool ret = datashareHelper->Query(enableUri, KEY_FOCUS_MODE_ENABLE, doNotDisturbEnabledState);
+    bool ret = datashareHelper->QueryByDataShare(enableUri, KEY_FOCUS_MODE_ENABLE, doNotDisturbEnabledState);
     if (!ret) {
         ANS_LOGE("Query focus mode enable failed");
-        return ERROR_INTERNAL_ERROR;
     }
     if (doNotDisturbEnabledState == DO_NOT_DISTURB_MODE) {
         ANS_LOGI("Currently is focus mode.");

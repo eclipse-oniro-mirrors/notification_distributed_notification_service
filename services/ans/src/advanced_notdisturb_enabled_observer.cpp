@@ -26,8 +26,10 @@ AdvancedNotdisturbEnabledObserver::~AdvancedNotdisturbEnabledObserver() = defaul
 
 void AdvancedNotdisturbEnabledObserver::OnChange()
 {
-    AdvancedNotificationService::GetInstance()->RefreshNotDisturbEnableState();
-    ANS_LOGI("IsDoNotDisturbEnabled change.");
+    if (AdvancedNotificationService::GetInstance() != nullptr) {
+        AdvancedNotificationService::GetInstance()->RefreshNotDisturbEnableState();
+        ANS_LOGI("IsDoNotDisturbEnabled change.");
+    }
 }
 } // namespace Notification
 } // namespace OHOS
