@@ -942,7 +942,8 @@ ErrCode AdvancedNotificationService::SetNotDisturbWhiteList(int32_t userId)
         return ERROR_INTERNAL_ERROR;
     }
     Uri whiteListUri(datashareHelper->GetNodistubrSoundWhiteListUri(userId));
-    bool isSuccess = datashareHelper->QueryByDataShare(whiteListUri, KEY_FOCUS_MODE_SOUND_WHITE_LIST, soundWhiteListString_);
+    bool isSuccess =
+        datashareHelper->QueryByDataShare(whiteListUri, KEY_FOCUS_MODE_SOUND_WHITE_LIST, soundWhiteListString_);
     if (!isSuccess) {
         ANS_LOGE("Query sound white list failed");
     }
