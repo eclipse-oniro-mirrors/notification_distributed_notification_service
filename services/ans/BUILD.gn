@@ -239,6 +239,9 @@ ohos_source_set("ans_service_sources") {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
     defines += [ "DEVICE_USAGE_STATISTICS_ENABLE" ]
   }
+  if (build_variant == "root") {
+    defines += [ "ANM_SUPPORT_DUMP" ]
+  }
 
   if (hisysevent_usage) {
     cflags += [ "-DHAS_HISYSEVENT_PART" ]
@@ -405,6 +408,9 @@ ohos_shared_library("libans") {
 
   if (distributed_notification_supported) {
     external_deps += [ "device_manager:devicemanagersdk" ]
+  }
+  if (build_variant == "root") {
+    defines += [ "ANM_SUPPORT_DUMP" ]
   }
 
   if (device_usage) {

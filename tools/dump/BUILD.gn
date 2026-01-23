@@ -55,8 +55,10 @@ ohos_executable("anm") {
     defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
   }
 
-  if (build_variant == "user") {
-    defines += [ "ANM_BUILD_VARIANT_USER" ]
+  install_enable = false
+  if (build_variant == "root") {
+    defines += [ "ANM_SUPPORT_DUMP" ]
+    install_enable = true
   }
 
   external_deps = [
@@ -70,11 +72,6 @@ ohos_executable("anm") {
     "relational_store:native_rdb",
   ]
   external_deps += component_external_deps
-
-  install_enable = false
-  if (build_variant == "root") {
-    install_enable = true
-  }
 
   part_name = "${component_name}"
   subsystem_name = "${subsystem_name}"

@@ -1885,6 +1885,22 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetRecordFromNo
     }
     return nullptr;
 }
+#ifdef ANM_SUPPORT_DUMP
+ErrCode AdvancedNotificationService::SetRecentNotificationCount(const std::string arg)
+{
+    ANS_LOGD("%{public}s arg = %{public}s", __FUNCTION__, arg.c_str());
+    int32_t count = atoi(arg.c_str());
+    if ((count < NOTIFICATION_MIN_COUNT) || (count > NOTIFICATION_MAX_COUNT)) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    recentInfo_->recentCount = count;
+    while (recentInfo_->list.size() > recentInfo_->recentCount) {
+        recentInfo_->list.pop_back();
+    }
+    return ERR_OK;
+}
+#endif
 
 void AdvancedNotificationService::UpdateRecentNotification(sptr<Notification> &notification,
     bool isDelete, int32_t reason)

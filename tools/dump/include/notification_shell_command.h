@@ -44,7 +44,7 @@ private:
     ErrCode RunAsSettingCommand();
     void SetNativeToken();
 
-#ifndef ANM_BUILD_VARIANT_USER
+#ifdef ANM_SUPPORT_DUMP
     ErrCode RunHelp();
     void CheckDumpOpt();
     void SetDumpCmdInfo(std::string &cmd, std::string &bundle, int32_t &userId, ErrCode &ret, int32_t &recvUserId);

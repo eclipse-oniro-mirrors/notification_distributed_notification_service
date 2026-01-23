@@ -30,6 +30,19 @@ public:
     std::string GetCmd();
     std::string GetBundle();
     int32_t GetUserId();
+#ifdef ANM_SUPPORT_DUMP
+    /**
+     * @brief Obtains specific datas via specified dump option.
+     *
+     * @param cmd Indicates the specified dump command.
+     * @param bundle Indicates the specified bundle name.
+     * @param userId Indicates the specified userId.
+     * @param dumpInfo Indicates the container containing datas.
+     * @return Returns check result.
+     */
+    virtual ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId, int32_t recvUserId,
+        std::vector<std::string> &dumpInfo) override;
+#endif
 
     ErrCode Publish(const std::string &label, const sptr<NotificationRequest> &notification) override
     {

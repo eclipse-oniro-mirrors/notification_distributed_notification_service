@@ -291,6 +291,123 @@ HWTEST_F(AnsUtilsTest, GetActiveNotificationByFilter_00003, Function | SmallTest
     EXPECT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundle1,
         notificationId, label, userId, keys, newRequest), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
 }
+#ifdef ANM_SUPPORT_DUMP
+/**
+ * @tc.name: RecentNotificationDump_00001
+ * @tc.desc: Test RecentNotificationDump
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, RecentNotificationDump_00001, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetOwnerUserId(1);
+    request->SetCreatorUserId(1);
+    request->SetOwnerBundleName("test");
+    request->SetOwnerUid(0);
+    request->SetNotificationId(1);
+    auto notification = new (std::nothrow) Notification(request);
+
+    auto recentNotification = std::make_shared<AdvancedNotificationService::RecentNotification>();
+    recentNotification->isActive = true;
+    recentNotification->notification = notification;
+    advancedNotificationService_->recentInfo_->list.emplace_front(recentNotification);
+
+    std::vector<std::string> dumpInfo;
+    int ret = advancedNotificationService_->RecentNotificationDump("test", 1, 1, dumpInfo);
+    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(dumpInfo.size(), 1);
+}
+
+/**
+ * @tc.name: RecentNotificationDump_00002
+ * @tc.desc: Test RecentNotificationDump
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, RecentNotificationDump_00002, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetOwnerUserId(1);
+    request->SetCreatorUserId(1);
+    request->SetOwnerBundleName("test");
+    request->SetOwnerUid(1);
+    request->SetNotificationId(1);
+    auto notification = new (std::nothrow) Notification(request);
+
+    auto recentNotification = std::make_shared<AdvancedNotificationService::RecentNotification>();
+    recentNotification->isActive = false;
+    recentNotification->notification = notification;
+    advancedNotificationService_->recentInfo_->list.emplace_front(recentNotification);
+
+    sptr<NotificationRequest> request1 = new (std::nothrow) NotificationRequest();
+    request1->SetOwnerUserId(2);
+    auto notification1 = new (std::nothrow) Notification(request1);
+    auto recentNotification1 = std::make_shared<AdvancedNotificationService::RecentNotification>();
+    recentNotification1->notification = notification1;
+    advancedNotificationService_->recentInfo_->list.emplace_front(recentNotification1);
+
+    sptr<NotificationRequest> request2 = new (std::nothrow) NotificationRequest();
+    request2->SetOwnerUserId(1);
+    request2->SetOwnerBundleName("test1");
+    auto notification2 = new (std::nothrow) Notification(request2);
+    auto recentNotification2 = std::make_shared<AdvancedNotificationService::RecentNotification>();
+    recentNotification2->notification = notification2;
+    advancedNotificationService_->recentInfo_->list.emplace_front(recentNotification2);
+
+    sptr<NotificationRequest> request3 = new (std::nothrow) NotificationRequest();
+    request3->SetReceiverUserId(2);
+    request3->SetOwnerUserId(1);
+    auto notification3 = new (std::nothrow) Notification(request3);
+    auto recentNotification3 = std::make_shared<AdvancedNotificationService::RecentNotification>();
+    recentNotification3->notification = notification3;
+    advancedNotificationService_->recentInfo_->list.emplace_front(recentNotification3);
+    
+    std::vector<std::string> dumpInfo;
+    int ret = advancedNotificationService_->RecentNotificationDump("test", 1, 1, dumpInfo);
+    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(dumpInfo.size(), 1);
+}
+
+/**
+ * @tc.name: RecentNotificationDump_00003
+ * @tc.desc: Test RecentNotificationDump
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, RecentNotificationDump_00003, Function | SmallTest | Level1)
+{
+    sptr<Notification> notification = nullptr;
+    auto recentNotification = std::make_shared<AdvancedNotificationService::RecentNotification>();
+    recentNotification->isActive = true;
+    recentNotification->notification = notification;
+    advancedNotificationService_->recentInfo_->list.emplace_front(recentNotification);
+
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetOwnerUserId(1);
+    request->SetCreatorUserId(1);
+    request->SetOwnerBundleName("test");
+    request->SetOwnerUid(0);
+    request->SetNotificationId(1);
+    auto notification1 = new (std::nothrow) Notification(request);
+
+    auto recentNotification1 = std::make_shared<AdvancedNotificationService::RecentNotification>();
+    recentNotification1->isActive = false;
+    recentNotification1->notification = notification1;
+    advancedNotificationService_->recentInfo_->list.emplace_front(recentNotification1);
+
+    std::vector<std::string> dumpInfo;
+    int ret = advancedNotificationService_->RecentNotificationDump("test", 1, 1, dumpInfo);
+    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(dumpInfo.size(), 1);
+}
+#endif
 
 /**
  * @tc.name: GetLocalNotificationKeys_00001

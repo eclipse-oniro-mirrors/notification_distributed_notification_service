@@ -43,6 +43,10 @@ ohos_systemtest("AnsDumpTest") {
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
+
+  if (build_variant == "root") {
+    defines = [ "ANM_SUPPORT_DUMP" ]
+  }
 }
 
 group("ansDumpTest") {

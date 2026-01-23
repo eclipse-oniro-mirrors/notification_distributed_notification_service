@@ -478,7 +478,7 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1200, Function | Medium
 
     EXPECT_EQ(cmd.RunAsSettingCommand(), ERR_INVALID_VALUE);
 }
-
+#ifdef ANM_SUPPORT_DUMP
 /**
  * @tc.number: Anm_Command_Dump_1300
  * @tc.name: RunSetEnableCmd
@@ -498,7 +498,7 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1300, Function | Medium
 
     EXPECT_EQ(cmd.RunSetEnableCmd(), ERR_ANS_SERVICE_NOT_CONNECTED);
 }
-
+#endif
 /**
  * @tc.number: Anm_Command_Dump_1400
  * @tc.name: GetCommandErrorMsg

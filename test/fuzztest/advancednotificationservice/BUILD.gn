@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//base/notification/distributed_notification_service/notification.gni")
+import("//build/ohos.gni")
 
 group("fuzztest") {
   testonly = true
@@ -101,4 +102,7 @@ group("fuzztest") {
     "servicegetallsubscriptionbundles_fuzzer:ServiceGetAllSubscriptionBundlesFuzzTest",
     "servicepublishasbundlewithmaxcapacity_fuzzer:ServicePublishAsBundleWithMaxCapacityFuzzTest",
   ]
+  if (build_variant == "root") {
+    deps += ["serviceshelldump_fuzzer:ServiceShellDumpFuzzTest"]
+  }
 }

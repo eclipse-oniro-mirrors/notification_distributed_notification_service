@@ -47,6 +47,10 @@ ohos_unittest("ans_manager_proxy_test") {
     "relational_store:native_rdb",
   ]
 
+  if (build_variant == "root") {
+    defines = [ "ANM_SUPPORT_DUMP" ]
+  }
+
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }

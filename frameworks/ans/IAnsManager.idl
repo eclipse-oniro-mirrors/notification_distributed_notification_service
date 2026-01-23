@@ -258,6 +258,13 @@ interface OHOS.Notification.IAnsManager {
 
     void GetEnabledForBundleSlotSelf([in] int slotTypeInt, [out] boolean enabled);
 
+    [macrodef ANM_SUPPORT_DUMP] void ShellDump(
+        [in] String cmd,
+        [in] String bundle,
+        [in] int userId,
+        [in] int recvUserId,
+        [out] String[] dumpInfo);
+
     void SetSyncNotificationEnabledWithoutApp([in] int userId, [in] boolean enabled);
 
     void GetSyncNotificationEnabledWithoutApp([in] int userId, [out] boolean enabled);

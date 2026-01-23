@@ -15,6 +15,7 @@
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/config/features.gni")
 import("//build/test.gni")
+import("//build/ohos.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("AnsManagerStubAnnexThreeFuzzTest") {
@@ -95,6 +96,10 @@ ohos_fuzztest("AnsManagerStubAnnexThreeFuzzTest") {
   if (screenlock_mgr_enable) {
     external_deps += [ "screenlock_mgr:screenlock_client" ]
     defines += [ "SCREENLOCK_MGR_ENABLE" ]
+  }
+
+  if (build_variant == "root") {
+    defines += [ "ANM_SUPPORT_DUMP" ]
   }
 
   if (distributed_notification_service_feature_additional_control) {

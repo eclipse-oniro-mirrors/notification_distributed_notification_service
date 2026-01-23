@@ -1290,6 +1290,47 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13100,
     ASSERT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId, callback, callerToken),
         (int)ERR_ANS_INVALID_PARAM);
 }
+#ifdef ANM_SUPPORT_DUMP
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_13600
+ * @tc.name      : ANS_ActiveNotificationDump_0100
+ * @tc.desc      : Test ActiveNotificationDump function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13600, Function | SmallTest | Level1)
+{
+    std::string bundle = "Bundle";
+    int32_t userId = 2;
+    std::vector<std::string> dumpInfo;
+    ASSERT_EQ(advancedNotificationService_->ActiveNotificationDump(bundle, userId, 0, dumpInfo), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_13700
+ * @tc.name      : ANS_RecentNotificationDump_0100
+ * @tc.desc      : Test RecentNotificationDump function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13700, Function | SmallTest | Level1)
+{
+    std::string bundle = "Bundle";
+    int32_t userId = 3;
+    std::vector<std::string> dumpInfo;
+    ASSERT_EQ(advancedNotificationService_->RecentNotificationDump(bundle, userId, 0, dumpInfo), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_13800
+ * @tc.name      : ANS_SetRecentNotificationCount_0100
+ * @tc.desc      : Test SetRecentNotificationCount function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13800, Function | SmallTest | Level1)
+{
+    std::string arg = "Arg";
+    ASSERT_EQ(advancedNotificationService_->SetRecentNotificationCount(arg), (int)ERR_OK);
+}
+#endif
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_13900
@@ -1416,7 +1457,55 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15200,
     bool hasPopped = true;
     ASSERT_EQ(advancedNotificationService_->GetHasPoppedDialog(bundleOption, hasPopped), (int)ERR_ANS_INVALID_PARAM);
 }
+#ifdef ANM_SUPPORT_DUMP
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_15300
+ * @tc.name      : ANS_ShellDump_0100
+ * @tc.desc      : Test ShellDump function when the result is ERR_ANS_INVALID_PARAM
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15300, Function | SmallTest | Level1)
+{
+    std::string cmd = "CMD";
+    std::string bundle = "Bundle";
+    int32_t userId = 4;
+    std::vector<std::string> dumpInfo;
+    ASSERT_EQ(advancedNotificationService_->ShellDump(cmd, bundle, userId, 0, dumpInfo), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->ShellDump("active", bundle, userId, 0, dumpInfo), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->ShellDump("recent", bundle, userId, 0, dumpInfo), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->ShellDump("setRecentCount 2", bundle, userId, 0, dumpInfo), (int)ERR_OK);
+}
 
+/**
+ * @tc.number    : ANS_ShellDump_0200
+ * @tc.name      : ANS_ShellDump
+ * @tc.desc      : Test ShellDump function when the result is ERR_ANS_INVALID_PARAM
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ANS_ShellDump_0200, Function | SmallTest | Level1)
+{
+    std::string cmd = "CMD";
+    std::string bundle = "Bundle";
+    int32_t userId = 4;
+    std::vector<std::string> dumpInfo;
+    AdvancedNotificationService ans;
+    ans.notificationSvrQueue_ = nullptr;
+    ASSERT_EQ(ans.ShellDump(cmd, bundle, userId, 0, dumpInfo), (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_15400
+ * @tc.name      : ANS_Dump_0100
+ * @tc.desc      : Test Dump function when the result is ERR_OK
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15400, Function | SmallTest | Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args;
+    ASSERT_EQ(advancedNotificationService_->Dump(fd, args), (int)ERR_OK);
+}
+#endif
 /**
  * @tc.number    : AdvancedNotificationServiceTest_15700
  * @tc.name      : PrepareNotificationRequest_0100
@@ -2062,6 +2151,82 @@ HWTEST_F(AdvancedNotificationServiceTest, GetAppTargetBundle_4000, Function | Sm
 
     GTEST_LOG_(INFO) << "GetAppTargetBundle_3000 test end";
 }
+#ifdef ANM_SUPPORT_DUMP
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_18100
+ * @tc.name      : ActiveNotificationDump_1000
+ * @tc.desc      : Test ActiveNotificationDump function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18100, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ActiveNotificationDump_1000 test start";
+
+    std::string bundle = "Bundle";
+    int32_t userId = -1;
+    std::vector<std::string> dumpInfo;
+
+    ASSERT_EQ(advancedNotificationService_->ActiveNotificationDump(bundle, userId, userId, dumpInfo), ERR_OK);
+
+    GTEST_LOG_(INFO) << "ActiveNotificationDump_1000 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_18200
+ * @tc.name      : RecentNotificationDump_1000
+ * @tc.desc      : Test RecentNotificationDump function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18200, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "RecentNotificationDump_1000 test start";
+
+    std::string bundle = "Bundle";
+    int32_t userId = -1;
+    std::vector<std::string> dumpInfo;
+
+    ASSERT_EQ(advancedNotificationService_->RecentNotificationDump(bundle, userId, userId, dumpInfo), ERR_OK);
+
+    GTEST_LOG_(INFO) << "RecentNotificationDump_1000 test end";
+}
+
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_18300
+ * @tc.name      : DistributedNotificationDump_1000
+ * @tc.desc      : Test DistributedNotificationDump function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18300, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "DistributedNotificationDump_1000 test start";
+
+    std::string bundle = "Bundle";
+    int32_t userId = -1;
+    std::vector<std::string> dumpInfo;
+
+    ASSERT_EQ(advancedNotificationService_->DistributedNotificationDump(bundle, userId, userId, dumpInfo), ERR_OK);
+
+    GTEST_LOG_(INFO) << "DistributedNotificationDump_1000 test end";
+}
+#endif
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_18400
+ * @tc.name      : SetRecentNotificationCount_1000
+ * @tc.desc      : Test SetRecentNotificationCount function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18400, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "SetRecentNotificationCount_1000 test start";
+
+    std::string arg = "1100";
+    ASSERT_EQ(advancedNotificationService_->SetRecentNotificationCount(arg), ERR_ANS_INVALID_PARAM);
+
+    GTEST_LOG_(INFO) << "SetRecentNotificationCount_1000 test end";
+}
+#endif
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_18500
@@ -3056,6 +3221,72 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20700,
 
     GTEST_LOG_(INFO) << "OnBundleDataCleared_0100 test end";
 }
+#ifdef ANM_SUPPORT_DUMP
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_20900
+ * @tc.name      : GetDumpInfo_0100
+ * @tc.desc      : Test GetDumpInfo function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20900, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetDumpInfo_0100 test start";
+
+    std::vector<std::u16string> args;
+    args.push_back(Str8ToStr16("args"));
+    std::string result = "result";
+    ASSERT_NE(nullptr, advancedNotificationService_);
+    advancedNotificationService_->GetDumpInfo(args, result);
+
+    std::vector<std::u16string> args2;
+    args2.push_back(Str8ToStr16("-r"));
+        auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto notification = new (std::nothrow) Notification(request);
+    auto recentNotification = std::make_shared<AdvancedNotificationService::RecentNotification>();
+    recentNotification->isActive = true;
+    recentNotification->notification = notification;
+    advancedNotificationService_->recentInfo_->list.emplace_front(recentNotification);
+    advancedNotificationService_->GetDumpInfo(args2, result);
+    std::string resMsg = "error: unknown option.\n"
+        "The arguments are illegal and you can enter '-h' for help.notification list:\n"
+        "No.1\n"
+        "\tUserId: -1\n"
+        "\tCreatePid: 0\n"
+        "\tBundleName: \n"
+        "\tOwnerUid: 0\n"
+        "\tReceiverUserId: -1\n"
+        "\tDeliveryTime = 1970-01-01, 08:00:00\n"
+        "\tNotification:\n"
+        "\t\tId: 1\n"
+        "\t\tLabel: \n"
+        "\t\tSlotType = 5\n";
+    ASSERT_EQ(result, resMsg);
+
+    GTEST_LOG_(INFO) << "GetDumpInfo_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_21000
+ * @tc.name      : GetDumpInfo_0200
+ * @tc.desc      : Test GetDumpInfo function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21000, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetDumpInfo_0200 test start";
+
+    std::vector<std::u16string> args;
+    args.push_back(Str8ToStr16("-h"));
+    std::string result = "result";
+    ASSERT_NE(nullptr, advancedNotificationService_);
+    advancedNotificationService_->GetDumpInfo(args, result);
+
+    GTEST_LOG_(INFO) << "GetDumpInfo_0200 test end";
+}
+#endif
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_21100
@@ -3257,6 +3488,21 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22500,
 
     GTEST_LOG_(INFO) << "PushCheck_0100 test end";
 }
+#ifdef ANM_SUPPORT_DUMP
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_220000
+ * @tc.name      : TimeToString_1000
+ * @tc.desc      : Test TimeToString function.
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_220000, Function | SmallTest | Level1)
+{
+    int64_t time = 60;
+    int64_t ret = 20;
+    std::string result = advancedNotificationService_->TimeToString(time);
+    ASSERT_EQ(result.size(), ret);
+}
+#endif
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_22600

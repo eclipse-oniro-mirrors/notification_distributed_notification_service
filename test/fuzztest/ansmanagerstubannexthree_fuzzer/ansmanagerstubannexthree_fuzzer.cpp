@@ -144,6 +144,9 @@ namespace OHOS {
         service->EnableDistributed(enabled);
         service->IsDistributedEnableByBundle(bundleOption, enabled);
         service->GetDeviceRemindType(remindType);
+#ifdef ANM_SUPPORT_DUMP
+        service->ShellDump(stringData, stringData, userId, userId, keys);
+#endif
         service->IsSupportTemplate(stringData, support);
         service->IsSpecialUserAllowedNotify(userId, allowed);
         service->SetNotificationsEnabledByUser(deviceIds, enabled);
