@@ -29,6 +29,16 @@ std::string NotificationClonePriorityInfo::GetBundleName() const
     return bundleName_;
 }
 
+void NotificationClonePriorityInfo::SetBundleUid(const int32_t uid)
+{
+    uid_ = uid;
+}
+
+int32_t NotificationClonePriorityInfo::GetBundleUid() const
+{
+    return uid_;
+}
+
 void NotificationClonePriorityInfo::SetAppIndex(const int32_t appIndex)
 {
     appIndex_ = appIndex;
@@ -82,15 +92,17 @@ void NotificationClonePriorityInfo::ToJson(nlohmann::json &jsonObject) const
     }
 }
 
-void NotificationClonePriorityInfo::FromJson(const nlohmann::json &jsonObject)
+bool NotificationClonePriorityInfo::FromJson(const nlohmann::json &jsonObject)
 {
     if (jsonObject.is_null() || !jsonObject.is_object() || jsonObject.is_discarded()) {
         ANS_LOGE("Invalid priority info json object");
-        return;
+        return false;
     }
     if (jsonObject.contains(PRIORITY_CLONE_PRIORITY_TYPE) && jsonObject[PRIORITY_CLONE_PRIORITY_TYPE].is_number()) {
         clonePriorityType_ = static_cast<NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE>(
             jsonObject.at(PRIORITY_CLONE_PRIORITY_TYPE).get<int32_t>());
+    } else {
+        return false;
     }
     if (jsonObject.contains(PRIORITY_BUNDLE_NAME) && jsonObject[PRIORITY_BUNDLE_NAME].is_string()) {
         bundleName_ = jsonObject.at(PRIORITY_BUNDLE_NAME).get<std::string>();
@@ -104,16 +116,17 @@ void NotificationClonePriorityInfo::FromJson(const nlohmann::json &jsonObject)
     if (jsonObject.contains(PRIORITY_CLONE_CONFIG) && jsonObject[PRIORITY_CLONE_CONFIG].is_string()) {
         config_ = jsonObject.at(PRIORITY_CLONE_CONFIG).get<std::string>();
     }
+    return true;
 }
 
-void NotificationClonePriorityInfo::FromJson(const std::string &jsonStr)
+bool NotificationClonePriorityInfo::FromJson(const std::string &jsonStr)
 {
     if (jsonStr.empty() || !nlohmann::json::accept(jsonStr)) {
         ANS_LOGE("Invalid clone priority json string");
-        return;
+        return false;
     }
     nlohmann::json jsonObject = nlohmann::json::parse(jsonStr, nullptr, false);
-    FromJson(jsonObject);
+    return FromJson(jsonObject);
 }
 
 std::string NotificationClonePriorityInfo::Dump() const
