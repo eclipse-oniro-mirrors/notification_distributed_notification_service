@@ -139,6 +139,7 @@ ohos_shared_library("notification_manager_ani") {
     "ability_runtime:ani_common",
     "ability_runtime:ani_wantagent_common",
     "ability_runtime:app_context",
+    "ability_runtime:napi_common",
     "ability_runtime:runtime",
     "ability_runtime:wantagent_innerkits",
     "access_token:libtokenid_sdk",

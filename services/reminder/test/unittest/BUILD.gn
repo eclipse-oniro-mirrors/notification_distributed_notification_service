@@ -141,6 +141,7 @@ ohos_unittest("reminder_agent_service_test") {
   external_deps = [
     "ability_base:zuri",
     "ability_runtime:abilitykit_native",
+    "ability_runtime:napi_common",
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
     "data_share:datashare_common",
