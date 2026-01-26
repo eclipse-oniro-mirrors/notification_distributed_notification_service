@@ -1323,8 +1323,12 @@ ErrCode NotificationPreferences::SetDistributedBundleOption(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("get foreground userId failed");
+        return false;
+    }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
