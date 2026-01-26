@@ -2363,8 +2363,12 @@ bool NotificationPreferencesDatabase::PutDistributedEnabledForBundle(const std::
         ANS_LOGE("Bundle name is null.");
         return false;
     }
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("get foreground userId failed");
+        return false;
+    }
 
     std::string key = GenerateBundleLablel(bundleInfo, deviceType);
     int32_t result = PutDataToDB(key, enabled, userId);
@@ -2935,7 +2939,12 @@ bool NotificationPreferencesDatabase::GetDistributedEnabledForBundle(const std::
     std::string key = GenerateBundleLablel(bundleInfo, deviceType);
     bool result = false;
     enabled = false;
-    int32_t userId = DEFAULT_USER_ID;
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("get foreground userId failed");
+        return false;
+    }
     GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
         switch (status) {
             case NativeRdb::E_EMPTY_VALUES_BUCKET: {
