@@ -755,14 +755,6 @@ AnsStatus AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifi
     }
     std::string bundle = "";
     AnsStatus ansStatus = PrePublishNotificationBySa(request, uid, bundle);
-    if (request->GetCreatorUid() == RSS_PID && request->IsSystemLiveView() &&
-        (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
-        request->GetContent()->GetNotificationContent())->GetType() != TYPE_CODE_DOWNLOAD)) {
-        request->SetSlotType(NotificationConstant::SlotType::OTHER);
-        request->GetContent()->ResetToBasicContent();
-        request->SetUnremovable(true);
-        request->SetTapDismissed(false);
-    }
     if (!ansStatus.Ok()) {
         return ansStatus;
     }
