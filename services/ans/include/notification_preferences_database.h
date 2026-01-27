@@ -27,6 +27,9 @@
 
 namespace OHOS {
 namespace Notification {
+namespace Infra {
+class NotificationRdbMgr;
+}
 class NotificationPreferencesDatabase final {
 public:
     NotificationPreferencesDatabase();
@@ -648,7 +651,7 @@ private:
     void ExecuteDisturbeDB(sptr<NotificationSlot> &slot, std::string &typeStr, std::string &valueStr,
         const std::string &findString, const int32_t &userId);
     bool CheckApiCompatibility(const std::string &bundleName, const int32_t &uid);
-    std::shared_ptr<NotificationDataMgr> rdbDataManager_;
+    std::shared_ptr<Infra::NotificationRdbMgr> rdbDataManager_;
     std::string GenerateSubscriberExistFlagKey(const std::string& deviceType, const int32_t userId) const;
     void GetSmartReminderEnableFromCCM(const std::string& deviceType, bool& enabled);
     bool isCachedSmartReminderEnableList_ = false;

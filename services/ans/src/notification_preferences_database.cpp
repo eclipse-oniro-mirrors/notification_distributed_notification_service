@@ -31,6 +31,8 @@
 #include "notification_config_parse.h"
 #include "uri.h"
 #include "distributed_data_define.h"
+#include "ans_rdb_mgr_builder.h"
+#include "notification_rdb_mgr.h"
 namespace OHOS {
 namespace Notification {
 /**
@@ -324,8 +326,7 @@ static const char* const KEY_DISTRIBUTED_DEVICE_LIST = "distributedDeviceList";
 
 NotificationPreferencesDatabase::NotificationPreferencesDatabase()
 {
-    NotificationRdbConfig notificationRdbConfig;
-    rdbDataManager_ = std::make_shared<NotificationDataMgr>(notificationRdbConfig);
+    rdbDataManager_ = Domain::GetAnsNotificationRdbMgrInstance();
     ANS_LOGD("Notification Rdb is created");
 }
 

@@ -83,8 +83,8 @@ void AdvancedNotificationRingToneServiceTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp start";
 
-    advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
     NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
+    advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     auto ret = advancedNotificationService_->CancelAll("",
         iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
