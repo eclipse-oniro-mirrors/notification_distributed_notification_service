@@ -36,7 +36,14 @@ private:
     void RestoreBundlePriorityInfo(const int32_t uid, const NotificationClonePriorityInfo &priorityInfo);
     void SetDefaultPriorityInfo(const int32_t uid, const std::string &bundleName);
     void BatchSetDefaultPriorityInfo(const std::set<std::string> &bundleNames, const int32_t userId);
+    bool IsFromUnSupportPriority(const std::set<std::string> &systemApps);
+    void InsertCoverdInfo(const int32_t uid,
+        const std::string &bundleName, const std::string configValue,
+        const NotificationConstant::PriorityEnableStatus enableStatus,
+        const NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE type);
 private:
+    bool fromUnSupportPriority_ = false;
+    std::vector<NotificationClonePriorityInfo> coverdPriorityInfo_;
     std::vector<NotificationClonePriorityInfo> priorityInfo_;
     std::set<std::string> clonedSystemApps_;
     ffrt::mutex lock_;

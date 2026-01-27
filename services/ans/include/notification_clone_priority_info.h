@@ -16,6 +16,7 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_CLONE_PRIORITY_INFO_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_CLONE_PRIORITY_INFO_H
 
+#include "ans_const_define.h"
 #include "nlohmann/json.hpp"
 #include "notification_constant.h"
 
@@ -45,6 +46,8 @@ public:
 
     void SetBundleName(const std::string &name);
     std::string GetBundleName() const;
+    void SetBundleUid(const int32_t uid);
+    int32_t GetBundleUid() const;
     void SetAppIndex(const int32_t appIndex);
     int32_t GetAppIndex() const;
     void SetSwitchState(const int32_t enableStatus);
@@ -55,12 +58,13 @@ public:
     CLONE_PRIORITY_TYPE GetClonePriorityType() const;
 
     void ToJson(nlohmann::json &jsonObject) const;
-    void FromJson(const nlohmann::json &jsonObject);
-    void FromJson(const std::string &jsonStr);
+    bool FromJson(const nlohmann::json &jsonObject);
+    bool FromJson(const std::string &jsonStr);
     std::string Dump() const;
 
 private:
     std::string bundleName_;
+    int32_t uid_ = DEFAULT_UID;
     int32_t appIndex_ = DEFAULT_APP_INDEX;
     CLONE_PRIORITY_TYPE clonePriorityType_ = CLONE_PRIORITY_TYPE::PRIORITY_ENABLE;
     int32_t enableStatus_;

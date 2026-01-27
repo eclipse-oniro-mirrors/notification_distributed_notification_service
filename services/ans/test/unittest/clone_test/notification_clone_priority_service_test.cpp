@@ -143,6 +143,57 @@ HWTEST_F(NotificationClonePriorityTest, OnRestore_00001, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: OnRestore_00002
+ * @tc.desc: Test clone OnRestore when old device not support priority.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationClonePriorityTest, OnRestore_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption =
+        new (std::nothrow) NotificationBundleOption("bundleName", 1000);
+    AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundleInner(bundleOption, 2);
+    std::string keyword = "keyword1\nkeyword2";
+    AdvancedNotificationService::GetInstance()->SetBundlePriorityConfig(bundleOption, keyword);
+    NotificationClonePriority::GetInstance()->OnRestoreEnd(100);
+    int32_t userId = NotificationCloneUtil::GetActiveUserId();
+    NotificationClonePriority::GetInstance()->OnRestoreStart("bundleName", 0, userId, 1000);
+    EXPECT_NE(NotificationClonePriority::GetInstance()->coverdPriorityInfo_.size(), 0);
+    nlohmann::json jsonObject;
+    std::set<std::string> systemApps = {"bundleName"};
+    NotificationClonePriority::GetInstance()->OnRestore(jsonObject, systemApps);
+    EXPECT_EQ(NotificationClonePriority::GetInstance()->coverdPriorityInfo_.size(), 0);
+}
+
+/**
+ * @tc.name: OnRestore_00003
+ * @tc.desc: Test clone OnRestore when old device jsonObject invalid.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationClonePriorityTest, OnRestore_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption =
+        new (std::nothrow) NotificationBundleOption("bundleName", 1000);
+    AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundleInner(bundleOption, 2);
+    std::string keyword = "keyword1\nkeyword2";
+    AdvancedNotificationService::GetInstance()->SetBundlePriorityConfig(bundleOption, keyword);
+    NotificationClonePriority::GetInstance()->OnRestoreEnd(100);
+    int32_t userId = NotificationCloneUtil::GetActiveUserId();
+    NotificationClonePriority::GetInstance()->OnRestoreStart("bundleName", 0, userId, 1000);
+    EXPECT_NE(NotificationClonePriority::GetInstance()->coverdPriorityInfo_.size(), 0);
+    nlohmann::json jsonObject;
+    jsonObject = nlohmann::json::array();
+    NotificationCloneBundleInfo cloneBundle;
+    nlohmann::json jsonNode;
+    cloneBundle.ToJson(jsonNode);
+    jsonObject.emplace_back(jsonNode);
+    std::set<std::string> systemApps = {"bundleName"};
+    NotificationClonePriority::GetInstance()->OnRestore(jsonObject, systemApps);
+    EXPECT_EQ(NotificationClonePriority::GetInstance()->coverdPriorityInfo_.size(), 0);
+}
+
+/**
  * @tc.name: OnRestoreEnd_Test_001
  * @tc.desc: Test that clear priority info.
  * @tc.type: FUNC
