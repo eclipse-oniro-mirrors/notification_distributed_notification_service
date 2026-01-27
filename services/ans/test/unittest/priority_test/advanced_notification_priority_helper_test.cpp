@@ -77,13 +77,15 @@ HWTEST_F(AdvancedNotificationPriorityHelperTest, SetPriorityTypeToExtendInfo_010
 HWTEST_F(AdvancedNotificationPriorityHelperTest, RefreshPriorityType_0100, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationRequest>> requests;
-    EXPECT_EQ(AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(requests),
+    EXPECT_EQ(AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
+        requests, NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE),
         NotificationAiExtensionWrapper::ErrorCode::ERR_OK);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetPriorityNotificationType(NotificationConstant::PriorityNotificationType::PRIMARY_CONTACT);
     AdvancedNotificationPriorityHelper::GetInstance()->SetPriorityTypeToExtendInfo(request);
     requests.push_back(request);
-    EXPECT_EQ(AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(requests),
+    EXPECT_EQ(AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
+        requests, NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE),
         NotificationAiExtensionWrapper::ErrorCode::ERR_OK);
 }
 #endif

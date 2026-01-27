@@ -53,7 +53,8 @@ ErrCode AdvancedNotificationService::SetPriorityEnabledInner(const bool enabled)
         }
         std::vector<sptr<NotificationRequest>> requests;
         GetRequestsFromNotification(GetAllNotification(), requests);
-        refreshResult = AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(requests);
+        refreshResult = AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
+            requests, NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE);
 #endif
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set priority enable.");
@@ -115,7 +116,8 @@ ErrCode AdvancedNotificationService::SetPriorityEnabledByBundleInner(
         }
         std::vector<sptr<NotificationRequest>> requests;
         GetRequestsFromNotification(GetNotificationsByBundle(bundleOption), requests);
-        refreshResult = AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(requests);
+        refreshResult = AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
+            requests, NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE);
 #endif
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set bundle priority enable.");
@@ -239,7 +241,8 @@ ErrCode AdvancedNotificationService::SetBundlePriorityConfigInner(
         }
         std::vector<sptr<NotificationRequest>> requests;
         GetRequestsFromNotification(GetNotificationsByBundle(bundleOption), requests);
-        refreshResult = AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(requests);
+        refreshResult = AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
+            requests, NotificationAiExtensionWrapper::REFRESH_KEYWORD_PRIORITY_TYPE);
 #endif
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set priority config.");

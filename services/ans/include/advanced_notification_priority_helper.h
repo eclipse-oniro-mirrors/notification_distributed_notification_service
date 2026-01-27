@@ -29,7 +29,7 @@ public:
     void UpdatePriorityType(const sptr<NotificationRequest> &request);
     bool IsCollaborationNotification(const sptr<NotificationRequest> &request);
     void SetPriorityTypeToExtendInfo(const sptr<NotificationRequest> &request);
-    int32_t RefreshPriorityType(std::vector<sptr<NotificationRequest>> requests);
+    int32_t RefreshPriorityType(const std::vector<sptr<NotificationRequest>> requests, const std::string &command);
 
 private:
     bool IsNeedUpdatePriorityType(const sptr<NotificationRequest> &request);

@@ -110,14 +110,14 @@ void AdvancedNotificationPriorityHelper::SetPriorityTypeToExtendInfo(const sptr<
     request->SetExtendInfo(extendInfo);
 }
 
-int32_t AdvancedNotificationPriorityHelper::RefreshPriorityType(std::vector<sptr<NotificationRequest>> requests)
+int32_t AdvancedNotificationPriorityHelper::RefreshPriorityType(
+    const std::vector<sptr<NotificationRequest>> requests, const std::string &command)
 {
     if (requests.size() <= 0) {
         return NotificationAiExtensionWrapper::ErrorCode::ERR_OK;
     }
     std::vector<int32_t> results;
-    return NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateNotification(
-        requests, NotificationAiExtensionWrapper::REFRESH_KEYWORD_PRIORITY_TYPE, results);
+    return NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateNotification(requests, command, results);
 }
 #endif
 }  // namespace Notification
