@@ -14,6 +14,7 @@
  */
 
 #include "constant.h"
+#include "notification_constant.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -24,6 +25,14 @@ void SetNamedPropertyByInteger(napi_env env, napi_value dstObj, int32_t objName,
     napi_value prop = nullptr;
     if (napi_create_int32(env, objName, &prop) == napi_ok) {
         napi_set_named_property(env, dstObj, propName, prop);
+    }
+}
+
+void SetNamedPropertyByString(napi_env env, napi_value dstObj, const char *objName)
+{
+    napi_value prop = nullptr;
+    if (napi_create_string_utf8(env, objName, NAPI_AUTO_LENGTH, &prop) == napi_ok) {
+        napi_set_named_property(env, dstObj, objName, prop);
     }
 }
 
@@ -306,6 +315,70 @@ napi_value NotificationControlFlagStatusInit(napi_env env, napi_value exports)
     return exports;
 }
 
+napi_value PriorityNotificationTypeInit(napi_env env, napi_value exports)
+{
+    ANS_LOGD("called");
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    SetNamedPropertyByString(env, obj, OHOS::Notification::NotificationConstant::PriorityNotificationType::OTHER);
+    SetNamedPropertyByString(env, obj,
+        OHOS::Notification::NotificationConstant::PriorityNotificationType::PRIMARY_CONTACT);
+    SetNamedPropertyByString(env, obj,
+        OHOS::Notification::NotificationConstant::PriorityNotificationType::AT_ME);
+    SetNamedPropertyByString(env, obj,
+        OHOS::Notification::NotificationConstant::PriorityNotificationType::URGENT_MESSAGE);
+    SetNamedPropertyByString(env, obj,
+        OHOS::Notification::NotificationConstant::PriorityNotificationType::SCHEDULE_REMINDER);
+    SetNamedPropertyByString(env, obj,
+        OHOS::Notification::NotificationConstant::PriorityNotificationType::PAYMENT_DUE);
+    SetNamedPropertyByString(env, obj,
+        OHOS::Notification::NotificationConstant::PriorityNotificationType::TRANSACTION_ALERT);
+    SetNamedPropertyByString(env, obj,
+        OHOS::Notification::NotificationConstant::PriorityNotificationType::EXPRESS_PROGRESS);
+    SetNamedPropertyByString(env, obj,
+        OHOS::Notification::NotificationConstant::PriorityNotificationType::MISS_CALL);
+    SetNamedPropertyByString(env, obj,
+        OHOS::Notification::NotificationConstant::PriorityNotificationType::TRAVEL_ALERT);
+    SetNamedPropertyByString(env, obj,
+        OHOS::Notification::NotificationConstant::PriorityNotificationType::ACCOUNT_ALERT);
+    SetNamedPropertyByString(env, obj,
+        OHOS::Notification::NotificationConstant::PriorityNotificationType::APPOINTMENT_REMINDER);
+    SetNamedPropertyByString(env, obj,
+        OHOS::Notification::NotificationConstant::PriorityNotificationType::TRAFFIC_NOTICE);
+    SetNamedPropertyByString(env, obj,
+        OHOS::Notification::NotificationConstant::PriorityNotificationType::KEY_PROGRESS);
+    SetNamedPropertyByString(env, obj,
+        OHOS::Notification::NotificationConstant::PriorityNotificationType::PUBLIC_EVENT);
+    SetNamedPropertyByString(env, obj,
+        OHOS::Notification::NotificationConstant::PriorityNotificationType::IOT_WARNING);
+    SetNamedPropertyByString(env, obj,
+        OHOS::Notification::NotificationConstant::PriorityNotificationType::CUSTOM_KEYWORD);
+    napi_property_descriptor exportFuncs[] = {
+        DECLARE_NAPI_PROPERTY("PriorityNotificationType", obj),
+    };
+    napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);
+    return exports;
+}
+
+napi_value PriorityEnableStatusInit(napi_env env, napi_value exports)
+{
+    ANS_LOGD("called");
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    SetNamedPropertyByInteger(env, obj,
+        static_cast<int32_t>(OHOS::Notification::NotificationConstant::PriorityEnableStatus::DISABLE), "DISABLE");
+    SetNamedPropertyByInteger(env, obj,
+        static_cast<int32_t>(OHOS::Notification::NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT),
+        "ENABLE_BY_INTELLIGENT");
+    SetNamedPropertyByInteger(env, obj,
+        static_cast<int32_t>(OHOS::Notification::NotificationConstant::PriorityEnableStatus::ENABLE), "ENABLE");
+    napi_property_descriptor exportFuncs[] = {
+        DECLARE_NAPI_PROPERTY("PriorityEnableStatus", obj),
+    };
+    napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);
+    return exports;
+}
+
 napi_value NotificationFlagTypeInit(napi_env env, napi_value exports)
 {
     ANS_LOGD("called");
@@ -424,6 +497,8 @@ napi_value ConstantInit(napi_env env, napi_value exports)
     SwitchStateInit(env, exports);
     RingtoneTypeInit(env, exports);
     SubscribeTypeInit(env, exports);
+    PriorityNotificationTypeInit(env, exports);
+    PriorityEnableStatusInit(env, exports);
     return exports;
 }
 }  // namespace NotificationNapi

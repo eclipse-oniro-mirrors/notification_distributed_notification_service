@@ -351,6 +351,25 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00004, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: SetAdditionConfig_00005
+ * @tc.desc: Test SetAdditionConfig with PRIORITY_RULE_CONFIG_KEY
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00005, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    std::string key = PRIORITY_RULE_CONFIG_KEY;
+    std::string value = "{\"rules\":[{\"appAllowList\":[\"com.ohos.sceneboard\"],\"id\":34,"
+        "\"messageCategoryList\":[\"1\"],\"messageSource\":1,\"ruleLabelList\":[\"KEY_PROGRESS\"],"
+        "\"ruleName\":\"功能升级\",\"ruleType\":0,\"textCondition\":[],"
+        "\"titleCondition\":[[\"优先通知\"]]}]}";
+    auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
  * @tc.name: GetAllLiveViewEnabledBundles_00001
  * @tc.desc: Test GetAllLiveViewEnabledBundles_00001
  * @tc.type: FUNC
