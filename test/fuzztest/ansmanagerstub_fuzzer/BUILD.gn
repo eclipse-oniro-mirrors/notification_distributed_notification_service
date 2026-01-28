@@ -15,6 +15,7 @@
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/config/features.gni")
 import("//build/test.gni")
+import("//build/ohos.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("AnsManagerStubFuzzTest") {
@@ -96,6 +97,10 @@ ohos_fuzztest("AnsManagerStubFuzzTest") {
 
   if (distributed_notification_service_feature_additional_control) {
     defines += [ "ENABLE_ANS_EXT_WRAPPER" ]
+  }
+
+  if (build_variant == "root") {
+    defines += [ "ANM_SUPPORT_DUMP" ]
   }
 
   if (distributed_notification_service_feature_additional_control) {

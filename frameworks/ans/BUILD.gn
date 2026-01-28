@@ -199,6 +199,10 @@ ohos_shared_library("ans_innerkits") {
     cflags = [ "-DCONFIG_DUAL_FRAMEWORK" ]
   }
 
+  if (build_variant == "root") {
+    defines += [ "ANM_SUPPORT_DUMP" ]
+  }
+
   if (ans_hitrace_usage) {
     external_deps += [ "hitrace:hitrace_meter" ]
     defines += [ "HITRACE_METER_ENABLE" ]
@@ -235,6 +239,9 @@ ohos_source_set("ans_manager_stub") {
   output_values = get_target_outputs(":ans_manager_interface")
   sources = filter_include(output_values, [ "*_stub.cpp" ])
   deps = [ ":ans_manager_interface" ]
+  if (build_variant == "root") {
+    defines = [ "ANM_SUPPORT_DUMP" ]
+  }
   external_deps = [
     "ability_runtime:wantagent_innerkits",
     "bundle_framework:appexecfwk_base",

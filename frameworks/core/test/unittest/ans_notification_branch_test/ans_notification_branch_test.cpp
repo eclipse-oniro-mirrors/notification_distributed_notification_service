@@ -644,6 +644,13 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+#ifdef ANM_SUPPORT_DUMP
+    ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId, int32_t recvUserId,
+        std::vector<std::string> &dumpInfo) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+#endif
 
     ErrCode SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled) override
     {

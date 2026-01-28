@@ -13,6 +13,7 @@
 
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/config/features.gni")
+import("//build/ohos.gni")
 import("//build/test.gni")
 
 # advancednotificationservice_fuzztest公共配置模板
@@ -48,6 +49,9 @@ template("advancednotificationservice_fuzztest_target") {
 
     if (defined(invoker.deps_value)) {
         deps += invoker.deps_value
+    }
+    if (build_variant == "root") {
+      defines += [ "ANM_SUPPORT_DUMP" ]
     }
 
     if (defined(invoker.common_deps_value)) {

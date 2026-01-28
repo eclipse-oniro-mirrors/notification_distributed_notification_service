@@ -13,6 +13,7 @@
 
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/test.gni")
+import("//build/ohos.gni")
 
 module_output_path =
     "distributed_notification_service/distributed_notification_service/tools"
@@ -58,6 +59,10 @@ ohos_unittest("notification_shell_command_dump_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
+  if (build_variant == "root") {
+    defines = [ "ANM_SUPPORT_DUMP" ]
+  }
+
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:ans_service_sources",
@@ -88,5 +93,7 @@ ohos_unittest("notification_shell_command_dump_test") {
 group("unittest") {
   testonly = true
 
-  deps = [ ":notification_shell_command_dump_test" ]
+  if (build_variant == "root") {
+    deps = [ ":notification_shell_command_dump_test" ]
+  }
 }

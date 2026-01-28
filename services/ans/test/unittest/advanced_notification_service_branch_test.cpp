@@ -1148,6 +1148,26 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_270000, Function | SmallTest | Level1)
             NotificationConstant::SlotType::SOCIAL_COMMUNICATION, enabled);
     ASSERT_EQ(result1, ERR_ANS_PERMISSION_DENIED);
 }
+#ifdef ANM_SUPPORT_DUMP
+/**
+ * @tc.number    : AnsBranchTest_271000
+ * @tc.name      : SetEnabledForBundleSlot_1000
+ * @tc.desc      : Test SetEnabledForBundleSlot function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_271000, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockVerifyShellToken(false);
+
+    std::string cmd = "CMD";
+    std::string bundle = "Bundle";
+    int32_t userId = 4;
+    std::vector<std::string> dumpInfo;
+    ASSERT_EQ(advancedNotificationService_->ShellDump(
+        cmd, bundle, userId, 0, dumpInfo), (int)ERR_ANS_PERMISSION_DENIED);
+}
+#endif
 
 /**
  * @tc.number    : AnsBranchTest_272000

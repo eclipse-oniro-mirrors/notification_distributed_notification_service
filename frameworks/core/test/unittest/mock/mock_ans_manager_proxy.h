@@ -161,6 +161,10 @@ public:
         ErrCode(const sptr<NotificationBundleOption>& bundleOption, int32_t, bool, bool));
     MOCK_METHOD3(GetEnabledForBundleSlot, ErrCode(const sptr<NotificationBundleOption>&, int32_t, bool&));
     MOCK_METHOD2(GetEnabledForBundleSlotSelf, ErrCode(int32_t, bool&));
+#ifdef ANM_SUPPORT_DUMP
+    MOCK_METHOD5(ShellDump,
+        ErrCode(const std::string&, const std::string&, int32_t, int32_t, std::vector<std::string>&));
+#endif
     MOCK_METHOD2(SetSyncNotificationEnabledWithoutApp, ErrCode(int32_t, bool));
     MOCK_METHOD2(GetSyncNotificationEnabledWithoutApp, ErrCode(int32_t, bool&));
     MOCK_METHOD2(SetBadgeNumber, ErrCode(int32_t, const std::string&));

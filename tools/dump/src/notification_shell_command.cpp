@@ -156,11 +156,7 @@ ErrCode NotificationShellCommand::RunAsHelpCommand()
 
 ErrCode NotificationShellCommand::RunAsDumpCommand()
 {
-#ifdef ANM_BUILD_VARIANT_USER
-     resultReceiver_.append("error: user version cannot use dump.\n");
-     return ERR_INVALID_VALUE;
-#endif
-#ifndef ANM_BUILD_VARIANT_USER
+#ifdef ANM_SUPPORT_DUMP
     ErrCode ret = ERR_OK;
     std::vector<std::string> infos;
     std::string cmd;
@@ -185,16 +181,15 @@ ErrCode NotificationShellCommand::RunAsDumpCommand()
         resultReceiver_.append(info);
     }
     return ret;
+#else
+     resultReceiver_.append("error: user version cannot use dump.\n");
+     return ERR_INVALID_VALUE;
 #endif
 }
 
 ErrCode NotificationShellCommand::RunAsSettingCommand()
 {
-#ifdef ANM_BUILD_VARIANT_USER
-     resultReceiver_.append("error: user version cannot use setting.\n");
-     return ERR_INVALID_VALUE;
-#endif
-#ifndef ANM_BUILD_VARIANT_USER
+#ifdef ANM_SUPPORT_DUMP
     int option = getopt_long(argc_, argv_, SETTING_SHORT_OPTIONS, SETTING_LONG_OPTIONS, nullptr);
     if (option == '?') {
         if (optopt == 'c') {
@@ -249,13 +244,29 @@ ErrCode NotificationShellCommand::RunAsSettingCommand()
     }
     resultReceiver_.append(SETTING_HELP_MSG);
     return ERR_INVALID_VALUE;
+#else
+     resultReceiver_.append("error: user version cannot use setting.\n");
+     return ERR_INVALID_VALUE;
 #endif
 }
 
-#ifndef ANM_BUILD_VARIANT_USER
+#ifdef ANM_SUPPORT_DUMP
 ErrCode NotificationShellCommand::RunDumpCmd(const std::string& cmd, const std::string& bundle,
     int32_t userId, int32_t recvUserId, std::vector<std::string> &infos)
 {
+    if (ans_ != nullptr) {
+        ErrCode ret = ans_->ShellDump(cmd, bundle, userId, recvUserId, infos);
+        if (strncmp(cmd.c_str(), COMMAND_SET_RECENT_COUNT, strlen(COMMAND_SET_RECENT_COUNT)) == 0) {
+            if (ret == ERR_OK) {
+                resultReceiver_.append("set recent count success\n");
+            } else {
+                resultReceiver_.append("set recent count failed\n");
+            }
+        } else {
+            resultReceiver_.append("Total:" + std::to_string(infos.size()) + "\n");
+        }
+        return ret;
+    }
     return ERR_ANS_SERVICE_NOT_CONNECTED;
 }
 

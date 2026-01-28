@@ -15,6 +15,7 @@
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/config/features.gni")
 import("//build/test.gni")
+import("//build/ohos.gni")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("AdvancedNotificationServiceFuzzTest") {
@@ -118,6 +119,10 @@ ohos_fuzztest("AdvancedNotificationServiceFuzzTest") {
   if (player_framework) {
     external_deps += [ "player_framework:media_client" ]
     defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
+
+  if (build_variant == "root") {
+    defines += [ "ANM_SUPPORT_DUMP" ]
   }
 
   if (ans_hitrace_usage) {

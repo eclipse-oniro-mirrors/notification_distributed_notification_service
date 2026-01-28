@@ -69,6 +69,18 @@ namespace Notification {
         recentNotification->isActive = true;
         recentNotification->notification = new Notification(req);
         service->recentInfo_->list.emplace_front(recentNotification);
+#ifdef ANM_SUPPORT_DUMP
+        service->ActiveNotificationDump(bundleName, creatorUserId, recvUserId, dumpInfo);
+        service->RecentNotificationDump(bundleName, ownerId, recvUserId, dumpInfo);
+        service->TimeToString(fuzzData->ConsumeIntegralInRange<int64_t>(0, 10000));
+        service->ShellDump(fuzzData->ConsumeRandomLengthString(), fuzzData->ConsumeRandomLengthString(),
+            recvUserId, recvUserId, dumpInfo);
+        
+        std::vector<std::u16string> args;
+        args.push_back(Str8ToStr16("args"));
+        std::string result = fuzzData->ConsumeRandomLengthString();
+        service->GetDumpInfo(args, result);
+#endif
 
         std::vector<std::string> keys;
         keys.push_back(recentNotification->notification->GetKey());
