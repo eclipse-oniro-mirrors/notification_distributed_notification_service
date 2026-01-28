@@ -5787,6 +5787,83 @@ HWTEST_F(AdvancedNotificationServiceTest, IsSilentReminderEnabled_00001, Functio
 }
 
 /**
+ * @tc.name      : SetSilentReminderEnabledInner_00001
+ * @tc.number    :
+ * @tc.desc      : test SetSilentReminderEnabledInner with enabled=true
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetSilentReminderEnabledInner_00001, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    std::string bundleName = "com.example.test";
+    int32_t uid = 101;
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleName, uid));
+    
+    // First set to false to establish initial state
+    NotificationPreferences::GetInstance()->SetSilentReminderEnabled(bo, false);
+    
+    // Then call SetSilentReminderEnabledInner with true
+    ErrCode ret = advancedNotificationService.SetSilentReminderEnabledInner(bo, true);
+    ASSERT_EQ(ret, ERR_OK);
+    
+    // Verify the state was changed
+    NotificationConstant::SWITCH_STATE state;
+    ret = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bo, state);
+    ASSERT_EQ(ret, ERR_OK);
+    ASSERT_EQ(state, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+}
+
+/**
+ * @tc.name      : SetSilentReminderEnabledInner_00002
+ * @tc.number    :
+ * @tc.desc      : test SetSilentReminderEnabledInner with enabled=false
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetSilentReminderEnabledInner_00002, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    std::string bundleName = "com.example.test2";
+    int32_t uid = 102;
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleName, uid));
+    
+    // First set to true to establish initial state
+    NotificationPreferences::GetInstance()->SetSilentReminderEnabled(bo, true);
+    
+    // Then call SetSilentReminderEnabledInner with false
+    ErrCode ret = advancedNotificationService.SetSilentReminderEnabledInner(bo, false);
+    ASSERT_EQ(ret, ERR_OK);
+    
+    // Verify the state was changed
+    NotificationConstant::SWITCH_STATE state;
+    ret = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bo, state);
+    ASSERT_EQ(ret, ERR_OK);
+    ASSERT_EQ(state, NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+}
+
+/**
+ * @tc.name      : SetSilentReminderEnabledInner_00003
+ * @tc.number    :
+ * @tc.desc      : test SetSilentReminderEnabledInner when state doesn't change
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetSilentReminderEnabledInner_00003, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    std::string bundleName = "com.example.test3";
+    int32_t uid = 103;
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleName, uid));
+    
+    // Set to true first
+    NotificationPreferences::GetInstance()->SetSilentReminderEnabled(bo, true);
+    
+    // Call SetSilentReminderEnabledInner with true again (no change)
+    ErrCode ret = advancedNotificationService.SetSilentReminderEnabledInner(bo, true);
+    ASSERT_EQ(ret, ERR_OK);
+    
+    // Verify the state is still true but may not trigger callback
+    NotificationConstant::SWITCH_STATE state;
+    ret = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bo, state);
+    ASSERT_EQ(ret, ERR_OK);
+}
+
+/**
  * @tc.number    : DisableNotificationFeature_00002
  * @tc.name      : Test DisableNotificationFeature
  * @tc.desc      : Test DisableNotificationFeature

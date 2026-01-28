@@ -269,6 +269,28 @@ napi_value Common::SetEnabledNotificationCallbackData(const napi_env &env, const
     return NapiGetBoolean(env, true);
 }
 
+napi_value Common::SetEnabledSilentReminderCallbackData(const napi_env &env,
+    const EnabledSilentReminderCallbackData &data, napi_value &result)
+{
+    ANS_LOGD("called");
+    // bundle: string
+    napi_value bundleNapi = nullptr;
+    napi_create_string_utf8(env, data.GetBundle().c_str(), NAPI_AUTO_LENGTH, &bundleNapi);
+    napi_set_named_property(env, result, "bundle", bundleNapi);
+
+    // uid: uid_t
+    napi_value uidNapi = nullptr;
+    napi_create_int32(env, data.GetUid(), &uidNapi);
+    napi_set_named_property(env, result, "uid", uidNapi);
+
+    // enable: bool
+    napi_value enableNapi = nullptr;
+    napi_create_int32(env, static_cast<int32_t>(data.GetEnableStatus()), &enableNapi);
+    napi_set_named_property(env, result, "enableStatus", enableNapi);
+
+    return NapiGetBoolean(env, true);
+}
+    
 napi_value Common::SetEnabledPriorityNotificationByBundleCallbackData(const napi_env &env,
     const EnabledPriorityNotificationByBundleCallbackData &data, napi_value &result)
 {

@@ -17,6 +17,7 @@
 
 #include "common.h"
 #include "notification_constant.h"
+#include "enabled_silent_reminder_callback_data.h"
 #include "ffrt.h"
 
 namespace OHOS {
@@ -100,6 +101,14 @@ public:
      */
     virtual void OnEnabledNotificationChanged(
         const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override;
+
+    /**
+     * @brief Callback when the silent reminder switch is changed.
+     *
+     * @param enable Indicates the switch state.
+     */
+    virtual void OnEnabledSilentReminderChanged(
+        const std::shared_ptr<EnabledSilentReminderCallbackData> &callbackData) override;
 
     /**
      * @brief Callback when the priority notification switch is changed.
@@ -210,6 +219,7 @@ private:
     void SetEnabledPriorityCallbackInfo(const napi_env &env, const napi_ref &ref);
     void SetEnabledPriorityByBundleCallbackInfo(const napi_env &env, const napi_ref &ref);
     void SetSystemUpdateCallbackInfo(const napi_env &env, const napi_ref &ref);
+    void SetEnabledSilentReminderCallbackInfo(const napi_env &env, const napi_ref &ref);
 
     CallbackInfo GetCancelCallbackInfo();
     CallbackInfo GetConsumeCallbackInfo();
@@ -227,6 +237,7 @@ private:
     CallbackInfo GetBadgeEnabledCallbackInfo();
     CallbackInfo GetBatchCancelCallbackInfo();
     CallbackInfo GetSystemUpdateCallbackInfo();
+    CallbackInfo GetEnabledSilentReminderCallbackInfo();
 
     void CallThreadSafeFunc(void *data);
     void SubDeleteRef();
@@ -251,6 +262,7 @@ private:
     CallbackInfo setBadgeCallbackInfo_;
     CallbackInfo setBadgeEnabledCallbackInfo_;
     CallbackInfo batchCancelCallbackInfo_;
+    CallbackInfo enabledSilentReminderCallbackInfo_;
 };
 
 struct SubscriberInstancesInfo {
