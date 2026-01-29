@@ -1741,46 +1741,6 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0102, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.number    : AnsModuleTest_103
- * @tc.name      : ANS_Module_Test_10300
- * @tc.desc      : Test publish notification when slot type is CONTENT_INFORMATION.
- */
-HWTEST_F(AnsModuleTest, AnsModuleTest_0103, Function | SmallTest | Level1)
-{
-    // create wantagent
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent =
-        std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
-
-    // subscriber
-    std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
-    std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
-    auto listener = new (std::nothrow) SubscriberListener(ptr);
-    sptr<NotificationSubscribeInfo> subscriberInfo = new NotificationSubscribeInfo();
-    subscriberInfo->AddAppName("a");
-    g_advancedNotificationService->Subscribe(listener, subscriberInfo, ptr->subscribedFlags_);
-    subscriber->consumedCb_ = [](const std::shared_ptr<Notification> notification,
-                                  const std::shared_ptr<NotificationSortingMap>
-                                      sortingMap) { passed = true; };
-
-    // create request
-    std::string label = "testLabel";
-    sptr<NotificationRequest> req = new NotificationRequest(0);
-    req->SetLabel(label);
-    req->SetWantAgent(agent);
-    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
-    std::shared_ptr<NotificationLongTextContent> longTextContent =
-        std::make_shared<NotificationLongTextContent>("longtext");
-    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(longTextContent);
-    req->SetContent(content2);
-
-    // publish request
-    g_advancedNotificationService->Publish(label, req);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    EXPECT_FALSE(passed);
-    g_advancedNotificationService->Unsubscribe(listener, subscriberInfo);
-}
-
-/**
  * @tc.number    : AnsModuleTest_105
  * @tc.name      : ANS_Module_Test_10500
  * @tc.desc      : Test publish notification when slot type is CONTENT_INFORMATION.

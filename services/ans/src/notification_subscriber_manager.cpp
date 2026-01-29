@@ -896,6 +896,16 @@ sptr<Notification> NotificationSubscriberManager::GenerateSubscribedNotification
         }
     }
 #endif
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    if (notificationStub == nullptr || notificationStub->GetNotificationRequestPoint() == nullptr) {
+        ANS_LOGE("null notificationStub");
+        return nullptr;
+    }
+    if (record->deviceType != NotificationConstant::CURRENT_DEVICE_TYPE) {
+        notificationStub->GetNotificationRequestPoint()->SetInnerPriorityNotificationType(
+            NotificationConstant::PriorityNotificationType::OTHER);
+    }
+#endif
     return notificationStub;
 }
 

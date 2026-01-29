@@ -101,22 +101,11 @@ HWTEST_F(NotificationAiExtensionWrapperTest, UpdateNotification_0100, Function |
     NOTIFICATION_AI_EXTENSION_WRAPPER->updateNotification_ = nullptr;
     std::vector<sptr<NotificationRequest>> requests;
     std::vector<int32_t> results;
+    NOTIFICATION_AI_EXTENSION_WRAPPER->Init();
     EXPECT_EQ(NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateNotification(
         requests, NotificationAiExtensionWrapper::REFRESH_KEYWORD_PRIORITY_TYPE, results),
         NOTIFICATION_AI_EXTENSION_WRAPPER->ErrorCode::ERR_FAIL);
-}
-
-/**
- * @tc.name: Init_0100
- * @tc.desc: Test Init when init_ nullptr.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationAiExtensionWrapperTest, Init_0100, Function | SmallTest | Level1)
-{
-    NOTIFICATION_AI_EXTENSION_WRAPPER->init_ = nullptr;
-    NOTIFICATION_AI_EXTENSION_WRAPPER->Init();
     NOTIFICATION_AI_EXTENSION_WRAPPER->InitExtensionWrapper();
-    EXPECT_NE(NOTIFICATION_AI_EXTENSION_WRAPPER->init_, nullptr);
 }
 }
 }

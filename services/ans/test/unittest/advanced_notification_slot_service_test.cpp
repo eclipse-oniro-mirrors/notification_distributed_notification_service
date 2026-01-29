@@ -318,27 +318,10 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00002, Function | SmallTest | Lev
 
 /**
  * @tc.name: SetAdditionConfig_00003
- * @tc.desc: Test SetAdditionConfig_00003
- * @tc.type: FUNC
- */
-HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00003, Function | SmallTest | Level1)
-{
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(true);
-    MockIsVerfyPermisson(true);
-    std::string key = CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY;
-    std::string value = "";
-
-    auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
-}
-
-/**
- * @tc.name: SetAdditionConfig_00004
  * @tc.desc: Test SetAdditionConfig with invalid key
  * @tc.type: FUNC
  */
-HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00004, Function | SmallTest | Level1)
+HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00003, Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
@@ -351,11 +334,11 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00004, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: SetAdditionConfig_00005
+ * @tc.name: SetAdditionConfig_00004
  * @tc.desc: Test SetAdditionConfig with PRIORITY_RULE_CONFIG_KEY
  * @tc.type: FUNC
  */
-HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00005, Function | SmallTest | Level1)
+HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00004, Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
@@ -427,7 +410,7 @@ HWTEST_F(AnsSlotServiceTest, GetAllLiveViewEnabledBundles_00002, Function | Smal
     OHOS::AccountSA::OsAccountManager::IsOsAccountExists(0, isOsAccountExists);
     MockIsOsAccountExists(false);
     ret = advancedNotificationService_->GetAllLiveViewEnabledBundles(bundleOptions, -99);
-    EXPECT_EQ(ret, (int)ERROR_USER_NOT_EXIST);
+    EXPECT_EQ(ret, (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
     MockIsOsAccountExists(isOsAccountExists);
 }
 

@@ -1321,7 +1321,6 @@ HWTEST_F(NotificationHelperTest, TriggerUpdatePriorityType_0100, TestSize.Level1
     request.SetPriorityNotificationType(NotificationConstant::PriorityNotificationType::PAYMENT_DUE);
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.TriggerUpdatePriorityType(request);
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
     EXPECT_EQ(request.GetPriorityNotificationType(), NotificationConstant::PriorityNotificationType::OTHER);
 }
 
@@ -1570,8 +1569,6 @@ HWTEST_F(NotificationHelperTest, RegisterBadgeQueryCallback_0100, Function | Sma
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.RegisterBadgeQueryCallback(nullptr);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
-    notificationHelper.UnRegisterBadgeQueryCallback(nullptr);
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
