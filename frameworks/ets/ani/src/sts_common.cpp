@@ -534,9 +534,9 @@ ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string
 
 bool GetAniStringArrayByVectorStringV2(ani_env *env, std::vector<std::string> strs, ani_object& aniArray)
 {
-    ANS_LOGD("WrapNotificationExtensionSubscribeInfo call");
+    ANS_LOGD("GetAniStringArrayByVectorStringV2 call");
     if (env == nullptr) {
-        ANS_LOGE("WrapNotificationExtensionSubscribeInfo failed, has nullptr");
+        ANS_LOGE("GetAniStringArrayByVectorStringV2 failed, has nullptr");
         return false;
     }
     ani_class cls = nullptr;
@@ -547,7 +547,8 @@ bool GetAniStringArrayByVectorStringV2(ani_env *env, std::vector<std::string> st
     }
     ani_array array = nullptr;
     size_t size = strs.size();
-    status = env->Array_New(size, nullptr, &array);
+    ani_object nullObj = GetNullObject(env);
+    status = env->Array_New(size, nullObj, &array);
     if (status != ANI_OK) {
         ANS_LOGE("Array_New failed. status : %{public}d", status);
         return false;
@@ -566,7 +567,7 @@ bool GetAniStringArrayByVectorStringV2(ani_env *env, std::vector<std::string> st
         }
         index++;
     }
-    ANS_LOGD("WrapNotificationExtensionSubscribeInfo end");
+    ANS_LOGD("GetAniStringArrayByVectorStringV2 end");
     aniArray = array;
     return true;
 }

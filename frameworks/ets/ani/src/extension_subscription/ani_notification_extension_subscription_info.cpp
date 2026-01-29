@@ -189,9 +189,9 @@ bool WrapNotificationExtensionSubscribeInfo(
 bool WrapNotificationExtensionSubscribeInfoArray(ani_env* env,
     const std::vector<sptr<Notification::NotificationExtensionSubscriptionInfo>>& infos, ani_object& outAniObj)
 {
-    ANS_LOGD("WrapNotificationExtensionSubscribeInfo call");
+    ANS_LOGD("WrapNotificationExtensionSubscribeInfoArray call");
     if (env == nullptr) {
-        ANS_LOGE("WrapNotificationExtensionSubscribeInfo failed, has nullptr");
+        ANS_LOGE("WrapNotificationExtensionSubscribeInfoArray failed, has nullptr");
         return false;
     }
     ani_class cls = nullptr;
@@ -202,7 +202,8 @@ bool WrapNotificationExtensionSubscribeInfoArray(ani_env* env,
     }
     ani_array array = nullptr;
     size_t size = infos.size();
-    status = env->Array_New(size, nullptr, &array);
+    ani_object nullObj = GetNullObject(env);
+    status = env->Array_New(size, nullObj, &array);
     if (status != ANI_OK) {
         ANS_LOGE("Array_New failed. status : %{public}d", status);
         return false;
@@ -211,7 +212,7 @@ bool WrapNotificationExtensionSubscribeInfoArray(ani_env* env,
     for (auto &it : infos) {
         ani_object infoObj;
         if (!WrapNotificationExtensionSubscribeInfo(env, it, infoObj) || infoObj == nullptr) {
-            ANS_LOGE("WrapNotificationExtensionSubscribeInfo Failed. index = %{public}d", index);
+            ANS_LOGE("WrapNotificationExtensionSubscribeInfoArray Failed. index = %{public}d", index);
             return false;
         }
         status = env->Array_Set(array, index, infoObj);
@@ -221,7 +222,7 @@ bool WrapNotificationExtensionSubscribeInfoArray(ani_env* env,
         }
         index++;
     }
-    ANS_LOGD("WrapNotificationExtensionSubscribeInfo end");
+    ANS_LOGD("WrapNotificationExtensionSubscribeInfoArray end");
     outAniObj = array;
     return true;
 }
