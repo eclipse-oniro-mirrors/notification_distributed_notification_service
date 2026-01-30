@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -144,33 +144,14 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/push_promise_callback.cpp",
   ]
 
-  output_values = get_target_outputs(":ans_manager_interface")
-  sources += filter_include(output_values,
-                            [
-                              "*_dialog_callback_proxy.cpp",
-                              "*_operation_callback_proxy.cpp",
-                              "*_result_data_synchronizer_proxy.cpp",
-                              "*_subscriber_proxy.cpp",
-                              "*_subscriber_local_live_view_proxy.cpp",
-                              "*_manager_proxy.cpp",
-                              "*badge_query_callback_proxy.cpp",
-                            ])
-  sources += filter_include(output_values,
-                            [
-                              "*_dialog_callback_stub.cpp",
-                              "*_operation_callback_stub.cpp",
-                              "*_result_data_synchronizer_stub.cpp",
-                              "*_subscriber_stub.cpp",
-                              "*_subscriber_local_live_view_stub.cpp",
-                              "*_manager_stub.cpp",
-                              "*badge_query_callback_stub.cpp",
-                            ])
-
   public_configs = [ ":ans_innerkits_public_config" ]
 
   defines = []
 
-  deps = [ ":ans_manager_interface" ]
+  deps = [
+    ":ans_callback_stub",
+    ":ans_manager_proxy",
+  ]
 
   external_deps = [
     "ability_base:want",
@@ -211,8 +192,6 @@ ohos_shared_library("ans_innerkits") {
 
   if (notification_smart_reminder_supported) {
     defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
-    sources += filter_include(output_values, [ "*_call_back_proxy.cpp" ])
-    sources += filter_include(output_values, [ "*_call_back_stub.cpp" ])
   }
 
   if (distributed_notification_service_feature_privileged_message) {
@@ -238,21 +217,140 @@ ohos_source_set("ans_manager_stub") {
   }
   public_configs = [ ":ans_innerkits_config" ]
   output_values = get_target_outputs(":ans_manager_interface")
-  sources = filter_include(output_values, [ "*_stub.cpp" ])
+  sources = filter_include(output_values, [ "*ans_manager_stub.cpp" ])
   deps = [ ":ans_manager_interface" ]
+  defines = []
+  if (notification_smart_reminder_supported) {
+    defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
+  }
   if (build_variant == "root") {
-    defines = [ "ANM_SUPPORT_DUMP" ]
+    defines += [ "ANM_SUPPORT_DUMP" ]
   }
   external_deps = [
     "ability_runtime:wantagent_innerkits",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
-    "hicollie:libhicollie",
     "hilog:libhilog",
     "i18n:intl_util",
     "image_framework:image_native",
     "ipc:ipc_core",
-    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+ohos_source_set("ans_manager_proxy") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":ans_innerkits_config" ]
+  output_values = get_target_outputs(":ans_manager_interface")
+  sources = filter_include(output_values, [ "*ans_manager_proxy.cpp" ])
+  deps = [ ":ans_manager_interface" ]
+  defines = []
+  if (notification_smart_reminder_supported) {
+    defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
+  }
+  if (build_variant == "root") {
+    defines += [ "ANM_SUPPORT_DUMP" ]
+  }
+  external_deps = [
+    "ability_runtime:wantagent_innerkits",
+    "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "i18n:intl_util",
+    "image_framework:image_native",
+    "ipc:ipc_core",
+  ]
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+ohos_source_set("ans_callback_proxy") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":ans_innerkits_config" ]
+  output_values = get_target_outputs(":ans_manager_interface")
+  sources = filter_include(output_values,
+                            [
+                              "*_dialog_callback_proxy.cpp",
+                              "*_operation_callback_proxy.cpp",
+                              "*_result_data_synchronizer_proxy.cpp",
+                              "*_subscriber_proxy.cpp",
+                              "*_subscriber_local_live_view_proxy.cpp",
+                              "*badge_query_callback_proxy.cpp",
+                            ])
+  deps = [ ":ans_manager_interface" ]
+  defines = []
+  if (notification_smart_reminder_supported) {
+    defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
+    sources += filter_include(output_values, [ "*_call_back_proxy.cpp" ])
+  }
+  if (build_variant == "root") {
+    defines += [ "ANM_SUPPORT_DUMP" ]
+  }
+  external_deps = [
+    "ability_runtime:wantagent_innerkits",
+    "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "i18n:intl_util",
+    "image_framework:image_native",
+    "ipc:ipc_core",
+  ]
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+ohos_source_set("ans_callback_stub") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":ans_innerkits_config" ]
+  output_values = get_target_outputs(":ans_manager_interface")
+  sources = filter_include(output_values,
+                            [
+                              "*_dialog_callback_stub.cpp",
+                              "*_operation_callback_stub.cpp",
+                              "*_result_data_synchronizer_stub.cpp",
+                              "*_subscriber_stub.cpp",
+                              "*_subscriber_local_live_view_stub.cpp",
+                              "*badge_query_callback_stub.cpp",
+                            ])
+  defines = []
+  if (notification_smart_reminder_supported) {
+    defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
+    sources += filter_include(output_values, [ "*_call_back_stub.cpp" ])
+  }
+  if (build_variant == "root") {
+    defines += [ "ANM_SUPPORT_DUMP" ]
+  }
+  deps = [ ":ans_manager_interface" ]
+  external_deps = [
+    "ability_runtime:wantagent_innerkits",
+    "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "i18n:intl_util",
+    "image_framework:image_native",
+    "ipc:ipc_core",
   ]
   subsystem_name = "notification"
   part_name = "distributed_notification_service"
