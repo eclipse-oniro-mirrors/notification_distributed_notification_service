@@ -36,7 +36,8 @@ HWTEST_F(ReminderAgentServiceAbilityTest, ReminderAgentServiceAbilityTest_001, F
 {
     int32_t systemAbilityId = 1;
     bool runOnCreate = true;
-    ReminderAgentServiceAbility(systemAbilityId, runOnCreate);
+    ReminderAgentServiceAbility test(systemAbilityId, runOnCreate);
+    EXPECT_EQ(test.service_, nullptr);
 }
 
 /**
