@@ -186,6 +186,10 @@ public:
     MOCK_METHOD2(SetPriorityEnabledByBundle, ErrCode(const sptr<NotificationBundleOption> &, const int32_t));
     MOCK_METHOD1(IsPriorityEnabled, ErrCode(bool &));
     MOCK_METHOD2(IsPriorityEnabledByBundle, ErrCode(const sptr<NotificationBundleOption> &, int32_t &));
+    MOCK_METHOD1(SetPriorityEnabledByBundles,
+        ErrCode(const std::map<sptr<NotificationBundleOption>, bool> &priorityEnable));
+    MOCK_METHOD2(GetPriorityEnabledByBundles, ErrCode(const std::vector<sptr<NotificationBundleOption>> &bundles,
+        std::map<sptr<NotificationBundleOption>, bool> &priorityEnable));
     MOCK_METHOD1(TriggerUpdatePriorityType, ErrCode(const sptr<NotificationRequest> &));
     MOCK_METHOD2(SetBundlePriorityConfig, ErrCode(const sptr<NotificationBundleOption> &, const std::string &));
     MOCK_METHOD2(GetBundlePriorityConfig, ErrCode(const sptr<NotificationBundleOption> &, std::string &));

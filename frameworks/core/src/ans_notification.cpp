@@ -2456,6 +2456,50 @@ ErrCode AnsNotification::IsPriorityEnabledByBundle(
     return result;
 }
 
+ErrCode AnsNotification::GetPriorityEnabledByBundles(const std::vector<NotificationBundleOption> &bundleOptions,
+    std::map<sptr<NotificationBundleOption>, bool> &priorityEnable)
+{
+    if (bundleOptions.empty()) {
+        ANS_LOGE("Invalid bundleOptions.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    std::vector<sptr<NotificationBundleOption>> sptrBundleOptions;
+    sptrBundleOptions.reserve(bundleOptions.size());
+    for (const auto &option : bundleOptions) {
+        sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption(option);
+        if (bo == nullptr) {
+            ANS_LOGE("null bundleOption");
+            return ERR_ANS_NO_MEMORY;
+        }
+        sptrBundleOptions.emplace_back(std::move(bo));
+    }
+    return proxy->GetPriorityEnabledByBundles(sptrBundleOptions, priorityEnable);
+}
+
+ErrCode AnsNotification::SetPriorityEnabledByBundles(
+    const std::map<sptr<NotificationBundleOption>, bool> &priorityEnable)
+{
+    if (priorityEnable.empty()) {
+        ANS_LOGE("Invalid priorityEnable.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->SetPriorityEnabledByBundles(priorityEnable);
+}
+
 ErrCode AnsNotification::TriggerUpdatePriorityType(const NotificationRequest &request)
 {
     sptr<IAnsManager> proxy = GetAnsManagerProxy();

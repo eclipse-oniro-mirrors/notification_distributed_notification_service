@@ -2122,6 +2122,65 @@ HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundle_0300, Function | Me
 }
 
 /*
+ * @tc.name: GetPriorityEnabledByBundles_0100
+ * @tc.desc: test GetPriorityEnabledByBundles with empty bundleName.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetPriorityEnabledByBundles_0100, Function | MediumTest | Level1)
+{
+    std::vector<NotificationBundleOption> bundleOptions;
+    std::map<sptr<NotificationBundleOption>, bool> switches;
+    ErrCode ret = ans_->GetPriorityEnabledByBundles(bundleOptions, switches);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetPriorityEnabledByBundles_0200
+ * @tc.desc: test GetPriorityEnabledByBundles with null proxy.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetPriorityEnabledByBundles_0200, Function | MediumTest | Level1)
+{
+    std::vector<NotificationBundleOption> bundleOptions;
+    std::map<sptr<NotificationBundleOption>, bool> switches;
+    NotificationBundleOption bo;
+    bo.SetBundleName("bundleName");
+    bo.SetUid(1);
+    bundleOptions.emplace_back(bo);
+    ErrCode ret = ans_->GetPriorityEnabledByBundles(bundleOptions, switches);
+    EXPECT_EQ(ret, ERR_OK);
+}
+/*
+ * @tc.name: SetPriorityEnabledByBundles_0100
+ * @tc.desc: test GetPriorityEnabledByBundles with empty bundleName.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundles_0100, Function | MediumTest | Level1)
+{
+    std::map<sptr<NotificationBundleOption>, bool> switches;
+    ErrCode ret = ans_->SetPriorityEnabledByBundles(switches);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetPriorityEnabledByBundles_0200
+ * @tc.desc: test SetPriorityEnabledByBundles with null proxy.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundles_0200, Function | MediumTest | Level1)
+{
+    std::map<sptr<NotificationBundleOption>, bool> switches;
+    sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption("bundle", 100);
+    switches[bo] = true;
+    ErrCode ret = ans_->SetPriorityEnabledByBundles(switches);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
  * @tc.name: TriggerUpdatePriorityType_0200
  * @tc.desc: test TriggerUpdatePriorityType success.
  * @tc.type: FUNC
