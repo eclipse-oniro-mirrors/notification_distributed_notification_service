@@ -756,6 +756,17 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetPriorityEnabledByBundles(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        std::map<sptr<NotificationBundleOption>, bool> &priorityEnable) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetPriorityEnabledByBundles(const std::map<sptr<NotificationBundleOption>, bool> &priorityEnable) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode SetBundlePriorityConfig(
         const sptr<NotificationBundleOption> &bundleOption, const std::string &value) override
     {

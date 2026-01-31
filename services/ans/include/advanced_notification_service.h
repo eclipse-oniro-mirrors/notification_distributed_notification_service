@@ -1610,6 +1610,24 @@ public:
         const sptr<NotificationBundleOption> &bundleOption, int32_t &enableStatusInt) override;
 
     /**
+     * @brief Configuring whether to allow sending priority notification by bundles.
+     *
+     * @param priorityEnable indicates the bundle name, uid and priority enable status of the application.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetPriorityEnabledByBundles(const std::map<sptr<NotificationBundleOption>, bool> &priorityEnable) override;
+
+    /**
+     * @brief Query switch for sending priority notification by bundles.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param priorityEnable indicates whether to allow sending priority notification by bundles.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetPriorityEnabledByBundles(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        std::map<sptr<NotificationBundleOption>, bool> &priorityEnable) override;
+
+    /**
      * @brief Update priority type of notification and notify subscriber.
      *
      * @param request Indicates the NotificationRequest object for setting the notification content.
