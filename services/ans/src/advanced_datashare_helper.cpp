@@ -82,6 +82,7 @@ AdvancedDatashareHelper::AdvancedDatashareHelper()
 
 AdvancedDatashareHelper::~AdvancedDatashareHelper()
 {
+    std::lock_guard<ffrt::mutex> lock(datashareInitMutex_);
     if (!CreateDataShareHelper()) {
         ANS_LOGE("UnRegister advanced datashare observer failed by nullptr");
         return;
@@ -584,6 +585,7 @@ void AdvancedDatashareHelper::RegisterObserver(
 
 void AdvancedDatashareHelper::OnUserSwitch(const int32_t userId)
 {
+    std::lock_guard<ffrt::mutex> lock(datashareInitMutex_);
     for (auto &dataObserver : dataObservers_) {
         if (dataObserver.first == userId) {
             return;

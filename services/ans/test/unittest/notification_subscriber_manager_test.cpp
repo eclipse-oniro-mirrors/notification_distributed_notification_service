@@ -2161,5 +2161,27 @@ HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_StubS
     EXPECT_EQ(nullptr, result);
 }
 #endif
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_ResetPriority, Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+    request->SetInnerPriorityNotificationType(NotificationConstant::PriorityNotificationType::KEY_PROGRESS);
+    sptr<Notification> notification(new Notification(request));
+    sptr<IAnsSubscriber> subscriber = new MockAnsSubscriber(new MockIRemoteObject());
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->deviceType = "tablet";
+    sptr<Notification> result = notificationSubscriberManager.GenerateSubscribedNotification(record, notification);
+    EXPECT_NE(nullptr, result);
+    sptr<NotificationRequest> resultRequest = result->GetNotificationRequestPoint();
+    EXPECT_NE(nullptr, resultRequest);
+    EXPECT_EQ(resultRequest->GetPriorityNotificationType(), NotificationConstant::PriorityNotificationType::OTHER);
+}
+#endif
 }  // namespace Notification
 }  // namespace OHOS
