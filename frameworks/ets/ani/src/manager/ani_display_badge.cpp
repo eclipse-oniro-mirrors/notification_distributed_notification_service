@@ -85,39 +85,6 @@ bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackBadgeInfo* asyncCa
     return true;
 }
 
-bool WrapBadges(ani_env *env, ani_object &outAniObj,
-    const std::map<sptr<Notification::NotificationBundleOption>, bool> &bundleEnable)
-{
-    ANS_LOGD("WrapBadges enter");
-    outAniObj = nullptr;
-    outAniObj = NotificationSts::CreateMapObject(env, "std.core.Map", ":");
-    if (outAniObj == nullptr) {
-        return false;
-    }
-    ani_ref mapRef = nullptr;
-    ani_status status = ANI_ERROR;
-    for (const auto& [k, v] : bundleEnable) {
-        ani_object bundleObj;
-        if (!NotificationSts::WrapBundleOption(env, k, bundleObj) || bundleObj == nullptr) {
-            ANS_LOGE("WrapNotificationBadgeInfo: WrapBundleOption failed");
-            continue;
-        }
-        ani_object enable = NotificationSts::CreateBoolean(env, v);
-        status = env->Object_CallMethodByName_Ref(outAniObj, "set",
-            "YY:C{std.core.Map}", &mapRef,
-            static_cast<ani_object>(bundleObj), static_cast<ani_object>(enable));
-        if (status != ANI_OK) {
-            ANS_LOGE("Faild to set bundleEnable map, status : %{public}d", status);
-            continue;
-        }
-    }
-    if (outAniObj == nullptr) {
-        return false;
-    }
-    ANS_LOGD("WrapBadges end");
-    return true;
-}
-
 void HandleBadgeCallbackComplete(ani_env* env, WorkStatus status, void* data)
 {
     auto asyncCallbackInfo = static_cast<AsyncCallbackBadgeInfo*>(data);
@@ -147,8 +114,9 @@ void HandleBadgeCallbackComplete(ani_env* env, WorkStatus status, void* data)
             }
             break;
         case GET_BADGE_DISPLAY_STATUS_BY_BUNDLES: {
-            if (!WrapBadges(envCurr, asyncCallbackInfo->info.result, asyncCallbackInfo->bundleEnable)) {
-                ANS_LOGE("WrapBadges failed");
+            if (!NotificationSts::WrapBundleOptionMap(envCurr,
+                asyncCallbackInfo->info.result, asyncCallbackInfo->bundleEnable)) {
+                ANS_LOGE("WrapBundleOptionMap failed");
                 asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
             }
             break;
@@ -326,41 +294,6 @@ ani_object AniSetBadgeNumberByBundle(ani_env *env, ani_object obj, ani_int badge
     return nullptr;
 }
 
-ani_status GetBadgesFromAni(ani_env *env, ani_object obj,
-    std::vector<std::pair<Notification::NotificationBundleOption, bool>> &badges)
-{
-    ANS_LOGD("GetBadgesFromAni call");
-    ani_boolean isUndefined = ANI_FALSE;
-    ani_status status = ANI_ERROR;
-
-    status = env->Reference_IsUndefined(obj, &isUndefined);
-    if (status != ANI_OK) {
-        ANS_LOGE("Failed to check undefined, status: %{public}d", status);
-        return ANI_ERROR;
-    }
-    if (isUndefined == ANI_TRUE) {
-        return ANI_ERROR;
-    }
-
-    ani_class mapClass;
-    if (env->FindClass("std.core.Map", &mapClass) != ANI_OK) {
-        ANS_LOGE("Find Map class failed.");
-        return ANI_ERROR;
-    }
-    ani_type typeMap = mapClass;
-    ani_boolean isMap = ANI_FALSE;
-    status = env->Object_InstanceOf(obj, typeMap, &isMap);
-    if (isMap != ANI_TRUE) {
-        ANS_LOGE("Current obj is not map type.");
-        return ANI_ERROR;
-    }
-
-    if (NotificationSts::GetMapByAniMap(env, obj, badges) != ANI_OK) {
-        return ANI_ERROR;
-    }
-    return ANI_OK;
-}
-
 ani_object AniSetBadgeDisplayStatusByBundles(ani_env *env, ani_object obj, ani_object callback)
 {
     ANS_LOGD("AniSetBadgeDisplayStatusByBundles call");
@@ -369,8 +302,8 @@ ani_object AniSetBadgeDisplayStatusByBundles(ani_env *env, ani_object obj, ani_o
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
-    if (GetBadgesFromAni(env, obj, asyncCallbackInfo->options) != ANI_OK) {
-        NotificationSts::ThrowInternerErrorWithLogE(env, "GetBadgesFromAni faild");
+    if (NotificationSts::UnwrapBundleOptionMap(env, obj, asyncCallbackInfo->options) != ANI_OK) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOptionMap faild");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }

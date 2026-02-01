@@ -34,6 +34,7 @@ constexpr int32_t COMMON_TEXT_SIZE = 3074;
 constexpr int32_t SHORT_TEXT_SIZE = 1026;
 constexpr int32_t LONG_LONG_STR_MAX_SIZE = 25600;
 constexpr float MAX_PIXEL_SIZE = 128.0f;
+const uint32_t STRUCTURED_TEXT_SIZE = 512;
 std::string GetResizeStr(std::string instr, int32_t length);
 int32_t GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id);
 
@@ -98,6 +99,13 @@ bool SetPropertyOptionalByInt(ani_env *env, ani_object &object, const char *name
 bool SetPropertyByRef(ani_env *env, ani_object &object, const char *name, ani_ref value);
 
 bool CreateClassObjByClassName(ani_env *env, const char *className, ani_class &cls, ani_object &outAniObj);
+
+ani_object CreateAniUndefined(ani_env *env);
+ani_object CreateMapObject(ani_env *env, const std::string name, const char *signature);
+ani_status GetMapIterator(ani_env *env, ani_object &mapObj, const char *method, ani_ref *it);
+ani_status GetMapIteratorNext(ani_env *env, ani_ref &it, ani_ref *next);
+ani_status GetMapByAniMap(ani_env *env, ani_object &mapObj,
+    std::vector<std::pair<std::string, std::string>> &out);
 
 inline bool AniBooleanToBool(ani_boolean value)
 {

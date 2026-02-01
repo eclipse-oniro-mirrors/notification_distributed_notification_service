@@ -54,6 +54,8 @@ ani_object AniSetPriorityEnabledByBundle(ani_env* env,
 ani_object AniIsPriorityEnabledByBundle(ani_env* env, ani_object obj, ani_object callback);
 ani_object AniSetPriorityEnabled(ani_env* env, ani_boolean enable, ani_object callback);
 ani_object AniIsPriorityEnabled(ani_env* env, ani_object callback);
+void AniSetPriorityEnabledByBundles(ani_env *env, ani_object obj);
+ani_object AniGetPriorityEnabledByBundles(ani_env *env, ani_object obj);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_PRIORITY_H
