@@ -211,14 +211,6 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledNotificationChanged(
     return ERR_OK;
 }
 
-ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledSilentReminderChanged(
-    const sptr<EnabledSilentReminderCallbackData> &callbackData)
-{
-    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    subscriber_.OnEnabledSilentReminderChanged(std::make_shared<EnabledSilentReminderCallbackData>(*callbackData));
-    return ERR_OK;
-}
-
 ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledWatchStatusChanged(uint32_t watchStatus)
 {
     return ERR_OK;

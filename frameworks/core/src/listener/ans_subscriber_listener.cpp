@@ -196,19 +196,6 @@ ErrCode SubscriberListener::OnEnabledNotificationChanged(
     return ERR_OK;
 }
 
-ErrCode SubscriberListener::OnEnabledSilentReminderChanged(
-    const sptr<EnabledSilentReminderCallbackData> &callbackData)
-{
-    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    auto subscriber = subscriber_.lock();
-    if (subscriber == nullptr) {
-        ANS_LOGE("null subscriber");
-        return ERR_INVALID_DATA;
-    }
-    subscriber->OnEnabledSilentReminderChanged(std::make_shared<EnabledSilentReminderCallbackData>(*callbackData));
-    return ERR_OK;
-}
-
 ErrCode SubscriberListener::OnEnabledPriorityChanged(const sptr<EnabledNotificationCallbackData> &callbackData)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);

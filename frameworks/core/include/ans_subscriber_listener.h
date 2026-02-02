@@ -64,8 +64,6 @@ public:
 
     ErrCode OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
-    ErrCode OnEnabledSilentReminderChanged(const sptr<EnabledSilentReminderCallbackData> &callbackData) override;
-
     ErrCode OnEnabledPriorityChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
     ErrCode OnEnabledPriorityByBundleChanged(

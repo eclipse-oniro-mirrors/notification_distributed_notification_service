@@ -23,7 +23,6 @@
 #include "ans_permission_def.h"
 
 #include "bundle_manager_helper.h"
-#include "enabled_silent_reminder_callback_data.h"
 #include "ipc_skeleton.h"
 
 #include "notification_preferences.h"
@@ -68,7 +67,7 @@ ErrCode AdvancedNotificationService::SetSilentReminderEnabled(const sptr<Notific
 
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
-        result = SetSilentReminderEnabledInner(bundle, enabled);
+        result = NotificationPreferences::GetInstance()->SetSilentReminderEnabled(bundle, enabled);
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set silent reminder enabled.");
     ANS_LOGI("%{public}s_%{public}d, enabled: %{public}s, "
@@ -78,31 +77,7 @@ ErrCode AdvancedNotificationService::SetSilentReminderEnabled(const sptr<Notific
  
     return result;
 }
-
-ErrCode AdvancedNotificationService::SetSilentReminderEnabledInner(
-    const sptr<NotificationBundleOption> &bundleOption, const bool enabled)
-{
-    ErrCode result = ERR_OK;
-    NotificationConstant::SWITCH_STATE oldState;
-    result = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, oldState);
-    if (result != ERR_OK) {
-        ANS_LOGE("Failed to get old state");
-        return result;
-    }
-    result = NotificationPreferences::GetInstance()->SetSilentReminderEnabled(bundleOption, enabled);
-    if (result == ERR_OK) {
-        NotificationConstant::SWITCH_STATE newState = enabled ?
-            NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
-            NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
-        if (oldState != newState) {
-            sptr<EnabledSilentReminderCallbackData> callbackData = new EnabledSilentReminderCallbackData(
-                bundleOption->GetBundleName(), bundleOption->GetUid(), newState);
-            NotificationSubscriberManager::GetInstance()->NotifyEnabledSilentReminderChanged(callbackData);
-        }
-    }
-    return result;
-}
-
+ 
 ErrCode AdvancedNotificationService::IsSilentReminderEnabled(const sptr<NotificationBundleOption> &bundleOption,
     int32_t &enableStatusInt)
 {
