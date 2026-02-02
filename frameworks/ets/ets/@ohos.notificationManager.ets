@@ -411,6 +411,8 @@ export default namespace notificationManager {
         callback?: AsyncCallback<PriorityEnableStatus>): Promise<PriorityEnableStatus>;
     export native function nativeSetPriorityEnabled(enable: boolean, callback?: AsyncCallback<void>): Promise<void>;
     export native function nativeIsPriorityEnabled(callback?: AsyncCallback<boolean>): Promise<boolean>;
+    export native function nativeGetPriorityEnabledByBundles(bundles: Array<BundleOption>): Map<BundleOption, boolean>;
+    export native function nativeSetPriorityEnabledByBundles(priorityEnable: Map<BundleOption, boolean>): void;
 
     function isInvalidParameter(doNotDisturbDate: DoNotDisturbDate): BusinessError
     {
@@ -3004,5 +3006,37 @@ export default namespace notificationManager {
             throw error;
         }
         return result;
+    }
+
+    export function setPriorityEnabledByBundles(priorityEnable: Map<BundleOption, boolean>): Promise<void> {
+        if (!priorityEnable || priorityEnable.size == 0) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativeSetPriorityEnabledByBundles(priorityEnable); });
+            p.then((data: Any): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function getPriorityEnabledByBundles(bundles: Array<BundleOption>): Promise<Map<BundleOption, boolean>> {
+        if (!bundles || bundles.length == 0) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<Map<BundleOption, boolean>>(
+            (resolve: ResolveCallback<Map<BundleOption, boolean>>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): Map<BundleOption, boolean> => { return nativeGetPriorityEnabledByBundles(bundles); });
+            p.then((data: Any): void => {
+                let ret : Map<BundleOption, boolean> = data as Map<BundleOption, boolean>;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
     }
 }

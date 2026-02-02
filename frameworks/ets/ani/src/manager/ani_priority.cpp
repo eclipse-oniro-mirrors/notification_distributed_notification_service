@@ -388,5 +388,60 @@ ani_object AniIsPriorityEnabled(ani_env* env, ani_object callback)
     }
     return nullptr;
 }
+
+
+void AniSetPriorityEnabledByBundles(ani_env *env, ani_object obj)
+{
+    std::vector<std::pair<Notification::NotificationBundleOption, bool>> options;
+    if (NotificationSts::UnwrapBundleOptionMap(env, obj, options) != ANI_OK) {
+        ANS_LOGE("UnwrapBundleOptionMap faild");
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+        return;
+    }
+    std::map<sptr<Notification::NotificationBundleOption>, bool> priorityEnable;
+    for (auto& [bundleOpt, enabled] : options) {
+        sptr<Notification::NotificationBundleOption> bo =
+            new (std::nothrow) Notification::NotificationBundleOption(std::move(bundleOpt));
+        if (bo == nullptr) {
+            ANS_LOGE("null bundleOption");
+            OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+                NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+            return;
+        }
+        priorityEnable.emplace(bo, enabled);
+    }
+    int returncode = Notification::NotificationHelper::SetPriorityEnabledByBundles(priorityEnable);
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
+        ANS_LOGE("sts batchSetPriorityEnable error, errorCode: %{public}d", externalCode);
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+    ANS_LOGD("AniSetPriorityEnabledByBundles end");
+    return;
+}
+
+ani_object AniGetPriorityEnabledByBundles(ani_env *env, ani_object obj)
+{
+    std::vector<Notification::NotificationBundleOption> bundles;
+    if (!NotificationSts::UnwrapArrayBundleOption(env, obj, bundles)) {
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+        ANS_LOGE("AniGetPriorityEnabledByBundles failed : ERROR_INTERNAL_ERROR");
+        return nullptr;
+    }
+ 
+    std::map<sptr<Notification::NotificationBundleOption>, bool> bundleEnable;
+    int returncode = Notification::NotificationHelper::GetPriorityEnabledByBundles(
+        bundles, bundleEnable);
+    ani_object outAniObj;
+    if (!NotificationSts::WrapBundleOptionMap(env, outAniObj, bundleEnable)) {
+        ANS_LOGE("WrapBundleOptionMap faild");
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+        return nullptr;
+    }
+    return outAniObj;
+}
 } // namespace NotificationManagerSts
 } // namespace OHOS

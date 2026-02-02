@@ -358,5 +358,130 @@ bool UnwrapArrayDistributedBundleOption(ani_env *env, ani_object arrayObj,
     ANS_LOGD("UnwrapArrayDistributedBundleOption end");
     return true;
 }
+
+ani_status GetBundleMapByAniMap(ani_env *env, ani_object &mapObj,
+    std::vector<std::pair<Notification::NotificationBundleOption, bool>> &out)
+{
+    ani_status status = ANI_ERROR;
+    ani_ref keys;
+    ani_ref values;
+    bool done = false;
+
+    if (GetMapIterator(env, mapObj, "keys", &keys) != ANI_OK ||
+        GetMapIterator(env, mapObj, "values", &values) != ANI_OK) {
+        return ANI_ERROR;
+    }
+
+    while (!done) {
+        ani_ref nextKey;
+        ani_ref nextVal;
+        ani_boolean done;
+
+        if (GetMapIteratorNext(env, keys, &nextKey) != ANI_OK ||
+            GetMapIteratorNext(env, values, &nextVal) != ANI_OK) {
+            return ANI_ERROR;
+        }
+
+        if ((status = env->Object_GetFieldByName_Boolean(reinterpret_cast<ani_object>(nextKey), "done", &done))
+            != ANI_OK) {
+            ANS_LOGE("Failed to check iterator done, status: %{public}d", status);
+            return ANI_ERROR;
+        }
+        if (done) {
+            break;
+        }
+
+        ani_ref val;
+        ani_status status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(nextKey), "value", &val);
+        if (status != ANI_OK) {
+            ANS_LOGE("Failed to get value, status: %{public}d", status);
+        }
+        Notification::NotificationBundleOption option;
+        if (!UnwrapBundleOption(env, static_cast<ani_object>(val), option)) {
+            ANS_LOGE("UnwrapBundleOption failed");
+            return ANI_ERROR;
+        }
+        status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(nextVal), "value", &val);
+        if (status != ANI_OK) {
+            ANS_LOGE("Failed to get value, status: %{public}d", status);
+            return ANI_ERROR;
+        }
+        ani_boolean anivalue = ANI_FALSE;
+        if ((status = env->Object_CallMethodByName_Boolean(
+            reinterpret_cast<ani_object>(val), "toBoolean", nullptr, &anivalue)) != ANI_OK) {
+            ANS_LOGE("Failed to get bool, status: %{public}d", status);
+            return ANI_ERROR;
+        }
+        out.emplace_back(option, AniBooleanToBool(anivalue));
+    }
+    return ANI_OK;
+}
+
+bool WrapBundleOptionMap(ani_env *env, ani_object &outAniObj,
+    const std::map<sptr<Notification::NotificationBundleOption>, bool> &bundleMap)
+{
+    ANS_LOGD("WrapBundleOptionMap call");
+    outAniObj = nullptr;
+    outAniObj = CreateMapObject(env, "std.core.Map", ":");
+    if (outAniObj == nullptr) {
+        return false;
+    }
+    ani_ref mapRef = nullptr;
+    ani_status status = ANI_ERROR;
+    for (const auto& [k, v] : bundleMap) {
+        ani_object bundleObj;
+        if (!WrapBundleOption(env, k, bundleObj) || bundleObj == nullptr) {
+            ANS_LOGE("WrapNotificationBadgeInfo: WrapBundleOption failed");
+            continue;
+        }
+        ani_object enable = CreateBoolean(env, v);
+        status = env->Object_CallMethodByName_Ref(outAniObj, "set",
+            "YY:C{std.core.Map}", &mapRef,
+            static_cast<ani_object>(bundleObj), static_cast<ani_object>(enable));
+        if (status != ANI_OK) {
+            ANS_LOGE("Faild to set bundleMap, status : %{public}d", status);
+            continue;
+        }
+    }
+    if (outAniObj == nullptr) {
+        return false;
+    }
+    return true;
+}
+
+ani_status UnwrapBundleOptionMap(ani_env *env, ani_object obj,
+    std::vector<std::pair<Notification::NotificationBundleOption, bool>> &bundleMap)
+{
+    ANS_LOGD("UnwrapBundleOptionMap call");
+    ani_boolean isUndefined = ANI_FALSE;
+    ani_status status = ANI_ERROR;
+
+    status = env->Reference_IsUndefined(obj, &isUndefined);
+    if (status != ANI_OK) {
+        ANS_LOGE("Failed to check undefined, status: %{public}d", status);
+        return ANI_ERROR;
+    }
+    if (isUndefined == ANI_TRUE) {
+        return ANI_ERROR;
+    }
+
+    ani_class mapClass;
+    if (env->FindClass("std.core.Map", &mapClass) != ANI_OK) {
+        ANS_LOGE("Find Map class failed.");
+        return ANI_ERROR;
+    }
+    ani_type typeMap = mapClass;
+    ani_boolean isMap = ANI_FALSE;
+    status = env->Object_InstanceOf(obj, typeMap, &isMap);
+    if (isMap != ANI_TRUE) {
+        ANS_LOGE("Current obj is not map type.");
+        return ANI_ERROR;
+    }
+
+    if (GetBundleMapByAniMap(env, obj, bundleMap) != ANI_OK) {
+        return ANI_ERROR;
+    }
+    return ANI_OK;
+}
 }
 }

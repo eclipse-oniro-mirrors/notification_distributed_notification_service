@@ -297,6 +297,10 @@ static std::array kitManagerFunctions = {
         nullptr, reinterpret_cast<void *>(AniIsPriorityEnabledByBundle)},
     ani_native_function {"nativeSetPriorityEnabled", nullptr, reinterpret_cast<void *>(AniSetPriorityEnabled)},
     ani_native_function {"nativeIsPriorityEnabled", nullptr, reinterpret_cast<void *>(AniIsPriorityEnabled)},
+    ani_native_function {"nativeSetPriorityEnabledByBundles", nullptr,
+        reinterpret_cast<void *>(AniSetPriorityEnabledByBundles)},
+    ani_native_function {"nativeGetPriorityEnabledByBundles", nullptr,
+        reinterpret_cast<void *>(AniGetPriorityEnabledByBundles)},
 #else
     ani_native_function {"nativeSetBundlePriorityConfig", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
     ani_native_function {"nativeGetBundlePriorityConfig", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
@@ -304,6 +308,8 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeIsPriorityEnabledByBundle", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
     ani_native_function {"nativeSetPriorityEnabled", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
     ani_native_function {"nativeIsPriorityEnabled", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeSetPriorityEnabledByBundles", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeGetPriorityEnabledByBundles", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
 #endif
 };
 

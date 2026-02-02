@@ -38,6 +38,10 @@ bool UnwrapArrayDistributedBundleOption(ani_env *env, ani_object arrayObj,
     std::vector<DistributedBundleOption> &options);
 bool SetAniArrayGrantedBundleInfo(
     ani_env* env, const std::vector<sptr<BundleOption>>& bundleOptions, ani_object& outAniObj);
+ani_status GetBundleMapByAniMap(ani_env *env, ani_object &mapObj, std::vector<std::pair<BundleOption, bool>> &out);
+bool WrapBundleOptionMap(ani_env *env, ani_object &outAniObj, const std::map<sptr<BundleOption>, bool> &bundleMap);
+ani_status UnwrapBundleOptionMap(ani_env *env, ani_object obj,
+    std::vector<std::pair<BundleOption, bool>> &bundleMap);
 }
 }
 
