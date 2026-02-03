@@ -16,7 +16,6 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_COMMON_H
 
 #include "ans_log_wrapper.h"
-#include "enabled_silent_reminder_callback_data.h"
 #include "enabled_priority_notification_by_bundle_callback_data.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
@@ -606,17 +605,6 @@ public:
      */
     static napi_value SetEnabledNotificationCallbackData(const napi_env &env,
         const EnabledNotificationCallbackData &data, napi_value &result);
-
-    /**
-     * @brief Sets a js object by specified EnabledSilentReminderCallbackData object
-     *
-     * @param env Indicates the environment that the API is invoked under
-     * @param date Indicates a EnabledSilentReminderCallbackData object to be converted
-     * @param result Indicates a js object to be set
-     * @return Returns the null object if success, returns the null value otherwise
-     */
-    static napi_value SetEnabledSilentReminderCallbackData(const napi_env &env,
-        const EnabledSilentReminderCallbackData &data, napi_value &result);
 
     /**
      * @brief Sets a js object by specified EnabledPriorityNotificationByBundleCallbackData object

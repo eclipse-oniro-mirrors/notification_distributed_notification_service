@@ -35,7 +35,6 @@ const std::string DISTURB_MODE_CHANGE = "onDisturbModeChange";
 const std::string DISTURB_DATE_CHANGE = "onDoNotDisturbDateChange";
 const std::string DISTURB_CHANGED = "onDoNotDisturbChanged";
 const std::string ENABLE_NOTIFICATION_CHANGED = "OnEnabledNotificationChanged";
-const std::string ENABLE_SILENT_REMINDER_CHANGED = "OnEnabledSilentReminderChanged";
 const std::string ENABLE_PRIORITY_CHANGED = "OnEnabledPriorityChanged";
 const std::string ENABLE_PRIORITY_BY_BUNDLE_CHANGED = "OnEnabledPriorityByBundleChanged";
 const std::string SYSTEM_UPDATE = "OnSystemUpdate";
@@ -59,8 +58,7 @@ enum class Type {
     BADGE_ENABLED_CHANGED,
     ENABLE_PRIORITY_CHANGED,
     ENABLE_PRIORITY_BY_BUNDLE_CHANGED,
-    SYSTEM_UPDATE,
-    ENABLE_SILENT_REMINDER_CHANGED
+    SYSTEM_UPDATE
 };
 
 struct NotificationReceiveDataWorker {
@@ -69,7 +67,6 @@ struct NotificationReceiveDataWorker {
     std::shared_ptr<NotificationSortingMap> sortingMap;
     NotificationDoNotDisturbDate date;
     EnabledNotificationCallbackData callbackData;
-    EnabledSilentReminderCallbackData silentReminderCallbackData;
     EnabledPriorityNotificationByBundleCallbackData priorityCallbackData;
     BadgeNumberCallbackData badge;
     int32_t deleteReason = 0;
@@ -847,65 +844,6 @@ void SubscriberInstance::OnEnabledNotificationChanged(
     CallThreadSafeFunc(dataWorker);
 }
 
-void ThreadSafeOnEnabledSilentReminderChanged(napi_env env, napi_value jsCallback, void* context, void* data)
-{
-    ANS_LOGD("called");
-
-    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
-    if (dataWorkerData == nullptr) {
-        ANS_LOGE("null dataWorkerData");
-        return;
-    }
-    auto subscriber = dataWorkerData->subscriber.lock();
-    if (subscriber == nullptr) {
-        ANS_LOGE("null subscriber");
-        return;
-    }
-    napi_value result = nullptr;
-    napi_handle_scope scope;
-    auto status = napi_open_handle_scope(env, &scope);
-    if (status != napi_ok || scope == nullptr) {
-        ANS_LOGE("status: %{public}d", status);
-        return;
-    }
-    napi_create_object(env, &result);
-
-    if (!Common::SetEnabledSilentReminderCallbackData(env, dataWorkerData->silentReminderCallbackData, result)) {
-        ANS_LOGE("SetEnabledSilentReminderCallbackData failed");
-        result = Common::NapiGetNull(env);
-    }
-
-    Common::SetCallback(env, subscriber->GetCallbackInfo(ENABLE_SILENT_REMINDER_CHANGED).ref, result);
-    napi_close_handle_scope(env, scope);
-}
-
-void SubscriberInstance::OnEnabledSilentReminderChanged(
-    const std::shared_ptr<EnabledSilentReminderCallbackData> &callbackData)
-{
-    ANS_LOGD("called");
-
-    if (enabledSilentReminderCallbackInfo_.ref == nullptr || enabledSilentReminderCallbackInfo_.env == nullptr) {
-        return;
-    }
-
-    if (callbackData == nullptr) {
-        ANS_LOGE("null callbackData");
-        return;
-    }
-
-    NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
-    if (dataWorker == nullptr) {
-        ANS_LOGE("null dataWorker");
-        return;
-    }
-
-    dataWorker->silentReminderCallbackData = *callbackData;
-    dataWorker->type = Type::ENABLE_SILENT_REMINDER_CHANGED;
-    dataWorker->subscriber = std::static_pointer_cast<SubscriberInstance>(shared_from_this());
-
-    CallThreadSafeFunc(dataWorker);
-};
-
 void ThreadSafeOnEnabledPriorityChanged(napi_env env, napi_value jsCallback, void* context, void* data)
 {
     ANS_LOGD("called");
@@ -1268,17 +1206,6 @@ SubscriberInstance::CallbackInfo SubscriberInstance::GetEnabledNotificationCallb
     return enabledNotificationCallbackInfo_;
 }
 
-void SubscriberInstance::SetEnabledSilentReminderCallbackInfo(const napi_env &env, const napi_ref &ref)
-{
-    enabledSilentReminderCallbackInfo_.env = env;
-    enabledSilentReminderCallbackInfo_.ref = ref;
-}
-
-SubscriberInstance::CallbackInfo SubscriberInstance::GetEnabledSilentReminderCallbackInfo()
-{
-    return enabledSilentReminderCallbackInfo_;
-}
-
 void SubscriberInstance::SetEnabledPriorityCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
     enabledPriorityCallbackInfo_.env = env;
@@ -1402,8 +1329,6 @@ void SubscriberInstance::SetCallbackInfo(const napi_env &env, const std::string 
         SetEnabledPriorityByBundleCallbackInfo(env, ref);
     } else if (type == SYSTEM_UPDATE) {
         SetSystemUpdateCallbackInfo(env, ref);
-    } else if (type == ENABLE_SILENT_REMINDER_CHANGED) {
-        SetEnabledSilentReminderCallbackInfo(env, ref);
     } else {
         ANS_LOGW("type is error");
     }
@@ -1443,8 +1368,6 @@ SubscriberInstance::CallbackInfo SubscriberInstance::GetCallbackInfo(const std::
         return GetEnabledPriorityByBundleCallbackInfo();
     } else if (type == SYSTEM_UPDATE) {
         return GetSystemUpdateCallbackInfo();
-    } else if (type == ENABLE_SILENT_REMINDER_CHANGED) {
-        return GetEnabledSilentReminderCallbackInfo();
     } else {
         ANS_LOGW("type is error");
         return {nullptr, nullptr};
@@ -1532,9 +1455,6 @@ void ThreadSafeCommon(napi_env env, napi_value jsCallback, void* context, void* 
             break;
         case Type::BADGE_ENABLED_CHANGED:
             ThreadSafeOnBadgeEnabledChanged(env, jsCallback, context, data);
-            break;
-        case Type::ENABLE_SILENT_REMINDER_CHANGED:
-            ThreadSafeOnEnabledSilentReminderChanged(env, jsCallback, context, data);
             break;
         default:
             break;
@@ -1733,23 +1653,6 @@ napi_value GetNotificationSubscriber(
         napi_create_reference(env, nOnEnabledNotificationChanged, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, ENABLE_NOTIFICATION_CHANGED, result);
         subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLENOTIFICATION_CHANGED;
-    }
-
-    // onEnabledSilentReminderChanged?:(data: notification.EnabledSilentReminderCallbackData) => void
-    NAPI_CALL(env, napi_has_named_property(env, value, "onEnabledSilentReminderChanged", &hasProperty));
-    if (hasProperty) {
-        napi_value nOnEnabledSilentReminderChanged = nullptr;
-        napi_get_named_property(env, value, "onEnabledSilentReminderChanged", &nOnEnabledSilentReminderChanged);
-        NAPI_CALL(env, napi_typeof(env, nOnEnabledSilentReminderChanged, &valuetype));
-        if (valuetype != napi_function) {
-            ANS_LOGE("Wrong argument type. Function expected.");
-            std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-            return nullptr;
-        }
-        napi_create_reference(env, nOnEnabledSilentReminderChanged, 1, &result);
-        subscriberInfo.subscriber->SetCallbackInfo(env, ENABLE_SILENT_REMINDER_CHANGED, result);
-        subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLEDSILENTREMINDER_CHANGED;
     }
 
     // onEnabledPriorityChanged?: (enable: boolean) => void

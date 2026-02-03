@@ -33,7 +33,6 @@ ohos_unittest("ans_test") {
     "${frameworks_module_ans_path}/test/unittest/ans_log_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/enabled_notification_callback_data_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/enabled_priority_notification_by_bundle_callback_data_test.cpp",
-    "${frameworks_module_ans_path}/test/unittest/enabled_silent_reminder_callback_data_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/message_user_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_action_button_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_bundle_option_test.cpp",

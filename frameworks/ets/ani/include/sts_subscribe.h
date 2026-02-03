@@ -71,9 +71,6 @@ public:
     virtual void OnEnabledNotificationChanged(
         const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override;
 
-    virtual void OnEnabledSilentReminderChanged(
-        const std::shared_ptr<EnabledSilentReminderCallbackData> &callbackData) override;
-
     void OnEnabledPriorityChanged(const std::shared_ptr<EnabledNotificationCallbackData> &callbackData) override;
 
     void OnEnabledPriorityByBundleChanged(

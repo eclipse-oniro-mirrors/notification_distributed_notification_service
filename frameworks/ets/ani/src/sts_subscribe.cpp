@@ -310,34 +310,6 @@ void StsSubscriberInstance::OnEnabledNotificationChanged(
     ANS_LOGD("done");
 }
 
-void StsSubscriberInstance::OnEnabledSilentReminderChanged(
-    const std::shared_ptr<EnabledSilentReminderCallbackData> &callbackData)
-{
-    std::lock_guard<std::mutex> lock(lock_);
-    ani_env* etsEnv;
-    ani_status aniResult = ANI_ERROR;
-    ani_options aniArgs { 0, nullptr };
-    aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
-    if (aniResult != ANI_OK) {
-        ANS_LOGE("AttachCurrentThread error. result: %{public}d.", aniResult);
-        return;
-    }
-    std::vector<ani_ref> vec;
-    ani_object obj;
-    if (WrapEnabledSilentReminderCallbackData(etsEnv, callbackData, obj)) {
-        vec.push_back(obj);
-        CallFunction(etsEnv, "onEnabledSilentReminderChanged", vec);
-    } else {
-        ANS_LOGE("WrapEnabledSilentReminderCallbackData faild");
-    }
-    aniResult = vm_->DetachCurrentThread();
-    if (aniResult != ANI_OK) {
-        ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
-        return;
-    }
-    ANS_LOGD("done");
-}
-
 void StsSubscriberInstance::OnEnabledPriorityChanged(
     const std::shared_ptr<EnabledNotificationCallbackData> &callbackData)
 {
@@ -727,9 +699,6 @@ void SubscriberInstanceManager::FillSubscribedFlags(
     }
     if (subscriberInfo->HasFunctionImplemented(env, "onEnabledNotificationChanged")) {
         subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLENOTIFICATION_CHANGED;
-    }
-    if (subscriberInfo->HasFunctionImplemented(env, "onEnabledSilentReminderChanged")) {
-        subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLEDSILENTREMINDER_CHANGED;
     }
     if (subscriberInfo->HasFunctionImplemented(env, "onBadgeChanged")) {
         subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BADGE_CHANGED;

@@ -18,7 +18,6 @@
 #include "sts_common.h"
 #include "sts_request.h"
 #include "sts_sorting_map.h"
-#include "sts_notification_manager.h"
 
 namespace OHOS {
 namespace NotificationSts {
@@ -236,42 +235,6 @@ bool WarpEnabledNotificationCallbackData(
             ANS_LOGE("set enable faild. status %{public}d", status);
             return false;
         }
-    return true;
-}
-
-bool WrapEnabledSilentReminderCallbackData(
-    ani_env *env, const std::shared_ptr<EnabledSilentReminderCallbackData> &callbackData, ani_object &outObj)
-{
-    ANS_LOGD("enter");
-    if (env == nullptr || callbackData == nullptr) {
-        ANS_LOGE("invalid parameter value");
-        return false;
-    }
-    ani_class cls;
-    const char *className = "notification.notificationSubscriber.EnabledSilentReminderCallbackDataInner";
-    if (!CreateClassObjByClassName(env, className, cls, outObj)) {
-        ANS_LOGE("CreateClassObjByClassName faild");
-        return false;
-    }
-    if (!SetFieldString(env, cls, outObj, "bundle", callbackData->GetBundle())) {
-        ANS_LOGE("SetFieldString bundle faild");
-        return false;
-    }
-    if (!SetFieldInt(env, cls, outObj, "uid", static_cast<ani_int>(callbackData->GetUid()))) {
-        ANS_LOGE("uid set faild");
-        return false;
-    }
-
-    ani_enum_item switchStateItem {};
-    SwitchState switchState = callbackData->GetEnableStatus();
-    if (!SwitchStateCToEts(env, switchState, switchStateItem)) {
-        ANS_LOGE("SwitchStateCToEts failed");
-        return false;
-    }
-    if (!SetPropertyByRef(env, outObj, "enableStatus", switchStateItem)) {
-        ANS_LOGE("set enableStatus faild");
-        return false;
-    }
     return true;
 }
 

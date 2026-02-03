@@ -254,7 +254,8 @@ ErrCode AdvancedNotificationService::SetReminderInfoByBundles(
             }
 
             //3、SetSilentReminderEnabled
-            result = SetSilentReminderEnabledInner(validBundle, silentReminderEnabled);
+            result = NotificationPreferences::GetInstance()->SetSilentReminderEnabled(
+                validBundle, silentReminderEnabled);
             if (result != ERR_OK) {
                 ANS_LOGE("%{public}s_%{public}d, set silentreminderenable failed.",
                     validBundle->GetBundleName().c_str(), validBundle->GetUid());
