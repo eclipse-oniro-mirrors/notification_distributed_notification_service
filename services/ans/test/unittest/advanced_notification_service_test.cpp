@@ -5306,14 +5306,14 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00001, Function | SmallTest | L
     client = AnsDialogHostClient::GetInstance();
 
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::ALLOW_CLICKED,
-        "test", 1, "versionCode"), (int)ERROR_INTERNAL_ERROR);
+        "test", 1), (int)ERROR_INTERNAL_ERROR);
 
     auto ret = advancedNotificationService_->dialogManager_
         ->RequestEnableNotificationDailog(bundleOption, nullptr, client, true, false);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::ALLOW_CLICKED,
-        "test", 1, "versionCode"), (int)ERROR_INTERNAL_ERROR);
+        "test", 1), (int)ERROR_INTERNAL_ERROR);
 
     ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfoIfNotExist(bundleOption, nullptr), true);
 
@@ -5324,7 +5324,7 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00001, Function | SmallTest | L
     ASSERT_EQ(ret, (int)ERR_ANS_DIALOG_IS_POPPING);
 
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::ALLOW_CLICKED,
-        "test", 1, "versionCode"), (int)ERR_OK);
+        "test", 1), (int)ERR_OK);
 }
 
 /**
@@ -5340,10 +5340,10 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00002, Function | SmallTest | L
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("test", 1);
     std::string deviceId = "deviceId";
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::DENY_CLICKED,
-        "test", 1, "versionCode"), (int)ERROR_INTERNAL_ERROR);
+        "test", 1), (int)ERROR_INTERNAL_ERROR);
     ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfoIfNotExist(bundleOption, nullptr), true);
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::DENY_CLICKED,
-        "test", 1, "versionCode"), (int)ERR_OK);
+        "test", 1), (int)ERR_OK);
 }
 
 /**
@@ -5362,10 +5362,10 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00003, Function | SmallTest | L
     AnsDialogHostClient::CreateIfNullptr(client);
     client = AnsDialogHostClient::GetInstance();
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::DIALOG_CRASHED,
-        "test", 1, "versionCode"), (int)ERROR_INTERNAL_ERROR);
+        "test", 1), (int)ERROR_INTERNAL_ERROR);
     ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfoIfNotExist(bundleOption, client), true);
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::DIALOG_CRASHED,
-        "test", 1, "versionCode"), (int)ERR_OK);
+        "test", 1), (int)ERR_OK);
 }
 
 /**
@@ -5382,7 +5382,7 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00004, Function | SmallTest | L
     std::string deviceId = "deviceId";
     ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfoIfNotExist(bundleOption, nullptr), true);
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(
-        DialogStatus::DIALOG_SERVICE_DESTROYED, "test", 1, "versionCode"), (int)ERR_OK);
+        DialogStatus::DIALOG_SERVICE_DESTROYED, "test", 1), (int)ERR_OK);
 }
 
 /**
@@ -5398,12 +5398,12 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00005, Function | SmallTest | L
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("test", 1);
     std::string deviceId = "deviceId";
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(
-        DialogStatus::REMOVE_BUNDLE, "test", 1, "versionCode"), (int)ERROR_INTERNAL_ERROR);
+        DialogStatus::REMOVE_BUNDLE, "test", 1), (int)ERROR_INTERNAL_ERROR);
     ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfo(bundleOption, nullptr), (int)ERR_OK);
     ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfo(
         bundleOption, nullptr), (int)ERR_ANS_DIALOG_IS_POPPING);
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(
-        DialogStatus::REMOVE_BUNDLE, "test", 1, "versionCode"), (int)ERR_OK);
+        DialogStatus::REMOVE_BUNDLE, "test", 1), (int)ERR_OK);
 }
 
 /**

@@ -232,8 +232,6 @@ async readConfig(): Promise<void> {
   }
 
   async publishButtonClickedEvent(enabled: boolean): Promise<void> {
-    let bundleFlags = bundleManager.BundleFlag.GET_BUNDLE_INFO_DEFAULT;
-    let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleFlags);
     CommonEventManager.publish(
       COMMON_EVENT_NAME,
       {
@@ -241,8 +239,7 @@ async readConfig(): Promise<void> {
         data: this.want.parameters.bundleName.toString(),
         parameters: {
           bundleName: this.want.parameters.bundleName.toString(),
-          bundleUid: this.want.parameters.bundleUid.toString(),
-          versionCode: bundleInfo?.versionCode?.toString()
+          bundleUid: this.want.parameters.bundleUid.toString()
         }
       } as CommonEventManager.CommonEventPublishData,
       () => { console.info(TAG, 'publish CLICKED succeeded'); }

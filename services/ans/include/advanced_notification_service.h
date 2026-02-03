@@ -1853,7 +1853,7 @@ public:
     ErrCode CanOpenSubscribeSettings() override;
 
     void SendDialogClickHiSysEvent(const sptr<NotificationBundleOption> &bundleOption,
-        bool enabled, const std::string& versionCode);
+        bool enabled);
 
 protected:
     /**
