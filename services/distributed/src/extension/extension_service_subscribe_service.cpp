@@ -29,7 +29,7 @@ ExtensionServiceSubscribeService& ExtensionServiceSubscribeService::GetInstance(
 void ExtensionServiceSubscribeService::SubscribeNotification(
     const sptr<NotificationBundleOption> bundle, const std::vector<sptr<NotificationBundleOption>>& subscribeBundles)
 {
-    ANS_LOGD("ExtensionServiceSubscribeService::SubscribeNotification");
+    ANS_LOGD("enter");
     if (bundle == nullptr) {
         ANS_LOGE("null bundle");
         return;
@@ -68,6 +68,7 @@ void ExtensionServiceSubscribeService::SubscribeNotification(
         subscribeInfo->AddAppUid(subscribeBundle->GetUid());
     }
     result = NotificationHelper::SubscribeNotification(subscriber, subscribeInfo);
+    ANS_LOGI("Subscribe %{public}s %{public}d.", bundleKey.c_str(), result);
     if (result == 0) {
         subscriberMap_.insert_or_assign(bundleKey, subscriber);
     } else {
@@ -77,7 +78,7 @@ void ExtensionServiceSubscribeService::SubscribeNotification(
 
 void ExtensionServiceSubscribeService::UnsubscribeNotification(const sptr<NotificationBundleOption> bundle)
 {
-    ANS_LOGD("ExtensionServiceSubscribeService::UnsubscribeNotification");
+    ANS_LOGD("enter");
     if (bundle == nullptr) {
         ANS_LOGE("null bundle");
         return;
@@ -91,6 +92,7 @@ void ExtensionServiceSubscribeService::UnsubscribeNotification(const sptr<Notifi
     }
 
     int32_t result = NotificationHelper::UnSubscribeNotification(iter->second);
+    ANS_LOGI("UnSubscribe %{public}s %{public}d.", bundleKey.c_str(), result);
     if (result == ERR_OK) {
         subscriberMap_.erase(iter);
     }
@@ -98,7 +100,7 @@ void ExtensionServiceSubscribeService::UnsubscribeNotification(const sptr<Notifi
 
 void ExtensionServiceSubscribeService::UnsubscribeAllNotification()
 {
-    ANS_LOGD("ExtensionServiceSubscribeService::UnsubscribeAllNotification");
+    ANS_LOGD("enter");
     std::lock_guard<ffrt::mutex> lock(mapLock_);
     for (auto& subscriberInfo : subscriberMap_) {
         int32_t result = NotificationHelper::UnSubscribeNotification(subscriberInfo.second);
