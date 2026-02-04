@@ -373,19 +373,19 @@ ErrCode ReminderAgentService::InitReminderRequest(sptr<ReminderRequest>& reminde
             wantAgentName.c_str(), maxWantAgentName.c_str());
         return ERR_REMINDER_INVALID_PARAM;
     }
-    int32_t activeUserId = -1;
-    if (AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(activeUserId) != ERR_OK) {
-        ANSR_LOGE("Failed to get active user id.");
+    int32_t userId = -1;
+    if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId) != ERR_OK) {
+        ANSR_LOGE("Failed to get user id by uid.");
         return ERR_REMINDER_INVALID_PARAM;
     }
     std::string bundleName = bundle;
     int32_t uid = callingUid;
     if (wantAgentName != bundle && wantAgentName != "") {
         bundleName = wantAgentName;
-        uid = ReminderBundleManagerHelper::GetInstance().GetDefaultUidByBundleName(bundleName, activeUserId);
+        uid = ReminderBundleManagerHelper::GetInstance().GetDefaultUidByBundleName(bundleName, userId);
     } else if (maxWantAgentName != bundle && maxWantAgentName != "") {
         bundleName = maxWantAgentName;
-        uid = ReminderBundleManagerHelper::GetInstance().GetDefaultUidByBundleName(bundleName, activeUserId);
+        uid = ReminderBundleManagerHelper::GetInstance().GetDefaultUidByBundleName(bundleName, userId);
     }
     // Only system applications can proxy other applications to send notifications
     bool isSystemApp = IsSystemApp();
@@ -394,7 +394,7 @@ ErrCode ReminderAgentService::InitReminderRequest(sptr<ReminderRequest>& reminde
         return ERR_REMINDER_INVALID_PARAM;
     }
     reminder->SetSystemApp(isSystemApp);
-    reminder->InitUserId(activeUserId);
+    reminder->InitUserId(userId);
     reminder->InitBundleName(bundleName);
     reminder->InitCreatorBundleName(bundle);
     reminder->InitCreatorUid(callingUid);

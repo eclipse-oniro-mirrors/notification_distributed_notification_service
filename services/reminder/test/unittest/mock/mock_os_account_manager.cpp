@@ -18,21 +18,22 @@
 #include "os_account_manager.h"
 
 namespace OHOS {
-namespace {
-int32_t g_mockGetForegroundOsAccountLocalIdRet = 0;
-}
+static int32_t g_mockGetOsAccountLocalIdFromUidRet = 0;
+static int32_t g_mockGetOsAccountLocalIdFromUidUserId = 100;
 
 namespace Notification {
-void MockOsAccountManager::MockGetForegroundOsAccountLocalId(const int32_t ret)
+void MockOsAccountManager::MockGetOsAccountLocalIdFromUid(const int32_t userId, const int32_t ret)
 {
-    g_mockGetForegroundOsAccountLocalIdRet = ret;
+    g_mockGetOsAccountLocalIdFromUidUserId = userId;
+    g_mockGetOsAccountLocalIdFromUidRet = ret;
 }
 }
 
 namespace AccountSA {
-ErrCode OsAccountManager::GetForegroundOsAccountLocalId(int32_t& id)
+ErrCode OsAccountManager::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id)
 {
-    return g_mockGetForegroundOsAccountLocalIdRet;
+    id = g_mockGetOsAccountLocalIdFromUidUserId;
+    return g_mockGetOsAccountLocalIdFromUidRet;
 }
 }
 } // namespace OHOS
