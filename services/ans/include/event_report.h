@@ -66,7 +66,6 @@ struct EventInfo {
     uint32_t reminderFlags = 0;
     uint32_t notificationControlFlags = 0;
     std::string classification;
-    std::string pVersionId;
 };
 
 struct UserDataSizeInfo {

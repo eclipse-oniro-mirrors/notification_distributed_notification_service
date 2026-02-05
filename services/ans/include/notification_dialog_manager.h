@@ -96,7 +96,7 @@ public:
      * when commonEvent callback is triggered.
      */
     ErrCode OnBundleEnabledStatusChanged(DialogStatus status, const std::string& bundleName,
-        const int32_t& uid, const std::string& versionCode);
+        const int32_t& uid);
 
     /*
      * AddDialogInfo
@@ -133,7 +133,7 @@ private:
     void RemoveAllDialogInfos(std::list<std::unique_ptr<DialogInfo>>& dialogInfosRemoved);
 
     bool OnDialogButtonClicked(const std::string& bundleName,
-        const int32_t& uid, bool enabled, const std::string& versionCode);
+        const int32_t& uid, bool enabled);
     bool OnDialogCrashed(const std::string& bundleName, const int32_t& uid);
     bool OnDialogServiceDestroyed();
     bool onRemoveBundle(const std::string bundleName, const int32_t& uid);

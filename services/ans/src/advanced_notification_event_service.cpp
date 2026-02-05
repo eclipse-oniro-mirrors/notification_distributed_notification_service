@@ -167,7 +167,7 @@ void AdvancedNotificationService::SendEnableNotificationHiSysEvent(const sptr<No
 }
 
 void AdvancedNotificationService::SendDialogClickHiSysEvent(
-    const sptr<NotificationBundleOption> &bundleOption, bool enabled, const std::string& versionCode)
+    const sptr<NotificationBundleOption> &bundleOption, bool enabled)
 {
     if (bundleOption == nullptr) {
         ANS_LOGE("bundleOption null");
@@ -178,7 +178,6 @@ void AdvancedNotificationService::SendDialogClickHiSysEvent(
     eventInfo.bundleName = bundleOption->GetBundleName();
     eventInfo.uid = bundleOption->GetUid();
     eventInfo.enable = enabled;
-    eventInfo.pVersionId = versionCode;
     EventReport::SendHiSysEvent(AUTH_DIALOG_CLICK, eventInfo);
 }
 

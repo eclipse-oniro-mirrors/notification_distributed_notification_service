@@ -62,10 +62,9 @@ void NotificationDialogEventSubscriber::OnReceiveEvent(const EventFwk::CommonEve
     int32_t code = data.GetCode();
     std::string bundleName = data.GetWant().GetStringParam("bundleName");
     int32_t bundleUid = std::atoi(data.GetWant().GetStringParam("bundleUid").c_str());
-    std::string versionCode = data.GetWant().GetStringParam("versionCode");
-    ANS_LOGI("NotificationDialogEventSubscriber Get Data %{public}d %{public}s %{public}d %{public}s", code,
-        bundleName.c_str(), bundleUid, versionCode.c_str());
-    dialogManager_.OnBundleEnabledStatusChanged(static_cast<DialogStatus>(code), bundleName, bundleUid, versionCode);
+    ANS_LOGI("NotificationDialogEventSubscriber Get Data %{public}d %{public}s %{public}d", code,
+        bundleName.c_str(), bundleUid);
+    dialogManager_.OnBundleEnabledStatusChanged(static_cast<DialogStatus>(code), bundleName, bundleUid);
 }
 
 NotificationDialogEventSubscriber::~NotificationDialogEventSubscriber()
@@ -126,16 +125,16 @@ ErrCode NotificationDialogManager::RequestEnableNotificationDailog(
 }
 
 ErrCode NotificationDialogManager::OnBundleEnabledStatusChanged(
-    DialogStatus status, const std::string& bundleName, const int32_t& uid, const std::string& versionCode)
+    DialogStatus status, const std::string& bundleName, const int32_t& uid)
 {
     ANS_LOGD("enter");
     bool result = false;
     switch (status) {
         case DialogStatus::ALLOW_CLICKED:
-            result = OnDialogButtonClicked(bundleName, uid, true, versionCode);
+            result = OnDialogButtonClicked(bundleName, uid, true);
             break;
         case DialogStatus::DENY_CLICKED:
-            result = OnDialogButtonClicked(bundleName, uid, false, versionCode);
+            result = OnDialogButtonClicked(bundleName, uid, false);
             break;
         case DialogStatus::DIALOG_CRASHED:
             result = OnDialogCrashed(bundleName, uid);
@@ -260,7 +259,7 @@ bool NotificationDialogManager::SetHasPoppedDialog(
 }
 
 bool NotificationDialogManager::OnDialogButtonClicked(
-    const std::string& bundleName, const int32_t& uid, bool enabled, const std::string& versionCode)
+    const std::string& bundleName, const int32_t& uid, bool enabled)
 {
     ANS_LOGD("enter");
     auto bundleOption = GetBundleOptionByBundleName(bundleName, uid);
@@ -282,11 +281,10 @@ bool NotificationDialogManager::OnDialogButtonClicked(
         ANS_LOGE("SetNotificationsEnabledForSpecialBundle Failed, code is %{public}d", result);
         // Do not return here, need to clear the data
     }
-    ans_.SendDialogClickHiSysEvent(bundleOption, enabled, versionCode);
+    ans_.SendDialogClickHiSysEvent(bundleOption, enabled);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_28, EventBranchId::BRANCH_0);
     message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
-        " allow:" + std::to_string(enabled) +
-        " pVersionId:" + versionCode);
+        " allow:" + std::to_string(enabled));
     NotificationAnalyticsUtil::ReportModifyEvent(message, true);
     EnabledDialogStatus status = enabled ? EnabledDialogStatus::ALLOW_CLICKED : EnabledDialogStatus::DENY_CLICKED;
     return HandleOneDialogClosed(bundleOption, status);
