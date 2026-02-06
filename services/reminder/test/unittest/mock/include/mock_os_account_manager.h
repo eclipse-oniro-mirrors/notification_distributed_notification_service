@@ -21,7 +21,7 @@
 namespace OHOS::Notification {
 class MockOsAccountManager {
 public:
-    static void MockGetForegroundOsAccountLocalId(const int32_t ret);
+    static void MockGetOsAccountLocalIdFromUid(const int32_t userId, const int32_t ret);
 };
 }  // namespace OHOS::Notification
 

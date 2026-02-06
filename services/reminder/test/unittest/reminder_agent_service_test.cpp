@@ -380,14 +380,14 @@ HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_013, Function | Smal
     reminder->maxScreenWantAgentInfo_->pkgName = "maxWant";
     EXPECT_EQ(reminderAgentService_->InitReminderRequest(reminder, "test", 0), ERR_REMINDER_INVALID_PARAM);
 
-    MockOsAccountManager::MockGetForegroundOsAccountLocalId(1);
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100, 1);
     reminder->maxScreenWantAgentInfo_->pkgName = "test";
     EXPECT_EQ(reminderAgentService_->InitReminderRequest(reminder, "test", 0), ERR_REMINDER_INVALID_PARAM);
     reminder->SetSystemApp(true);
     EXPECT_EQ(reminderAgentService_->InitReminderRequest(reminder, "test", 0), ERR_REMINDER_INVALID_PARAM);
-    MockOsAccountManager::MockGetForegroundOsAccountLocalId(0);
-    
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100, 0);
     EXPECT_EQ(reminderAgentService_->InitReminderRequest(reminder, "test", 0), ERR_OK);
+    EXPECT_EQ(reminder->GetUserId(), 100);
 }
 
 /**
