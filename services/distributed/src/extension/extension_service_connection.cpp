@@ -102,7 +102,7 @@ void ExtensionServiceConnection::NotifyOnReceiveMessage(const sptr<NotificationR
         return;
     }
     std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
-    ANS_LOGD("NotifyOnReceiveMessage %{public}s", subscriberInfo_.GetKey().c_str());
+    ANS_LOGD("%{public}s", subscriberInfo_.GetKey().c_str());
     if (state_ == ExtensionServiceConnectionState::DISCONNECTED) {
         return;
     }
@@ -126,7 +126,8 @@ void ExtensionServiceConnection::NotifyOnReceiveMessage(const sptr<NotificationR
     } else {
         int32_t retResult = 0;
         ErrCode callResult = proxy_->OnReceiveMessage(notificationRequest, retResult);
-        ANS_LOGI("Notify NotifyOnReceiveMessage callResult %{public}d retResult %{public}d", callResult, retResult);
+        ANS_LOGI("%{public}s OnReceiveMessage callResult %{public}d retResult %{public}d",
+            subscriberInfo_.GetKey().c_str(), callResult, retResult);
         std::string message = subscriberInfo_.bundleName + ", " +
             std::to_string(subscriberInfo_.uid) +
             " receive message " + notificationRequest->GetNotificationHashCode();
@@ -145,7 +146,6 @@ void ExtensionServiceConnection::NotifyOnCancelMessages(const std::shared_ptr<st
         return;
     }
     std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
-    ANS_LOGD("NotifyOnCancelMessages %{public}s", subscriberInfo_.GetKey().c_str());
     if (state_ == ExtensionServiceConnectionState::DISCONNECTED) {
         return;
     }
@@ -169,7 +169,8 @@ void ExtensionServiceConnection::NotifyOnCancelMessages(const std::shared_ptr<st
     } else {
         int32_t retResult = 0;
         ErrCode callResult = proxy_->OnCancelMessages(*hashCodes, retResult);
-        ANS_LOGI("Notify OnCancelMessages callResult %{public}d retResult %{public}d", callResult, retResult);
+        ANS_LOGI("%{public}s OnCancelMessages callResult %{public}d retResult %{public}d",
+            subscriberInfo_.GetKey().c_str(), callResult, retResult);
         std::string message = subscriberInfo_.bundleName + ", " +
             std::to_string(subscriberInfo_.uid) +
             " cancel message size " + std::to_string(hashCodes->size());
@@ -185,7 +186,7 @@ void ExtensionServiceConnection::OnAbilityConnectDone(
     const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
     std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
-    ANS_LOGD("OnAbilityConnectDone %{public}s", subscriberInfo_.GetKey().c_str());
+    ANS_LOGD("%{public}s", subscriberInfo_.GetKey().c_str());
     wptr<ExtensionServiceConnection> wThis = this;
     deathRecipient_ = new (std::nothrow) RemoteDeathRecipient([wThis] (const wptr<IRemoteObject> &remote) {
         sptr<ExtensionServiceConnection> sThis = wThis.promote();
@@ -294,7 +295,7 @@ void ExtensionServiceConnection::PrepareDisconnect()
 {
     std::lock_guard<ffrt::recursive_mutex> lock(mutex_);
 
-    ANS_LOGI("PrepareDisconnect %{public}s", subscriberInfo_.GetKey().c_str());
+    ANS_LOGD("%{public}s", subscriberInfo_.GetKey().c_str());
     auto timerClient = MiscServices::TimeServiceClient::GetInstance();
     if (timerClient == nullptr) {
         ANS_LOGE("null TimeServiceClient");
