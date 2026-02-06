@@ -97,7 +97,8 @@ bool GetAniArrayBundleOptionV2(
     }
     ani_array array = nullptr;
     size_t size = bundleOptions.size();
-    status = env->Array_New(size, nullptr, &array);
+    ani_object nullObj = GetNullObject(env);
+    status = env->Array_New(size, nullObj, &array);
     if (status != ANI_OK) {
         ANS_LOGE("Array_New_Ref failed. status : %{public}d", status);
         return false;
@@ -139,7 +140,8 @@ bool SetAniArrayGrantedBundleInfo(
     }
     ani_array array = nullptr;
     size_t size = bundleOptions.size();
-    status = env->Array_New(size, nullptr, &array);
+    ani_object nullObj = GetNullObject(env);
+    status = env->Array_New(size, nullObj, &array);
     if (status != ANI_OK) {
         ANS_LOGE("Array_New_Ref failed. status : %{public}d", status);
         return false;
