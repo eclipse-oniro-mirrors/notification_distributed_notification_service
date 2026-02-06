@@ -2181,6 +2181,50 @@ HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundles_0200, Function | M
 }
 
 /*
+ * @tc.name: SetPriorityIntelligentEnabled_0100
+ * @tc.desc: test SetPriorityIntelligentEnabled success.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetPriorityIntelligentEnabled_0100, Function | MediumTest | Level1)
+{
+    bool enable = true;
+    ErrCode ret = ans_->SetPriorityIntelligentEnabled(enable);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = ans_->IsPriorityIntelligentEnabled(enable);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_TRUE(enable);
+}
+
+/*
+ * @tc.name: SetPriorityStrategyByBundles_0100
+ * @tc.desc: test SetPriorityStrategyByBundles with empty bundleName.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetPriorityStrategyByBundles_0100, Function | MediumTest | Level1)
+{
+    std::map<sptr<NotificationBundleOption>, int64_t> strategies;
+    ErrCode ret = ans_->SetPriorityStrategyByBundles(strategies);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetPriorityStrategyByBundles_0200
+ * @tc.desc: test SetPriorityStrategyByBundles success.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetPriorityStrategyByBundles_0200, Function | MediumTest | Level1)
+{
+    std::map<sptr<NotificationBundleOption>, int64_t> strategies;
+    sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption("bundle", 1000);
+    strategies[bo] = 24;
+    ErrCode ret = ans_->SetPriorityStrategyByBundles(strategies);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
  * @tc.name: TriggerUpdatePriorityType_0200
  * @tc.desc: test TriggerUpdatePriorityType success.
  * @tc.type: FUNC

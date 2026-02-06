@@ -235,6 +235,10 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getBundlePriorityConfig", NapiGetBundlePriorityConfig),
         DECLARE_NAPI_FUNCTION("setPriorityEnabledByBundles", NapiSetPriorityEnabledByBundles),
         DECLARE_NAPI_FUNCTION("getPriorityEnabledByBundles", NapiGetPriorityEnabledByBundles),
+        DECLARE_NAPI_FUNCTION("isPriorityIntelligentEnabled", NapiIsPriorityIntelligentEnabled),
+        DECLARE_NAPI_FUNCTION("setPriorityIntelligentEnabled", NapiSetPriorityIntelligentEnabled),
+        DECLARE_NAPI_FUNCTION("getPriorityStrategyByBundles", NapiGetPriorityStrategyByBundles),
+        DECLARE_NAPI_FUNCTION("setPriorityStrategyByBundles", NapiSetPriorityStrategyByBundles),
 #else
         DECLARE_NAPI_FUNCTION("setPriorityEnabled", Common::NapiReturnCapErr),
         DECLARE_NAPI_FUNCTION("setPriorityEnabledByBundle", Common::NapiReturnCapErr),
@@ -244,6 +248,10 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getBundlePriorityConfig", Common::NapiReturnCapErr),
         DECLARE_NAPI_FUNCTION("setPriorityEnabledByBundles", Common::NapiReturnCapErr),
         DECLARE_NAPI_FUNCTION("getPriorityEnabledByBundles", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("isPriorityIntelligentEnabled", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("setPriorityIntelligentEnabled", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("getPriorityStrategyByBundles", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("setPriorityStrategyByBundles", Common::NapiReturnCapErr),
 #endif
     };
 

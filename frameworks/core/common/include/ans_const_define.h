@@ -59,6 +59,19 @@ constexpr int32_t NOTIFICATION_MIN_COUNT = 0;
 constexpr int32_t NOTIFICATION_MAX_COUNT = 1024;
 constexpr int32_t DO_NOT_DISTURB_PROFILE_MIN_ID = 1;
 constexpr int32_t DO_NOT_DISTURB_PROFILE_MAX_ID = 10;
+constexpr int64_t PRIORITY_STRATEGY_DEFAULT = static_cast<int64_t>(
+    NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT |
+    NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_RULE |
+    NotificationConstant::PriorityStrategyStatus::STATUS_INTELLIGENT |
+    NotificationConstant::PriorityStrategyStatus::STATUS_USER_DEFINED |
+    NotificationConstant::PriorityStrategyStatus::STATUS_APPLICATION_DEFINED);
+constexpr int64_t PRIORITY_STRATEGY_MAX = static_cast<int64_t>(
+    NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT |
+    NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_RULE |
+    NotificationConstant::PriorityStrategyStatus::STATUS_INTELLIGENT |
+    NotificationConstant::PriorityStrategyStatus::STATUS_USER_DEFINED |
+    NotificationConstant::PriorityStrategyStatus::STATUS_APPLICATION_DEFINED |
+    NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY);
 
 extern const std::string AGGREGATE_KEY;
 extern const std::string RING_TRUST_PKG_KEY;

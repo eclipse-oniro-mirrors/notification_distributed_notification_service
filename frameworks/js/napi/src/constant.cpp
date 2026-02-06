@@ -362,7 +362,6 @@ napi_value PriorityNotificationTypeInit(napi_env env, napi_value exports)
 
 napi_value PriorityEnableStatusInit(napi_env env, napi_value exports)
 {
-    ANS_LOGD("called");
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
     SetNamedPropertyByInteger(env, obj,
@@ -375,6 +374,38 @@ napi_value PriorityEnableStatusInit(napi_env env, napi_value exports)
     napi_property_descriptor exportFuncs[] = {
         DECLARE_NAPI_PROPERTY("PriorityEnableStatus", obj),
     };
+    napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);
+    return exports;
+}
+
+napi_value PriorityStrategyStatusInit(napi_env env, napi_value exports)
+{
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    SetNamedPropertyByInteger(env, obj,
+        static_cast<int32_t>(OHOS::Notification::NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT),
+        "STATUS_SYSTEM_DEFAULT");
+    SetNamedPropertyByInteger(env, obj,
+        static_cast<int32_t>(OHOS::Notification::NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_RULE),
+        "STATUS_SYSTEM_RULE");
+    SetNamedPropertyByInteger(env, obj,
+        static_cast<int32_t>(OHOS::Notification::NotificationConstant::PriorityStrategyStatus::STATUS_INTELLIGENT),
+        "STATUS_INTELLIGENT");
+    SetNamedPropertyByInteger(env, obj,
+        static_cast<int32_t>(OHOS::Notification::NotificationConstant::PriorityStrategyStatus::STATUS_USER_DEFINED),
+        "STATUS_USER_DEFINED");
+    SetNamedPropertyByInteger(env, obj,
+        static_cast<int32_t>(
+            OHOS::Notification::NotificationConstant::PriorityStrategyStatus::STATUS_APPLICATION_DEFINED),
+        "STATUS_APPLICATION_DEFINED");
+    SetNamedPropertyByInteger(env, obj,
+        static_cast<int32_t>(OHOS::Notification::NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY),
+        "STATUS_ALL_PRIORITY");
+
+    napi_property_descriptor exportFuncs[] = {
+        DECLARE_NAPI_PROPERTY("PriorityStrategyStatus", obj),
+    };
+
     napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);
     return exports;
 }
@@ -499,6 +530,7 @@ napi_value ConstantInit(napi_env env, napi_value exports)
     SubscribeTypeInit(env, exports);
     PriorityNotificationTypeInit(env, exports);
     PriorityEnableStatusInit(env, exports);
+    PriorityStrategyStatusInit(env, exports);
     return exports;
 }
 }  // namespace NotificationNapi

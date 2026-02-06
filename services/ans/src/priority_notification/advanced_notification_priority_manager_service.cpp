@@ -16,12 +16,16 @@
 #include "advanced_notification_service.h"
 
 #include "advanced_notification_priority_helper.h"
+#include "ans_permission_def.h"
+#include "common_event_manager.h"
+#include "common_event_publish_info.h"
 #include "notification_ai_extension_wrapper.h"
 #include "notification_preferences.h"
 #include "notification_subscriber_manager.h"
 
 namespace OHOS {
 namespace Notification {
+const int32_t MAP_SIZE_ONE = 1;
 ErrCode AdvancedNotificationService::SetPriorityEnabled(const bool enabled)
 {
     auto result = SystemPermissionCheck();
@@ -47,15 +51,6 @@ ErrCode AdvancedNotificationService::SetPriorityEnabledInner(const bool enabled)
         } else {
             NotificationSubscriberManager::GetInstance()->NotifyEnabledPriorityChanged(bundleData);
         }
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-        if (result != ERR_OK || !enabled) {
-            return;
-        }
-        std::vector<sptr<NotificationRequest>> requests;
-        GetRequestsFromNotification(GetAllNotification(), requests);
-        refreshResult = AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
-            requests, NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE);
-#endif
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set priority enable.");
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_25);
@@ -109,16 +104,6 @@ ErrCode AdvancedNotificationService::SetPriorityEnabledByBundleInner(
         } else {
             NotificationSubscriberManager::GetInstance()->NotifyEnabledPriorityByBundleChanged(bundleData);
         }
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-        if (result != ERR_OK || enableStatusInt !=
-            static_cast<int32_t>(NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT)) {
-            return;
-        }
-        std::vector<sptr<NotificationRequest>> requests;
-        GetRequestsFromNotification(GetNotificationsByBundle(bundleOption), requests);
-        refreshResult = AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
-            requests, NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE);
-#endif
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set bundle priority enable.");
     ANS_LOGI("SetPriorityEnabledByBundle %{public}s_%{public}d, "
@@ -241,8 +226,9 @@ ErrCode AdvancedNotificationService::SetBundlePriorityConfigInner(
         }
         std::vector<sptr<NotificationRequest>> requests;
         GetRequestsFromNotification(GetNotificationsByBundle(bundleOption), requests);
+        std::vector<int32_t> results;
         refreshResult = AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
-            requests, NotificationAiExtensionWrapper::REFRESH_KEYWORD_PRIORITY_TYPE);
+            NotificationAiExtensionWrapper::REFRESH_KEYWORD_PRIORITY_TYPE, requests, results);
 #endif
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set priority config.");
@@ -280,6 +266,9 @@ void AdvancedNotificationService::GetRequestsFromNotification(
             notification->GetNotificationRequestPoint())) {
             continue;
         }
+        if (notification->GetNotificationRequestPoint()->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW) {
+            continue;
+        }
 #endif
         MessageParcel parcel;
         if (!parcel.WriteParcelable(notification)) {
@@ -295,31 +284,327 @@ void AdvancedNotificationService::GetRequestsFromNotification(
     }
 }
 
+template <typename T>
+ErrCode AdvancedNotificationService::GetValidMapByBundle(const EventBranchId branchId,
+    const std::map<sptr<NotificationBundleOption>, T> &originMap, std::map<sptr<NotificationBundleOption>, T> &validMap)
+{
+    for (auto &iter : originMap) {
+        sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(iter.first);
+        if (bundle == nullptr) {
+            ANS_LOGW("GetValidMapByBundle invalid bundleOption name: %{public}s, uid: %{public}d.",
+                iter.first->GetBundleName().c_str(), iter.first->GetUid());
+            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, branchId);
+            message.Message("bundle:" + iter.first->GetBundleName() + ", id:" + std::to_string(iter.first->GetUid()));
+            message.ErrorCode(ERR_ANS_INVALID_BUNDLE).Append(" bundle name is empty");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+            continue;
+        }
+        validMap[bundle] = iter.second;
+    }
+    if (validMap.size() == 0) {
+        ANS_LOGE("OriginMap is invalid.");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetValidBundles(
+    const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+    std::vector<sptr<NotificationBundleOption>> &validBundleOptions)
+{
+    for (auto &bundleOption : bundleOptions) {
+        sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+        if (bundle == nullptr) {
+            ANS_LOGW("GetValidBundles invalid bundleOption name: %{public}s, uid: %{public}d.",
+                bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
+            continue;
+        }
+        validBundleOptions.emplace_back(bundle);
+    }
+    if (validBundleOptions.size() == 0) {
+        ANS_LOGE("BundleOptions is invalid.");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::SetPriorityEnabledByBundles(
     const std::map<sptr<NotificationBundleOption>, bool> &priorityEnable)
 {
-    ANS_LOGD("SetPriorityEnabledByBundles");
-    return ERR_OK;
-    if (priorityEnable.empty()) {
-        return ERR_ANS_INVALID_PARAM;
-    }
     ErrCode result = SystemPermissionCheck();
     if (result != ERR_OK) {
         return result;
     }
-    return ERR_OK;
+    std::map<sptr<NotificationBundleOption>, bool> validPriorityEnable;
+    result = GetValidMapByBundle(EventBranchId::BRANCH_29, priorityEnable, validPriorityEnable);
+    if (result != ERR_OK) {
+        return result;
+    }
+    std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> innerPriorityEnable;
+    for (auto &iter : validPriorityEnable) {
+        innerPriorityEnable[iter.first] = iter.second ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
+            NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    }
+    return SetPriorityEnabledByBundlesInner(innerPriorityEnable);
+}
+
+ErrCode AdvancedNotificationService::SetPriorityEnabledByBundlesInner(
+    const std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> &priorityEnable)
+{
+    ErrCode result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
+        std::vector<sptr<NotificationRequest>> requests;
+        std::map<sptr<NotificationBundleOption>, bool> effectPriorityEnable;
+        for (auto &iter : priorityEnable) {
+            bool enable = (iter.second == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
+                iter.second == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+            ErrCode dbResult =
+                NotificationPreferences::GetInstance()->PutPriorityEnabledByBundleV2(iter.first, iter.second);
+            if (dbResult != ERR_OK) {
+                continue;
+            }
+            result = ERR_OK;
+            effectPriorityEnable[iter.first] = enable;
+            if (enable) {
+                GetRequestsFromNotification(GetNotificationsByBundle(iter.first), requests);
+            }
+        }
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+        std::vector<int32_t> results;
+        AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
+            NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE, requests, results);
+#endif
+        SendCommonEvent(NotificationConstant::TYPE_PRIORITY_SWITCH_BY_BUNDLE, effectPriorityEnable, 0);
+    }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set priority bundles enable.");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_29);
+    message.ErrorCode(result);
+    if (priorityEnable.size() == MAP_SIZE_ONE) {
+        message.Message("bundle:" + priorityEnable.begin()->first->GetBundleName() +
+            ", id:" + std::to_string(priorityEnable.begin()->first->GetUid()) +
+            ", en:" + std::to_string(static_cast<int32_t>(priorityEnable.begin()->second)));
+    }
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
+    ANS_LOGI("SetPriorityEnabledByBundles result: %{public}d", result);
+    return result;
 }
 
 ErrCode AdvancedNotificationService::GetPriorityEnabledByBundles(
     const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
     std::map<sptr<NotificationBundleOption>, bool> &priorityEnable)
 {
-    ANS_LOGD("GetPriorityEnabledByBundles called");
     ErrCode result = SystemPermissionCheck();
     if (result != ERR_OK) {
         return result;
     }
-    return ERR_OK;
+    std::vector<sptr<NotificationBundleOption>> validBundleOptions;
+    result = GetValidBundles(bundleOptions, validBundleOptions);
+    if (result != ERR_OK) {
+        return result;
+    }
+    priorityEnable.clear();
+    result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    for (auto &bundleOption : validBundleOptions) {
+        NotificationConstant::SWITCH_STATE priorityStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+        ErrCode dbResult =
+            NotificationPreferences::GetInstance()->GetPriorityEnabledByBundleV2(bundleOption, priorityStatus);
+        if (dbResult != ERR_OK) {
+            continue;
+        }
+        result = ERR_OK;
+        priorityEnable[bundleOption] = (priorityStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+            priorityStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    }
+    ANS_LOGI("GetPriorityEnabledByBundles result %{public}d, priorityEnable size: %{public}d.",
+        result, static_cast<int32_t>(priorityEnable.size()));
+    return result;
+}
+
+ErrCode AdvancedNotificationService::IsPriorityIntelligentEnabled(bool &enabled)
+{
+    ErrCode result = SystemPermissionCheck();
+    if (result != ERR_OK) {
+        return result;
+    }
+    NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    result = NotificationPreferences::GetInstance()->GetPriorityIntelligentEnabled(enableStatus);
+    enabled = (enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+        enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    ANS_LOGI("IsPriorityIntelligentEnabled enabled: %{public}d, result: %{public}d", enabled, result);
+    return result;
+}
+
+ErrCode AdvancedNotificationService::SetPriorityIntelligentEnabled(const bool enabled)
+{
+    ErrCode result = SystemPermissionCheck();
+    if (result != ERR_OK) {
+        return result;
+    }
+    return SetPriorityIntelligentEnabledInner(enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
+            NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+}
+
+ErrCode AdvancedNotificationService::SetPriorityIntelligentEnabledInner(
+    const NotificationConstant::SWITCH_STATE enableStatus)
+{
+    ErrCode result = ERR_OK;
+    bool enabled = (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
+        enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
+        result = NotificationPreferences::GetInstance()->PutPriorityIntelligentEnabled(enableStatus);
+        if (result != ERR_OK) {
+            return;
+        }
+        std::map<sptr<NotificationBundleOption>, bool> params;
+        SendCommonEvent(NotificationConstant::TYPE_PRIORITY_INTELLIGENT_SWITCH, params, enabled);
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+        std::vector<sptr<NotificationRequest>> requests;
+        GetRequestsFromNotification(GetAllNotification(), requests);
+        std::vector<int32_t> results;
+        AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
+            NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE, requests, results);
+#endif
+    }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set priority intelligent enable.");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_30);
+    message.Message("en:" + std::to_string(static_cast<int32_t>(enableStatus))).ErrorCode(result);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
+    ANS_LOGI("SetPriorityIntelligentEnabled enabled: %{public}d, result: %{public}d, ", enableStatus, result);
+    return result;
+}
+
+ErrCode AdvancedNotificationService::GetPriorityStrategyByBundles(
+    const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+    std::map<sptr<NotificationBundleOption>, int64_t> &strategies)
+{
+    ErrCode result = SystemPermissionCheck();
+    if (result != ERR_OK) {
+        return result;
+    }
+    std::vector<sptr<NotificationBundleOption>> validBundleOptions;
+    result = GetValidBundles(bundleOptions, validBundleOptions);
+    if (result != ERR_OK) {
+        return result;
+    }
+    strategies.clear();
+    result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    for (auto &bundleOption : validBundleOptions) {
+        int64_t strategy = PRIORITY_STRATEGY_DEFAULT;
+        ErrCode dbResult = NotificationPreferences::GetInstance()->GetPriorityStrategyByBundle(bundleOption, strategy);
+        if (dbResult != ERR_OK) {
+            continue;
+        }
+        result = ERR_OK;
+        strategies[bundleOption] = strategy;
+    }
+    ANS_LOGI("GetPriorityStrategyByBundles result %{public}d, strategies size: %{public}d.",
+        result, static_cast<int32_t>(strategies.size()));
+    return result;
+}
+
+ErrCode AdvancedNotificationService::SetPriorityStrategyByBundles(
+    const std::map<sptr<NotificationBundleOption>, int64_t> &strategies)
+{
+    ErrCode result = SystemPermissionCheck();
+    if (result != ERR_OK) {
+        return result;
+    }
+    std::map<sptr<NotificationBundleOption>, int64_t> validStrategies;
+    result = GetValidMapByBundle(EventBranchId::BRANCH_31, strategies, validStrategies);
+    if (result != ERR_OK) {
+        return result;
+    }
+    return SetPriorityStrategyByBundlesInner(validStrategies);
+}
+
+ErrCode AdvancedNotificationService::SetPriorityStrategyByBundlesInner(
+    const std::map<sptr<NotificationBundleOption>, int64_t> &strategies)
+{
+    ErrCode result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
+        std::vector<sptr<NotificationRequest>> requests;
+        std::map<sptr<NotificationBundleOption>, int64_t> effectStrategies;
+        for (auto &iter : strategies) {
+            if (iter.second < 0 || iter.second > PRIORITY_STRATEGY_MAX) {
+                ANS_LOGW("Invalid strategy %{public}d, %{public}s_%{public}d",
+                    static_cast<int32_t>(iter.second), iter.first->GetBundleName().c_str(), iter.first->GetUid());
+                result = ERR_ANS_INVALID_PARAM;
+                continue;
+            }
+            ErrCode dbResult =
+                NotificationPreferences::GetInstance()->PutPriorityStrategyByBundle(iter.first, iter.second);
+            if (dbResult != ERR_OK) {
+                continue;
+            }
+            result = ERR_OK;
+            effectStrategies[iter.first] = iter.second;
+            GetRequestsFromNotification(GetNotificationsByBundle(iter.first), requests);
+        }
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+        std::vector<int32_t> results;
+        AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
+            NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE, requests, results);
+#endif
+        SendCommonEvent(NotificationConstant::TYPE_PRIORITY_STRATEGY_BY_BUNDLE, effectStrategies, 0);
+    }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set priority bundles enable.");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_31);
+    message.ErrorCode(result);
+    if (strategies.size() == MAP_SIZE_ONE) {
+        message.Message("bundle:" + strategies.begin()->first->GetBundleName() +
+            ", id:" + std::to_string(strategies.begin()->first->GetUid()) +
+            ", value:" + std::to_string(strategies.begin()->second));
+    }
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
+    ANS_LOGI("SetPriorityStrategyByBundles result: %{public}d", result);
+    return result;
+}
+
+template <typename T>
+void AdvancedNotificationService::SendCommonEvent(
+    const uint32_t eventType, const std::map<sptr<NotificationBundleOption>, T> &params, int32_t code)
+{
+    EventFwk::Want want;
+    EventFwk::CommonEventData commonData;
+    if (eventType != NotificationConstant::TYPE_PRIORITY_INTELLIGENT_SWITCH && params.size() <= 0) {
+        return;
+    }
+    switch (eventType) {
+        case NotificationConstant::TYPE_PRIORITY_INTELLIGENT_SWITCH:
+            want.SetAction(NotificationConstant::EVENT_PRIORITY_INTELLIGENT_SWITCH);
+            commonData.SetCode(code);
+            break;
+        case NotificationConstant::TYPE_PRIORITY_SWITCH_BY_BUNDLE: {
+                nlohmann::json jsonObject = nlohmann::json::array();
+                for (auto &param : params) {
+                    bool enabled = param.second;
+                    nlohmann::json jsonNode = {{"bundle", param.first->GetBundleName()},
+                        {"uid", param.first->GetUid()}, {"enable", enabled}};
+                    jsonObject.emplace_back(jsonNode);
+                }
+                want.SetParam("switches", jsonObject.dump());
+                want.SetAction(NotificationConstant::EVENT_PRIORITY_SWITCH_BY_BUNDLE);
+            }
+            break;
+        case NotificationConstant::TYPE_PRIORITY_STRATEGY_BY_BUNDLE: {
+                nlohmann::json jsonObject = nlohmann::json::array();
+                for (auto &param : params) {
+                    nlohmann::json jsonNode = {{"bundle", param.first->GetBundleName()},
+                        {"uid", param.first->GetUid()}, {"strategy", param.second}};
+                    jsonObject.emplace_back(jsonNode);
+                }
+                want.SetParam("strategies", jsonObject.dump());
+                want.SetAction(NotificationConstant::EVENT_PRIORITY_STRATEGY_BY_BUNDLE);
+            }
+            break;
+        default:
+            break;
+    }
+    commonData.SetWant(want);
+    std::vector<std::string> permission { OHOS_PERMISSION_NOTIFICATION_CONTROLLER };
+    EventFwk::CommonEventPublishInfo publishInfo;
+    publishInfo.SetSubscriberPermissions(permission);
+    bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(commonData, publishInfo);
 }
 }  // namespace Notification
 }  // namespa OHOS

@@ -1628,6 +1628,40 @@ public:
         std::map<sptr<NotificationBundleOption>, bool> &priorityEnable) override;
 
     /**
+     * @brief Checks whether the intelligent priority notification service is enabled.
+     *
+     * @param enabled Whether the intelligent priority notification service is enabled.
+     * @return Returns result checking whether the intelligent priority notification service is enabled.
+     */
+    ErrCode IsPriorityIntelligentEnabled(bool &enabled) override;
+
+    /**
+     * @brief Sets the enabling status of the intelligent priority notification.
+     *
+     * @param enabled Whether the intelligent priority notification service is enabled.
+     * @return Returns result setting the enabling status of the intelligent priority notification.
+     */
+    ErrCode SetPriorityIntelligentEnabled(const bool enabled) override;
+
+    /**
+     * @brief Gets the priority strategy of bundles.
+     *
+     * @param bundleOptions Indicates the bundle name and uid of the application.
+     * @param strategies Indicates the priority strategy of bundles.
+     * @return Returns result getting the priority strategy of bundles.
+     */
+    ErrCode GetPriorityStrategyByBundles(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        std::map<sptr<NotificationBundleOption>, int64_t> &strategies) override;
+
+    /**
+     * @brief Sets the priority strategy of bundles.
+     *
+     * @param strategies Indicates the priority strategy of bundles.
+     * @return Returns result setting the priority strategy of bundles.
+     */
+    ErrCode SetPriorityStrategyByBundles(const std::map<sptr<NotificationBundleOption>, int64_t> &strategies) override;
+
+    /**
      * @brief Update priority type of notification and notify subscriber.
      *
      * @param request Indicates the NotificationRequest object for setting the notification content.
@@ -1892,6 +1926,12 @@ public:
     ErrCode SetPriorityEnabledByBundleInner(
         const sptr<NotificationBundleOption> &bundleOption, const int32_t enableStatusInt);
     ErrCode SetPriorityEnabledInner(const bool enabled);
+    ErrCode SetPriorityIntelligentEnabledInner(const NotificationConstant::SWITCH_STATE enableStatus);
+    ErrCode SetPriorityEnabledByBundlesInner(
+        const std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> &priorityEnable);
+    ErrCode SetPriorityStrategyByBundlesInner(const std::map<sptr<NotificationBundleOption>, int64_t> &strategies);
+    void GetRequestsFromNotification(
+        const std::vector<sptr<Notification>> &notifications, std::vector<sptr<NotificationRequest>> &requests);
     ErrCode SetNotDisturbEnableState(int32_t userId, bool& isDoNotDisturbEnabled);
     ErrCode SetNotDisturbWhiteList(int32_t userId);
     void RefreshNotDisturbEnableState();
@@ -1968,8 +2008,6 @@ private:
         const int32_t ownerUid, const int32_t notificationId);
     std::vector<sptr<Notification>> GetAllNotification();
     std::vector<sptr<Notification>> GetNotificationsByBundle(const sptr<NotificationBundleOption> &bundleOption);
-    void GetRequestsFromNotification(
-        const std::vector<sptr<Notification>> &notifications, std::vector<sptr<NotificationRequest>> &requests);
     std::vector<std::string> GetNotificationKeys(const sptr<NotificationBundleOption> &bundleOption);
     std::vector<std::string> GetNotificationKeysByBundle(const sptr<NotificationBundleOption> &bundleOption);
     bool IsNotificationExists(const std::string &key);
@@ -2401,6 +2439,15 @@ private:
     void DistributedEnabledBySlotChangeStrategy(const std::string &deviceType,
         const NotificationConstant::SlotType slotType, const bool enabled, const ErrCode result);
     ErrCode SetSilentReminderEnabledInner(const sptr<NotificationBundleOption> &bundleOption, const bool enabled);
+    template <typename T>
+    ErrCode GetValidMapByBundle(const EventBranchId branchId,
+        const std::map<sptr<NotificationBundleOption>, T> &originMap,
+        std::map<sptr<NotificationBundleOption>, T> &validMap);
+    ErrCode GetValidBundles(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        std::vector<sptr<NotificationBundleOption>> &validBundleOptions);
+    template <typename T>
+    void SendCommonEvent(
+        const uint32_t eventType, const std::map<sptr<NotificationBundleOption>, T> &params, int32_t code);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;

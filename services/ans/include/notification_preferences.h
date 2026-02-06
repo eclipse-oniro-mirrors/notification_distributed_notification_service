@@ -437,6 +437,60 @@ public:
         const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::PriorityEnableStatus &enableStatus);
 
     /**
+     * @brief Put the enabling status of the intelligent priority notification.
+     *
+     * @param enabled Whether the intelligent priority notification service is enabled.
+     * @return Returns result setting the enabling status of the intelligent priority notification.
+     */
+    ErrCode PutPriorityIntelligentEnabled(const NotificationConstant::SWITCH_STATE enabled);
+
+    /**
+     * @brief Query whether the intelligent priority notification service is enabled.
+     *
+     * @param enabled Whether the intelligent priority notification service is enabled.
+     * @return Returns result checking whether the intelligent priority notification service is enabled.
+     */
+    ErrCode GetPriorityIntelligentEnabled(NotificationConstant::SWITCH_STATE &enabled);
+
+    /**
+     * @brief Put switch for sending priority notification by bundles.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param priorityStatus indicates whether to allow sending priority notification by bundle.
+     * @return Return true on success, false on failure.
+     */
+    ErrCode PutPriorityEnabledByBundleV2(
+        const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SWITCH_STATE priorityStatus);
+
+    /**
+     * @brief Query switch for sending priority notification by bundles.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param priorityStatus indicates whether to allow sending priority notification by bundle.
+     * @return Return true on success, false on failure.
+     */
+    ErrCode GetPriorityEnabledByBundleV2(
+        const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::SWITCH_STATE &priorityStatus);
+
+    /**
+     * @brief Put the priority strategy of bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param strategy Indicates the priority strategy of bundle.
+     * @return Returns result put the priority strategy of bundle.
+     */
+    ErrCode PutPriorityStrategyByBundle(const sptr<NotificationBundleOption> &bundleOption, const int64_t strategy);
+
+    /**
+     * @brief Query the priority strategy of bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param strategy Indicates the priority strategy of bundle.
+     * @return Returns result getting the priority strategy of bundle.
+     */
+    ErrCode GetPriorityStrategyByBundle(const sptr<NotificationBundleOption> &bundleOption, int64_t &strategy);
+
+    /**
      * @brief Get whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
      *

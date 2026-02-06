@@ -41,20 +41,6 @@ public:
 
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
 /**
- * @tc.name: IsNeedUpdatePriorityType_0100
- * @tc.desc: Test IsNeedUpdatePriorityType when request is nullptr.
- * @tc.type: FUNC
- */
-HWTEST_F(AdvancedNotificationPriorityHelperTest, IsNeedUpdatePriorityType_0100, Function | SmallTest | Level1)
-{
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    NotificationPreferences::GetInstance()->SetPriorityEnabled(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
-    AdvancedNotificationPriorityHelper::GetInstance()->UpdatePriorityType(nullptr);
-    EXPECT_FALSE(AdvancedNotificationPriorityHelper::GetInstance()->IsNeedUpdatePriorityType(request));
-}
-
-/**
  * @tc.name: SetPriorityTypeToExtendInfo_0100
  * @tc.desc: Test SetPriorityTypeToExtendInfo success.
  * @tc.type: FUNC
@@ -77,15 +63,16 @@ HWTEST_F(AdvancedNotificationPriorityHelperTest, SetPriorityTypeToExtendInfo_010
 HWTEST_F(AdvancedNotificationPriorityHelperTest, RefreshPriorityType_0100, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationRequest>> requests;
-    EXPECT_EQ(AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
-        requests, NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE),
-        NotificationAiExtensionWrapper::ErrorCode::ERR_OK);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetPriorityNotificationType(NotificationConstant::PriorityNotificationType::PRIMARY_CONTACT);
     AdvancedNotificationPriorityHelper::GetInstance()->SetPriorityTypeToExtendInfo(request);
     requests.push_back(request);
+    std::vector<int32_t> results;
+    AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
+        NotificationAiExtensionWrapper::REFRESH_KEYWORD_PRIORITY_TYPE, requests, results);
+    requests.clear();
     EXPECT_EQ(AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
-        requests, NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE),
+        NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE, requests, results),
         NotificationAiExtensionWrapper::ErrorCode::ERR_OK);
 }
 #endif

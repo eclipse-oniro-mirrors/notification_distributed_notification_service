@@ -2500,6 +2500,71 @@ ErrCode AnsNotification::SetPriorityEnabledByBundles(
     return proxy->SetPriorityEnabledByBundles(priorityEnable);
 }
 
+ErrCode AnsNotification::IsPriorityIntelligentEnabled(bool &enabled)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->IsPriorityIntelligentEnabled(enabled);
+}
+
+ErrCode AnsNotification::SetPriorityIntelligentEnabled(const bool enabled)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->SetPriorityIntelligentEnabled(enabled);
+}
+
+ErrCode AnsNotification::GetPriorityStrategyByBundles(const std::vector<NotificationBundleOption> &bundleOptions,
+    std::map<sptr<NotificationBundleOption>, int64_t> &strategies)
+{
+    if (bundleOptions.empty()) {
+        ANS_LOGE("Invalid bundleOptions.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    std::vector<sptr<NotificationBundleOption>> sptrBundleOptions;
+    for (const auto &option : bundleOptions) {
+        sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption(option);
+        if (bo == nullptr) {
+            ANS_LOGE("null bundleOption");
+            return ERR_ANS_NO_MEMORY;
+        }
+        sptrBundleOptions.emplace_back(std::move(bo));
+    }
+    return proxy->GetPriorityStrategyByBundles(sptrBundleOptions, strategies);
+}
+
+ErrCode AnsNotification::SetPriorityStrategyByBundles(
+    const std::map<sptr<NotificationBundleOption>, int64_t> &strategies)
+{
+    if (strategies.empty()) {
+        ANS_LOGE("Invalid strategies.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->SetPriorityStrategyByBundles(strategies);
+}
+
 ErrCode AnsNotification::TriggerUpdatePriorityType(const NotificationRequest &request)
 {
     sptr<IAnsManager> proxy = GetAnsManagerProxy();

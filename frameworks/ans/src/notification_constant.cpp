@@ -55,5 +55,10 @@ const char* NotificationConstant::PriorityNotificationType::KEY_PROGRESS = "KEY_
 const char* NotificationConstant::PriorityNotificationType::PUBLIC_EVENT = "PUBLIC_EVENT";
 const char* NotificationConstant::PriorityNotificationType::IOT_WARNING = "IOT_WARNING";
 const char* NotificationConstant::PriorityNotificationType::CUSTOM_KEYWORD = "CUSTOM_KEYWORD";
+
+const char* NotificationConstant::EVENT_PRIORITY_INTELLIGENT_SWITCH = "notification.event.PRIORITY_INTELLIGENT_SWITCH";
+const char* NotificationConstant::EVENT_PRIORITY_SWITCH_BY_BUNDLE = "notification.event.PRIORITY_SWITCH_BY_BUNDLE";
+const char* NotificationConstant::EVENT_PRIORITY_STRATEGY_BY_BUNDLE = "notification.event.PRIORITY_STRATEGY_BY_BUNDLE";
+const char* NotificationConstant::EVENT_NOTIFICATION_REMOVED = "usual.event.NOTIFICATION_REMOVED";
 }  // namespace Notification
 }  // namespace OHOS

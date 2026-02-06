@@ -413,6 +413,10 @@ export default namespace notificationManager {
     export native function nativeIsPriorityEnabled(callback?: AsyncCallback<boolean>): Promise<boolean>;
     export native function nativeGetPriorityEnabledByBundles(bundles: Array<BundleOption>): Map<BundleOption, boolean>;
     export native function nativeSetPriorityEnabledByBundles(priorityEnable: Map<BundleOption, boolean>): void;
+    export native function nativeSetPriorityIntelligentEnabled(enable: boolean): void;
+    export native function nativeIsPriorityIntelligentEnabled(): boolean;
+    export native function nativeSetPriorityStrategyByBundles(strategies: Map<BundleOption, long>): void;
+    export native function nativeGetPriorityStrategyByBundles(bundles: Array<BundleOption>): Map<BundleOption, long>;
 
     function isInvalidParameter(doNotDisturbDate: DoNotDisturbDate): BusinessError
     {
@@ -3008,12 +3012,12 @@ export default namespace notificationManager {
         return result;
     }
 
-    export function setPriorityEnabledByBundles(priorityEnable: Map<BundleOption, boolean>): Promise<void> {
-        if (!priorityEnable || priorityEnable.size == 0) {
+    export function setPriorityEnabledByBundles(switches: Map<BundleOption, boolean>): Promise<void> {
+        if (!switches || switches.size == 0) {
             throw errorParamInvalid;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetPriorityEnabledByBundles(priorityEnable); });
+            let p = taskpool.execute((): void => { return nativeSetPriorityEnabledByBundles(switches); });
             p.then((data: Any): void => {
                 resolve(undefined);
             }, (error: Error): void => {
@@ -3032,6 +3036,63 @@ export default namespace notificationManager {
             let p = taskpool.execute((): Map<BundleOption, boolean> => { return nativeGetPriorityEnabledByBundles(bundles); });
             p.then((data: Any): void => {
                 let ret : Map<BundleOption, boolean> = data as Map<BundleOption, boolean>;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function setPriorityIntelligentEnabled(enable: boolean): Promise<void> {
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativeSetPriorityIntelligentEnabled(enable); });
+            p.then((data: Any): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function isPriorityIntelligentEnabled(): Promise<boolean> {
+        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): boolean => { return nativeIsPriorityIntelligentEnabled(); });
+            p.then((data: Any): void => {
+                let ret : boolean = data as boolean;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function setPriorityStrategyByBundles(strategies: Map<BundleOption, long>): Promise<void> {
+        if (!strategies || strategies.size == 0) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativeSetPriorityStrategyByBundles(strategies); });
+            p.then((data: Any): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function getPriorityStrategyByBundles(bundles: Array<BundleOption>): Promise<Map<BundleOption, long>> {
+        if (!bundles || bundles.length == 0) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<Map<BundleOption, long>>(
+            (resolve: ResolveCallback<Map<BundleOption, long>>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): Map<BundleOption, long> => { return nativeGetPriorityStrategyByBundles(bundles); });
+            p.then((data: Any): void => {
+                let ret : Map<BundleOption, long> = data as Map<BundleOption, long>;
                 resolve(ret);
             }, (error: Error): void => {
                 reject(error);

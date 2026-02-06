@@ -18,9 +18,11 @@
 #include "ani.h"
 #include "distributed_bundle_option.h"
 #include "notification_bundle_option.h"
+#include "notification_constant.h"
 
 using BundleOption = OHOS::Notification::NotificationBundleOption;
 using DistributedBundleOption = OHOS::Notification::DistributedBundleOption;
+using NotificationConstant = OHOS::Notification::NotificationConstant;
 namespace OHOS {
 namespace NotificationSts {
 bool UnwrapBundleOption(ani_env *env, ani_object param, BundleOption& option);
@@ -38,10 +40,14 @@ bool UnwrapArrayDistributedBundleOption(ani_env *env, ani_object arrayObj,
     std::vector<DistributedBundleOption> &options);
 bool SetAniArrayGrantedBundleInfo(
     ani_env* env, const std::vector<sptr<BundleOption>>& bundleOptions, ani_object& outAniObj);
-ani_status GetBundleMapByAniMap(ani_env *env, ani_object &mapObj, std::vector<std::pair<BundleOption, bool>> &out);
+template <typename T>
+ani_status GetBundleMapByAniMap(ani_env *env, ani_object &mapObj,
+    NotificationConstant::TypePriorityParam type, std::vector<std::pair<BundleOption, T>> &out);
 bool WrapBundleOptionMap(ani_env *env, ani_object &outAniObj, const std::map<sptr<BundleOption>, bool> &bundleMap);
-ani_status UnwrapBundleOptionMap(ani_env *env, ani_object obj,
-    std::vector<std::pair<BundleOption, bool>> &bundleMap);
+bool WrapBundleOptionMap(ani_env *env, ani_object &outAniObj, const std::map<sptr<BundleOption>, int64_t> &bundleMap);
+ani_status UnwrapBundleOptionMap(
+    ani_env *env, ani_object obj, std::vector<std::pair<BundleOption, int64_t>> &bundleMap);
+ani_status UnwrapBundleOptionMap(ani_env *env, ani_object obj, std::vector<std::pair<BundleOption, bool>> &bundleMap);
 }
 }
 
