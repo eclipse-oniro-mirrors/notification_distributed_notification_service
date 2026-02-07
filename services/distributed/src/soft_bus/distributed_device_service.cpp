@@ -368,10 +368,11 @@ void DistributedDeviceService::SetDeviceStatus(const std::shared_ptr<TlvBox>& bo
     int32_t status;
     std::string deviceName = DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_);
     if (stateBox.GetState(status)) {
-        int32_t result = NotificationHelper::SetTargetDeviceStatus(deviceName, status,
+        uint32_t state = (static_cast<uint32_t>(status) << 1);
+        int32_t result = NotificationHelper::SetTargetDeviceStatus(deviceName, state,
             DEFAULT_LOCK_SCREEN_FLAG, device.udid_);
         ANS_LOGI("Dans set state %{public}s %{public}s %{public}d %{public}d.", deviceName.c_str(),
-            StringAnonymous(deviceId).c_str(), status, result);
+            StringAnonymous(deviceId).c_str(), state, result);
     }
 
     bool liveViewEnable;

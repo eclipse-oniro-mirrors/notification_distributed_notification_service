@@ -87,16 +87,12 @@ void DistributedScreenStatusManager::OnDeviceDisconnected(const std::string &dev
 
 void DistributedScreenStatusManager::GetKvDataManager()
 {
-#ifdef DISABLE_DISTRIBUTED_NOTIFICATION_SUPPORTED
     initCallback_ = std::make_shared<DeviceInitCallBack>();
     int32_t ret = DistributedHardware::DeviceManager::GetInstance().InitDeviceManager(APP_ID + STORE_ID, initCallback_);
     if (ret != 0) {
         ANS_LOGE("init device manager failed, ret:%{public}d", ret);
         return;
     }
-#else
-    int32_t ret = 0;
-#endif
     ret = DistributedHardware::DeviceManager::GetInstance().RegisterDevStateCallback(APP_ID + STORE_ID, "", deviceCb_);
     if (ret != 0) {
         ANS_LOGD("register devStateCallback failed, ret:%{public}d", ret);

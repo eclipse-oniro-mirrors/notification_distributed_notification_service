@@ -34,7 +34,7 @@ DistributedServer& DistributedServer::GetInstance()
 
 void DistributedServer::ReleaseServer()
 {
-    ANS_LOGI("Release server socket %{public}d.", (int32_t)(serverSocket_.size()));
+    ANS_LOGI("Release server socket %{public}zu.", serverSocket_.size());
     for (auto& item : serverSocket_) {
         CloseSocket(item.second);
     }
@@ -55,7 +55,7 @@ void DistributedServer::CheckServer()
 int32_t DistributedServer::InitServer(const std::string &deviceId, uint16_t deviceType)
 {
     if (init.load()) {
-        ANS_LOGI("Server has inited %{public}d.", (int32_t)(serverSocket_.size()));
+        ANS_LOGI("Server has inited %{public}zu.", serverSocket_.size());
         return 0;
     }
     int32_t socketId = 0;
@@ -112,13 +112,13 @@ void DistributedServer::OnShutdown(int32_t socket, ShutdownReason reason)
 void DistributedServer::OnBytes(int32_t socket, const void *data, uint32_t dataLen)
 {
     DistributedService::GetInstance().OnReceiveMsg(data, dataLen);
-    ANS_LOGI("Distributed server On bytes %{public}d %{public}d", (int32_t)(dataLen), socket);
+    ANS_LOGI("Distributed server On bytes %{public}zu %{public}d", dataLen, socket);
 }
 
 void DistributedServer::OnMessage(int32_t socket, const void *data, uint32_t dataLen)
 {
     DistributedService::GetInstance().OnReceiveMsg(data, dataLen);
-    ANS_LOGI("Distributed server On message %{public}d %{public}d", (int32_t)(dataLen), socket);
+    ANS_LOGI("Distributed server On message %{public}zu %{public}d", dataLen, socket);
 }
 }
 }

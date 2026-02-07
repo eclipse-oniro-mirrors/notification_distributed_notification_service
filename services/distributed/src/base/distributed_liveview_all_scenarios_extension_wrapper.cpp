@@ -161,22 +161,24 @@ ErrCode DistributedLiveviewAllScenariosExtensionWrapper::TriggerPushWantAgent(
     return triggerHandler_(request, actionType, extraInfo);
 }
 
-ErrCode DistributedLiveviewAllScenariosExtensionWrapper::SubscribeAllConnect(bool isPadOrPc)
+void DistributedLiveviewAllScenariosExtensionWrapper::SubscribeAllConnect(bool isPadOrPc)
 {
     if (subscribeHandler_ == nullptr) {
         ANS_LOGE("Subscribe all connect wrapper symbol failed");
-        return 0;
+        return;
     }
-    return subscribeHandler_(isPadOrPc);
+    subscribeHandler_(isPadOrPc);
+    return;
 }
 
-ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UnSubscribeAllConnect()
+void DistributedLiveviewAllScenariosExtensionWrapper::UnSubscribeAllConnect()
 {
     if (unSubscribeHandler_ == nullptr) {
         ANS_LOGE("UnSubscribe all connect wrapper symbol failed");
-        return 0;
+        return;
     }
-    return unSubscribeHandler_();
+    unSubscribeHandler_();
+    return;
 }
 
 ErrCode DistributedLiveviewAllScenariosExtensionWrapper::DistributedLiveViewOperation(

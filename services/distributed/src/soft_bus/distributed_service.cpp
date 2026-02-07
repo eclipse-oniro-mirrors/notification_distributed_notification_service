@@ -449,6 +449,28 @@ void DistributedService::HandleDeviceUsingChange(const DeviceStatueChangeInfo& c
     DistributedDeviceService::GetInstance().SetDeviceState(device.deviceId_, DeviceState::STATE_SYNC);
     ConnectPeerDevice(device);
 }
+
+bool DistributedService::OnConsumedSetFlags(const std::shared_ptr<Notification> &request,
+    const DistributedDeviceInfo& peerDevice)
+{
+    std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(peerDevice.deviceType_);
+    sptr<NotificationRequest> requestPoint = request->GetNotificationRequestPoint();
+    auto flagsMap = requestPoint->GetDeviceFlags();
+    if (flagsMap == nullptr || flagsMap->size() <= 0) {
+        return false;
+    }
+    auto flagIter = flagsMap->find(deviceType);
+    if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
+        requestPoint->SetFlags(flagIter->second);
+        ANS_LOGI("SetFlags-final, key = %{public}s flags = %{public}d deviceType: %{public}s.",
+            requestPoint->GetBaseKey("").c_str(),
+            requestPoint->GetFlags()->GetReminderFlags(), deviceType.c_str());
+    } else {
+        return false;
+    }
+    return true;
+}
+
 #else
 void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request,
     const DistributedDeviceInfo& peerDevice)
@@ -468,7 +490,6 @@ void DistributedService::SyncDeviceStatus(int32_t status)
         ANS_LOGE("Check handler is null.");
         return;
     }
-    status = (static_cast<uint32_t>(status) << 1);
     std::function<void()> task = std::bind([&, status]() {
         DistributedDeviceService::GetInstance().SyncDeviceStatus(DistributedDeviceService::STATE_TYPE_LOCKSCREEN,
             status, false, false);
@@ -627,9 +648,6 @@ void DistributedService::OnHandleMsg(std::shared_ptr<TlvBox>& box)
             case NotificationEventType::REMOVE_ALL_NOTIFICATIONS:
                 DistributedPublishService::GetInstance().RemoveNotifications(box);
                 break;
-            case NotificationEventType::BUNDLE_ICON_SYNC:
-                DistributedBundleService::GetInstance().HandleBundleIconSync(box);
-                break;
             case NotificationEventType::NOTIFICATION_RESPONSE_SYNC:
             case NotificationEventType::NOTIFICATION_RESPONSE_REPLY_SYNC:
                 DistributedOperationService::GetInstance().HandleNotificationOperation(box);
@@ -671,27 +689,6 @@ void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)
         return;
     }
     OnHandleMsg(box);
-}
-
-bool DistributedService::OnConsumedSetFlags(const std::shared_ptr<Notification> &request,
-    const DistributedDeviceInfo& peerDevice)
-{
-    std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(peerDevice.deviceType_);
-    sptr<NotificationRequest> requestPoint = request->GetNotificationRequestPoint();
-    auto flagsMap = requestPoint->GetDeviceFlags();
-    if (flagsMap == nullptr || flagsMap->size() <= 0) {
-        return false;
-    }
-    auto flagIter = flagsMap->find(deviceType);
-    if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
-        requestPoint->SetFlags(flagIter->second);
-        ANS_LOGI("SetFlags-final, key = %{public}s flags = %{public}d deviceType: %{public}s.",
-            requestPoint->GetBaseKey("").c_str(),
-            requestPoint->GetFlags()->GetReminderFlags(), deviceType.c_str());
-    } else {
-        return false;
-    }
-    return true;
 }
 }
 }

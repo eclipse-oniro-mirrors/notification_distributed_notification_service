@@ -51,8 +51,8 @@ public:
         const std::string& deviceType);
     ErrCode TriggerPushWantAgent(const sptr<NotificationRequest> &request, int32_t actionType,
         const AAFwk::WantParams extraInfo);
-    ErrCode SubscribeAllConnect(bool isPadOrPc);
-    ErrCode UnSubscribeAllConnect();
+    void SubscribeAllConnect(bool isPadOrPc);
+    void UnSubscribeAllConnect();
     ErrCode DistributedLiveViewOperation(
         sptr<NotificationRequest> &request, const int32_t operationType, const int32_t btnIndex);
     ErrCode DistributedAncoNotificationClick(const sptr<NotificationRequest> &request, bool &triggerWantInner);
