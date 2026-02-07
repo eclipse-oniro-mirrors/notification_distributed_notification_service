@@ -1203,6 +1203,40 @@ public:
         std::map<sptr<NotificationBundleOption>, bool> &priorityEnable);
 
     /**
+     * @brief Checks whether the intelligent priority notification service is enabled.
+     *
+     * @param enabled Whether the intelligent priority notification service is enabled.
+     * @return Returns result checking whether the intelligent priority notification service is enabled.
+     */
+    ErrCode IsPriorityIntelligentEnabled(bool &enabled);
+
+    /**
+     * @brief Sets the enabling status of the intelligent priority notification.
+     *
+     * @param enabled Whether the intelligent priority notification service is enabled.
+     * @return Returns result setting the enabling status of the intelligent priority notification.
+     */
+    ErrCode SetPriorityIntelligentEnabled(const bool enabled);
+
+    /**
+     * @brief Gets the priority strategy of bundles.
+     *
+     * @param bundleOptions Indicates the bundle name and uid of the application.
+     * @param strategies Indicates the priority strategy of bundles.
+     * @return Returns result getting the priority strategy of bundles.
+     */
+    ErrCode GetPriorityStrategyByBundles(const std::vector<NotificationBundleOption> &bundleOptions,
+        std::map<sptr<NotificationBundleOption>, int64_t> &strategies);
+
+    /**
+     * @brief Sets the priority strategy of bundles.
+     *
+     * @param strategies Indicates the priority strategy of bundles.
+     * @return Returns result setting the priority strategy of bundles.
+     */
+    ErrCode SetPriorityStrategyByBundles(const std::map<sptr<NotificationBundleOption>, int64_t> &strategies);
+
+    /**
      * @brief Update priority type of notification and notify subscriber.
      *
      * @param request Indicates the NotificationRequest object for setting the notification content.

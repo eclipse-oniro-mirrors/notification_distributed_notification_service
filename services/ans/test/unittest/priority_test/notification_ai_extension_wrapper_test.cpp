@@ -86,9 +86,11 @@ HWTEST_F(NotificationAiExtensionWrapperTest, NotifyPriorityEvent_0100, Function 
 {
     NOTIFICATION_AI_EXTENSION_WRAPPER->notifyPriorityEvent_ = nullptr;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 200202);
-    EXPECT_EQ(
-        NOTIFICATION_AI_EXTENSION_WRAPPER->NotifyPriorityEvent("event", bundleOption),
-            NOTIFICATION_AI_EXTENSION_WRAPPER->ErrorCode::ERR_FAIL);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.emplace_back(bundleOption);
+    std::vector<sptr<NotificationRequest>> requests;
+    EXPECT_EQ(NOTIFICATION_AI_EXTENSION_WRAPPER->NotifyPriorityEvent("event", bundleOptions, requests),
+        NOTIFICATION_AI_EXTENSION_WRAPPER->ErrorCode::ERR_FAIL);
 }
 
 /**
@@ -101,9 +103,11 @@ HWTEST_F(NotificationAiExtensionWrapperTest, UpdateNotification_0100, Function |
     NOTIFICATION_AI_EXTENSION_WRAPPER->updateNotification_ = nullptr;
     std::vector<sptr<NotificationRequest>> requests;
     std::vector<int32_t> results;
+    std::vector<int64_t> strategies;
+    uint32_t aiStatus = 0;
     NOTIFICATION_AI_EXTENSION_WRAPPER->Init();
-    EXPECT_EQ(NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateNotification(
-        requests, NotificationAiExtensionWrapper::REFRESH_KEYWORD_PRIORITY_TYPE, results),
+    EXPECT_EQ(NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateNotification(requests,
+        NotificationAiExtensionWrapper::REFRESH_KEYWORD_PRIORITY_TYPE, results, aiStatus, strategies),
         NOTIFICATION_AI_EXTENSION_WRAPPER->ErrorCode::ERR_FAIL);
     NOTIFICATION_AI_EXTENSION_WRAPPER->InitExtensionWrapper();
 }

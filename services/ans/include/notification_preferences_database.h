@@ -203,6 +203,60 @@ public:
         NotificationConstant::PriorityEnableStatus &enableStatus);
 
     /**
+     * @brief Put the enabling status of the intelligent priority notification into disturbe DB.
+     *
+     * @param enabled Whether the intelligent priority notification service is enabled.
+     * @return Returns result setting the enabling status of the intelligent priority notification.
+     */
+    bool PutPriorityIntelligentEnabled(const NotificationConstant::SWITCH_STATE enabled);
+
+    /**
+     * @brief Query whether the intelligent priority notification service is enabled into disturbe DB.
+     *
+     * @param enabled Whether the intelligent priority notification service is enabled.
+     * @return Returns result checking whether the intelligent priority notification service is enabled.
+     */
+    bool GetPriorityIntelligentEnabled(NotificationConstant::SWITCH_STATE &enabled);
+
+    /**
+     * @brief Put switch for sending priority notification by bundles into disturbe DB.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param priorityStatus indicates whether to allow sending priority notification by bundle.
+     * @return Return true on success, false on failure.
+     */
+    bool PutPriorityEnabledByBundleV2(
+        const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SWITCH_STATE priorityStatus);
+
+    /**
+     * @brief Query switch for sending priority notification by bundles into disturbe DB.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param priorityStatus indicates whether to allow sending priority notification by bundle.
+     * @return Return true on success, false on failure.
+     */
+    bool GetPriorityEnabledByBundleV2(
+        const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::SWITCH_STATE &priorityStatus);
+
+    /**
+     * @brief Put the priority strategy of bundle into disturbe DB.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param strategy Indicates the priority strategy of bundle.
+     * @return Returns result put the priority strategy of bundle.
+     */
+    bool PutPriorityStrategyByBundle(const sptr<NotificationBundleOption> &bundleOption, const int64_t strategy);
+
+    /**
+     * @brief Query the priority strategy of bundle into disturbe DB.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param strategy Indicates the priority strategy of bundle.
+     * @return Returns result getting the priority strategy of bundle.
+     */
+    bool GetPriorityStrategyByBundle(const sptr<NotificationBundleOption> &bundleOption, int64_t &strategy);
+
+    /**
      * @brief Put distributed enable notification in the of  bundle into disturbe DB.
      *
      * @param deviceType Indicates device type.

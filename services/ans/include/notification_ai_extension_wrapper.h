@@ -21,6 +21,7 @@
 
 #include "refbase.h"
 #include "singleton.h"
+#include "notification.h"
 #include "notification_request.h"
 
 namespace OHOS::Notification {
@@ -33,19 +34,23 @@ public:
     typedef int32_t (*SYNC_RULES)(const std::string &rules);
     typedef int32_t (*UPDATE_NOTIFICATION)(
         const std::vector<sptr<NotificationRequest>> &requests,
-        const std::string &command,
-        std::vector<int32_t> &results);
+        const std::string &command, std::vector<int32_t> &results,
+        const uint32_t aiStatus, const std::vector<int64_t> strategies);
     typedef int32_t (*SYNC_BUNDLE_KEYWORDS)(
         const sptr<NotificationBundleOption> &bundleOption, const std::string &keyword);
-    typedef int32_t (*NOTIFY_PRIORITY_EVENT)(
-        const std::string &event, const sptr<NotificationBundleOption> &bundleOption);
+    typedef int32_t (*NOTIFY_PRIORITY_EVENT)(const std::string &event,
+        const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        const std::vector<sptr<NotificationRequest>> &requests);
     void Init();
     int32_t SyncRules(const std::string &rules);
     int32_t UpdateNotification(
         const std::vector<sptr<NotificationRequest>> &requests,
-        const std::string &command, std::vector<int32_t> &results);
+        const std::string &command, std::vector<int32_t> &results,
+        const uint32_t aiStatus, const std::vector<int64_t> strategies);
     int32_t SyncBundleKeywords(const sptr<NotificationBundleOption> &bundleOption, const std::string &keyword);
-    int32_t NotifyPriorityEvent(const std::string &event, const sptr<NotificationBundleOption> &bundleOption);
+    int32_t NotifyPriorityEvent(const std::string &event,
+        const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        const std::vector<sptr<NotificationRequest>> &requests);
 
     enum ErrorCode : int32_t {
         ERR_FAIL = -1,

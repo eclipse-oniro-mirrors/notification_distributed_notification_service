@@ -236,6 +236,43 @@ public:
         ENABLE = 2,
     };
 
+    enum PriorityStrategyStatus {
+        /**
+         * Default priority strategy status
+         */
+        STATUS_SYSTEM_DEFAULT = 1 << 0,
+    
+        /**
+         * Priority rules only
+         */
+        STATUS_SYSTEM_RULE = 1 << 1,
+    
+        /**
+         * Intelligent recognition only
+         */
+        STATUS_INTELLIGENT = 1 << 2,
+    
+        /**
+         * User-defined only
+         */
+        STATUS_USER_DEFINED = 1 << 3,
+    
+        /**
+         * Application-defined only
+         */
+        STATUS_APPLICATION_DEFINED = 1 << 4,
+    
+        /**
+         * All notifications are priority state
+         */
+        STATUS_ALL_PRIORITY = 1 << 5
+    };
+
+    enum class TypePriorityParam {
+        TYPE_BOOL,
+        TYPE_LONG
+    };
+
     enum class MonitorEvent {
         MONITOR_TYPE_ENTRY = 1,
         MONITOR_TYPE_LEAVE = 2,
@@ -667,6 +704,15 @@ public:
 
     // minimum radius for publish geofence notification
     static constexpr double MIN_GEOFENCE_RADIUS = 200.0;
+
+    // priority common event
+    static const char* EVENT_PRIORITY_INTELLIGENT_SWITCH;
+    static const char* EVENT_PRIORITY_SWITCH_BY_BUNDLE;
+    static const char* EVENT_PRIORITY_STRATEGY_BY_BUNDLE;
+    static const char* EVENT_NOTIFICATION_REMOVED;
+    static const uint32_t TYPE_PRIORITY_INTELLIGENT_SWITCH = 0;
+    static const uint32_t TYPE_PRIORITY_SWITCH_BY_BUNDLE = 1;
+    static const uint32_t TYPE_PRIORITY_STRATEGY_BY_BUNDLE = 2;
 };
 }  // namespace Notification
 }  // namespace OHOS

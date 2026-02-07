@@ -31,58 +31,23 @@ void AdvancedNotificationPriorityHelper::UpdatePriorityType(const sptr<Notificat
         return;
     }
     ANS_LOGI("priorityNotificationType: %{public}s", request->GetPriorityNotificationType().c_str());
-    if (!IsNeedUpdatePriorityType(request) || IsCollaborationNotification(request)) {
+    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW || IsCollaborationNotification(request)) {
         return;
     }
     std::vector<int32_t> results;
-    NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateNotification(
-        { request }, NotificationAiExtensionWrapper::UPDATE_PRIORITY_TYPE, results);
+    std::string cmd = NotificationAiExtensionWrapper::UPDATE_PRIORITY_TYPE;
+    RefreshPriorityType(cmd, { request }, results);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_27);
     for (int32_t result : results) {
         ANS_LOGI("UpdateNotification cmd: %{public}s, code: %{public}d, priorityType: %{public}s",
-            NotificationAiExtensionWrapper::UPDATE_PRIORITY_TYPE,
-            result, request->GetPriorityNotificationType().c_str());
+            cmd.c_str(), result, request->GetPriorityNotificationType().c_str());
         if (result == NOTIFICATION_AI_EXTENSION_WRAPPER->ErrorCode::ERR_OK) {
             continue;
         }
         message.ErrorCode(result);
-        std::string cmd = NotificationAiExtensionWrapper::UPDATE_PRIORITY_TYPE;
         message.Message("cmd: " + cmd);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
     }
-}
-
-bool AdvancedNotificationPriorityHelper::IsNeedUpdatePriorityType(const sptr<NotificationRequest> &request)
-{
-    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW) {
-        return false;
-    }
-    bool priorityEnabled = true;
-    AdvancedNotificationService::GetInstance()->IsPriorityEnabled(priorityEnabled);
-    if (!priorityEnabled) {
-        ANS_LOGI("Priority enabled is disabled");
-        return false;
-    }
-    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
-    if (bundleOption == nullptr) {
-        ANS_LOGE("UpdatePriorityType bundleOption null");
-        return false;
-    }
-    if (request->GetOwnerBundleName().empty()) {
-        bundleOption->SetBundleName(request->GetCreatorBundleName());
-        bundleOption->SetUid(request->GetCreatorUid());
-    } else {
-        bundleOption->SetBundleName(request->GetOwnerBundleName());
-        bundleOption->SetUid(request->GetOwnerUid());
-    }
-    NotificationConstant::PriorityEnableStatus enableStatus =
-        NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT;
-    if (NotificationPreferences::GetInstance()->IsPriorityEnabledByBundle(bundleOption, enableStatus) != ERR_OK) {
-        ANS_LOGI("GetPriorityEnabledByBundle Preferences fail");
-        return false;
-    }
-    ANS_LOGI("Priority enableStatus for bundle: %{public}d", static_cast<int32_t>(enableStatus));
-    return enableStatus == NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT;
 }
 
 bool AdvancedNotificationPriorityHelper::IsCollaborationNotification(const sptr<NotificationRequest> &request)
@@ -110,14 +75,57 @@ void AdvancedNotificationPriorityHelper::SetPriorityTypeToExtendInfo(const sptr<
     request->SetExtendInfo(extendInfo);
 }
 
-int32_t AdvancedNotificationPriorityHelper::RefreshPriorityType(
-    const std::vector<sptr<NotificationRequest>> requests, const std::string &command)
+ErrCode AdvancedNotificationPriorityHelper::RefreshPriorityType(const std::string &command,
+    const std::vector<sptr<NotificationRequest>> originRequests, std::vector<int32_t> &results)
 {
-    if (requests.size() <= 0) {
-        return NotificationAiExtensionWrapper::ErrorCode::ERR_OK;
+    std::vector<int64_t> strategies;
+    std::vector<sptr<NotificationRequest>> requests;
+    for (auto &request : originRequests) {
+        sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+        if (bundleOption == nullptr) {
+            ANS_LOGW("RefreshPriorityType bundleOption null");
+            continue;
+        }
+        if (request->GetOwnerBundleName().empty()) {
+            bundleOption->SetBundleName(request->GetCreatorBundleName());
+            bundleOption->SetUid(request->GetCreatorUid());
+        } else {
+            bundleOption->SetBundleName(request->GetOwnerBundleName());
+            bundleOption->SetUid(request->GetOwnerUid());
+        }
+        NotificationConstant::SWITCH_STATE priorityStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+        ErrCode dbResult =
+            NotificationPreferences::GetInstance()->GetPriorityEnabledByBundleV2(bundleOption, priorityStatus);
+        if (dbResult != ERR_OK || priorityStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF ||
+            priorityStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) {
+            ANS_LOGI("PriorityEnabledV2 close %{public}s_%{public}d or db fail",
+                bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
+            continue;
+        }
+        int64_t strategy = PRIORITY_STRATEGY_DEFAULT;
+        dbResult = NotificationPreferences::GetInstance()->GetPriorityStrategyByBundle(bundleOption, strategy);
+        if (dbResult != ERR_OK ||
+            strategy & static_cast<int64_t>(NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY)) {
+            ANS_LOGI("StatusAllPriority %{public}s_%{public}d or db fail",
+                bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
+            continue;
+        }
+        strategies.emplace_back(strategy);
+        requests.emplace_back(request);
     }
-    std::vector<int32_t> results;
-    return NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateNotification(requests, command, results);
+    if (requests.size() <= 0) {
+        ANS_LOGI("RefreshPriorityType requests empty, originRequests size: %{public}lu", originRequests.size());
+        return ERR_OK;
+    }
+    NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    ErrCode result = NotificationPreferences::GetInstance()->GetPriorityIntelligentEnabled(enableStatus);
+    if (result != ERR_OK) {
+        return result;
+    }
+    uint32_t aiStatus = static_cast<uint32_t>(enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+        enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateNotification(requests, command, results, aiStatus, strategies);
+    return ERR_OK;
 }
 #endif
 }  // namespace Notification

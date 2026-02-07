@@ -361,8 +361,29 @@ bool UnwrapArrayDistributedBundleOption(ani_env *env, ani_object arrayObj,
     return true;
 }
 
-ani_status GetBundleMapByAniMap(ani_env *env, ani_object &mapObj,
-    std::vector<std::pair<Notification::NotificationBundleOption, bool>> &out)
+ani_status PreGetBundleMapByAniMap(ani_env *env,
+    ani_ref &val, ani_ref &nextKey, ani_ref &nextVal, Notification::NotificationBundleOption &option)
+{
+    ani_status status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(nextKey), "value", &val);
+    if (status != ANI_OK) {
+        ANS_LOGE("Failed to get value, status: %{public}d", status);
+        return ANI_ERROR;
+    }
+    if (!UnwrapBundleOption(env, static_cast<ani_object>(val), option)) {
+        ANS_LOGE("UnwrapNotificationSlot failed");
+        return ANI_ERROR;
+    }
+    status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(nextVal), "value", &val);
+    if (status != ANI_OK) {
+        ANS_LOGE("Failed to get value, status: %{public}d", status);
+        return ANI_ERROR;
+    }
+    return ANI_OK;
+}
+
+template <typename T>
+ani_status GetBundleMapByAniMap(ani_env *env, ani_object &mapObj, NotificationConstant::TypePriorityParam type,
+    std::vector<std::pair<Notification::NotificationBundleOption, T>> &out)
 {
     ani_status status = ANI_ERROR;
     ani_ref keys;
@@ -378,9 +399,7 @@ ani_status GetBundleMapByAniMap(ani_env *env, ani_object &mapObj,
         ani_ref nextKey;
         ani_ref nextVal;
         ani_boolean done;
-
-        if (GetMapIteratorNext(env, keys, &nextKey) != ANI_OK ||
-            GetMapIteratorNext(env, values, &nextVal) != ANI_OK) {
+        if (GetMapIteratorNext(env, keys, &nextKey) != ANI_OK || GetMapIteratorNext(env, values, &nextVal) != ANI_OK) {
             return ANI_ERROR;
         }
 
@@ -394,27 +413,28 @@ ani_status GetBundleMapByAniMap(ani_env *env, ani_object &mapObj,
         }
 
         ani_ref val;
-        ani_status status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(nextKey), "value", &val);
-        if (status != ANI_OK) {
-            ANS_LOGE("Failed to get value, status: %{public}d", status);
-        }
         Notification::NotificationBundleOption option;
-        if (!UnwrapBundleOption(env, static_cast<ani_object>(val), option)) {
-            ANS_LOGE("UnwrapBundleOption failed");
+        if (PreGetBundleMapByAniMap(env, val, nextKey, nextVal, option) != ANI_OK) {
             return ANI_ERROR;
         }
-        status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(nextVal), "value", &val);
-        if (status != ANI_OK) {
-            ANS_LOGE("Failed to get value, status: %{public}d", status);
-            return ANI_ERROR;
+        if (type == NotificationConstant::TypePriorityParam::TYPE_BOOL) {
+            ani_boolean anivalue = ANI_FALSE;
+            if ((status = env->Object_CallMethodByName_Boolean(
+                reinterpret_cast<ani_object>(val), "toBoolean", nullptr, &anivalue)) != ANI_OK) {
+                ANS_LOGE("Failed to get bool, status: %{public}d", status);
+                return ANI_ERROR;
+            }
+            out.emplace_back(option, AniBooleanToBool(anivalue));
         }
-        ani_boolean anivalue = ANI_FALSE;
-        if ((status = env->Object_CallMethodByName_Boolean(
-            reinterpret_cast<ani_object>(val), "toBoolean", nullptr, &anivalue)) != ANI_OK) {
-            ANS_LOGE("Failed to get bool, status: %{public}d", status);
-            return ANI_ERROR;
+        if (type == NotificationConstant::TypePriorityParam::TYPE_LONG) {
+            ani_long anivalue;
+            if ((status = env->Object_CallMethodByName_Long(
+                static_cast<ani_object>(val), "toLong", ":l", &anivalue)) != ANI_OK) {
+                ANS_LOGE("Failed to get long, status: %{public}d", status);
+                return ANI_ERROR;
+            }
+            out.emplace_back(option, static_cast<int64_t>(anivalue));
         }
-        out.emplace_back(option, AniBooleanToBool(anivalue));
     }
     return ANI_OK;
 }
@@ -451,10 +471,38 @@ bool WrapBundleOptionMap(ani_env *env, ani_object &outAniObj,
     return true;
 }
 
-ani_status UnwrapBundleOptionMap(ani_env *env, ani_object obj,
-    std::vector<std::pair<Notification::NotificationBundleOption, bool>> &bundleMap)
+bool WrapBundleOptionMap(ani_env *env, ani_object &outAniObj,
+    const std::map<sptr<Notification::NotificationBundleOption>, int64_t> &bundleMap)
 {
-    ANS_LOGD("UnwrapBundleOptionMap call");
+    outAniObj = nullptr;
+    outAniObj = CreateMapObject(env, "std.core.Map", ":");
+    if (outAniObj == nullptr) {
+        return false;
+    }
+    ani_ref mapRef = nullptr;
+    ani_status status = ANI_ERROR;
+    for (const auto& [k, v] : bundleMap) {
+        ani_object bundleObj;
+        if (!WrapBundleOption(env, k, bundleObj) || bundleObj == nullptr) {
+            ANS_LOGE("WrapBundleOption failed");
+            continue;
+        }
+        ani_object num = CreateLong(env, static_cast<int64_t>(v));
+        status = env->Object_CallMethodByName_Ref(outAniObj, "set",
+            "YY:C{std.core.Map}", &mapRef, static_cast<ani_object>(bundleObj), num);
+        if (status != ANI_OK) {
+            ANS_LOGE("Faild to set bundleMap, status : %{public}d", status);
+            continue;
+        }
+    }
+    if (outAniObj == nullptr) {
+        return false;
+    }
+    return true;
+}
+
+ani_status PreUnwrapBundleOptionMap(ani_env *env, ani_object &obj)
+{
     ani_boolean isUndefined = ANI_FALSE;
     ani_status status = ANI_ERROR;
 
@@ -479,8 +527,30 @@ ani_status UnwrapBundleOptionMap(ani_env *env, ani_object obj,
         ANS_LOGE("Current obj is not map type.");
         return ANI_ERROR;
     }
+    return ANI_OK;
+}
 
-    if (GetBundleMapByAniMap(env, obj, bundleMap) != ANI_OK) {
+ani_status UnwrapBundleOptionMap(ani_env *env, ani_object obj,
+    std::vector<std::pair<Notification::NotificationBundleOption, bool>> &bundleMap)
+{
+    ani_status status = PreUnwrapBundleOptionMap(env, obj);
+    if (status != ANI_OK) {
+        return ANI_ERROR;
+    }
+    if (GetBundleMapByAniMap(env, obj, NotificationConstant::TypePriorityParam::TYPE_BOOL, bundleMap) != ANI_OK) {
+        return ANI_ERROR;
+    }
+    return ANI_OK;
+}
+
+ani_status UnwrapBundleOptionMap(ani_env *env, ani_object obj,
+    std::vector<std::pair<Notification::NotificationBundleOption, int64_t>> &bundleMap)
+{
+    ani_status status = PreUnwrapBundleOptionMap(env, obj);
+    if (status != ANI_OK) {
+        return ANI_ERROR;
+    }
+    if (GetBundleMapByAniMap(env, obj, NotificationConstant::TypePriorityParam::TYPE_LONG, bundleMap) != ANI_OK) {
         return ANI_ERROR;
     }
     return ANI_OK;

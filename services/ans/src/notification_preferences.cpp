@@ -1447,7 +1447,7 @@ ErrCode NotificationPreferences::IsPriorityEnabledByBundle(
     const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::PriorityEnableStatus &enableStatus)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+    if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -1471,11 +1471,73 @@ ErrCode NotificationPreferences::GetBundlePriorityConfig(
     const sptr<NotificationBundleOption> &bundleOption, std::string &configValue)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+    if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->GetBundlePriorityConfig(bundleOption, configValue);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::PutPriorityIntelligentEnabled(const NotificationConstant::SWITCH_STATE enabled)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    bool storeDBResult = preferncesDB_->PutPriorityIntelligentEnabled(enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::GetPriorityIntelligentEnabled(NotificationConstant::SWITCH_STATE &enabled)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    bool storeDBResult = preferncesDB_->GetPriorityIntelligentEnabled(enabled);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::PutPriorityEnabledByBundleV2(
+    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SWITCH_STATE priorityStatus)
+{
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        ANS_LOGW("PutPriorityEnabledByBundleV2 fail invalid bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    bool storeDBResult = preferncesDB_->PutPriorityEnabledByBundleV2(bundleOption, priorityStatus);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::GetPriorityEnabledByBundleV2(
+    const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::SWITCH_STATE &priorityStatus)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGW("GetPriorityEnabledByBundleV2 fail invalid bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    bool storeDBResult = preferncesDB_->GetPriorityEnabledByBundleV2(bundleOption, priorityStatus);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::PutPriorityStrategyByBundle(
+    const sptr<NotificationBundleOption> &bundleOption, const int64_t strategy)
+{
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        ANS_LOGW("PutPriorityStrategyByBundle fail invalid bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    bool storeDBResult = preferncesDB_->PutPriorityStrategyByBundle(bundleOption, strategy);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::GetPriorityStrategyByBundle(
+    const sptr<NotificationBundleOption> &bundleOption, int64_t &strategy)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGW("GetPriorityStrategyByBundle fail invalid bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    bool storeDBResult = preferncesDB_->GetPriorityStrategyByBundle(bundleOption, strategy);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 

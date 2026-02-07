@@ -338,7 +338,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_001, Level1
     subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
     subscribeInfo->SetSubscribedFlags(0xFFFFFFFF);
     notificationSubscriberManager_->AddRecordInfo(record, subscribeInfo);
-    notificationSubscriberManager_->BatchNotifyConsumedInner(notifications, notificationMap, record, notifications);
+    notificationSubscriberManager_->BatchNotifyConsumedInner(notifications, notificationMap, record);
 }
 
 /**
@@ -351,7 +351,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_002, Level1
     sptr<MockAnsSubscriber> mockSubscriber = new MockAnsSubscriber(new MockIRemoteObject());
     EXPECT_CALL(*mockSubscriber, OnConsumedList(_, _)).Times(0);
     std::vector<sptr<OHOS::Notification::Notification>> notifications;
-    notificationSubscriberManager_->BatchNotifyConsumedInner(notifications, nullptr, nullptr, notifications);
+    notificationSubscriberManager_->BatchNotifyConsumedInner(notifications, nullptr, nullptr);
 }
 
 /**
@@ -378,7 +378,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_003, Level1
     subscribeInfo->AddAppName("test_1");
     subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
     notificationSubscriberManager_->AddRecordInfo(record, subscribeInfo);
-    notificationSubscriberManager_->BatchNotifyConsumedInner(notifications, notificationMap, record, notifications);
+    notificationSubscriberManager_->BatchNotifyConsumedInner(notifications, notificationMap, record);
 }
 
 /**
@@ -1374,7 +1374,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_001, Level1)
     sptr<NotificationSortingMap> notificationMap = nullptr;
 
     NotificationSubscriberManager notificationSubscriberManager;
-    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap, notification);
+    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap);
 
     ASSERT_EQ(notification, nullptr);
 }
@@ -1403,7 +1403,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_002, Level1)
     sptr<Notification> notification = new Notification(request);
     sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
 
-    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap, notification);
+    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap);
 
     auto isCall = subscriber->IsCalled();
     ASSERT_TRUE(isCall);
@@ -1432,7 +1432,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_003, Level1)
     sptr<Notification> notification = new Notification(request);
     sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
 
-    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap, notification);
+    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap);
 
     auto isCall = subscriber->IsCalled();
     ASSERT_TRUE(isCall);
@@ -1462,7 +1462,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_004, Level1)
     sptr<Notification> notification = new Notification(request);
     sptr<NotificationSortingMap> notificationMap = nullptr;
 
-    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap, notification);
+    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap);
 
     auto isCall = subscriber->IsCalled();
     ASSERT_TRUE(isCall);
@@ -1491,7 +1491,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_005, Level1)
     sptr<Notification> notification = new Notification(request);
     sptr<NotificationSortingMap> notificationMap = nullptr;
 
-    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap, notification);
+    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap);
 
     auto isCall = subscriber->IsCalled();
     ASSERT_TRUE(isCall);

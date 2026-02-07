@@ -91,14 +91,15 @@ void NotificationAiExtensionWrapper::CloseExtensionWrapper()
 
 int32_t NotificationAiExtensionWrapper::UpdateNotification(
     const std::vector<sptr<NotificationRequest>> &requests,
-    const std::string &command, std::vector<int32_t> &results)
+    const std::string &command, std::vector<int32_t> &results,
+    const uint32_t aiStatus, const std::vector<int64_t> strategies)
 {
     if (updateNotification_ == nullptr) {
         ANS_LOGE("update priority notification wrapper symbol failed");
         return ErrorCode::ERR_FAIL;
     }
-    updateNotification_(requests, command, results);
-    return ErrorCode::ERR_OK;
+    
+    return updateNotification_(requests, command, results, aiStatus, strategies);
 }
 
 void NotificationAiExtensionWrapper::Init()
@@ -143,12 +144,14 @@ int32_t NotificationAiExtensionWrapper::SyncBundleKeywords(
 }
 
 int32_t NotificationAiExtensionWrapper::NotifyPriorityEvent(
-    const std::string &event, const sptr<NotificationBundleOption> &bundleOption)
+    const std::string &event,
+    const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+    const std::vector<sptr<NotificationRequest>> &requests)
 {
-    if (notifyPriorityEvent_  == nullptr) {
+    if (notifyPriorityEvent_ == nullptr || bundleOptions.size() <= 0) {
         ANS_LOGE("notify priority event wrapper symbol failed");
         return ErrorCode::ERR_FAIL;
     }
-    return notifyPriorityEvent_(event, bundleOption);
+    return notifyPriorityEvent_(event, bundleOptions, requests);
 }
 }

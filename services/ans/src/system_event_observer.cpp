@@ -115,7 +115,10 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         }
         if (bundleOption != nullptr) {
             NotificationLiveViewUtils::GetInstance().NotifyLiveViewEvent(action, bundleOption);
-            NOTIFICATION_AI_EXTENSION_WRAPPER->NotifyPriorityEvent(action, bundleOption);
+            std::vector<sptr<NotificationBundleOption>> bundleOptions;
+            bundleOptions.emplace_back(bundleOption);
+            std::vector<sptr<NotificationRequest>> requests;
+            NOTIFICATION_AI_EXTENSION_WRAPPER->NotifyPriorityEvent(action, bundleOptions, requests);
         }
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
         AdvancedNotificationService::GetInstance()->HandleBundleUninstall(bundleOption);

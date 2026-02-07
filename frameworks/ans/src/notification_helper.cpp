@@ -778,6 +778,29 @@ ErrCode NotificationHelper::SetPriorityEnabledByBundles(
     return DelayedSingleton<AnsNotification>::GetInstance()->SetPriorityEnabledByBundles(priorityEnable);
 }
 
+ErrCode NotificationHelper::IsPriorityIntelligentEnabled(bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsPriorityIntelligentEnabled(enabled);
+}
+
+ErrCode NotificationHelper::SetPriorityIntelligentEnabled(const bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetPriorityIntelligentEnabled(enabled);
+}
+
+ErrCode NotificationHelper::GetPriorityStrategyByBundles(const std::vector<NotificationBundleOption> &bundleOptions,
+    std::map<sptr<NotificationBundleOption>, int64_t> &strategies)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetPriorityStrategyByBundles(
+        bundleOptions, strategies);
+}
+
+ErrCode NotificationHelper::SetPriorityStrategyByBundles(
+    const std::map<sptr<NotificationBundleOption>, int64_t> &strategies)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetPriorityStrategyByBundles(strategies);
+}
+
 ErrCode NotificationHelper::TriggerUpdatePriorityType(const NotificationRequest &request)
 {
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
