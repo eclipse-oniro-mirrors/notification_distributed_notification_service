@@ -57,10 +57,14 @@ void DistributedSendAdapter::DoSendPackage(const std::shared_ptr<PackageInfo>& p
         return;
     }
     nextPackageInfo = packageCached_.front();
+    if (nextPackageInfo == nullptr) {
+        ANS_LOGW("Dans submit invalid.");
+        return;
+    }
     packageCached_.pop_front();
-    std::function<void()> sendTask = std::bind([nextPackageInfo]() {
+    std::function<void()> sendTask = [nextPackageInfo]() {
         DistributedSendAdapter::GetInstance().DoSendPackage(nextPackageInfo);
-    });
+    };
     ffrt::submit(sendTask);
 }
 
@@ -80,9 +84,9 @@ void DistributedSendAdapter::SendPackage(const std::shared_ptr<PackageInfo>& pac
 
     ANS_LOGI("Dans submit start.");
     isRunning.store(true);
-    std::function<void()> sendTask = std::bind([packageInfo]() {
+    std::function<void()> sendTask = [packageInfo]() {
         DistributedSendAdapter::GetInstance().DoSendPackage(packageInfo);
-    });
+    };
     ffrt::submit(sendTask);
 }
 

@@ -339,8 +339,7 @@ bool NotificationRequestBox::SetNotificationBasicInfo(const std::string& basicIn
     if (box_ == nullptr) {
         return false;
     }
-    box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BASIC_INFO, basicInfo));
-    return true;
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BASIC_INFO, basicInfo));
 }
 #else
 bool NotificationRequestBox::GetNotificationHashCode(std::string& hasdCode) const
@@ -648,8 +647,7 @@ bool NotificationRequestBox::GetNotificationBasicInfo(std::string& basicInfo) co
     if (box_ == nullptr) {
         return false;
     }
-    box_->GetStringValue(NOTIFICATION_BASIC_INFO, basicInfo);
-    return true;
+    return box_->GetStringValue(NOTIFICATION_BASIC_INFO, basicInfo);
 }
 #endif
 }
