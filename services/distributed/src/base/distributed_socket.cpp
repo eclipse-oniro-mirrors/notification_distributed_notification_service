@@ -25,7 +25,7 @@ namespace OHOS {
 namespace Notification {
 
 static const int32_t BIND_SERVICE_MAX_RETRY_TIMES = 1;
-static const int32_t BIND_SERVICE_SLEEP_TIMES_MS = 10000;  // 0.1s
+static const int32_t BIND_SERVICE_SLEEP_TIMES_MS = 10000;  // 10s
 static const uint32_t SOCKET_NAME_MAX_LEN = 256;
 static const int32_t QOS_NUM = 5;
 
@@ -41,7 +41,7 @@ static void OnServerBind(int32_t socket, PeerSocketInfo info)
 
 static void OnServerShutdown(int32_t socket, ShutdownReason reason)
 {
-    ANS_LOGI("Socket fd %{public}d shutdown because %{public}d.", socket, (int32_t)(reason));
+    ANS_LOGI("Socket fd %{public}d shutdown because %{public}zu.", socket, reason);
     if (socket <= 0) {
         ANS_LOGE("Socket fd invalid.");
         return;
@@ -80,7 +80,7 @@ static void OnClientBytes(int32_t socket, const void *data, uint32_t dataLen)
 
 static void OnClientShutdown(int32_t socket, ShutdownReason reason)
 {
-    ANS_LOGI("Socket fd %{public}d shutdown because %{public}d.", socket, (int32_t)(reason));
+    ANS_LOGI("Socket fd %{public}d shutdown because %{public}zu.", socket, reason);
     if (socket <= 0) {
         ANS_LOGE("Socket fd invalid.");
         return;
@@ -90,7 +90,7 @@ static void OnClientShutdown(int32_t socket, ShutdownReason reason)
 
 static void OnQos(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t qosCount)
 {
-    ANS_LOGI("OnQos %{public}d %{public}d %{public}d", socket, (int32_t)eventId, (int32_t)(qosCount));
+    ANS_LOGI("OnQos %{public}d %{public}d %{public}zu", socket, (int32_t)eventId, qosCount);
 }
 
 void CloseSocket(int32_t socketId)
@@ -208,6 +208,10 @@ int32_t ClientBind(const std::string& name, const std::string& pkgName,
 
 int32_t ClientSendBytes(int32_t socketId, const void* data, uint32_t length)
 {
+    if (data == nullptr || length <= 0) {
+        ANS_LOGE("Invalid Parameters.");
+        return DISRTIBUED_ERR;
+    }
     int32_t result = ::SendBytes(socketId, data, length);
     ANS_LOGI("Socket send byte %{public}d %{public}d %{public}d ", socketId, length, result);
     return result;
@@ -215,6 +219,10 @@ int32_t ClientSendBytes(int32_t socketId, const void* data, uint32_t length)
 
 int32_t ClientSendMessage(int32_t socketId, const void* data, uint32_t length)
 {
+    if (data == nullptr || length <= 0) {
+        ANS_LOGE("Invalid Parameters.");
+        return DISRTIBUED_ERR;
+    }
     int32_t result = ::SendMessage(socketId, data, length);
     ANS_LOGI("Socket send message %{public}d %{public}d %{public}d ", socketId, length, result);
     return result;

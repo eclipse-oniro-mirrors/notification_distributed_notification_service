@@ -39,16 +39,12 @@ DistributedDatabase::~DistributedDatabase()
 
 void DistributedDatabase::GetKvDataManager()
 {
-#ifdef DISABLE_DISTRIBUTED_NOTIFICATION_SUPPORTED
     initCallback_ = std::make_shared<DeviceInitCallBack>();
     int32_t ret = DistributedHardware::DeviceManager::GetInstance().InitDeviceManager(APP_ID + STORE_ID, initCallback_);
     if (ret != ERR_OK) {
         ANS_LOGE("init device manager failed, ret:%{public}d", ret);
         return;
     }
-#else
-    int32_t ret = ERR_OK;
-#endif
     ret = DistributedHardware::DeviceManager::GetInstance().RegisterDevStateCallback(APP_ID + STORE_ID, "", deviceCb_);
     if (ret != ERR_OK) {
         ANS_LOGD("register devStateCallback failed, ret:%{public}d", ret);

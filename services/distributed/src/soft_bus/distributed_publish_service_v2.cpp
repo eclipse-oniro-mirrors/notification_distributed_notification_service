@@ -38,8 +38,8 @@
 #include "string_wrapper.h"
 #include "want_params_wrapper.h"
 #include "distributed_subscribe_service.h"
-#include "remove_all_distributed_box.h"
 #include "bundle_resource_helper.h"
+#include "remove_all_distributed_box.h"
 #include "distributed_service.h"
 #include "distributed_send_adapter.h"
 
@@ -486,7 +486,7 @@ void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Not
     }
 
     auto requestPoint = request->GetNotificationRequestPoint();
-    ANS_LOGI("Dans OnConsumed Notification key = %{public}s, notificationFlag = %{public}s", request->GetKey().c_str(),
+    ANS_LOGI("Dans OnConsumed Notification key = %{public}s, flag = %{public}s", request->GetKey().c_str(),
         requestPoint->GetFlags() == nullptr ? "null" : requestPoint->GetFlags()->Dump().c_str());
     if (IsInterceptNotification(peerDevice, requestPoint)) {
         return;
@@ -949,6 +949,10 @@ void DistributedPublishService::MakeNotificationButtons(const NotificationReques
         }
         std::shared_ptr<NotificationActionButton> actionButton =
             NotificationActionButton::Create(nullptr, actionName, nullptr);
+        if (!actionButton) {
+            ANS_LOGE("Failed to create NotificationActionButton by actionName=%{public}s", actionName.c_str());
+            return;
+        }
         actionButton->AddNotificationUserInput(userInput);
         request->AddActionButton(actionButton);
     }
