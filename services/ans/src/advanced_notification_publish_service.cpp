@@ -1343,7 +1343,6 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(
                 ANS_LOGE("record is nullptr");
                 continue;
             }
-#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
             if (userId != -1) {
                 int32_t bundleUserId = -1;
                 auto ret = OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
@@ -1352,7 +1351,6 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(
                     continue;
                 }
             }
-#endif
             if ((record->bundleOption->GetBundleName() == bundleName)
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 && record->deviceId.empty()
