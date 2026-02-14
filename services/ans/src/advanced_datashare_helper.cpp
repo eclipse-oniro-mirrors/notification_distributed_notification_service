@@ -48,6 +48,7 @@ constexpr const char *FOCUS_MODE_REPEAT_CALLERS_ENABLE_URI = "?Proxy=true&key=fo
 constexpr const char *UNIFIED_GROUP_ENABLE_URI = "?Proxy=true&key=unified_group_enable";
 constexpr const char *INTELLIGENT_SCENE_DATA = "?Proxy=true&key=intelligent_scene_data";
 constexpr const char *INTELLIGENT_URI = "?Proxy=true&key=intelligent_uri";
+constexpr const char *SCENEBOARD_IS_PCMODE_URI = "?Proxy=true&key=settings.sceneboard.ispcmode";
 constexpr const char *CONTACT_URI = "datashare:///com.ohos.contactsdataability";
 constexpr const char *CALLLOG_URI = "datashare:///com.ohos.calllogability";
 constexpr const char *CALL_SUBSECTION = "datashare:///com.ohos.calllogability/calls/calllog?Proxy=true";
@@ -75,7 +76,7 @@ constexpr const int PHONE_NUMBER_LAST_SPACE_POS = 4;
 std::vector<std::string> QUERY_CONTACT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FAVORITE, FOCUS_MODE_LIST, DETAIL_INFO};
 std::vector<std::string> QUERY_INTELLIGENT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FOCUS_MODE_LIST, DETAIL_INFO};
 } // namespace
-AdvancedDatashareHelper::AdvancedDatashareHelper()
+AdvancedDatashareHelper::AdvancedDatashareHelper() : isPCModeEnabled_(false)
 {
     CreateDataShareHelper();
 }
@@ -119,6 +120,7 @@ void AdvancedDatashareHelper::Init()
         RegisterObserver(userId, GetIntelligentExperienceUri(userId), { KEY_INTELLIGENT_EXPERIENCE });
         RegisterObserver(userId, GetFocusModeCallPolicyUri(userId), { KEY_FOCUS_MODE_CALL_MESSAGE_POLICY });
         RegisterObserver(userId, GetFocusModeRepeatCallUri(userId), { KEY_FOCUS_MODE_REPEAT_CALLERS_ENABLE });
+        RegisterObserver(userId, GetPCModeUri(userId), { KEY_SCENEBOARD_IS_PCMODE });
     }
 }
 
@@ -601,6 +603,17 @@ void AdvancedDatashareHelper::OnUserSwitch(const int32_t userId)
     RegisterObserver(userId, GetIntelligentExperienceUri(userId), { KEY_INTELLIGENT_EXPERIENCE });
     RegisterObserver(userId, GetFocusModeCallPolicyUri(userId), { KEY_FOCUS_MODE_CALL_MESSAGE_POLICY });
     RegisterObserver(userId, GetFocusModeRepeatCallUri(userId), { KEY_FOCUS_MODE_REPEAT_CALLERS_ENABLE });
+    RegisterObserver(userId, GetPCModeUri(userId), { KEY_SCENEBOARD_IS_PCMODE });
+}
+
+bool AdvancedDatashareHelper::IsPCModeEnabled()
+{
+    return isPCModeEnabled_.load();
+}
+
+std::string AdvancedDatashareHelper::GetPCModeUri(const int32_t userId) const
+{
+    return USER_SETTINGS_DATA_URI + std::to_string(userId) + SCENEBOARD_IS_PCMODE_URI;
 }
 } // namespace Notification
 } // namespace OHOS
