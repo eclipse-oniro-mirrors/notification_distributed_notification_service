@@ -16,6 +16,7 @@
 #include "advanced_notification_service.h"
 #include "access_token_helper.h"
 #include "aes_gcm_helper.h"
+#include "advanced_datashare_helper.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_permission_def.h"
@@ -35,7 +36,8 @@ namespace OHOS {
 namespace Notification {
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 
-using STARTUP = int32_t (*)(std::function<void()>, std::function<void(uint32_t, uint32_t, int32_t, std::string)>);
+using STARTUP = int32_t (*)(std::function<void()>, std::function<void(uint32_t, uint32_t, int32_t, std::string)>,
+    std::function<bool()>);
 using SHUTDOWN = void (*)();
 using SUBSCRIBE = void (*)(const sptr<NotificationBundleOption>,
     const std::vector<sptr<NotificationBundleOption>> &);
@@ -72,6 +74,8 @@ int32_t AdvancedNotificationService::LoadExtensionService()
     startup(nullptr, [](uint32_t sceneId, uint32_t branchId, int32_t errorCode, std::string message) {
         HaMetaMessage msg = HaMetaMessage(sceneId, branchId);
         NotificationAnalyticsUtil::ReportModifyEvent(msg.Message(message));
+    }, []() -> bool {
+        return AdvancedDatashareHelper::GetInstance().IsPCModeEnabled();
     });
     notificationExtensionLoaded_.store(true);
     return 0;
@@ -132,8 +136,7 @@ void AdvancedNotificationService::CheckExtensionServiceCondition(
 {
     subscribedBundleInfos.clear();
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_7);
-    std::string isPCMode = OHOS::system::GetParameter("persist.sceneboard.ispcmode", "false");
-    if (isPCMode == "true") {
+    if (AdvancedDatashareHelper::GetInstance().IsPCModeEnabled()) {
         ANS_LOGW("PC Mode, skip loading ExtensionService");
         NotificationAnalyticsUtil::ReportModifyEvent(message.Message("cannot subscribe, due to PC Mode"));
         unsubscribedBundles = bundles;

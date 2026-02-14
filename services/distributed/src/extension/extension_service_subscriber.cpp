@@ -15,17 +15,13 @@
 
 #include "ans_log_wrapper.h"
 #include "bundle_manager_helper.h"
+#include "extension_service.h"
 #include "extension_service_connection_service.h"
 #include "extension_service_subscriber.h"
 #include "os_account_manager.h"
-#include "parameters.h"
 
 namespace OHOS {
 namespace Notification {
-namespace {
-    const char* IS_PCMODE_PARAM_NAME = "persist.sceneboard.ispcmode";
-    const char* IS_PCMODE_PARAM_DEFALT_VALUE = "false";
-}
 
 bool ExtensionServiceSubscriber::Init(const sptr<NotificationBundleOption> &bundle)
 {
@@ -111,8 +107,7 @@ void ExtensionServiceSubscriber::OnCanceled(const std::shared_ptr<Notification> 
     }
 
     messageQueue_->submit([request, this]() {
-        std::string isPCMode = OHOS::system::GetParameter(IS_PCMODE_PARAM_NAME, IS_PCMODE_PARAM_DEFALT_VALUE);
-        if (isPCMode == "true") {
+        if (NotificationExtensionService::GetInstance().IsPCModeEnabled()) {
             ANS_LOGW("PC Mode, skip NotifyOnReceiveMessage");
             return;
         }
@@ -150,8 +145,7 @@ void ExtensionServiceSubscriber::OnConsumed(const std::shared_ptr<Notification> 
     }
 
     messageQueue_->submit([request, this]() {
-        std::string isPCMode = OHOS::system::GetParameter(IS_PCMODE_PARAM_NAME, IS_PCMODE_PARAM_DEFALT_VALUE);
-        if (isPCMode == "true") {
+        if (NotificationExtensionService::GetInstance().IsPCModeEnabled()) {
             ANS_LOGW("PC Mode, skip NotifyOnReceiveMessage");
             return;
         }
