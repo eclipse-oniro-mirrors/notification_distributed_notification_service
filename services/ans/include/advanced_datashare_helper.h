@@ -67,6 +67,7 @@ public:
     void OnUserSwitch(const int32_t userId);
     void Init();
     bool IsPCModeEnabled();
+    void SetPCModeEnabled(bool enabled);
     std::string GetPCModeUri(const int32_t userId) const;
 
     struct DatashareItem {

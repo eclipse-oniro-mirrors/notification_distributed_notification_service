@@ -41,7 +41,7 @@ void AdvancedDatashareHelperDataObserver::OnChange()
         if (key == "settings.sceneboard.ispcmode") {
             bool isPCMode = (value == "true");
             ANS_LOGI("PC mode changed to %{public}s", isPCMode ? "true" : "false");
-            datashareHelper->isPCModeEnabled_.store(isPCMode);
+            datashareHelper->SetPCModeEnabled(isPCMode);
         }
     }
 }

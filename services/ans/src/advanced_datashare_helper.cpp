@@ -611,6 +611,11 @@ bool AdvancedDatashareHelper::IsPCModeEnabled()
     return isPCModeEnabled_.load();
 }
 
+void AdvancedDatashareHelper::SetPCModeEnabled(bool enabled)
+{
+    isPCModeEnabled_.store(enabled);
+}
+
 std::string AdvancedDatashareHelper::GetPCModeUri(const int32_t userId) const
 {
     return USER_SETTINGS_DATA_URI + std::to_string(userId) + SCENEBOARD_IS_PCMODE_URI;
