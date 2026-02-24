@@ -59,7 +59,7 @@ HWTEST_F(AdvancedDatashareHelperTest, UnregisterObserver_0001, Function | SmallT
     int32_t userId = 101;
     size_t dataObserversSize = advancedDatashareHelper.dataObservers_.size();
     advancedDatashareHelper.OnUserSwitch(userId);
-    EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), dataObserversSize + 5);
+    EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), dataObserversSize + 6);
     advancedDatashareHelper.UnregisterObserver();
     EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), 0);
 }
@@ -92,7 +92,7 @@ HWTEST_F(AdvancedDatashareHelperTest, Init_0001, Function | SmallTest | Level1)
     AdvancedDatashareHelper::SetIsDataShareReady(true);
     AdvancedDatashareHelper advancedDatashareHelper;
     advancedDatashareHelper.Init();
-    EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), 5);
+    EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), 6);
 }
 
 // Test cases

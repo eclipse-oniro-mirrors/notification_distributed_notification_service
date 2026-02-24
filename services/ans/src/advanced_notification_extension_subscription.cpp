@@ -75,7 +75,12 @@ int32_t AdvancedNotificationService::LoadExtensionService()
         HaMetaMessage msg = HaMetaMessage(sceneId, branchId);
         NotificationAnalyticsUtil::ReportModifyEvent(msg.Message(message));
     }, []() -> bool {
-        return AdvancedDatashareHelper::GetInstance().IsPCModeEnabled();
+        auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
+        if (datashareHelper == nullptr) {
+            ANS_LOGE("The data share helper is nullptr.");
+            return false;
+        }
+        return datashareHelper->IsPCModeEnabled();
     });
     notificationExtensionLoaded_.store(true);
     return 0;
@@ -136,7 +141,8 @@ void AdvancedNotificationService::CheckExtensionServiceCondition(
 {
     subscribedBundleInfos.clear();
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_7);
-    if (AdvancedDatashareHelper::GetInstance().IsPCModeEnabled()) {
+    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
+    if (datashareHelper != nullptr && datashareHelper->IsPCModeEnabled()) {
         ANS_LOGW("PC Mode, skip loading ExtensionService");
         NotificationAnalyticsUtil::ReportModifyEvent(message.Message("cannot subscribe, due to PC Mode"));
         unsubscribedBundles = bundles;

@@ -248,7 +248,7 @@ HWTEST_F(NotificationExtensionServiceTest, NotifyOnCancelMessagesTest_0100, Func
 HWTEST_F(NotificationExtensionServiceTest, NotificationExtensionServiceTest_0100, Function | SmallTest | Level1)
 {
     auto notificationExtensionService = NotificationExtensionService::GetInstance();
-    notificationExtensionService.InitService(nullptr, nullptr);
+    notificationExtensionService.InitService(nullptr, nullptr, nullptr);
     auto bundle = sptr<NotificationBundleOption>(new NotificationBundleOption("testBundle", 1));
     auto bundle2 = sptr<NotificationBundleOption>(new NotificationBundleOption("testBundle2", 2));
     std::vector<sptr<NotificationBundleOption>> subscribedBundles;
@@ -291,7 +291,7 @@ HWTEST_F(NotificationExtensionServiceTest, NotificationExtensionService_SendHaRe
         gotBranch = branch;
         gotError = error;
         gotMsg = msg;
-    });
+    }, nullptr);
     uint32_t scene = 11;
     uint32_t branchId = 22;
     int32_t errorCode = -33;
@@ -314,10 +314,10 @@ HWTEST_F(NotificationExtensionServiceTest, NotificationExtensionService_SendHaRe
 {
     auto &service = NotificationExtensionService::GetInstance();
     std::atomic<int> flag { 0 };
-    service.InitService(nullptr, [&](uint32_t, uint32_t, int32_t, std::string) { flag = 1; });
+    service.InitService(nullptr, [&](uint32_t, uint32_t, int32_t, std::string) { flag = 1; }, nullptr);
     service.SendHaReport(1, 2, 3, "msg1");
     EXPECT_EQ(flag.load(), 1);
-    service.InitService(nullptr, nullptr);
+    service.InitService(nullptr, nullptr, nullptr);
     flag = 0;
     service.SendHaReport(9, 9, 9, "unused");
     EXPECT_EQ(flag.load(), 0);
