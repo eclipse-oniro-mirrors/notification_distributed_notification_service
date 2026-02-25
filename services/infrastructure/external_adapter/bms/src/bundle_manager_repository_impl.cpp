@@ -19,25 +19,11 @@
 #include "iaccount_manager_impl.h"
 
 #include "ans_const_define.h"
+#include "in_process_call_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
 namespace Infra {
-
-#define IN_PROCESS_CALL(theCall)                                     \
-    ([&]() {                                                         \
-        std::string identity = IPCSkeleton::ResetCallingIdentity();  \
-        auto retVal = theCall;                                       \
-        IPCSkeleton::SetCallingIdentity(identity);                   \
-        return retVal;                                               \
-    }())
-
-#define IN_PROCESS_CALL_WITHOUT_RET(theCall)                         \
-    do {                                                             \
-        std::string identity = IPCSkeleton::ResetCallingIdentity();  \
-        theCall;                                                     \
-        IPCSkeleton::SetCallingIdentity(identity);                   \
-    } while (0)
 
 constexpr int32_t APP_TYPE_ONE = 1;
 constexpr int32_t APP_TYPE_TWO = 2;

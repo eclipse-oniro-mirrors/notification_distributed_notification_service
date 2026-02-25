@@ -21,6 +21,7 @@
 
 #include "bundle_mgr_interface.h"
 #include "ffrt.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace Notification {
@@ -32,12 +33,8 @@ public:
     virtual sptr<AppExecFwk::IBundleMgr> GetBundleManager() = 0;
 };
 
-class BundleServiceConnector : public IBundleServiceConnector {
+class BundleServiceConnector : public IBundleServiceConnector, public DelayedSingleton<BundleServiceConnector> {
 public:
-    explicit BundleServiceConnector();
-
-    virtual ~BundleServiceConnector();
-    
     sptr<AppExecFwk::IBundleMgr> GetBundleManager() override;
     
 private:
@@ -48,6 +45,9 @@ private:
     sptr<AppExecFwk::IBundleMgr> bundleMgr_;
     ffrt::mutex connectionMutex_;
     sptr<RemoteDeathRecipient> deathRecipient_;
+
+    DECLARE_DELAYED_SINGLETON(BundleServiceConnector);
+    DISALLOW_COPY_AND_MOVE(BundleServiceConnector);
 };
 } // namespace Infra
 } // namespace Notification

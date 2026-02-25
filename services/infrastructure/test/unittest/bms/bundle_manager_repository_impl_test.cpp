@@ -57,7 +57,7 @@ void BundleManagerRepositoryImplTest::SetUp()
     EXPECT_CALL(*mockConnectorPtr_, GetBundleManager())
         .WillRepeatedly(Return(mockBundleMgrPtr_));
 
-    repository_ = std::make_unique<BundleManagerRepositoryImpl>(std::move(mockConnectorPtr));
+    repository_ = std::make_unique<BundleManagerRepositoryImpl>(mockConnectorPtr_);
     GTEST_LOG_(INFO) << "SetUp end";
 }
 
