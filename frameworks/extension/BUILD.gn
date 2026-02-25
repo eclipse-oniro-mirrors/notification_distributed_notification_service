@@ -74,7 +74,6 @@ ohos_source_set("notification_subscriber_stub") {
   external_deps = [
     "ability_base:configuration",
     "ability_base:want",
-    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
@@ -110,7 +109,6 @@ ohos_shared_library("notification_subscriber_ipc") {
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
-    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",

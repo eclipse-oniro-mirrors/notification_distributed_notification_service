@@ -41,7 +41,7 @@ static void OnServerBind(int32_t socket, PeerSocketInfo info)
 
 static void OnServerShutdown(int32_t socket, ShutdownReason reason)
 {
-    ANS_LOGI("Socket fd %{public}d shutdown because %{public}zu.", socket, reason);
+    ANS_LOGI("Socket fd %{public}d shutdown because %{public}." PRIu32, socket, reason);
     if (socket <= 0) {
         ANS_LOGE("Socket fd invalid.");
         return;
@@ -80,7 +80,7 @@ static void OnClientBytes(int32_t socket, const void *data, uint32_t dataLen)
 
 static void OnClientShutdown(int32_t socket, ShutdownReason reason)
 {
-    ANS_LOGI("Socket fd %{public}d shutdown because %{public}zu.", socket, reason);
+    ANS_LOGI("Socket fd %{public}d shutdown because %{public}." PRIu32, socket, reason);
     if (socket <= 0) {
         ANS_LOGE("Socket fd invalid.");
         return;
@@ -90,7 +90,7 @@ static void OnClientShutdown(int32_t socket, ShutdownReason reason)
 
 static void OnQos(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t qosCount)
 {
-    ANS_LOGI("OnQos %{public}d %{public}d %{public}zu", socket, (int32_t)eventId, qosCount);
+    ANS_LOGI("OnQos %{public}d %{public}d %{public}" PRIu32, socket, (int32_t)eventId, qosCount);
 }
 
 void CloseSocket(int32_t socketId)
