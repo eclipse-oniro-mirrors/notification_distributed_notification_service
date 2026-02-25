@@ -209,7 +209,7 @@ bool DistribuedSubscriber::CheckCollaborationNotification(const sptr<Notificatio
     std::string device = DistributedDeviceService::DeviceTypeToTypeString(peerDevice_.deviceType_);
     for (std::string deviceType : NotificationConstant::DEVICESTYPES) {
         if (deviceType == device) {
-            ANS_LOGE("collaboration %{public}d, %{public}d, %{public}s.", deviceList, index, device.c_str());
+            ANS_LOGW("Collaboration %{public}d, %{public}d, %{public}s.", deviceList, index, device.c_str());
             return (((uint32_t)deviceList) & (1 << index));
         }
         index++;

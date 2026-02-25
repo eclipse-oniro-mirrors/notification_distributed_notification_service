@@ -129,6 +129,7 @@ void NotificationBasicContent::ReadFromJson(const nlohmann::json &jsonObject)
             }
         }
     }
+    return;
 }
 
 bool NotificationBasicContent::Marshalling(Parcel &parcel) const
