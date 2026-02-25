@@ -2474,27 +2474,6 @@ ErrCode AdvancedNotificationService::DisableNotificationFeature(const sptr<Notif
         }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Disable notification feature.");
     if (notificationDisable->GetDisabled()) {
-        if (userId != SUBSCRIBE_USER_INIT) {
-#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
-            std::vector<int32_t> ForegroundUserIds;
-            if (OsAccountManagerHelper::GetInstance().GetForegroundUserIds(ForegroundUserIds) != ERR_OK) {
-                ANS_LOGD("GetActiveUserIds failed");
-                return ERR_OK;
-            }
-            if (std::find(ForegroundUserIds.begin(), ForegroundUserIds.end(), userId) == ForegroundUserIds.end()) {
-                return ERR_OK;
-            }
-#else
-            int32_t currentUserId = SUBSCRIBE_USER_INIT;
-            if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(currentUserId) != ERR_OK) {
-                ANS_LOGD("GetCurrentActiveUserId failed");
-                return ERR_OK;
-            }
-            if (currentUserId != userId) {
-                return ERR_OK;
-            }
-#endif
-        }
         std::vector<std::string> bundleList = notificationDisable->GetBundleList();
         for (auto bundle : bundleList) {
             RemoveAllNotificationsByBundleName(
