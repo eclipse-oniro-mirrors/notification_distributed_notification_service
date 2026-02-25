@@ -29,9 +29,7 @@ namespace Notification {
 namespace Infra {
 class BundleManagerRepositoryImpl : public IBundleManagerRepository {
 public:
-    using ConnectorPtr = std::unique_ptr<IBundleServiceConnector>;
-
-    explicit BundleManagerRepositoryImpl(ConnectorPtr&& connector) : connector_(std::move(connector)) {}
+    explicit BundleManagerRepositoryImpl(IBundleServiceConnector* connector) : connector_(connector) {}
 
     ~BundleManagerRepositoryImpl() override = default;
 
@@ -188,7 +186,7 @@ private:
 
     ErrCode GetApplicationInfo(const std::string &bundleName, int32_t flags, int32_t userId,
         AppExecFwk::ApplicationInfo &appInfo);
-    ConnectorPtr connector_;
+    IBundleServiceConnector* connector_;
 };
 } // Infra
 } // namespace Notification

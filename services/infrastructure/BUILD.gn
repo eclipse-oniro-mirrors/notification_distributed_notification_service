@@ -16,8 +16,6 @@ import("//build/ohos.gni")
 
 config("ans_base_config") {
   include_dirs = [
-    "${services_path}/infrastructure/external_adapter/account/include",
-    "${services_path}/infrastructure/external_adapter/bms/include",
     "${services_path}/infrastructure/external_adapter/extension/include",
     "${services_path}/infrastructure/external_adapter/ffrt/include",
     "${services_path}/infrastructure/interfaces",
@@ -37,10 +35,7 @@ ohos_shared_library("ans_base") {
   branch_protector_ret = "pac_ret"
 
   sources = [
-    "external_adapter/account/iaccount_manager_impl.cpp",
     "external_adapter/extension/src/all_scenarios_extension_wrapper.cpp",
-    "external_adapter/bms/src/bundle_manager_repository_impl.cpp",
-    "external_adapter/bms/src/bundle_service_connector.cpp",
     "external_adapter/ffrt/src/ffrt_queue_impl.cpp",
   ]
 
