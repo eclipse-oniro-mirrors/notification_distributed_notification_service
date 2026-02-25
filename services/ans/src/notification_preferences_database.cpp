@@ -974,7 +974,7 @@ bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundlesInner(
         ANS_LOGE("Query data begin with ans_bundle_ from db error");
         return false;
     }
-    return HandleDataBaseMap(datas, bundleOption);
+    return HandleDataBaseMap(datas, bundleOption, userId);
 }
 
 bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(
