@@ -184,6 +184,30 @@ HWTEST_F(AdvancedNotificationPriorityHelperTest, RefreshPriorityType_0500, Funct
        ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
     MockQueryForgroundOsAccountId(true, 0);
 }
+
+/**
+ * @tc.name: UpdatePriorityType_0100
+ * @tc.desc: Test UpdatePriorityType erased priorityType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationPriorityHelperTest, UpdatePriorityType_0100, Function | SmallTest | Level1)
+{
+    std::string bundleName = "bundleName";
+    int32_t uid = 1000;
+    NotificationConstant::SWITCH_STATE priorityStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    sptr<NotificationBundleOption> notification = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+    NotificationPreferences::GetInstance()->PutPriorityEnabledByBundleV2(notification, priorityStatus);
+    NotificationPreferences::GetInstance()->PutPriorityStrategyByBundle(notification, 32);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorBundleName("");
+    request->SetCreatorUid(uid);
+    request->SetOwnerBundleName(bundleName);
+    request->SetOwnerUid(uid);
+    request->SetPriorityNotificationType(NotificationConstant::PriorityNotificationType::PRIMARY_CONTACT);
+    AdvancedNotificationPriorityHelper::GetInstance()->UpdatePriorityType(nullptr);
+    AdvancedNotificationPriorityHelper::GetInstance()->UpdatePriorityType(request);
+    EXPECT_EQ(request->GetPriorityNotificationType(), NotificationConstant::PriorityNotificationType::OTHER);
+}
 #endif
 }
 }

@@ -36,6 +36,7 @@ void AdvancedNotificationPriorityHelper::UpdatePriorityType(const sptr<Notificat
     }
     std::vector<int32_t> results;
     std::string cmd = NotificationAiExtensionWrapper::UPDATE_PRIORITY_TYPE;
+    request->SetInnerPriorityNotificationType(NotificationConstant::PriorityNotificationType::OTHER);
     RefreshPriorityType(cmd, { request }, results);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_27);
     for (int32_t result : results) {

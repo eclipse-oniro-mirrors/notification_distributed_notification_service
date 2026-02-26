@@ -2443,7 +2443,6 @@ private:
         int64_t id, sptr<NotificationDoNotDisturbProfile> &profile, const int32_t userId);
     bool IsDisableNotificationInner(const std::string &bundleName, const int32_t userId);
     ErrCode SetHashCodeRuleInner(const uint32_t type, int32_t userId = -1);
-    bool CheckAdditionalConfigKey(const std::string &key);
     void DistributedEnabledBySlotChangeStrategy(const std::string &deviceType,
         const NotificationConstant::SlotType slotType, const bool enabled, const ErrCode result);
     template <typename T>
@@ -2452,9 +2451,6 @@ private:
         std::map<sptr<NotificationBundleOption>, T> &validMap);
     ErrCode GetValidBundles(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
         std::vector<sptr<NotificationBundleOption>> &validBundleOptions);
-    template <typename T>
-    void SendCommonEvent(
-        const uint32_t eventType, const std::map<sptr<NotificationBundleOption>, T> &params, int32_t code);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;
