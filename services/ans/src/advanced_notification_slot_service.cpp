@@ -64,6 +64,17 @@ namespace {
         NotificationConstant::LITEWEARABLE_DEVICE_TYPE,
         NotificationConstant::WEARABLE_DEVICE_TYPE
     };
+
+    static const std::vector<std::string> VALID_ADDITION_CONFIG = {
+        CTRL_LIST_KEY,
+        AGGREGATE_KEY,
+        RING_TRUST_PKG_KEY,
+        HEALTH_BUNDLE_WHITE_LIST_KEY,
+        PRIORITY_RULE_CONFIG_KEY,
+        CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY,
+        PROXY_PKG_KEY,
+        KIOSK_APP_TRUST_KEY
+    };
 }
 
 ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<NotificationSlot>> &slots)
@@ -1320,18 +1331,6 @@ bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<Notifi
     return true;
 }
 
-bool AdvancedNotificationService::CheckAdditionalConfigKey(const std::string &key)
-{
-    if (key.empty() || (key != CTRL_LIST_KEY && key != AGGREGATE_KEY &&
-        key != RING_TRUST_PKG_KEY && key != HEALTH_BUNDLE_WHITE_LIST_KEY &&
-        key != PRIORITY_RULE_CONFIG_KEY && key != CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY &&
-        key != PROXY_PKG_KEY)) {
-        ANS_LOGW("Argument param error. not allow key: %{public}s.", key.c_str());
-        return false;
-    }
-    return true;
-}
-
 ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, const std::string &value)
 {
     ANS_LOGD("SetAdditionConfig called (%{public}s, %{public}s).", key.c_str(), value.c_str());
@@ -1350,7 +1349,9 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PERMISSION_DENIED;
     }
-    if (!CheckAdditionalConfigKey(key)) {
+    if (key.empty() ||
+        std::find(VALID_ADDITION_CONFIG.begin(), VALID_ADDITION_CONFIG.end(), key) == VALID_ADDITION_CONFIG.end()) {
+        ANS_LOGW("Argument param error. not allow key: %{public}s.", key.c_str());
         return ERR_OK;
     }
 
@@ -1397,7 +1398,7 @@ ErrCode AdvancedNotificationService::SyncAdditionConfig(
         int32_t syncResult = NOTIFICATION_AI_EXTENSION_WRAPPER->SyncRules(value);
         message.ErrorCode(syncResult);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        ANS_LOGE("Sync addition config to ai result: %{public}d, key: %{public}s", syncResult, key.c_str());
+        ANS_LOGI("Sync addition config to ai result: %{public}d, key: %{public}s", syncResult, key.c_str());
         if (syncResult == NOTIFICATION_AI_EXTENSION_WRAPPER->ErrorCode::ERR_FAIL) {
             return ERR_ANS_SERVICE_NOT_READY;
         }

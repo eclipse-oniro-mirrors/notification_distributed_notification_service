@@ -214,6 +214,15 @@ public:
 #endif
     void NotifyApplicationInfoNeedChanged(const std::string& bundleName);
 
+    void NotifyRefreshPrioritySwitch(const std::vector<sptr<NotificationRequest>> &requests,
+        const std::map<sptr<NotificationBundleOption>, bool> &priorityEnable);
+
+    void NotifyRefreshPriorityIntelligent(const bool enabled, const std::vector<sptr<NotificationRequest>> &requests);
+
+    void NotifyRefreshPriorityStrategy(const std::vector<sptr<NotificationRequest>> &requests,
+        const std::map<sptr<NotificationBundleOption>, int64_t> &strategies);
+
+    void NotifyRefreshPriorityConfig(const std::vector<sptr<NotificationRequest>> &requests);
 private:
     void NotifyApplicationInfochangedInner(const std::string& bundleName);
     std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const wptr<IRemoteObject> &object);
@@ -273,6 +282,16 @@ private:
         NotificationConstant::SubscribedFlag flags, ErrCode (IAnsSubscriber::*func)(Args...), Args&& ... args);
     void NotifySubscribers(int32_t userId,
         ErrCode (IAnsSubscriber::*func)(uint32_t), uint32_t watchStatus);
+    void NotifyRefreshPrioritySwitchInner(const std::vector<sptr<NotificationRequest>> &requests,
+        const std::map<sptr<NotificationBundleOption>, bool> &priorityEnable);
+    void NotifyRefreshPriorityIntelligentInner(
+        const bool enabled, const std::vector<sptr<NotificationRequest>> &requests);
+    void NotifyRefreshPriorityStrategyInner(const std::vector<sptr<NotificationRequest>> &requests,
+        const std::map<sptr<NotificationBundleOption>, int64_t> &strategies);
+    void NotifyRefreshPriorityConfigInner(const std::vector<sptr<NotificationRequest>> &requests);
+    template <typename T>
+    void SendCommonEvent(
+        const uint32_t eventType, const std::map<sptr<NotificationBundleOption>, T> &params, int32_t code);
 
 private:
     ffrt::mutex subscriberRecordListMutex_;
