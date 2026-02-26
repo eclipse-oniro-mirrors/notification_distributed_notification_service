@@ -640,8 +640,6 @@ void SmartReminderCenter::HandleReminderMethods(
     map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
     shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices) const
 {
-    std::string classfication = request->GetClassification();
-
     if (syncDevices.find(deviceType) == syncDevices.end()) {
         return;
     }
@@ -884,15 +882,12 @@ void SmartReminderCenter::GetDeviceStatusByType(
 {
     u_int32_t status = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->GetDeviceStatus(deviceType);
     bitStatus = bitset<DistributedDeviceStatus::STATUS_SIZE>(status);
-    Rosen::ScreenPowerState powerState = Rosen::ScreenPowerState::INVALID_STATE;
     if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
         bool screenLocked = true;
         screenLocked = ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
         bitStatus.set(DistributedDeviceStatus::LOCK_FLAG, !screenLocked);
-        powerState = Rosen::ScreenManager::GetInstance().GetScreenPower();
     }
-    ANS_LOGI("deviceType: %{public}s, power %{public}d bitStatus: %{public}s", deviceType.c_str(), powerState,
-        bitStatus.to_string().c_str());
+    ANS_LOGI("deviceType: %{public}s, bitStatus: %{public}s", deviceType.c_str(), bitStatus.to_string().c_str());
 }
 
 bool SmartReminderCenter::CheckHealthWhiteList(const sptr<NotificationRequest> &request,

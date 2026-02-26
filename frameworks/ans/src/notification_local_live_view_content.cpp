@@ -369,7 +369,7 @@ bool NotificationLocalLiveViewContent::ReadFromParcel(Parcel &parcel)
     delete pButton;
     pButton = nullptr;
 
-    auto vsize = static_cast<int32_t>(parcel.ReadInt32());
+    auto vsize = static_cast<uint32_t>(parcel.ReadInt32());
     vsize = (vsize < BUTTON_MAX_SIZE) ? vsize : BUTTON_MAX_SIZE;
     card_button_.clear();
     for (uint32_t i = 0; i < vsize; ++i) {

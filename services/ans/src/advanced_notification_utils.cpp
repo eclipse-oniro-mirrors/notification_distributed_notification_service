@@ -1445,7 +1445,7 @@ ErrCode AdvancedNotificationService::ShellDump(const std::string &cmd, const std
             result = ERR_ANS_INVALID_PARAM;
         }
     }));
-    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Shell dump.");
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Shell dump");
     return result;
 }
 #endif
