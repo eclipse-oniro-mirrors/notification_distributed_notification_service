@@ -238,10 +238,9 @@ namespace Notification {
     bool GetNotificationBasicContentDetailedV2(CNotificationBasicContentV2* contentResult,
         std::shared_ptr<NotificationBasicContent> basicContent)
     {
-        char str[SHORT_STR_SIZE] = {0};
-        char long_str[LONG_STR_SIZE] = {0};
+        char str[STR_MAX_SIZE] = {0};
         // title: String
-        if (strcpy_s(str, SHORT_STR_SIZE, contentResult->title) != EOK) {
+        if (strcpy_s(str, STR_MAX_SIZE, contentResult->title) != EOK) {
             return false;
         }
         if (strlen(str) == 0) {
@@ -250,20 +249,20 @@ namespace Notification {
         }
         basicContent->SetTitle(std::string(str));
         // text: String
-        if (strcpy_s(long_str, LONG_STR_SIZE, contentResult->text) != EOK) {
+        if (strcpy_s(str, STR_MAX_SIZE, contentResult->text) != EOK) {
             return false;
         }
-        if (strlen(long_str) == 0) {
+        if (strlen(str) == 0) {
             LOGE("Property text is empty");
             return false;
         }
-        basicContent->SetText(std::string(long_str));
+        basicContent->SetText(std::string(str));
         // additionalText: string
-        if (strcpy_s(long_str, LONG_STR_SIZE, contentResult->additionalText) != EOK) {
+        if (strcpy_s(str, STR_MAX_SIZE, contentResult->additionalText) != EOK) {
             return false;
         }
-        basicContent->SetAdditionalText(std::string(long_str));
-        
+        basicContent->SetAdditionalText(std::string(str));
+
         // lockScreenPicture?: pixelMap
         if (contentResult->lockscreenPicture != -1) {
             auto pixelMap = FFIData::GetData<Media::PixelMapImpl>(contentResult->lockscreenPicture);
@@ -295,8 +294,8 @@ namespace Notification {
         CNotificationLongTextContentV2* contentResult,
         std::shared_ptr<NotificationLongTextContent> &longContent)
     {
-        char str[SHORT_STR_SIZE] = {0};
-        char long_str[LONG_STR_SIZE] = {0};
+        char str[STR_MAX_SIZE] = {0};
+        char long_str[LONG_STR_MAX_SIZE + 1] = {0};
 
         std::shared_ptr<CNotificationBasicContentV2> tempContent = std::make_shared<CNotificationBasicContentV2>();
         tempContent->title = contentResult->title;
@@ -306,9 +305,9 @@ namespace Notification {
         if (!GetNotificationBasicContentDetailedV2(tempContent.get(), longContent)) {
             return false;
         }
-        
+
         // longText: String
-        if (strcpy_s(long_str, LONG_STR_SIZE, contentResult->longText) != EOK) {
+        if (strcpy_s(long_str, LONG_STR_MAX_SIZE + 1, contentResult->longText) != EOK) {
             return false;
         }
         if (strlen(long_str) == 0) {
@@ -318,7 +317,7 @@ namespace Notification {
         longContent->SetLongText(std::string(long_str));
 
         // briefText: String
-        if (strcpy_s(str, SHORT_STR_SIZE, contentResult->briefText) != EOK) {
+        if (strcpy_s(str, STR_MAX_SIZE, contentResult->briefText) != EOK) {
             return false;
         }
         if (strlen(str) == 0) {
@@ -328,7 +327,7 @@ namespace Notification {
         longContent->SetBriefText(std::string(str));
 
         // expandedTitle: String
-        if (strcpy_s(str, SHORT_STR_SIZE, contentResult->expandedTitle) != EOK) {
+        if (strcpy_s(str, STR_MAX_SIZE, contentResult->expandedTitle) != EOK) {
             return false;
         }
         if (strlen(str) == 0) {
@@ -362,8 +361,7 @@ namespace Notification {
         CNotificationPictureContentV2* contentResult,
         std::shared_ptr<NotificationPictureContent> &pictureContent)
     {
-        char str[SHORT_STR_SIZE] = {0};
-        char long_str[LONG_STR_SIZE] = {0};
+        char str[STR_MAX_SIZE] = {0};
 
         std::shared_ptr<CNotificationBasicContentV2> tempContent = std::make_shared<CNotificationBasicContentV2>();
         tempContent->title = contentResult->title;
@@ -375,7 +373,7 @@ namespace Notification {
         }
 
         // briefText: String
-        if (strcpy_s(str, SHORT_STR_SIZE, contentResult->briefText) != EOK) {
+        if (strcpy_s(str, STR_MAX_SIZE, contentResult->briefText) != EOK) {
             return false;
         }
         if (std::strlen(str) == 0) {
@@ -385,14 +383,14 @@ namespace Notification {
         pictureContent->SetBriefText(std::string(str));
 
         // expandedTitle: String
-        if (strcpy_s(long_str, LONG_STR_SIZE, contentResult->expandedTitle) != EOK) {
+        if (strcpy_s(str, STR_MAX_SIZE, contentResult->expandedTitle) != EOK) {
             return false;
         }
-        if (std::strlen(long_str) == 0) {
+        if (std::strlen(str) == 0) {
             LOGE("Property expandedTitle is empty");
             return false;
         }
-        pictureContent->SetExpandedTitle(std::string(long_str));
+        pictureContent->SetExpandedTitle(std::string(str));
 
         // picture: image.PixelMap
         auto pixelMap = FFIData::GetData<Media::PixelMapImpl>(contentResult->picture);
@@ -428,14 +426,14 @@ namespace Notification {
         CNotificationMultiLineContentV2* result,
         std::shared_ptr<OHOS::Notification::NotificationMultiLineContent> &multiLineContent)
     {
-        char str[SHORT_STR_SIZE] = {0};
+        char str[STR_MAX_SIZE] = {0};
         int64_t length = result->lines.size;
         if (length == 0) {
             LOGE("The array is empty.");
             return false;
         }
         for (int64_t i = 0; i < length; i++) {
-            if (strcpy_s(str, SHORT_STR_SIZE, result->lines.head[i]) != EOK) {
+            if (strcpy_s(str, STR_MAX_SIZE, result->lines.head[i]) != EOK) {
                 return false;
             }
             multiLineContent->AddSingleLine(std::string(str));
@@ -447,7 +445,7 @@ namespace Notification {
         CNotificationMultiLineContentV2* contentResult,
         NotificationRequest &request)
     {
-        char str[SHORT_STR_SIZE] = {0};
+        char str[STR_MAX_SIZE] = {0};
 
         std::shared_ptr<OHOS::Notification::NotificationMultiLineContent> multiLineContent =
         std::make_shared<OHOS::Notification::NotificationMultiLineContent>();
@@ -466,7 +464,7 @@ namespace Notification {
         }
 
         // briefText: String
-        if (strcpy_s(str, SHORT_STR_SIZE, contentResult->briefText) != EOK) {
+        if (strcpy_s(str, STR_MAX_SIZE, contentResult->briefText) != EOK) {
             return false;
         }
         if (std::strlen(str) == 0) {
@@ -476,7 +474,7 @@ namespace Notification {
         multiLineContent->SetBriefText(std::string(str));
 
         // longTitle: String
-        if (strcpy_s(str, LONG_STR_SIZE, contentResult->longTitle) != EOK) {
+        if (strcpy_s(str, STR_MAX_SIZE, contentResult->longTitle) != EOK) {
             return false;
         }
         if (std::strlen(str) == 0) {
