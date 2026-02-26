@@ -41,12 +41,10 @@ struct NotificationDialogPage {
     builder: PermissionDialog({ isUpdate: $isUpdate }),
     autoCancel: false,
     alignment: DialogAlignment.TopStart,
-    customStyle: false,
+    customStyle: true,
     onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
       console.info(TAG, `dialog onWillDismiss reason= : ${JSON.stringify(dismissDialogAction.reason)}`);
-    },
-    width: '466px',
-    height: '466px'
+    }
   });
 
   build() {}
@@ -74,102 +72,104 @@ struct PermissionDialog {
   @State buttonWidth: string | number = 'auto';
 
   build() {
-    Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {   
-      Column() {
-        Scroll() {
-          Column() {
-            Row() {
-              Image(permission.icon)
-                .width('92px')
-                .height('92px')
-                .margin({
-                  top: 8
-                })
-            }
-
-            Row() {
-              Flex({ justifyContent: FlexAlign.Center }) {
-                Text() {
-                  Span(getContext(this).resourceManager.getStringSync(permission.label.id).replace('%s', this.appName))
-                }
-                .fontSize('36px')
-                .fontColor('#FFFFFF')
-                .fontWeight(500)
-                .lineHeight('Auto')
-                .margin({
-                  top: 12,
-                  left: 26,
-                  right: 26
-                })
-                .textAlign(TextAlign.Center)
+    Row(){
+      Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {   
+        Column() {
+          Scroll() {
+            Column() {
+              Row() {
+                Image(permission.icon)
+                  .width('92px')
+                  .height('92px')
+                  .margin({
+                    top: 8
+                  })
               }
-            }
 
-            Row() {
-              Flex({ justifyContent: FlexAlign.Center }) {
-                Button() {
-                  Text($r('app.string.ALLOW'))
+              Row() {
+                Flex({ justifyContent: FlexAlign.Center }) {
+                  Text() {
+                    Span(getContext(this).resourceManager.getStringSync(permission.label.id).replace('%s', this.appName))
+                  }
+                  .fontSize('36px')
                   .fontColor('#FFFFFF')
                   .fontWeight(500)
-                  .minFontSize('27px')
-                  .maxFontSize('30px')
-                  .maxLines(1)
-                  .textOverflow({overflow: TextOverflow.MARQUEE})
+                  .lineHeight('Auto')
+                  .margin({
+                    top: 12,
+                    left: 26,
+                    right: 26
+                  })
+                  .textAlign(TextAlign.Center)
                 }
-                .onClick(async (): Promise<void> => {
-                  await this.enableNotification(true);
-                })
-                .backgroundColor('#FF1F71FF')
-                .width(this.buttonWidth)
-                .height('80px')  
-                .constraintSize({ 
-                    minWidth: '232px',
-                    maxWidth: '362px'
-                })
-                .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-                  console.info(`onSizeChange-allow, newValue=${newValue?.width}.`)
-                  this.buttonWidthAllow = newValue?.width as number;
-                  this.updateButtonWidth();
-                })
               }
-              .margin({top:16})
-            }
 
-            Row() {
-              Flex({ justifyContent: FlexAlign.Center }) {
-                Button() {
-                  Text($r('app.string.BAN'))
-                  .fontColor('#5EA1FF')
-                  .fontWeight(500)
-                  .minFontSize('27px')
-                  .maxFontSize('30px')
-                  .maxLines(1)
-                  .textOverflow({overflow: TextOverflow.MARQUEE})
+              Row() {
+                Flex({ justifyContent: FlexAlign.Center }) {
+                  Button() {
+                    Text($r('app.string.ALLOW'))
+                    .fontColor('#FFFFFF')
+                    .fontWeight(500)
+                    .minFontSize('27px')
+                    .maxFontSize('30px')
+                    .maxLines(1)
+                    .textOverflow({overflow: TextOverflow.MARQUEE})
+                  }
+                  .onClick(async (): Promise<void> => {
+                    await this.enableNotification(true);
+                  })
+                  .backgroundColor('#FF1F71FF')
+                  .width(this.buttonWidth)
+                  .height('80px')  
+                  .constraintSize({ 
+                      minWidth: '232px',
+                      maxWidth: '362px'
+                  })
+                  .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+                    console.info(`onSizeChange-allow, newValue=${newValue?.width}.`)
+                    this.buttonWidthAllow = newValue?.width as number;
+                    this.updateButtonWidth();
+                  })
                 }
-                .onClick(async (): Promise<void> => {
-                  await this.enableNotification(false);
-                })
-                .backgroundColor('#405ea1ff')
-                .width(this.buttonWidth)
-                .height('80px')  
-                .constraintSize({ 
-                    minWidth: '232px',
-                    maxWidth: '362px'
-                })
-                .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-                  console.info(TAG, `onSizeChange-deny, newValue=${newValue?.width}.`)
-                  this.buttonWidthDeny = newValue?.width as number;
-                  this.updateButtonWidth();
-                })
+                .margin({top:16})
               }
-              .margin({
-                top:12,
-                bottom:36})
+
+              Row() {
+                Flex({ justifyContent: FlexAlign.Center }) {
+                  Button() {
+                    Text($r('app.string.BAN'))
+                    .fontColor('#5EA1FF')
+                    .fontWeight(500)
+                    .minFontSize('27px')
+                    .maxFontSize('30px')
+                    .maxLines(1)
+                    .textOverflow({overflow: TextOverflow.MARQUEE})
+                  }
+                  .onClick(async (): Promise<void> => {
+                    await this.enableNotification(false);
+                  })
+                  .backgroundColor('#405ea1ff')
+                  .width(this.buttonWidth)
+                  .height('80px')  
+                  .constraintSize({ 
+                      minWidth: '232px',
+                      maxWidth: '362px'
+                  })
+                  .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+                    console.info(TAG, `onSizeChange-deny, newValue=${newValue?.width}.`)
+                    this.buttonWidthDeny = newValue?.width as number;
+                    this.updateButtonWidth();
+                  })
+                }
+                .margin({
+                  top:12,
+                  bottom:36})
+              }
             }
           }
-        }
-        .scrollBar(BarState.Off)
-      } 
+          .scrollBar(BarState.Off)
+        } 
+      }
     }
     .margin({
       top: 0,
@@ -177,8 +177,6 @@ struct PermissionDialog {
       right: 0,
       bottom: 0
     })
-    .width('100%')
-    .height('100%')
     .backgroundColor('#ff000000')
     
   }
