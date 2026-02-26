@@ -2015,22 +2015,20 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
     NotificationConstant::SlotType slotType = notificationCheckRequest->GetSlotType();
     int32_t uid = IPCSkeleton::GetCallingUid();
 
+    std::lock_guard<ffrt::mutex> lock(pushMutex_);
     if (pushCallBacks_.find(slotType) != pushCallBacks_.end()) {
         if (checkRequests_[slotType]->GetUid() != uid) {
             NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERROR_INTERNAL_ERROR).BranchId(BRANCH_18));
             return ERROR_INTERNAL_ERROR;
         }
     }
-    {
-        std::lock_guard<ffrt::mutex> lock(pushMutex_);
-        pushRecipient_ = new (std::nothrow) PushCallbackRecipient(slotType);
-        if (!pushRecipient_) {
-            ANS_LOGE("Failed to create death Recipient ptr PushCallbackRecipient!");
-            return ERR_NO_INIT;
-        }
-        pushCallback->AddDeathRecipient(pushRecipient_);
-        pushCallBacks_.insert_or_assign(slotType, pushCallBack);
+    pushRecipient_ = new (std::nothrow) PushCallbackRecipient(slotType);
+    if (!pushRecipient_) {
+        ANS_LOGE("Failed to create death Recipient ptr PushCallbackRecipient!");
+        return ERR_NO_INIT;
     }
+    pushCallback->AddDeathRecipient(pushRecipient_);
+    pushCallBacks_.insert_or_assign(slotType, pushCallBack);
     ANS_LOGD("insert pushCallBack, slot type %{public}d", slotType);
     notificationCheckRequest->SetUid(uid);
     checkRequests_.insert_or_assign(slotType, notificationCheckRequest);
@@ -2059,16 +2057,13 @@ ErrCode AdvancedNotificationService::UnregisterPushCallback()
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    std::lock_guard<ffrt::mutex> lock(pushMutex_);
     if (pushCallBacks_.empty()) {
         ANS_LOGE("The registration callback has not been processed yet.");
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_INVALID_OPERATION));
         return ERR_INVALID_OPERATION;
     }
-    
-    {
-        std::lock_guard<ffrt::mutex> lock(pushMutex_);
-        pushCallBacks_.clear();
-    }
+    pushCallBacks_.clear();
 
     ANS_LOGD("end");
     return ERR_OK;
@@ -2094,6 +2089,7 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
         return true;
     }
 
+    std::lock_guard<ffrt::mutex> lock(pushMutex_);
     if (pushCallBacks_.find(slotType) == pushCallBacks_.end()) {
         ANS_LOGD("PushCallback unregistered");
         return false;
@@ -2179,6 +2175,7 @@ AnsStatus AdvancedNotificationService::HandlePushCheckFailed(const sptr<Notifica
 AnsStatus AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &request)
 {
     ANS_LOGD("start.");
+    std::lock_guard<ffrt::mutex> lock(pushMutex_);
     if (pushCallBacks_.find(request->GetSlotType()) == pushCallBacks_.end()) {
         if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
             AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
