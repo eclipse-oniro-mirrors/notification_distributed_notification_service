@@ -16,6 +16,8 @@
 #ifndef NOTIFICATION_ADVANCED_DATASHAER_HELPER_H
 #define NOTIFICATION_ADVANCED_DATASHAER_HELPER_H
 
+#include <atomic>
+#include <functional>
 #include <vector>
 
 #include "advanced_datashare_helper_data_observer.h"
@@ -37,6 +39,7 @@ constexpr const char *KEY_FOCUS_MODE_REPEAT_CALLERS_ENABLE = "focus_mode_repeate
 constexpr const char *KEY_INTELLIGENT_SCENE_DATA = "intelligent_scene_data";
 constexpr const char *KEY_INTELLIGENT_URI = "intelligent_uri";
 constexpr const char *KEY_FOCUS_MODE_SOUND_WHITE_LIST = "intelligent_scene_notification_white_list";
+constexpr const char *KEY_SCENEBOARD_IS_PCMODE = "settings.sceneboard.ispcmode";
 } // namespace
 
 class AdvancedDatashareHelper : DelayedSingleton<AdvancedDatashareHelper> {
@@ -63,6 +66,9 @@ public:
     bool QueryByDataShare(Uri &uri, const std::string &key, std::string &value);
     void OnUserSwitch(const int32_t userId);
     void Init();
+    bool IsPCModeEnabled();
+    void SetPCModeEnabled(bool enabled);
+    std::string GetPCModeUri(const int32_t userId) const;
 
     struct DatashareItem {
         Uri uri;
@@ -109,6 +115,7 @@ private:
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper_;
     std::vector<DatashareItem> dataShareItems_;
     std::vector<std::pair<int32_t, sptr<AdvancedDatashareHelperDataObserver>>> dataObservers_;
+    std::atomic<bool> isPCModeEnabled_;
 };
 } // namespace Notification
 } // namespace OHOS

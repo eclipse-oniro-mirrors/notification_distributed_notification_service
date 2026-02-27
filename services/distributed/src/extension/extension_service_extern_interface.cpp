@@ -25,9 +25,11 @@ extern "C" {
 #endif
 
 SYMBOL_EXPORT int32_t Startup(std::function<void()> shutdownCallback,
-    std::function<void(uint32_t, uint32_t, int32_t, std::string)> haReportCallback)
+    std::function<void(uint32_t, uint32_t, int32_t, std::string)> haReportCallback,
+    std::function<bool()> isPCModeCallback)
 {
-    return NotificationExtensionService::GetInstance().InitService(shutdownCallback, haReportCallback);
+    return NotificationExtensionService::GetInstance()
+        .InitService(shutdownCallback, haReportCallback, isPCModeCallback);
 }
 
 SYMBOL_EXPORT void Shutdown()

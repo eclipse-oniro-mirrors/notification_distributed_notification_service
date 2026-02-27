@@ -248,7 +248,7 @@ HWTEST_F(NotificationExtensionServiceTest, NotifyOnCancelMessagesTest_0100, Func
 HWTEST_F(NotificationExtensionServiceTest, NotificationExtensionServiceTest_0100, Function | SmallTest | Level1)
 {
     auto notificationExtensionService = NotificationExtensionService::GetInstance();
-    notificationExtensionService.InitService(nullptr, nullptr);
+    notificationExtensionService.InitService(nullptr, nullptr, nullptr);
     auto bundle = sptr<NotificationBundleOption>(new NotificationBundleOption("testBundle", 1));
     auto bundle2 = sptr<NotificationBundleOption>(new NotificationBundleOption("testBundle2", 2));
     std::vector<sptr<NotificationBundleOption>> subscribedBundles;
@@ -291,7 +291,7 @@ HWTEST_F(NotificationExtensionServiceTest, NotificationExtensionService_SendHaRe
         gotBranch = branch;
         gotError = error;
         gotMsg = msg;
-    });
+    }, nullptr);
     uint32_t scene = 11;
     uint32_t branchId = 22;
     int32_t errorCode = -33;
@@ -314,10 +314,10 @@ HWTEST_F(NotificationExtensionServiceTest, NotificationExtensionService_SendHaRe
 {
     auto &service = NotificationExtensionService::GetInstance();
     std::atomic<int> flag { 0 };
-    service.InitService(nullptr, [&](uint32_t, uint32_t, int32_t, std::string) { flag = 1; });
+    service.InitService(nullptr, [&](uint32_t, uint32_t, int32_t, std::string) { flag = 1; }, nullptr);
     service.SendHaReport(1, 2, 3, "msg1");
     EXPECT_EQ(flag.load(), 1);
-    service.InitService(nullptr, nullptr);
+    service.InitService(nullptr, nullptr, nullptr);
     flag = 0;
     service.SendHaReport(9, 9, 9, "unused");
     EXPECT_EQ(flag.load(), 0);
@@ -691,5 +691,101 @@ HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnection_NotifyOnCa
     connection->OnAbilityDisconnectDone(element, 0);
     EXPECT_EQ(connection->state_, ExtensionServiceConnectionState::DISCONNECTED);
 }
+
+/**
+ * @tc.name: IsPCModeEnabled_001
+ * @tc.desc: Test IsPCModeEnabled returns false when callback is null
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(NotificationExtensionServiceTest, IsPCModeEnabled_001, Function | SmallTest | Level1)
+{
+    NotificationExtensionService::GetInstance().InitService(
+        nullptr,
+        [](uint32_t, uint32_t, int32_t, std::string) {},
+        nullptr);
+
+    bool result = NotificationExtensionService::GetInstance().IsPCModeEnabled();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsPCModeEnabled_002
+ * @tc.desc: Test IsPCModeEnabled returns true when callback returns true
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(NotificationExtensionServiceTest, IsPCModeEnabled_002, Function | SmallTest | Level1)
+{
+    NotificationExtensionService::GetInstance().InitService(
+        nullptr,
+        [](uint32_t, uint32_t, int32_t, std::string) {},
+        []() -> bool { return true; });
+
+    bool result = NotificationExtensionService::GetInstance().IsPCModeEnabled();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsPCModeEnabled_003
+ * @tc.desc: Test IsPCModeEnabled returns false when callback returns false
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(NotificationExtensionServiceTest, IsPCModeEnabled_003, Function | SmallTest | Level1)
+{
+    NotificationExtensionService::GetInstance().InitService(
+        nullptr,
+        [](uint32_t, uint32_t, int32_t, std::string) {},
+        []() -> bool { return false; });
+
+    bool result = NotificationExtensionService::GetInstance().IsPCModeEnabled();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsPCModeEnabled_004
+ * @tc.desc: Test IsPCModeEnabled callback can be updated
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(NotificationExtensionServiceTest, IsPCModeEnabled_004, Function | SmallTest | Level1)
+{
+    NotificationExtensionService::GetInstance().InitService(
+        nullptr,
+        [](uint32_t, uint32_t, int32_t, std::string) {},
+        []() -> bool { return true; });
+
+    EXPECT_TRUE(NotificationExtensionService::GetInstance().IsPCModeEnabled());
+
+    NotificationExtensionService::GetInstance().InitService(
+        nullptr,
+        [](uint32_t, uint32_t, int32_t, std::string) {},
+        []() -> bool { return false; });
+
+    EXPECT_FALSE(NotificationExtensionService::GetInstance().IsPCModeEnabled());
+}
+
+/**
+ * @tc.name: InitService_001
+ * @tc.desc: Test InitService with all callbacks including isPCModeCallback
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(NotificationExtensionServiceTest, InitService_001, Function | SmallTest | Level1)
+{
+    bool shutdownCalled = false;
+    bool haReportCalled = false;
+    bool isPCModeCalled = false;
+
+    int32_t result = NotificationExtensionService::GetInstance().InitService(
+        [&shutdownCalled]() { shutdownCalled = true; },
+        [&haReportCalled](uint32_t, uint32_t, int32_t, std::string) { haReportCalled = true; },
+        [&isPCModeCalled]() -> bool { isPCModeCalled = true; return true; });
+
+    EXPECT_EQ(result, 0);
+    EXPECT_TRUE(NotificationExtensionService::GetInstance().IsPCModeEnabled());
+}
+
 } // namespace Notification
 } // namespace OHOS
