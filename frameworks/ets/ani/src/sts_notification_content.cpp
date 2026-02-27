@@ -1597,10 +1597,6 @@ bool WarpNotificationLiveViewContent(
         ANS_LOGE("SetNotificationLiveViewContent: get LiveViewContent failed");
         return false;
     }
-    ani_object lockScreenPicObj = CreateAniPixelMap(env, content->GetLockScreenPicture());
-    if (lockScreenPicObj == nullptr || !SetPropertyByRef(env, contentObj, "lockScreenPicture", lockScreenPicObj)) {
-        ANS_LOGD("SetNotificationLiveViewContent: set lockScreenPicture failed");
-    }
     ani_enum_item enumItem = nullptr;
     if (!LiveViewStatusCToEts(env, content->GetLiveViewStatus(), enumItem)
         || enumItem == nullptr || !SetPropertyByRef(env, contentObj, "status", enumItem)) {

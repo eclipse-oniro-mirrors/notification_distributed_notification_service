@@ -296,11 +296,11 @@ ani_object AniSetDistributedEnableByBundle(ani_env* env, ani_object obj, ani_boo
     auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackDistributedInfo{.asyncWork = nullptr};
     if (!asyncCallbackInfo) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
-        DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
     if (!NotificationSts::UnwrapBundleOption(env, obj, asyncCallbackInfo->option)) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOption failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
     asyncCallbackInfo->isEnabled = NotificationSts::AniBooleanToBool(enabled);
