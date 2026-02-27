@@ -26,6 +26,8 @@
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_trace_wrapper.h"
+#include "common_event_manager.h"
+#include "common_event_publish_info.h"
 #include "ipc_skeleton.h"
 #include "notification_flags.h"
 #include "notification_ai_extension_wrapper.h"
@@ -368,6 +370,147 @@ void NotificationSubscriberManager::NotifyEnabledPriorityByBundleChanged(
     AppExecFwk::EventHandler::Callback func =
         std::bind(&NotificationSubscriberManager::NotifyEnabledPriorityByBundleChangedInner, this, callbackData);
     notificationSubQueue_->submit(func);
+}
+
+void NotificationSubscriberManager::NotifyRefreshPrioritySwitch(const std::vector<sptr<NotificationRequest>> &requests,
+    const std::map<sptr<NotificationBundleOption>, bool> &priorityEnable)
+{
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("null queue");
+        return;
+    }
+    AppExecFwk::EventHandler::Callback func =
+        std::bind(&NotificationSubscriberManager::NotifyRefreshPrioritySwitchInner, this, requests, priorityEnable);
+    notificationSubQueue_->submit(func);
+}
+
+void NotificationSubscriberManager::NotifyRefreshPrioritySwitchInner(
+    const std::vector<sptr<NotificationRequest>> &requests,
+    const std::map<sptr<NotificationBundleOption>, bool> &priorityEnable)
+{
+    SendCommonEvent(NotificationConstant::TYPE_PRIORITY_SWITCH_BY_BUNDLE, priorityEnable, 0);
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    std::vector<int32_t> results;
+    AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
+        NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE, requests, results);
+#endif
+}
+
+void NotificationSubscriberManager::NotifyRefreshPriorityIntelligent(
+    const bool enabled, const std::vector<sptr<NotificationRequest>> &requests)
+{
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("null queue");
+        return;
+    }
+    AppExecFwk::EventHandler::Callback func =
+        std::bind(&NotificationSubscriberManager::NotifyRefreshPriorityIntelligentInner, this, enabled, requests);
+    notificationSubQueue_->submit(func);
+}
+
+void NotificationSubscriberManager::NotifyRefreshPriorityIntelligentInner(
+    const bool enabled, const std::vector<sptr<NotificationRequest>> &requests)
+{
+    std::map<sptr<NotificationBundleOption>, bool> params;
+    SendCommonEvent(NotificationConstant::TYPE_PRIORITY_INTELLIGENT_SWITCH, params, enabled);
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    std::vector<int32_t> results;
+    AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
+        NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE, requests, results);
+#endif
+}
+
+void NotificationSubscriberManager::NotifyRefreshPriorityStrategy(
+    const std::vector<sptr<NotificationRequest>> &requests,
+    const std::map<sptr<NotificationBundleOption>, int64_t> &strategies)
+{
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("null queue");
+        return;
+    }
+    AppExecFwk::EventHandler::Callback func =
+        std::bind(&NotificationSubscriberManager::NotifyRefreshPriorityStrategyInner, this, requests, strategies);
+    notificationSubQueue_->submit(func);
+}
+
+void NotificationSubscriberManager::NotifyRefreshPriorityStrategyInner(
+    const std::vector<sptr<NotificationRequest>> &requests,
+    const std::map<sptr<NotificationBundleOption>, int64_t> &strategies)
+{
+    SendCommonEvent(NotificationConstant::TYPE_PRIORITY_STRATEGY_BY_BUNDLE, strategies, 0);
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    std::vector<int32_t> results;
+    AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
+        NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE, requests, results);
+#endif
+}
+
+void NotificationSubscriberManager::NotifyRefreshPriorityConfig(const std::vector<sptr<NotificationRequest>> &requests)
+{
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("null queue");
+        return;
+    }
+    AppExecFwk::EventHandler::Callback func =
+        std::bind(&NotificationSubscriberManager::NotifyRefreshPriorityConfigInner, this, requests);
+    notificationSubQueue_->submit(func);
+}
+
+void NotificationSubscriberManager::NotifyRefreshPriorityConfigInner(
+    const std::vector<sptr<NotificationRequest>> &requests)
+{
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    std::vector<int32_t> results;
+    AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
+        NotificationAiExtensionWrapper::REFRESH_KEYWORD_PRIORITY_TYPE, requests, results);
+#endif
+}
+
+template <typename T>
+void NotificationSubscriberManager::SendCommonEvent(
+    const uint32_t eventType, const std::map<sptr<NotificationBundleOption>, T> &params, int32_t code)
+{
+    EventFwk::Want want;
+    EventFwk::CommonEventData commonData;
+    if (eventType != NotificationConstant::TYPE_PRIORITY_INTELLIGENT_SWITCH && params.size() <= 0) {
+        return;
+    }
+    switch (eventType) {
+        case NotificationConstant::TYPE_PRIORITY_INTELLIGENT_SWITCH:
+            want.SetAction(NotificationConstant::EVENT_PRIORITY_INTELLIGENT_SWITCH);
+            commonData.SetCode(code);
+            break;
+        case NotificationConstant::TYPE_PRIORITY_SWITCH_BY_BUNDLE: {
+                nlohmann::json jsonObject = nlohmann::json::array();
+                for (auto &param : params) {
+                    bool enabled = param.second;
+                    nlohmann::json jsonNode = {{"bundle", param.first->GetBundleName()},
+                        {"uid", param.first->GetUid()}, {"enable", enabled}};
+                    jsonObject.emplace_back(jsonNode);
+                }
+                want.SetParam("switches", jsonObject.dump());
+                want.SetAction(NotificationConstant::EVENT_PRIORITY_SWITCH_BY_BUNDLE);
+            }
+            break;
+        case NotificationConstant::TYPE_PRIORITY_STRATEGY_BY_BUNDLE: {
+                nlohmann::json jsonObject = nlohmann::json::array();
+                for (auto &param : params) {
+                    nlohmann::json jsonNode = {{"bundle", param.first->GetBundleName()},
+                        {"uid", param.first->GetUid()}, {"strategy", param.second}};
+                    jsonObject.emplace_back(jsonNode);
+                }
+                want.SetParam("strategies", jsonObject.dump());
+                want.SetAction(NotificationConstant::EVENT_PRIORITY_STRATEGY_BY_BUNDLE);
+            }
+            break;
+        default:
+            break;
+    }
+    commonData.SetWant(want);
+    std::vector<std::string> permission { OHOS_PERMISSION_NOTIFICATION_CONTROLLER };
+    EventFwk::CommonEventPublishInfo publishInfo;
+    publishInfo.SetSubscriberPermissions(permission);
+    bool publishResult = EventFwk::CommonEventManager::PublishCommonEvent(commonData, publishInfo);
 }
 
 void NotificationSubscriberManager::NotifyEnabledWatchChanged(const uint32_t watchStatus)

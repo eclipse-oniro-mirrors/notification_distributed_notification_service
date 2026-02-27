@@ -85,6 +85,7 @@ extern const std::string CTRL_LIST_KEY;
 extern const std::string CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY;
 extern const std::string HEALTH_BUNDLE_WHITE_LIST_KEY;
 extern const std::string PROXY_PKG_KEY;
+extern const std::string KIOSK_APP_TRUST_KEY;
 extern const std::string DOWNLOAD_TEMPLATE_NAME;
 extern const std::string ANS_EXTENDINFO_INFO_PRE;
 extern const std::string ANS_EXTENDINFO_DEVICE_ID;

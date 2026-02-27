@@ -2612,7 +2612,7 @@ bool NotificationPreferencesDatabase::PutPriorityEnabledByBundleV2(
     const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SWITCH_STATE priorityStatus)
 {
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
     if (userId == SUBSCRIBE_USER_INIT) {
         ANS_LOGE("Current user acquisition failed");
         return false;
@@ -2661,7 +2661,7 @@ bool NotificationPreferencesDatabase::PutPriorityStrategyByBundle(
     const sptr<NotificationBundleOption> &bundleOption, const int64_t strategy)
 {
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
     if (userId == SUBSCRIBE_USER_INIT) {
         ANS_LOGE("Current user acquisition failed");
         return false;

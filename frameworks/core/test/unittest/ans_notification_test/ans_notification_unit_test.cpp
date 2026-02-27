@@ -2147,14 +2147,14 @@ HWTEST_F(AnsNotificationUnitTest, GetPriorityEnabledByBundles_0200, Function | M
     std::map<sptr<NotificationBundleOption>, bool> switches;
     NotificationBundleOption bo;
     bo.SetBundleName("bundleName");
-    bo.SetUid(1);
+    bo.SetUid(2000);
     bundleOptions.emplace_back(bo);
     ErrCode ret = ans_->GetPriorityEnabledByBundles(bundleOptions, switches);
     EXPECT_EQ(ret, ERR_OK);
 }
 /*
  * @tc.name: SetPriorityEnabledByBundles_0100
- * @tc.desc: test GetPriorityEnabledByBundles with empty bundleName.
+ * @tc.desc: test SetPriorityEnabledByBundles with empty bundleName.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -2174,7 +2174,7 @@ HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundles_0100, Function | M
 HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundles_0200, Function | MediumTest | Level1)
 {
     std::map<sptr<NotificationBundleOption>, bool> switches;
-    sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption("bundle", 100);
+    sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption("bundleName", 2000);
     switches[bo] = true;
     ErrCode ret = ans_->SetPriorityEnabledByBundles(switches);
     EXPECT_EQ(ret, ERR_OK);
@@ -2221,7 +2221,7 @@ HWTEST_F(AnsNotificationUnitTest, SetPriorityStrategyByBundles_0100, Function | 
 HWTEST_F(AnsNotificationUnitTest, SetPriorityStrategyByBundles_0200, Function | MediumTest | Level1)
 {
     std::map<sptr<NotificationBundleOption>, int64_t> strategies;
-    sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption("bundle", 1000);
+    sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption("bundleName", 2000);
     strategies[bo] = 24;
     ErrCode ret = ans_->SetPriorityStrategyByBundles(strategies);
     EXPECT_EQ(ret, ERR_OK);
