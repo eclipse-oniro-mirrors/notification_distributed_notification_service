@@ -41,7 +41,7 @@ static void OnServerBind(int32_t socket, PeerSocketInfo info)
 
 static void OnServerShutdown(int32_t socket, ShutdownReason reason)
 {
-    ANS_LOGI("Socket fd %{public}d shutdown because %{public}." PRIu32, socket, reason);
+    ANS_LOGI("Socket fd %{public}d shutdown because %{public}u.", socket, static_cast<uint32_t>(reason));
     if (socket <= 0) {
         ANS_LOGE("Socket fd invalid.");
         return;
@@ -51,7 +51,7 @@ static void OnServerShutdown(int32_t socket, ShutdownReason reason)
 
 static void OnServerBytes(int32_t socket, const void *data, uint32_t dataLen)
 {
-    ANS_LOGI("Socket byte fd %{public}d, recv len %{public}d.", socket, dataLen);
+    ANS_LOGI("Socket byte fd %{public}d, recv len %{public}u.", socket, dataLen);
     if ((socket <= 0) || (data == nullptr) || (dataLen == 0)) {
         ANS_LOGW("Socket byte invalid data.");
         return;
@@ -61,7 +61,7 @@ static void OnServerBytes(int32_t socket, const void *data, uint32_t dataLen)
 
 static void OnServerMessage(int32_t socket, const void *data, uint32_t dataLen)
 {
-    ANS_LOGI("Socket byte fd %{public}d, recv len %{public}d.", socket, dataLen);
+    ANS_LOGI("Socket byte fd %{public}d, recv len %{public}u.", socket, dataLen);
     if ((socket <= 0) || (data == nullptr) || (dataLen == 0)) {
         ANS_LOGW("Socket byte invalid data.");
         return;
@@ -71,7 +71,7 @@ static void OnServerMessage(int32_t socket, const void *data, uint32_t dataLen)
 
 static void OnClientBytes(int32_t socket, const void *data, uint32_t dataLen)
 {
-    ANS_LOGI("Socket message fd %{public}d, recv len %{public}d.", socket, dataLen);
+    ANS_LOGI("Socket message fd %{public}d, recv len %{public}u.", socket, dataLen);
     if ((socket <= 0) || (data == nullptr) || (dataLen == 0)) {
         ANS_LOGW("Socket message invalid data.");
     }
@@ -80,7 +80,7 @@ static void OnClientBytes(int32_t socket, const void *data, uint32_t dataLen)
 
 static void OnClientShutdown(int32_t socket, ShutdownReason reason)
 {
-    ANS_LOGI("Socket fd %{public}d shutdown because %{public}." PRIu32, socket, reason);
+    ANS_LOGI("Socket fd %{public}d shutdown because %{public}u.", socket, static_cast<uint32_t>(reason));
     if (socket <= 0) {
         ANS_LOGE("Socket fd invalid.");
         return;
@@ -90,7 +90,7 @@ static void OnClientShutdown(int32_t socket, ShutdownReason reason)
 
 static void OnQos(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t qosCount)
 {
-    ANS_LOGI("OnQos %{public}d %{public}d %{public}" PRIu32, socket, (int32_t)eventId, qosCount);
+    ANS_LOGI("OnQos %{public}d %{public}d %{public}u", socket, static_cast<int32_t>(eventId), qosCount);
 }
 
 void CloseSocket(int32_t socketId)
