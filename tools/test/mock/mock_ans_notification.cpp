@@ -58,7 +58,7 @@ ErrCode AnsNotification::SetSmartReminderEnabled(const std::string &deviceType, 
 }
 
 ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
-    const std::string &deviceType, const bool enabled)
+    const std::string &deviceType, const bool enabled, const bool isNotification)
 {
     if (deviceType == "phone") {
         return ERR_OK;

@@ -1422,28 +1422,34 @@ void NotificationSubscriberManager::UnRegisterOnSubscriberAddCallback()
     onSubscriberAddCallback_ = nullptr;
 }
 
-void NotificationSubscriberManager::NotifyApplicationInfoNeedChanged(const std::string& bundleName)
+void NotificationSubscriberManager::NotifyApplicationInfoNeedChanged(
+    const sptr<NotificationApplicationChangeInfo>& applicationChangeInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (notificationSubQueue_ == nullptr || bundleName.empty()) {
+    if (notificationSubQueue_ == nullptr || applicationChangeInfo == nullptr) {
         ANS_LOGE("queue is nullptr");
         return;
     }
     AppExecFwk::EventHandler::Callback NotifyConsumedFunc =
-        std::bind(&NotificationSubscriberManager::NotifyApplicationInfochangedInner, this, bundleName);
+        std::bind(&NotificationSubscriberManager::NotifyApplicationInfochangedInner, this, applicationChangeInfo);
 
     notificationSubQueue_->submit(NotifyConsumedFunc);
 }
 
-
-void NotificationSubscriberManager::NotifyApplicationInfochangedInner(const std::string& bundleName)
+void NotificationSubscriberManager::NotifyApplicationInfochangedInner(
+    const sptr<NotificationApplicationChangeInfo>& applicationChangeInfo)
 {
+    if (applicationChangeInfo == nullptr) {
+        ANS_LOGE("Invalid application change info.");
+        return;
+    }
+
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGI("NotifyApplicationInfochangedInner %{public}s", bundleName.c_str());
+    ANS_LOGI("NotifyApplicationInfochangedInner %{public}s", applicationChangeInfo->Dump().c_str());
     for (auto record : subscriberRecordList_) {
         if (record->needNotifyApplicationChanged && (record->subscribedFlags_ &
             NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_APPLICATIONINFONEED_CHANGED)) {
-            record->subscriber->OnApplicationInfoNeedChanged(bundleName);
+            record->subscriber->OnApplicationInfoNeedChanged(applicationChangeInfo);
         }
     }
 }

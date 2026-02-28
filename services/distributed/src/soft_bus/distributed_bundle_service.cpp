@@ -26,6 +26,8 @@
 #include "distributed_preference.h"
 #include "distributed_subscribe_service.h"
 #include "distributed_send_adapter.h"
+#include "notification_distributed_bundle.h"
+#include "application_change_box.h"
 
 namespace OHOS {
 namespace Notification {
@@ -37,230 +39,195 @@ DistributedBundleService& DistributedBundleService::GetInstance()
 }
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
-void DistributedBundleService::HandleBundleIconSync(const std::shared_ptr<TlvBox>& boxMessage)
+// soft bus max buffer length is 4*1024*1024.
+constexpr int32_t MAX_BUFFER_LENGTH = 7 * 512 * 1024;
+
+void DistributedBundleService::SendDistributedBundleInfo(const DistributedDeviceInfo device)
 {
-    int32_t type = 0;
-    BundleIconBox iconBox = BundleIconBox(boxMessage);
-    if (!iconBox.GetIconSyncType(type)) {
-        ANS_LOGI("Dans handle bundle icon sync failed.");
+    if (!device.IsPadOrPc()) {
         return;
     }
-
-    ANS_LOGI("Dans handle bundl icon type %{public}d.", type);
-    if (type == IconSyncType::REPORT_SAVED_ICON) {
-        std::string deviceId;
-        if (!iconBox.GetLocalDeviceId(deviceId)) {
-            ANS_LOGI("Dans get deviceId failed.");
-            return;
-        }
-
-        DistributedDeviceInfo device;
-        if (!DistributedDeviceService::GetInstance().GetDeviceInfo(deviceId, device)) {
-            return;
-        }
-        std::set<std::string> bundleSet;
-        std::vector<std::string> bundleList;
-        iconBox.GetBundleList(bundleList);
-        for (auto bundle : bundleList) {
-            ANS_LOGI("Dans handle receive %{public}s.", bundle.c_str());
-            bundleSet.insert(bundle);
-        }
-        bundleIconCache_[device.deviceId_] = bundleSet;
-        GenerateBundleIconSync(device);
-    }
-}
-
-void DistributedBundleService::RequestBundlesIcon(const DistributedDeviceInfo peerDevice, bool isForce)
-{
-    if (!DistributedDeviceService::GetInstance().IsSyncIcons(peerDevice.deviceId_, isForce)) {
-        return;
-    }
-
-    auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
-    std::shared_ptr<BundleIconBox> iconBox = std::make_shared<BundleIconBox>();
-    iconBox->SetIconSyncType(IconSyncType::REQUEST_BUNDLE_ICON);
-    iconBox->SetLocalDeviceId(localDevice.deviceId_);
-    if (!iconBox->Serialize()) {
-        ANS_LOGW("Dans RequestBundlesIcon serialize failed.");
-        return;
-    }
-
-    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(iconBox, peerDevice,
-        TransDataType::DATA_TYPE_MESSAGE, MODIFY_ERROR_EVENT_CODE);
-    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
-    DistributedDeviceService::GetInstance().SetDeviceSyncData(peerDevice.deviceId_,
-        DistributedDeviceService::SYNC_BUNDLE_ICONS, true);
-}
-
-void DistributedBundleService::GenerateBundleIconSync(const DistributedDeviceInfo& device)
-{
-    std::vector<NotificationBundleOption> bundleOption;
-    if (NotificationHelper::GetAllLiveViewEnabledBundles(bundleOption) != 0) {
-        ANS_LOGW("Dans get all live view enable bundle failed.");
-        return;
-    }
-
-    std::vector<NotificationBundleOption> enableBundleOption;
-    if (NotificationHelper::GetAllDistribuedEnabledBundles("liteWearable", enableBundleOption) != 0) {
-        ANS_LOGW("Dans get all live view enable bundle failed.");
-    }
-
-    std::set<std::string> enabledBundles;
-    for (auto item : enableBundleOption) {
-        enabledBundles.insert(item.GetBundleName());
-    }
-    std::set<std::string> cachedIcons;
-    std::vector<std::string> unCachedBundleList;
-    if (bundleIconCache_.find(device.deviceId_) != bundleIconCache_.end()) {
-        cachedIcons = bundleIconCache_[device.deviceId_];
-    }
-    for (auto item : bundleOption) {
-        if (enabledBundles.find(item.GetBundleName()) != enabledBundles.end() ||
-            cachedIcons.find(item.GetBundleName()) != cachedIcons.end()) {
+    std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_);
+    std::vector<NotificationDistributedBundle> bundles;
+    std::vector<NotificationDistributedBundle> sendBundles;
+    NotificationHelper::GetLocalDistributedBundleList(deviceType, bundles);
+    std::set<int32_t> launcherBundles;
+    int32_t userId = DistributedSubscribeService::GetCurrentActiveUserId();
+    DelayedSingleton<BundleResourceHelper>::GetInstance()->GetAllLauncherAbility(userId, launcherBundles);
+    for (auto& bundle : bundles) {
+        if (!launcherBundles.count(bundle.GetBundleUid())) {
+            ANS_LOGI("Dans not launcher %{public}d %{public}s.", bundle.GetBundleUid(), bundle.GetBundleName().c_str());
             continue;
         }
-        unCachedBundleList.push_back(item.GetBundleName());
-    }
-
-    ANS_LOGI("Dans Generate bundle %{public}zu %{public}zu %{public}zu.", bundleOption.size(),
-        enableBundleOption.size(), unCachedBundleList.size());
-    std::vector<std::string> sendIcon;
-    std::unordered_map<std::string, std::string> icons;
-    for (auto bundle : unCachedBundleList) {
-        std::string icon;
-        if (!GetBundleResourceInfo(bundle, icon)) {
+        std::shared_ptr<ApplicationChangeBox> applicationChange = std::make_shared<ApplicationChangeBox>();
+        applicationChange->SetApplicationSyncType(DistributedBundleChangeType::MASTER_BUNDLE_ADD);
+        if (!GetApplicationResource(bundle)) {
             continue;
         }
-        sendIcon.push_back(bundle);
-        icons.insert(std::make_pair(bundle, icon));
-        if (icons.size() == BundleIconBox::MAX_ICON_NUM) {
-            if (UpdateBundlesIcon(icons, device) == ERR_OK) {
-                cachedIcons.insert(sendIcon.begin(), sendIcon.end());
-            }
-            icons.clear();
-            sendIcon.clear();
+        ANS_LOGE("Dans send bundle %{public}d %{public}s.", bundle.GetBundleUid(), bundle.GetBundleName().c_str());
+        std::vector<NotificationDistributedBundle> tmpBundles = sendBundles;
+        sendBundles.push_back(bundle);
+        applicationChange->SetApplicationChangeList(sendBundles);
+        if (applicationChange->GetByteLength() < MAX_BUFFER_LENGTH &&
+            sendBundles.size() <= ApplicationChangeBox::MAX_LIST_NUM) {
+            continue;
         }
+        // single application buffer is over size.
+        if (tmpBundles.empty()) {
+            ANS_LOGW("Dans send over size %{public}s.", bundle.GetBundleName().c_str());
+            sendBundles.clear();
+            continue;
+        }
+        // send application info to peer.
+        SendDistributedBundleChange(tmpBundles, DistributedBundleChangeType::MASTER_BUNDLE_ADD);
+        sendBundles.clear();
+        sendBundles.push_back(bundle);
     }
-    if (!icons.empty() && UpdateBundlesIcon(icons, device) == ERR_OK) {
-        cachedIcons.insert(sendIcon.begin(), sendIcon.end());
+    if (!sendBundles.empty()) {
+        SendDistributedBundleChange(sendBundles, DistributedBundleChangeType::MASTER_BUNDLE_ADD);
     }
-    bundleIconCache_[device.deviceId_] = cachedIcons;
+    SendDistributedBundleChange({}, DistributedBundleChangeType::INIT_DEVICE_CONNECT);
 }
 
-void DistributedBundleService::HandleBundleRemoved(const std::string& bundleName)
+void DistributedBundleService::SendDistributedBundleChange(
+    const std::vector<NotificationDistributedBundle>& applicationList, DistributedBundleChangeType type)
 {
-    auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
+    std::shared_ptr<ApplicationChangeBox> applicationChange = std::make_shared<ApplicationChangeBox>();
+    applicationChange->SetApplicationSyncType(static_cast<int32_t>(type));
+    applicationChange->SetApplicationChangeList(applicationList);
+    if (!applicationChange->Serialize()) {
+        ANS_LOGW("Dans application serialize failed.");
+        return;
+    }
+
+    ANS_LOGI("Dans send change %{public}zu %{public}d.", applicationList.size(), static_cast<int32_t>(type));
     auto peerDevices = DistributedDeviceService::GetInstance().GetDeviceList();
     for (auto& device : peerDevices) {
-        auto iter = bundleIconCache_.find(device.first);
-        if (iter == bundleIconCache_.end() ||
-            iter->second.find(bundleName) == iter->second.end()) {
+        if (device.second.peerState_ != DeviceState::STATE_ONLINE ||
+            !(device.second.abilityId_ & DistributedAbilityType::APPLICATION_SWITCH)) {
+            ANS_LOGI("Dans not send %{public}d %{public}s %{public}d.", device.second.peerState_,
+                StringAnonymous(device.second.deviceId_).c_str(), device.second.abilityId_);
             continue;
         }
-        iter->second.erase(bundleName);
-        if (device.second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
-            continue;
+        // send to pc/pad
+        if (device.second.IsPadOrPc()) {
+            std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(applicationChange, device.second,
+                TransDataType::DATA_TYPE_BYTES, MODIFY_ERROR_EVENT_CODE);
+            DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
+            ANS_LOGI("Dans send change %{public}s %{public}d.", StringAnonymous(device.second.deviceId_).c_str(),
+                device.second.deviceType_);
         }
-
-        std::shared_ptr<BundleIconBox> iconBox = std::make_shared<BundleIconBox>();
-        iconBox->SetIconSyncType(IconSyncType::REMOVE_BUNDLE_ICON);
-        iconBox->SetBundleList({bundleName});
-        iconBox->SetLocalDeviceId(localDevice.deviceId_);
-        if (!iconBox->Serialize()) {
-            ANS_LOGW("Dans HandleBundleRemove serialize failed.");
-            continue;
-        }
-
-        auto packageInfo = std::make_shared<PackageInfo>(iconBox, device.second,
-            TransDataType::DATA_TYPE_MESSAGE, MODIFY_ERROR_EVENT_CODE);
-        DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
-        ANS_LOGI("Dans ReportBundleIconList %{public}s %{public}d.",
-            StringAnonymous(device.second.deviceId_).c_str(), device.second.deviceType_);
     }
 }
 
-void DistributedBundleService::HandleBundleChanged(const std::string& bundleName, bool updatedExit)
+bool DistributedBundleService::GetApplicationResource(NotificationDistributedBundle& info)
 {
-    std::vector<DistributedDeviceInfo> updateDeviceList;
-    GetNeedUpdateDevice(updatedExit, bundleName, updateDeviceList);
-    if (updateDeviceList.empty()) {
-        ANS_LOGI("No need update %{public}s.", bundleName.c_str());
-        return;
+    std::string bundleName = info.GetBundleName();
+    if (bundleName.empty()) {
+        ANS_LOGW("Dans get empty resource.");
+        return false;
     }
-    std::string icon;
-    if (!GetBundleResourceInfo(bundleName, icon)) {
-        return;
-    }
-    std::unordered_map<std::string, std::string> icons;
-    icons.insert(std::make_pair(bundleName, icon));
-    for (auto& device : updateDeviceList) {
-        UpdateBundlesIcon(icons, device);
-    }
-}
-
-int32_t DistributedBundleService::UpdateBundlesIcon(const std::unordered_map<std::string, std::string>& icons,
-    const DistributedDeviceInfo peerDevice)
-{
-    std::shared_ptr<BundleIconBox> iconBox = std::make_shared<BundleIconBox>();
-    iconBox->SetIconSyncType(IconSyncType::UPDATE_BUNDLE_ICON);
-    iconBox->SetBundlesIcon(icons);
-    if (!iconBox->Serialize()) {
-        ANS_LOGW("Dans UpdateBundlesIcon serialize failed.");
-        return -1;
-    }
-
-    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(iconBox, peerDevice,
-        TransDataType::DATA_TYPE_BYTES, MODIFY_ERROR_EVENT_CODE);
-    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
-    ANS_LOGI("Dans UpdateBundlesIcon %{public}s %{public}d.",
-        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_);
-    return ERR_OK;
-}
-
-bool DistributedBundleService::GetBundleResourceInfo(const std::string bundleName, std::string& icon)
-{
     AppExecFwk::BundleResourceInfo resourceInfo;
-    if (DelayedSingleton<BundleResourceHelper>::GetInstance()->GetBundleInfo(bundleName, resourceInfo) != 0) {
-        ANS_LOGW("Dans get bundle icon failed %{public}s.", bundleName.c_str());
+    if (DelayedSingleton<BundleResourceHelper>::GetInstance()->GetBundleInfo(bundleName, resourceInfo)
+        != ERR_OK) {
+        ANS_LOGW("Dans get bundle failed %{public}s.", bundleName.c_str());
         return false;
     }
-    std::shared_ptr<Media::PixelMap> iconPixelmap = AnsImageUtil::CreatePixelMapByString(resourceInfo.icon);
-    if (!AnsImageUtil::ImageScale(iconPixelmap, DEFAULT_ICON_WITHE, DEFAULT_ICON_HEIGHT)) {
+    info.SetBundleLabel(resourceInfo.label);
+    info.SetBundleIcon(AnsImageUtil::CreatePixelMapByString(resourceInfo.icon));
+
+    bool isAnco = false;
+    if (!DelayedSingleton<BundleResourceHelper>::GetInstance()->IsAncoApp(bundleName, info.GetBundleUid(), isAnco)) {
+        ANS_LOGW("Dans get bundle anco %{public}s.", bundleName.c_str());
         return false;
     }
-    icon = AnsImageUtil::PackImage(iconPixelmap);
-    ANS_LOGI("Dans get bundle icon bundle %{public}s %{public}zu.", bundleName.c_str(), resourceInfo.icon.size());
+
+    info.SetAncoBundle(isAnco);
     return true;
 }
 
-void DistributedBundleService::GetNeedUpdateDevice(bool updatedExit, const std::string& bundleName,
-    std::vector<DistributedDeviceInfo>& updateDeviceList)
+void DistributedBundleService::HandleApplicationEnableChange(
+    const std::shared_ptr<NotificationApplicationChangeInfo>& applicationChangeInfo,
+    NotificationDistributedBundle distributedBundle, DistributedBundleChangeType changeType)
 {
+    // for application switch is off.
+    if (!applicationChangeInfo->GetEnable()) {
+        if (changeType == DistributedBundleChangeType::MASTER_NOTIFICATION_ENABLE) {
+            distributedBundle.SetNotificationEnable(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+        }
+        if (changeType == DistributedBundleChangeType::MASTER_LIVEVIEW_ENABLE) {
+            distributedBundle.SetLiveViewEnable(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+        }
+        ANS_LOGI("Dans handle application change %{public}s.", distributedBundle.Dump().c_str());
+        SendDistributedBundleChange({ distributedBundle }, changeType);
+        return;
+    }
+
+    // for application switch is on.
+    if (!GetApplicationResource(distributedBundle)) {
+        return;
+    }
     auto peerDevices = DistributedDeviceService::GetInstance().GetDeviceList();
     for (auto& device : peerDevices) {
-        if (device.second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        if (device.second.peerState_ != DeviceState::STATE_ONLINE || !device.second.IsPadOrPc() ||
+            !(device.second.abilityId_ & DistributedAbilityType::APPLICATION_SWITCH)) {
+            ANS_LOGI("Dans application not send %{public}d %{public}s %{public}d.", device.second.peerState_,
+                StringAnonymous(device.second.deviceId_).c_str(), device.second.abilityId_);
             continue;
         }
-        auto iter = bundleIconCache_.find(device.first);
-        if (updatedExit) {
-            if (iter == bundleIconCache_.end() ||
-                iter->second.find(bundleName) == iter->second.end()) {
-                continue;
-            }
-            updateDeviceList.push_back(device.second);
-        } else {
-            if (iter != bundleIconCache_.end() &&
-                iter->second.find(bundleName) != iter->second.end()) {
-                continue;
-            }
-            if (iter == bundleIconCache_.end()) {
-                std::set<std::string> cachedIcons = { bundleName };
-                bundleIconCache_.insert(std::make_pair(device.first, cachedIcons));
+        int32_t enabled;
+        bool notification = (changeType == DistributedBundleChangeType::MASTER_NOTIFICATION_ENABLE);
+        NotificationBundleOption bundleOption =
+            NotificationBundleOption(distributedBundle.GetBundleName(), distributedBundle.GetBundleUid());
+        std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(device.second.deviceType_);
+        // when application notification or live view switch is on, need send collaboration switch to peer.
+        auto result = NotificationHelper::IsDistributedEnabledByBundle(bundleOption, deviceType, notification, enabled);
+        if (result == ERR_OK) {
+            if (notification) {
+                distributedBundle.SetNotificationEnable(static_cast<NotificationConstant::SWITCH_STATE>(enabled));
             } else {
-                iter->second.insert(bundleName);
+                distributedBundle.SetLiveViewEnable(static_cast<NotificationConstant::SWITCH_STATE>(enabled));
             }
-            updateDeviceList.push_back(device.second);
+            std::shared_ptr<ApplicationChangeBox> applicationChange = std::make_shared<ApplicationChangeBox>();
+            applicationChange->SetApplicationSyncType(static_cast<int32_t>(changeType));
+            applicationChange->SetApplicationChangeList({ distributedBundle });
+            if (!applicationChange->Serialize()) {
+                ANS_LOGW("Dans application serialize failed.");
+                return;
+            }
+
+            std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(applicationChange,
+                device.second, TransDataType::DATA_TYPE_BYTES, MODIFY_ERROR_EVENT_CODE);
+            DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
+            ANS_LOGI("Dans send change %{public}d %{public}s %{public}d.", device.second.deviceType_,
+                StringAnonymous(device.second.deviceId_).c_str(), enabled);
         }
+    }
+}
+
+void DistributedBundleService::HandleLocalApplicationChanged(
+    const std::shared_ptr<NotificationApplicationChangeInfo>& applicationChangeInfo)
+{
+    auto bundle = applicationChangeInfo->GetBundle();
+    if (bundle == nullptr || bundle->GetBundleName().empty()) {
+        ANS_LOGW("Dans handle application remove failed.");
+        return;
+    }
+    NotificationDistributedBundle distributedBundle;
+    distributedBundle.SetBundleUid(bundle->GetUid());
+    distributedBundle.SetBundleName(bundle->GetBundleName());
+    auto changeType = applicationChangeInfo->GetChangeType();
+    switch (changeType) {
+        case DistributedBundleChangeType::MASTER_BUNDLE_REMOVE:
+            SendDistributedBundleChange({ distributedBundle }, changeType);
+            break;
+        case DistributedBundleChangeType::MASTER_NOTIFICATION_ENABLE:
+        case DistributedBundleChangeType::MASTER_LIVEVIEW_ENABLE:
+            HandleApplicationEnableChange(applicationChangeInfo, distributedBundle, changeType);
+            break;
+        default:
+            ANS_LOGW("Handle change invalid type %{public}d.", static_cast<int32_t>(changeType));
+            break;
     }
 }
 
@@ -303,68 +270,116 @@ void DistributedBundleService::SetDeviceBundleList(const std::shared_ptr<TlvBox>
     ANS_LOGI("SetDeviceBundleList %{public}s %{public}s %{public}d %{public}zu %{public}d", deviceType.c_str(),
         StringAnonymous(deviceId).c_str(), operatorType, bundleList.size(), ret);
 }
-#else
-void DistributedBundleService::HandleBundleIconSync(const std::shared_ptr<TlvBox>& boxMessage)
+
+void DistributedBundleService::HandleRemoteApplicationChanged(const std::shared_ptr<TlvBox>& boxMessage)
 {
-    int32_t type = 0;
-    BundleIconBox iconBox = BundleIconBox(boxMessage);
-    if (!iconBox.GetIconSyncType(type)) {
-        ANS_LOGI("Dans handle bundle icon sync failed.");
+    int32_t changeType;
+    ApplicationChangeBox application = ApplicationChangeBox(boxMessage);
+    if (!application.GetApplicationSyncType(changeType)) {
+        ANS_LOGW("Dans get change type failed.");
         return;
     }
 
-    ANS_LOGI("Dans handle bundl icon type %{public}d.", type);
-    if (type == IconSyncType::UPDATE_BUNDLE_ICON) {
-        std::unordered_map<std::string, std::string> bundlesIcon;
-        if (!iconBox.GetBundlesIcon(bundlesIcon)) {
-            ANS_LOGI("Dans handle bundle icon get icon failed.");
-            return;
-        }
-        DistributedPreferences::GetInstance().InsertBatchBundleIcons(bundlesIcon);
+    if (changeType != static_cast<int32_t>(DistributedBundleChangeType::COLLABORATION_LIVEVIEW_ENABLE) &&
+        changeType != static_cast<int32_t>(DistributedBundleChangeType::COLLABORATION_NOTIFICATION_ENABLE)) {
+        ANS_LOGI("Handle remote change invalid %{public}d.", changeType);
+        return;
     }
 
-    if (type == IconSyncType::REQUEST_BUNDLE_ICON) {
-        std::string deviceId;
-        if (!iconBox.GetLocalDeviceId(deviceId)) {
-            ANS_LOGI("Dans get deviceId failed.");
-            return;
-        }
-
-        DistributedDeviceInfo device;
-        if (!DistributedDeviceService::GetInstance().GetDeviceInfo(deviceId, device)) {
-            return;
-        }
-        ReportBundleIconList(device);
+    std::string deviceId;
+    if (!application.GetLocalDeviceId(deviceId)) {
+        ANS_LOGW("Dans get deviceId failed.");
+        return;
     }
 
-    if (type == IconSyncType::REMOVE_BUNDLE_ICON) {
-        std::vector<std::string> bundleList;
-        iconBox.GetBundleList(bundleList);
-        for (auto& bundle : bundleList) {
-            DistributedPreferences::GetInstance().DeleteBundleIcon(bundle);
+    DistributedDeviceInfo device;
+    if (!DistributedDeviceService::GetInstance().GetDeviceInfo(deviceId, device)) {
+        return;
+    }
+    bool isNotification = true;
+    if (changeType == DistributedBundleChangeType::COLLABORATION_LIVEVIEW_ENABLE) {
+        isNotification = false;
+    }
+    std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_);
+    std::vector<NotificationDistributedBundle> applicationList;
+    application.GetApplicationChangeList(applicationList);
+    ANS_LOGI("Handle remote change %{public}d %{public}zu.", changeType, applicationList.size());
+    for (auto application: applicationList) {
+        bool enable = (application.GetNotificationEnable() == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+        if (!isNotification) {
+            bool enable = (application.GetLiveViewEnable() == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+        }
+        NotificationBundleOption bundleOption = NotificationBundleOption(application.GetBundleName(),
+            application.GetBundleUid());
+        auto result = NotificationHelper::SetDistributedEnabledByBundle(bundleOption, deviceType, enable,
+            isNotification);
+        ANS_LOGI("Handle remote change %{public}d, %{public}s.", result, application.Dump().c_str());
+    }
+}
+
+#else
+
+void DistributedBundleService::SendDistributedBundleChange(
+    const std::vector<NotificationDistributedBundle>& applicationList, DistributedBundleChangeType type)
+{
+    auto peerDevices = DistributedDeviceService::GetInstance().GetDeviceList();
+    for (auto& device : peerDevices) {
+        if (device.second.peerState_ != DeviceState::STATE_ONLINE ||
+            !(device.second.abilityId_ & DistributedAbilityType::APPLICATION_SWITCH)) {
+            ANS_LOGI("Dans not send %{public}d %{public}s %{public}d.", device.second.peerState_,
+                StringAnonymous(device.second.deviceId_).c_str(), device.second.abilityId_);
+            continue;
+        }
+
+        std::shared_ptr<ApplicationChangeBox> applicationChange = std::make_shared<ApplicationChangeBox>();
+        applicationChange->SetLocalDeviceId(device.second.deviceId_);
+        applicationChange->SetApplicationSyncType(static_cast<int32_t>(type));
+        applicationChange->SetApplicationChangeList(applicationList);
+        if (!applicationChange->Serialize()) {
+            ANS_LOGW("Dans application serialize failed.");
+            return;
+        }
+
+        // send to phone
+        if (device.second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+            std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(applicationChange, device.second,
+                TransDataType::DATA_TYPE_MESSAGE, MODIFY_ERROR_EVENT_CODE);
+            DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
+            ANS_LOGI("Dans send change %{public}s %{public}d.", StringAnonymous(device.second.deviceId_).c_str(),
+                device.second.deviceType_);
         }
     }
 }
 
-void DistributedBundleService::ReportBundleIconList(const DistributedDeviceInfo peerDevice)
+void DistributedBundleService::HandleLocalApplicationChanged(
+    const std::shared_ptr<NotificationApplicationChangeInfo>& applicationChangeInfo)
 {
-    std::vector<std::string> bundlesName;
-    DistributedPreferences::GetInstance().GetSavedBundlesIcon(bundlesName);
-    std::shared_ptr<BundleIconBox> iconBox = std::make_shared<BundleIconBox>();
-    auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
-    iconBox->SetIconSyncType(IconSyncType::REPORT_SAVED_ICON);
-    iconBox->SetBundleList(bundlesName);
-    iconBox->SetLocalDeviceId(localDevice.deviceId_);
-    if (!iconBox->Serialize()) {
-        ANS_LOGW("Dans ReportBundleIconList serialize failed.");
+    auto bundle = applicationChangeInfo->GetBundle();
+    if (bundle == nullptr || bundle->GetBundleName().empty()) {
+        ANS_LOGW("Dans handle application remove failed.");
         return;
     }
-
-    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(iconBox, peerDevice,
-        TransDataType::DATA_TYPE_MESSAGE, MODIFY_ERROR_EVENT_CODE);
-    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
-    ANS_LOGI("Dans ReportBundleIconList %{public}s %{public}d.",
-        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_);
+    NotificationDistributedBundle distributedBundle;
+    distributedBundle.SetBundleUid(bundle->GetUid());
+    distributedBundle.SetBundleName(bundle->GetBundleName());
+    auto enble = applicationChangeInfo->GetEnable() ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    auto changeType = applicationChangeInfo->GetChangeType();
+    if (changeType == DistributedBundleChangeType::COLLABORATION_NOTIFICATION_ENABLE) {
+        distributedBundle.SetNotificationEnable(enble);
+    }
+    if (changeType == DistributedBundleChangeType::COLLABORATION_LIVEVIEW_ENABLE) {
+        distributedBundle.SetLiveViewEnable(enble);
+    }
+    switch (changeType) {
+        case DistributedBundleChangeType::COLLABORATION_NOTIFICATION_ENABLE:
+        case DistributedBundleChangeType::COLLABORATION_LIVEVIEW_ENABLE:
+            SendDistributedBundleChange({ distributedBundle }, changeType);
+            break;
+        default:
+            ANS_LOGW("Handle change invalid type %{public}d.", static_cast<int32_t>(changeType));
+            break;
+    }
 }
 
 void DistributedBundleService::SyncInstalledBundles(const DistributedDeviceInfo& peerDevice, bool isForce)
@@ -418,6 +433,33 @@ void DistributedBundleService::SendInstalledBundles(const DistributedDeviceInfo&
     DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
     ANS_LOGI("Dans send bundle %{public}s %{public}d.",
         StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_);
+}
+
+void DistributedBundleService::HandleRemoteApplicationChanged(const std::shared_ptr<TlvBox>& boxMessage)
+{
+    int32_t changeType;
+    ApplicationChangeBox application = ApplicationChangeBox(boxMessage);
+    if (!application.GetApplicationSyncType(changeType)) {
+        ANS_LOGW("Dans get change type failed.");
+        return;
+    }
+
+    if (changeType != static_cast<int32_t>(DistributedBundleChangeType::INIT_DEVICE_CONNECT) &&
+        changeType != static_cast<int32_t>(DistributedBundleChangeType::MASTER_BUNDLE_ADD) &&
+        changeType != static_cast<int32_t>(DistributedBundleChangeType::MASTER_BUNDLE_REMOVE) &&
+        changeType != static_cast<int32_t>(DistributedBundleChangeType::MASTER_LIVEVIEW_ENABLE) &&
+        changeType != static_cast<int32_t>(DistributedBundleChangeType::MASTER_NOTIFICATION_ENABLE)) {
+        ANS_LOGI("Handle remote change invalid %{public}d.", changeType);
+        return;
+    }
+
+    std::vector<NotificationDistributedBundle> applicationList;
+    if (!application.GetApplicationChangeList(applicationList)) {
+        ANS_LOGI("Handle remote change application failed %{public}d.", changeType);
+    }
+
+    NotificationHelper::SetDeviceDistributedBundleList(static_cast<DistributedBundleChangeType>(changeType),
+        applicationList);
 }
 #endif
 

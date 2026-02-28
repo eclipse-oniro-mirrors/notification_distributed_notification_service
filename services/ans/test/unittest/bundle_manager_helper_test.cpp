@@ -183,7 +183,7 @@ HWTEST_F(BundleManagerHelperTest, GetBundleInfo_00100, Level1)
     // need mock
     auto res = bundleManagerHelper.GetBundleInfo("test",
         AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, 100, info);
-    ASSERT_FALSE(res);
+    ASSERT_TRUE(res);
 }
 
 /**

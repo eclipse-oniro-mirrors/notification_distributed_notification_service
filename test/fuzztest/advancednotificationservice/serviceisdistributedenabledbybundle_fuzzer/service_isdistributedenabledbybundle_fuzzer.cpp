@@ -30,9 +30,9 @@ namespace Notification {
 
         sptr<NotificationBundleOption> bundleOption = ObjectBuilder<NotificationBundleOption>::Build(fuzzData);
         std::string deviceType = fuzzData->ConsumeRandomLengthString();
-        bool enabled = fuzzData->ConsumeBool();
-
-        service->IsDistributedEnabledByBundle(bundleOption, deviceType, enabled);
+        bool notifictaion = fuzzData->ConsumeBool();
+        int32_t enabled = fuzzData->ConsumeIntegral<int32_t>();
+        service->IsDistributedEnabledByBundle(bundleOption, deviceType, notifictaion, enabled);
         return true;
     }
 }

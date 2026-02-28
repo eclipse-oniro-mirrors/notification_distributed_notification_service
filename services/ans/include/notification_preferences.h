@@ -318,7 +318,7 @@ public:
      * @return Returns set notifications enabled for specified bundle result.
      */
     ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
-        const std::string &deviceType, const bool enabled);
+        const std::string &deviceType, const bool isNotification, const NotificationConstant::SWITCH_STATE& enabled);
     
     /**
      * @brief Sets whether to allow a specified application to publish notifications cross
@@ -497,7 +497,7 @@ public:
      * @return Returns set notifications enabled for specified bundle result.
      */
     ErrCode IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
-        const std::string &deviceType, bool &enabled);
+        const std::string &deviceType, const bool isNotification, int32_t &enabled);
 
     /**
      * @brief Configuring Whether to Synchronize Common Notifications to Target Devices.
@@ -622,8 +622,10 @@ public:
     void SetAncoApplicationUserId(int32_t userId);
     void SetAncoApplicationUserId(const sptr<NotificationBundleOption>& bundleOption, int32_t userId);
     void GetAllAncoBundlesInfo(int32_t dbUserId, int32_t userId, std::vector<sptr<NotificationBundleOption>> &bundles);
-    void GetAllCLoneBundlesInfo(int32_t dbUserId, int32_t userId,
+    void GetAllCloneBundlesInfo(int32_t dbUserId, int32_t userId,
         std::vector<NotificationCloneBundleInfo> &cloneBundles);
+    void GetLocalDistributedBundles(const std::string& deviceType, int32_t userId,
+        std::vector<NotificationDistributedBundle>& bundles);
     void GetAllClonePriorityInfo(const int32_t userId, std::vector<NotificationClonePriorityInfo> &cloneInfos);
     void GetCloneBundlePriorityInfo(std::vector<NotificationClonePriorityInfo> &cloneInfos,
         const int32_t &userId, const std::string &key, const NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE &type);

@@ -72,7 +72,8 @@ public:
     ErrCode OnBadgeEnabledChanged(
         const sptr<EnabledNotificationCallbackData> &callbackData) override { return ERR_OK; };
 
-    ErrCode OnApplicationInfoNeedChanged(const std::string& bundleName) override { return ERR_OK; };
+    ErrCode OnApplicationInfoNeedChanged(
+        const sptr<NotificationApplicationChangeInfo>& applicationChangeInfo) override { return ERR_OK; };
 
     ErrCode OnOperationResponse(
         const sptr<NotificationOperationInfo>& operationInfo, int32_t& funcResult) override { return 0; }

@@ -88,12 +88,16 @@ public:
     ErrCode GetApplicationInfo(const std::string &appName, int32_t flags, int32_t userId,
         AppExecFwk::ApplicationInfo &appInfo);
 
+    bool GetAllLauncherAbility(int32_t userId, std::set<int32_t>& launcherBundles);
+
     bool CheckSystemApp(const std::string& bundleName, int32_t userId);
 
     ErrCode GetBundleInfoV9(const std::string& bundleName, int32_t userId,
         AppExecFwk::BundleInfo& bundleInfo);
 
     int32_t GetAppIndexByUid(const int32_t uid);
+
+    bool IsAncoApp(const std::string &bundleName, int32_t uid, bool& isAnco);
 private:
     void Connect();
     void Disconnect();

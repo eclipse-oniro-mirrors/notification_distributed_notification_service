@@ -60,6 +60,7 @@ struct DistributedDeviceInfo {
     bool iconSync = false;
     bool installedBundlesSync = false;
     uint16_t deviceType_;
+    int32_t abilityId_ = 0;
     int32_t peerState_ = DeviceState::STATE_INIT;
     int32_t socketId_ = -1;
     int32_t connectedTry_ = 0;

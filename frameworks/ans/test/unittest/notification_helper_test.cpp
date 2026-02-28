@@ -1196,8 +1196,8 @@ HWTEST_F(NotificationHelperTest, IsDistributedEnabledByBundle_0100, TestSize.Lev
     bundleOption.SetUid(1);
     std::string deviceType = "testDeviceType1111";
     NotificationHelper notificationHelper;
-    bool enable = true;
-    ErrCode ret = notificationHelper.IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    int32_t enable;
+    ErrCode ret = notificationHelper.IsDistributedEnabledByBundle(bundleOption, deviceType, true, enable);
     EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -1213,8 +1213,8 @@ HWTEST_F(NotificationHelperTest, IsDistributedEnabledByBundle_0200, TestSize.Lev
     bundleOption.SetUid(1);
     std::string deviceType = "testDeviceType";
     NotificationHelper notificationHelper;
-    bool enable = true;
-    ErrCode ret = notificationHelper.IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    int32_t enable;
+    ErrCode ret = notificationHelper.IsDistributedEnabledByBundle(bundleOption, deviceType, true, enable);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
 

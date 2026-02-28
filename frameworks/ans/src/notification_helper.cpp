@@ -637,10 +637,10 @@ ErrCode NotificationHelper::UnregisterPushCallback()
 }
 
 ErrCode NotificationHelper::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
-    const std::string &deviceType, const bool enabled)
+    const std::string &deviceType, const bool enabled, const bool isNotification)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedEnabledByBundle(bundleOption,
-        deviceType, enabled);
+        deviceType, enabled, isNotification);
 }
 
 ErrCode NotificationHelper::SetDistributedBundleOption(const std::vector<DistributedBundleOption> &bundles,
@@ -650,10 +650,10 @@ ErrCode NotificationHelper::SetDistributedBundleOption(const std::vector<Distrib
 }
 
 ErrCode NotificationHelper::IsDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
-    const std::string &deviceType, bool &enabled)
+    const std::string &deviceType, bool isNotification, int32_t &enabled)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabledByBundle(bundleOption,
-        deviceType, enabled);
+        deviceType, isNotification, enabled);
 }
 
 ErrCode NotificationHelper::SetDistributedEnabled(const std::string &deviceType, const bool &enabled)
@@ -828,6 +828,23 @@ ErrCode NotificationHelper::SetTargetDeviceBundleList(const std::string& deviceT
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceBundleList(deviceType, deviceId,
         operatorType, bundleList, labelList);
+}
+
+ErrCode NotificationHelper::SetDeviceDistributedBundleList(DistributedBundleChangeType type,
+    const std::vector<NotificationDistributedBundle>& bundles)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetDeviceDistributedBundleList(type, bundles);
+}
+
+ErrCode NotificationHelper::SetTargetDeviceAbility(const std::string& deviceType, const int32_t ability)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceAbility(deviceType, ability);
+}
+
+ErrCode NotificationHelper::GetLocalDistributedBundleList(const std::string& deviceType,
+    std::vector<NotificationDistributedBundle>& bundles)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetLocalDistributedBundleList(deviceType, bundles);
 }
 
 ErrCode NotificationHelper::SetTargetDeviceSwitch(const std::string& deviceType, const std::string& deviceId,

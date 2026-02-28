@@ -56,6 +56,9 @@
 #include "notification_clone_bundle_service.h"
 #include "advanced_notification_flow_control_service.h"
 #include "parameters.h"
+#ifdef ALL_SCENARIO_COLLABORATION
+#include "distributed_bundle_service.h"
+#endif
 
 #define CHECK_BUNDLE_OPTION_IS_INVALID(option)                              \
     if (option == nullptr || option->GetBundleName().empty()) {             \
@@ -518,6 +521,9 @@ void AdvancedNotificationService::OnBundleRemovedInner(
             RemoveDoNotDisturbProfileTrustList(bundleOption, userId);
         }
         DeleteDuplicateMsgs(bundleOption);
+#ifdef ALL_SCENARIO_COLLABORATION
+        DistributedBundleService::GetInstance().HandleSlaveBundleChange(bundleOption, false);
+#endif
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return, "On bundle removed inner.");
     NotificationPreferences::GetInstance()->RemoveEnabledDbByBundle(bundleOption);
@@ -609,6 +615,9 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
                 ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
             }
         }
+#ifdef ALL_SCENARIO_COLLABORATION
+        DistributedBundleService::GetInstance().HandleSlaveBundleChange(bundleOption, true);
+#endif
     };
 
     notificationSvrQueue_.RunOnce(bundleInstall);
@@ -2068,8 +2077,10 @@ void AdvancedNotificationService::ResetDistributedEnabled()
             }
             sptr<NotificationBundleOption> bundleOption =
                 new NotificationBundleOption(bundleName, uid);
+            auto type = enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
+                NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
             ErrCode result =  NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(
-                bundleOption, deviceType, enabled);
+                bundleOption, deviceType, true, type);
             if (result != ERR_OK) {
                 ANS_LOGE("SetDistributeEnabled failed! key:%{public}s, uid:%{public}d",
                     iter.first.c_str(), uid);
@@ -2218,6 +2229,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
             bundle, cloneBundleInfo.GetHasPoppedDialog()) != ERR_OK) {
             ANS_LOGW("Set hasPoped failed.");
         }
+        UpdateCloneBundleInfoForDistributedEnable(cloneBundleInfo);
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
         UpdateCloneBundleInfoForExtensionSubscription(userId, cloneBundleInfo, bundle);
 #endif
@@ -2342,6 +2354,27 @@ void AdvancedNotificationService::UpdateCloneBundleInfoFoSlot(
     }
 }
 
+void AdvancedNotificationService::UpdateCloneBundleInfoForDistributedEnable(
+    const NotificationCloneBundleInfo cloneBundleInfo)
+{
+    auto collaborationSwitch = cloneBundleInfo.GetCollaborationSwitch();
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    if (bundleOption == nullptr) {
+        ANS_LOGW("Update cistributed enable %{public}s.", cloneBundleInfo.GetBundleName().c_str());
+        return;
+    }
+    bundleOption->SetUid(cloneBundleInfo.GetUid());
+    bundleOption->SetBundleName(cloneBundleInfo.GetBundleName());
+    NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundleOption,
+        NotificationConstant::PC_DEVICE_TYPE, false, collaborationSwitch.pcLiveView_);
+    NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundleOption,
+        NotificationConstant::PC_DEVICE_TYPE, true, collaborationSwitch.pcNotification_);
+    NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundleOption,
+        NotificationConstant::PAD_DEVICE_TYPE, false, collaborationSwitch.tabletLiveView_);
+    NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundleOption,
+        NotificationConstant::PAD_DEVICE_TYPE, true, collaborationSwitch.tabletNotification_);
+}
+ 
 void AdvancedNotificationService::UpdateCloneBundleInfoFoSilentReminder(
     const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle)
 {

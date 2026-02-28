@@ -14,11 +14,15 @@
  */
 #include "bundle_resource_helper.h"
 
+#include "ans_const_define.h"
 #include "iservice_registry.h"
+#include "os_account_manager.h"
 #include "system_ability_definition.h"
+#include "launcher_service.h"
 
 namespace OHOS {
 namespace Notification {
+constexpr int32_t APP_TYPE_ONE = 1;
 
 BundleResourceHelper::BundleResourceHelper()
 {
@@ -164,6 +168,37 @@ ErrCode BundleResourceHelper::GetApplicationInfo(const std::string &appName, int
     return result;
 }
 
+bool BundleResourceHelper::GetAllLauncherAbility(int32_t userId, std::set<int32_t>& launcherBundles)
+{
+    sptr<AppExecFwk::LauncherService> launcherService = new (std::nothrow) AppExecFwk::LauncherService();
+    if (launcherService == nullptr) {
+        ANS_LOGW("Get launcher service failed.");
+        return false;
+    }
+ 
+    std::vector<AppExecFwk::LauncherAbilityInfo> launcherAbilityInfos;
+    ErrCode ret = launcherService->GetAllLauncherAbility(ZERO_USERID, launcherAbilityInfos);
+    if (ret != ERR_OK) {
+        ANS_LOGW("Get launcher ability %{public}d %{public}d.", ZERO_USERID, ret);
+        return false;
+    }
+    for (auto& abilityInfo : launcherAbilityInfos) {
+        launcherBundles.insert(abilityInfo.applicationInfo.uid);
+    }
+ 
+    launcherAbilityInfos.clear();
+    ret = launcherService->GetAllLauncherAbility(userId, launcherAbilityInfos);
+    if (ret != ERR_OK) {
+        ANS_LOGW("Get launcher ability %{public}d %{public}d.", ZERO_USERID, ret);
+        return false;
+    }
+    for (auto& abilityInfo : launcherAbilityInfos) {
+        launcherBundles.insert(abilityInfo.applicationInfo.uid);
+    }
+    ANS_LOGI("Get launcher ability %{public}zu.", launcherBundles.size());
+    return true;
+}
+
 bool BundleResourceHelper::CheckSystemApp(const std::string& bundleName, int32_t userId)
 {
     AppExecFwk::BundleInfo bundleInfo;
@@ -211,6 +246,25 @@ int32_t BundleResourceHelper::GetAppIndexByUid(const int32_t uid)
         return 0;
     }
     return appIndex;
+}
+
+bool BundleResourceHelper::IsAncoApp(const std::string &bundleName, int32_t uid, bool& isAnco)
+{
+    int32_t userId = ZERO_USERID;
+    AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+    if (userId >= DEFAULT_USER_ID) {
+        isAnco = false;
+        return true;
+    }
+ 
+    userId = ZERO_USERID;
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!GetBundleInfoV9(bundleName, userId, bundleInfo)) {
+        ANS_LOGW("Get Bundle bundleName %{public}s, %{public}d", bundleName.c_str(), userId);
+        return false;
+    }
+ 
+    return bundleInfo.applicationInfo.codePath == std::to_string(APP_TYPE_ONE);
 }
 }
 }

@@ -195,7 +195,8 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnApplicatio
     ExtensionServiceSubscriber subscriber;
     subscriber.Init(bundle);
     auto beforeConnSize = ExtensionServiceConnectionService::GetInstance().connectionMap_.size();
-    subscriber.OnApplicationInfoNeedChanged("bundleAppNeed");
+    auto changeInfo = std::make_shared<NotificationApplicationChangeInfo>();
+    subscriber.OnApplicationInfoNeedChanged(changeInfo);
     EXPECT_EQ(beforeConnSize, ExtensionServiceConnectionService::GetInstance().connectionMap_.size());
 }
 

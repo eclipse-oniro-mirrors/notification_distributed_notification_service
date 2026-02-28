@@ -55,7 +55,8 @@ void DistributedSubscribeService::SubscribeNotification(const DistributedDeviceI
 
     int32_t userId = GetCurrentActiveUserId();
     std::shared_ptr<DistribuedSubscriber> subscriber = std::make_shared<DistribuedSubscriber>();
-    subscriber->SetLocalDevice(DistributedDeviceService::GetInstance().GetLocalDevice());
+    auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
+    subscriber->SetLocalDevice(localDevice);
     subscriber->SetPeerDevice(peerDevice);
     sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
     if (peerDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
@@ -67,7 +68,9 @@ void DistributedSubscribeService::SubscribeNotification(const DistributedDeviceI
     }
     subscribeInfo->AddDeviceType(DistributedDeviceService::DeviceTypeToTypeString(peerDevice.deviceType_));
     subscribeInfo->AddAppUserId(userId);
-    subscribeInfo->SetNeedNotifyApplication(true);
+    if (peerDevice.IsPadOrPc() || localDevice.IsPadOrPc()) {
+        subscribeInfo->SetNeedNotifyApplication(true);
+    }
     subscribeInfo->SetNeedNotifyResponse(true);
     int result = NotificationHelper::SubscribeNotification(subscriber, subscribeInfo);
     if (result == 0) {

@@ -23,6 +23,7 @@
 #include "ans_inner_errors.h"
 #include "ans_ut_constant.h"
 #include "notification_subscriber_manager.h"
+#include "mock_bundle_manager_helper.h"
 #undef private
 #undef protected
 
@@ -47,38 +48,6 @@ public:
 void SmartReminderCenterTest::SetUp(void)
 {
     smartReminderCenter_ = DelayedSingleton<SmartReminderCenter>::GetInstance();
-}
-
-/**
- * @tc.name: Test IsNeedSynergy
- * @tc.desc: Test IsNeedSynergy
- * @tc.type: FUNC
- */
-HWTEST_F(SmartReminderCenterTest, IsNeedSynergy_00001, Function | SmallTest | Level1)
-{
-    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
-    string deviceType = "test";
-    string ownerBundleName = "testName";
-    int32_t ownerUid = 100;
-
-    auto res = smartReminderCenter_->IsNeedSynergy(slotType, deviceType, ownerBundleName, ownerUid);
-    ASSERT_FALSE(res);
-
-    auto err = NotificationPreferences::GetInstance()->SetSmartReminderEnabled(deviceType, true);
-    ASSERT_EQ(err, ERR_OK);
-    res = smartReminderCenter_->IsNeedSynergy(slotType, deviceType, ownerBundleName, ownerUid);
-    ASSERT_FALSE(res);
-
-    err = NotificationPreferences::GetInstance()->SetSmartReminderEnabled(deviceType, true);
-    ASSERT_EQ(err, ERR_OK);
-    res = smartReminderCenter_->IsNeedSynergy(slotType, deviceType, ownerBundleName, ownerUid);
-    ASSERT_FALSE(res);
-
-    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption(ownerBundleName, ownerUid));
-    err = NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
-    ASSERT_EQ(err, ERR_OK);
-    res = smartReminderCenter_->IsNeedSynergy(slotType, deviceType, ownerBundleName, ownerUid);
-    ASSERT_TRUE(res);
 }
 
 /**
@@ -207,7 +176,7 @@ HWTEST_F(SmartReminderCenterTest, InitValidDevices_00002, Function | SmallTest |
     sptr<NotificationBundleOption> bundleOption(
         new (std::nothrow) NotificationBundleOption(ownerBundleName, ownerUid));
     res = NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(
-        bundleOption, deviceType, true);
+        bundleOption, deviceType, true, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     ASSERT_EQ(res, 0);
 
     set<string> validDevices;
@@ -1027,6 +996,131 @@ HWTEST_F(SmartReminderCenterTest, SetSyncDevice_100, Function | SmallTest | Leve
 
     auto deviceList = extendInfo->GetIntParam("collaboration_device_list", -1);
     ASSERT_EQ(deviceList, 9); // 5 = 1 << 0 | 1 << 3
+}
+
+/**
+ * @tc.name: CheckPcPadCollaboration_100
+ * @tc.desc: Test status map without current
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, CheckPcPadCollaboration_100, Function | SmallTest | Level1)
+{
+    AppExecFwk::BundleResourceInfo bundleResourceInfo;
+    sptr<NotificationRequest> request = new NotificationRequest(100);
+    request->SetOwnerUid(20020001);
+    request->SetOwnerBundleName("com.test.demo.application");
+    // set collaboration notificatio switch.
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("com.test.demo.application", 20020001);
+    NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle, "tablet", true,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+ 
+    auto result = smartReminderCenter_->CheckPcPadCollaborationForApplication(request, "tablet",
+        "testid", bundleResourceInfo);
+    ASSERT_EQ(result, false);
+ 
+    NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle, "tablet", true,
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    result = smartReminderCenter_->CheckPcPadCollaborationForApplication(request, "tablet",
+        "testid", bundleResourceInfo);
+    ASSERT_EQ(result, false);
+ 
+    NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle, "tablet", true,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    result = smartReminderCenter_->CheckPcPadCollaborationForApplication(request, "tablet",
+        "testid", bundleResourceInfo);
+    ASSERT_EQ(result, true);
+ 
+    NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle, "tablet", true,
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+    result = smartReminderCenter_->CheckPcPadCollaborationForApplication(request, "tablet",
+        "testid", bundleResourceInfo);
+    ASSERT_EQ(result, true);
+ 
+    // install same bundle
+    DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList("tablet", "testid",
+        BundleListOperationType::ADD_BUNDLES, { "com.test.demo.application" }, { "label" });
+    result = smartReminderCenter_->CheckPcPadCollaborationForApplication(request, "tablet",
+        "testid", bundleResourceInfo);
+    ASSERT_EQ(result, false);
+}
+ 
+/**
+ * @tc.name: GetAppSwitch_200
+ * @tc.desc: Test GetAppSwitch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, GetAppSwitch_200, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("com.test.demo.application", 20020001);
+    NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle, "tablet", true,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+ 
+    auto result = smartReminderCenter_->GetAppSwitch("tablet", "com.test.demo.application", 20020001);
+    ASSERT_FALSE(result);
+ 
+    NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle, "tablet", true,
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    result = smartReminderCenter_->GetAppSwitch("tablet", "com.test.demo.application", 20020001);
+    ASSERT_FALSE(result);
+ 
+    NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle, "tablet", true,
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+    result = smartReminderCenter_->GetAppSwitch("tablet", "com.test.demo.application", 20020001);
+    ASSERT_TRUE(result);
+}
+ 
+/**
+ * @tc.name: CheckPcPadCollaborationForDevice_100
+ * @tc.desc: Test GetAppSwitch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, CheckPcPadCollaborationForDevice_100, Function | SmallTest | Level1)
+{
+    DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList("tablet", "testid",
+        BundleListOperationType::RELEASE_BUNDLES, {}, {});
+    MockBundleManager::MockSystemBundle(true);
+    AppExecFwk::BundleResourceInfo bundleResourceInfo;
+    bundleResourceInfo.label = "label";
+    auto result = smartReminderCenter_->CheckPcPadCollaborationForDevice("tablet", "testid",
+        "com.test.demo.application", 100, bundleResourceInfo);
+    ASSERT_FALSE(result);
+ 
+    MockBundleManager::MockSystemBundle(false);
+    result = smartReminderCenter_->CheckPcPadCollaborationForDevice("tablet", "testid", "com.test.demo.application",
+        100, bundleResourceInfo);
+    ASSERT_TRUE(result);
+ 
+    DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList("tablet", "testid",
+        BundleListOperationType::ADD_BUNDLES, { "com.test.demo.application" }, { "label" });
+    result = smartReminderCenter_->CheckPcPadCollaborationForDevice("tablet", "testid", "com.test.demo.application",
+        100, bundleResourceInfo);
+    ASSERT_FALSE(result);
+}
+ 
+/**
+ * @tc.name: GetCollaborationBundleInfo_100
+ * @tc.desc: Test GetAppSwitch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, GetCollaborationBundleInfo_100, Function | SmallTest | Level1)
+{
+    AppExecFwk::ApplicationInfo appInfo;
+    AppExecFwk::BundleResourceInfo bundleResourceInfo;
+    auto result = smartReminderCenter_->GetCollaborationBundleInfo("com.test.demo.application", 100,
+        appInfo, bundleResourceInfo);
+    ASSERT_TRUE(result);
+ 
+    MockBundleManager::MockBundleRseult(false);
+    result = smartReminderCenter_->GetCollaborationBundleInfo("com.test.demo.application", 100,
+        appInfo, bundleResourceInfo);
+    ASSERT_FALSE(result);
+ 
+    MockBundleManager::MockBundleRseult(true);
+    MockBundleManager::MockBundleInterfaceResult(-1);
+    result = smartReminderCenter_->GetCollaborationBundleInfo("com.test.demo.application", 100,
+        appInfo, bundleResourceInfo);
+    ASSERT_FALSE(result);
+    MockBundleManager::MockBundleInterfaceResult(0);
 }
 }   //namespace Notification
 }   //namespace OHOS

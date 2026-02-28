@@ -180,5 +180,26 @@ bool DistributedDeviceDataService::GetDeviceLiveViewEnable(const std::string& de
     ANS_LOGW("Get live view failed %{public}s %{public}s", deviceType.c_str(), StringAnonymous(deviceId).c_str());
     return false;
 }
+
+bool DistributedDeviceDataService::CheckDeviceAbility(const std::string& deviceType, int32_t ability)
+{
+    std::lock_guard<ffrt::mutex> lock(abilityLock_);
+    if (abilitys_.find(deviceType) == abilitys_.end()) {
+        ANS_LOGW("Get device ability failed %{public}s.", deviceType.c_str());
+        return false;
+    }
+    bool enable = abilitys_[deviceType] & ability;
+    ANS_LOGI("Check device ability failed %{public}d,%{public}d,%{public}d,%{public}s.", abilitys_[deviceType],
+        ability, enable, deviceType.c_str());
+    return enable;
+}
+ 
+void DistributedDeviceDataService::SetDeviceAbility(const std::string& deviceType, int32_t ability)
+{
+    std::lock_guard<ffrt::mutex> lock(abilityLock_);
+    abilitys_[deviceType] = ability;
+    ANS_LOGI("Set device ability %{public}d,%{public}s.", ability, deviceType.c_str());
+    return;
+}
 }
 }

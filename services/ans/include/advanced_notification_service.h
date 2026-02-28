@@ -1234,7 +1234,7 @@ public:
      * @return Returns set notifications enabled for specified bundle result.
      */
     ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
-        const std::string &deviceType, const bool enabled) override;
+        const std::string &deviceType, const bool enabled, const bool isNotification) override;
 
     /**
      * @brief Sets whether to allow a specified application to publish notifications cross
@@ -1259,7 +1259,7 @@ public:
      * @return Returns set notifications enabled for specified bundle result.
      */
     ErrCode IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
-        const std::string &deviceType, bool &enabled) override;
+        const std::string &deviceType, const bool isNotification, int32_t &enabled) override;
 
     /**
      * @brief Sets whether to allow a specified application to publish notifications cross
@@ -1474,6 +1474,14 @@ public:
     ErrCode SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
         int operatorType, const std::vector<std::string>& bundleList,
         const std::vector<std::string>& labelList) override;
+
+    ErrCode SetDeviceDistributedBundleList(int32_t type,
+        const std::vector<NotificationDistributedBundle>& bundles) override;
+ 
+    ErrCode SetTargetDeviceAbility(const std::string& deviceType, const int32_t ability) override;
+ 
+    ErrCode GetLocalDistributedBundleList(const std::string& deviceType,
+        std::vector<NotificationDistributedBundle>& bundles) override;
 
     ErrCode SetTargetDeviceSwitch(const std::string& deviceType, const std::string& deviceId,
         bool notificaitonEnable, bool liveViewEnable) override;
@@ -1777,6 +1785,8 @@ public:
 
     void UpdateCloneBundleInfoFoSilentReminder(
         const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle);
+
+    void UpdateCloneBundleInfoForDistributedEnable(const NotificationCloneBundleInfo cloneBundleInfo);
 
     void TryStartReminderAgentService();
     /**
@@ -2423,6 +2433,8 @@ private:
     ErrCode SyncAdditionConfig(const std::string &key, const std::string &value, HaMetaMessage &message);
     bool isProxyForUnaware(const int32_t uid);
 
+    ErrCode SetDistributedEnabledForCollaboration(const sptr<NotificationBundleOption> &bundleOption,
+        const std::string &deviceType, const bool enabled, const bool isNotification);
     ErrCode SystemPermissionCheck();
     void RegisterNotDisturbEnableListener();
     ErrCode GetUri(sptr<NotificationRequest> &request);

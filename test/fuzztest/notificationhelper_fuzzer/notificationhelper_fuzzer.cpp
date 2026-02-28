@@ -232,8 +232,9 @@ public:
         bool enabled = fdp->ConsumeBool();
         int32_t uid = fdp->ConsumeIntegralInRange<int32_t>(0, 100);
         
+        int32_t enableType = fdp->ConsumeIntegral<int32_t>();
         notificationHelper.SetDistributedEnabledByBundle(bundleOption, deviceType, enabled);
-        notificationHelper.IsDistributedEnabledByBundle(bundleOption, deviceType, enabled);
+        notificationHelper.IsDistributedEnabledByBundle(bundleOption, deviceType, enabled, enableType);
         notificationHelper.SetDistributedEnabled(deviceType, enabled);
         notificationHelper.IsDistributedEnabled(deviceType, enabled);
         

@@ -356,6 +356,48 @@ void DistributedPublishService::SyncLiveViewList(const DistributedDeviceInfo dev
     SyncNotifictionList(device, notificationList);
 }
 
+bool CheckLiveViewSync(const DistributedDeviceInfo device, const sptr<NotificationRequest>& requestPoint,
+    const std::unordered_set<std::string> labelSet, const std::unordered_set<std::string> bundleSet)
+{
+    int32_t ownerUid = requestPoint->GetOwnerUid();
+    std::string bundleName = requestPoint->GetOwnerBundleName();
+    if (device.abilityId_ & DistributedAbilityType::APPLICATION_SWITCH) {
+        NotificationBundleOption bundleOption = NotificationBundleOption(bundleName, ownerUid);
+        int32_t enableType = 0;
+        std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_);
+        if (NotificationHelper::IsDistributedEnabledByBundle(bundleOption, deviceType, false, enableType) != ERR_OK) {
+            return false;
+        }
+        ANS_LOGI("Dans check %{public}d %{public}s %{public}s.", enableType, deviceType.c_str(), bundleName.c_str());
+        if (enableType == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON)) {
+            return true;
+        } else if (enableType == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF) ||
+            enableType == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF)) {
+            return false;
+        }
+    }
+ 
+    if (bundleSet.count(bundleName)) {
+        ANS_LOGI("Dans no need sync %{public}s.", bundleName.c_str());
+        return false;
+    }
+    int32_t userId = requestPoint->GetOwnerUserId();
+    if (DelayedSingleton<BundleResourceHelper>::GetInstance()->CheckSystemApp(bundleName, userId)) {
+        return false;
+    }
+    AppExecFwk::BundleResourceInfo resourceInfo;
+    if (DelayedSingleton<BundleResourceHelper>::GetInstance()->GetBundleInfo(bundleName, resourceInfo) != ERR_OK) {
+        ANS_LOGW("Dans get bundle failed %{public}s.", bundleName.c_str());
+        return false;
+    }
+ 
+    if (labelSet.count(resourceInfo.label)) {
+        ANS_LOGI("Bundle system no sycn %{public}s.", bundleName.c_str());
+        return false;
+    }
+    return true;
+}
+
 void DistributedPublishService::SyncLiveViewContent(const DistributedDeviceInfo device,
     const std::vector<sptr<Notification>>& notifications)
 {
@@ -384,27 +426,9 @@ void DistributedPublishService::SyncLiveViewContent(const DistributedDeviceInfo 
             continue;
         }
 
-        auto requestPoint = notification->GetNotificationRequestPoint();
         if (checkBundleExist) {
-            std::string bundleName = requestPoint->GetOwnerBundleName();
-            if (bundleSet.count(bundleName)) {
-                ANS_LOGI("Dans no need sync %{public}d %{public}s.", checkBundleExist, bundleName.c_str());
-                continue;
-            }
-            int32_t userId = requestPoint->GetOwnerUserId();
-            if (DelayedSingleton<BundleResourceHelper>::GetInstance()->CheckSystemApp(bundleName, userId)) {
-                continue;
-            }
-
-            AppExecFwk::BundleResourceInfo resourceInfo;
-            if (DelayedSingleton<BundleResourceHelper>::GetInstance()->GetBundleInfo(bundleName, resourceInfo)
-                != ERR_OK) {
-                ANS_LOGW("Dans get bundle failed %{public}s.", bundleName.c_str());
-                continue;
-            }
-
-            if (checkBundleExist && labelSet.count(resourceInfo.label)) {
-                ANS_LOGI("Bundle system no sycn %{public}s.", bundleName.c_str());
+            auto requestPoint = notification->GetNotificationRequestPoint();
+            if (!CheckLiveViewSync(device, requestPoint, labelSet, bundleSet)) {
                 continue;
             }
         }

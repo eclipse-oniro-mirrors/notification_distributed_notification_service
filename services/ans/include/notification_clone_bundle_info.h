@@ -39,6 +39,17 @@ public:
         bool isForceControl_;
         bool authorizedStatus_ = true;
     };
+    class CollaborationSwitch {
+    public:
+        std::string Dump() const;
+        nlohmann::json ToJson() const;
+        void FromJson(const nlohmann::json &root);
+        NotificationConstant::SWITCH_STATE pcLiveView_  = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+        NotificationConstant::SWITCH_STATE pcNotification_ = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+        NotificationConstant::SWITCH_STATE tabletLiveView_ = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+        NotificationConstant::SWITCH_STATE tabletNotification_ = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    };
+
     NotificationCloneBundleInfo() = default;
     ~NotificationCloneBundleInfo() = default;
 
@@ -56,6 +67,9 @@ public:
 
     void SetIsShowBadge(const bool &isShowBadge);
     bool GetIsShowBadge() const;
+
+    void SetCollaborationSwitch(const CollaborationSwitch &switchEnable);
+    CollaborationSwitch GetCollaborationSwitch() const;
 
     void SetHasPoppedDialog(const bool &hasPoppedDialog);
     bool GetHasPoppedDialog() const;
@@ -102,6 +116,7 @@ private:
     NotificationConstant::SWITCH_STATE isEnabledNotification_ {NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF};
     sptr<NotificationRingtoneInfo> ringtoneInfo_ = nullptr;
     std::vector<SlotInfo> slotsInfo_;
+    CollaborationSwitch collaborationSwitch;
     NotificationConstant::SWITCH_STATE silentReminderEnabled_ {NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF};
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> extensionSubscriptionInfos_;
     NotificationConstant::SWITCH_STATE enabledExtensionSubscription_ =

@@ -82,6 +82,41 @@ bool BundleManagerHelper::IsSystemApp(int32_t uid)
     return isSystemApp;
 }
 
+ErrCode BundleManagerHelper::GetAllBundleOption(std::vector<NotificationBundleOption>& bundleOptions,
+    int32_t userId)
+{
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    {
+        std::lock_guard<ffrt::mutex> lock(connectionMutex_);
+        Connect();
+        if (bundleMgr_ == nullptr) {
+            ANS_LOGE("GetBundleInfo bundle proxy failed.");
+            return -1;
+        }
+
+        int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+        std::string identity = IPCSkeleton::ResetCallingIdentity();
+        ErrCode result = bundleMgr_->GetBundleInfosV9(flags, bundleInfos, userId);
+        IPCSkeleton::SetCallingIdentity(identity);
+        if (result != ERR_OK) {
+            ANS_LOGE("Get installed bundle failed %{public}d.", result);
+            return result;
+        }
+    }
+
+    for (auto& bundle : bundleInfos) {
+        ANS_LOGD("Get bundle %{public}d %{public}s %{public}s.", bundle.applicationInfo.uid,
+            bundle.applicationInfo.bundleName.c_str(), bundle.label.c_str());
+        NotificationBundleOption option = NotificationBundleOption(bundle.applicationInfo.bundleName,
+            bundle.applicationInfo.uid);
+        option.SetAppName(bundle.label);
+        bundleOptions.emplace_back(option);
+    }
+
+    ANS_LOGI("Get bundles size %{public}zu.", bundleOptions.size());
+    return ERR_OK;
+}
+
 ErrCode BundleManagerHelper::GetAllBundleInfo(std::map<std::string, sptr<NotificationBundleOption>>& bundleOptions,
     int32_t userId)
 {

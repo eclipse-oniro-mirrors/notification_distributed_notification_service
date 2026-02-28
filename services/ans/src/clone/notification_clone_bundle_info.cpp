@@ -39,6 +39,7 @@ constexpr const char *BUNDLE_INFO_RINGTONE_INFO = "ringtone";
 constexpr const char *BUNDLE_INFO_SUBSCRIPTION_INFO = "extensionSubscriptionInfo";
 constexpr const char *BUNDLE_INFO_SUBSCRIPTION_ENABLED = "enableExtensionSubscription";
 constexpr const char *BUNDLE_INFO_SUBSCRIPTION_BUNDLES = "extensionSubscriptionBundles";
+constexpr const char *COLLABORATION_SWITCH = "collaborationSwitch";
 constexpr int32_t CONST_ENABLE_INT = 1;
 }
 void NotificationCloneBundleInfo::SetBundleName(const std::string &name)
@@ -104,6 +105,72 @@ bool NotificationCloneBundleInfo::GetHasPoppedDialog() const
 bool NotificationCloneBundleInfo::GetIshasPoppedSupportClone() const
 {
     return ishasPoppedSupportClone_;
+}
+
+void NotificationCloneBundleInfo::SetCollaborationSwitch(const CollaborationSwitch &switchEnable)
+{
+    collaborationSwitch = switchEnable;
+}
+ 
+NotificationCloneBundleInfo::CollaborationSwitch NotificationCloneBundleInfo::GetCollaborationSwitch() const
+{
+    return collaborationSwitch;
+}
+ 
+std::string NotificationCloneBundleInfo::CollaborationSwitch::Dump() const
+{
+    return std::to_string(static_cast<int32_t>(pcLiveView_)) + " " +
+        std::to_string(static_cast<int32_t>(pcNotification_)) + " "+
+        std::to_string(static_cast<int32_t>(tabletLiveView_)) + " " +
+        std::to_string(static_cast<int32_t>(tabletNotification_));
+}
+ 
+nlohmann::json NotificationCloneBundleInfo::CollaborationSwitch::ToJson() const
+{
+    nlohmann::json jsonObject;
+    jsonObject["pcLiveView"] = static_cast<int32_t>(pcLiveView_);
+    jsonObject["pcNotification"] = static_cast<int32_t>(pcNotification_);
+    jsonObject["tabletLiveView"] = static_cast<int32_t>(tabletLiveView_);
+    jsonObject["tabletNotification"] = static_cast<int32_t>(tabletNotification_);
+    return jsonObject;
+}
+ 
+void NotificationCloneBundleInfo::CollaborationSwitch::FromJson(const nlohmann::json &root)
+{
+    if (!root.contains(COLLABORATION_SWITCH) || !root[COLLABORATION_SWITCH].is_object()) {
+        return;
+    }
+
+    int32_t enableType;
+    nlohmann::json switchObject = root.at(COLLABORATION_SWITCH);
+    if (switchObject.contains("pcLiveView") && switchObject["pcLiveView"].is_number()) {
+        enableType = switchObject.at("pcLiveView").get<int32_t>();
+        if (enableType >= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) &&
+            enableType <= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+            pcLiveView_ = static_cast<NotificationConstant::SWITCH_STATE>(enableType);
+        }
+    }
+    if (switchObject.contains("pcNotification") && switchObject["pcNotification"].is_number()) {
+        enableType = switchObject.at("pcNotification").get<int32_t>();
+        if (enableType >= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) &&
+            enableType <= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+            pcNotification_ = static_cast<NotificationConstant::SWITCH_STATE>(enableType);
+        }
+    }
+    if (switchObject.contains("tabletLiveView") && switchObject["tabletLiveView"].is_number()) {
+        enableType = switchObject.at("tabletLiveView").get<int32_t>();
+        if (enableType >= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) &&
+            enableType <= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+            tabletLiveView_ = static_cast<NotificationConstant::SWITCH_STATE>(enableType);
+        }
+    }
+    if (switchObject.contains("tabletNotification") && switchObject["tabletNotification"].is_number()) {
+        enableType = switchObject.at("tabletNotification").get<int32_t>();
+        if (enableType >= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) &&
+            enableType <= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+            tabletNotification_ = static_cast<NotificationConstant::SWITCH_STATE>(enableType);
+        }
+    }
 }
 
 void NotificationCloneBundleInfo::SetEnableNotification(const NotificationConstant::SWITCH_STATE &state)
@@ -216,6 +283,7 @@ void NotificationCloneBundleInfo::ToJson(nlohmann::json &jsonObject) const
         jsonObject[BUNDLE_INFO_SUBSCRIPTION_BUNDLES] = jsonNodes;
     }
 
+    jsonObject[COLLABORATION_SWITCH] = collaborationSwitch.ToJson();
     jsonObject[BUNDLE_INFO_NAME] = bundleName_;
     jsonObject[BUNDLE_INFO_APP_INDEX] = appIndex_;
     jsonObject[BUNDLE_INFO_SLOT_FLAGS] = slotFlags_;
@@ -354,6 +422,7 @@ void NotificationCloneBundleInfo::FromJson(const nlohmann::json &jsonObject)
         }
     }
 
+    collaborationSwitch.FromJson(jsonObject);
     SlotsFromJson(jsonObject);
     RingtoneFromJson(jsonObject);
     SubscriptionInfosFromJson(jsonObject);
@@ -416,6 +485,7 @@ std::string NotificationCloneBundleInfo::Dump() const
             ", isEnabled = " + std::to_string(static_cast<int32_t>(isEnabledNotification_)) +
             ", slotsInfo = " + slotDump +
             ", ringtone = " + ringtoneDump +
+            ", collaboration = " + collaborationSwitch.Dump() +
             ", silentReminderEnabled = " + std::to_string(static_cast<int32_t>(silentReminderEnabled_)) +
             " }";
 }

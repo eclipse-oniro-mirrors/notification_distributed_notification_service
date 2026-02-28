@@ -2551,7 +2551,7 @@ ErrCode AnsNotification::TriggerUpdatePriorityType(const NotificationRequest &re
 }
 
 ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
-    const std::string &deviceType, const bool enabled)
+    const std::string &deviceType, const bool enabled, const bool isNotification)
 {
     ANS_LOGD("called");
     if (bundleOption.GetBundleName().empty() || deviceType.empty()) {
@@ -2570,7 +2570,7 @@ ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleO
         ANS_LOGE("null bundleOption");
         return ERR_ANS_INVALID_PARAM;
     }
-    return proxy->SetDistributedEnabledByBundle(bo, deviceType, enabled);
+    return proxy->SetDistributedEnabledByBundle(bo, deviceType, enabled, isNotification);
 }
 
 ErrCode AnsNotification::SetDistributedBundleOption(
@@ -2704,7 +2704,7 @@ ErrCode AnsNotification::UpdateDistributedDeviceList(const std::string &deviceTy
 }
 
 ErrCode AnsNotification::IsDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
-    const std::string &deviceType, bool &enabled)
+    const std::string &deviceType, bool isNotification, int32_t &enabled)
 {
     ANS_LOGD("called");
     if (bundleOption.GetBundleName().empty() || deviceType.empty()) {
@@ -2723,7 +2723,7 @@ ErrCode AnsNotification::IsDistributedEnabledByBundle(const NotificationBundleOp
         ANS_LOGE("null bundleOption");
         return ERR_ANS_INVALID_PARAM;
     }
-    return proxy->IsDistributedEnabledByBundle(bo, deviceType, enabled);
+    return proxy->IsDistributedEnabledByBundle(bo, deviceType, isNotification, enabled);
 }
 
 ErrCode AnsNotification::SetSilentReminderEnabled(const NotificationBundleOption &bundleOption,
@@ -2905,6 +2905,39 @@ ErrCode AnsNotification::SetTargetDeviceBundleList(const std::string& deviceType
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->SetTargetDeviceBundleList(deviceType, deviceId, operatorType, bundleList, labelList);
+}
+
+ErrCode AnsNotification::SetDeviceDistributedBundleList(DistributedBundleChangeType type,
+    const std::vector<NotificationDistributedBundle>& bundles)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->SetDeviceDistributedBundleList(static_cast<int32_t>(type), bundles);
+}
+
+
+ErrCode AnsNotification::SetTargetDeviceAbility(const std::string& deviceType, const int32_t ability)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->SetTargetDeviceAbility(deviceType, ability);
+}
+
+ErrCode AnsNotification::GetLocalDistributedBundleList(const std::string& deviceType,
+    std::vector<NotificationDistributedBundle>& bundles)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->GetLocalDistributedBundleList(deviceType, bundles);
 }
 
 ErrCode AnsNotification::GetMutilDeviceStatus(const std::string &deviceType, const uint32_t status,

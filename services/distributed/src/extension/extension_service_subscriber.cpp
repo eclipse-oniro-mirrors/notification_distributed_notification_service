@@ -205,7 +205,8 @@ ErrCode ExtensionServiceSubscriber::OnOperationResponse(const std::shared_ptr<No
     return ERR_OK;
 }
 
-void ExtensionServiceSubscriber::OnApplicationInfoNeedChanged(const std::string& bundleName)
+void ExtensionServiceSubscriber::OnApplicationInfoNeedChanged(
+    const std::shared_ptr<NotificationApplicationChangeInfo>& applicationChangeInfo)
 {
     ANS_LOGD("ExtensionServiceSubscriber::OnApplicationInfoNeedChanged");
 }

@@ -547,7 +547,34 @@ void NotificationPreferencesInfo::GetAllDoNotDisturbProfiles(
     }
 }
 
-void NotificationPreferencesInfo::GetAllCLoneBundlesInfo(const int32_t &dbUserId, const int32_t &userId,
+void SetCloneBundleBasicInfo(NotificationPreferencesInfo::BundleInfo& bundle,
+    NotificationCloneBundleInfo& cloneBundleInfo)
+{
+    int32_t index = BundleManagerHelper::GetInstance()->GetAppIndexByUid(bundle.GetBundleUid());
+    cloneBundleInfo.SetAppIndex(index);
+    cloneBundleInfo.SetUid(bundle.GetBundleUid());
+    cloneBundleInfo.SetBundleName(bundle.GetBundleName());
+    cloneBundleInfo.SetSlotFlags(bundle.GetSlotFlags());
+    cloneBundleInfo.SetIsShowBadge(bundle.GetIsShowBadge());
+    cloneBundleInfo.SetHasPoppedDialog(bundle.GetHasPoppedDialog());
+    cloneBundleInfo.SetEnableNotification(bundle.GetEnableNotification());
+    cloneBundleInfo.AddRingtoneInfo(bundle.GetRingtoneInfo());
+    cloneBundleInfo.SetEnabledExtensionSubscription(bundle.GetExtensionSubscriptionEnabled());
+
+    std::vector<sptr<NotificationSlot>> slots;
+    bundle.GetAllSlots(slots);
+    for (auto& slot : slots) {
+        NotificationCloneBundleInfo::SlotInfo slotInfo;
+        slotInfo.slotType_ = slot->GetType();
+        slotInfo.enable_ = slot->GetEnable();
+        slotInfo.isForceControl_ = slot->GetForceControl();
+        slotInfo.authorizedStatus_ =
+            (slot->GetAuthorizedStatus() ==NotificationSlot::AuthorizedStatus::AUTHORIZED);
+        cloneBundleInfo.AddSlotInfo(slotInfo);
+    }
+}
+
+void NotificationPreferencesInfo::GetAllCloneBundlesInfo(const int32_t &dbUserId, const int32_t &userId,
     const std::unordered_map<std::string, std::string> &bunlesMap,
     std::vector<NotificationCloneBundleInfo> &cloneBundles)
 {
@@ -571,27 +598,8 @@ void NotificationPreferencesInfo::GetAllCLoneBundlesInfo(const int32_t &dbUserId
             continue;
         }
 
-        std::vector<sptr<NotificationSlot>> slots;
         NotificationCloneBundleInfo cloneBundleInfo;
-        int32_t index = BundleManagerHelper::GetInstance()->GetAppIndexByUid(iter->second.GetBundleUid());
-        cloneBundleInfo.SetBundleName(iter->second.GetBundleName());
-        cloneBundleInfo.SetAppIndex(index);
-        cloneBundleInfo.SetSlotFlags(iter->second.GetSlotFlags());
-        cloneBundleInfo.SetIsShowBadge(iter->second.GetIsShowBadge());
-        cloneBundleInfo.SetHasPoppedDialog(iter->second.GetHasPoppedDialog());
-        cloneBundleInfo.SetEnableNotification(iter->second.GetEnableNotification());
-        cloneBundleInfo.AddRingtoneInfo(iter->second.GetRingtoneInfo());
-        cloneBundleInfo.SetEnabledExtensionSubscription(iter->second.GetExtensionSubscriptionEnabled());
-        iter->second.GetAllSlots(slots);
-        for (auto& slot : slots) {
-            NotificationCloneBundleInfo::SlotInfo slotInfo;
-            slotInfo.slotType_ = slot->GetType();
-            slotInfo.enable_ = slot->GetEnable();
-            slotInfo.isForceControl_ = slot->GetForceControl();
-            slotInfo.authorizedStatus_ =
-                (slot->GetAuthorizedStatus() ==NotificationSlot::AuthorizedStatus::AUTHORIZED);
-            cloneBundleInfo.AddSlotInfo(slotInfo);
-        }
+        SetCloneBundleBasicInfo(iter->second, cloneBundleInfo);
         cloneBundleInfo.SetExtensionSubscriptionInfos(iter->second.GetExtensionSubscriptionInfos());
         std::vector<sptr<NotificationBundleOption>> bundles;
         iter->second.GetExtensionSubscriptionBundles(bundles);

@@ -51,6 +51,7 @@ public:
     bool GetDeviceInfo(const std::string& deviceId, DistributedDeviceInfo& device);
     void SetDeviceState(const std::string& deviceId, int32_t state);
     void SetDeviceSyncData(const std::string& deviceId, int32_t type, bool syncData);
+    void SetDeviceAbility(const std::string& deviceId, int32_t ability);
     bool CheckDeviceExist(const std::string& deviceId);
     bool CheckDeviceNeedSync(const std::string& deviceId);
     void IncreaseDeviceSyncCount(const std::string& deviceId);

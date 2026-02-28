@@ -372,7 +372,7 @@ public:
     void RemoveDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
     bool GetDoNotDisturbProfiles(int64_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profiles);
     void GetAllDoNotDisturbProfiles(int32_t userId, std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
-    void GetAllCLoneBundlesInfo(const int32_t &dbUserId, const int32_t &userId,
+    void GetAllCloneBundlesInfo(const int32_t &dbUserId, const int32_t &userId,
         const std::unordered_map<std::string, std::string> &bunlesMap,
         std::vector<NotificationCloneBundleInfo> &cloneBundles);
     void SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
