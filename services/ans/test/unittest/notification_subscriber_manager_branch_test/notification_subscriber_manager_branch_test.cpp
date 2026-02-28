@@ -53,6 +53,26 @@ public:
 };
 
 /**
+ * @tc.number    : NotifyRefreshPriority_00100
+ * @tc.name      : NotifyRefreshPriority_00100
+ * @tc.desc      : test NotifyRefreshPriority_00100 function and notificationSubQueue_ == nullptr
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, NotifyRefreshPriority_00100, Function | SmallTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriberManager> notificationSubscriberManager =
+        std::make_shared<NotificationSubscriberManager>();
+    std::vector<sptr<NotificationRequest>> requests;
+    std::map<sptr<NotificationBundleOption>, bool> priorityEnable;
+    std::map<sptr<NotificationBundleOption>, int64_t> strategies;
+    ASSERT_NE(nullptr, notificationSubscriberManager);
+    notificationSubscriberManager->notificationSubQueue_ = nullptr;
+    notificationSubscriberManager->NotifyRefreshPrioritySwitch(requests, priorityEnable);
+    notificationSubscriberManager->NotifyRefreshPriorityIntelligent(true, requests);
+    notificationSubscriberManager->NotifyRefreshPriorityStrategy(requests, strategies);
+    notificationSubscriberManager->NotifyRefreshPriorityConfig(requests);
+}
+
+/**
  * @tc.number    : NotificationSubscriberManager_00100
  * @tc.name      : NotificationSubscriberManager_00100
  * @tc.desc      : test NotifyConsumed function and notificationSubQueue_ == nullptr
