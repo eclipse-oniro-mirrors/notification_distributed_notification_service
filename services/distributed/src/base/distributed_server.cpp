@@ -112,13 +112,13 @@ void DistributedServer::OnShutdown(int32_t socket, ShutdownReason reason)
 void DistributedServer::OnBytes(int32_t socket, const void *data, uint32_t dataLen)
 {
     DistributedService::GetInstance().OnReceiveMsg(data, dataLen);
-    ANS_LOGI("Distributed server On bytes %{public}d %{public}" PRIu32, socket, dataLen);
+    ANS_LOGI("Distributed server On bytes %{public}u %{public}d", dataLen, socket);
 }
 
 void DistributedServer::OnMessage(int32_t socket, const void *data, uint32_t dataLen)
 {
     DistributedService::GetInstance().OnReceiveMsg(data, dataLen);
-    ANS_LOGI("Distributed server On message %{public}d %{public}" PRIu32, socket, dataLen);
+    ANS_LOGI("Distributed server On message %{public}u %{public}d", dataLen, socket);
 }
 }
 }
