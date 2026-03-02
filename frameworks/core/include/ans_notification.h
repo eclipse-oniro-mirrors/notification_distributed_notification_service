@@ -1235,10 +1235,12 @@ public:
      * @param enabled Specifies whether to allow the given application to publish notifications. The value
      *                true indicates that notifications are allowed, and the value false indicates that notifications
      *                are not allowed.
+     * @param isNotification Indicates notification switch or liveview swtich, default is notification switch.
      * @return Returns set notifications enabled for specified bundle result.
      */
     ErrCode SetDistributedEnabledByBundle(
-        const NotificationBundleOption &bundleOption, const std::string &deviceType, const bool enabled);
+        const NotificationBundleOption &bundleOption, const std::string &deviceType, const bool enabled,
+        const bool isNotification = true);
 
     /**
      * @brief Sets whether to allow a specified application to publish notifications cross
@@ -1262,8 +1264,8 @@ public:
      *                are not allowed.
      * @return Returns set notifications enabled for specified bundle result.
      */
-    ErrCode IsDistributedEnabledByBundle(
-        const NotificationBundleOption &bundleOption, const std::string &deviceType, bool &enabled);
+    ErrCode IsDistributedEnabledByBundle(const NotificationBundleOption &bundleOption, const std::string &deviceType,
+        bool isNotification, int32_t &enabled);
 
     /**
      * @brief Sets whether to allow a specified application to publish notifications cross
@@ -1431,6 +1433,14 @@ public:
 
     ErrCode GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
             std::vector<std::string>& bundleList, std::vector<std::string>& labelList);
+
+    ErrCode SetDeviceDistributedBundleList(DistributedBundleChangeType type,
+        const std::vector<NotificationDistributedBundle>& bundles);
+
+    ErrCode SetTargetDeviceAbility(const std::string& deviceType, const int32_t ability);
+
+    ErrCode GetLocalDistributedBundleList(const std::string& deviceType,
+        std::vector<NotificationDistributedBundle>& bundles);
 
     ErrCode GetMutilDeviceStatus(const std::string &deviceType, const uint32_t status,
         std::string& deviceId, int32_t& userId);

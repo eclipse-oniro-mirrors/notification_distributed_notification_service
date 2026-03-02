@@ -212,7 +212,7 @@ public:
     ErrCode IsDeviceTypeAffordConsume(const std::string deviceType,
         const sptr<NotificationRequest> &request, bool &result);
 #endif
-    void NotifyApplicationInfoNeedChanged(const std::string& bundleName);
+    void NotifyApplicationInfoNeedChanged(const sptr<NotificationApplicationChangeInfo>& applicationChangeInfo);
 
     void NotifyRefreshPrioritySwitch(const std::vector<sptr<NotificationRequest>> &requests,
         const std::map<sptr<NotificationBundleOption>, bool> &priorityEnable);
@@ -224,7 +224,7 @@ public:
 
     void NotifyRefreshPriorityConfig(const std::vector<sptr<NotificationRequest>> &requests);
 private:
-    void NotifyApplicationInfochangedInner(const std::string& bundleName);
+    void NotifyApplicationInfochangedInner(const sptr<NotificationApplicationChangeInfo>& applicationChangeInfo);
     std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const wptr<IRemoteObject> &object);
     std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const sptr<IAnsSubscriber> &subscriber);
     std::shared_ptr<SubscriberRecord> CreateSubscriberRecord(const sptr<IAnsSubscriber> &subscriber);

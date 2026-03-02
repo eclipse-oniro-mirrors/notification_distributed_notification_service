@@ -197,8 +197,12 @@ public:
     MOCK_METHOD1(TriggerUpdatePriorityType, ErrCode(const sptr<NotificationRequest> &));
     MOCK_METHOD2(SetBundlePriorityConfig, ErrCode(const sptr<NotificationBundleOption> &, const std::string &));
     MOCK_METHOD2(GetBundlePriorityConfig, ErrCode(const sptr<NotificationBundleOption> &, std::string &));
-    MOCK_METHOD3(SetDistributedEnabledByBundle,
-        ErrCode(const sptr<NotificationBundleOption>&, const std::string&, bool));
+    MOCK_METHOD4(SetDistributedEnabledByBundle,
+        ErrCode(const sptr<NotificationBundleOption>&, const std::string&, bool, bool));
+    MOCK_METHOD2(SetDeviceDistributedBundleList, ErrCode(int32_t, const std::vector<NotificationDistributedBundle>&));
+    MOCK_METHOD2(GetLocalDistributedBundleList,
+        ErrCode(const std::string&, std::vector<NotificationDistributedBundle>&));
+    MOCK_METHOD2(SetTargetDeviceAbility, ErrCode(const std::string&, const int32_t));
     MOCK_METHOD2(SetDistributedBundleOption,
         ErrCode(const std::vector<sptr<DistributedBundleOption>>&, const std::string &));
     MOCK_METHOD2(SetDistributedEnabled, ErrCode(const std::string&, bool));
@@ -209,8 +213,8 @@ public:
     MOCK_METHOD1(UpdateDistributedDeviceList, ErrCode(const std::string&));
     MOCK_METHOD2(IsSmartReminderEnabled, ErrCode(const std::string&, bool&));
     MOCK_METHOD2(SetSmartReminderEnabled, ErrCode(const std::string&, bool));
-    MOCK_METHOD3(IsDistributedEnabledByBundle,
-        ErrCode(const sptr<NotificationBundleOption>&, const std::string&, bool&));
+    MOCK_METHOD4(IsDistributedEnabledByBundle,
+        ErrCode(const sptr<NotificationBundleOption>&, const std::string&, const bool, int32_t&));
     MOCK_METHOD3(CancelAsBundleWithAgent, ErrCode(const sptr<NotificationBundleOption>&, int32_t,
         const sptr<IAnsResultDataSynchronizer>&));
     MOCK_METHOD2(CancelAsBundleWithAgent, ErrCode(const sptr<NotificationBundleOption>&, int32_t));

@@ -168,13 +168,15 @@ ErrCode DistribuedSubscriber::OnOperationResponse(const std::shared_ptr<Notifica
     return DistributedService::GetInstance().OnOperationResponse(operationInfo, peerDevice_);
 }
 
-void DistribuedSubscriber::OnApplicationInfoNeedChanged(const std::string& bundleName)
+void DistribuedSubscriber::OnApplicationInfoNeedChanged(
+    const std::shared_ptr<NotificationApplicationChangeInfo>& applicationChangeInfo)
 {
-    ANS_LOGI("Notify changed %{public}s %{public}d.", bundleName.c_str(), localDevice_.deviceType_);
-    if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+    if (applicationChangeInfo == nullptr) {
+        ANS_LOGI("Invalid application changed.");
         return;
     }
-    DistributedService::GetInstance().OnApplicationInfnChanged(bundleName);
+ 
+    DistributedService::GetInstance().OnApplicationInfnChanged(applicationChangeInfo);
 }
 
 void DistribuedSubscriber::SetLocalDevice(DistributedDeviceInfo localDevice)

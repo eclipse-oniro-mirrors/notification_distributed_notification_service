@@ -21,6 +21,7 @@ sequenceable OHOS.Notification.EnabledPriorityNotificationByBundleCallbackData;
 sequenceable OHOS.Notification.EnabledSilentReminderCallbackData;
 sequenceable OHOS.Notification.BadgeNumberCallbackData;
 sequenceable OHOS.Notification.NotificationOperationInfo;
+sequenceable OHOS.Notification.NotificationApplicationChangeInfo;
 interface OHOS.Notification.IAnsSubscriber {
     [oneway] void OnConnected();
 
@@ -48,6 +49,6 @@ interface OHOS.Notification.IAnsSubscriber {
     [oneway] void OnEnabledSilentReminderChanged([in] sptr<EnabledSilentReminderCallbackData> callbackData);
     [oneway] void OnBadgeChanged([in] sptr<BadgeNumberCallbackData> badgeData);
     [oneway] void OnBadgeEnabledChanged([in] sptr<EnabledNotificationCallbackData> callbackData);
-    [oneway] void OnApplicationInfoNeedChanged([in] String bundleName);
+    [oneway] void OnApplicationInfoNeedChanged([in] sptr<NotificationApplicationChangeInfo> applicationChangeInfo);
     int OnOperationResponse([in] sptr<NotificationOperationInfo> operationInfo);
 }

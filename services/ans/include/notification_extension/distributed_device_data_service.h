@@ -49,13 +49,17 @@ public:
         const std::string& bundleName, const std::string& label);
     bool GetDeviceNotificationEnable(const std::string& deviceType, const std::string& deviceId);
     bool GetDeviceLiveViewEnable(const std::string& deviceType, const std::string& deviceId);
+    bool CheckDeviceAbility(const std::string& deviceType, int32_t ability);
+    void SetDeviceAbility(const std::string& deviceType, int32_t ability);
 
 private:
     DistributedDeviceDataService() = default;
     ~DistributedDeviceDataService() = default;
 
     ffrt::mutex lock_;
+    ffrt::mutex abilityLock_;
     std::vector<DeviceData> devicesData_;
+    std::unordered_map<std::string, int32_t> abilitys_;
 };
 }
 }

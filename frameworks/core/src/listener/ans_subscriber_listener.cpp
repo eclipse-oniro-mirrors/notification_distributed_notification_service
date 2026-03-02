@@ -288,7 +288,8 @@ ErrCode SubscriberListener::OnBadgeEnabledChanged(
     return ERR_OK;
 }
 
-ErrCode SubscriberListener::OnApplicationInfoNeedChanged(const std::string& bundleName)
+ErrCode SubscriberListener::OnApplicationInfoNeedChanged(
+    const sptr<NotificationApplicationChangeInfo>& applicationChangeInfo)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("called");
@@ -297,7 +298,9 @@ ErrCode SubscriberListener::OnApplicationInfoNeedChanged(const std::string& bund
         ANS_LOGE("null subscriber");
         return ERR_INVALID_DATA;
     }
-    subscriber->OnApplicationInfoNeedChanged(bundleName);
+    std::shared_ptr<NotificationApplicationChangeInfo> sharedInfo =
+        std::make_shared<NotificationApplicationChangeInfo>(*applicationChangeInfo);
+    subscriber->OnApplicationInfoNeedChanged(sharedInfo);
     return ERR_OK;
 }
 

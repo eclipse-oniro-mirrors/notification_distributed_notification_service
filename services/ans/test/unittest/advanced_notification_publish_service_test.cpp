@@ -1514,7 +1514,7 @@ HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0100, TestSize.Lev
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType";
 
-    ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true, true);
     ASSERT_EQ(res, ERR_OK);
 }
 
@@ -1530,7 +1530,7 @@ HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0200, TestSize.Lev
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType";
 
-    ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true, true);
     ASSERT_EQ(res, ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -1547,7 +1547,7 @@ HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0300, TestSize.Lev
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType";
 
-    ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    ErrCode res = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true, true);
     ASSERT_EQ(res, ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -1563,8 +1563,8 @@ HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0100, TestSize.Leve
     MockIsVerfyPermisson(true);
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType1111";
-    bool enable = true;
-    ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    int32_t enable;
+    ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, true, enable);
     ASSERT_EQ(result, ERR_OK);
 }
 
@@ -1580,10 +1580,10 @@ HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0200, TestSize.Leve
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType";
 
-    ErrCode ret = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    ErrCode ret = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true, true);
     ASSERT_EQ(ret, ERR_OK);
-    bool enable = false;
-    ret = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    int32_t enable;
+    ret = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, true, enable);
     ASSERT_EQ(ret, ERR_OK);
     ASSERT_EQ(enable, true);
 }
@@ -1599,8 +1599,8 @@ HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0300, TestSize.Leve
     MockIsSystemApp(false);
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType1111";
-    bool enable = true;
-    ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    int32_t enable;
+    ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, true, enable);
     ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -1616,8 +1616,8 @@ HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0400, TestSize.Leve
     MockIsVerfyPermisson(false);
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType1111";
-    bool enable = true;
-    ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    int32_t enable;
+    ErrCode result = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, true, enable);
     ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
 }
 

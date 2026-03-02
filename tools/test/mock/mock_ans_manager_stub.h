@@ -628,7 +628,23 @@ public:
     }
 
     ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption>& bundleOption,
-        const std::string& deviceType, const bool enabled) override
+        const std::string& deviceType, const bool enabled, const bool isNotification) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode SetDeviceDistributedBundleList(int32_t type,
+        const std::vector<NotificationDistributedBundle>& bundles) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+ 
+    ErrCode GetLocalDistributedBundleList(const std::string& deviceType,
+        std::vector<NotificationDistributedBundle>& bundles) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+ 
+    ErrCode SetTargetDeviceAbility(const std::string& deviceType, const int32_t ability) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -714,8 +730,8 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode IsDistributedEnabledByBundle(
-        const sptr<NotificationBundleOption>& bundleOption, const std::string& deviceType, bool& enabled) override
+    ErrCode IsDistributedEnabledByBundle(const sptr<NotificationBundleOption>& bundleOption,
+        const std::string& deviceType, const bool isNotification, int32_t& enabled) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

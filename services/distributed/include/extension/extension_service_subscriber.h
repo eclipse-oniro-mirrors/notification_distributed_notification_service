@@ -44,7 +44,8 @@ public:
     void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
     void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>> &requestList,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override;
-    void OnApplicationInfoNeedChanged(const std::string& bundleName) override;
+    void OnApplicationInfoNeedChanged(
+        const std::shared_ptr<NotificationApplicationChangeInfo>& applicationChangeInfo) override;
     ErrCode OnOperationResponse(const std::shared_ptr<NotificationOperationInfo> &operationInfo) override;
 
 private:

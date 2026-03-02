@@ -77,6 +77,7 @@ void DistributedDeviceService::InitLocalDevice(const std::string &deviceId, uint
 {
     localDevice_.deviceId_ = deviceId;
     localDevice_.deviceType_ = deviceType;
+    localDevice_.abilityId_ = DistributedAbilityType::APPLICATION_SWITCH;
 }
 
 DistributedDeviceInfo DistributedDeviceService::GetLocalDevice()
@@ -213,6 +214,7 @@ void DistributedDeviceService::ResetDeviceInfo(const std::string& deviceId, int3
         ANS_LOGI("Dans unknown device %{public}s.", StringAnonymous(deviceId).c_str());
         return;
     }
+    deviceIter->second.abilityId_ = 0;
     deviceIter->second.connectedTry_ = 0;
     deviceIter->second.deviceUsage = false;
     deviceIter->second.liveViewSync = false;
@@ -230,6 +232,17 @@ void DistributedDeviceService::SetDeviceState(const std::string& deviceId, int32
         return;
     }
     iter->second.peerState_ = state;
+}
+
+void DistributedDeviceService::SetDeviceAbility(const std::string& deviceId, int32_t ability)
+{
+    std::lock_guard<ffrt::mutex> lock(mapLock_);
+    auto iter = peerDevice_.find(deviceId);
+    if (iter == peerDevice_.end()) {
+        ANS_LOGE("Dans unknown device %{public}s.", StringAnonymous(deviceId).c_str());
+        return;
+    }
+    iter->second.abilityId_ = ability;
 }
 
 bool DistributedDeviceService::CheckDeviceExist(const std::string& deviceId)
@@ -334,6 +347,7 @@ void DistributedDeviceService::SyncDeviceMatch(const DistributedDeviceInfo peerD
     matchBox->SetMatchType(type);
     matchBox->SetLocalDeviceId(localDevice_.deviceId_);
     matchBox->SetLocalDeviceType(localDevice_.deviceType_);
+    matchBox->SetLocalAbility(localDevice_.abilityId_);
     if (type == MatchType::MATCH_ACK) {
         matchBox->SetPeerDeviceId(peerDevice.deviceId_);
         matchBox->SetPeerDeviceType(peerDevice.deviceType_);

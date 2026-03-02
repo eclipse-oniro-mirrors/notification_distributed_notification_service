@@ -1381,8 +1381,8 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutDistributedEnabledForBundle_010
     bundleInfo.SetBundleName("name");
     bundleInfo.SetBundleUid(1);
     std::string deviceType = "testDeviceType1111";
-    bool enable = true;
-    bool ret = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo, enable);
+    bool ret = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     EXPECT_EQ(ret, true);
 }
 
@@ -1397,8 +1397,8 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutDistributedEnabledForBundle_020
     bundleInfo.SetBundleName("");
     bundleInfo.SetBundleUid(1);
     std::string deviceType = "testDeviceType1111";
-    bool enable = true;
-    bool ret = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo, enable);
+    bool ret = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     EXPECT_EQ(ret, false);
 }
 
@@ -1413,8 +1413,8 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedEnabledForBundle_010
     bundleInfo.SetBundleName("name");
     bundleInfo.SetBundleUid(1);
     std::string deviceType = "testDeviceType1111";
-    bool enable = true;
-    bool result = preferncesDB_->GetDistributedEnabledForBundle(deviceType, bundleInfo, enable);
+    int32_t enabled;
+    bool result = preferncesDB_->GetDistributedEnabledForBundle(deviceType, true, bundleInfo, enabled);
     EXPECT_EQ(result, true);
 }
 
@@ -1429,8 +1429,8 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedEnabledForBundle_020
     bundleInfo.SetBundleName("");
     bundleInfo.SetBundleUid(1);
     std::string deviceType = "testDeviceType1111";
-    bool enable = true;
-    bool result = preferncesDB_->GetDistributedEnabledForBundle(deviceType, bundleInfo, enable);
+    int32_t enabled;
+    bool result = preferncesDB_->GetDistributedEnabledForBundle(deviceType, true, bundleInfo, enabled);
     EXPECT_EQ(result, false);
 }
 
@@ -3194,6 +3194,136 @@ HWTEST_F(NotificationPreferencesDatabaseTest, HandleDataBaseMap_0200, TestSize.L
     datas.insert({"ans_bundle_oh_test_demo10001_uid", "10001"});
     preferncesDB_->HandleDataBaseMap(datas, bundleOption);
     ASSERT_EQ(bundleOption.size(), 1);
+}
+
+/**
+ * @tc.name: GetDistributedEnabledForBundle_1000
+ * @tc.desc: test GetDistributedEnabledForBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedEnabledForBundle_1000, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleUid(20020001);
+    bundleInfo.SetBundleName("com.demo.test");
+    auto ret = preferncesDB_->PutDistributedEnabledForBundle("tablet_0", bundleInfo,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    ASSERT_EQ(ret, true);
+    ret = preferncesDB_->PutDistributedEnabledForBundle("tablet_1", bundleInfo,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    ASSERT_EQ(ret, true);
+ 
+    NotificationDistributedBundle distributedBundle;
+    auto key = preferncesDB_->GenerateBundleLablel(bundleInfo, "tablet");
+    preferncesDB_->GetDistributedEnabledForBundle(key, 100, distributedBundle);
+    ASSERT_EQ(distributedBundle.GetLiveViewEnable(), NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    ASSERT_EQ(distributedBundle.GetNotificationEnable(), NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+}
+ 
+/**
+ * @tc.name: ParseDistributedInfoFromDB_0100
+ * @tc.desc: test ParseDistributedInfoFromDB.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseDistributedInfoFromDB_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleUid(20020001);
+    bundleInfo.SetBundleName("com.demo.test");
+    auto ret = preferncesDB_->PutBundlePropertyValueToDisturbeDB(bundleInfo);
+    ASSERT_EQ(ret, true);
+ 
+    std::vector<NotificationDistributedBundle> bundles;
+    std::unordered_map<std::string, std::string> values;
+    values["label_ans_bundle_com.demo.test20020001"] = "com.demo.test20020001";
+    preferncesDB_->ParseDistributedInfoFromDB("tablet", 100, values, bundles);
+    ASSERT_EQ(bundles.empty(), false);
+ 
+    preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+    preferncesDB_->ParseDistributedInfoFromDB("tablet", 100, values, bundles);
+    ASSERT_EQ(bundles.empty(), false);
+ 
+    preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    preferncesDB_->ParseDistributedInfoFromDB("tablet", 100, values, bundles);
+    ASSERT_EQ(bundles.empty(), false);
+ 
+    // clear data
+    std::string bundleKey = preferncesDB_->GenerateBundleLablel(bundleInfo);
+    preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey, bundleInfo.GetBundleUid());
+}
+ 
+/**
+ * @tc.name: ParseDistributedInfoFromDB_0200
+ * @tc.desc: test ParseDistributedInfoFromDB.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseDistributedInfoFromDB_0200, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleUid(20020001);
+    bundleInfo.SetBundleName("com.demo.test");
+    auto ret = preferncesDB_->PutBundlePropertyValueToDisturbeDB(bundleInfo);
+    ASSERT_EQ(ret, true);
+    // insert userid
+    std::vector<NotificationPreferencesInfo::BundleInfo> bundleList;
+    bundleList.push_back(bundleInfo);
+    preferncesDB_->PutBundleUserIdToDisturbeDB(bundleList, 100, 100);
+ 
+    std::vector<NotificationDistributedBundle> bundles;
+    std::unordered_map<std::string, std::string> values;
+    values["label_ans_bundle_com.demo.test20020001"] = "com.demo.test20020001";
+    preferncesDB_->ParseDistributedInfoFromDB("tablet", 100, values, bundles);
+    ASSERT_EQ(bundles.empty(), false);
+ 
+    // insert userid
+    bundles.clear();
+    preferncesDB_->PutBundleUserIdToDisturbeDB(bundleList, 101, 100);
+    preferncesDB_->ParseDistributedInfoFromDB("tablet", 100, values, bundles);
+    ASSERT_EQ(bundles.empty(), true);
+    // clear data
+    std::string bundleKey = preferncesDB_->GenerateBundleLablel(bundleInfo);
+    preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey, bundleInfo.GetBundleUid());
+}
+ 
+/**
+ * @tc.name: ParseDistributedInfoFromDB_0300
+ * @tc.desc: test ParseDistributedInfoFromDB.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseDistributedInfoFromDB_0300, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleUid(20020001);
+    bundleInfo.SetBundleName("com.demo.test");
+    auto ret = preferncesDB_->PutBundlePropertyValueToDisturbeDB(bundleInfo);
+    ASSERT_EQ(ret, true);
+    // insert slot
+    std::vector<sptr<NotificationSlot>> slots;
+    sptr<NotificationSlot> slotInfo = new (std::nothrow) NotificationSlot(NotificationConstant::SlotType::LIVE_VIEW);
+    slots.push_back(slotInfo);
+    ret = preferncesDB_->UpdateBundleSlotToDisturbeDB(100, "com.demo.test", 20020001, slots);
+    ASSERT_EQ(ret, true);
+ 
+    std::vector<NotificationDistributedBundle> bundles;
+    std::unordered_map<std::string, std::string> values;
+    values["label_ans_bundle_com.demo.test20020001"] = "com.demo.test20020001";
+    preferncesDB_->ParseDistributedInfoFromDB("tablet", 100, values, bundles);
+    ASSERT_EQ(bundles.empty(), false);
+ 
+    // insert close slot switch
+    slots.clear();
+    slotInfo->SetEnable(false);
+    slots.push_back(slotInfo);
+    ret = preferncesDB_->UpdateBundleSlotToDisturbeDB(100, "com.demo.test", 20020001, slots);
+    ASSERT_EQ(ret, true);
+ 
+    // insert userid
+    bundles.clear();
+    preferncesDB_->ParseDistributedInfoFromDB("tablet", 100, values, bundles);
+    ASSERT_EQ(bundles.empty(), false);
+    // clear data
+    std::string bundleKey = preferncesDB_->GenerateBundleLablel(bundleInfo);
+    preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey, bundleInfo.GetBundleUid());
 }
 }  // namespace Notification
 }  // namespace OHOS

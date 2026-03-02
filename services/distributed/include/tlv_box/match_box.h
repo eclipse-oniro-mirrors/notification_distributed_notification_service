@@ -36,6 +36,7 @@ public:
     bool SetPeerDeviceId(const std::string& deviceId);
     bool SetLocalDeviceType(const int32_t& deviceType);
     bool SetLocalDeviceId(const std::string& deviceId);
+    bool SetLocalAbility(const int32_t& abilityId);
     bool SetVersion(int32_t version);
     bool SetMatchType(int32_t type);
 
@@ -43,6 +44,7 @@ public:
     bool GetPeerDeviceId(std::string& deviceId);
     bool GetLocalDeviceType(int32_t& deviceType);
     bool GetLocalDeviceId(std::string& deviceId);
+    bool GetLocalAbility(int32_t& abilityId);
     bool GetVersion(int32_t& version);
     bool GetMatchType(int32_t& type);
 };

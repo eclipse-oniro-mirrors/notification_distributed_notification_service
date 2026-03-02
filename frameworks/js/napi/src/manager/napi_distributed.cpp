@@ -434,10 +434,13 @@ napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoIsEnabledByBundle *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasDeviceType) {
+                    int32_t enabledType = 0;
                     std::string deviceType = asynccallbackinfo->params.deviceType;
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsDistributedEnabledByBundle(
-                        asynccallbackinfo->params.option, deviceType, asynccallbackinfo->enable);
-                    ANS_LOGI("isDistributedEnableByType has deviceType code=%{public}d",
+                        asynccallbackinfo->params.option, deviceType, true, enabledType);
+                    asynccallbackinfo->enable = ((enabledType == static_cast<int32_t>(SwitchState::USER_MODIFIED_ON)) ||
+                        (enabledType == static_cast<int32_t>(SwitchState::SYSTEM_DEFAULT_ON)));
+                    ANS_LOGI("isDistributedEnableByType has deviceType %{public}d code=%{public}d", enabledType,
                         asynccallbackinfo->info.errorCode);
                 } else {
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsDistributedEnableByBundle(

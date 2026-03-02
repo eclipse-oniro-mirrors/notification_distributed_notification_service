@@ -268,10 +268,11 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnBadgeEnabledChanged(
 }
 
 ErrCode NotificationSubscriber::SubscriberImpl::OnApplicationInfoNeedChanged(
-    const std::string& bundleName)
+    const sptr<NotificationApplicationChangeInfo>& applicationChangeInfo)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    subscriber_.OnApplicationInfoNeedChanged(bundleName);
+    subscriber_.OnApplicationInfoNeedChanged(
+        std::make_shared<NotificationApplicationChangeInfo>(*applicationChangeInfo));
     return ERR_OK;
 }
 

@@ -343,5 +343,23 @@ HWTEST_F(BundleManagerHelperBranchTest, GetAllBundleInfo_00001, Function | Small
     auto result = bundleManagerHelper.GetAllBundleInfo(bundleOptions, 100);
     ASSERT_NE(result, (int32_t)ERR_OK);
 }
+
+/**
+ * @tc.number    : GetAllBundleOption_00001
+ * @tc.name      : GetAllBundleOption_00001
+ * @tc.desc      : test GetAllBundleOption
+ */
+HWTEST_F(BundleManagerHelperBranchTest, GetAllBundleOption_00001, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(true);
+    BundleManagerHelper bundleManagerHelper;
+    std::vector<NotificationBundleOption> bundleOptions;
+    auto result = bundleManagerHelper.GetAllBundleOption(bundleOptions, 100);
+    ASSERT_EQ(result, -1);
+ 
+    MockGetSystemAbilityManager(false);
+    result = bundleManagerHelper.GetAllBundleOption(bundleOptions, 100);
+    ASSERT_NE(result, (int32_t)ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

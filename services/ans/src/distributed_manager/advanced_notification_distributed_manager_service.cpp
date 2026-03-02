@@ -45,6 +45,7 @@
 #include "distributed_device_data_service.h"
 #ifdef ALL_SCENARIO_COLLABORATION
 #include "distributed_extension_service.h"
+#include "distributed_bundle_service.h"
 #endif
 
 namespace OHOS {
@@ -509,6 +510,69 @@ ErrCode AdvancedNotificationService::SetTargetDeviceBundleList(const std::string
 #endif
 }
 
+ErrCode AdvancedNotificationService::SetDeviceDistributedBundleList(int32_t type,
+    const std::vector<NotificationDistributedBundle>& bundles)
+{
+#ifdef ALL_SCENARIO_COLLABORATION
+    if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("AccessTokenHelper::CheckPermission is false.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    return DistributedBundleService::GetInstance().SetDeviceDistributedBundleList(
+        static_cast<DistributedBundleChangeType>(type), bundles);
+#else
+    return ERR_ANS_INVALID_PARAM;
+#endif
+}
+ 
+ErrCode AdvancedNotificationService::SetTargetDeviceAbility(const std::string& deviceType, const int32_t ability)
+{
+#ifdef ALL_SCENARIO_COLLABORATION
+    if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("AccessTokenHelper::CheckPermission is false.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    DistributedDeviceDataService::GetInstance().SetDeviceAbility(deviceType, ability);
+    return ERR_OK;
+#else
+    return ERR_ANS_INVALID_PARAM;
+#endif
+}
+ 
+ErrCode AdvancedNotificationService::GetLocalDistributedBundleList(const std::string& deviceType,
+    std::vector<NotificationDistributedBundle>& bundles)
+{
+#ifdef ALL_SCENARIO_COLLABORATION
+    if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGW("AccessTokenHelper::CheckPermission is false.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (deviceType != NotificationConstant::PAD_DEVICE_TYPE && deviceType != NotificationConstant::PC_DEVICE_TYPE) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    int32_t userId = DEFAULT_USER_ID;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    NotificationPreferences::GetInstance()->GetLocalDistributedBundles(deviceType, userId, bundles);
+    return ERR_OK;
+#else
+    return ERR_ANS_INVALID_PARAM;
+#endif
+}
+
 ErrCode AdvancedNotificationService::GetMutilDeviceStatus(const std::string &deviceType, const uint32_t status,
     std::string& deviceId, int32_t& userId)
 {
@@ -643,8 +707,43 @@ ErrCode AdvancedNotificationService::IsSmartReminderEnabled(const std::string &d
     return NotificationPreferences::GetInstance()->IsSmartReminderEnabled(deviceType, enabled);
 }
 
+ErrCode AdvancedNotificationService::SetDistributedEnabledForCollaboration(
+    const sptr<NotificationBundleOption> &bundleOption, const std::string &deviceType, const bool enabled,
+    const bool isNotification)
+{
+    ErrCode result = ERR_OK;
+    // only for support collaboration and not master node.
+#if defined(ALL_SCENARIO_COLLABORATION) && !defined(DISTRIBUTED_FEATURE_MASTER)
+    if (bundleOption->GetBundleName().empty() || bundleOption->GetUid() <= 0) {
+        ANS_LOGE("invalid bundle info.");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    auto type = isNotification ? DistributedBundleChangeType::COLLABORATION_NOTIFICATION_ENABLE :
+        DistributedBundleChangeType::COLLABORATION_LIVEVIEW_ENABLE;
+    NotificationDistributedBundle bundle = NotificationDistributedBundle(
+        bundleOption->GetBundleName(), bundleOption->GetUid());
+    result = DistributedBundleService::GetInstance().SetDeviceDistributedBundleList(type, { bundle });
+    if (result == ERR_OK) {
+        DistributedBundleService::GetInstance().HandleLocalSwitchEvent(type, bundleOption->GetBundleName(),
+            bundleOption->GetUid(), enabled);
+    }
+#else
+    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+    if (bundle == nullptr) {
+        ANS_LOGE("bundle is nullptr");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    auto type = enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    // for pad/pc, distinguish notification switch or liveview switch
+    result = NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle, deviceType,
+        isNotification, type);
+#endif
+    return result;
+}
+
 ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
-    const std::string &deviceType, const bool enabled)
+    const std::string &deviceType, const bool enabled, const bool isNotification)
 {
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_13, EventBranchId::BRANCH_10);
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -669,14 +768,19 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
-    if (bundle == nullptr) {
-        ANS_LOGE("bundle is nullptr");
-        return ERR_ANS_INVALID_BUNDLE;
+    ErrCode result = ERR_OK;
+    if (deviceType == NotificationConstant::PAD_DEVICE_TYPE || deviceType == NotificationConstant::PC_DEVICE_TYPE) {
+        result = SetDistributedEnabledForCollaboration(bundleOption, deviceType, enabled, isNotification);
+    } else {
+        sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+        if (bundle == nullptr) {
+            ANS_LOGE("bundle is nullptr");
+            return ERR_ANS_INVALID_BUNDLE;
+        }
+        auto type = enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
+            NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+        result = NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle, deviceType, true, type);
     }
-    
-    ErrCode result = NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle,
-        deviceType, enabled);
     
     ANS_LOGI("%{public}s_%{public}d, deviceType: %{public}s, enabled: %{public}s, "
         "SetDistributedEnabledByBundle result: %{public}d", bundleOption->GetBundleName().c_str(),
@@ -762,7 +866,7 @@ ErrCode AdvancedNotificationService::SetDistributedBundleOption(
 }
 
 ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
-    const std::string &deviceType, bool &enabled)
+    const std::string &deviceType, const bool isNotification, int32_t &enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -782,7 +886,8 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<Not
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    return NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(bundle, deviceType, enabled);
+    return NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(bundle, deviceType,
+        isNotification, enabled);
 }
 
 ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &deviceType, const bool enabled)

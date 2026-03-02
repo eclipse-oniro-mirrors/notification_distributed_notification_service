@@ -101,7 +101,7 @@ public:
      * @return Return true on success, false on failure.
      */
     bool PutDistributedEnabledForBundle(const std::string deviceType,
-        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled);
+        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const NotificationConstant::SWITCH_STATE& enabled);
 
     /**
      * @brief Sets whether to allow a specified application to publish notifications cross
@@ -126,8 +126,8 @@ public:
      * @param enabled Indicates to whether to enabled
      * @return Return true on success, false on failure.
      */
-    bool GetDistributedEnabledForBundle(const std::string deviceType,
-        const NotificationPreferencesInfo::BundleInfo &bundleInfo, bool &enabled);
+    bool GetDistributedEnabledForBundle(const std::string deviceType, const bool isNotification,
+        const NotificationPreferencesInfo::BundleInfo &bundleInfo, int32_t &enabled);
 
     /**
      * @brief Put distributed enable notification in the of  bundle into disturbe DB.
@@ -539,6 +539,14 @@ public:
      */
     void ParseBundleFromDistureDB(NotificationPreferencesInfo &info,
         const std::unordered_map<std::string, std::string> &entries, const int32_t &userId);
+
+    void ParseDistributedInfoFromDB(const std::string& deviceType, const int32_t &userId,
+        const std::unordered_map<std::string, std::string> &values,
+        std::vector<NotificationDistributedBundle>& bundles);
+ 
+    void GetDistributedEnabledForBundle(const std::string& key, const int32_t &userId,
+        NotificationDistributedBundle& distributedBundle);
+    void GetDistributedEnabledForClone(const int32_t &userId, std::vector<NotificationCloneBundleInfo> &cloneBundles);
 
     /**
      * @brief Put distributed device list into disturbe DB.

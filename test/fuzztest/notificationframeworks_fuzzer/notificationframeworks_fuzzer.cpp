@@ -185,7 +185,7 @@ public:
         ans.GetDistributedAuthStatus(str, str2, id, enabled);
         ans.SetDistributedAuthStatus(str, str2, id, enabled);
         ans.UpdateDistributedDeviceList(str);
-        ans.IsDistributedEnabledByBundle(bundle, str, enabled);
+        ans.IsDistributedEnabledByBundle(bundle, str, true, enabled);
         ans.SetSilentReminderEnabled(bundle, enabled);
         ans.IsSilentReminderEnabled(bundle, num);
         ans.SetSmartReminderEnabled(str, enabled);

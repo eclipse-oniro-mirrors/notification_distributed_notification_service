@@ -235,10 +235,14 @@ ani_object AniIsDistributedEnabledByBundleType(ani_env* env, ani_object obj, ani
     asyncCallbackInfo->functionType = IS_DISTURB_ENABLED_BY_BUNDLE_TYPE;
     WorkStatus status = CreateAsyncWork(env,
         [](ani_env* env, void* data) {
+            int32_t enabled = 0;
             auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::IsDistributedEnabledByBundle(
-                    asyncCallbackInfo->option, asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->isEnabled);
+                    asyncCallbackInfo->option, asyncCallbackInfo->deviceTypeStr, true, enabled);
+                asyncCallbackInfo->isEnabled =
+                (enabled == static_cast<int32_t>(Notification::NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) ||
+                enabled == static_cast<int32_t>(Notification::NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON));
             }
         },
         HandleDistribCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));

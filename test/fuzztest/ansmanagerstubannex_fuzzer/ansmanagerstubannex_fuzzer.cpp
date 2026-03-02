@@ -245,8 +245,10 @@ namespace OHOS {
         service->AllowUseReminder(bundleName, userId, allowed);
         service->SetTargetDeviceStatus(deviceType, status, stringData);
         service->SetTargetDeviceStatus(deviceType, status, controlFlag, stringData, userId);
-        service->SetDistributedEnabledByBundle(bundleOption, deviceType, enabled);
-        service->IsDistributedEnabledByBundle(bundleOption, deviceType, enabled);
+        service->SetDistributedEnabledByBundle(bundleOption, deviceType, enabled, enabled);
+        bool notifictaion = fuzzData->ConsumeBool();
+        int32_t enabledType = fuzzData->ConsumeIntegral<int32_t>();
+        service->IsDistributedEnabledByBundle(bundleOption, deviceType, notifictaion, enabledType);
         service->SetSmartReminderEnabled(deviceType, enabled);
         service->IsSmartReminderEnabled(deviceType, enabled);
         service->SetAdditionConfig(key1, value);

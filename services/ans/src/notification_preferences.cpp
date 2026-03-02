@@ -34,6 +34,9 @@
 #include "notification_config_parse.h"
 #include "system_sound_helper.h"
 #include "os_account_manager.h"
+#ifdef ALL_SCENARIO_COLLABORATION
+#include "distributed_bundle_service.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -91,6 +94,13 @@ ErrCode NotificationPreferences::AddNotificationSlots(
         if (result != ERR_OK) {
             return result;
         }
+#ifdef DISTRIBUTED_FEATURE_MASTER
+        if (slot->GetType() == NotificationConstant::SlotType::LIVE_VIEW) {
+            DistributedBundleService::GetInstance().HandleLocalSwitchEvent(
+                DistributedBundleChangeType::MASTER_LIVEVIEW_ENABLE, bundleOption->GetBundleName(),
+                bundleOption->GetUid(), slot->GetEnable());
+        }
+#endif
     }
 
     ANS_LOGD("ffrt: add slot to db!");
@@ -455,6 +465,15 @@ ErrCode NotificationPreferences::SetNotificationsEnabledForBundle(
         BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, static_cast<int32_t>(state));
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
+#ifdef DISTRIBUTED_FEATURE_MASTER
+        if (state != NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF) {
+            bool enable = (state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
+                state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+            DistributedBundleService::GetInstance().HandleLocalSwitchEvent(
+                DistributedBundleChangeType::MASTER_NOTIFICATION_ENABLE,
+                bundleOption->GetBundleName(), bundleOption->GetUid(), enable);
+        }
+#endif
     }
     ANS_LOGI("set ntf auht status %{public}s %{public}d %{public}d %{public}d",
         bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), state, result);
@@ -760,7 +779,19 @@ void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
     preferencesInfo_ = preferencesInfo;
 }
 
-void NotificationPreferences::GetAllCLoneBundlesInfo(int32_t dbUserId, int32_t userId,
+void NotificationPreferences::GetLocalDistributedBundles(const std::string& deviceType, int32_t userId,
+    std::vector<NotificationDistributedBundle>& bundles)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    std::unordered_map<std::string, std::string> bundlesMap;
+    if (GetBatchKvsFromDb(KEY_BUNDLE_LABEL, bundlesMap, userId) != ERR_OK) {
+        ANS_LOGE("Get bundle map info failed.");
+        return;
+    }
+    preferncesDB_->ParseDistributedInfoFromDB(deviceType, userId, bundlesMap, bundles);
+}
+
+void NotificationPreferences::GetAllCloneBundlesInfo(int32_t dbUserId, int32_t userId,
     std::vector<NotificationCloneBundleInfo> &cloneBundles)
 {
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -771,7 +802,8 @@ void NotificationPreferences::GetAllCLoneBundlesInfo(int32_t dbUserId, int32_t u
         return;
     }
     preferncesDB_->ParseBundleFromDistureDB(preferencesInfo, bundlesMap, dbUserId);
-    preferencesInfo.GetAllCLoneBundlesInfo(dbUserId, userId, bundlesMap, cloneBundles);
+    preferencesInfo.GetAllCloneBundlesInfo(dbUserId, userId, bundlesMap, cloneBundles);
+    preferncesDB_->GetDistributedEnabledForClone(userId, cloneBundles);
     preferencesInfo_ = preferencesInfo;
 }
 
@@ -1307,7 +1339,7 @@ ErrCode NotificationPreferences::GetTemplateSupported(const std::string& templat
 }
 
 ErrCode NotificationPreferences::SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
-    const std::string &deviceType, const bool enabled)
+    const std::string &deviceType, const bool isNotification, const NotificationConstant::SWITCH_STATE& enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
@@ -1323,7 +1355,12 @@ ErrCode NotificationPreferences::SetDistributedEnabledByBundle(const sptr<Notifi
         NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     bundleInfo.SetEnableNotification(defaultState);
     bool storeDBResult = true;
-    storeDBResult = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo, enabled);
+    if (deviceType == NotificationConstant::PAD_DEVICE_TYPE || deviceType == NotificationConstant::PC_DEVICE_TYPE) {
+        storeDBResult = preferncesDB_->PutDistributedEnabledForBundle(
+            deviceType + "_" + std::to_string(isNotification), bundleInfo, enabled);
+    } else {
+        storeDBResult = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo, enabled);
+    }
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
@@ -1347,7 +1384,7 @@ ErrCode NotificationPreferences::SetDistributedBundleOption(
 }
 
 ErrCode NotificationPreferences::IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
-    const std::string &deviceType, bool &enabled)
+    const std::string &deviceType, const bool isNotification, int32_t &enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
@@ -1363,7 +1400,7 @@ ErrCode NotificationPreferences::IsDistributedEnabledByBundle(const sptr<Notific
         NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     bundleInfo.SetEnableNotification(defaultState);
     bool storeDBResult = true;
-    storeDBResult = preferncesDB_->GetDistributedEnabledForBundle(deviceType, bundleInfo, enabled);
+    storeDBResult = preferncesDB_->GetDistributedEnabledForBundle(deviceType, isNotification, bundleInfo, enabled);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
@@ -2752,7 +2789,8 @@ void NotificationPreferences::SetDistributedEnabledForBundle(const NotificationP
         bool ret = preferncesDB_->IsDistributedEnabledEmptyForBundle(deviceType, bundleInfo);
         if (!ret) {
             ANS_LOGD("get %{public}s distributedEnabled is empty", deviceType.c_str());
-            preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo, true);
+            preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo,
+                NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
         }
     }
 }

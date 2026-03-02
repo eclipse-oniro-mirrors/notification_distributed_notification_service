@@ -483,6 +483,84 @@ void SmartReminderCenter::InitThirdPartyWearableDevices(set<string> &syncDevices
 }
 #endif
 #ifdef ALL_SCENARIO_COLLABORATION
+
+bool SmartReminderCenter::GetCollaborationBundleInfo(const std::string& bundleName, int32_t userId,
+    AppExecFwk::ApplicationInfo& appInfo, AppExecFwk::BundleResourceInfo& bundleResourceInfo) const
+{
+    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+    if (bundleManager == nullptr) {
+        ANS_LOGE("get bundleManager fail");
+        return false;
+    }
+
+    AppExecFwk::BundleInfo bundleInfo;
+    int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+    if (!bundleManager->GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
+        ANS_LOGE("PC/PAD init, GetApplicationInfo error bundleName = %{public}s", bundleName.c_str());
+        return false;
+    }
+    appInfo = bundleInfo.applicationInfo;
+    if (bundleManager->GetBundleResourceInfo(bundleName, bundleResourceInfo, appInfo.appIndex) != ERR_OK) {
+        ANS_LOGE("PC/PAD init, GetBundleResourceInfo error bundleName = %{public}s", bundleName.c_str());
+        return false;
+    }
+    return true;
+}
+ 
+bool SmartReminderCenter::CheckPcPadCollaborationForDevice(const std::string& deviceType, const std::string& deviceId,
+    const std::string& bundleName, int32_t userId, const AppExecFwk::BundleResourceInfo bundleResourceInfo) const
+{
+    if (BundleManagerHelper::GetInstance()->CheckSystemApp(bundleName, userId)) {
+        ANS_LOGI("PC/PAD init, application is systemApp, type = %{public}s, bundleName = %{public}s",
+            deviceType.c_str(), bundleName.c_str());
+        return false;
+    }
+    // installed bundle
+    if (DistributedDeviceDataService::GetInstance().CheckDeviceBundleExist(
+        deviceType, deviceId, bundleName, bundleResourceInfo.label)) {
+        ANS_LOGI("PC/PAD init, application has installed, type = %{public}s, bundleName = %{public}s",
+            deviceType.c_str(), bundleName.c_str());
+        return false;
+    }
+    return true;
+}
+ 
+bool SmartReminderCenter::CheckPcPadCollaborationForApplication(const sptr<NotificationRequest> &request,
+    const std::string& deviceType, const std::string& deviceId,
+    const AppExecFwk::BundleResourceInfo bundleResourceInfo) const
+{
+    sptr<NotificationBundleOption> bundle =  new (std::nothrow) NotificationBundleOption();
+    if (bundle == nullptr) {
+        return false;
+    }
+
+    int32_t enableType = 0;
+    bundle->SetUid(request->GetOwnerUid());
+    bundle->SetBundleName(request->GetOwnerBundleName());
+    bool isNotification = (request->GetSlotType() != NotificationConstant::SlotType::LIVE_VIEW);
+    if (NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(bundle,
+        deviceType, isNotification, enableType) != ERR_OK) {
+        return false;
+    }
+    ANS_LOGI("Get enable switch %{public}d, %{public}s, %{public}d, %{public}s", request->GetOwnerUid(),
+        request->GetOwnerBundleName().c_str(), enableType, deviceType.c_str());
+    if (enableType == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON)) {
+        return true;
+    } else if (enableType == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF) ||
+        enableType == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF)) {
+        return false;
+    }
+
+    // installed bundle
+    if (DistributedDeviceDataService::GetInstance().CheckDeviceBundleExist(
+        deviceType, deviceId, request->GetOwnerBundleName(), bundleResourceInfo.label)) {
+        ANS_LOGI("PC/PAD init, application has installed, type = %{public}s, bundleName = %{public}s",
+            deviceType.c_str(), request->GetOwnerBundleName().c_str());
+        return false;
+    }
+    return true;
+}
+
 void SmartReminderCenter::InitPcPadDevices(const string &deviceType,
     set<string> &syncDevices, set<string> &smartDevices,
     map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
@@ -517,40 +595,22 @@ void SmartReminderCenter::InitPcPadDevices(const string &deviceType,
     if (userId == SUBSCRIBE_USER_INIT) {
         OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     }
-    AppExecFwk::BundleInfo bundleInfo;
     AppExecFwk::ApplicationInfo appInfo;
     AppExecFwk::BundleResourceInfo bundleResourceInfo;
-    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
-    if (bundleManager != nullptr) {
-        // system app
-        if (bundleManager->CheckSystemApp(bundleName, userId)) {
-            ANS_LOGI("PC/PAD init, application is systemApp, type = %{public}s, bundleName = %{public}s",
-                deviceType.c_str(), bundleName.c_str());
-            return;
-        }
-        int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
-        if (!bundleManager->GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
-            ANS_LOGE("PC/PAD init, GetApplicationInfo error, type = %{public}s, bundleName = %{public}s",
-                deviceType.c_str(), bundleName.c_str());
-            return;
-        }
-        appInfo = bundleInfo.applicationInfo;
-        if (bundleManager->GetBundleResourceInfo(bundleName, bundleResourceInfo, appInfo.appIndex) != ERR_OK) {
-            ANS_LOGE("PC/PAD init, GetBundleResourceInfo error, type = %{public}s, bundleName = %{public}s",
-                deviceType.c_str(), bundleName.c_str());
-            return;
-        }
-        // installed bundle
-        if (DistributedDeviceDataService::GetInstance().CheckDeviceBundleExist(
-            deviceType, deviceId, bundleName, bundleResourceInfo.label)) {
-            ANS_LOGI("PC/PAD init, application has installed, type = %{public}s, bundleName = %{public}s",
-                deviceType.c_str(), bundleName.c_str());
-            return;
-        }
-    } else {
-        ANS_LOGE("get bundleManager fail");
+    if (!GetCollaborationBundleInfo(bundleName, userId, appInfo, bundleResourceInfo)) {
         return;
     }
+
+    bool applicationSwitch = DistributedDeviceDataService::GetInstance().CheckDeviceAbility(deviceType,
+        DistributedAbilityType::APPLICATION_SWITCH);
+    bool checkResult = true;
+    if (applicationSwitch) {
+        checkResult = CheckPcPadCollaborationForApplication(request, deviceType, deviceId, bundleResourceInfo);
+    } else {
+        checkResult = CheckPcPadCollaborationForDevice(deviceType, deviceId, bundleName, userId, bundleResourceInfo);
+    }
+    ANS_COND_DO_WARN(!checkResult, return, "collaboration check failed.");
+
     FillRequestExtendInfo(deviceType, deviceStatus, request, appInfo, bundleResourceInfo);
     statusMap.insert(pair<string, bitset<DistributedDeviceStatus::STATUS_SIZE>>(
         deviceType, bitset<DistributedDeviceStatus::STATUS_SIZE>(deviceStatus.status)));
@@ -703,30 +763,6 @@ void SmartReminderCenter::HandleReminderMethods(
     ANS_LOGI("not match any rule. deviceType = %{public}s", deviceType.c_str());
 }
 
-bool SmartReminderCenter::IsNeedSynergy(const NotificationConstant::SlotType &slotType,
-    const string &deviceType, const string &ownerBundleName, int32_t ownerUid) const
-{
-    std::string device = deviceType;
-    if (deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) == 0) {
-        device = NotificationConstant::LITEWEARABLE_DEVICE_TYPE;
-    }
-
-    bool isEnable = true;
-    if (NotificationPreferences::GetInstance()->IsSmartReminderEnabled(device, isEnable) != ERR_OK || !isEnable) {
-        ANS_LOGI("switch-status, smartReminderEnable closed. device = %{public}s", device.c_str());
-        return false;
-    }
-
-    sptr<NotificationBundleOption> bundleOption =
-        new (std::nothrow) NotificationBundleOption(ownerBundleName, ownerUid);
-    if (NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(
-        bundleOption, device, isEnable) != ERR_OK || !isEnable) {
-        ANS_LOGI("switch-status, app switch closed. device = %{public}s", device.c_str());
-        return false;
-    }
-    return true;
-}
-
 bool SmartReminderCenter::GetAppSwitch(const string &deviceType,
     const string &ownerBundleName, int32_t ownerUid) const
 {
@@ -735,12 +771,13 @@ bool SmartReminderCenter::GetAppSwitch(const string &deviceType,
         device = NotificationConstant::LITEWEARABLE_DEVICE_TYPE;
     }
 
-    bool isEnable = true;
-
+    int32_t enableType = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     sptr<NotificationBundleOption> bundleOption =
         new (std::nothrow) NotificationBundleOption(ownerBundleName, ownerUid);
     if (NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(
-        bundleOption, device, isEnable) != ERR_OK || !isEnable) {
+        bundleOption, device, true, enableType) != ERR_OK ||
+        enableType == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) ||
+        enableType == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF)) {
         return false;
     }
     return true;

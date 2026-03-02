@@ -203,6 +203,8 @@ public:
      * @return Returns true if the application is an atomic service; returns false otherwise.
      */
     bool IsAtomicServiceByBundle(const std::string& bundleName, const int32_t userId);
+
+    ErrCode GetAllBundleOption(std::vector<NotificationBundleOption>& bundleOptions, int32_t userId);
 private:
     void Connect();
     void Disconnect();

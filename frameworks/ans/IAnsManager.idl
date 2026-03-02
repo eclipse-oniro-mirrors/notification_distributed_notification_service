@@ -35,6 +35,7 @@ sequenceable OHOS.Notification.Notification;
 sequenceable OHOS.Notification.NotificationButtonOption;
 sequenceable OHOS.Notification.NotificationCheckRequest;
 sequenceable OHOS.Notification.NotificationRingtoneInfo;
+sequenceable OHOS.Notification.NotificationDistributedBundle;
 sequenceable OHOS.IRemoteObject;
 
 interface OHOS.Notification.IAnsManager {
@@ -308,7 +309,7 @@ interface OHOS.Notification.IAnsManager {
     void GetBundlePriorityConfig([in] sptr<NotificationBundleOption> bundleOption, [out] String value);
 
     void SetDistributedEnabledByBundle(
-        [in] sptr<NotificationBundleOption> bundleOption, [in] String deviceType, [in] boolean enabled);
+        [in] sptr<NotificationBundleOption> bundleOption, [in] String deviceType, [in] boolean enabled, [in] boolean isNotification);
 
     void SetPriorityEnabled([in] boolean enabled);
 
@@ -357,7 +358,7 @@ interface OHOS.Notification.IAnsManager {
 
     void SetSilentReminderEnabled([in] sptr<NotificationBundleOption> bundleOption, [in] boolean enabled);
 
-    void IsDistributedEnabledByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] String deviceType, [out] boolean enabled);
+    void IsDistributedEnabledByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] String deviceType, [in] boolean isNotification, [out] int enabled);
 
     void CancelAsBundleWithAgent([in] sptr<NotificationBundleOption> bundleOption, [in] int id, [in] IAnsResultDataSynchronizer synchronizer);
     void CancelAsBundleWithAgent([in] sptr<NotificationBundleOption> bundleOption, [in] int id);
@@ -388,6 +389,12 @@ interface OHOS.Notification.IAnsManager {
         [in] String hashCode, [out] null_sptr<NotificationRequest> notificationRequest);
 
     void SetTargetDeviceBundleList([in] String deviceType, [in] String deviceId, [in] int operatorType, [in] String[] bundleList, [in] String[] labelList);
+
+    void SetDeviceDistributedBundleList([in] int type, [in] NotificationDistributedBundle[] bundles);
+
+    void SetTargetDeviceAbility([in] String deviceType, [in] int ability);
+
+    void GetLocalDistributedBundleList([in] String deviceType, [out] NotificationDistributedBundle[] bundles);
 
     void SetTargetDeviceSwitch([in] String deviceType, [in] String deviceId, [in] boolean notificaitonEnable, [in] boolean liveViewEnable);
 

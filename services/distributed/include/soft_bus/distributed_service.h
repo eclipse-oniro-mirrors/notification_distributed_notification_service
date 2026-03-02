@@ -24,7 +24,6 @@
 #include "request_box.h"
 #include "match_box.h"
 #include <functional>
-#include "bundle_icon_box.h"
 #include <unordered_set>
 #include "distributed_data_define.h"
 #include "response_box.h"
@@ -43,7 +42,7 @@ public:
     void DeviceStatusChange(const DeviceStatueChangeInfo& changeInfo);
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const DistributedDeviceInfo& device);
-    void OnApplicationInfnChanged(const std::string& bundleName);
+    void OnApplicationInfnChanged(const std::shared_ptr<NotificationApplicationChangeInfo>& applicationChangeInfo);
     int32_t OnOperationResponse(const std::shared_ptr<NotificationOperationInfo>& operationInfo,
         const DistributedDeviceInfo& device);
     void OnCanceled(const std::shared_ptr<Notification>& notification, const DistributedDeviceInfo& peerDevice);
@@ -51,7 +50,6 @@ public:
         const DistributedDeviceInfo& peerDevice);
     void OnReceiveMsg(const void *data, uint32_t dataLen);
 #ifdef DISTRIBUTED_FEATURE_MASTER
-    void HandleBundlesEvent(const std::string& bundleName, const std::string& action);
     void HandleDeviceUsingChange(const DeviceStatueChangeInfo& changeInfo);
     bool OnConsumedSetFlags(const std::shared_ptr<Notification> &request,
         const DistributedDeviceInfo& peerDevice);

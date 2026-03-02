@@ -725,9 +725,24 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDistributedEnabledByBundle_1
     bool enabled = false;
     sptr<NotificationBundleOption> bundleOption = nullptr;
 
-    auto ret = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, enabled);
+    auto ret = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, enabled, true);
 
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: SetDistributedEnabledByBundle_200
+ * @tc.desc: Test SetDistributedEnabledByBundle when caller has invalid parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDistributedEnabledByBundle_200, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("com.test.demo", 20020001);
+    auto ret = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, "tablet", false, true);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ret = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, "2in1", false, true);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -1001,6 +1016,79 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedDevicelist_0100, 
     std::vector<std::string> deviceTypes;
     auto ret = advancedNotificationService_->GetDistributedDevicelist(deviceTypes);
     ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: SetDeviceDistributedBundleList_0100
+ * @tc.desc: Test SetDeviceDistributedBundleList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDeviceDistributedBundleList_0100, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    auto ret = advancedNotificationService_->SetDeviceDistributedBundleList(
+        static_cast<int32_t>(DistributedBundleChangeType::INIT_DEVICE_CONNECT), {});
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+ 
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsVerfyPermisson(false);
+    ret = advancedNotificationService_->SetDeviceDistributedBundleList(
+        static_cast<int32_t>(DistributedBundleChangeType::INIT_DEVICE_CONNECT), {});
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+ 
+    MockIsVerfyPermisson(true);
+    ret = advancedNotificationService_->SetDeviceDistributedBundleList(
+        static_cast<int32_t>(DistributedBundleChangeType::INIT_DEVICE_CONNECT), {});
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+ 
+/**
+ * @tc.name: SetTargetDeviceAbility_0100
+ * @tc.desc: Test SetTargetDeviceAbility.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceAbility_0100, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    auto ret = advancedNotificationService_->SetTargetDeviceAbility("tablet", 1);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+ 
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsVerfyPermisson(false);
+    ret = advancedNotificationService_->SetTargetDeviceAbility("tablet", 1);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+ 
+    MockIsVerfyPermisson(true);
+    ret = advancedNotificationService_->SetTargetDeviceAbility("tablet", 1);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+ 
+/**
+ * @tc.name: GetLocalDistributedBundleList_0100
+ * @tc.desc: Test GetLocalDistributedBundleList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetLocalDistributedBundleList_0100, Function | SmallTest | Level1)
+{
+    std::vector<NotificationDistributedBundle> bundles;
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    auto ret = advancedNotificationService_->GetLocalDistributedBundleList("tablet", bundles);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+ 
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsVerfyPermisson(false);
+    ret = advancedNotificationService_->GetLocalDistributedBundleList("tablet", bundles);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+ 
+    MockIsVerfyPermisson(true);
+    ret = advancedNotificationService_->GetLocalDistributedBundleList("wearable", bundles);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+ 
+    ret = advancedNotificationService_->GetLocalDistributedBundleList("tablet", bundles);
+    ASSERT_EQ(ret, (int)ERR_OK);
+ 
+    ret = advancedNotificationService_->GetLocalDistributedBundleList("2in1", bundles);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS

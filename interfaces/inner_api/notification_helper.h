@@ -1100,10 +1100,11 @@ public:
      * @param enabled Specifies whether to allow the given application to publish notifications. The value
      *                true indicates that notifications are allowed, and the value false indicates that
      *                notifications are not allowed.
+     * @param isNotification Indicates notification switch or liveview swtich, default is notification switch.
      * @return Returns set notifications enabled for specified bundle result.
      */
-    static ErrCode SetDistributedEnabledByBundle(
-        const NotificationBundleOption &bundleOption, const std::string &deviceType, const bool enabled);
+    static ErrCode SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
+        const std::string &deviceType, const bool enabled, const bool isNotification = true);
 
     /**
      * @brief Sets whether to allow a specified application to publish notifications cross
@@ -1127,8 +1128,8 @@ public:
      *                notifications are not allowed.
      * @return Returns set notifications enabled for specified bundle result.
      */
-    static ErrCode IsDistributedEnabledByBundle(
-        const NotificationBundleOption &bundleOption, const std::string &deviceType, bool &enabled);
+    static ErrCode IsDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
+        const std::string &deviceType, bool isNotification, int32_t &enabled);
 
     /**
      * @brief Configuring Whether to Synchronize Common Notifications to Target Devices.
@@ -1420,6 +1421,35 @@ public:
      */
     static ErrCode SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
         int operatorType, const std::vector<std::string>& bundleList, const std::vector<std::string>& labelList);
+
+    /**
+     * @brief set device of bundle list.
+     *
+     * @param type change type.
+     * @param bundles device of bundle list.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode SetDeviceDistributedBundleList(DistributedBundleChangeType type,
+        const std::vector<NotificationDistributedBundle>& bundles);
+
+    /**
+     * @brief set device of ability.
+     *
+     * @param deviceType device type.
+     * @param ability device of ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode SetTargetDeviceAbility(const std::string& deviceType, const int32_t ability);
+
+    /**
+     * @brief get device of distributed bundle list.
+     *
+     * @param deviceType device type.
+     * @param bundles device of bundle list.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode GetLocalDistributedBundleList(const std::string& deviceType,
+        std::vector<NotificationDistributedBundle>& bundles);
 
     /**
      * @brief Get the status of the target device.

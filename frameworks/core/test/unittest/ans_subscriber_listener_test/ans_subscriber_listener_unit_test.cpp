@@ -696,7 +696,8 @@ HWTEST_F(SubscriberListenerTest, OnSystemUpdate_0300, Function | MediumTest | Le
 HWTEST_F(SubscriberListenerTest, OnApplicationInfoNeedChanged_0100, Function | MediumTest | Level1)
 {
     sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(nullptr);
-    ErrCode result = listener->OnApplicationInfoNeedChanged("");
+    sptr<NotificationApplicationChangeInfo> changeInfo = new NotificationApplicationChangeInfo();
+    ErrCode result = listener->OnApplicationInfoNeedChanged(changeInfo);
     EXPECT_EQ(result, ERR_INVALID_DATA);
 }
  
@@ -708,7 +709,8 @@ HWTEST_F(SubscriberListenerTest, OnApplicationInfoNeedChanged_0200, Function | M
 {
     std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
     sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
-    ErrCode result = listener->OnApplicationInfoNeedChanged("");
+    sptr<NotificationApplicationChangeInfo> changeInfo = new NotificationApplicationChangeInfo();
+    ErrCode result = listener->OnApplicationInfoNeedChanged(changeInfo);
     EXPECT_EQ(result, ERR_OK);
 }
  

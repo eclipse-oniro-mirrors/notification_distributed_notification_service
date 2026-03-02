@@ -170,5 +170,26 @@ HWTEST_F(DistributedDeviceDataServiceTest, DeviceData_00002, Function | SmallTes
         DEVICE_ID, "ohos.com.test2", "");
     ASSERT_EQ(exist, false);
 }
+
+/**
+ * @tc.name: Device sync device ability
+ * @tc.desc: Test device data service
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(DistributedDeviceDataServiceTest, CheckDeviceAbility_00001, Function | SmallTest | Level1)
+{
+    DistributedDeviceDataService::GetInstance().SetDeviceAbility("tablet", 1);
+    auto result = DistributedDeviceDataService::GetInstance().CheckDeviceAbility("tablet",
+        DistributedAbilityType::APPLICATION_SWITCH);
+    ASSERT_EQ(result, true);
+    result = DistributedDeviceDataService::GetInstance().CheckDeviceAbility("2in1",
+        DistributedAbilityType::APPLICATION_SWITCH);
+    ASSERT_EQ(result, false);
+    DistributedDeviceDataService::GetInstance().SetDeviceAbility("tablet", 2);
+    result = DistributedDeviceDataService::GetInstance().CheckDeviceAbility("tablet",
+        DistributedAbilityType::APPLICATION_SWITCH);
+    ASSERT_EQ(result, false);
+}
 }
 }

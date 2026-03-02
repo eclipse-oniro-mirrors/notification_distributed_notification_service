@@ -20,7 +20,9 @@
 #include <map>
 
 #include "tlv_box.h"
+#include "application_change_box.h"
 #include "distributed_device_data.h"
+#include "notification_application_change_info.h"
 
 namespace OHOS {
 namespace Notification {
@@ -28,28 +30,22 @@ class DistributedBundleService {
 public:
     static DistributedBundleService& GetInstance();
 
-    void HandleBundleIconSync(const std::shared_ptr<TlvBox>& boxMessage);
+    void HandleLocalApplicationChanged(const std::shared_ptr<NotificationApplicationChangeInfo>& applicationChangeInfo);
+    void HandleRemoteApplicationChanged(const std::shared_ptr<TlvBox>& boxMessage);
 #ifdef DISTRIBUTED_FEATURE_MASTER
-    void RequestBundlesIcon(const DistributedDeviceInfo peerDevice, bool isForce);
-    void GenerateBundleIconSync(const DistributedDeviceInfo& device);
-    void HandleBundleRemoved(const std::string& bundleName);
-    void HandleBundleChanged(const std::string& bundleName, bool updatedExit);
     void SetDeviceBundleList(const std::shared_ptr<TlvBox>& boxMessage);
-private:
-    int32_t UpdateBundlesIcon(const std::unordered_map<std::string, std::string>& icons,
-        const DistributedDeviceInfo peerDevice);
-    bool GetBundleResourceInfo(const std::string bundleName, std::string& icon);
-    void GetNeedUpdateDevice(bool updatedExit, const std::string& bundleName,
-        std::vector<DistributedDeviceInfo>& updateDeviceList);
+    bool GetApplicationResource(NotificationDistributedBundle& info);
+    void SendDistributedBundleInfo(const DistributedDeviceInfo device);
+    void HandleApplicationEnableChange(const std::shared_ptr<NotificationApplicationChangeInfo>& applicationChangeInfo,
+        NotificationDistributedBundle distributedBundle, DistributedBundleChangeType changeType);
 #else
-    void ReportBundleIconList(const DistributedDeviceInfo peerDevice);
     void SyncInstalledBundles(const DistributedDeviceInfo& peerDevice, bool isForce);
     void SendInstalledBundles(const DistributedDeviceInfo& peerDevice, const std::string& localDeviceId,
         const std::vector<std::pair<std::string, std::string>>& bundles, int32_t type);
 #endif
-
 private:
-    std::map<std::string, std::set<std::string>> bundleIconCache_;
+    void SendDistributedBundleChange(const std::vector<NotificationDistributedBundle>& applicationList,
+        DistributedBundleChangeType type);
 };
 }
 }

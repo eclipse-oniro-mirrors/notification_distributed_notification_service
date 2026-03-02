@@ -18,6 +18,7 @@
 
 #include <string>
 #include <set>
+#include <map>
 #include <mutex>
 #include <unordered_set>
 #include "notification_operation_info.h"
@@ -52,6 +53,23 @@ struct DistributedHaCallbacks {
     std::function<void(int32_t, int32_t, std::string)> hiSysEventCallback;
     std::function<void(int32_t, int32_t, uint32_t, std::string)> haMaintenanceCallback;
     std::function<void(const std::string&, int32_t, int32_t, std::string)> haOperationCallback;
+};
+
+enum DistributedAbilityType {
+    APPLICATION_SWITCH = 1 << 0,
+};
+
+enum DistributedBundleChangeType {
+    INIT_DEVICE_CONNECT = 0,
+    END_DEVICE_CONNECT = 1,
+    MASTER_BUNDLE_ADD = 2,
+    MASTER_BUNDLE_REMOVE = 3,
+    MASTER_NOTIFICATION_ENABLE = 4,
+    MASTER_LIVEVIEW_ENABLE = 5,
+    SLAVE_BUNDLE_ADD = 6,
+    SLAVE_BUNDLE_REMOVE = 7,
+    COLLABORATION_NOTIFICATION_ENABLE = 8,
+    COLLABORATION_LIVEVIEW_ENABLE = 9,
 };
 
 struct DeviceStatueChangeInfo {

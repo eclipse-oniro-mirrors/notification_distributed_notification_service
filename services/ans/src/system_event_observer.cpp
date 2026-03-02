@@ -26,6 +26,7 @@
 #include "notification_clone_manager.h"
 #ifdef ALL_SCENARIO_COLLABORATION
 #include "distributed_device_manager.h"
+#include "distributed_bundle_service.h"
 #endif
 #include "notification_liveview_utils.h"
 
@@ -119,6 +120,11 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
             bundleOptions.emplace_back(bundleOption);
             std::vector<sptr<NotificationRequest>> requests;
             NOTIFICATION_AI_EXTENSION_WRAPPER->NotifyPriorityEvent(action, bundleOptions, requests);
+#ifdef DISTRIBUTED_FEATURE_MASTER
+            DistributedBundleService::GetInstance().HandleLocalSwitchEvent(
+                DistributedBundleChangeType::MASTER_BUNDLE_REMOVE,
+                bundleOption->GetBundleName(), bundleOption->GetUid(), false);
+#endif
         }
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
         AdvancedNotificationService::GetInstance()->HandleBundleUninstall(bundleOption);

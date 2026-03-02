@@ -1568,7 +1568,7 @@ HWTEST_F(AnsNotificationUnitTest, SetDistributedEnabledByBundle_0100, TestSize.L
     bundleOption.SetUid(1);
     std::string deviceType = "testDeviceType";
 
-    ErrCode res = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    ErrCode res = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, true, true);
     EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
 
@@ -1581,7 +1581,7 @@ HWTEST_F(AnsNotificationUnitTest, SetDistributedEnabledByBundle_0200, TestSize.L
 {
     NotificationBundleOption bundleOption;
     std::string deviceType = "testDeviceType";
-    ErrCode ret = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    ErrCode ret = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, true, true);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
 
@@ -1596,7 +1596,7 @@ HWTEST_F(AnsNotificationUnitTest, SetDistributedEnabledByBundle_0300, TestSize.L
     bundleOption.SetBundleName("");
     bundleOption.SetUid(1);
     std::string deviceType = "testDeviceType";
-    ErrCode ret = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    ErrCode ret = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, true, true);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
 
@@ -1642,8 +1642,8 @@ HWTEST_F(AnsNotificationUnitTest, IsDistributedEnabledByBundle_0100, TestSize.Le
     bundleOption.SetBundleName(bundleName);
     bundleOption.SetUid(1);
     std::string deviceType = "testDeviceType1111";
-    bool enable = true;
-    ErrCode result = ans_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    int32_t enable;
+    ErrCode result = ans_->IsDistributedEnabledByBundle(bundleOption, deviceType, true, enable);
     EXPECT_EQ(result, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
 
@@ -1658,8 +1658,8 @@ HWTEST_F(AnsNotificationUnitTest, IsDistributedEnabledByBundle_0200, TestSize.Le
     NotificationBundleOption bundleOption;
     std::string deviceType = "testDeviceType";
 
-    bool enable = true;
-    ErrCode ret = ans_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    int32_t enable;
+    ErrCode ret = ans_->IsDistributedEnabledByBundle(bundleOption, deviceType, true, enable);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
 
@@ -1676,8 +1676,8 @@ HWTEST_F(AnsNotificationUnitTest, IsDistributedEnabledByBundle_0300, TestSize.Le
     bundleOption.SetUid(1);
     std::string deviceType = "testDeviceType";
 
-    bool enable = true;
-    ErrCode ret = ans_->IsDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    int32_t enable;
+    ErrCode ret = ans_->IsDistributedEnabledByBundle(bundleOption, deviceType, true, enable);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
 
@@ -1785,7 +1785,7 @@ HWTEST_F(AnsNotificationUnitTest, RegisterSwingCallback_0100, TestSize.Level1)
 
 /*
  * @tc.name: IsNeedSilentInDoNotDisturbMode_0100
- * @tc.desc: test IsNeedSilentInDoNotDisturbMode.
+ * @tc.desc: test Is NeedSilentInDoNotDisturbMode.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, IsNeedSilentInDoNotDisturbMode_0100, Function | MediumTest | Level1)
@@ -3122,6 +3122,55 @@ HWTEST_F(AnsNotificationUnitTest, GetRingtoneInfoByBundle_0200, Function | Mediu
     bundle.SetBundleName("testBundle");
     NotificationRingtoneInfo ringtoneInfo;
     ErrCode res = ans_->GetRingtoneInfoByBundle(bundle, ringtoneInfo);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: SetDeviceDistributedBundleList_0100
+ * @tc.desc: test SetDeviceDistributedBundleList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetDeviceDistributedBundleList_0100, Function | MediumTest | Level1)
+{
+    MockGetAnsManagerProxy(nullptr);
+    ErrCode res = ans_->SetDeviceDistributedBundleList(DistributedBundleChangeType::INIT_DEVICE_CONNECT, {});
+    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
+    MockGetAnsManagerProxy(proxy);
+    res = ans_->SetDeviceDistributedBundleList(DistributedBundleChangeType::INIT_DEVICE_CONNECT, {});
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: SetTargetDeviceAbility_0100
+ * @tc.desc: test SetTargetDeviceAbility.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetTargetDeviceAbility_0100, Function | MediumTest | Level1)
+{
+    MockGetAnsManagerProxy(nullptr);
+    ErrCode res = ans_->SetTargetDeviceAbility("tablet", 0);
+    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
+    MockGetAnsManagerProxy(proxy);
+    res = ans_->SetTargetDeviceAbility("tablet", 0);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: GetLocalDistributedBundleList_0100
+ * @tc.desc: test GetLocalDistributedBundleList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetLocalDistributedBundleList_0100, Function | MediumTest | Level1)
+{
+    std::vector<NotificationDistributedBundle> bundles;
+    MockGetAnsManagerProxy(nullptr);
+    ErrCode res = ans_->GetLocalDistributedBundleList("tablet", bundles);
+    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
+    MockGetAnsManagerProxy(proxy);
+    res = ans_->GetLocalDistributedBundleList("tablet", bundles);
     EXPECT_EQ(res, ERR_OK);
 }
 }  // namespace Notification

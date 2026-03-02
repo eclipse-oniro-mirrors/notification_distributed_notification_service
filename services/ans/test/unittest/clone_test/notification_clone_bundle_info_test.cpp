@@ -408,6 +408,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, Dump_00001, Function | SmallTest | Lev
         slotDump += slot.Dump();
         slotDump += ",";
     }
+    NotificationCloneBundleInfo::CollaborationSwitch collaborationSwitch;
     slotDump += "}";
     std::string ringtoneDump = ringtoneInfo->Dump();
     dumpInfo += "CloneBundle{ name = " + bundleName +
@@ -419,6 +420,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, Dump_00001, Function | SmallTest | Lev
             ", isEnabled = " + std::to_string(static_cast<int32_t>(enabledNotification)) +
             ", slotsInfo = " + slotDump +
             ", ringtone = " + ringtoneDump +
+            ", collaboration = " + collaborationSwitch.Dump() +
             ", silentReminderEnabled = 0" +
             " }";
     EXPECT_EQ(rrc->Dump(), dumpInfo);
@@ -886,6 +888,61 @@ HWTEST_F(NotificationCloneBundleInfoTest, CloneInfoJson_00005, Function | SmallT
     EXPECT_FALSE(bundleInfo.ishasPoppedSupportClone_);
     EXPECT_EQ(bundleInfo.isEnabledNotification_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
     EXPECT_EQ(bundleInfo.silentReminderEnabled_, NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+}
+
+/**
+ * @tc.name: CollaborationSwitch_00001
+ * @tc.desc: Test Json contain json object keys.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneBundleInfoTest, CollaborationSwitch_00001, Function | SmallTest | Level1) {
+    // lost some item
+    nlohmann::json jsonObject = {"name", "com.example.app"};
+    NotificationCloneBundleInfo::CollaborationSwitch collaborationSwitch;
+    // not contain "collaborationSwitch".
+    collaborationSwitch.FromJson(jsonObject);
+    EXPECT_EQ(collaborationSwitch.pcLiveView_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+ 
+    // "collaborationSwitch" is not object.
+    jsonObject = {{"collaborationSwitch", "com.example.app"}};
+    collaborationSwitch.FromJson(jsonObject);
+    EXPECT_EQ(collaborationSwitch.pcLiveView_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+ 
+    // "collaborationSwitch" object not contain switch.
+    jsonObject = {{"collaborationSwitch", {{"name", "com.example.app"}}}};
+    collaborationSwitch.FromJson(jsonObject);
+    EXPECT_EQ(collaborationSwitch.pcLiveView_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+ 
+    // "collaborationSwitch" object contain switch.
+    jsonObject = {{"collaborationSwitch", {
+        {"pcLiveView", "com.example.app"}, {"pcNotification", "com.example.app"},
+        {"tabletLiveView", "com.example.app"}, {"tabletNotification", "com.example.app"}
+    }}};
+    collaborationSwitch.FromJson(jsonObject);
+    EXPECT_EQ(collaborationSwitch.pcLiveView_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+ 
+    // "collaborationSwitch" object contain switch.
+    jsonObject = {{"collaborationSwitch",
+        {{"pcLiveView", -1}, {"pcNotification", -1}, {"tabletLiveView", -1}, {"tabletNotification", -1}}
+    }};
+    collaborationSwitch.FromJson(jsonObject);
+    EXPECT_EQ(collaborationSwitch.pcLiveView_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+ 
+    // "collaborationSwitch" object contain switch.
+    jsonObject = {{"collaborationSwitch",
+        {{"pcLiveView", 100}, {"pcNotification", 100}, {"tabletLiveView", 100}, {"tabletNotification", 100}}
+    }};
+    collaborationSwitch.FromJson(jsonObject);
+    EXPECT_EQ(collaborationSwitch.pcLiveView_, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+ 
+    // "collaborationSwitch" object contain switch.
+    jsonObject = {{"collaborationSwitch",
+        {{"pcLiveView", 0}, {"pcNotification", 1}, {"tabletLiveView", 0}, {"tabletNotification", 1}}
+    }};
+    collaborationSwitch.FromJson(jsonObject);
+    EXPECT_EQ(collaborationSwitch.pcLiveView_, NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+    EXPECT_EQ(collaborationSwitch.pcNotification_, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
 }
 }
 }

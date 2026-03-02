@@ -1373,7 +1373,8 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledByBundle_0100, TestSi
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType";
 
-    ErrCode res = NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundleOption, deviceType, true);
+    ErrCode res = NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundleOption,
+        deviceType, true, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     EXPECT_EQ(res, ERR_OK);
 }
 
@@ -1388,7 +1389,7 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledByBundle_0200, TestSi
     std::string deviceType = "testDeviceType";
 
     ErrCode res = NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundleOption,
-        deviceType, true);
+        deviceType, true, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
 }
 
@@ -1401,9 +1402,9 @@ HWTEST_F(NotificationPreferencesTest, IsDistributedEnabledByBundle_0100, TestSiz
 {
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType1111";
-    bool enable = true;
+    int32_t enable;
     ErrCode result = NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(bundleOption,
-        deviceType, enable);
+        deviceType, true, enable);
     EXPECT_EQ(result, ERR_OK);
 }
 
@@ -1416,9 +1417,9 @@ HWTEST_F(NotificationPreferencesTest, IsDistributedEnabledByBundle_0200, TestSiz
 {
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("", 1));
     std::string deviceType = "testDeviceType1111";
-    bool enable = true;
+    int32_t enable;
     ErrCode result = NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(bundleOption,
-        deviceType, enable);
+        deviceType, true, enable);
     EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
 }
 
@@ -2029,7 +2030,7 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledForBundle_0100, TestS
 
 /**
  * @tc.name: SetDistributedEnabledForBundle_0200
- * @tc.desc: test SetDistributedEnabledForBundle.
+ * @tc.desc: test Set Distributed Enabled For Bundle.
  * @tc.type: FUNC
  */
 HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledForBundle_0200, TestSize.Level1)
@@ -2042,11 +2043,11 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledForBundle_0200, TestS
     std::string deviceType = "deviceTypeC";
     notificationPreferences.mirrorNotificationEnabledStatus_.push_back(deviceType);
     notificationPreferences.SetDistributedEnabledForBundle(bundleInfo);
-    bool isDistributedEnabled = false;
+    int32_t enable;
     auto ret = notificationPreferences.preferncesDB_->GetDistributedEnabledForBundle(
-        deviceType, bundleInfo, isDistributedEnabled);
+        deviceType, true, bundleInfo, enable);
     EXPECT_TRUE(ret);
-    EXPECT_TRUE(isDistributedEnabled);
+    EXPECT_EQ(enable, static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON));
 }
 
 /**

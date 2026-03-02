@@ -117,7 +117,8 @@ private:
         {
             isCallback_ = true;
         }
-        void OnApplicationInfoNeedChanged(const std::string& bundleName) override
+        void OnApplicationInfoNeedChanged(
+            const std::shared_ptr<NotificationApplicationChangeInfo>& applicationChangeInfo) override
         {
             isCallback_ = true;
         }
@@ -1204,7 +1205,8 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyApplicationInfoNeedChanged_001
     info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
-    notificationSubscriberManager.NotifyApplicationInfoNeedChanged("test");
+    sptr<NotificationApplicationChangeInfo> changeInfo = new (std::nothrow) NotificationApplicationChangeInfo();
+    notificationSubscriberManager.NotifyApplicationInfoNeedChanged(changeInfo);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
@@ -1225,7 +1227,8 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyApplicationInfoNeedChanged_Sub
     info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
-    notificationSubscriberManager.NotifyApplicationInfoNeedChanged("test");
+    sptr<NotificationApplicationChangeInfo> changeInfo = new (std::nothrow) NotificationApplicationChangeInfo();
+    notificationSubscriberManager.NotifyApplicationInfoNeedChanged(changeInfo);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);

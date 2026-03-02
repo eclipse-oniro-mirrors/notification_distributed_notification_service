@@ -82,8 +82,6 @@ private:
         const sptr<NotificationRequest> &request,
         vector<shared_ptr<ReminderAffected>> &reminderAffecteds) const;
     void GetDeviceStatusByType(const string &deviceType, bitset<DistributedDeviceStatus::STATUS_SIZE> &bitStatus) const;
-    bool IsNeedSynergy(const NotificationConstant::SlotType &slotType,
-        const string &deviceType, const string &ownerBundleName, int32_t ownerUid) const;
     bool GetAppSwitch(const string &deviceType, const string &ownerBundleName, int32_t ownerUid) const;
     bool GetSmartSwitch(const string &deviceType) const;
     bool GetDistributedSwitch(const string &deviceType) const;
@@ -94,6 +92,12 @@ private:
     void InitThirdPartyWearableDevices(set<string> &syncDevices, const sptr<NotificationRequest> &request) const;
 #endif
 #ifdef ALL_SCENARIO_COLLABORATION
+    bool GetCollaborationBundleInfo(const std::string& bundleName, int32_t userId, AppExecFwk::ApplicationInfo& appInfo,
+        AppExecFwk::BundleResourceInfo& bundleResourceInfo) const;
+    bool CheckPcPadCollaborationForDevice(const std::string& deviceType, const std::string& deviceId,
+        const std::string& bundleName, int32_t userId, const AppExecFwk::BundleResourceInfo bundleResourceInfo) const;
+    bool CheckPcPadCollaborationForApplication(const sptr<NotificationRequest> &request, const std::string& deviceType,
+        const std::string& deviceId, const AppExecFwk::BundleResourceInfo bundleResourceInfo) const;
     void InitPcPadDevices(const string &deviceType,
         set<string> &syncDevices, set<string> &smartDevices,
         map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,

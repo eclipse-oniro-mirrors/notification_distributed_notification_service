@@ -379,7 +379,7 @@ namespace Notification {
         service->RemoveNotifications(keys, fuzzData->ConsumeIntegral<int32_t>());
         service->SetBadgeNumberByBundle(bundleOption, fuzzData->ConsumeIntegral<int32_t>());
         service->SetDistributedEnabledByBundle(bundleOption, fuzzData->ConsumeRandomLengthString(),
-            fuzzData->ConsumeBool());
+            fuzzData->ConsumeBool(), fuzzData->ConsumeBool());
         service->IsDistributedEnableByBundle(bundleOption, enable);
         service->SetDefaultNotificationEnabled(bundleOption, enabled);
         service->ExcuteCancelAll(bundleOption, fuzzData->ConsumeIntegral<int32_t>());
@@ -401,7 +401,9 @@ namespace Notification {
         service->RemoveNotificationFromRecordList(recordList);
         service->UpdateUnifiedGroupInfo(key1, groupInfo);
         service->PublishNotificationBySa(request);
-        service->IsDistributedEnabledByBundle(bundleOption, deviceType, enabled);
+        bool notifictaion = fuzzData->ConsumeBool();
+        int32_t enabledType = fuzzData->ConsumeIntegral<int32_t>();
+        service->IsDistributedEnabledByBundle(bundleOption, deviceType, notifictaion, enabledType);
         service->DuplicateMsgControl(request);
         service->DeleteDuplicateMsgs(bundleOption);
         service->RemoveExpiredUniqueKey();
