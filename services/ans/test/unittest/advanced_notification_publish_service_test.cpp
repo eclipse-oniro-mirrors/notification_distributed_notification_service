@@ -3319,5 +3319,38 @@ HWTEST_F(AnsPublishServiceTest, AtomicServicePublish_0200, Function | MediumTest
     auto ret = advancedNotificationService_->Publish("", request);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
+
+/**
+ * @tc.name: RemoveAllNotificationsByBundleName_00002
+ * @tc.desc: Test RemoveAllNotificationsByBundleName, except is notificationList_ == 1
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RemoveAllNotificationsByBundleName_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    auto record1 = std::make_shared<NotificationRecord>();
+    record1->request = request;
+    record1->notification = notification;
+    record1->bundleOption = bundle;
+    advancedNotificationService_->notificationList_.push_back(record1);
+    auto record2 = nullptr;
+    advancedNotificationService_->notificationList_.push_back(record2);
+    std::string bundleName = TEST_DEFUALT_BUNDLE;
+    int32_t reason = 0;
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
+    int32_t userId = 100;
+    MockGetOsAccountLocalIdFromUid(false, 1);
+    auto ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason, 100);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
+    MockGetOsAccountLocalIdFromUid(true, 1);
+    ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason, 100);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
+    MockGetOsAccountLocalIdFromUid(true, 3);
+    ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason, 100);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
 }  // namespace Notification
 }  // namespace OHOS
