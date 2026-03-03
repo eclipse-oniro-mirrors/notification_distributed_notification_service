@@ -142,6 +142,23 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundle_0400, Function |
 }
 
 /**
+ * @tc.name: SetPriorityEnabledByBundle_0500
+ * @tc.desc: Test SetPriorityEnabledByBundle param ERR_ANS_INVALID_BUNDLE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundle_0500, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    bundleOption->SetBundleName("bundleName");
+    bundleOption->SetUid(2000);
+    EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundle(bundleOption, 2),
+        ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
  * @tc.name: IsPriorityEnabledByBundle_0100
  * @tc.desc: Test IsPriorityEnabledByBundle return ERR_ANS_PERMISSION_DENIED.
  * @tc.type: FUNC
@@ -220,6 +237,23 @@ HWTEST_F(PriorityManagerServiceTest, SetBundlePriorityConfig_0300, Function | Sm
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     bundleOption->SetBundleName("testBundleName");
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetBundlePriorityConfig(bundleOption, "keyword1\nkeyword2"),
+        ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: SetBundlePriorityConfig_0400
+ * @tc.desc: Test SetBundlePriorityConfig param ERR_ANS_INVALID_BUNDLE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityManagerServiceTest, SetBundlePriorityConfig_0400, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    bundleOption->SetBundleName("bundleName");
+    bundleOption->SetUid(2000);
+    EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetBundlePriorityConfig(bundleOption, ""),
         ERR_ANS_INVALID_BUNDLE);
 }
 
