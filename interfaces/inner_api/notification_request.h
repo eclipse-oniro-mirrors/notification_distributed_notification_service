@@ -1574,6 +1574,8 @@ public:
 
     bool CollaborationToJson(std::string& data) const;
 
+    bool CollaborationGroupInfoToJson(nlohmann::json jsonObject) const;
+
     static NotificationRequest *CollaborationFromJson(const std::string& basicInfo);
 
     static bool ConvertJsonToTemplate(NotificationRequest *target, const nlohmann::json &jsonObject);
