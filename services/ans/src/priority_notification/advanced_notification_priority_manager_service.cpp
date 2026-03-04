@@ -78,6 +78,12 @@ ErrCode AdvancedNotificationService::SetPriorityEnabledByBundle(
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_INVALID_BUNDLE;
     }
+    std::string bundleName = BundleManagerHelper::GetInstance()->GetBundleNameByUid(bundle->GetUid());
+    if (bundleName.empty() || bundleName != bundle->GetBundleName()) {
+        ANS_LOGW("Invalid bundleOption name: %{public}s not match uid: %{public}s-%{public}d.",
+            bundle->GetBundleName().c_str(), bundleName.c_str(), bundle->GetUid());
+        return ERR_ANS_INVALID_BUNDLE;
+    }
     if (enableStatusInt < static_cast<int32_t>(NotificationConstant::PriorityEnableStatus::DISABLE) ||
         enableStatusInt > static_cast<int32_t>(NotificationConstant::PriorityEnableStatus::ENABLE)) {
         ANS_LOGE("EnableStatus out of range %{public}d.", enableStatusInt);
@@ -198,6 +204,12 @@ ErrCode AdvancedNotificationService::SetBundlePriorityConfig(
         message.Message("bundle: " + bundleOption->GetBundleName() + ", id: " + std::to_string(bundleOption->GetUid()));
         message.ErrorCode(ERR_ANS_INVALID_BUNDLE).Append(" bundle name is empty");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    std::string bundleName = BundleManagerHelper::GetInstance()->GetBundleNameByUid(bundle->GetUid());
+    if (bundleName.empty() || bundleName != bundle->GetBundleName()) {
+        ANS_LOGW("Invalid bundleOption name: %{public}s not match uid: %{public}s-%{public}d.",
+            bundle->GetBundleName().c_str(), bundleName.c_str(), bundle->GetUid());
         return ERR_ANS_INVALID_BUNDLE;
     }
     return SetBundlePriorityConfigInner(bundle, value);
