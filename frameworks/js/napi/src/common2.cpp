@@ -125,5 +125,37 @@ napi_value Common::GetNotificationFlags(const napi_env &env, const napi_value &v
 
     return NapiGetNull(env);
 }
+
+napi_value Common::SetNotificationSettings(const napi_env &env, uint32_t slotFlags, napi_value &result)
+{
+    ANS_LOGD("called");
+
+    napi_value value = nullptr;
+    // vibrationEnabled: boolean
+    napi_get_boolean(env, slotFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG, &value);
+    napi_set_named_property(env, result, "vibrationEnabled", value);
+
+    // soundEnabled: boolean
+    napi_get_boolean(env, slotFlags & NotificationConstant::ReminderFlag::SOUND_FLAG, &value);
+    napi_set_named_property(env, result, "soundEnabled", value);
+
+    // lockScreenEnabled: boolean
+    napi_get_boolean(env, slotFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, &value);
+    napi_set_named_property(env, result, "lockScreenEnabled", value);
+
+    // bannerEnabled: boolean
+    napi_get_boolean(env, slotFlags & NotificationConstant::ReminderFlag::BANNER_FLAG, &value);
+    napi_set_named_property(env, result, "bannerEnabled", value);
+
+    // badgeNumberEnabled: boolean
+    napi_get_boolean(env, slotFlags & NotificationConstant::ReminderFlag::BADGENUMBER_SHOW_FLAG, &value);
+    napi_set_named_property(env, result, "badgeNumberEnabled", value);
+
+    // notificationEnabled: boolean
+    napi_get_boolean(env, slotFlags & NotificationConstant::ReminderFlag::NOTIFICATION_FLAG, &value);
+    napi_set_named_property(env, result, "notificationEnabled", value);
+
+    return NapiGetBoolean(env, true);
+}
 }  // namespace NotificationNapi
 }  // namespace OHOS

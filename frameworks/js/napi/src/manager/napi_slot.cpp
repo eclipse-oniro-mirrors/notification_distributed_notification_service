@@ -999,15 +999,9 @@ void AsyncCompleteCallbackNapiGetNotificationSettings(napi_env env, napi_status 
     if (asynccallbackinfo) {
         napi_value result = Common::NapiGetNull(env);
         napi_create_object(env, &result);
-        bool soundEnabled = asynccallbackinfo->slotFlags & NotificationConstant::ReminderFlag::SOUND_FLAG;
-        bool vibrationEnabled = asynccallbackinfo->slotFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG;
-        napi_value vibrationValue;
-        napi_value soundValue;
-        napi_get_boolean(env, vibrationEnabled, &vibrationValue);
-        napi_get_boolean(env, soundEnabled, &soundValue);
-
-        napi_set_named_property(env, result, "vibrationEnabled", vibrationValue);
-        napi_set_named_property(env, result, "soundEnabled", soundValue);
+        if (!Common::SetNotificationSettings(env, asynccallbackinfo->slotFlags, result)) {
+            asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        }
         Common::CreateReturnValue(env, asynccallbackinfo->info, result);
         if (asynccallbackinfo->info.callback != nullptr) {
             ANS_LOGD("Delete NapiGetNotificationSettings callback reference.");
