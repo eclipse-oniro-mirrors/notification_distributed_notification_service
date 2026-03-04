@@ -7098,6 +7098,26 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationByFilterTest_0100, Functi
     EXPECT_EQ(ERR_OK, result);
 }
 
+/*
+ * @tc.name: GetNotificationParameters_100
+ * @tc.desc: test GetNotificationParameters function
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, GetNotificationParameters_100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(true);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+
+    int32_t notificationId = 0;
+    std::string label = "label";
+    sptr<NotificationParameters> parameters = nullptr;
+    int32_t result = proxy->GetNotificationParameters(notificationId, label, parameters);
+    EXPECT_EQ(ERR_OK, result);
+}
+
 /**
  * @tc.name: AddDoNotDisturbProfiles_0200
  * @tc.desc: test AddDoNotDisturbProfiles when WriteInterfaceToken return false.

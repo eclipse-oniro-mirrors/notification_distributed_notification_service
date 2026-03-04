@@ -25,6 +25,7 @@
 #include "enabled_notification_callback_data.h"
 #include "notification_extension_subscription_info.h"
 #include "notification_live_view_content.h"
+#include "notification_parameters.h"
 #include "notification_request.h"
 #include "notification_slot.h"
 #include "notification_sorting_map.h"
@@ -714,6 +715,17 @@ public:
      */
     static ErrCode GetActiveNotificationByFilter(
         const LiveViewFilter &filter, sptr<NotificationRequest> &request);
+
+    /**
+     * @brief Get notification parameters by id and label.
+     *
+     * @param notificationId Notification id.
+     * @param label Notification label.
+     * @param parameters Notification parameters to return.
+     * @return Returns ERR_OK on success, error code on failure.
+     */
+    static ErrCode GetNotificationParameters(
+        int32_t notificationId, const std::string &label, sptr<NotificationParameters> &parameters);
 
     /**
      * @brief Checks whether a specified application has the permission to publish notifications. If bundle specifies

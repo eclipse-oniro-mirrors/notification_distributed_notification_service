@@ -366,6 +366,13 @@ ErrCode NotificationHelper::GetActiveNotificationByFilter(
     return DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotificationByFilter(filter, request);
 }
 
+ErrCode NotificationHelper::GetNotificationParameters(int32_t notificationId, const std::string &label,
+    sptr<NotificationParameters> &parameters)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationParameters(
+        notificationId, label, parameters);
+}
+
 ErrCode NotificationHelper::IsAllowedNotify(const NotificationBundleOption &bundleOption, bool &allowed)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotify(bundleOption, allowed);

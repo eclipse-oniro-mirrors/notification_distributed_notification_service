@@ -28,6 +28,7 @@
 #include "napi_enable_notification.h"
 #include "napi_geofence_enabled.h"
 #include "napi_get_active.h"
+#include "napi_get_notification_parameters.h"
 #include "napi_publish.h"
 #include "napi_remove_group.h"
 #include "napi_ringtone_info_by_bundle.h"
@@ -111,6 +112,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setRingtoneInfoByBundle", NapiSetRingtoneInfoByBundle),
         DECLARE_NAPI_FUNCTION("getRingtoneInfoByBundle", NapiGetRingtoneInfoByBundle),
         DECLARE_NAPI_FUNCTION("getReminderInfoByBundles", NapiGetReminderInfoByBundles),
+        DECLARE_NAPI_FUNCTION("getNotificationParameters", NapiGetNotificationParameters),
         DECLARE_NAPI_FUNCTION("setGeofenceEnabled", NapiSetGeofenceEnabled),
         DECLARE_NAPI_FUNCTION("isGeofenceEnabled", NapiIsGeofenceEnabled),
         DECLARE_NAPI_FUNCTION("setReminderInfoByBundles", NapiSetReminderInfoByBundles),

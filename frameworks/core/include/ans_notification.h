@@ -25,6 +25,7 @@
 #include "ians_manager.h"
 #include "notification_extension_subscription_info.h"
 #include "notification_local_live_view_subscriber.h"
+#include "notification_parameters.h"
 #include "notification_subscriber.h"
 #include "want_params.h"
 #include "distributed_bundle_option.h"
@@ -671,6 +672,17 @@ public:
      */
     ErrCode GetActiveNotificationByFilter(
         const LiveViewFilter &filter, sptr<NotificationRequest> &request);
+
+    /**
+     * @brief Get notification parameters by id and label.
+     *
+     * @param notificationId Notification id.
+     * @param label Notification label.
+     * @param parameters Notification parameters to parameters.
+     * @return Returns ERR_OK on success, error code on failure.
+     */
+    ErrCode GetNotificationParameters(
+        int32_t notificationId, const std::string &label, sptr<NotificationParameters> &parameters);
 
     /**
      * @brief Checks whether a specified application has the permission to publish notifications. If bundle specifies

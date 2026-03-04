@@ -4278,6 +4278,54 @@ HWTEST_F(AdvancedNotificationServiceTest, GetActiveNotificationByFilter_0001, Fu
 }
 
 /**
+ * @tc.number    : GetNotificationParameters_100
+ * @tc.desc      : Test GetNotificationParameters.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetNotificationParameters_100, Function | SmallTest | Level1)
+{
+    int32_t notificationId = 1;
+    std::string label = "GetNotificationParameters's label";
+    sptr<NotificationParameters> parameters = nullptr;
+    ASSERT_EQ(advancedNotificationService_->GetNotificationParameters(notificationId, label, parameters),
+        (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
+ * @tc.number    : GetNotificationParameters_200
+ * @tc.desc      : Test GetNotificationParameters.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetNotificationParameters_200, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::OTHER);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), true), (int)ERR_OK);
+    int32_t notificationId = 2;
+    std::string label = "testLabel";
+    sptr<NotificationRequest> req = new NotificationRequest(notificationId);
+    req->SetSlotType(NotificationConstant::OTHER);
+    req->SetLabel(label);
+    req->SetUnremovable(true);
+    req->SetCreatorUid(1);
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    want->SetUri("testUri");
+    want->SetAction("testAction");
+    want->SetParam("testParam", false);
+    std::shared_ptr<AbilityRuntime::WantAgent::LocalPendingWant> localPendingWant =
+        std::make_shared<AbilityRuntime::WantAgent::LocalPendingWant>("TestBundleName", want, 0);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>(localPendingWant);
+    EXPECT_NE(wantAgent, nullptr);
+    req->SetWantAgent(wantAgent);
+    EXPECT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
+    sptr<NotificationParameters> parameters = nullptr;
+    EXPECT_EQ(advancedNotificationService_->GetNotificationParameters(notificationId, label, parameters),
+        (int)ERR_OK);
+    EXPECT_EQ(parameters->GetWantAction(), "testAction");
+}
+
+/**
  * @tc.number    : IsAllowedRemoveSlot_0001
  * @tc.name      : IsAllowedRemoveSlot
  * @tc.desc      : Test IsAllowedRemoveSlot and slotType is not liveView.
