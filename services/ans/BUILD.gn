@@ -343,6 +343,12 @@ ohos_shared_library("libans") {
 
   defines = []
 
+  ldflags = [
+    "-flto",
+    "-Wl,--gc-sections",
+    "-Wl,-Bsymbolic",
+  ]
+
   if (is_double_framework) {
     cflags += [ "-DCONFIG_DUAL_FRAMEWORK" ]
   }
@@ -367,7 +373,7 @@ ohos_shared_library("libans") {
     }
     if (distributed_notification_service_feature_enable_pgo && target_cpu == "arm64" &&
         enable_enhanced_opt) {
-      ldflags = [ "-Wl,--aarch64-inline-plt" ]
+      ldflags += [ "-Wl,--aarch64-inline-plt" ]
     }
   }
 
