@@ -40,11 +40,13 @@ NotificationExtensionService::NotificationExtensionService()
 }
 
 int32_t NotificationExtensionService::InitService(std::function<void()> shutdownCallback,
-    std::function<void(uint32_t, uint32_t, int32_t, std::string)> haReportCallback)
+    std::function<void(uint32_t, uint32_t, int32_t, std::string)> haReportCallback,
+    std::function<bool()> isPCModeCallback)
 {
     ANS_LOGD("NotificationExtensionService::InitService");
     shutdownCallback_ = shutdownCallback;
     haReportCallback_ = haReportCallback;
+    isPCModeCallback_ = isPCModeCallback;
     ExtensionServiceConnectionService::GetInstance().SetOnAllConnectionsClosed([this]() {
         ANS_LOGD("onAllConnectionsClosed");
         if (serviceQueue_ == nullptr) {
@@ -111,6 +113,14 @@ void NotificationExtensionService::SendHaReport(
     if (haReportCallback_) {
         haReportCallback_(scene, branchId, errorCode, message);
     }
+}
+
+bool NotificationExtensionService::IsPCModeEnabled() const
+{
+    if (isPCModeCallback_) {
+        return isPCModeCallback_();
+    }
+    return false;
 }
 }
 }

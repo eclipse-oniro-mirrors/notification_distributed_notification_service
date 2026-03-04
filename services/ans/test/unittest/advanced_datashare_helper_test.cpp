@@ -59,7 +59,7 @@ HWTEST_F(AdvancedDatashareHelperTest, UnregisterObserver_0001, Function | SmallT
     int32_t userId = 101;
     size_t dataObserversSize = advancedDatashareHelper.dataObservers_.size();
     advancedDatashareHelper.OnUserSwitch(userId);
-    EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), dataObserversSize + 5);
+    EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), dataObserversSize + 6);
     advancedDatashareHelper.UnregisterObserver();
     EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), 0);
 }
@@ -92,7 +92,7 @@ HWTEST_F(AdvancedDatashareHelperTest, Init_0001, Function | SmallTest | Level1)
     AdvancedDatashareHelper::SetIsDataShareReady(true);
     AdvancedDatashareHelper advancedDatashareHelper;
     advancedDatashareHelper.Init();
-    EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), 5);
+    EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), 6);
 }
 
 // Test cases
@@ -323,5 +323,159 @@ HWTEST_F(AdvancedDatashareHelperTest, isRepeatCall_0001, Function | SmallTest | 
     ret = advancedDatashareHelper.isRepeatCall(phoneNumber);
     EXPECT_EQ(ret, 0);
 }
+
+/**
+ * @tc.name: IsPCModeEnabled_001
+ * @tc.desc: Test IsPCModeEnabled returns initial false value
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, IsPCModeEnabled_001, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+    AdvancedDatashareHelper advancedDatashareHelper;
+    
+    bool result = advancedDatashareHelper.IsPCModeEnabled();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsPCModeEnabled_002
+ * @tc.desc: Test IsPCModeEnabled returns true after setting
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, IsPCModeEnabled_002, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+    AdvancedDatashareHelper advancedDatashareHelper;
+    
+    advancedDatashareHelper.isPCModeEnabled_.store(true);
+    bool result = advancedDatashareHelper.IsPCModeEnabled();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsPCModeEnabled_003
+ * @tc.desc: Test IsPCModeEnabled toggles correctly
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, IsPCModeEnabled_003, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+    AdvancedDatashareHelper advancedDatashareHelper;
+    
+    EXPECT_FALSE(advancedDatashareHelper.IsPCModeEnabled());
+    
+    advancedDatashareHelper.isPCModeEnabled_.store(true);
+    EXPECT_TRUE(advancedDatashareHelper.IsPCModeEnabled());
+    
+    advancedDatashareHelper.isPCModeEnabled_.store(false);
+    EXPECT_FALSE(advancedDatashareHelper.IsPCModeEnabled());
+}
+
+/**
+ * @tc.name: GetPCModeUri_001
+ * @tc.desc: Test GetPCModeUri returns correct URI format
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, GetPCModeUri_001, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+    AdvancedDatashareHelper advancedDatashareHelper;
+    
+    int32_t userId = 100;
+    std::string uri = advancedDatashareHelper.GetPCModeUri(userId);
+    
+    EXPECT_FALSE(uri.empty());
+    EXPECT_TRUE(uri.find("settings.sceneboard.ispcmode") != std::string::npos);
+    EXPECT_TRUE(uri.find(std::to_string(userId)) != std::string::npos);
+}
+
+/**
+ * @tc.name: GetPCModeUri_002
+ * @tc.desc: Test GetPCModeUri with different user IDs
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, GetPCModeUri_002, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+    AdvancedDatashareHelper advancedDatashareHelper;
+    
+    std::string uri1 = advancedDatashareHelper.GetPCModeUri(0);
+    std::string uri2 = advancedDatashareHelper.GetPCModeUri(100);
+    std::string uri3 = advancedDatashareHelper.GetPCModeUri(999);
+    
+    EXPECT_TRUE(uri1.find("0") != std::string::npos);
+    EXPECT_TRUE(uri2.find("100") != std::string::npos);
+    EXPECT_TRUE(uri3.find("999") != std::string::npos);
+}
+
+/**
+ * @tc.name: Init_001
+ * @tc.desc: Test Init registers PC mode observer
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, Init_001, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+    AdvancedDatashareHelper advancedDatashareHelper;
+    
+    advancedDatashareHelper.Init();
+    
+    EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), 6);
+}
+
+/**
+ * @tc.name: OnUserSwitch_001
+ * @tc.desc: Test OnUserSwitch registers PC mode observer for new user
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, OnUserSwitch_001, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+    AdvancedDatashareHelper advancedDatashareHelper;
+    
+    int32_t userId = 200;
+    size_t initialSize = advancedDatashareHelper.dataObservers_.size();
+    
+    advancedDatashareHelper.OnUserSwitch(userId);
+    
+    EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), initialSize + 6);
+}
+
+/**
+ * @tc.name: OnUserSwitch_002
+ * @tc.desc: Test OnUserSwitch does not duplicate observer for existing user
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, OnUserSwitch_002, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+    AdvancedDatashareHelper advancedDatashareHelper;
+    
+    int32_t userId = 100;
+    advancedDatashareHelper.OnUserSwitch(userId);
+    size_t sizeAfterFirst = advancedDatashareHelper.dataObservers_.size();
+    
+    advancedDatashareHelper.OnUserSwitch(userId);
+    
+    EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), sizeAfterFirst);
+}
+
 }
 }

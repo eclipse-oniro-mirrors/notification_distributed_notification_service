@@ -37,6 +37,12 @@ void AdvancedDatashareHelperDataObserver::OnChange()
     for (std::string key : keys_) {
         std::string value;
         datashareHelper->QueryByDataShare(uri_, key, value);
+
+        if (key == "settings.sceneboard.ispcmode") {
+            bool isPCMode = (value == "true");
+            ANS_LOGI("PC mode changed to %{public}s", isPCMode ? "true" : "false");
+            datashareHelper->SetPCModeEnabled(isPCMode);
+        }
     }
 }
 
