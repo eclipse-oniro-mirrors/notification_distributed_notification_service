@@ -107,7 +107,7 @@ NotificationGroupInfo *NotificationGroupInfo::FromJson(const nlohmann::json &jso
 
     auto *pGroupInfo = new (std::nothrow) NotificationGroupInfo();
     if (pGroupInfo == nullptr) {
-        ANS_LOGE("null pBundle");
+        ANS_LOGE("null pGroupInfo");
         return nullptr;
     }
 

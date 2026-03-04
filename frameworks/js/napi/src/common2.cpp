@@ -132,7 +132,7 @@ napi_value Common::GetNotificationGroupInfo(
     ANS_LOGD("Called.");
     napi_valuetype valuetype = napi_undefined;
     napi_value groupInfoObj = nullptr;
-    napi_value groupInfoPramaObj = nullptr;
+    napi_value groupInfoParamObj = nullptr;
     bool hasProperty = false;
     NAPI_CALL(env, napi_has_named_property(env, value, "groupInfo", &hasProperty));
     if (hasProperty) {
@@ -146,21 +146,21 @@ napi_value Common::GetNotificationGroupInfo(
         std::shared_ptr<NotificationGroupInfo> groupInfo = std::make_shared<NotificationGroupInfo>();
         NAPI_CALL(env, napi_has_named_property(env, groupInfoObj, "isGroupIcon", &hasProperty));
         if (hasProperty) {
-            napi_get_named_property(env, groupInfoObj, "isGroupIcon", &groupInfoPramaObj);
-            NAPI_CALL(env, napi_typeof(env, groupInfoPramaObj, &valuetype));
+            napi_get_named_property(env, groupInfoObj, "isGroupIcon", &groupInfoParamObj);
+            NAPI_CALL(env, napi_typeof(env, groupInfoParamObj, &valuetype));
             if (valuetype != napi_boolean) {
                 std::string msg = "Incorrect parameter types. The type of isGroupIcon must be boolean.";
                 Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
                 return nullptr;
             }
             bool isGroupIcon = false;
-            NAPI_CALL(env, napi_get_value_bool(env, groupInfoPramaObj, &isGroupIcon));
+            NAPI_CALL(env, napi_get_value_bool(env, groupInfoParamObj, &isGroupIcon));
             groupInfo->SetIsGroupIcon(isGroupIcon);
         }
         NAPI_CALL(env, napi_has_named_property(env, groupInfoObj, "groupTitle", &hasProperty));
         if (hasProperty) {
-            napi_get_named_property(env, groupInfoObj, "groupTitle", &groupInfoPramaObj);
-            NAPI_CALL(env, napi_typeof(env, groupInfoPramaObj, &valuetype));
+            napi_get_named_property(env, groupInfoObj, "groupTitle", &groupInfoParamObj);
+            NAPI_CALL(env, napi_typeof(env, groupInfoParamObj, &valuetype));
             if (valuetype != napi_string) {
                 std::string msg = "Incorrect parameter types. The type of groupTitle must be string.";
                 Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
@@ -168,7 +168,7 @@ napi_value Common::GetNotificationGroupInfo(
             }
             char groupTitle[STR_MAX_SIZE] = {0};
             size_t strLen = 0;
-            NAPI_CALL(env, napi_get_value_string_utf8(env, groupInfoPramaObj, groupTitle, STR_MAX_SIZE - 1, &strLen));
+            NAPI_CALL(env, napi_get_value_string_utf8(env, groupInfoParamObj, groupTitle, STR_MAX_SIZE - 1, &strLen));
             groupInfo->SetGroupTitle(groupTitle);
         }
         request.SetGroupInfo(groupInfo);

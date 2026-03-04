@@ -936,7 +936,7 @@ bool NotificationRequest::CollaborationToJson(std::string& data) const
     if (groupInfo_ != nullptr) {
         nlohmann::json groupInfoObj;
         if (!NotificationJsonConverter::ConvertToJson(groupInfo_.get(), groupInfoObj)) {
-            ANS_LOGE("Cannot convert agentBundle to JSON.");
+            ANS_LOGE("Cannot convert groupInfo to JSON.");
             return false;
         }
         jsonObject["groupInfo"] = groupInfoObj;
