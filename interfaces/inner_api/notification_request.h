@@ -33,6 +33,7 @@
 #include "notification_bundle_option.h"
 #include "notification_trigger.h"
 #include "notification_unified_group_Info.h"
+#include "notification_group_info.h"
 #include <string>
 #include <map>
 
@@ -1494,6 +1495,20 @@ public:
     std::shared_ptr<NotificationUnifiedGroupInfo> GetUnifiedGroupInfo() const;
 
     /**
+     * @brief Sets the groupInfo of this notification.
+     *
+     * @param flags Indicates the groupInfo of this notification.
+     */
+    void SetGroupInfo(const std::shared_ptr<NotificationGroupInfo> &groupInfo);
+
+    /**
+     * @brief Obtains the groupInfo of the notification.
+     *
+     * @return Returns the groupInfo of the notification.
+     */
+    std::shared_ptr<NotificationGroupInfo> GetGroupInfo() const;
+
+    /**
      * @brief Sets the delay time of this notification.
      *
      * @param delayTime Indicates the delay time of this notification.
@@ -1562,6 +1577,8 @@ public:
     static NotificationRequest *CollaborationFromJson(const std::string& basicInfo);
 
     static bool ConvertJsonToTemplate(NotificationRequest *target, const nlohmann::json &jsonObject);
+
+    static bool ConvertJsonToGroupInfo(NotificationRequest *target, const nlohmann::json &jsonObject);
 
     bool IsAtomicServiceNotification();
 
@@ -1759,6 +1776,7 @@ private:
     std::shared_ptr<NotificationTrigger> notificationTrigger_ {};
     std::shared_ptr<NotificationUnifiedGroupInfo> unifiedGroupInfo_ {};
     std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> notificationFlagsOfDevices_ {};
+    std::shared_ptr<NotificationGroupInfo> groupInfo_ {};
 
     uint32_t publishDelayTime_ {0};
     std::string priorityNotificationType_ {NotificationConstant::PriorityNotificationType::OTHER};

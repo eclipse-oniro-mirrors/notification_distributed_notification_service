@@ -146,7 +146,8 @@ class SubscribeCallbackDataInner implements SubscribeCallbackData {
         notificationControlFlags: undefined,
         appInstanceKey: undefined,
         forceDistributed: undefined,
-        notDistributed: undefined
+        notDistributed: undefined,
+        groupInfo: undefined,
     };
     public readonly sortingMap?: NotificationSortingMap;
     public readonly reason?: int;

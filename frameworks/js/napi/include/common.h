@@ -641,6 +641,17 @@ public:
         const napi_env &env, const napi_value &value, NotificationRequest &request);
 
     /**
+     * @brief Gets the NotificationGroupInfo of NotificationRequest object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param request Indicates a NotificationRequest object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationGroupInfo(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
+
+    /**
      * @brief Gets a NotificationSubscribeInfo object from specified js object
      *
      * @param env Indicates the environment that the API is invoked under
@@ -1805,6 +1816,17 @@ public:
      */
     static napi_value SetNotificationFlags(
         const napi_env &env, const std::shared_ptr<NotificationFlags> &flags, napi_value &result);
+
+    /**
+     * @brief Sets a js object by specified NotificationGroupInfo object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param info Indicates a NotificationGroupInfo object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetNotificationGroupInfo(
+        const napi_env &env, const std::shared_ptr<NotificationGroupInfo> &info, napi_value &result);
 
     /**
      * @brief Sets a js object by specified NotificationUnifiedGroupInfo object
