@@ -155,6 +155,14 @@ ErrCode AdvancedNotificationService::UpdateNotificationTimerInfo(const std::shar
             // delete old, then add new
             CancelUpdateTimer(record);
             result = SetUpdateTimer(record);
+            if (result != ERR_OK) {
+                return result;
+            }
+            if (record->request->GetAutoDeletedTime() != NotificationConstant::INVALID_AUTO_DELETE_TIME) {
+                ANS_LOGI("Update finish time.");
+                CancelFinishTimer(record);
+                result = SetFinishTimer(record);
+            }
             return result;
 
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END:

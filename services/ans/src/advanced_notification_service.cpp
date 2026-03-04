@@ -549,9 +549,17 @@ ErrCode AdvancedNotificationService::StartFinishTimer(const std::shared_ptr<Noti
 
 ErrCode AdvancedNotificationService::SetFinishTimer(const std::shared_ptr<NotificationRecord> &record)
 {
-    int64_t maxExpiredTime = GetCurrentTime() + NotificationConstant::MAX_FINISH_TIME;
-    auto result = StartFinishTimer(record, maxExpiredTime,
-        NotificationConstant::TRIGGER_EIGHT_HOUR_REASON_DELETE);
+    int64_t finishTime = NotificationConstant::MAX_FINISH_TIME;
+    int32_t reason = NotificationConstant::TRIGGER_EIGHT_HOUR_REASON_DELETE;
+    int64_t autoDeletedTime = record->request->GetAutoDeletedTime();
+    if (autoDeletedTime != NotificationConstant::INVALID_AUTO_DELETE_TIME) {
+        finishTime = NotificationConstant::SECOND_TO_MS * autoDeletedTime;
+        reason = NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE;
+        record->request->SetAutoDeletedTime(NotificationConstant::INVALID_AUTO_DELETE_TIME);
+    }
+    ANS_LOGI("Set finish time %{public}s", std::to_string(finishTime).c_str());
+    int64_t maxExpiredTime = GetCurrentTime() + finishTime;
+    auto result = StartFinishTimer(record, maxExpiredTime, reason);
     if (result != ERR_OK) {
         return result;
     }

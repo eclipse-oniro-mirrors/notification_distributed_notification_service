@@ -773,5 +773,50 @@ HWTEST_F(AnsLiveViewServiceTest, StartFinishTimerForUpdate_200, Function | Small
 
     ASSERT_EQ(record->finish_status, AdvancedNotificationService::UploadStatus::CONTINUOUS_UPDATE_TIME_OUT);
 }
+
+/**
+ * @tc.name: SetFinishTimerForCommonLiveView_100
+ * @tc.desc: Test SetFinishTimer
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, SetFinishTimerForCommonLiveView_100, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    record->request->SetAutoDeletedTime(100);
+    ErrCode res = advancedNotificationService_->SetFinishTimer(record);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: UpdateNotificationTimerInfo_100
+ * @tc.desc: Test UpdateNotificationTimerInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, UpdateNotificationTimerInfo_100, Function | SmallTest | Level1)
+{
+    auto record = std::make_shared<NotificationRecord>();
+    NotificationRequest notificationRequest;
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+
+    record->request = sptr<NotificationRequest>::MakeSptr(notificationRequest);
+    record->request->SetAutoDeletedTime(20);
+    record->notification = new (std::nothrow) Notification(record->request);
+
+    auto result = advancedNotificationService_->UpdateNotificationTimerInfo(record);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_NE(record->request->GetFinishDeadLine(), 0);
+}
 }  // namespace Notification
 }  // namespace OHOS
