@@ -1292,6 +1292,11 @@ HWTEST_F(NotificationRequestTest, NotificationCollaboration_0100, Level1)
     notificationRequest.SetAlertOneTime(true);
     notificationRequest.SetUnremovable(true);
 
+    auto groupInfo = std::make_shared<NotificationGroupInfo>();
+    groupInfo->SetIsGroupIcon(true);
+    groupInfo->SetGroupTitle("groupTitle");
+    notificationRequest.SetGroupInfo(groupInfo);
+
     std::shared_ptr<AAFwk::WantParams> extras = std::make_shared<AAFwk::WantParams>();
     extras->SetParam("sys_traceid", AAFwk::String::Box("hi"));
     notificationRequest.SetAdditionalData(extras);
@@ -1446,6 +1451,43 @@ HWTEST_F(NotificationRequestTest, IsConsumedDevices_0001, Level1)
     EXPECT_FALSE(request.IsConsumedDevices(NotificationConstant::LITEWEARABLE_DEVICE_TYPE));
     EXPECT_FALSE(request.IsConsumedDevices(NotificationConstant::CURRENT_DEVICE_TYPE));
     EXPECT_FALSE(request.IsConsumedDevices(NotificationConstant::HEADSET_DEVICE_TYPE));
+}
+
+/**
+ * @tc.name:TestGroupInfo_001
+ * @tc.desc: Test NotificationGroupInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, TestGroupInfo_001, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest request(myNotificationId);
+    std::shared_ptr<NotificationGroupInfo> groupInfo = std::make_shared<NotificationGroupInfo>();
+    ASSERT_NE(groupInfo, nullptr);
+    groupInfo->SetIsGroupIcon(true);
+    groupInfo->SetGroupTitle("testTitle");
+    request.SetGroupInfo(groupInfo);
+    EXPECT_EQ(request.GetGroupInfo()->GetIsGroupIcon(), true);
+    EXPECT_EQ(request.GetGroupInfo()->GetGroupTitle(), "testTitle");
+}
+
+/**
+ * @tc.name:ConvertGroupInfoObjToJson_001
+ * @tc.desc: Test ConvertGroupInfoObjToJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, ConvertGroupInfoObjToJson_001, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest request(myNotificationId);
+    std::shared_ptr<NotificationGroupInfo> groupInfo = std::make_shared<NotificationGroupInfo>();
+    ASSERT_NE(groupInfo, nullptr);
+    groupInfo->SetIsGroupIcon(true);
+    groupInfo->SetGroupTitle("testTitle");
+    request.SetGroupInfo(groupInfo);
+
+    nlohmann::json jsonObject;
+    EXPECT_EQ(request.ConvertGroupInfoToJson(jsonObject), true);
 }
 } // namespace Notification
 } // namespace OHOS

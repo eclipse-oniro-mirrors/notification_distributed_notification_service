@@ -30,7 +30,7 @@ public:
 
     std::string GetGroupTitle() const;
 
-    void SetIsGroupIcon(const bool &isGroupIcon);
+    void SetIsGroupIcon(const bool isGroupIcon);
 
     bool GetIsGroupIcon() const;
 

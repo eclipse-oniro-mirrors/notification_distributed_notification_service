@@ -840,13 +840,13 @@ void GetNotificationGroupInfo(ani_env *env, ani_object obj,
     std::shared_ptr<OHOS::Notification::NotificationGroupInfo> groupInfo
         = std::make_shared<OHOS::Notification::NotificationGroupInfo>();
     bool isGroupIcon = false;
-    if (ANI_OK == GetPropertyBool(env, static_cast<ani_object>(groupInfoRef), "isGroupIcon", isUndefind, isGroupIcon) && 
-        isUndefind == ANI_FALSE) {
+    status = GetPropertyBool(env, static_cast<ani_object>(groupInfoRef), "isGroupIcon", isUndefind, isGroupIcon);
+    if (ANI_OK == status && isUndefind == ANI_FALSE) {
         groupInfo->SetIsGroupIcon(isGroupIcon);
     }
     std::string groupTitle = "";
-    if (ANI_OK == GetPropertyString(env, static_cast<ani_object>(groupInfoRef), "groupTitle", isUndefind, groupTitle) && 
-        isUndefind == ANI_FALSE) {
+    status = GetPropertyString(env, static_cast<ani_object>(groupInfoRef), "groupTitle", isUndefind, groupTitle);
+    if (ANI_OK == status && isUndefind == ANI_FALSE) {
         groupInfo->SetGroupTitle(GetResizeStr(groupTitle, STR_MAX_SIZE));
     }
     request->SetGroupInfo(groupInfo);
