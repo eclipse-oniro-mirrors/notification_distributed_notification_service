@@ -16,57 +16,59 @@
 #include "system_sound_helper.h"
 
 #include "ans_log_wrapper.h"
-#ifdef PLAYER_FRAMEWORK_ENABLE
-#include "media_errors.h"
-#endif
+#include "notifictaion_load_utils.h"
+#include <memory>
 
 namespace OHOS {
 namespace Notification {
-SystemSoundHelper::SystemSoundHelper()
-{
-}
-
-SystemSoundHelper::~SystemSoundHelper()
-{
-}
-
 #ifdef PLAYER_FRAMEWORK_ENABLE
-
-static const int32_t REMOVE_SUCCESS_COUNT = 1;
 static const int32_t MAX_RETRY_TIME = 2;
 static const uint64_t TASK_DELAY = 2 * 1000 * 1000;
+static const std::string DYNAMIC_LIB_PATH = "libans_dynamic_open.z.so";
+static const std::string REMOVE_TONC_FUNC_STR = "SystemSoundRemoveCustomizedTone";
+static const std::string REMOVE_TONC_LIST_FUNC_STR = "SystemSoundRemoveCustomizedToneList";
 
-void SystemSoundHelper::Connect()
+using REMOVE_TONE_FUNC = bool (*)(std::string);
+using REMOVE_TONE_LIST_FUNC = bool (*)(std::vector<std::string>);
+#endif
+
+ffrt::mutex SystemSoundHelper::instanceMutex_;
+std::shared_ptr<SystemSoundHelper> SystemSoundHelper::instance_;
+
+std::shared_ptr<SystemSoundHelper> SystemSoundHelper::GetInstance()
 {
-    if (systemSoundClient_ == nullptr) {
-        systemSoundClient_ = Media::SystemSoundManagerFactory::CreateSystemSoundManager();
+    if (instance_ == nullptr) {
+        std::lock_guard<ffrt::mutex> lock(instanceMutex_);
+        if (instance_ == nullptr) {
+            instance_ = std::make_shared<SystemSoundHelper>();
+        }
     }
-}
-
-int32_t SystemSoundHelper::InvokeRemoveCustomizedTone(const std::string uri, int32_t retry)
-{
-    if (uri.empty()) {
-        return REMOVE_SUCCESS_COUNT;
-    }
-
-    std::lock_guard<ffrt::mutex> lock(lock_);
-    Connect();
-    if (systemSoundClient_ == nullptr) {
-        ANS_LOGW("Get system clint failed.");
-        return -1;
-    }
-    int32_t result = systemSoundClient_->RemoveCustomizedTone(nullptr, uri);
-    ANS_LOGI("Remove Customized tone %{public}d, uri: %{public}s, result: %{public}d",
-        retry, uri.c_str(), result);
-    return result;
+    return instance_;
 }
 
 void SystemSoundHelper::RemoveCustomizedTone(const std::string uri)
 {
+#ifndef PLAYER_FRAMEWORK_ENABLE
+    ANS_LOGW("remove ringtone uri.");
+    return;
+#endif
+    if (uri.empty()) {
+        return;
+    }
+
     std::function<void()> retryTask = [uri]() {
         for (int32_t i = 0; i < MAX_RETRY_TIME; i++) {
-            auto result = SystemSoundHelper::GetInstance()->InvokeRemoveCustomizedTone(uri, i);
-            if (result == REMOVE_SUCCESS_COUNT) {
+            std::unique_ptr<NotificationLoadUtils> loadUtils =
+                std::make_unique<NotificationLoadUtils>(DYNAMIC_LIB_PATH);
+            if (loadUtils == nullptr || !loadUtils->IsValid()) {
+                continue;
+            }
+            REMOVE_TONE_FUNC removeToneFunc = (REMOVE_TONE_FUNC)loadUtils->GetProxyFunc(REMOVE_TONC_FUNC_STR);
+            if (removeToneFunc == nullptr) {
+                ANS_LOGW("AnsSystemSoundRemoveTone not available");
+                continue;
+            }
+            if (removeToneFunc(uri)) {
                 break;
             }
         }
@@ -76,6 +78,10 @@ void SystemSoundHelper::RemoveCustomizedTone(const std::string uri)
 
 void SystemSoundHelper::RemoveCustomizedTone(sptr<NotificationRingtoneInfo> ringtoneInfo)
 {
+#ifndef PLAYER_FRAMEWORK_ENABLE
+    ANS_LOGW("remove ringtone info.");
+    return;
+#endif
     if (ringtoneInfo == nullptr || (
         ringtoneInfo->GetRingtoneType() != NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL &&
         ringtoneInfo->GetRingtoneType() != NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE)) {
@@ -85,38 +91,16 @@ void SystemSoundHelper::RemoveCustomizedTone(sptr<NotificationRingtoneInfo> ring
     RemoveCustomizedTone(ringtoneInfo->GetRingtoneUri());
 }
 
-std::vector<std::pair<std::string, int32_t>> SystemSoundHelper::InvokeRemoveCustomizedTones(
-    const std::vector<std::string> uris, bool retry)
-{
-    std::vector<std::pair<std::string, int32_t>> invockResults;
-    if (uris.empty()) {
-        ANS_LOGI("Empty local or online info.");
-        return invockResults;
-    }
-
-    std::lock_guard<ffrt::mutex> lock(lock_);
-    Connect();
-    if (systemSoundClient_ == nullptr) {
-        ANS_LOGW("Get system clint failed.");
-        return invockResults;
-    }
-
-    Media::SystemSoundError error = Media::SystemSoundError::ERROR_OK;
-    auto results = systemSoundClient_->RemoveCustomizedToneList(uris, error);
-    for (auto item : results) {
-        ANS_LOGI("Remove Customized tone %{public}d, uri: %{public}s, result: %{public}d",
-            retry, item.first.c_str(), item.second);
-        invockResults.push_back(std::make_pair(item.first, item.second));
-    }
-    return invockResults;
-}
-
 void SystemSoundHelper::RemoveCustomizedTones(std::vector<NotificationRingtoneInfo> ringtoneInfos)
 {
+#ifndef PLAYER_FRAMEWORK_ENABLE
+    ANS_LOGW("remove ringtone info: %{public}zu.", ringtoneInfos.size());
+    return;
+#endif
     if (ringtoneInfos.empty()) {
         return;
     }
-
+    
     std::vector<std::string> uris;
     for (auto& ringtoneInfo : ringtoneInfos) {
         if (ringtoneInfo.GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL ||
@@ -125,40 +109,27 @@ void SystemSoundHelper::RemoveCustomizedTones(std::vector<NotificationRingtoneIn
         }
     }
 
+    if (uris.empty()) {
+        return;
+    }
+
     std::function<void()> retryTask = [uris]() {
-        auto results = SystemSoundHelper::GetInstance()->InvokeRemoveCustomizedTones(uris);
-        if (results.empty()) {
-            return;
-        }
-
-        std::vector<std::string> failedUris;
-        for (auto& item : results) {
-            if (item.second != Media::SystemSoundError::ERROR_OK) {
-                failedUris.push_back(item.first);
+        for (int32_t i = 0; i < MAX_RETRY_TIME; i++) {
+            std::unique_ptr<NotificationLoadUtils> loadUtils =
+                std::make_unique<NotificationLoadUtils>(DYNAMIC_LIB_PATH);
+            if (loadUtils == nullptr || !loadUtils->IsValid()) {
+                continue;
             }
-        }
-
-        if (!failedUris.empty()) {
-            SystemSoundHelper::GetInstance()->InvokeRemoveCustomizedTones(failedUris, true);
+            REMOVE_TONE_LIST_FUNC removeToneListFunc =
+                (REMOVE_TONE_LIST_FUNC)loadUtils->GetProxyFunc(REMOVE_TONC_LIST_FUNC_STR);
+            if (removeToneListFunc == nullptr) {
+                ANS_LOGW("AnsSystemSoundRemoveTone not available");
+                continue;
+            }
+            removeToneListFunc(uris);
         }
     };
     ffrt::submit(retryTask, ffrt::task_attr().delay(TASK_DELAY));
 }
-#else
-void SystemSoundHelper::RemoveCustomizedTone(const std::string uri)
-{
-    ANS_LOGW("remove ringtone uri.");
-}
-
-void SystemSoundHelper::RemoveCustomizedTone(sptr<NotificationRingtoneInfo> ringtoneInfo)
-{
-    ANS_LOGW("remove ringtone info.");
-}
-
-void SystemSoundHelper::RemoveCustomizedTones(std::vector<NotificationRingtoneInfo> ringtoneInfos)
-{
-    ANS_LOGW("remove ringtone info: %{public}zu.", ringtoneInfos.size());
-}
-#endif
 }  // namespace Notification
 }  // namespace OHOS
