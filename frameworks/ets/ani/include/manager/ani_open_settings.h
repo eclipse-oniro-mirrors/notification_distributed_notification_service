@@ -30,13 +30,16 @@ struct OpenSettingsInfo {
     int32_t errorCode = ANI_OK;
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = nullptr;
     ani_resolver resolver {};
+    bool isWithResult = false;
 };
 
 ani_object AniOpenNotificationSettings(ani_env *env, ani_object content);
+ani_object AniOpenNotificationSettingsWithResult(ani_env *env, ani_object content);
 bool GetOpenSettingsInfo(ani_env *env, ani_object content, std::shared_ptr<OpenSettingsInfo> &info);
 bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName,
     ani_env *env, std::shared_ptr<OpenSettingsInfo> &info);
 void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSettingsInfo> info);
+ani_object StsNotificationSettingResult(ani_env *env, std::shared_ptr<OpenSettingsInfo> info);
 
 using StsSettingsModalExtensionCallbackComplete = void(ani_env *env, std::shared_ptr<OpenSettingsInfo> info);
 void ProcessStatusChanged(int32_t code);

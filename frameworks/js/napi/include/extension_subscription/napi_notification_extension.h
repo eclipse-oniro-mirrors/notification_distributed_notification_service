@@ -54,6 +54,7 @@ struct AsyncCallbackInfoOpenSettings {
     napi_async_work asyncWork = nullptr;
     OpenSettingsParams params;
     CallbackPromiseInfo info;
+    bool isWithResult = false;
 };
 
 bool CreateSettingsUiExtensionSub(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName);
@@ -71,7 +72,9 @@ napi_value NapiGetUserGrantedEnabledBundles(napi_env env, napi_callback_info inf
 napi_value NapiSetUserGrantedBundleState(napi_env env, napi_callback_info info);
 napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_info &info, OpenSettingsParams &params);
 napi_value NapiNotificationExtensionOpenSubscriptionSettings(napi_env env, napi_callback_info info);
+napi_value NapiNotificationExtensionOpenSubscriptionSettingsWithResult(napi_env env, napi_callback_info info);
 napi_value NapiGetAllSubscriptionBundles(napi_env env, napi_callback_info info);
+napi_value NapiNotificationSettingResult(napi_env env, void* data);
 
 class SettingsSubModalExtensionCallback {
     public:

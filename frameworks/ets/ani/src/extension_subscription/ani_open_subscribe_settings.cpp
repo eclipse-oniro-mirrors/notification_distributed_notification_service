@@ -21,6 +21,8 @@
 #include "ani_common_util.h"
 #include "sts_throw_erro.h"
 #include "ani_ans_dialog_callback.h"
+#include "sts_common.h"
+#include "sts_bundle_option.h"
 
 namespace OHOS {
 namespace NotificationExtensionSubScriptionSts {
@@ -124,6 +126,47 @@ bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> co
     return true;
 }
 
+ani_object StsNotificationSettingResult(ani_env *env, std::shared_ptr<OpenSettingsInfo> info)
+{
+    ani_object outAniObj = nullptr;
+    bool enabled = false;
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    info->errorCode = NotificationHelper::IsUserGranted(enabled);
+    if (info->errorCode == ERR_OK && enabled) {
+        info->errorCode = NotificationHelper::GetUserGrantedEnabledBundlesForSelf(bundles);
+    }
+    if (info->errorCode != ERR_OK) {
+        return nullptr;
+    }
+    ani_class cls = nullptr;
+    const char* className = "notification.NotificationCommonDef.UserGrantSettingInner";
+    if (!NotificationSts::CreateClassObjByClassName(env, className, cls, outAniObj)) {
+        ANS_LOGE("StsNotificationSettingResult: Failed to create profile class object");
+        return nullptr;
+    }
+    if (cls == nullptr || outAniObj == nullptr) {
+        ANS_LOGE("Create class failed");
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_SetPropertyByName_Boolean(
+        outAniObj, "userGrantEnabled", BoolToAniBoolean(enabled))) {
+        ANS_LOGE("Set userGrantEnabled fail");
+        return nullptr;
+    }
+    ani_object arrayBundles = nullptr;
+    if (!NotificationSts::SetAniArrayGrantedBundleInfo(env, bundles, arrayBundles)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env,
+            "StsNotificationSettingResult failed, arrayBundles is nullptr");
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_SetPropertyByName_Ref(outAniObj, "grantedBundleInfos", arrayBundles)) {
+        ANS_LOGE("Set grantedBundleInfos fail");
+        return nullptr;
+    }
+
+    return outAniObj;
+}
+
 void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSettingsInfo> info)
 {
     ANS_LOGD("enter");
@@ -141,10 +184,12 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
         errorCode = info->errorCode ==
             ERR_OK ? ERR_OK : NotificationSts::GetExternalCode(info->errorCode);
     }
-
     if (errorCode == ERR_OK) {
         ANS_LOGD("Resolve. errorCode %{public}d", errorCode);
         ani_object ret = OHOS::AppExecFwk::CreateInt(env, errorCode);
+        if (info->isWithResult) {
+            ret = StsNotificationSettingResult(env, info);
+        }
         if (ret == nullptr) {
             NotificationSts::ThrowInternerErrorWithLogE(env, "createInt faild");
             return;
@@ -188,6 +233,58 @@ ani_object AniOpenSubscribeSettings(ani_env *env, ani_object content)
     std::string bundleName {""};
     if (isExist.exchange(true)) {
         ANS_LOGE("sts AniOpenSubscribeSettings ERROR_SETTING_WINDOW_EXIST");
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_SETTING_WINDOW_EXIST,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_SETTING_WINDOW_EXIST));
+        return nullptr;
+    }
+    ani_object aniPromise {};
+    ani_resolver aniResolver {};
+    if (ANI_OK != env->Promise_New(&aniResolver, &aniPromise)) {
+        ANS_LOGE("Promise_New faild");
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+        return nullptr;
+    }
+    info->resolver = aniResolver;
+    info->errorCode = CreateSettingsUIExtension(info->context, bundleName, env, info) ?
+        OHOS::Notification::ERR_ANS_DIALOG_POP_SUCCEEDED : OHOS::Notification::ERROR_INTERNAL_ERROR;
+    if (info->errorCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
+        ANS_LOGE("error, code is %{public}d.", info->errorCode);
+        StsAsyncCompleteCallbackOpenSettings(env, info);
+        isExist.store(false);
+        return nullptr;
+    }
+    ANS_LOGD("sts AniOpenSubscribeSettings end");
+
+    return aniPromise;
+}
+
+ani_object AniOpenSubscribeSettingsWithResult(ani_env *env, ani_object content)
+{
+    ANS_LOGD("sts AniOpenSubscribeSettingsWithResult call");
+    int returncode = ERR_OK;
+    returncode = NotificationHelper::CanOpenSubscribeSettings();
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
+        ANS_LOGE("AniOpenSubscribeSettingsWithResult error, errorCode: %{public}d", externalCode);
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        return nullptr;
+    }
+    std::shared_ptr<OpenSettingsInfo> info = std::make_shared<OpenSettingsInfo>();
+    if (!GetOpenSettingsInfo(env, content, info)) {
+        ANS_LOGE("sts AniOpenSubscribeSettingsWithResult GetOpenSettingsInfo fail");
+        NotificationSts::ThrowErrorWithInvalidParam(env);
+        return nullptr;
+    }
+    if (info->context == nullptr) {
+        ANS_LOGE("sts AniOpenSubscribeSettingsWithResult context is null");
+        NotificationSts::ThrowErrorWithInvalidParam(env);
+        return nullptr;
+    }
+    info->isWithResult = true;
+    std::string bundleName {""};
+    if (isExist.exchange(true)) {
+        ANS_LOGE("sts AniOpenSubscribeSettingsWithResult ERROR_SETTING_WINDOW_EXIST");
         OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_SETTING_WINDOW_EXIST,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_SETTING_WINDOW_EXIST));
         return nullptr;
@@ -296,6 +393,7 @@ void SettingsModalExtensionCallback::OnRelease(int32_t releaseCode)
 {
     ANS_LOGD("OnRelease");
     ReleaseOrErrorHandle(releaseCode);
+    ProcessStatusChanged(releaseCode, true);
 }
 
 /*
@@ -315,7 +413,6 @@ void SettingsModalExtensionCallback::OnError(int32_t code, const std::string& na
 void SettingsModalExtensionCallback::OnRemoteReady(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy)
 {
     ANS_LOGI("OnRemoteReady");
-    ProcessStatusChanged(0, true);
 }
 
 /*

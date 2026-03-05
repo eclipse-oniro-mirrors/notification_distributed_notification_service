@@ -26,6 +26,48 @@ static AsyncCallbackInfoOpenSettings* callbackInfo_ = nullptr;
 static JsAnsCallbackComplete* complete_ = nullptr;
 static std::atomic<bool> isExist = false;
 
+napi_value NapiNotificationSettingResult(napi_env env, void *data)
+{
+    auto* asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings*>(data);
+    napi_value result = Common::NapiGetNull(env);
+    if (!asynccallbackinfo) {
+        return result;
+    }
+    uint32_t slotFlags = 0;
+    asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationSettings(slotFlags);
+    if (asynccallbackinfo->info.errorCode != ERR_OK) {
+        return result;
+    }
+    napi_create_object(env, &result);
+    bool soundEnabled = slotFlags & NotificationConstant::ReminderFlag::SOUND_FLAG;
+    bool vibrationEnabled = slotFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG;
+    bool lockScreenEnabled = slotFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG;
+    bool bannerEnabled = slotFlags & NotificationConstant::ReminderFlag::BANNER_FLAG;
+    bool badgeNumberEnabled = slotFlags & NotificationConstant::ReminderFlag::BADGENUMBER_SHOW_FLAG;
+    bool notificationEnabled = slotFlags & NotificationConstant::ReminderFlag::NOTIFICATION_FLAG;
+    napi_value vibrationValue;
+    napi_value soundValue;
+    napi_value lockScreenValue;
+    napi_value bannerValue;
+    napi_value badgeNumerValue;
+    napi_value notificationValue;
+    napi_get_boolean(env, vibrationEnabled, &vibrationValue);
+    napi_get_boolean(env, soundEnabled, &soundValue);
+    napi_get_boolean(env, lockScreenEnabled, &lockScreenValue);
+    napi_get_boolean(env, bannerEnabled, &bannerValue);
+    napi_get_boolean(env, badgeNumberEnabled, &badgeNumerValue);
+    napi_get_boolean(env, notificationEnabled, &notificationValue);
+
+    napi_set_named_property(env, result, "vibrationEnabled", vibrationValue);
+    napi_set_named_property(env, result, "soundEnabled", soundValue);
+    napi_set_named_property(env, result, "lockScreenEnabled", lockScreenValue);
+    napi_set_named_property(env, result, "bannerEnabled", bannerValue);
+    napi_set_named_property(env, result, "badgeNumberEnabled", badgeNumerValue);
+    napi_set_named_property(env, result, "notificationEnabled", notificationValue);
+
+    return result;
+}
+
 void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
 {
     ANS_LOGD("called");
@@ -47,6 +89,9 @@ void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
         return;
     }
     napi_get_undefined(env, &result);
+    if (asynccallbackinfo->isWithResult) {
+        result = NapiNotificationSettingResult(env, data);
+    }
     int32_t errorCode = ERR_OK;
     if (asynccallbackinfo->info.errorCode == ERROR_SETTING_WINDOW_EXIST) {
         errorCode = ERROR_SETTING_WINDOW_EXIST;
@@ -126,6 +171,55 @@ napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info)
 
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     ANS_LOGD("end");
+    return promise;
+}
+
+ napi_value NapiOpenNotificationSettingsWithResult(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("start");
+    OpenSettingsParams params {};
+    if (ParseOpenSettingsParameters(env, info, params) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+    AsyncCallbackInfoOpenSettings *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoOpenSettings {
+            .env = env, .params = params};
+    if (!asynccallbackinfo) {
+        return Common::JSParaError(env, nullptr);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+    asynccallbackinfo->isWithResult = true;
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "openNotificationSettingsWithResult", NAPI_AUTO_LENGTH, &resourceName);
+    auto createExtension = [](napi_env env, void* data) {
+    };
+    auto jsCb = [](napi_env env, napi_status status, void* data) {
+        if (data == nullptr) {
+            ANS_LOGE("null data");
+            return;
+        }
+        auto* asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings*>(data);
+        CreateExtension(asynccallbackinfo);
+        ErrCode errCode = asynccallbackinfo->info.errorCode;
+        if (errCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
+            ANS_LOGE("errCode: %{public}d.", errCode);
+            NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
+            if (errCode != ERROR_SETTING_WINDOW_EXIST) {
+                isExist.store(false);
+            }
+            return;
+        }
+        if (!Init(env, asynccallbackinfo, NapiAsyncCompleteCallbackOpenSettings)) {
+            ANS_LOGE("error");
+            asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+            NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
+            return;
+        }
+    };
+    napi_create_async_work(env, nullptr, resourceName, createExtension, jsCb,
+        static_cast<void*>(asynccallbackinfo), &asynccallbackinfo->asyncWork);
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     return promise;
 }
 
@@ -355,6 +449,7 @@ void SettingsModalExtensionCallback::OnRelease(int32_t releaseCode)
 {
     ANS_LOGD("OnRelease");
     ReleaseOrErrorHandle(releaseCode);
+    ProcessStatusChanged(releaseCode);
 }
 
 /*
@@ -374,7 +469,6 @@ void SettingsModalExtensionCallback::OnError(int32_t code, const std::string& na
 void SettingsModalExtensionCallback::OnRemoteReady(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy)
 {
     ANS_LOGD("called");
-    ProcessStatusChanged(0);
 }
 
 /*
