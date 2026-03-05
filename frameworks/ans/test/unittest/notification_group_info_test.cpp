@@ -141,5 +141,32 @@ HWTEST_F(NotificationGroupInfoTest, JsonConvert_00003, Function | SmallTest | Le
     auto *rrcNew = NotificationGroupInfo::FromJson(jsonObject);
     EXPECT_EQ(rrcNew->GetGroupTitle(), "testtitle");
 }
+
+/**
+ * @tc.name: JsonConvert_00004
+ * @tc.desc: Test json convert
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationGroupInfoTest, JsonConvert_00004, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nullptr;
+    auto result = NotificationGroupInfo::FromJson(jsonObject);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: JsonConvert_00005
+ * @tc.desc: Test json convert
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationGroupInfoTest, JsonConvert_00005, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = "invalid";
+    auto result = NotificationGroupInfo::FromJson(jsonObject);
+    EXPECT_EQ(result, nullptr);
+}
+
 }
 }
