@@ -1472,11 +1472,11 @@ HWTEST_F(NotificationRequestTest, TestGroupInfo_001, Level1)
 }
 
 /**
- * @tc.name:ConvertGroupInfoObjToJson_001
- * @tc.desc: Test ConvertGroupInfoObjToJson
+ * @tc.name:ConvertGroupInfoToJson_001
+ * @tc.desc: Test ConvertGroupInfoToJson
  * @tc.type: FUNC
  */
-HWTEST_F(NotificationRequestTest, ConvertGroupInfoObjToJson_001, Level1)
+HWTEST_F(NotificationRequestTest, ConvertGroupInfoToJson_001, Level1)
 {
     int32_t myNotificationId = 10;
     NotificationRequest request(myNotificationId);

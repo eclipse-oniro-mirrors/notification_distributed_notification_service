@@ -75,50 +75,30 @@ HWTEST_F(NotificationGroupInfoTest, Marshalling_00001, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: ReadFromParcel_00001
- * @tc.desc: Test ReadFromParcel parameters.
+ * @tc.name: UnMarshalling_00001
+ * @tc.desc: Test UnMarshalling.
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(NotificationGroupInfoTest, ReadFromParcel_00001, Function | SmallTest | Level1)
+HWTEST_F(NotificationGroupInfoTest, UnMarshalling_00001, Function | SmallTest | Level1)
 {
     Parcel parcel;
-    auto rrc = std::make_shared<NotificationGroupInfo>();
-    ASSERT_NE(rrc, nullptr);
-    EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
+    auto ptr = NotificationGroupInfo::Unmarshalling(parcel);
+    EXPECT_EQ(ptr, nullptr);
 }
 
 /**
- * @tc.name: ReadFromParcel_00002
- * @tc.desc: Test ReadFromParcel parameters.
+ * @tc.name: UnMarshalling_00002
+ * @tc.desc: Test UnMarshalling.
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(NotificationGroupInfoTest, ReadFromParcel_00002, Function | SmallTest | Level1)
+HWTEST_F(NotificationGroupInfoTest, UnMarshalling_00002, Function | SmallTest | Level1)
 {
     Parcel parcel;
     parcel.WriteBool(true);
-    auto rrc = std::make_shared<NotificationGroupInfo>();
-    ASSERT_NE(rrc, nullptr);
-    EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
-}
-
-/**
- * @tc.name: ReadFromParcel_00003
- * @tc.desc: Test ReadFromParcel parameters.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationGroupInfoTest, ReadFromParcel_00003, Function | SmallTest | Level1)
-{
-    Parcel parcel;
-    parcel.WriteBool(true);
-    parcel.WriteString("testtitle");
-    auto rrc = std::make_shared<NotificationGroupInfo>();
-    ASSERT_NE(rrc, nullptr);
-    EXPECT_EQ(rrc->ReadFromParcel(parcel), true);
-    EXPECT_EQ(rrc->GetIsGroupIcon(), true);
-    EXPECT_EQ(rrc->GetGroupTitle(), "testtitle");
+    auto ptr = NotificationGroupInfo::Unmarshalling(parcel);
+    EXPECT_EQ(ptr, nullptr);
 }
 
 /**
@@ -130,12 +110,11 @@ HWTEST_F(NotificationGroupInfoTest, ReadFromParcel_00003, Function | SmallTest |
 HWTEST_F(NotificationGroupInfoTest, JsonConvert_00001, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<NotificationGroupInfo>();
-    ASSERT_NE(rrc, nullptr);
     rrc->SetIsGroupIcon(true);
     rrc->SetGroupTitle("testtitle");
     nlohmann::json jsonObject;
     EXPECT_TRUE(rrc->ToJson(jsonObject));
-    auto *rrcNew = rrc->FromJson(jsonObject);
+    auto *rrcNew = NotificationGroupInfo::FromJson(jsonObject);
     EXPECT_EQ(rrcNew->GetIsGroupIcon(), rrc->GetIsGroupIcon());
     EXPECT_EQ(rrcNew->GetGroupTitle(), rrc->GetGroupTitle());
 }
@@ -150,9 +129,7 @@ HWTEST_F(NotificationGroupInfoTest, JsonConvert_00002, Function | SmallTest | Le
 {
     nlohmann::json jsonObject;
     jsonObject["isGroupIcon"] = true;
-    auto rrc = std::make_shared<NotificationGroupInfo>();
-    ASSERT_NE(rrc, nullptr);
-    auto *rrcNew = rrc->FromJson(jsonObject);
+    auto *rrcNew = NotificationGroupInfo::FromJson(jsonObject);
     EXPECT_EQ(rrcNew->GetIsGroupIcon(), true);
 }
 
@@ -166,9 +143,7 @@ HWTEST_F(NotificationGroupInfoTest, JsonConvert_00003, Function | SmallTest | Le
 {
     nlohmann::json jsonObject;
     jsonObject["groupTitle"] = "testtitle";
-    auto rrc = std::make_shared<NotificationGroupInfo>();
-    ASSERT_NE(rrc, nullptr);
-    auto *rrcNew = rrc->FromJson(jsonObject);
+    auto *rrcNew = NotificationGroupInfo::FromJson(jsonObject);
     EXPECT_EQ(rrcNew->GetGroupTitle(), "testtitle");
 }
 }
