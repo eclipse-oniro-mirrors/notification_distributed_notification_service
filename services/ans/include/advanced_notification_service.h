@@ -1835,9 +1835,10 @@ public:
 
     bool IsDisableNotification(const std::string &bundleName, const int32_t userId);
 
-    bool IsDisableNotificationByKiosk(const std::string &bundleName);
+    bool IsDisableNotificationByRestrictedMode(const std::string &bundleName, const int32_t &userId);
 
-    bool IsDisableNotificationForSaByKiosk(const std::string &bundleName, bool directAgency);
+    bool IsDisableNotificationForSaByRestrictedMode(const std::string &bundleName,
+        const int32_t &userId, bool directAgency);
 
     bool IsNeedToControllerByDisableNotification(const sptr<NotificationRequest> &request);
 
@@ -2335,7 +2336,7 @@ private:
         const bool easyAbroad);
     void ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid, int32_t sourceType);
     ErrCode RegisterPushCallbackTokenCheck();
-    bool IsEnableNotificationByKioskAppTrustList(const std::string &bundleName);
+    bool IsExistRestrictedModeTrustList(const std::string &bundleName, const int32_t &userId);
     ErrCode RemoveDistributedNotifications(const std::vector<std::string>& hashcodes,
         const int32_t removeReason);
     ErrCode RemoveDistributedNotifications(const NotificationConstant::SlotType& slotType,

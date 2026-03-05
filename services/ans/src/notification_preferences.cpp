@@ -2044,7 +2044,7 @@ int32_t NotificationPreferences::SetKvToDb(
     if (preferncesDB_ == nullptr) {
         return ERR_ANS_SERVICE_NOT_READY;
     }
-    if (key == "kiosk_app_trust_list") {
+    if (key == KIOSK_APP_TRUST_LIST_KEY) {
         isKioskTrustListUpdate_ = true;
     }
     return preferncesDB_->SetKvToDb(key, value, userId);
@@ -2307,13 +2307,14 @@ bool NotificationPreferences::GetUserDisableNotificationInfo(int32_t userId, Not
 bool NotificationPreferences::GetkioskAppTrustList(std::vector<std::string> &kioskAppTrustList)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferencesInfo_.GetkioskAppTrustList(kioskAppTrustList) && !isKioskTrustListUpdate_) {
         ANS_LOGD("info get disable notification success");
         return true;
     }
     std::string value = "";
     int32_t userId = -1;
-    if (GetKvFromDb("kiosk_app_trust_list", value, userId) != ERR_OK) {
+    if (GetKvFromDb(KIOSK_APP_TRUST_LIST_KEY, value, userId) != ERR_OK) {
         ANS_LOGD("Get kiosk app trust list failed.");
         return false;
     }
@@ -2333,6 +2334,60 @@ bool NotificationPreferences::GetkioskAppTrustList(std::vector<std::string> &kio
     kioskAppTrustList = jsonObject.get<std::vector<std::string>>();
     preferencesInfo_.SetkioskAppTrustList(kioskAppTrustList);
     isKioskTrustListUpdate_ = false;
+    return true;
+}
+
+bool NotificationPreferences::GetRestrictedModeTrustList(std::unordered_map<int32_t,
+    std::vector<std::string>> &restrictedModeTrustList)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferencesInfo_.GetRestrictedModeTrustList(restrictedModeTrustList)) {
+        ANS_LOGD("info get restricted mode TrustList success");
+        return true;
+    }
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return false;
+    }
+    if (preferncesDB_->GetRestrictedModeTrustList(preferencesInfo_)) {
+        ANS_LOGD("db get restricted mode TrustList success");
+        preferencesInfo_.GetRestrictedModeTrustList(restrictedModeTrustList);
+    } else {
+        ANS_LOGE("db get restricted mode TrustList fail");
+        return false;
+    }
+    return true;
+}
+ 
+bool NotificationPreferences::SetRestrictedModeTrustList(const std::string &value)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    std::unordered_map<int32_t, std::vector<std::string>> restrictedModeTrustList;
+    if (value.empty() || !nlohmann::json::accept(value)) {
+        ANS_LOGE("Invalid json string");
+        return false;
+    }
+    nlohmann::json jsonObject = nlohmann::json::parse(value, nullptr, false);
+    if (jsonObject.is_discarded() || !jsonObject.is_array()) {
+        ANS_LOGE("Parse restricted mode trust list failed due to data is discarded or not array");
+        return false;
+    }
+    for (const auto &item : jsonObject) {
+        if (!item.contains("userId") || !item["userId"].is_number_integer()) {
+            ANS_LOGE("Missing or invalid 'userId' field");
+            return false;
+        }
+        int32_t userId = item["userId"];
+        if (!item.contains("trustList") || !item["trustList"].is_array()) {
+            ANS_LOGE("Missing or invalid 'trustList' field");
+            return false;
+        }
+        std::vector<std::string> trustList = item["trustList"].get<std::vector<std::string>>();
+        restrictedModeTrustList[userId] = trustList;
+    }
+    preferencesInfo_.SetRestrictedModeTrustList(restrictedModeTrustList);
     return true;
 }
 
@@ -2876,6 +2931,12 @@ bool NotificationPreferences::IsKioskMode()
     }
     isKioskMode_ = kioskStatus.isKioskMode_;
     return isKioskMode_;
+}
+
+bool NotificationPreferences::IsRestrictedMode(const int32_t &userId)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    return preferencesInfo_.IsRestrictedMode(userId);
 }
 
 ErrCode NotificationPreferences::SetGeofenceEnabled(bool enabled)

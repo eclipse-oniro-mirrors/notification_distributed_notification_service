@@ -826,9 +826,9 @@ AnsStatus AdvancedNotificationService::PublishPreparedNotificationInner(
             return;
         }
 #endif
-        if (IsDisableNotificationByKiosk(ownerBundleName)) {
-            ANS_LOGE("bundle: %{public}s not in kiosk trust list", (request->GetOwnerBundleName()).c_str());
-            ansStatus = AnsStatus(ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION, "bundle not in kiosk trust list");
+        if (IsDisableNotificationByRestrictedMode(ownerBundleName, record->notification->GetRecvUserId())) {
+            ANS_LOGE("bundle(%{public}s) not in trust list.", (request->GetOwnerBundleName()).c_str());
+            ansStatus = AnsStatus(ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION, "bundle not in trust list");
             return;
         }
         if (record->request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&

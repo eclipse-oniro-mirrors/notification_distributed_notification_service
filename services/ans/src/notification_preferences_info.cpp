@@ -720,6 +720,32 @@ bool NotificationPreferencesInfo::GetkioskAppTrustList(std::vector<std::string> 
     return true;
 }
 
+bool NotificationPreferencesInfo::IsRestrictedMode(const int32_t &userId)
+{
+    auto it = restrictedModeTrustList_.find(userId);
+    if (it == restrictedModeTrustList_.end()) {
+        return false;
+    }
+    return true;
+}
+ 
+void NotificationPreferencesInfo::SetRestrictedModeTrustList(const std::unordered_map<int32_t,
+    std::vector<std::string>> &restrictedModeTrustList)
+{
+    restrictedModeTrustList_ = restrictedModeTrustList;
+}
+ 
+bool NotificationPreferencesInfo::GetRestrictedModeTrustList(std::unordered_map<int32_t,
+    std::vector<std::string>> &restrictedModeTrustList) const
+{
+    if (restrictedModeTrustList_.empty()) {
+        ANS_LOGE("restrictedModeTrustList is empty");
+        return false;
+    }
+    restrictedModeTrustList = restrictedModeTrustList_;
+    return true;
+}
+
 void NotificationPreferencesInfo::AddDisableNotificationInfo(const std::string &value)
 {
     NotificationDisable notificationDisable;

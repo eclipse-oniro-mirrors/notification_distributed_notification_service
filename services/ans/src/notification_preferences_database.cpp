@@ -832,6 +832,7 @@ bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreference
         GetDoNotDisturbProfile(info, iter);
     }
     GetDisableNotificationInfo(info);
+    GetRestrictedModeTrustList(info);
 
     return true;
 }
@@ -3990,6 +3991,45 @@ void NotificationPreferencesDatabase::GetDisableNotificationInfo(NotificationPre
         return;
     }
     info.AddDisableNotificationInfo(value);
+}
+
+bool NotificationPreferencesDatabase::GetRestrictedModeTrustList(NotificationPreferencesInfo &info)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null rdbStore");
+        return false;
+    }
+    std::string value;
+    std::unordered_map<int32_t, std::vector<std::string>> restrictedModeTrustList;
+    int32_t result = rdbDataManager_->QueryData(RESTRICTED_MODE_TRUST_LIST_KEY, value, ZERO_USER_ID);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Query agent relationships failed.");
+        return false;
+    }
+    if (value.empty() || !nlohmann::json::accept(value)) {
+        ANS_LOGE("Invalid json string");
+        return false;
+    }
+    nlohmann::json jsonObject = nlohmann::json::parse(value, nullptr, false);
+    if (jsonObject.is_discarded() || !jsonObject.is_array()) {
+        ANS_LOGE("Parse restricted mode trust list failed due to data is discarded or not array");
+        return false;
+    }
+    for (const auto &item : jsonObject) {
+        if (!item.contains("userId") || !item["userId"].is_number_integer()) {
+            ANS_LOGE("Missing or invalid 'userId' field");
+            return false;
+        }
+        int32_t userId = item["userId"];
+        if (!item.contains("trustList") || !item["trustList"].is_array()) {
+            ANS_LOGE("Missing or invalid 'trustList' field");
+            return false;
+        }
+        std::vector<std::string> trustList = item["trustList"].get<std::vector<std::string>>();
+        restrictedModeTrustList[userId] = trustList;
+    }
+    info.SetRestrictedModeTrustList(restrictedModeTrustList);
+    return true;
 }
 
 bool NotificationPreferencesDatabase::GetAllDistribuedEnabledBundles(int32_t userId,

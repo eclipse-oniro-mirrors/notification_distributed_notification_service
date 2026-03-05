@@ -3069,6 +3069,185 @@ HWTEST_F(NotificationPreferencesTest, GetkioskAppTrustList_009, Function | Small
     EXPECT_EQ(ret, true);
 }
 
+
+/**
+ * @tc.name: GetRestrictedModeTrustList_001
+ * @tc.desc: Test GetRestrictedModeTrustList
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetRestrictedModeTrustList_001, Function | SmallTest | Level1)
+{
+    int32_t userId = 100;
+    std::string bundleName = "com.test.example";
+    std::vector<std::string> bundleList = {bundleName};
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
+    std::unordered_map<int32_t, std::vector<std::string>> restrictedModeTrustList;
+    restrictedModeTrustList[userId] = bundleList;
+    notificationPreferences.preferencesInfo_.SetRestrictedModeTrustList(restrictedModeTrustList);
+    std::unordered_map<int32_t, std::vector<std::string>> resultList;
+    auto ret = notificationPreferences.GetRestrictedModeTrustList(resultList);
+    EXPECT_EQ(ret, true);
+}
+ 
+/**
+ * @tc.name: GetRestrictedModeTrustList_002
+ * @tc.desc: Test GetRestrictedModeTrustList
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetRestrictedModeTrustList_002, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
+    std::unordered_map<int32_t, std::vector<std::string>> resultList;
+    auto ret = notificationPreferences.GetRestrictedModeTrustList(resultList);
+    EXPECT_EQ(ret, false);
+}
+ 
+/**
+ * @tc.name: GetRestrictedModeTrustList_003
+ * @tc.desc: Test GetRestrictedModeTrustList
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetRestrictedModeTrustList_003, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
+ 
+    std::string key = "restricted_mode_trust_list";
+    std::string value = R"([])";
+    int32_t userId = -1;
+    auto result = notificationPreferences.SetKvToDb(key, value, userId);
+    EXPECT_EQ(result, ERR_OK);
+    std::unordered_map<int32_t, std::vector<std::string>> resultList;
+    auto ret = notificationPreferences.GetRestrictedModeTrustList(resultList);
+    EXPECT_EQ(ret, true);
+}
+ 
+/**
+ * @tc.name: GetRestrictedModeTrustList_004
+ * @tc.desc: Test GetRestrictedModeTrustList
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetRestrictedModeTrustList_004, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
+ 
+    std::string key = "restricted_mode_trust_list";
+    std::string value = R"(invalid json string)";
+    int32_t userId = -1;
+    auto result = notificationPreferences.SetKvToDb(key, value, userId);
+    EXPECT_EQ(result, ERR_OK);
+    std::unordered_map<int32_t, std::vector<std::string>> resultList;
+    auto ret = notificationPreferences.GetRestrictedModeTrustList(resultList);
+    EXPECT_EQ(ret, false);
+}
+ 
+/**
+ * @tc.name: GetRestrictedModeTrustList_005
+ * @tc.desc: Test GetRestrictedModeTrustList
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetRestrictedModeTrustList_005, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
+ 
+    std::string key = "restricted_mode_trust_list";
+    std::string value = R"([{"userId":100,"trustList":["bundle1","bundle2"]}])";
+    int32_t userId = -1;
+    auto result = notificationPreferences.SetKvToDb(key, value, userId);
+    EXPECT_EQ(result, ERR_OK);
+    std::unordered_map<int32_t, std::vector<std::string>> resultList;
+    auto ret = notificationPreferences.GetRestrictedModeTrustList(resultList);
+    EXPECT_EQ(ret, true);
+}
+ 
+/**
+ * @tc.name: SetRestrictedModeTrustList_001
+ * @tc.desc: Test SetRestrictedModeTrustList
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetRestrictedModeTrustList_001, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
+    std::string value = R"([{"userId":100,"trustList":["bundle1","bundle2"]}])";
+    auto result = notificationPreferences.SetRestrictedModeTrustList(value);
+    EXPECT_TRUE(result);
+}
+ 
+/**
+ * @tc.name: SetRestrictedModeTrustList_002
+ * @tc.desc: Test SetRestrictedModeTrustList
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetRestrictedModeTrustList_002, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
+    std::string value = R"()";
+    auto result = notificationPreferences.SetRestrictedModeTrustList(value);
+    EXPECT_FALSE(result);
+}
+ 
+/**
+ * @tc.name: SetRestrictedModeTrustList_003
+ * @tc.desc: Test SetRestrictedModeTrustList
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetRestrictedModeTrustList_003, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
+    std::string value = R"([{"userId1":100,"trustList":["bundle1","bundle2"]}])";
+    auto result = notificationPreferences.SetRestrictedModeTrustList(value);
+    EXPECT_FALSE(result);
+}
+ 
+/**
+ * @tc.name: SetRestrictedModeTrustList_004
+ * @tc.desc: Test SetRestrictedModeTrustList
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetRestrictedModeTrustList_004, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
+    std::string value = "test";
+    auto result = notificationPreferences.SetRestrictedModeTrustList(value);
+    EXPECT_FALSE(result);
+}
+ 
+/**
+ * @tc.name: SetRestrictedModeTrustList_005
+ * @tc.desc: Test SetRestrictedModeTrustList
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetRestrictedModeTrustList_005, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
+    std::string value = R"([{"userId":100,"trustList1":["bundle1","bundle2"]}])";
+    auto result = notificationPreferences.SetRestrictedModeTrustList(value);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetRestrictedModeTrustList_006
+ * @tc.desc: Test SetRestrictedModeTrustList
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetRestrictedModeTrustList_006, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
+    std::string value = R"({"userId":100})";
+    auto result = notificationPreferences.SetRestrictedModeTrustList(value);
+    EXPECT_FALSE(result);
+}
+
 /**
  * @tc.name: GetUserDisableNotificationInfo_001
  * @tc.desc: test GetUserDisableNotificationInfo.

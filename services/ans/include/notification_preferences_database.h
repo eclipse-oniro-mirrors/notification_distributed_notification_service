@@ -598,6 +598,7 @@ public:
     bool SetBundlePriorityConfig(
         const sptr<NotificationBundleOption> &bundleOption, const std::string &configValue);
     bool GetBundlePriorityConfig(const sptr<NotificationBundleOption> &bundleOption, std::string &configValue);
+    bool GetRestrictedModeTrustList(NotificationPreferencesInfo &info);
 
 private:
     bool CheckRdbStore();
