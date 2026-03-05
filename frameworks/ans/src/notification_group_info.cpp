@@ -21,8 +21,6 @@
 
 namespace OHOS {
 namespace Notification {
-NotificationGroupInfo::~NotificationGroupInfo()
-{}
 
 void NotificationGroupInfo::SetGroupTitle(const std::string &groupTitle)
 {
@@ -34,7 +32,7 @@ std::string NotificationGroupInfo::GetGroupTitle() const
     return groupTitle_;
 }
 
-void NotificationGroupInfo::SetIsGroupIcon(const bool &isGroupIcon)
+void NotificationGroupInfo::SetIsGroupIcon(const bool isGroupIcon)
 {
     isGroupIcon_ = isGroupIcon;
 }

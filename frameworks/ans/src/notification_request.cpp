@@ -880,7 +880,7 @@ std::string NotificationRequest::Dump()
             ", sound = " + sound_ + ", distributed = " + std::to_string(distributedCollaborate_) + ":" +
             distributedHashCode_ + " flag: " + std::to_string(collaboratedReminderFlag_)  + ", unifiedGroupInfo_ = " +
             (unifiedGroupInfo_ ? unifiedGroupInfo_->Dump() : "null") + ", groupInfo_ = " +
-            (groupInfo_ ? groupInfo_->Dump() : "null")+ " }";
+            (groupInfo_ ? groupInfo_->Dump() : "null") + " }";
 }
 
 bool NotificationRequest::CollaborationToJson(std::string& data) const

@@ -23,7 +23,6 @@ namespace OHOS {
 namespace Notification {
 class NotificationGroupInfo : public Parcelable, public NotificationJsonConvertionBase {
 public:
-    NotificationGroupInfo() = default;
 
     virtual ~NotificationGroupInfo();
 
