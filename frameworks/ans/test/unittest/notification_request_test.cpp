@@ -154,6 +154,76 @@ HWTEST_F(NotificationRequestTest, NotificationMarshalling_0100, Level1)
 }
 
 /**
+ * @tc.name: NotificationMarshalling_0101
+ * @tc.desc: Marshalling with groupInfo
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, NotificationMarshalling_0101, Level1)
+{
+    int32_t myNotificationId = 10;
+    Parcel parcel;
+    NotificationRequest notificationRequest(myNotificationId);
+    auto groupInfo = std::make_shared<NotificationGroupInfo>();
+    groupInfo->SetIsGroupIcon(true);
+    groupInfo->SetGroupTitle("testtitle");
+    notificationRequest.SetGroupInfo(groupInfo);
+    auto result = notificationRequest.Marshalling(parcel);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: NotificationMarshalling_0102
+ * @tc.desc: Marshalling with groupInfo
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, NotificationMarshalling_0102, Level1)
+{
+    int32_t myNotificationId = 10;
+    Parcel parcel;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetGroupInfo(nullptr);
+    auto result = notificationRequest.Marshalling(parcel);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: NotificationUnMarshalling_0100
+ * @tc.desc: UnMarshalling with groupInfo
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, NotificationUnMarshalling_0100, Level1)
+{
+    int32_t myNotificationId = 10;
+    Parcel parcel;
+    NotificationRequest notificationRequest(myNotificationId);
+    auto result = notificationRequest.Marshalling(parcel);
+    auto request = NotificationRequest::Unmarshalling(parcel);
+    EXPECT_NE(request, nullptr);
+    delete request;
+}
+
+/**
+ * @tc.name: NotificationUnMarshalling_0100
+ * @tc.desc: UnMarshalling with groupInfo
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, NotificationUnMarshalling_0101, Level1)
+{
+    int32_t myNotificationId = 10;
+    Parcel parcel;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetGroupInfo(nullptr);
+    auto request = NotificationRequest::Unmarshalling(parcel);
+    EXPECT_NE(request, nullptr);
+    delete request;
+}
+
+
+/**
  * @tc.name: NotificationReadFromParcel_0100
  * @tc.desc: ReadFromParcel
  * @tc.type: FUNC
@@ -1476,7 +1546,7 @@ HWTEST_F(NotificationRequestTest, TestGroupInfo_001, Level1)
  * @tc.desc: Test ConvertGroupInfoToJson
  * @tc.type: FUNC
  */
-HWTEST_F(NotificationRequestTest, ConvertGroupInfoToJson_001, Level1)
+HWTEST_F(NotificationRequestTest, ConvertGroupInfoToJson_001, Level0)
 {
     int32_t myNotificationId = 10;
     NotificationRequest request(myNotificationId);
@@ -1488,6 +1558,83 @@ HWTEST_F(NotificationRequestTest, ConvertGroupInfoToJson_001, Level1)
 
     nlohmann::json jsonObject;
     EXPECT_EQ(request.ConvertGroupInfoToJson(jsonObject), true);
+}
+
+/**
+ * @tc.name:ConvertJsonToGroupInfo_001
+ * @tc.desc: Test ConvertJsonToGroupInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToGroupInfo_001, Level0)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest request(myNotificationId);
+    NotificationRequest *target = nullptr;
+    nlohmann::json jsonObject;
+    EXPECT_EQ(request.ConvertJsonToGroupInfo(target, jsonObject), false);
+}
+
+/**
+ * @tc.name:ConvertJsonToGroupInfo_002
+ * @tc.desc: Test ConvertJsonToGroupInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToGroupInfo_002, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest request(myNotificationId);
+    nlohmann::json jsonObject;
+    jsonObject["id"] = 0;
+    EXPECT_EQ(request.ConvertJsonToGroupInfo(&request, jsonObject), true);
+}
+
+/**
+ * @tc.name:ConvertJsonToGroupInfo_003
+ * @tc.desc: Test ConvertJsonToGroupInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToGroupInfo_003, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest request(myNotificationId);
+    nlohmann::json jsonObject;
+    jsonObject["groupInfo"] = nullptr;
+    EXPECT_EQ(request.ConvertJsonToGroupInfo(&request, jsonObject), true);
+}
+
+/**
+ * @tc.name:ConvertObjectsToJson_0002
+ * @tc.desc: Check return true when groupInfo_ is not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, ConvertObjectsToJson_0002, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest request(myNotificationId);
+    std::shared_ptr<NotificationGroupInfo> groupInfo = std::make_shared<NotificationGroupInfo>();
+    ASSERT_NE(groupInfo, nullptr);
+    groupInfo->SetIsGroupIcon(true);
+    groupInfo->SetGroupTitle("testTitle");
+    request.SetGroupInfo(groupInfo);
+    nlohmann::json jsonObject;
+    auto result = request.ConvertObjectsToJson(jsonObject);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(jsonObject["groupInfo"]["groupTitle"],"testTitle");
+}
+
+/**
+ * @tc.name:ConvertObjectsToJson_0003
+ * @tc.desc: Check return true when groupInfo_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, ConvertObjectsToJson_0003, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest request(myNotificationId);
+    request.SetGroupInfo(nullptr);
+    nlohmann::json jsonObject;
+    auto result = request.ConvertObjectsToJson(jsonObject);
+    EXPECT_EQ(result, true);
 }
 } // namespace Notification
 } // namespace OHOS
