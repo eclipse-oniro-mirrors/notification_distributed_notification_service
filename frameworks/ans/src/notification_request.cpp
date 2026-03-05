@@ -933,24 +933,12 @@ bool NotificationRequest::CollaborationToJson(std::string& data) const
         jsonObject["template"] = templateOptionObj;
     }
 
-    if (!CollaborationGroupInfoToJson(jsonObject)) {
+    if (!ConvertGroupInfoToJson(jsonObject)) {
         ANS_LOGE("Cannot convert groupInfo to JSON.");
         return false;
     }
 
     data = jsonObject.dump();
-    return true;
-}
-
-bool NotificationRequest::CollaborationGroupInfoToJson(nlohmann::json &jsonObject) const
-{
-    if (groupInfo_ != nullptr) {
-        nlohmann::json groupInfoObj;
-        if (!NotificationJsonConverter::ConvertToJson(groupInfo_.get(), groupInfoObj)) {
-            return false;
-        }
-        jsonObject["groupInfo"] = groupInfoObj;
-    }
     return true;
 }
 
@@ -2524,14 +2512,14 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
         jsonObject["notificationTrigger"] = triggerObj;
     }
 
-    if (!ConvertGroupInfoObjToJson(nlohmann::json &jsonObject)) {
+    if (!ConvertGroupInfoToJson(nlohmann::json &jsonObject)) {
         ANS_LOGE("Cannot convert groupInfo to JSON");
         return false;
     }
     return true;
 }
 
-bool NotificationRequest::ConvertGroupInfoObjToJson(nlohmann::json &jsonObject) const
+bool NotificationRequest::ConvertGroupInfoToJson(nlohmann::json &jsonObject) const
 {
     if (groupInfo_) {
         nlohmann::json groupInfoObj;
