@@ -2113,6 +2113,7 @@ group("unittest") {
     ":os_account_manager_helper_test",
     ":push_callback_stub_test",
     "advanced_notification_service_test:unittest",
-    "badge_manager_test:unittest"
+    "badge_manager_test:unittest",
+    "dynamic_dependency_test:unittest",
   ]
 }
