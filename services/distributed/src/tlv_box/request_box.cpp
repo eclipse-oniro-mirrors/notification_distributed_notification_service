@@ -198,6 +198,9 @@ bool NotificationRequestBox::SetSmallIcon(const std::shared_ptr<Media::PixelMap>
     std::vector<uint8_t> buffer;
     DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewPiexlMap2BinFile(smallIcon, buffer);
     ANS_LOGD("SetSmallIcon buffer size: %{public}d", static_cast<int32_t>(buffer.size()));
+    if (buffer.empty()) {
+        return false;
+    }
     const unsigned char* begin = buffer.data();
     return box_->PutValue(std::make_shared<TlvItem>(BUNDLE_ICON, begin, buffer.size()));
 }
@@ -222,6 +225,9 @@ bool NotificationRequestBox::SetBigIcon(const std::shared_ptr<Media::PixelMap>& 
     }
     std::vector<uint8_t> buffer;
     DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewPiexlMap2BinFile(bigIcon, buffer);
+    if (buffer.empty()) {
+        return false;
+    }
     ANS_LOGD("SetBigIcon buffer size: %{public}d", static_cast<int32_t>(buffer.size()));
     const unsigned char* begin = buffer.data();
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BIG_ICON, begin, buffer.size()));
@@ -247,6 +253,9 @@ bool NotificationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelMa
     }
     std::vector<uint8_t> buffer;
     DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewPiexlMap2BinFile(overlayIcon, buffer);
+    if (buffer.empty()) {
+        return false;
+    }
     ANS_LOGD("SetOverlayIcon buffer size: %{public}d", static_cast<int32_t>(buffer.size()));
     const unsigned char* begin = buffer.data();
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_OVERLAY_ICON, begin, buffer.size()));
@@ -254,7 +263,7 @@ bool NotificationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelMa
 
 bool NotificationRequestBox::SetCommonLiveView(const std::vector<uint8_t>& byteSequence)
 {
-    if (box_ == nullptr) {
+    if (box_ == nullptr || byteSequence.empty()) {
         return false;
     }
     const unsigned char* begin = byteSequence.data();
