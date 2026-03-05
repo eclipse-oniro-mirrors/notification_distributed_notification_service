@@ -20,9 +20,14 @@ import common from '@ohos.app.ability.common';
 import uiextension from '@ohos.arkui.uiExtension';
 import window from '@ohos.window';
 import display from '@ohos.display';
+import settings from '@ohos.settings';
+import deviceInfo from '@ohos.deviceInfo';
 
 const TAG = 'NotificationDialog_Service ';
 const DEFAULT_DISPLAY_ID: number = 0;
+const REGION_CODE: string = 'region_code';
+const CHINA_LOGIN_SITE_ID: string = '1';
+const EUROPE_LOGIN_SITE_ID: string = '7';
 
 /**
  * Omit display when application name is too long
@@ -161,4 +166,25 @@ export function shouldMoveToDisplayCenter(comW: number, comH: number,
 
 export async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export function isOvVersion(): boolean {
+  if (deviceInfo.displayVersion.search('OV') > -1) {
+    console.info(TAG, `isOvVersion true`);
+    return true;
+  } else {
+    console.info(TAG, `isOvVersion false`);
+    return false;
+  }
+}
+
+export function isEuropeRegion(context: Context): boolean {
+  try {
+    const regionCode: string = settings.getValueSync(context, REGION_CODE, CHINA_LOGIN_SITE_ID);
+    console.info(TAG, `regionCode : ${regionCode}`);
+    return regionCode === EUROPE_LOGIN_SITE_ID;
+  } catch (error) {
+    console.error(TAG, `getRegionCode is error, error code is ${error?.code},message:${error?.message}`);
+  }
+  return false;
 }
