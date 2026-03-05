@@ -1574,8 +1574,6 @@ public:
 
     bool CollaborationToJson(std::string& data) const;
 
-    bool CollaborationGroupInfoToJson(nlohmann::json &jsonObject) const;
-
     static NotificationRequest *CollaborationFromJson(const std::string& basicInfo);
 
     static bool ConvertJsonToTemplate(NotificationRequest *target, const nlohmann::json &jsonObject);
@@ -1649,7 +1647,7 @@ private:
     void CopyBase(const NotificationRequest &other);
     void CopyOther(const NotificationRequest &other);
 
-    bool ConvertGroupInfoObjToJson(nlohmann::json &jsonObject) const;
+    bool ConvertGroupInfoToJson(nlohmann::json &jsonObject) const;
     bool ConvertObjectsToJson(nlohmann::json &jsonObject) const;
     ErrCode CheckVersion(const sptr<NotificationRequest> &oldRequest) const;
 
