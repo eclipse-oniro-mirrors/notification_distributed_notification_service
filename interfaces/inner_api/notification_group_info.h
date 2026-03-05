@@ -24,7 +24,7 @@ namespace Notification {
 class NotificationGroupInfo : public Parcelable, public NotificationJsonConvertionBase {
 public:
 
-    virtual ~NotificationGroupInfo();
+    virtual ~NotificationGroupInfo() = default;
 
     void SetGroupTitle(const std::string &groupTitle);
 
