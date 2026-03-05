@@ -26,6 +26,7 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace OHOS::Notification;
+using namespace OHOS::NotificationSts;
 static std::atomic<bool> isExist = false;
 const int32_t ERR__INVALID_WANT = 1011;
 bool GetOpenSettingsInfo(ani_env *env, ani_object content, std::shared_ptr<OpenSettingsInfo> &info)
@@ -125,6 +126,54 @@ bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> co
     return true;
 }
 
+ani_object StsNotificationSettingResult(ani_env *env, std::shared_ptr<OpenSettingsInfo> info)
+{
+    ani_object outAniObj = nullptr;
+    uint32_t slotFlags = 0;
+    info->errorCode = NotificationHelper::GetNotificationSettings(slotFlags);
+    if (info->errorCode != ERR_OK) {
+        return nullptr;
+    }
+    ani_class cls = nullptr;
+    const char* className = "@ohos.notificationManager.notificationManager.NotificationSettingInner";
+    if (!NotificationSts::CreateClassObjByClassName(env, className, cls, outAniObj)) {
+        return nullptr;
+    }
+    if (cls == nullptr || outAniObj == nullptr) {
+        return nullptr;
+    }
+    bool soundEnabled = slotFlags & NotificationConstant::ReminderFlag::SOUND_FLAG;
+    bool vibrationEnabled = slotFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG;
+    bool lockScreenEnabled = slotFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG;
+    bool bannerEnabled = slotFlags & NotificationConstant::ReminderFlag::BANNER_FLAG;
+    bool badgeNumberEnabled = slotFlags & NotificationConstant::ReminderFlag::BADGENUMBER_SHOW_FLAG;
+    bool notificationEnabled = slotFlags & NotificationConstant::ReminderFlag::NOTIFICATION_FLAG;
+    if (ANI_OK != env->Object_SetPropertyByName_Boolean(
+        outAniObj, "vibrationEnabled", BoolToAniBoolean(vibrationEnabled))) {
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_SetPropertyByName_Boolean(outAniObj, "soundEnabled", BoolToAniBoolean(soundEnabled))) {
+        return nullptr;
+    }
+    if (!SetPropertyOptionalByBoolean(env, outAniObj, "lockScreenEnabled", lockScreenEnabled)) {
+        ANS_LOGE("Set lockScreenEnabled fail");
+        return nullptr;
+    }
+    if (!SetPropertyOptionalByBoolean(env, outAniObj, "bannerEnabled", bannerEnabled)) {
+        ANS_LOGE("Set bannerEnabled fail");
+        return nullptr;
+    }
+    if (!SetPropertyOptionalByBoolean(env, outAniObj, "badgeNumberEnabled", badgeNumberEnabled)) {
+        ANS_LOGE("Set badgeNumberEnabled fail");
+        return nullptr;
+    }
+    if (!SetPropertyOptionalByBoolean(env, outAniObj, "notificationEnabled", notificationEnabled)) {
+        ANS_LOGE("Set notificationEnabled fail");
+        return nullptr;
+    }
+    return outAniObj;
+}
+
 void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSettingsInfo> info)
 {
     ANS_LOGD("StsAsyncCompleteCallbackOpenSettings called");
@@ -142,10 +191,12 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
         errorCode = info->errorCode ==
             ERR_OK ? ERR_OK : NotificationSts::GetExternalCode(info->errorCode);
     }
-
     if (errorCode == ERR_OK) {
         ANS_LOGD("Resolve. errorCode %{public}d", errorCode);
         ani_object ret = OHOS::AppExecFwk::CreateInt(env, errorCode);
+        if (info->isWithResult) {
+            ret = StsNotificationSettingResult(env, info);
+        }
         if (ret == nullptr) {
             NotificationSts::ThrowInternerErrorWithLogE(env, "createInt of errorCode faild.");
             return;
@@ -204,6 +255,51 @@ ani_object AniOpenNotificationSettings(ani_env *env, ani_object content)
         return nullptr;
     }
     ANS_LOGD("sts AniOpenNotificationSettings end");
+
+    return aniPromise;
+}
+
+ani_object AniOpenNotificationSettingsWithResult(ani_env *env, ani_object content)
+{
+    ANS_LOGD("sts AniOpenNotificationSettingsWithResult call");
+    std::shared_ptr<OpenSettingsInfo> info = std::make_shared<OpenSettingsInfo>();
+    if (!GetOpenSettingsInfo(env, content, info)) {
+        ANS_LOGE("sts AniOpenNotificationSettingsWithResult GetOpenSettingsInfo fail");
+        return nullptr;
+    }
+    if (info->context == nullptr) {
+        ANS_LOGE("sts AniOpenNotificationSettingsWithResult context is null");
+        NotificationSts::ThrowInternerErrorWithLogE(env, "");
+        return nullptr;
+    }
+    info->isWithResult = true;
+    std::string bundleName {""};
+    if (isExist.exchange(true)) {
+        ANS_LOGE("sts AniOpenNotificationSettingsWithResult ERROR_SETTING_WINDOW_EXIST");
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_SETTING_WINDOW_EXIST,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_SETTING_WINDOW_EXIST));
+        return nullptr;
+    }
+    ani_object aniPromise {};
+    ani_resolver aniResolver {};
+    if (ANI_OK != env->Promise_New(&aniResolver, &aniPromise)) {
+        ANS_LOGE("Promise_New faild");
+        return nullptr;
+    }
+    info->resolver = aniResolver;
+    bool success = CreateSettingsUIExtension(info->context, bundleName, env, info);
+    if (success) {
+        info->errorCode = OHOS::Notification::ERR_ANS_DIALOG_POP_SUCCEEDED;
+    } else {
+        info->errorCode = OHOS::Notification::ERROR_INTERNAL_ERROR;
+    }
+    if (info->errorCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
+        ANS_LOGE("error, code is %{public}d.", info->errorCode);
+        StsAsyncCompleteCallbackOpenSettings(env, info);
+        isExist.store(false);
+        return nullptr;
+    }
+    ANS_LOGD("sts AniOpenNotificationSettingsWithResult end");
 
     return aniPromise;
 }
@@ -290,6 +386,7 @@ void SettingsModalExtensionCallback::OnRelease(int32_t releaseCode)
 {
     ANS_LOGD("OnRelease");
     ReleaseOrErrorHandle(releaseCode);
+    ProcessStatusChanged(releaseCode, true);
 }
 
 /*
@@ -309,7 +406,6 @@ void SettingsModalExtensionCallback::OnError(int32_t code, const std::string& na
 void SettingsModalExtensionCallback::OnRemoteReady(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy)
 {
     ANS_LOGI("SettingsModalExtensionCallback OnRemoteReady");
-    ProcessStatusChanged(0, true);
 }
 
 /*

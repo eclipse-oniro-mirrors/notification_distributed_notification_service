@@ -35,10 +35,13 @@ struct AsyncCallbackInfoOpenSettings {
     napi_async_work asyncWork = nullptr;
     OpenSettingsParams params;
     CallbackPromiseInfo info;
+    bool isWithResult = false;
 };
 
+napi_value NapiNotificationSettingResult(napi_env env, void *data);
 void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data);
 napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info);
+napi_value NapiOpenNotificationSettingsWithResult(napi_env env, napi_callback_info info);
 napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_info &info, OpenSettingsParams &params);
 bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName);
 bool Init(napi_env env, AsyncCallbackInfoOpenSettings* callbackInfo, JsAnsCallbackComplete complete);

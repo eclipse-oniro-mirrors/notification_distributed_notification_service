@@ -14,7 +14,7 @@
  */
 
 import { AsyncCallback, BusinessError } from '@ohos.base';
-import { BundleOption } from 'notification.NotificationCommonDef';
+import { BundleOption, UserGrantSetting } from 'notification.NotificationCommonDef';
 import { NotificationExtensionSubscriptionInfo } from 'notification.NotificationExtensionSubscriptionInfo';
 import UIAbilityContext from 'application.UIAbilityContext';
 
@@ -40,6 +40,7 @@ export default namespace notificationExtensionSubscription {
     }
 
     native function nativeOpenSubscriptionSettings(context: UIAbilityContext): Promise<int>;
+    native function nativeOpenSubscriptionSettingsWithResult(context: UIAbilityContext): UserGrantSetting;
     native function nativeSubscribe(info: NotificationExtensionSubscriptionInfo[]): void;
     native function nativeUnsubscribe(): void;
     native function nativeGetSubscribeInfo(): NotificationExtensionSubscriptionInfo[];
@@ -83,6 +84,22 @@ export default namespace notificationExtensionSubscription {
                         reject(rejectInternalError);
                     }
                 }
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    function openSubscriptionSettingsWithResult(context: UIAbilityContext): Promise<UserGrantSetting> {
+        if (context == undefined || context === null) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<UserGrantSetting>((resolve: ResolveCallback<UserGrantSetting>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): UserGrantSetting => { return nativeOpenSubscriptionSettingsWithResult(context); });
+            p.then((data: Any): void => {
+                let result: UserGrantSetting = data as UserGrantSetting;
+                resolve(result);
             }, (error: Error): void => {
                 reject(error);
             });
