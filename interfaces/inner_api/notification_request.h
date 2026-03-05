@@ -1649,6 +1649,7 @@ private:
     void CopyBase(const NotificationRequest &other);
     void CopyOther(const NotificationRequest &other);
 
+    bool ConvertGroupInfoObjToJson(nlohmann::json &jsonObject) const;
     bool ConvertObjectsToJson(nlohmann::json &jsonObject) const;
     ErrCode CheckVersion(const sptr<NotificationRequest> &oldRequest) const;
 
