@@ -2524,10 +2524,18 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
         jsonObject["notificationTrigger"] = triggerObj;
     }
 
+    if (!ConvertGroupInfoObjToJson(nlohmann::json &jsonObject)) {
+        ANS_LOGE("Cannot convert groupInfo to JSON");
+        return false;
+    }
+    return true;
+}
+
+bool NotificationRequest::ConvertGroupInfoObjToJson(nlohmann::json &jsonObject) const
+{
     if (groupInfo_) {
         nlohmann::json groupInfoObj;
         if (!NotificationJsonConverter::ConvertToJson(groupInfo_.get(), groupInfoObj)) {
-            ANS_LOGE("Cannot convert groupInfo to JSON");
             return false;
         }
         jsonObject["groupInfo"] = groupInfoObj;
