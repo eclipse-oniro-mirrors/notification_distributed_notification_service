@@ -45,7 +45,7 @@ bool NotificationGroupInfo::GetIsGroupIcon() const
 std::string NotificationGroupInfo::Dump()
 {
     return "NotificationGroupInfo{ "
-            "isGroupIcon = " + std::to_string(isGroupIcon_) +
+            "isGroupIcon = " + std::string(isGroupIcon_ ? "true" : "false") +
             ", groupTitle = " + groupTitle_ +
             " }";
 }
