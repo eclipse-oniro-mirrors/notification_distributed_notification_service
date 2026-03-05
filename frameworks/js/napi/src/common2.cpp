@@ -187,13 +187,13 @@ napi_value Common::SetNotificationGroupInfo(
     }
     napi_value value = nullptr;
 
-    // key?: string
+    // isGroupIcon?: boolean
     napi_get_boolean(env, info->GetIsGroupIcon(), &value);
     napi_set_named_property(env, result, "isGroupIcon", value);
 
     // GroupTitle?: string
     napi_create_string_utf8(env, info->GetGroupTitle().c_str(), NAPI_AUTO_LENGTH, &value);
-    napi_set_named_property(env, result, "title", value);
+    napi_set_named_property(env, result, "groupTitle", value);
 
     return NapiGetBoolean(env, true);
 }

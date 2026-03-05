@@ -1252,8 +1252,8 @@ bool SetNotificationGroupInfo(ani_env *env, const OHOS::Notification::Notificati
 {
     std::shared_ptr<OHOS::Notification::NotificationGroupInfo> groupInfo = request->GetGroupInfo();
     if (groupInfo == nullptr) {
-        ANS_LOGE("groupInfo is Undefine");
-        return true;
+        ANS_LOGD("groupInfo is Undefine");
+        return false;
     }
     ani_object groupInfoObject;
     ani_class groupInfoCls = nullptr;
@@ -1276,7 +1276,7 @@ bool SetNotificationGroupInfo(ani_env *env, const OHOS::Notification::Notificati
             return false;
         }
     if (!SetPropertyByRef(env, object, "groupInfo", groupInfoObject)) {
-        ANS_LOGD("SetNotificationRequest set 'groupInfo' failed");
+        ANS_LOGE("SetNotificationRequest set 'groupInfo' failed");
         return false;
     }
     return true;

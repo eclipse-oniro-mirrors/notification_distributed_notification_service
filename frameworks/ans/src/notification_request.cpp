@@ -1778,7 +1778,7 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    valid = groupInfo_ ? true : false;
+    valid = groupInfo_ != nullptr ? true : false;
     if (!parcel.WriteBool(valid)) {
         ANS_LOGE("Failed to write groupInfo for the notification");
         return false;
