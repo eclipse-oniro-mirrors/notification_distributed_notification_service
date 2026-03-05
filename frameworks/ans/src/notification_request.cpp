@@ -886,27 +886,7 @@ std::string NotificationRequest::Dump()
 bool NotificationRequest::CollaborationToJson(std::string& data) const
 {
     nlohmann::json jsonObject;
-    jsonObject["id"]              = notificationId_;
-    jsonObject["autoDeletedTime"] = autoDeletedTime_;
-
-    jsonObject["groupName"]         = groupName_;
-    jsonObject["label"]             = label_;
-    jsonObject["classification"]    = classification_;
-    jsonObject["isRemoveAllowed"]   = isRemoveAllowed_;
-
-    jsonObject["tapDismissed"]     = tapDismissed_;
-    jsonObject["isOngoing"]        = inProgress_;
-    jsonObject["isAlertOnce"]      = alertOneTime_;
-    jsonObject["isUnremovable"]    = unremovable_;
-
-    jsonObject["creatorBundleName"] = GetOwnerBundleName();
-    jsonObject["creatorUid"]        = GetOwnerUid();
-    jsonObject["creatorPid"]        = GetCreatorPid();
-    jsonObject["creatorInstanceKey"] = creatorInstanceKey_;
-    jsonObject["appInstanceKey"]    = appInstanceKey_;
-    jsonObject["appIndex"]    = appIndex_;
-    jsonObject["appName"]    = appName_;
-    jsonObject["notificationControlFlags"] = notificationControlFlags_;
+    CollaborationBaseToJson(jsonObject);
 
     if (additionalParams_) {
         AAFwk::WantParamWrapper wWrapper(*additionalParams_);
@@ -942,7 +922,31 @@ bool NotificationRequest::CollaborationToJson(std::string& data) const
     return true;
 }
 
-bool NotificationRequest::CollaborationGroupInfoToJson(nlohmann::json jsonObject) const
+void NotificationRequest::CollaborationBaseToJson(nlohmann::json &jsonObject) const
+{
+    jsonObject["id"]              = notificationId_;
+    jsonObject["autoDeletedTime"] = autoDeletedTime_;
+
+    jsonObject["groupName"]         = groupName_;
+    jsonObject["label"]             = label_;
+    jsonObject["classification"]    = classification_;
+    jsonObject["isRemoveAllowed"]   = isRemoveAllowed_;
+
+    jsonObject["tapDismissed"]     = tapDismissed_;
+    jsonObject["isOngoing"]        = inProgress_;
+    jsonObject["isAlertOnce"]      = alertOneTime_;
+    jsonObject["isUnremovable"]    = unremovable_;
+
+    jsonObject["creatorBundleName"] = GetOwnerBundleName();
+    jsonObject["creatorUid"]        = GetOwnerUid();
+    jsonObject["creatorPid"]        = GetCreatorPid();
+    jsonObject["creatorInstanceKey"] = creatorInstanceKey_;
+    jsonObject["appInstanceKey"]    = appInstanceKey_;
+    jsonObject["appIndex"]    = appIndex_;
+    jsonObject["appName"]    = appName_;
+    jsonObject["notificationControlFlags"] = notificationControlFlags_;
+}
+bool NotificationRequest::CollaborationGroupInfoToJson(nlohmann::json &jsonObject) const
 {
     if (groupInfo_ != nullptr) {
         nlohmann::json groupInfoObj;
