@@ -24,7 +24,7 @@ namespace Notification {
 #ifdef PLAYER_FRAMEWORK_ENABLE
 static const int32_t MAX_RETRY_TIME = 2;
 static const uint64_t TASK_DELAY = 2 * 1000 * 1000;
-static const std::string DYNAMIC_LIB_PATH = "libans_dynamic_open.z.so";
+static const std::string DYNAMIC_LIB_PATH = "libans_dynamic.z.so";
 static const std::string REMOVE_TONC_FUNC_STR = "SystemSoundRemoveCustomizedTone";
 static const std::string REMOVE_TONC_LIST_FUNC_STR = "SystemSoundRemoveCustomizedToneList";
 
@@ -57,17 +57,18 @@ void SystemSoundHelper::RemoveCustomizedTone(const std::string uri)
     }
 
     std::function<void()> retryTask = [uri]() {
+        std::unique_ptr<NotificationLoadUtils> loadUtils =
+            std::make_unique<NotificationLoadUtils>(DYNAMIC_LIB_PATH);
+        if (loadUtils == nullptr || !loadUtils->IsValid()) {
+            ANS_LOGW("libans_dynamic not available");
+            return;
+        }
+        REMOVE_TONE_FUNC removeToneFunc = (REMOVE_TONE_FUNC)loadUtils->GetProxyFunc(REMOVE_TONC_FUNC_STR);
+        if (removeToneFunc == nullptr) {
+            ANS_LOGW("SystemSoundRemoveCustomizedTone not available");
+            return;
+        }
         for (int32_t i = 0; i < MAX_RETRY_TIME; i++) {
-            std::unique_ptr<NotificationLoadUtils> loadUtils =
-                std::make_unique<NotificationLoadUtils>(DYNAMIC_LIB_PATH);
-            if (loadUtils == nullptr || !loadUtils->IsValid()) {
-                continue;
-            }
-            REMOVE_TONE_FUNC removeToneFunc = (REMOVE_TONE_FUNC)loadUtils->GetProxyFunc(REMOVE_TONC_FUNC_STR);
-            if (removeToneFunc == nullptr) {
-                ANS_LOGW("AnsSystemSoundRemoveTone not available");
-                continue;
-            }
             if (removeToneFunc(uri)) {
                 break;
             }
@@ -114,18 +115,19 @@ void SystemSoundHelper::RemoveCustomizedTones(std::vector<NotificationRingtoneIn
     }
 
     std::function<void()> retryTask = [uris]() {
+        std::unique_ptr<NotificationLoadUtils> loadUtils =
+            std::make_unique<NotificationLoadUtils>(DYNAMIC_LIB_PATH);
+        if (loadUtils == nullptr || !loadUtils->IsValid()) {
+            ANS_LOGW("libans_dynamic not available");
+            return;
+        }
+        REMOVE_TONE_LIST_FUNC removeToneListFunc =
+            (REMOVE_TONE_LIST_FUNC)loadUtils->GetProxyFunc(REMOVE_TONC_LIST_FUNC_STR);
+        if (removeToneListFunc == nullptr) {
+            ANS_LOGW("SystemSoundRemoveCustomizedToneList not available");
+            return;
+        }
         for (int32_t i = 0; i < MAX_RETRY_TIME; i++) {
-            std::unique_ptr<NotificationLoadUtils> loadUtils =
-                std::make_unique<NotificationLoadUtils>(DYNAMIC_LIB_PATH);
-            if (loadUtils == nullptr || !loadUtils->IsValid()) {
-                continue;
-            }
-            REMOVE_TONE_LIST_FUNC removeToneListFunc =
-                (REMOVE_TONE_LIST_FUNC)loadUtils->GetProxyFunc(REMOVE_TONC_LIST_FUNC_STR);
-            if (removeToneListFunc == nullptr) {
-                ANS_LOGW("AnsSystemSoundRemoveTone not available");
-                continue;
-            }
             removeToneListFunc(uris);
         }
     };

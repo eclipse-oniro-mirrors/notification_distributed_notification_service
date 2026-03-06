@@ -25,11 +25,11 @@ namespace Notification {
 extern "C" {
 #endif
 
-bool SystemSoundRemoveCustomizedTone(const std::string uri)
+SYMBOL_EXPORT bool SystemSoundRemoveCustomizedTone(const std::string uri)
 {
     return SystemSoundDynamicWrapper::GetInstance().RemoveCustomizedTone(uri);
 }
-bool SystemSoundRemoveCustomizedToneList(const std::vector<std::string> uris)
+SYMBOL_EXPORT bool SystemSoundRemoveCustomizedToneList(const std::vector<std::string> uris)
 {
     return SystemSoundDynamicWrapper::GetInstance().RemoveCustomizedToneList(uris);
 }

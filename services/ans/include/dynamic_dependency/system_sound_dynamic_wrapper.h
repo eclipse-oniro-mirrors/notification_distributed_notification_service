@@ -28,7 +28,7 @@ class SystemSoundDynamicWrapper final {
 public:
     SystemSoundDynamicWrapper();
     ~SystemSoundDynamicWrapper() = default;
-    static SystemSoundDynamicWrapper GetInstance();
+    static SystemSoundDynamicWrapper& GetInstance();
     bool RemoveCustomizedTone(const std::string uri);
     bool RemoveCustomizedToneList(const std::vector<std::string> uris);
 private:
