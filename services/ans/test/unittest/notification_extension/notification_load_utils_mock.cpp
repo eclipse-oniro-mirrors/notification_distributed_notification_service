@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace Notification {
 
-static bool g_notificationProxyValid = false;
+static bool g_notificationProxyValid = true;
 static std::map<std::string, std::string> g_deviceList;
 
 void DeviceCheck::ResetDeviceData()
@@ -90,12 +90,6 @@ void InitHACallBack(std::function<void(int32_t, int32_t, uint32_t, std::string)>
 
 void InitSendReportCallBack(std::function<void(int32_t, int32_t, std::string)> callback)
 {
-    return;
-}
-
-NotificationLoadUtils::NotificationLoadUtils(const std::string& path) : path_(path)
-{
-    g_notificationProxyValid = true;
     return;
 }
 

@@ -42,7 +42,7 @@ NotificationConfigParse::NotificationConfigParse()
     };
 }
 
-std::shared_ptr<NotificationAppPrivileges> NotificationConfigParse::GetAppPrivileges(
+std::shared_ptr<NotificationAppPrivileges> __attribute__((weak)) NotificationConfigParse::GetAppPrivileges(
     const std::string &bundleName) const
 {
     nlohmann::json root;
@@ -69,7 +69,8 @@ std::shared_ptr<NotificationAppPrivileges> NotificationConfigParse::GetAppPrivil
     return nullptr;
 }
 
-bool NotificationConfigParse::GetConfigJson(const std::string &keyCheck, nlohmann::json &configJson) const
+bool __attribute__((weak)) NotificationConfigParse::GetConfigJson(
+    const std::string &keyCheck, nlohmann::json &configJson) const
 {
     if (notificationConfigJsons_.size() <= 0) {
         ANS_LOGE("Failed to get config json cause empty notificationConfigJsons.");
@@ -97,7 +98,7 @@ bool NotificationConfigParse::GetConfigJson(const std::string &keyCheck, nlohman
     return ret;
 }
 
-bool NotificationConfigParse::GetCurrentSlotReminder(
+bool __attribute__((weak)) NotificationConfigParse::GetCurrentSlotReminder(
     std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const
 {
     nlohmann::json root;
@@ -144,7 +145,8 @@ bool NotificationConfigParse::GetCurrentSlotReminder(
     return true;
 }
 
-uint32_t NotificationConfigParse::GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType)
+uint32_t __attribute__((weak)) NotificationConfigParse::GetConfigSlotReminderModeByType(
+    NotificationConstant::SlotType slotType)
 {
     static std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> configSlotsReminder;
     {
@@ -166,7 +168,7 @@ uint32_t NotificationConfigParse::GetConfigSlotReminderModeByType(NotificationCo
     return 0;
 }
 
-bool NotificationConfigParse::IsLiveViewEnabled(const std::string bundleName) const
+bool __attribute__((weak)) NotificationConfigParse::IsLiveViewEnabled(const std::string bundleName) const
 {
     std::shared_ptr<NotificationAppPrivileges> appPrivileges = GetAppPrivileges(bundleName);
     if (appPrivileges == nullptr) {
@@ -175,7 +177,7 @@ bool NotificationConfigParse::IsLiveViewEnabled(const std::string bundleName) co
     return appPrivileges->IsLiveViewEnabled();
 }
 
-bool NotificationConfigParse::IsReminderEnabled(const std::string& bundleName) const
+bool __attribute__((weak)) NotificationConfigParse::IsReminderEnabled(const std::string& bundleName) const
 {
     std::shared_ptr<NotificationAppPrivileges> appPrivileges = GetAppPrivileges(bundleName);
     if (appPrivileges == nullptr) {
@@ -184,7 +186,7 @@ bool NotificationConfigParse::IsReminderEnabled(const std::string& bundleName) c
     return appPrivileges->IsReminderEnabled();
 }
 
-bool NotificationConfigParse::IsDistributedReplyEnabled(const std::string& bundleName) const
+bool __attribute__((weak)) NotificationConfigParse::IsDistributedReplyEnabled(const std::string& bundleName) const
 {
     std::shared_ptr<NotificationAppPrivileges> appPrivileges = GetAppPrivileges(bundleName);
     if (appPrivileges == nullptr) {
@@ -193,7 +195,7 @@ bool NotificationConfigParse::IsDistributedReplyEnabled(const std::string& bundl
     return appPrivileges->IsDistributedReplyEnabled();
 }
 
-bool NotificationConfigParse::IsBannerEnabled(const std::string bundleName) const
+bool __attribute__((weak)) NotificationConfigParse::IsBannerEnabled(const std::string bundleName) const
 {
     std::shared_ptr<NotificationAppPrivileges> appPrivileges = GetAppPrivileges(bundleName);
     if (appPrivileges != nullptr && appPrivileges->IsBannerEnabled()) {
@@ -207,7 +209,7 @@ bool NotificationConfigParse::IsBannerEnabled(const std::string bundleName) cons
 #endif
 }
 
-void NotificationConfigParse::GetFlowCtrlConfigFromCCM(FlowControlThreshold &threshold)
+void __attribute__((weak)) NotificationConfigParse::GetFlowCtrlConfigFromCCM(FlowControlThreshold &threshold)
 {
     nlohmann::json root;
     std::string JsonPoint = "/";
@@ -244,7 +246,7 @@ void NotificationConfigParse::GetFlowCtrlConfigFromCCM(FlowControlThreshold &thr
     ANS_LOGI("GetFlowCtrlConfigFromCCM success");
 }
 
-bool NotificationConfigParse::GetSmartReminderEnableList(std::vector<std::string>& deviceTypes)
+bool __attribute__((weak)) NotificationConfigParse::GetSmartReminderEnableList(std::vector<std::string>& deviceTypes)
 {
     nlohmann::json root;
     std::string jsonPoint = "/";
@@ -271,7 +273,8 @@ bool NotificationConfigParse::GetSmartReminderEnableList(std::vector<std::string
     return true;
 }
 
-bool NotificationConfigParse::GetMirrorNotificationEnabledStatus(std::vector<std::string>& deviceTypes)
+bool __attribute__((weak)) NotificationConfigParse::GetMirrorNotificationEnabledStatus(
+    std::vector<std::string>& deviceTypes)
 {
     nlohmann::json root;
     std::string jsonPoint = "/";
@@ -300,7 +303,8 @@ bool NotificationConfigParse::GetMirrorNotificationEnabledStatus(std::vector<std
     return true;
 }
 
-bool NotificationConfigParse::GetAppAndDeviceRelationMap(std::map<std::string, std::string>& relationMap)
+bool __attribute__((weak)) NotificationConfigParse::GetAppAndDeviceRelationMap(
+    std::map<std::string, std::string>& relationMap)
 {
     nlohmann::json root;
     std::string jsonPoint = "/";
@@ -329,7 +333,7 @@ bool NotificationConfigParse::GetAppAndDeviceRelationMap(std::map<std::string, s
     return true;
 }
 
-std::unordered_set<std::string> NotificationConfigParse::GetCollaborativeDeleteType() const
+std::unordered_set<std::string> __attribute__((weak)) NotificationConfigParse::GetCollaborativeDeleteType() const
 {
     nlohmann::json root;
     std::string JsonPoint = "/";
@@ -360,7 +364,7 @@ std::unordered_set<std::string> NotificationConfigParse::GetCollaborativeDeleteT
     return collaborativeDeleteTypeSet;
 }
 
-bool NotificationConfigParse::GetFilterUidAndBundleName(const std::string &key)
+bool __attribute__((weak)) NotificationConfigParse::GetFilterUidAndBundleName(const std::string &key)
 {
     nlohmann::json root;
     std::string jsonPoint = "/";
@@ -395,7 +399,7 @@ bool NotificationConfigParse::GetFilterUidAndBundleName(const std::string &key)
     return false;
 }
 
-void NotificationConfigParse::GetCollaborationFilter()
+void __attribute__((weak)) NotificationConfigParse::GetCollaborationFilter()
 {
     if (!GetFilterUidAndBundleName(COLLABORATION_FILTER_KEY_UID)) {
         ANS_LOGW("Failed to get filterUid.");
@@ -405,7 +409,8 @@ void NotificationConfigParse::GetCollaborationFilter()
     }
 }
 
-bool NotificationConfigParse::IsInCollaborationFilter(const std::string& bundleName, int32_t uid) const
+bool __attribute__((weak)) NotificationConfigParse::IsInCollaborationFilter(
+    const std::string& bundleName, int32_t uid) const
 {
     if (uidList_.empty() && bundleNameList_.empty()) {
         ANS_LOGD("empty uidList or bundleNameList");
@@ -426,7 +431,7 @@ bool NotificationConfigParse::IsInCollaborationFilter(const std::string& bundleN
     return false;
 }
 
-uint32_t NotificationConfigParse::GetStartAbilityTimeout()
+uint32_t __attribute__((weak)) NotificationConfigParse::GetStartAbilityTimeout()
 {
     nlohmann::json root;
     std::string JsonPoint = "/";
@@ -451,7 +456,7 @@ uint32_t NotificationConfigParse::GetStartAbilityTimeout()
     return 0;
 }
 
-bool NotificationConfigParse::CheckAppLiveViewCcm()
+bool __attribute__((weak)) NotificationConfigParse::CheckAppLiveViewCcm()
 {
     nlohmann::json root;
     std::string JsonPoint = "/";
@@ -463,7 +468,7 @@ bool NotificationConfigParse::CheckAppLiveViewCcm()
     return true;
 }
 
-void NotificationConfigParse::GetReportTrustListConfig()
+void __attribute__((weak)) NotificationConfigParse::GetReportTrustListConfig()
 {
     nlohmann::json root;
     std::string reportJsonPoint = "/";
@@ -498,17 +503,17 @@ void NotificationConfigParse::GetReportTrustListConfig()
     return;
 }
 
-bool NotificationConfigParse::IsReportTrustList(const std::string& bundleName) const
+bool __attribute__((weak)) NotificationConfigParse::IsReportTrustList(const std::string& bundleName) const
 {
     return reporteTrustSet_.count(bundleName);
 }
 
-bool NotificationConfigParse::IsReportTrustBundles(const std::string& bundleName) const
+bool __attribute__((weak)) NotificationConfigParse::IsReportTrustBundles(const std::string& bundleName) const
 {
     return keyTrustBundles_.count(bundleName);
 }
 
-bool NotificationConfigParse::GetCloneExpiredTime(int32_t& days)
+bool __attribute__((weak)) NotificationConfigParse::GetCloneExpiredTime(int32_t& days)
 {
     nlohmann::json root;
     std::string reportJsonPoint = "/";
@@ -532,7 +537,7 @@ bool NotificationConfigParse::GetCloneExpiredTime(int32_t& days)
     return true;
 }
 
-bool NotificationConfigParse::GetCollaborativeDeleteTypeByDevice(std::map<std::string,
+bool __attribute__((weak)) NotificationConfigParse::GetCollaborativeDeleteTypeByDevice(std::map<std::string,
     std::map<std::string, std::unordered_set<std::string>>>& resultMap) const
 {
     nlohmann::json root;
@@ -566,7 +571,7 @@ bool NotificationConfigParse::GetCollaborativeDeleteTypeByDevice(std::map<std::s
     return true;
 }
 
-bool NotificationConfigParse::ParseCollaborativeDeleteTypesDevices(std::map<std::string,
+bool __attribute__((weak)) NotificationConfigParse::ParseCollaborativeDeleteTypesDevices(std::map<std::string,
     std::map<std::string, std::unordered_set<std::string>>>& resultMap,
     nlohmann::json& collaborativeDeleteTypes) const
 {
@@ -587,7 +592,7 @@ bool NotificationConfigParse::ParseCollaborativeDeleteTypesDevices(std::map<std:
     return true;
 }
 
-bool NotificationConfigParse::ParseDeviceSlotType(const nlohmann::json& device,
+bool __attribute__((weak)) NotificationConfigParse::ParseDeviceSlotType(const nlohmann::json& device,
     std::map<std::string, std::unordered_set<std::string>>& peerDeviceTypeMap) const
 {
     for (const auto& peerDevice : device[PEER_DELETE_FILTER_DEVICE]) {
@@ -612,7 +617,8 @@ bool NotificationConfigParse::ParseDeviceSlotType(const nlohmann::json& device,
     return true;
 }
 
-bool NotificationConfigParse::IsNotificationExtensionLifecycleDestroyTimeConfigured(uint32_t &outDestroyTime) const
+bool __attribute__((weak)) NotificationConfigParse::IsNotificationExtensionLifecycleDestroyTimeConfigured(
+    uint32_t &outDestroyTime) const
 {
     nlohmann::json root;
     std::string jsonPoint = "/";
@@ -650,7 +656,8 @@ bool NotificationConfigParse::IsNotificationExtensionLifecycleDestroyTimeConfigu
     return false;
 }
 
-bool NotificationConfigParse::IsNotificationExtensionSubscribeSupportHfp(bool &outSupportHfp) const
+bool __attribute__((weak)) NotificationConfigParse::IsNotificationExtensionSubscribeSupportHfp(
+    bool &outSupportHfp) const
 {
     nlohmann::json root;
     std::string jsonPoint = "/";
@@ -687,7 +694,7 @@ bool NotificationConfigParse::IsNotificationExtensionSubscribeSupportHfp(bool &o
     return false;
 }
 
-bool NotificationConfigParse::GetNotificationExtensionEnabledBundlesWriteList(
+bool __attribute__((weak)) NotificationConfigParse::GetNotificationExtensionEnabledBundlesWriteList(
     std::vector<std::string>& bundles) const
 {
     nlohmann::json root;
