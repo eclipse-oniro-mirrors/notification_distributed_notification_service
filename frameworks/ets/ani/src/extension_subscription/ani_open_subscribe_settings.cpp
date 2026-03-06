@@ -149,7 +149,7 @@ ani_object StsNotificationSettingResult(ani_env *env, std::shared_ptr<OpenSettin
         return nullptr;
     }
     if (ANI_OK != env->Object_SetPropertyByName_Boolean(
-        outAniObj, "userGrantEnabled", BoolToAniBoolean(enabled))) {
+        outAniObj, "userGrantEnabled", NotificationSts::BoolToAniBoolean(enabled))) {
         ANS_LOGE("Set userGrantEnabled fail");
         return nullptr;
     }
@@ -295,6 +295,7 @@ ani_object AniOpenSubscribeSettingsWithResult(ani_env *env, ani_object content)
         ANS_LOGE("Promise_New faild");
         OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+        isExist.store(false);
         return nullptr;
     }
     info->resolver = aniResolver;

@@ -239,6 +239,7 @@ ani_object AniOpenNotificationSettings(ani_env *env, ani_object content)
     ani_resolver aniResolver {};
     if (ANI_OK != env->Promise_New(&aniResolver, &aniPromise)) {
         ANS_LOGE("Promise_New faild");
+        isExist.store(false);
         return nullptr;
     }
     info->resolver = aniResolver;
