@@ -19,14 +19,15 @@ ohos_unittest("system_sound_dynamic_wrapper_test") {
   module_out_path = "${component_name}/distributed_notification_service/unittest"
   
   sources = [
+    "${services_path}/ans/src/dynamic_dependency/system_sound_dynamic_wrapper.cpp",
     "system_sound_dynamic_wrapper_test.cpp",
   ]
   
   include_dirs = [
     ".",
-    "${services_path}/ans/include/dynamic_depnendency",
+    "${services_path}/ans/include/dynamic_dependency",
   ]
-  deps = [ "${services_path}/ans:libans_dynamic" ]
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
   
   external_deps = [
     "googletest:gmock_main",

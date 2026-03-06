@@ -28,7 +28,7 @@ namespace {
 static const int32_t REMOVE_SUCCESS_COUNT = 1;
 }
 
-SystemSoundDynamicWrapper SystemSoundDynamicWrapper::GetInstance()
+SystemSoundDynamicWrapper& SystemSoundDynamicWrapper::GetInstance()
 {
     static SystemSoundDynamicWrapper instance;
     return instance;
@@ -49,7 +49,7 @@ bool SystemSoundDynamicWrapper::RemoveCustomizedTone(const std::string uri)
         return false;
     }
     
-    int32_t result = systemSoundClient_->RemoveCustomizedTone(nullptr, std::string(uri));
+    int32_t result = systemSoundClient_->RemoveCustomizedTone(nullptr, uri);
     ANS_LOGI("Remove Customized tone, uri: %{public}s, result: %{public}d",
         uri.c_str(), result);
     return result == REMOVE_SUCCESS_COUNT;
