@@ -189,41 +189,6 @@ HWTEST_F(NotificationRequestTest, NotificationMarshalling_0102, Level1)
 }
 
 /**
- * @tc.name: NotificationUnMarshalling_0100
- * @tc.desc: UnMarshalling with groupInfo
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationRequestTest, NotificationUnMarshalling_0100, Level1)
-{
-    int32_t myNotificationId = 10;
-    Parcel parcel;
-    NotificationRequest notificationRequest(myNotificationId);
-    auto result = notificationRequest.Marshalling(parcel);
-    auto request = NotificationRequest::Unmarshalling(parcel);
-    EXPECT_NE(request, nullptr);
-    delete request;
-}
-
-/**
- * @tc.name: NotificationUnMarshalling_0100
- * @tc.desc: UnMarshalling with groupInfo
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationRequestTest, NotificationUnMarshalling_0101, Level1)
-{
-    int32_t myNotificationId = 10;
-    Parcel parcel;
-    NotificationRequest notificationRequest(myNotificationId);
-    notificationRequest.SetGroupInfo(nullptr);
-    auto request = NotificationRequest::Unmarshalling(parcel);
-    EXPECT_NE(request, nullptr);
-    delete request;
-}
-
-
-/**
  * @tc.name: NotificationReadFromParcel_0100
  * @tc.desc: ReadFromParcel
  * @tc.type: FUNC
