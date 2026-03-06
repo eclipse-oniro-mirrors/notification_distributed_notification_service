@@ -1584,7 +1584,7 @@ HWTEST_F(NotificationRequestTest, ConvertObjectsToJson_0002, Level1)
     nlohmann::json jsonObject;
     auto result = request.ConvertObjectsToJson(jsonObject);
     EXPECT_EQ(result, true);
-    EXPECT_EQ(jsonObject["groupInfo"]["groupTitle"],"testTitle");
+    EXPECT_EQ(jsonObject["groupInfo"]["groupTitle"], "testTitle");
 }
 
 /**
