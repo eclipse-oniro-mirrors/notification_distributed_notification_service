@@ -621,6 +621,12 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetNotificationParameters(int32_t notificationId, const std::string &label,
+        sptr<NotificationParameters> &parameters) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode TriggerLocalLiveView(const sptr<NotificationBundleOption>& bundleOption, const int32_t notificationId,
         const sptr<NotificationButtonOption>& buttonOption) override
     {

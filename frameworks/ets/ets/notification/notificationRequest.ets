@@ -78,6 +78,18 @@ class UnifiedGroupInfoInner implements UnifiedGroupInfo {
     public extraInfo?: Record<string, RecordData> | undefined;
 }
 
+export interface NotificationParameters {
+    wantAction?: string;
+    wantUri?: string;
+    wantParameters?: Record<string, RecordData>;
+}
+
+class NotificationParametersInner implements NotificationParameters {
+    public wantAction?: string | undefined;
+    public wantUri?: string | undefined;
+    public wantParameters?: Record<string, RecordData> | undefined;
+}
+
 export enum MonitorEvent {
     MONITOR_TYPE_ENTRY = 1,
     MONITOR_TYPE_LEAVE = 2

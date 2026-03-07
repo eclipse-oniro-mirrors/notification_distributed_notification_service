@@ -141,6 +141,48 @@ bool WarpNotificationUnifiedGroupInfo(ani_env* env,
     return true;
 }
 
+bool WrapNotificationParameters(ani_env *env, const sptr<NotificationParameters> parameter, ani_object &parameterObj)
+{
+    ANS_LOGD("WrapNotificationParameters start");
+    if (env == nullptr || parameter == nullptr) {
+        ANS_LOGE("WrapNotificationParameters failed, has nullptr");
+        return false;
+    }
+
+    ani_class paramCls = nullptr;
+    if ((!CreateClassObjByClassName(env,
+        "notification.notificationRequest.NotificationParametersInner", paramCls, parameterObj))
+        || paramCls == nullptr || parameterObj == nullptr) {
+        ANS_LOGE("WrapNotificationParameters: create class failed");
+        return false;
+    }
+    // wantAction?: string;
+    if (!SetPropertyOptionalByString(env, parameterObj, "wantAction", parameter->GetWantAction())) {
+        ANS_LOGE("WrapNotificationParameters: set wantAction failed");
+        return false;
+    }
+    // wantUri?: string;
+    if (!SetPropertyOptionalByString(env, parameterObj, "wantUri", parameter->GetWantUri())) {
+        ANS_LOGE("WrapNotificationParameters: set wantUri failed");
+        return false;
+    }
+    // wantParameters?: Record<string, RecordData>;
+    std::shared_ptr<AAFwk::WantParams> wantParams = parameter->GetWantParameters();
+    if (wantParams) {
+        ani_ref valueRef = OHOS::AppExecFwk::WrapWantParams(env, *wantParams);
+        if (valueRef == nullptr) {
+            ANS_LOGE("WrapWantParams faild. 'wantParams'");
+            return false;
+        }
+        if (!SetPropertyByRef(env, parameterObj, "wantParameters", valueRef)) {
+            ANS_LOGE("WrapNotificationParameters: set wantParameters failed");
+            return false;
+        }
+    }
+    ANS_LOGD("WrapNotificationParameters end");
+    return true;
+}
+
 void GetNotificationRequestByBooleanOne(ani_env *env, ani_object obj,
     std::shared_ptr<NotificationRequest> &request)
 {

@@ -127,6 +127,7 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/notification_multiline_content.cpp",
     "${frameworks_module_ans_path}/src/notification_normal_content.cpp",
     "${frameworks_module_ans_path}/src/notification_operation_info.cpp",
+    "${frameworks_module_ans_path}/src/notification_parameters.cpp",
     "${frameworks_module_ans_path}/src/notification_picture_content.cpp",
     "${frameworks_module_ans_path}/src/notification_progress.cpp",
     "${frameworks_module_ans_path}/src/notification_reminder_info.cpp",
@@ -286,14 +287,14 @@ ohos_source_set("ans_callback_proxy") {
   public_configs = [ ":ans_innerkits_config" ]
   output_values = get_target_outputs(":ans_manager_interface")
   sources = filter_include(output_values,
-                            [
-                              "*_dialog_callback_proxy.cpp",
-                              "*_operation_callback_proxy.cpp",
-                              "*_result_data_synchronizer_proxy.cpp",
-                              "*_subscriber_proxy.cpp",
-                              "*_subscriber_local_live_view_proxy.cpp",
-                              "*badge_query_callback_proxy.cpp",
-                            ])
+                           [
+                             "*_dialog_callback_proxy.cpp",
+                             "*_operation_callback_proxy.cpp",
+                             "*_result_data_synchronizer_proxy.cpp",
+                             "*_subscriber_proxy.cpp",
+                             "*_subscriber_local_live_view_proxy.cpp",
+                             "*badge_query_callback_proxy.cpp",
+                           ])
   deps = [ ":ans_manager_interface" ]
   defines = []
   if (notification_smart_reminder_supported) {
@@ -328,14 +329,14 @@ ohos_source_set("ans_callback_stub") {
   public_configs = [ ":ans_innerkits_config" ]
   output_values = get_target_outputs(":ans_manager_interface")
   sources = filter_include(output_values,
-                            [
-                              "*_dialog_callback_stub.cpp",
-                              "*_operation_callback_stub.cpp",
-                              "*_result_data_synchronizer_stub.cpp",
-                              "*_subscriber_stub.cpp",
-                              "*_subscriber_local_live_view_stub.cpp",
-                              "*badge_query_callback_stub.cpp",
-                            ])
+                           [
+                             "*_dialog_callback_stub.cpp",
+                             "*_operation_callback_stub.cpp",
+                             "*_result_data_synchronizer_stub.cpp",
+                             "*_subscriber_stub.cpp",
+                             "*_subscriber_local_live_view_stub.cpp",
+                             "*badge_query_callback_stub.cpp",
+                           ])
   defines = []
   if (notification_smart_reminder_supported) {
     defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]

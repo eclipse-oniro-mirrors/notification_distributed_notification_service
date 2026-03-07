@@ -81,6 +81,10 @@ public:
         int32_t,
         const std::vector<std::string>&,
         sptr<NotificationRequest>&));
+    MOCK_METHOD3(GetNotificationParameters, ErrCode(
+        int32_t,
+        const std::string&,
+        sptr<NotificationParameters>&));
     MOCK_METHOD2(CanPublishAsBundle, ErrCode(const std::string&, bool&));
     MOCK_METHOD2(PublishAsBundle, ErrCode(const sptr<NotificationRequest>&, const std::string&));
     MOCK_METHOD2(PublishAsBundleWithMaxCapacity, ErrCode(const sptr<NotificationRequest>&, const std::string&));
