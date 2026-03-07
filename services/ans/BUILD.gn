@@ -210,6 +210,7 @@ ohos_source_set("ans_service_sources") {
 
   external_deps = [
     "ability_base:configuration",
+    "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
     "ability_runtime:appkit_native",
@@ -348,6 +349,12 @@ ohos_shared_library("libans") {
 
   defines = []
 
+  ldflags = [
+    "-flto",
+    "-Wl,--gc-sections",
+    "-Wl,-Bsymbolic",
+  ]
+
   if (is_double_framework) {
     cflags += [ "-DCONFIG_DUAL_FRAMEWORK" ]
   }
@@ -372,7 +379,7 @@ ohos_shared_library("libans") {
     }
     if (distributed_notification_service_feature_enable_pgo && target_cpu == "arm64" &&
         enable_enhanced_opt) {
-      ldflags = [ "-Wl,--aarch64-inline-plt" ]
+      ldflags += [ "-Wl,--aarch64-inline-plt" ]
     }
   }
 
