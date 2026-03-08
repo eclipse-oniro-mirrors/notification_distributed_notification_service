@@ -48,6 +48,10 @@ ohos_unittest("rdb_mgr_repo_unit_test") {
     "json:nlohmann_json_static",
   ]
 
+  if (hisysevent_usage) {
+    external_deps += [ "hisysevent:libhisysevent" ]
+  }
+
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }

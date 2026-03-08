@@ -40,8 +40,6 @@
 #include "os_account_manager.h"
 #include "refbase.h"
 
-extern void MockVerifyNativeToken(bool mockRet);
-extern void MockVerifyShellToken(bool mockRet);
 extern void MockGetDistributedEnableInApplicationInfo(bool mockRet, uint8_t mockCase = 0);
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 extern void MockIsOsAccountExists(bool mockRet);
@@ -906,7 +904,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_258000, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_259000, Function | SmallTest | Level1)
 {
-    MockVerifyNativeToken(false);
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
 
@@ -923,7 +920,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_259000, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_260000, Function | SmallTest | Level1)
 {
-    MockVerifyNativeToken(false);
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
 
@@ -941,7 +937,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_260000, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_261000, Function | SmallTest | Level1)
 {
-    MockVerifyNativeToken(false);
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
 
@@ -1158,7 +1153,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_270000, Function | SmallTest | Level1)
 HWTEST_F(AnsBranchTest, AnsBranchTest_271000, Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockVerifyShellToken(false);
 
     std::string cmd = "CMD";
     std::string bundle = "Bundle";
@@ -1249,7 +1243,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_276000, Function | SmallTest | Level1)
 {
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    MockVerifyNativeToken(true);
     MockGetDistributedEnableInApplicationInfo(true, 2);
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(
         TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
@@ -1658,7 +1651,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_286005, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_286006, Function | SmallTest | Level1)
 {
-    advancedNotificationService_->InvokeCheckConfig(0);
+    advancedNotificationService_->InvokeCheckConfig("0");
 }
 
 /**
@@ -1681,7 +1674,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_286007, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_287001, Function | SmallTest | Level1)
 {
-    MockVerifyNativeToken(true);
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
@@ -1729,7 +1721,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287004, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_287005, Function | SmallTest | Level1)
 {
-    MockVerifyNativeToken(true);
     MockIsVerfyPermisson(true);
     std::vector<std::string> triggerKeys;
     std::vector<int32_t> userIds;
@@ -1771,7 +1762,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287006, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_287007, Function | SmallTest | Level1)
 {
-    MockVerifyNativeToken(true);
     MockIsVerfyPermisson(true);
     std::string triggerKey;
     int32_t userId = 100;
@@ -3130,7 +3120,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287062, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_287063, Function | SmallTest | Level1)
 {
-    MockVerifyNativeToken(true);
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
@@ -3210,7 +3199,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287066, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_287067, Function | SmallTest | Level1)
 {
-    MockVerifyNativeToken(true);
     MockIsVerfyPermisson(true);
     std::string triggerKey = "secure_trigger_live_view_ans_distributedhashCodeTest_";
     int32_t userId = 100;
