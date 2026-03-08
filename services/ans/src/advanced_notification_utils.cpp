@@ -986,7 +986,7 @@ void AdvancedNotificationService::OnDistributedDelete(
     }));
 }
 
-ErrCode AdvancedNotificationService::GetDistributedEnableInApplicationInfo(
+ErrCode __attribute__((weak)) AdvancedNotificationService::GetDistributedEnableInApplicationInfo(
     const sptr<NotificationBundleOption> bundleOption, bool &enable)
 {
     int32_t userId = SUBSCRIBE_USER_INIT;
