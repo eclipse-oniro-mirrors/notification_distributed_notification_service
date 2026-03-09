@@ -78,6 +78,7 @@ bool ApplicationChangeBox::SetApplicationChangeList(const std::vector<Notificati
         box.PutValue(std::make_shared<TlvItem>(APPLICATION_INFO_START + offset++, liveViewType));
         int32_t notificationType = static_cast<int32_t>(application.GetNotificationEnable());
         box.PutValue(std::make_shared<TlvItem>(APPLICATION_INFO_START + offset++, notificationType));
+        box.PutValue(std::make_shared<TlvItem>(APPLICATION_INFO_START + offset++, application.GetAppIndex()));
         box.PutValue(std::make_shared<TlvItem>(APPLICATION_INFO_START + offset++, application.GetBundleUid()));
         if (application.GetBundleIcon() != nullptr) {
             std::vector<uint8_t> buffer;
@@ -151,6 +152,9 @@ bool ApplicationChangeBox::GetApplicationChangeList(std::vector<NotificationDist
         }
         if (box.GetInt32Value(APPLICATION_INFO_START + offset++, intType)) {
             application.SetNotificationEnable(static_cast<NotificationConstant::SWITCH_STATE>(intType));
+        }
+        if (box.GetInt32Value(APPLICATION_INFO_START + offset++, intType)) {
+            application.SetAppIndex(intType);
         }
         if (box.GetInt32Value(APPLICATION_INFO_START + offset++, intType)) {
             application.SetBundleUid(intType);

@@ -498,6 +498,11 @@ public:
     static const int32_t TRIGGER_GEOFENCE_REASON_DELETE = 38;
 
     /**
+     * Indicates that notification is deleted because distributed enable close.
+     */
+    static const int32_t DISTRIBUTED_APPLICATION_ENABLE_REASON_DELETE = 39;
+
+    /**
      * Indicates that a notification is deleted for other reasons.
      */
     static const int32_t APP_CANCEL_REASON_OTHER = 100;

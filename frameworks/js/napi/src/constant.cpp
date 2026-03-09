@@ -509,6 +509,24 @@ napi_value SubscribeTypeInit(napi_env env, napi_value exports)
     return exports;
 }
 
+napi_value NotificationTypeInit(napi_env env, napi_value exports)
+{
+    ANS_LOGD("%{public}s, called", __func__);
+
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+
+    SetNamedPropertyByInteger(env, obj, (int32_t)NotificationType::NOTIFICATION, "NOTIFICATION");
+    SetNamedPropertyByInteger(env, obj, (int32_t)NotificationType::LIVE_VIEW, "LIVE_VIEW");
+
+    napi_property_descriptor exportFuncs[] = {
+        DECLARE_NAPI_PROPERTY("NotificationType", obj),
+    };
+
+    napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);
+    return exports;
+}
+
 napi_value ConstantInit(napi_env env, napi_value exports)
 {
     RemoveReasonInit(env, exports);
@@ -531,6 +549,7 @@ napi_value ConstantInit(napi_env env, napi_value exports)
     PriorityNotificationTypeInit(env, exports);
     PriorityEnableStatusInit(env, exports);
     PriorityStrategyStatusInit(env, exports);
+    NotificationTypeInit(env, exports);
     return exports;
 }
 }  // namespace NotificationNapi

@@ -203,6 +203,10 @@ public:
     MOCK_METHOD2(GetBundlePriorityConfig, ErrCode(const sptr<NotificationBundleOption> &, std::string &));
     MOCK_METHOD4(SetDistributedEnabledByBundle,
         ErrCode(const sptr<NotificationBundleOption>&, const std::string&, bool, bool));
+    MOCK_METHOD2(GetDistributedBundleListByType,
+        ErrCode(const bool isNotification, std::vector<DistributedBundleOption> &enableList));
+    MOCK_METHOD2(GetDistributedBundleInfo, ErrCode(const std::vector<sptr<NotificationBundleOption>>& bundleOption,
+        std::vector<DistributedNotificationBundleInfo>& bundleInfoList));
     MOCK_METHOD2(SetDeviceDistributedBundleList, ErrCode(int32_t, const std::vector<NotificationDistributedBundle>&));
     MOCK_METHOD2(GetLocalDistributedBundleList,
         ErrCode(const std::string&, std::vector<NotificationDistributedBundle>&));

@@ -638,6 +638,16 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+    ErrCode GetDistributedBundleListByType(const bool isNotification,
+        std::vector<DistributedBundleOption> &enableList) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode GetDistributedBundleInfo(const std::vector<sptr<NotificationBundleOption>>& bundleOption,
+        std::vector<DistributedNotificationBundleInfo>& bundleInfoList) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
     ErrCode SetDeviceDistributedBundleList(int32_t type,
         const std::vector<NotificationDistributedBundle>& bundles) override
     {
