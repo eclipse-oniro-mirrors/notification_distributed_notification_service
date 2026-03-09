@@ -2171,7 +2171,10 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     finishDeadLine_ = parcel.ReadInt64();
     triggerDeadLine_ = parcel.ReadInt64();
 
-    valid = parcel.ReadBool();
+    if (!parcel.ReadBool(valid)) {
+        ANS_LOGE("Failed to read bool for groupInfo from parcel");
+        return false;
+    }
     if (valid) {
         auto* groupInfoPtr = parcel.ReadParcelable<NotificationGroupInfo>();
         if (groupInfoPtr == nullptr) {
