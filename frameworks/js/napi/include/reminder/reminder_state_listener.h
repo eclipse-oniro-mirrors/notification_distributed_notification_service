@@ -73,8 +73,10 @@ public:
     napi_value RegisterReminderStateCallback(napi_env env, napi_callback_info info);
     napi_value UnRegisterReminderStateCallback(napi_env env, napi_callback_info info);
 
-    void RegisterReminderStateCallbackInner(napi_env env, void* data);
-    void UnRegisterReminderStateCallbackInner(napi_env env, void* data);
+    bool RegisterReminderStateCallbackInner(napi_env env, void* data);
+    bool UnRegisterReminderStateCallbackInner(napi_env env, void* data);
+
+    void RegisterReminderStateCallbackEnd(const napi_ref& jsCallbackRef, sptr<JsReminderStateCallback> callback);
 
     void OnReminderState(napi_env env, napi_value callbackObj, const std::vector<Notification::ReminderState>& states);
 
