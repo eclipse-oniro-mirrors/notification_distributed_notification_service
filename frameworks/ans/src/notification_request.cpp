@@ -2173,8 +2173,12 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     valid = parcel.ReadBool();
     if (valid) {
-        groupInfo_ =
-            std::shared_ptr<NotificationGroupInfo>(parcel.ReadParcelable<NotificationGroupInfo>());
+        auto* groupInfoPtr = parcel.ReadParcelable<NotificationGroupInfo>();
+        if (groupInfoPtr == nullptr) {
+            ANS_LOGE("Failed to read groupInfo from parcel");
+            return false;
+        }
+        groupInfo_ = std::shared_ptr<NotificationGroupInfo>(groupInfoPtr);
         if (!groupInfo_) {
             ANS_LOGE("null groupInfo");
             return false;
