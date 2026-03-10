@@ -484,6 +484,10 @@ ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<Notific
     if (!isSystemApp  && !isSubsystem && request->GetExtendInfo() != nullptr) {
         request->SetExtendInfo(nullptr);
     }
+
+    if (!isSystemApp  && !isSubsystem && request->GetGroupInfo() != nullptr) {
+        request->SetGroupInfo(nullptr);
+    }
     return ERR_OK;
 }
 

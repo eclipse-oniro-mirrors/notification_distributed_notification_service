@@ -323,7 +323,7 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     "devicesSupportOperate = [] }, notificationFlags = null, notificationFlagsOfDevices = null, "
     "notificationBundleOption = null, agentBundle = null, notificationTrigger = null, creatorUserId = -1, "
     "ownerUserId = -1, receiverUserId = -1, updateDeadLine = 0, finishDeadLine = 0, triggerDeadLine = 0, sound = , "
-    "distributed = 0: flag: 0, unifiedGroupInfo_ = null }, postTime = 0, "
+    "distributed = 0: flag: 0, unifiedGroupInfo_ = null, groupInfo_ = null }, postTime = 0, "
     "sound = nullptr, vibrationStyle = [], updateTimer = 0, finishTimer = 0, archiveTimer = 0 }";
     EXPECT_EQ(rrc->Dump(), ret);
 }

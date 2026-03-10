@@ -879,7 +879,8 @@ std::string NotificationRequest::Dump()
             ", triggerDeadLine = " + std::to_string(triggerDeadLine_) +
             ", sound = " + sound_ + ", distributed = " + std::to_string(distributedCollaborate_) + ":" +
             distributedHashCode_ + " flag: " + std::to_string(collaboratedReminderFlag_)  + ", unifiedGroupInfo_ = " +
-            (unifiedGroupInfo_ ? unifiedGroupInfo_->Dump() : "null")+ " }";
+            (unifiedGroupInfo_ ? unifiedGroupInfo_->Dump() : "null") + ", groupInfo_ = " +
+            (groupInfo_ ? groupInfo_->Dump() : "null") + " }";
 }
 
 bool NotificationRequest::CollaborationToJson(std::string& data) const
@@ -931,6 +932,12 @@ bool NotificationRequest::CollaborationToJson(std::string& data) const
         }
         jsonObject["template"] = templateOptionObj;
     }
+
+    if (!ConvertGroupInfoToJson(jsonObject)) {
+        ANS_LOGE("Cannot convert groupInfo to JSON.");
+        return false;
+    }
+
     data = jsonObject.dump();
     return true;
 }
@@ -968,7 +975,29 @@ NotificationRequest *NotificationRequest::CollaborationFromJson(const std::strin
     ConvertJsonToBool(pRequest, jsonObject);
     ConvertJsonToAgentBundle(pRequest, jsonObject);
     ConvertJsonToTemplate(pRequest, jsonObject);
+    ConvertJsonToGroupInfo(pRequest, jsonObject);
     return pRequest;
+}
+bool NotificationRequest::ConvertJsonToGroupInfo(
+    NotificationRequest *target, const nlohmann::json &jsonObject)
+{
+    if (target == nullptr) {
+        ANS_LOGE("null target");
+        return false;
+    }
+    const auto &jsonEnd = jsonObject.cend();
+    if (jsonObject.find("groupInfo") != jsonEnd) {
+        auto groupInfoObj = jsonObject.at("groupInfo");
+        if (!groupInfoObj.is_null()) {
+            auto *pGroupInfo = NotificationJsonConverter::ConvertFromJson<NotificationGroupInfo>(groupInfoObj);
+            if (pGroupInfo == nullptr) {
+                ANS_LOGE("null pGroupInfo");
+                return false;
+            }
+            target->SetGroupInfo(std::shared_ptr<NotificationGroupInfo>(pGroupInfo));
+        }
+    }
+    return true;
 }
 
 bool NotificationRequest::ConvertJsonToTemplate(
@@ -1155,6 +1184,8 @@ NotificationRequest *NotificationRequest::FromJson(const nlohmann::json &jsonObj
         pRequest = nullptr;
         return nullptr;
     }
+
+    ConvertJsonToGroupInfo(pRequest, jsonObject);
 
     return pRequest;
 }
@@ -1747,6 +1778,19 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    valid = groupInfo_ != nullptr ? true : false;
+    if (!parcel.WriteBool(valid)) {
+        ANS_LOGE("Failed to write groupInfo for the notification");
+        return false;
+    }
+
+    if (valid) {
+        if (!parcel.WriteParcelable(groupInfo_.get())) {
+            ANS_LOGE("Failed to write notification groupInfo");
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -2127,6 +2171,22 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     finishDeadLine_ = parcel.ReadInt64();
     triggerDeadLine_ = parcel.ReadInt64();
 
+    if (!parcel.ReadBool(valid)) {
+        ANS_LOGE("Failed to read bool for groupInfo from parcel");
+        return false;
+    }
+    if (valid) {
+        auto* groupInfoPtr = parcel.ReadParcelable<NotificationGroupInfo>();
+        if (groupInfoPtr == nullptr) {
+            ANS_LOGE("Failed to read groupInfo from parcel");
+            return false;
+        }
+        groupInfo_ = std::shared_ptr<NotificationGroupInfo>(groupInfoPtr);
+        if (!groupInfo_) {
+            ANS_LOGE("null groupInfo");
+            return false;
+        }
+    }
     return true;
 }
 
@@ -2366,6 +2426,7 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->publishDelayTime_ = other.publishDelayTime_;
     this->hashCodeGenerateType_ = other.hashCodeGenerateType_;
     this->collaboratedReminderFlag_ = other.collaboratedReminderFlag_;
+    this->groupInfo_ = other.groupInfo_;
 }
 
 bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
@@ -2458,6 +2519,22 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
         jsonObject["notificationTrigger"] = triggerObj;
     }
 
+    if (!ConvertGroupInfoToJson(jsonObject)) {
+        ANS_LOGE("Cannot convert groupInfo to JSON");
+        return false;
+    }
+    return true;
+}
+
+bool NotificationRequest::ConvertGroupInfoToJson(nlohmann::json &jsonObject) const
+{
+    if (groupInfo_) {
+        nlohmann::json groupInfoObj;
+        if (!NotificationJsonConverter::ConvertToJson(groupInfo_.get(), groupInfoObj)) {
+            return false;
+        }
+        jsonObject["groupInfo"] = groupInfoObj;
+    }
     return true;
 }
 
@@ -3453,6 +3530,16 @@ std::string NotificationRequest::GenerateDistributedUniqueKey()
 void NotificationRequest::SetUnifiedGroupInfo(const std::shared_ptr<NotificationUnifiedGroupInfo> &unifiedGroupInfo)
 {
     unifiedGroupInfo_ = unifiedGroupInfo;
+}
+
+std::shared_ptr<NotificationGroupInfo> NotificationRequest::GetGroupInfo() const
+{
+    return groupInfo_;
+}
+
+void NotificationRequest::SetGroupInfo(const std::shared_ptr<NotificationGroupInfo> &groupInfo)
+{
+    groupInfo_ = groupInfo;
 }
 
 std::shared_ptr<NotificationUnifiedGroupInfo> NotificationRequest::GetUnifiedGroupInfo() const
