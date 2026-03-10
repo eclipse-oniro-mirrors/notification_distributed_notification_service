@@ -39,7 +39,7 @@ bool __attribute__((weak)) AccessTokenHelper::VerifyCallerPermission(
     return (result == PERMISSION_GRANTED);
 }
 
-bool AccessTokenHelper::VerifyNativeToken(const AccessTokenID &callerToken)
+bool __attribute__((weak)) AccessTokenHelper::VerifyNativeToken(const AccessTokenID &callerToken)
 {
     ATokenTypeEnum tokenType = AccessTokenKit::GetTokenTypeFlag(callerToken);
     return (tokenType == ATokenTypeEnum::TOKEN_NATIVE);

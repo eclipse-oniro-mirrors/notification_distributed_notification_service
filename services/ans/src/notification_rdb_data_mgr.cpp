@@ -297,7 +297,7 @@ NotificationDataMgr::NotificationDataMgr(const NotificationRdbConfig &notificati
     ANS_LOGD("create notification rdb data manager");
 }
 
-int32_t NotificationDataMgr::Init()
+int32_t __attribute__((weak)) NotificationDataMgr::Init()
 {
     ANS_LOGD("Create rdbStore");
     {
@@ -361,7 +361,7 @@ int32_t NotificationDataMgr::InitCreatedTables()
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::Destroy()
+int32_t __attribute__((weak)) NotificationDataMgr::Destroy()
 {
     ANS_LOGD("Destory rdbStore");
     std::lock_guard<ffrt::mutex> lock(createdTableMutex_);
@@ -384,7 +384,8 @@ int32_t NotificationDataMgr::Destroy()
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::InsertData(const std::string &key, const std::string &value, const int32_t &userId)
+int32_t __attribute__((weak)) NotificationDataMgr::InsertData(
+    const std::string &key, const std::string &value, const int32_t &userId)
 {
     ANS_LOGD("InsertData start");
     if (isRecovering_.load()) {
@@ -478,8 +479,8 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::vecto
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::string, std::string> &values,
-    const int32_t &userId)
+int32_t __attribute__((weak)) NotificationDataMgr::InsertBatchData(
+    const std::unordered_map<std::string, std::string> &values, const int32_t &userId)
 {
     ANS_LOGD("InsertBatchData start");
     if (isRecovering_.load()) {
@@ -529,7 +530,7 @@ int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::strin
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::DeleteData(const std::string &key, const int32_t &userId)
+int32_t __attribute__((weak)) NotificationDataMgr::DeleteData(const std::string &key, const int32_t &userId)
 {
     ANS_LOGD("DeleteData start");
     if (isRecovering_.load()) {
@@ -582,7 +583,8 @@ int32_t NotificationDataMgr::DeleteData(const std::string tableName, const std::
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::DeleteBatchData(const std::vector<std::string> &keys, const int32_t &userId)
+int32_t __attribute__((weak)) NotificationDataMgr::DeleteBatchData(
+    const std::vector<std::string> &keys, const int32_t &userId)
 {
     if (isRecovering_.load()) {
         ANS_LOGD("The db is being repaired.");
@@ -635,7 +637,8 @@ int32_t NotificationDataMgr::DeleteBatchData(const std::vector<std::string> &key
     return ret == NativeRdb::E_SQLITE_CORRUPT ? NativeRdb::E_ERROR : NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::QueryData(const std::string &key, std::string &value, const int32_t &userId)
+int32_t __attribute__((weak)) NotificationDataMgr::QueryData(
+    const std::string &key, std::string &value, const int32_t &userId)
 {
     ANS_LOGD("QueryData start");
     if (isRecovering_.load()) {
@@ -775,7 +778,7 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::QueryDataBeginWithKey(
+int32_t __attribute__((weak)) NotificationDataMgr::QueryDataBeginWithKey(
     const std::string &key, std::unordered_map<std::string, std::string> &values, const int32_t &userId)
 {
     ANS_LOGD("QueryData BeginWithKey start");
@@ -961,7 +964,8 @@ int32_t NotificationDataMgr::QueryDataContainsWithKey(
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::string> &datas, const int32_t &userId)
+int32_t __attribute__((weak)) NotificationDataMgr::QueryAllData(
+    std::unordered_map<std::string, std::string> &datas, const int32_t &userId)
 {
     ANS_LOGD("QueryAllData start");
     if (isRecovering_.load()) {
@@ -1054,7 +1058,7 @@ int32_t NotificationDataMgr::QueryAllData(
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::DropUserTable(const int32_t userId)
+int32_t __attribute__((weak)) NotificationDataMgr::DropUserTable(const int32_t userId)
 {
     const char *keySpliter = "_";
     std::stringstream stream;

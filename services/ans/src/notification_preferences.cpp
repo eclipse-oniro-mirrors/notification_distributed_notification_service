@@ -277,7 +277,8 @@ ErrCode NotificationPreferences::UpdateNotificationSlots(
     return result;
 }
 
-ErrCode NotificationPreferences::GetNotificationSlot(const sptr<NotificationBundleOption> &bundleOption,
+ErrCode __attribute__((weak)) NotificationPreferences::GetNotificationSlot(
+    const sptr<NotificationBundleOption> &bundleOption,
     const NotificationConstant::SlotType &type, sptr<NotificationSlot> &slot)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -2095,7 +2096,7 @@ int32_t NotificationPreferences::GetBatchKvsFromDb(
     return preferncesDB_->GetBatchKvsFromDb(key, values, userId);
 }
 
-int32_t NotificationPreferences::DeleteKvFromDb(const std::string &key, const int32_t &userId)
+int32_t __attribute__((weak)) NotificationPreferences::DeleteKvFromDb(const std::string &key, const int32_t &userId)
 {
     if (preferncesDB_ == nullptr) {
         return ERR_ANS_SERVICE_NOT_READY;
@@ -2878,7 +2879,7 @@ bool NotificationPreferences::IsKioskMode()
     return isKioskMode_;
 }
 
-ErrCode NotificationPreferences::SetGeofenceEnabled(bool enabled)
+ErrCode __attribute__((weak)) NotificationPreferences::SetGeofenceEnabled(bool enabled)
 {
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("Invalid prefernces db.");
