@@ -3173,5 +3173,48 @@ HWTEST_F(AnsNotificationUnitTest, GetLocalDistributedBundleList_0100, Function |
     res = ans_->GetLocalDistributedBundleList("tablet", bundles);
     EXPECT_EQ(res, ERR_OK);
 }
+
+/**
+ * @tc.name: GetDistributedBundleListByType_0100
+ * @tc.desc: test GetDistributedBundleListByType with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetDistributedBundleListByType_0100, TestSize.Level1)
+{
+    MockGetAnsManagerProxy(nullptr);
+    std::vector<DistributedBundleOption> bundleList;
+    ErrCode res = ans_->GetDistributedBundleListByType(true, bundleList);
+    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
+    MockGetAnsManagerProxy(proxy);
+
+    res = ans_->GetDistributedBundleListByType(true, bundleList);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: GetDistributedBundleInfo_0100
+ * @tc.desc: test GetDistributedBundleInfo with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetDistributedBundleInfo_0100, TestSize.Level1)
+{
+    std::vector<NotificationBundleOption> bundleOption;
+    std::vector<DistributedNotificationBundleInfo> bundleInfoList;
+    ErrCode res = ans_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+
+    NotificationBundleOption bundle = NotificationBundleOption("com.test.demo", 20020001);
+    bundleOption.emplace_back(bundle);
+    MockGetAnsManagerProxy(nullptr);
+    std::vector<DistributedBundleOption> bundleList;
+    res = ans_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
+    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
+    MockGetAnsManagerProxy(proxy);
+
+    res = ans_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
+    EXPECT_EQ(res, ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

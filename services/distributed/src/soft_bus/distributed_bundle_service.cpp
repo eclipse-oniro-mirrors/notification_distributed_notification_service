@@ -136,6 +136,8 @@ bool DistributedBundleService::GetApplicationResource(NotificationDistributedBun
     info.SetBundleLabel(resourceInfo.label);
     info.SetBundleIcon(AnsImageUtil::CreatePixelMapByString(resourceInfo.icon));
 
+    int32_t index = DelayedSingleton<BundleResourceHelper>::GetInstance()->GetAppIndexByUid(info.GetBundleUid());
+    info.SetAppIndex(index);
     bool isAnco = false;
     if (!DelayedSingleton<BundleResourceHelper>::GetInstance()->IsAncoApp(bundleName, info.GetBundleUid(), isAnco)) {
         ANS_LOGW("Dans get bundle anco %{public}s.", bundleName.c_str());

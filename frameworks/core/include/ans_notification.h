@@ -1255,6 +1255,26 @@ public:
         const bool isNotification = true);
 
     /**
+     * @brief Get the bundle list whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param isNotification Indicates notification switch or liveview swtich, default is notification switch.
+     * @return Returns the bundle list for cross device collaboration.
+     */
+    ErrCode GetDistributedBundleListByType(const bool isNotification,
+        std::vector<DistributedBundleOption> &enableList);
+
+    /**
+     * @brief Get the cross device application specified information. The caller must have system
+     * permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @return Returns the detail bundle info for cross device collaboration.
+     */
+    ErrCode GetDistributedBundleInfo(const std::vector<NotificationBundleOption>& bundleOption,
+        std::vector<DistributedNotificationBundleInfo>& bundleInfoList);
+
+    /**
      * @brief Sets whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
      *

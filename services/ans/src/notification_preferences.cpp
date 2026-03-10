@@ -1355,13 +1355,8 @@ ErrCode NotificationPreferences::SetDistributedEnabledByBundle(const sptr<Notifi
         NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
         NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     bundleInfo.SetEnableNotification(defaultState);
-    bool storeDBResult = true;
-    if (deviceType == NotificationConstant::PAD_DEVICE_TYPE || deviceType == NotificationConstant::PC_DEVICE_TYPE) {
-        storeDBResult = preferncesDB_->PutDistributedEnabledForBundle(
-            deviceType + "_" + std::to_string(isNotification), bundleInfo, enabled);
-    } else {
-        storeDBResult = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo, enabled);
-    }
+    bool storeDBResult = preferncesDB_->PutDistributedEnabledForBundle(
+        deviceType, isNotification, bundleInfo, enabled);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
@@ -2790,7 +2785,7 @@ void NotificationPreferences::SetDistributedEnabledForBundle(const NotificationP
         bool ret = preferncesDB_->IsDistributedEnabledEmptyForBundle(deviceType, bundleInfo);
         if (!ret) {
             ANS_LOGD("get %{public}s distributedEnabled is empty", deviceType.c_str());
-            preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo,
+            preferncesDB_->PutDistributedEnabledForBundle(deviceType, true, bundleInfo,
                 NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
         }
     }

@@ -24,6 +24,8 @@
 #include "distributed_data_define.h"
 #include "notification_bundle_option.h"
 #include "notification_distributed_bundle.h"
+#include "distributed_bundle_option.h"
+#include "distributed_notification_bundle_info.h"
 
 namespace OHOS {
 namespace Notification {
@@ -44,6 +46,9 @@ public:
     void HandleLocalSwitchEvent(DistributedBundleChangeType type, const std::string& bundleName,
         int32_t uid, bool enable);
     void HandleSlaveBundleChange(const sptr<NotificationBundleOption> &bundleOption, const bool addBundle);
+    void GetDistributedBundleInfo(const std::vector<sptr<NotificationBundleOption>>& bundleOption,
+        std::vector<DistributedNotificationBundleInfo>& bundleInfoList);
+    void GetDistributedBundleListByType(const bool notification, std::vector<DistributedBundleOption> &enableList);
 
 private:
     DistributedBundleService() = default;

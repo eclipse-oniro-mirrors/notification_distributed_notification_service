@@ -87,6 +87,14 @@ bool NotificationRequestBox::SetCreatorBundleName(const std::string& bundleName)
     return box_->PutValue(std::make_shared<TlvItem>(BUNDLE_NAME, bundleName));
 }
 
+bool NotificationRequestBox::SetCreatorBundleUid(const int32_t& bundleUid)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(BUNDLE_UID, bundleUid));
+}
+
 bool NotificationRequestBox::SetNotificationTitle(const std::string& title)
 {
     if (box_ == nullptr) {
@@ -381,6 +389,14 @@ bool NotificationRequestBox::GetCreatorBundleName(std::string& bundleName) const
         return false;
     }
     return box_->GetStringValue(BUNDLE_NAME, bundleName);
+}
+
+bool NotificationRequestBox::GetCreatorBundleUid(int32_t& bundleUid) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt32Value(BUNDLE_UID, bundleUid);
 }
 
 bool NotificationRequestBox::GetReminderFlag(int32_t& flag) const

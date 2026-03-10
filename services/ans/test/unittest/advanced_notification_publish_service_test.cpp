@@ -527,6 +527,72 @@ HWTEST_F(AnsPublishServiceTest, RemoveDistributedNotifications_00005, Function |
 }
 
 /**
+ * @tc.name: RemoveDistributedNotifications_00006
+ * @tc.desc: delete distributed notificaitons test permission and param
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RemoveDistributedNotifications_00006, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    request->SetDistributedCollaborate(false);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    sptr<Notification> notification(new (std::nothrow) Notification(request));
+    auto record = std::make_shared<NotificationRecord>();
+    advancedNotificationService_->notificationList_.push_back(record);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+
+    advancedNotificationService_->RemoveDistributedNotificationsByBundle(nullptr, false);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("com.test.demo", 20020001);
+    advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, false);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+
+    record->bundleOption = new NotificationBundleOption("com.test.demo1", 20020002);
+    advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, false);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+
+    record->bundleOption = new NotificationBundleOption("com.test.demo", 20020002);
+    advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, false);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+
+    record->bundleOption = new NotificationBundleOption("com.test.demo1", 20020001);
+    advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, false);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+
+    record->bundleOption = new NotificationBundleOption("com.test.demo", 20020001);
+    advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, false);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    
+    sptr<Notification> notificationNull(new (std::nothrow) Notification(nullptr));
+    record->notification = notificationNull;
+    advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, false);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+
+    record->notification = notification;
+    advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, false);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+
+    request->SetDistributedCollaborate(true);
+    advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+
+    advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, false);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+}
+
+/**
  * @tc.name: RemoveAllDistributedNotifications_00001
  * @tc.desc: delete ALL distributed notificaitons
  * @tc.type: FUNC

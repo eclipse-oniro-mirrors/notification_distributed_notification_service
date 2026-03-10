@@ -37,6 +37,7 @@ sequenceable OHOS.Notification.NotificationCheckRequest;
 sequenceable OHOS.Notification.NotificationRingtoneInfo;
 sequenceable OHOS.Notification.NotificationDistributedBundle;
 sequenceable OHOS.Notification.NotificationParameters;
+sequenceable OHOS.Notification.DistributedNotificationBundleInfo;
 sequenceable OHOS.IRemoteObject;
 
 interface OHOS.Notification.IAnsManager {
@@ -316,6 +317,10 @@ interface OHOS.Notification.IAnsManager {
 
     void SetDistributedEnabledByBundle(
         [in] sptr<NotificationBundleOption> bundleOption, [in] String deviceType, [in] boolean enabled, [in] boolean isNotification);
+
+    void GetDistributedBundleListByType([in] boolean isNotification, [out] DistributedBundleOption[] enableList);
+
+    void GetDistributedBundleInfo([in] sptr<NotificationBundleOption>[] bundleOption, [out] DistributedNotificationBundleInfo[] bundleInfoList);
 
     void SetPriorityEnabled([in] boolean enabled);
 

@@ -19,6 +19,7 @@
 #define protected public
 #include "notification_bundle_option.h"
 #include "distributed_bundle_option.h"
+#include "distributed_notification_bundle_info.h"
 #undef private
 #undef protected
 
@@ -170,9 +171,13 @@ HWTEST_F(NotificationBundleOptionTest, DistributedBundleOption_00001, Function |
     EXPECT_EQ(rrc->GetBundle()->GetBundleName(), bundleName);
     rrc->SetEnable(enable);
     EXPECT_EQ(rrc->isEnable(), enable);
+    rrc->SetNotification(true);
+    EXPECT_EQ(rrc->IsNotification(), true);
+    rrc->SetAppLabel("label");
+    EXPECT_EQ(rrc->GetAppLabel(), "label");
 
     std::string dumpstr =
-        "DistributedBundleOption{ bundleName = BundleName, uid = 10, enable = 1 }";
+        "DistributedBundleOption{ bundleName = BundleName, uid = 10, enable = 1, notification = 1, label = label}";
     EXPECT_EQ(rrc->Dump(), dumpstr);
 
     Parcel parcel;
@@ -192,6 +197,40 @@ HWTEST_F(NotificationBundleOptionTest, DistributedBundleOption_00001, Function |
     EXPECT_EQ(rrcNew->GetBundle()->GetBundleName(), rrc->GetBundle()->GetBundleName());
 }
 
+/**
+ * @tc.name: DistributedBundleOption_00002
+ * @tc.desc: Test DistributedBundleOption.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationBundleOptionTest, DistributedBundleOption_00002, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = {{
+        "bundle", {{"uid", 20020001}, {"bundleName", "com.example.app"}}
+    }};
+
+    auto bundleOption = DistributedBundleOption::FromJson(jsonObject);
+    EXPECT_NE(bundleOption, nullptr);
+    delete bundleOption;
+
+    jsonObject = {
+        { "bundle", {{"uid", 20020001}, {"bundleName", "com.example.app"}}},
+        { "notification", "notification" }, { "label", 100 },
+    };
+    bundleOption = DistributedBundleOption::FromJson(jsonObject);
+    EXPECT_NE(bundleOption, nullptr);
+    delete bundleOption;
+
+    jsonObject = {
+        { "bundle", {{"uid", 20020001}, {"bundleName", "com.example.app" }}},
+        { "notification", false }, { "label", "label" },
+    };
+    bundleOption = DistributedBundleOption::FromJson(jsonObject);
+    EXPECT_NE(bundleOption, nullptr);
+    EXPECT_EQ(bundleOption->GetAppLabel(), "label");
+    delete bundleOption;
+}
+
 HWTEST_F(NotificationBundleOptionTest, SetAppName_00001, Level1)
 {
     std::string bundleName = "BundleName";
@@ -200,6 +239,64 @@ HWTEST_F(NotificationBundleOptionTest, SetAppName_00001, Level1)
 
     rrc->SetAppName("appName");
     EXPECT_EQ(rrc->GetAppName(), "appName");
+}
+
+/**
+ * @tc.name: DistributedNotificationBundleInfo_00001
+ * @tc.desc: Test DistributedNotificationBundleInfo.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationBundleOptionTest, DistributedNotificationBundleInfo_00001, Level1)
+{
+    std::string bundleName = "BundleName";
+    int32_t uid = 10;
+    auto bundleInfo = std::make_shared<DistributedNotificationBundleInfo>("com.test.demo", 20020001);
+
+    bundleInfo->SetBundleName("bundleName");
+    EXPECT_EQ(bundleInfo->GetBundleName(), "bundleName");
+
+    bundleInfo->SetBundleUid(20020002);
+    EXPECT_EQ(bundleInfo->GetBundleUid(), 20020002);
+
+    std::shared_ptr<AAFwk::WantParams> extendInfo = std::make_shared<AAFwk::WantParams>();
+    bundleInfo->SetExtendInfo(extendInfo);
+    EXPECT_NE(bundleInfo->GetExtendInfo(), nullptr);
+
+    bundleInfo->SetBundleIcon(std::make_shared<Media::PixelMap>());
+    EXPECT_NE(bundleInfo->GetBundleIcon(), nullptr);
+
+    Parcel parcel;
+    EXPECT_EQ(bundleInfo->Marshalling(parcel), false);
+
+    auto distributedBundlePoint = DistributedNotificationBundleInfo::Unmarshalling(parcel);
+    EXPECT_EQ(distributedBundlePoint, nullptr);
+}
+
+/**
+ * @tc.name: DistributedNotificationBundleInfo_00002
+ * @tc.desc: Test DistributedNotificationBundleInfo.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationBundleOptionTest, DistributedNotificationBundleInfo_00002, Level1)
+{
+    std::string bundleName = "BundleName";
+    int32_t uid = 10;
+    auto bundleInfo = std::make_shared<DistributedNotificationBundleInfo>("com.test.demo", 20020001);
+
+    bundleInfo->SetBundleName("bundleName");
+    EXPECT_EQ(bundleInfo->GetBundleName(), "bundleName");
+
+    bundleInfo->SetBundleUid(20020002);
+    EXPECT_EQ(bundleInfo->GetBundleUid(), 20020002);
+
+    Parcel parcel;
+    EXPECT_EQ(bundleInfo->Marshalling(parcel), true);
+
+    auto bundleInfoPoint = DistributedNotificationBundleInfo::Unmarshalling(parcel);
+    EXPECT_NE(bundleInfoPoint, nullptr);
+    delete bundleInfoPoint;
 }
 } // namespace Notification
 } // namespace OHOS

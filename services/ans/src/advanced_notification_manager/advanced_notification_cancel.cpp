@@ -1274,6 +1274,63 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
     return ERR_OK;
 }
 
+void AdvancedNotificationService::RemoveDistributedNotificationsByBundle(
+    const sptr<NotificationBundleOption> &bundleOption, const bool& notification)
+{
+    auto submitResult = notificationSvrQueue_.Submit(std::bind([this, bundleOption, notification]() {
+        if (bundleOption == nullptr) {
+            ANS_LOGW("Remove distributed notifications by bundle failed.");
+            return;
+        }
+ 
+        ANS_LOGI("Remove notification %{public}d %{public}d %{public}s", notification, bundleOption->GetUid(),
+            bundleOption->GetBundleName().c_str());
+        std::vector<sptr<Notification>> notifications;
+        std::list<std::shared_ptr<NotificationRecord>> deleteRecords;
+        for (auto record : notificationList_) {
+            if (record->bundleOption == nullptr) {
+                continue;
+            }
+            
+            auto info = record->bundleOption;
+            if (info->GetUid() != bundleOption->GetUid() || info->GetBundleName() != bundleOption->GetBundleName()) {
+                ANS_LOGW("Request bundele %{public}s %{public}d.", info->GetBundleName().c_str(), info->GetUid());
+                continue;
+            }
+ 
+            if (record->notification == nullptr || record->notification->GetNotificationRequestPoint() == nullptr) {
+                continue;
+            }
+ 
+            auto request = record->notification->GetNotificationRequestPoint();
+            auto slotType = request->GetSlotType();
+            if (IsDistributedNotification(request) &&
+                (slotType == NotificationConstant::SlotType::LIVE_VIEW) == !notification) {
+                notifications.emplace_back(record->notification);
+                CancelTimer(record->notification->GetAutoDeletedTimer());
+                ProcForDeleteLiveView(record);
+                deleteRecords.push_back(record);
+            }
+ 
+            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                std::vector<sptr<Notification>> currNotificationList = notifications;
+                NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                    currNotificationList, nullptr, NotificationConstant::DISTRIBUTED_APPLICATION_ENABLE_REASON_DELETE);
+                notifications.clear();
+            }
+        }
+ 
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                notifications, nullptr, NotificationConstant::DISTRIBUTED_APPLICATION_ENABLE_REASON_DELETE);
+        }
+        for (auto deleteRecord : deleteRecords) {
+            notificationList_.remove(deleteRecord);
+        }
+    }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return, "Remove distributed notifications.");
+}
+
 ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
     const NotificationConstant::SlotType& slotType, const int32_t removeReason,
     const NotificationConstant::DistributedDeleteType& deleteType)

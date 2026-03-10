@@ -650,6 +650,19 @@ ErrCode NotificationHelper::SetDistributedEnabledByBundle(const NotificationBund
         deviceType, enabled, isNotification);
 }
 
+ErrCode NotificationHelper::GetDistributedBundleListByType(const bool isNotification,
+    std::vector<DistributedBundleOption> &enableList)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetDistributedBundleListByType(isNotification, enableList);
+}
+
+ErrCode NotificationHelper::GetDistributedBundleInfo(const std::vector<NotificationBundleOption>& bundleOption,
+    std::vector<DistributedNotificationBundleInfo>& bundleInfoList)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetDistributedBundleInfo(bundleOption,
+        bundleInfoList);
+}
+
 ErrCode NotificationHelper::SetDistributedBundleOption(const std::vector<DistributedBundleOption> &bundles,
     const std::string &deviceType)
 {

@@ -18,10 +18,16 @@
 #include "ans_inner_errors.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
+#include "napi_common.h"
+#include "napi_common_util.h"
+#include "want_params.h"
+#include "pixel_map_napi.h"
+#include "napi_common_want_agent.h"
 
 namespace OHOS {
 namespace NotificationNapi {
-const int SET_DISTRIBUTED_ENABLE_MAX_PARA = 3;
+const int ARGC_ONE = 1;
+const int SET_DISTRIBUTED_ENABLE_MAX_PARA = 4;
 const int SET_DISTRIBUTED_ENABLE_MIN_PARA = 2;
 const int SET_SMART_REMINDER_ENABLE_MAX_PARA = 2;
 const int SET_SMART_REMINDER_ENABLE_MIN_PARA = 1;
@@ -89,6 +95,26 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         napi_get_value_bool(env, argv[PARAM2], &params.enable);
     }
 
+    if (argc == SET_DISTRIBUTED_ENABLE_MAX_PARA) {
+        // argv[3]: notificationType
+        NAPI_CALL(env, napi_typeof(env, argv[PARAM3], &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. enum NotificationType expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be enum NotificationType.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        int32_t notificationType = 0;
+        napi_get_value_int32(env, argv[PARAM3], &notificationType);
+        if (notificationType < static_cast<int32_t>(NotificationType::NOTIFICATION) ||
+            notificationType > static_cast<int32_t>(NotificationType::LIVE_VIEW)) {
+            ANS_LOGE("Parameter type exceed. Object expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be enum NotificationType.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        params.isNotification = (notificationType == static_cast<int32_t>(NotificationType::NOTIFICATION));
+    }
     return Common::NapiGetNull(env);
 }
 
@@ -669,6 +695,314 @@ napi_value NapiIsDistributedEnabledBySlot(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    return promise;
+}
+
+napi_value ParseBundleListParameters(const napi_env &env, const napi_callback_info &info, bool& isNotification)
+{
+    ANS_LOGD("enter");
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    if (argc != ARGC_ONE) {
+        ANS_LOGE("Wrong number of arguments.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        return nullptr;
+    }
+
+    // argv[0]: type
+    napi_valuetype valuetype = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
+    if (valuetype != napi_number) {
+        ANS_LOGE("Parameter enum error. Enum expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be enum NotificationType.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    int32_t notificationType = 0;
+    napi_get_value_int32(env, argv[PARAM0], &notificationType);
+    if (notificationType < static_cast<int32_t>(NotificationType::NOTIFICATION) ||
+        notificationType > static_cast<int32_t>(NotificationType::LIVE_VIEW)) {
+        ANS_LOGE("Parameter type exceed. Enum expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be enum NotificationType.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    isNotification = (notificationType == static_cast<int32_t>(NotificationType::NOTIFICATION));
+    return Common::NapiGetNull(env);
+}
+ 
+void SetDistributedBundleOption(const napi_env &env, const DistributedBundleOption &bundleOption, napi_value &obj)
+{
+    if (bundleOption.GetBundle() == nullptr) {
+        ANS_LOGE("Invalid bundle option data");
+        return;
+    }
+    napi_value value = nullptr;
+    // bundleName: string
+    napi_create_string_utf8(env, bundleOption.GetBundle()->GetBundleName().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, obj, "bundleName", value);
+
+    // uid: int32_t
+    napi_create_int32(env, bundleOption.GetBundle()->GetUid(), &value);
+    napi_set_named_property(env, obj, "uid", value);
+
+    // enable bool
+    napi_get_boolean(env, bundleOption.isEnable(), &value);
+    napi_set_named_property(env, obj, "enable", value);
+
+    // type
+    napi_create_int32(env, static_cast<int32_t>(!bundleOption.IsNotification()), &value);
+    napi_set_named_property(env, obj, "type", value);
+
+    // label: string
+    napi_create_string_utf8(env, bundleOption.GetAppLabel().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, obj, "label", value);
+    return;
+}
+ 
+void AsyncCompleteCallbackNapiGetDistributedBundleListByType(napi_env env, napi_status status, void *data)
+{
+    ANS_LOGD("called");
+    if (!data) {
+        ANS_LOGE("Invalid async callback data");
+        return;
+    }
+    AsyncCallbackDistributedBundleList *asynccallbackinfo = static_cast<AsyncCallbackDistributedBundleList *>(data);
+    if (asynccallbackinfo == nullptr) {
+        return;
+    }
+
+    napi_value result = nullptr;
+    if (asynccallbackinfo->info.errorCode != ERR_OK) {
+        result = Common::NapiGetNull(env);
+    } else {
+        napi_value arr = nullptr;
+        napi_create_array(env, &arr);
+        size_t count = 0;
+        for (auto vec : asynccallbackinfo->bundleList) {
+            napi_value bundleOption = nullptr;
+            napi_create_object(env, &bundleOption);
+            SetDistributedBundleOption(env, vec, bundleOption);
+            napi_set_element(env, arr, count, bundleOption);
+            count++;
+        }
+        result = arr;
+    }
+    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+    napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+    delete asynccallbackinfo;
+    asynccallbackinfo = nullptr;
+}
+ 
+napi_value NapiGetDistributedBundleListByType(napi_env env, napi_callback_info info)
+{
+    bool isNotification = true;
+    if (ParseBundleListParameters(env, info, isNotification) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+
+    AsyncCallbackDistributedBundleList *asynccallbackinfo = new (std::nothrow)
+        AsyncCallbackDistributedBundleList {.env = env, .asyncWork = nullptr, .notification = isNotification};
+    if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        return Common::JSParaError(env, nullptr);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "getDistributedBundleListByType", NAPI_AUTO_LENGTH, &resourceName);
+    // Asynchronous function call
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGD("NapiGetDistributedBundleListByType work excute.");
+            AsyncCallbackDistributedBundleList *asynccallbackinfo =
+                static_cast<AsyncCallbackDistributedBundleList *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = NotificationHelper::GetDistributedBundleListByType(
+                    asynccallbackinfo->notification, asynccallbackinfo->bundleList);
+                ANS_LOGI("Get distributed bundles %{public}d %{public}zu %{public}d", asynccallbackinfo->notification,
+                    asynccallbackinfo->bundleList.size(), asynccallbackinfo->info.errorCode);
+            }
+        },
+        AsyncCompleteCallbackNapiGetDistributedBundleListByType,
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+ 
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+ 
+    return promise;
+}
+ 
+napi_value ParseGetDistributedBundlesParameters(const napi_env &env, const napi_callback_info &info,
+    std::vector<NotificationBundleOption> &bundles)
+{
+    ANS_LOGD("ParseParameters bundles");
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    if (argc != ARGC_ONE) {
+        ANS_LOGE("Wrong number of arguments.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        return nullptr;
+    }
+
+    // argv[0]: Array<BundleOption>
+    bool isArray = false;
+    NAPI_CALL(env, napi_is_array(env, argv[PARAM0], &isArray));
+    if (!isArray) {
+        ANS_LOGE("Parameter type error. Array expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be array.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    uint32_t len = 0;
+    NAPI_CALL(env, napi_get_array_length(env, argv[PARAM0], &len));
+    if (len == 0) {
+        ANS_LOGD("The array is empty.");
+        std::string msg = "Mandatory parameters are left unspecified. The array is empty.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    for (uint32_t index = 0; index < len; ++index) {
+        napi_value nBundle = nullptr;
+        NAPI_CALL(env, napi_get_element(env, argv[PARAM0], index, &nBundle));
+        NAPI_CALL(env, napi_typeof(env, nBundle, &valueType));
+        if (valueType != napi_object) {
+            ANS_LOGE("Wrong argument type. Object expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be object.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        NotificationBundleOption bundle;
+        if (!Common::GetBundleOption(env, nBundle, bundle)) {
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+            return nullptr;
+        }
+        bundles.emplace_back(bundle);
+    }
+    return Common::NapiGetNull(env);
+}
+ 
+void SetDistributedBundleInfo(const napi_env &env,
+    const DistributedNotificationBundleInfo &bundleOption, napi_value &obj)
+{
+    napi_value value = nullptr;
+    // bundleName: string
+    napi_create_string_utf8(env, bundleOption.GetBundleName().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, obj, "bundleName", value);
+
+    // uid: int32_t
+    napi_create_int32(env, bundleOption.GetBundleUid(), &value);
+    napi_set_named_property(env, obj, "uid", value);
+
+    // icon
+    std::shared_ptr<Media::PixelMap> icon = bundleOption.GetBundleIcon();
+    if (icon) {
+        napi_valuetype valuetype = napi_undefined;
+        napi_value iconResult = Media::PixelMapNapi::CreatePixelMap(env, icon);
+        napi_typeof(env, iconResult, &valuetype);
+        if (valuetype == napi_undefined) {
+            ANS_LOGE("iconResult is undefined");
+            napi_set_named_property(env, obj, "icon", Common::NapiGetNull(env));
+        } else {
+            napi_set_named_property(env, obj, "icon", iconResult);
+        }
+    }
+
+    // extendInfo: {[key:string] : any}
+    std::shared_ptr<AAFwk::WantParams> extendInfoData = bundleOption.GetExtendInfo();
+    if (extendInfoData) {
+        napi_value extendInfo = nullptr;
+        extendInfo = OHOS::AppExecFwk::WrapWantParams(env, *extendInfoData);
+        napi_set_named_property(env, obj, "extendInfo", extendInfo);
+    }
+    return;
+}
+ 
+void AsyncCompleteCallbackNapiGetDistributedBundleInfo(napi_env env, napi_status status, void *data)
+{
+    ANS_LOGD("called");
+    if (!data) {
+        ANS_LOGE("Invalid async callback data");
+        return;
+    }
+    AsyncCallbackDistributedBundleInfo *asynccallbackinfo = static_cast<AsyncCallbackDistributedBundleInfo *>(data);
+    if (asynccallbackinfo == nullptr) {
+        return;
+    }
+
+    napi_value result = nullptr;
+    if (asynccallbackinfo->info.errorCode != ERR_OK) {
+        result = Common::NapiGetNull(env);
+    } else {
+        napi_value arr = nullptr;
+        napi_create_array(env, &arr);
+        size_t count = 0;
+        for (auto vec : asynccallbackinfo->bundleInfoList) {
+            napi_value bundleInfo = nullptr;
+            napi_create_object(env, &bundleInfo);
+            SetDistributedBundleInfo(env, vec, bundleInfo);
+            napi_set_element(env, arr, count, bundleInfo);
+            count++;
+        }
+        result = arr;
+    }
+    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+    napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+    delete asynccallbackinfo;
+    asynccallbackinfo = nullptr;
+}
+ 
+napi_value NapiGetDistributedBundleInfo(napi_env env, napi_callback_info info)
+{
+    std::vector<NotificationBundleOption> bundleOptions;
+    if (ParseGetDistributedBundlesParameters(env, info, bundleOptions) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+
+    AsyncCallbackDistributedBundleInfo *asynccallbackinfo = new (std::nothrow)
+        AsyncCallbackDistributedBundleInfo {.env = env, .asyncWork = nullptr, .bundles = bundleOptions};
+    if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        return Common::JSParaError(env, nullptr);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "getDistributedBundleInfo", NAPI_AUTO_LENGTH, &resourceName);
+    // Asynchronous function call
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGD("NapiGetDistributedBundleInfo work excute.");
+            AsyncCallbackDistributedBundleInfo *asynccallbackinfo =
+                static_cast<AsyncCallbackDistributedBundleInfo *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = NotificationHelper::GetDistributedBundleInfo(
+                    asynccallbackinfo->bundles, asynccallbackinfo->bundleInfoList);
+                ANS_LOGI("Get bundle info %{public}zu %{public}zu %{public}d.", asynccallbackinfo->bundles.size(),
+                    asynccallbackinfo->bundleInfoList.size(), asynccallbackinfo->info.errorCode);
+            }
+        },
+        AsyncCompleteCallbackNapiGetDistributedBundleInfo,
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+ 
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     return promise;
 }

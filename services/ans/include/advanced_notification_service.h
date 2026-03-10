@@ -1249,6 +1249,26 @@ public:
         const std::string &deviceType, const bool enabled, const bool isNotification) override;
 
     /**
+     * @brief Get the bundle list whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param isNotification Indicates notification switch or liveview swtich, default is notification switch.
+     * @return Returns the bundle list for cross device collaboration.
+     */
+    ErrCode GetDistributedBundleListByType(const bool isNotification,
+        std::vector<DistributedBundleOption> &enableList) override;
+
+    /**
+     * @brief Get the cross device application specified information. The caller must have system
+     * permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @return Returns the detail bundle info for cross device collaboration.
+     */
+    ErrCode GetDistributedBundleInfo(const std::vector<sptr<NotificationBundleOption>>& bundleOption,
+        std::vector<DistributedNotificationBundleInfo>& bundleInfoList) override;
+
+    /**
      * @brief Sets whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
      *
@@ -2355,6 +2375,8 @@ private:
         const NotificationConstant::DistributedDeleteType& deleteType);
     ErrCode RemoveDistributedNotificationsByDeviceId(const std::string& deviceId,
         const int32_t removeReason);
+    void RemoveDistributedNotificationsByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const bool& notification);
     ErrCode RemoveAllDistributedNotifications(const int32_t removeReason);
     bool ExecuteDeleteDistributedNotification(std::shared_ptr<NotificationRecord>& record,
         std::vector<sptr<Notification>>& notifications, const int32_t removeReason);
