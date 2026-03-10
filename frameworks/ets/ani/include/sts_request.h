@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_STS_REQUEST_H
 #include "ani.h"
 #include "notification.h"
+#include "notification_parameters.h"
 #include "notification_request.h"
 
 namespace OHOS {
@@ -34,6 +35,7 @@ struct StsDistributedOptions {
 void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOptions &distributedOptions);
 bool WarpNotificationUnifiedGroupInfo(ani_env* env,
     const std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo, ani_object &groupInfoObject);
+bool WrapNotificationParameters(ani_env *env, const sptr<NotificationParameters> parameter, ani_object &parameterObj);
 
 int32_t UnWarpNotificationRequest(
     ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &notificationRequest);

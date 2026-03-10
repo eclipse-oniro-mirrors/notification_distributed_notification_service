@@ -23,6 +23,9 @@ import configPolicy from '@ohos.configPolicy';
 import { EnableNotificationDialog } from '../ServiceExtAbility/NotificationServiceExtAbility';
 import { Callback} from '@ohos.base';
 import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
+import {
+  isOvVersion, 
+  isEuropeRegion } from '../common/utils';
 
 const TAG = 'NotificationDialog_Service ';
 const permission: Record<string, Resource> = {
@@ -60,6 +63,7 @@ struct NotificationDialogPage {
 
 @CustomDialog
 struct PermissionDialog {
+  private context: Context = getContext(this);
   @State appName: string = '';
   @State isBottomPopover: boolean = true;
   @StorageLink('clicked') clicked: boolean = false;
@@ -70,6 +74,7 @@ struct PermissionDialog {
   @State buttonWidthAllow: number = 0;
   @State buttonWidthDeny: number = 0;
   @State buttonWidth: string | number = 'auto';
+  @State europeRegion: boolean = false;
 
   build() {
     Row(){
@@ -108,7 +113,7 @@ struct PermissionDialog {
                 Flex({ justifyContent: FlexAlign.Center }) {
                   Button() {
                     Text($r('app.string.ALLOW'))
-                    .fontColor('#FFFFFF')
+                    .fontColor(this.europeRegion ? '#5EA1FF' : '#FFFFFF')
                     .fontWeight(500)
                     .minFontSize('27px')
                     .maxFontSize('30px')
@@ -118,7 +123,7 @@ struct PermissionDialog {
                   .onClick(async (): Promise<void> => {
                     await this.enableNotification(true);
                   })
-                  .backgroundColor('#FF1F71FF')
+                  .backgroundColor(this.europeRegion ? '#405ea1ff' : '#FF1F71FF')
                   .width(this.buttonWidth)
                   .height('80px')  
                   .constraintSize({ 
@@ -252,6 +257,7 @@ struct PermissionDialog {
     this.session = storage.get('session') as UIExtensionContentSession;
     try {
       await this.updateStatus();
+      this.europeRegion = isOvVersion() && isEuropeRegion(this.context);
     } catch (err) {
       console.error(TAG, `aboutToAppear error : ${err?.code}`);
       await this.dialog?.destroyException();

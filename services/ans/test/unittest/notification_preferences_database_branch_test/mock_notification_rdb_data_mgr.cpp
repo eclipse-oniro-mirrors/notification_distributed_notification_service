@@ -80,11 +80,6 @@ void MockDropTable(bool mockRet)
 }
 namespace OHOS {
 namespace Notification {
-NotificationDataMgr::NotificationDataMgr(const NotificationRdbConfig &notificationRdbConfig)
-    : notificationRdbConfig_(notificationRdbConfig)
-{
-}
-
 int32_t NotificationDataMgr::Init()
 {
     if (g_mockInitRet == false) {

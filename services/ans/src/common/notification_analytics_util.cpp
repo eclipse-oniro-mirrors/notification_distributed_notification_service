@@ -140,7 +140,7 @@ HaMetaMessage::HaMetaMessage(uint32_t sceneId, uint32_t branchId)
 {
 }
 
-bool HaMetaMessage::NeedReport() const
+bool __attribute__((weak)) HaMetaMessage::NeedReport() const
 {
     if (errorCode_ == ERR_OK && checkfailed_) {
         return false;
@@ -233,7 +233,7 @@ HaMetaMessage& HaMetaMessage::DeleteReason(int32_t deleteReason)
     return *this;
 }
 
-std::string HaMetaMessage::Build() const
+std::string __attribute__((weak)) HaMetaMessage::Build() const
 {
     return std::to_string(sceneId_) + MESSAGE_DELIMITER +
         std::to_string(branchId_) + MESSAGE_DELIMITER + std::to_string(errorCode_) +
@@ -449,7 +449,7 @@ void NotificationAnalyticsUtil::ReportTipsEvent(const sptr<NotificationRequest>&
     CommonNotificationEvent(request, PUBLISH_ERROR_EVENT_CODE, message);
 }
 
-void NotificationAnalyticsUtil::ReportPublishFailedEvent(const sptr<NotificationRequest>& request,
+void __attribute__((weak)) NotificationAnalyticsUtil::ReportPublishFailedEvent(const sptr<NotificationRequest>& request,
     const HaMetaMessage& message)
 {
     if (request == nullptr) {
@@ -463,7 +463,7 @@ void NotificationAnalyticsUtil::ReportPublishFailedEvent(const sptr<Notification
     ReportLiveViewNumber(request, PUBLISH_ERROR_EVENT_CODE);
 }
 
-void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const sptr<NotificationRequest>& request,
+void __attribute__((weak)) NotificationAnalyticsUtil::ReportDeleteFailedEvent(const sptr<NotificationRequest>& request,
     HaMetaMessage& message)
 {
     if (request == nullptr || !message.NeedReport()) {
@@ -696,7 +696,7 @@ ReportCache NotificationAnalyticsUtil::AggregateLiveView()
     return reportCache;
 }
 
-void NotificationAnalyticsUtil::CommonNotificationEvent(const sptr<NotificationRequest>& request,
+void __attribute__((weak)) NotificationAnalyticsUtil::CommonNotificationEvent(const sptr<NotificationRequest>& request,
     int32_t eventCode, const HaMetaMessage& message)
 {
     if (request == nullptr) {
@@ -767,7 +767,7 @@ void NotificationAnalyticsUtil::ReportPublishWithUserInput(const sptr<Notificati
     IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, ANS_CUSTOMIZE_CODE));
 }
 
-void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationRequest>& request,
+void __attribute__((weak)) NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationRequest>& request,
     EventFwk::Want want, int32_t eventCode, const std::string& reason)
 {
     NotificationNapi::SlotType slotType;
@@ -791,7 +791,8 @@ void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationR
     IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, eventCode));
 }
 
-void NotificationAnalyticsUtil::ReportModifyEvent(const HaMetaMessage& message, bool unFlowControl)
+void __attribute__((weak)) NotificationAnalyticsUtil::ReportModifyEvent(
+    const HaMetaMessage& message, bool unFlowControl)
 {
     if (!unFlowControl && !ReportFlowControl(MODIFY_ERROR_EVENT_CODE)) {
         ANS_LOGI("Publish event failed, reason:%{public}s", message.Build().c_str());
@@ -812,7 +813,7 @@ void NotificationAnalyticsUtil::ReportModifyEvent(const HaMetaMessage& message, 
     IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, MODIFY_ERROR_EVENT_CODE));
 }
 
-void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const HaMetaMessage& message)
+void __attribute__((weak)) NotificationAnalyticsUtil::ReportDeleteFailedEvent(const HaMetaMessage& message)
 {
     if (!ReportFlowControl(DELETE_ERROR_EVENT_CODE)) {
         ANS_LOGE("Publish event failed, reason:%{public}s", message.Build().c_str());
@@ -946,7 +947,7 @@ uint32_t NotificationAnalyticsUtil::SetControlFlags(const std::shared_ptr<Notifi
     }
     return controlFlags;
 }
-void NotificationAnalyticsUtil::ReportNotificationEvent(EventFwk::Want want,
+void __attribute__((weak)) NotificationAnalyticsUtil::ReportNotificationEvent(EventFwk::Want want,
     int32_t eventCode, const std::string& reason)
 {
     EventFwk::CommonEventPublishInfo publishInfo;

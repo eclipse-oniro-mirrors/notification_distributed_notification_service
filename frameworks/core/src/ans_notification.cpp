@@ -1258,6 +1258,20 @@ ErrCode AnsNotification::GetActiveNotificationByFilter(const LiveViewFilter &fil
         filter.notificationKey.label, filter.userId, filter.extraInfoKeys, request);
 }
 
+ErrCode AnsNotification::GetNotificationParameters(
+    int32_t notificationId, const std::string &label, sptr<NotificationParameters> &parameters)
+{
+    ANS_LOGD("called");
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->GetNotificationParameters(notificationId, label, parameters);
+}
+
 ErrCode AnsNotification::IsAllowedNotify(const NotificationBundleOption &bundleOption, bool &allowed)
 {
     if (bundleOption.GetBundleName().empty()) {

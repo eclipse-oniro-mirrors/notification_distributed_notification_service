@@ -50,8 +50,6 @@
 #include "want_params.h"
 #include "bundle_manager_helper.h"
 
-extern void MockVerifyNativeToken(bool mockRet);
-
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
 
@@ -114,7 +112,6 @@ HWTEST_F(AdvancedNotificationRingToneServiceTest, SetRingtoneInfoByBundle_00001,
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     MockIsVerfyPermisson(true);
-    MockVerifyNativeToken(false);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundle", 1);
     ASSERT_NE(bundleOption, nullptr);
     sptr<NotificationRingtoneInfo> ringtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
@@ -188,7 +185,6 @@ HWTEST_F(AdvancedNotificationRingToneServiceTest, GetRingtoneInfoByBundle_00001,
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     MockIsVerfyPermisson(true);
-    MockVerifyNativeToken(false);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundle", 1);
     ASSERT_NE(bundleOption, nullptr);
     sptr<NotificationRingtoneInfo> ringtoneInfo = new (std::nothrow) NotificationRingtoneInfo();

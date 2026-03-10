@@ -41,6 +41,7 @@
 #include "notification_dialog_manager.h"
 #include "notification_do_not_disturb_profile.h"
 #include "notifictaion_load_utils.h"
+#include "notification_parameters.h"
 #include "notification_record.h"
 #include "notification_slot_filter.h"
 #include "notification_sorting_map.h"
@@ -399,6 +400,17 @@ public:
     ErrCode GetActiveNotificationByFilter(
         const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label,
         int32_t userId, const std::vector<std::string> &extraInfoKeys, sptr<NotificationRequest> &request) override;
+
+    /**
+     * @brief Get notification parameters by id and label.
+     *
+     * @param notificationId Notification id.
+     * @param label Notification label.
+     * @param parameters Notification parameters to return.
+     * @return Returns ERR_OK on success, error code on failure.
+     */
+    ErrCode GetNotificationParameters(
+        int32_t notificationId, const std::string &label, sptr<NotificationParameters> &parameters) override;
 
     /**
      * @brief Checks whether your application has permission to publish notifications by calling
@@ -2464,6 +2476,10 @@ private:
         std::map<sptr<NotificationBundleOption>, T> &validMap);
     ErrCode GetValidBundles(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
         std::vector<sptr<NotificationBundleOption>> &validBundleOptions);
+    ErrCode QueryNotificationParameters(int32_t notificationId, const std::string &label,
+        const sptr<NotificationBundleOption> &bundleOption, sptr<NotificationParameters> &parameters);
+    ErrCode ExtractWantAgentInfo(
+        const std::shared_ptr<NotificationRecord> record, sptr<NotificationParameters> &parameters);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;

@@ -84,7 +84,9 @@ bool ApplicationChangeBox::SetApplicationChangeList(const std::vector<Notificati
             DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewPiexlMap2BinFile(
                 application.GetBundleIcon(), buffer);
             const unsigned char* begin = buffer.data();
-            box.PutValue(std::make_shared<TlvItem>(APPLICATION_INFO_START + offset, begin, buffer.size()));
+            if (!buffer.empty()) {
+                box.PutValue(std::make_shared<TlvItem>(APPLICATION_INFO_START + offset, begin, buffer.size()));
+            }
         }
         offset++;
         box.PutValue(std::make_shared<TlvItem>(APPLICATION_INFO_START + offset++, application.GetBundleLabel()));

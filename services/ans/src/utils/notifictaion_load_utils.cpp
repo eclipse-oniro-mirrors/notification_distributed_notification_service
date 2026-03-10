@@ -30,7 +30,7 @@ NotificationLoadUtils::NotificationLoadUtils(const std::string& path) : path_(pa
     ANS_LOGI("Open symbol name: %{public}s", path_.c_str());
 }
 
-NotificationLoadUtils::~NotificationLoadUtils()
+__attribute__((weak)) NotificationLoadUtils::~NotificationLoadUtils()
 {
     if (proxyHandle_ == nullptr) {
         return;
@@ -40,7 +40,7 @@ NotificationLoadUtils::~NotificationLoadUtils()
     proxyHandle_ = nullptr;
 }
 
-void* NotificationLoadUtils::GetProxyFunc(const std::string& func)
+void* __attribute__((weak)) NotificationLoadUtils::GetProxyFunc(const std::string& func)
 {
     if (proxyHandle_ == nullptr) {
         ANS_LOGE("Get func failed: %{public}s %{public}s", path_.c_str(), func.c_str());
@@ -50,7 +50,7 @@ void* NotificationLoadUtils::GetProxyFunc(const std::string& func)
     return dlsym(proxyHandle_, func.c_str());
 }
 
-bool NotificationLoadUtils::IsValid()
+bool __attribute__((weak)) NotificationLoadUtils::IsValid()
 {
     return (proxyHandle_ != nullptr);
 }

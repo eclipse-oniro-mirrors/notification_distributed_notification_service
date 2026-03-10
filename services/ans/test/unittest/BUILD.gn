@@ -40,7 +40,6 @@ ohos_unittest("ans_unit_test") {
     "health_white_list_util_test.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
-    "mock/mock_access_token_helper.cpp",
     "mock/mock_accesstoken_kit.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_event_handler.cpp",
@@ -73,7 +72,7 @@ ohos_unittest("ans_unit_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   if (distributed_notification_service_feature_distributed_db) {
@@ -172,7 +171,7 @@ ohos_unittest("notification_preferences_database_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   if (distributed_notification_service_feature_distributed_db) {
@@ -260,7 +259,7 @@ ohos_unittest("notification_preferences_database_two_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   if (distributed_notification_service_feature_distributed_db) {
@@ -353,7 +352,7 @@ ohos_unittest("notification_subscriber_manager_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   if (distributed_notification_service_feature_distributed_db) {
@@ -453,10 +452,8 @@ ohos_unittest("notification_service_test") {
     "advanced_notification_utils_test.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
-    "mock/mock_access_token_helper.cpp",
     "mock/mock_accesstoken_kit.cpp",
     "mock/mock_badgequery_callback_stub.cpp",
-    "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_bundle_mgr.cpp",
     "mock/mock_event_handler.cpp",
     "mock/mock_ipc.cpp",
@@ -467,7 +464,7 @@ ohos_unittest("notification_service_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -566,7 +563,6 @@ ohos_unittest("notification_clone_test") {
     "clone_test/notification_clone_util_test.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
-    "mock/mock_access_token_helper.cpp",
     "mock/mock_accesstoken_kit.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_bundle_mgr.cpp",
@@ -580,7 +576,7 @@ ohos_unittest("notification_clone_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   if (distributed_notification_service_feature_distributed_db) {
@@ -666,7 +662,6 @@ ohos_unittest("notification_publish_service_test") {
     "advanced_notification_publish_service_test.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
-    "mock/mock_access_token_helper.cpp",
     "mock/mock_accesstoken_kit.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_bundle_mgr.cpp",
@@ -681,7 +676,7 @@ ohos_unittest("notification_publish_service_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -775,9 +770,7 @@ ohos_unittest("notification_service_publish_test") {
     "advanced_notification_service_test/advanced_notification_service_publish_test.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
-    "mock/mock_access_token_helper.cpp",
     "mock/mock_accesstoken_kit.cpp",
-    "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_bundle_mgr.cpp",
     "mock/mock_event_handler.cpp",
     "mock/mock_ipc.cpp",
@@ -788,7 +781,7 @@ ohos_unittest("notification_service_publish_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   if (distributed_notification_service_feature_distributed_db) {
@@ -864,7 +857,7 @@ ohos_unittest("notification_preferences_second_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   external_deps = [
@@ -922,7 +915,7 @@ ohos_unittest("notification_preferences_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   if (distributed_notification_service_feature_distributed_db) {
@@ -1060,7 +1053,7 @@ ohos_unittest("bundle_manager_helper_branch_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   external_deps = [
@@ -1116,7 +1109,7 @@ ohos_unittest("notification_dialog_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   external_deps = [
@@ -1171,14 +1164,11 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
   defines = []
 
   sources = [
-    "${services_path}/ans/src/advanced_notification_geofence_service.cpp",
     "${services_path}/infrastructure/external_adapter/ffrt/src/ffrt_queue_impl.cpp",
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "mock/mock_accesstoken_kit.cpp",
-    "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_ipc.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
-    "notification_subscriber_manager_branch_test/mock_access_token_helper.cpp",
     "notification_subscriber_manager_branch_test/mock_advanced_notification_service.cpp",
     "notification_subscriber_manager_branch_test/mock_notification.cpp",
     "notification_subscriber_manager_branch_test/mock_notification_preferences.cpp",
@@ -1187,7 +1177,7 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -1252,7 +1242,6 @@ ohos_unittest("advanced_notification_ringtone_service_test") {
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
-    "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_bundle_mgr.cpp",
     "mock/mock_event_handler.cpp",
     "mock/mock_ipc.cpp",
@@ -1264,7 +1253,7 @@ ohos_unittest("advanced_notification_ringtone_service_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -1352,12 +1341,11 @@ ohos_unittest("advanced_notification_geofence_service_test") {
     "mock/mock_push_callback_stub.cpp",
     "mock/mock_single_kv_store.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
-    "notification_subscriber_manager_branch_test/mock_access_token_helper.cpp",
   ]
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -1439,18 +1427,16 @@ ohos_unittest("advanced_notification_service_branch_test") {
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
     "mock/mock_advanced_notification_service.cpp",
-    "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_bundle_mgr.cpp",
     "mock/mock_event_handler.cpp",
     "mock/mock_ipc.cpp",
     "mock/mock_single_kv_store.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
-    "notification_subscriber_manager_branch_test/mock_access_token_helper.cpp",
   ]
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -1509,14 +1495,6 @@ ohos_unittest("notification_preferences_database_branch_test") {
   ]
 
   sources = [
-    "${services_path}/ans/src/bundle_manager_helper.cpp",
-    "${services_path}/ans/src/common/aes_gcm_helper.cpp",
-    "${services_path}/ans/src/common/file_utils.cpp",
-    "${services_path}/ans/src/common/notification_app_privileges.cpp",
-    "${services_path}/ans/src/common/notification_config_parse.cpp",
-    "${services_path}/ans/src/notification_preferences_database.cpp",
-    "${services_path}/ans/src/notification_preferences_info.cpp",
-    "${services_path}/ans/src/os_account_manager_helper.cpp",
     "${services_path}/ans/test/unittest/mock/mock_notification_analytics_util.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
     "notification_preferences_database_branch_test/mock_notification_rdb_data_mgr.cpp",
@@ -1525,7 +1503,7 @@ ohos_unittest("notification_preferences_database_branch_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -1580,7 +1558,7 @@ ohos_unittest("push_callback_stub_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   external_deps = [
@@ -1638,7 +1616,7 @@ ohos_unittest("notification_rdb_data_mgr_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   external_deps = [
@@ -1695,7 +1673,7 @@ ohos_unittest("notification_config_parse_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   external_deps = [
@@ -1746,7 +1724,7 @@ ohos_unittest("os_account_manager_helper_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   external_deps = [
@@ -1803,7 +1781,7 @@ ohos_unittest("advanced_datashare_observer_unit_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   external_deps = [
@@ -1824,6 +1802,14 @@ ohos_unittest("advanced_datashare_observer_unit_test") {
 }
 
 ohos_unittest("notification_extension_wrapper_unit_test") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
   include_dirs = [
     ".",
@@ -1837,7 +1823,7 @@ ohos_unittest("notification_extension_wrapper_unit_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   external_deps = [
@@ -1915,7 +1901,7 @@ ohos_unittest("advanced_notification_service_unit_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -1980,7 +1966,7 @@ ohos_unittest("common_utils_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
+    "${services_path}/ans:ans_service_sources",
   ]
 
   external_deps = [
@@ -2032,96 +2018,6 @@ ohos_unittest("notification_extension_test") {
     "notification_extension/notification_config_parse_mock.cpp",
     "notification_extension/notification_load_utils_mock.cpp",
     "notification_extension/notification_operation_service_test.cpp",
-    "${services_path}/ans/src/access_token_helper.cpp",
-    "${services_path}/ans/src/advanced_notdisturb_enabled_observer.cpp",
-    "${services_path}/ans/src/advanced_notdisturb_white_list_observer.cpp",
-    "${services_path}/ans/src/advanced_aggregation_data_roaming_observer.cpp",
-    "${services_path}/ans/src/advanced_datashare_helper.cpp",
-    "${services_path}/ans/src/advanced_datashare_helper_data_observer.cpp",
-    "${services_path}/ans/src/advanced_datashare_helper_ext.cpp",
-    "${services_path}/ans/src/advanced_datashare_observer.cpp",
-    "${services_path}/ans/src/advanced_notification_manager/advanced_notification_cancel.cpp",
-    "${services_path}/ans/src/advanced_notification_clone_service.cpp",
-    "${services_path}/ans/src/advanced_notification_event_service.cpp",
-    "${services_path}/ans/src/advanced_notification_extension_subscription.cpp",
-    "${services_path}/ans/src/advanced_notification_flow_control_service.cpp",
-    "${services_path}/ans/src/advanced_notification_geofence_service.cpp",
-    "${services_path}/ans/src/advanced_notification_inline.cpp",
-    "${services_path}/ans/src/advanced_notification_live_view_service.cpp",
-    "${services_path}/ans/src/advanced_notification_manager/advanced_notification_publish.cpp",
-    "${services_path}/ans/src/advanced_notification_manager/advanced_notification_atomic_service_publish.cpp",
-    "${services_path}/ans/src/advanced_notification_manager/advanced_notification_query.cpp",
-    "${services_path}/ans/src/advanced_notification_publish/base_publish_process.cpp",
-    "${services_path}/ans/src/advanced_notification_publish/common_notification_publish_process.cpp",
-    "${services_path}/ans/src/advanced_notification_publish/live_publish_process.cpp",
-    "${services_path}/ans/src/advanced_notification_publish_service.cpp",
-    "${services_path}/ans/src/advanced_notification_reminder_service.cpp",
-    "${services_path}/ans/src/advanced_notification_ringtone_service.cpp",
-    "${services_path}/ans/src/advanced_notification_service.cpp",
-    "${services_path}/ans/src/advanced_notification_service_ability.cpp",
-    "${services_path}/ans/src/advanced_notification_slot_service.cpp",
-    "${services_path}/ans/src/advanced_notification_subscriber_service.cpp",
-    "${services_path}/ans/src/advanced_notification_utils.cpp",
-    "${services_path}/ans/src/badge_manager/badge_manager.cpp",
-    "${services_path}/ans/src/clone/dh_notification_clone_bundle_service.cpp",
-    "${services_path}/ans/src/clone/notification_clone_bundle_info.cpp",
-    "${services_path}/ans/src/clone/notification_clone_priority_info.cpp",
-    "${services_path}/ans/src/clone/notification_clone_bundle_service.cpp",
-    "${services_path}/ans/src/clone/notification_clone_disturb_service.cpp",
-    "${services_path}/ans/src/clone/notification_clone_geofence_switch.cpp",
-    "${services_path}/ans/src/clone/notification_clone_priority_service.cpp",
-    "${services_path}/ans/src/clone/notification_clone_manager.cpp",
-    "${services_path}/ans/src/clone/notification_clone_util.cpp",
-    "${services_path}/ans/src/common/aes_gcm_helper.cpp",
-    "${services_path}/ans/src/common/file_utils.cpp",
-    "${services_path}/ans/src/common/notification_analytics_util.cpp",
-    "${services_path}/ans/src/common/ans_status.cpp",
-    "${services_path}/ans/src/common/health_white_list_util.cpp",
-    "${services_path}/ans/src/common/notification_app_privileges.cpp",
-    "${services_path}/ans/src/common/system_sound_helper.cpp",
-    "${services_path}/ans/src/distributed_device_status.cpp",
-    "${services_path}/ans/src/distributed_manager/advanced_notification_distributed_manager_service.cpp",
-    "${services_path}/ans/src/disturb_manager/advanced_notification_disturb_manager_service.cpp",
-    "${services_path}/ans/src/enable_manager/enable_manager.cpp",
-    "${services_path}/ans/src/enable_manager/silent_reminder_manager.cpp",
-    "${services_path}/ans/src/event_report.cpp",
-    "${services_path}/ans/src/notification_bluetooth_helper.cpp",
-    "${services_path}/ans/src/notification_dialog.cpp",
-    "${services_path}/ans/src/notification_dialog_manager.cpp",
-    "${services_path}/ans/src/notification_extension/distributed_bundle_service.cpp",
-    "${services_path}/ans/src/notification_extension/distributed_collaboration_service.cpp",
-    "${services_path}/ans/src/notification_extension/distributed_device_data_service.cpp",
-    "${services_path}/ans/src/notification_extension/distributed_device_manager.cpp",
-    "${services_path}/ans/src/notification_extension/distributed_extension_service.cpp",
-    "${services_path}/ans/src/notification_extension/notification_operation_service.cpp",
-    "${services_path}/ans/src/notification_extension_wrapper.cpp",
-    "${services_path}/ans/src/notification_local_live_view_subscriber_manager.cpp",
-    "${services_path}/ans/src/notification_preferences.cpp",
-    "${services_path}/ans/src/notification_preferences_database.cpp",
-    "${services_path}/ans/src/notification_preferences_info.cpp",
-    "${services_path}/ans/src/notification_rdb_data_mgr.cpp",
-    "${services_path}/ans/src/notification_slot_filter.cpp",
-    "${services_path}/ans/src/notification_smart_reminder/reminder_affected.cpp",
-    "${services_path}/ans/src/notification_smart_reminder/smart_reminder_center.cpp",
-    "${services_path}/ans/src/notification_smart_reminder/string_utils.cpp",
-    "${services_path}/ans/src/priority_notification/advanced_notification_priority_manager_service.cpp",
-    "${services_path}/ans/src/priority_notification/advanced_notification_priority_helper.cpp",
-    "${services_path}/ans/src/priority_notification/notification_ai_extension_wrapper.cpp",
-    "${services_path}/ans/src/notification_subscriber_manager.cpp",
-    "${services_path}/ans/src/notification_timer_info.cpp",
-    "${services_path}/ans/src/os_account_manager_helper.cpp",
-    "${services_path}/ans/src/permission_filter.cpp",
-    "${services_path}/ans/src/reminder_swing_decision_center.cpp",
-    "${services_path}/ans/src/report_time_info.cpp",
-    "${services_path}/ans/src/system_dialog_connect_stb.cpp",
-    "${services_path}/ans/src/system_event_observer.cpp",
-    "${services_path}/ans/src/system_live_view/advanced_notification_system_live_view_service.cpp",
-    "${services_path}/ans/src/telephony_extension_wrapper.cpp",
-    "${services_path}/ans/src/utils/notification_liveview_utils.cpp",
-    "${services_path}/domain/settings/rdb_mgr_repo/src/ans_rdb_mgr_builder.cpp",
-    "${services_path}/domain/settings/rdb_mgr_repo/src/on_rdb_operation_fail_report.cpp",
-    "${services_path}/domain/settings/rdb_mgr_repo/src/on_rdb_upgrade_liveview_migrate.cpp",
-    "${services_path}/domain/settings/rdb_mgr_repo/src/on_send_user_data_size_hisysevent.cpp",
   ]
 
   defines = []
@@ -2133,6 +2029,7 @@ ohos_unittest("notification_extension_test") {
     "${frameworks_module_ans_path}:ans_innerkits",
     "${frameworks_module_ans_path}:ans_manager_stub",
     "${frameworks_module_reminder_path}:reminder_innerkits",
+    "${services_path}/ans:ans_service_sources",
     "${services_path}/infrastructure:ans_base",
   ]
 

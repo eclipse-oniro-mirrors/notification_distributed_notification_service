@@ -54,7 +54,7 @@ unsigned char* TlvItem::GetValue() const
 
 void TlvItem::Initialize(const void* data, uint32_t length)
 {
-    if (length > MAX_BUFFER_LENGTH) {
+    if (length == 0 || length > MAX_BUFFER_LENGTH) {
         ANS_LOGW("Initialize data invalid %{public}d %{public}d %{public}d", type_, length, length_);
         return;
     }
@@ -138,6 +138,10 @@ bool TlvBox::GetBoolValue(int32_t type, bool& value)
 {
     auto iter = TlvMap_.find(type);
     if (iter != TlvMap_.end()) {
+        if (iter->second->GetValue() == nullptr || iter->second->GetLength() < sizeof(bool)) {
+            ANS_LOGW("Invalid bool item %{public}d %{public}u.", type, iter->second->GetLength());
+            return false;
+        }
         value = (*(bool*)(iter->second->GetValue()));
         return true;
     }
@@ -149,6 +153,10 @@ bool TlvBox::GetBytes(int32_t type, std::vector<uint8_t>& value)
     auto iter = TlvMap_.find(type);
     if (iter != TlvMap_.end()) {
         auto begin = iter->second->GetValue();
+        if (iter->second->GetValue() == nullptr || iter->second->GetLength() <= 0) {
+            ANS_LOGW("Invalid byte item %{public}d %{public}u.", type, iter->second->GetLength());
+            return false;
+        }
         value.assign(begin, begin + iter->second->GetLength());
         return true;
     }
@@ -159,7 +167,13 @@ bool TlvBox::GetStringValue(int32_t type, std::string& value)
 {
     auto iter = TlvMap_.find(type);
     if (iter != TlvMap_.end()) {
-        value = reinterpret_cast<char*>(iter->second->GetValue());
+        if (iter->second->GetValue() == nullptr || iter->second->GetLength() <= 0) {
+            ANS_LOGW("Invalid string item %{public}d %{public}u.", type, iter->second->GetLength());
+            return false;
+        }
+
+        char* begin = reinterpret_cast<char*>(iter->second->GetValue());
+        value = std::string(begin, iter->second->GetLength() - 1);
         return true;
     }
     return false;
@@ -169,7 +183,7 @@ bool TlvBox::GetInt32Value(int32_t type, int32_t& value)
 {
     auto iter = TlvMap_.find(type);
     if (iter != TlvMap_.end()) {
-        if (iter->second->GetLength() < sizeof(int32_t)) {
+        if (iter->second->GetLength() < sizeof(int32_t) || iter->second->GetValue() == nullptr) {
             ANS_LOGW("Invalid item %{public}d %{public}u.", type, iter->second->GetLength());
             return false;
         }
@@ -183,7 +197,7 @@ bool TlvBox::GetInt64Value(int32_t type, int64_t& value)
 {
     auto iter = TlvMap_.find(type);
     if (iter != TlvMap_.end()) {
-        if (iter->second->GetLength() < sizeof(uint64_t)) {
+        if (iter->second->GetLength() < sizeof(uint64_t) || iter->second->GetValue() == nullptr) {
             ANS_LOGW("Invalid item %{public}d %{public}u.", type, iter->second->GetLength());
             return false;
         }
