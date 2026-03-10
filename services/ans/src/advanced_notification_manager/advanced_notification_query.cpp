@@ -328,6 +328,71 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
     return result;
 }
 
+ErrCode AdvancedNotificationService::GetNotificationParameters(
+    int32_t notificationId, const std::string &label, sptr<NotificationParameters> &parameters)
+{
+    ANS_LOGD("called");
+
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
+        result = QueryNotificationParameters(notificationId, label, bundleOption, parameters);
+    }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get notification parameters");
+
+    return result;
+}
+
+ErrCode AdvancedNotificationService::QueryNotificationParameters(
+    int32_t notificationId, const std::string &label,
+    const sptr<NotificationBundleOption> &bundleOption, sptr<NotificationParameters> &parameters)
+{
+    ANS_LOGD("called");
+
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    auto record = GetRecordFromNotificationList(
+        notificationId, bundleOption->GetUid(), label, bundleOption->GetBundleName(), userId);
+    if (record == nullptr || record->request == nullptr) {
+        ANS_LOGE("Notification record not found");
+        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    }
+
+    parameters = new (std::nothrow) NotificationParameters();
+    if (parameters == nullptr) {
+        ANS_LOGE("Failed to create NotificationParameters");
+        return ERR_ANS_NO_MEMORY;
+    }
+
+    return ExtractWantAgentInfo(record, parameters);
+}
+
+ErrCode AdvancedNotificationService::ExtractWantAgentInfo(
+    const std::shared_ptr<NotificationRecord> record, sptr<NotificationParameters> &parameters)
+{
+    ANS_LOGD("called");
+
+    auto wantAgent = record->request->GetWantAgent();
+    if (wantAgent == nullptr) {
+        ANS_LOGE("WantAgent is null, return empty parameters");
+        return ERR_OK;
+    }
+
+    std::shared_ptr<AAFwk::Want> want = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(wantAgent);
+    if (want != nullptr) {
+        parameters->SetWantAction(want->GetAction());
+        parameters->SetWantUri(want->GetUriString());
+        auto params = std::make_shared<AAFwk::WantParams>(want->GetParams());
+        parameters->SetWantParameters(params);
+    }
+
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::GetNotificationRequestByHashCode(
     const std::string& hashCode, sptr<NotificationRequest>& notificationRequest)
 {

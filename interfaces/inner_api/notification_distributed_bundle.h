@@ -90,6 +90,16 @@ public:
     void SetAncoBundle(bool isAnco);
 
     /**
+     * @brief Get app index.
+     */
+    int32_t GetAppIndex() const;
+ 
+    /**
+     * @brief Set app index.
+     */
+    void SetAppIndex(const int32_t appIndex);
+
+    /**
      * @brief Set installed same bundle.
      */
     void SetInstalledbundle(const std::string& bundleName, const std::string& label);
@@ -98,6 +108,11 @@ public:
      * @brief Check installed bundle.
      */
     bool CheckInstalledBundle(const std::string bundleName, const std::string label) const;
+
+    /**
+     * @brief Check same bundle.
+     */
+    bool CheckSameBundle() const;
 
     /**
      * @brief Get live view enable.
@@ -157,6 +172,7 @@ private:
     NotificationConstant::SWITCH_STATE liveView_ = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
     NotificationConstant::SWITCH_STATE notification_ = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
     int32_t uid_ = 0;
+    int32_t appIndex_ = 0;
     std::string installedAppLabel_;
     std::string installedBundleName_;
     std::string appLabel_;

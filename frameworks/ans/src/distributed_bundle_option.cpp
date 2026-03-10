@@ -47,13 +47,33 @@ void DistributedBundleOption::SetEnable(const bool& enable)
     enable_ = enable;
 }
 
+bool DistributedBundleOption::IsNotification() const
+{
+    return notification_;
+}
+
+void DistributedBundleOption::SetNotification(const bool& notification)
+{
+    notification_ = notification;
+}
+
+std::string DistributedBundleOption::GetAppLabel() const
+{
+    return label_;
+}
+
+void DistributedBundleOption::SetAppLabel(const std::string& label)
+{
+    label_ = label;
+}
+
 std::string DistributedBundleOption::Dump()
 {
     return "DistributedBundleOption{ "
             "bundleName = " +(bundle_ ? bundle_->GetBundleName() : "null")  +
             ", uid = " + (bundle_ ? std::to_string(bundle_->GetUid()) : "null") +
-            ", enable = " + std::to_string(enable_) +
-            " }";
+            ", enable = " + std::to_string(enable_) + ", notification = " + std::to_string(notification_) +
+            ", label = " + label_ + " }";
 }
 
 bool DistributedBundleOption::Marshalling(Parcel &parcel) const
@@ -77,6 +97,15 @@ bool DistributedBundleOption::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteBool(notification_)) {
+        ANS_LOGE("Failed to write notification");
+        return false;
+    }
+
+    if (!parcel.WriteString(label_)) {
+        ANS_LOGE("Failed to write label");
+        return false;
+    }
     return true;
 }
 
@@ -105,6 +134,8 @@ bool DistributedBundleOption::ReadFromParcel(Parcel &parcel)
     }
 
     enable_ = parcel.ReadBool();
+    notification_ = parcel.ReadBool();
+    label_ = parcel.ReadString();
 
     return true;
 }
@@ -121,6 +152,8 @@ bool DistributedBundleOption::ToJson(nlohmann::json &jsonObject) const
     }
 
     jsonObject["enable"] = enable_;
+    jsonObject["notification"] = notification_;
+    jsonObject["label"] = label_;
     return true;
 }
 
@@ -154,6 +187,14 @@ DistributedBundleOption *DistributedBundleOption::FromJson(const nlohmann::json 
 
     if (jsonObject.find("enable") != jsonEnd && jsonObject.at("enable").is_boolean()) {
         pDistributedBundleOption->enable_ = jsonObject.at("enable").get<bool>();
+    }
+
+    if (jsonObject.find("notification") != jsonEnd && jsonObject.at("notification").is_boolean()) {
+        pDistributedBundleOption->notification_ = jsonObject.at("notification").get<bool>();
+    }
+
+    if (jsonObject.find("label") != jsonEnd && jsonObject.at("label").is_string()) {
+        pDistributedBundleOption->label_ = jsonObject.at("label").get<std::string>();
     }
     return pDistributedBundleOption;
 }

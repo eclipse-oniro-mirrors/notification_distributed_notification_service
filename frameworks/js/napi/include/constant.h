@@ -34,6 +34,7 @@ napi_value LiveViewStatusInit(napi_env env, napi_value exports);
 napi_value SwitchStateInit(napi_env env, napi_value exports);
 napi_value RingtoneTypeInit(napi_env env, napi_value exports);
 napi_value SubscribeTypeInit(napi_env env, napi_value exports);
+napi_value NotificationTypeInit(napi_env env, napi_value exports);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 

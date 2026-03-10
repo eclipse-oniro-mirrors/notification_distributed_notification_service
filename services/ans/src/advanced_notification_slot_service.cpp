@@ -49,7 +49,7 @@ namespace Notification {
 namespace {
     constexpr char CALL_UI_BUNDLE[] = "com.ohos.callui";
     constexpr char LIVEVIEW_CONFIG_KEY[] = "APP_LIVEVIEW_CONFIG";
-    constexpr uint32_t NOTIFICATION_SETTING_FLAG_BASE = 0x11;
+    constexpr uint32_t NOTIFICATION_SETTING_FLAG_BASE = 0x17;
     constexpr uint32_t NOTIFICATION_SETTING_SILENT = 0;
     constexpr int32_t MAX_LIVEVIEW_CONFIG_SIZE = 60;
     constexpr int32_t MAX_CHECK_RETRY_TIME = 3;
@@ -60,6 +60,8 @@ namespace {
     constexpr uint64_t DELAY_TIME_CHECK_LIVEVIEW = 10 * 1000 * 1000;
     constexpr uint64_t DELAY_TIME_TRIGGER_LIVEVIEW = 5 * 60 * 1000 * 1000;
     constexpr uint64_t INTERVAL_CHECK_LIVEVIEW = 1000 * 1000;
+    constexpr uint64_t BADGENUMBER_SHOW_FLAG = 0x40;
+    constexpr uint64_t NOTIFICATION_ENABLED_FLAG = 0x80;
     const std::set<std::string> unAffectDevices = {
         NotificationConstant::LITEWEARABLE_DEVICE_TYPE,
         NotificationConstant::WEARABLE_DEVICE_TYPE
@@ -463,6 +465,18 @@ ErrCode AdvancedNotificationService::GetNotificationSettings(uint32_t &slotFlags
         if (enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
             enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
             slotFlags = NOTIFICATION_SETTING_SILENT;
+        }
+        bool isShowBadge = false;
+        result = NotificationPreferences::GetInstance()->IsShowBadge(bundleOption, isShowBadge);
+        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST || isShowBadge) {
+            result = ERR_OK;
+            slotFlags |= BADGENUMBER_SHOW_FLAG;
+        }
+        enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+        NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, enableStatus);
+        if (enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+            enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
+            slotFlags |= NOTIFICATION_ENABLED_FLAG;
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get notification settings.");

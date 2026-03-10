@@ -1258,6 +1258,20 @@ ErrCode AnsNotification::GetActiveNotificationByFilter(const LiveViewFilter &fil
         filter.notificationKey.label, filter.userId, filter.extraInfoKeys, request);
 }
 
+ErrCode AnsNotification::GetNotificationParameters(
+    int32_t notificationId, const std::string &label, sptr<NotificationParameters> &parameters)
+{
+    ANS_LOGD("called");
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->GetNotificationParameters(notificationId, label, parameters);
+}
+
 ErrCode AnsNotification::IsAllowedNotify(const NotificationBundleOption &bundleOption, bool &allowed)
 {
     if (bundleOption.GetBundleName().empty()) {
@@ -2571,6 +2585,46 @@ ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleO
         return ERR_ANS_INVALID_PARAM;
     }
     return proxy->SetDistributedEnabledByBundle(bo, deviceType, enabled, isNotification);
+}
+
+ErrCode AnsNotification::GetDistributedBundleListByType(const bool isNotification,
+    std::vector<DistributedBundleOption> &enableList)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetDistributedBundleListByType fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->GetDistributedBundleListByType(isNotification, enableList);
+}
+
+ErrCode AnsNotification::GetDistributedBundleInfo(const std::vector<NotificationBundleOption>& bundleOption,
+    std::vector<DistributedNotificationBundleInfo>& bundleInfoList)
+{
+    ANS_LOGD("called");
+    if (bundleOption.empty()) {
+        ANS_LOGE("bundleOption is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetDistributedBundleInfo fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    std::vector<sptr<NotificationBundleOption>> bundlesSptr;
+    bundlesSptr.reserve(bundleOption.size());
+    for (const auto &it : bundleOption) {
+        sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(it);
+        if (bundle == nullptr) {
+            ANS_LOGE("null bundleOption");
+            return ERR_ANS_NO_MEMORY;
+        }
+        bundlesSptr.emplace_back(std::move(bundle));
+    }
+    return proxy->GetDistributedBundleInfo(bundlesSptr, bundleInfoList);
 }
 
 ErrCode AnsNotification::SetDistributedBundleOption(

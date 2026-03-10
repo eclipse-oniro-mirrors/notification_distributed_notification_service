@@ -299,6 +299,10 @@ public:
         notificationHelper.GetNotificationRequestByHashCode(hashCode, notificationRequest);
         notificationHelper.GetActiveNotificationByFilter(filter, notificationRequest);
         
+        int32_t notificationId = fdp->ConsumeIntegralInRange<int32_t>(0, 100);
+        std::string stringData = fdp->ConsumeRandomLengthString();
+        sptr<NotificationParameters> parameters = nullptr;
+        notificationHelper.GetNotificationParameters(notificationId, stringData, parameters);
         int32_t result = fdp->ConsumeIntegralInRange<int32_t>(0, 100);
         notificationHelper.ReplyDistributeOperation(hashCode, result);
         

@@ -544,10 +544,12 @@ bool DistributedPublishService::MakeRequestBox(
     if (!requestPoint->GetAppMessageId().empty()) {
         requestBox->SetAppMessageId(requestPoint->GetAppMessageId());
     }
-    if (request->GetBundleName().empty()) {
-        requestBox->SetCreatorBundleName(request->GetCreateBundle());
+    if (requestPoint->GetOwnerBundleName().empty()) {
+        requestBox->SetCreatorBundleUid(requestPoint->GetCreatorUid());
+        requestBox->SetCreatorBundleName(requestPoint->GetCreatorBundleName());
     } else {
-        requestBox->SetCreatorBundleName(request->GetBundleName());
+        requestBox->SetCreatorBundleUid(requestPoint->GetOwnerUid());
+        requestBox->SetCreatorBundleName(requestPoint->GetOwnerBundleName());
     }
     if (requestPoint->IsCommonLiveView()) {
         std::vector<uint8_t> buffer;
@@ -1016,6 +1018,11 @@ void DistributedPublishService::MakeNotificationReminderFlag(const NotificationR
     if (box.GetCreatorBundleName(context)) {
         request->SetOwnerBundleName(context);
         request->SetCreatorBundleName(context);
+    }
+    int32_t uid = 0;
+    if (box.GetCreatorBundleUid(uid)) {
+        request->SetOwnerUid(uid);
+        request->SetCreatorUid(uid);
     }
     if (box.GetNotificationHashCode(context)) {
         request->SetDistributedHashCode(context);

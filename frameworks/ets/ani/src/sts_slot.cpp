@@ -154,9 +154,12 @@ bool WrapGetNotificationSetting(ani_env *env, uint32_t slotFlags, ani_object &ou
         ANS_LOGE("Create class failed");
         return false;
     }
-    
     bool soundEnabled = slotFlags & Notification::NotificationConstant::ReminderFlag::SOUND_FLAG;
     bool vibrationEnabled = slotFlags & Notification::NotificationConstant::ReminderFlag::VIBRATION_FLAG;
+    bool lockScreenEnabled = slotFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG;
+    bool bannerEnabled = slotFlags & NotificationConstant::ReminderFlag::BANNER_FLAG;
+    bool badgeNumberEnabled = slotFlags & NotificationConstant::ReminderFlag::BADGENUMBER_SHOW_FLAG;
+    bool notificationEnabled = slotFlags & NotificationConstant::ReminderFlag::NOTIFICATION_FLAG;
     ani_status status = ANI_OK;
     if (ANI_OK != (status = env->Object_SetPropertyByName_Boolean(
         outAniObj, "vibrationEnabled", BoolToAniBoolean(vibrationEnabled)))) {
@@ -166,6 +169,26 @@ bool WrapGetNotificationSetting(ani_env *env, uint32_t slotFlags, ani_object &ou
     if (ANI_OK != (status = env->Object_SetPropertyByName_Boolean(
         outAniObj, "soundEnabled", BoolToAniBoolean(soundEnabled)))) {
         ANS_LOGE("Set soundEnabled fail, status %{public}d", status);
+        return false;
+    }
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Boolean(
+        outAniObj, "lockScreenEnabled", BoolToAniBoolean(lockScreenEnabled)))) {
+        ANS_LOGE("Set lockScreenEnabled fail, status %{public}d", status);
+        return false;
+    }
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Boolean(
+        outAniObj, "bannerEnabled", BoolToAniBoolean(bannerEnabled)))) {
+        ANS_LOGE("Set bannerEnabled fail, status %{public}d", status);
+        return false;
+    }
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Boolean(
+        outAniObj, "badgeNumberEnabled", BoolToAniBoolean(badgeNumberEnabled)))) {
+        ANS_LOGE("Set badgeNumberEnabled fail, status %{public}d", status);
+        return false;
+    }
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Boolean(
+        outAniObj, "notificationEnabled", BoolToAniBoolean(notificationEnabled)))) {
+        ANS_LOGE("Set notificationEnabled fail, status %{public}d", status);
         return false;
     }
     return true;

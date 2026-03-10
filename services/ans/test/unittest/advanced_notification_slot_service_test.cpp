@@ -924,7 +924,7 @@ HWTEST_F(AnsSlotServiceTest, GetNotificationSettings_00001, Function | SmallTest
     auto ret = advancedNotificationService_->GetNotificationSettings(flag);
     ASSERT_EQ(ret, ERR_OK);
     // invalid outside of the 0th and 4th position
-    uint32_t result = flag & 0xee;
+    uint32_t result = flag & 0x28;
     EXPECT_EQ(result, 0);
 }
 
@@ -944,10 +944,12 @@ HWTEST_F(AnsSlotServiceTest, GetNotificationSettings_00002, Function | SmallTest
     uint32_t flag = 0xff;
     auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundleOption, flag);
     ASSERT_EQ(ret, ERR_OK);
-
+    ret = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundleOption, false);
+    ASSERT_EQ(ret, ERR_OK);
     ret = advancedNotificationService_->GetNotificationSettings(flag);
     ASSERT_EQ(ret, ERR_OK);
-    EXPECT_EQ(flag, 0x11);
+    uint32_t result = flag & 0x28;
+    EXPECT_EQ(result, 0);
 }
 
 /**
@@ -984,6 +986,60 @@ HWTEST_F(AnsSlotServiceTest, GetNotificationSettings_00004, Function | SmallTest
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsNonBundleName(false);
     EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: GetNotificationSettings_00005
+ * @tc.desc: Test GetNotificationSettings
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, GetNotificationSettings_00005, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    sptr<NotificationBundleOption> bundleOption = advancedNotificationService_->GenerateBundleOption();
+    ASSERT_NE(bundleOption, nullptr);
+
+    std::string deviceId = "";
+    uint32_t flag = 0xff;
+    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundleOption, flag);
+    ASSERT_EQ(ret, ERR_OK);
+    ret = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundleOption, true);
+    ASSERT_EQ(ret, ERR_OK);
+    ret =  advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(deviceId, bundleOption, false);
+    ASSERT_EQ(ret, ERR_OK);
+    ret = advancedNotificationService_->GetNotificationSettings(flag);
+    ASSERT_EQ(ret, ERR_OK);
+    uint32_t result = flag & 0x1A8;
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: GetNotificationSettings_00006
+ * @tc.desc: Test GetNotificationSettings
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, GetNotificationSettings_00006, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    sptr<NotificationBundleOption> bundleOption = advancedNotificationService_->GenerateBundleOption();
+    ASSERT_NE(bundleOption, nullptr);
+
+    std::string deviceId = "";
+    uint32_t flag = 0xff;
+    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundleOption, flag);
+    ASSERT_EQ(ret, ERR_OK);
+    ret = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundleOption, true);
+    ASSERT_EQ(ret, ERR_OK);
+    ret =  advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(deviceId, bundleOption, true);
+    ASSERT_EQ(ret, ERR_OK);
+    ret = advancedNotificationService_->GetNotificationSettings(flag);
+    ASSERT_EQ(ret, ERR_OK);
+    uint32_t result = flag & 0x128;
+    EXPECT_EQ(result, 0);
 }
 
 /**

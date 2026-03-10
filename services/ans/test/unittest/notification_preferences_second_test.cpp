@@ -490,5 +490,65 @@ HWTEST_F(NotificationPreferencesTest, GetRingtoneInfoByBundle_0300, TestSize.Lev
     auto getRet = notificationPreferences.GetRingtoneInfoByBundle(bundleOption, ringtoneInfoResult);
     ASSERT_EQ(getRet, ERR_OK);
 }
+
+HWTEST_F(NotificationPreferencesTest, RemoveRingtoneInfoByBundle_0100, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("bundle", 100);
+    ASSERT_NE(bundleOption, nullptr);
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
+    ASSERT_NE(ringtoneInfo, nullptr);
+    ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    ringtoneInfo->SetRingtoneFileName("fileName");
+    ringtoneInfo->SetRingtoneUri("uri");
+    auto ret = notificationPreferences.SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    ASSERT_EQ(ret, ERR_OK);
+
+    notificationPreferences.RemoveRingtoneInfoByBundle(bundleOption);
+
+    sptr<NotificationRingtoneInfo> ringtoneInfoResult = nullptr;
+    auto getRet = notificationPreferences.GetRingtoneInfoByBundle(bundleOption, ringtoneInfoResult);
+    ASSERT_EQ(getRet, ERR_ANS_NO_CUSTOM_RINGTONE_INFO);
+}
+
+HWTEST_F(NotificationPreferencesTest, RemoveRingtoneInfoByBundle_0200, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("bundle", 100);
+    ASSERT_NE(bundleOption, nullptr);
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
+    ASSERT_NE(ringtoneInfo, nullptr);
+    ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_SYSTEM);
+    ringtoneInfo->SetRingtoneFileName("fileName");
+    ringtoneInfo->SetRingtoneUri("uri");
+    auto ret = notificationPreferences.SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    ASSERT_EQ(ret, ERR_OK);
+
+    notificationPreferences.RemoveRingtoneInfoByBundle(bundleOption);
+
+    sptr<NotificationRingtoneInfo> ringtoneInfoResult = nullptr;
+    auto getRet = notificationPreferences.GetRingtoneInfoByBundle(bundleOption, ringtoneInfoResult);
+    ASSERT_EQ(getRet, ERR_ANS_NO_CUSTOM_RINGTONE_INFO);
+}
+
+HWTEST_F(NotificationPreferencesTest, RemoveRingtoneInfoByBundle_0300, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("bundle", 100);
+    ASSERT_NE(bundleOption, nullptr);
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
+    ASSERT_NE(ringtoneInfo, nullptr);
+    ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE);
+    ringtoneInfo->SetRingtoneFileName("fileName");
+    ringtoneInfo->SetRingtoneUri("uri");
+    auto ret = notificationPreferences.SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    ASSERT_EQ(ret, ERR_OK);
+
+    notificationPreferences.RemoveRingtoneInfoByBundle(bundleOption);
+
+    sptr<NotificationRingtoneInfo> ringtoneInfoResult = nullptr;
+    auto getRet = notificationPreferences.GetRingtoneInfoByBundle(bundleOption, ringtoneInfoResult);
+    ASSERT_EQ(getRet, ERR_ANS_NO_CUSTOM_RINGTONE_INFO);
+}
 } // namespace Notification
 } // namespace OHOS

@@ -57,7 +57,8 @@ struct AsyncCallbackInfoOpenSettings {
     bool isWithResult = false;
 };
 
-bool CreateSettingsUiExtensionSub(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName);
+bool CreateSettingsUiExtensionSub(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName,
+    bool isWithResult);
 bool InitSub(napi_env env, AsyncCallbackInfoOpenSettings* callbackInfo, JsAnsCallbackComplete complete);
 void ProcessStatusChangedSub(int32_t code);
 void CreateExtensionSub(AsyncCallbackInfoOpenSettings* asynccallbackinfo);
@@ -81,10 +82,12 @@ class SettingsSubModalExtensionCallback {
         SettingsSubModalExtensionCallback();
         ~SettingsSubModalExtensionCallback();
         void OnRelease(int32_t releaseCode);
+        void OnReleaseNew(int32_t releaseCode);
         void OnResult(int32_t resultCode, const OHOS::AAFwk::Want& result);
         void OnReceive(const OHOS::AAFwk::WantParams& request);
         void OnError(int32_t code, const std::string& name, const std::string &message);
         void OnRemoteReady(const std::shared_ptr<OHOS::Ace::ModalUIExtensionProxy> &uiProxy);
+        void OnRemoteReadyNew(const std::shared_ptr<OHOS::Ace::ModalUIExtensionProxy> &uiProxy);
         void OnDestroy();
         void SetSessionId(int32_t sessionId);
         void SetBundleName(std::string bundleName);

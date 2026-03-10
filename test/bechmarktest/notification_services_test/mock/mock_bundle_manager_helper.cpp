@@ -21,12 +21,6 @@ namespace {
     const int32_t DEFAULT_USERID = 10000;
 }
 
-BundleManagerHelper::BundleManagerHelper()
-{}
-
-BundleManagerHelper::~BundleManagerHelper()
-{}
-
 void BundleManagerHelper::OnRemoteDied(const wptr<IRemoteObject> &object)
 {}
 

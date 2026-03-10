@@ -125,5 +125,108 @@ napi_value Common::GetNotificationFlags(const napi_env &env, const napi_value &v
 
     return NapiGetNull(env);
 }
+
+napi_value Common::SetNotificationSettings(const napi_env &env, uint32_t slotFlags, napi_value &result)
+{
+    ANS_LOGD("called");
+
+    napi_value value = nullptr;
+    // vibrationEnabled: boolean
+    napi_get_boolean(env, slotFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG, &value);
+    napi_set_named_property(env, result, "vibrationEnabled", value);
+
+    // soundEnabled: boolean
+    napi_get_boolean(env, slotFlags & NotificationConstant::ReminderFlag::SOUND_FLAG, &value);
+    napi_set_named_property(env, result, "soundEnabled", value);
+
+    // lockScreenEnabled: boolean
+    napi_get_boolean(env, slotFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, &value);
+    napi_set_named_property(env, result, "lockScreenEnabled", value);
+
+    // bannerEnabled: boolean
+    napi_get_boolean(env, slotFlags & NotificationConstant::ReminderFlag::BANNER_FLAG, &value);
+    napi_set_named_property(env, result, "bannerEnabled", value);
+
+    // badgeNumberEnabled: boolean
+    napi_get_boolean(env, slotFlags & NotificationConstant::ReminderFlag::BADGENUMBER_SHOW_FLAG, &value);
+    napi_set_named_property(env, result, "badgeNumberEnabled", value);
+
+    // notificationEnabled: boolean
+    napi_get_boolean(env, slotFlags & NotificationConstant::ReminderFlag::NOTIFICATION_FLAG, &value);
+    napi_set_named_property(env, result, "notificationEnabled", value);
+
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::GetNotificationGroupInfo(
+    const napi_env &env, const napi_value &value, NotificationRequest &request)
+{
+    ANS_LOGD("Called.");
+    napi_valuetype valuetype = napi_undefined;
+    napi_value groupInfoObj = nullptr;
+    napi_value groupInfoParamObj = nullptr;
+    bool hasProperty = false;
+    NAPI_CALL(env, napi_has_named_property(env, value, "groupInfo", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, value, "groupInfo", &groupInfoObj);
+        NAPI_CALL(env, napi_typeof(env, groupInfoObj, &valuetype));
+        if (valuetype != napi_object) {
+            std::string msg = "Incorrect parameter types. The type of groupInfo must be object.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        std::shared_ptr<NotificationGroupInfo> groupInfo = std::make_shared<NotificationGroupInfo>();
+        NAPI_CALL(env, napi_has_named_property(env, groupInfoObj, "isGroupIcon", &hasProperty));
+        if (hasProperty) {
+            napi_get_named_property(env, groupInfoObj, "isGroupIcon", &groupInfoParamObj);
+            NAPI_CALL(env, napi_typeof(env, groupInfoParamObj, &valuetype));
+            if (valuetype != napi_boolean) {
+                std::string msg = "Incorrect parameter types. The type of isGroupIcon must be boolean.";
+                Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+                return nullptr;
+            }
+            bool isGroupIcon = false;
+            NAPI_CALL(env, napi_get_value_bool(env, groupInfoParamObj, &isGroupIcon));
+            groupInfo->SetIsGroupIcon(isGroupIcon);
+        }
+        NAPI_CALL(env, napi_has_named_property(env, groupInfoObj, "groupTitle", &hasProperty));
+        if (hasProperty) {
+            napi_get_named_property(env, groupInfoObj, "groupTitle", &groupInfoParamObj);
+            NAPI_CALL(env, napi_typeof(env, groupInfoParamObj, &valuetype));
+            if (valuetype != napi_string) {
+                std::string msg = "Incorrect parameter types. The type of groupTitle must be string.";
+                Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+                return nullptr;
+            }
+            char groupTitle[STR_MAX_SIZE] = {0};
+            size_t strLen = 0;
+            NAPI_CALL(env, napi_get_value_string_utf8(env, groupInfoParamObj, groupTitle, STR_MAX_SIZE - 1, &strLen));
+            groupInfo->SetGroupTitle(groupTitle);
+        }
+        request.SetGroupInfo(groupInfo);
+    }
+    return NapiGetNull(env);
+}
+
+napi_value Common::SetNotificationGroupInfo(
+    const napi_env &env, const std::shared_ptr<NotificationGroupInfo> &info, napi_value &result)
+{
+    ANS_LOGD("called");
+
+    if (info == nullptr) {
+        ANS_LOGE("info is null");
+        return NapiGetBoolean(env, false);
+    }
+    napi_value value = nullptr;
+
+    // isGroupIcon?: boolean
+    napi_get_boolean(env, info->GetIsGroupIcon(), &value);
+    napi_set_named_property(env, result, "isGroupIcon", value);
+
+    // GroupTitle?: string
+    napi_create_string_utf8(env, info->GetGroupTitle().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "groupTitle", value);
+    return NapiGetBoolean(env, true);
+}
 }  // namespace NotificationNapi
 }  // namespace OHOS

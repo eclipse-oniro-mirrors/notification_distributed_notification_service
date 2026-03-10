@@ -39,31 +39,9 @@ napi_value NapiNotificationSettingResult(napi_env env, void *data)
         return result;
     }
     napi_create_object(env, &result);
-    bool soundEnabled = slotFlags & NotificationConstant::ReminderFlag::SOUND_FLAG;
-    bool vibrationEnabled = slotFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG;
-    bool lockScreenEnabled = slotFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG;
-    bool bannerEnabled = slotFlags & NotificationConstant::ReminderFlag::BANNER_FLAG;
-    bool badgeNumberEnabled = slotFlags & NotificationConstant::ReminderFlag::BADGENUMBER_SHOW_FLAG;
-    bool notificationEnabled = slotFlags & NotificationConstant::ReminderFlag::NOTIFICATION_FLAG;
-    napi_value vibrationValue;
-    napi_value soundValue;
-    napi_value lockScreenValue;
-    napi_value bannerValue;
-    napi_value badgeNumerValue;
-    napi_value notificationValue;
-    napi_get_boolean(env, vibrationEnabled, &vibrationValue);
-    napi_get_boolean(env, soundEnabled, &soundValue);
-    napi_get_boolean(env, lockScreenEnabled, &lockScreenValue);
-    napi_get_boolean(env, bannerEnabled, &bannerValue);
-    napi_get_boolean(env, badgeNumberEnabled, &badgeNumerValue);
-    napi_get_boolean(env, notificationEnabled, &notificationValue);
-
-    napi_set_named_property(env, result, "vibrationEnabled", vibrationValue);
-    napi_set_named_property(env, result, "soundEnabled", soundValue);
-    napi_set_named_property(env, result, "lockScreenEnabled", lockScreenValue);
-    napi_set_named_property(env, result, "bannerEnabled", bannerValue);
-    napi_set_named_property(env, result, "badgeNumberEnabled", badgeNumerValue);
-    napi_set_named_property(env, result, "notificationEnabled", notificationValue);
+    if (!Common::SetNotificationSettings(env, slotFlags, result)) {
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+    }
 
     return result;
 }
@@ -260,7 +238,31 @@ napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_
     return Common::NapiGetNull(env);
 }
 
-bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName)
+std::shared_ptr<SettingsModalExtensionCallback> CreateUiExtCallback(
+    Ace::ModalUIExtensionCallbacks& uiExtensionCallbacks, bool isWithResult)
+{
+    auto uiExtCallback = std::make_shared<SettingsModalExtensionCallback>();
+    uiExtensionCallbacks = {
+        .onRelease = isWithResult ?
+            std::bind(&SettingsModalExtensionCallback::OnReleaseNew, uiExtCallback, std::placeholders::_1) :
+            std::bind(&SettingsModalExtensionCallback::OnRelease, uiExtCallback, std::placeholders::_1),
+        .onResult = std::bind(&SettingsModalExtensionCallback::OnResult, uiExtCallback,
+            std::placeholders::_1, std::placeholders::_2),
+        .onReceive =
+            std::bind(&SettingsModalExtensionCallback::OnReceive, uiExtCallback, std::placeholders::_1),
+        .onError = std::bind(&SettingsModalExtensionCallback::OnError, uiExtCallback,
+            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
+        .onRemoteReady = isWithResult ?
+            std::bind(&SettingsModalExtensionCallback::OnRemoteReadyNew, uiExtCallback, std::placeholders::_1) :
+            std::bind(&SettingsModalExtensionCallback::OnRemoteReady, uiExtCallback, std::placeholders::_1),
+        .onDestroy = std::bind(&SettingsModalExtensionCallback::OnDestroy, uiExtCallback),
+    };
+
+    return uiExtCallback;
+}
+
+bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName,
+    bool isWithResult)
 {
     if (context == nullptr) {
         ANS_LOGE("null context");
@@ -288,22 +290,10 @@ bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> co
     std::string typeValue = "sys/commonUI";
     want.SetParam(typeKey, typeValue);
 
-    auto uiExtCallback = std::make_shared<SettingsModalExtensionCallback>();
+    Ace::ModalUIExtensionCallbacks uiExtensionCallbacks;
+    auto uiExtCallback = CreateUiExtCallback(uiExtensionCallbacks, isWithResult);
     uiExtCallback->SetAbilityContext(abilityContext);
     uiExtCallback->SetBundleName(bundleName);
-    Ace::ModalUIExtensionCallbacks uiExtensionCallbacks = {
-        .onRelease =
-            std::bind(&SettingsModalExtensionCallback::OnRelease, uiExtCallback, std::placeholders::_1),
-        .onResult = std::bind(&SettingsModalExtensionCallback::OnResult, uiExtCallback,
-            std::placeholders::_1, std::placeholders::_2),
-        .onReceive =
-            std::bind(&SettingsModalExtensionCallback::OnReceive, uiExtCallback, std::placeholders::_1),
-        .onError = std::bind(&SettingsModalExtensionCallback::OnError, uiExtCallback,
-            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
-        .onRemoteReady =
-            std::bind(&SettingsModalExtensionCallback::OnRemoteReady, uiExtCallback, std::placeholders::_1),
-        .onDestroy = std::bind(&SettingsModalExtensionCallback::OnDestroy, uiExtCallback),
-    };
 
     Ace::ModalUIExtensionConfig config;
     config.isProhibitBack = true;
@@ -406,7 +396,8 @@ void CreateExtension(AsyncCallbackInfoOpenSettings* asynccallbackinfo)
             asynccallbackinfo->info.errorCode = ERROR_SETTING_WINDOW_EXIST;
             return;
         }
-        bool success = CreateSettingsUIExtension(asynccallbackinfo->params.context, bundleName);
+        bool success = CreateSettingsUIExtension(asynccallbackinfo->params.context, bundleName,
+            asynccallbackinfo->isWithResult);
         if (success) {
             asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_POP_SUCCEEDED;
         } else {
@@ -449,8 +440,19 @@ void SettingsModalExtensionCallback::OnRelease(int32_t releaseCode)
 {
     ANS_LOGD("OnRelease");
     ReleaseOrErrorHandle(releaseCode);
+}
+
+/*
+ * when UIExtensionAbility disconnect or use terminate or process die
+ * releaseCode is 0 when process normal exit
+ */
+void SettingsModalExtensionCallback::OnReleaseNew(int32_t releaseCode)
+{
+    ANS_LOGD("OnReleaseNew");
+    ReleaseOrErrorHandle(releaseCode);
     ProcessStatusChanged(releaseCode);
 }
+
 
 /*
  * when UIExtensionComponent init or turn to background or destroy UIExtensionAbility occur error
@@ -467,6 +469,16 @@ void SettingsModalExtensionCallback::OnError(int32_t code, const std::string& na
  * UIExtensionComponent can send message to UIExtensionAbility by ModalUIExtensionProxy
  */
 void SettingsModalExtensionCallback::OnRemoteReady(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy)
+{
+    ANS_LOGD("called");
+    ProcessStatusChanged(0);
+}
+
+/*
+ * when UIExtensionComponent connect to UIExtensionAbility, ModalUIExtensionProxy will init,
+ * UIExtensionComponent can send message to UIExtensionAbility by ModalUIExtensionProxy
+ */
+void SettingsModalExtensionCallback::OnRemoteReadyNew(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy)
 {
     ANS_LOGD("called");
 }

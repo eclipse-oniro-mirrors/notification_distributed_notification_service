@@ -1042,8 +1042,8 @@ bool NotificationSubscriberManager::IsSubscribedByDeviceType(const std::shared_p
         ANS_LOGE("null request");
         return false;
     }
-    if (deviceType != NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE &&
-        checkConsumedDevice && request->IsConsumedDevices(deviceType)) {
+    if (deviceType != NotificationConstant::THIRD_PARTY_WEARABLE_DEVICE_TYPE && checkConsumedDevice &&
+        (request->IsCommonLiveView() || request->IsConsumedDevices(deviceType))) {
         return true;
     }
     auto flagsMap = request->GetDeviceFlags();

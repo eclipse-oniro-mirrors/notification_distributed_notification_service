@@ -25,6 +25,8 @@
 #include "distributed_data_define.h"
 #include "bundle_manager_helper.h"
 #include "os_account_manager_helper.h"
+#include "bool_wrapper.h"
+#include "int_wrapper.h"
 #include "notification_subscriber_manager.h"
 #include "notification_application_change_info.h"
 
@@ -323,6 +325,74 @@ void DistributedBundleService::PublishDistributedStateChange(
     publishInfo.SetSubscriberPermissions(permission);
     bool result = EventFwk::CommonEventManager::PublishCommonEvent(commonData, publishInfo);
     ANS_LOGI("Publish event %{public}d, %{public}d.", eventCode, result);
+}
+
+void DistributedBundleService::GetDistributedBundleInfo(const std::vector<sptr<NotificationBundleOption>>& bundleOption,
+    std::vector<DistributedNotificationBundleInfo>& bundleInfoList)
+{
+    std::unique_lock lock(lock_);
+    for (auto& bundle : bundleOption) {
+        std::string key = bundle->GetBundleName() + std::to_string(bundle->GetUid());
+        if (bundleList_.find(key) == bundleList_.end()) {
+            ANS_LOGW("Distributed bundle info unknow %{public}s.", key.c_str());
+            continue;
+        }
+        DistributedNotificationBundleInfo item = DistributedNotificationBundleInfo(bundleList_[key].GetBundleName(),
+            bundleList_[key].GetBundleUid());
+        item.SetBundleIcon(bundleList_[key].GetBundleIcon());
+        std::shared_ptr<AAFwk::WantParams> extendInfo = std::make_shared<AAFwk::WantParams>();
+        if (extendInfo == nullptr) {
+            ANS_LOGI("Get distributed bundle failed %{public}s.", key.c_str());
+            continue;
+        }
+        extendInfo->SetParam("distributed_app_index", AAFwk::Integer::Box(bundleList_[key].GetAppIndex()));
+        extendInfo->SetParam("distributed_app_anco", AAFwk::Boolean::Box(bundleList_[key].IsAncoBundle()));
+        item.SetExtendInfo(extendInfo);
+        ANS_LOGI("Distributed bundle info %{public}d, %{public}d, %{public}s.", bundleList_[key].IsAncoBundle(),
+            bundleList_[key].GetAppIndex(), key.c_str());
+        bundleInfoList.emplace_back(item);
+    }
+    ANS_LOGI("Get bundle info %{public}zu %{public}zu.", bundleOption.size(), bundleInfoList.size());
+}
+ 
+void DistributedBundleService::GetDistributedBundleListByType(const bool notification,
+    std::vector<DistributedBundleOption> &enableList)
+{
+    std::unique_lock lock(lock_);
+    for (auto& bundle : bundleList_) {
+        NotificationConstant::SWITCH_STATE switchType;
+        if (notification) {
+            switchType = bundle.second.GetNotificationEnable();
+        } else {
+            switchType = bundle.second.GetLiveViewEnable();
+        }
+
+        if (switchType == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF) {
+            ANS_LOGI("Distributed bundle no show %{public}d %{public}s.", notification, bundle.first.c_str());
+            continue;
+        }
+
+        auto bundleOption = std::make_shared<NotificationBundleOption>(bundle.second.GetBundleName(),
+            bundle.second.GetBundleUid());
+        if (bundleOption == nullptr) {
+            ANS_LOGI("Get distributed bundle failed %{public}s.", bundle.first.c_str());
+            continue;
+        }
+
+        bool enable = true;
+        if (switchType == NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) {
+            enable = false;
+        } else if (switchType == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) {
+            enable = !bundle.second.CheckSameBundle();
+        }
+
+        DistributedBundleOption item = DistributedBundleOption(bundleOption, enable);
+        item.SetNotification(notification);
+        item.SetAppLabel(bundle.second.GetBundleLabel());
+        ANS_LOGI("Get distributed bundle Info %{public}d, %{public}s.", switchType, item.Dump().c_str());
+        enableList.emplace_back(item);
+    }
+    ANS_LOGI("Get distributed bundle %{public}d %{public}zu.", notification, enableList.size());
 }
 }
 }

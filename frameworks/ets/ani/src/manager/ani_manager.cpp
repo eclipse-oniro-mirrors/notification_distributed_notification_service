@@ -24,6 +24,7 @@
 #include "ani_slot.h"
 #include "ani_local_live_view.h"
 #include "ani_notification_enable.h"
+#include "ani_get_notification_parameters.h"
 #include "ani_on.h"
 #include "ani_open_settings.h"
 #include "ani_priority.h"
@@ -104,6 +105,8 @@ static std::array kitManagerFunctions = {
         reinterpret_cast<void *>(AniGetReminderInfoByBundles)},
     ani_native_function {"nativeSetReminderInfoByBundles", nullptr,
         reinterpret_cast<void *>(AniSetReminderInfoByBundles)},
+    ani_native_function {"nativeGetNotificationParameters", nullptr,
+        reinterpret_cast<void *>(AniGetNotificationParameters)},
     ani_native_function {"nativeSetRingtoneInfoByBundle", nullptr,
         reinterpret_cast<void *>(AniSetRingtoneInfoByBundle)},
     ani_native_function {"nativeGetRingtoneInfoByBundle", nullptr,

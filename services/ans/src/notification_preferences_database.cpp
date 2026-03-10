@@ -111,6 +111,11 @@ const static std::string KEY_BUNDLE_ENABLE_NOTIFICATION = "enabledNotification";
 const static std::string KEY_ENABLE_BUNDLE_DISTRIBUTED_NOTIFICATION = "enabledDistributedNotification";
 
 /**
+ * Indicates that disturbe key which bundle enable liveview.
+ */
+const static std::string KEY_ENABLE_BUNDLE_DISTRIBUTED_LIVEVIEW = "enabledDistributedLiveView";
+
+/**
  * Indicates that disturbe key which bundle enable notification.
  */
 const static std::string KEY_SMART_REMINDER_ENABLE_NOTIFICATION = "enabledSmartReminder";
@@ -1227,10 +1232,8 @@ void NotificationPreferencesDatabase::GetDistributedEnabledForClone(const int32_
         NotificationPreferencesInfo::BundleInfo bundleInfo;
         bundleInfo.SetBundleUid(bundleItem.GetUid());
         bundleInfo.SetBundleName(bundleItem.GetBundleName());
-        GetDistributedEnabledForBundle(GenerateBundleLablel(bundleInfo, NotificationConstant::PC_DEVICE_TYPE),
-            userId, pcDistributedBundle);
-        GetDistributedEnabledForBundle(GenerateBundleLablel(bundleInfo, NotificationConstant::PAD_DEVICE_TYPE),
-            userId, tableDistributedBundle);
+        GetDistributedEnabledForBundle(bundleInfo, NotificationConstant::PC_DEVICE_TYPE, pcDistributedBundle);
+        GetDistributedEnabledForBundle(bundleInfo, NotificationConstant::PAD_DEVICE_TYPE, tableDistributedBundle);
         NotificationCloneBundleInfo::CollaborationSwitch collaborationSwitch;
         collaborationSwitch.pcLiveView_ = pcDistributedBundle.GetLiveViewEnable();
         collaborationSwitch.pcNotification_ = pcDistributedBundle.GetNotificationEnable();
@@ -1240,25 +1243,18 @@ void NotificationPreferencesDatabase::GetDistributedEnabledForClone(const int32_
     }
 }
  
-void NotificationPreferencesDatabase::GetDistributedEnabledForBundle(const std::string& key, const int32_t &userId,
-    NotificationDistributedBundle& distributedBundle)
+void NotificationPreferencesDatabase::GetDistributedEnabledForBundle(
+    const NotificationPreferencesInfo::BundleInfo& bundleInfo,
+    const std::string& deviceType, NotificationDistributedBundle& distributedBundle)
 {
-    if (!CheckRdbStore()) {
-        ANS_LOGE("null RdbStore");
-        return;
+    int32_t notification;
+    if (GetDistributedEnabledForBundle(deviceType, true, bundleInfo, notification)) {
+        distributedBundle.SetNotificationEnable(static_cast<NotificationConstant::SWITCH_STATE>(notification));
     }
 
-    std::unordered_map<std::string, std::string> bundleEntries;
-    rdbDataManager_->QueryDataBeginWithKey(key, bundleEntries, userId);
-    for (auto bundleEntry : bundleEntries) {
-        if (bundleEntry.first == key + "_" + std::to_string(true)) {
-            int32_t notifictaion = StringToInt(bundleEntry.second);
-            distributedBundle.SetNotificationEnable(static_cast<NotificationConstant::SWITCH_STATE>(notifictaion));
-        }
-        if (bundleEntry.first == key + "_" + std::to_string(false)) {
-            int32_t liveview = StringToInt(bundleEntry.second);
-            distributedBundle.SetLiveViewEnable(static_cast<NotificationConstant::SWITCH_STATE>(liveview));
-        }
+    int32_t liveView;
+    if (GetDistributedEnabledForBundle(deviceType, false, bundleInfo, liveView)) {
+        distributedBundle.SetLiveViewEnable(static_cast<NotificationConstant::SWITCH_STATE>(liveView));
     }
     ANS_LOGI("Get distributed enabled %{public}s", distributedBundle.Dump().c_str());
 }
@@ -1292,15 +1288,18 @@ void NotificationPreferencesDatabase::ParseDistributedInfoFromDB(const std::stri
         NotificationDistributedBundle distributedBundle;
         distributedBundle.SetBundleUid(bundleInfo.GetBundleUid());
         distributedBundle.SetBundleName(bundleInfo.GetBundleName());
-        GetDistributedEnabledForBundle(GenerateBundleLablel(bundleInfo, deviceType), userId, distributedBundle);
+        GetDistributedEnabledForBundle(bundleInfo, deviceType, distributedBundle);
         if (bundleInfo.GetEnableNotification() == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF ||
             bundleInfo.GetEnableNotification() == NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) {
             distributedBundle.SetNotificationEnable(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
         }
 
+        bool liveView = DelayedSingleton<NotificationConfigParse>::GetInstance()->IsLiveViewEnabled(
+            bundleInfo.GetBundleName());
         sptr<NotificationSlot> slot = nullptr;
         bundleInfo.GetSlot(NotificationConstant::SlotType::LIVE_VIEW, slot);
-        if (slot == nullptr || !slot->GetEnable()) {
+        if (slot == nullptr || !slot->GetEnable() || liveView) {
+            ANS_LOGI("Live view enable %{public}d %{public}s.", liveView, bundleKey.c_str());
             distributedBundle.SetLiveViewEnable(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
         }
         bundles.emplace_back(distributedBundle);
@@ -2162,6 +2161,29 @@ bool NotificationPreferencesDatabase::RemoveSilentEnabledDbByBundle(std::string 
     return true;
 }
 
+void NotificationPreferencesDatabase::GetDistributedRemoveEnabledDb(const std::string& key, const int32_t& userId,
+    std::vector<std::string>& keys)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return;
+    }
+
+    std::unordered_map<std::string, std::string> values;
+    int32_t result = rdbDataManager_->QueryDataBeginWithKey(key, values, userId);
+    if (result == NativeRdb::E_EMPTY_VALUES_BUCKET) {
+        return;
+    } else if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Get failed, key %{public}s,result %{public}d.", key.c_str(), result);
+        return;
+    }
+
+    for (const auto& iter : values) {
+        ANS_LOGD("Get enable, key %{public}s", iter.first.c_str());
+        keys.push_back(iter.first);
+    }
+}
+
 bool NotificationPreferencesDatabase::RemoveEnabledDbByBundleName(std::string bundleName, const int32_t &bundleUid)
 {
     if (!CheckRdbStore()) {
@@ -2170,26 +2192,14 @@ bool NotificationPreferencesDatabase::RemoveEnabledDbByBundleName(std::string bu
     }
     int32_t userId = -1;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleUid, userId);
+    std::vector<std::string> keys;
     std::string key = std::string(KEY_ENABLE_BUNDLE_DISTRIBUTED_NOTIFICATION).append(
         KEY_MIDDLE_LINE).append(std::string(bundleName).append(KEY_MIDDLE_LINE));
-    ANS_LOGD("key is %{public}s", key.c_str());
-    int32_t result = NativeRdb::E_OK;
-    std::unordered_map<std::string, std::string> values;
-    result = rdbDataManager_->QueryDataBeginWithKey(key, values, userId);
-    if (result == NativeRdb::E_EMPTY_VALUES_BUCKET) {
-        return true;
-    } else if (result != NativeRdb::E_OK) {
-        ANS_LOGE("Get failed, key %{public}s,result %{public}d.", key.c_str(), result);
-        return NativeRdb::E_ERROR;
-    }
-
-    std::vector<std::string> keys;
-    for (auto iter : values) {
-        ANS_LOGD("Get failed, key %{public}s", iter.first.c_str());
-        keys.push_back(iter.first);
-    }
-
-    result = rdbDataManager_->DeleteBatchData(keys, userId);
+    GetDistributedRemoveEnabledDb(key, userId, keys);
+    key = std::string(KEY_ENABLE_BUNDLE_DISTRIBUTED_LIVEVIEW).append(
+        KEY_MIDDLE_LINE).append(std::string(bundleName).append(KEY_MIDDLE_LINE));
+    GetDistributedRemoveEnabledDb(key, userId, keys);
+    int32_t result = rdbDataManager_->DeleteBatchData(keys, userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("delete bundle Info failed.");
         return false;
@@ -2401,7 +2411,8 @@ bool NotificationPreferencesDatabase::IsAgentRelationship(const std::string &age
 }
 
 bool NotificationPreferencesDatabase::PutDistributedEnabledForBundle(const std::string deviceType,
-    const NotificationPreferencesInfo::BundleInfo &bundleInfo, const NotificationConstant::SWITCH_STATE& enabled)
+    const bool& isNotification, const NotificationPreferencesInfo::BundleInfo &bundleInfo,
+    const NotificationConstant::SWITCH_STATE& enabled)
 {
     ANS_LOGD("%{public}s, deviceType:%{public}s,enabled[%{public}d]", __FUNCTION__, deviceType.c_str(), enabled);
     if (bundleInfo.GetBundleName().empty()) {
@@ -2416,6 +2427,9 @@ bool NotificationPreferencesDatabase::PutDistributedEnabledForBundle(const std::
     }
 
     std::string key = GenerateBundleLablel(bundleInfo, deviceType);
+    if (!isNotification) {
+        key = GenerateLiveViewBundleLabel(bundleInfo, deviceType);
+    }
     int32_t result = PutDataToDB(key, static_cast<int32_t>(enabled), userId);
     ANS_LOGD("result[%{public}d]", result);
     return (result == NativeRdb::E_OK);
@@ -2482,6 +2496,14 @@ std::string NotificationPreferencesDatabase::GenerateBundleLablel(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &deviceType) const
 {
     return std::string(KEY_ENABLE_BUNDLE_DISTRIBUTED_NOTIFICATION).append(KEY_MIDDLE_LINE).append(
+        std::string(bundleInfo.GetBundleName()).append(KEY_MIDDLE_LINE).append(std::to_string(
+            bundleInfo.GetBundleUid())).append(KEY_MIDDLE_LINE).append(deviceType));
+}
+
+std::string NotificationPreferencesDatabase::GenerateLiveViewBundleLabel(
+    const NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &deviceType) const
+{
+    return std::string(KEY_ENABLE_BUNDLE_DISTRIBUTED_LIVEVIEW).append(KEY_MIDDLE_LINE).append(
         std::string(bundleInfo.GetBundleName()).append(KEY_MIDDLE_LINE).append(std::to_string(
             bundleInfo.GetBundleUid())).append(KEY_MIDDLE_LINE).append(deviceType));
 }
@@ -3128,11 +3150,13 @@ bool NotificationPreferencesDatabase::GetDistributedEnabledForBundle(const std::
         return false;
     }
 
-    enabled = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
     std::string key = GenerateBundleLablel(bundleInfo, deviceType);
-    // only for pad/pc distinguish live view and and for pad/pc default is on, for others default is off..
+    if (!isNotification) {
+        key = GenerateLiveViewBundleLabel(bundleInfo, deviceType);
+    }
+    enabled = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+    // only for pad/pc distinguish live view and and for pad/pc default is on, for others default is off.
     if (deviceType == NotificationConstant::PAD_DEVICE_TYPE || deviceType == NotificationConstant::PC_DEVICE_TYPE) {
-        key = GenerateBundleLablel(bundleInfo, deviceType + "_" + std::to_string(isNotification));
         enabled = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
     }
     bool result = false;

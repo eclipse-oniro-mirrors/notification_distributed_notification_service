@@ -87,6 +87,14 @@ bool NotificationRequestBox::SetCreatorBundleName(const std::string& bundleName)
     return box_->PutValue(std::make_shared<TlvItem>(BUNDLE_NAME, bundleName));
 }
 
+bool NotificationRequestBox::SetCreatorBundleUid(const int32_t& bundleUid)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(BUNDLE_UID, bundleUid));
+}
+
 bool NotificationRequestBox::SetNotificationTitle(const std::string& title)
 {
     if (box_ == nullptr) {
@@ -198,6 +206,9 @@ bool NotificationRequestBox::SetSmallIcon(const std::shared_ptr<Media::PixelMap>
     std::vector<uint8_t> buffer;
     DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewPiexlMap2BinFile(smallIcon, buffer);
     ANS_LOGD("SetSmallIcon buffer size: %{public}d", static_cast<int32_t>(buffer.size()));
+    if (buffer.empty()) {
+        return false;
+    }
     const unsigned char* begin = buffer.data();
     return box_->PutValue(std::make_shared<TlvItem>(BUNDLE_ICON, begin, buffer.size()));
 }
@@ -222,6 +233,9 @@ bool NotificationRequestBox::SetBigIcon(const std::shared_ptr<Media::PixelMap>& 
     }
     std::vector<uint8_t> buffer;
     DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewPiexlMap2BinFile(bigIcon, buffer);
+    if (buffer.empty()) {
+        return false;
+    }
     ANS_LOGD("SetBigIcon buffer size: %{public}d", static_cast<int32_t>(buffer.size()));
     const unsigned char* begin = buffer.data();
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BIG_ICON, begin, buffer.size()));
@@ -247,6 +261,9 @@ bool NotificationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelMa
     }
     std::vector<uint8_t> buffer;
     DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewPiexlMap2BinFile(overlayIcon, buffer);
+    if (buffer.empty()) {
+        return false;
+    }
     ANS_LOGD("SetOverlayIcon buffer size: %{public}d", static_cast<int32_t>(buffer.size()));
     const unsigned char* begin = buffer.data();
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_OVERLAY_ICON, begin, buffer.size()));
@@ -254,7 +271,7 @@ bool NotificationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelMa
 
 bool NotificationRequestBox::SetCommonLiveView(const std::vector<uint8_t>& byteSequence)
 {
-    if (box_ == nullptr) {
+    if (box_ == nullptr || byteSequence.empty()) {
         return false;
     }
     const unsigned char* begin = byteSequence.data();
@@ -372,6 +389,14 @@ bool NotificationRequestBox::GetCreatorBundleName(std::string& bundleName) const
         return false;
     }
     return box_->GetStringValue(BUNDLE_NAME, bundleName);
+}
+
+bool NotificationRequestBox::GetCreatorBundleUid(int32_t& bundleUid) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt32Value(BUNDLE_UID, bundleUid);
 }
 
 bool NotificationRequestBox::GetReminderFlag(int32_t& flag) const

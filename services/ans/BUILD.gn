@@ -15,7 +15,10 @@ import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 
 group("ans_targets") {
-  deps = [ ":libans" ]
+  deps = [
+    ":libans",
+    ":libans_dynamic"
+  ]
 }
 
 config("public_ans_config") {
@@ -26,6 +29,26 @@ config("public_ans_config") {
     "${core_path}/include",
     "${frameworks_module_reminder_path}/include",
   ]
+
+  cflags = [
+    "-fno-math-errno",
+    "-fno-unroll-loops",
+    "-fmerge-all-constants",
+    "-fno-ident",
+    "-Oz",
+    "-flto",
+    "-ffunction-sections",
+    "-fdata-sections",
+  ]
+
+  if (is_double_framework) {
+    cflags += [ "-DCONFIG_DUAL_FRAMEWORK" ]
+  }
+
+  if (hisysevent_usage) {
+    cflags += [ "-DHAS_HISYSEVENT_PART" ]
+  }
+
 }
 
 ohos_source_set("ans_service_sources") {
@@ -161,6 +184,8 @@ ohos_source_set("ans_service_sources") {
     "src/utils/notifictaion_load_utils.cpp",
   ]
 
+  public_configs = [ ":public_ans_config" ]
+
   deps = [
     "${frameworks_module_ans_path}:ans_callback_proxy",
     "${frameworks_module_ans_path}:ans_innerkits",
@@ -210,6 +235,7 @@ ohos_source_set("ans_service_sources") {
 
   external_deps = [
     "ability_base:configuration",
+    "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
     "ability_runtime:appkit_native",
@@ -266,9 +292,6 @@ ohos_source_set("ans_service_sources") {
   }
 
   if (player_framework) {
-    external_deps += [ "player_framework:media_client" ]
-    external_deps += [ "audio_framework:audio_client" ]
-    external_deps += [ "player_framework:system_sound_client" ]
     defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
   }
 
@@ -332,25 +355,13 @@ ohos_shared_library("libans") {
 
   shlib_type = "sa"
   version_script = "libans.map"
-  cflags = [
-    "-fno-math-errno",
-    "-fno-unroll-loops",
-    "-fmerge-all-constants",
-    "-fno-ident",
-    "-Oz",
+  
+  cflags = []
+  ldflags = [
     "-flto",
-    "-ffunction-sections",
-    "-fdata-sections",
+    "-Wl,--gc-sections",
+    "-Wl,-Bsymbolic",
   ]
-  sources = []
-
-  configs = [ ":public_ans_config" ]
-
-  defines = []
-
-  if (is_double_framework) {
-    cflags += [ "-DCONFIG_DUAL_FRAMEWORK" ]
-  }
 
   deps = [
     "${services_path}/ans:ans_service_sources",
@@ -358,28 +369,6 @@ ohos_shared_library("libans") {
     "../ans:ans.para.dac",
     "../ans:external.json",
   ]
-
-  if (is_ohos && is_clang && enhanced_opt &&
-      (target_cpu == "arm" || target_cpu == "arm64")) {
-    if (distributed_notification_service_feature_enable_pgo) {
-      cflags += [
-        "-fprofile-use="+rebase_path("${distributed_notification_service_feature_pgo_path}/libans.profdata",
-                root_build_dir),
-        "-Wno-error=backend-plugin",
-        "-Wno-profile-instr-out-of-date",
-        "-Wno-profile-instr-unprofiled",
-      ]
-    }
-    if (distributed_notification_service_feature_enable_pgo && target_cpu == "arm64" &&
-        enable_enhanced_opt) {
-      ldflags = [ "-Wl,--aarch64-inline-plt" ]
-    }
-  }
-
-  if (distributed_notification_supported) {
-    deps += [ "${services_path}/distributed:libans_distributed" ]
-  }
-
   external_deps = [
     "ability_base:configuration",
     "ability_runtime:ability_connect_callback_stub",
@@ -400,54 +389,37 @@ ohos_shared_library("libans") {
     "data_share:datashare_consumer",
     "data_share:datashare_permission",
     "ffrt:libffrt",
+    "graphic_2d:librender_service_base",
+    "hitrace:libhitracechain",
     "i18n:intl_util",
-    "icu:shared_icuuc",
     "image_framework:image_native",
     "init:libbegetutil",
     "kv_store:distributeddata_inner",
-    "libxml2:libxml2",
     "openssl:libcrypto_shared",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "time_service:time_client",
+    "bluetooth:btframework",
+    "window_manager:libdm",
   ]
   external_deps += component_external_deps
 
-  if (distributed_notification_supported) {
-    external_deps += [ "device_manager:devicemanagersdk" ]
-  }
-  if (build_variant == "root") {
-    defines += [ "ANM_SUPPORT_DUMP" ]
-  }
-
-  if (device_usage) {
-    external_deps += [ "device_usage_statistics:usagestatsinner" ]
-  }
-
-  if (hisysevent_usage) {
-    cflags += [ "-DHAS_HISYSEVENT_PART" ]
-    external_deps += [ "hisysevent:libhisysevent" ]
-  }
-
-  if (standby_enable) {
-    external_deps += [ "device_standby:standby_innerkits" ]
-  }
-
-  if (player_framework) {
-    external_deps += [ "player_framework:media_client" ]
-  }
-
-  if (ans_hitrace_usage) {
-    external_deps += [ "hitrace:hitrace_meter" ]
-  }
-
-  if (ans_config_policy_enable) {
-    external_deps += [ "config_policy:configpolicy_util" ]
-  }
-
-  if (screenlock_mgr_enable) {
-    external_deps += [ "screenlock_mgr:screenlock_client" ]
+  if (is_ohos && is_clang && enhanced_opt &&
+      (target_cpu == "arm" || target_cpu == "arm64")) {
+    if (distributed_notification_service_feature_enable_pgo) {
+      cflags += [
+        "-fprofile-use="+rebase_path("${distributed_notification_service_feature_pgo_path}/libans.profdata",
+                root_build_dir),
+        "-Wno-error=backend-plugin",
+        "-Wno-profile-instr-out-of-date",
+        "-Wno-profile-instr-unprofiled",
+      ]
+    }
+    if (distributed_notification_service_feature_enable_pgo && target_cpu == "arm64" &&
+        enable_enhanced_opt) {
+      ldflags += [ "-Wl,--aarch64-inline-plt" ]
+    }
   }
 
   subsystem_name = "${subsystem_name}"
@@ -471,6 +443,40 @@ ohos_prebuilt_etc("ans.para.dac") {
 ohos_prebuilt_etc("external.json") {
   source = "etc/external.json"
   relative_install_dir = "notification_template"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
+ohos_shared_library("libans_dynamic") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
+  shlib_type = "sa"
+
+  sources = [
+    "src/dynamic_dependency/ans_dynamic_dependency_interface.cpp",
+    "src/dynamic_dependency/system_sound_dynamic_wrapper.cpp",
+  ]
+
+  include_dirs = [ "include/dynamic_dependency" ]
+
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
+
+  external_deps = [
+    "ability_runtime:abilitykit_native",
+    "audio_framework:audio_client",
+    "player_framework:media_client",
+    "player_framework:system_sound_client",
+    "hilog:libhilog",
+  ]
+
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }

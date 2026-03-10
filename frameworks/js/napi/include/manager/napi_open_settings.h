@@ -43,7 +43,8 @@ void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data);
 napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info);
 napi_value NapiOpenNotificationSettingsWithResult(napi_env env, napi_callback_info info);
 napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_info &info, OpenSettingsParams &params);
-bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName);
+bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName,
+    bool isWithResult);
 bool Init(napi_env env, AsyncCallbackInfoOpenSettings* callbackInfo, JsAnsCallbackComplete complete);
 void ProcessStatusChanged(int32_t code);
 void CreateExtension(AsyncCallbackInfoOpenSettings* asynccallbackinfo);
@@ -53,10 +54,12 @@ public:
     SettingsModalExtensionCallback();
     ~SettingsModalExtensionCallback();
     void OnRelease(int32_t releaseCode);
+    void OnReleaseNew(int32_t releaseCode);
     void OnResult(int32_t resultCode, const OHOS::AAFwk::Want& result);
     void OnReceive(const OHOS::AAFwk::WantParams& request);
     void OnError(int32_t code, const std::string& name, const std::string &message);
     void OnRemoteReady(const std::shared_ptr<OHOS::Ace::ModalUIExtensionProxy> &uiProxy);
+    void OnRemoteReadyNew(const std::shared_ptr<OHOS::Ace::ModalUIExtensionProxy> &uiProxy);
     void OnDestroy();
     void SetSessionId(int32_t sessionId);
     void SetBundleName(std::string bundleName);

@@ -214,6 +214,8 @@ namespace OHOS {
         service->GetSpecialActiveNotifications(keys, notificationsVector);
         service->GetActiveNotificationByFilter(
             bundleOption, notificationId, stringData, userId, keys, notificationRequest);
+        sptr<NotificationParameters> parameters = nullptr;
+        service->GetNotificationParameters(notificationId, stringData, parameters);
         service->CanPublishAsBundle(stringData, canPublish);
         service->PublishAsBundle(notificationRequest, stringData);
         service->PublishAsBundleWithMaxCapacity(notificationRequest, stringData);

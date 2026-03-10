@@ -130,7 +130,7 @@ bool AesGcmHelper::GenerateKey(std::string &key)
     return true;
 }
 
-ErrCode AesGcmHelper::Encrypt(const std::string &plainText, std::string &cipherText)
+ErrCode __attribute__((weak)) AesGcmHelper::Encrypt(const std::string &plainText, std::string &cipherText)
 {
     if (plainText.empty()) {
         ANS_LOGE("Can't encrypt empty plain text.");
@@ -150,7 +150,7 @@ ErrCode AesGcmHelper::Encrypt(const std::string &plainText, std::string &cipherT
     return ERR_OK;
 }
 
-ErrCode AesGcmHelper::Decrypt(std::string &plainText, const std::string &cipherText)
+ErrCode __attribute__((weak)) AesGcmHelper::Decrypt(std::string &plainText, const std::string &cipherText)
 {
     if (cipherText.empty()) {
         ANS_LOGE("Can't decrypt empty cipher text.");

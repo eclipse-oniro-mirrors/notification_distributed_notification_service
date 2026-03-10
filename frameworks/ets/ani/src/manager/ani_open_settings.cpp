@@ -22,6 +22,7 @@
 #include "sts_throw_erro.h"
 #include "ani_ans_dialog_callback.h"
 #include "sts_common.h"
+#include "sts_slot.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
@@ -61,7 +62,8 @@ bool CreateUiExtCallback(ani_env *env, std::shared_ptr<SettingsModalExtensionCal
     uiExtCallback->SetAbilityContext(abilityContext);
     uiExtCallback->SetBundleName(bundleName);
     uiExtensionCallbacks = {
-        .onRelease =
+        .onRelease = info->isWithResult ?
+            std::bind(&SettingsModalExtensionCallback::OnReleaseNew, uiExtCallback, std::placeholders::_1) :
             std::bind(&SettingsModalExtensionCallback::OnRelease, uiExtCallback, std::placeholders::_1),
         .onResult = std::bind(&SettingsModalExtensionCallback::OnResult, uiExtCallback,
             std::placeholders::_1, std::placeholders::_2),
@@ -69,7 +71,8 @@ bool CreateUiExtCallback(ani_env *env, std::shared_ptr<SettingsModalExtensionCal
             std::bind(&SettingsModalExtensionCallback::OnReceive, uiExtCallback, std::placeholders::_1),
         .onError = std::bind(&SettingsModalExtensionCallback::OnError, uiExtCallback,
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
-        .onRemoteReady =
+        .onRemoteReady = info->isWithResult ?
+            std::bind(&SettingsModalExtensionCallback::OnRemoteReadyNew, uiExtCallback, std::placeholders::_1) :
             std::bind(&SettingsModalExtensionCallback::OnRemoteReady, uiExtCallback, std::placeholders::_1),
         .onDestroy = std::bind(&SettingsModalExtensionCallback::OnDestroy, uiExtCallback),
     };
@@ -134,41 +137,9 @@ ani_object StsNotificationSettingResult(ani_env *env, std::shared_ptr<OpenSettin
     if (info->errorCode != ERR_OK) {
         return nullptr;
     }
-    ani_class cls = nullptr;
-    const char* className = "@ohos.notificationManager.notificationManager.NotificationSettingInner";
-    if (!NotificationSts::CreateClassObjByClassName(env, className, cls, outAniObj)) {
-        return nullptr;
-    }
-    if (cls == nullptr || outAniObj == nullptr) {
-        return nullptr;
-    }
-    bool soundEnabled = slotFlags & NotificationConstant::ReminderFlag::SOUND_FLAG;
-    bool vibrationEnabled = slotFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG;
-    bool lockScreenEnabled = slotFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG;
-    bool bannerEnabled = slotFlags & NotificationConstant::ReminderFlag::BANNER_FLAG;
-    bool badgeNumberEnabled = slotFlags & NotificationConstant::ReminderFlag::BADGENUMBER_SHOW_FLAG;
-    bool notificationEnabled = slotFlags & NotificationConstant::ReminderFlag::NOTIFICATION_FLAG;
-    if (ANI_OK != env->Object_SetPropertyByName_Boolean(
-        outAniObj, "vibrationEnabled", BoolToAniBoolean(vibrationEnabled))) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Boolean(outAniObj, "soundEnabled", BoolToAniBoolean(soundEnabled))) {
-        return nullptr;
-    }
-    if (!SetPropertyOptionalByBoolean(env, outAniObj, "lockScreenEnabled", lockScreenEnabled)) {
-        ANS_LOGE("Set lockScreenEnabled fail");
-        return nullptr;
-    }
-    if (!SetPropertyOptionalByBoolean(env, outAniObj, "bannerEnabled", bannerEnabled)) {
-        ANS_LOGE("Set bannerEnabled fail");
-        return nullptr;
-    }
-    if (!SetPropertyOptionalByBoolean(env, outAniObj, "badgeNumberEnabled", badgeNumberEnabled)) {
-        ANS_LOGE("Set badgeNumberEnabled fail");
-        return nullptr;
-    }
-    if (!SetPropertyOptionalByBoolean(env, outAniObj, "notificationEnabled", notificationEnabled)) {
-        ANS_LOGE("Set notificationEnabled fail");
+    if (NotificationSts::WrapGetNotificationSetting(env, slotFlags, outAniObj)) {
+        ANS_LOGE("WrapGetNotificationSetting failed");
+        info->errorCode = OHOS::Notification::ERROR_INTERNAL_ERROR;
         return nullptr;
     }
     return outAniObj;
@@ -191,16 +162,17 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
         errorCode = info->errorCode ==
             ERR_OK ? ERR_OK : NotificationSts::GetExternalCode(info->errorCode);
     }
+    ani_object ret = nullptr;
     if (errorCode == ERR_OK) {
-        ANS_LOGD("Resolve. errorCode %{public}d", errorCode);
-        ani_object ret = OHOS::AppExecFwk::CreateInt(env, errorCode);
+        ret = OHOS::AppExecFwk::CreateInt(env, errorCode);
         if (info->isWithResult) {
             ret = StsNotificationSettingResult(env, info);
         }
         if (ret == nullptr) {
-            NotificationSts::ThrowInternerErrorWithLogE(env, "createInt of errorCode faild.");
-            return;
+            errorCode = ERROR_INTERNAL_ERROR;
         }
+    }
+    if (errorCode == ERR_OK) {
         if (ANI_OK != (status = env->PromiseResolver_Resolve(info->resolver, static_cast<ani_ref>(ret)))) {
             NotificationSts::ThrowInternerErrorWithLogE(env, "PromiseResolver_Resolve faild.");
         }
@@ -239,7 +211,6 @@ ani_object AniOpenNotificationSettings(ani_env *env, ani_object content)
     ani_resolver aniResolver {};
     if (ANI_OK != env->Promise_New(&aniResolver, &aniPromise)) {
         ANS_LOGE("Promise_New faild");
-        isExist.store(false);
         return nullptr;
     }
     info->resolver = aniResolver;
@@ -285,6 +256,7 @@ ani_object AniOpenNotificationSettingsWithResult(ani_env *env, ani_object conten
     ani_resolver aniResolver {};
     if (ANI_OK != env->Promise_New(&aniResolver, &aniPromise)) {
         ANS_LOGE("Promise_New faild");
+        isExist.store(false);
         return nullptr;
     }
     info->resolver = aniResolver;
@@ -341,9 +313,11 @@ void SettingsModalExtensionCallback::ProcessStatusChanged(int32_t code, bool isA
     ani_env* env;
     ani_status aniResult = ANI_ERROR;
     ani_options aniArgs { 0, nullptr };
+    bool isAttachSuccess = isAsync;
     if (isAsync) {
         aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env);
         if (aniResult != ANI_OK) {
+            isAttachSuccess = false;
             ANS_LOGE("AttachCurrentThread fail. result: %{public}d.", aniResult);
             aniResult = vm_->GetEnv(ANI_VERSION_1, &env);
         }
@@ -357,7 +331,7 @@ void SettingsModalExtensionCallback::ProcessStatusChanged(int32_t code, bool isA
     if (complete_) {
         complete_(env, info_);
     }
-    if (isAsync && (aniResult = vm_->DetachCurrentThread()) != ANI_OK) {
+    if (isAttachSuccess && (aniResult = vm_->DetachCurrentThread()) != ANI_OK) {
         ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
@@ -387,6 +361,16 @@ void SettingsModalExtensionCallback::OnRelease(int32_t releaseCode)
 {
     ANS_LOGD("OnRelease");
     ReleaseOrErrorHandle(releaseCode);
+}
+
+/*
+ * when UIExtensionAbility disconnect or use terminate or process die
+ * releaseCode is 0 when process normal exit
+ */
+void SettingsModalExtensionCallback::OnReleaseNew(int32_t releaseCode)
+{
+    ANS_LOGD("OnReleaseNew");
+    ReleaseOrErrorHandle(releaseCode);
     ProcessStatusChanged(releaseCode, true);
 }
 
@@ -407,6 +391,16 @@ void SettingsModalExtensionCallback::OnError(int32_t code, const std::string& na
 void SettingsModalExtensionCallback::OnRemoteReady(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy)
 {
     ANS_LOGI("SettingsModalExtensionCallback OnRemoteReady");
+    ProcessStatusChanged(0, true);
+}
+
+/*
+ * when UIExtensionComponent connect to UIExtensionAbility, ModalUIExtensionProxy will init,
+ * UIExtensionComponent can send message to UIExtensionAbility by ModalUIExtensionProxy
+ */
+void SettingsModalExtensionCallback::OnRemoteReadyNew(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy)
+{
+    ANS_LOGI("SettingsModalExtensionCallback OnRemoteReadyNew");
 }
 
 /*

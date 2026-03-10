@@ -692,7 +692,31 @@ void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
     asynccallbackinfo = nullptr;
 }
 
-bool CreateSettingsUIExtensionSub(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName)
+std::shared_ptr<SettingsSubModalExtensionCallback> CreateUiExtCallback(
+    Ace::ModalUIExtensionCallbacks& uiExtensionCallbacks, bool isWithResult)
+{
+    auto uiExtCallback = std::make_shared<SettingsSubModalExtensionCallback>();
+    uiExtensionCallbacks = {
+        .onRelease = isWithResult ?
+            std::bind(&SettingsSubModalExtensionCallback::OnReleaseNew, uiExtCallback, std::placeholders::_1) :
+            std::bind(&SettingsSubModalExtensionCallback::OnRelease, uiExtCallback, std::placeholders::_1),
+        .onResult = std::bind(&SettingsSubModalExtensionCallback::OnResult, uiExtCallback,
+            std::placeholders::_1, std::placeholders::_2),
+        .onReceive =
+            std::bind(&SettingsSubModalExtensionCallback::OnReceive, uiExtCallback, std::placeholders::_1),
+        .onError = std::bind(&SettingsSubModalExtensionCallback::OnError, uiExtCallback,
+            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
+        .onRemoteReady = isWithResult ?
+            std::bind(&SettingsSubModalExtensionCallback::OnRemoteReadyNew, uiExtCallback, std::placeholders::_1) :
+            std::bind(&SettingsSubModalExtensionCallback::OnRemoteReady, uiExtCallback, std::placeholders::_1),
+        .onDestroy = std::bind(&SettingsSubModalExtensionCallback::OnDestroy, uiExtCallback),
+    };
+
+    return uiExtCallback;
+}
+
+bool CreateSettingsUIExtensionSub(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName,
+    bool isWithResult)
 {
     if (context == nullptr) {
         ANS_LOGE("null context");
@@ -720,22 +744,10 @@ bool CreateSettingsUIExtensionSub(std::shared_ptr<OHOS::AbilityRuntime::Context>
     std::string typeValue = "sys/commonUI";
     want.SetParam(typeKey, typeValue);
 
-    auto uiExtCallback = std::make_shared<SettingsSubModalExtensionCallback>();
+    Ace::ModalUIExtensionCallbacks uiExtensionCallbacks;
+    auto uiExtCallback = CreateUiExtCallback(uiExtensionCallbacks, isWithResult);
     uiExtCallback->SetAbilityContext(abilityContext);
     uiExtCallback->SetBundleName(bundleName);
-    Ace::ModalUIExtensionCallbacks uiExtensionCallbacks = {
-        .onRelease =
-            std::bind(&SettingsSubModalExtensionCallback::OnRelease, uiExtCallback, std::placeholders::_1),
-        .onResult = std::bind(&SettingsSubModalExtensionCallback::OnResult, uiExtCallback,
-            std::placeholders::_1, std::placeholders::_2),
-        .onReceive =
-            std::bind(&SettingsSubModalExtensionCallback::OnReceive, uiExtCallback, std::placeholders::_1),
-        .onError = std::bind(&SettingsSubModalExtensionCallback::OnError, uiExtCallback,
-            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
-        .onRemoteReady =
-            std::bind(&SettingsSubModalExtensionCallback::OnRemoteReady, uiExtCallback, std::placeholders::_1),
-        .onDestroy = std::bind(&SettingsSubModalExtensionCallback::OnDestroy, uiExtCallback),
-    };
 
     Ace::ModalUIExtensionConfig config;
     config.isProhibitBack = true;
@@ -831,7 +843,8 @@ void CreateExtensionSub(AsyncCallbackInfoOpenSettings* asynccallbackinfo)
             asynccallbackinfo->info.errorCode = ERROR_SETTING_WINDOW_EXIST;
             return;
         }
-        bool success = CreateSettingsUIExtensionSub(asynccallbackinfo->params.context, bundleName);
+        bool success = CreateSettingsUIExtensionSub(asynccallbackinfo->params.context, bundleName,
+            asynccallbackinfo->isWithResult);
         if (success) {
             asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_POP_SUCCEEDED;
         } else {
@@ -1407,6 +1420,12 @@ void SettingsSubModalExtensionCallback::OnRelease(int32_t releaseCode)
 {
     ANS_LOGD("OnRelease");
     ReleaseOrErrorHandle(releaseCode);
+}
+
+void SettingsSubModalExtensionCallback::OnReleaseNew(int32_t releaseCode)
+{
+    ANS_LOGD("OnReleaseNew");
+    ReleaseOrErrorHandle(releaseCode);
     ProcessStatusChangedSub(releaseCode);
 }
 
@@ -1418,6 +1437,12 @@ void SettingsSubModalExtensionCallback::OnError(int32_t code, const std::string&
 }
 
 void SettingsSubModalExtensionCallback::OnRemoteReady(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy)
+{
+    ANS_LOGD("called");
+    ProcessStatusChangedSub(0);
+}
+
+void SettingsSubModalExtensionCallback::OnRemoteReadyNew(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy)
 {
     ANS_LOGD("called");
 }

@@ -28,6 +28,7 @@ import { NotificationTemplate } from 'notification.notificationTemplate';
 import { DistributedOptions } from 'notification.notificationRequest';
 import { NotificationLiveViewContent } from 'notification.notificationContent';
 import { UnifiedGroupInfo } from 'notification.notificationRequest';
+import { NotificationParameters } from 'notification.notificationRequest';
 import { NotificationFilter } from 'notification.notificationRequest';
 import image from '@ohos.multimedia.image';
 
@@ -101,11 +102,19 @@ export default namespace notificationManager {
     export interface NotificationSetting {
         vibrationEnabled: boolean;
         soundEnabled: boolean;
+        lockScreenEnabled?: boolean;
+        bannerEnabled?: boolean;
+        badgeNumberEnabled?: boolean;
+        notificationEnabled?: boolean;
     }
 
     class NotificationSettingInner implements NotificationSetting {
         vibrationEnabled: boolean = false;
         soundEnabled: boolean = false;
+        lockScreenEnabled?: boolean | undefined;
+        bannerEnabled?: boolean | undefined;
+        badgeNumberEnabled?: boolean | undefined;
+        notificationEnabled?: boolean | undefined;
     }
 
     export interface DoNotDisturbProfile {
@@ -397,6 +406,8 @@ export default namespace notificationManager {
         callback?: AsyncCallback<void>): Promise<void>;
     export native function nativeGetReminderInfoByBundles(bundles: Array<BundleOption>,
         callback?: AsyncCallback<Array<NotificationReminderInfo>>): Promise<Array<NotificationReminderInfo>>;
+    export native function nativeGetNotificationParameters(
+        id: int, label?: string): Promise<NotificationParameters|null>;
     export native function nativeGetBadgeDisplayStatusByBundles(bundles: Array<BundleOption>,
         callback?: AsyncCallback<Map<BundleOption, boolean>>): Promise<Map<BundleOption, boolean>>;
     export native function nativeSetBadgeDisplayStatusByBundles(badges: Map<BundleOption, boolean>,
@@ -2794,6 +2805,26 @@ export default namespace notificationManager {
         } catch (err) {
             let error: BusinessError = err as BusinessError;
             throw error;
+        }
+        return result;
+    }
+
+    export function getNotificationParameters(id: int, label?: string): Promise<NotificationParameters|null>
+    {
+        let result: Promise<NotificationParameters|null>;
+        try {
+            if (label == undefined) {
+                result = nativeGetNotificationParameters(id, "");
+            } else {
+                result = nativeGetNotificationParameters(id, label);
+            }
+        } catch (err) {
+            if (err instanceof BusinessError) {
+                throw err;
+            } else {
+                let error: BusinessError = err as BusinessError;
+                throw error;
+            }
         }
         return result;
     }

@@ -55,29 +55,6 @@ ErrCode AesGcmHelper::Decrypt(std::string &plainText, const std::string &cipherT
     return ERR_OK;
 }
 
-HaMetaMessage::HaMetaMessage(uint32_t sceneId, uint32_t branchId)
-{
-    sceneId_ = sceneId;
-    branchId_ = branchId;
-}
-
-HaMetaMessage& HaMetaMessage::ErrorCode(uint32_t errorCode)
-{
-    errorCode_ = errorCode;
-    return *this;
-}
-
-HaMetaMessage& HaMetaMessage::Message(const std::string& message, bool /*print*/)
-{
-    message_ = message;
-    return *this;
-}
-
-std::string HaMetaMessage::GetMessage() const
-{
-    return message_;
-}
-
 void NotificationAnalyticsUtil::ReportModifyEvent(const HaMetaMessage& message, bool /*unFlowControl*/)
 {
     g_modifyEventReportCount.fetch_add(1);

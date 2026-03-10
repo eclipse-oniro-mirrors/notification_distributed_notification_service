@@ -711,6 +711,12 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetNotificationParameters(int32_t notificationId, const std::string &label,
+        sptr<NotificationParameters> &parameters) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode TriggerLocalLiveView(const sptr<NotificationBundleOption> &bundleOption,
         const int32_t notificationId, const sptr<NotificationButtonOption> &buttonOption) override
     {
@@ -719,6 +725,18 @@ public:
 
     ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
         const std::string &deviceType, const bool enabled, const bool isNotification) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetDistributedBundleListByType(const bool isNotification,
+        std::vector<DistributedBundleOption> &enableList) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetDistributedBundleInfo(const std::vector<sptr<NotificationBundleOption>>& bundleOption,
+        std::vector<DistributedNotificationBundleInfo>& bundleInfoList) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -1276,6 +1294,40 @@ HWTEST_F(AnsNotificationBranchTest, UnregisterPushCallback_0200, Function | Medi
     auto ansNotification = std::make_shared<AnsNotification>();
     EXPECT_NE(ansNotification, nullptr);
     ansNotification->UnregisterPushCallback();
+}
+
+/*
+ * @tc.name: GetNotificationParameters_0100
+ * @tc.desc: Test GetNotificationParameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationBranchTest, GetNotificationParameters_0100, Function | MediumTest | Level1)
+{
+    MockGetAnsManagerProxy(nullptr);
+    auto ansNotification = std::make_shared<AnsNotification>();
+    EXPECT_NE(ansNotification, nullptr);
+    int32_t notificationId = 0;
+    std::string label = "label";
+    sptr<NotificationParameters> parameters = nullptr;
+    auto result = ansNotification->GetNotificationParameters(notificationId, label, parameters);
+    EXPECT_EQ(result, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: GetNotificationParameters_0200
+ * @tc.desc: Test GetNotificationParameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationBranchTest, GetNotificationParameters_0200, Function | MediumTest | Level1)
+{
+    MockGetAnsManagerProxy(new (std::nothrow) MockAnsManagerInterface());
+    auto ansNotification = std::make_shared<AnsNotification>();
+    EXPECT_NE(ansNotification, nullptr);
+    int32_t notificationId = 0;
+    std::string label = "label";
+    sptr<NotificationParameters> parameters = nullptr;
+    auto result = ansNotification->GetNotificationParameters(notificationId, label, parameters);
+    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
 }
 
 /*

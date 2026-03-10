@@ -76,6 +76,16 @@ void NotificationDistributedBundle::SetAncoBundle(bool isAnco)
     isAnco_ = isAnco;
 }
 
+int32_t NotificationDistributedBundle::GetAppIndex() const
+{
+    return appIndex_;
+}
+
+void NotificationDistributedBundle::SetAppIndex(const int32_t appIndex)
+{
+    appIndex_ = appIndex;
+}
+
 void NotificationDistributedBundle::SetInstalledbundle(const std::string& bundleName,
     const std::string& label)
 {
@@ -99,6 +109,11 @@ bool NotificationDistributedBundle::CheckInstalledBundle(const std::string bundl
         return true;
     }
     return false;
+}
+
+bool NotificationDistributedBundle::CheckSameBundle() const
+{
+    return !installedBundleName_.empty() || !installedAppLabel_.empty();
 }
 
 NotificationConstant::SWITCH_STATE NotificationDistributedBundle::GetLiveViewEnable() const
@@ -126,7 +141,7 @@ std::string NotificationDistributedBundle::Dump() const
     return "NotificationDistributedBundle{ name = " + bundleName_ + ", uid = " + std::to_string(uid_) +
         ", anco: " + std::to_string(isAnco_) + ", enable = " + std::to_string(static_cast<int32_t>(liveView_)) + " " +
         std::to_string(static_cast<int32_t>(notification_)) + ", icon = " + ((icon_ == nullptr) ? "null" : "not null") +
-        ", same: " + std::to_string(existSame_) + " }";
+        ", same: " + std::to_string(existSame_) + ", index: " + std::to_string(appIndex_) + " }";
 }
 
 bool NotificationDistributedBundle::Marshalling(Parcel &parcel) const
@@ -148,6 +163,11 @@ bool NotificationDistributedBundle::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteInt32(uid_)) {
         ANS_LOGE("Failed to write uid");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(appIndex_)) {
+        ANS_LOGE("Failed to write index");
         return false;
     }
 
@@ -196,6 +216,7 @@ bool NotificationDistributedBundle::ReadFromParcel(Parcel &parcel)
     }
     notification_ = static_cast<NotificationConstant::SWITCH_STATE>(notificationType);
     uid_ = parcel.ReadInt32();
+    appIndex_ = parcel.ReadInt32();
     appLabel_ = parcel.ReadString();
     bundleName_ = parcel.ReadString();
     bool valid = parcel.ReadBool();
