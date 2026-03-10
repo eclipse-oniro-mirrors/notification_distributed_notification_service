@@ -96,12 +96,15 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
             }
             UpdateRecentNotification(record->notification, false, 0);
 
+            CancelTimer(record->notification->GetFinishTimer());
+            CancelTimer(record->notification->GetUpdateTimer());
             StartFinishTimer(record, requestObj.request->GetFinishDeadLine(),
                 NotificationConstant::TRIGGER_EIGHT_HOUR_REASON_DELETE);
             StartUpdateTimer(record, requestObj.request->GetUpdateDeadLine(),
                 NotificationConstant::TRIGGER_FOUR_HOUR_REASON_DELETE);
             auto triggerDeadLine = requestObj.request->GetGeofenceTriggerDeadLine();
             if (triggerDeadLine != NotificationConstant::INVALID_DISPLAY_TIME) {
+                CancelTimer(record->notification->GetGeofenceTriggerTimer());
                 StartGeofenceTriggerTimer(record, triggerDeadLine,
                     NotificationConstant::TRIGGER_GEOFENCE_REASON_DELETE);
             }
