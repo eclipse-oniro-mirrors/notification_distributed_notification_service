@@ -2015,6 +2015,7 @@ public:
     static napi_value SetGrantedBundleInfo(const napi_env &env, const NotificationBundleOption &bundleInfo,
         napi_value &result);
     static int32_t GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id);
+    static napi_value SetNotificationSettings(const napi_env &env, uint32_t slotFlags, napi_value &result);
 private:
     static const int32_t ARGS_ONE = 1;
     static const int32_t ARGS_TWO = 2;

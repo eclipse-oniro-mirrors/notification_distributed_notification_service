@@ -102,11 +102,19 @@ export default namespace notificationManager {
     export interface NotificationSetting {
         vibrationEnabled: boolean;
         soundEnabled: boolean;
+        lockScreenEnabled?: boolean;
+        bannerEnabled?: boolean;
+        badgeNumberEnabled?: boolean;
+        notificationEnabled?: boolean;
     }
 
     class NotificationSettingInner implements NotificationSetting {
         vibrationEnabled: boolean = false;
         soundEnabled: boolean = false;
+        lockScreenEnabled?: boolean | undefined;
+        bannerEnabled?: boolean | undefined;
+        badgeNumberEnabled?: boolean | undefined;
+        notificationEnabled?: boolean | undefined;
     }
 
     export interface DoNotDisturbProfile {
