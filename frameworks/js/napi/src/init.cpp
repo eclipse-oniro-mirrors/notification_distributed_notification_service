@@ -78,13 +78,12 @@ napi_value NotificationInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("show", Common::NapiReturnCapErr),
 #endif
 
-#ifdef ANS_FEATURE_DISTRIBUTED_DB
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
         DECLARE_NAPI_FUNCTION("isDistributedEnabled", IsDistributedEnabled),
         DECLARE_NAPI_FUNCTION("enableDistributed", EnableDistributed),
         DECLARE_NAPI_FUNCTION("enableDistributedByBundle", EnableDistributedByBundle),
         DECLARE_NAPI_FUNCTION("enableDistributedSelf", EnableDistributedSelf),
         DECLARE_NAPI_FUNCTION("isDistributedEnabledByBundle", IsDistributedEnableByBundle),
-        DECLARE_NAPI_FUNCTION("getDeviceRemindType", GetDeviceRemindType),
         DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", SetSyncNotificationEnabledWithoutApp),
         DECLARE_NAPI_FUNCTION("getSyncNotificationEnabledWithoutApp", GetSyncNotificationEnabledWithoutApp),
 #else
@@ -93,9 +92,14 @@ napi_value NotificationInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("enableDistributedByBundle", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("enableDistributedSelf", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("isDistributedEnabledByBundle", Common::NapiReturnCapErrCb),
-        DECLARE_NAPI_FUNCTION("getDeviceRemindType", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("getSyncNotificationEnabledWithoutApp", Common::NapiReturnCapErrCb),
+#endif
+
+#ifdef ANS_FEATURE_DISTRIBUTED_SUPPORTED
+        DECLARE_NAPI_FUNCTION("getDeviceRemindType", GetDeviceRemindType),
+#else
+        DECLARE_NAPI_FUNCTION("getDeviceRemindType", Common::NapiReturnCapErrCb),
 #endif
 
 #ifdef ANS_FEATURE_DISTURB_MANAGER

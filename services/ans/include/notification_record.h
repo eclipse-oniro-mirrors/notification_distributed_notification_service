@@ -40,10 +40,10 @@ struct NotificationRecord {
     uint32_t tokenCaller = 0;
     int32_t uid = -1;
     bool isSystemApp {false};
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     std::string deviceId;
     std::string bundleName;
-#endif  // DISTRIBUTED_NOTIFICATION_SUPPORTED
+#endif  // ANS_FEATURE_ORIGINAL_DISTRIBUTED
 };
 }  // namespace Notification
 }  // namespace OHOS

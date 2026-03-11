@@ -162,7 +162,7 @@ public:
 
     bool IsAtomicServiceByBundle(const std::string &bundleName, const int32_t userId) override;
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     /**
      * @brief Check whether the specified bundle has the distributed notification supported.
      *

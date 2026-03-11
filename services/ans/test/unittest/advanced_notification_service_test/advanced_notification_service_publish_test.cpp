@@ -1827,7 +1827,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_1100, Function | SmallT
     ASSERT_EQ(static_cast<int32_t>(state), 0);
 }
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 /**
  * @tc.number    : OnReceiveEvent_1200
  * @tc.name      : OnReceiveEvent_1200

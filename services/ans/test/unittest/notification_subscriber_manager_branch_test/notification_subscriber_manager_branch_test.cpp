@@ -217,7 +217,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_00
     ASSERT_EQ(advancedNotificationService.ActiveNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
 }
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 /**
  * @tc.number  : AdvancedNotificationService_00400
  * @tc.name    : AdvancedNotificationService_00400
@@ -1029,7 +1029,12 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.EnableDistributed(enabled), ERR_ANS_NON_SYSTEM_APP);
+    int32_t ret = advancedNotificationService.EnableDistributed(enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 }
 
 /**
@@ -1045,7 +1050,12 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.EnableDistributedByBundle(bundleOption, enabled), ERR_ANS_NON_SYSTEM_APP);
+    int32_t ret = advancedNotificationService.EnableDistributedByBundle(bundleOption, enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 }
 
 /**
@@ -1062,7 +1072,12 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     int32_t notificationId = 0;
     bundleOption->SetUid(notificationId);
     AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.EnableDistributedByBundle(bundleOption, enabled), ERR_ANS_INVALID_BUNDLE);
+    int32_t ret = advancedNotificationService.EnableDistributedByBundle(bundleOption, enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 }
 
 /**
@@ -1078,7 +1093,12 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.IsDistributedEnableByBundle(bundleOption, enabled), ERR_ANS_NON_SYSTEM_APP);
+    int32_t ret = advancedNotificationService.IsDistributedEnableByBundle(bundleOption, enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 }
 
 /**
@@ -1095,7 +1115,12 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     int32_t notificationId = 0;
     bundleOption->SetUid(notificationId);
     AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.IsDistributedEnableByBundle(bundleOption, enabled), ERR_ANS_INVALID_BUNDLE);
+    int32_t ret = advancedNotificationService.IsDistributedEnableByBundle(bundleOption, enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 }
 
 /**
@@ -1272,8 +1297,12 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.SetSyncNotificationEnabledWithoutApp(userId, enabled),
-        ERR_ANS_NON_SYSTEM_APP);
+    int32_t ret = advancedNotificationService.SetSyncNotificationEnabledWithoutApp(userId, enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 }
 
 /**
@@ -1289,8 +1318,12 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.GetSyncNotificationEnabledWithoutApp(userId, enabled),
-        ERR_ANS_NON_SYSTEM_APP);
+    int32_t ret = advancedNotificationService.GetSyncNotificationEnabledWithoutApp(userId, enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 }
 
 /**

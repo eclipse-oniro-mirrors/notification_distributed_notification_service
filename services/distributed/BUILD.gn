@@ -63,7 +63,7 @@ ohos_shared_library("libans_distributed") {
     "ipc:ipc_single",
     "kv_store:distributeddata_inner",
   ]
-  if (distributed_notification_supported) {
+  if (ans_device_manager_enable) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -170,11 +170,11 @@ ohos_shared_library("libdans") {
     "time_service:time_client",
     "zlib:libz",
   ]
-  if (distributed_notification_supported) {
-    external_deps += [
-      "device_manager:devicemanagersdk",
-      "dsoftbus:softbus_client",
-    ]
+  if (ans_device_manager_enable) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
+  if (ans_soft_bus_enable) {
+    external_deps += [ "dsoftbus:softbus_client" ]
   }
 
   if (screenlock_mgr_enable) {
@@ -269,12 +269,6 @@ ohos_shared_library("libans_extension_service") {
     "time_service:time_client",
     "zlib:libz",
   ]
-  if (distributed_notification_supported) {
-    external_deps += [
-      "device_manager:devicemanagersdk",
-      "dsoftbus:softbus_client",
-    ]
-  }
 
   if (ans_config_policy_enable) {
     external_deps += [ "config_policy:configpolicy_util" ]

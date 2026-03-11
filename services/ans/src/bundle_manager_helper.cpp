@@ -263,7 +263,7 @@ int32_t __attribute__((weak)) BundleManagerHelper::GetDefaultUidByBundleName(
     return uid;
 }
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 bool __attribute__((weak)) BundleManagerHelper::GetDistributedNotificationEnabled(
     const std::string &bundleName, const int32_t userId)
 {

@@ -1089,7 +1089,7 @@ public:
     virtual ErrCode SetSlotFlagsAsBundle(const sptr<NotificationBundleOption>& bundleOption,
         uint32_t slotFlags) override;
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     /**
      * @brief Obtains the event of turn on screen.
      */
@@ -1959,7 +1959,7 @@ public:
         const std::vector<sptr<NotificationBundleOption>> &enabledBundles = {});
     void ReportRingtoneChanged(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationRingtoneInfo> &ringtoneInfo, NotificationConstant::RingtoneReportType reportType);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     void InitDistributeCallBack();
 #endif
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
@@ -2137,7 +2137,7 @@ private:
     void RemoveNtfBySlotFromTriggerNotificationList(const sptr<NotificationBundleOption> &bundle,
         const sptr<NotificationSlot> &slot);
 #ifdef ANM_SUPPORT_DUMP
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     ErrCode DistributedNotificationDump(const std::string& bundle, int32_t userId, int32_t recvUserId,
         std::vector<std::string> &dumpInfo);
 #endif
@@ -2154,7 +2154,7 @@ private:
     ErrCode IsAllowedNotifySelf(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
 
     ErrCode SetNotificationRemindType(sptr<Notification> notification, bool isLocal);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     std::vector<std::string> GetLocalNotificationKeys(const sptr<NotificationBundleOption> &bundleOption);
     NotificationConstant::RemindType GetRemindType();
     ErrCode DoDistributedPublish(
@@ -2521,7 +2521,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> pushRecipient_ = nullptr;
     Infra::FfrtQueueImpl notificationSvrQueue_;
     std::map<NotificationConstant::SlotType, std::shared_ptr<BasePublishProcess>> publishProcess_;
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;
     DistributedKv::DistributedKvDataManager dataManager_;
     NotificationConstant::DistributedReminderPolicy distributedReminderPolicy_ = DEFAULT_DISTRIBUTED_REMINDER_POLICY;

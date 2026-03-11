@@ -38,7 +38,7 @@ void MockGetDistributedEnableInApplicationInfo(bool mockRet, uint8_t mockCase = 
 
 namespace OHOS {
 namespace Notification {
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 ErrCode AdvancedNotificationService::GetDistributedEnableInApplicationInfo(
     const sptr<NotificationBundleOption> bundleOption, bool &enable)
 {
