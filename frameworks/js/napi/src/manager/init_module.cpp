@@ -228,8 +228,10 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
 
 #ifdef ANS_FEATURE_OPEN_NOTIFICATION_SETTINGS
         DECLARE_NAPI_FUNCTION("openNotificationSettings", NapiOpenNotificationSettings),
+        DECLARE_NAPI_FUNCTION("openNotificationSettingsWithResult", NapiOpenNotificationSettingsWithResult),
 #else
         DECLARE_NAPI_FUNCTION("openNotificationSettings", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("openNotificationSettingsWithResult", Common::NapiReturnCapErr),
 #endif
 
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION

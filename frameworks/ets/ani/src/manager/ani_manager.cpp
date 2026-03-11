@@ -286,8 +286,13 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeOpenNotificationSettings",
         "C{application.UIAbilityContext.UIAbilityContext}:C{std.core.Promise}",
         reinterpret_cast<void *>(AniOpenNotificationSettings)},
+    ani_native_function {"nativeOpenNotificationSettingsWithResult",
+        nullptr,
+        reinterpret_cast<void *>(AniOpenNotificationSettingsWithResult)},
 #else
     ani_native_function {"nativeOpenNotificationSettings", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeOpenNotificationSettingsWithResult", nullptr,
+        reinterpret_cast<void *>(ThrowSystemCapErr)},
 #endif
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
     ani_native_function {"nativeSetBundlePriorityConfig",

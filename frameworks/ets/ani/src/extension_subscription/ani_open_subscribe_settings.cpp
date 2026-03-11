@@ -21,6 +21,8 @@
 #include "ani_common_util.h"
 #include "sts_throw_erro.h"
 #include "ani_ans_dialog_callback.h"
+#include "sts_common.h"
+#include "sts_bundle_option.h"
 
 namespace OHOS {
 namespace NotificationExtensionSubScriptionSts {
@@ -59,7 +61,8 @@ bool CreateUiExtCallback(ani_env *env, std::shared_ptr<SettingsModalExtensionCal
     uiExtCallback->SetAbilityContext(abilityContext);
     uiExtCallback->SetBundleName(bundleName);
     uiExtensionCallbacks = {
-        .onRelease =
+        .onRelease = info->isWithResult ?
+            std::bind(&SettingsModalExtensionCallback::OnReleaseNew, uiExtCallback, std::placeholders::_1) :
             std::bind(&SettingsModalExtensionCallback::OnRelease, uiExtCallback, std::placeholders::_1),
         .onResult = std::bind(&SettingsModalExtensionCallback::OnResult, uiExtCallback,
             std::placeholders::_1, std::placeholders::_2),
@@ -67,7 +70,8 @@ bool CreateUiExtCallback(ani_env *env, std::shared_ptr<SettingsModalExtensionCal
             std::bind(&SettingsModalExtensionCallback::OnReceive, uiExtCallback, std::placeholders::_1),
         .onError = std::bind(&SettingsModalExtensionCallback::OnError, uiExtCallback,
             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
-        .onRemoteReady =
+        .onRemoteReady = info->isWithResult ?
+            std::bind(&SettingsModalExtensionCallback::OnRemoteReadyNew, uiExtCallback, std::placeholders::_1) :
             std::bind(&SettingsModalExtensionCallback::OnRemoteReady, uiExtCallback, std::placeholders::_1),
         .onDestroy = std::bind(&SettingsModalExtensionCallback::OnDestroy, uiExtCallback),
     };
@@ -124,6 +128,47 @@ bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> co
     return true;
 }
 
+ani_object StsNotificationSettingResult(ani_env *env, std::shared_ptr<OpenSettingsInfo> info)
+{
+    ani_object outAniObj = nullptr;
+    bool enabled = false;
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    info->errorCode = NotificationHelper::IsUserGranted(enabled);
+    if (info->errorCode == ERR_OK && enabled) {
+        info->errorCode = NotificationHelper::GetUserGrantedEnabledBundlesForSelf(bundles);
+    }
+    if (info->errorCode != ERR_OK) {
+        return nullptr;
+    }
+    ani_class cls = nullptr;
+    const char* className = "notification.NotificationCommonDef.UserGrantSettingInner";
+    if (!NotificationSts::CreateClassObjByClassName(env, className, cls, outAniObj)) {
+        ANS_LOGE("StsNotificationSettingResult: Failed to create profile class object");
+        return nullptr;
+    }
+    if (cls == nullptr || outAniObj == nullptr) {
+        ANS_LOGE("Create class failed");
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_SetPropertyByName_Boolean(
+        outAniObj, "userGrantEnabled", NotificationSts::BoolToAniBoolean(enabled))) {
+        ANS_LOGE("Set userGrantEnabled fail");
+        return nullptr;
+    }
+    ani_object arrayBundles = nullptr;
+    if (!NotificationSts::SetAniArrayGrantedBundleInfo(env, bundles, arrayBundles)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env,
+            "StsNotificationSettingResult failed, arrayBundles is nullptr");
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_SetPropertyByName_Ref(outAniObj, "grantedBundleInfos", arrayBundles)) {
+        ANS_LOGE("Set grantedBundleInfos fail");
+        return nullptr;
+    }
+
+    return outAniObj;
+}
+
 void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSettingsInfo> info)
 {
     ANS_LOGD("enter");
@@ -141,14 +186,17 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
         errorCode = info->errorCode ==
             ERR_OK ? ERR_OK : NotificationSts::GetExternalCode(info->errorCode);
     }
-
+    ani_object ret = nullptr;
     if (errorCode == ERR_OK) {
-        ANS_LOGD("Resolve. errorCode %{public}d", errorCode);
-        ani_object ret = OHOS::AppExecFwk::CreateInt(env, errorCode);
-        if (ret == nullptr) {
-            NotificationSts::ThrowInternerErrorWithLogE(env, "createInt faild");
-            return;
+        ret = OHOS::AppExecFwk::CreateInt(env, errorCode);
+        if (info->isWithResult) {
+            ret = StsNotificationSettingResult(env, info);
         }
+        if (ret == nullptr) {
+            errorCode = ERROR_INTERNAL_ERROR;
+        }
+    }
+    if (errorCode == ERR_OK) {
         if (ANI_OK != (status = env->PromiseResolver_Resolve(info->resolver, static_cast<ani_ref>(ret)))) {
             NotificationSts::ThrowInternerErrorWithLogE(env, "PromiseResolver_Resolve faild.");
         }
@@ -214,6 +262,59 @@ ani_object AniOpenSubscribeSettings(ani_env *env, ani_object content)
     return aniPromise;
 }
 
+ani_object AniOpenSubscribeSettingsWithResult(ani_env *env, ani_object content)
+{
+    ANS_LOGD("sts AniOpenSubscribeSettingsWithResult call");
+    int returncode = ERR_OK;
+    returncode = NotificationHelper::CanOpenSubscribeSettings();
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
+        ANS_LOGE("AniOpenSubscribeSettingsWithResult error, errorCode: %{public}d", externalCode);
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        return nullptr;
+    }
+    std::shared_ptr<OpenSettingsInfo> info = std::make_shared<OpenSettingsInfo>();
+    if (!GetOpenSettingsInfo(env, content, info)) {
+        ANS_LOGE("sts AniOpenSubscribeSettingsWithResult GetOpenSettingsInfo fail");
+        NotificationSts::ThrowErrorWithInvalidParam(env);
+        return nullptr;
+    }
+    if (info->context == nullptr) {
+        ANS_LOGE("sts AniOpenSubscribeSettingsWithResult context is null");
+        NotificationSts::ThrowErrorWithInvalidParam(env);
+        return nullptr;
+    }
+    info->isWithResult = true;
+    std::string bundleName {""};
+    if (isExist.exchange(true)) {
+        ANS_LOGE("sts AniOpenSubscribeSettingsWithResult ERROR_SETTING_WINDOW_EXIST");
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_SETTING_WINDOW_EXIST,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_SETTING_WINDOW_EXIST));
+        return nullptr;
+    }
+    ani_object aniPromise {};
+    ani_resolver aniResolver {};
+    if (ANI_OK != env->Promise_New(&aniResolver, &aniPromise)) {
+        ANS_LOGE("Promise_New faild");
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+        isExist.store(false);
+        return nullptr;
+    }
+    info->resolver = aniResolver;
+    info->errorCode = CreateSettingsUIExtension(info->context, bundleName, env, info) ?
+        OHOS::Notification::ERR_ANS_DIALOG_POP_SUCCEEDED : OHOS::Notification::ERROR_INTERNAL_ERROR;
+    if (info->errorCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
+        ANS_LOGE("error, code is %{public}d.", info->errorCode);
+        StsAsyncCompleteCallbackOpenSettings(env, info);
+        isExist.store(false);
+        return nullptr;
+    }
+    ANS_LOGD("sts AniOpenSubscribeSettings end");
+
+    return aniPromise;
+}
+
 SettingsModalExtensionCallback::SettingsModalExtensionCallback()
 {}
 
@@ -250,9 +351,11 @@ void SettingsModalExtensionCallback::ProcessStatusChanged(int32_t code, bool isA
     ani_env* env;
     ani_status aniResult = ANI_ERROR;
     ani_options aniArgs { 0, nullptr };
+    bool isAttachSuccess = isAsync;
     if (isAsync) {
         aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env);
         if (aniResult != ANI_OK) {
+            isAttachSuccess = false;
             ANS_LOGE("AttachCurrentThread fail. result: %{public}d.", aniResult);
             aniResult = vm_->GetEnv(ANI_VERSION_1, &env);
         }
@@ -266,7 +369,7 @@ void SettingsModalExtensionCallback::ProcessStatusChanged(int32_t code, bool isA
     if (complete_) {
         complete_(env, info_);
     }
-    if (isAsync && (aniResult = vm_->DetachCurrentThread()) != ANI_OK) {
+    if (isAttachSuccess && (aniResult = vm_->DetachCurrentThread()) != ANI_OK) {
         ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
@@ -299,6 +402,17 @@ void SettingsModalExtensionCallback::OnRelease(int32_t releaseCode)
 }
 
 /*
+ * when UIExtensionAbility disconnect or use terminate or process die
+ * releaseCode is 0 when process normal exit
+ */
+void SettingsModalExtensionCallback::OnReleaseNew(int32_t releaseCode)
+{
+    ANS_LOGD("OnReleaseNew");
+    ReleaseOrErrorHandle(releaseCode);
+    ProcessStatusChanged(releaseCode, true);
+}
+
+/*
  * when UIExtensionComponent init or turn to background or destroy UIExtensionAbility occur error
  */
 void SettingsModalExtensionCallback::OnError(int32_t code, const std::string& name, const std::string& message)
@@ -316,6 +430,15 @@ void SettingsModalExtensionCallback::OnRemoteReady(const std::shared_ptr<Ace::Mo
 {
     ANS_LOGI("OnRemoteReady");
     ProcessStatusChanged(0, true);
+}
+
+/*
+ * when UIExtensionComponent connect to UIExtensionAbility, ModalUIExtensionProxy will init,
+ * UIExtensionComponent can send message to UIExtensionAbility by ModalUIExtensionProxy
+ */
+void SettingsModalExtensionCallback::OnRemoteReadyNew(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy)
+{
+    ANS_LOGI("OnRemoteReadyNew");
 }
 
 /*

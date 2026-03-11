@@ -37,6 +37,9 @@ void AniNotificationExtensionRegistryInit(ani_env *env)
     std::array methods = {
         ani_native_function {
             "nativeOpenSubscriptionSettings", nullptr, reinterpret_cast<void*>(AniOpenSubscribeSettings) },
+        ani_native_function {
+            "nativeOpenSubscriptionSettingsWithResult", nullptr,
+            reinterpret_cast<void*>(AniOpenSubscribeSettingsWithResult) },
         ani_native_function { "nativeSubscribe", nullptr, reinterpret_cast<void*>(AniSubscribe) },
         ani_native_function { "nativeUnsubscribe", nullptr, reinterpret_cast<void*>(AniUnsubscribe) },
         ani_native_function { "nativeGetSubscribeInfo", nullptr, reinterpret_cast<void*>(AniGetSubscribeInfo) },

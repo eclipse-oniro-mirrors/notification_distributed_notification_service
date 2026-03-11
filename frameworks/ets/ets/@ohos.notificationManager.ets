@@ -352,6 +352,7 @@ export default namespace notificationManager {
         callback?: AsyncCallback<DoNotDisturbProfile>): Promise<DoNotDisturbProfile>;
 
     export native function nativeOpenNotificationSettings(content: UIAbilityContext): Promise<int>;
+    export native function nativeOpenNotificationSettingsWithResult(content: UIAbilityContext): NotificationSetting;
 
     export native function nativesetTargetDeviceStatus(deviceType: string, status: long,
         callback?: AsyncCallback<void>): Promise<void>;
@@ -2371,6 +2372,26 @@ export default namespace notificationManager {
                             reject(rejectInternalError);
                         }
                     }
+                },
+                (error: Error): void => {
+                    reject(error);
+                }
+            )
+        });
+        return pPromise;
+    }
+
+    export function openNotificationSettingsWithResult(context: UIAbilityContext): Promise<NotificationSetting>
+    {
+        if (context == undefined || context === null) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<NotificationSetting>((resolve: ResolveCallback<NotificationSetting>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): NotificationSetting => { return nativeOpenNotificationSettingsWithResult(context); });
+            p.then(
+                (data: Any): void => {
+                    let result: NotificationSetting = data as NotificationSetting;
+                    resolve(result);
                 },
                 (error: Error): void => {
                     reject(error);

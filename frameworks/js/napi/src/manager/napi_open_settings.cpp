@@ -26,6 +26,26 @@ static AsyncCallbackInfoOpenSettings* callbackInfo_ = nullptr;
 static JsAnsCallbackComplete* complete_ = nullptr;
 static std::atomic<bool> isExist = false;
 
+napi_value NapiNotificationSettingResult(napi_env env, void *data)
+{
+    auto* asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings*>(data);
+    napi_value result = Common::NapiGetNull(env);
+    if (!asynccallbackinfo) {
+        return result;
+    }
+    uint32_t slotFlags = 0;
+    asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationSettings(slotFlags);
+    if (asynccallbackinfo->info.errorCode != ERR_OK) {
+        return result;
+    }
+    napi_create_object(env, &result);
+    if (!Common::SetNotificationSettings(env, slotFlags, result)) {
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+    }
+
+    return result;
+}
+
 void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
 {
     ANS_LOGD("called");
@@ -47,6 +67,9 @@ void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
         return;
     }
     napi_get_undefined(env, &result);
+    if (asynccallbackinfo->isWithResult) {
+        result = NapiNotificationSettingResult(env, data);
+    }
     int32_t errorCode = ERR_OK;
     if (asynccallbackinfo->info.errorCode == ERROR_SETTING_WINDOW_EXIST) {
         errorCode = ERROR_SETTING_WINDOW_EXIST;
@@ -129,6 +152,55 @@ napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info)
     return promise;
 }
 
+ napi_value NapiOpenNotificationSettingsWithResult(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("start");
+    OpenSettingsParams params {};
+    if (ParseOpenSettingsParameters(env, info, params) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+    AsyncCallbackInfoOpenSettings *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoOpenSettings {
+            .env = env, .params = params};
+    if (!asynccallbackinfo) {
+        return Common::JSParaError(env, nullptr);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+    asynccallbackinfo->isWithResult = true;
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "openNotificationSettingsWithResult", NAPI_AUTO_LENGTH, &resourceName);
+    auto createExtension = [](napi_env env, void* data) {
+    };
+    auto jsCb = [](napi_env env, napi_status status, void* data) {
+        if (data == nullptr) {
+            ANS_LOGE("null data");
+            return;
+        }
+        auto* asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings*>(data);
+        CreateExtension(asynccallbackinfo);
+        ErrCode errCode = asynccallbackinfo->info.errorCode;
+        if (errCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
+            ANS_LOGE("errCode: %{public}d.", errCode);
+            NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
+            if (errCode != ERROR_SETTING_WINDOW_EXIST) {
+                isExist.store(false);
+            }
+            return;
+        }
+        if (!Init(env, asynccallbackinfo, NapiAsyncCompleteCallbackOpenSettings)) {
+            ANS_LOGE("error");
+            asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+            NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
+            return;
+        }
+    };
+    napi_create_async_work(env, nullptr, resourceName, createExtension, jsCb,
+        static_cast<void*>(asynccallbackinfo), &asynccallbackinfo->asyncWork);
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    return promise;
+}
+
 napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_info &info, OpenSettingsParams &params)
 {
     ANS_LOGD("called");
@@ -166,7 +238,31 @@ napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_
     return Common::NapiGetNull(env);
 }
 
-bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName)
+std::shared_ptr<SettingsModalExtensionCallback> CreateUiExtCallback(
+    Ace::ModalUIExtensionCallbacks& uiExtensionCallbacks, bool isWithResult)
+{
+    auto uiExtCallback = std::make_shared<SettingsModalExtensionCallback>();
+    uiExtensionCallbacks = {
+        .onRelease = isWithResult ?
+            std::bind(&SettingsModalExtensionCallback::OnReleaseNew, uiExtCallback, std::placeholders::_1) :
+            std::bind(&SettingsModalExtensionCallback::OnRelease, uiExtCallback, std::placeholders::_1),
+        .onResult = std::bind(&SettingsModalExtensionCallback::OnResult, uiExtCallback,
+            std::placeholders::_1, std::placeholders::_2),
+        .onReceive =
+            std::bind(&SettingsModalExtensionCallback::OnReceive, uiExtCallback, std::placeholders::_1),
+        .onError = std::bind(&SettingsModalExtensionCallback::OnError, uiExtCallback,
+            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
+        .onRemoteReady = isWithResult ?
+            std::bind(&SettingsModalExtensionCallback::OnRemoteReadyNew, uiExtCallback, std::placeholders::_1) :
+            std::bind(&SettingsModalExtensionCallback::OnRemoteReady, uiExtCallback, std::placeholders::_1),
+        .onDestroy = std::bind(&SettingsModalExtensionCallback::OnDestroy, uiExtCallback),
+    };
+
+    return uiExtCallback;
+}
+
+bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName,
+    bool isWithResult)
 {
     if (context == nullptr) {
         ANS_LOGE("null context");
@@ -194,22 +290,10 @@ bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> co
     std::string typeValue = "sys/commonUI";
     want.SetParam(typeKey, typeValue);
 
-    auto uiExtCallback = std::make_shared<SettingsModalExtensionCallback>();
+    Ace::ModalUIExtensionCallbacks uiExtensionCallbacks;
+    auto uiExtCallback = CreateUiExtCallback(uiExtensionCallbacks, isWithResult);
     uiExtCallback->SetAbilityContext(abilityContext);
     uiExtCallback->SetBundleName(bundleName);
-    Ace::ModalUIExtensionCallbacks uiExtensionCallbacks = {
-        .onRelease =
-            std::bind(&SettingsModalExtensionCallback::OnRelease, uiExtCallback, std::placeholders::_1),
-        .onResult = std::bind(&SettingsModalExtensionCallback::OnResult, uiExtCallback,
-            std::placeholders::_1, std::placeholders::_2),
-        .onReceive =
-            std::bind(&SettingsModalExtensionCallback::OnReceive, uiExtCallback, std::placeholders::_1),
-        .onError = std::bind(&SettingsModalExtensionCallback::OnError, uiExtCallback,
-            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
-        .onRemoteReady =
-            std::bind(&SettingsModalExtensionCallback::OnRemoteReady, uiExtCallback, std::placeholders::_1),
-        .onDestroy = std::bind(&SettingsModalExtensionCallback::OnDestroy, uiExtCallback),
-    };
 
     Ace::ModalUIExtensionConfig config;
     config.isProhibitBack = true;
@@ -312,7 +396,8 @@ void CreateExtension(AsyncCallbackInfoOpenSettings* asynccallbackinfo)
             asynccallbackinfo->info.errorCode = ERROR_SETTING_WINDOW_EXIST;
             return;
         }
-        bool success = CreateSettingsUIExtension(asynccallbackinfo->params.context, bundleName);
+        bool success = CreateSettingsUIExtension(asynccallbackinfo->params.context, bundleName,
+            asynccallbackinfo->isWithResult);
         if (success) {
             asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_POP_SUCCEEDED;
         } else {
@@ -358,6 +443,18 @@ void SettingsModalExtensionCallback::OnRelease(int32_t releaseCode)
 }
 
 /*
+ * when UIExtensionAbility disconnect or use terminate or process die
+ * releaseCode is 0 when process normal exit
+ */
+void SettingsModalExtensionCallback::OnReleaseNew(int32_t releaseCode)
+{
+    ANS_LOGD("OnReleaseNew");
+    ReleaseOrErrorHandle(releaseCode);
+    ProcessStatusChanged(releaseCode);
+}
+
+
+/*
  * when UIExtensionComponent init or turn to background or destroy UIExtensionAbility occur error
  */
 void SettingsModalExtensionCallback::OnError(int32_t code, const std::string& name, const std::string& message)
@@ -375,6 +472,15 @@ void SettingsModalExtensionCallback::OnRemoteReady(const std::shared_ptr<Ace::Mo
 {
     ANS_LOGD("called");
     ProcessStatusChanged(0);
+}
+
+/*
+ * when UIExtensionComponent connect to UIExtensionAbility, ModalUIExtensionProxy will init,
+ * UIExtensionComponent can send message to UIExtensionAbility by ModalUIExtensionProxy
+ */
+void SettingsModalExtensionCallback::OnRemoteReadyNew(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy)
+{
+    ANS_LOGD("called");
 }
 
 /*
