@@ -355,6 +355,10 @@ bool __attribute__((weak)) BundleManagerHelper::GetBundleInfoV9(
     const std::string bundle, const int32_t flag,
     AppExecFwk::BundleInfo &bundleInfo, const int32_t userId)
 {
+    if (bundle.empty()) {
+        ANS_LOGD("empty str");
+        return false;
+    }
     std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Connect();
 
