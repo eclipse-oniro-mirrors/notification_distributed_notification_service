@@ -72,9 +72,8 @@ void DoSomethingInterestingWithManager(FuzzedDataProvider* fdp)
     manager->CancelReminderToDb(id, id);
     manager->CheckAndCloseShareReminder(reminder);
     manager->CollapseNotificationPanel();
-    std::unordered_map<std::string, int32_t> limits;
-    std::unordered_map<int32_t, int32_t> bundleLimits;
-    manager->CheckShowLimit(limits, bundleLimits, id, reminder);
+    Notification::ReminderDataManager::ShowLimit limits;
+    manager->CheckShowLimit(limits, reminder);
 }
 
 void Clear()

@@ -190,18 +190,17 @@ void ReminderDataManager::ReportSysEvent(const sptr<ReminderRequest>& reminder)
 #endif
 }
 
-bool ReminderDataManager::CheckShowLimit(std::unordered_map<std::string, int32_t>& limits,
-    std::unordered_map<int32_t, int32_t>& bundleLimits, int32_t& totalCount, sptr<ReminderRequest>& reminder)
+bool ReminderDataManager::CheckShowLimit(ShowLimit& limits, sptr<ReminderRequest>& reminder)
 {
-    if (totalCount > TOTAL_MAX_NUMBER_SHOW_AT_ONCE) {
+    if (limits.totalCount > TOTAL_MAX_NUMBER_SHOW_AT_ONCE) {
         ANSR_LOGE("The max number of displays that can be displayed at a time has been reached.");
         return false;
     }
     int32_t uid = reminder->GetUid();
     std::string key = std::to_string(uid) + "_" + std::to_string(reminder->GetTriggerTimeInMilli());
-    auto iter = limits.find(key);
-    if (iter == limits.end()) {
-        limits.emplace(key, 1);
+    auto iter = limits.timeLimits.find(key);
+    if (iter == limits.timeLimits.end()) {
+        limits.timeLimits.emplace(key, 1);
     } else {
         if (iter->second > ONE_HAP_MAX_NUMBER_SHOW_AT_SAME_TIME) {
             ANSR_LOGE("The max number of displays that can be shown at the same time in "
@@ -210,9 +209,9 @@ bool ReminderDataManager::CheckShowLimit(std::unordered_map<std::string, int32_t
         }
         ++iter->second;
     }
-    auto bundleIter = bundleLimits.find(uid);
-    if (bundleIter == bundleLimits.end()) {
-        bundleLimits.emplace(uid, 1);
+    auto bundleIter = limits.bundleLimits.find(uid);
+    if (bundleIter == limits.bundleLimits.end()) {
+        limits.bundleLimits.emplace(uid, 1);
     } else {
         if (bundleIter->second > ONE_HAP_MAX_NUMBER_SHOW_AT_ONCE) {
             ANSR_LOGE("The max number of displays that can be displayed in a single app[%{public}s] has been reached",
@@ -221,7 +220,7 @@ bool ReminderDataManager::CheckShowLimit(std::unordered_map<std::string, int32_t
         }
         ++bundleIter->second;
     }
-    ++totalCount;
+    ++limits.totalCount;
     return true;
 }
 
@@ -231,7 +230,8 @@ void ReminderDataManager::OnDataShareInsertOrDelete()
     std::vector<sptr<ReminderRequest>> immediatelyReminders;
     std::vector<sptr<ReminderRequest>> extensionReminders;
     CheckReminderTime(immediatelyReminders, extensionReminders);
-    HandleImmediatelyShow(immediatelyReminders, false, false);
+    ShowLimit limits;
+    HandleImmediatelyShow(immediatelyReminders, limits, false, false);
     StartRecentReminder();
 }
 

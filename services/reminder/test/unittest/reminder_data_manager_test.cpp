@@ -426,7 +426,8 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_015, Level1)
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     std::vector<sptr<ReminderRequest>> vec;
     vec.push_back(reminder);
-    manager->HandleImmediatelyShow(vec, true, true);
+    ReminderDataManager::ShowLimit limits;
+    manager->HandleImmediatelyShow(vec, limits, true, true);
     manager->HandleRefreshReminder(0, reminder);
     manager->HandleSameNotificationIdShowing(reminder);
     manager->Init();
@@ -1319,49 +1320,48 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_045, Level1)
     reminder->InitUid(1);
     reminder->SetTriggerTimeInMilli(100);
 
-    int32_t totalCount = 300;
-    std::unordered_map<std::string, int32_t> limits;
-    std::unordered_map<int32_t, int32_t> bundleLimits;
-    bool ret = manager->CheckShowLimit(limits, bundleLimits, totalCount, reminder);
+    ReminderDataManager::ShowLimit limits;
+    limits.totalCount = 300;
+    bool ret = manager->CheckShowLimit(limits, reminder);
     EXPECT_EQ(ret, true);
-    EXPECT_EQ(totalCount, 301);
+    EXPECT_EQ(limits.totalCount, 301);
 
-    totalCount = 501;
-    ret = manager->CheckShowLimit(limits, bundleLimits, totalCount, reminder);
+    limits.totalCount = 501;
+    ret = manager->CheckShowLimit(limits, reminder);
     EXPECT_EQ(ret, false);
-    EXPECT_EQ(totalCount, 501);
+    EXPECT_EQ(limits.totalCount, 501);
     
-    totalCount = 0;
-    limits.clear();
-    bundleLimits.clear();
-    ret = manager->CheckShowLimit(limits, bundleLimits, totalCount, reminder);
+    limits.totalCount = 0;
+    limits.timeLimits.clear();
+    limits.bundleLimits.clear();
+    ret = manager->CheckShowLimit(limits, reminder);
     EXPECT_EQ(ret, true);
-    EXPECT_EQ(limits.size(), 1);
-    EXPECT_EQ(bundleLimits.size(), 1);
-    EXPECT_EQ(limits["1_100"], 1);
-    EXPECT_EQ(bundleLimits[1], 1);
-    EXPECT_EQ(totalCount, 1);
+    EXPECT_EQ(limits.timeLimits.size(), 1);
+    EXPECT_EQ(limits.bundleLimits.size(), 1);
+    EXPECT_EQ(limits.timeLimits["1_100"], 1);
+    EXPECT_EQ(limits.bundleLimits[1], 1);
+    EXPECT_EQ(limits.totalCount, 1);
 
-    ret = manager->CheckShowLimit(limits, bundleLimits, totalCount, reminder);
+    ret = manager->CheckShowLimit(limits, reminder);
     EXPECT_EQ(ret, true);
-    EXPECT_EQ(limits["1_100"], 2);
-    EXPECT_EQ(bundleLimits[1], 2);
-    EXPECT_EQ(totalCount, 2);
+    EXPECT_EQ(limits.timeLimits["1_100"], 2);
+    EXPECT_EQ(limits.bundleLimits[1], 2);
+    EXPECT_EQ(limits.totalCount, 2);
 
-    limits["1_100"] = 11;
-    ret = manager->CheckShowLimit(limits, bundleLimits, totalCount, reminder);
+    limits.timeLimits["1_100"] = 11;
+    ret = manager->CheckShowLimit(limits, reminder);
     EXPECT_EQ(ret, false);
-    EXPECT_EQ(limits["1_100"], 11);
-    EXPECT_EQ(bundleLimits[1], 2);
-    EXPECT_EQ(totalCount, 2);
+    EXPECT_EQ(limits.timeLimits["1_100"], 11);
+    EXPECT_EQ(limits.bundleLimits[1], 2);
+    EXPECT_EQ(limits.totalCount, 2);
 
-    limits["1_100"] = 2;
-    bundleLimits[1] = 31;
-    ret = manager->CheckShowLimit(limits, bundleLimits, totalCount, reminder);
+    limits.timeLimits["1_100"] = 2;
+    limits.bundleLimits[1] = 31;
+    ret = manager->CheckShowLimit(limits, reminder);
     EXPECT_EQ(ret, false);
-    EXPECT_EQ(limits["1_100"], 3);
-    EXPECT_EQ(bundleLimits[1], 31);
-    EXPECT_EQ(totalCount, 2);
+    EXPECT_EQ(limits.timeLimits["1_100"], 3);
+    EXPECT_EQ(limits.bundleLimits[1], 31);
+    EXPECT_EQ(limits.totalCount, 2);
 }
 }  // namespace Notification
 }  // namespace OHOS
