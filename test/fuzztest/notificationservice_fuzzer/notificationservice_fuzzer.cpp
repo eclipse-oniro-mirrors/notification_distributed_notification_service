@@ -304,7 +304,10 @@ namespace Notification {
         service->TriggerLiveViewSwitchCheck(num);
         service->SetCheckConfig(num, str, str2, str3);
         service->GetLiveViewConfig(strs);
-        service->SetAdditionConfig(str, str2);
+        RawDataContainer rawDataContainer;
+        rawDataContainer.SetRawString(str2);
+        sptr<LargeInfoContainer> largeInfoContainer = new (std::nothrow) LargeInfoContainer(rawDataContainer);
+        service->SetAdditionConfig(str, largeInfoContainer);
         return true;
     }
 

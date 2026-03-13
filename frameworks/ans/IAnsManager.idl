@@ -37,6 +37,7 @@ sequenceable OHOS.Notification.NotificationCheckRequest;
 sequenceable OHOS.Notification.NotificationRingtoneInfo;
 sequenceable OHOS.Notification.NotificationDistributedBundle;
 sequenceable OHOS.Notification.NotificationParameters;
+sequenceable OHOS.Notification.LargeInfoContainer;
 sequenceable OHOS.Notification.DistributedNotificationBundleInfo;
 sequenceable OHOS.IRemoteObject;
 
@@ -309,7 +310,7 @@ interface OHOS.Notification.IAnsManager {
 
     void UnRegisterBadgeQueryCallback();
 
-    void SetAdditionConfig([in] String key, [in] String value);
+    void SetAdditionConfig([in] String key, [in] sptr<LargeInfoContainer> largeInfoContainer);
 
     void SetBundlePriorityConfig([in] sptr<NotificationBundleOption> bundleOption, [in] String value);
 

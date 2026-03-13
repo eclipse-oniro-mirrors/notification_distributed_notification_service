@@ -27,6 +27,7 @@
 #include "notification_button_option.h"
 #include "notification_reminder_info.h"
 #include "notification_local_live_view_subscriber.h"
+#include "large_info_container.h"
 #include "system_ability_definition.h"
 #include "unique_fd.h"
 #include "hitrace_util.h"
@@ -2318,8 +2319,16 @@ ErrCode AnsNotification::SetAdditionConfig(const std::string &key, const std::st
         ANS_LOGE("Get ans manager proxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-
-    return proxy->SetAdditionConfig(key, value);
+    RawDataContainer rawDataContainer;
+    rawDataContainer.SetRawString(value);
+    sptr<LargeInfoContainer> largeInfoContainer =
+        sptr<LargeInfoContainer>(new (std::nothrow) LargeInfoContainer(rawDataContainer));
+    if (largeInfoContainer == nullptr) {
+        ANS_LOGE("null largeInfoContainer");
+        return ERR_ANS_NO_MEMORY;
+    }
+    ANS_LOGI("SetAdditionConfig called (%{public}s, %{public}d).", key.c_str(), static_cast<int32_t>(value.size()));
+    return proxy->SetAdditionConfig(key, largeInfoContainer);
 }
 
 ErrCode AnsNotification::SetBundlePriorityConfig(const NotificationBundleOption &bundleOption, const std::string &value)

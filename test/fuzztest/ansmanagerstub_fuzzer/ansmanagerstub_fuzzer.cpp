@@ -267,7 +267,10 @@ namespace OHOS {
             new Notification::NotificationCheckRequest();
         service->RegisterPushCallback(nullptr, notificationCheckRequest);
         service->UnregisterPushCallback();
-        service->SetAdditionConfig(key1, value);
+        Notification::RawDataContainer rawDataContainer;
+        rawDataContainer.SetRawString(value);
+        sptr<LargeInfoContainer> largeInfoContainer = new (std::nothrow) LargeInfoContainer(rawDataContainer);
+        service->SetAdditionConfig(key1, largeInfoContainer);
         service->PublishNotificationForIndirectProxy(notification);
         service->PublishNotificationForIndirectProxyWithMaxCapacity(notification);
 

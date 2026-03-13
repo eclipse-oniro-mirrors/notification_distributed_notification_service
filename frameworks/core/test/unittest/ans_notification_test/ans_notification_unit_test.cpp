@@ -3216,5 +3216,23 @@ HWTEST_F(AnsNotificationUnitTest, GetDistributedBundleInfo_0100, TestSize.Level1
     res = ans_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
     EXPECT_EQ(res, ERR_OK);
 }
+
+/*
+ * @tc.name: SetAdditionConfig_0200
+ * @tc.desc: test SetAdditionConfig.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetAdditionConfig_0200, Function | MediumTest | Level1)
+{
+    sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
+    ASSERT_NE(proxy, nullptr);
+    MockGetAnsManagerProxy(proxy);
+    std::string key = "key";
+    std::string value = "value";
+    ErrCode ret1 = ans_->SetAdditionConfig(key, value);
+    MockGetAnsManagerProxy(nullptr);
+    EXPECT_EQ(ret1, ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

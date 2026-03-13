@@ -21,6 +21,7 @@
 #include "ans_const_define.h"
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
+#include "message_parcel.h"
 #include "notification_constant.h"
 
 namespace OHOS {
@@ -59,6 +60,84 @@ public:
             parcelableInfos.emplace_back(info);
         }
 
+        return true;
+    }
+
+    static bool GetDataFromRawData(void *&buffer, size_t size, const void *data)
+    {
+        if (data == nullptr) {
+            ANS_LOGE("GetData failed due to null data");
+            return false;
+        }
+        if (size == 0 || size > NotificationConstant::MAX_IPC_RAW_DATA_SIZE) {
+            ANS_LOGE("GetData failed due to zero size");
+            return false;
+        }
+        buffer = malloc(size);
+        if (buffer == nullptr) {
+            ANS_LOGE("GetData failed due to malloc buffer failed");
+            return false;
+        }
+        if (memcpy_s(buffer, size, data, size) != EOK) {
+            free(buffer);
+            ANS_LOGE("GetData failed due to memcpy_s failed");
+            return false;
+        }
+        return true;
+    }
+
+    template<typename T>
+    static bool WriteLargeInfoIntoParcelable(MessageParcel &data, const T &info, uint64_t maxSize)
+    {
+        Parcel tempParcel;
+        tempParcel.SetMaxCapacity(maxSize);
+        if (!tempParcel.WriteParcelable(&info)) {
+            ANS_LOGE("Write info failed.");
+            return false;
+        }
+        size_t infoSize = tempParcel.GetDataSize();
+        if (infoSize > NotificationConstant::MAX_IPC_RAW_DATA_SIZE) {
+            ANS_LOGE("data is too large, cannot write!");
+            return false;
+        }
+        data.SetMaxCapacity(maxSize);
+        if (!data.WriteUint32(static_cast<uint32_t>(infoSize))) {
+            ANS_LOGE("write dataSize failed");
+            return false;
+        }
+        if (!data.WriteRawData(reinterpret_cast<uint8_t *>(tempParcel.GetData()), infoSize)) {
+            ANS_LOGE("write WriteRawData failed");
+            return false;
+        }
+        return true;
+    }
+
+    template <typename T>
+    static bool ReadLargeInfoFromParcelable(MessageParcel &data, T &info)
+    {
+        uint32_t dataSize = data.ReadUint32();
+        if (dataSize > NotificationConstant::MAX_IPC_RAW_DATA_SIZE) {
+            ANS_LOGE("data is too large, cannot read!");
+            return false;
+        }
+        void *buffer = nullptr;
+        if (!GetDataFromRawData(buffer, dataSize, data.ReadRawData(dataSize))) {
+            ANS_LOGE("GetDataFromRawData failed dataSize : %{public}u", dataSize);
+            return false;
+        }
+        MessageParcel tmpParcel;
+        if (!tmpParcel.ParseFrom(reinterpret_cast<uintptr_t>(buffer), dataSize)) {
+            ANS_LOGE("GetDataFromRawData ParseFrom failed");
+            free(buffer);
+            return false;
+        }
+        std::unique_ptr<T> tempInfo(tmpParcel.ReadParcelable<T>());
+        if (tempInfo == nullptr) {
+            ANS_LOGE("Read info from parcel failed");
+            free(buffer);
+            return false;
+        }
+        info = *tempInfo;
         return true;
     }
 };

@@ -53,6 +53,7 @@
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "reminder_swing_decision_center.h"
 #endif
+#include "large_info_container.h"
 #include "notification_clone_bundle_info.h"
 #include "ibadge_query_callback.h"
 #include "ffrt_queue_impl.h"
@@ -1569,10 +1570,10 @@ public:
      * @brief Set agent relationship.
      *
      * @param key Indicates storing agent relationship if the value is "PROXY_PKG".
-     * @param value Indicates key-value pair of agent relationship.
+     * @param largeInfoContainer Indicates key-value pair of agent relationship.
      * @return Returns set result.
      */
-    ErrCode SetAdditionConfig(const std::string &key, const std::string &value) override;
+    ErrCode SetAdditionConfig(const std::string &key, const sptr<LargeInfoContainer> &largeInfoContainer) override;
 
     /**
      * @brief Set priority config of bundle for intelligent identification.

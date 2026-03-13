@@ -723,6 +723,9 @@ public:
     static const uint32_t TYPE_PRIORITY_INTELLIGENT_SWITCH = 0;
     static const uint32_t TYPE_PRIORITY_SWITCH_BY_BUNDLE = 1;
     static const uint32_t TYPE_PRIORITY_STRATEGY_BY_BUNDLE = 2;
+
+    // IPC raw data mas size is 1MB
+    static constexpr uint64_t MAX_IPC_RAW_DATA_SIZE = 1024ULL * 1024ULL + 12ULL;
 };
 }  // namespace Notification
 }  // namespace OHOS
