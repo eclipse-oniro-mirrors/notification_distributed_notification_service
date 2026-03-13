@@ -621,6 +621,12 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetNotificationParameters(int32_t notificationId, const std::string &label,
+        sptr<NotificationParameters> &parameters) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode TriggerLocalLiveView(const sptr<NotificationBundleOption>& bundleOption, const int32_t notificationId,
         const sptr<NotificationButtonOption>& buttonOption) override
     {
@@ -629,6 +635,16 @@ public:
 
     ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption>& bundleOption,
         const std::string& deviceType, const bool enabled, const bool isNotification) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode GetDistributedBundleListByType(const bool isNotification,
+        std::vector<DistributedBundleOption> &enableList) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode GetDistributedBundleInfo(const std::vector<sptr<NotificationBundleOption>>& bundleOption,
+        std::vector<DistributedNotificationBundleInfo>& bundleInfoList) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

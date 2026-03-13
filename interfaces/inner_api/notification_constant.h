@@ -82,6 +82,8 @@ public:
         LIGHTSCREEN_FLAG = 1 << 3,
         VIBRATION_FLAG = 1 << 4,
         STATUSBAR_ICON_FLAG = 1 << 5,
+        BADGENUMBER_SHOW_FLAG = 1 << 6,
+        NOTIFICATION_FLAG = 1 << 7,
         SA_SELF_BANNER_FLAG = 1 << 9,
     };
 
@@ -496,6 +498,11 @@ public:
      * Indicates that notification is deleted because geofence timer cancel it.
      */
     static const int32_t TRIGGER_GEOFENCE_REASON_DELETE = 38;
+
+    /**
+     * Indicates that notification is deleted because distributed enable close.
+     */
+    static const int32_t DISTRIBUTED_APPLICATION_ENABLE_REASON_DELETE = 39;
 
     /**
      * Indicates that a notification is deleted for other reasons.

@@ -65,6 +65,30 @@ public:
     void SetEnable(const bool& enable);
 
     /**
+     * @brief is notification type.
+     */
+    bool IsNotification() const;
+
+    /**
+     * @brief Sets notification.
+     *
+     * @param notification notification type.
+     */
+    void SetNotification(const bool& notification);
+
+    /**
+     * @brief Get app label.
+     */
+    std::string GetAppLabel() const;
+
+    /**
+     * @brief Set app label.
+     *
+     * @param label app label.
+     */
+    void SetAppLabel(const std::string& label);
+
+    /**
      * @brief Returns a string representation of the object.
      *
      * @return Returns a string representation of the object.
@@ -115,6 +139,8 @@ private:
 private:
     std::shared_ptr<NotificationBundleOption> bundle_ {};
     bool enable_ = false;
+    bool notification_ = true;
+    std::string label_;
 };
 }  // namespace Notification
 }  // namespace OHOS

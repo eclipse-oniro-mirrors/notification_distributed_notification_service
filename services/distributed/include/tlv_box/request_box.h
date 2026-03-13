@@ -35,6 +35,7 @@ public:
     bool SetContentType(int32_t type);
     bool SetReminderFlag(int32_t flag);
     bool SetCreatorBundleName(const std::string& bundleName);
+    bool SetCreatorBundleUid(const int32_t& bundleUid);
     bool SetNotificationTitle(const std::string& title);
     bool SetNotificationText(const std::string& text);
     bool SetNotificationAdditionalText(const std::string& text);
@@ -66,6 +67,7 @@ public:
     bool GetContentType(int32_t& type) const;
     bool GetReminderFlag(int32_t& flag) const;
     bool GetCreatorBundleName(std::string& bundleName) const;
+    bool GetCreatorBundleUid(int32_t& bundleUid) const;
     bool GetNotificationTitle(std::string& title) const;
     bool GetNotificationText(std::string& text) const;
     bool GetNotificationAdditionalText(std::string& text) const;

@@ -1381,7 +1381,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutDistributedEnabledForBundle_010
     bundleInfo.SetBundleName("name");
     bundleInfo.SetBundleUid(1);
     std::string deviceType = "testDeviceType1111";
-    bool ret = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo,
+    bool ret = preferncesDB_->PutDistributedEnabledForBundle(deviceType, true, bundleInfo,
         NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     EXPECT_EQ(ret, true);
 }
@@ -1397,7 +1397,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutDistributedEnabledForBundle_020
     bundleInfo.SetBundleName("");
     bundleInfo.SetBundleUid(1);
     std::string deviceType = "testDeviceType1111";
-    bool ret = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo,
+    bool ret = preferncesDB_->PutDistributedEnabledForBundle(deviceType, true, bundleInfo,
         NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     EXPECT_EQ(ret, false);
 }
@@ -3206,16 +3206,15 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedEnabledForBundle_100
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleUid(20020001);
     bundleInfo.SetBundleName("com.demo.test");
-    auto ret = preferncesDB_->PutDistributedEnabledForBundle("tablet_0", bundleInfo,
+    auto ret = preferncesDB_->PutDistributedEnabledForBundle("tablet", true, bundleInfo,
         NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     ASSERT_EQ(ret, true);
-    ret = preferncesDB_->PutDistributedEnabledForBundle("tablet_1", bundleInfo,
+    ret = preferncesDB_->PutDistributedEnabledForBundle("tablet", true, bundleInfo,
         NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     ASSERT_EQ(ret, true);
  
     NotificationDistributedBundle distributedBundle;
-    auto key = preferncesDB_->GenerateBundleLablel(bundleInfo, "tablet");
-    preferncesDB_->GetDistributedEnabledForBundle(key, 100, distributedBundle);
+    preferncesDB_->GetDistributedEnabledForBundle(bundleInfo, "tablet", distributedBundle);
     ASSERT_EQ(distributedBundle.GetLiveViewEnable(), NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     ASSERT_EQ(distributedBundle.GetNotificationEnable(), NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
 }

@@ -25,6 +25,7 @@
 #include "ians_manager.h"
 #include "notification_extension_subscription_info.h"
 #include "notification_local_live_view_subscriber.h"
+#include "notification_parameters.h"
 #include "notification_subscriber.h"
 #include "want_params.h"
 #include "distributed_bundle_option.h"
@@ -673,6 +674,17 @@ public:
         const LiveViewFilter &filter, sptr<NotificationRequest> &request);
 
     /**
+     * @brief Get notification parameters by id and label.
+     *
+     * @param notificationId Notification id.
+     * @param label Notification label.
+     * @param parameters Notification parameters to parameters.
+     * @return Returns ERR_OK on success, error code on failure.
+     */
+    ErrCode GetNotificationParameters(
+        int32_t notificationId, const std::string &label, sptr<NotificationParameters> &parameters);
+
+    /**
      * @brief Checks whether a specified application has the permission to publish notifications. If bundle specifies
      * the current application, no permission is required for calling this method. If bundle specifies another
      * application, the caller must have system permissions.
@@ -1241,6 +1253,26 @@ public:
     ErrCode SetDistributedEnabledByBundle(
         const NotificationBundleOption &bundleOption, const std::string &deviceType, const bool enabled,
         const bool isNotification = true);
+
+    /**
+     * @brief Get the bundle list whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param isNotification Indicates notification switch or liveview swtich, default is notification switch.
+     * @return Returns the bundle list for cross device collaboration.
+     */
+    ErrCode GetDistributedBundleListByType(const bool isNotification,
+        std::vector<DistributedBundleOption> &enableList);
+
+    /**
+     * @brief Get the cross device application specified information. The caller must have system
+     * permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @return Returns the detail bundle info for cross device collaboration.
+     */
+    ErrCode GetDistributedBundleInfo(const std::vector<NotificationBundleOption>& bundleOption,
+        std::vector<DistributedNotificationBundleInfo>& bundleInfoList);
 
     /**
      * @brief Sets whether to allow a specified application to publish notifications cross

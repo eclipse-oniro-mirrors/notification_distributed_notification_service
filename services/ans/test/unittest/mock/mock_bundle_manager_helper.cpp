@@ -67,12 +67,6 @@ void MockBundleManager::MockSystemBundle(bool systemBundle)
     g_systemBundle = systemBundle;
 }
 
-BundleManagerHelper::BundleManagerHelper()
-{}
-
-BundleManagerHelper::~BundleManagerHelper()
-{}
-
 void BundleManagerHelper::OnRemoteDied(const wptr<IRemoteObject> &object)
 {}
 

@@ -17,6 +17,7 @@
 
 #include "notification_config_parse.h"
 
+#include "bundle_manager_helper.h"
 #include "ans_log_wrapper.h"
 #ifdef ENABLE_ANS_ADDITIONAL_CONTROL
 #include "notification_extension_wrapper.h"
@@ -42,9 +43,14 @@ void DeviceTrigger::MockConfigScene(int32_t scene)
     g_configScene = scene;
 }
 
+BundleManagerHelper::BundleManagerHelper()
+{}
+ 
+BundleManagerHelper::~BundleManagerHelper()
+{}
+ 
 NotificationConfigParse::NotificationConfigParse()
-{
-}
+{}
 
 std::shared_ptr<NotificationAppPrivileges> NotificationConfigParse::GetAppPrivileges(
     const std::string &bundleName) const

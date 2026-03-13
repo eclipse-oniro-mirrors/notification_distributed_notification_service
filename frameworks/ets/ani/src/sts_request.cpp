@@ -141,6 +141,48 @@ bool WarpNotificationUnifiedGroupInfo(ani_env* env,
     return true;
 }
 
+bool WrapNotificationParameters(ani_env *env, const sptr<NotificationParameters> parameter, ani_object &parameterObj)
+{
+    ANS_LOGD("WrapNotificationParameters start");
+    if (env == nullptr || parameter == nullptr) {
+        ANS_LOGE("WrapNotificationParameters failed, has nullptr");
+        return false;
+    }
+
+    ani_class paramCls = nullptr;
+    if ((!CreateClassObjByClassName(env,
+        "notification.notificationRequest.NotificationParametersInner", paramCls, parameterObj))
+        || paramCls == nullptr || parameterObj == nullptr) {
+        ANS_LOGE("WrapNotificationParameters: create class failed");
+        return false;
+    }
+    // wantAction?: string;
+    if (!SetPropertyOptionalByString(env, parameterObj, "wantAction", parameter->GetWantAction())) {
+        ANS_LOGE("WrapNotificationParameters: set wantAction failed");
+        return false;
+    }
+    // wantUri?: string;
+    if (!SetPropertyOptionalByString(env, parameterObj, "wantUri", parameter->GetWantUri())) {
+        ANS_LOGE("WrapNotificationParameters: set wantUri failed");
+        return false;
+    }
+    // wantParameters?: Record<string, RecordData>;
+    std::shared_ptr<AAFwk::WantParams> wantParams = parameter->GetWantParameters();
+    if (wantParams) {
+        ani_ref valueRef = OHOS::AppExecFwk::WrapWantParams(env, *wantParams);
+        if (valueRef == nullptr) {
+            ANS_LOGE("WrapWantParams faild. 'wantParams'");
+            return false;
+        }
+        if (!SetPropertyByRef(env, parameterObj, "wantParameters", valueRef)) {
+            ANS_LOGE("WrapNotificationParameters: set wantParameters failed");
+            return false;
+        }
+    }
+    ANS_LOGD("WrapNotificationParameters end");
+    return true;
+}
+
 void GetNotificationRequestByBooleanOne(ani_env *env, ani_object obj,
     std::shared_ptr<NotificationRequest> &request)
 {
@@ -825,6 +867,33 @@ void GetNotificationFlags(ani_env *env, ani_object obj,
     request->SetFlags(flags);
 }
 
+void GetNotificationGroupInfo(ani_env *env, ani_object obj,
+    std::shared_ptr<OHOS::Notification::NotificationRequest> &request)
+{
+    ani_status status = ANI_ERROR;
+    ani_ref groupInfoRef = {};
+    ani_boolean isUndefind = ANI_TRUE;
+    status = GetPropertyRef(env, obj, "groupInfo", isUndefind, groupInfoRef);
+    if (status != ANI_OK || isUndefind == ANI_TRUE) {
+        ANS_LOGE("Cannot get the value of notificationGroupInfo. status %{public}d isUndefind %{public}d",
+            status, isUndefind);
+        return;
+    }
+    std::shared_ptr<OHOS::Notification::NotificationGroupInfo> groupInfo
+        = std::make_shared<OHOS::Notification::NotificationGroupInfo>();
+    bool isGroupIcon = false;
+    status = GetPropertyBool(env, static_cast<ani_object>(groupInfoRef), "isGroupIcon", isUndefind, isGroupIcon);
+    if (ANI_OK == status && isUndefind == ANI_FALSE) {
+        groupInfo->SetIsGroupIcon(isGroupIcon);
+    }
+    std::string groupTitle = "";
+    status = GetPropertyString(env, static_cast<ani_object>(groupInfoRef), "groupTitle", isUndefind, groupTitle);
+    if (ANI_OK == status && isUndefind == ANI_FALSE) {
+        groupInfo->SetGroupTitle(GetResizeStr(groupTitle, STR_MAX_SIZE));
+    }
+    request->SetGroupInfo(groupInfo);
+}
+
 int32_t GetNotificationRequestByCustom(ani_env *env, ani_object obj,
     std::shared_ptr<OHOS::Notification::NotificationRequest> &notificationRequest)
 {
@@ -852,6 +921,7 @@ int32_t GetNotificationRequestByCustom(ani_env *env, ani_object obj,
         return ERROR_PARAM_INVALID;
     }
     GetNotificationFlags(env, obj, notificationRequest);
+    GetNotificationGroupInfo(env, obj, notificationRequest);
     return status;
 }
 
@@ -1220,6 +1290,40 @@ bool SetRequestTrigger(ani_env *env, const OHOS::Notification::NotificationReque
     return true;
 }
 
+bool SetNotificationGroupInfo(ani_env *env, const OHOS::Notification::NotificationRequest *request, ani_object &object)
+{
+    std::shared_ptr<OHOS::Notification::NotificationGroupInfo> groupInfo = request->GetGroupInfo();
+    if (groupInfo == nullptr) {
+        ANS_LOGD("groupInfo is Undefine");
+        return false;
+    }
+    ani_object groupInfoObject;
+    ani_class groupInfoCls = nullptr;
+    if ((!CreateClassObjByClassName(env,
+        "notification.notificationRequest.GroupInfoInner", groupInfoCls, groupInfoObject))
+        || groupInfoCls == nullptr || groupInfoObject == nullptr) {
+        ANS_LOGE("SetNotificationGroupInfo: create class failed");
+        return false;
+    }
+    // isGroupIcon?: boolean;
+    if (!SetPropertyOptionalByBoolean(env, groupInfoObject, "isGroupIcon", groupInfo->GetIsGroupIcon())) {
+            ANS_LOGE("SetNotificationGroupInfo: set isGroupIcon failed");
+            return false;
+        }
+    // groupTitle?: string;
+    std::string groupTitle = groupInfo->GetGroupTitle();
+    if (!groupTitle.empty()
+        && !SetPropertyOptionalByString(env, groupInfoObject, "groupTitle", groupTitle)) {
+            ANS_LOGE("SetNotificationGroupInfo: set groupTitle failed");
+            return false;
+        }
+    if (!SetPropertyByRef(env, object, "groupInfo", groupInfoObject)) {
+        ANS_LOGE("SetNotificationRequest set 'groupInfo' failed");
+        return false;
+    }
+    return true;
+}
+
 bool SetNotificationRequestByCustom(ani_env* env, ani_class cls,
     const OHOS::Notification::NotificationRequest *request, ani_object &object)
 {
@@ -1263,6 +1367,10 @@ bool SetNotificationRequestByCustom(ani_env* env, ani_class cls,
     // trigger?: Trigger
     if (!SetRequestTrigger(env, request, object)) {
         ANS_LOGD("set trigger faild");
+    }
+    // groupInfo?: GroupInfo
+    if (!SetNotificationGroupInfo(env, request, object)) {
+        ANS_LOGD("set groupInfo faild");
     }
     return true;
 }

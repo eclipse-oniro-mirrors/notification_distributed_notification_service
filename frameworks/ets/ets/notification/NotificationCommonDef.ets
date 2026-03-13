@@ -34,3 +34,13 @@ class GrantedBundleInfoInner implements GrantedBundleInfo {
     public readonly appIndex: int = 0;
     public readonly appName?: string | undefined;
 }
+
+export interface UserGrantSetting {
+    readonly userGrantEnabled: boolean;
+    readonly grantedBundleInfos?: Array<GrantedBundleInfo>;
+}
+ 	 
+class UserGrantSettingInner implements UserGrantSetting {
+    public readonly userGrantEnabled: boolean;
+    public readonly grantedBundleInfos?: Array<GrantedBundleInfo> | undefined;
+}

@@ -366,6 +366,13 @@ ErrCode NotificationHelper::GetActiveNotificationByFilter(
     return DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotificationByFilter(filter, request);
 }
 
+ErrCode NotificationHelper::GetNotificationParameters(int32_t notificationId, const std::string &label,
+    sptr<NotificationParameters> &parameters)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationParameters(
+        notificationId, label, parameters);
+}
+
 ErrCode NotificationHelper::IsAllowedNotify(const NotificationBundleOption &bundleOption, bool &allowed)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotify(bundleOption, allowed);
@@ -641,6 +648,19 @@ ErrCode NotificationHelper::SetDistributedEnabledByBundle(const NotificationBund
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedEnabledByBundle(bundleOption,
         deviceType, enabled, isNotification);
+}
+
+ErrCode NotificationHelper::GetDistributedBundleListByType(const bool isNotification,
+    std::vector<DistributedBundleOption> &enableList)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetDistributedBundleListByType(isNotification, enableList);
+}
+
+ErrCode NotificationHelper::GetDistributedBundleInfo(const std::vector<NotificationBundleOption>& bundleOption,
+    std::vector<DistributedNotificationBundleInfo>& bundleInfoList)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetDistributedBundleInfo(bundleOption,
+        bundleInfoList);
 }
 
 ErrCode NotificationHelper::SetDistributedBundleOption(const std::vector<DistributedBundleOption> &bundles,

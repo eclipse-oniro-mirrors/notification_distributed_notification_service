@@ -16,7 +16,6 @@
 #include "gtest/gtest.h"
 
 #define private public
-
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "distributed_data_define.h"
@@ -38,7 +37,7 @@ public:
 
 void DistributedBundleServiceTest::SetUpTestCase()
 {
-    GTEST_LOG_(INFO) << "SetUp Case start";
+    GTEST_LOG_(INFO) << "SetUp case start";
     MockBundleManager::MockClearInstalledBundle();
     MockBundleManager::MockBundleInterfaceResult(0);
     GTEST_LOG_(INFO) << "SetUp end";
@@ -46,7 +45,7 @@ void DistributedBundleServiceTest::SetUpTestCase()
 
 void DistributedBundleServiceTest::TearDownTestCase()
 {
-    GTEST_LOG_(INFO) << "TearDown case";
+    GTEST_LOG_(INFO) << "TearDown test case";
 }
 
 
@@ -284,6 +283,84 @@ HWTEST_F(DistributedBundleServiceTest, DistributedBundleList_00004, Function | S
     DistributedBundleService::GetInstance().SetDeviceDistributedBundleList(
         DistributedBundleChangeType::END_DEVICE_CONNECT, {});
     ASSERT_EQ(DistributedBundleService::GetInstance().connected.load(), false);
+}
+
+/**
+ * @tc.name: Distributed bundle list check
+ * @tc.desc: Test device bundle service
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(DistributedBundleServiceTest, DistributedBundleList_00005, Function | SmallTest | Level1)
+{
+    DistributedBundleService::GetInstance().bundleList_["com.test.demo20020001"] =
+        NotificationDistributedBundle("com.test.demo", 20020001);
+    DistributedBundleService::GetInstance().bundleList_["com.test.demo20020002"] =
+        NotificationDistributedBundle("com.test.demo", 20020002);
+
+    std::vector<sptr<NotificationBundleOption>> bundleOption;
+    sptr<NotificationBundleOption> bundle0 = new NotificationBundleOption("com.test.demo", 20020000);
+    sptr<NotificationBundleOption> bundle1 = new NotificationBundleOption("com.test.demo", 20020001);
+    bundleOption.push_back(bundle0);
+    bundleOption.push_back(bundle1);
+    std::vector<DistributedNotificationBundleInfo> bundleInfoList;
+    DistributedBundleService::GetInstance().GetDistributedBundleInfo(bundleOption, bundleInfoList);
+    ASSERT_EQ(bundleInfoList.size(), 1);
+}
+ 
+/**
+ * @tc.name: Distributed bundle list check
+ * @tc.desc: Test device bundle service
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(DistributedBundleServiceTest, DistributedBundleList_00006, Function | SmallTest | Level1)
+{
+    NotificationDistributedBundle bundle1 = NotificationDistributedBundle("com.test.demo", 20020001);
+    bundle1.SetNotificationEnable(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+    NotificationDistributedBundle bundle2 = NotificationDistributedBundle("com.test.demo", 20020002);
+    bundle2.SetNotificationEnable(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    NotificationDistributedBundle bundle3 = NotificationDistributedBundle("com.test.demo", 20020003);
+    bundle3.SetNotificationEnable(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    NotificationDistributedBundle bundle4 = NotificationDistributedBundle("com.test.demo", 20020004);
+    bundle4.SetNotificationEnable(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+
+    DistributedBundleService::GetInstance().bundleList_["com.test.demo20020001"] = bundle1;
+    DistributedBundleService::GetInstance().bundleList_["com.test.demo20020002"] = bundle2;
+    DistributedBundleService::GetInstance().bundleList_["com.test.demo20020003"] = bundle3;
+    DistributedBundleService::GetInstance().bundleList_["com.test.demo20020004"] = bundle4;
+    std::vector<DistributedBundleOption> enableList;
+    DistributedBundleService::GetInstance().GetDistributedBundleListByType(true, enableList);
+    ASSERT_EQ(enableList.size(), 3);
+    DistributedBundleService::GetInstance().bundleList_.clear();
+}
+ 
+/**
+ * @tc.name: Distributed bundle list check
+ * @tc.desc: Test device bundle service
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(DistributedBundleServiceTest, DistributedBundleList_00007, Function | SmallTest | Level1)
+{
+    NotificationDistributedBundle bundle1 = NotificationDistributedBundle("com.test.demo", 20020001);
+    bundle1.SetLiveViewEnable(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+    NotificationDistributedBundle bundle2 = NotificationDistributedBundle("com.test.demo", 20020002);
+    bundle2.SetLiveViewEnable(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    NotificationDistributedBundle bundle3 = NotificationDistributedBundle("com.test.demo", 20020003);
+    bundle3.SetLiveViewEnable(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    NotificationDistributedBundle bundle4 = NotificationDistributedBundle("com.test.demo", 20020004);
+    bundle4.SetLiveViewEnable(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+
+    DistributedBundleService::GetInstance().bundleList_["com.test.demo20020001"] = bundle1;
+    DistributedBundleService::GetInstance().bundleList_["com.test.demo20020002"] = bundle2;
+    DistributedBundleService::GetInstance().bundleList_["com.test.demo20020003"] = bundle3;
+    DistributedBundleService::GetInstance().bundleList_["com.test.demo20020004"] = bundle4;
+
+    std::vector<DistributedBundleOption> enableList;
+    DistributedBundleService::GetInstance().GetDistributedBundleListByType(false, enableList);
+    ASSERT_EQ(enableList.size(), 3);
+    DistributedBundleService::GetInstance().bundleList_.clear();
 }
 }
 }

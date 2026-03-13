@@ -18,6 +18,7 @@
 
 #include "common.h"
 #include <string>
+#include "distributed_notification_bundle_info.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -26,6 +27,7 @@ struct DistributedEnableParams {
     NotificationBundleOption option;
     std::string deviceType;
     bool enable = false;
+    bool isNotification = true;
 };
 
 struct DistributedBundleOptionParams {
@@ -71,12 +73,31 @@ struct AsyncCallbackDistributedEnableBySlot {
     DistributedEnableBySlotParams params;
     CallbackPromiseInfo info;
 };
+
+struct AsyncCallbackDistributedBundleList {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    bool notification = true;
+    CallbackPromiseInfo info;
+    std::vector<DistributedBundleOption> bundleList;
+};
+
+struct AsyncCallbackDistributedBundleInfo {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    std::vector<NotificationBundleOption> bundles;
+    CallbackPromiseInfo info;
+    std::vector<DistributedNotificationBundleInfo> bundleInfoList;
+};
+
 napi_value NapiSetDistributedEnabledByBundle(napi_env env, napi_callback_info info);
 napi_value NapiSetDistributedBundleOption(napi_env env, napi_callback_info info);
 napi_value NapiSetSmartReminderEnabled(napi_env env, napi_callback_info info);
 napi_value NapiIsSmartReminderEnabled(napi_env env, napi_callback_info info);
 napi_value NapiSetDistributedEnabledBySlot(napi_env env, napi_callback_info info);
 napi_value NapiIsDistributedEnabledBySlot(napi_env env, napi_callback_info info);
+napi_value NapiGetDistributedBundleListByType(napi_env env, napi_callback_info info);
+napi_value NapiGetDistributedBundleInfo(napi_env env, napi_callback_info info);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 

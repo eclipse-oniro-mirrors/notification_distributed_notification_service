@@ -20,35 +20,24 @@
 #include <vector>
 #include <string>
 
-#ifdef PLAYER_FRAMEWORK_ENABLE
-#include "system_sound_manager.h"
-#endif
-
 #include "singleton.h"
 #include "ffrt.h"
 #include "notification_ringtone_info.h"
 
 namespace OHOS {
 namespace Notification {
-class SystemSoundHelper : public DelayedSingleton<SystemSoundHelper> {
+class SystemSoundHelper final {
 public:
+    static std::shared_ptr<SystemSoundHelper> GetInstance();
     void RemoveCustomizedTone(const std::string uri);
 
     void RemoveCustomizedTone(sptr<NotificationRingtoneInfo> ringtoneInfo);
 
     void RemoveCustomizedTones(std::vector<NotificationRingtoneInfo> ringtoneInfos);
-#ifdef PLAYER_FRAMEWORK_ENABLE
-    void Connect();
-    int32_t InvokeRemoveCustomizedTone(const std::string uri, int32_t retry);
-    std::vector<std::pair<std::string, int32_t>> InvokeRemoveCustomizedTones(
-        const std::vector<std::string> uris, bool retry = false);
-#endif
+
 private:
-    ffrt::mutex lock_;
-#ifdef PLAYER_FRAMEWORK_ENABLE
-    std::shared_ptr<Media::SystemSoundManager> systemSoundClient_ = nullptr;
-#endif
-    DECLARE_DELAYED_SINGLETON(SystemSoundHelper)
+    static ffrt::mutex instanceMutex_;
+    static std::shared_ptr<SystemSoundHelper> instance_;
 };
 }  // namespace Notification
 }  // namespace OHOS

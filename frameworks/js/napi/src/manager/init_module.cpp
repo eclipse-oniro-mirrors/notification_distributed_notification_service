@@ -28,6 +28,7 @@
 #include "napi_enable_notification.h"
 #include "napi_geofence_enabled.h"
 #include "napi_get_active.h"
+#include "napi_get_notification_parameters.h"
 #include "napi_publish.h"
 #include "napi_remove_group.h"
 #include "napi_ringtone_info_by_bundle.h"
@@ -111,6 +112,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setRingtoneInfoByBundle", NapiSetRingtoneInfoByBundle),
         DECLARE_NAPI_FUNCTION("getRingtoneInfoByBundle", NapiGetRingtoneInfoByBundle),
         DECLARE_NAPI_FUNCTION("getReminderInfoByBundles", NapiGetReminderInfoByBundles),
+        DECLARE_NAPI_FUNCTION("getNotificationParameters", NapiGetNotificationParameters),
         DECLARE_NAPI_FUNCTION("setGeofenceEnabled", NapiSetGeofenceEnabled),
         DECLARE_NAPI_FUNCTION("isGeofenceEnabled", NapiIsGeofenceEnabled),
         DECLARE_NAPI_FUNCTION("setReminderInfoByBundles", NapiSetReminderInfoByBundles),
@@ -152,6 +154,8 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isSmartReminderEnabled", NapiIsSmartReminderEnabled),
         DECLARE_NAPI_FUNCTION("setDistributedEnabled", NapiSetDistributedEnabled),
         DECLARE_NAPI_FUNCTION("getDistributedDeviceList", NapiGetDistributedDeviceList),
+        DECLARE_NAPI_FUNCTION("getDistributedBundleListByType", NapiGetDistributedBundleListByType),
+        DECLARE_NAPI_FUNCTION("getDistributedBundleInfo", NapiGetDistributedBundleInfo),
 #else
         DECLARE_NAPI_FUNCTION("isDistributedEnabled", Common::NapiReturnFalseCbNewType),
         DECLARE_NAPI_FUNCTION("setDistributedEnable", Common::NapiReturnCapErrCb),
@@ -166,6 +170,8 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isSmartReminderEnabled", Common::NapiReturnCapErr),
         DECLARE_NAPI_FUNCTION("setDistributedEnabled", Common::NapiReturnCapErr),
         DECLARE_NAPI_FUNCTION("getDistributedDeviceList", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("getDistributedBundleListByType", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("getDistributedBundleInfo", Common::NapiReturnCapErr),
 #endif
         
 #ifdef ANS_FEATURE_DISTURB_MANAGER
@@ -222,8 +228,10 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
 
 #ifdef ANS_FEATURE_OPEN_NOTIFICATION_SETTINGS
         DECLARE_NAPI_FUNCTION("openNotificationSettings", NapiOpenNotificationSettings),
+        DECLARE_NAPI_FUNCTION("openNotificationSettingsWithResult", NapiOpenNotificationSettingsWithResult),
 #else
         DECLARE_NAPI_FUNCTION("openNotificationSettings", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("openNotificationSettingsWithResult", Common::NapiReturnCapErr),
 #endif
 
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION

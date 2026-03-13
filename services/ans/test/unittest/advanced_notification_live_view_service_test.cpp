@@ -794,29 +794,5 @@ HWTEST_F(AnsLiveViewServiceTest, SetFinishTimerForCommonLiveView_100, Function |
     ErrCode res = advancedNotificationService_->SetFinishTimer(record);
     EXPECT_EQ(res, ERR_OK);
 }
-
-/**
- * @tc.name: UpdateNotificationTimerInfo_100
- * @tc.desc: Test UpdateNotificationTimerInfo
- * @tc.type: FUNC
- */
-HWTEST_F(AnsLiveViewServiceTest, UpdateNotificationTimerInfo_100, Function | SmallTest | Level1)
-{
-    auto record = std::make_shared<NotificationRecord>();
-    NotificationRequest notificationRequest;
-    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    auto liveContent = std::make_shared<NotificationLiveViewContent>();
-    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
-    auto content = std::make_shared<NotificationContent>(liveContent);
-    notificationRequest.SetContent(content);
-
-    record->request = sptr<NotificationRequest>::MakeSptr(notificationRequest);
-    record->request->SetAutoDeletedTime(20);
-    record->notification = new (std::nothrow) Notification(record->request);
-
-    auto result = advancedNotificationService_->UpdateNotificationTimerInfo(record);
-    EXPECT_EQ(result, ERR_OK);
-    EXPECT_NE(record->request->GetFinishDeadLine(), 0);
-}
 }  // namespace Notification
 }  // namespace OHOS

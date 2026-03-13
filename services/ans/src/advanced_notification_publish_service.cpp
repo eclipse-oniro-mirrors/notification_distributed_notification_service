@@ -262,7 +262,8 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
         ANS_LOGE("Failed to create notification");
         return ERR_ANS_NO_MEMORY;
     }
-    record->bundleOption = new (std::nothrow) NotificationBundleOption(request->GetCreatorBundleName(), 0);
+    record->bundleOption =
+        new (std::nothrow) NotificationBundleOption(request->GetCreatorBundleName(), request->GetCreatorUid());
     record->notification->SetKey("ans_distributed" + request->GetDistributedHashCode());
     if (CollaborateFilter(request) != ERR_OK) {
         return ERR_ANS_NOT_ALLOWED;

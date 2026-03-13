@@ -461,6 +461,18 @@ napi_value Common::SetNotificationRequestByCustomInnerThird(
         napi_set_named_property(env, result, "trigger", notificationTriggerResult);
     }
 
+    // groupInfo?: GroupInfo
+    std::shared_ptr<NotificationGroupInfo> groupInfo = request->GetGroupInfo();
+    if (groupInfo) {
+        napi_value groupInfoResult = nullptr;
+        napi_create_object(env, &groupInfoResult);
+        if (!SetNotificationGroupInfo(env, groupInfo, groupInfoResult)) {
+            ANS_LOGE("SetNotificationGroupInfo call failed");
+            return NapiGetBoolean(env, false);
+        }
+        napi_set_named_property(env, result, "groupInfo", groupInfoResult);
+    }
+
     return NapiGetBoolean(env, true);
 }
 
@@ -853,6 +865,10 @@ napi_value Common::GetNotificationRequestByCustomInnerSecond(
 
     // trigger?: Trigger
     if (GetNotificationTrigger(env, value, request) == nullptr) {
+        return nullptr;
+    }
+
+    if (GetNotificationGroupInfo(env, value, request) == nullptr) {
         return nullptr;
     }
 

@@ -41,6 +41,7 @@
 #include "notification_dialog_manager.h"
 #include "notification_do_not_disturb_profile.h"
 #include "notifictaion_load_utils.h"
+#include "notification_parameters.h"
 #include "notification_record.h"
 #include "notification_slot_filter.h"
 #include "notification_sorting_map.h"
@@ -399,6 +400,17 @@ public:
     ErrCode GetActiveNotificationByFilter(
         const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label,
         int32_t userId, const std::vector<std::string> &extraInfoKeys, sptr<NotificationRequest> &request) override;
+
+    /**
+     * @brief Get notification parameters by id and label.
+     *
+     * @param notificationId Notification id.
+     * @param label Notification label.
+     * @param parameters Notification parameters to return.
+     * @return Returns ERR_OK on success, error code on failure.
+     */
+    ErrCode GetNotificationParameters(
+        int32_t notificationId, const std::string &label, sptr<NotificationParameters> &parameters) override;
 
     /**
      * @brief Checks whether your application has permission to publish notifications by calling
@@ -1235,6 +1247,26 @@ public:
      */
     ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
         const std::string &deviceType, const bool enabled, const bool isNotification) override;
+
+    /**
+     * @brief Get the bundle list whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param isNotification Indicates notification switch or liveview swtich, default is notification switch.
+     * @return Returns the bundle list for cross device collaboration.
+     */
+    ErrCode GetDistributedBundleListByType(const bool isNotification,
+        std::vector<DistributedBundleOption> &enableList) override;
+
+    /**
+     * @brief Get the cross device application specified information. The caller must have system
+     * permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @return Returns the detail bundle info for cross device collaboration.
+     */
+    ErrCode GetDistributedBundleInfo(const std::vector<sptr<NotificationBundleOption>>& bundleOption,
+        std::vector<DistributedNotificationBundleInfo>& bundleInfoList) override;
 
     /**
      * @brief Sets whether to allow a specified application to publish notifications cross
@@ -2344,6 +2376,8 @@ private:
         const NotificationConstant::DistributedDeleteType& deleteType);
     ErrCode RemoveDistributedNotificationsByDeviceId(const std::string& deviceId,
         const int32_t removeReason);
+    void RemoveDistributedNotificationsByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const bool& notification);
     ErrCode RemoveAllDistributedNotifications(const int32_t removeReason);
     bool ExecuteDeleteDistributedNotification(std::shared_ptr<NotificationRecord>& record,
         std::vector<sptr<Notification>>& notifications, const int32_t removeReason);
@@ -2465,6 +2499,10 @@ private:
         std::map<sptr<NotificationBundleOption>, T> &validMap);
     ErrCode GetValidBundles(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
         std::vector<sptr<NotificationBundleOption>> &validBundleOptions);
+    ErrCode QueryNotificationParameters(int32_t notificationId, const std::string &label,
+        const sptr<NotificationBundleOption> &bundleOption, sptr<NotificationParameters> &parameters);
+    ErrCode ExtractWantAgentInfo(
+        const std::shared_ptr<NotificationRecord> record, sptr<NotificationParameters> &parameters);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;

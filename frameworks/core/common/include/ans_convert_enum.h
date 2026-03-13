@@ -170,6 +170,11 @@ enum class SubscribeType {
     BLUETOOTH = 0
 };
 
+enum class NotificationType {
+    NOTIFICATION = 0,
+    LIVE_VIEW = 1,
+};
+
 class AnsEnumUtil {
 public:
     /**

@@ -100,7 +100,7 @@ public:
      * @param enabled Indicates to whether to enabled
      * @return Return true on success, false on failure.
      */
-    bool PutDistributedEnabledForBundle(const std::string deviceType,
+    bool PutDistributedEnabledForBundle(const std::string deviceType, const bool& isNotification,
         const NotificationPreferencesInfo::BundleInfo &bundleInfo, const NotificationConstant::SWITCH_STATE& enabled);
 
     /**
@@ -447,6 +447,7 @@ public:
         int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
     bool GetDoNotDisturbProfiles(
         const std::string &key, sptr<NotificationDoNotDisturbProfile> &profile, const int32_t &userId);
+    void GetDistributedRemoveEnabledDb(const std::string& key, const int32_t& userId, std::vector<std::string>& keys);
     bool RemoveEnabledDbByBundleName(std::string bundleName, const int32_t &bundleUid);
     int32_t SetKvToDb(const std::string &key, const std::string &value, const int32_t &userId);
     int32_t SetByteToDb(const std::string &key, const std::vector<uint8_t> &value, const int32_t &userId);
@@ -544,8 +545,8 @@ public:
         const std::unordered_map<std::string, std::string> &values,
         std::vector<NotificationDistributedBundle>& bundles);
  
-    void GetDistributedEnabledForBundle(const std::string& key, const int32_t &userId,
-        NotificationDistributedBundle& distributedBundle);
+    void GetDistributedEnabledForBundle(const NotificationPreferencesInfo::BundleInfo& bundleInfo,
+        const std::string& deviceType, NotificationDistributedBundle& distributedBundle);
     void GetDistributedEnabledForClone(const int32_t &userId, std::vector<NotificationCloneBundleInfo> &cloneBundles);
 
     /**
@@ -701,6 +702,8 @@ private:
         const std::string &deviceType, const int32_t userId) const;
     std::string GenerateBundleLablel(
         const std::string &deviceType, const std::string &deviceId, const int32_t userId) const;
+    std::string GenerateLiveViewBundleLabel(
+        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &deviceType) const;
     std::string GenerateSilentReminderKey(
         const NotificationPreferencesInfo::SilentReminderInfo &silentReminderInfo) const;
     void GetDoNotDisturbType(NotificationPreferencesInfo &info, int32_t userId);

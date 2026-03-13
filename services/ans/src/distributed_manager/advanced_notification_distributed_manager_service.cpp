@@ -726,6 +726,9 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledForCollaboration(
     if (result == ERR_OK) {
         DistributedBundleService::GetInstance().HandleLocalSwitchEvent(type, bundleOption->GetBundleName(),
             bundleOption->GetUid(), enabled);
+        if (!enabled) {
+            RemoveDistributedNotificationsByBundle(bundleOption, isNotification);
+        }
     }
 #else
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
@@ -788,6 +791,50 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
     NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_13));
 
     return result;
+}
+
+ErrCode AdvancedNotificationService::GetDistributedBundleListByType(const bool isNotification,
+    std::vector<DistributedBundleOption> &enableList)
+{
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("IsSystemApp is false.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission Denied.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+#ifdef ALL_SCENARIO_COLLABORATION
+    DistributedBundleService::GetInstance().GetDistributedBundleListByType(isNotification, enableList);
+#endif
+    return ERR_OK;
+}
+ 
+ErrCode AdvancedNotificationService::GetDistributedBundleInfo(
+    const std::vector<sptr<NotificationBundleOption>>& bundleOption,
+    std::vector<DistributedNotificationBundleInfo>& bundleInfoList)
+{
+    if (bundleOption.empty()) {
+        ANS_LOGE("BundleOption is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("IsSystemApp is false.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission Denied.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+#ifdef ALL_SCENARIO_COLLABORATION
+    DistributedBundleService::GetInstance().GetDistributedBundleInfo(bundleOption, bundleInfoList);
+#endif
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::SetDistributedBundleOption(

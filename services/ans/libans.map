@@ -13,46 +13,6 @@
 
 1.0 {
   global:
-    *AddRecordInfo*;
-    *AddSlots*;
-    *BundleInfo*;
-    *BundleManagerHelper*;
-    *Cancel*;
-    *CheckApiCompatibility*;
-    *CheckBundle*;
-    *CheckPermission*;
-    *Connect*;
-    *CreateSubscriberRecord*;
-    *Delete*;
-    *Destroy*;
-    *Disconnect*;
-    *FindLastString*;
-    *GetBundle*;
-    *GetDefaultUidByBundleName*;
-    *GetDoNotDisturb*;
-    *GetInstance*;
-    *GetShowBadgeEnabledForBundle*;
-    *GetSlotsByBundle*;
-    *GetValueFromDisturbeDB*;
-    *Init*;
-    *Insert*Data*;
-    *IsAllowedNotify*;
-    *IsSystemApp*;
-    *Notification*;
-    *Notify*;
-    *OnRemoteDied*;
-    *Parse*DistureDB*;
-    *Publish*;
-    *Put*;
-    *Query*;
-    *Remove*;
-    *SetShowBadgeEnabledForBundle*;
-    *SlotToEntry*;
-    *StringToInt*;
-    *Subscribe*;
-    *UpdateSlots*;
-    *VerifyShellToken*;
-    *GetAdditionalConfig*;
     *SetKvToDb*;
     *GetKvFromDb*;
     *GetNotificationSlotFlagsForBundle*;

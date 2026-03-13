@@ -23,6 +23,16 @@ import { WantAgent } from '@ohos.app.ability.wantAgent';
 import { BundleOption } from 'notification.NotificationCommonDef';
 import { RecordData } from '@ohos.base';
 
+export interface GroupInfo {
+    isGroupIcon?: boolean;
+    groupTitle?: string;
+}
+
+class GroupInfoInner implements GroupInfo {
+    public isGroupIcon?: boolean | undefined;
+    public groupTitle?: string | undefined;
+}
+
 export interface DistributedOptions {
     isDistributed?: boolean;
     supportDisplayDevices?: Array<string>;
@@ -76,6 +86,18 @@ class UnifiedGroupInfoInner implements UnifiedGroupInfo {
     public content?: string | undefined;
     public sceneName?: string | undefined;
     public extraInfo?: Record<string, RecordData> | undefined;
+}
+
+export interface NotificationParameters {
+    wantAction?: string;
+    wantUri?: string;
+    wantParameters?: Record<string, RecordData>;
+}
+
+class NotificationParametersInner implements NotificationParameters {
+    public wantAction?: string | undefined;
+    public wantUri?: string | undefined;
+    public wantParameters?: Record<string, RecordData> | undefined;
 }
 
 export enum MonitorEvent {
@@ -174,6 +196,7 @@ export interface NotificationRequest {
     readonly appInstanceKey?: string;
     forceDistributed?: boolean;
     notDistributed?: boolean;
+    groupInfo?: GroupInfo;
 }
 
 class NotificationRequestInner implements NotificationRequest {
@@ -228,4 +251,5 @@ class NotificationRequestInner implements NotificationRequest {
     public readonly appInstanceKey?: string | undefined;
     public forceDistributed?: boolean | undefined;
     public notDistributed?: boolean | undefined;
+    public groupInfo?: GroupInfo | undefined;
 }

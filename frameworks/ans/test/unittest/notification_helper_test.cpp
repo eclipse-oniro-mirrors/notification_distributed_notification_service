@@ -1083,6 +1083,21 @@ HWTEST_F(NotificationHelperTest, GetActiveNotificationByFilter_00001, Function |
 }
 
 /**
+ * @tc.name: GetNotificationParameters_100
+ * @tc.desc: Test GetNotificationParameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, GetNotificationParameters_100, Function | SmallTest | Level1)
+{
+    int32_t notificationId = 0;
+    std::string label = "";
+    sptr<NotificationParameters> parameters = nullptr;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.GetNotificationParameters(notificationId, label, parameters);
+    EXPECT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
  * @tc.name: SetSmartReminderEnabled_0100
  * @tc.desc: test SetSmartReminderEnabled with parameters
  * @tc.type: FUNC

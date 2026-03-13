@@ -24,6 +24,7 @@
 #include "notification_flags.h"
 #include "notification_helper.h"
 #include "notification_local_live_view_button.h"
+#include "notification_parameters.h"
 #include "notification_progress.h"
 #include "notification_time.h"
 #include "ans_convert_enum.h"
@@ -638,6 +639,17 @@ public:
      * @return Returns the null object if success, returns the null value otherwise
      */
     static napi_value GetNotificationFlags(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
+
+    /**
+     * @brief Gets the NotificationGroupInfo of NotificationRequest object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param request Indicates a NotificationRequest object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationGroupInfo(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
 
     /**
@@ -1807,6 +1819,17 @@ public:
         const napi_env &env, const std::shared_ptr<NotificationFlags> &flags, napi_value &result);
 
     /**
+     * @brief Sets a js object by specified NotificationGroupInfo object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param info Indicates a NotificationGroupInfo object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetNotificationGroupInfo(
+        const napi_env &env, const std::shared_ptr<NotificationGroupInfo> &info, napi_value &result);
+
+    /**
      * @brief Sets a js object by specified NotificationUnifiedGroupInfo object
      *
      * @param env Indicates the environment that the API is invoked under
@@ -1957,6 +1980,17 @@ public:
     static napi_value SetDoNotDisturbProfile(
         const napi_env &env, const NotificationDoNotDisturbProfile &data, napi_value &result);
 
+    /**
+     * @brief Sets a js object by specified NotificationParameters object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param parameters Indicates a NotificationParameters object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the NotificationParameters object
+     */
+    static napi_value SetNotificationParameters(
+        const napi_env &env, const sptr<NotificationParameters> parameters, napi_value &result);
+
     static napi_value SetBundleOption(
         const napi_env &env, const NotificationBundleOption &bundleInfo, napi_value &result);
     static bool IsValidRemoveReason(int32_t reasonType);
@@ -2003,6 +2037,7 @@ public:
     static napi_value SetGrantedBundleInfo(const napi_env &env, const NotificationBundleOption &bundleInfo,
         napi_value &result);
     static int32_t GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id);
+    static napi_value SetNotificationSettings(const napi_env &env, uint32_t slotFlags, napi_value &result);
 private:
     static const int32_t ARGS_ONE = 1;
     static const int32_t ARGS_TWO = 2;

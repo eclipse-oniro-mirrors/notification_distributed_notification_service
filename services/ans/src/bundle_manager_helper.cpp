@@ -45,13 +45,13 @@ BundleManagerHelper::~BundleManagerHelper()
     Disconnect();
 }
 
-void BundleManagerHelper::OnRemoteDied(const wptr<IRemoteObject> &object)
+void __attribute__((weak)) BundleManagerHelper::OnRemoteDied(const wptr<IRemoteObject> &object)
 {
     std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Disconnect();
 }
 
-std::string BundleManagerHelper::GetBundleNameByUid(int32_t uid)
+std::string __attribute__((weak)) BundleManagerHelper::GetBundleNameByUid(int32_t uid)
 {
     std::string bundle;
 
@@ -67,7 +67,7 @@ std::string BundleManagerHelper::GetBundleNameByUid(int32_t uid)
 
     return bundle;
 }
-bool BundleManagerHelper::IsSystemApp(int32_t uid)
+bool __attribute__((weak)) BundleManagerHelper::IsSystemApp(int32_t uid)
 {
     bool isSystemApp = false;
 
@@ -82,8 +82,8 @@ bool BundleManagerHelper::IsSystemApp(int32_t uid)
     return isSystemApp;
 }
 
-ErrCode BundleManagerHelper::GetAllBundleOption(std::vector<NotificationBundleOption>& bundleOptions,
-    int32_t userId)
+ErrCode __attribute__((weak)) BundleManagerHelper::GetAllBundleOption(
+    std::vector<NotificationBundleOption>& bundleOptions, int32_t userId)
 {
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     {
@@ -117,8 +117,8 @@ ErrCode BundleManagerHelper::GetAllBundleOption(std::vector<NotificationBundleOp
     return ERR_OK;
 }
 
-ErrCode BundleManagerHelper::GetAllBundleInfo(std::map<std::string, sptr<NotificationBundleOption>>& bundleOptions,
-    int32_t userId)
+ErrCode __attribute__((weak)) BundleManagerHelper::GetAllBundleInfo(
+    std::map<std::string, sptr<NotificationBundleOption>>& bundleOptions, int32_t userId)
 {
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     {
@@ -162,7 +162,8 @@ ErrCode BundleManagerHelper::GetAllBundleInfo(std::map<std::string, sptr<Notific
     return ERR_OK;
 }
 
-bool BundleManagerHelper::CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption)
+bool __attribute__((weak)) BundleManagerHelper::CheckApiCompatibility(
+    const sptr<NotificationBundleOption> &bundleOption)
 {
     if (bundleOption == nullptr) {
         ANS_LOGE("bundleOption is nullptr");
@@ -171,7 +172,8 @@ bool BundleManagerHelper::CheckApiCompatibility(const sptr<NotificationBundleOpt
     return CheckApiCompatibility(bundleOption->GetBundleName(), bundleOption->GetUid());
 }
 
-bool BundleManagerHelper::CheckApiCompatibility(const std::string &bundleName, const int32_t &uid)
+bool __attribute__((weak)) BundleManagerHelper::CheckApiCompatibility(
+    const std::string &bundleName, const int32_t &uid)
 {
 #ifdef ANS_DISABLE_FA_MODEL
     return false;
@@ -193,7 +195,7 @@ bool BundleManagerHelper::CheckApiCompatibility(const std::string &bundleName, c
     return true;
 }
 
-bool BundleManagerHelper::GetBundleInfoByBundleName(
+bool __attribute__((weak)) BundleManagerHelper::GetBundleInfoByBundleName(
     const std::string bundle, const int32_t userId, AppExecFwk::BundleInfo &bundleInfo)
 {
     std::lock_guard<ffrt::mutex> lock(connectionMutex_);
@@ -209,7 +211,7 @@ bool BundleManagerHelper::GetBundleInfoByBundleName(
     return ret;
 }
 
-void BundleManagerHelper::Connect()
+void __attribute__((weak)) BundleManagerHelper::Connect()
 {
     if (bundleMgr_ != nullptr) {
         return;
@@ -232,7 +234,7 @@ void BundleManagerHelper::Connect()
     }
 }
 
-void BundleManagerHelper::Disconnect()
+void __attribute__((weak)) BundleManagerHelper::Disconnect()
 {
     if (bundleMgr_ != nullptr) {
         bundleMgr_->AsObject()->RemoveDeathRecipient(deathRecipient_);
@@ -240,7 +242,8 @@ void BundleManagerHelper::Disconnect()
     }
 }
 
-int32_t BundleManagerHelper::GetDefaultUidByBundleName(const std::string &bundle, const int32_t userId)
+int32_t __attribute__((weak)) BundleManagerHelper::GetDefaultUidByBundleName(
+    const std::string &bundle, const int32_t userId)
 {
     int32_t uid = -1;
 
@@ -261,7 +264,8 @@ int32_t BundleManagerHelper::GetDefaultUidByBundleName(const std::string &bundle
 }
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-bool BundleManagerHelper::GetDistributedNotificationEnabled(const std::string &bundleName, const int32_t userId)
+bool __attribute__((weak)) BundleManagerHelper::GetDistributedNotificationEnabled(
+    const std::string &bundleName, const int32_t userId)
 {
     std::lock_guard<ffrt::mutex> lock(connectionMutex_);
 
@@ -281,8 +285,8 @@ bool BundleManagerHelper::GetDistributedNotificationEnabled(const std::string &b
 }
 #endif
 
-bool BundleManagerHelper::GetBundleInfo(const std::string &bundleName, const AppExecFwk::BundleFlag flag,
-    int32_t userId, AppExecFwk::BundleInfo &bundleInfo)
+bool __attribute__((weak)) BundleManagerHelper::GetBundleInfo(const std::string &bundleName,
+    const AppExecFwk::BundleFlag flag, int32_t userId, AppExecFwk::BundleInfo &bundleInfo)
 {
     std::lock_guard<ffrt::mutex> lock(connectionMutex_);
 
@@ -299,7 +303,7 @@ bool BundleManagerHelper::GetBundleInfo(const std::string &bundleName, const App
     return ret;
 }
 
-bool BundleManagerHelper::GetBundleInfos(
+bool __attribute__((weak)) BundleManagerHelper::GetBundleInfos(
     const AppExecFwk::BundleFlag flag, std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId)
 {
     std::lock_guard<ffrt::mutex> lock(connectionMutex_);
@@ -315,7 +319,7 @@ bool BundleManagerHelper::GetBundleInfos(
     return ret;
 }
 
-int32_t BundleManagerHelper::GetAppIndexByUid(const int32_t uid)
+int32_t __attribute__((weak)) BundleManagerHelper::GetAppIndexByUid(const int32_t uid)
 {
     int32_t appIndex = 0;
     std::lock_guard<ffrt::mutex> lock(connectionMutex_);
@@ -330,8 +334,8 @@ int32_t BundleManagerHelper::GetAppIndexByUid(const int32_t uid)
     return appIndex;
 }
 
-int32_t BundleManagerHelper::GetDefaultUidByBundleName(const std::string &bundle, const int32_t userId,
-    const int32_t appIndex)
+int32_t __attribute__((weak)) BundleManagerHelper::GetDefaultUidByBundleName(
+    const std::string &bundle, const int32_t userId, const int32_t appIndex)
 {
     int32_t uid = -1;
     std::lock_guard<ffrt::mutex> lock(connectionMutex_);
@@ -347,7 +351,7 @@ int32_t BundleManagerHelper::GetDefaultUidByBundleName(const std::string &bundle
     return uid;
 }
 
-bool BundleManagerHelper::GetBundleInfoV9(
+bool __attribute__((weak)) BundleManagerHelper::GetBundleInfoV9(
     const std::string bundle, const int32_t flag,
     AppExecFwk::BundleInfo &bundleInfo, const int32_t userId)
 {
@@ -368,7 +372,8 @@ bool BundleManagerHelper::GetBundleInfoV9(
     return true;
 }
 
-ErrCode BundleManagerHelper::GetApplicationInfo(const std::string &bundleName, int32_t flags, int32_t userId,
+ErrCode __attribute__((weak)) BundleManagerHelper::GetApplicationInfo(
+    const std::string &bundleName, int32_t flags, int32_t userId,
     AppExecFwk::ApplicationInfo &appInfo)
 {
     ErrCode result = 0;
@@ -385,7 +390,7 @@ ErrCode BundleManagerHelper::GetApplicationInfo(const std::string &bundleName, i
     return result;
 }
 
-bool BundleManagerHelper::CheckSystemApp(const std::string& bundleName, int32_t userId)
+bool __attribute__((weak)) BundleManagerHelper::CheckSystemApp(const std::string& bundleName, int32_t userId)
 {
     if (userId == SUBSCRIBE_USER_INIT) {
         OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
@@ -402,7 +407,7 @@ bool BundleManagerHelper::CheckSystemApp(const std::string& bundleName, int32_t 
     return bundleInfo.applicationInfo.isSystemApp;
 }
 
-ErrCode BundleManagerHelper::GetBundleResourceInfo(const std::string &bundleName,
+ErrCode __attribute__((weak)) BundleManagerHelper::GetBundleResourceInfo(const std::string &bundleName,
     AppExecFwk::BundleResourceInfo &bundleResourceInfo, const int32_t appIndex)
 {
     ErrCode result = 0;
@@ -426,8 +431,8 @@ ErrCode BundleManagerHelper::GetBundleResourceInfo(const std::string &bundleName
     return result;
 }
 
-bool BundleManagerHelper::QueryExtensionInfos(std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos,
-    int32_t userId)
+bool __attribute__((weak)) BundleManagerHelper::QueryExtensionInfos(
+    std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos, int32_t userId)
 {
     std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Connect();
@@ -442,7 +447,8 @@ bool BundleManagerHelper::QueryExtensionInfos(std::vector<AppExecFwk::ExtensionA
     return true;
 }
 
-bool BundleManagerHelper::CheckBundleImplExtensionAbility(const sptr<NotificationBundleOption> &bundleOption)
+bool __attribute__((weak)) BundleManagerHelper::CheckBundleImplExtensionAbility(
+    const sptr<NotificationBundleOption> &bundleOption)
 {
     int32_t userId = -1;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
@@ -472,7 +478,8 @@ bool BundleManagerHelper::CheckBundleImplExtensionAbility(const sptr<Notificatio
     return false;
 }
 
-bool BundleManagerHelper::CheckCurrentUserIdApp(const std::string &bundleName, const int32_t uid, const int32_t userId)
+bool __attribute__((weak)) BundleManagerHelper::CheckCurrentUserIdApp(
+    const std::string &bundleName, const int32_t uid, const int32_t userId)
 {
     AppExecFwk::BundleInfo bundleInfo;
     int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
@@ -484,7 +491,7 @@ bool BundleManagerHelper::CheckCurrentUserIdApp(const std::string &bundleName, c
     return bundleInfo.uid == uid;
 }
 
-bool BundleManagerHelper::IsAncoApp(const std::string &bundleName, int32_t uid)
+bool __attribute__((weak)) BundleManagerHelper::IsAncoApp(const std::string &bundleName, int32_t uid)
 {
     int32_t userId = -1;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
@@ -503,7 +510,7 @@ bool BundleManagerHelper::IsAncoApp(const std::string &bundleName, int32_t uid)
     return bundleInfo.applicationInfo.codePath == std::to_string(APP_TYPE_ONE);
 }
 
-bool BundleManagerHelper::GetCloneAppIndexes(
+bool __attribute__((weak)) BundleManagerHelper::GetCloneAppIndexes(
     const std::string& bundleName, std::vector<int32_t>& appIndexes, int32_t userId)
 {
     ErrCode result = 0;
@@ -526,7 +533,7 @@ bool BundleManagerHelper::GetCloneAppIndexes(
     return true;
 }
 
-bool BundleManagerHelper::GetCloneBundleInfo(
+bool __attribute__((weak)) BundleManagerHelper::GetCloneBundleInfo(
     const std::string& bundleName, int32_t flag, int32_t appIndex, AppExecFwk::BundleInfo& bundleInfo, int32_t userId)
 {
     ErrCode result = 0;
@@ -549,14 +556,15 @@ bool BundleManagerHelper::GetCloneBundleInfo(
     return true;
 }
 
-std::string BundleManagerHelper::GetBundleLabel(const std::string& bundleName)
+std::string __attribute__((weak)) BundleManagerHelper::GetBundleLabel(const std::string& bundleName)
 {
     AppExecFwk::BundleResourceInfo bundleResourceInfo = {};
     int32_t result = GetBundleResourceInfo(bundleName, bundleResourceInfo, 0);
     return bundleResourceInfo.label;
 }
 
-bool BundleManagerHelper::IsAtomicServiceByBundle(const std::string& bundleName, const int32_t userId)
+bool __attribute__((weak)) BundleManagerHelper::IsAtomicServiceByBundle(
+    const std::string& bundleName, const int32_t userId)
 {
     auto flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
     AppExecFwk::BundleInfo bundleInfo;

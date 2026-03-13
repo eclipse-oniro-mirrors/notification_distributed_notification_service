@@ -746,6 +746,79 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDistributedEnabledByBundle_2
 }
 
 /**
+ * @tc.name: GetDistributedBundleListByType_100
+ * @tc.desc: Test GetDistributedBundleListByType when caller has invalid parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedBundleListByType_100, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    std::vector<DistributedBundleOption> enableList;
+    auto ret = advancedNotificationService_->GetDistributedBundleListByType(true, enableList);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    ret = advancedNotificationService_->GetDistributedBundleListByType(true, enableList);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+
+    MockIsSystemApp(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    ret = advancedNotificationService_->GetDistributedBundleListByType(true, enableList);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    ret = advancedNotificationService_->GetDistributedBundleListByType(true, enableList);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+
+    MockIsVerfyPermisson(true);
+    ret = advancedNotificationService_->GetDistributedBundleListByType(true, enableList);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+ 
+/**
+ * @tc.name: GetDistributedBundleInfo_100
+ * @tc.desc: Test GetDistributedBundleInfo when caller has invalid parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedBundleInfo_100, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(false);
+    std::vector<sptr<NotificationBundleOption>> bundleOption;
+    std::vector<DistributedNotificationBundleInfo> bundleInfoList;
+    auto ret = advancedNotificationService_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("com.test.demo", 20020001);
+    bundleOption.push_back(bundle);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    std::vector<DistributedBundleOption> enableList;
+    ret = advancedNotificationService_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    ret = advancedNotificationService_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+
+    MockIsSystemApp(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    ret = advancedNotificationService_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    ret = advancedNotificationService_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+
+    MockIsVerfyPermisson(true);
+    ret = advancedNotificationService_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
  * @tc.name: SetDistributedEnabled_100
  * @tc.desc: Test SetDistributedEnabled when caller is not subsystem or system app.
  * @tc.type: FUNC

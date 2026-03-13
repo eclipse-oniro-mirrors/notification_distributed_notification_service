@@ -22,14 +22,15 @@ namespace OHOS {
 namespace Notification {
 
 constexpr int32_t MAIN_USER_ID = 100;
-int32_t NotificationCloneUtil::GetActiveUserId()
+int32_t __attribute__((weak)) NotificationCloneUtil::GetActiveUserId()
 {
     int32_t userId = MAIN_USER_ID;
     OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     return userId;
 }
 
-int32_t NotificationCloneUtil::GetBundleUid(const std::string bundleName, int32_t userId, int32_t appIndex)
+int32_t __attribute__((weak)) NotificationCloneUtil::GetBundleUid(
+    const std::string bundleName, int32_t userId, int32_t appIndex)
 {
     if (appIndex == -1) {
         return BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, userId);
