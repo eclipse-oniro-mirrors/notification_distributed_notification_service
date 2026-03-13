@@ -3216,66 +3216,122 @@ HWTEST_F(AnsPublishServiceTest, CollaborateFilter_00002, Function | SmallTest | 
 }
 
 /**
- * @tc.name: IsEnableNotificationByKioskAppTrustList_001
- * @tc.desc: Test IsEnableNotificationByKioskAppTrustList
+ * @tc.name: IsExistRestrictedModeTrustList_001
+ * @tc.desc: Test IsExistRestrictedModeTrustList
  * @tc.type: FUNC
  */
-HWTEST_F(AnsPublishServiceTest, IsEnableNotificationByKioskAppTrustList_001, Function | SmallTest | Level1)
+HWTEST_F(AnsPublishServiceTest, IsExistRestrictedModeTrustList_001, Function | SmallTest | Level1)
 {
     std::string bundleName = "";
-    bool result = advancedNotificationService_->IsEnableNotificationByKioskAppTrustList(bundleName);
+    int32_t userId = 0;
+    bool result = advancedNotificationService_->IsExistRestrictedModeTrustList(bundleName, userId);
     EXPECT_FALSE(result);
     bundleName = "com.test.example";
     NotificationPreferences::GetInstance()->preferencesInfo_.kioskAppTrustList_.emplace_back(bundleName);
-    result = advancedNotificationService_->IsEnableNotificationByKioskAppTrustList(bundleName);
+    result = advancedNotificationService_->IsExistRestrictedModeTrustList(bundleName, userId);
     EXPECT_TRUE(result);
 }
-
+ 
 /**
- * @tc.name: IsDisableNotificationByKiosk_001
- * @tc.desc: Test IsDisableNotificationByKiosk
+ * @tc.name: IsExistRestrictedModeTrustList_002
+ * @tc.desc: Test IsExistRestrictedModeTrustList
  * @tc.type: FUNC
  */
-HWTEST_F(AnsPublishServiceTest, IsDisableNotificationByKiosk_001, Function | SmallTest | Level1)
+HWTEST_F(AnsPublishServiceTest, IsExistRestrictedModeTrustList_002, Function | SmallTest | Level1)
+{
+    int32_t userId = 100;
+    std::string bundleName = "com.test.example";
+    NotificationPreferences::GetInstance()->preferencesInfo_.restrictedModeTrustList_.clear();
+    bool result = advancedNotificationService_->IsExistRestrictedModeTrustList(bundleName, userId);
+    EXPECT_FALSE(result);
+    std::vector<std::string> bundleList = {bundleName};
+    NotificationPreferences::GetInstance()->preferencesInfo_.restrictedModeTrustList_[userId] = bundleList;
+    result = advancedNotificationService_->IsExistRestrictedModeTrustList(bundleName, userId);
+    EXPECT_TRUE(result);
+    bundleName = "com.test.example1";
+    result = advancedNotificationService_->IsExistRestrictedModeTrustList(bundleName, userId);
+    EXPECT_FALSE(result);
+}
+ 
+/**
+ * @tc.name: IsDisableNotificationByRestrictedMode_001
+ * @tc.desc: Test IsDisableNotificationByRestrictedMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsDisableNotificationByRestrictedMode_001, Function | SmallTest | Level1)
 {
     std::string bundleName = "";
-    bool result = advancedNotificationService_->IsDisableNotificationByKiosk(bundleName);
+    int32_t userId = 0;
+    bool result = advancedNotificationService_->IsDisableNotificationByRestrictedMode(bundleName, userId);
     EXPECT_FALSE(result);
     NotificationPreferences::GetInstance()->SetKioskModeStatus(true);
-    result = advancedNotificationService_->IsDisableNotificationByKiosk(bundleName);
+    result = advancedNotificationService_->IsDisableNotificationByRestrictedMode(bundleName, userId);
     EXPECT_TRUE(result);
     bundleName = "com.test.example";
     NotificationPreferences::GetInstance()->preferencesInfo_.kioskAppTrustList_.emplace_back(bundleName);
-    result = advancedNotificationService_->IsDisableNotificationByKiosk(bundleName);
+    result = advancedNotificationService_->IsDisableNotificationByRestrictedMode(bundleName, userId);
     EXPECT_FALSE(result);
 }
-
+ 
 /**
- * @tc.name: IsDisableNotificationForSaByKiosk_001
- * @tc.desc: Test IsDisableNotificationForSaByKiosk
+ * @tc.name: IsDisableNotificationByRestrictedMode_002
+ * @tc.desc: Test IsDisableNotificationByRestrictedMode
  * @tc.type: FUNC
  */
-HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByKiosk_001, Function | SmallTest | Level1)
+HWTEST_F(AnsPublishServiceTest, IsDisableNotificationByRestrictedMode_002, Function | SmallTest | Level1)
 {
     std::string bundleName = "com.test.example";
-    EXPECT_FALSE(advancedNotificationService_->IsDisableNotificationForSaByKiosk(bundleName, true));
-
-    bundleName = "";
-    EXPECT_FALSE(advancedNotificationService_->IsDisableNotificationForSaByKiosk(bundleName, false));
+    int32_t userId = 100;
+    std::vector<std::string> bundleList = {bundleName};
+    NotificationPreferences::GetInstance()->preferencesInfo_.restrictedModeTrustList_[userId] = bundleList;
+    bool result = advancedNotificationService_->IsDisableNotificationByRestrictedMode(bundleName, userId);
+    EXPECT_FALSE(result);
 }
-
+ 
 /**
- * @tc.name: IsDisableNotificationForSaByKiosk_002
- * @tc.desc: Test IsDisableNotificationForSaByKiosk
+ * @tc.name: IsDisableNotificationForSaByRestrictedMode_001
+ * @tc.desc: Test IsDisableNotificationForSaByRestrictedMode
  * @tc.type: FUNC
  */
-HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByKiosk_002, Function | SmallTest | Level1)
+HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByRestrictedMode_001, Function | SmallTest | Level1)
 {
+    int32_t userId = 0;
+    std::string bundleName = "com.test.example";
+    EXPECT_FALSE(advancedNotificationService_->IsDisableNotificationForSaByRestrictedMode(bundleName, userId, true));
+ 
+    bundleName = "";
+    EXPECT_FALSE(advancedNotificationService_->IsDisableNotificationForSaByRestrictedMode(bundleName, userId, false));
+}
+ 
+/**
+ * @tc.name: IsDisableNotificationForSaByRestrictedMode_002
+ * @tc.desc: Test IsDisableNotificationForSaByRestrictedMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByRestrictedMode_002, Function | SmallTest | Level1)
+{
+    int32_t userId = 0;
     std::string bundleName = "com.test.example";
     NotificationPreferences::GetInstance()->isKioskMode_ = true;
     NotificationPreferences::GetInstance()->preferencesInfo_.kioskAppTrustList_.clear();
-
-    EXPECT_TRUE(advancedNotificationService_->IsDisableNotificationForSaByKiosk(bundleName, false));
+ 
+    EXPECT_TRUE(advancedNotificationService_->IsDisableNotificationForSaByRestrictedMode(bundleName, userId, false));
+}
+ 
+/**
+ * @tc.name: IsDisableNotificationForSaByRestrictedMode_003
+ * @tc.desc: Test IsDisableNotificationForSaByRestrictedMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByRestrictedMode_003, Function | SmallTest | Level1)
+{
+    int32_t userId = 100;
+    std::string bundleName = "com.test.example";
+    std::vector<std::string> bundleList = {bundleName};
+    NotificationPreferences::GetInstance()->isKioskMode_ = false;
+    NotificationPreferences::GetInstance()->preferencesInfo_.restrictedModeTrustList_[userId] = bundleList;
+ 
+    EXPECT_FALSE(advancedNotificationService_->IsDisableNotificationForSaByRestrictedMode(bundleName, userId, false));
 }
 
 /**

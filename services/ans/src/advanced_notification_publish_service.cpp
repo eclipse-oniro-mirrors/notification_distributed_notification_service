@@ -816,9 +816,9 @@ AnsStatus AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifi
             return;
         }
 #endif
-        if (IsDisableNotificationForSaByKiosk(bundle, directAgency)) {
-            ANS_LOGE("bundle not in kiosk trust list, bundleName=%{public}s", bundle.c_str());
-            ansStatus = AnsStatus(ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION, "bundle not in kiosk trust list");
+        if (IsDisableNotificationForSaByRestrictedMode(bundle, record->notification->GetRecvUserId(), directAgency)) {
+            ANS_LOGE("bundle(%{public}s) not in trust list.", bundle.c_str());
+            ansStatus = AnsStatus(ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION, "bundle not in trust list");
             return;
         }
         if (!bundleOption->GetBundleName().empty() &&
@@ -1203,40 +1203,77 @@ bool AdvancedNotificationService::IsDisableNotification(const std::string &bundl
     return IsDisableNotificationInner(bundleName, userId);
 }
 
-bool AdvancedNotificationService::IsDisableNotificationByKiosk(const std::string &bundleName)
+bool AdvancedNotificationService::IsDisableNotificationByRestrictedMode(
+    const std::string &bundleName, const int32_t &userId)
 {
     bool isKioskMode = NotificationPreferences::GetInstance()->IsKioskMode();
-    if (isKioskMode && !IsEnableNotificationByKioskAppTrustList(bundleName)) {
+    if (isKioskMode && !IsExistRestrictedModeTrustList(bundleName, userId)) {
+        ANS_LOGE("Kiosk Mode is on.");
+        return true;
+    }
+    bool isRestrictedMode = NotificationPreferences::GetInstance()->IsRestrictedMode(userId);
+    if (isRestrictedMode && !IsExistRestrictedModeTrustList(bundleName, userId)) {
+        ANS_LOGE("Restricted Mode is on.");
         return true;
     }
     return false;
 }
 
-bool AdvancedNotificationService::IsDisableNotificationForSaByKiosk(
-    const std::string &bundleName, bool directAgency)
+bool AdvancedNotificationService::IsDisableNotificationForSaByRestrictedMode(
+    const std::string &bundleName, const int32_t &userId, bool directAgency)
 {
     bool isAppAgent = false;
     if (!directAgency && !bundleName.empty()) {
         isAppAgent = true;
     }
     bool isKioskMode = NotificationPreferences::GetInstance()->IsKioskMode();
-    if (isKioskMode && isAppAgent && !IsEnableNotificationByKioskAppTrustList(bundleName)) {
+    if (isKioskMode && isAppAgent && !IsExistRestrictedModeTrustList(bundleName, userId)) {
+        ANS_LOGE("Kiosk Mode is on.");
+        return true;
+    }
+    bool isRestrictedMode = NotificationPreferences::GetInstance()->IsRestrictedMode(userId);
+    if (isRestrictedMode && isAppAgent && !IsExistRestrictedModeTrustList(bundleName, userId)) {
+        ANS_LOGE("Restricted Mode is on.");
         return true;
     }
     return false;
 }
 
-bool AdvancedNotificationService::IsEnableNotificationByKioskAppTrustList(const std::string &bundleName)
+/*
+    When bundleName exists in "kioskAppTrustList" or "restrictedModeTrustList",
+    the notification can be sent successfully regardless of the current mode.
+*/
+bool AdvancedNotificationService::IsExistRestrictedModeTrustList(const std::string &bundleName, const int32_t &userId)
 {
     std::vector<std::string> kioskAppTrustList;
+    std::unordered_map<int32_t, std::vector<std::string>> restrictedModeTrustList;
     if (NotificationPreferences::GetInstance()->GetkioskAppTrustList(kioskAppTrustList)) {
         auto it = std::find(kioskAppTrustList.begin(), kioskAppTrustList.end(), bundleName);
         if (it != kioskAppTrustList.end()) {
+            ANS_LOGI("kioskAppTrustList bundle(%{public}s) is exist.", bundleName.c_str());
             return true;
+        } else {
+            ANS_LOGW("kioskAppTrustList bundle(%{public}s) not exist.", bundleName.c_str());
         }
-    } else {
-        ANS_LOGD("no kiosk app trust list has been set up");
     }
+    if (NotificationPreferences::GetInstance()->GetRestrictedModeTrustList(restrictedModeTrustList)) {
+        auto it = restrictedModeTrustList.find(userId);
+        if (it == restrictedModeTrustList.end()) {
+            ANS_LOGE("restrictedModeTrustList userId(%{public}d) not exist.", userId);
+            return false;
+        }
+        const auto& trustList = it->second;
+        auto itBundle = std::find(trustList.begin(), trustList.end(), bundleName);
+        if (itBundle != trustList.end()) {
+            ANS_LOGI("restrictedModeTrustList bundle(%{public}s) exist in userId(%{public}d).",
+                bundleName.c_str(), userId);
+            return true;
+        } else {
+            ANS_LOGW("restrictedModeTrustList bundle(%{public}s) not exist in userId(%{public}d).",
+                bundleName.c_str(), userId);
+        }
+    }
+    ANS_LOGD("no restricted mode trust list has been set up");
     return false;
 }
 

@@ -310,8 +310,8 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
             return;
         }
 #endif
-        if (IsDisableNotificationByKiosk(bundle)) {
-            ANS_LOGE("bundle not in kiosk trust list, bundleName=%{public}s", bundle.c_str());
+        if (IsDisableNotificationByRestrictedMode(bundle, record->notification->GetRecvUserId())) {
+            ANS_LOGE("bundle(%{public}s) not in trust list.", bundle.c_str());
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
             return;
         }

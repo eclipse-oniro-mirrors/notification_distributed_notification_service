@@ -353,6 +353,38 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00004, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: SetAdditionConfig_00005
+ * @tc.desc: Test SetAdditionConfig with RESTRICTED_MODE_TRUST_LIST_KEY
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00005, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    std::string key = RESTRICTED_MODE_TRUST_LIST_KEY;
+    std::string value = R"([{"userId":100,"trustList":["bundle1","bundle2"]}])";
+    auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: SetAdditionConfig_00006
+ * @tc.desc: Test SetAdditionConfig with RESTRICTED_MODE_TRUST_LIST_KEY
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00006, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    std::string key = RESTRICTED_MODE_TRUST_LIST_KEY;
+    std::string value = R"([{}])";
+    auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
  * @tc.name: GetAllLiveViewEnabledBundles_00001
  * @tc.desc: Test GetAllLiveViewEnabledBundles_00001
  * @tc.type: FUNC

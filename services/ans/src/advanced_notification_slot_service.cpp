@@ -75,7 +75,8 @@ namespace {
         PRIORITY_RULE_CONFIG_KEY,
         CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY,
         PROXY_PKG_KEY,
-        KIOSK_APP_TRUST_KEY
+        KIOSK_APP_TRUST_LIST_KEY,
+        RESTRICTED_MODE_TRUST_LIST_KEY
     };
 }
 
@@ -1380,6 +1381,11 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     }
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
+        if (key == RESTRICTED_MODE_TRUST_LIST_KEY &&
+            !NotificationPreferences::GetInstance()->SetRestrictedModeTrustList(value)) {
+            result = ERR_ANS_INVALID_PARAM;
+            return;
+        }
         result = NotificationPreferences::GetInstance()->SetKvToDb(key, value, SUBSCRIBE_USER_INIT);
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set addition config.");

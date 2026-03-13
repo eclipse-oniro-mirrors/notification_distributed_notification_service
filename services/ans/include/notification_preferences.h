@@ -686,6 +686,12 @@ public:
 
     bool GetkioskAppTrustList(std::vector<std::string> &kioskAppTrustList);
 
+    bool IsRestrictedMode(const int32_t &userId);
+
+    bool GetRestrictedModeTrustList(std::unordered_map<int32_t, std::vector<std::string>> &restrictedModeTrustList);
+
+    bool SetRestrictedModeTrustList(const std::string &value);
+
     /**
      * @brief Set distributed device list.
      *

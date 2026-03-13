@@ -382,6 +382,11 @@ public:
     void SetkioskAppTrustList(const std::vector<std::string> &kioskAppTrustList);
     bool GetkioskAppTrustList(std::vector<std::string> &kioskAppTrustList) const;
     bool GetUserDisableNotificationInfo(int32_t userId, NotificationDisable &notificationDisable);
+    bool IsRestrictedMode(const int32_t &userId);
+    void SetRestrictedModeTrustList(const std::unordered_map<int32_t,
+        std::vector<std::string>> &restrictedModeTrustList);
+    bool GetRestrictedModeTrustList(std::unordered_map<int32_t,
+        std::vector<std::string>> &restrictedModeTrustList) const;
 
 private:
     std::map<int32_t, bool> isEnabledAllNotification_;
@@ -389,6 +394,7 @@ private:
     std::map<std::string, sptr<NotificationDoNotDisturbProfile>> doNotDisturbProfiles_;
     std::map<std::string, BundleInfo> infos_;
     std::vector<std::string> kioskAppTrustList_;
+    std::unordered_map<int32_t, std::vector<std::string>> restrictedModeTrustList_;
     std::unordered_map<std::string, SilentReminderInfo> silentReminderInfos_;
 
     struct DisableNotificationInfo {
