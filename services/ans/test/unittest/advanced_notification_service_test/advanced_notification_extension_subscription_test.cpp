@@ -1057,9 +1057,11 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, CanOpenSubscribeSettings
 {
     MockIsVerfyPermisson(true);
     MockIsNeedHapModuleInfos(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
     ErrCode ret = advancedNotificationService_->CanOpenSubscribeSettings();
     EXPECT_EQ(ret, ERR_OK);
     MockIsNeedHapModuleInfos(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
 }
 
 /**
