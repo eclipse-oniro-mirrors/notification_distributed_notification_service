@@ -687,5 +687,45 @@ ErrCode AdvancedNotificationService::CanPublishAsBundle(const std::string &repre
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AdvancedNotificationService::GetNotificationSwitch(const sptr<NotificationBundleOption> &bundleOption,
+    int32_t &state)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (bundleOption == nullptr) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+        ANS_LOGD("GetActiveUserId is false");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+    
+    ErrCode result = ERR_OK;
+    bool allowed = false;
+    NotificationConstant::SWITCH_STATE enumState = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
+    if (result == ERR_OK && allowed) {
+        result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, enumState);
+        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+            ANS_LOGI("get ntf auth status, invalid bundle %{public}s %{public}d",
+                bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
+            return ERR_ANS_INVALID_BUNDLE;
+        }
+    }
+    state = static_cast<int32_t>(enumState);
+    ANS_LOGI("get ntf auth status %{public}s %{public}d %{public}d %{public}d",
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), state, result);
+    return ERR_OK;
+}
 } // Notification
 } // OHOS

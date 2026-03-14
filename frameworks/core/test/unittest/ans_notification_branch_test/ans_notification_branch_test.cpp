@@ -1157,6 +1157,12 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ErrCode GetNotificationSwitch(
+        const sptr<NotificationBundleOption>& bundleOption, int32_t &state) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 };
 
 class AnsNotificationBranchTest : public testing::Test {

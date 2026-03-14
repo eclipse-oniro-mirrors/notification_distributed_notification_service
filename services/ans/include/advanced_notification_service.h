@@ -1937,6 +1937,9 @@ public:
     void SendDialogClickHiSysEvent(const sptr<NotificationBundleOption> &bundleOption,
         bool enabled);
 
+    ErrCode GetNotificationSwitch(const sptr<NotificationBundleOption> &bundleOption,
+        int32_t &state) override;
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.

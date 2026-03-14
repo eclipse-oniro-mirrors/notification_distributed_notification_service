@@ -63,6 +63,7 @@ namespace OHOS {
         int32_t userId = fuzzData->ConsumeIntegral<int32_t>();
         uint64_t num = fuzzData->ConsumeIntegral<uint64_t>();
         int64_t id = fuzzData->ConsumeIntegral<uint64_t>();
+        int32_t state = fuzzData->ConsumeIntegral<int32_t>();
 
         std::string stringData = fuzzData->ConsumeRandomLengthString();
         std::string phoneNumber = fuzzData->ConsumeRandomLengthString();
@@ -151,6 +152,7 @@ namespace OHOS {
         service->SetEnabledForBundleSlot(bundleOption, slotType, enabled, isForceControl);
         service->RequestEnableNotification(stringData, callback, nullptr);
         service->RequestEnableNotification(stringData, callback);
+        service->GetNotificationSwitch(bundleOption, state);
         service->Subscribe(nullptr, info, fuzzData->ConsumeIntegral<uint32_t>());
         service->Subscribe(nullptr, fuzzData->ConsumeIntegral<uint32_t>());
         service->Unsubscribe(nullptr, info);

@@ -3807,5 +3807,31 @@ ErrCode AnsNotification::IsNotifyAllowedInDoNotDisturb(int32_t userId, bool& isA
     }
     return proxy->IsNotifyAllowedInDoNotDisturb(userId, isAllowed);
 }
+
+ErrCode AnsNotification::GetNotificationSwitch(
+    const NotificationBundleOption &bundleOption, NotificationConstant::SWITCH_STATE &state)
+{
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Unable to connect to ANS service.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bundleInfo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    if (bundleInfo == nullptr) {
+        ANS_LOGE("null bundleInfo");
+        return ERR_ANS_NO_MEMORY;
+    }
+
+    int32_t intState = 0;
+    ErrCode result =  proxy->GetNotificationSwitch(bundleInfo, intState);
+    state = static_cast<NotificationConstant::SWITCH_STATE>(intState);
+    return result;
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -1863,6 +1863,16 @@ public:
      * @return Returns get result.
      */
     static ErrCode IsNotifyAllowedInDoNotDisturb(int32_t userId, bool& isAllowed);
+
+    /**
+     * @brief get notification switch state.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param state The application notification switch state.
+     * @return Returns get notification switch state result.
+     */
+    static ErrCode GetNotificationSwitch(const NotificationBundleOption &bundleOption,
+        NotificationConstant::SWITCH_STATE &state);
 };
 }  // namespace Notification
 }  // namespace OHOS
