@@ -6467,10 +6467,10 @@ HWTEST_F(AdvancedNotificationServiceTest, GetNotificationSwitch_0100, Function |
 {
     MockIsVerfyPermisson(false);
 
-    std::string bundlleName = "switchTestBundle";    
+    std::string bundlleName = "switchTestBundle";
     int32_t uid = 1000;
     int32_t state;
-    
+
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundlleName, uid);
     ErrCode result = advancedNotificationService_->GetNotificationSwitch(bundleOption, state);
     EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
@@ -6492,7 +6492,6 @@ HWTEST_F(AdvancedNotificationServiceTest, GetNotificationSwitch_0100, Function |
         static_cast<NotificationConstant::SWITCH_STATE>(0)), (int)ERR_OK);
     result = advancedNotificationService_->GetNotificationSwitch(bundleOption, state);
     EXPECT_EQ(result, ERR_OK);
-
 }
 }  // namespace Notification
 }  // namespace OHOS
