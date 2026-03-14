@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ans_dynamic_dependency_interface.h"
 
 #include <cstdint>
 #include <vector>
