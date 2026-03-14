@@ -241,6 +241,7 @@ ohos_source_set("ans_service_sources") {
     "ability_runtime:appkit_native",
     "ability_runtime:dataobs_manager",
     "ability_runtime:extension_manager",
+    "ability_runtime:uri_permission_mgr",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",

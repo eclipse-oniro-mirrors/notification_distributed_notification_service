@@ -1556,6 +1556,29 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19000,
 }
 
 /**
+ * @tc.number    : GrantSoundPermission_100
+ * @tc.name      : GrantSoundPermission_100
+ * @tc.desc      : Test GrantSoundPermission.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GrantSoundPermission_100, Function | SmallTest | Level1)
+{
+    EXPECT_FALSE(advancedNotificationService_->GrantSoundPermission(nullptr, nullptr));
+    sptr<NotificationRequest> req = new NotificationRequest(1);
+    EXPECT_FALSE(advancedNotificationService_->GrantSoundPermission(req, nullptr));
+    int32_t uid = 2001001;
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("testBundle", uid);
+    ASSERT_NE(bundleOption, nullptr);
+    EXPECT_FALSE(advancedNotificationService_->GrantSoundPermission(req, bundleOption));
+    req->SetSound("testSound");
+    EXPECT_FALSE(advancedNotificationService_->GrantSoundPermission(req, bundleOption));
+    req->SetSound("uri::file://notification_service_publish_test/data/storage/el1/base/testSound.mp3");
+    bundleOption->SetBundleName("notification_service_publish_test");
+    EXPECT_FALSE(advancedNotificationService_->GrantSoundPermission(req, bundleOption));
+    req->SetSound("uri::file://notification_service_publish_test/data/storage/el1/base/files/testSound.mp3");
+    EXPECT_FALSE(advancedNotificationService_->GrantSoundPermission(req, bundleOption));
+}
+
+/**
  * @tc.number    : OnReceiveEvent_0200
  * @tc.name      : OnReceiveEvent_0200
  * @tc.desc      : Test OnReceiveEvent COMMON_EVENT_PACKAGE_REMOVED
