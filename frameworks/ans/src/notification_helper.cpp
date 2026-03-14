@@ -1111,5 +1111,11 @@ ErrCode NotificationHelper::IsNotifyAllowedInDoNotDisturb(int32_t userId, bool& 
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->IsNotifyAllowedInDoNotDisturb(userId, isAllowed);
 }
+
+ErrCode NotificationHelper::GetNotificationSwitch(
+    const NotificationBundleOption &bundleOption, NotificationConstant::SWITCH_STATE &state)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSwitch(bundleOption, state);
+}
 }  // namespace Notification
 }  // namespace OHOS

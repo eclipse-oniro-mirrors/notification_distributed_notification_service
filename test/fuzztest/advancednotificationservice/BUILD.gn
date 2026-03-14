@@ -101,6 +101,7 @@ group("fuzztest") {
     "servicegetallnotificationsbyslottypebyuser_fuzzer:ServiceGetAllNotificationsBySlotTypeByUserFuzzTest",
     "servicegetallsubscriptionbundles_fuzzer:ServiceGetAllSubscriptionBundlesFuzzTest",
     "servicepublishasbundlewithmaxcapacity_fuzzer:ServicePublishAsBundleWithMaxCapacityFuzzTest",
+    "servicegetnotificationswitch_fuzzer:ServiceGetNotificationSwitchFuzzTest",
   ]
   if (build_variant == "root") {
     deps += ["serviceshelldump_fuzzer:ServiceShellDumpFuzzTest"]

@@ -84,6 +84,9 @@ public:
         ans.RemoveEnableNotificationDialog();
         ans.RequestEnableNotification(str, id);
 
+        NotificationConstant::SWITCH_STATE state;
+        ans.GetNotificationSwitch(bundle, state);
+
         FuzzTestSubscriber subscriber;
         auto info = NotificationSubscribeInfo();
         ans.SubscribeNotificationSelf(subscriber);

@@ -122,6 +122,10 @@ public:
         notificationHelper.RemoveEnableNotificationDialog();
         int32_t uid = fdp->ConsumeIntegralInRange<int32_t>(0, 100);
         notificationHelper.RequestEnableNotification(stringData, uid);
+
+        NotificationBundleOption bundleOption;
+        NotificationConstant::SWITCH_STATE state;
+        notificationHelper.GetNotificationSwitch(bundleOption, state);
         sptr<IRemoteObject> callerToken = nullptr;
         sptr<NotificationCheckRequest> notificationCheckRequest =
             new NotificationCheckRequest();

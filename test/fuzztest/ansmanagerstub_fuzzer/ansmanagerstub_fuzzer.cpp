@@ -287,6 +287,8 @@ namespace OHOS {
         sptr<Notification::IAnsDialogCallback> callback = new Notification::AnsDialogCallbackProxy(nullptr);
         service->RequestEnableNotification(stringData, callback, nullptr);
         service->RequestEnableNotification(stringData, callback);
+        int32_t state;
+        service->GetNotificationSwitch(bundleOption, state);
 
         service->SetDistributedEnabledBySlot(slotType, deviceType, enabled);
         std::vector<sptr<Notification::Notification>> notificationsVector;

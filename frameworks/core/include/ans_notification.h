@@ -1838,6 +1838,16 @@ public:
      * @return Returns get result.
      */
     ErrCode IsNotifyAllowedInDoNotDisturb(int32_t userId, bool& isAllowed);
+
+    /**
+     * @brief get notification switch state.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param state The application notification switch state.
+     * @return Returns get notification switch state result.
+     */
+    ErrCode GetNotificationSwitch(const NotificationBundleOption &bundleOption,
+        NotificationConstant::SWITCH_STATE &state);
 private:
     /**
      * @brief Gets Ans Manager proxy.
