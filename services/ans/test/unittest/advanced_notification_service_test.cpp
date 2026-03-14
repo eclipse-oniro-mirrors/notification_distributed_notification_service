@@ -6484,6 +6484,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetNotificationSwitch_0100, Function |
     EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
 
     bundleOption = new (std::nothrow) NotificationBundleOption(bundlleName, uid);
+    result = advancedNotificationService_->GetNotificationSwitch(bundleOption, state);
     EXPECT_EQ(result, ERR_ANS_INVALID_BUNDLE);
 
     ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabled(100, true), (int)ERR_OK);
