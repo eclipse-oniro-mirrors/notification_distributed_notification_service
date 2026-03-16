@@ -632,7 +632,7 @@ napi_value NapiNotificationSettingResult(napi_env env, void *data)
         }
         napi_value bundleOption = nullptr;
         napi_create_object(env, &bundleOption);
-        if (!Common::SetBundleOption(env, *item, bundleOption)) {
+        if (!Common::SetGrantedBundleInfo(env, *item, bundleOption)) {
             ANS_LOGW("Set NotificationBundleOption object failed.");
             continue;
         }
@@ -668,7 +668,7 @@ void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
         return;
     }
     napi_get_undefined(env, &result);
-    if (asynccallbackinfo->isWithResult) {
+    if (asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->isWithResult) {
         result = NapiNotificationSettingResult(env, data);
     }
     int32_t errorCode = ERR_OK;
