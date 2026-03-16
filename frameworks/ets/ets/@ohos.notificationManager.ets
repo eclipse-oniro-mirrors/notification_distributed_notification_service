@@ -425,8 +425,8 @@ export default namespace notificationManager {
     export native function nativeIsPriorityEnabled(callback?: AsyncCallback<boolean>): Promise<boolean>;
     export native function nativeGetPriorityEnabledByBundles(bundles: Array<BundleOption>): Map<BundleOption, boolean>;
     export native function nativeSetPriorityEnabledByBundles(priorityEnable: Map<BundleOption, boolean>): void;
-    export native function nativeSetPriorityIntelligentEnabled(enable: boolean): void;
-    export native function nativeIsPriorityIntelligentEnabled(): boolean;
+    export native function nativeSetPriorityIntelligentEnabled(enable: boolean): Promise<void>;
+    export native function nativeIsPriorityIntelligentEnabled(): Promise<boolean>;
     export native function nativeSetPriorityStrategyByBundles(strategies: Map<BundleOption, long>): void;
     export native function nativeGetPriorityStrategyByBundles(bundles: Array<BundleOption>): Map<BundleOption, long>;
 
@@ -3104,28 +3104,25 @@ export default namespace notificationManager {
     }
 
     export function setPriorityIntelligentEnabled(enable: boolean): Promise<void> {
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetPriorityIntelligentEnabled(enable); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetPriorityIntelligentEnabled(enable);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function isPriorityIntelligentEnabled(): Promise<boolean> {
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeIsPriorityIntelligentEnabled(); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeIsPriorityIntelligentEnabled();
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setPriorityStrategyByBundles(strategies: Map<BundleOption, long>): Promise<void> {

@@ -30,6 +30,9 @@ enum PriorityFunction {
     GET_BUNDLE_PRIORITY_CONFIG,
     IS_PRIORITY_ENABLED_BY_BUNDLE,
     IS_PRIORITY_ENABLED,
+    GET_PRIORITY_ENABLED,
+    GET_PRIORITY_STRATEGY,
+    IS_PRIORITY_INTELLIGENT_ENABLED
 };
 
 struct AsyncCallbackPriorityInfo {
@@ -42,9 +45,13 @@ struct AsyncCallbackPriorityInfo {
     OHOS::Notification::NotificationConstant::PriorityEnableStatus status =
         OHOS::Notification::NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT;
     bool isPriorityEnabled;
+    std::vector<Notification::NotificationBundleOption> bundles;
+    std::map<sptr<Notification::NotificationBundleOption>, bool> priorityEnable;
+    std::map<sptr<Notification::NotificationBundleOption>, int64_t> priorityDatas;
 };
 
 void HandlePriorityFunctionCallbackComplete(ani_env* env, arkts::concurrency_helpers::WorkStatus status, void* data);
+void HandleExtFunctionTypeCallback(ani_env* envCurr, AsyncCallbackPriorityInfo* asyncCallbackInfo);
 
 ani_object AniSetBundlePriorityConfig(ani_env* env,
     ani_object obj, ani_string value, ani_object callback);
@@ -54,11 +61,11 @@ ani_object AniSetPriorityEnabledByBundle(ani_env* env,
 ani_object AniIsPriorityEnabledByBundle(ani_env* env, ani_object obj, ani_object callback);
 ani_object AniSetPriorityEnabled(ani_env* env, ani_boolean enable, ani_object callback);
 ani_object AniIsPriorityEnabled(ani_env* env, ani_object callback);
-void AniSetPriorityEnabledByBundles(ani_env *env, ani_object obj);
+ani_object AniSetPriorityEnabledByBundles(ani_env *env, ani_object obj);
 ani_object AniGetPriorityEnabledByBundles(ani_env *env, ani_object obj);
-void AniSetPriorityIntelligentEnabled(ani_env* env, ani_boolean enable);
-ani_boolean AniIsPriorityIntelligentEnabled(ani_env *env, ani_object obj);
-void AniSetPriorityStrategyByBundles(ani_env *env, ani_object obj);
+ani_object AniSetPriorityIntelligentEnabled(ani_env *env, ani_boolean enable);
+ani_object AniIsPriorityIntelligentEnabled(ani_env *env);
+ani_object AniSetPriorityStrategyByBundles(ani_env *env, ani_object obj);
 ani_object AniGetPriorityStrategyByBundles(ani_env *env, ani_object obj);
 } // namespace NotificationManagerSts
 } // namespace OHOS

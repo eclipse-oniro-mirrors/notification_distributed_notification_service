@@ -131,8 +131,42 @@ void HandlePriorityFunctionCallbackComplete(ani_env* env, WorkStatus status, voi
         default:
             break;
     }
+    HandleExtFunctionTypeCallback(envCurr, asyncCallbackInfo);
     NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
     DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
+}
+
+void HandleExtFunctionTypeCallback(ani_env* envCurr, AsyncCallbackPriorityInfo* asyncCallbackInfo)
+{
+    switch (asyncCallbackInfo->functionType) {
+        case GET_PRIORITY_ENABLED: {
+            if (!NotificationSts::WrapBundleOptionMap(envCurr,
+                asyncCallbackInfo->info.result, asyncCallbackInfo->priorityEnable)) {
+                ANS_LOGE("WrapBundleOptionMap for getPriorityEnabled faild");
+                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            }
+            break;
+        }
+        case IS_PRIORITY_INTELLIGENT_ENABLED: {
+            asyncCallbackInfo->info.result =
+                NotificationSts::CreateBoolean(envCurr, asyncCallbackInfo->isPriorityEnabled);
+            if (asyncCallbackInfo->info.result == nullptr) {
+                ANS_LOGE("CreateBoolean for isPriorityIntelligentEnabled failed");
+                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            }
+            break;
+        }
+        case GET_PRIORITY_STRATEGY: {
+            if (!NotificationSts::WrapBundleOptionMap(envCurr,
+                asyncCallbackInfo->info.result, asyncCallbackInfo->priorityDatas)) {
+                ANS_LOGE("WrapBundleOptionMap for getPriorityStrategy faild");
+                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            }
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 ani_object AniSetBundlePriorityConfig(ani_env* env, ani_object obj, ani_string value, ani_object callback)
@@ -355,7 +389,8 @@ ani_object AniSetPriorityEnabled(ani_env* env, ani_boolean enable, ani_object ca
 ani_object AniIsPriorityEnabled(ani_env* env, ani_object callback)
 {
     ANS_LOGD("AniIsPriorityEnabled called");
-    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackPriorityInfo{.asyncWork = nullptr};
+    auto asyncCallbackInfo =
+        new (std::nothrow)AsyncCallbackPriorityInfo{.asyncWork = nullptr, .isPriorityEnabled = true};
     if (!asyncCallbackInfo) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
@@ -389,146 +424,221 @@ ani_object AniIsPriorityEnabled(ani_env* env, ani_object callback)
     return nullptr;
 }
 
-
-void AniSetPriorityEnabledByBundles(ani_env *env, ani_object obj)
+ani_object AniSetPriorityEnabledByBundles(ani_env *env, ani_object obj)
 {
     std::vector<std::pair<Notification::NotificationBundleOption, bool>> options;
     if (NotificationSts::UnwrapBundleOptionMap(env, obj, options) != ANI_OK) {
-        ANS_LOGE("UnwrapBundleOptionMap faild");
-        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
-            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-        return;
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOptionMap faild");
+        return nullptr;
     }
-    std::map<sptr<Notification::NotificationBundleOption>, bool> priorityEnable;
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackPriorityInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
     for (auto& [bundleOpt, enabled] : options) {
-        sptr<Notification::NotificationBundleOption> bo =
-            new (std::nothrow) Notification::NotificationBundleOption(std::move(bundleOpt));
+        sptr<Notification::NotificationBundleOption> bo = sptr<Notification::NotificationBundleOption>(
+            new (std::nothrow) Notification::NotificationBundleOption(std::move(bundleOpt)));
         if (bo == nullptr) {
-            ANS_LOGE("null bundleOption");
-            OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
-                NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-            return;
+            NotificationSts::ThrowInternerErrorWithLogE(env, "null bundleOption");
+            DeleteCallBackInfo(env, asyncCallbackInfo);
+            return nullptr;
         }
-        priorityEnable.emplace(bo, enabled);
+        asyncCallbackInfo->priorityEnable.emplace(bo, enabled);
     }
-    int returnCode = Notification::NotificationHelper::SetPriorityEnabledByBundles(priorityEnable);
-    if (returnCode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returnCode);
-        ANS_LOGE("sts setPriorityEnabledByBundles error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackPriorityInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode =
+                    Notification::NotificationHelper::SetPriorityEnabledByBundles(asyncCallbackInfo->priorityEnable);
+                ANS_LOGI("sts setPriorityEnabledByBundles, errorCode: %{public}d", asyncCallbackInfo->info.returnCode);
+            }
+        },
+        HandlePriorityFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
-    ANS_LOGD("AniSetPriorityEnabledByBundles end");
-    return;
+    return promise;
 }
 
 ani_object AniGetPriorityEnabledByBundles(ani_env *env, ani_object obj)
 {
-    std::vector<Notification::NotificationBundleOption> bundles;
-    if (!NotificationSts::UnwrapArrayBundleOption(env, obj, bundles)) {
-        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
-            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-        ANS_LOGE("AniGetPriorityEnabledByBundles failed : ERROR_INTERNAL_ERROR");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackPriorityInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
- 
-    std::map<sptr<Notification::NotificationBundleOption>, bool> bundleEnable;
-    int returnCode = Notification::NotificationHelper::GetPriorityEnabledByBundles(
-        bundles, bundleEnable);
-    if (returnCode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returnCode);
-        ANS_LOGE("sts getPriorityEnabledByBundles error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    if (!NotificationSts::UnwrapArrayBundleOption(env, obj, asyncCallbackInfo->bundles)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "AniGetPriorityEnabledByBundles failed:ERROR_INTERNAL_ERROR");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object outAniObj;
-    if (!NotificationSts::WrapBundleOptionMap(env, outAniObj, bundleEnable)) {
-        ANS_LOGE("WrapBundleOptionMap faild");
-        NotificationSts::ThrowInternerErrorWithLogE(
-            env, "AniGetPriorityEnabledByBundles:failed to WrapBundleOptionMap");
+    asyncCallbackInfo->functionType = GET_PRIORITY_ENABLED;
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackPriorityInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetPriorityEnabledByBundles(
+                    asyncCallbackInfo->bundles, asyncCallbackInfo->priorityEnable);
+            }
+        },
+        HandlePriorityFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    return outAniObj;
+    return promise;
 }
 
-void AniSetPriorityIntelligentEnabled(ani_env* env, ani_boolean enable)
+ani_object AniSetPriorityIntelligentEnabled(ani_env* env, ani_boolean enable)
 {
-    int returnCode =
-        Notification::NotificationHelper::SetPriorityIntelligentEnabled(NotificationSts::AniBooleanToBool(enable));
-    if (returnCode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returnCode);
-        ANS_LOGE("sts setPriorityIntelligentEnabled failed, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackPriorityInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
     }
+    asyncCallbackInfo->isPriorityEnabled = NotificationSts::AniBooleanToBool(enable);
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackPriorityInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetPriorityIntelligentEnabled(
+                    asyncCallbackInfo->isPriorityEnabled);
+                ANS_LOGI("sts setPriorityIntelligentEnabled, errorCode: %{public}d",
+                    asyncCallbackInfo->info.returnCode);
+            }
+        },
+        HandlePriorityFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    return promise;
 }
 
-ani_boolean AniIsPriorityIntelligentEnabled(ani_env *env, ani_object obj)
+ani_object AniIsPriorityIntelligentEnabled(ani_env *env)
 {
-    bool enable = true;
-    int returnCode = Notification::NotificationHelper::IsPriorityIntelligentEnabled(enable);
-    if (returnCode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returnCode);
-        ANS_LOGE("sts isPriorityIntelligentEnabled failed, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    auto asyncCallbackInfo =
+        new (std::nothrow)AsyncCallbackPriorityInfo{.asyncWork = nullptr, .isPriorityEnabled = true};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
     }
-    return NotificationSts::BoolToAniBoolean(enable);
+    asyncCallbackInfo->functionType = IS_PRIORITY_INTELLIGENT_ENABLED;
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackPriorityInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::IsPriorityIntelligentEnabled(
+                    asyncCallbackInfo->isPriorityEnabled);
+            }
+        },
+        HandlePriorityFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    return promise;
 }
 
-void AniSetPriorityStrategyByBundles(ani_env *env, ani_object obj)
+ani_object AniSetPriorityStrategyByBundles(ani_env *env, ani_object obj)
 {
     std::vector<std::pair<Notification::NotificationBundleOption, int64_t>> options;
     if (NotificationSts::UnwrapBundleOptionMap(env, obj, options) != ANI_OK) {
-        ANS_LOGE("UnwrapBundleOptionMap faild");
-        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
-            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-        return;
+        NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOptionMap faild");
+        return nullptr;
     }
-    std::map<sptr<Notification::NotificationBundleOption>, int64_t> priorityStrategies;
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackPriorityInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
     for (auto& [bundleOpt, strategy] : options) {
-        sptr<Notification::NotificationBundleOption> bo =
-            new (std::nothrow) Notification::NotificationBundleOption(std::move(bundleOpt));
+        sptr<Notification::NotificationBundleOption> bo = sptr<Notification::NotificationBundleOption>(
+            new (std::nothrow) Notification::NotificationBundleOption(std::move(bundleOpt)));
         if (bo == nullptr) {
-            ANS_LOGE("null bundleOption");
-            OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
-                NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-            return;
+            NotificationSts::ThrowInternerErrorWithLogE(env, "null bundleOption");
+            DeleteCallBackInfo(env, asyncCallbackInfo);
+            return nullptr;
         }
-        priorityStrategies.emplace(bo, strategy);
+        asyncCallbackInfo->priorityDatas.emplace(bo, strategy);
     }
-    int returnCode = Notification::NotificationHelper::SetPriorityStrategyByBundles(priorityStrategies);
-    if (returnCode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returnCode);
-        ANS_LOGE("sts SetPriorityStrategyByBundles error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackPriorityInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode =
+                    Notification::NotificationHelper::SetPriorityStrategyByBundles(asyncCallbackInfo->priorityDatas);
+                ANS_LOGI("sts SetPriorityStrategyByBundles, errorCode: %{public}d", asyncCallbackInfo->info.returnCode);
+            }
+        },
+        HandlePriorityFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
     }
+    return promise;
 }
 
 ani_object AniGetPriorityStrategyByBundles(ani_env *env, ani_object obj)
 {
-    std::vector<Notification::NotificationBundleOption> bundles;
-    if (!NotificationSts::UnwrapArrayBundleOption(env, obj, bundles)) {
-        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
-            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-        ANS_LOGE("AniGetPriorityStrategyByBundles failed : ERROR_INTERNAL_ERROR");
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackPriorityInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
- 
-    std::map<sptr<Notification::NotificationBundleOption>, int64_t> priorityStrategies;
-    int returnCode = Notification::NotificationHelper::GetPriorityStrategyByBundles(
-        bundles, priorityStrategies);
-    if (returnCode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returnCode);
-        ANS_LOGE("sts getPriorityEnabledByBundles error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    if (!NotificationSts::UnwrapArrayBundleOption(env, obj, asyncCallbackInfo->bundles)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "AniGetPriorityEnabledByBundles failed:ERROR_INTERNAL_ERROR");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object outAniObj;
-    if (!NotificationSts::WrapBundleOptionMap(env, outAniObj, priorityStrategies)) {
-        ANS_LOGE("WrapBundleOptionMap faild");
-        NotificationSts::ThrowInternerErrorWithLogE(
-            env, "AniGetPriorityStrategyByBundles:failed to WrapBundleOptionMap");
+    asyncCallbackInfo->functionType = GET_PRIORITY_STRATEGY;
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    env->GetVM(&asyncCallbackInfo->vm);
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackPriorityInfo*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetPriorityStrategyByBundles(
+                    asyncCallbackInfo->bundles, asyncCallbackInfo->priorityDatas);
+            }
+        },
+        HandlePriorityFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    return outAniObj;
+    return promise;
 }
 } // namespace NotificationManagerSts
 } // namespace OHOS

@@ -118,7 +118,7 @@ bool ParsePraramForAdditionalConfig(ani_env *env,
         asyncCallbackInfo->result = RESULT_FAILED;
         return false;
     }
-    std::string valueStr = NotificationSts::GetResizeStr(tempValue, NotificationSts::LONG_LONG_STR_MAX_SIZE);
+    std::string valueStr = NotificationSts::GetResizeStr(tempValue, NotificationSts::STR_512K_SIZE);
     asyncCallbackInfo->configValue = valueStr;
     asyncCallbackInfo->configkey = keyStr;
     return true;

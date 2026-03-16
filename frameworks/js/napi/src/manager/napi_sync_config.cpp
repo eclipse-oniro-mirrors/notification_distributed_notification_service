@@ -75,9 +75,9 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         return nullptr;
     }
 
-    char valueStr[LONG_LONG_STR_MAX_SIZE] = {0};
+    char valueStr[STR_512K_SIZE] = {0};
     size_t valStrLen = 0;
-    NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM1], valueStr, LONG_LONG_STR_MAX_SIZE - 1, &valStrLen));
+    NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM1], valueStr, STR_512K_SIZE - 1, &valStrLen));
     params.value = valueStr;
 
     return Common::NapiGetNull(env);
