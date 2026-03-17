@@ -456,9 +456,24 @@ ohos_shared_library("libans_dynamic") {
     cfi_cross_dso = true
     debug = false
   }
+  visibility = [ ":*" ]
   branch_protector_ret = "pac_ret"
-
-  shlib_type = "sa"
+  cflags = [
+    "-fvisibility=hidden",
+    "-fno-math-errno",
+    "-fno-unroll-loops",
+    "-fmerge-all-constants",
+    "-fno-ident",
+    "-Oz",
+    "-flto",
+    "-ffunction-sections", 
+    "-fdata-sections",
+    "-Os"
+  ]
+  cflags_cc = [
+    "-fvisibility-inlines-hidden",
+    "-Os",
+  ]
 
   sources = [
     "src/dynamic_dependency/ans_dynamic_dependency_interface.cpp",
