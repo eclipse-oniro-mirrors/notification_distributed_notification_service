@@ -22,11 +22,6 @@
 
 namespace OHOS {
 namespace Notification {
-BundleManagerHelper::BundleManagerHelper()
-{}
-
-BundleManagerHelper::~BundleManagerHelper()
-{}
 
 void BundleManagerHelper::OnRemoteDied(const wptr<IRemoteObject> &object)
 {}

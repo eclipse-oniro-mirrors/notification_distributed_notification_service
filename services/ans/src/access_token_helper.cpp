@@ -32,20 +32,20 @@ const std::string NOTIFICATION_ANS_CHECK_SA_PERMISSION = "notification.ces.check
 
 std::string AccessTokenHelper::supportCheckSaPermission_ = "non-initilization";
 
-bool AccessTokenHelper::VerifyCallerPermission(
+bool __attribute__((weak)) AccessTokenHelper::VerifyCallerPermission(
     const AccessTokenID &tokenCaller, const std::string &permission)
 {
     int result = AccessTokenKit::VerifyAccessToken(tokenCaller, permission);
     return (result == PERMISSION_GRANTED);
 }
 
-bool AccessTokenHelper::VerifyNativeToken(const AccessTokenID &callerToken)
+bool __attribute__((weak)) AccessTokenHelper::VerifyNativeToken(const AccessTokenID &callerToken)
 {
     ATokenTypeEnum tokenType = AccessTokenKit::GetTokenTypeFlag(callerToken);
     return (tokenType == ATokenTypeEnum::TOKEN_NATIVE);
 }
 
-bool AccessTokenHelper::IsSystemApp()
+bool __attribute__((weak)) AccessTokenHelper::IsSystemApp()
 {
     AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
     ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(tokenId);
@@ -58,7 +58,7 @@ bool AccessTokenHelper::IsSystemApp()
     return false;
 }
 
-bool AccessTokenHelper::IsDlpHap(const AccessTokenID &callerToken)
+bool __attribute__((weak)) AccessTokenHelper::IsDlpHap(const AccessTokenID &callerToken)
 {
     ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(callerToken);
     if (type == ATokenTypeEnum::TOKEN_HAP) {
@@ -71,13 +71,13 @@ bool AccessTokenHelper::IsDlpHap(const AccessTokenID &callerToken)
     return false;
 }
 
-bool AccessTokenHelper::VerifyShellToken(const AccessTokenID &callerToken)
+bool __attribute__((weak)) AccessTokenHelper::VerifyShellToken(const AccessTokenID &callerToken)
 {
     ATokenTypeEnum tokenType = AccessTokenKit::GetTokenTypeFlag(callerToken);
     return (tokenType == ATokenTypeEnum::TOKEN_SHELL);
 }
 
-bool AccessTokenHelper::CheckPermission(const std::string &permission)
+bool __attribute__((weak)) AccessTokenHelper::CheckPermission(const std::string &permission)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();

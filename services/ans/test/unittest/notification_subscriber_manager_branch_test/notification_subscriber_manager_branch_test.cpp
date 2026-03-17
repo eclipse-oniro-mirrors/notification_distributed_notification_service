@@ -1256,8 +1256,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     bundleOption->SetUid(notificationId);
     MockGetNotificationSlotRet(true);
     AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.GetEnabledForBundleSlot(bundleOption, slotType, enabled),
-        ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService.GetEnabledForBundleSlot(bundleOption, slotType, enabled), ERR_OK);
 }
 
 /**

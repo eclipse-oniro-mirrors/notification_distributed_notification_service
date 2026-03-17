@@ -42,10 +42,6 @@ void DeviceTrigger::MockConfigScene(int32_t scene)
     g_configScene = scene;
 }
 
-NotificationConfigParse::NotificationConfigParse()
-{
-}
-
 std::shared_ptr<NotificationAppPrivileges> NotificationConfigParse::GetAppPrivileges(
     const std::string &bundleName) const
 {

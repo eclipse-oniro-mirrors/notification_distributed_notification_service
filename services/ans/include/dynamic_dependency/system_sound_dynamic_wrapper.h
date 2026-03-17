@@ -20,24 +20,19 @@
 #include <vector>
 #include <string>
 
-#include "singleton.h"
-#include "ffrt.h"
-#include "notification_ringtone_info.h"
+#include "system_sound_manager.h"
 
 namespace OHOS {
 namespace Notification {
-class SystemSoundHelper final {
+class SystemSoundDynamicWrapper final {
 public:
-    static std::shared_ptr<SystemSoundHelper> GetInstance();
-    void RemoveCustomizedTone(const std::string uri);
-
-    void RemoveCustomizedTone(sptr<NotificationRingtoneInfo> ringtoneInfo);
-
-    void RemoveCustomizedTones(std::vector<NotificationRingtoneInfo> ringtoneInfos);
-
+    SystemSoundDynamicWrapper();
+    ~SystemSoundDynamicWrapper() = default;
+    static SystemSoundDynamicWrapper& GetInstance();
+    bool RemoveCustomizedTone(const std::string uri);
+    bool RemoveCustomizedToneList(const std::vector<std::string> uris);
 private:
-    static ffrt::mutex instanceMutex_;
-    static std::shared_ptr<SystemSoundHelper> instance_;
+    std::shared_ptr<Media::SystemSoundManager> systemSoundClient_ = nullptr;
 };
 }  // namespace Notification
 }  // namespace OHOS

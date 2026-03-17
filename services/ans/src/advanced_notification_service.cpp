@@ -745,7 +745,7 @@ AnsStatus AdvancedNotificationService::PublishPreparedNotification(const sptr<No
     return PublishPreparedNotificationInner(parameter);
 }
 
-AnsStatus AdvancedNotificationService::PublishPreparedNotificationInner(
+AnsStatus __attribute__((weak)) AdvancedNotificationService::PublishPreparedNotificationInner(
     const PublishNotificationParameter &parameter)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
