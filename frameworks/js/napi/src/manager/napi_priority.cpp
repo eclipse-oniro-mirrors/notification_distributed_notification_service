@@ -774,8 +774,8 @@ napi_value NapiGetPriorityStrategyByBundles(napi_env env, napi_callback_info inf
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::GetPriorityStrategyByBundles(
                     asynccallbackinfo->bundles, asynccallbackinfo->priorityStrategy);
+                ANS_LOGI("GetPriorityStrategyByBundles errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
-            ANS_LOGI("GetPriorityStrategyByBundles errorCode = %{public}d", asynccallbackinfo->info.errorCode);
         },
         AsyncCompleteCallbackNapiGetPriorityStrategyByBundles,
         (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
@@ -808,8 +808,8 @@ napi_value NapiSetPriorityStrategyByBundles(napi_env env, napi_callback_info inf
             if (asynccallbackinfo != nullptr) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::SetPriorityStrategyByBundles(asynccallbackinfo->priorityStrategy);
+                ANS_LOGI("SetPriorityStrategyByBundles errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
-            ANS_LOGI("SetPriorityStrategyByBundles errorCode = %{public}d", asynccallbackinfo->info.errorCode);
         },
         [](napi_env env, napi_status status, void *data) {
             AsyncCallbackInfoPriorityEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoPriorityEnabled *>(data);

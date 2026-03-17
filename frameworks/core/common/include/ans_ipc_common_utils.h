@@ -134,7 +134,6 @@ public:
         std::unique_ptr<T> tempInfo(tmpParcel.ReadParcelable<T>());
         if (tempInfo == nullptr) {
             ANS_LOGE("Read info from parcel failed");
-            free(buffer);
             return false;
         }
         info = *tempInfo;
