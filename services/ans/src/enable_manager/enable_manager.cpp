@@ -714,6 +714,10 @@ ErrCode AdvancedNotificationService::GetNotificationSwitch(const sptr<Notificati
     bool allowed = false;
     NotificationConstant::SWITCH_STATE enumState = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
+    if (result != ERR_OK) {
+        ANS_LOGE("GetNotificationsEnabled fail result = %{public}d", result);
+        return result;
+    }
     if (result == ERR_OK && allowed) {
         result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, enumState);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
