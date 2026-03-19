@@ -132,16 +132,10 @@ bool SetAniArrayGrantedBundleInfo(
         ANS_LOGE("SetAniArrayGrantedBundleInfo failed, has nullptr");
         return false;
     }
-    ani_class cls = nullptr;
-    ani_status status = env->FindClass(GRANTED_BUNDLE_INFO_CLASSNAME, &cls);
-    if (status != ANI_OK) {
-        ANS_LOGE("FindClass failed. status : %{public}d", status);
-        return false;
-    }
     ani_array array = nullptr;
     size_t size = bundleOptions.size();
     ani_object nullObj = GetNullObject(env);
-    status = env->Array_New(size, nullObj, &array);
+    ani_status status = env->Array_New(size, nullObj, &array);
     if (status != ANI_OK) {
         ANS_LOGE("Array_New_Ref failed. status : %{public}d", status);
         return false;

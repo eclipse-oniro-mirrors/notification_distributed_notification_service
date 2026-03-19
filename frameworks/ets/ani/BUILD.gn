@@ -269,6 +269,7 @@ ohos_shared_library("notificationextensionsubscription_ani") {
     "./src/extension_subscription/ani_notification_subscriber_extension.cpp",
     "./src/extension_subscription/ani_open_subscribe_settings.cpp",
     "./src/sts_bundle_option.cpp",
+    "./src/sts_callback_promise.cpp",
     "./src/sts_common.cpp",
     "./src/sts_notification_manager.cpp",
     "./src/sts_throw_erro.cpp",
