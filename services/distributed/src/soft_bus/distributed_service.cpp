@@ -51,13 +51,8 @@ DistributedService& DistributedService::GetInstance()
     return distributedService;
 }
 
-DistributedService::DistributedService()
+DistributedService::DistributedService() : serviceQueue_("ans_distributed")
 {
-    serviceQueue_ = std::make_shared<ffrt::queue>("ans_distributed");
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGW("ffrt create failed!");
-        return;
-    }
     ANS_LOGI("Distributed service init successfully.");
 }
 
@@ -92,11 +87,7 @@ int32_t DistributedService::InitService(const std::string &deviceId, uint16_t de
 
 void DistributedService::DestroyService()
 {
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGE("Check handler is null.");
-        return;
-    }
-    ffrt::task_handle handler = serviceQueue_->submit_h([&]() {
+    serviceQueue_.SyncSubmit([&]() {
         ANS_LOGI("Start destory service.");
         DistributedClient::GetInstance().ReleaseClient();
         DistributedServer::GetInstance().ReleaseServer();
@@ -106,7 +97,6 @@ void DistributedService::DestroyService()
 #endif
         DistributedSubscribeService::GetInstance().UnSubscribeAllNotification();
     });
-    serviceQueue_->wait(handler);
 }
 
 void DistributedService::ConnectPeerDevice(DistributedDeviceInfo device)
@@ -118,12 +108,9 @@ void DistributedService::ConnectPeerDevice(DistributedDeviceInfo device)
 
     DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_SYN);
     DistributedDeviceService::GetInstance().IncreaseDeviceSyncCount(device.deviceId_);
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGE("Check handler is null.");
-        return;
-    }
-    serviceQueue_->submit_h([&, device]() { ConnectPeerDevice(device); },
-        ffrt::task_attr().name("sync").delay(SYNC_TASK_DELAY));
+    int32_t ret = serviceQueue_.Submit([&, device]() { ConnectPeerDevice(device); },
+        SYNC_TASK_DELAY, "sync");
+    ANS_COND_DO_ERR(ret != ERR_OK, return, "DistributedService::ConnectPeerDevice: Submit task failed");
 }
 
 bool DistributedService::CheckCollaborationAbility(const DistributedDeviceInfo device, const std::string &extraData)
@@ -161,11 +148,7 @@ bool DistributedService::CheckCollaborationAbility(const DistributedDeviceInfo d
 
 void DistributedService::AddDevice(DistributedDeviceInfo device, const std::string &extraData)
 {
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGE("Check handler is null.");
-        return;
-    }
-    serviceQueue_->submit_h([&, device, extraData]() {
+    int32_t ret = serviceQueue_.Submit([&, device, extraData]() {
         ANS_LOGI("Dans AddDevice %{public}s %{public}d, %{public}s.", StringAnonymous(device.deviceId_).c_str(),
             device.deviceType_, extraData.c_str());
         if (!CheckCollaborationAbility(device, extraData)) {
@@ -179,19 +162,16 @@ void DistributedService::AddDevice(DistributedDeviceInfo device, const std::stri
             ANS_LOGI("Dans wait peer %{public}s.", StringAnonymous(device.deviceId_).c_str());
             return;
         }
-        // Delay linking to avoid bind failure, There is a delay in reporting the device online
+        // Delay linking to avoid bind failure, There is a delay in reporting of device online
         auto sleepTime = std::chrono::milliseconds(ADD_DEVICE_SLEEP_TIMES_MS);
         std::this_thread::sleep_for(sleepTime);
         ConnectPeerDevice(device);
     });
+    ANS_COND_DO_ERR(ret != ERR_OK, return, "DistributedService::AddDevice: Submit task failed");
 }
 
 void DistributedService::ReleaseDevice(const std::string &deviceId, uint16_t deviceType)
 {
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGE("Check handler is null.");
-        return;
-    }
     std::function<void()> subscribeTask = std::bind([deviceId, deviceType]() {
         DistributedDeviceInfo device;
         if (!DistributedDeviceService::GetInstance().GetDeviceInfo(deviceId, device)) {
@@ -213,7 +193,8 @@ void DistributedService::ReleaseDevice(const std::string &deviceId, uint16_t dev
                 device.udid_);
         }
     });
-    serviceQueue_->submit(subscribeTask);
+    int32_t ret = serviceQueue_.Submit(subscribeTask);
+    ANS_COND_DO_ERR(ret != ERR_OK, return, "DistributedService::ReleaseDevice: Submit task failed");
 }
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
@@ -324,25 +305,18 @@ void DistributedService::HandleStatusChange(const DeviceStatueChangeInfo& change
 
 void DistributedService::DeviceStatusChange(const DeviceStatueChangeInfo& changeInfo)
 {
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGE("Check handler is null.");
-        return;
-    }
     std::function<void()> task = std::bind([&, changeInfo]() {
         ANS_LOGI("Device change %{public}d %{public}d %{public}d", changeInfo.changeType,
             changeInfo.enableChange, changeInfo.liveViewChange);
         HandleStatusChange(changeInfo);
     });
-    serviceQueue_->submit(task);
+    int32_t ret = serviceQueue_.Submit(task);
+    ANS_COND_DO_ERR(ret != ERR_OK, return, "DistributedService::DeviceStatusChange: Submit task failed");
 }
 
 void DistributedService::OnCanceled(const std::shared_ptr<Notification>& notification,
     const DistributedDeviceInfo& peerDevice)
 {
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGE("check handler is null");
-        return;
-    }
     if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
         ANS_LOGE("notification or GetNotificationRequestPoint is nullptr");
         return;
@@ -353,17 +327,13 @@ void DistributedService::OnCanceled(const std::shared_ptr<Notification>& notific
         DistributedPublishService::GetInstance().OnRemoveNotification(peerDevice,
             notificationKey, slotType);
     });
-    serviceQueue_->submit(task);
+    int32_t ret = serviceQueue_.Submit(task);
+    ANS_COND_DO_ERR(ret != ERR_OK, return, "DistributedService::OnCanceled: Submit task failed");
 }
 
 void DistributedService::OnBatchCanceled(const std::vector<std::shared_ptr<Notification>>& notifications,
     const DistributedDeviceInfo& peerDevice)
 {
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGE("check handler is null.");
-        return;
-    }
-
     std::ostringstream keysStream;
     std::ostringstream slotTypesStream;
     for (auto notification : notifications) {
@@ -380,26 +350,23 @@ void DistributedService::OnBatchCanceled(const std::vector<std::shared_ptr<Notif
         DistributedPublishService::GetInstance().OnRemoveNotifications(peerDevice,
             notificationKeys, slotTypes);
     });
-    serviceQueue_->submit(task);
+    int32_t ret = serviceQueue_.Submit(task);
+    ANS_COND_DO_ERR(ret != ERR_OK, return, "DistributedService::OnBatchCanceled: Submit task failed");
 }
 
 void DistributedService::OnApplicationInfnChanged(
     const std::shared_ptr<NotificationApplicationChangeInfo>& applicationChangeInfo)
 {
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGE("Check handler is null.");
-        return;
-    }
- 
     std::function<void()> task = std::bind([applicationChangeInfo]() {
         if (applicationChangeInfo == nullptr) {
             ANS_LOGE("Change info is null.");
             return;
         }
-        ANS_LOGI("On application info change %{public}s.", applicationChangeInfo->Dump().c_str());
+        ANS_LOGI("On application info change: %{public}s.", applicationChangeInfo->Dump().c_str());
         DistributedBundleService::GetInstance().HandleLocalApplicationChanged(applicationChangeInfo);
     });
-    serviceQueue_->submit(task);
+    int32_t ret = serviceQueue_.Submit(task);
+    ANS_COND_DO_ERR(ret != ERR_OK, return, "DistributedService::OnApplicationInfnChanged: Submit task failed");
 }
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
@@ -412,17 +379,14 @@ int32_t DistributedService::OnOperationResponse(const std::shared_ptr<Notificati
 void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request,
     const DistributedDeviceInfo& peerDevice)
 {
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGE("Check handler is null.");
-        return;
-    }
     std::function<void()> task = std::bind([request, peerDevice, this]() {
         if (!OnConsumedSetFlags(request, peerDevice)) {
             return;
         }
         DistributedPublishService::GetInstance().SendNotifictionRequest(request, peerDevice);
     });
-    serviceQueue_->submit(task);
+    int32_t ret = serviceQueue_.Submit(task);
+    ANS_COND_DO_ERR(ret != ERR_OK, return, "DistributedService::OnConsumed: Submit task failed");
 }
 
 void DistributedService::HandleDeviceUsingChange(const DeviceStatueChangeInfo& changeInfo)
@@ -478,23 +442,16 @@ int32_t DistributedService::OnOperationResponse(const std::shared_ptr<Notificati
 
 void DistributedService::SyncDeviceStatus(int32_t status)
 {
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGE("Check handler is null.");
-        return;
-    }
     std::function<void()> task = std::bind([&, status]() {
         DistributedDeviceService::GetInstance().SyncDeviceStatus(DistributedDeviceService::STATE_TYPE_LOCKSCREEN,
             status, false, false);
     });
-    serviceQueue_->submit(task);
+    int32_t ret = serviceQueue_.Submit(task);
+    ANS_COND_DO_ERR(ret != ERR_OK, return, "DistributedService::SyncDeviceStatus: Submit task failed");
 }
 
 void DistributedService::SyncInstalledBundle(const std::string& bundleName, bool isAdd)
 {
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGE("Check handler is null.");
-        return;
-    }
     int32_t userId = DistributedSubscribeService::GetCurrentActiveUserId();
     std::function<void()> task = std::bind([&, userId, bundleName, isAdd]() {
         std::vector<std::pair<std::string, std::string>> bundles;
@@ -534,7 +491,8 @@ void DistributedService::SyncInstalledBundle(const std::string& bundleName, bool
         }
         ANS_LOGI("Sync bundle %{public}d %{public}s %{public}zu.", syncType, bundleName.c_str(), peerDevices.size());
     });
-    serviceQueue_->submit(task);
+    int32_t ret = serviceQueue_.Submit(task);
+    ANS_COND_DO_ERR(ret != ERR_OK, return, "DistributedService::SyncInstalledBundle: Submit task failed");
 }
 #endif
 
@@ -627,7 +585,7 @@ void DistributedService::HandleMatchByType(const int32_t matchType, const Distri
 
 void DistributedService::OnHandleMsg(std::shared_ptr<TlvBox>& box)
 {
-    if (serviceQueue_ == nullptr || box == nullptr) {
+    if (box == nullptr) {
         return;
     }
     std::function<void()> task = std::bind([&, box]() {
@@ -676,7 +634,8 @@ void DistributedService::OnHandleMsg(std::shared_ptr<TlvBox>& box)
                 break;
         }
     });
-    serviceQueue_->submit(task);
+    int32_t ret = serviceQueue_.Submit(task);
+    ANS_COND_DO_ERR(ret != ERR_OK, return, "DistributedService::OnHandleMsg: Submit task failed");
 }
 
 void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)

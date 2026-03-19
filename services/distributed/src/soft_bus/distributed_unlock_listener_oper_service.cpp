@@ -40,13 +40,8 @@ UnlockListenerOperService& UnlockListenerOperService::GetInstance()
     return unlockListenerOperService;
 }
 
-UnlockListenerOperService::UnlockListenerOperService()
+UnlockListenerOperService::UnlockListenerOperService() : operationQueue_("ans_operation")
 {
-    operationQueue_ = std::make_shared<ffrt::queue>("ans_operation");
-    if (operationQueue_ == nullptr) {
-        ANS_LOGE("ffrt create failed!");
-        return;
-    }
     ANS_LOGI("Operation service init successfully.");
 }
 
@@ -145,15 +140,11 @@ void UnlockListenerOperService::ReplyOperationResponse()
 
 void UnlockListenerOperService::HandleOperationTimeOut(const std::string& hashCode)
 {
-    if (operationQueue_ == nullptr) {
-        ANS_LOGE("Operation queue is invalid.");
-        return;
-    }
-
     ANS_LOGI("HandleOperationTimeOut hashCode: %{public}s", hashCode.c_str());
-    operationQueue_->submit_h([&, hashCode]() {
+    int32_t ret = operationQueue_.Submit([&, hashCode]() {
         RemoveOperationResponse(hashCode);
     });
+    ANS_COND_DO_ERR(ret != ERR_OK, return, "UnlockListenerOperService::HandleOperationTimeOut: Submit task failed");
 }
 
 void UnlockListenerOperService::TriggerByJumpType(const std::string& hashCode, const int32_t jumpType,

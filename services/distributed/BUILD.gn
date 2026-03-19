@@ -144,9 +144,13 @@ ohos_shared_library("libdans") {
     "${services_path}/distributed/include/tlv_box",
     "${services_path}/ans/include",
     "${services_path}/distributed/include",
+    "${services_path}/infrastructure/external_adapter/ffrt/include",
   ]
 
-  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/infrastructure:ans_base",
+  ]
 
   defines = []
 
