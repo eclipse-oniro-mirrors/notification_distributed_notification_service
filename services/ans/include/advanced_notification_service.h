@@ -2507,6 +2507,7 @@ private:
         const sptr<NotificationBundleOption> &bundleOption, sptr<NotificationParameters> &parameters);
     ErrCode ExtractWantAgentInfo(
         const std::shared_ptr<NotificationRecord> record, sptr<NotificationParameters> &parameters);
+    bool GrantSoundPermission(const sptr<NotificationRequest> request, sptr<NotificationBundleOption> bundleOption);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;

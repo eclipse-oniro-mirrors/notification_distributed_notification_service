@@ -15,6 +15,8 @@
 
 #include "advanced_notification_service.h"
 
+#include <filesystem>
+
 #include "accesstoken_kit.h"
 #include "access_token_helper.h"
 #include "advanced_notification_flow_control_service.h"
@@ -30,6 +32,8 @@
 #include "os_account_manager_helper.h"
 #include "string_wrapper.h"
 #include "hitrace_util.h"
+#include "uri.h"
+#include "uri_permission_manager_client.h"
 
 namespace OHOS {
 namespace Notification {
@@ -78,6 +82,65 @@ void AdvancedNotificationService::SetControlFlagsByFlagsFor3rd(const sptr<Notifi
         notificationControlFlags |= NotificationConstant::ReminderFlag::BANNER_FLAG;
     }
     request->SetNotificationControlFlags(notificationControlFlags);
+}
+
+std::string NormalizePath(const std::string& path) {
+    std::filesystem::path fsPath(path);
+    std::filesystem::path normalizedPath = fsPath.lexically_normal();
+    return normalizedPath.string();
+}
+
+bool AdvancedNotificationService::GrantSoundPermission(const sptr<NotificationRequest> request,
+    sptr<NotificationBundleOption> bundleOption)
+{
+    if (!request || !bundleOption) {
+        return false;
+    }
+    std::string soundPath = request->GetSound();
+    if (soundPath.empty()) {
+        return false;
+    }
+    std::string uriPath = "";
+    const std::string prefix = "uri::", sceneboard = "com.ohos.sceneboard";
+    if (soundPath.compare(0, prefix.length(), prefix) == 0) {
+        uriPath = soundPath.substr(prefix.length());
+    } else {
+        return false;
+    }
+    auto uid = bundleOption->GetUid();
+    auto bundleName = bundleOption->GetBundleName();
+    auto appIndex = BundleManagerHelper::GetInstance()->GetAppIndexByUid(uid);
+    int32_t userId = -1;
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
+        return false;
+    }
+    int32_t appTokenId =  Security::AccessToken::AccessTokenKit::GetHapTokenID(userId, bundleName, appIndex);
+    int32_t sceneboardTokenId = Security::AccessToken::AccessTokenKit::GetHapTokenID(userId, sceneboard, 0);
+    auto uri = OHOS::Uri(uriPath);
+    bool isGranted = AAFwk::UriPermissionManagerClient::GetInstance().CheckUriAuthorization({uriPath},
+        AAFwk::Want::FLAG_AUTH_READ_URI_PERMISSION, sceneboardTokenId).at(0);
+    if (isGranted) {
+        ANS_LOGI("check sound uri granted");
+        return true;
+    }
+    const std::string FILE_URI_PREFIX = "uri::file://", SANDBOX_BASE_PATH = "/data/storage/el1/base/files/";
+    std::string sandboxPath = "";
+    if (appIndex <= 0) {
+        sandboxPath = FILE_URI_PREFIX + bundleName + SANDBOX_BASE_PATH;
+    } else {
+        sandboxPath = FILE_URI_PREFIX + "+clone-" + std::to_string(appIndex) + "+" + bundleName + SANDBOX_BASE_PATH;
+    }
+    auto normSoundPath = NormalizePath(soundPath), normSandboxPath = NormalizePath(sandboxPath);
+    if (normSoundPath.find(normSandboxPath) != 0) {
+        ANS_LOGE("Path format failed.");
+        return false;
+    }
+    auto result = AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(
+        uri, AAFwk::Want::FLAG_AUTH_READ_URI_PERMISSION, sceneboard, appIndex, appTokenId);
+    if (result != ERR_OK) {
+        ANS_LOGE("GrantUriPermission failed. %{public}d", result);
+    }
+    return result == ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::Publish(const std::string &label, const sptr<NotificationRequest> &request)
@@ -167,6 +230,9 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
             ansStatus = AnsStatus(result, "CheckSoundPermission fail.");
             break;
         }
+        std::string identity = IPCSkeleton::ResetCallingIdentity();
+        GrantSoundPermission(request, bundleOption);
+        IPCSkeleton::SetCallingIdentity(identity);
 
 #ifndef IS_EMULATOR
         if (IsNeedPushCheck(request)) {

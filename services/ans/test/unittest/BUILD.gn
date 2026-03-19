@@ -2130,6 +2130,7 @@ ohos_unittest("notification_extension_test") {
     "ability_runtime:appkit_native",
     "ability_runtime:dataobs_manager",
     "ability_runtime:extension_manager",
+    "ability_runtime:uri_permission_mgr",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
