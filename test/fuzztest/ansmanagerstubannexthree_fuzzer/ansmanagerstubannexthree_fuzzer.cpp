@@ -258,10 +258,7 @@ namespace OHOS {
         service->IsDistributedEnabledByBundle(bundleOption, deviceType, notifictaion, enabledType);
         service->SetSmartReminderEnabled(deviceType, enabled);
         service->IsSmartReminderEnabled(deviceType, enabled);
-        Notification::RawDataContainer rawDataContainer;
-        rawDataContainer.SetRawString(value);
-        sptr<LargeInfoContainer> largeInfoContainer = new (std::nothrow) LargeInfoContainer(rawDataContainer);
-        service->SetAdditionConfig(key1, largeInfoContainer);
+        service->SetAdditionConfig(key1, value);
         service->CancelAsBundleWithAgent(bundleOption, userId);
         if (service->CancelAsBundleWithAgent(bundleOption, userId,
             iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {

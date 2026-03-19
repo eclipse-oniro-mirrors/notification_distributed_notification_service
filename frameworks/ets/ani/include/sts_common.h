@@ -32,7 +32,7 @@ constexpr int32_t PROFILE_NAME_SIZE = 202;
 constexpr int32_t LONG_STR_MAX_SIZE = 1028;
 constexpr int32_t COMMON_TEXT_SIZE = 3074;
 constexpr int32_t SHORT_TEXT_SIZE = 1026;
-constexpr int32_t STR_512K_SIZE = 524288;
+constexpr int32_t STR_500K_SIZE = 512000;
 constexpr float MAX_PIXEL_SIZE = 128.0f;
 const uint32_t STRUCTURED_TEXT_SIZE = 512;
 std::string GetResizeStr(std::string instr, int32_t length);
