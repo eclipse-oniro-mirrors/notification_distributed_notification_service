@@ -15,6 +15,7 @@
 
 import { AsyncCallback, BusinessError } from '@ohos.base';
 import { BundleOption, UserGrantSetting } from 'notification.NotificationCommonDef';
+import { BundleOption, GrantedBundleInfo } from 'notification.NotificationCommonDef';
 import { NotificationExtensionSubscriptionInfo } from 'notification.NotificationExtensionSubscriptionInfo';
 import UIAbilityContext from 'application.UIAbilityContext';
 
@@ -41,17 +42,17 @@ export default namespace notificationExtensionSubscription {
 
     native function nativeOpenSubscriptionSettings(context: UIAbilityContext): Promise<int>;
     native function nativeOpenSubscriptionSettingsWithResult(context: UIAbilityContext): UserGrantSetting;
-    native function nativeSubscribe(info: NotificationExtensionSubscriptionInfo[]): void;
-    native function nativeUnsubscribe(): void;
-    native function nativeGetSubscribeInfo(): NotificationExtensionSubscriptionInfo[];
-    native function nativeGetAllSubscriptionBundles(): BundleOption[];
-    native function nativeIsUserGranted(): boolean;
-    native function nativeGetUserGrantedState(targetBundle:BundleOption): boolean
-    native function nativeSetUserGrantedState(targetBundle:BundleOption, enabled:boolean): void
-    native function nativeGetUserGrantedEnabledBundles(targetBundle: BundleOption): BundleOption[];
-    native function nativeGetUserGrantedEnabledBundlesForSelf(): string[];
-    native function nativeSetUserGrantedBundleState(targetBundle:BundleOption,
-        enabledBundles:BundleOption[], enabled:boolean): void;
+    native function nativeSubscribe(info: NotificationExtensionSubscriptionInfo[]): Promise<void>;
+    native function nativeUnsubscribe(): Promise<void>;
+    native function nativeGetSubscribeInfo(): Promise<NotificationExtensionSubscriptionInfo[]>;
+    native function nativeGetAllSubscriptionBundles(): Promise<BundleOption[]>;
+    native function nativeIsUserGranted(): Promise<boolean>;
+    native function nativeGetUserGrantedState(targetBundle:BundleOption): Promise<boolean>;
+    native function nativeSetUserGrantedState(targetBundle:BundleOption, enabled:boolean): Promise<void>;
+    native function nativeGetUserGrantedEnabledBundles(targetBundle: BundleOption): Promise<BundleOption[]>;
+    native function nativeGetUserGrantedEnabledBundlesForSelf(): Promise<GrantedBundleInfo[]>;
+    native function nativeSetUserGrantedBundleState(targetBundle: BundleOption,
+        enabledBundles:BundleOption[], enabled:boolean): Promise<void>;
 
     function isInvalidParameter(bundle: BundleOption): BusinessError
     {
@@ -108,72 +109,58 @@ export default namespace notificationExtensionSubscription {
     }
 
     function subscribe(info: NotificationExtensionSubscriptionInfo[]): Promise<void> {
-        let pPromise = new Promise<void>((
-            resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSubscribe(info); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSubscribe(info);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     function unsubscribe(): Promise<void> {
-        let pPromise = new Promise<void>((
-            resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeUnsubscribe(); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeUnsubscribe();
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     function getSubscribeInfo(): Promise<NotificationExtensionSubscriptionInfo[]> {
-        let pPromise = new Promise<NotificationExtensionSubscriptionInfo[]>((
-            resolve: ResolveCallback<NotificationExtensionSubscriptionInfo[]>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): NotificationExtensionSubscriptionInfo[] => { 
-                return nativeGetSubscribeInfo(); });
-            p.then((data: Any): void => {
-                let infos : NotificationExtensionSubscriptionInfo[] = 
-                    data as NotificationExtensionSubscriptionInfo[];
-                resolve(infos);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<NotificationExtensionSubscriptionInfo[]>;
+        try {
+            result = nativeGetSubscribeInfo();
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     function getAllSubscriptionBundles(): Promise<BundleOption[]> {
-        let pPromise = new Promise<BundleOption[]>(
-            (resolve: ResolveCallback<BundleOption[]>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): BundleOption[] => { return nativeGetAllSubscriptionBundles(); });
-            p.then((data: Any): void => {
-                let options : BundleOption[] = data as BundleOption[];
-                resolve(options);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<BundleOption[]>;
+        try {
+            result = nativeGetAllSubscriptionBundles();
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     function isUserGranted(): Promise<boolean> {
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeIsUserGranted(); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeIsUserGranted();
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     function getUserGrantedState(targetBundle: BundleOption): Promise<boolean> {
@@ -181,16 +168,14 @@ export default namespace notificationExtensionSubscription {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeGetUserGrantedState(targetBundle); });
-            p.then((data: Any): void => {
-                let ret : boolean = data as boolean;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<boolean>;
+        try {
+            result = nativeGetUserGrantedState(targetBundle);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     function setUserGrantedState(targetBundle: BundleOption, enabled: boolean): Promise<void> {
@@ -198,15 +183,14 @@ export default namespace notificationExtensionSubscription {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetUserGrantedState(targetBundle, enabled); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetUserGrantedState(targetBundle, enabled);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     function getUserGrantedEnabledBundles(targetBundle: BundleOption): Promise<BundleOption[]> {
@@ -214,29 +198,25 @@ export default namespace notificationExtensionSubscription {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<BundleOption[]>((resolve: ResolveCallback<BundleOption[]>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): BundleOption[] => { return nativeGetUserGrantedEnabledBundles(targetBundle); });
-            p.then((data: Any): void => {
-                let bundles : BundleOption[] = data as BundleOption[];
-                resolve(bundles);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<BundleOption[]>;
+        try {
+            result = nativeGetUserGrantedEnabledBundles(targetBundle);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
-    function getUserGrantedEnabledBundles(): Promise<string[]> {
-        let pPromise = new Promise<string[]>((resolve: ResolveCallback<string[]>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): string[] => { return nativeGetUserGrantedEnabledBundlesForSelf(); });
-            p.then((data: Any): void => {
-                let bundles : string[] = data as string[];
-                resolve(bundles);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+    function getUserGrantedEnabledBundles(): Promise<GrantedBundleInfo[]> {
+        let result: Promise<GrantedBundleInfo[]>;
+        try {
+            result = nativeGetUserGrantedEnabledBundlesForSelf();
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     function setUserGrantedBundleState(targetBundle: BundleOption,
@@ -245,14 +225,13 @@ export default namespace notificationExtensionSubscription {
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetUserGrantedBundleState(targetBundle, enabledBundles, enabled); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetUserGrantedBundleState(targetBundle, enabledBundles, enabled);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 }
