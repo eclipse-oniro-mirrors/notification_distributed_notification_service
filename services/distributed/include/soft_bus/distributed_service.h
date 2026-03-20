@@ -16,8 +16,9 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_H
 
+#include <memory>
 #include <string>
-#include "ffrt.h"
+#include "ffrt_queue_impl.h"
 #include "socket.h"
 #include "distributed_subscriber.h"
 #include "distributed_device_data.h"
@@ -75,7 +76,7 @@ private:
 #endif
 
 private:
-    std::shared_ptr<ffrt::queue> serviceQueue_ = nullptr;
+    Infra::FfrtQueueImpl serviceQueue_;
 };
 }
 }

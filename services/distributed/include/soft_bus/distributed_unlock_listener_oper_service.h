@@ -19,7 +19,7 @@
 
 #include <functional>
 
-#include "ffrt.h"
+#include "ffrt_queue_impl.h"
 #include "itimer_info.h"
 #include "notification_constant.h"
 #include "notification_request.h"
@@ -106,7 +106,7 @@ private:
 
 private:
     ffrt::mutex mapLock_;
-    std::shared_ptr<ffrt::queue> operationQueue_ = nullptr;
+    Infra::FfrtQueueImpl operationQueue_;
     std::vector<std::string> hashCodeOrder_;
     std::map<std::string, uint64_t> timerMap_;
     std::map<std::string, NotifictionJumpInfo> delayTaskMap_;
