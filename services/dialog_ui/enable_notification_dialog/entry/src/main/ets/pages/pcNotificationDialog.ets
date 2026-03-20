@@ -116,6 +116,7 @@ struct PermissionDialog {
   @State waterFallMode: boolean = false;
   @State contentSizeChangeUpdated: boolean = false;
   @State firstUpdateCompoment:boolean = true;
+  @State firstUpdateContentWidth:boolean = true;
   @State isBottomPopover: boolean = false;
   @StorageLink('clicked') clicked: boolean = false;
   @Link @Watch('updateOnPageShow') isUpdate: number;
@@ -124,7 +125,8 @@ struct PermissionDialog {
   session?: UIExtensionContentSession;
   controller?: CustomDialogController;
   @State titleContainerWidth: string | number = 'auto';
-  @State maxWidth: number = Constants.PC_DIALOG_WIDTH;
+  @State contentWidth: number = Constants.PC_DIALOG_WIDTH;
+  @State initContentWidth: number = Constants.PC_DIALOG_WIDTH;
 
   build() {
     Row() {
@@ -227,34 +229,40 @@ struct PermissionDialog {
                 })
               }
             }
-            .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-              this.contentComW = vp2px(newValue.width as number);
-              this.contentComH = vp2px(newValue.height as number);
-              console.info(TAG, `content onSizeChange size ${this.contentComW} ${this.contentComH}`);
-              this.updateMaxWidth();
-              if (!this.contentSizeChangeUpdated) {
-                this.updateContentCompoment();
-                this.contentSizeChangeUpdated = true;
-              }
-            })
           }
         }
         .borderRadius(Constants.PC_RDIUS_12)
         .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
-        .width(Constants.PC_DIALOG_WIDTH > this.maxWidth ? this.maxWidth : Constants.PC_DIALOG_WIDTH)
+        .width(this.contentWidth)
         .outline({
             width: 1,
             color: Constants.PC_OUTLINE_COLOR,
             radius: Constants.PC_RDIUS_12
           })
         .clip(true)
+        .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+          this.contentComW = vp2px(newValue.width as number);
+          this.contentComH = vp2px(newValue.height as number);
+          console.info(TAG, `content onSizeChange size ${this.contentComW} ${this.contentComH}`);
+          this.updateContentWidth();
+          if (!this.contentSizeChangeUpdated) {
+            this.updateContentCompoment();
+            this.contentSizeChangeUpdated = true;
+          }
+        })
       }
       .width(Constants.FULL_WIDTH)
       .height(Constants.FULL_HEIGHT)
     }
-    .margin({
-      left: Constants.DIALOG_MARGIN,
-      right: Constants.DIALOG_MARGIN
+    .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+      let dialogWidth = newValue.width as number;
+      console.info(TAG, `dialog onSizeChange  ${dialogWidth} `);
+      if(dialogWidth > 0 && this.contentWidth >= dialogWidth && this.firstUpdateContentWidth) {
+        this.contentWidth = dialogWidth - 32;
+        this.initContentWidth = this.contentWidth;
+      }
+      console.info(TAG, `initContentWidth =  ${this.initContentWidth}`);
+      this.firstUpdateContentWidth = false;
     })
   }
 
@@ -278,23 +286,28 @@ struct PermissionDialog {
   }
 
   async updateOnPageShow(): Promise<void> {
-    if (this.isUpdate > 0) {
+    if (this.isUpdate > 1) {
+      this.isUpdate = 1;
       await this.updateStatus();
       await this.updateContentCompoment();
-      this.isUpdate = 0;
     }
     if (this.uecRectChangeNum > 0) {
-      await this.updateMaxWidth();
-      await this.updateContentCompoment();
       this.uecRectChangeNum = 0;
+      await this.updateContentWidth();
+      if (!this.followParentMode) {
+        await this.updateContentCompoment();
+      }
     }
   }
 
-  async updateMaxWidth(): Promise<void> {
+  async updateContentWidth(): Promise<void> {
+    let tempContentWidth:number  = 0;
     let windowRect = this.dialog?.extensionWindow.properties?.uiExtensionHostWindowProxyRect;
       if (windowRect && windowRect.width > 0) {
-        this.maxWidth = px2vp(windowRect.width) - 32;
+        tempContentWidth = px2vp(windowRect.width) - 32;
       }
+      this.contentWidth = tempContentWidth < this.initContentWidth ? tempContentWidth :this.initContentWidth;
+      console.info(TAG, `contentWidth =  ${this.contentWidth}`);
   }
 
   async updateStatus(): Promise<void> {
