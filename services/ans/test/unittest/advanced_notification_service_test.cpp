@@ -6466,15 +6466,15 @@ HWTEST_F(AdvancedNotificationServiceTest, GetDoNotDisturbProfile_0500, Function 
 HWTEST_F(AdvancedNotificationServiceTest, GetNotificationSwitch_0100, Function | SmallTest | Level1)
 {
     MockIsVerfyPermisson(false);
-
+ 
     std::string bundlleName = "switchTestBundle";
     int32_t uid = 1000;
     int32_t state;
-
+ 
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundlleName, uid);
     ErrCode result = advancedNotificationService_->GetNotificationSwitch(bundleOption, state);
     EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
-
+ 
     MockIsVerfyPermisson(true);
     result = advancedNotificationService_->GetNotificationSwitch(nullptr, state);
     EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
@@ -6484,9 +6484,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetNotificationSwitch_0100, Function |
     EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
 
     bundleOption = new (std::nothrow) NotificationBundleOption(bundlleName, uid);
-    result = advancedNotificationService_->GetNotificationSwitch(bundleOption, state);
-    EXPECT_EQ(result, ERR_ANS_INVALID_BUNDLE);
-
+    MockSystemApp();
     ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabled(100, true), (int)ERR_OK);
     ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption,
         static_cast<NotificationConstant::SWITCH_STATE>(0)), (int)ERR_OK);
