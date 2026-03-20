@@ -35,7 +35,7 @@
 #include "os_account_manager_helper.h"
 #include "distributed_data_define.h"
 #include "nlohmann/json.hpp"
-#include "screen_manager.h"
+#include "screen_manager_helper.h"
 #include "health_white_list_util.h"
 
 namespace OHOS {
@@ -344,8 +344,8 @@ void SmartReminderCenter::CheckScreenOffForCollaboration(const set<string>& sync
         return;
     }
 
-    Rosen::ScreenPowerState powerState = Rosen::ScreenManager::GetInstance().GetScreenPower();
-    current.set(DistributedDeviceStatus::LOCK_FLAG, powerState != Rosen::ScreenPowerState::POWER_OFF);
+    NotificationScreenPowerState powerState = ScreenManagerHelper::GetInstance()->GetScreenPower();
+    current.set(DistributedDeviceStatus::LOCK_FLAG, powerState != NotificationScreenPowerState::POWER_OFF);
     statusMap[NotificationConstant::CURRENT_DEVICE_TYPE] = current;
     ANS_LOGW("Check Screen Off current power %{public}d %{public}s", powerState, current.to_string().c_str());
 }

@@ -16,7 +16,7 @@
 #ifndef NOTIFICATION_DISTRIBUTED_EXTENSION_OPERATION_SERVICE_H
 #define NOTIFICATION_DISTRIBUTED_EXTENSION_OPERATION_SERVICE_H
 
-#include "notifictaion_load_utils.h"
+#include "notification_load_utils.h"
 #include "ffrt.h"
 #include "notification_config_parse.h"
 #include "distributed_data_define.h"

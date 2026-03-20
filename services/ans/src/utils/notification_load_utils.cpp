@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "notifictaion_load_utils.h"
+#include "notification_load_utils.h"
 
 #include <dlfcn.h>
 #include "ans_log_wrapper.h"
