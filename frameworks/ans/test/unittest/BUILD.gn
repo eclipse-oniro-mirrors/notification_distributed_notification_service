@@ -34,6 +34,7 @@ ohos_unittest("ans_test") {
     "${frameworks_module_ans_path}/test/unittest/enabled_notification_callback_data_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/enabled_priority_notification_by_bundle_callback_data_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/enabled_silent_reminder_callback_data_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/large_info_container_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/message_user_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_action_button_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_application_change_info_test.cpp",
@@ -69,6 +70,7 @@ ohos_unittest("ans_test") {
     "${frameworks_module_ans_path}/test/unittest/notification_slot_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_sorting_map_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_sorting_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/notification_statistics_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_subscribe_info_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_template_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_test.cpp",
@@ -76,7 +78,6 @@ ohos_unittest("ans_test") {
     "${frameworks_module_ans_path}/test/unittest/notification_unified_group_info_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_user_input_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/push_promise_callback_test.cpp",
-    "${frameworks_module_ans_path}/test/unittest/large_info_container_test.cpp",
   ]
 
   cflags = [

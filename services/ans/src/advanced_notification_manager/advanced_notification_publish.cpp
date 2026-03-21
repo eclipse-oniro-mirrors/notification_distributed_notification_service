@@ -414,7 +414,9 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
             message.BranchId(EventBranchId::BRANCH_5).ErrorCode(result).Message("Failed to assign notification list");
             return;
         }
-
+#ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
+        SetNotificationStatisticsToDB(record, bundleOption, isNotificationExists);
+#endif
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
         if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {

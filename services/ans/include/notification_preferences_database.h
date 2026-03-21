@@ -54,6 +54,20 @@ public:
      */
     bool PutBundlePropertyToDisturbeDB(const NotificationPreferencesInfo::BundleInfo &bundleInfo);
 
+    bool PutNotificationStatistics(const int32_t userId, const sptr<NotificationBundleOption> &bundleOption);
+    
+    bool CleanExperDbData(const int32_t userId);
+
+    bool DeleteStatisticsByBundle(const int32_t userId, const std::string &bundleName, int32_t packageId);
+
+    bool TimerCleanExperData(const std::vector<int32_t> &userIds);
+
+    bool QueryStatisticsByBundle(const int32_t bundleUid, int32_t &recentCount, int64_t &lastTime);
+
+    bool UpdateCustomTimeDbData(int64_t offsetMs);
+
+    bool DropStatisticsTable(const int32_t userId);
+
     /**
      * @brief Put show badge in the of bundle into disturbe DB.
      *

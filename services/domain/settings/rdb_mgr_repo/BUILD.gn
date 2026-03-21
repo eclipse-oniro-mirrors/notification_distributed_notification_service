@@ -1,4 +1,3 @@
-
 # Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,16 +25,16 @@ ohos_unittest("rdb_mgr_repo_unit_test") {
     "${services_path}/ans/include",
     "include",
     "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
   ]
 
   version_script = "${services_path}/ans/libans.map"
-  sources = [
-    "${services_path}/domain/settings/rdb_mgr_repo/test/src/rdb_mgr_repo_test.cpp",
-  ]
+  sources = [ "${services_path}/domain/settings/rdb_mgr_repo/test/src/rdb_mgr_repo_test.cpp" ]
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources"
+    "${services_path}/ans:ans_service_sources",
   ]
 
   external_deps = [

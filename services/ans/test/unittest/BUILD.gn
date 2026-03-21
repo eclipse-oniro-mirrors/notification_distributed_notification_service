@@ -48,13 +48,13 @@ ohos_unittest("ans_unit_test") {
     "mock/mock_single_kv_store.cpp",
     "mock/mock_swing_callback_stub.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
-    "priority_test/advanced_notification_priority_helper_test.cpp",
-    "priority_test/advanced_notification_priority_manager_service_test.cpp",
-    "priority_test/notification_ai_extension_wrapper_test.cpp",
     "notification_hisysevent_test.cpp",
     "notification_local_live_view_subscriber_manager_test.cpp",
     "notification_slot_filter_test.cpp",
     "permission_filter_test.cpp",
+    "priority_test/advanced_notification_priority_helper_test.cpp",
+    "priority_test/advanced_notification_priority_manager_service_test.cpp",
+    "priority_test/notification_ai_extension_wrapper_test.cpp",
     "reminder_affected_test.cpp",
     "smart_reminder_center_test.cpp",
   ]
@@ -93,6 +93,7 @@ ohos_unittest("ans_unit_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -112,7 +113,6 @@ ohos_unittest("ans_unit_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
   if (distributed_notification_supported) {
     external_deps += [ "device_manager:devicemanagersdk" ]
@@ -149,6 +149,7 @@ ohos_unittest("notification_preferences_database_test") {
     "${services_path}/../framworks/core/include",
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
   ]
 
   defines = []
@@ -187,6 +188,7 @@ ohos_unittest("notification_preferences_database_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -206,7 +208,6 @@ ohos_unittest("notification_preferences_database_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
   if (distributed_notification_supported) {
     external_deps += [ "device_manager:devicemanagersdk" ]
@@ -246,6 +247,7 @@ ohos_unittest("notification_preferences_database_two_test") {
     "${services_path}/../framworks/core/include",
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
   ]
 
   defines = []
@@ -253,8 +255,8 @@ ohos_unittest("notification_preferences_database_two_test") {
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "mock/blob.cpp",
-    "notification_preferences_database_two_test.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
+    "notification_preferences_database_two_test.cpp",
   ]
 
   deps = [
@@ -275,6 +277,7 @@ ohos_unittest("notification_preferences_database_two_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -295,7 +298,6 @@ ohos_unittest("notification_preferences_database_two_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
 
   if (device_usage) {
@@ -329,6 +331,7 @@ ohos_unittest("notification_subscriber_manager_test") {
     "${services_path}/../framworks/core/include",
     "/${services_path}/ans/include/utils",
     "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
   ]
 
   defines = []
@@ -377,6 +380,7 @@ ohos_unittest("notification_subscriber_manager_test") {
     "ability_runtime:dataobs_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -396,7 +400,6 @@ ohos_unittest("notification_subscriber_manager_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
   if (distributed_notification_supported) {
     external_deps += [ "device_manager:devicemanagersdk" ]
@@ -440,6 +443,7 @@ ohos_unittest("notification_service_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
   ]
 
   defines = []
@@ -482,13 +486,14 @@ ohos_unittest("notification_service_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "googletest:gmock_main",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
@@ -501,7 +506,6 @@ ohos_unittest("notification_service_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
   if (distributed_notification_supported) {
     external_deps += [ "device_manager:devicemanagersdk" ]
@@ -558,8 +562,8 @@ ohos_unittest("notification_clone_test") {
     "clone_test/notification_clone_bundle_info_test.cpp",
     "clone_test/notification_clone_bundle_service_test.cpp",
     "clone_test/notification_clone_disturb_service_test.cpp",
-    "clone_test/notification_clone_priority_service_test.cpp",
     "clone_test/notification_clone_manager_test.cpp",
+    "clone_test/notification_clone_priority_service_test.cpp",
     "clone_test/notification_clone_util_test.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
@@ -593,13 +597,14 @@ ohos_unittest("notification_clone_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "googletest:gmock_main",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
@@ -613,7 +618,6 @@ ohos_unittest("notification_clone_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
   if (distributed_notification_supported) {
     external_deps += [ "device_manager:devicemanagersdk" ]
@@ -699,6 +703,7 @@ ohos_unittest("notification_publish_service_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -718,7 +723,6 @@ ohos_unittest("notification_publish_service_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
   if (distributed_notification_supported) {
     external_deps += [ "device_manager:devicemanagersdk" ]
@@ -798,6 +802,7 @@ ohos_unittest("notification_service_publish_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -816,7 +821,6 @@ ohos_unittest("notification_service_publish_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
   if (distributed_notification_supported) {
     external_deps += [ "device_manager:devicemanagersdk" ]
@@ -849,6 +853,7 @@ ohos_unittest("notification_preferences_second_test") {
     "/${services_path}/ans/include",
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
   ]
 
   defines = []
@@ -862,6 +867,7 @@ ohos_unittest("notification_preferences_second_test") {
 
   external_deps = [
     "ability_base:configuration",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "data_share:datashare_consumer",
@@ -871,7 +877,6 @@ ohos_unittest("notification_preferences_second_test") {
     "hitrace:hitrace_meter",
     "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
-    "bluetooth:btframework",
   ]
 
   subsystem_name = "${subsystem_name}"
@@ -888,6 +893,7 @@ ohos_unittest("notification_preferences_test") {
     "${services_path}/ans/include/notification_extension",
     "${services_path}/ans/test/unittest/mock/include",
     "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
   ]
 
   defines = []
@@ -904,9 +910,9 @@ ohos_unittest("notification_preferences_test") {
     "mock/mock_ipc.cpp",
     "mock/mock_push_callback_stub.cpp",
     "mock/mock_single_kv_store.cpp",
+    "notification_dialog_test/mock_os_account_manager_annex.cpp",
     "notification_preferences_info_test.cpp",
     "notification_preferences_test.cpp",
-    "notification_dialog_test/mock_os_account_manager_annex.cpp",
   ]
 
   if (distributed_notification_service_feature_all_scenario_collaboration) {
@@ -931,6 +937,7 @@ ohos_unittest("notification_preferences_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -951,7 +958,6 @@ ohos_unittest("notification_preferences_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
   if (distributed_notification_supported) {
     external_deps += [ "device_manager:devicemanagersdk" ]
@@ -968,6 +974,10 @@ ohos_unittest("notification_preferences_test") {
   }
   if (distributed_notification_service_feature_notification_extension_subscription) {
     defines += [ "NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED" ]
+  }
+
+  if (distributed_notification_service_feature_notification_statistics) {
+    defines += [ "ANS_FEATURE_NOTIFICATION_STATISTICS" ]
   }
 
   cflags = []
@@ -1007,6 +1017,7 @@ ohos_unittest("access_token_helper_test") {
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -1025,7 +1036,6 @@ ohos_unittest("access_token_helper_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1063,6 +1073,7 @@ ohos_unittest("bundle_manager_helper_branch_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -1081,7 +1092,6 @@ ohos_unittest("bundle_manager_helper_branch_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1120,6 +1130,7 @@ ohos_unittest("notification_dialog_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -1138,7 +1149,6 @@ ohos_unittest("notification_dialog_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1194,6 +1204,7 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -1212,7 +1223,6 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1271,6 +1281,7 @@ ohos_unittest("advanced_notification_ringtone_service_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -1289,7 +1300,6 @@ ohos_unittest("advanced_notification_ringtone_service_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
   if (distributed_notification_supported) {
     external_deps += [ "device_manager:devicemanagersdk" ]
@@ -1363,6 +1373,7 @@ ohos_unittest("advanced_notification_geofence_service_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -1381,7 +1392,6 @@ ohos_unittest("advanced_notification_geofence_service_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
   if (distributed_notification_supported) {
     external_deps += [ "device_manager:devicemanagersdk" ]
@@ -1453,6 +1463,7 @@ ohos_unittest("advanced_notification_service_branch_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -1471,7 +1482,6 @@ ohos_unittest("advanced_notification_service_branch_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1492,6 +1502,7 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "/${services_path}/ans/include/utils",
     "${services_path}/domain/settings/rdb_mgr_repo/include",
     "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
   ]
 
   sources = [
@@ -1514,6 +1525,7 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -1534,7 +1546,6 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1568,6 +1579,7 @@ ohos_unittest("push_callback_stub_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -1586,7 +1598,6 @@ ohos_unittest("push_callback_stub_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1605,6 +1616,7 @@ ohos_unittest("notification_rdb_data_mgr_test") {
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
     "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
   ]
 
   sources = [
@@ -1626,6 +1638,7 @@ ohos_unittest("notification_rdb_data_mgr_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -1644,7 +1657,6 @@ ohos_unittest("notification_rdb_data_mgr_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1683,6 +1695,7 @@ ohos_unittest("notification_config_parse_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -1702,7 +1715,6 @@ ohos_unittest("notification_config_parse_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1734,6 +1746,7 @@ ohos_unittest("os_account_manager_helper_test") {
     "ability_runtime:app_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -1752,7 +1765,6 @@ ohos_unittest("os_account_manager_helper_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
 
   if (player_framework) {
@@ -1915,10 +1927,15 @@ ohos_unittest("advanced_notification_service_unit_test") {
     defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
   }
 
+  if (distributed_notification_service_feature_notification_statistics) {
+    defines += [ "ANS_FEATURE_NOTIFICATION_STATISTICS" ]
+  }
+
   external_deps = [
     "ability_base:configuration",
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -1931,7 +1948,6 @@ ohos_unittest("advanced_notification_service_unit_test") {
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
 
   subsystem_name = "${subsystem_name}"
@@ -2003,30 +2019,18 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/domain/settings/rdb_mgr_repo/include",
     "${services_path}/infrastructure/external_adapter/extension/include",
     "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
   ]
 
   sources = [
-    "mock/mock_bundle_manager_helper.cpp",
-    "notification_extension/device_manager_impl_mock.cpp",
-    "notification_extension/distributed_bundle_service_test.cpp",
-    "notification_extension/distributed_collaboration_service_test.cpp",
-    "notification_extension/distributed_device_data_service_test.cpp",
-    "notification_extension/distributed_device_status_test.cpp",
-    "notification_extension/distributed_extension_service_test.cpp",
-    "notification_extension/mock_distributed_operation_callback.cpp",
-    "notification_extension/notification_liveview_utils_test.cpp",
-    "notification_extension/notification_config_parse_mock.cpp",
-    "notification_extension/notification_load_utils_mock.cpp",
-    "notification_extension/notification_operation_service_test.cpp",
     "${services_path}/ans/src/access_token_helper.cpp",
-    "${services_path}/ans/src/advanced_notdisturb_enabled_observer.cpp",
-    "${services_path}/ans/src/advanced_notdisturb_white_list_observer.cpp",
     "${services_path}/ans/src/advanced_aggregation_data_roaming_observer.cpp",
     "${services_path}/ans/src/advanced_datashare_helper.cpp",
     "${services_path}/ans/src/advanced_datashare_helper_data_observer.cpp",
     "${services_path}/ans/src/advanced_datashare_helper_ext.cpp",
     "${services_path}/ans/src/advanced_datashare_observer.cpp",
-    "${services_path}/ans/src/advanced_notification_manager/advanced_notification_cancel.cpp",
+    "${services_path}/ans/src/advanced_notdisturb_enabled_observer.cpp",
+    "${services_path}/ans/src/advanced_notdisturb_white_list_observer.cpp",
     "${services_path}/ans/src/advanced_notification_clone_service.cpp",
     "${services_path}/ans/src/advanced_notification_event_service.cpp",
     "${services_path}/ans/src/advanced_notification_extension_subscription.cpp",
@@ -2034,8 +2038,9 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/advanced_notification_geofence_service.cpp",
     "${services_path}/ans/src/advanced_notification_inline.cpp",
     "${services_path}/ans/src/advanced_notification_live_view_service.cpp",
-    "${services_path}/ans/src/advanced_notification_manager/advanced_notification_publish.cpp",
     "${services_path}/ans/src/advanced_notification_manager/advanced_notification_atomic_service_publish.cpp",
+    "${services_path}/ans/src/advanced_notification_manager/advanced_notification_cancel.cpp",
+    "${services_path}/ans/src/advanced_notification_manager/advanced_notification_publish.cpp",
     "${services_path}/ans/src/advanced_notification_manager/advanced_notification_query.cpp",
     "${services_path}/ans/src/advanced_notification_publish/base_publish_process.cpp",
     "${services_path}/ans/src/advanced_notification_publish/common_notification_publish_process.cpp",
@@ -2051,18 +2056,18 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/badge_manager/badge_manager.cpp",
     "${services_path}/ans/src/clone/dh_notification_clone_bundle_service.cpp",
     "${services_path}/ans/src/clone/notification_clone_bundle_info.cpp",
-    "${services_path}/ans/src/clone/notification_clone_priority_info.cpp",
     "${services_path}/ans/src/clone/notification_clone_bundle_service.cpp",
     "${services_path}/ans/src/clone/notification_clone_disturb_service.cpp",
     "${services_path}/ans/src/clone/notification_clone_geofence_switch.cpp",
-    "${services_path}/ans/src/clone/notification_clone_priority_service.cpp",
     "${services_path}/ans/src/clone/notification_clone_manager.cpp",
+    "${services_path}/ans/src/clone/notification_clone_priority_info.cpp",
+    "${services_path}/ans/src/clone/notification_clone_priority_service.cpp",
     "${services_path}/ans/src/clone/notification_clone_util.cpp",
     "${services_path}/ans/src/common/aes_gcm_helper.cpp",
-    "${services_path}/ans/src/common/file_utils.cpp",
-    "${services_path}/ans/src/common/notification_analytics_util.cpp",
     "${services_path}/ans/src/common/ans_status.cpp",
+    "${services_path}/ans/src/common/file_utils.cpp",
     "${services_path}/ans/src/common/health_white_list_util.cpp",
+    "${services_path}/ans/src/common/notification_analytics_util.cpp",
     "${services_path}/ans/src/common/notification_app_privileges.cpp",
     "${services_path}/ans/src/common/system_sound_helper.cpp",
     "${services_path}/ans/src/distributed_device_status.cpp",
@@ -2090,13 +2095,13 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/notification_smart_reminder/reminder_affected.cpp",
     "${services_path}/ans/src/notification_smart_reminder/smart_reminder_center.cpp",
     "${services_path}/ans/src/notification_smart_reminder/string_utils.cpp",
-    "${services_path}/ans/src/priority_notification/advanced_notification_priority_manager_service.cpp",
-    "${services_path}/ans/src/priority_notification/advanced_notification_priority_helper.cpp",
-    "${services_path}/ans/src/priority_notification/notification_ai_extension_wrapper.cpp",
     "${services_path}/ans/src/notification_subscriber_manager.cpp",
     "${services_path}/ans/src/notification_timer_info.cpp",
     "${services_path}/ans/src/os_account_manager_helper.cpp",
     "${services_path}/ans/src/permission_filter.cpp",
+    "${services_path}/ans/src/priority_notification/advanced_notification_priority_helper.cpp",
+    "${services_path}/ans/src/priority_notification/advanced_notification_priority_manager_service.cpp",
+    "${services_path}/ans/src/priority_notification/notification_ai_extension_wrapper.cpp",
     "${services_path}/ans/src/reminder_swing_decision_center.cpp",
     "${services_path}/ans/src/report_time_info.cpp",
     "${services_path}/ans/src/system_dialog_connect_stb.cpp",
@@ -2108,6 +2113,18 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/domain/settings/rdb_mgr_repo/src/on_rdb_operation_fail_report.cpp",
     "${services_path}/domain/settings/rdb_mgr_repo/src/on_rdb_upgrade_liveview_migrate.cpp",
     "${services_path}/domain/settings/rdb_mgr_repo/src/on_send_user_data_size_hisysevent.cpp",
+    "mock/mock_bundle_manager_helper.cpp",
+    "notification_extension/device_manager_impl_mock.cpp",
+    "notification_extension/distributed_bundle_service_test.cpp",
+    "notification_extension/distributed_collaboration_service_test.cpp",
+    "notification_extension/distributed_device_data_service_test.cpp",
+    "notification_extension/distributed_device_status_test.cpp",
+    "notification_extension/distributed_extension_service_test.cpp",
+    "notification_extension/mock_distributed_operation_callback.cpp",
+    "notification_extension/notification_config_parse_mock.cpp",
+    "notification_extension/notification_liveview_utils_test.cpp",
+    "notification_extension/notification_load_utils_mock.cpp",
+    "notification_extension/notification_operation_service_test.cpp",
   ]
 
   defines = []
@@ -2134,6 +2151,7 @@ ohos_unittest("notification_extension_test") {
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -2158,7 +2176,6 @@ ohos_unittest("notification_extension_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
-    "bluetooth:btframework",
   ]
   if (distributed_notification_supported) {
     external_deps += [ "device_manager:devicemanagersdk" ]
@@ -2187,6 +2204,7 @@ group("unittest") {
     ":ans_unit_test",
     ":bundle_manager_helper_branch_test",
     ":common_utils_test",
+    ":notification_clone_test",
     ":notification_config_parse_test",
     ":notification_dialog_test",
     ":notification_extension_test",
@@ -2200,7 +2218,6 @@ group("unittest") {
     ":notification_rdb_data_mgr_test",
     ":notification_service_publish_test",
     ":notification_service_test",
-    ":notification_clone_test",
     ":notification_subscriber_manager_branch_test",
     ":notification_subscriber_manager_test",
     ":os_account_manager_helper_test",

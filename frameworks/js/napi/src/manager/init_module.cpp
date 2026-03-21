@@ -43,6 +43,7 @@
 #include "napi_silent_reminder_enable.h"
 #include "napi_reminder_info.h"
 #include "napi_badge_query_callback.h"
+#include "napi_statistics.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -116,6 +117,11 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setGeofenceEnabled", NapiSetGeofenceEnabled),
         DECLARE_NAPI_FUNCTION("isGeofenceEnabled", NapiIsGeofenceEnabled),
         DECLARE_NAPI_FUNCTION("setReminderInfoByBundles", NapiSetReminderInfoByBundles),
+#ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
+        DECLARE_NAPI_FUNCTION("getNotificationStatisticsByBundle", NapiGetNotificationStatisticsByBundle),
+#else
+        DECLARE_NAPI_FUNCTION("getNotificationStatisticsByBundle", Common::NapiReturnCapErrCb),
+#endif
 
 #ifdef ANS_FEATURE_BADGE_MANAGER
         DECLARE_NAPI_FUNCTION("displayBadge", NapiDisplayBadge),

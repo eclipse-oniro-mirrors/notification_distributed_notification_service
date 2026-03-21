@@ -18,6 +18,7 @@
 #include <fstream>
 #include <memory>
 #include <mutex>
+#include <algorithm>
 
 #include "ability_manager_client.h"
 #include "access_token_helper.h"
@@ -47,6 +48,10 @@ constexpr static const char* KEY_PRIORITY_CONFIG_FOR_BUNDLE = "priorityConfigFor
 constexpr static const char* KEY_PRIORITY_NOTIFICATION_SWITCH_FOR_BUNDLE_V2 = "priorityNotificationSwitchForBundleV2";
 constexpr static const char* KEY_PRIORITY_NOTIFICATION_STRATEGY_FOR_BUNDLE = "priorityStrategyForBundle";
 const static std::string KEY_UNDER_LINE = "_";
+const static int32_t STATISTIC_INDEX_ZERO = 0;
+const static int32_t STATISTIC_INDEX_ONE = 1;
+const static int32_t STATISTIC_INDEX_TWO = 2;
+const static int32_t STATISTIC_INDEX_THR = 3;
 }
 ffrt::mutex NotificationPreferences::instanceMutex_;
 std::shared_ptr<NotificationPreferences> NotificationPreferences::instance_;
@@ -114,6 +119,114 @@ ErrCode NotificationPreferences::AddNotificationSlots(
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
     }
+    return result;
+}
+
+ErrCode NotificationPreferences::TimerCleanExperData()
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    ErrCode result = ERR_OK;
+
+    std::vector<int32_t> userIds;
+    result = OsAccountManagerHelper::GetInstance().GetAllActiveOsAccount(userIds);
+    if (result != ERR_OK) {
+        ANS_LOGE("NotificationPreferences::TimerCleanExperData GetAllActiveOsAccount fail");
+        return result;
+    }
+
+    if (!preferncesDB_->TimerCleanExperData(userIds)) {
+        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+
+    ANS_LOGD("NotificationPreferences::TimerCleanExperData.result: %{public}d", result);
+    return result;
+}
+
+ErrCode NotificationPreferences::CleanExperData(const int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    ErrCode result = ERR_OK;
+
+    if (!preferncesDB_->CleanExperDbData(userId)) {
+        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+
+    ANS_LOGD("NotificationPreferences::CleanExperData.result: %{public}d", result);
+    return result;
+}
+
+ErrCode NotificationPreferences::DeleteStatisticsByBundle(const int32_t userId,
+    const std::string &bundleName, int32_t packageId)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    ErrCode result = ERR_OK;
+
+    if (!preferncesDB_->DeleteStatisticsByBundle(userId, bundleName, packageId)) {
+        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+
+    ANS_LOGI("NotificationPreferences::DeleteStatisticsByBundle.result: %{public}d", result);
+    return result;
+}
+
+ErrCode NotificationPreferences::QueryStatisticsByBundle(const sptr<NotificationBundleOption>& bundle,
+    int32_t &recentCount, int64_t &lastTime)
+{
+    if (!bundle) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode result = ERR_OK;
+
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);	 
+     if (!preferncesDB_->QueryStatisticsByBundle(bundle->GetUid(), recentCount, lastTime)) { 
+         result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED; 
+     }
+     ANS_LOGD("NotificationPreferences::QueryStatisticsByBundle.result: %{public}d", result);	 
+     return result;
+}
+
+ErrCode NotificationPreferences::UpdateCustomTimeData(int64_t offsetMs)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    ErrCode result = ERR_OK;
+
+    if (!preferncesDB_->UpdateCustomTimeDbData(offsetMs)) {
+        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+
+    ANS_LOGD("NotificationPreferences::UpdateCustomTimeData.result: %{public}d", result);
+    return result;
+}
+
+ErrCode NotificationPreferences::DropStatisticsTable(const int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    ErrCode result = ERR_OK;
+
+    if (!preferncesDB_->DropStatisticsTable(userId)) {
+        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode NotificationPreferences::PutNotificationStatistics(const int32_t userId,
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGD("NotificationPreferences::PutNotificationStatistics");
+
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    ErrCode result = ERR_OK;
+
+    if (!preferncesDB_->PutNotificationStatistics(userId, bundleOption)) {
+        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+
+    ANS_LOGI("NotificationPreferences::PutNotificationStatistics2.result: %{public}d", result);
     return result;
 }
 

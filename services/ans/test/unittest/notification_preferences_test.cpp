@@ -1022,6 +1022,123 @@ HWTEST_F(NotificationPreferencesTest, GetHasPoppedDialog_00100, Function | Small
 }
 
 /**
+ * @tc.number    : PutNotificationStatistics_00100
+ * @tc.name      : PutNotificationStatistics
+ * @tc.desc      : put notification data to table in DB
+ */
+HWTEST_F(NotificationPreferencesTest, PutNotificationStatistics_00100, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("", 100);
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->PutNotificationStatistics(
+        100, bundle), ERR_ANS_INVALID_PARAM);
+
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->PutNotificationStatistics(
+        100, nullptr), ERR_ANS_INVALID_PARAM);
+    
+    sptr<NotificationBundleOption> bundle01 = new NotificationBundleOption("testBundle", 100);
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->PutNotificationStatistics(
+        100, bundle01), ERR_OK);
+}
+
+/**
+ * @tc.number    : TimerCleanExperData_00101
+ * @tc.name      : TimerCleanExperData
+ * @tc.desc      : clean exper data in statistics table
+ */
+HWTEST_F(NotificationPreferencesTest, TimerCleanExperData_00101, Function | SmallTest | Level1)
+{
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->TimerCleanExperData(),
+        ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->PutNotificationStatistics(
+        100, bundle), ERR_OK);
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->TimerCleanExperData(), ERR_OK);
+}
+
+/**
+ * @tc.number    : CleanExperData_00100
+ * @tc.name      : CleanExperData
+ * @tc.desc      : clean exper data in statistics table
+ */
+HWTEST_F(NotificationPreferencesTest, CleanExperData_00100, Function | SmallTest | Level1)
+{
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->CleanExperData(100),
+        ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->PutNotificationStatistics(
+        100, bundle), ERR_OK);
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->CleanExperData(100), ERR_OK);
+}
+
+
+/**
+ * @tc.number    : DeleteStatisticsByBundle_00100
+ * @tc.name      : DeleteStatisticsByBundle
+ * @tc.desc      : delete statistics table data by bundle
+ */
+HWTEST_F(NotificationPreferencesTest, DeleteStatisticsByBundle_00100, Function | SmallTest | Level1)
+{
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->DeleteStatisticsByBundle(100,
+        "testBundle", 100), ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->PutNotificationStatistics(
+        100, bundle), ERR_OK);
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->DeleteStatisticsByBundle(100,
+        "testBundle", 100), ERR_OK);
+}
+
+/**
+ * @tc.number    : QueryStatisticsByBundle_00100
+ * @tc.name      : QueryStatisticsByBundle
+ * @tc.desc      : query statistics table data by bundle
+ */
+HWTEST_F(NotificationPreferencesTest, QueryStatisticsByBundle_00100, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("", 1);
+    int32_t recentCount = 0;
+    int64_t lastTime = 0;
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->QueryStatisticsByBundle(nullptr,
+        recentCount, lastTime), ERR_ANS_INVALID_PARAM);
+
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->QueryStatisticsByBundle(bundle,
+        recentCount, lastTime), ERR_OK);
+}
+
+/**
+ * @tc.number    : UpdateCustomTimeData_00100
+ * @tc.name      : UpdateCustomTimeData
+ * @tc.desc      : update statistics table notificationTime
+ */
+HWTEST_F(NotificationPreferencesTest, UpdateCustomTimeData_00100, Function | SmallTest | Level1)
+{
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->UpdateCustomTimeData(1),
+        ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->PutNotificationStatistics(
+        100, bundle), ERR_OK);
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->UpdateCustomTimeData(1), ERR_OK);
+}
+
+/**
+ * @tc.number    : DropStatisticsTable_00100
+ * @tc.name      : DropStatisticsTable
+ * @tc.desc      : drop statistics_userid table in DB
+ */
+HWTEST_F(NotificationPreferencesTest, DropStatisticsTable_00100, Function | SmallTest | Level1)
+{
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->DropStatisticsTable(100),
+        ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->PutNotificationStatistics(
+        100, bundle), ERR_OK);
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->DropStatisticsTable(100), ERR_OK);
+}
+
+/**
  * @tc.number    : AddNotificationBundleProperty_00100
  * @tc.name      : AddNotificationBundleProperty
  * @tc.desc      : Add a notification BundleProperty into distrube DB when bundleOption is null,

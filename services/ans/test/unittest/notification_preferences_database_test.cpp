@@ -376,6 +376,92 @@ HWTEST_F(NotificationPreferencesDatabaseTest, CheckKvStore_00100, Function | Sma
 }
 
 /**
+ * @tc.name      : DropStatisticsTable
+ * @tc.number    :
+ * @tc.desc      : drop statistics DB table
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, DropStatisticsTable_00100, Function | SmallTest | Level1)
+{
+    EXPECT_TRUE(preferncesDB_->CheckRdbStore());
+    EXPECT_TRUE(preferncesDB_->DropStatisticsTable(100));
+}
+
+/**
+ * @tc.name      : TimerCleanExperData
+ * @tc.number    :
+ * @tc.desc      : clean exper data in DB table
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, TimerCleanExperData_00100, Function | SmallTest | Level1)
+{
+    EXPECT_TRUE(preferncesDB_->CheckRdbStore());
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("testbundle", 100);
+    EXPECT_TRUE(preferncesDB_->PutNotificationStatistics(100, bundleOption));
+    EXPECT_TRUE(preferncesDB_->TimerCleanExperData({100}));
+}
+
+/**
+ * @tc.name      : CleanExperDbData
+ * @tc.number    :
+ * @tc.desc      : clean exper data in DB table
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, CleanExperDbData_00100, Function | SmallTest | Level1)
+{
+    EXPECT_TRUE(preferncesDB_->CheckRdbStore());
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("testbundle", 100);
+    EXPECT_TRUE(preferncesDB_->PutNotificationStatistics(100, bundleOption));
+    EXPECT_TRUE(preferncesDB_->CleanExperDbData(100));
+}
+
+/**
+ * @tc.name      : DeleteStatisticsByBundle
+ * @tc.number    :
+ * @tc.desc      : delete statistics table data by bundle in DB table
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, DeleteStatisticsByBundle_00100, Function | SmallTest | Level1)
+{
+    EXPECT_TRUE(preferncesDB_->CheckRdbStore());
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("testbundle", 100);
+    EXPECT_TRUE(preferncesDB_->PutNotificationStatistics(100, bundleOption));
+    EXPECT_TRUE(preferncesDB_->DeleteStatisticsByBundle(100, "testbundle", 100));
+}
+
+/**
+ * @tc.name      : PutNotificationStatistics
+ * @tc.number    :
+ * @tc.desc      : insert data to statistics table in DB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutNotificationStatistics_00100, Function | SmallTest | Level1)
+{
+    EXPECT_TRUE(preferncesDB_->CheckRdbStore());
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("", 1);
+    EXPECT_TRUE(preferncesDB_->PutNotificationStatistics(100, bundleOption));
+}
+
+/**
+ * @tc.name      : UpdateCustomTimeDbData
+ * @tc.number    :
+ * @tc.desc      : update timestamp due to users in DB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, UpdateCustomTimeDbData_00100, Function | SmallTest | Level1)
+{
+    EXPECT_TRUE(preferncesDB_->CheckRdbStore());
+    EXPECT_TRUE(preferncesDB_->UpdateCustomTimeDbData(1));
+}
+
+/**
+ * @tc.name      : QueryStatisticsByBundle
+ * @tc.number    :
+ * @tc.desc      : query statistics by bundle in DB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, QueryStatisticsByBundle_00100, Function | SmallTest | Level1)
+{
+    EXPECT_TRUE(preferncesDB_->CheckRdbStore());
+    int32_t recentCount = 0;
+    int64_t lastTime = 0;
+    EXPECT_TRUE(preferncesDB_->QueryStatisticsByBundle(100, recentCount, lastTime));
+}
+
+/**
  * @tc.name      : CheckKvStore_00200
  * @tc.number    :
  * @tc.desc      : Check disturbe DB is exsit, return is false.

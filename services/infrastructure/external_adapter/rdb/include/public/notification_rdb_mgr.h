@@ -26,10 +26,12 @@
 #include "notification_rdb_config.h"
 #include "notification_rdb_hook.h"
 #include "notification_rdb_event_handler_type.h"
+#include "rdb_store_wrapper.h"
 
 namespace OHOS::Notification::Infra {
 
 class NtfRdbStoreWrapper;
+struct StatisticsWrapperInfo;
 
 /**
  * @class NotificationRdbMgr
@@ -66,6 +68,21 @@ public:
      * @param userId User id used for per-user tables (implementation defines the valid range).
      */
     int32_t InsertData(const std::string &key, const std::string &value, const int32_t &userId = -1);
+
+    int32_t CleanStatisticsExperData(const int32_t userId);
+
+    int32_t DeleteStatisticsByBundle(const int32_t userId, const std::string &bundleName, int32_t packageId);
+
+    int32_t CleanStatisticsExperDataTimer(const std::vector<int32_t> &userIds);
+
+    int32_t InsertStatisticsData(const int32_t userId, const struct StatisticsWrapperInfo &info);
+
+    int32_t QueryStatisticsByBundle(const int32_t bundleUid,
+        const int32_t uid, const int64_t beginTime, int32_t &totalCount, int64_t &lastTime);
+
+    int32_t UpdateStatisticsTime(const int32_t userId, int64_t offsetMs);
+
+    int32_t DropStatisticsTable(const int32_t userId);
 
     /**
      * @brief Insert or replace a blob value by key.

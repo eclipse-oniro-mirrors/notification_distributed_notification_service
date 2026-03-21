@@ -46,6 +46,7 @@ public:
 private:
     void OnStart() final;
     void OnStop() final;
+    bool SubscribeCommonEvent();
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     void OnReceiveEvent(const EventFwk::CommonEventData &data);

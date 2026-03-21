@@ -33,6 +33,8 @@
 #include "distributed_data_define.h"
 #include "ans_rdb_mgr_builder.h"
 #include "notification_rdb_mgr.h"
+#include "advanced_notification_inline.h"
+
 namespace OHOS {
 namespace Notification {
 /**
@@ -275,6 +277,8 @@ const static std::string KEY_SECOND_REMOVED_FLAG = "2";
 
 constexpr int32_t CLEAR_SLOT_FROM_AVSEESAION = 1;
 
+constexpr int32_t QUERY_STATISTICS_HOURS = 6 * 24;
+
 /**
  * Indicates hashCode rule.
  */
@@ -284,6 +288,7 @@ const static std::string CLONE_BUNDLE = "bundle_";
 const static std::string CLONE_PROFILE = "profile_";
 const static std::string CLONE_PRIORITY = "priority_";
 const static std::string KEY_DISABLE_NOTIFICATION = "disableNotificationFeature";
+const static std::string NITIFICATION_CREATE_TYPE = "1";
 constexpr int32_t ZERO_USER_ID = 0;
 const static int32_t DISTRIBUTED_KEY_NUM = 4;
 const static int32_t DISTRIBUTED_KEY_BUNDLE_INDEX = 1;
@@ -363,7 +368,6 @@ bool NotificationPreferencesDatabase::CheckRdbStore()
             return true;
         }
     }
-
     return false;
 }
 
@@ -397,6 +401,98 @@ bool NotificationPreferencesDatabase::PutSlotsToDisturbeDB(
     }
     int32_t result = rdbDataManager_->InsertBatchData(values, userId);
     return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::UpdateCustomTimeDbData(int64_t offsetMs)
+{
+    std::vector<int> activeUserId;
+    OsAccountManagerHelper::GetInstance().GetAllActiveOsAccount(activeUserId);
+
+    int32_t result = NativeRdb::E_OK;
+    for (auto iter : activeUserId) {
+        result = rdbDataManager_->UpdateStatisticsTime(iter, offsetMs);
+        if (result != NativeRdb::E_OK) {
+            break;
+        }
+    }
+    return result == NativeRdb::E_OK ? true : false;
+}
+
+bool NotificationPreferencesDatabase::QueryStatisticsByBundle(
+    const int32_t bundleUid, int32_t &recentCount, int64_t &lastTime)
+{
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleUid, userId);
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+    auto startDuration = getTodayStartLocalDuration();
+    auto targetLocalDuration = startDuration - std::chrono::hours(QUERY_STATISTICS_HOURS);
+    auto targetUtc = std::chrono::system_clock::time_point(targetLocalDuration - getCurrentTimezoneOffset());
+    auto beginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(targetUtc.time_since_epoch());
+    int64_t beginTime = beginDuration.count();
+    int32_t result = rdbDataManager_->QueryStatisticsByBundle(bundleUid, userId, beginTime, recentCount, lastTime);
+    
+    return result == NativeRdb::E_OK ? true : false;
+}
+
+bool NotificationPreferencesDatabase::DropStatisticsTable(const int32_t userId)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+    int32_t result = rdbDataManager_->DropStatisticsTable(userId);
+    return result == NativeRdb::E_OK ? true : false;
+}
+
+bool NotificationPreferencesDatabase::TimerCleanExperData(const std::vector<int32_t> &userIds)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+    int32_t result = rdbDataManager_->CleanStatisticsExperDataTimer(userIds);
+    return result == NativeRdb::E_OK ? true : false;
+}
+
+bool NotificationPreferencesDatabase::CleanExperDbData(const int32_t userId)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+    int32_t result = rdbDataManager_->CleanStatisticsExperData(userId);
+    return result == NativeRdb::E_OK ? true : false;
+}
+
+bool NotificationPreferencesDatabase::DeleteStatisticsByBundle(const int32_t userId,
+    const std::string &bundleName, int32_t packageId)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+    int32_t result = rdbDataManager_->DeleteStatisticsByBundle(userId, bundleName, packageId);
+    return result == NativeRdb::E_OK ? true : false;
+}
+
+bool NotificationPreferencesDatabase::PutNotificationStatistics(const int32_t userId,
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+    std::string bundleName = bundleOption->GetBundleName();
+    int32_t PackageId = bundleOption->GetUid();
+
+    Infra::StatisticsWrapperInfo info { GetCurrentTime(), bundleName,
+        PackageId, NITIFICATION_CREATE_TYPE };
+
+    int32_t result = rdbDataManager_->InsertStatisticsData(userId, info);
+    return result == NativeRdb::E_OK ? true : false;
 }
 
 bool NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(

@@ -206,6 +206,98 @@ HWTEST_F(
     EXPECT_EQ(test.isDatashaReready_, true);
 }
 
+/**
+ * @tc.number    : AdvancedNotificationServiceAbilityTest_01100
+ * @tc.name      : AdvancedNotificationServiceAbilityTest_01100
+ * @tc.desc      : Structure AdvancedNotificationServiceAbility with systemAbilityId and runOnCreate
+ */
+HWTEST_F(
+    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_01100, Function | SmallTest | Level1)
+{
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    std::string deviceId = "deviceId";
+    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    data.SetWant(want.SetAction("usual.event.TIME_CHANGED"));
+    test.OnReceiveEvent(data);
+    EXPECT_EQ(test.isDatashaReready_, false);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceAbilityTest_01200
+ * @tc.name      : AdvancedNotificationServiceAbilityTest_01200
+ * @tc.desc      : Structure AdvancedNotificationServiceAbility with systemAbilityId and runOnCreate
+ */
+HWTEST_F(
+    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_01200, Function | SmallTest | Level1)
+{
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    std::string deviceId = "deviceId";
+    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    data.SetWant(want.SetAction("usual.event.PACKAGE_REMOVED"));
+    test.OnReceiveEvent(data);
+    EXPECT_EQ(test.isDatashaReready_, false);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceAbilityTest_01300
+ * @tc.name      : AdvancedNotificationServiceAbilityTest_01300
+ * @tc.desc      : Structure AdvancedNotificationServiceAbility with systemAbilityId and runOnCreate
+ */
+HWTEST_F(
+    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_01300, Function | SmallTest | Level1)
+{
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    std::string deviceId = "deviceId";
+    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    data.SetWant(want.SetAction("usual.event.USER_REMOVED"));
+    test.OnReceiveEvent(data);
+    EXPECT_EQ(test.isDatashaReready_, false);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceAbilityTest_01400
+ * @tc.name      : AdvancedNotificationServiceAbilityTest_01400
+ * @tc.desc      : Structure AdvancedNotificationServiceAbility with systemAbilityId and runOnCreate
+ */
+HWTEST_F(
+    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_01400, Function | SmallTest | Level1)
+{
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    std::string deviceId = "deviceId";
+    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    data.SetWant(want.SetAction("usual.event.TIMEZONE_CHANGED"));
+    test.OnReceiveEvent(data);
+    EXPECT_EQ(test.isDatashaReready_, false);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceAbilityTest_01500
+ * @tc.name      : AdvancedNotificationServiceAbilityTest_01500
+ * @tc.desc      : Structure AdvancedNotificationServiceAbility with systemAbilityId and runOnCreate
+ */
+HWTEST_F(
+    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_01500, Function | SmallTest | Level1)
+{
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    std::string deviceId = "deviceId";
+    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
+    test.SubscribeCommonEvent();
+    EXPECT_EQ(test.isDatashaReready_, false);
+}
+
 #ifdef ALL_SCENARIO_COLLABORATION
 /**
  * @tc.number    : AdvancedNotificationServiceAbilityTest_02000

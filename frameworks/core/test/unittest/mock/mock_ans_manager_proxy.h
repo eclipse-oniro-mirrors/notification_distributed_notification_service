@@ -297,6 +297,8 @@ public:
     MOCK_METHOD1(RegisterBadgeQueryCallback, ErrCode(const sptr<IBadgeQueryCallback>&));
     MOCK_METHOD0(UnRegisterBadgeQueryCallback, ErrCode());
     MOCK_METHOD2(GetNotificationSwitch, ErrCode(const sptr<NotificationBundleOption>&, int32_t&));
+    MOCK_METHOD2(GetStatisticsByBundle, ErrCode(
+        const std::vector<sptr<NotificationBundleOption>>&, std::vector<NotificationStatistics>&));
 };
 } // namespace Notification
 } // namespace OHOS

@@ -65,6 +65,7 @@
 #include "notification_extension_wrapper.h"
 #include "bool_wrapper.h"
 #include "notification_config_parse.h"
+#include "notification_statistics.h"
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_notification_manager.h"
@@ -357,6 +358,9 @@ AdvancedNotificationService::AdvancedNotificationService()
         std::bind(&AdvancedNotificationService::OnDistributedKvStoreDeathRecipient, this));
     dataManager_.RegisterKvStoreServiceDeathRecipient(distributedKvStoreDeathRecipient_);
     InitDistributeCallBack();
+#endif
+#ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
+    NotificationAnalyticsUtil::CreateCleanExperDataTimerExecute();
 #endif
 }
 
@@ -753,6 +757,30 @@ AnsStatus AdvancedNotificationService::PublishPreparedNotification(const sptr<No
     return PublishPreparedNotificationInner(parameter);
 }
 
+#ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
+void AdvancedNotificationService::SetNotificationStatisticsToDB(const std::shared_ptr<NotificationRecord> &record,
+    const sptr<NotificationBundleOption> bundleOption, const bool isExists)
+{
+    if (record->request->IsSystemLiveView() ||
+        record->request->IsCommonLiveView() || record->request->IsTriggerLiveView()) {
+        return;
+    }
+    if (!isExists) {
+        int32_t userId = INVALID_USER_ID;
+        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+        if (userId < 0) {
+            return;
+        }
+        auto result = NotificationPreferences::GetInstance()->PutNotificationStatistics(
+            userId, bundleOption);
+        ANS_LOGD("AdvancedNotificationService PutNotificationStatistics: %{public}d", result);
+
+        result = NotificationPreferences::GetInstance()->CleanExperData(userId);
+        ANS_LOGD("AdvancedNotificationService CleanExperData: %{public}d", result);
+    }
+}
+#endif
+
 AnsStatus __attribute__((weak)) AdvancedNotificationService::PublishPreparedNotificationInner(
     const PublishNotificationParameter &parameter)
 {
@@ -869,6 +897,9 @@ AnsStatus __attribute__((weak)) AdvancedNotificationService::PublishPreparedNoti
             ansStatus = AnsStatus(result, "SetNotificationRequestToDb fail.");
             return;
         }
+#ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
+        SetNotificationStatisticsToDB(record, bundleOption, isNotificationExists);
+#endif
         NotificationAnalyticsUtil::ReportPublishWithUserInput(request);
         NotificationAnalyticsUtil::ReportPublishSuccessEvent(request, message);
         NotificationAnalyticsUtil::ReportPublishBadge(request);
@@ -1039,6 +1070,45 @@ ErrCode AdvancedNotificationService::IsNotifyAllowedInDoNotDisturb(int32_t userI
         isAllowed = false;
         ANS_LOGI("Currently app is not in white list.");
     }
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetStatisticsByBundle(const std::vector<sptr<NotificationBundleOption>> &bundles,
+    std::vector<NotificationStatistics> &statistics)
+{
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_26, EventBranchId::BRANCH_0);
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("IsSystemApp is false");
+        message.Message("Not systemApp.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NON_SYSTEM_APP));
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission NOTIFICATION_CONTROLLER denied for uid=%{public}d, pid=%{public}d",
+            IPCSkeleton::GetCallingUid(), IPCSkeleton::GetCallingPid());
+        message.Message("Permission denied.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_1));
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
+        for (const auto &bundle : bundles) {
+            sptr<NotificationBundleOption> validBundle = GenerateValidBundleOptionV3(bundle);
+            if (validBundle == nullptr) {
+                continue;
+            }
+            int64_t lastTime = 0;
+            int32_t recentCount = 0;
+            NotificationPreferences::GetInstance()->QueryStatisticsByBundle(validBundle, recentCount, lastTime);
+            NotificationStatistics statistic;
+            statistic.SetBundleOption(*validBundle);
+            statistic.SetLastTime(lastTime);
+            statistic.SetRecentCount(recentCount);
+            statistics.emplace_back(statistic);
+        }
+    }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get Statistics info by bundles.");
+    ANS_LOGD("GetStatisticsByBundle end");
     return ERR_OK;
 }
 

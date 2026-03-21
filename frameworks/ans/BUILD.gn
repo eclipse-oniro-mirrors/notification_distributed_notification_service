@@ -95,6 +95,7 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/enabled_notification_callback_data.cpp",
     "${frameworks_module_ans_path}/src/enabled_priority_notification_by_bundle_callback_data.cpp",
     "${frameworks_module_ans_path}/src/enabled_silent_reminder_callback_data.cpp",
+    "${frameworks_module_ans_path}/src/large_info_container.cpp",
     "${frameworks_module_ans_path}/src/message_user.cpp",
     "${frameworks_module_ans_path}/src/notification.cpp",
     "${frameworks_module_ans_path}/src/notification_action_button.cpp",
@@ -138,6 +139,7 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/notification_slot.cpp",
     "${frameworks_module_ans_path}/src/notification_sorting.cpp",
     "${frameworks_module_ans_path}/src/notification_sorting_map.cpp",
+    "${frameworks_module_ans_path}/src/notification_statistics.cpp",
     "${frameworks_module_ans_path}/src/notification_subscribe_info.cpp",
     "${frameworks_module_ans_path}/src/notification_subscriber.cpp",
     "${frameworks_module_ans_path}/src/notification_template.cpp",
@@ -147,7 +149,6 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/notification_user_input.cpp",
     "${frameworks_module_ans_path}/src/push_callback_stub.cpp",
     "${frameworks_module_ans_path}/src/push_promise_callback.cpp",
-    "${frameworks_module_ans_path}/src/large_info_container.cpp",
     "${frameworks_module_ans_path}/src/raw_data_container.cpp",
   ]
 

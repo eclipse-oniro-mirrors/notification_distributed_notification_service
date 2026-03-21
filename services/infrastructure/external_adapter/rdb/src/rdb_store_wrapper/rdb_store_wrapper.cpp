@@ -212,6 +212,56 @@ int32_t NtfRdbStoreWrapper::GetUserTableName(const int32_t &userId, std::string 
     return NativeRdb::E_OK;
 }
 
+int32_t NtfRdbStoreWrapper::GetUserStatisticTableName(const int32_t &userId, std::string &tableName)
+{
+    if (!IsSystemAccount(userId)) {
+        ANS_LOGI("is not system account");
+        tableName = NOTIFICATION_STATISTICS_TABLENAME;
+        return NativeRdb::E_OK;
+    }
+    const char *keySpliter = "_";
+    std::stringstream stream;
+    stream << NOTIFICATION_STATISTICS_TABLENAME << keySpliter << userId;
+    tableName = stream.str();
+
+    // If statistics table already exists, no need to create it.
+    {
+        std::lock_guard<ffrt::mutex> lock(createdTableMutex_);
+        if (createdTables_.find(tableName) != createdTables_.end()) {
+            return NativeRdb::E_OK;
+        }
+    }
+
+    // Create table if it does not exist in the database.
+    do {
+        std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ == nullptr) {
+            ANS_LOGE("notification rdb is null");
+            return NativeRdb::E_ERROR;
+        }
+
+        std::string createTableSql = "CREATE TABLE IF NOT EXISTS " + tableName
+            + " (notificationTime BIGINT NOT NULL, bundleName TEXT NOT NULL,"
+            + " uid INTEGER NOT NULL, type TEXT NOT NULL,"
+            + " id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL);";
+        int32_t ret = rdbStore_->ExecuteSql(createTableSql);
+        if (ret != NativeRdb::E_OK) {
+            ANS_LOGW("createTable %{public}s failed, code: %{public}d", tableName.c_str(), ret);
+            // EventSceneId::SCENE_11, EventBranchId::BRANCH_1
+            hookMgr_->OnRdbOperationFailReport(11, 1, ret, "create table failed");
+            return ret;
+        }
+    } while (0);
+
+    // Record the created table name to avoid future creations.
+    {
+        std::lock_guard<ffrt::mutex> lock(createdTableMutex_);
+        createdTables_.insert(tableName);
+    }
+
+    return NativeRdb::E_OK;
+}
+
 int32_t NtfRdbStoreWrapper::RestoreForMasterSlaver()
 {
     // EventSceneId::SCENE_10, EventBranchId::BRANCH_1

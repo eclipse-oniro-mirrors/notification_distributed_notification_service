@@ -1117,5 +1117,11 @@ ErrCode NotificationHelper::GetNotificationSwitch(
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSwitch(bundleOption, state);
 }
+
+ErrCode NotificationHelper::GetStatisticsByBundle(const std::vector<NotificationBundleOption> &bundleOptions,
+    std::vector<NotificationStatistics> &statistics)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetStatisticsByBundle(bundleOptions, statistics);
+}
 }  // namespace Notification
 }  // namespace OHOS

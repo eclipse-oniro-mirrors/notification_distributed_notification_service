@@ -17,7 +17,7 @@ import("//build/ohos.gni")
 group("ans_targets") {
   deps = [
     ":libans",
-    ":libans_dynamic"
+    ":libans_dynamic",
   ]
 }
 
@@ -48,7 +48,6 @@ config("public_ans_config") {
   if (hisysevent_usage) {
     cflags += [ "-DHAS_HISYSEVENT_PART" ]
   }
-
 }
 
 ohos_source_set("ans_service_sources") {
@@ -81,7 +80,8 @@ ohos_source_set("ans_service_sources") {
     "${services_path}/domain/settings/rdb_mgr_repo/include",
     "${services_path}/infrastructure/external_adapter/extension/include",
     "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/interfaces"
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/interfaces",
   ]
 
   defines = []
@@ -101,13 +101,12 @@ ohos_source_set("ans_service_sources") {
     "${services_path}/domain/settings/rdb_mgr_repo/src/on_send_user_data_size_hisysevent.cpp",
     "src/access_token_helper.cpp",
     "src/advanced_aggregation_data_roaming_observer.cpp",
-    "src/advanced_notdisturb_enabled_observer.cpp",
-    "src/advanced_notdisturb_white_list_observer.cpp",
     "src/advanced_datashare_helper.cpp",
     "src/advanced_datashare_helper_data_observer.cpp",
     "src/advanced_datashare_helper_ext.cpp",
     "src/advanced_datashare_observer.cpp",
-    "src/advanced_notification_manager/advanced_notification_cancel.cpp",
+    "src/advanced_notdisturb_enabled_observer.cpp",
+    "src/advanced_notdisturb_white_list_observer.cpp",
     "src/advanced_notification_clone_service.cpp",
     "src/advanced_notification_event_service.cpp",
     "src/advanced_notification_extension_subscription.cpp",
@@ -116,6 +115,7 @@ ohos_source_set("ans_service_sources") {
     "src/advanced_notification_inline.cpp",
     "src/advanced_notification_live_view_service.cpp",
     "src/advanced_notification_manager/advanced_notification_atomic_service_publish.cpp",
+    "src/advanced_notification_manager/advanced_notification_cancel.cpp",
     "src/advanced_notification_manager/advanced_notification_publish.cpp",
     "src/advanced_notification_manager/advanced_notification_query.cpp",
     "src/advanced_notification_publish/base_publish_process.cpp",
@@ -134,17 +134,17 @@ ohos_source_set("ans_service_sources") {
     "src/clone/dh_notification_clone_bundle_service.cpp",
     "src/clone/notification_clone_bundle_info.cpp",
     "src/clone/notification_clone_bundle_service.cpp",
-    "src/clone/notification_clone_priority_info.cpp",
-    "src/clone/notification_clone_priority_service.cpp",
     "src/clone/notification_clone_disturb_service.cpp",
     "src/clone/notification_clone_geofence_switch.cpp",
     "src/clone/notification_clone_manager.cpp",
+    "src/clone/notification_clone_priority_info.cpp",
+    "src/clone/notification_clone_priority_service.cpp",
     "src/clone/notification_clone_util.cpp",
     "src/common/aes_gcm_helper.cpp",
+    "src/common/ans_status.cpp",
     "src/common/file_utils.cpp",
     "src/common/health_white_list_util.cpp",
     "src/common/notification_analytics_util.cpp",
-    "src/common/ans_status.cpp",
     "src/common/notification_app_privileges.cpp",
     "src/common/notification_config_parse.cpp",
     "src/common/system_sound_helper.cpp",
@@ -154,9 +154,6 @@ ohos_source_set("ans_service_sources") {
     "src/enable_manager/enable_manager.cpp",
     "src/enable_manager/silent_reminder_manager.cpp",
     "src/event_report.cpp",
-    "src/priority_notification/advanced_notification_priority_manager_service.cpp",
-    "src/priority_notification/advanced_notification_priority_helper.cpp",
-    "src/priority_notification/notification_ai_extension_wrapper.cpp",
     "src/notification_bluetooth_helper.cpp",
     "src/notification_dialog.cpp",
     "src/notification_dialog_manager.cpp",
@@ -174,6 +171,9 @@ ohos_source_set("ans_service_sources") {
     "src/notification_timer_info.cpp",
     "src/os_account_manager_helper.cpp",
     "src/permission_filter.cpp",
+    "src/priority_notification/advanced_notification_priority_helper.cpp",
+    "src/priority_notification/advanced_notification_priority_manager_service.cpp",
+    "src/priority_notification/notification_ai_extension_wrapper.cpp",
     "src/reminder_swing_decision_center.cpp",
     "src/report_time_info.cpp",
     "src/system_dialog_connect_stb.cpp",
@@ -204,11 +204,15 @@ ohos_source_set("ans_service_sources") {
   if (distributed_notification_service_feature_all_scenario_collaboration) {
     defines += [ "ALL_SCENARIO_COLLABORATION" ]
     sources += [ "src/notification_extension/distributed_bundle_service.cpp" ]
-    sources += [ "src/notification_extension/distributed_collaboration_service.cpp" ]
-    sources += [ "src/notification_extension/distributed_device_data_service.cpp" ]
+    sources +=
+        [ "src/notification_extension/distributed_collaboration_service.cpp" ]
+    sources +=
+        [ "src/notification_extension/distributed_device_data_service.cpp" ]
     sources += [ "src/notification_extension/distributed_device_manager.cpp" ]
-    sources += [ "src/notification_extension/distributed_extension_service.cpp" ]
-    sources += [ "src/notification_extension/notification_operation_service.cpp" ]
+    sources +=
+        [ "src/notification_extension/distributed_extension_service.cpp" ]
+    sources +=
+        [ "src/notification_extension/notification_operation_service.cpp" ]
   }
 
   if (is_double_framework) {
@@ -233,6 +237,10 @@ ohos_source_set("ans_service_sources") {
     defines += [ "NOTIFICATION_SUPPORT_GEOFENCE" ]
   }
 
+  if (distributed_notification_service_feature_notification_statistics) {
+    defines += [ "ANS_FEATURE_NOTIFICATION_STATISTICS" ]
+  }
+
   external_deps = [
     "ability_base:configuration",
     "ability_runtime:ability_connect_callback_stub",
@@ -245,6 +253,7 @@ ohos_source_set("ans_service_sources") {
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -265,7 +274,6 @@ ohos_source_set("ans_service_sources") {
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "time_service:time_client",
-    "bluetooth:btframework",
     "window_manager:libdm",
   ]
   external_deps += component_external_deps
@@ -356,7 +364,7 @@ ohos_shared_library("libans") {
 
   shlib_type = "sa"
   version_script = "libans.map"
-  
+
   cflags = []
   ldflags = [
     "-flto",
@@ -381,6 +389,7 @@ ohos_shared_library("libans") {
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
+    "bluetooth:btframework",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -401,7 +410,6 @@ ohos_shared_library("libans") {
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "time_service:time_client",
-    "bluetooth:btframework",
     "window_manager:libdm",
   ]
   external_deps += component_external_deps
@@ -410,15 +418,16 @@ ohos_shared_library("libans") {
       (target_cpu == "arm" || target_cpu == "arm64")) {
     if (distributed_notification_service_feature_enable_pgo) {
       cflags += [
-        "-fprofile-use="+rebase_path("${distributed_notification_service_feature_pgo_path}/libans.profdata",
+        "-fprofile-use=" + rebase_path(
+                "${distributed_notification_service_feature_pgo_path}/libans.profdata",
                 root_build_dir),
         "-Wno-error=backend-plugin",
         "-Wno-profile-instr-out-of-date",
         "-Wno-profile-instr-unprofiled",
       ]
     }
-    if (distributed_notification_service_feature_enable_pgo && target_cpu == "arm64" &&
-        enable_enhanced_opt) {
+    if (distributed_notification_service_feature_enable_pgo &&
+        target_cpu == "arm64" && enable_enhanced_opt) {
       ldflags += [ "-Wl,--aarch64-inline-plt" ]
     }
   }
@@ -467,9 +476,9 @@ ohos_shared_library("libans_dynamic") {
     "-fno-ident",
     "-Oz",
     "-flto",
-    "-ffunction-sections", 
+    "-ffunction-sections",
     "-fdata-sections",
-    "-Os"
+    "-Os",
   ]
   cflags_cc = [
     "-fvisibility-inlines-hidden",
@@ -488,9 +497,9 @@ ohos_shared_library("libans_dynamic") {
   external_deps = [
     "ability_runtime:abilitykit_native",
     "audio_framework:audio_client",
+    "hilog:libhilog",
     "player_framework:media_client",
     "player_framework:system_sound_client",
-    "hilog:libhilog",
   ]
 
   subsystem_name = "${subsystem_name}"

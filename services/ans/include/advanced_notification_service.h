@@ -825,6 +825,16 @@ public:
     ErrCode IsNotifyAllowedInDoNotDisturb(int32_t userId, bool &isAllowed) override;
 
     /**
+     * @brief Obtains the notification statistics of the bundleOptions
+     *
+     * @param bundles The list of bundle option.
+     * @param enabled The list of notificationStatistics
+     * @return Returns get result.
+     */
+    ErrCode GetStatisticsByBundle(const std::vector<sptr<NotificationBundleOption>> &bundles,
+    std::vector<NotificationStatistics> &statistics) override;
+
+    /**
      * @brief Add Do Not Disturb profiles.
      *
      * @param profiles Indicates the list of NotificationDoNotDisturbProfile objects to add.
@@ -2278,6 +2288,7 @@ private:
     void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool enabled);
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
     sptr<NotificationBundleOption> GenerateValidBundleOptionV2(const sptr<NotificationBundleOption> &bundleOption);
+    sptr<NotificationBundleOption> GenerateValidBundleOptionV3(const sptr<NotificationBundleOption> &bundleOption);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
     AnsStatus AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record,
         bool isSystemApp, bool isUpdateByOwner, const bool isAgentController);
@@ -2508,6 +2519,10 @@ private:
     ErrCode ExtractWantAgentInfo(
         const std::shared_ptr<NotificationRecord> record, sptr<NotificationParameters> &parameters);
     bool GrantSoundPermission(const sptr<NotificationRequest> request, sptr<NotificationBundleOption> bundleOption);
+#ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
+    void SetNotificationStatisticsToDB(const std::shared_ptr<NotificationRecord> &record,
+        const sptr<NotificationBundleOption> bundleOption, const bool isExists);
+#endif
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;
