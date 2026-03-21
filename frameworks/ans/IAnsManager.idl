@@ -40,7 +40,6 @@ sequenceable OHOS.Notification.NotificationDistributedBundle;
 sequenceable OHOS.Notification.NotificationParameters;
 sequenceable OHOS.Notification.LargeInfoContainer;
 sequenceable OHOS.Notification.DistributedNotificationBundleInfo;
-sequenceable OHOS.Notification.NotificationStatistics;
 sequenceable OHOS.IRemoteObject;
 
 interface OHOS.Notification.IAnsManager {
@@ -471,9 +470,9 @@ interface OHOS.Notification.IAnsManager {
 
     void IsNotifyAllowedInDoNotDisturb([in] int userId, [out] boolean isAllowed);
 
-    [macrodef NOTIFICATION_SMART_REMINDER_SUPPORTED] void RegisterSwingCallback([in] IRemoteObject swingCallback);
-
     void GetNotificationSwitch([in] sptr<NotificationBundleOption> bundleOption, [out] int state);
+
+    [macrodef NOTIFICATION_SMART_REMINDER_SUPPORTED] void RegisterSwingCallback([in] IRemoteObject swingCallback);
 
     void GetStatisticsByBundle([in] sptr<NotificationBundleOption>[] bundleOptions, [out] NotificationStatistics[] statistics);
 }

@@ -407,7 +407,10 @@ bool NotificationPreferencesDatabase::UpdateCustomTimeDbData(int64_t offsetMs)
 {
     std::vector<int> activeUserId;
     OsAccountManagerHelper::GetInstance().GetAllActiveOsAccount(activeUserId);
-
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
     int32_t result = NativeRdb::E_OK;
     for (auto iter : activeUserId) {
         result = rdbDataManager_->UpdateStatisticsTime(iter, offsetMs);

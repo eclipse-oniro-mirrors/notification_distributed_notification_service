@@ -214,11 +214,6 @@ int32_t NtfRdbStoreWrapper::GetUserTableName(const int32_t &userId, std::string 
 
 int32_t NtfRdbStoreWrapper::GetUserStatisticTableName(const int32_t &userId, std::string &tableName)
 {
-    if (!IsSystemAccount(userId)) {
-        ANS_LOGI("is not system account");
-        tableName = NOTIFICATION_STATISTICS_TABLENAME;
-        return NativeRdb::E_OK;
-    }
     const char *keySpliter = "_";
     std::stringstream stream;
     stream << NOTIFICATION_STATISTICS_TABLENAME << keySpliter << userId;

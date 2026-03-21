@@ -387,6 +387,7 @@ public:
         std::vector<std::string>> &restrictedModeTrustList);
     bool GetRestrictedModeTrustList(std::unordered_map<int32_t,
         std::vector<std::string>> &restrictedModeTrustList) const;
+
 private:
     std::map<int32_t, bool> isEnabledAllNotification_;
     std::map<int32_t, sptr<NotificationDoNotDisturbDate>> doNotDisturbDate_;
