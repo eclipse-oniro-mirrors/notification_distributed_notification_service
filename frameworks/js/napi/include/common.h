@@ -37,7 +37,7 @@ using namespace OHOS::Notification;
 constexpr int32_t STR_MAX_SIZE = 204;
 constexpr int32_t LONG_STR_MAX_SIZE = 1028;
 constexpr uint8_t OPERATION_MAX_TYPE = 3;
-constexpr int32_t STR_512K_SIZE = 524290;
+constexpr int32_t STR_500K_SIZE = 512000 + 2;
 constexpr int32_t COMMON_TEXT_SIZE = 3074;
 constexpr int32_t SHORT_TEXT_SIZE = 1026;
 constexpr int32_t MAP_TEXT_SIZE = 514;

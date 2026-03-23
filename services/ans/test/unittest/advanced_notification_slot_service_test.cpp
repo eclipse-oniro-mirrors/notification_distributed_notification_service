@@ -281,22 +281,21 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00001, Function | SmallTest | Lev
     MockIsSystemApp(false);
     MockIsVerfyPermisson(false);
     std::string key = RING_TRUST_PKG_KEY;
-    RawDataContainer rawDataContainer;
-    sptr<LargeInfoContainer> largeInfoContainer = new (std::nothrow) LargeInfoContainer(rawDataContainer);
-    auto ret = advancedNotificationService_->SetAdditionConfig(key, largeInfoContainer);
+    std::string value = "";
+    auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
     ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
  
     MockIsSystemApp(true);
-    ret = advancedNotificationService_->SetAdditionConfig(key, largeInfoContainer);
+    ret = advancedNotificationService_->SetAdditionConfig(key, value);
     ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    ret = advancedNotificationService_->SetAdditionConfig(key, largeInfoContainer);
+    ret = advancedNotificationService_->SetAdditionConfig(key, value);
     ASSERT_EQ(ret, (int)ERR_OK);
 
     advancedNotificationService_->notificationSvrQueue_.Reset();
-    ret = advancedNotificationService_->SetAdditionConfig(key, largeInfoContainer);
+    ret = advancedNotificationService_->SetAdditionConfig(key, value);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -311,9 +310,9 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00002, Function | SmallTest | Lev
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
     std::string key = CTRL_LIST_KEY;
-    RawDataContainer rawDataContainer;
-    sptr<LargeInfoContainer> largeInfoContainer = new (std::nothrow) LargeInfoContainer(rawDataContainer);
-    auto ret = advancedNotificationService_->SetAdditionConfig(key, largeInfoContainer);
+    std::string value = "";
+
+    auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
     ASSERT_EQ(ret, (int)ERR_OK);
 }
 
@@ -328,9 +327,9 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00003, Function | SmallTest | Lev
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
     std::string key = "";
-    RawDataContainer rawDataContainer;
-    sptr<LargeInfoContainer> largeInfoContainer = new (std::nothrow) LargeInfoContainer(rawDataContainer);
-    auto ret = advancedNotificationService_->SetAdditionConfig(key, largeInfoContainer);
+    std::string value = "";
+ 
+    auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
     ASSERT_EQ(ret, (int)ERR_OK);
 }
 
@@ -349,10 +348,7 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00004, Function | SmallTest | Lev
         "\"messageCategoryList\":[\"1\"],\"messageSource\":1,\"ruleLabelList\":[\"KEY_PROGRESS\"],"
         "\"ruleName\":\"功能升级\",\"ruleType\":0,\"textCondition\":[],"
         "\"titleCondition\":[[\"优先通知\"]]}]}";
-    RawDataContainer rawDataContainer;
-    rawDataContainer.SetRawString(value);
-    sptr<LargeInfoContainer> largeInfoContainer = new (std::nothrow) LargeInfoContainer(rawDataContainer);
-    auto ret = advancedNotificationService_->SetAdditionConfig(key, largeInfoContainer);
+    auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
     ASSERT_EQ(ret, (int)ERR_OK);
 }
 
@@ -368,10 +364,7 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00005, Function | SmallTest | Lev
     MockIsVerfyPermisson(true);
     std::string key = RESTRICTED_MODE_TRUST_LIST_KEY;
     std::string value = R"([{"userId":100,"trustList":["bundle1","bundle2"]}])";
-    RawDataContainer rawDataContainer;
-    rawDataContainer.SetRawString(value);
-    sptr<LargeInfoContainer> largeInfoContainer = new (std::nothrow) LargeInfoContainer(rawDataContainer);
-    auto ret = advancedNotificationService_->SetAdditionConfig(key, largeInfoContainer);
+    auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
     ASSERT_EQ(ret, (int)ERR_OK);
 }
 
@@ -387,25 +380,7 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00006, Function | SmallTest | Lev
     MockIsVerfyPermisson(true);
     std::string key = RESTRICTED_MODE_TRUST_LIST_KEY;
     std::string value = R"([{}])";
-    RawDataContainer rawDataContainer;
-    rawDataContainer.SetRawString(value);
-    sptr<LargeInfoContainer> largeInfoContainer = new (std::nothrow) LargeInfoContainer(rawDataContainer);
-    auto ret = advancedNotificationService_->SetAdditionConfig(key, largeInfoContainer);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
-}
-
-/**
- * @tc.name: SetAdditionConfig_00007
- * @tc.desc: Test SetAdditionConfig with nulltpr value
- * @tc.type: FUNC
- */
-HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00007, Function | SmallTest | Level1)
-{
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(true);
-    MockIsVerfyPermisson(true);
-    std::string key = "";
-    auto ret = advancedNotificationService_->SetAdditionConfig(key, nullptr);
+    auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
