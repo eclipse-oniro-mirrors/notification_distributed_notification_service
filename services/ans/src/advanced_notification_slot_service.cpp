@@ -35,7 +35,6 @@
 #include "notification_config_parse.h"
 #endif
 
-#include "large_info_container.h"
 #include "notification_liveview_utils.h"
 #include "os_account_manager_helper.h"
 #include "advanced_notification_inline.h"
@@ -1347,14 +1346,8 @@ bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<Notifi
     return true;
 }
 
-ErrCode AdvancedNotificationService::SetAdditionConfig(
-    const std::string &key, const sptr<LargeInfoContainer> &largeInfoContainer)
+ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, const std::string &value)
 {
-    if (largeInfoContainer == nullptr) {
-        ANS_LOGE("SetAdditionConfig large info container empty!");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    std::string value = largeInfoContainer->GetRawDataContainer().GetRawString();
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_1);
     message.Message("key:" + key);
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());

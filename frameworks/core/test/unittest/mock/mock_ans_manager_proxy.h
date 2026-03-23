@@ -185,7 +185,7 @@ public:
     MOCK_METHOD2(GetAllDistribuedEnabledBundles, ErrCode(const std::string&, std::vector<NotificationBundleOption>&));
     MOCK_METHOD2(RegisterPushCallback, ErrCode(const sptr<IRemoteObject>&, const sptr<NotificationCheckRequest>&));
     MOCK_METHOD0(UnregisterPushCallback, ErrCode());
-    MOCK_METHOD2(SetAdditionConfig, ErrCode(const std::string&, const sptr<LargeInfoContainer> &));
+    MOCK_METHOD2(SetAdditionConfig, ErrCode(const std::string&, const std::string&));
     MOCK_METHOD1(SetPriorityEnabled, ErrCode(const bool));
     MOCK_METHOD2(SetPriorityEnabledByBundle, ErrCode(const sptr<NotificationBundleOption> &, const int32_t));
     MOCK_METHOD1(IsPriorityEnabled, ErrCode(bool &));

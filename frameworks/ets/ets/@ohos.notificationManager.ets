@@ -423,12 +423,12 @@ export default namespace notificationManager {
         callback?: AsyncCallback<PriorityEnableStatus>): Promise<PriorityEnableStatus>;
     export native function nativeSetPriorityEnabled(enable: boolean, callback?: AsyncCallback<void>): Promise<void>;
     export native function nativeIsPriorityEnabled(callback?: AsyncCallback<boolean>): Promise<boolean>;
-    export native function nativeGetPriorityEnabledByBundles(bundles: Array<BundleOption>): Map<BundleOption, boolean>;
-    export native function nativeSetPriorityEnabledByBundles(priorityEnable: Map<BundleOption, boolean>): void;
+    export native function nativeGetPriorityEnabledByBundles(bundles: Array<BundleOption>): Promise<Map<BundleOption, boolean>>;
+    export native function nativeSetPriorityEnabledByBundles(priorityEnable: Map<BundleOption, boolean>): Promise<void>;
     export native function nativeSetPriorityIntelligentEnabled(enable: boolean): Promise<void>;
     export native function nativeIsPriorityIntelligentEnabled(): Promise<boolean>;
-    export native function nativeSetPriorityStrategyByBundles(strategies: Map<BundleOption, long>): void;
-    export native function nativeGetPriorityStrategyByBundles(bundles: Array<BundleOption>): Map<BundleOption, long>;
+    export native function nativeSetPriorityStrategyByBundles(strategies: Map<BundleOption, long>): Promise<void>;
+    export native function nativeGetPriorityStrategyByBundles(bundles: Array<BundleOption>): Promise<Map<BundleOption, long>>;
     export native function nativeGetNotificationStatisticsByBundle(bundles: Array<BundleOption>): Promise<Array<NotificationStatistics>>;
 
     function isInvalidParameter(doNotDisturbDate: DoNotDisturbDate): BusinessError
@@ -3076,32 +3076,28 @@ export default namespace notificationManager {
         if (!switches || switches.size == 0) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetPriorityEnabledByBundles(switches); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetPriorityEnabledByBundles(switches);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getPriorityEnabledByBundles(bundles: Array<BundleOption>): Promise<Map<BundleOption, boolean>> {
         if (!bundles || bundles.length == 0) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<Map<BundleOption, boolean>>(
-            (resolve: ResolveCallback<Map<BundleOption, boolean>>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): Map<BundleOption, boolean> => { return nativeGetPriorityEnabledByBundles(bundles); });
-            p.then((data: Any): void => {
-                let ret : Map<BundleOption, boolean> = data as Map<BundleOption, boolean>;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<Map<BundleOption, boolean>>;
+        try {
+            result = nativeGetPriorityEnabledByBundles(bundles);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function setPriorityIntelligentEnabled(enable: boolean): Promise<void> {
@@ -3130,32 +3126,28 @@ export default namespace notificationManager {
         if (!strategies || strategies.size == 0) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetPriorityStrategyByBundles(strategies); });
-            p.then((data: Any): void => {
-                resolve(undefined);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<void>;
+        try {
+            result = nativeSetPriorityStrategyByBundles(strategies);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export function getPriorityStrategyByBundles(bundles: Array<BundleOption>): Promise<Map<BundleOption, long>> {
         if (!bundles || bundles.length == 0) {
             throw errorParamInvalid;
         }
-        let pPromise = new Promise<Map<BundleOption, long>>(
-            (resolve: ResolveCallback<Map<BundleOption, long>>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): Map<BundleOption, long> => { return nativeGetPriorityStrategyByBundles(bundles); });
-            p.then((data: Any): void => {
-                let ret : Map<BundleOption, long> = data as Map<BundleOption, long>;
-                resolve(ret);
-            }, (error: Error): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
+        let result: Promise<Map<BundleOption, long>>;
+        try {
+            result = nativeGetPriorityStrategyByBundles(bundles);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
     }
 
     export interface NotificationStatistics {
