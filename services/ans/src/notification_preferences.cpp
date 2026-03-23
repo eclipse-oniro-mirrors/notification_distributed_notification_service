@@ -179,7 +179,7 @@ ErrCode NotificationPreferences::QueryStatisticsByBundle(const sptr<Notification
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (!preferncesDB_->QueryStatisticsByBundle(bundle->GetUid(), recentCount, lastTime)) {
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED; 
+        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     ANS_LOGD("NotificationPreferences::QueryStatisticsByBundle.result: %{public}d", result);
     return result;
