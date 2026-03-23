@@ -35,9 +35,8 @@ void DoSomethingInterestingWithManager(FuzzedDataProvider* fdp)
     bool value = fdp->ConsumeBool();
     int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
     std::string bundleName = fdp->ConsumeRandomLengthString();
-    std::string groupId = fdp->ConsumeRandomLengthString();
     manager->CancelRemindersImplLocked(bundleName, userId, uid, value);
-    manager->CloseRemindersByGroupId(reminderId, bundleName, groupId);
+    manager->CloseRemindersByGroupId(reminderId, bundleName, bundleName);
     sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(SECONDS);
     reminder->InitUserId(userId);
     manager->CheckReminderLimitExceededLocked(uid, reminder);
@@ -48,7 +47,8 @@ void DoSomethingInterestingWithManager(FuzzedDataProvider* fdp)
     manager->FindReminderRequestLocked(reminderId, value);
     manager->GetRecentReminder();
     std::vector<sptr<ReminderRequest>> reminders;
-    manager->HandleImmediatelyShow(reminders, value, value);
+    Notification::ReminderDataManager::ShowLimit limits;
+    manager->HandleImmediatelyShow(reminders, limits, value, value);
     manager->HandleExtensionReminder(reminders, static_cast<int8_t>(type));
     manager->HandleRefreshReminder(type, reminder);
     manager->HandleSameNotificationIdShowing(reminder);
@@ -56,7 +56,7 @@ void DoSomethingInterestingWithManager(FuzzedDataProvider* fdp)
     manager->IsBelongToSameApp(uid, uid);
     manager->CheckIsSameApp(reminder, uid);
     manager->IsMatched(reminder, userId, uid, value);
-    manager->IsMatchedForGroupIdAndPkgName(reminder, bundleName, groupId);
+    manager->IsMatchedForGroupIdAndPkgName(reminder, bundleName, bundleName);
     manager->IsAllowedNotify(reminder);
     manager->IsReminderAgentReady();
     manager->SetPlayerParam(reminder);
@@ -65,15 +65,15 @@ void DoSomethingInterestingWithManager(FuzzedDataProvider* fdp)
     manager->StopSoundAndVibrationLocked(reminder);
     manager->StopSoundAndVibration(reminder);
     manager->RemoveFromShowedReminders(reminder);
-    std::vector<sptr<ReminderRequest>> immediatelyReminders;
-    std::vector<sptr<ReminderRequest>> extensionReminders;
-    manager->RefreshRemindersLocked(type, immediatelyReminders, extensionReminders);
+    std::vector<sptr<ReminderRequest>> immediatelys;
+    std::vector<sptr<ReminderRequest>> extensions;
+    manager->RefreshRemindersLocked(type, immediatelys, extensions);
     manager->StartTimer(reminder, timerType);
     manager->ResetStates(timerType);
     manager->StopTimer(timerType);
     manager->StopTimerLocked(timerType);
     manager->StartTimerLocked(reminder, timerType);
-    manager->ShowActiveReminderExtendLocked(reminder, extensionReminders);
+    manager->ShowActiveReminderExtendLocked(reminder->GetTriggerTimeInMilli(), immediatelys, extensions);
 }
 
 void Clear()

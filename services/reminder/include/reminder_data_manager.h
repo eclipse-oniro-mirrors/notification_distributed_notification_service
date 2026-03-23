@@ -339,6 +339,17 @@ private:
         ALERTING_TIMER
     };
 
+    struct ShowLimit {
+        // Limit on the number of single applications at the same time.
+        std::unordered_map<std::string, int32_t> timeLimits;
+        // Notification limit for a single app.
+        std::unordered_map<int32_t, int32_t> bundleLimits;
+        // Total number of notifications displayed at one time.
+        int32_t totalCount {0};
+        // Whether to play custom ringtones.
+        bool isAlerting {false};
+    };
+
     static std::shared_ptr<ffrt::queue> serviceQueue_;
 
     /**
@@ -462,8 +473,8 @@ private:
      */
     sptr<ReminderRequest> GetRecentReminder();
 
-    void HandleImmediatelyShow(std::vector<sptr<ReminderRequest>>& showImmediately, const bool isSysTimeChanged,
-        const bool isSlienceNotification);
+    void HandleImmediatelyShow(std::vector<sptr<ReminderRequest>>& showImmediately, ShowLimit& limits,
+        const bool isSysTimeChanged, const bool isSlienceNotification, size_t index = 0);
     void HandleExtensionReminder(std::vector<sptr<ReminderRequest>> &extensionReminders, const int8_t type);
 
     /**
@@ -567,7 +578,8 @@ private:
 
     void SetActiveReminder(const sptr<ReminderRequest> &reminder);
     void SetAlertingReminder(const sptr<ReminderRequest> &reminder);
-    void ShowActiveReminderExtendLocked(sptr<ReminderRequest> &reminder,
+    void ShowActiveReminderExtendLocked(const uint64_t triggerTime,
+        std::vector<sptr<ReminderRequest>>& immediatelyReminders,
         std::vector<sptr<ReminderRequest>>& extensionReminders);
     static bool StartExtensionAbility(const sptr <ReminderRequest> &reminder, const int8_t type);
     static void AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder,
@@ -720,9 +732,7 @@ private:
      * @param bundleLimits Notification limit for a single app.
      * @param totalCount Total number of notifications displayed at one time.
      */
-    bool CheckShowLimit(std::unordered_map<std::string, int32_t>& limits,
-        std::unordered_map<int32_t, int32_t>& bundleLimits, int32_t& totalCount,
-        sptr<ReminderRequest>& reminder);
+    bool CheckShowLimit(ShowLimit& limits, sptr<ReminderRequest>& reminder);
 
     void UpdateReminderFromDb(const std::vector<sptr<ReminderRequest>>& remindersFromDb);
     ErrCode CancelReminderToDb(const int32_t reminderId, const int32_t callingUid);

@@ -55,6 +55,7 @@ constexpr int8_t REISSUE_CALLBACK = 1;  // time change, boot complte callback
 constexpr int32_t FIRST_QUERY_DELAY = 5 * 1000 * 1000;  // 5s, ut: microsecond
 constexpr int64_t ONE_DAY_TIME = 24 * 60 * 60 * 1000;
 constexpr uint64_t NEXT_LOAD_TIME = 8 * 60 * 60 * 1000;  // 8h, ut: millisecond
+constexpr int32_t MAX_ONCE_TASK_SHOW_COUNT = 100;
 
 inline int64_t TimeDistance(int64_t first, int64_t last)
 {
@@ -625,7 +626,8 @@ void ReminderDataManager::InitShareReminders(const bool registerObserver)
     std::vector<sptr<ReminderRequest>> immediatelyReminders;
     std::vector<sptr<ReminderRequest>> extensionReminders;
     CheckReminderTime(immediatelyReminders, extensionReminders);
-    HandleImmediatelyShow(immediatelyReminders, false, true);
+    ShowLimit limits;
+    HandleImmediatelyShow(immediatelyReminders, limits, false, true);
     StartRecentReminder();
 }
 
@@ -827,7 +829,8 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
     std::vector<sptr<ReminderRequest>> showImmediately;
     std::vector<sptr<ReminderRequest>> extensionReminders;
     RefreshRemindersLocked(type, showImmediately, extensionReminders);
-    HandleImmediatelyShow(showImmediately, true, false);
+    ShowLimit limits;
+    HandleImmediatelyShow(showImmediately, limits, true, false);
     HandleExtensionReminder(extensionReminders, REISSUE_CALLBACK);
     StartRecentReminder();
     StartLoadTimer();
@@ -952,7 +955,10 @@ void ReminderDataManager::ShowActiveReminder(const EventFwk::Want &want)
     }
     ReportTimerEvent(targetTime, false);
     std::vector<sptr<ReminderRequest>> extensionReminders;
-    ShowActiveReminderExtendLocked(reminder, extensionReminders);
+    std::vector<sptr<ReminderRequest>> showImmediately;
+    ShowActiveReminderExtendLocked(reminder->GetTriggerTimeInMilli(), showImmediately, extensionReminders);
+    ShowLimit limits;
+    HandleImmediatelyShow(showImmediately, limits, false, false);
     HandleExtensionReminder(extensionReminders, NORMAL_CALLBACK);
     StartRecentReminder();
 }
@@ -967,16 +973,11 @@ bool ReminderDataManager::HandleSysTimeChange(const sptr<ReminderRequest> remind
     }
 }
 
-void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& reminder,
+void ReminderDataManager::ShowActiveReminderExtendLocked(const uint64_t triggerTime,
+    std::vector<sptr<ReminderRequest>>& immediatelyReminders,
     std::vector<sptr<ReminderRequest>>& extensionReminders)
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-    uint64_t triggerTime = reminder->GetTriggerTimeInMilli();
-    bool isAlerting = false;
-    sptr<ReminderRequest> playSoundReminder = nullptr;
-    std::unordered_map<std::string, int32_t> limits;
-    std::unordered_map<int32_t, int32_t> bundleLimits;
-    int32_t totalCount = 0;
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
         if ((*it)->IsExpired()) {
             continue;
@@ -992,25 +993,14 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& 
         if (!(*it)->IsNeedNotification()) {
             continue;
         }
-        extensionReminders.push_back((*it));
+        if ((*it)->IsPullUpService()) {
+            extensionReminders.push_back((*it));
+        }
         if ((*it)->CheckExcludeDate()) {
             ANSR_LOGI("reminder[%{public}d] trigger time is in exclude date", (*it)->GetReminderId());
             continue;
         }
-        if (!CheckShowLimit(limits, bundleLimits, totalCount, (*it))) {
-            (*it)->OnShow(false, false, false);
-            store_->UpdateOrInsert((*it));
-            continue;
-        }
-        if (((*it)->GetRingDuration() > 0) && !isAlerting) {
-            playSoundReminder = (*it);
-            isAlerting = true;
-        } else {
-            ShowReminder((*it), false, false, isAlerting, false);
-        }
-    }
-    if (playSoundReminder != nullptr) {
-        ShowReminder(playSoundReminder, true, false, true, false);
+        immediatelyReminders.push_back((*it));
     }
 }
 
@@ -1193,36 +1183,56 @@ sptr<ReminderRequest> ReminderDataManager::GetRecentReminder()
 }
 
 void ReminderDataManager::HandleImmediatelyShow(std::vector<sptr<ReminderRequest>>& showImmediately,
-    const bool isSysTimeChanged, const bool isSlienceNotification)
+    ShowLimit& limits, const bool isSysTimeChanged, const bool isSlienceNotification, size_t index)
 {
-    bool isAlerting = false;
-    std::unordered_map<std::string, int32_t> limits;
-    std::unordered_map<int32_t, int32_t> bundleLimits;
-    int32_t totalCount = 0;
+    if (index >= showImmediately.size()) {
+        return;
+    }
     sptr<ReminderRequest> playSoundReminder = nullptr;
-    for (auto it = showImmediately.begin(); it != showImmediately.end(); ++it) {
+    bool needFfrtTask = false;
+    int32_t oneTaskShowCount = 0;
+    auto it = std::next(showImmediately.begin(), index);
+    for (; it != showImmediately.end(); ++it) {
+        ++oneTaskShowCount;
+        if (oneTaskShowCount > MAX_ONCE_TASK_SHOW_COUNT) {
+            needFfrtTask = true;
+            break;
+        }
+        ++index;
         if ((*it)->IsShowing()) {
             continue;
         }
-        if (!CheckShowLimit(limits, bundleLimits, totalCount, (*it))) {
+        if (!CheckShowLimit(limits, (*it))) {
             std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
             (*it)->OnShow(false, isSysTimeChanged, false);
             store_->UpdateOrInsert((*it));
             continue;
         }
-        if (((*it)->GetRingDuration() > 0) && !isAlerting) {
+        if (((*it)->GetRingDuration() > 0) && !limits.isAlerting) {
             std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
             playSoundReminder = (*it);
-            isAlerting = true;
+            limits.isAlerting = true;
         } else {
             std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-            ShowReminder((*it), false, isSysTimeChanged, isAlerting, isSlienceNotification);
+            ShowReminder((*it), false, isSysTimeChanged, limits.isAlerting, isSlienceNotification);
         }
     }
     if (playSoundReminder != nullptr) {
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
         ShowReminder(playSoundReminder, true, isSysTimeChanged, true, isSlienceNotification);
     }
+    if (!needFfrtTask) {
+        return;
+    }
+    ANSR_LOGI("Too many notifications need to be displayed, execute in batches.");
+    auto callback = [showImmediately, limits, isSysTimeChanged, isSlienceNotification, index]() mutable {
+        auto manager = ReminderDataManager::GetInstance();
+        if (manager == nullptr) {
+            return;
+        }
+        manager->HandleImmediatelyShow(showImmediately, limits, isSysTimeChanged, isSlienceNotification, index);
+    };
+    queue_->submit(callback);
 }
 
 sptr<ReminderRequest> ReminderDataManager::HandleRefreshReminder(const uint8_t &type, sptr<ReminderRequest> &reminder)
@@ -1311,7 +1321,8 @@ void ReminderDataManager::Init()
     std::vector<sptr<ReminderRequest>> immediatelyReminders;
     std::vector<sptr<ReminderRequest>> extensionReminders;
     CheckReminderTime(immediatelyReminders, extensionReminders);
-    HandleImmediatelyShow(immediatelyReminders, false, true);
+    ShowLimit limits;
+    HandleImmediatelyShow(immediatelyReminders, limits, false, true);
     HandleExtensionReminder(extensionReminders, REISSUE_CALLBACK);
     StartRecentReminder();
     StartLoadTimer();
