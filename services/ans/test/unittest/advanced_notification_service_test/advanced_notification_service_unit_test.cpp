@@ -2240,7 +2240,6 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SetNotificationStatisticsToDB_100,
     sptr<NotificationBundleOption> bundle01 = sptr<NotificationBundleOption>::MakeSptr();
     bundle01->SetBundleName(TEST_DEFUALT_BUNDLE);
     bundle01->SetUid(SYSTEM_APP_UID);
-    record->notification->SetKey("test00001");
     advancedNotificationService_->SetNotificationStatisticsToDB(record, bundle01, false);
     std::vector<sptr<NotificationBundleOption>> bundles;
     bundles.push_back(bundle01);

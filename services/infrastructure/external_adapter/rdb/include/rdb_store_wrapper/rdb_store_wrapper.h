@@ -105,9 +105,6 @@ public:
     int32_t GetStatisticsInfos(const int64_t lastTimeMs,
         const int32_t bundleUid, const std::string &tableName, int32_t &totalCount, int64_t &lastTime);
 
-    int32_t GetStatisticsData(const int64_t beginTime, const std::string &tableName,
-        std::vector<std::tuple<int32_t, std::string, int32_t, int64_t>> &statisticsData);
-
     int32_t CleanExpertotal(const int32_t total, const std::string &tableName);
 
     int32_t DropStatisticsTable(const int32_t userId);
