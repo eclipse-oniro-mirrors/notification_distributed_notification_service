@@ -27,7 +27,6 @@ namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackStatistics* asyncCallbackInfo)
 {
-    ANS_LOGD("Delete AsyncCallbackReminderInfo Without Promise");
     if (!asyncCallbackInfo) {
         return;
     }
@@ -46,7 +45,6 @@ void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackStatistics* asy
 
 void DeleteCallBackInfo(ani_env* env, AsyncCallbackStatistics* asyncCallbackInfo)
 {
-    ANS_LOGD("Delete AsyncCallbackReminderInfo");
     if (!asyncCallbackInfo) {
         return;
     }
