@@ -88,7 +88,8 @@ void ExtensionServiceConnection::Close()
     timerClient->DestroyTimer(timerIdDisconnect_);
     timerIdDisconnect_ = 0L;
     if (state_ == ExtensionServiceConnectionState::CREATED ||
-        state_ == ExtensionServiceConnectionState::DISCONNECTED) {
+        state_ == ExtensionServiceConnectionState::DISCONNECTED ||
+        state_ == ExtensionServiceConnectionState::CONNECTING) {
         HandleDisconnectedState();
     } else {
         AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(this);
@@ -116,7 +117,12 @@ void ExtensionServiceConnection::NotifyOnReceiveMessage(const sptr<NotificationR
             state_ = ExtensionServiceConnectionState::CONNECTING;
             AAFwk::Want want;
             want.SetElementName(subscriberInfo_.bundleName, subscriberInfo_.extensionName);
-            AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, subscriberInfo_.userId);
+            int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(
+                want, this, subscriberInfo_.userId);
+            if (ret != ERR_OK) {
+                ANS_LOGW("ConnectAbility failed code:%{public}d", ret);
+                state_ = ExtensionServiceConnectionState::CREATED;
+            }
         }
         return;
     }
@@ -159,7 +165,12 @@ void ExtensionServiceConnection::NotifyOnCancelMessages(const std::shared_ptr<st
             state_ = ExtensionServiceConnectionState::CONNECTING;
             AAFwk::Want want;
             want.SetElementName(subscriberInfo_.bundleName, subscriberInfo_.extensionName);
-            AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, subscriberInfo_.userId);
+            int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(
+                want, this, subscriberInfo_.userId);
+            if (ret != ERR_OK) {
+                ANS_LOGW("ConnectAbility failed code:%{public}d", ret);
+                state_ = ExtensionServiceConnectionState::CREATED;
+            }
         }
         return;
     }
