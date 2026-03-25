@@ -402,7 +402,7 @@ ErrCode BundleManagerRepositoryImpl::GetApplicationInfo(const std::string &bundl
     return result;
 }
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 bool BundleManagerRepositoryImpl::GetDistributedNotificationEnabled(const std::string &bundleName, const int32_t userId)
 {
     auto bundleMgr = connector_->GetBundleManager();

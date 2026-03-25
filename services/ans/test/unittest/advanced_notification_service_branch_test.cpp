@@ -976,6 +976,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_263000, Function | SmallTest | Level1)
     ASSERT_EQ(advancedNotificationService_->DoesSupportDoNotDisturbMode(doesSupport), ERR_ANS_PERMISSION_DENIED);
 }
 
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 /**
  * @tc.number    : AnsBranchTest_264000
  * @tc.name      : EnableDistributed_1000
@@ -1015,6 +1016,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_284000, Function | SmallTest | Level1)
     ASSERT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(
         bundleOption, enabled), ERR_ANS_PERMISSION_DENIED);
 }
+#endif
 
 /**
  * @tc.number    : AnsBranchTest_265000
@@ -1162,7 +1164,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_271000, Function | SmallTest | Level1)
         cmd, bundle, userId, 0, dumpInfo), (int)ERR_ANS_PERMISSION_DENIED);
 }
 #endif
-
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 /**
  * @tc.number    : AnsBranchTest_272000
  * @tc.name      : SetSyncNotificationEnabledWithoutApp_1000
@@ -1250,7 +1252,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_276000, Function | SmallTest | Level1)
     ASSERT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enabled), ERR_OK);
 }
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 /**
  * @tc.number    : AnsBranchTest_277000
  * @tc.name      : DoDistributedPublish_3000
@@ -1418,7 +1419,11 @@ HWTEST_F(AnsBranchTest, GetDeviceRemindType_3000, Function | SmallTest | Level1)
     AdvancedNotificationService ans;
     ans.notificationSvrQueue_.Reset();
     int32_t remindType = -1;
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     ASSERT_EQ(ans.GetDeviceRemindType(remindType), ERR_ANS_INVALID_PARAM);
+#else
+    ASSERT_EQ(ans.GetDeviceRemindType(remindType), ERR_INVALID_OPERATION);
+#endif
 }
 
 /**

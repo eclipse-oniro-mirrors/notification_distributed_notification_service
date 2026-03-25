@@ -50,7 +50,7 @@
       "distributed_notification_service_disable_control",
       "distributed_notification_service_feature_badge_manager",
       "distributed_notification_service_feature_local_liveview",
-      "distributed_notification_service_feature_distributed_db",
+      "distributed_notification_service_feature_original_distributed",
       "distributed_notification_service_feature_disturb_manager",
       "distributed_notification_service_feature_slot_manager",
       "distributed_notification_service_feature_additional_config",
@@ -63,7 +63,8 @@
       "distributed_notification_service_feature_support_geofence",
       "distributed_notification_service_feature_enable_pgo",
       "distributed_notification_service_feature_pgo_path",
-      "distributed_notification_service_feature_notification_statistics"
+      "distributed_notification_service_feature_notification_statistics",
+      "distributed_notification_service_feature_distributed_supported"
     ],
     "adapted_system_type": [
       "standard"

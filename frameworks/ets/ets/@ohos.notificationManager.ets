@@ -2440,7 +2440,7 @@ export default namespace notificationManager {
             result = nativesetDistributedEnableByBundle(bundle, enable, undefined);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
-            throw error;
+            return Promise.reject(error);
         }
         return result;
     }
@@ -2529,7 +2529,7 @@ export default namespace notificationManager {
             nativesetDistributedEnableByBundle(bundle, enable, callback);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
-            throw error;
+            callback(error, undefined);
         }
     }
 
@@ -2542,7 +2542,7 @@ export default namespace notificationManager {
             nativeSetDistributedEnable(enable, callback);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
-            throw error;
+            callback(error, undefined);
         }
     }
 
@@ -2553,7 +2553,7 @@ export default namespace notificationManager {
             result = nativeSetDistributedEnable(enable, undefined);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
-            throw error;
+            return Promise.reject(error);
         }
         return result;
     }
@@ -2565,7 +2565,7 @@ export default namespace notificationManager {
             result = nativeIsDistributedEnabled(undefined);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
-            throw error;
+            return Promise.reject(error);
         }
         return result;
     }
@@ -2579,7 +2579,7 @@ export default namespace notificationManager {
             nativeIsDistributedEnabled(callback);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
-            throw error;
+            callback(error, undefined);
         }
     }
 
@@ -2594,7 +2594,7 @@ export default namespace notificationManager {
             result = nativeIsDistributedEnabledByBundle(bundle, undefined);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
-            throw error;
+            return Promise.reject(error);
         }
         return result;
     }
@@ -2613,7 +2613,7 @@ export default namespace notificationManager {
             nativeIsDistributedEnabledByBundle(bundle, callback);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
-            throw error;
+            callback(error, undefined);
         }
     }
 
@@ -2668,7 +2668,7 @@ export default namespace notificationManager {
             nativeSetSyncNotificationEnabledWithoutApp(userId, enable, callback);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
-            throw error;
+            callback(error, undefined);
         }
     }
 
@@ -2679,7 +2679,7 @@ export default namespace notificationManager {
             result = nativeSetSyncNotificationEnabledWithoutApp(userId, enable, undefined);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
-            throw error;
+            return Promise.reject(error);
         }
         return result;
     }
@@ -2690,7 +2690,7 @@ export default namespace notificationManager {
             result = nativeGetSyncNotificationEnabledWithoutApp(userId, undefined);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
-            throw error;
+            return Promise.reject(error);
         }
         return result;
     }
@@ -2704,7 +2704,7 @@ export default namespace notificationManager {
             nativeGetSyncNotificationEnabledWithoutApp(userId, callback);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
-            throw error;
+            callback(error, undefined);
         }
     }
 

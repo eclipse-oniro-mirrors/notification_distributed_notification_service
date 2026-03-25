@@ -38,7 +38,7 @@ SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callba
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(CLONE_EVENT_START);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
 #endif
@@ -129,7 +129,7 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
         AdvancedNotificationService::GetInstance()->HandleBundleUninstall(bundleOption);
 #endif
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
         if (callbacks_.onScreenOn != nullptr) {
             callbacks_.onScreenOn();

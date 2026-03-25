@@ -425,7 +425,7 @@ HWTEST_F(AnsUtilsTest, GetLocalNotificationKeys_00001, Function | SmallTest | Le
     sptr<NotificationBundleOption> bundle2 = new NotificationBundleOption("test1", 2);
     TestAddNotification(notificationId, bundle2);
     EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 2);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     auto keys = advancedNotificationService_->GetLocalNotificationKeys(bundle2);
     EXPECT_EQ(keys.size(), 1);
 #endif
@@ -444,9 +444,9 @@ HWTEST_F(AnsUtilsTest, OnBundleDataCleared_00001, Function | SmallTest | Level1)
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetNotificationId(notificationId);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     record->deviceId = "deviceId";
-#endif  // DISTRIBUTED_NOTIFICATION_SUPPORTED
+#endif  // ANS_FEATURE_ORIGINAL_DISTRIBUTED
     advancedNotificationService_->AssignToNotificationList(record);
     advancedNotificationService_->OnBundleDataCleared(bundle);
     SleepForFC();

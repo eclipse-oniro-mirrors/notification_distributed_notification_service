@@ -33,7 +33,7 @@
 #include "reminder_helper.h"
 #include "os_account_manager.h"
 #include "hitrace_meter_adapter.h"
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 #include "distributed_notification_manager.h"
 #include "distributed_preferences.h"
 #include "distributed_screen_status_manager.h"
@@ -48,7 +48,7 @@ constexpr const char* REMINDER_AGENT_SERVICE_CONFIG_PATH =
     "/data/service/el1/public/notification/reminder_agent_service_config";
 constexpr const char* CALENDAR_DATA_NAME = "com.ohos.calendardata";
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 NotificationConstant::RemindType AdvancedNotificationService::GetRemindType()
 {
     bool remind = localScreenOn_;
@@ -85,7 +85,7 @@ NotificationConstant::RemindType AdvancedNotificationService::GetRemindType()
 
 ErrCode AdvancedNotificationService::SetNotificationRemindType(sptr<Notification> notification, bool isLocal)
 {
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     notification->SetRemindType(GetRemindType());
 #else
     notification->SetRemindType(NotificationConstant::RemindType::NONE);

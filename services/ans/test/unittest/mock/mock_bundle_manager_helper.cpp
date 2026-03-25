@@ -112,7 +112,7 @@ void BundleManagerHelper::Connect()
 void BundleManagerHelper::Disconnect()
 {}
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 bool BundleManagerHelper::GetDistributedNotificationEnabled(const std::string &bundleName, const int userId)
 {
     return true;

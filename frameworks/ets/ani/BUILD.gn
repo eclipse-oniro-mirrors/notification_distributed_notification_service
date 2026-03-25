@@ -110,10 +110,13 @@ ohos_shared_library("notification_manager_ani") {
     defines += [ "ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW" ]
   }
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "ANS_FEATURE_DISTRIBUTED_DB" ]
+  if (distributed_notification_service_feature_distributed_supported) {
+    defines += [ "ANS_FEATURE_DISTRIBUTED_SUPPORTED" ]
   }
 
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
+  }
   if (distributed_notification_service_feature_disturb_manager) {
     defines += [ "ANS_FEATURE_DISTURB_MANAGER" ]
   }

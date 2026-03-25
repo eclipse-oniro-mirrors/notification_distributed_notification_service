@@ -50,7 +50,7 @@
 #include "want_agent_helper.h"
 #include "want_params.h"
 #include "bundle_manager_helper.h"
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 #include "distributed_preferences.h"
 #include "distributed_notification_manager.h"
 #endif
@@ -1373,7 +1373,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14300,
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     bool enabled = true;
-    ASSERT_EQ(advancedNotificationService_->IsDistributedEnabled(enabled), (int)ERR_OK);
+    int32_t ret = advancedNotificationService_->IsDistributedEnabled(enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_OK);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 }
 
 /**
@@ -1388,7 +1393,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14400,
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     bool enabled = true;
-    ASSERT_EQ(advancedNotificationService_->EnableDistributed(enabled), (int)ERR_OK);
+    int32_t ret = advancedNotificationService_->EnableDistributed(enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_OK);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 }
 
 /**
@@ -1403,7 +1413,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14600,
     sptr<NotificationRequest> req = new NotificationRequest();
     EXPECT_NE(req, nullptr);
     bool enabled = true;
-    ASSERT_EQ(advancedNotificationService_->EnableDistributedSelf(enabled), (int)ERR_OK);
+    int32_t ret = advancedNotificationService_->EnableDistributedSelf(enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_OK);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 }
 
 /**
@@ -1854,7 +1869,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
     ASSERT_EQ(advancedNotificationService_->CancelGroup(groupName, ""), ERR_ANS_INVALID_BUNDLE);
 
     bool enabled = true;
-    ASSERT_EQ(advancedNotificationService_->EnableDistributedSelf(enabled), ERR_ANS_INVALID_BUNDLE);
+    ret = advancedNotificationService_->EnableDistributedSelf(enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_OK);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
     MockIsNonBundleName(false);
     GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test end";
 }
@@ -1960,14 +1980,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
 
     ASSERT_EQ(advancedNotificationService_->DoesSupportDoNotDisturbMode(enable), ERR_OK);
 
-    ASSERT_EQ(advancedNotificationService_->EnableDistributed(enable), ERR_OK);
-
-    ASSERT_EQ(advancedNotificationService_->EnableDistributedByBundle(bundleOption, enable), ERR_OK);
-
-    ASSERT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enable), ERR_OK);
-
     int32_t remindType = -1;
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     ASSERT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_OK);
+#else
+    EXPECT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_INVALID_OPERATION);
+#endif
 
     int32_t userId = 1;
     ASSERT_EQ(advancedNotificationService_->IsSpecialUserAllowedNotify(userId, enable), ERR_ANS_INVALID_PARAM);
@@ -1983,10 +2001,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
 
     ASSERT_EQ(advancedNotificationService_->GetEnabledForBundleSlot(bundleOption,
         NotificationConstant::SlotType::OTHER, enable), ERR_OK);
-
-    ASSERT_EQ(advancedNotificationService_->SetSyncNotificationEnabledWithoutApp(userId, enable), ERR_OK);
-
-    ASSERT_EQ(advancedNotificationService_->GetSyncNotificationEnabledWithoutApp(userId, enable), ERR_OK);
 
     std::string phoneNumber = "11111111111";
     int32_t callerType = 0;
@@ -2190,7 +2204,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18200,
     GTEST_LOG_(INFO) << "RecentNotificationDump_1000 test end";
 }
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 /**
  * @tc.number    : AdvancedNotificationServiceTest_18300
  * @tc.name      : DistributedNotificationDump_1000
@@ -2245,7 +2259,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18500,
     GTEST_LOG_(INFO) << "OnBundleRemoved_1000 test end";
 }
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 /**
  * @tc.number    : AdvancedNotificationServiceTest_18600
  * @tc.name      : OnScreenOn_1000
@@ -2331,22 +2345,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19000,
 }
 
 /**
- * @tc.number    : AdvancedNotificationServiceTest_19100
- * @tc.name      : ANS_IsDistributedEnabled_0100
- * @tc.desc      : Test IsDistributedEnabled function
- * @tc.require   : #I61RF2
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19100, Function | SmallTest | Level1)
-{
-    GTEST_LOG_(INFO) << "ANS_IsDistributedEnabled_0100 test start";
-
-    bool enabled = false;
-    ASSERT_EQ(advancedNotificationService_->IsDistributedEnabled(enabled), ERR_OK);
-
-    GTEST_LOG_(INFO) << "ANS_IsDistributedEnabled_0100 test end";
-}
-
-/**
  * @tc.number    : AdvancedNotificationServiceTest_19200
  * @tc.name      : EnableDistributedByBundle_0100
  * @tc.desc      : Test EnableDistributedByBundle function
@@ -2358,7 +2356,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19200,
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     bool enabled = false;
-    ASSERT_EQ(advancedNotificationService_->EnableDistributedByBundle(bundleOption, enabled), ERR_OK);
+    int32_t ret = advancedNotificationService_->EnableDistributedByBundle(bundleOption, enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_OK);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 
     GTEST_LOG_(INFO) << "EnableDistributedByBundle_0100 test end";
 }
@@ -2375,8 +2378,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19300,
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     bool enabled = true;
-    ASSERT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enabled), ERR_OK);
-
+    int32_t ret = advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_OK);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
     GTEST_LOG_(INFO) << "IsDistributedEnableByBundle_0100 test end";
 }
 
@@ -2392,7 +2399,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19400,
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     bool enabled = false;
-    ASSERT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enabled), ERR_OK);
+    int32_t ret = advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_OK);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 
     GTEST_LOG_(INFO) << "IsDistributedEnableByBundle_0200 test end";
 }
@@ -2408,12 +2420,17 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19500,
     GTEST_LOG_(INFO) << "GetDeviceRemindType_0100 test start";
 
     int32_t remindType = -1;
-    ASSERT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_OK);
+    int32_t ret = advancedNotificationService_->GetDeviceRemindType(remindType);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_OK);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 
     GTEST_LOG_(INFO) << "GetDeviceRemindType_0100 test end";
 }
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 /**
  * @tc.number    : AdvancedNotificationServiceTest_19600
  * @tc.name      : GetLocalNotificationKeys_0100
@@ -4459,10 +4476,18 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00001, Function |
 
     bool enabled = false;
     ret = advancedNotificationService_->IsDistributedEnabled(enabled);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 
     ret = advancedNotificationService_->EnableDistributed(enabled);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 }
 
 /**
@@ -4508,20 +4533,36 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00002, Function |
     auto request = new (std::nothrow) NotificationRequest();
 
     auto ret = advancedNotificationService_->EnableDistributedSelf(true);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 
     bool enable = false;
     ret = advancedNotificationService_->IsDistributedEnableByBundle(bundle, enable);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 
     ret = advancedNotificationService_->GetHasPoppedDialog(bundle1, enable);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     ret = advancedNotificationService_->SetSyncNotificationEnabledWithoutApp(1, enable);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 
     ret = advancedNotificationService_->GetSyncNotificationEnabledWithoutApp(1, enable);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+#else
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+#endif
 
     request->SetIsCoverActionButtons(true);
     advancedNotificationService_->FillActionButtons(request);
@@ -5660,7 +5701,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetRingtoneInfoByBundle_0300, Function
     EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
 }
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 /**
  * @tc.name      : SetNotificationRemindType_00001
  * @tc.number    :

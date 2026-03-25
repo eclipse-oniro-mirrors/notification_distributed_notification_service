@@ -744,7 +744,11 @@ HWTEST_F(NotificationHelperTest, IsDistributedEnabled_00001, Function | SmallTes
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.IsDistributedEnabled(enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     EXPECT_EQ(ret, (int)ERR_OK);
+#else
+    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+#endif
 }
 
 /**
@@ -772,7 +776,11 @@ HWTEST_F(NotificationHelperTest, EnableDistributedByBundle_00001, Function | Sma
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.EnableDistributedByBundle(bundleOption, enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+#else
+    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+#endif
 }
 
 /**
@@ -786,7 +794,11 @@ HWTEST_F(NotificationHelperTest, EnableDistributedSelf_00001, Function | SmallTe
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.EnableDistributedSelf(enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
+#else
+    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+#endif
 }
 
 /**
@@ -801,7 +813,11 @@ HWTEST_F(NotificationHelperTest, IsDistributedEnableByBundle_00001, Function | S
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.IsDistributedEnableByBundle(bundleOption, enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+#else
+    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+#endif
 }
 
 /**
@@ -1010,7 +1026,11 @@ HWTEST_F(NotificationHelperTest, SetSyncNotificationEnabledWithoutApp_00001, Fun
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.SetSyncNotificationEnabledWithoutApp(userId, enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+#else
+    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+#endif
 }
 
 /**
@@ -1025,7 +1045,11 @@ HWTEST_F(NotificationHelperTest, GetSyncNotificationEnabledWithoutApp_00001, Fun
     bool enabled = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetSyncNotificationEnabledWithoutApp(userId, enabled);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+#else
+    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+#endif
 }
 
 /**

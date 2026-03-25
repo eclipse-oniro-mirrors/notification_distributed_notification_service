@@ -450,7 +450,7 @@ namespace Notification {
         service->OnResourceRemove(randomInt32);
         service->CheckApiCompatibility(bundleOption);
         service->OnBundleDataCleared(bundleOption);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
         service->CheckPublishWithoutApp(randomInt32, request);
         service->GetLocalNotificationKeys(bundleOption);
         service->OnDistributedPublish(randomString, randomString, request);

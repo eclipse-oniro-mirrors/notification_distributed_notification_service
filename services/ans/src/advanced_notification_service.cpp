@@ -67,7 +67,7 @@
 #include "notification_config_parse.h"
 #include "notification_statistics.h"
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 #include "distributed_notification_manager.h"
 #include "distributed_preferences.h"
 #include "distributed_screen_status_manager.h"
@@ -300,7 +300,7 @@ std::map<std::string, uint32_t>& AdvancedNotificationService::GetDefaultSlotConf
     return slotFlagsDefaultMap_;
 }
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 void AdvancedNotificationService::InitDistributeCallBack()
 {
     DistributedNotificationManager::IDistributedCallback distributedCallback = {
@@ -340,7 +340,7 @@ AdvancedNotificationService::AdvancedNotificationService()
     ISystemEvent iSystemEvent = {
         std::bind(&AdvancedNotificationService::onBundleRemovedByUserId,
             this, std::placeholders::_1, std::placeholders::_2),
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
         std::bind(&AdvancedNotificationService::OnScreenOn, this),
         std::bind(&AdvancedNotificationService::OnScreenOff, this),
 #endif
@@ -353,7 +353,7 @@ AdvancedNotificationService::AdvancedNotificationService()
     };
     systemEventObserver_ = std::make_shared<SystemEventObserver>(iSystemEvent);
     DelayedSingleton<NotificationConfigParse>::GetInstance()->GetReportTrustListConfig();
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     distributedKvStoreDeathRecipient_ = std::make_shared<DistributedKvStoreDeathRecipient>(
         std::bind(&AdvancedNotificationService::OnDistributedKvStoreDeathRecipient, this));
     dataManager_.RegisterKvStoreServiceDeathRecipient(distributedKvStoreDeathRecipient_);
@@ -373,7 +373,7 @@ void AdvancedNotificationService::SelfClean()
 {
     notificationSvrQueue_.Reset();
     NotificationSubscriberManager::GetInstance()->ResetFfrtQueue();
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     DistributedNotificationManager::GetInstance()->ResetFfrtQueue();
 #endif
     NotificationLocalLiveViewSubscriberManager::GetInstance()->ResetFfrtQueue();
@@ -439,7 +439,7 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
             UpdateRecentNotification(notification, true, reason);
             CancelTimer(notification->GetAutoDeletedTimer());
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
             DoDistributedDelete("", "", notification);
 #endif
         }
@@ -476,7 +476,7 @@ AnsStatus AdvancedNotificationService::CancelPreparedNotification(int32_t notifi
             UpdateRecentNotification(notification, true, reason);
             CancelTimer(notification->GetAutoDeletedTimer());
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
             DoDistributedDelete("", "", notification);
 #endif
         }
@@ -885,7 +885,7 @@ AnsStatus __attribute__((weak)) AdvancedNotificationService::PublishPreparedNoti
         if (IsNeedNotifyConsumed(record->request)) {
             NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
         }
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
         if (!request->IsAgentNotification()) {
             DoDistributedPublish(bundleOption, record);
         }
@@ -1764,7 +1764,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
             (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey()) &&
             (record->notification->GetLabel() == notificationKey.label) &&
             (record->notification->GetId() == notificationKey.id)
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
             && record->deviceId.empty()
 #endif
         ) {

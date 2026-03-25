@@ -67,7 +67,7 @@ void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
         return;
     }
     napi_get_undefined(env, &result);
-    if (asynccallbackinfo->isWithResult) {
+    if (asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->isWithResult) {
         result = NapiNotificationSettingResult(env, data);
     }
     int32_t errorCode = ERR_OK;
