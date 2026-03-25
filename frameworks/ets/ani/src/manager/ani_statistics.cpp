@@ -27,7 +27,6 @@ namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackStatistics* asyncCallbackInfo)
 {
-    ANS_LOGD("Delete AsyncCallbackReminderInfo Without Promise");
     if (!asyncCallbackInfo) {
         return;
     }
@@ -46,7 +45,6 @@ void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackStatistics* asy
 
 void DeleteCallBackInfo(ani_env* env, AsyncCallbackStatistics* asyncCallbackInfo)
 {
-    ANS_LOGD("Delete AsyncCallbackReminderInfo");
     if (!asyncCallbackInfo) {
         return;
     }
@@ -86,7 +84,7 @@ void HandleStatisticsFunctionCallbackComplete(ani_env* env, WorkStatus status, v
     asyncCallbackInfo->info.result =
         NotificationSts::GetAniArrayStatisticsInfo(envCurr, asyncCallbackInfo->statisticsInfos);
     if (asyncCallbackInfo->info.result == nullptr) {
-        ANS_LOGE("GetAniArrayReminderInfo failed");
+        ANS_LOGE("GetAniArrayStatisticsInfo failed");
         asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
     }
     NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
