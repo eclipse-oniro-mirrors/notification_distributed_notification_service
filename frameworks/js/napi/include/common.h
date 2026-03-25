@@ -1159,17 +1159,6 @@ public:
         const napi_env &env, const napi_value &userInputResult, std::shared_ptr<NotificationUserInput> &userInput);
 
     /**
-     * @brief Gets the tag of NotificationUserInput object from specified js object
-     *
-     * @param env Indicates the environment that the API is invoked under
-     * @param userInputResult Indicates a js object to be converted
-     * @param userInput Indicates a NotificationUserInput object from specified js object
-     * @return Returns the null object if success, returns the null value otherwise
-     */
-    static napi_value GetNotificationUserInputByTag(
-        const napi_env &env, const napi_value &userInputResult, std::shared_ptr<NotificationUserInput> &userInput);
-
-    /**
      * @brief Gets the options of NotificationUserInput object from specified js object
      *
      * @param env Indicates the environment that the API is invoked under

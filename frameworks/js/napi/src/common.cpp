@@ -541,39 +541,6 @@ napi_value Common::GetNotificationUserInputByInputKey(
     return NapiGetNull(env);
 }
 
-napi_value Common::GetNotificationUserInputByTag(
-    const napi_env &env, const napi_value &userInputResult, std::shared_ptr<NotificationUserInput> &userInput)
-{
-    ANS_LOGD("called");
-
-    napi_valuetype valuetype = napi_undefined;
-    napi_value value = nullptr;
-    bool hasProperty = false;
-    char str[STR_MAX_SIZE] = {0};
-    size_t strLen = 0;
-
-    if (!userInput) {
-        return nullptr;
-    }
-    // tag: string
-    NAPI_CALL(env, napi_has_named_property(env, userInputResult, "tag", &hasProperty));
-    if (!hasProperty) {
-        ANS_LOGE("Property tag expected.");
-        return nullptr;
-    }
-    napi_get_named_property(env, userInputResult, "tag", &value);
-    NAPI_CALL(env, napi_typeof(env, value, &valuetype));
-    if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
-        return nullptr;
-    }
-    NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
-    userInput->SetTag(str);
-    ANS_LOGD("NotificationUserInput::tag = %{public}s", str);
-
-    return NapiGetNull(env);
-}
-
 napi_value Common::GetNotificationUserInputByOptions(
     const napi_env &env, const napi_value &userInputResult, std::shared_ptr<NotificationUserInput> &userInput)
 {
