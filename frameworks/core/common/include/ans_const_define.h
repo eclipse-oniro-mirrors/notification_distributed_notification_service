@@ -95,7 +95,7 @@ extern const std::string RESTRICTED_MODE_TRUST_LIST_KEY;
 
 const static std::string DEFAULT_TEMPLATE_PATH("/system/etc/notification_template/external.json");
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 constexpr NotificationConstant::DistributedReminderPolicy DEFAULT_DISTRIBUTED_REMINDER_POLICY =
     NotificationConstant::DistributedReminderPolicy::DEFAULT;
 constexpr bool DEFAULT_DISTRIBUTED_ENABLE_IN_APPLICATION_INFO = false;

@@ -32,7 +32,7 @@
 #include "notification_constant.h"
 #include "notification_unified_group_Info.h"
 #include "os_account_manager.h"
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 #include "distributed_screen_status_manager.h"
 #endif
 #include "notification_extension_wrapper.h"
@@ -536,7 +536,7 @@ ErrCode AdvancedNotificationService::ExcuteCancelGroupCancel(
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
                 (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
                 (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey()) &&
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
                 record->deviceId.empty() &&
 #endif
                 (record->request->GetGroupName() == groupName)) {
@@ -552,7 +552,7 @@ ErrCode AdvancedNotificationService::ExcuteCancelGroupCancel(
                 UpdateRecentNotification(record->notification, true, reason);
                 notifications.emplace_back(record->notification);
                 timerIds.emplace_back(record->notification->GetAutoDeletedTimer());
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
                 DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
 #endif
             }
@@ -628,7 +628,7 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
             }
             if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
                 (record->bundleOption->GetUid() == bundle->GetUid()) && !record->request->IsUnremovable() &&
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
                 record->deviceId.empty() &&
 #endif
                 (record->request->GetGroupName() == groupName)) {
@@ -647,7 +647,7 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
                 UpdateRecentNotification(record->notification, true, reason);
                 notifications.emplace_back(record->notification);
                 timerIds.emplace_back(record->notification->GetAutoDeletedTimer());
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
                 DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
 #endif
             }
@@ -1390,7 +1390,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(
                 }
             }
             if ((record->bundleOption->GetBundleName() == bundleName)
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
                 && record->deviceId.empty()
 #endif
             ) {
@@ -1412,7 +1412,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(
                 UpdateRecentNotification(record->notification, true, reason);
                 notifications.emplace_back(record->notification);
                 timerIds.emplace_back(record->notification->GetAutoDeletedTimer());
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
                 DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
 #endif
             }

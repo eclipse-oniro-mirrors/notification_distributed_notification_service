@@ -51,8 +51,8 @@ ohos_executable("anm") {
   configs = [ "${frameworks_module_ans_path}:ans_innerkits_public_config" ]
 
   defines = []
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
   }
 
   install_enable = false

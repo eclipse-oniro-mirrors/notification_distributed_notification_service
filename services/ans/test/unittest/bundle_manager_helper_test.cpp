@@ -124,7 +124,7 @@ HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00500, Level1)
     ASSERT_EQ(result, 1000);
 }
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 /**
  * @tc.number    : GetDistributedNotificationEnabled_00100
  * @tc.name      : GetDistributedNotificationEnabled

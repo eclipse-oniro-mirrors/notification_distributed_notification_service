@@ -91,7 +91,7 @@ template("advancednotificationservice_fuzztest_target") {
       "time_service:time_client",
       "bluetooth:btframework",
     ]
-    if (distributed_notification_supported) {
+    if (ans_device_manager_enable) {
       external_deps += [ "device_manager:devicemanagersdk" ]
     }
     external_deps += component_external_deps
@@ -101,8 +101,8 @@ template("advancednotificationservice_fuzztest_target") {
       cflags += [ "-DCONFIG_DUAL_FRAMEWORK" ]
     }
 
-    if (distributed_notification_service_feature_distributed_db) {
-      defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+    if (distributed_notification_service_feature_original_distributed) {
+      defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
       deps += [ "${services_path}/distributed:libans_distributed" ]
       include_dirs += [ "${services_path}/distributed/include" ]
     }

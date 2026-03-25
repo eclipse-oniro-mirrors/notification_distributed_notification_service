@@ -42,7 +42,7 @@
 #include "notification_extension_wrapper.h"
 #include "string_utils.h"
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 #include "distributed_notification_manager.h"
 #include "distributed_preferences.h"
 #include "distributed_screen_status_manager.h"
@@ -77,7 +77,7 @@ namespace Notification {
 namespace {
 #ifdef ANM_SUPPORT_DUMP
 constexpr char ACTIVE_NOTIFICATION_OPTION[] = "active";
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 constexpr char DISTRIBUTED_NOTIFICATION_OPTION[] = "distributed";
 #endif
 constexpr char SET_RECENT_COUNT_OPTION[] = "setRecentCount";
@@ -339,7 +339,7 @@ ErrCode AdvancedNotificationService::ActiveNotificationDump(const std::string& b
         if (!bundle.empty() && bundle != record->notification->GetBundleName()) {
             continue;
         }
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
         if (!record->deviceId.empty()) {
             continue;
         }
@@ -413,7 +413,7 @@ ErrCode AdvancedNotificationService::RecentNotificationDump(const std::string& b
     return ERR_OK;
 }
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 ErrCode AdvancedNotificationService::DistributedNotificationDump(const std::string& bundle, int32_t userId,
     int32_t recvUserId, std::vector<std::string> &dumpInfo)
 {
@@ -482,7 +482,7 @@ void AdvancedNotificationService::OnBundleRemovedInner(
         if (result != ERR_OK) {
             ANS_LOGW("NotificationPreferences::RemoveNotificationForBundle failed: %{public}d", result);
         }
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
         DistributedPreferences::GetInstance()->DeleteDistributedBundleInfo(bundleOption);
         std::vector<std::string> keys = GetLocalNotificationKeys(bundleOption);
 #else
@@ -504,7 +504,7 @@ void AdvancedNotificationService::OnBundleRemovedInner(
                 notifications.emplace_back(notification);
                 timerIds.emplace_back(notification->GetAutoDeletedTimer());
                 ExecBatchCancel(notifications, reason);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
                 DoDistributedDelete("", "", notification);
 #endif
             }
@@ -663,7 +663,7 @@ void AdvancedNotificationService::OnBootSystemCompleted()
     TryStartReminderAgentService();
 }
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 void AdvancedNotificationService::OnScreenOn()
 {
     ANS_LOGD("called");
@@ -684,7 +684,7 @@ void AdvancedNotificationService::OnDistributedKvStoreDeathRecipient()
     ANS_LOGD("%{public}s", __FUNCTION__);
     notificationSvrQueue_.Submit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
         DistributedNotificationManager::GetInstance()->OnDistributedKvStoreDeathRecipient();
 #endif
     }));
@@ -784,7 +784,7 @@ void AdvancedNotificationService::AdjustDateForDndTypeOnce(int64_t &beginDate, i
     endDate = newEndDuration.count();
 }
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 void AdvancedNotificationService::OnDistributedPublish(
     const std::string &deviceId, const std::string &bundleName, sptr<NotificationRequest> &request)
 {
@@ -1219,7 +1219,7 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
         std::vector<sptr<Notification>> notifications;
         std::vector<uint64_t> timerIds;
         for (auto key : keys) {
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
             std::string deviceId;
             std::string bundleName;
             GetDistributedInfo(key, deviceId, bundleName);
@@ -1237,7 +1237,7 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
                 UpdateRecentNotification(notification, true, reason);
                 notifications.emplace_back(notification);
                 timerIds.emplace_back(notification->GetAutoDeletedTimer());
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
                 DoDistributedDelete(deviceId, bundleName, notification);
 #endif
             }
@@ -1303,7 +1303,7 @@ void AdvancedNotificationService::DeleteAllByUserStopped(int32_t userId)
     std::vector<sptr<Notification>> notifications;
     std::vector<uint64_t> timerIds;
     for (auto key : keys) {
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
         std::string deviceId;
         std::string bundleName;
         GetDistributedInfo(key, deviceId, bundleName);
@@ -1328,7 +1328,7 @@ void AdvancedNotificationService::DeleteAllByUserStopped(int32_t userId)
             UpdateRecentNotification(notification, true, NotificationConstant::USER_LOGOUT_REASON_DELETE);
             notifications.emplace_back(notification);
             timerIds.emplace_back(notification->GetAutoDeletedTimer());
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
             DoDistributedDelete(deviceId, bundleName, notification);
 #endif
         }
@@ -1383,7 +1383,7 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
         std::vector<sptr<Notification>> notifications;
         std::vector<uint64_t> timerIds;
         for (auto key : keys) {
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
             std::string deviceId;
             std::string bundleName;
             GetDistributedInfo(key, deviceId, bundleName);
@@ -1399,7 +1399,7 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
                 UpdateRecentNotification(notification, true, deleteReason);
                 notifications.emplace_back(notification);
                 timerIds.emplace_back(notification->GetAutoDeletedTimer());
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
                 DoDistributedDelete(deviceId, bundleName, notification);
 #endif
             }
@@ -1444,7 +1444,7 @@ ErrCode AdvancedNotificationService::ShellDump(const std::string &cmd, const std
             result = ActiveNotificationDump(bundle, userId, recvUserId, dumpInfo);
         } else if (cmd == RECENT_NOTIFICATION_OPTION) {
             result = RecentNotificationDump(bundle, userId, recvUserId, dumpInfo);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
         } else if (cmd == DISTRIBUTED_NOTIFICATION_OPTION) {
             result = DistributedNotificationDump(bundle, userId, recvUserId, dumpInfo);
 #endif
@@ -2102,7 +2102,7 @@ ErrCode AdvancedNotificationService::OnRecoverLiveView(
     for (auto key : keys) {
         ANS_LOGI("BatchRemoveByKeys key = %{public}s", key.c_str());
         sptr<Notification> notification = nullptr;
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
         std::string deviceId;
         std::string bundleName;
         GetDistributedInfo(key, deviceId, bundleName);
@@ -2114,7 +2114,7 @@ ErrCode AdvancedNotificationService::OnRecoverLiveView(
         if (notification != nullptr) {
             notifications.emplace_back(notification);
             timerIds.emplace_back(notification->GetAutoDeletedTimer());
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
             DoDistributedDelete(deviceId, bundleName, notification);
 #endif
         }

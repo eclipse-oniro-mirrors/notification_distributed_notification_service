@@ -35,7 +35,8 @@ test_path = "${component_path}/test"
 tools_path = "${component_path}/tools"
 service_fuzz_test_path =
     "distributed_notification_service/distributed_notification_service"
-distributed_notification_supported = true
+ans_device_manager_enable = true
+ans_soft_bus_enable = true
 subsystem_name = "notification"
 component_external_deps = [
   "ability_base:base",
@@ -63,7 +64,8 @@ declare_args() {
   distributed_notification_service_feature_privileged_message = false
   distributed_notification_service_feature_badge_manager = true
   distributed_notification_service_feature_local_liveview = true
-  distributed_notification_service_feature_distributed_db = true
+  distributed_notification_service_feature_original_distributed = true #Separating ans_distributed.z.so
+  distributed_notification_service_feature_distributed_supported = true #Separating distributed related interfaces
   distributed_notification_service_feature_disturb_manager = true
   distributed_notification_service_feature_slot_manager = true
   distributed_notification_service_feature_additional_config = true
@@ -124,7 +126,8 @@ declare_args() {
 
   if (defined(global_parts_info) &&
       !defined(global_parts_info.communication_dsoftbus)) {
-    distributed_notification_supported = false
+    ans_soft_bus_enable = false
+    ans_device_manager_enable = false
   }
 
   print("hisysevent_usage = " + "$hisysevent_usage")

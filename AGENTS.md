@@ -244,7 +244,7 @@ Test levels: Level1 (fast), Level2, Level3, Level4 (slow)
 Use feature flags defined in `notification.gni`:
 
 ```cpp
-#if defined(DISTRIBUTED_NOTIFICATION_SUPPORTED)
+#if defined(ANS_FEATURE_ORIGINAL_DISTRIBUTED)
     // Distributed notification code
 #endif
 

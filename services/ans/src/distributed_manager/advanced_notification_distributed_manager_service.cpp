@@ -33,7 +33,7 @@
 #include "os_account_manager.h"
 #include "os_account_manager_helper.h"
 #include "hitrace_meter_adapter.h"
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 #include "distributed_notification_manager.h"
 #include "distributed_preferences.h"
 #include "distributed_screen_status_manager.h"
@@ -58,7 +58,7 @@ const static std::string NOTIFICATION_EVENT_DISTRIBUTED_DEVICE_TYPES_CHANGE =
 ErrCode AdvancedNotificationService::IsDistributedEnabled(bool &enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
@@ -168,7 +168,7 @@ ErrCode AdvancedNotificationService::EnableDistributed(bool enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("VerifyNativeToken and IsSystemApp is false.");
@@ -197,7 +197,7 @@ ErrCode AdvancedNotificationService::EnableDistributedByBundle(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
@@ -240,7 +240,7 @@ ErrCode AdvancedNotificationService::EnableDistributedByBundle(
 ErrCode AdvancedNotificationService::EnableDistributedSelf(const bool enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
@@ -271,7 +271,7 @@ ErrCode AdvancedNotificationService::IsDistributedEnableByBundle(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
@@ -1163,7 +1163,7 @@ ErrCode AdvancedNotificationService::GetDeviceRemindType(int32_t& remindTypeInt)
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     auto submitResult = notificationSvrQueue_.SyncSubmit(
         std::bind([&]() { remindTypeInt = static_cast<int32_t>(GetRemindType()); }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get device remind type.");
@@ -1177,7 +1177,7 @@ ErrCode AdvancedNotificationService::SetSyncNotificationEnabledWithoutApp(const 
 {
     ANS_LOGD("userId: %{public}d, enabled: %{public}d", userId, enabled);
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
@@ -1205,7 +1205,7 @@ ErrCode AdvancedNotificationService::GetSyncNotificationEnabledWithoutApp(const 
 {
     ANS_LOGD("userId: %{public}d", userId);
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;

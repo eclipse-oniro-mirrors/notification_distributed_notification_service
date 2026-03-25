@@ -79,7 +79,7 @@ public:
     bool GetBundleInfoByBundleName(const std::string bundle, const int32_t userId,
         AppExecFwk::BundleInfo &bundleInfo) = 0;
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     /**
      * @brief Check whether the specified bundle has the distributed notification supported.
      *

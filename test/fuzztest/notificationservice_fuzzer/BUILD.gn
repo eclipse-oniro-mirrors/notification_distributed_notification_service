@@ -60,7 +60,7 @@ ohos_fuzztest("NotificationServiceFuzzTest") {
     "data_share:datashare_permission",
     "time_service:time_client",
   ]
-  if (distributed_notification_supported) {
+  if (ans_device_manager_enable) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
   external_deps += component_external_deps
@@ -73,8 +73,8 @@ ohos_fuzztest("NotificationServiceFuzzTest") {
     defines += [ "ANM_SUPPORT_DUMP" ]
   }
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
   }

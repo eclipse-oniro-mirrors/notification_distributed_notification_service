@@ -141,9 +141,14 @@ HWTEST_F(AnsInnerKitsModuleSettingTest, ANS_Interface_MT_NotificationSetting_007
 HWTEST_F(AnsInnerKitsModuleSettingTest, ANS_Interface_MT_NotificationSetting_00800, Function | MediumTest | Level1)
 {
     NotificationBundleOption bundleOption("bundlename", CALLING_UID);
-    EXPECT_EQ(ERR_ANS_PERMISSION_DENIED, NotificationHelper::SetSyncNotificationEnabledWithoutApp(USERID, true));
     bool enabled = false;
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    EXPECT_EQ(ERR_ANS_PERMISSION_DENIED, NotificationHelper::SetSyncNotificationEnabledWithoutApp(USERID, true));
     EXPECT_EQ(ERR_ANS_PERMISSION_DENIED, NotificationHelper::GetSyncNotificationEnabledWithoutApp(USERID, enabled));
+#else
+    EXPECT_EQ(ERR_INVALID_OPERATION, NotificationHelper::SetSyncNotificationEnabledWithoutApp(USERID, true));
+    EXPECT_EQ(ERR_INVALID_OPERATION, NotificationHelper::GetSyncNotificationEnabledWithoutApp(USERID, enabled));
+#endif
 }
 }  // namespace Notification
 }  // namespace OHOS

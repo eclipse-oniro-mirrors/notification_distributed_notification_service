@@ -31,7 +31,7 @@ namespace Notification {
 namespace {
 constexpr char COMMAND_ACTIVE[] = "active";
 constexpr char COMMAND_RECENT[] = "recent";
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 constexpr char COMMAND_DISTRIBUTED[] = "distributed";
 constexpr char SHORT_OPTIONS[] = "hARDb:u:r:";
 #else
@@ -42,7 +42,7 @@ const struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {COMMAND_ACTIVE, no_argument, nullptr, 'A'},
     {COMMAND_RECENT, no_argument, nullptr, 'R'},
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     {COMMAND_DISTRIBUTED, no_argument, nullptr, 'D'},
 #endif
     {"bundle", required_argument, nullptr, 'b'},
@@ -59,7 +59,7 @@ constexpr char DUMP_HELP_MSG[] =
     "usage: anm dump [<options>]\n"
     "options list:\n"
     "  --help, -h                   help menu\n"
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     "  --distributed, -D            list all distributed notifications by remote device\n"
 #endif
     "  --active,  -A                 list all active notifications\n"
@@ -293,7 +293,7 @@ void NotificationShellCommand::SetDumpCmdInfo(std::string &cmd, std::string &bun
             case 'R':
                 cmd = COMMAND_RECENT;
                 break;
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
             case 'D':
                 cmd = COMMAND_DISTRIBUTED;
                 break;

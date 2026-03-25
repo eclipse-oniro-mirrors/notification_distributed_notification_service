@@ -75,8 +75,8 @@ ohos_unittest("ans_unit_test") {
     "${services_path}/ans:ans_service_sources",
   ]
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
   }
@@ -114,7 +114,7 @@ ohos_unittest("ans_unit_test") {
     "time_service:time_client",
     "bluetooth:btframework",
   ]
-  if (distributed_notification_supported) {
+  if (ans_device_manager_enable) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -174,8 +174,8 @@ ohos_unittest("notification_preferences_database_test") {
     "${services_path}/ans:ans_service_sources",
   ]
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
   }
@@ -208,7 +208,7 @@ ohos_unittest("notification_preferences_database_test") {
     "time_service:time_client",
     "bluetooth:btframework",
   ]
-  if (distributed_notification_supported) {
+  if (ans_device_manager_enable) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -262,8 +262,8 @@ ohos_unittest("notification_preferences_database_two_test") {
     "${services_path}/ans:ans_service_sources",
   ]
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
   }
@@ -279,7 +279,6 @@ ohos_unittest("notification_preferences_database_two_test") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gmock_main",
@@ -297,6 +296,9 @@ ohos_unittest("notification_preferences_database_two_test") {
     "time_service:time_client",
     "bluetooth:btframework",
   ]
+  if (ans_device_manager_enable) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
@@ -355,8 +357,8 @@ ohos_unittest("notification_subscriber_manager_test") {
     "${services_path}/ans:ans_service_sources",
   ]
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
   }
@@ -398,7 +400,7 @@ ohos_unittest("notification_subscriber_manager_test") {
     "time_service:time_client",
     "bluetooth:btframework",
   ]
-  if (distributed_notification_supported) {
+  if (ans_device_manager_enable) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -468,8 +470,8 @@ ohos_unittest("notification_service_test") {
     "${services_path}/infrastructure:ans_base",
   ]
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
   }
@@ -503,7 +505,7 @@ ohos_unittest("notification_service_test") {
     "time_service:time_client",
     "bluetooth:btframework",
   ]
-  if (distributed_notification_supported) {
+  if (ans_device_manager_enable) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -579,8 +581,8 @@ ohos_unittest("notification_clone_test") {
     "${services_path}/ans:ans_service_sources",
   ]
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
   }
@@ -615,7 +617,7 @@ ohos_unittest("notification_clone_test") {
     "time_service:time_client",
     "bluetooth:btframework",
   ]
-  if (distributed_notification_supported) {
+  if (ans_device_manager_enable) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -684,8 +686,8 @@ ohos_unittest("notification_publish_service_test") {
     defines += [ "ANS_FEATURE_PRIORITY_NOTIFICATION" ]
   }
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
   }
@@ -720,7 +722,7 @@ ohos_unittest("notification_publish_service_test") {
     "time_service:time_client",
     "bluetooth:btframework",
   ]
-  if (distributed_notification_supported) {
+  if (ans_device_manager_enable) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -784,8 +786,8 @@ ohos_unittest("notification_service_publish_test") {
     "${services_path}/ans:ans_service_sources",
   ]
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
   }
@@ -818,7 +820,7 @@ ohos_unittest("notification_service_publish_test") {
     "time_service:time_client",
     "bluetooth:btframework",
   ]
-  if (distributed_notification_supported) {
+  if (ans_device_manager_enable) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -918,8 +920,8 @@ ohos_unittest("notification_preferences_test") {
     "${services_path}/ans:ans_service_sources",
   ]
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
   }
@@ -953,7 +955,7 @@ ohos_unittest("notification_preferences_test") {
     "time_service:time_client",
     "bluetooth:btframework",
   ]
-  if (distributed_notification_supported) {
+  if (ans_device_manager_enable) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -1181,8 +1183,8 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "${services_path}/infrastructure:ans_base",
   ]
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
   }
@@ -1257,8 +1259,8 @@ ohos_unittest("advanced_notification_ringtone_service_test") {
     "${services_path}/infrastructure:ans_base",
   ]
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
   }
@@ -1291,7 +1293,7 @@ ohos_unittest("advanced_notification_ringtone_service_test") {
     "time_service:time_client",
     "bluetooth:btframework",
   ]
-  if (distributed_notification_supported) {
+  if (ans_device_manager_enable) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -1349,8 +1351,8 @@ ohos_unittest("advanced_notification_geofence_service_test") {
     "${services_path}/infrastructure:ans_base",
   ]
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
   }
@@ -1383,7 +1385,7 @@ ohos_unittest("advanced_notification_geofence_service_test") {
     "time_service:time_client",
     "bluetooth:btframework",
   ]
-  if (distributed_notification_supported) {
+  if (ans_device_manager_enable) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -1440,8 +1442,8 @@ ohos_unittest("advanced_notification_service_branch_test") {
     "${services_path}/infrastructure:ans_base",
   ]
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
   }
@@ -1905,8 +1907,8 @@ ohos_unittest("advanced_notification_service_unit_test") {
     "${services_path}/infrastructure:ans_base",
   ]
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
   }
@@ -2160,7 +2162,7 @@ ohos_unittest("notification_extension_test") {
     "time_service:time_client",
     "bluetooth:btframework",
   ]
-  if (distributed_notification_supported) {
+  if (ans_device_manager_enable) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 

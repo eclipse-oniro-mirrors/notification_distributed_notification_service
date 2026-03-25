@@ -29,7 +29,7 @@
 #include "ipc_skeleton.h"
 #include "notification_constant.h"
 #include "os_account_manager_helper.h"
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 #include "distributed_notification_manager.h"
 #include "distributed_preferences.h"
 #include "distributed_screen_status_manager.h"
