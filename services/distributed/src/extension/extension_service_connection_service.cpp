@@ -105,7 +105,7 @@ sptr<ExtensionServiceConnection> ExtensionServiceConnectionService::GetConnectio
     sptr<ExtensionServiceConnection> connection = nullptr;
     auto iter = connectionMap_.find(connectionKey);
     if (iter == connectionMap_.end()) {
-        ANS_LOGD("create connection: %{public}s", connectionKey.c_str());
+        ANS_LOGI("create connection: %{public}s", connectionKey.c_str());
         connection = new (std::nothrow) ExtensionServiceConnection(
             *subscriberInfo, [this](const ExtensionSubscriberInfo& info) { RemoveConnection(info); });
         if (connection == nullptr) {
