@@ -132,10 +132,11 @@ ohos_unittest("distributed_base_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
-  if (ans_device_manager_enable) {
+
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
-  if (ans_soft_bus_enable) {
+  if (ans_soft_bus_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -242,10 +243,11 @@ ohos_unittest("distributed_device_service_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
-  if (ans_device_manager_enable) {
+
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
-  if (ans_soft_bus_enable) {
+  if (ans_soft_bus_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -308,7 +310,8 @@ ohos_unittest("ans_distributed_unit_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
   ]
-  if (ans_device_manager_enable) {
+
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -359,7 +362,7 @@ ohos_unittest("distributed_preferences_database_test") {
   if (distributed_notification_service_feature_original_distributed) {
     defines = [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
   }
-  if (ans_device_manager_enable) {
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -411,7 +414,7 @@ ohos_unittest("distributed_screen_status_manager_branch_test") {
   if (distributed_notification_service_feature_original_distributed) {
     defines = [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
   }
-  if (ans_device_manager_enable) {
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -463,7 +466,7 @@ ohos_unittest("distributed_database_branch_test") {
   if (distributed_notification_service_feature_original_distributed) {
     defines = [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
   }
-  if (ans_device_manager_enable) {
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -509,7 +512,7 @@ ohos_unittest("distributed_preferences_branch_test") {
   if (distributed_notification_service_feature_original_distributed) {
     defines = [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
   }
-  if (ans_device_manager_enable) {
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -552,7 +555,7 @@ ohos_unittest("distributed_device_callback_test") {
   if (distributed_notification_service_feature_original_distributed) {
     defines = [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
   }
-  if (ans_device_manager_enable) {
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -675,7 +678,7 @@ ohos_unittest("distributed_notification_manager_branch_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
   ]
-  if (ans_device_manager_enable) {
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -772,10 +775,10 @@ ohos_unittest("distributed_service_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
-  if (ans_device_manager_enable) {
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
-  if (ans_soft_bus_enable) {
+  if (ans_soft_bus_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -880,10 +883,10 @@ ohos_unittest("distributed_subscriber_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
-  if (ans_device_manager_enable) {
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
-  if (ans_soft_bus_enable) {
+  if (ans_soft_bus_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -927,10 +930,10 @@ ohos_unittest("distributed_library_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
-  if (ans_device_manager_enable) {
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
-  if (ans_soft_bus_enable) {
+  if (ans_soft_bus_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -1036,10 +1039,10 @@ ohos_unittest("distributed_tlvbox_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
-  if (ans_device_manager_enable) {
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
-  if (ans_soft_bus_enable) {
+  if (ans_soft_bus_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -1147,10 +1150,10 @@ ohos_unittest("distributed_helper_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
-  if (ans_device_manager_enable) {
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
-  if (ans_soft_bus_enable) {
+  if (ans_soft_bus_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -1234,10 +1237,10 @@ ohos_unittest("distributed_soft_bus_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
-  if (ans_device_manager_enable) {
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
-  if (ans_soft_bus_enable) {
+  if (ans_soft_bus_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -1324,10 +1327,10 @@ ohos_unittest("distributed_soft_bus_non_master_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
-  if (ans_device_manager_enable) {
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
-  if (ans_soft_bus_enable) {
+  if (ans_soft_bus_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
@@ -1404,10 +1407,10 @@ ohos_unittest("notification_extension_service_test") {
     "time_service:time_client",
     "zlib:libz",
   ]
-  if (ans_device_manager_enable) {
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
-  if (ans_soft_bus_enable) {
+  if (ans_soft_bus_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 

@@ -278,7 +278,7 @@ ohos_source_set("ans_service_sources") {
   ]
   external_deps += component_external_deps
 
-  if (ans_device_manager_enable) {
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
