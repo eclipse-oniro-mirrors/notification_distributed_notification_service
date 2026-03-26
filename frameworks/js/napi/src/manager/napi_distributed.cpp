@@ -91,7 +91,7 @@ napi_value NapiIsDistributedEnabled(napi_env env, napi_callback_info info)
     if (!params.deviceType.empty()) {
         return DoIsDistributedEnabledWithDeviceType(env, info, params);
     }
-
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     napi_ref callback = params.callback;
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoIsEnabled {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
@@ -130,6 +130,9 @@ napi_value NapiIsDistributedEnabled(napi_env env, napi_callback_info info)
     } else {
         return promise;
     }
+#else
+    return Common::NapiReturnFalseCbNewType(env, info);
+#endif
 }
 
 napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
