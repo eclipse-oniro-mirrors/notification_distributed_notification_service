@@ -21,7 +21,6 @@ config("ans_base_rdb_config") {
     "${core_path}/common/include",
     "include",
     "include/rdb_event_handler",
-    "include/rdb_store_wrapper",
   ]
 }
 
@@ -29,6 +28,7 @@ config("ans_base_rdb_config_public") {
   visibility = [ "./../../../*" ]
   include_dirs = [
     "include/public",
+    "include/rdb_store_wrapper",
   ]
 }
 
@@ -56,22 +56,17 @@ if (is_build_source_set_ntf) {
       "src/rdb_event_handler/priorityinfo_migration_handler.cpp",
       "src/rdb_event_handler/rdb_event_handler_manager.cpp",
       "src/rdb_event_handler/rdb_store_callback.cpp",
+      "src/rdb_store_wrapper/rdb_store_wrapper.cpp",
       "src/rdb_store_wrapper/rdb_store_wrapper_delete.cpp",
       "src/rdb_store_wrapper/rdb_store_wrapper_insert.cpp",
       "src/rdb_store_wrapper/rdb_store_wrapper_query.cpp",
-      "src/rdb_store_wrapper/rdb_store_wrapper.cpp"
     ]
 
     defines = []
 
+    configs = [ ":ans_base_rdb_config" ]
 
-    configs = [
-      ":ans_base_rdb_config",
-    ]
-
-    public_configs = [
-      ":ans_base_rdb_config_public"
-    ]
+    public_configs = [ ":ans_base_rdb_config_public" ]
 
     external_deps = [
       "c_utils:utils",
@@ -105,21 +100,17 @@ if (is_build_source_set_ntf) {
       "src/rdb_event_handler/priorityinfo_migration_handler.cpp",
       "src/rdb_event_handler/rdb_event_handler_manager.cpp",
       "src/rdb_event_handler/rdb_store_callback.cpp",
+      "src/rdb_store_wrapper/rdb_store_wrapper.cpp",
       "src/rdb_store_wrapper/rdb_store_wrapper_delete.cpp",
       "src/rdb_store_wrapper/rdb_store_wrapper_insert.cpp",
       "src/rdb_store_wrapper/rdb_store_wrapper_query.cpp",
-      "src/rdb_store_wrapper/rdb_store_wrapper.cpp"
     ]
 
     defines = []
 
-    configs = [
-      ":ans_base_rdb_config",
-    ]
+    configs = [ ":ans_base_rdb_config" ]
 
-    public_configs = [
-      ":ans_base_rdb_config_public"
-    ]
+    public_configs = [ ":ans_base_rdb_config_public" ]
 
     external_deps = [
       "c_utils:utils",
@@ -148,33 +139,29 @@ ohos_unittest("ans_base_rdb_unittest") {
 
   module_out_path = module_output_path
 
-  include_dirs = [
-    "test/include/mock"
-  ]
+  include_dirs = [ "test/include/mock" ]
 
-  configs = [
-    ":ans_base_rdb_config",
-  ]
+  configs = [ ":ans_base_rdb_config" ]
 
   sources = [
+    "test/src/i_rdb_event_handler_test.cpp",
+    "test/src/init_default_table_handler_test.cpp",
+    "test/src/live_view_migration_handler_test.cpp",
     "test/src/mock/mock_abs_shared_result_set.cpp",
     "test/src/mock/mock_rdb_event_handler.cpp",
     "test/src/mock/mock_rdb_helper.cpp",
     "test/src/mock/mock_rdb_store.cpp",
-    "test/src/i_rdb_event_handler_test.cpp",
-    "test/src/init_default_table_handler_test.cpp",
-    "test/src/live_view_migration_handler_test.cpp",
-    "test/src/priorityinfo_migration_handler_test.cpp",
     "test/src/notification_rdb_hook_mgr_test.cpp",
+    "test/src/notification_rdb_mgr_statistics_test.cpp",
     "test/src/notification_rdb_mgr_test.cpp",
+    "test/src/notification_rdb_wrapper_statistics_test.cpp",
     "test/src/notification_rdb_wrapper_test.cpp",
+    "test/src/priorityinfo_migration_handler_test.cpp",
     "test/src/rdb_event_handler_manager_test.cpp",
     "test/src/rdb_store_callback_test.cpp",
   ]
 
-  deps = [
-    ":ans_base_rdb",
-  ]
+  deps = [ ":ans_base_rdb" ]
 
   external_deps = [
     "c_utils:utils",

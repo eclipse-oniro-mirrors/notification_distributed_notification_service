@@ -100,6 +100,7 @@ ohos_shared_library("notificationmanager") {
     "napi_ringtone_info_by_bundle.cpp",
     "napi_silent_reminder_enable.cpp",
     "napi_slot.cpp",
+    "napi_statistics.cpp",
     "napi_sync_config.cpp",
     "napi_template.cpp",
   ]
@@ -175,6 +176,10 @@ ohos_shared_library("notificationmanager") {
 
   if (distributed_notification_service_feature_priority_notification) {
     defines += [ "ANS_FEATURE_PRIORITY_NOTIFICATION" ]
+  }
+
+  if (distributed_notification_service_feature_notification_statistics) {
+    defines += [ "ANS_FEATURE_NOTIFICATION_STATISTICS" ]
   }
 
   relative_install_dir = "module"

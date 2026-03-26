@@ -1905,6 +1905,36 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleO
     validBundleOption->SetAppIndex(BundleManagerHelper::GetInstance()->GetAppIndexByUid(validBundleOption->GetUid()));
     return validBundleOption;
 }
+
+sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleOptionV3(
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    sptr<NotificationBundleOption> validBundle = GenerateValidBundleOptionV2(bundleOption);
+    if (validBundle == nullptr) {
+        int32_t activeUserId = -1;
+        if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
+            ANS_LOGE("Failed to get active user id!");
+            return nullptr;
+        }
+        int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_DEFAULT);
+        AppExecFwk::BundleInfo bundleInfo = {};
+        if (!BundleManagerHelper::GetInstance()->GetBundleInfoV9(bundleOption->GetBundleName(), flags,
+            bundleInfo, activeUserId)) {
+            ANS_LOGE("Failed to get bundle info, name: %{public}s, userId: %{public}d",
+                bundleOption->GetBundleName().c_str(), activeUserId);
+            return nullptr;
+        }
+        if (bundleOption->GetUid() > 0 &&  bundleOption->GetUid() != bundleInfo.uid) {
+            ANS_LOGE("Bundle uid mismatch: expected %{public}d, actual %{public}d",
+                bundleInfo.uid, bundleOption->GetUid());
+            return nullptr;
+        }
+        validBundle =
+            new (std::nothrow) NotificationBundleOption(bundleOption->GetBundleName(), bundleInfo.uid);
+    }
+
+    return validBundle;
+}
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 sptr<NotificationBundleOption> AdvancedNotificationService::GenerateCloneValidBundleOption(
     const sptr<NotificationBundleOption> &bundleOption)

@@ -23,6 +23,7 @@ namespace {
 const std::string NOTIFICATION_KEY = "KEY";
 const int32_t NOTIFICATION_KEY_INDEX = 0;
 const int32_t NOTIFICATION_VALUE_INDEX = 1;
+const int64_t LAST_DAY_MS = 7 * 24 * 60 * 60 * 1000;
 }
 
 template<typename Func>
@@ -60,6 +61,79 @@ int32_t NtfRdbStoreWrapper::QueryMultiTablesWithErrorHandling(
         }
     }
     return ret;
+}
+
+int32_t NtfRdbStoreWrapper::GetStatisticsInfos(const int64_t lastTimeMs,
+    const int32_t bundleUid, const std::string &tableName, int32_t &totalCount, int64_t &lastTime)
+{
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
+    std::string querySql =
+        "SELECT COUNT(*) as total_count, MAX(notificationTime) as max_timestamp "
+        "FROM " + tableName + " "
+        "WHERE "
+        "uid = " + std::to_string(bundleUid) + " "
+        "AND notificationTime >= " +  std::to_string(lastTimeMs) + ";";
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = nullptr;
+    resultSet = rdbStore_->QuerySql(querySql);
+    if (resultSet == nullptr) {
+        ANS_LOGE("SELECT * fail resultSet is nullptr");
+        return NativeRdb::E_ERROR;
+    }
+
+    if (resultSet->GoToNextRow() == NativeRdb::E_OK) {
+        int32_t columnIndex;
+        if (resultSet->GetColumnIndex("total_count", columnIndex) == NativeRdb::E_OK) {
+            if (resultSet->GetInt(columnIndex, totalCount) != NativeRdb::E_OK) {
+                ANS_LOGW("failed to get total_count value");
+            }
+        }
+        if (resultSet->GetColumnIndex("max_timestamp", columnIndex) == NativeRdb::E_OK) {
+            if (resultSet->GetLong(columnIndex, lastTime) != NativeRdb::E_OK) {
+                ANS_LOGW("failed to get max_timestamp value");
+            }
+        }
+    }
+    resultSet->Close();
+    ANS_LOGD("NtfRdbStoreWrapper::GetStatisticsInfos: %{public}s", tableName.c_str());
+    return NativeRdb::E_OK;
+}
+
+int32_t NtfRdbStoreWrapper::QueryStatisticsInfosByBundle(const int32_t bundleUid, const int32_t userId,
+    const int64_t beginTime, int32_t &totalCount, int64_t &lastTime)
+{
+    if (rdbStore_ == nullptr) {
+        ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
+        return NativeRdb::E_ERROR;
+    }
+
+    std::string tableName = NOTIFICATION_STATISTICS_TABLENAME + "_" + std::to_string(userId);
+    int32_t reuslt = GetStatisticsInfos(beginTime, bundleUid, tableName, totalCount, lastTime);
+
+    ANS_LOGD("QueryStatisticsInfosByBundle reuslt: %{public}d", reuslt);
+    return reuslt;
+}
+
+int32_t NtfRdbStoreWrapper::UpdateStatisticsTimeStamp(const int32_t userId, int64_t offsetMs)
+{
+    if (rdbStore_ == nullptr) {
+        ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
+        return NativeRdb::E_ERROR;
+    }
+
+    int updatedRows = -1;
+    std::string tableName = NOTIFICATION_STATISTICS_TABLENAME + "_" + std::to_string(userId);
+    std::string updateSqlStr = "UPDATE " + tableName + " SET notificationTime = notificationTime + ?";
+    std::vector<NativeRdb::ValueObject> bindArgs;
+    NativeRdb::ValueObject value(offsetMs);
+    bindArgs.push_back(value);
+
+    int ret = rdbStore_->ExecuteSql(updateSqlStr, bindArgs);
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGE("rdbStore_ ExecuteSql update notificationTime fail: %{public}d", ret);
+        return NativeRdb::E_ERROR;
+    }
+
+    return NativeRdb::E_OK;
 }
 
 int32_t NtfRdbStoreWrapper::QueryData(const std::string &key, std::string &value, const int32_t &userId)

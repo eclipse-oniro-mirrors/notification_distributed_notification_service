@@ -28,6 +28,7 @@
 
 namespace OHOS {
 namespace Notification {
+constexpr int32_t SECONDS_IN_ONE_DAY = 24 * 3600;
 inline std::string GetClientBundleNameByUid(int32_t callingUid)
 {
     std::string bundle;
@@ -160,6 +161,33 @@ inline ErrCode PermissionVerification()
         return ERR_ANS_PERMISSION_DENIED;
     }
     return ERR_OK;
+}
+
+inline std::chrono::seconds getCurrentTimezoneOffset()
+{
+    std::time_t nowTime = std::time(nullptr);
+    
+    std::tm local_tm;
+    std::tm utc_tm;
+    localtime_r(&nowTime, &local_tm);
+    gmtime_r(&nowTime, &utc_tm);
+    
+    std::time_t local_epoch = std::mktime(&local_tm);
+    std::time_t utc_epoch = std::mktime(&utc_tm);
+    
+    return std::chrono::seconds(local_epoch - utc_epoch);
+}
+
+inline std::chrono::seconds getTodayStartLocalDuration()
+{
+    std::chrono::seconds tzOffset = getCurrentTimezoneOffset();
+
+    auto nowUtc = std::chrono::system_clock::now();
+    auto nowUtcSeconds = std::chrono::time_point_cast<std::chrono::seconds>(nowUtc);
+    auto nowLocal = nowUtcSeconds + tzOffset;
+
+    auto todayStartLocalSeconds = (nowLocal.time_since_epoch().count() / SECONDS_IN_ONE_DAY) * SECONDS_IN_ONE_DAY;
+    return std::chrono::seconds(todayStartLocalSeconds);
 }
 }  // namespace Notification
 }  // namespace OHOS

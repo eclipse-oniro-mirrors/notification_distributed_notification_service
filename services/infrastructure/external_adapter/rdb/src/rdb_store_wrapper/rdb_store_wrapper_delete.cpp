@@ -23,6 +23,9 @@ namespace OHOS::Notification::Infra {
 namespace {
 const std::string NOTIFICATION_KEY = "KEY";
 const std::ptrdiff_t MAX_SIZE_PER_BATCH = 100;
+const int64_t LAST_TIMER_DAY_MS = 9 * 24 * 60 * 60 * 1000;
+const int LINES = 15000;
+const int DELETEROWS = 5000;
 }
 
 template<typename Func>
@@ -80,6 +83,136 @@ int32_t NtfRdbStoreWrapper::DeleteData(const std::string &key, const int32_t &us
     constexpr int32_t sceneId = 10;
     constexpr int32_t branchId = 6; // EventSceneId::SCENE_10, EventBranchId::BRANCH_6
     return DeleteDataWithErrorHandling(userId, deleteFunc, false, sceneId, branchId);
+}
+
+int32_t NtfRdbStoreWrapper::DeleteStatisticsByBundle(const int32_t userId,
+    const std::string &bundleName, int32_t packageId)
+{
+    if (rdbStore_ == nullptr) {
+        ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
+        return NativeRdb::E_ERROR;
+    }
+    std::string tableName = NOTIFICATION_STATISTICS_TABLENAME + "_" + std::to_string(userId);
+
+    NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
+    absRdbPredicates.EqualTo("bundleName", bundleName);
+    absRdbPredicates.EqualTo("uid", packageId);
+
+    int affectedRows = -1;
+    int ret = rdbStore_->Delete(affectedRows, absRdbPredicates);
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGE("NtfRdbStoreWrapper::DeleteStatisticsByBundle fail: %{public}d", ret);
+        return NativeRdb::E_ERROR;
+    }
+    ANS_LOGD("DeleteStatisticsByBundle sucess affectedRows: %{public}d, %{public}d", affectedRows, ret);
+
+    return NativeRdb::E_OK;
+}
+
+int32_t NtfRdbStoreWrapper::CleanExperDataTimer(const std::vector<int32_t> &userIds)
+{
+    ANS_LOGD("NtfRdbStoreWrapper::CleanExperDataTimer");
+    if (rdbStore_ == nullptr) {
+        ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
+        return NativeRdb::E_ERROR;
+    }
+
+    auto now = std::chrono::system_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    int64_t minTimestamp = duration.count() - LAST_TIMER_DAY_MS;
+
+    for (auto userId : userIds) {
+        std::string tableName = NOTIFICATION_STATISTICS_TABLENAME + "_" + std::to_string(userId);
+
+        NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
+        absRdbPredicates.SetWhereClause("notificationTime < ?");
+        absRdbPredicates.SetWhereArgs({std::to_string(minTimestamp)});
+
+        int affectedRows = -1;
+        int ret = rdbStore_->Delete(affectedRows, absRdbPredicates);
+        if (ret != NativeRdb::E_OK) {
+            ANS_LOGE("NtfRdbStoreWrapper::CleanExperDataTimer fail: %{public}d", ret);
+            return NativeRdb::E_ERROR;
+        }
+        ANS_LOGD("NtfRdbStoreWrapper::CleanExperDataTimer sucess affectedRows:%{public}d, %{public}d",
+            affectedRows, ret);
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NtfRdbStoreWrapper::CleanExpertotal(const int32_t totalCount, const std::string &tableName)
+{
+    if (totalCount >= LINES) {
+        ANS_LOGI("data exper, begin clean: %{public}d", totalCount);
+        std::string querySqlStr =
+            "DELETE FROM " + tableName +
+            "  WHERE id IN ("
+            "  SELECT id "
+            "  FROM " + tableName + " "
+            "  ORDER BY notificationTime ASC "
+            "  LIMIT " + std::to_string(DELETEROWS) + " "
+            ");";
+        int32_t ret = NativeRdb::E_OK;
+        ret = rdbStore_->ExecuteSql(querySqlStr);
+        if (ret != NativeRdb::E_OK) {
+            ANS_LOGE("ExecuteSql fail, querySqlStr: %{public}s", querySqlStr.c_str());
+            return NativeRdb::E_ERROR;
+        }
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NtfRdbStoreWrapper::CleanExperData(const int32_t userId)
+{
+    if (rdbStore_ == nullptr) {
+        ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
+        return NativeRdb::E_ERROR;
+    }
+    std::string tableName = NOTIFICATION_STATISTICS_TABLENAME + "_" + std::to_string(userId);
+    std::string querySqlStr = "SELECT COUNT(*) FROM " + tableName;
+    std::shared_ptr<NativeRdb::ResultSet> rs = rdbStore_->QuerySql(querySqlStr);
+    int32_t totalCount = 0;
+
+    if (rs == nullptr) {
+        ANS_LOGE("QuerySql ResultSet is nullptr");
+        return NativeRdb::E_ERROR;
+    }
+
+    if (rs->GoToNextRow() == NativeRdb::E_OK) {
+        rs->GetInt(0, totalCount);
+    }
+    
+    rs->Close();
+
+    return CleanExpertotal(totalCount, tableName);
+}
+
+int32_t NtfRdbStoreWrapper::DropStatisticsTable(const int32_t userId)
+{
+    constexpr const char* TABLE_SEPARATOR = "_";
+    std::stringstream stream;
+    stream << NOTIFICATION_STATISTICS_TABLENAME << TABLE_SEPARATOR << userId;
+    const std::string tableName = stream.str();
+    int32_t ret = NativeRdb::E_OK;
+    {
+        std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ == nullptr) {
+            ANS_LOGE("notification rdb is null");
+            return NativeRdb::E_ERROR;
+        }
+        std::string dropTableSql = "DROP TABLE IF EXISTS " + tableName;
+        ret = rdbStore_->ExecuteSql(dropTableSql);
+    }
+
+    if (ret == NativeRdb::E_OK) {
+        std::lock_guard<ffrt::mutex> lock(createdTableMutex_);
+        createdTables_.erase(tableName);
+        ANS_LOGD("Drop table %{public}s succeed", tableName.c_str());
+    } else {
+        ANS_LOGW("Drop table %{public}s failed, result: %{public}d", tableName.c_str(), ret);
+    }
+
+    return ret;
 }
 
 int32_t NtfRdbStoreWrapper::DeleteData(const std::string &tableName, const std::string &key, int32_t rowId)

@@ -1128,6 +1128,13 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ErrCode GetStatisticsByBundle(const std::vector<sptr<NotificationBundleOption>> &bundles,
+        std::vector<NotificationStatistics> &statistics) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
 private:
     std::string cmd_;
     std::string bundle_;

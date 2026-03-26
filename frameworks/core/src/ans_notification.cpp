@@ -3833,5 +3833,27 @@ ErrCode AnsNotification::GetNotificationSwitch(
     state = static_cast<NotificationConstant::SWITCH_STATE>(intState);
     return result;
 }
+
+ErrCode AnsNotification::GetStatisticsByBundle(const std::vector<NotificationBundleOption> &bundleOptions,
+    std::vector<NotificationStatistics> &statistics)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    std::vector<sptr<NotificationBundleOption>> bundlesSptr;
+    bundlesSptr.reserve(bundleOptions.size());
+    for (const auto &it : bundleOptions) {
+        sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(it);
+        if (bundle == nullptr) {
+            ANS_LOGE("null bundleOption");
+            return ERR_ANS_NO_MEMORY;
+        }
+        bundlesSptr.emplace_back(std::move(bundle));
+    }
+    return proxy->GetStatisticsByBundle(bundlesSptr, statistics);
+}
 }  // namespace Notification
 }  // namespace OHOS

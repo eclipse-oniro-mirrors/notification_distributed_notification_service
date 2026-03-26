@@ -84,6 +84,7 @@ constexpr const int32_t VIBRATION_FLAG = 1 << 13;
 constexpr const int32_t SUB_CODE = 100;
 constexpr const int32_t MAX_TIME = 43200000;
 constexpr const int32_t NOTIFICATION_MAX_DATA = 100;
+constexpr const int32_t ONE_DAY_HOURS = 24;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 static ffrt::mutex reportFlowControlMutex_;
 static std::map<int32_t, std::list<std::chrono::system_clock::time_point>> flowControlTimestampMap_ = {
@@ -123,6 +124,10 @@ static std::list<ReportSlotMessage> slotEnabledList_;
 static ffrt::mutex slotEnabledListMutex_;
 static bool g_reportSlotFlag = false;
 static ffrt::mutex reportSlotEnabledMutex_;
+
+static ffrt::mutex cleanExperDataMutex_;
+static int32_t g_cleanExperDataTimerId = 0;
+static std::shared_ptr<ReportTimerInfo> cleanExperInfo = nullptr;
 
 static int32_t LIVEVIEW_SUB_CODE = 202;
 static int32_t LIVEVIEW_AGGREGATE_NUM = 10;
@@ -1513,6 +1518,67 @@ int64_t NotificationAnalyticsUtil::GetCurrentTime()
     auto now = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
     return duration.count();
+}
+
+void NotificationAnalyticsUtil::CreateCleanExperDataTimerExecute()
+{
+    ANS_LOGI("NotificationAnalyticsUtil::CreateCleanExperDataTimerExecute");
+    sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
+    if (timer == nullptr) {
+        ANS_LOGE("null clean exper data timer");
+        return;
+    }
+    if (!cleanExperInfo) {
+        cleanExperInfo = std::make_shared<ReportTimerInfo>();
+    }
+    if (g_cleanExperDataTimerId == 0) {
+        g_cleanExperDataTimerId = timer->CreateTimer(cleanExperInfo);
+    }
+
+    auto triggerFunc = [] {
+        ExecuteExperDataClean();
+    };
+
+    cleanExperInfo->SetCallbackInfo(triggerFunc);
+    timer->StartTimer(g_cleanExperDataTimerId, GetMsToNextMidnight());
+}
+
+void NotificationAnalyticsUtil::UpdateCleanExperDataTimer()
+{
+    sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
+    if (timer == nullptr) {
+        ANS_LOGE("null clean exper data timer");
+        return;
+    }
+    if (!cleanExperInfo) {
+        cleanExperInfo = std::make_shared<ReportTimerInfo>();
+        g_cleanExperDataTimerId = timer->CreateTimer(cleanExperInfo);
+    }
+    auto triggerFunc = [] {
+        ExecuteExperDataClean();
+    };
+    timer->StopTimer(g_cleanExperDataTimerId);
+    cleanExperInfo->SetCallbackInfo(triggerFunc);
+    timer->StartTimer(g_cleanExperDataTimerId, GetMsToNextMidnight());
+}
+
+void NotificationAnalyticsUtil::ExecuteExperDataClean()
+{
+    ANS_LOGD("NotificationAnalyticsUtil::ExecuteExperDataClean");
+    ErrCode result = NotificationPreferences::GetInstance()->TimerCleanExperData();
+    if (result != ERR_OK) {
+        ANS_LOGD("failed to CleanExperData and it be clean on NextMidnight");
+    }
+    UpdateCleanExperDataTimer();
+}
+
+int64_t NotificationAnalyticsUtil::GetMsToNextMidnight()
+{
+    auto startDuration = getTodayStartLocalDuration();
+    auto targetLocalDuration = startDuration + std::chrono::hours(ONE_DAY_HOURS);
+    auto targetUtc = std::chrono::system_clock::time_point(targetLocalDuration - getCurrentTimezoneOffset());
+    auto beginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(targetUtc.time_since_epoch());
+    return beginDuration.count();
 }
 
 void NotificationAnalyticsUtil::ReportOperationsDotEvent(HaOperationMessage& operationMessage)

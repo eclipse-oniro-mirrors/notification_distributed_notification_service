@@ -64,8 +64,10 @@ declare_args() {
   distributed_notification_service_feature_privileged_message = false
   distributed_notification_service_feature_badge_manager = true
   distributed_notification_service_feature_local_liveview = true
-  distributed_notification_service_feature_original_distributed = true #Separating ans_distributed.z.so
-  distributed_notification_service_feature_distributed_supported = true #Separating distributed related interfaces
+  distributed_notification_service_feature_original_distributed =
+      true  #Separating ans_distributed.z.so
+  distributed_notification_service_feature_distributed_supported =
+      true  #Separating distributed related interfaces
   distributed_notification_service_feature_disturb_manager = true
   distributed_notification_service_feature_slot_manager = true
   distributed_notification_service_feature_additional_config = true
@@ -74,11 +76,14 @@ declare_args() {
   distributed_notification_service_feature_all_scenario_collaboration = true
   distributed_notification_service_feature_phone_collaboration = true
   distributed_notification_service_disable_control = false
-  distributed_notification_service_feature_notification_extension_subscription = false
-  distributed_notification_service_feature_notification_multi_foreground_user = false
+  distributed_notification_service_feature_notification_extension_subscription =
+      false
+  distributed_notification_service_feature_notification_multi_foreground_user =
+      false
   distributed_notification_service_feature_support_geofence = false
   distributed_notification_service_feature_enable_pgo = false
   distributed_notification_service_feature_pgo_path = ""
+  distributed_notification_service_feature_notification_statistics = true
   notification_smart_reminder_supported = true
   ans_config_policy_enable = true
   screenlock_mgr_enable = true

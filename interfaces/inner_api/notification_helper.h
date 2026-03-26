@@ -35,6 +35,7 @@
 #include <memory>
 #include "ians_operation_callback.h"
 #include "notification_ringtone_info.h"
+#include "notification_statistics.h"
 
 namespace OHOS {
 namespace Notification {
@@ -1873,6 +1874,16 @@ public:
      */
     static ErrCode GetNotificationSwitch(const NotificationBundleOption &bundleOption,
         NotificationConstant::SWITCH_STATE &state);
+
+    /**
+     * @brief Obtains the notification statistics of the bundleOptions
+     *
+     * @param bundleOptions The list of bundle option.
+     * @param statistics The list of notificationStatistics.
+     * @return Returns get result.
+     */
+    static ErrCode GetStatisticsByBundle(const std::vector<NotificationBundleOption> &bundleOptions,
+        std::vector<NotificationStatistics> &statistics);
 };
 }  // namespace Notification
 }  // namespace OHOS

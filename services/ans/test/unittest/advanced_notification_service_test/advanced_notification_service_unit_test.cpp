@@ -2154,5 +2154,102 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, IsDoNotDisturbEnabled_300, Functio
     observer = nullptr;
     ASSERT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: GetStatisticsByBundle_100
+ * @tc.desc: Test GetStatisticsByBundle when VerifyNativeToken true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, GetStatisticsByBundle_100, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    std::vector<NotificationStatistics> statistics;
+    MockIsSystemApp(false);
+    auto ret = advancedNotificationService_->GetStatisticsByBundle(bundleOptions, statistics);
+    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: GetStatisticsByBundle_101
+ * @tc.desc: Test GetStatisticsByBundle when VerifyNativeToken true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, GetStatisticsByBundle_101, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    std::vector<NotificationStatistics> statistics;
+    MockIsSystemApp(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
+    auto ret = advancedNotificationService_->GetStatisticsByBundle(bundleOptions, statistics);
+    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: GetStatisticsByBundle_102
+ * @tc.desc: Test GetStatisticsByBundle when VerfyPermisson false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, GetStatisticsByBundle_102, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    std::vector<NotificationStatistics> statistics;
+    MockIsSystemApp(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsVerfyPermisson(false);
+    auto ret = advancedNotificationService_->GetStatisticsByBundle(bundleOptions, statistics);
+    ASSERT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: GetStatisticsByBundle_103
+ * @tc.desc: Test GetStatisticsByBundle when ATokenTypeEnum::TOKEN_NATIVE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, GetStatisticsByBundle_103, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    sptr<NotificationBundleOption> bundle01 = sptr<NotificationBundleOption>::MakeSptr();
+    bundle01->SetBundleName("testBundleName01");
+    bundle01->SetUid(-1);
+    sptr<NotificationBundleOption> bundle02 = sptr<NotificationBundleOption>::MakeSptr();
+    bundle02->SetBundleName("testBundleName02");
+    bundle02->SetUid(100);
+    bundleOptions.push_back(bundle01);
+    bundleOptions.push_back(bundle02);
+    std::vector<NotificationStatistics> statistics;
+    MockIsSystemApp(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsVerfyPermisson(true);
+    auto ret = advancedNotificationService_->GetStatisticsByBundle(bundleOptions, statistics);
+    ASSERT_EQ(ret, ERR_OK);
+}
+
+#ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
+/**
+ * @tc.name: SetNotificationStatisticsToDB_100
+ * @tc.desc: Test SetNotificationStatisticsToDB
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SetNotificationStatisticsToDB_100, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    request->SetNotificationId(100);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    sptr<NotificationBundleOption> bundle01 = sptr<NotificationBundleOption>::MakeSptr();
+    bundle01->SetBundleName(TEST_DEFUALT_BUNDLE);
+    bundle01->SetUid(SYSTEM_APP_UID);
+    advancedNotificationService_->SetNotificationStatisticsToDB(record, bundle01, false);
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    bundles.push_back(bundle01);
+    std::vector<NotificationStatistics> statistic;
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsVerfyPermisson(true);
+    advancedNotificationService_->GetStatisticsByBundle(bundles, statistic);
+    int ret = statistic.size();
+    ASSERT_EQ(ret, 1);
+}
+#endif
 }
 }

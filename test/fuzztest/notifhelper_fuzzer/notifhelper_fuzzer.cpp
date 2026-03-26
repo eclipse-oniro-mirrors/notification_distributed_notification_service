@@ -80,6 +80,9 @@ constexpr int32_t MAX_USER_ID = 100;
         std::vector<NotificationReminderInfo> reminders;
         notificationHelper.GetReminderInfoByBundles(bundles, reminders);
         notificationHelper.SetReminderInfoByBundles(reminders);
+
+        std::vector<NotificationStatistics> statistics;
+        notificationHelper.GetStatisticsByBundle(bundles, statistics);
         return true;
     }
 

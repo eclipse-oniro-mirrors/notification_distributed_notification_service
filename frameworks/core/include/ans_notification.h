@@ -27,6 +27,7 @@
 #include "notification_local_live_view_subscriber.h"
 #include "notification_parameters.h"
 #include "notification_subscriber.h"
+#include "notification_statistics.h"
 #include "want_params.h"
 #include "distributed_bundle_option.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
@@ -1848,6 +1849,16 @@ public:
      */
     ErrCode GetNotificationSwitch(const NotificationBundleOption &bundleOption,
         NotificationConstant::SWITCH_STATE &state);
+
+    /**
+     * @brief Obtains the notification statistics of the bundleOptions
+     *
+     * @param bundleOptions The list of bundle option.
+     * @param statistics The list of notificationStatistics.
+     * @return Returns get result.
+     */
+    ErrCode GetStatisticsByBundle(const std::vector<NotificationBundleOption> &bundleOptions,
+        std::vector<NotificationStatistics> &statistics);
 private:
     /**
      * @brief Gets Ans Manager proxy.

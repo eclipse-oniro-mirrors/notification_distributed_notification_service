@@ -43,6 +43,7 @@
 #include "napi_silent_reminder_enable.h"
 #include "napi_reminder_info.h"
 #include "napi_badge_query_callback.h"
+#include "napi_statistics.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -115,6 +116,11 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setGeofenceEnabled", NapiSetGeofenceEnabled),
         DECLARE_NAPI_FUNCTION("isGeofenceEnabled", NapiIsGeofenceEnabled),
         DECLARE_NAPI_FUNCTION("setReminderInfoByBundles", NapiSetReminderInfoByBundles),
+#ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
+        DECLARE_NAPI_FUNCTION("getNotificationStatisticsByBundle", NapiGetNotificationStatisticsByBundle),
+#else
+        DECLARE_NAPI_FUNCTION("getNotificationStatisticsByBundle", Common::NapiReturnCapErrCb),
+#endif
 
 #ifdef ANS_FEATURE_BADGE_MANAGER
         DECLARE_NAPI_FUNCTION("displayBadge", NapiDisplayBadge),
@@ -140,14 +146,12 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
 #endif
 
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
-        DECLARE_NAPI_FUNCTION("isDistributedEnabled", NapiIsDistributedEnabled),
         DECLARE_NAPI_FUNCTION("setDistributedEnable", NapiEnableDistributed),
         DECLARE_NAPI_FUNCTION("setDistributedEnableByBundle", NapiEnableDistributedByBundle),
         DECLARE_NAPI_FUNCTION("isDistributedEnabledByBundle", NapiIsDistributedEnableByBundle),
         DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", NapiSetSyncNotificationEnabledWithoutApp),
         DECLARE_NAPI_FUNCTION("getSyncNotificationEnabledWithoutApp", NapiGetSyncNotificationEnabledWithoutApp),
 #else
-        DECLARE_NAPI_FUNCTION("isDistributedEnabled", Common::NapiReturnFalseCbNewType),
         DECLARE_NAPI_FUNCTION("setDistributedEnable", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("setDistributedEnableByBundle", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("isDistributedEnabledByBundle", Common::NapiReturnCapErrCb),
@@ -156,6 +160,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
 #endif
         
 #ifdef ANS_FEATURE_DISTRIBUTED_SUPPORTED
+        DECLARE_NAPI_FUNCTION("isDistributedEnabled", NapiIsDistributedEnabled),
         DECLARE_NAPI_FUNCTION("enableDistributedSelf", NapiEnableDistributedSelf),
         DECLARE_NAPI_FUNCTION("setDistributedEnabledByBundle", NapiSetDistributedEnabledByBundle),
         DECLARE_NAPI_FUNCTION("setSmartReminderEnabled", NapiSetSmartReminderEnabled),
@@ -167,6 +172,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getDistributedBundleListByType", NapiGetDistributedBundleListByType),
         DECLARE_NAPI_FUNCTION("getDistributedBundleInfo", NapiGetDistributedBundleInfo),
 #else
+        DECLARE_NAPI_FUNCTION("isDistributedEnabled", Common::NapiReturnFalseCbNewType),
         DECLARE_NAPI_FUNCTION("enableDistributedSelf", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("setDistributedEnabledByBundle", Common::NapiReturnCapErr),
         DECLARE_NAPI_FUNCTION("setSmartReminderEnabled", Common::NapiReturnCapErr),

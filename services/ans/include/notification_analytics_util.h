@@ -231,6 +231,14 @@ public:
 
     static int64_t GetCurrentTime();
 
+    static int64_t GetMsToNextMidnight();
+
+    static void CreateCleanExperDataTimerExecute();
+
+    static void ExecuteExperDataClean();
+
+    static void UpdateCleanExperDataTimer();
+
     static void ReportOperationsDotEvent(HaOperationMessage& message);
 
     static void ReportPublishFailedEvent(const HaMetaMessage& message);
