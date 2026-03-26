@@ -556,6 +556,10 @@ ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<Notific
     if (!isSystemApp  && !isSubsystem && request->GetGroupInfo() != nullptr) {
         request->SetGroupInfo(nullptr);
     }
+
+    if (request->IsCommonLiveView() && request->GetLittleIcon() != nullptr) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
     return ERR_OK;
 }
 
