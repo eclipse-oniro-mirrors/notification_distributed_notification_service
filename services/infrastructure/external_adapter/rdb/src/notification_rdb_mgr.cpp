@@ -16,7 +16,6 @@
 
 #include <sstream>
 #include "ans_log_wrapper.h"
-#include "rdb_store_wrapper.h"
 
 namespace OHOS::Notification::Infra {
 NotificationRdbMgr::NotificationRdbMgr(NotificationRdbConfig& config, const NtfRdbHook &hooks,
@@ -38,6 +37,43 @@ int32_t NotificationRdbMgr::Destroy()
 int32_t NotificationRdbMgr::InsertData(const std::string &key, const std::string &value, const int32_t &userId)
 {
     return rdbStoreWrapper_->InsertData(key, value, userId);
+}
+
+int32_t NotificationRdbMgr::CleanStatisticsExperData(const int32_t userId)
+{
+    return rdbStoreWrapper_->CleanExperData(userId);
+}
+
+int32_t NotificationRdbMgr::DeleteStatisticsByBundle(const int32_t userId,
+    const std::string &bundleName, int32_t packageId)
+{
+    return rdbStoreWrapper_->DeleteStatisticsByBundle(userId, bundleName, packageId);
+}
+
+int32_t NotificationRdbMgr::CleanStatisticsExperDataTimer(const std::vector<int32_t> &userIds)
+{
+    return rdbStoreWrapper_->CleanExperDataTimer(userIds);
+}
+
+int32_t NotificationRdbMgr::UpdateStatisticsTime(const int32_t userId, int64_t offsetMs)
+{
+    return rdbStoreWrapper_->UpdateStatisticsTimeStamp(userId, offsetMs);
+}
+
+int32_t NotificationRdbMgr::InsertStatisticsData(const int32_t userId, const struct StatisticsWrapperInfo &info)
+{
+    return rdbStoreWrapper_->InsertStatisticsData(userId, info);
+}
+
+int32_t NotificationRdbMgr::QueryStatisticsByBundle(const int32_t bundleUid,
+    const int32_t uid, const int64_t beginTime, int32_t &totalCount, int64_t &lastTime)
+{
+    return rdbStoreWrapper_->QueryStatisticsInfosByBundle(bundleUid, uid, beginTime, totalCount, lastTime);
+}
+
+int32_t NotificationRdbMgr::DropStatisticsTable(const int32_t userId)
+{
+    return rdbStoreWrapper_->DropStatisticsTable(userId);
 }
 
 int32_t NotificationRdbMgr::InsertData(const std::string &key, const std::vector<uint8_t> &value,

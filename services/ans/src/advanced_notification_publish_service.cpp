@@ -70,7 +70,6 @@
 namespace OHOS {
 namespace Notification {
 
-constexpr uint32_t SECONDS_IN_ONE_DAY = 24 * 60 * 60;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 const static std::string NOTIFICATION_EVENT_SUBSCRIBER_STATUS = "notification.event.SUBSCRIBER_STATUS";
 constexpr int32_t RSS_PID = 1096;
@@ -862,6 +861,11 @@ AnsStatus AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifi
             return;
         }
 
+#ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
+        if (!directAgency) {
+            SetNotificationStatisticsToDB(record, bundleOption, isNotificationExists);
+        }
+#endif
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
         if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {

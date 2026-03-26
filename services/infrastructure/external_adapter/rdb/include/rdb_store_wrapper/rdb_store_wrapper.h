@@ -35,6 +35,16 @@ class AbsSharedResultSet;
 class AbsRdbPredicates;
 } // namespace NativeRdb
 namespace Notification::Infra {
+
+const std::string NOTIFICATION_STATISTICS_TABLENAME = "notification_statistics";
+
+struct StatisticsWrapperInfo {
+    int64_t notificationTime {0};
+    std::string bundleName {""};
+    int32_t uid {0};
+    std::string type {""};
+};
+
 /**
  * @class NtfRdbStoreWrapper
  * @brief Notification RDB adapter that provides key-value style operations on top of NativeRdb.
@@ -60,6 +70,51 @@ public:
 
     /** @brief Close and delete the underlying database file. */
     int32_t Destroy();
+
+    /**
+     * @brief Insert statistics data in DB.
+     * @param struct StatisticsInfo
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t InsertStatisticsData(const int32_t userId, const struct StatisticsWrapperInfo &info);
+
+    /**
+     * @brief Clean exper batch data in DB.
+     * @param nullptr.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t CleanExperData(const int32_t userId);
+
+    int32_t DeleteStatisticsByBundle(const int32_t userId, const std::string &bundleName, int32_t packageId);
+
+    /**
+     * @brief Timer Clean 9 day batch data in DB.
+     * @param vector userid.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t CleanExperDataTimer(const std::vector<int32_t> &userIds);
+
+    /**
+     * @brief Query last 7 days data in DB.
+     * @param vector packageId, vector StatisticsWrapperInfo
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t QueryStatisticsInfosByBundle(const int32_t bundleUid, const int32_t userId, const int64_t beginTime,
+        int32_t &totalCount, int64_t &lastTime);
+
+    int32_t GetStatisticsInfos(const int64_t lastTimeMs,
+        const int32_t bundleUid, const std::string &tableName, int32_t &totalCount, int64_t &lastTime);
+
+    int32_t CleanExpertotal(const int32_t total, const std::string &tableName);
+
+    int32_t DropStatisticsTable(const int32_t userId);
+
+    /**
+     * @brief Update notificationTime data in DB.
+     * @param offset MS .
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UpdateStatisticsTimeStamp(const int32_t userId, int64_t offsetMs);
 
     /** @brief Insert or replace a string value by key. */
     int32_t InsertData(const std::string &key, const std::string &value, const int32_t &userId = -1);
@@ -109,6 +164,9 @@ private:
     /** @brief Resolve the actual table name for a user (create it if needed). */
     int32_t GetUserTableName(const int32_t &userId, std::string &tableName);
 
+    /** @brief Resolve the statistics table name for a user (create it if needed). */
+    int32_t GetUserStatisticTableName(const int32_t &userId, std::string &tableName);
+
     /** @brief Try to restore the store when corruption is detected. */
     int32_t RestoreForMasterSlaver();
 
@@ -147,6 +205,11 @@ private:
     template<typename Func>
     /** @brief Execute an insert function with corruption detection and error reporting. */
     int32_t InsertDataWithErrorHandling(const int32_t userId, Func insertFunc, bool isBatchMode,
+        const int32_t sceneId, const int32_t branchId);
+    
+    template<typename Func>
+    /** @brief Execute an insert function with corruption detection and error reporting. */
+    int32_t InsertStatisticsDataWithErrorHandling(const int32_t userId, Func insertFunc, bool isBatchMode,
         const int32_t sceneId, const int32_t branchId);
 
     template<typename Func>

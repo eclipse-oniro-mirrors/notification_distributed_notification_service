@@ -1763,5 +1763,25 @@ HWTEST_F(NotificationHelperTest, IsNotifyAllowedInDoNotDisturb_0100, Function | 
     ErrCode ret = notificationHelper.IsNotifyAllowedInDoNotDisturb(uid, isAllowed);
     EXPECT_EQ(ret, ERROR_PERMISSION_DENIED);
 }
+
+/**
+ * @tc.name: GetStatisticsByBundle_0100
+ * @tc.desc: Test GetStatisticsByBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, GetStatisticsByBundle_0100, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    int32_t uid = 100;
+    bool isAllowed = true;
+    std::vector<NotificationBundleOption> bundleOptions;
+    NotificationBundleOption bundle01;
+    bundle01.SetBundleName("testBundleName1");
+    bundle01.SetUid(100);
+    bundleOptions.push_back(bundle01);
+    std::vector<NotificationStatistics> statistics;
+    ErrCode ret = notificationHelper.GetStatisticsByBundle(bundleOptions, statistics);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
 }
 }

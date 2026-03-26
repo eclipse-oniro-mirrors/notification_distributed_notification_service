@@ -1,0 +1,180 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "napi_statistics.h"
+
+#include "ans_inner_errors.h"
+#include "js_native_api.h"
+#include "js_native_api_types.h"
+
+namespace OHOS {
+namespace NotificationNapi {
+
+const int GET_STATISTICS_MAX_PARA = 1;
+
+static napi_value ParseBundlesParameters(const napi_env &env, const napi_callback_info &info,
+    std::vector<NotificationBundleOption> &bundles)
+{
+    ANS_LOGD("ParseParameters bundles");
+    size_t argc = GET_STATISTICS_MAX_PARA;
+    napi_value argv[GET_STATISTICS_MAX_PARA] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    if (argc != GET_STATISTICS_MAX_PARA) {
+        ANS_LOGE("Wrong number of arguments.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        return nullptr;
+    }
+
+    // argv[0]: Array<BundleOption>
+    bool isArray = false;
+    NAPI_CALL(env, napi_is_array(env, argv[PARAM0], &isArray));
+    if (!isArray) {
+        ANS_LOGE("Parameter type error. Array expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be array.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    uint32_t len = 0;
+    NAPI_CALL(env, napi_get_array_length(env, argv[PARAM0], &len));
+    if (len == 0) {
+        ANS_LOGD("The array is empty.");
+        std::string msg = "Mandatory parameters are left unspecified. The array is empty.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    for (uint32_t index = 0; index < len; ++index) {
+        napi_value nBundle = nullptr;
+        NAPI_CALL(env, napi_get_element(env, argv[PARAM0], index, &nBundle));
+        NAPI_CALL(env, napi_typeof(env, nBundle, &valueType));
+        if (valueType != napi_object) {
+            ANS_LOGE("Wrong argument type. Object expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be object.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        NotificationBundleOption bundle;
+        if (!Common::GetBundleOption(env, nBundle, bundle)) {
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+            return nullptr;
+        }
+        bundles.emplace_back(bundle);
+    }
+    return Common::NapiGetNull(env);
+}
+
+void SetNotificationStatistics(
+    const napi_env &env, const NotificationStatistics &statisticsInfo, napi_value &obj)
+{
+    ANS_LOGD("SetNotificationStatistics");
+
+    napi_value bundleNapi = nullptr;
+    napi_create_object(env, &bundleNapi);
+    // bundleName: string
+    napi_value bundleNameNapi = nullptr;
+    napi_create_string_utf8(env, statisticsInfo.GetBundleOption().GetBundleName().c_str(),
+        NAPI_AUTO_LENGTH, &bundleNameNapi);
+    napi_set_named_property(env, bundleNapi, "bundle", bundleNameNapi);
+    // uid: int32_t
+    napi_value uidNapi = nullptr;
+    napi_create_int32(env, statisticsInfo.GetBundleOption().GetUid(), &uidNapi);
+    napi_set_named_property(env, bundleNapi, "uid", uidNapi);
+
+    napi_value lastTimeNapi = nullptr;
+    napi_create_int64(env, statisticsInfo.GetLastTime(), &lastTimeNapi);
+
+    napi_value recentCountNapi = nullptr;
+    napi_create_int32(env, statisticsInfo.GetRecentCount(), &recentCountNapi);
+
+    napi_set_named_property(env, obj, "bundle", bundleNapi);
+    napi_set_named_property(env, obj, "lastTime", lastTimeNapi);
+    napi_set_named_property(env, obj, "recentCount", recentCountNapi);
+    return;
+}
+
+void AsyncCompleteCallbackNapiGetStatisticsByBundle(napi_env env, napi_status status, void *data)
+{
+    ANS_LOGD("AsyncCompleteCallbackNapiGetStatisticsByBundle");
+    if (!data) {
+        ANS_LOGE("Invalid async callback data");
+        return;
+    }
+    napi_value result = Common::NapiGetNull(env);
+    AsyncCallbackInfoStatistics *asynccallbackinfo = static_cast<AsyncCallbackInfoStatistics*>(data);
+    if (asynccallbackinfo == nullptr) {
+        ANS_LOGE("null asynccallbackinfo");
+        return;
+    }
+    if (asynccallbackinfo->info.errorCode == ERR_OK) {
+        napi_value arr = nullptr;
+        napi_create_array(env, &arr);
+        uint32_t cnt = 0;
+        for (auto vec : asynccallbackinfo->statisticsInfos) {
+            napi_value obj;
+            napi_create_object(env, &obj);
+            SetNotificationStatistics(env, vec, obj);
+            napi_set_element(env, arr, cnt, obj);
+            ++cnt;
+        }
+        result = arr;
+    }
+    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+    napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+    delete asynccallbackinfo;
+    asynccallbackinfo = nullptr;
+    return;
+}
+
+napi_value NapiGetNotificationStatisticsByBundle(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("NapiGetNotificationStatisticsByBundle");
+    std::vector<NotificationBundleOption> bundles;
+    if (ParseBundlesParameters(env, info, bundles) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+    AsyncCallbackInfoStatistics *asynccallbackinfo =
+        new (std::nothrow) AsyncCallbackInfoStatistics {.env = env, .asyncWork = nullptr, .bundles = bundles};
+    if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        return Common::JSParaError(env, nullptr);
+    }
+
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "GetNotificationStatisticsByBundle", NAPI_AUTO_LENGTH, &resourceName);
+
+    napi_create_async_work(env, nullptr, resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGD("Napi get Statistics by bundle work excute.");
+            AsyncCallbackInfoStatistics *asynccallbackinfo =
+                static_cast<AsyncCallbackInfoStatistics *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = NotificationHelper::GetStatisticsByBundle(
+                    asynccallbackinfo->bundles, asynccallbackinfo->statisticsInfos);
+            }
+        },
+        AsyncCompleteCallbackNapiGetStatisticsByBundle,
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    return promise;
+}
+}
+}

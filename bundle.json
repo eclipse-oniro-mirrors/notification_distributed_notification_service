@@ -63,6 +63,7 @@
       "distributed_notification_service_feature_support_geofence",
       "distributed_notification_service_feature_enable_pgo",
       "distributed_notification_service_feature_pgo_path",
+      "distributed_notification_service_feature_notification_statistics",
       "distributed_notification_service_feature_distributed_supported"
     ],
     "adapted_system_type": [

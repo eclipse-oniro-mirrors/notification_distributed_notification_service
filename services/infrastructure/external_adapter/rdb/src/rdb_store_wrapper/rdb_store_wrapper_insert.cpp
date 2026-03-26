@@ -78,6 +78,75 @@ int32_t NtfRdbStoreWrapper::InsertDataWithErrorHandling(const int32_t userId, Fu
     return NativeRdb::E_OK;
 }
 
+template<typename Func>
+int32_t NtfRdbStoreWrapper::InsertStatisticsDataWithErrorHandling(const int32_t userId, Func insertFunc,
+    bool isBatchMode, const int32_t sceneId, const int32_t branchId)
+{
+    if (isRecovering_.load()) {
+        ANS_LOGD("The db is being repaired.");
+        return NativeRdb::E_ERROR;
+    }
+    std::string tableName;
+    int32_t ret = GetUserStatisticTableName(userId, tableName);
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGE("Get statistics table name failed.");
+        return NativeRdb::E_ERROR;
+    }
+
+    int32_t insertRet = NativeRdb::E_OK;
+    bool needRecover = false;
+    do {
+        std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ == nullptr) {
+            ANS_LOGE("notification rdb is null");
+            return NativeRdb::E_ERROR;
+        }
+
+        insertRet = insertFunc(tableName);
+        if (insertRet == NativeRdb::E_SQLITE_CORRUPT) {
+            ANS_LOGW("Insert statistics SQLITE_CORRUPT for table=%{public}s", tableName.c_str());
+            needRecover = true;
+        }
+    } while (0);
+    
+    // Handle corruption / recovery outside the DB lock to avoid deadlocks and long-held locks.
+    if (needRecover) {
+        int32_t restoreRet = RestoreForMasterSlaver();
+        if (restoreRet == NativeRdb::E_SQLITE_CORRUPT) {
+            // Full recovery may be time-consuming; call RecoverDatabase() (it guards against concurrent runs).
+            RecoverDatabase();
+        }
+    }
+
+    if (insertRet != NativeRdb::E_OK) {
+        ANS_LOGE("Insert statistics failed, result: %{public}d, table=%{public}s.", insertRet, tableName.c_str());
+        // EventSceneId and EventBranchId depend on mode
+        hookMgr_->OnRdbOperationFailReport(sceneId, branchId, insertRet,
+            isBatchMode ? "Insert statistics operation failed" : "Insert operation failed");
+        return NativeRdb::E_ERROR;
+    }
+    hookMgr_->OnSendUserDataSizeHisysevent();
+    return NativeRdb::E_OK;
+}
+
+int32_t NtfRdbStoreWrapper::InsertStatisticsData(const int32_t userId, const struct StatisticsWrapperInfo &info)
+{
+    NativeRdb::ValuesBucket valuesBucket;
+    valuesBucket.PutLong("notificationTime", info.notificationTime);
+    valuesBucket.PutString("bundleName", info.bundleName);
+    valuesBucket.PutInt("uid", info.uid);
+    valuesBucket.PutString("type", info.type);
+
+    auto insertFunc = [this, &valuesBucket](const std::string& tableName) {
+        int64_t rowId = -1;
+        return this->rdbStore_->InsertWithConflictResolution(rowId, tableName, valuesBucket,
+            NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
+    };
+    constexpr int32_t sceneId = 11;
+    constexpr int32_t branchId = 0; // EventSceneId::SCENE_10, EventBranchId::BRANCH_7
+    return InsertStatisticsDataWithErrorHandling(userId, insertFunc, false, sceneId, branchId);
+}
+
 int32_t NtfRdbStoreWrapper::InsertData(const std::string &key, const std::string &value, const int32_t &userId)
 {
     // Prepare values outside the DB lock to minimize lock duration.

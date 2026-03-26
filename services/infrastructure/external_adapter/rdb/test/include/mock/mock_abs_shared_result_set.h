@@ -21,15 +21,21 @@ class MockAbsSharedResultSet : public NativeRdb::AbsSharedResultSet {
 public:
     int GoToFirstRow() override;
     int GetString(int columnIndex, std::string &value) override;
+    int GetInt(int columnIndex, int &value) override;
     int GetBlob(int columnIndex, std::vector<uint8_t>& blob) override;
     int GoToNextRow() override;
     int Close() override;
+    int GetLong(int columnIndex, int64_t &value) override;
+    int GetColumnIndex(const std::string &columnName, int &columnIndex) override;
 };
 
 void SetMockGoToFirstRowErrCodes(const std::vector<int> &errCodes);
 void SetMockGetStringValuesAndErrCodes(const std::vector<std::string> &values, const std::vector<int> &errCodes);
+void SetMockGetIntValuesAndErrCodes(const std::vector<int> &values, const std::vector<int> &errCodes);
 void SetMockGetBlobValuesAndErrCodes(const std::vector<std::vector<uint8_t>> blobs, const std::vector<int> &errCodes);
 void SetMockGoToNextRowErrCodes(const std::vector<int> &errCodes);
+void SetMockGetColumnIndexValuesAndErrCodes(const std::vector<int> &values, const std::vector<int> &errCodes);
+void SetMockGetLongValuesAndErrCodes(const std::vector<int64_t> &values, const std::vector<int> &errCodes);
 void ResetMockAbsSharedResultSet();
 } // namespace OHOS::Notification::Infra
 #endif // ANS_NOTIFICATION_MOCK_ABS_SHARED_RESULT_SET_H

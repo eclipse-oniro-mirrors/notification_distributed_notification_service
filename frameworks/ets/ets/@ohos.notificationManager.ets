@@ -429,6 +429,7 @@ export default namespace notificationManager {
     export native function nativeIsPriorityIntelligentEnabled(): Promise<boolean>;
     export native function nativeSetPriorityStrategyByBundles(strategies: Map<BundleOption, long>): Promise<void>;
     export native function nativeGetPriorityStrategyByBundles(bundles: Array<BundleOption>): Promise<Map<BundleOption, long>>;
+    export native function nativeGetNotificationStatisticsByBundle(bundles: Array<BundleOption>): Promise<Array<NotificationStatistics>>;
 
     function isInvalidParameter(doNotDisturbDate: DoNotDisturbDate): BusinessError
     {
@@ -3142,6 +3143,32 @@ export default namespace notificationManager {
         let result: Promise<Map<BundleOption, long>>;
         try {
             result = nativeGetPriorityStrategyByBundles(bundles);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
+    }
+
+    export interface NotificationStatistics {
+        bundle: BundleOption;
+        lastTime: long;
+        recentCount: int;
+    }
+     	 
+    class NotificationStatisticsInner implements NotificationStatistics {
+        public bundle: BundleOption = { bundle: '' };
+        public lastTime: long = 0;
+        public recentCount: int = 0;
+    }
+     	 
+    export function getNotificationStatisticsByBundle(bundles: BundleOption[]): Promise<NotificationStatistics[]> {
+        if (!bundles || bundles.length == 0) {
+            throw errorParamInvalid;
+        }
+        let result: Promise<Array<NotificationStatistics>>;
+        try {
+            result = nativeGetNotificationStatisticsByBundle(bundles);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
             throw error;

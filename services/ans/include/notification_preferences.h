@@ -55,6 +55,21 @@ public:
      * @return Return ERR_OK on success, others on failure.
      */
     ErrCode AddNotificationBundleProperty(const sptr<NotificationBundleOption> &bundleOption);
+    
+    ErrCode PutNotificationStatistics(const int32_t userId, const sptr<NotificationBundleOption> &bundleOption);
+
+    ErrCode CleanExperData(const int32_t userId);
+
+    ErrCode DeleteStatisticsByBundle(const int32_t userId, const std::string &bundleName, int32_t packageId);
+
+    ErrCode TimerCleanExperData();
+
+    ErrCode QueryStatisticsByBundle(const sptr<NotificationBundleOption>& bundle,
+        int32_t &recentCount, int64_t &lastTime);
+
+    ErrCode UpdateCustomTimeData(int64_t offsetMs);
+
+    ErrCode DropStatisticsTable(const int32_t userId);
 
     /**
      * @brief Remove notification a slot in the of bundle from DB.

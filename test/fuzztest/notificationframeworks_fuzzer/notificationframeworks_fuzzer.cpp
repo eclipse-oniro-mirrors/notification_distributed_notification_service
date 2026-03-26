@@ -239,6 +239,9 @@ public:
         ans.GetReminderInfoByBundles(bundles, reminders);
         ans.SetReminderInfoByBundles(reminders);
 
+        std::vector<NotificationStatistics> statistics;
+        ans.GetStatisticsByBundle(bundles, statistics);
+
         sptr<NotificationExtensionSubscriptionInfo> info =
             new (std::nothrow) NotificationExtensionSubscriptionInfo();
         std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
