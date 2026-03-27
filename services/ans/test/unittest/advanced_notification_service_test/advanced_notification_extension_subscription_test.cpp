@@ -24,7 +24,7 @@
 #include "notification_bluetooth_helper.h"
 #include "notification_check_request.h"
 #include "notification_constant.h"
-#include "notifictaion_load_utils.h"
+#include "notification_load_utils.h"
 #include "notification_preferences.h"
 
 #include "ans_ut_constant.h"

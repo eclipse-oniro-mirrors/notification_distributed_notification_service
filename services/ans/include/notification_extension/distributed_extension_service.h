@@ -18,7 +18,7 @@
 
 #include "device_manager.h"
 
-#include "notifictaion_load_utils.h"
+#include "notification_load_utils.h"
 #include "ffrt.h"
 #include "notification_config_parse.h"
 #include "distributed_data_define.h"

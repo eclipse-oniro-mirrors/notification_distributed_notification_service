@@ -40,7 +40,7 @@
 #include "distributed_bundle_option.h"
 #include "notification_dialog_manager.h"
 #include "notification_do_not_disturb_profile.h"
-#include "notifictaion_load_utils.h"
+#include "notification_load_utils.h"
 #include "notification_parameters.h"
 #include "notification_record.h"
 #include "notification_slot_filter.h"

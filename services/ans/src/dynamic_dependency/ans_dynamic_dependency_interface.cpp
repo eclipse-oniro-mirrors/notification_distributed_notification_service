@@ -12,14 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "ans_dynamic_dependency_interface.h"
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 #include "system_sound_dynamic_wrapper.h"
+#include "screen_manager_dynamic_wrapper.h"
 
 #define SYMBOL_EXPORT __attribute__ ((visibility("default")))
+
 namespace OHOS {
 namespace Notification {
 #ifdef __cplusplus
@@ -30,9 +34,15 @@ SYMBOL_EXPORT bool SystemSoundRemoveCustomizedTone(const std::string uri)
 {
     return SystemSoundDynamicWrapper::GetInstance().RemoveCustomizedTone(uri);
 }
+
 SYMBOL_EXPORT bool SystemSoundRemoveCustomizedToneList(const std::vector<std::string> uris)
 {
     return SystemSoundDynamicWrapper::GetInstance().RemoveCustomizedToneList(uris);
+}
+
+SYMBOL_EXPORT NotificationScreenPowerState ScreenManagerGetScreenPower()
+{
+    return ScreenManagerDynamicWrapper::GetInstance().GetScreenPower();
 }
 
 #ifdef __cplusplus
