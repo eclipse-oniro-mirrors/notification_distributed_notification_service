@@ -382,7 +382,7 @@ ErrCode AdvancedNotificationService::ExtractWantAgentInfo(
         return ERR_OK;
     }
 
-    std::shared_ptr<AAFwk::Want> want = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(wantAgent);
+    std::shared_ptr<AAFwk::Want> want = AbilityRuntime::WantAgent::WantAgentHelper::GetWantFromProxy(wantAgent);
     if (want != nullptr) {
         parameters->SetWantAction(want->GetAction());
         parameters->SetWantUri(want->GetUriString());
@@ -438,7 +438,7 @@ ErrCode AdvancedNotificationService::GetUri(sptr<NotificationRequest> &request)
         return ERROR_INTERNAL_ERROR;
     }
 
-    std::shared_ptr<AAFwk::Want> want = AbilityRuntime::WantAgent::WantAgentHelper::GetWant(wantAgent);
+    std::shared_ptr<AAFwk::Want> want = AbilityRuntime::WantAgent::WantAgentHelper::GetWantFromProxy(wantAgent);
     if (!want) {
         std::string msg = "Get want failed, id:" + std::to_string(request->GetNotificationId()) +
                           ", uid:" + std::to_string(request->GetOwnerUid()) +
