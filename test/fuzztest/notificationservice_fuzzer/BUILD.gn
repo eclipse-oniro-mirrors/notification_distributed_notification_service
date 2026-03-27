@@ -60,7 +60,7 @@ ohos_fuzztest("NotificationServiceFuzzTest") {
     "data_share:datashare_permission",
     "time_service:time_client",
   ]
-  if (ans_device_manager_enable) {
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
   external_deps += component_external_deps

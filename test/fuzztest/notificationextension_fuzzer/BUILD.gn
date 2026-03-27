@@ -55,7 +55,8 @@ ohos_fuzztest("NotificationExtensionFuzzTest") {
     "relational_store:native_rdb",
     "ffrt:libffrt",
   ]
-  if (ans_device_manager_enable) {
+
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 }

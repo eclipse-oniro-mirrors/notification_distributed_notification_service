@@ -96,7 +96,8 @@ ohos_fuzztest("AdvancedNotificationServiceFuzzTest") {
     "time_service:time_client",
     "bluetooth:btframework",
   ]
-  if (ans_device_manager_enable) {
+
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
   external_deps += component_external_deps

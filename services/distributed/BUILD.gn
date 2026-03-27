@@ -63,7 +63,8 @@ ohos_shared_library("libans_distributed") {
     "ipc:ipc_single",
     "kv_store:distributeddata_inner",
   ]
-  if (ans_device_manager_enable) {
+
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
 
@@ -174,10 +175,11 @@ ohos_shared_library("libdans") {
     "time_service:time_client",
     "zlib:libz",
   ]
-  if (ans_device_manager_enable) {
+
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "device_manager:devicemanagersdk" ]
   }
-  if (ans_soft_bus_enable) {
+  if (ans_soft_bus_enable && distributed_notification_service_feature_watch) {
     external_deps += [ "dsoftbus:softbus_client" ]
   }
 
