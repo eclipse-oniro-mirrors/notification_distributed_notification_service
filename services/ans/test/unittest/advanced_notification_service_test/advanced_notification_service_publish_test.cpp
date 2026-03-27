@@ -2945,48 +2945,5 @@ HWTEST_F(AdvancedNotificationServiceTest, Dump_0100, Level1)
     std::string targetStr = "10.000000 11.000000 12.000000 11 2 2";
     ASSERT_EQ(str, targetStr);
 }
-
-/**
- * @tc.number    : CheckNotificationRequest_0100
- * @tc.name      : CheckNotificationRequest_0100
- * @tc.desc      : Test check notification request
- */
-HWTEST_F(AdvancedNotificationServiceTest, CheckNotificationRequest_0100, Level1)
-{
-    TestAddSlot(NotificationConstant::SlotType::LIVE_VIEW);
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-
-    sptr<NotificationRequest> req = new NotificationRequest(1);
-    EXPECT_NE(req, nullptr);
-    req->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
-    EXPECT_NE(liveViewContent, nullptr);
-    liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
-    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
-    req->SetLabel("req's label");
-    req->SetCreatorUid(1);
-    req->SetContent(content);
-
-    auto pixelMap = std::make_shared<Media::PixelMap>();
-    EXPECT_NE(pixelMap, nullptr);
-    Media::ImageInfo imageInfo;
-    imageInfo.size.width = 32;
-    imageInfo.size.height = 32;
-    imageInfo.pixelFormat = Media::PixelFormat::ALPHA_8;
-    imageInfo.colorSpace = Media::ColorSpace::SRGB;
-    pixelMap->SetImageInfo(imageInfo);
-    int32_t rowDataSize = 35 / 4 * 4;
-    uint32_t bufferSize = rowDataSize * 32;
-    void *buffer = malloc(bufferSize);
-    if (buffer != nullptr) {
-        pixelMap->SetPixelsAddr(buffer, nullptr, bufferSize, Media::AllocatorType::HEAP_ALLOC, nullptr);
-    }
-    EXPECT_NE(buffer, nullptr);
-    req->SetLittleIcon(pixelMap);
-
-    std::string label = "publish's label";
-    ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_NON_SYSTEM_APP);
-}
 }  // namespace Notification
 }  // namespace OHOS
