@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
+#define private public  // NOLINT
+#define protected public  // NOLINT
 #include "notification_capsule.h"
 #include "notification_icon_button.h"
 #undef private

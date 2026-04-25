@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
+#define private public  // NOLINT
+#define protected public  // NOLINT
 #include "notification_application_change_info.h"
 #undef private
 #undef protected

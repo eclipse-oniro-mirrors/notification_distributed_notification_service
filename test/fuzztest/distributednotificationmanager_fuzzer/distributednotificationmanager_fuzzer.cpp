@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
+#define private public  // NOLINT
+#define protected public  // NOLINT
 #include "distributed_notification_manager.h"
 #include "distributed_preferences.h"
 #include "distributed_flow_control.h"

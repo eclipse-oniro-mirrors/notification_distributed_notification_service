@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
+#define private public  // NOLINT
+#define protected public  // NOLINT
 #include "notification_local_live_view_content.h"
 #include "notification_local_live_view_button.h"
 #include "notification_progress.h"
