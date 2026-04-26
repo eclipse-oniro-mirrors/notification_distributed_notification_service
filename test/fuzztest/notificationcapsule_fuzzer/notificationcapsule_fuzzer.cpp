@@ -27,7 +27,8 @@ namespace Notification {
 
 constexpr uint8_t MAX_BUTTON_SIZE = 3;
 
-static void TestNotificationCapsule(FuzzedDataProvider* fuzzData) {
+static void TestNotificationCapsule(FuzzedDataProvider* fuzzData)
+{
     NotificationCapsule capsule;
     std::string title = fuzzData->ConsumeRandomLengthString();
     std::string backgroundColor = fuzzData->ConsumeRandomLengthString();
@@ -66,7 +67,8 @@ static void TestNotificationCapsule(FuzzedDataProvider* fuzzData) {
     NotificationCapsule::Unmarshalling(parcel);
 }
 
-static void TestNotificationIconButton(FuzzedDataProvider* fuzzData) {
+static void TestNotificationIconButton(FuzzedDataProvider* fuzzData)
+{
     NotificationIconButton button;
     std::string text = fuzzData->ConsumeRandomLengthString();
     std::string name = fuzzData->ConsumeRandomLengthString();
@@ -90,7 +92,8 @@ static void TestNotificationIconButton(FuzzedDataProvider* fuzzData) {
     NotificationIconButton::Unmarshalling(parcel);
 }
 
-static void TestNotificationIconButtonWithResource(FuzzedDataProvider* fuzzData) {
+static void TestNotificationIconButtonWithResource(FuzzedDataProvider* fuzzData)
+{
     NotificationIconButton button;
     std::string text = fuzzData->ConsumeRandomLengthString();
     button.SetText(text);
@@ -102,7 +105,8 @@ static void TestNotificationIconButtonWithResource(FuzzedDataProvider* fuzzData)
     button.ReadResourceFromParcel(readParcel, resourceObj);
 }
 
-bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fuzzData) {
+bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fuzzData)
+{
     TestNotificationCapsule(fuzzData);
     TestNotificationIconButton(fuzzData);
     TestNotificationIconButtonWithResource(fuzzData);
@@ -112,7 +116,8 @@ bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fuzzData) {
 }  // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+{
     FuzzedDataProvider fuzzData(data, size);
     OHOS::Notification::DoSomethingInterestingWithMyAPI(&fuzzData);
     return 0;

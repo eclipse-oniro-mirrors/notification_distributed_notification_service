@@ -28,7 +28,8 @@ namespace Notification {
 constexpr uint8_t CONTENT_TYPE_MAX = 10;
 constexpr uint8_t SLOT_TYPE_MAX = 9;
 
-static void TestNotificationCheckRequest(FuzzedDataProvider* fuzzData) {
+static void TestNotificationCheckRequest(FuzzedDataProvider* fuzzData)
+{
     uint8_t contentTypeValue = fuzzData->ConsumeIntegral<uint8_t>() % CONTENT_TYPE_MAX;
     uint8_t slotTypeValue = fuzzData->ConsumeIntegral<uint8_t>() % SLOT_TYPE_MAX;
     NotificationContent::Type contentType = static_cast<NotificationContent::Type>(contentTypeValue);
@@ -55,7 +56,8 @@ static void TestNotificationCheckRequest(FuzzedDataProvider* fuzzData) {
     NotificationCheckRequest::Unmarshalling(parcel);
 }
 
-static void TestNotificationCheckInfo(FuzzedDataProvider* fuzzData) {
+static void TestNotificationCheckInfo(FuzzedDataProvider* fuzzData)
+{
     std::string pkgName = fuzzData->ConsumeRandomLengthString();
     int32_t notifyId = fuzzData->ConsumeIntegral<int32_t>();
     int32_t contentType = fuzzData->ConsumeIntegral<int32_t>();
@@ -81,7 +83,8 @@ static void TestNotificationCheckInfo(FuzzedDataProvider* fuzzData) {
     info.ConvertJsonStringToValue(jsonData);
 }
 
-bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fuzzData) {
+bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fuzzData)
+{
     TestNotificationCheckRequest(fuzzData);
     TestNotificationCheckInfo(fuzzData);
     return true;
@@ -90,7 +93,8 @@ bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fuzzData) {
 }  // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+{
     FuzzedDataProvider fuzzData(data, size);
     OHOS::Notification::DoSomethingInterestingWithMyAPI(&fuzzData);
     return 0;
