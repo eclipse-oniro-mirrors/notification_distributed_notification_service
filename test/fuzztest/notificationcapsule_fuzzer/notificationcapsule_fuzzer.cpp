@@ -13,27 +13,36 @@
  * limitations under the License.
  */
 
-#define private public  // NOLINT
+#define private public    // NOLINT
 #define protected public  // NOLINT
 #include "notification_capsule.h"
 #include "notification_icon_button.h"
 #undef private
 #undef protected
-#include "notificationcapsule_fuzzer.h"
 #include <fuzzer/FuzzedDataProvider.h>
+#include "notificationcapsule_fuzzer.h"
 
 namespace OHOS {
 namespace Notification {
 
 constexpr uint8_t MAX_BUTTON_SIZE = 3;
 
-static void TestNotificationCapsule(FuzzedDataProvider *fuzzData)
-{
+static void TestNotificationCapsule(FuzzedDataProvider* fuzzData) {
     NotificationCapsule capsule;
     std::string title = fuzzData->ConsumeRandomLengthString();
     std::string backgroundColor = fuzzData->ConsumeRandomLengthString();
     std::string content = fuzzData->ConsumeRandomLengthString();
     int32_t time = fuzzData->ConsumeIntegral<int32_t>();
+    uint8_t buttonSize = fuzzData->ConsumeIntegral<uint8_t>() % (MAX_BUTTON_SIZE + 1);
+    std::vector<NotificationIconButton> buttons;
+    buttons.reserve(buttonSize);
+    for (uint8_t i = 0; i < buttonSize; ++i) {
+        NotificationIconButton button;
+        button.SetText(fuzzData->ConsumeRandomLengthString());
+        button.SetName(fuzzData->ConsumeRandomLengthString());
+        button.SetHidePanel(fuzzData->ConsumeBool());
+        buttons.emplace_back(button);
+    }
 
     capsule.SetTitle(title);
     capsule.GetTitle();
@@ -43,6 +52,8 @@ static void TestNotificationCapsule(FuzzedDataProvider *fuzzData)
     capsule.GetContent();
     capsule.SetTime(time);
     capsule.GetTime();
+    capsule.SetCapsuleButton(buttons);
+    capsule.GetCapsuleButton();
     capsule.Dump();
     capsule.ResetIcon();
 
@@ -55,8 +66,7 @@ static void TestNotificationCapsule(FuzzedDataProvider *fuzzData)
     NotificationCapsule::Unmarshalling(parcel);
 }
 
-static void TestNotificationIconButton(FuzzedDataProvider *fuzzData)
-{
+static void TestNotificationIconButton(FuzzedDataProvider* fuzzData) {
     NotificationIconButton button;
     std::string text = fuzzData->ConsumeRandomLengthString();
     std::string name = fuzzData->ConsumeRandomLengthString();
@@ -80,8 +90,7 @@ static void TestNotificationIconButton(FuzzedDataProvider *fuzzData)
     NotificationIconButton::Unmarshalling(parcel);
 }
 
-static void TestNotificationIconButtonWithResource(FuzzedDataProvider *fuzzData)
-{
+static void TestNotificationIconButtonWithResource(FuzzedDataProvider* fuzzData) {
     NotificationIconButton button;
     std::string text = fuzzData->ConsumeRandomLengthString();
     button.SetText(text);
@@ -93,8 +102,7 @@ static void TestNotificationIconButtonWithResource(FuzzedDataProvider *fuzzData)
     button.ReadResourceFromParcel(readParcel, resourceObj);
 }
 
-bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
-{
+bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fuzzData) {
     TestNotificationCapsule(fuzzData);
     TestNotificationIconButton(fuzzData);
     TestNotificationIconButtonWithResource(fuzzData);
@@ -104,8 +112,7 @@ bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
 }  // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
-{
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     FuzzedDataProvider fuzzData(data, size);
     OHOS::Notification::DoSomethingInterestingWithMyAPI(&fuzzData);
     return 0;
