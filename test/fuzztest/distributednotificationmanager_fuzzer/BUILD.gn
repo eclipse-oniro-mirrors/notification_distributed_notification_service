@@ -50,6 +50,10 @@ ohos_fuzztest("DistributedNotificationManagerFuzzTest") {
     "relational_store:native_rdb",
     "kv_store:distributeddata_inner",
   ]
+
+  if (ans_device_manager_enable && distributed_notification_service_feature_watch) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
 }
 
 ###############################################################################
