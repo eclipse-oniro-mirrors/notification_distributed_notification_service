@@ -85,8 +85,12 @@ static void TestNotificationIconButtonWithResource(FuzzedDataProvider *fuzzData)
     NotificationIconButton button;
     std::string text = fuzzData->ConsumeRandomLengthString();
     button.SetText(text);
-    button.WriteIconToParcel(Parcel());
-    button.ReadResourceFromParcel(Parcel(), std::shared_ptr<ResourceManager::Resource>());
+    Parcel writeParcel;
+    button.WriteIconToParcel(writeParcel);
+
+    Parcel readParcel;
+    std::shared_ptr<ResourceManager::Resource> resourceObj;
+    button.ReadResourceFromParcel(readParcel, resourceObj);
 }
 
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
