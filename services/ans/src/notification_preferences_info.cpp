@@ -458,7 +458,7 @@ bool NotificationPreferencesInfo::RemoveBundleInfo(const sptr<NotificationBundle
     return bundleCache_.Remove(bundleKey);
 }
 
-bool NotificationPreferencesInfo::IsExsitBundleInfo(const sptr<NotificationBundleOption> &bundleOption) const
+bool NotificationPreferencesInfo::IsExsitBundleInfo(const sptr<NotificationBundleOption> &bundleOption)
 {
     std::string bundleKey = GenerateBundleKey(bundleOption->GetBundleName(), bundleOption->GetUid());
     return bundleCache_.Contains(bundleKey);

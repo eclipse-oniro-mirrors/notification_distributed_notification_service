@@ -461,3 +461,242 @@ HWTEST_F(LRUCacheTest, MoveSemantics_PutRvalue_00001, Function | SmallTest | Lev
     EXPECT_EQ(result.id, 1);
     EXPECT_EQ(result.name, "test");
 }
+
+/**
+ * @tc.name: Peek_ExpiredAutoRemove_00001
+ * @tc.desc: Test peeking expired entry removes it and increments expireCount
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Peek_ExpiredAutoRemove_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+
+    // Manually expire the entry by setting old timestamp
+    cache.nodeTimestamps_["key1"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+
+    TestValue result;
+    bool found = cache.Peek("key1", result);
+
+    EXPECT_FALSE(found);
+    EXPECT_EQ(cache.Size(), 0);
+    auto stats = cache.GetStats();
+    EXPECT_EQ(stats.expires, 1);
+}
+
+/**
+ * @tc.name: Contains_ExpiredAutoRemove_00001
+ * @tc.desc: Test contains on expired entry removes it and increments expireCount
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Contains_ExpiredAutoRemove_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+
+    cache.nodeTimestamps_["key1"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+
+    EXPECT_FALSE(cache.Contains("key1"));
+    EXPECT_EQ(cache.Size(), 0);
+    auto stats = cache.GetStats();
+    EXPECT_EQ(stats.expires, 1);
+}
+
+/**
+ * @tc.name: Put_FullCache_EvictExpiredFirst_00001
+ * @tc.desc: Test that when cache is full, Put evicts expired entries before LRU eviction
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Put_FullCache_EvictExpiredFirst_00001, Function | SmallTest | Level1)
+{
+    typename LRUCache<std::string, TestValue>::Config config;
+    config.maxSize = 3;
+    config.enableTTL = true;
+    LRUCache<std::string, TestValue> cache(config);
+
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+    cache.Put("key3", TestValue(3, "value3"));
+    EXPECT_EQ(cache.Size(), 3);
+
+    // Expire key2 only
+    cache.nodeTimestamps_["key2"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+
+    // Put should evict expired key2 first, then there's room, no LRU eviction needed
+    cache.Put("key4", TestValue(4, "value4"));
+
+    EXPECT_EQ(cache.Size(), 3);
+    EXPECT_TRUE(cache.Contains("key1"));
+    EXPECT_FALSE(cache.Contains("key2"));
+    EXPECT_TRUE(cache.Contains("key3"));
+    EXPECT_TRUE(cache.Contains("key4"));
+}
+
+/**
+ * @tc.name: Put_FullCache_ExpiredThenLRU_00001
+ * @tc.desc: Test that when cache is full after evicting expired, LRU eviction follows
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Put_FullCache_ExpiredThenLRU_00001, Function | SmallTest | Level1)
+{
+    typename LRUCache<std::string, TestValue>::Config config;
+    config.maxSize = 3;
+    config.enableTTL = true;
+    LRUCache<std::string, TestValue> cache(config);
+
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+    cache.Put("key3", TestValue(3, "value3"));
+    EXPECT_EQ(cache.Size(), 3);
+
+    // No expired entries, must use LRU eviction
+    cache.Put("key4", TestValue(4, "value4"));
+
+    EXPECT_EQ(cache.Size(), 3);
+    EXPECT_FALSE(cache.Contains("key1")); // key1 was LRU, evicted
+    EXPECT_TRUE(cache.Contains("key2"));
+    EXPECT_TRUE(cache.Contains("key3"));
+    EXPECT_TRUE(cache.Contains("key4"));
+}
+
+/**
+ * @tc.name: GetAllKeys_FiltersExpired_00001
+ * @tc.desc: Test GetAllKeys filters out expired entries
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, GetAllKeys_FiltersExpired_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+
+    cache.nodeTimestamps_["key2"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+
+    auto keys = cache.GetAllKeys();
+
+    EXPECT_EQ(keys.size(), 1);
+    EXPECT_EQ(keys[0], "key1");
+    EXPECT_EQ(cache.Size(), 1);
+}
+
+/**
+ * @tc.name: Put_FullCache_AllExpired_NoLRU_00001
+ * @tc.desc: Test that when all entries are expired, Put only expires, no LRU needed
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Put_FullCache_AllExpired_NoLRU_00001, Function | SmallTest | Level1)
+{
+    typename LRUCache<std::string, TestValue>::Config config;
+    config.maxSize = 2;
+    config.enableTTL = true;
+    LRUCache<std::string, TestValue> cache(config);
+
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+
+    cache.nodeTimestamps_["key1"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+    cache.nodeTimestamps_["key2"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+
+    cache.Put("key3", TestValue(3, "value3"));
+
+    EXPECT_EQ(cache.Size(), 1);
+    EXPECT_FALSE(cache.Contains("key1"));
+    EXPECT_FALSE(cache.Contains("key2"));
+    EXPECT_TRUE(cache.Contains("key3"));
+}
+
+
+/**
+ * @tc.name: EvictExpired_NoExpired_ReturnsZero_00001
+ * @tc.desc: Test EvictExpired returns 0 when no entries are expired
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, EvictExpired_NoExpired_ReturnsZero_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+
+    size_t evicted = cache.EvictExpired();
+
+    EXPECT_EQ(evicted, 0);
+    EXPECT_EQ(cache.Size(), 2);
+    EXPECT_TRUE(cache.Contains("key1"));
+    EXPECT_TRUE(cache.Contains("key2"));
+}
+
+/**
+ * @tc.name: UpdateConfig_ReduceSize_EvictsExpiredFirst_00001
+ * @tc.desc: Test UpdateConfig reduces maxSize, evicts expired before LRU
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, UpdateConfig_ReduceSize_EvictsExpiredFirst_00001, Function | SmallTest | Level1)
+{
+    typename LRUCache<std::string, TestValue>::Config config;
+    config.maxSize = 5;
+    LRUCache<std::string, TestValue> cache(config);
+
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+    cache.Put("key3", TestValue(3, "value3"));
+    cache.Put("key4", TestValue(4, "value4"));
+    cache.Put("key5", TestValue(5, "value5"));
+    EXPECT_EQ(cache.Size(), 5);
+
+    // Expire key4 and key5
+    cache.nodeTimestamps_["key4"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+    cache.nodeTimestamps_["key5"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+
+    // Reduce maxSize to 3: 2 expired evicted first, remaining 3 equals new limit, no LRU
+    config.maxSize = 3;
+    cache.UpdateConfig(config);
+
+    EXPECT_EQ(cache.Size(), 3);
+    EXPECT_TRUE(cache.Contains("key1"));
+    EXPECT_TRUE(cache.Contains("key2"));
+    EXPECT_TRUE(cache.Contains("key3"));
+    EXPECT_FALSE(cache.Contains("key4"));
+    EXPECT_FALSE(cache.Contains("key5"));
+}
+
+/**
+ * @tc.name: UpdateConfig_ReduceSize_ExpiredThenLRU_00001
+ * @tc.desc: Test UpdateConfig reduces maxSize, expired evicted then LRU follows
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, UpdateConfig_ReduceSize_ExpiredThenLRU_00001, Function | SmallTest | Level1)
+{
+    typename LRUCache<std::string, TestValue>::Config config;
+    config.maxSize = 5;
+    LRUCache<std::string, TestValue> cache(config);
+
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+    cache.Put("key3", TestValue(3, "value3"));
+    cache.Put("key4", TestValue(4, "value4"));
+    cache.Put("key5", TestValue(5, "value5"));
+    EXPECT_EQ(cache.Size(), 5);
+
+    // Expire key4 only (1 expired)
+    cache.nodeTimestamps_["key4"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+
+    // Reduce maxSize to 3: 1 expired evicted + 1 LRU eviction (key1 is LRU)
+    config.maxSize = 3;
+    cache.UpdateConfig(config);
+
+    EXPECT_EQ(cache.Size(), 3);
+    EXPECT_FALSE(cache.Contains("key1")); // LRU evicted
+    EXPECT_TRUE(cache.Contains("key2"));
+    EXPECT_TRUE(cache.Contains("key3"));
+    EXPECT_FALSE(cache.Contains("key4")); // expired
+    EXPECT_TRUE(cache.Contains("key5"));
+}

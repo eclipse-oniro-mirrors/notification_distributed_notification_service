@@ -50,8 +50,8 @@ public:
     using TimePoint = std::chrono::steady_clock::time_point;
 
     struct Config {
-        size_t maxSize = 50;
-        std::chrono::minutes ttl = std::chrono::minutes(2);
+        size_t maxSize = 100;
+        std::chrono::minutes ttl = std::chrono::minutes(5);
         bool enableTTL = true;
     };
 
@@ -141,16 +141,21 @@ public:
      * @param value Output value if found.
      * @return true if found, false otherwise.
      */
-    bool Peek(const K& key, V& value) const
+    bool Peek(const K& key, V& value)
     {
         auto it = cache_.find(key);
         if (it == cache_.end()) {
             return false;
         }
         if (config_.enableTTL) {
-            auto age = Clock::now() - nodeTimestamps_.at(key);
-            if (age > config_.ttl) {
-                return false;
+            auto tsIt = nodeTimestamps_.find(key);
+            if (tsIt != nodeTimestamps_.end()) {
+                auto age = Clock::now() - tsIt->second;
+                if (age > config_.ttl) {
+                    Remove(key);
+                    ++expireCount_;
+                    return false;
+                }
             }
         }
         value = it->second.value;
@@ -171,6 +176,7 @@ public:
             nodeTimestamps_[key] = Clock::now();
             return;
         }
+        EvictExpired();
         if (cache_.size() >= config_.maxSize) {
             EvictLRU();
         }
@@ -193,6 +199,7 @@ public:
             nodeTimestamps_[key] = Clock::now();
             return;
         }
+        EvictExpired();
         if (cache_.size() >= config_.maxSize) {
             EvictLRU();
         }
@@ -231,18 +238,24 @@ public:
      * @brief Check if the cache contains a key.
      * @return true if the key exists and is not expired, false otherwise.
      */
-    bool Contains(const K& key) const
+    bool Contains(const K& key)
     {
+        auto it = cache_.find(key);
+        if (it == cache_.end()) {
+            return false;
+        }
         if (config_.enableTTL) {
             auto tsIt = nodeTimestamps_.find(key);
             if (tsIt != nodeTimestamps_.end()) {
                 auto age = Clock::now() - tsIt->second;
                 if (age > config_.ttl) {
+                    Remove(key);
+                    ++expireCount_;
                     return false;
                 }
             }
         }
-        return cache_.find(key) != cache_.end();
+        return true;
     }
 
     /**
@@ -305,6 +318,9 @@ public:
                 expiredKeys.push_back(entry.first);
             }
         }
+        if (expiredKeys.empty()) {
+            return 0;
+        }
         size_t evictedCount = expiredKeys.size();
         for (const auto& key : expiredKeys) {
             Remove(key);
@@ -329,6 +345,7 @@ public:
     void UpdateConfig(const Config& config)
     {
         config_ = config;
+        EvictExpired();
         while (cache_.size() > config_.maxSize) {
             EvictLRU();
         }
@@ -338,8 +355,9 @@ public:
      * @brief Get all keys currently in the cache.
      * @return Vector of keys.
      */
-    std::vector<K> GetAllKeys() const
+    std::vector<K> GetAllKeys()
     {
+        EvictExpired();
         std::vector<K> keys;
         keys.reserve(cache_.size());
         for (const auto& entry : cache_) {

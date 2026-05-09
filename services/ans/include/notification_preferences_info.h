@@ -328,7 +328,7 @@ public:
      * @param bundleOption Indicates the bundle info label.
      * @return Whether to exsist bundle info.
      */
-    bool IsExsitBundleInfo(const sptr<NotificationBundleOption> &bundleOption) const;
+    bool IsExsitBundleInfo(const sptr<NotificationBundleOption> &bundleOption);
 
     /**
      * clear bundle info in the of preferences info.

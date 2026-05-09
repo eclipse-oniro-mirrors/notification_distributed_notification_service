@@ -34,6 +34,7 @@
 #include "os_account_manager_helper.h"
 #include "notification_analytics_util.h"
 #include "notification_config_parse.h"
+#include "itimer_info.h"
 #include "system_sound_helper.h"
 #include "os_account_manager.h"
 #ifdef ALL_SCENARIO_COLLABORATION
@@ -49,6 +50,47 @@ constexpr static const char* KEY_PRIORITY_CONFIG_FOR_BUNDLE = "priorityConfigFor
 constexpr static const char* KEY_PRIORITY_NOTIFICATION_SWITCH_FOR_BUNDLE_V2 = "priorityNotificationSwitchForBundleV2";
 constexpr static const char* KEY_PRIORITY_NOTIFICATION_STRATEGY_FOR_BUNDLE = "priorityStrategyForBundle";
 const static std::string KEY_UNDER_LINE = "_";
+
+class CacheExpiryTimerInfo : public MiscServices::ITimerInfo {
+public:
+    CacheExpiryTimerInfo() = default;
+    ~CacheExpiryTimerInfo() override = default;
+
+    void OnTrigger() override
+    {
+        if (callback_) {
+            callback_();
+        }
+    }
+
+    void SetType(const int32_t &timerInfoType) override
+    {
+        type = timerInfoType;
+    }
+
+    void SetRepeat(bool timerInfoRepeat) override
+    {
+        repeat = timerInfoRepeat;
+    }
+
+    void SetInterval(const uint64_t &timerInfoInterval) override
+    {
+        interval = timerInfoInterval;
+    }
+
+    void SetWantAgent(std::shared_ptr<OHOS::AbilityRuntime::WantAgent::WantAgent> timerInfoWantAgent) override
+    {
+        wantAgent = timerInfoWantAgent;
+    }
+
+    void SetCallback(std::function<void()> callback)
+    {
+        callback_ = std::move(callback);
+    }
+
+private:
+    std::function<void()> callback_;
+};
 }
 ffrt::mutex NotificationPreferences::instanceMutex_;
 std::shared_ptr<NotificationPreferences> NotificationPreferences::instance_;
@@ -63,6 +105,11 @@ NotificationPreferences::NotificationPreferences()
     }
     InitSettingFromDisturbDB();
     StartCacheExpiryTask();
+}
+
+NotificationPreferences::~NotificationPreferences()
+{
+    StopCacheExpiryTask();
 }
 
 std::shared_ptr<NotificationPreferences> NotificationPreferences::GetInstance()
@@ -3169,25 +3216,33 @@ int32_t NotificationPreferences::GetKvFromDb(
 
 void NotificationPreferences::StartCacheExpiryTask()
 {
-    constexpr uint64_t HEARTBEAT_INTERVAL_US = 120 * 1000 * 1000;  // 120 seconds
+    constexpr uint64_t INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
-    cacheExpiryTask_ = ffrt::submit_h([this]() {
-        std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    auto timerInfo = std::make_shared<CacheExpiryTimerInfo>();
+    std::weak_ptr<NotificationPreferences> weakThis = instance_;
+    timerInfo->SetCallback([weakThis]() {
+        auto instance = weakThis.lock();
+        if (instance) {
+            std::lock_guard<ffrt::mutex> lock(instance->preferenceMutex_);
+            instance->preferencesInfo_.EvictExpiredCache();
+        }
+    });
+    timerInfo->SetRepeat(true);
+    timerInfo->SetInterval(INTERVAL_MS);
+    uint8_t timerTypeWakeup = static_cast<uint8_t>(timerInfo->TIMER_TYPE_WAKEUP);
+    uint8_t timerTypeExact = static_cast<uint8_t>(timerInfo->TIMER_TYPE_EXACT);
+    int32_t timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
+    timerInfo->SetType(timerType);
 
-        // Use LRU cache's built-in TTL eviction
-        preferencesInfo_.EvictExpiredCache();
-
-        // Reschedule next eviction check
-        StartCacheExpiryTask();
-    }, {}, {}, ffrt::task_attr().delay(HEARTBEAT_INTERVAL_US));
+    cacheExpiryTimer_.CreateTimer(timerInfo);
+    int64_t triggerTime = NotificationAnalyticsUtil::GetCurrentTime() + INTERVAL_MS;
+    cacheExpiryTimer_.StartTimer(triggerTime);
 }
 
 void NotificationPreferences::StopCacheExpiryTask()
 {
-    if (cacheExpiryTask_) {
-        ffrt::skip(cacheExpiryTask_);
-        cacheExpiryTask_ = nullptr;
-    }
+    cacheExpiryTimer_.StopTimer();
+    cacheExpiryTimer_.DestroyTimer();
 }
 
 ErrCode NotificationPreferences::SetCollaborationBlockList(const std::string& blockListJson)

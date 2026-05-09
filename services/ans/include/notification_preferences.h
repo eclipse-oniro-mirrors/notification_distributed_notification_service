@@ -29,13 +29,14 @@
 #include "notification_constant.h"
 #include "ffrt.h"
 #include <set>
+#include "timer_impl.h"
 
 namespace OHOS {
 namespace Notification {
 class NotificationPreferences final {
 public:
     NotificationPreferences();
-    ~NotificationPreferences() = default;
+    ~NotificationPreferences();
     /**
      * @brief Get NotificationPreferences instance object.
      */
@@ -853,7 +854,7 @@ private:
     bool isRestrictedTrustListUpdate_ = false;
     ffrt::task_handle cacheExpiryTask_ = nullptr;
     
-// Collaboration block list cache (multi-user support)
+    // Collaboration block list cache (multi-user support)
     // Key: userId, Value: set of (bundleName, appIndex) pairs
     std::map<int32_t, std::set<std::pair<std::string, int32_t>>> collaborationBlockListCache_;
     
@@ -863,6 +864,7 @@ private:
     
     // Use ffrt::mutex for thread safety
     ffrt::mutex collaborationBlockListMutex_;
+    Infra::TimerImpl cacheExpiryTimer_;
 };
 }  // namespace Notification
 }  // namespace OHOS
