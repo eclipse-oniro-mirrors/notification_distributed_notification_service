@@ -41,10 +41,6 @@ namespace OHOS {
         repeatDays.push_back(days);
         Notification::ReminderRequestCalendar reminderRequestCalendar(nowTime, repeatMonths, repeatDays, daysOfWeek);
         Notification::ReminderRequestCalendar reminder(reminderRequestCalendar);
-        // test SetNextTriggerTime function
-        reminderRequestCalendar.SetNextTriggerTime();
-        // test InitDateTime function
-        reminderRequestCalendar.InitDateTime();
         // test InitDateTime function
         reminderRequestCalendar.InitDateTime(nowTime);
         // test SetDay function

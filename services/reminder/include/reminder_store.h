@@ -109,7 +109,9 @@ public:
 
 private:
     void UpgradeV7(NativeRdb::RdbStore& store);
+    void UpgradeV9(NativeRdb::RdbStore& store);
     void UpgradeV11(NativeRdb::RdbStore& store);
+    void UpgradeV12(NativeRdb::RdbStore& store);
 
 private:
     int32_t CreateTable(NativeRdb::RdbStore& store);

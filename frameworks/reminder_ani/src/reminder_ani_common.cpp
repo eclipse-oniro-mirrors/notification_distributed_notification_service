@@ -557,6 +557,42 @@ void Common::ParseRingChannel(const ::ohos::reminderAgentManager::manager::RingC
     }
 }
 
+void Common::ParseTimeZoneType(const reminderAgentManager::manager::TimeZoneType& timeZoneType,
+    std::shared_ptr<Notification::ReminderRequest>& reminder)
+{
+    Notification::ReminderRequest::TimeZoneType tz = Notification::ReminderRequest::TimeZoneType::DEFAULT;
+    switch (timeZoneType.get_key()) {
+        case reminderAgentManager::manager::TimeZoneType::key_t::DEFAULT:
+            reminder->SetTimeZoneType(Notification::ReminderRequest::TimeZoneType::DEFAULT);
+            break;
+        case reminderAgentManager::manager::TimeZoneType::key_t::FIXED_TIME_ZONE:
+            reminder->SetTimeZoneType(Notification::ReminderRequest::TimeZoneType::FIXED_TIME_ZONE);
+            break;
+        case reminderAgentManager::manager::TimeZoneType::key_t::SYSTEM_TIME_ZONE:
+            reminder->SetTimeZoneType(Notification::ReminderRequest::TimeZoneType::SYSTEM_TIME_ZONE);
+            break;
+        default:
+            break;
+    }
+}
+
+void Common::ParseNotificationRequestProxy(const reminderAgentManager::manager::ReminderRequest& reminderReq,
+    std::shared_ptr<Notification::ReminderRequest>& reminder)
+{
+    if (!reminderReq.notificationRequestProxy.has_value()) {
+        return;
+    }
+    const auto& aniProxy = reminderReq.notificationRequestProxy.value();
+    Notification::ReminderRequest::NotificationRequestProxy proxy;
+    if (aniProxy.appMessageId.has_value()) {
+        proxy.appMessageId = std::string(aniProxy.appMessageId.value().c_str());
+    }
+    if (aniProxy.isAlertOnce.has_value()) {
+        proxy.isAlertOnce = aniProxy.isAlertOnce.value();
+    }
+    reminder->SetNotificationRequestProxy(proxy);
+}
+
 bool Common::ParseCalendarParam(const ::ohos::reminderAgentManager::manager::ReminderRequestCalendar& calendarReq,
     std::vector<uint8_t>& repeatMonths, std::vector<uint8_t>& repeatDays, std::vector<uint8_t>& daysOfWeek)
 {
@@ -620,6 +656,10 @@ bool Common::CreateReminderBase(const reminderAgentManager::manager::ReminderReq
         }
         reminder->SetSnoozeSlotType(slotType);
     }
+    if (reminderReq.fixedTimeZone.has_value()) {
+        ParseTimeZoneType(reminderReq.fixedTimeZone.value(), reminder);
+    }
+    ParseNotificationRequestProxy(reminderReq, reminder);
     return true;
 }
 
@@ -771,6 +811,14 @@ void Common::GenAniStringResult(const sptr<Notification::ReminderRequest>& remin
     base.customRingUri = ::taihe::optional<::taihe::string>::make(::taihe::string(reminder->GetCustomRingUri()));
 }
 
+void Common::GenAniBoolResult(const sptr<Notification::ReminderRequest>& reminder,
+    reminderAgentManager::manager::ReminderRequest& base)
+{
+    base.tapDismissed = ::taihe::optional<bool>::make(reminder->IsTapDismissed());
+    base.notDistributed = ::taihe::optional<bool>::make(reminder->IsNotDistributed());
+    base.forceDistributed = ::taihe::optional<bool>::make(reminder->IsForceDistributed());
+}
+
 void Common::GenAniWantAgent(const sptr<Notification::ReminderRequest>& reminder,
     ::taihe::optional<reminderAgentManager::manager::WantAgent>& aniWantAgent)
 {
@@ -853,16 +901,51 @@ void Common::GenAniRingChannel(const sptr<Notification::ReminderRequest>& remind
     aniRingChannel = ::taihe::optional<reminderAgentManager::manager::RingChannel>::make(aniChannel);
 }
 
+void Common::GenAniTimeZoneType(const sptr<Notification::ReminderRequest>& reminder,
+    ::taihe::optional<reminderAgentManager::manager::TimeZoneType>& aniTimeZoneType)
+{
+    reminderAgentManager::manager::TimeZoneType::key_t type;
+    switch (reminder->GetTimeZoneType()) {
+        case Notification::ReminderRequest::TimeZoneType::DEFAULT:
+            type = reminderAgentManager::manager::TimeZoneType::key_t::DEFAULT;
+            break;
+        case Notification::ReminderRequest::TimeZoneType::FIXED_TIME_ZONE:
+            type = reminderAgentManager::manager::TimeZoneType::key_t::FIXED_TIME_ZONE;
+            break;
+        case Notification::ReminderRequest::TimeZoneType::SYSTEM_TIME_ZONE:
+            type = reminderAgentManager::manager::TimeZoneType::key_t::SYSTEM_TIME_ZONE;
+            break;
+        default:
+            type = reminderAgentManager::manager::TimeZoneType::key_t::DEFAULT;
+            break;
+    }
+    reminderAgentManager::manager::TimeZoneType aniTz(type);
+    aniTimeZoneType = ::taihe::optional<reminderAgentManager::manager::TimeZoneType>::make(aniTz);
+}
+
+void Common::GenAniNotificationRequestProxy(const sptr<Notification::ReminderRequest>& reminder,
+    ::taihe::optional<reminderAgentManager::manager::NotificationRequestProxy>& aniProxy)
+{
+    auto proxy = reminder->GetNotificationRequestProxy();
+    reminderAgentManager::manager::NotificationRequestProxy out {
+        .appMessageId = ::taihe::optional<::taihe::string>::make(::taihe::string(proxy.appMessageId)),
+        .isAlertOnce = ::taihe::optional<bool>::make(proxy.isAlertOnce),
+    };
+    aniProxy = ::taihe::optional<reminderAgentManager::manager::NotificationRequestProxy>::make(out);
+}
+
 void Common::GenAniReminderBase(const sptr<Notification::ReminderRequest>& reminder,
     reminderAgentManager::manager::ReminderRequest& base)
 {
     GenAniIntResult(reminder, base);
     GenAniStringResult(reminder, base);
-    base.tapDismissed = ::taihe::optional<bool>::make(reminder->IsTapDismissed());
+    GenAniBoolResult(reminder, base);
     GenAniRingChannel(reminder, base.ringChannel);
     GenAniWantAgent(reminder, base.wantAgent);
     GenAniMaxScreenWantAgent(reminder, base.maxScreenWantAgent);
     GenAniActionButton(reminder, base.actionButton);
+    GenAniTimeZoneType(reminder, base.fixedTimeZone);
+    GenAniNotificationRequestProxy(reminder, base.notificationRequestProxy);
 }
 
 void Common::GenAniReminderTimer(const sptr<Notification::ReminderRequest>& reminder,

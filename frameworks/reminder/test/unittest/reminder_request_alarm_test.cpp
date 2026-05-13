@@ -625,5 +625,20 @@ HWTEST_F(ReminderRequestAlarmTest, ReminderRequestAlarmTest_002, Function | Smal
     ret = alarm.PreGetNextTriggerTimeIgnoreSnooze(false, false);
     EXPECT_EQ(ret, ReminderRequest::INVALID_LONG_LONG_VALUE);
 }
+
+/**
+ * @tc.name: OnTimeZoneChange_001
+ * @tc.desc: Test OnTimeZoneChange parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestAlarmTest, OnTimeZoneChange_001, Function | SmallTest | Level1)
+{
+    ReminderRequestAlarm alarm;
+    alarm.SetTimeZoneType(ReminderRequest::TimeZoneType::FIXED_TIME_ZONE);
+    EXPECT_GE(alarm.OnTimeZoneChange(), 0);
+    alarm.SetTimeZoneType(ReminderRequest::TimeZoneType::SYSTEM_TIME_ZONE);
+    EXPECT_GE(alarm.OnTimeZoneChange(), 0);
+}
 }
 }
