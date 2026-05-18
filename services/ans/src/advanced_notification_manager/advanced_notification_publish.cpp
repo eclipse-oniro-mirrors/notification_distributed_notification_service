@@ -345,8 +345,14 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     int32_t uid = request->GetCreatorUid();
     request->SetOwnerUid(uid);
     request->SetOwnerBundleName(bundle);
-    if (!EXTENTION_WRAPPER->NotificationContentControl(request)) {
-        ANS_LOGE("NotificationContentControl fail, bundle = %{public}s", bundle.c_str());
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+        ANS_LOGE("GetActiveUserId is false");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+    if (!EXTENTION_WRAPPER->NotificationContentControl(request, userId)) {
+        ANS_LOGE("NotificationContentControl fail, bundle: %{public}s, userId: %{public}d", bundle.c_str(), userId);
         return ERR_ANS_NOT_ALLOWED;
     }
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
