@@ -3573,5 +3573,97 @@ HWTEST_F(AnsPublishServiceTest, RemoveAllNotificationsByBundleName_00003, Functi
     auto ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason, 100);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 }
+
+/**
+ * @tc.name: DuplicateMsgControlBySa_00001
+ * @tc.desc: Test DuplicateMsgControlBySa
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DuplicateMsgControlBySa_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+
+    auto ret = advancedNotificationService_->DuplicateMsgControlBySa(request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 0);
+}
+
+/**
+ * @tc.name: DuplicateMsgControlBySa_00002
+ * @tc.desc: Test DuplicateMsgControlBySa when duplicate message exists
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DuplicateMsgControlBySa_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test1");
+    auto uniqueKey = request->GenerateUniqueKey();
+    advancedNotificationService_->uniqueKeyList_.emplace_back(
+        std::make_pair(std::chrono::system_clock::now(), uniqueKey));
+
+    auto ret = advancedNotificationService_->DuplicateMsgControlBySa(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_DUPLICATE_MSG);
+    ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);
+}
+
+/**
+ * @tc.name: DuplicateMsgControlBySa_00003
+ * @tc.desc: Test DuplicateMsgControlBySa when message is not duplicate
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DuplicateMsgControlBySa_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test2");
+
+    auto ret = advancedNotificationService_->DuplicateMsgControlBySa(request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);
+}
+
+/**
+ * @tc.name: DuplicateMsgControlBySa_00004
+ * @tc.desc: Test DuplicateMsgControlBySa when app message id is empty
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DuplicateMsgControlBySa_00004, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+
+    auto ret = advancedNotificationService_->DuplicateMsgControlBySa(request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 0);
+}
+
+/**
+ * @tc.name: DuplicateMsgControlBySa_00005
+ * @tc.desc: Test DuplicateMsgControlBySa removes expired unique key before duplicate check
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DuplicateMsgControlBySa_00005, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test_sa_expired");
+    auto uniqueKey = request->GenerateUniqueKey();
+    advancedNotificationService_->uniqueKeyList_.emplace_back(
+        std::make_pair(std::chrono::system_clock::now() - std::chrono::hours(25), uniqueKey));
+
+    auto ret = advancedNotificationService_->DuplicateMsgControlBySa(request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);
+}
 }  // namespace Notification
 }  // namespace OHOS
