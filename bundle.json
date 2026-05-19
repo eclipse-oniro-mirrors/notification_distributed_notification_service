@@ -132,8 +132,7 @@
         "window_manager",
         "graphic_2d",
         "api_metrics",
-        "ets_frontend",
-        "ace_ets2bundle"
+        "ets_frontend"
       ],
       "third_party": [
         "libuv",
