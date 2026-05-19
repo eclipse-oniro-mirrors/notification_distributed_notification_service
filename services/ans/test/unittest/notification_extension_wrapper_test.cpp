@@ -381,7 +381,7 @@ HWTEST_F(NotificationExtensionWrapperTest, NotificationContentControl_00001, Tes
     sptr<NotificationRequest> request = new NotificationRequest();
 
     // Act
-    bool result = wrapper.NotificationContentControl(request);
+    bool result = wrapper.NotificationContentControl(request, 100);
 
     // Assert
     EXPECT_TRUE(result);
@@ -397,14 +397,15 @@ HWTEST_F(NotificationExtensionWrapperTest, NotificationContentControl_00002, Tes
 {
     // Arrange
     ExtensionWrapper wrapper;
-    auto mockNotificationContentControl = [](const sptr<NotificationRequest> &request) {
+    auto mockNotificationContentControl = [](
+        const sptr<NotificationRequest> &request, const int32_t &userId) {
         return true;
     };
     wrapper.notificationContentControl_ = mockNotificationContentControl;
     sptr<NotificationRequest> request = new NotificationRequest();
 
     // Act
-    bool result = wrapper.NotificationContentControl(request);
+    bool result = wrapper.NotificationContentControl(request, 100);
 
     // Assert
     EXPECT_TRUE(result);
@@ -420,14 +421,15 @@ HWTEST_F(NotificationExtensionWrapperTest, NotificationContentControl_00003, Tes
 {
     // Arrange
     ExtensionWrapper wrapper;
-    auto mockNotificationContentControl = [](const sptr<NotificationRequest> &request) {
+    auto mockNotificationContentControl = [](
+        const sptr<NotificationRequest> &request, const int32_t &userId) {
         return false;
     };
     wrapper.notificationContentControl_ = mockNotificationContentControl;
     sptr<NotificationRequest> request = new NotificationRequest();
 
     // Act
-    bool result = wrapper.NotificationContentControl(request);
+    bool result = wrapper.NotificationContentControl(request, 100);
 
     // Assert
     EXPECT_FALSE(result);

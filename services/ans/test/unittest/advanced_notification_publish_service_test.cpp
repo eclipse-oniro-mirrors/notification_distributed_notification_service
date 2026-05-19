@@ -2534,7 +2534,52 @@ HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00003, Funct
     request->SetCreatorBundleName("testBundle");
 
     auto originalNotificationContentControl = EXTENTION_WRAPPER->notificationContentControl_;
-    EXTENTION_WRAPPER->notificationContentControl_ = [](const sptr<NotificationRequest> &request) {
+    EXTENTION_WRAPPER->notificationContentControl_ = [](
+        const sptr<NotificationRequest> &request, const int32_t &userId) {
+        return false;
+    };
+
+    auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
+
+    EXTENTION_WRAPPER->notificationContentControl_ = originalNotificationContentControl;
+}
+
+/**
+ * @tc.name: PublishNotificationForIndirectProxy_00004
+ * @tc.desc: Test PublishNotificationForIndirectProxy,
+ *  GetCurrentActiveUserId failed, expected ERR_ANS_GET_ACTIVE_USER_FAILED
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00004, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorUid(1);
+    request->SetCreatorBundleName("testBundle");
+
+    MockQueryForgroundOsAccountId(false, 0);
+    auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
+}
+
+/**
+ * @tc.name: PublishNotificationForIndirectProxy_00005
+ * @tc.desc: Test PublishNotificationForIndirectProxy,
+ *  NotificationContentControl return false with valid userId, expected ERR_ANS_NOT_ALLOWED
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00005, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorUid(1);
+    request->SetCreatorBundleName("testBundle");
+
+    MockQueryForgroundOsAccountId(true, 0);
+    auto originalNotificationContentControl = EXTENTION_WRAPPER->notificationContentControl_;
+    EXTENTION_WRAPPER->notificationContentControl_ = [](
+        const sptr<NotificationRequest> &request, const int32_t &userId) {
         return false;
     };
 

@@ -824,7 +824,13 @@ AnsStatus __attribute__((weak)) AdvancedNotificationService::PublishPreparedNoti
     } else {
         isThirdparty = true;
     }
-    if (!EXTENTION_WRAPPER->NotificationContentControl(request)) {
+    
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId)!= ERR_OK) {
+        ANS_LOGE("GetActiveUserId is false");
+        return AnsStatus(ERR_ANS_GET_ACTIVE_USER_FAILED, "ERR_ANS_GET_ACTIVE_USER_FAILED");
+    }
+    if (!EXTENTION_WRAPPER->NotificationContentControl(request, userId)) {
         ANS_LOGE("NotificationContentControl fail");
         return AnsStatus(ERR_ANS_NOT_ALLOWED, "NotificationContentControl fail");
     }

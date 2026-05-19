@@ -354,13 +354,13 @@ bool ExtensionWrapper::NotificationDialogControl()
     return result;
 }
 
-bool ExtensionWrapper::NotificationContentControl(const sptr<NotificationRequest> &request)
+bool ExtensionWrapper::NotificationContentControl(const sptr<NotificationRequest> &request, const int32_t &userId)
 {
     if (notificationContentControl_ == nullptr) {
         ANS_LOGE("NotificationContentControl wrapper symbol failed");
         return true;
     }
-    return notificationContentControl_(request);
+    return notificationContentControl_(request, userId);
 }
 
 int32_t ExtensionWrapper::convertToDelType(int32_t deleteReason)
