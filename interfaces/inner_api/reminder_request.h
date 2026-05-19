@@ -210,9 +210,34 @@ public:
         MAX_CHANNEL = NOTIFICATION,
     };
 
+    /**
+     * @brief Calendar / alarm time interpretation and system adaptation.
+     * DEFAULT: legacy behaviour (localtime/mktime, DST adjustment). OnTimeZoneChange keeps the historical
+     *          epoch adjustment (localtime + mktime on the current trigger instant).
+     * FIXED_TIME_ZONE: stored calendar fields are composed in UTC (gmtime_r/timegm); the physical instant is
+     *          fixed when the device time zone changes (OnTimeZoneChange is a no-op). The same instant shows as
+     *          different local wall times in different zones (e.g. 2026-08-08 20:00 in +8 appears as
+     *          2026-08-08 16:00 in +4). GetTriggerTimeWithDST returns the raw next time (no local DST nudge).
+     * SYSTEM_TIME_ZONE: stored date-time is interpreted in the current system local zone (localtime_r/mktime).
+     *          The same calendar fields stay after a zone change (e.g. 2026-08-08 20:00 in +8 remains
+     *          2026-08-08 20:00 after moving to +4). OnTimeZoneChange recomputes the trigger via
+     *          PreGetNextTriggerTimeIgnoreSnooze from those fields; DST adjustment follows DEFAULT-style logic.
+     */
+    enum class TimeZoneType : uint8_t {
+        DEFAULT = 0,
+        FIXED_TIME_ZONE,
+        SYSTEM_TIME_ZONE,
+        MAX_TIME_ZONE_TYPE = SYSTEM_TIME_ZONE,
+    };
+
     struct ButtonWantAgent {
         std::string pkgName = "";
         std::string abilityName = "";
+    };
+
+    struct NotificationRequestProxy {
+        std::string appMessageId = "";
+        bool isAlertOnce = false;
     };
 
     struct ButtonDataShareUpdate {
@@ -288,6 +313,7 @@ public:
      * @param parcel the object into the parcel
      */
     virtual bool Marshalling(Parcel &parcel) const override;
+    virtual bool WriteParcel(Parcel &parcel) const;
 
     /**
      * @brief Unmarshal object from a Parcel.
@@ -296,7 +322,6 @@ public:
      */
     static ReminderRequest *Unmarshalling(Parcel &parcel);
     virtual bool ReadFromParcel(Parcel &parcel);
-    virtual bool WriteParcel(Parcel &parcel) const;
     /**
      * @brief If the reminder is showing on the notification panel, it should not be removed automatically.
      *
@@ -338,6 +363,20 @@ public:
      * @return creator uid
      */
     int32_t GetCreatorUid() const;
+
+    /**
+     * @brief Obtains notification request proxy fields persisted with the reminder.
+     *
+     * @return NotificationRequestProxy value.
+     */
+    NotificationRequestProxy GetNotificationRequestProxy() const;
+
+    /**
+     * @brief Sets notification request proxy fields.
+     *
+     * @param proxy Indicates app message id and alert-once flag aligned with NotificationRequest.
+     */
+    void SetNotificationRequestProxy(const NotificationRequestProxy& proxy);
 
     /**
      * @brief Obtains the configured content.
@@ -471,6 +510,12 @@ public:
      */
     void SetRingChannel(const RingChannel channel);
     RingChannel GetRingChannel() const;
+
+    /**
+     * @brief Set/Get time zone handling type for reminder scheduling.
+     */
+    void SetTimeZoneType(TimeZoneType type);
+    TimeZoneType GetTimeZoneType() const;
 
     /**
      * @brief Set/Get ring loop.
@@ -850,7 +895,6 @@ public:
      * @return true if next trigger time exist and set success.
      */
     virtual bool UpdateNextReminder();
-    virtual bool SetNextTriggerTime();
 
     /**
      * @brief Check reminder request is repeat
@@ -1007,6 +1051,20 @@ public:
      * Recover from the rdb.
      */
     void DeserializeWantAgent(const std::string& wantAgentInfo, const uint8_t type);
+
+    /**
+     * @brief Serialize notification request proxy to JSON for RDB persistence.
+     *
+     * @return JSON string containing appMessageId and isAlertOnce.
+     */
+    std::string SerializeNotificationRequestProxy() const;
+
+    /**
+     * @brief Deserialize notification request proxy from JSON recovered from RDB.
+     *
+     * @param jsonStr JSON string from database; empty or invalid input resets to defaults.
+     */
+    void DeserializeNotificationRequestProxy(const std::string& jsonStr);
 
     /**
      * @brief Serialize action button info to string.
@@ -1175,10 +1233,19 @@ private:
      */
     void UpdateNotificationStateForSnooze(NotificationRequest& notificationRequest);
 
-    bool MarshallingWantParameters(Parcel& parcel, const AAFwk::WantParams& params) const;
-    bool MarshallingActionButton(Parcel& parcel) const;
-    bool ReadWantParametersFromParcel(Parcel& parcel, AAFwk::WantParams& wantParams);
+    // write to parcel
+    bool WriteEnumToParcel(Parcel& parcel) const;
+    bool WriteStringToParcel(Parcel& parcel) const;
+    bool WriteWantAgentToParcel(Parcel& parcel) const;
+    bool WriteActionButtonToParcel(Parcel& parcel) const;
+    bool WriteNotificationRequestProxyToParcel(Parcel& parcel) const;
+
+    // read from parcel
+    bool ReadEnumFromParcel(Parcel& parcel);
+    bool ReadStringFromParcel(Parcel& parcel);
+    bool ReadWantAgentFromParcel(Parcel& parcel);
     bool ReadActionButtonFromParcel(Parcel& parcel);
+    bool ReadNotificationRequestProxyFromParcel(Parcel& parcel);
 
     void RecoverActionButtonJsonMode(const std::string& jsonString);
     void RecoverWantAgentByJson(const std::string& wantAgentInfo, const uint8_t& type);
@@ -1200,6 +1267,7 @@ private:
     uint8_t snoozeTimesDynamic_ {0};
     uint8_t state_ {0};
     RingChannel ringChannel_ {RingChannel::ALARM};
+    TimeZoneType timeZoneType_ {TimeZoneType::DEFAULT};
     int32_t notificationId_ {0};
     std::string groupId_ {};
     int32_t reminderId_ {-1};
@@ -1229,6 +1297,7 @@ private:
     std::shared_ptr<WantAgentInfo> wantAgentInfo_ = nullptr;
     std::shared_ptr<MaxScreenAgentInfo> maxScreenWantAgentInfo_ = nullptr;
     std::map<ActionButtonType, ActionButtonInfo> actionButtonMap_ {};
+    NotificationRequestProxy notificationRequestProxy_;
 
     std::vector<std::shared_ptr<NotificationActionButton>> actionButtons_ {};
     std::string wantAgentStr_{};

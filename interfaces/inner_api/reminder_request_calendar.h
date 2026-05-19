@@ -255,6 +255,7 @@ public:
 
     virtual bool UpdateNextReminder() override;
     virtual bool OnDateTimeChange() override;
+    bool OnTimeZoneChange() override;
 
     /**
      * @brief Check reminder request is repeat
@@ -300,7 +301,6 @@ public:
      */
     bool ReadFromParcel(Parcel &parcel) override;
     bool WriteParcel(Parcel &parcel) const override;
-    bool SetNextTriggerTime() override;
 
     static uint8_t GetDaysOfMonth(const uint16_t &year, const uint8_t &month);
     bool SetEndDateTime(const uint64_t time);
@@ -339,10 +339,6 @@ private:
     uint64_t GetTimeInstantMilli(
         uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second) const;
 
-    /**
-     * @brief Init dateTime_ when read from parcel.
-     */
-    void InitDateTime();
     void InitDateTime(const tm &dateTime);
     bool IsRepeatReminder() const;
     bool IsRepeatMonth(uint8_t month) const;
@@ -360,17 +356,6 @@ private:
 
     static const uint8_t DEFAULT_SNOOZE_TIMES;
 
-    tm dateTime_ = {
-        .tm_sec = 0,
-        .tm_min = 0,
-        .tm_hour = 0,
-        .tm_mday = 1,
-        .tm_mon = 0,
-        .tm_year = 0,
-        .tm_wday = 0,
-        .tm_yday = 0,
-        .tm_isdst = -1
-    };
     uint16_t firstDesignateYear_ {1};
     uint8_t firstDesignateMonth_ {1};
     uint8_t firstDesignateDay_ {1};

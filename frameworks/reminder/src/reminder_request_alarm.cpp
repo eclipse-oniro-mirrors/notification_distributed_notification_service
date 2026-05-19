@@ -131,6 +131,18 @@ uint8_t ReminderRequestAlarm::GetMinute() const
     return minute_;
 }
 
+bool ReminderRequestAlarm::OnTimeZoneChange()
+{
+    if (GetTimeZoneType() == TimeZoneType::FIXED_TIME_ZONE) {
+        time_t t = static_cast<time_t>(GetTriggerTimeInMilli() / MILLI_SECONDS);
+        struct tm dateTime;
+        (void)localtime_r(&t, &dateTime);
+        hour_ = static_cast<uint8_t>(dateTime.tm_hour);
+        minute_ = static_cast<uint8_t>(dateTime.tm_min);
+    }
+    return ReminderRequest::OnTimeZoneChange();
+}
+
 bool ReminderRequestAlarm::UpdateNextReminder()
 {
     ANSR_LOGD("called");

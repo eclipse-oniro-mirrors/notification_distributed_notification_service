@@ -113,6 +113,7 @@ public:
      */
     bool ReadFromParcel(Parcel &parcel) override;
     bool WriteParcel(Parcel &parcel) const override;
+    bool OnTimeZoneChange() override;
 
     ReminderRequestAlarm() : ReminderRequest(ReminderType::ALARM) {};
 

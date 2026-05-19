@@ -517,6 +517,11 @@ napi_value ReminderCommon::GenReminder(
         return nullptr;
     }
 
+    if (!ParseTimeZoneType(env, value, reminder)) {
+        return nullptr;
+    }
+
+    ParseNotificationRequestProxy(env, value, reminder);
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
@@ -1231,6 +1236,41 @@ bool ReminderCommon::ParseRingChannel(const napi_env& env, const napi_value& val
         reminder->SetRingChannel(static_cast<ReminderRequest::RingChannel>(ringChannel));
     }
     return true;
+}
+
+bool ReminderCommon::ParseTimeZoneType(const napi_env& env, const napi_value& value,
+    std::shared_ptr<ReminderRequest>& reminder)
+{
+    int32_t timeZoneType = static_cast<int32_t>(ReminderRequest::TimeZoneType::DEFAULT);
+    if (GetInt32(env, value, ReminderAgentNapi::REMINDER_TIME_ZONE_TYPE, timeZoneType, false)) {
+        if (!CheckRange(timeZoneType, static_cast<int32_t>(ReminderRequest::TimeZoneType::DEFAULT),
+            static_cast<int32_t>(ReminderRequest::TimeZoneType::MAX_TIME_ZONE_TYPE))) {
+            ANSR_LOGE("Parameter[timeZoneType] error value: %{public}d.", timeZoneType);
+            return false;
+        }
+        reminder->SetTimeZoneType(static_cast<ReminderRequest::TimeZoneType>(timeZoneType));
+    }
+    return true;
+}
+
+void ReminderCommon::ParseNotificationRequestProxy(const napi_env& env, const napi_value& value,
+    std::shared_ptr<ReminderRequest>& reminder)
+{
+    napi_value proxyObj = nullptr;
+    if (!GetObject(env, value, ReminderAgentNapi::REMINDER_NOTIFICATION_REQUEST_PROXY, proxyObj)) {
+        return;
+    }
+    ReminderRequest::NotificationRequestProxy proxy;
+    char str[NotificationNapi::STR_MAX_SIZE] = {0};
+    if (GetStringUtf8(env, proxyObj, ReminderAgentNapi::REMINDER_NOTIFICATION_REQUEST_PROXY_APP_MESSAGE_ID, str,
+        NotificationNapi::STR_MAX_SIZE)) {
+        proxy.appMessageId = std::string(str);
+    }
+    bool isAlertOnce = false;
+    if (GetBool(env, proxyObj, ReminderAgentNapi::REMINDER_NOTIFICATION_REQUEST_PROXY_IS_ALERT_ONCE, isAlertOnce)) {
+        proxy.isAlertOnce = isAlertOnce;
+    }
+    reminder->SetNotificationRequestProxy(proxy);
 }
 }
 }

@@ -44,7 +44,8 @@ constexpr int32_t REMINDER_RDB_VERSION_V8 = 8;
 constexpr int32_t REMINDER_RDB_VERSION_V9 = 9;
 constexpr int32_t REMINDER_RDB_VERSION_V10 = 10;
 constexpr int32_t REMINDER_RDB_VERSION_V11 = 11;
-constexpr int32_t REMINDER_RDB_VERSION = 12;
+constexpr int32_t REMINDER_RDB_VERSION_V12 = 12;
+constexpr int32_t REMINDER_RDB_VERSION = 13;
 constexpr int64_t DURATION_PRELOAD_TIME = 10 * 60 * 60 * 1000;  // 10h, millisecond
 }
 
@@ -96,15 +97,16 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
                 AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::RING_CHANNEL, "INT", "0");
                 [[fallthrough]];
             case REMINDER_RDB_VERSION_V9:
-                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::FORCE_DISTRIBUTED,
-                    "TEXT", "false");
-                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::NOT_DISTRIBUTED, "TEXT", "false");
+                UpgradeV9(store);
                 [[fallthrough]];
             case REMINDER_RDB_VERSION_V10:
                 CreateStateTable(store);
                 [[fallthrough]];
             case REMINDER_RDB_VERSION_V11:
                 UpgradeV11(store);
+                [[fallthrough]];
+            case REMINDER_RDB_VERSION_V12:
+                UpgradeV12(store);
                 [[fallthrough]];
             default:
                 break;
@@ -139,11 +141,23 @@ inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV7(NativeRdb::RdbSt
     AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::EXPIRED_CONTENT_RESOURCE_ID, "INT", "0");
 }
 
+inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV9(NativeRdb::RdbStore& store)
+{
+    AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::FORCE_DISTRIBUTED, "TEXT", "false");
+    AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::NOT_DISTRIBUTED, "TEXT", "false");
+}
+
 inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV11(NativeRdb::RdbStore& store)
 {
     AddRdbColum(store, ReminderTimerTable::TABLE_NAME, ReminderTimerTable::REPEAT_INTERVAL, "BIGINT", "0");
     AddRdbColum(store, ReminderTimerTable::TABLE_NAME, ReminderTimerTable::REPEAT_COUNT, "INTEGER", "0");
     AddRdbColum(store, ReminderTimerTable::TABLE_NAME, ReminderTimerTable::REMAINED_REPEAT_COUNT, "INTEGER", "0");
+}
+
+inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV12(NativeRdb::RdbStore& store)
+{
+    AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::TIME_ZONE_TYPE, "INT", "0");
+    AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::NOTIFICATION_REQUEST_PROXY, "TEXT", "''");
 }
 
 int32_t ReminderStore::ReminderStoreDataCallBack::CreateTable(NativeRdb::RdbStore& store)

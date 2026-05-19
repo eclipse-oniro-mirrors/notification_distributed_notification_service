@@ -114,6 +114,10 @@ private:
         std::shared_ptr<Notification::ReminderRequest>& reminder);
     void ParseRingChannel(const ::ohos::reminderAgentManager::manager::RingChannel channel,
         std::shared_ptr<Notification::ReminderRequest>& reminder);
+    void ParseTimeZoneType(const ::ohos::reminderAgentManager::manager::TimeZoneType& timeZoneType,
+        std::shared_ptr<Notification::ReminderRequest>& reminder);
+    void ParseNotificationRequestProxy(const ::ohos::reminderAgentManager::manager::ReminderRequest& reminderReq,
+        std::shared_ptr<Notification::ReminderRequest>& reminder);
 
     bool ParseCalendarParam(const ::ohos::reminderAgentManager::manager::ReminderRequestCalendar& calendarReq,
         std::vector<uint8_t>& repeatMonths, std::vector<uint8_t>& repeatDays, std::vector<uint8_t>& daysOfWeek);
@@ -133,6 +137,8 @@ private:
         ::ohos::reminderAgentManager::manager::ReminderRequest& base);
     void GenAniStringResult(const sptr<Notification::ReminderRequest>& reminder,
         ::ohos::reminderAgentManager::manager::ReminderRequest& base);
+    void GenAniBoolResult(const sptr<Notification::ReminderRequest>& reminder,
+        ::ohos::reminderAgentManager::manager::ReminderRequest& base);
 
     void GenAniWantAgent(const sptr<Notification::ReminderRequest>& reminder,
         ::taihe::optional<::ohos::reminderAgentManager::manager::WantAgent>& aniWantAgent);
@@ -142,6 +148,10 @@ private:
         ::taihe::optional<::taihe::array<::ohos::reminderAgentManager::manager::ActionButton>>& aniActionButtons);
     void GenAniRingChannel(const sptr<Notification::ReminderRequest>& reminder,
         ::taihe::optional<::ohos::reminderAgentManager::manager::RingChannel>& aniRingChannel);
+    void GenAniTimeZoneType(const sptr<Notification::ReminderRequest>& reminder,
+        ::taihe::optional<::ohos::reminderAgentManager::manager::TimeZoneType>& aniTimeZoneType);
+    void GenAniNotificationRequestProxy(const sptr<Notification::ReminderRequest>& reminder,
+        ::taihe::optional<::ohos::reminderAgentManager::manager::NotificationRequestProxy>& aniProxy);
 
     void GenAniReminderBase(const sptr<Notification::ReminderRequest>& reminder,
         ::ohos::reminderAgentManager::manager::ReminderRequest& base);

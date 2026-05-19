@@ -89,6 +89,10 @@ const char* REMINDER_INFO_REMINDER_REQ = "reminderReq";
 const char* REMINDER_INFO_REMINDER_ID = "reminderId";
 const char* REMINDER_FORCE_DISTRIBUTED = "forceDistributed";
 const char* REMINDER_NOT_DISTRIBUTED = "notDistributed";
+const char* REMINDER_TIME_ZONE_TYPE = "fixedTimeZone";
+const char* REMINDER_NOTIFICATION_REQUEST_PROXY = "notificationRequestProxy";
+const char* REMINDER_NOTIFICATION_REQUEST_PROXY_APP_MESSAGE_ID = "appMessageId";
+const char* REMINDER_NOTIFICATION_REQUEST_PROXY_IS_ALERT_ONCE = "isAlertOnce";
 const int INDEX_KEY = 0;
 const int INDEX_TYPE = 1;
 const int INDEX_VALUE = 2;
@@ -152,7 +156,12 @@ private:
     static bool ParseRingChannel(const napi_env& env, const napi_value& value,
         std::shared_ptr<ReminderRequest>& reminder);
 
-private:
+    static bool ParseTimeZoneType(const napi_env& env, const napi_value& value,
+        std::shared_ptr<ReminderRequest>& reminder);
+
+    static void ParseNotificationRequestProxy(const napi_env& env, const napi_value& value,
+        std::shared_ptr<ReminderRequest>& reminder);
+
     static bool CheckCalendarParams(const int32_t &year, const int32_t &month, const int32_t &day,
         const int32_t &hour, const int32_t &min);
 
