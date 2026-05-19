@@ -146,8 +146,7 @@ ohos_shared_library("libdans") {
     "${services_path}/distributed/include/tlv_box",
     "${services_path}/ans/include",
     "${services_path}/distributed/include",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
   ]
 
   deps = [

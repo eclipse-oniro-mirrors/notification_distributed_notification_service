@@ -41,9 +41,9 @@ ohos_shared_library("ans_base") {
     "external_adapter/account/iaccount_manager_impl.cpp",
     "external_adapter/bms/src/bundle_manager_repository_impl.cpp",
     "external_adapter/bms/src/bundle_service_connector.cpp",
-    "external_adapter/extension/src/all_scenarios_extension_wrapper.cpp",
-    "external_adapter/ffrt/src/ffrt_queue_impl.cpp",
-    "external_adapter/timer/src/timer_impl.cpp",
+    "external_adapter/extension/all_scenarios_extension_wrapper.cpp",
+    "external_adapter/ffrt/ffrt_queue_impl.cpp",
+    "external_adapter/timer/timer_impl.cpp",
   ]
 
   defines = []

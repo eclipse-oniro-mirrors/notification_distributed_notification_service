@@ -24,8 +24,8 @@ namespace OHOS::Notification::Infra {
 class AllScenariosExtensionWrapper final {
 public:
     static AllScenariosExtensionWrapper& GetInstance();
-    void InitExtentionWrapper();
-    void CloseExtentionWrapper();
+    void InitExtensionWrapper();
+    void CloseExtensionWrapper();
     typedef ErrCode (*UPDATE_LIVEVIEW_REMINDER_FLAGS)(const sptr<NotificationRequest> &request);
     ErrCode UpdateLiveviewReminderFlags(const sptr<NotificationRequest> &request);
     typedef ErrCode (*UPDATE_LIVEVIEW_VOICE_CONTENT)(const sptr<NotificationRequest> &request);
