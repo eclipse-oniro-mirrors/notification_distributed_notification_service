@@ -67,7 +67,6 @@ public:
 
     ErrCode TimerCleanExperData();
 
-
     ErrCode QueryStatisticsByBundle(const sptr<NotificationBundleOption>& bundle,
         int32_t &recentCount, int64_t &lastTime);
 

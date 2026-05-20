@@ -700,3 +700,489 @@ HWTEST_F(LRUCacheTest, UpdateConfig_ReduceSize_ExpiredThenLRU_00001, Function | 
     EXPECT_FALSE(cache.Contains("key4")); // expired
     EXPECT_TRUE(cache.Contains("key5"));
 }
+
+/**
+ * @tc.name: CopyConstructor_00001
+ * @tc.desc: Test copy constructor creates independent cache with same data
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, CopyConstructor_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+    cache.Put("key3", TestValue(3, "value3"));
+
+    LRUCache<std::string, TestValue> copiedCache(cache);
+
+    EXPECT_EQ(copiedCache.Size(), 3);
+    EXPECT_TRUE(copiedCache.Contains("key1"));
+    EXPECT_TRUE(copiedCache.Contains("key2"));
+    EXPECT_TRUE(copiedCache.Contains("key3"));
+
+    TestValue result;
+    EXPECT_TRUE(copiedCache.Get("key1", result));
+    EXPECT_EQ(result.id, 1);
+    EXPECT_EQ(result.name, "value1");
+
+    auto originalStats = cache.GetStats();
+    auto copiedStats = copiedCache.GetStats();
+    EXPECT_EQ(originalStats.hits, copiedStats.hits);
+    EXPECT_EQ(originalStats.misses, copiedStats.misses);
+
+    copiedCache.Put("key4", TestValue(4, "value4"));
+    EXPECT_EQ(copiedCache.Size(), 4);
+    EXPECT_EQ(cache.Size(), 3);
+    EXPECT_FALSE(cache.Contains("key4"));
+}
+
+/**
+ * @tc.name: CopyAssignment_00001
+ * @tc.desc: Test copy assignment operator copies all data correctly
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, CopyAssignment_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache1;
+    cache1.Put("key1", TestValue(1, "value1"));
+    cache1.Put("key2", TestValue(2, "value2"));
+
+    LRUCache<std::string, TestValue> cache2;
+    cache2.Put("key3", TestValue(3, "value3"));
+
+    cache2 = cache1;
+
+    EXPECT_EQ(cache2.Size(), 2);
+    EXPECT_TRUE(cache2.Contains("key1"));
+    EXPECT_TRUE(cache2.Contains("key2"));
+    EXPECT_FALSE(cache2.Contains("key3"));
+
+    TestValue result;
+    EXPECT_TRUE(cache2.Get("key1", result));
+    EXPECT_EQ(result.id, 1);
+    EXPECT_EQ(result.name, "value1");
+
+    cache2.Put("key4", TestValue(4, "value4"));
+    EXPECT_EQ(cache2.Size(), 3);
+    EXPECT_EQ(cache1.Size(), 2);
+}
+
+/**
+ * @tc.name: CopyAssignment_SelfAssignment_00001
+ * @tc.desc: Test self-assignment does not corrupt cache
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, CopyAssignment_SelfAssignment_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+
+    cache = cache;
+
+    EXPECT_EQ(cache.Size(), 2);
+    EXPECT_TRUE(cache.Contains("key1"));
+    EXPECT_TRUE(cache.Contains("key2"));
+
+    TestValue result;
+    EXPECT_TRUE(cache.Get("key1", result));
+    EXPECT_EQ(result.id, 1);
+}
+
+/**
+ * @tc.name: Get_ExpiredEntry_00001
+ * @tc.desc: Test Get removes expired entry and increments expireCount
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Get_ExpiredEntry_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+
+    cache.nodeTimestamps_["key1"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+
+    TestValue result;
+    bool found = cache.Get("key1", result);
+
+    EXPECT_FALSE(found);
+    EXPECT_EQ(cache.Size(), 0);
+    auto stats = cache.GetStats();
+    EXPECT_EQ(stats.expires, 1);
+    EXPECT_EQ(stats.misses, 1);
+    EXPECT_EQ(stats.hits, 0);
+}
+
+/**
+ * @tc.name: Get_MissingTimestamp_00001
+ * @tc.desc: Test Get handles entry without timestamp (corrupted state)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Get_MissingTimestamp_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+
+    cache.nodeTimestamps_.erase("key1");
+
+    TestValue result;
+    bool found = cache.Get("key1", result);
+
+    EXPECT_FALSE(found);
+    EXPECT_EQ(cache.Size(), 0);
+    auto stats = cache.GetStats();
+    EXPECT_EQ(stats.misses, 1);
+}
+
+/**
+ * @tc.name: Peek_NonExisting_00001
+ * @tc.desc: Test Peek returns false for non-existent key
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Peek_NonExisting_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+
+    TestValue result;
+    bool found = cache.Peek("non_existent", result);
+
+    EXPECT_FALSE(found);
+}
+
+/**
+ * @tc.name: Peek_MissingTimestamp_00001
+ * @tc.desc: Test Peek handles entry without timestamp
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Peek_MissingTimestamp_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+
+    cache.nodeTimestamps_.erase("key1");
+
+    TestValue result;
+    bool found = cache.Peek("key1", result);
+
+    EXPECT_FALSE(found);
+    EXPECT_EQ(cache.Size(), 0);
+}
+
+/**
+ * @tc.name: Empty_True_00001
+ * @tc.desc: Test Empty returns true for cache with no entries
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Empty_True_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+
+    EXPECT_TRUE(cache.Empty());
+    EXPECT_EQ(cache.Size(), 0);
+}
+
+/**
+ * @tc.name: Empty_False_00001
+ * @tc.desc: Test Empty returns false for cache with entries
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Empty_False_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+
+    EXPECT_FALSE(cache.Empty());
+    EXPECT_EQ(cache.Size(), 1);
+}
+
+/**
+ * @tc.name: EvictExpired_MultipleExpired_00001
+ * @tc.desc: Test EvictExpired removes all expired entries and returns count
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, EvictExpired_MultipleExpired_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+    cache.Put("key3", TestValue(3, "value3"));
+    cache.Put("key4", TestValue(4, "value4"));
+
+    cache.nodeTimestamps_["key1"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+    cache.nodeTimestamps_["key2"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+
+    size_t evicted = cache.EvictExpired();
+
+    EXPECT_EQ(evicted, 2);
+    EXPECT_EQ(cache.Size(), 2);
+    EXPECT_FALSE(cache.Contains("key1"));
+    EXPECT_FALSE(cache.Contains("key2"));
+    EXPECT_TRUE(cache.Contains("key3"));
+    EXPECT_TRUE(cache.Contains("key4"));
+
+    auto stats = cache.GetStats();
+    EXPECT_EQ(stats.expires, 2);
+}
+
+/**
+ * @tc.name: EvictExpired_DisabledTTL_00001
+ * @tc.desc: Test EvictExpired returns 0 when TTL is disabled
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, EvictExpired_DisabledTTL_00001, Function | SmallTest | Level1)
+{
+    typename LRUCache<std::string, TestValue>::Config config;
+    config.enableTTL = false;
+    LRUCache<std::string, TestValue> cache(config);
+
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+
+    size_t evicted = cache.EvictExpired();
+
+    EXPECT_EQ(evicted, 0);
+    EXPECT_EQ(cache.Size(), 2);
+}
+
+/**
+ * @tc.name: TTLDisabled_00001
+ * @tc.desc: Test cache operations when TTL is disabled
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, TTLDisabled_00001, Function | SmallTest | Level1)
+{
+    typename LRUCache<std::string, TestValue>::Config config;
+    config.enableTTL = false;
+    config.maxSize = 3;
+    LRUCache<std::string, TestValue> cache(config);
+
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+    cache.Put("key3", TestValue(3, "value3"));
+
+    TestValue result;
+    EXPECT_TRUE(cache.Get("key1", result));
+    EXPECT_TRUE(cache.Contains("key1"));
+    EXPECT_TRUE(cache.Peek("key2", result));
+    EXPECT_EQ(cache.nodeTimestamps_.size(), 0);
+
+    cache.Put("key4", TestValue(4, "value4"));
+    EXPECT_EQ(cache.Size(), 3);
+    EXPECT_FALSE(cache.Contains("key1"));
+
+    auto stats = cache.GetStats();
+    EXPECT_EQ(stats.expires, 0);
+}
+
+/**
+ * @tc.name: Stats_HitRate_EmptyCache_00001
+ * @tc.desc: Test HitRate returns 0 when no hits or misses
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Stats_HitRate_EmptyCache_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+
+    auto stats = cache.GetStats();
+    EXPECT_EQ(stats.hits, 0);
+    EXPECT_EQ(stats.misses, 0);
+    EXPECT_DOUBLE_EQ(stats.HitRate(), 0.0);
+}
+
+/**
+ * @tc.name: Stats_HitRate_AllHits_00001
+ * @tc.desc: Test HitRate returns 1.0 when all operations are hits
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Stats_HitRate_AllHits_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+
+    TestValue result;
+    cache.Get("key1", result);
+    cache.Get("key2", result);
+
+    auto stats = cache.GetStats();
+    EXPECT_EQ(stats.hits, 2);
+    EXPECT_EQ(stats.misses, 0);
+    EXPECT_DOUBLE_EQ(stats.HitRate(), 1.0);
+}
+
+/**
+ * @tc.name: GetConfig_DefaultValues_00001
+ * @tc.desc: Test GetConfig returns default configuration values
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, GetConfig_DefaultValues_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+
+    auto config = cache.GetConfig();
+
+    EXPECT_EQ(config.maxSize, 100);
+    EXPECT_EQ(config.ttl, std::chrono::minutes(5));
+    EXPECT_TRUE(config.enableTTL);
+}
+
+/**
+ * @tc.name: Contains_MissingTimestamp_00001
+ * @tc.desc: Test Contains handles entry without timestamp
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Contains_MissingTimestamp_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+
+    cache.nodeTimestamps_.erase("key1");
+
+    EXPECT_FALSE(cache.Contains("key1"));
+    EXPECT_EQ(cache.Size(), 0);
+}
+
+/**
+ * @tc.name: Put_CopyVersion_00001
+ * @tc.desc: Test Put with copy version (const ref) works correctly
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Put_CopyVersion_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+
+    TestValue value(1, "value1");
+    cache.Put("key1", value);
+
+    TestValue result;
+    bool found = cache.Get("key1", result);
+
+    EXPECT_TRUE(found);
+    EXPECT_EQ(result.id, 1);
+    EXPECT_EQ(result.name, "value1");
+    EXPECT_EQ(value.id, 1);
+}
+
+/**
+ * @tc.name: Put_UpdateExisting_CopyVersion_00001
+ * @tc.desc: Test Put with copy version updates existing key
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Put_UpdateExisting_CopyVersion_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+
+    TestValue newValue(2, "newValue");
+    cache.Put("key1", newValue);
+
+    TestValue result;
+    bool found = cache.Get("key1", result);
+
+    EXPECT_TRUE(found);
+    EXPECT_EQ(result.id, 2);
+    EXPECT_EQ(result.name, "newValue");
+    EXPECT_EQ(cache.Size(), 1);
+}
+
+/**
+ * @tc.name: RemoveInternal_ThroughPeek_00001
+ * @tc.desc: Test internal removal through Peek on expired entry
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, RemoveInternal_ThroughPeek_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+
+    cache.nodeTimestamps_["key1"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+
+    TestValue result;
+    cache.Peek("key1", result);
+
+    EXPECT_EQ(cache.Size(), 1);
+    EXPECT_FALSE(cache.Contains("key1"));
+    EXPECT_TRUE(cache.Contains("key2"));
+
+    EXPECT_EQ(cache.lruList_.size(), 1);
+}
+
+/**
+ * @tc.name: MaybeEvictExpired_FullCache_00001
+ * @tc.desc: Test automatic expired eviction during Get operation
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, MaybeEvictExpired_FullCache_00001, Function | SmallTest | Level1)
+{
+    typename LRUCache<std::string, TestValue>::Config config;
+    config.maxSize = 2;
+    config.enableTTL = true;
+    LRUCache<std::string, TestValue> cache(config);
+
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+
+    cache.nodeTimestamps_["key1"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+
+    TestValue result;
+    cache.Get("key2", result);
+
+    EXPECT_EQ(cache.Size(), 1);
+    EXPECT_FALSE(cache.Contains("key1"));
+}
+
+/**
+ * @tc.name: GetAllKeys_EmptyCache_00001
+ * @tc.desc: Test GetAllKeys on empty cache returns empty vector
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, GetAllKeys_EmptyCache_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+
+    auto keys = cache.GetAllKeys();
+
+    EXPECT_EQ(keys.size(), 0);
+}
+
+/**
+ * @tc.name: Clear_ResetsTimestamps_00001
+ * @tc.desc: Test Clear removes all timestamps
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Clear_ResetsTimestamps_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+
+    EXPECT_EQ(cache.nodeTimestamps_.size(), 2);
+
+    cache.Clear();
+
+    EXPECT_EQ(cache.nodeTimestamps_.size(), 0);
+    EXPECT_EQ(cache.lastEvictionTime_, LRUCache<std::string, TestValue>::TimePoint());
+}
