@@ -781,7 +781,8 @@ HWTEST_F(LRUCacheTest, CopyAssignment_SelfAssignment_00001, Function | SmallTest
     cache.Put("key1", TestValue(1, "value1"));
     cache.Put("key2", TestValue(2, "value2"));
 
-    cache = cache;
+    LRUCache<std::string, TestValue>& cacheRef = cache;
+    cache = cacheRef;
 
     EXPECT_EQ(cache.Size(), 2);
     EXPECT_TRUE(cache.Contains("key1"));
@@ -1184,5 +1185,6 @@ HWTEST_F(LRUCacheTest, Clear_ResetsTimestamps_00001, Function | SmallTest | Leve
     cache.Clear();
 
     EXPECT_EQ(cache.nodeTimestamps_.size(), 0);
-    EXPECT_EQ(cache.lastEvictionTime_, LRUCache<std::string, TestValue>::TimePoint());
+    auto defaultTimePoint = LRUCache<std::string, TestValue>::TimePoint();
+    EXPECT_EQ(cache.lastEvictionTime_, defaultTimePoint);
 }
