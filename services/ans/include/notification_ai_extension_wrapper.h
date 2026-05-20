@@ -42,7 +42,9 @@ public:
         const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
         const std::vector<sptr<NotificationRequest>> &requests);
     typedef int32_t (*GENERATE_VOICE_CONTENT)(const sptr<NotificationRequest>& requests,
-        std::string& content);
+        std::string& content, std::string& externInfo);
+    typedef int32_t (*UPDATE_VOICE_CONFIG)(const std::string& configs);
+    typedef int32_t (*NOTIFYVOICEEVENT)(const std::string& event, const sptr<NotificationRequest>& request);
     void Init();
     int32_t SyncRules(const std::string &rules);
     int32_t UpdateNotification(
@@ -53,7 +55,10 @@ public:
     int32_t NotifyPriorityEvent(const std::string &event,
         const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
         const std::vector<sptr<NotificationRequest>> &requests);
-    int32_t GenerateVoiceContent(const sptr<NotificationRequest>& requests, std::string& content);
+    int32_t GenerateVoiceContent(const sptr<NotificationRequest>& requests, std::string& content,
+        std::string& externInfo);
+    int32_t UpdateVoiceConfig(const std::string& configs);
+    int32_t NotifyVoiceEvent(const std::string& event, const sptr<NotificationRequest>& request);
 
     enum ErrorCode : int32_t {
         ERR_FAIL = -1,
@@ -72,6 +77,8 @@ private:
     SYNC_BUNDLE_KEYWORDS syncBundleKeywords_ = nullptr;
     NOTIFY_PRIORITY_EVENT notifyPriorityEvent_ = nullptr;
     GENERATE_VOICE_CONTENT generateVoiceContent_ = nullptr;
+    UPDATE_VOICE_CONFIG updateVoiceConfig_ = nullptr;
+    NOTIFYVOICEEVENT notifyVoiceEvent_ = nullptr;
 };
 
 #define NOTIFICATION_AI_EXTENSION_WRAPPER \

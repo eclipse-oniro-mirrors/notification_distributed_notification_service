@@ -1608,6 +1608,7 @@ public:
 
     bool SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus status);
 
+    uint32_t GetConsumedDeviceFlag();
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).

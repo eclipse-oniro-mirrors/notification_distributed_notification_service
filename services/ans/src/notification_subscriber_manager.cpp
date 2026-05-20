@@ -791,13 +791,15 @@ int32_t NotificationSubscriberManager::GetVoiceContentInfo(const sptr<Notificati
     if (voiceFlag.empty()) {
         return ERR_OK;
     }
-    int32_t voiceResult = NOTIFICATION_AI_EXTENSION_WRAPPER->GenerateVoiceContent(request, content);
-    ANS_LOGI("Get voice content %{public}zu, %{public}s, %{public}d, %{public}s.", flagsMap->size(),
-        deviceList.c_str(), voiceResult, content.c_str());
+    std::string externInfo;
+    int32_t voiceResult = NOTIFICATION_AI_EXTENSION_WRAPPER->GenerateVoiceContent(request, content, externInfo);
+    ANS_LOGI("Get voice content %{public}zu, %{public}s, %{public}d, %{public}s %{public}s.", flagsMap->size(),
+        deviceList.c_str(), voiceResult, content.c_str(), externInfo.c_str());
     if (voiceResult != ERR_OK) {
         content.clear();
         voiceFlag.clear();
     }
+    NotificationAnalyticsUtil::ReportVoiceBroadcastInfo(voiceResult, notification->GetKey(), externInfo);
     return voiceResult;
 }
 
@@ -952,6 +954,15 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(
     }
 }
 
+void NotificationSubscriberManager::NotifyVoiceNotificationCanceled(const sptr<NotificationRequest>& request)
+{
+    if (request == nullptr || !request->IsCommonLiveView() || request->GetConsumedDeviceFlag() == 0) {
+        return;
+    }
+    NOTIFICATION_AI_EXTENSION_WRAPPER->NotifyVoiceEvent(
+        NotificationConstant::EVENT_NOTIFICATION_REMOVED, request);
+}
+
 void NotificationSubscriberManager::NotifyCanceledInner(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
@@ -985,6 +996,7 @@ void NotificationSubscriberManager::NotifyCanceledInner(
     NOTIFICATION_AI_EXTENSION_WRAPPER->NotifyPriorityEvent(
         NotificationConstant::EVENT_NOTIFICATION_REMOVED, bundleOptions, requests);
 #endif
+    NotifyVoiceNotificationCanceled(notification->GetNotificationRequestPoint());
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);
         if (IsSubscribedBysubscriber(record, notification) && IsSubscribedByDeviceType(record, notification, true) &&
@@ -1176,6 +1188,7 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
         if (notification->GetNotificationRequestPoint() != nullptr) {
             bool liveView = notification->GetNotificationRequestPoint()->IsCommonLiveView();
             HaOperationMessage(liveView).SyncDelete(notification->GetKey());
+            NotifyVoiceNotificationCanceled(notification->GetNotificationRequestPoint());
         }
     }
     ANS_LOGI("CancelNotification key = %{public}s", notificationKeys.c_str());
