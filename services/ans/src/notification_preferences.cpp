@@ -50,47 +50,6 @@ constexpr static const char* KEY_PRIORITY_CONFIG_FOR_BUNDLE = "priorityConfigFor
 constexpr static const char* KEY_PRIORITY_NOTIFICATION_SWITCH_FOR_BUNDLE_V2 = "priorityNotificationSwitchForBundleV2";
 constexpr static const char* KEY_PRIORITY_NOTIFICATION_STRATEGY_FOR_BUNDLE = "priorityStrategyForBundle";
 const static std::string KEY_UNDER_LINE = "_";
-
-class CacheExpiryTimerInfo : public MiscServices::ITimerInfo {
-public:
-    CacheExpiryTimerInfo() = default;
-    ~CacheExpiryTimerInfo() override = default;
-
-    void OnTrigger() override
-    {
-        if (callback_) {
-            callback_();
-        }
-    }
-
-    void SetType(const int32_t &timerInfoType) override
-    {
-        type = timerInfoType;
-    }
-
-    void SetRepeat(bool timerInfoRepeat) override
-    {
-        repeat = timerInfoRepeat;
-    }
-
-    void SetInterval(const uint64_t &timerInfoInterval) override
-    {
-        interval = timerInfoInterval;
-    }
-
-    void SetWantAgent(std::shared_ptr<OHOS::AbilityRuntime::WantAgent::WantAgent> timerInfoWantAgent) override
-    {
-        wantAgent = timerInfoWantAgent;
-    }
-
-    void SetCallback(std::function<void()> callback)
-    {
-        callback_ = std::move(callback);
-    }
-
-private:
-    std::function<void()> callback_;
-};
 }
 ffrt::mutex NotificationPreferences::instanceMutex_;
 std::shared_ptr<NotificationPreferences> NotificationPreferences::instance_;
@@ -104,12 +63,6 @@ NotificationPreferences::NotificationPreferences()
         NotificationAnalyticsUtil::ReportModifyEvent(message);
     }
     InitSettingFromDisturbDB();
-    StartCacheExpiryTask();
-}
-
-NotificationPreferences::~NotificationPreferences()
-{
-    StopCacheExpiryTask();
 }
 
 std::shared_ptr<NotificationPreferences> NotificationPreferences::GetInstance()
@@ -117,8 +70,7 @@ std::shared_ptr<NotificationPreferences> NotificationPreferences::GetInstance()
     if (instance_ == nullptr) {
         std::lock_guard<ffrt::mutex> lock(instanceMutex_);
         if (instance_ == nullptr) {
-            auto instance = std::make_shared<NotificationPreferences>();
-            instance_ = instance;
+            instance_ = std::make_shared<NotificationPreferences>();
         }
     }
     return instance_;
@@ -3213,37 +3165,6 @@ int32_t NotificationPreferences::GetKvFromDb(
     return preferncesDB_->GetKvFromDb(key, value, userId, retCode);
 }
 #endif
-
-void NotificationPreferences::StartCacheExpiryTask()
-{
-    constexpr uint64_t INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
-
-    auto timerInfo = std::make_shared<CacheExpiryTimerInfo>();
-    std::weak_ptr<NotificationPreferences> weakThis = instance_;
-    timerInfo->SetCallback([weakThis]() {
-        auto instance = weakThis.lock();
-        if (instance) {
-            std::lock_guard<ffrt::mutex> lock(instance->preferenceMutex_);
-            instance->preferencesInfo_.EvictExpiredCache();
-        }
-    });
-    timerInfo->SetRepeat(true);
-    timerInfo->SetInterval(INTERVAL_MS);
-    uint8_t timerTypeWakeup = static_cast<uint8_t>(timerInfo->TIMER_TYPE_WAKEUP);
-    uint8_t timerTypeExact = static_cast<uint8_t>(timerInfo->TIMER_TYPE_EXACT);
-    int32_t timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
-    timerInfo->SetType(timerType);
-
-    cacheExpiryTimer_.CreateTimer(timerInfo);
-    int64_t triggerTime = NotificationAnalyticsUtil::GetCurrentTime() + INTERVAL_MS;
-    cacheExpiryTimer_.StartTimer(triggerTime);
-}
-
-void NotificationPreferences::StopCacheExpiryTask()
-{
-    cacheExpiryTimer_.StopTimer();
-    cacheExpiryTimer_.DestroyTimer();
-}
 
 ErrCode NotificationPreferences::SetCollaborationBlockList(const std::string& blockListJson)
 {

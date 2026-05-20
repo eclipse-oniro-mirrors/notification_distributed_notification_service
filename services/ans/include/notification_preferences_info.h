@@ -397,10 +397,9 @@ public:
     void UpdateNotificationStatisticsTime(int64_t offsetTime);
     std::vector<NotificationStatistics> GetNotificationStatisticsAll();
 
-    // LRU Cache internal management (used by expiry task)
+    // LRU Cache internal management
     size_t GetCacheSize() const;
     void GetCacheStats(size_t& hitCount, size_t& missCount) const;
-    void EvictExpiredCache();
 
 private:
     std::string GenerateBundleKey(const std::string& bundleName, int32_t uid) const;

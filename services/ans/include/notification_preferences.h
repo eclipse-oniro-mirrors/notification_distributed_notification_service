@@ -29,7 +29,6 @@
 #include "notification_constant.h"
 #include "ffrt.h"
 #include <set>
-#include "timer_impl.h"
 
 namespace OHOS {
 namespace Notification {
@@ -68,8 +67,6 @@ public:
 
     ErrCode TimerCleanExperData();
 
-    void StartCacheExpiryTask();
-    void StopCacheExpiryTask();
 
     ErrCode QueryStatisticsByBundle(const sptr<NotificationBundleOption>& bundle,
         int32_t &recentCount, int64_t &lastTime);
@@ -852,19 +849,17 @@ private:
     bool isKioskMode_ = false;
     bool isKioskTrustListUpdate_ = false;
     bool isRestrictedTrustListUpdate_ = false;
-    ffrt::task_handle cacheExpiryTask_ = nullptr;
-    
+
     // Collaboration block list cache (multi-user support)
     // Key: userId, Value: set of (bundleName, appIndex) pairs
     std::map<int32_t, std::set<std::pair<std::string, int32_t>>> collaborationBlockListCache_;
-    
+
     // Lazy loading flags for each user (per-user loading)
     // Key: userId, Value: true if loaded, false if not loaded
     std::map<int32_t, bool> collaborationBlockListLoadedMap_;
-    
+
     // Use ffrt::mutex for thread safety
     ffrt::mutex collaborationBlockListMutex_;
-    Infra::TimerImpl cacheExpiryTimer_;
 };
 }  // namespace Notification
 }  // namespace OHOS
