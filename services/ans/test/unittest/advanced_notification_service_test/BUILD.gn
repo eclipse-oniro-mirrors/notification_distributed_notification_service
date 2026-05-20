@@ -35,8 +35,7 @@ ohos_unittest("advanced_notification_extension_subscription_test") {
     "../mock/include",
     "${services_path}/ans/include",
     "${services_path}/ans/include/utils/",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
   ]
   version_script = "../libans_test.map"
 
