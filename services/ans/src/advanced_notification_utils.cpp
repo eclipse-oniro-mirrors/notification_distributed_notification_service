@@ -1753,9 +1753,8 @@ ErrCode AdvancedNotificationService::UpdateNotificationSwitchState(
         }
     }
 
-    bool isSystemDefaultState = (currentState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
-                            currentState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
-    if (isSystemDefaultState && (currentState != targetState)) {
+    if (currentState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF &&
+        targetState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) {
         ANS_LOGI("Updating system default state for %{public}s : %{public}d -> %{public}d",
             bundleOption->GetBundleName().c_str(),
             static_cast<int32_t>(currentState),
@@ -1763,7 +1762,7 @@ ErrCode AdvancedNotificationService::UpdateNotificationSwitchState(
         message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid())
             + "_st" + std::to_string(static_cast<int32_t>(targetState))).BranchId(BRANCH_10);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        enable = (targetState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) ? true : false;
+        enable = true;
         return AdvancedNotificationService::GetInstance()->SetDefaultNotificationEnabled(
             bundleOption, enable);
     }
