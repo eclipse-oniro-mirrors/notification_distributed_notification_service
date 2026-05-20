@@ -65,6 +65,11 @@ NotificationPreferences::NotificationPreferences()
     InitSettingFromDisturbDB();
 }
 
+NotificationPreferences::~NotificationPreferences()
+{
+    preferncesDB_ = nullptr;
+}
+
 std::shared_ptr<NotificationPreferences> NotificationPreferences::GetInstance()
 {
     if (instance_ == nullptr) {
