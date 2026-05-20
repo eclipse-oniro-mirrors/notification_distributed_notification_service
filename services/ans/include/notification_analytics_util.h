@@ -261,6 +261,9 @@ public:
     static void ReportCustomizeInfo(const nlohmann::json& data, int32_t subCode);
 
     static void ReportCloneInfo(const NotificationCloneBundleInfo& cloneBundleInfo);
+
+    static void ReportVoiceBroadcastInfo(int32_t errorCode, const std::string& hashCode,
+        const std::string& externInfo);
 private:
     static void ReportNotificationEvent(const sptr<NotificationRequest>& request,
         EventFwk::Want want, int32_t eventCode, const std::string& reason);

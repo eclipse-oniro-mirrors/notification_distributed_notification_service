@@ -3699,6 +3699,11 @@ const std::map<std::string, std::string> NotificationRequest::GetdeviceStatus() 
     return deviceStatus_;
 }
 
+uint32_t NotificationRequest::GetConsumedDeviceFlag()
+{
+    return consumedDeviceFlag_;
+}
+
 void NotificationRequest::AddConsumedDevices(const std::string &deviceType)
 {
     int32_t index = 0;

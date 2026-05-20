@@ -32,5 +32,6 @@ const std::string EXTENDINFO_PRIORITY_TYPE = "ExtendPriorityNotificationType";
 const std::string RESTRICTED_MODE_TRUST_LIST_KEY = "restricted_mode_trust_list";
 const std::string KIOSK_APP_TRUST_LIST_KEY = "kiosk_app_trust_list";
 const std::string COLLABORATION_BLOCKLIST = "COLLABORATION_BLOCKLIST";
+const std::string VOICE_BROADCAST_CONFIG_RULE_KEY = "voice_broadcast_config_rule";
 }
 }
