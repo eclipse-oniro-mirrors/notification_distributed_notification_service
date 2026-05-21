@@ -16,12 +16,13 @@
 #include "mock_dlfcn.h"
 
 #include <dlfcn.h>
+#include <cstring>
 #include <string>
 
 namespace OHOS::Notification::Infra::Test {
 
-static constexpr void* MOCK_HANDLE = reinterpret_cast<void*>(0x12345678);
-static const std::string VOICE_SO_NAME = "libnotification_voice.z.so";
+static void* const MOCK_HANDLE = reinterpret_cast<void*>(0x12345678);
+static const char* VOICE_SO_NAME = "libnotification_voice.z.so";
 
 MockDlfcnState g_mockDlfcn;
 
@@ -56,7 +57,7 @@ void ResetMockDlfcn()
 extern void* __real_dlopen(const char* filename, int flag);
 extern void* __wrap_dlopen(const char* filename, int flag)
 {
-    if (filename != nullptr && std::string(filename) == VOICE_SO_NAME) {
+    if (filename != nullptr && strcmp(filename, VOICE_SO_NAME) == 0) {
         if (g_mockDlfcn.dlopenSuccess) {
             return MOCK_HANDLE;
         }

@@ -60,7 +60,7 @@ private:
     NOTIFY_VOICE_EVENT notifyVoiceEvent_ = nullptr;
 };
 
-#define VOICE_EXTENSION_WRAPPER VoiceExtensionWrapper::GetInstance()
+#define VOICE_EXTENSION_WRAPPER OHOS::Notification::Infra::VoiceExtensionWrapper::GetInstance()
 
 } // namespace OHOS::Notification::Infra
 #endif // NOTIFICATION_INFRA_VOICE_EXTENSION_WRAPPER_H
