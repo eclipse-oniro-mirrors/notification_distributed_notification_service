@@ -20,9 +20,10 @@
 #include <map>
 #include <string>
 
-#include "notification_request.h"
-
-namespace OHOS::Notification::Infra::Test {
+namespace OHOS {
+namespace Notification {
+namespace Infra {
+namespace Test {
 
 struct MockDlfcnState {
     bool dlopenSuccess = false;

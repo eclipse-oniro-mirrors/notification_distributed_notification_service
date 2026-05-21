@@ -53,7 +53,7 @@ ohos_shared_library("ans_base") {
     defines += [ "NOTIFICATION_MULTI_FOREGROUND_USER" ]
   }
 
-  if (distributed_notification_service_feature_voice_broadcast) {
+  if (distributed_notification_service_feature_ai_engine) {
     defines += [ "NOTIFICATION_VOICE_BROADCAST_ENABLE" ]
   }
 

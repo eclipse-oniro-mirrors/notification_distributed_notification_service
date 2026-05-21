@@ -22,6 +22,8 @@
 #include "mock_dlfcn.h"
 
 using namespace testing::ext;
+using namespace OHOS;
+using namespace OHOS::Notification;
 using namespace OHOS::Notification::Infra;
 using namespace OHOS::Notification::Infra::Test;
 

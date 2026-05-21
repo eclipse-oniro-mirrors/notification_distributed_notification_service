@@ -15,16 +15,19 @@
 
 #include "mock_dlfcn.h"
 
-#include <dlfcn.h>
 #include <cstring>
+#include <dlfcn.h>
 #include <string>
 
-namespace OHOS::Notification::Infra::Test {
+#include "notification_request.h"
+
+using OHOS::sptr;
+using OHOS::Notification::NotificationRequest;
+using OHOS::Notification::Infra::Test::g_mockDlfcn;
+using OHOS::Notification::Infra::Test::MockDlfcnState;
 
 static void* const MOCK_HANDLE = reinterpret_cast<void*>(0x12345678);
 static const char* VOICE_SO_NAME = "libnotification_voice.z.so";
-
-MockDlfcnState g_mockDlfcn;
 
 static int32_t MockGenerateVoiceContent(
     const sptr<NotificationRequest>&, std::string& content, std::string& externInfo)
@@ -46,6 +49,13 @@ static int32_t MockNotifyVoiceEvent(const std::string& event, const sptr<Notific
     return g_mockDlfcn.notifyResult;
 }
 
+namespace OHOS {
+namespace Notification {
+namespace Infra {
+namespace Test {
+
+MockDlfcnState g_mockDlfcn;
+
 void ResetMockDlfcn()
 {
     g_mockDlfcn = {};
@@ -53,6 +63,11 @@ void ResetMockDlfcn()
     g_mockDlfcn.dlsymSuccessMap["UpdateVoiceConfig"] = true;
     g_mockDlfcn.dlsymSuccessMap["NotifyVoiceEvent"] = true;
 }
+
+}  // namespace Test
+}  // namespace Infra
+}  // namespace Notification
+}  // namespace OHOS
 
 extern void* __real_dlopen(const char* filename, int flag);
 extern void* __wrap_dlopen(const char* filename, int flag)
@@ -70,17 +85,14 @@ extern void* __real_dlsym(void* handle, const char* symbol);
 extern void* __wrap_dlsym(void* handle, const char* symbol)
 {
     if (handle == MOCK_HANDLE) {
-        auto it = g_mockDlfcn.dlsymSuccessMap.find(std::string(symbol));
-        if (it != g_mockDlfcn.dlsymSuccessMap.end() && it->second) {
-            if (std::string(symbol) == "GenerateVoiceContent") {
-                return reinterpret_cast<void*>(MockGenerateVoiceContent);
-            }
-            if (std::string(symbol) == "UpdateVoiceConfig") {
-                return reinterpret_cast<void*>(MockUpdateVoiceConfig);
-            }
-            if (std::string(symbol) == "NotifyVoiceEvent") {
-                return reinterpret_cast<void*>(MockNotifyVoiceEvent);
-            }
+        if (strcmp(symbol, "GenerateVoiceContent") == 0 && g_mockDlfcn.dlsymSuccessMap["GenerateVoiceContent"]) {
+            return reinterpret_cast<void*>(MockGenerateVoiceContent);
+        }
+        if (strcmp(symbol, "UpdateVoiceConfig") == 0 && g_mockDlfcn.dlsymSuccessMap["UpdateVoiceConfig"]) {
+            return reinterpret_cast<void*>(MockUpdateVoiceConfig);
+        }
+        if (strcmp(symbol, "NotifyVoiceEvent") == 0 && g_mockDlfcn.dlsymSuccessMap["NotifyVoiceEvent"]) {
+            return reinterpret_cast<void*>(MockNotifyVoiceEvent);
         }
         return nullptr;
     }
@@ -96,8 +108,3 @@ extern int __wrap_dlclose(void* handle)
     }
     return __real_dlclose(handle);
 }
-
-}  // namespace Test
-}  // namespace Infra
-}  // namespace Notification
-}  // namespace OHOS
