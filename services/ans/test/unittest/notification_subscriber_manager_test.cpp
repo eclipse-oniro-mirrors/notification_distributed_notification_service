@@ -42,6 +42,17 @@ int32_t NotificationAiExtensionWrapper::GenerateVoiceContent(
     return ERR_OK;
 }
 
+int32_t NotificationAiExtensionWrapper::UpdateVoiceConfig(const std::string& configs)
+{
+    return ERR_OK;
+}
+
+int32_t NotificationAiExtensionWrapper::NotifyVoiceEvent(const std::string& event,
+    const sptr<NotificationRequest>& request)
+{
+    return ERR_OK;
+}
+
 class MockAnsSubscriberTest : public MockAnsSubscriber  {
 public:
     explicit MockAnsSubscriberTest(const sptr<IRemoteObject>& remote) : MockAnsSubscriber(remote) {};
