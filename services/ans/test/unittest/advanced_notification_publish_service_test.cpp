@@ -17,6 +17,7 @@
 #include <functional>
 #include <memory>
 #include <thread>
+#include <vector>
 
 #include "gtest/gtest.h"
 
@@ -3664,6 +3665,182 @@ HWTEST_F(AnsPublishServiceTest, DuplicateMsgControlBySa_00005, Function | SmallT
     auto ret = advancedNotificationService_->DuplicateMsgControlBySa(request);
     ASSERT_EQ(ret, (int)ERR_OK);
     ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);
+}
+
+/**
+ * @tc.name: InitPublishProcess_00001
+ * @tc.desc: Test InitPublishProcess initializes publishProcess_ correctly
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, InitPublishProcess_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    bool result = advancedNotificationService_->InitPublishProcess();
+    ASSERT_EQ(result, true);
+    ASSERT_EQ(advancedNotificationService_->publishProcess_.size(), static_cast<size_t>(8));
+    ASSERT_NE(
+        advancedNotificationService_->publishProcess_.find(NotificationConstant::SlotType::LIVE_VIEW)->second,
+        nullptr);
+    ASSERT_NE(
+        advancedNotificationService_->publishProcess_.find(NotificationConstant::SlotType::SOCIAL_COMMUNICATION)
+            ->second,
+        nullptr);
+}
+
+/**
+ * @tc.name: InitPublishProcess_00002
+ * @tc.desc: Test InitPublishProcess returns true when already initialized
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, InitPublishProcess_00002, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    bool result1 = advancedNotificationService_->InitPublishProcess();
+    ASSERT_EQ(result1, true);
+    size_t sizeAfterFirst = advancedNotificationService_->publishProcess_.size();
+    bool result2 = advancedNotificationService_->InitPublishProcess();
+    ASSERT_EQ(result2, true);
+    ASSERT_EQ(advancedNotificationService_->publishProcess_.size(), sizeAfterFirst);
+}
+
+/**
+ * @tc.name: GetPublishProcess_00001
+ * @tc.desc: Test GetPublishProcess returns correct process for valid slot types
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, GetPublishProcess_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    auto process = advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::LIVE_VIEW);
+    ASSERT_NE(process, nullptr);
+    auto commonProcess =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    ASSERT_NE(commonProcess, nullptr);
+}
+
+/**
+ * @tc.name: GetPublishProcess_00002
+ * @tc.desc: Test GetPublishProcess returns same instance for repeated calls
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, GetPublishProcess_00002, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    auto process1 = advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    ASSERT_NE(process1, nullptr);
+    auto process2 = advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    ASSERT_EQ(process1, process2);
+}
+
+/**
+ * @tc.name: GetPublishProcess_00003
+ * @tc.desc: Test GetPublishProcess for all common slot types returns non-null
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, GetPublishProcess_00003, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    auto serviceProcess = advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::SERVICE_REMINDER);
+    ASSERT_NE(serviceProcess, nullptr);
+    auto otherProcess = advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::OTHER);
+    ASSERT_NE(otherProcess, nullptr);
+    auto customProcess = advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::CUSTOM);
+    ASSERT_NE(customProcess, nullptr);
+    auto customerServiceProcess =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::CUSTOMER_SERVICE);
+    ASSERT_NE(customerServiceProcess, nullptr);
+    auto emergencyProcess =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::EMERGENCY_INFORMATION);
+    ASSERT_NE(emergencyProcess, nullptr);
+}
+
+/**
+ * @tc.name: GetPublishProcess_00004
+ * @tc.desc: Test GetPublishProcess returns same common process for all common slot types
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, GetPublishProcess_00004, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    auto socialProcess =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    auto serviceProcess =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::SERVICE_REMINDER);
+    ASSERT_EQ(socialProcess, serviceProcess);
+}
+
+/**
+ * @tc.name: GetPublishProcess_00005
+ * @tc.desc: Test GetPublishProcess returns different process for LIVE_VIEW vs common slot types
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, GetPublishProcess_00005, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    auto liveProcess = advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::LIVE_VIEW);
+    auto commonProcess =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::OTHER);
+    ASSERT_NE(liveProcess, commonProcess);
+}
+
+/**
+ * @tc.name: InitPublishProcess_Concurrency_00001
+ * @tc.desc: Test InitPublishProcess thread safety - concurrent calls should not cause data corruption
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, InitPublishProcess_Concurrency_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    const int threadCount = 10;
+    std::vector<std::thread> threads;
+    std::vector<bool> results(threadCount, false);
+    for (int i = 0; i < threadCount; i++) {
+        threads.emplace_back([this, &results, i]() {
+            results[i] = advancedNotificationService_->InitPublishProcess();
+        });
+    }
+    for (auto& thread : threads) {
+        thread.join();
+    }
+    for (int i = 0; i < threadCount; i++) {
+        ASSERT_EQ(results[i], true);
+    }
+    ASSERT_EQ(advancedNotificationService_->publishProcess_.size(), static_cast<size_t>(8));
+}
+
+/**
+ * @tc.name: GetPublishProcess_Concurrency_00001
+ * @tc.desc: Test GetPublishProcess thread safety - concurrent reads should not cause data corruption
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, GetPublishProcess_Concurrency_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    const int threadCount = 10;
+    std::vector<std::thread> threads;
+    std::vector<std::shared_ptr<BasePublishProcess>> results(threadCount);
+    for (int i = 0; i < threadCount; i++) {
+        threads.emplace_back([this, &results, i]() {
+            results[i] =
+                advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::LIVE_VIEW);
+        });
+    }
+    for (auto& thread : threads) {
+        thread.join();
+    }
+    for (int i = 0; i < threadCount; i++) {
+        ASSERT_NE(results[i], nullptr);
+    }
+    ASSERT_EQ(advancedNotificationService_->publishProcess_.size(), static_cast<size_t>(8));
 }
 }  // namespace Notification
 }  // namespace OHOS
