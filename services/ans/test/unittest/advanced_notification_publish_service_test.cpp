@@ -3730,9 +3730,11 @@ HWTEST_F(AnsPublishServiceTest, GetPublishProcess_00001, Function | SmallTest | 
 HWTEST_F(AnsPublishServiceTest, GetPublishProcess_00002, Function | SmallTest | Level1)
 {
     advancedNotificationService_->publishProcess_.clear();
-    auto process1 = advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    auto process1 =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::CONTENT_INFORMATION);
     ASSERT_NE(process1, nullptr);
-    auto process2 = advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    auto process2 =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::CONTENT_INFORMATION);
     ASSERT_EQ(process1, process2);
 }
 
@@ -3745,7 +3747,8 @@ HWTEST_F(AnsPublishServiceTest, GetPublishProcess_00002, Function | SmallTest | 
 HWTEST_F(AnsPublishServiceTest, GetPublishProcess_00003, Function | SmallTest | Level1)
 {
     advancedNotificationService_->publishProcess_.clear();
-    auto serviceProcess = advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::SERVICE_REMINDER);
+    auto serviceProcess =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::SERVICE_REMINDER);
     ASSERT_NE(serviceProcess, nullptr);
     auto otherProcess = advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::OTHER);
     ASSERT_NE(otherProcess, nullptr);
