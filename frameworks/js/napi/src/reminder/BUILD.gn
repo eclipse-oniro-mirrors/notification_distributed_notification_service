@@ -40,6 +40,7 @@ ohos_shared_library("reminderagent") {
   include_dirs = [ "../../include" ]
 
   configs = [ ":native_module_config" ]
+  defines = []
 
   sources = [
     "../common.cpp",
@@ -80,6 +81,10 @@ ohos_shared_library("reminderagent") {
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
   ]
+  if (distributed_notification_service_feature_api_metrics) {
+    external_deps += [ "api_metrics:histogrammanager" ]
+    defines += [ "ANS_FEATURE_API_METRICS_HISTOGRAM" ]
+  }
 
   relative_install_dir = "module"
   subsystem_name = "${subsystem_name}"
@@ -104,6 +109,7 @@ ohos_shared_library("reminderagentmanager") {
   ]
 
   configs = [ ":native_module_config" ]
+  defines = []
 
   sources = [
     "../common.cpp",
@@ -139,6 +145,10 @@ ohos_shared_library("reminderagentmanager") {
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
   ]
+  if (distributed_notification_service_feature_api_metrics) {
+    external_deps += [ "api_metrics:histogrammanager" ]
+    defines += [ "ANS_FEATURE_API_METRICS_HISTOGRAM" ]
+  }
 
   relative_install_dir = "module"
   subsystem_name = "${subsystem_name}"
