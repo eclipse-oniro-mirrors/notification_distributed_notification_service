@@ -37,7 +37,18 @@ namespace OHOS {
 namespace Notification {
 
 int32_t NotificationAiExtensionWrapper::GenerateVoiceContent(
-    const sptr<NotificationRequest>& requests, std::string& content)
+    const sptr<NotificationRequest>& requests, std::string& content, std::string& externInfo)
+{
+    return ERR_OK;
+}
+
+int32_t NotificationAiExtensionWrapper::UpdateVoiceConfig(const std::string& configs)
+{
+    return ERR_OK;
+}
+
+int32_t NotificationAiExtensionWrapper::NotifyVoiceEvent(const std::string& event,
+    const sptr<NotificationRequest>& request)
 {
     return ERR_OK;
 }

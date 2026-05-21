@@ -97,7 +97,8 @@ namespace {
         PROXY_PKG_KEY,
         KIOSK_APP_TRUST_LIST_KEY,
         RESTRICTED_MODE_TRUST_LIST_KEY,
-        COLLABORATION_BLOCKLIST
+        COLLABORATION_BLOCKLIST,
+        VOICE_BROADCAST_CONFIG_RULE_KEY
     };
 }
 
@@ -1519,6 +1520,17 @@ ErrCode AdvancedNotificationService::SyncAdditionConfig(
             return ERR_ANS_SERVICE_NOT_READY;
         }
         if (syncResult != NotificationAiExtensionWrapper::ErrorCode::ERR_OK) {
+            return ERR_ANS_INVALID_PARAM;
+        }
+    }
+#endif
+#ifdef NOTIFICATION_VOICE_BROADCAST_ENABLE
+    if (key == VOICE_BROADCAST_CONFIG_RULE_KEY) {
+        int32_t syncResult = NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateVoiceConfig(value);
+        message.ErrorCode(syncResult);
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        ANS_LOGI("Sync voice config: %{public}d, key: %{public}s", syncResult, key.c_str());
+        if (syncResult != ERR_OK) {
             return ERR_ANS_INVALID_PARAM;
         }
     }

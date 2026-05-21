@@ -57,6 +57,7 @@ constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
 constexpr const int32_t BADGE_CHANGE_CODE = 201;
 static int32_t LIVEVIEW_TRIGGER_SUB_CODE = 103;
 constexpr const int32_t CLONE_SUB_CODE = 104;
+constexpr const int32_t VOICE_BROADCAST_SUB_CODE = 105;
 
 constexpr const int32_t DEFAULT_ERROR_EVENT_COUNT = 5;
 constexpr const int32_t DEFAULT_ERROR_EVENT_TIME = 60;
@@ -1483,6 +1484,16 @@ void NotificationAnalyticsUtil::ReportTriggerLiveView(const std::vector<std::str
         dataArray.push_back(bundle);
     }
     ReportCustomizeInfo(dataArray, LIVEVIEW_TRIGGER_SUB_CODE);
+}
+
+void NotificationAnalyticsUtil::ReportVoiceBroadcastInfo(int32_t errorCode,
+    const std::string& hashCode, const std::string& externInfo)
+{
+    nlohmann::json data;
+    data["errorCode"] = errorCode;
+    data["hashCode"] = hashCode;
+    data["externInfo"] = externInfo;
+    ReportCustomizeInfo(data, VOICE_BROADCAST_SUB_CODE);
 }
 
 void NotificationAnalyticsUtil::ReportCloneInfo(const NotificationCloneBundleInfo& cloneBundleInfo)

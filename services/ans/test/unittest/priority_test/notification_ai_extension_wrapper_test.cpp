@@ -123,7 +123,8 @@ HWTEST_F(NotificationAiExtensionWrapperTest, GenerateVoiceContent_0100, Function
     NOTIFICATION_AI_EXTENSION_WRAPPER->generateVoiceContent_ = nullptr;
     sptr<NotificationRequest> request = new NotificationRequest();
     std::string content;
-    EXPECT_EQ(NOTIFICATION_AI_EXTENSION_WRAPPER->GenerateVoiceContent(request, content),
+    std::string externInfo;
+    EXPECT_EQ(NOTIFICATION_AI_EXTENSION_WRAPPER->GenerateVoiceContent(request, content, externInfo),
         NotificationAiExtensionWrapper::ErrorCode::ERR_FAIL);
     NOTIFICATION_AI_EXTENSION_WRAPPER->InitExtensionWrapper();
 }
@@ -138,7 +139,8 @@ HWTEST_F(NotificationAiExtensionWrapperTest, GenerateVoiceContent_0200, Function
 {
     NOTIFICATION_AI_EXTENSION_WRAPPER->InitExtensionWrapper();
     std::string content;
-    int32_t result = NOTIFICATION_AI_EXTENSION_WRAPPER->GenerateVoiceContent(nullptr, content);
+    std::string externInfo;
+    int32_t result = NOTIFICATION_AI_EXTENSION_WRAPPER->GenerateVoiceContent(nullptr, content, externInfo);
     EXPECT_NE(result, ERR_OK);
 }
 }
