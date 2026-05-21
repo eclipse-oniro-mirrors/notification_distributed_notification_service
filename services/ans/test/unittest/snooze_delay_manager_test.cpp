@@ -477,6 +477,7 @@ HWTEST_F(AnsSnoozeDelayTest, StartSnoozeTimer_00001, Function | SmallTest | Leve
  */
 HWTEST_F(AnsSnoozeDelayTest, RemoveAllFromSnoozeDelayList_00001, Function | SmallTest | Level1)
 {
+    advancedNotificationService_->snoozeDelayTimerList_.clear();
     sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
     auto record1 = std::make_shared<NotificationRecord>();
     record1->request = request;
@@ -504,6 +505,7 @@ HWTEST_F(AnsSnoozeDelayTest, RemoveAllFromSnoozeDelayList_00001, Function | Smal
  */
 HWTEST_F(AnsSnoozeDelayTest, RemoveAllFromSnoozeDelayList_00002, Function | SmallTest | Level1)
 {
+    advancedNotificationService_->snoozeDelayTimerList_.clear();
     sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
     auto record = std::make_shared<NotificationRecord>();
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
@@ -527,6 +529,7 @@ HWTEST_F(AnsSnoozeDelayTest, RemoveAllFromSnoozeDelayList_00002, Function | Smal
  */
 HWTEST_F(AnsSnoozeDelayTest, RemoveAllFromSnoozeDelayList_00003, Function | SmallTest | Level1)
 {
+    advancedNotificationService_->snoozeDelayTimerList_.clear();
     sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
     auto record = std::make_shared<NotificationRecord>();
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
@@ -539,6 +542,80 @@ HWTEST_F(AnsSnoozeDelayTest, RemoveAllFromSnoozeDelayList_00003, Function | Smal
     record->bundleOption = bundleOption;
     advancedNotificationService_->snoozeDelayTimerList_.push_back(record);
     advancedNotificationService_->RemoveAllFromSnoozeDelayList(bundleOption1);
+    ASSERT_EQ(advancedNotificationService_->snoozeDelayTimerList_.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveAllFromSnoozeDelayList_00004
+ * @tc.desc: Test RemoveAllFromSnoozeDelayList when has nullptr
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, RemoveAllFromSnoozeDelayList_00004, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->snoozeDelayTimerList_.clear();
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(nullptr);
+    auto record0 = std::make_shared<NotificationRecord>();
+    sptr<NotificationBundleOption> bundleOption0 = new NotificationBundleOption();
+    bundleOption0->SetBundleName("testBundle");
+    bundleOption0->SetUid(50);
+    record0->bundleOption = bundleOption0;
+    record0->request = nullptr;
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(record0);
+
+    sptr<NotificationRequest> request1(new (std::nothrow) NotificationRequest());
+    request1->SetOwnerUid(200);
+    auto record1 = std::make_shared<NotificationRecord>();
+    sptr<NotificationBundleOption> bundleOption1 = new NotificationBundleOption();
+    bundleOption1->SetBundleName("testBundle1");
+    bundleOption1->SetUid(100);
+    record1->request = request1;
+    record1->bundleOption = bundleOption1;
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(record1);
+
+    sptr<NotificationBundleOption> targetBundle = new NotificationBundleOption();
+    targetBundle->SetBundleName("targetBundle");
+    advancedNotificationService_->RemoveAllFromSnoozeDelayList(targetBundle);
+
+    ASSERT_EQ(advancedNotificationService_->snoozeDelayTimerList_.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveAllFromSnoozeDelayList_00005
+ * @tc.desc: Test RemoveAllFromSnoozeDelayList when ownerUid matches
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, RemoveAllFromSnoozeDelayList_00005, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->snoozeDelayTimerList_.clear();
+
+    sptr<NotificationRequest> request1(new (std::nothrow) NotificationRequest());
+    request1->SetOwnerUid(200);
+    auto record1 = std::make_shared<NotificationRecord>();
+    sptr<NotificationBundleOption> bundleOption1 = new NotificationBundleOption();
+    bundleOption1->SetBundleName("testBundle1");
+    bundleOption1->SetUid(100);
+    record1->request = request1;
+    record1->bundleOption = bundleOption1;
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(record1);
+
+    sptr<NotificationRequest> request2(new (std::nothrow) NotificationRequest());
+    request2->SetOwnerUid(300);
+    auto record2 = std::make_shared<NotificationRecord>();
+    sptr<NotificationBundleOption> bundleOption2 = new NotificationBundleOption();
+    bundleOption2->SetBundleName("testBundle2");
+    bundleOption2->SetUid(150);
+    record2->request = request2;
+    record2->bundleOption = bundleOption2;
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(record2);
+
+    sptr<NotificationBundleOption> targetBundle = new NotificationBundleOption();
+    targetBundle->SetBundleName("targetBundle");
+    targetBundle->SetUid(200);
+
+    advancedNotificationService_->RemoveAllFromSnoozeDelayList(targetBundle);
+
     ASSERT_EQ(advancedNotificationService_->snoozeDelayTimerList_.size(), 1);
 }
 
@@ -717,6 +794,23 @@ HWTEST_F(AnsSnoozeDelayTest, IsSetSnooze_00005, Function | SmallTest | Level1)
     advancedNotificationService_->snoozeDelayTimerList_.push_back(record);
     ASSERT_EQ(advancedNotificationService_->AssignToNotificationList(record),
         (int)ERR_OK);
+}
+
+/**
+ * @tc.name: SetNextSnoozeTimer_001
+ * @tc.desc: Test SetNextSnoozeTimer when request is nullptr
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, SetNextSnoozeTimer_001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->snoozeDelayTimerList_.clear();
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(nullptr);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = nullptr;
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(record);
+    advancedNotificationService_->SetNextSnoozeTimer(NotificationAnalyticsUtil::GetCurrentTime());
+    ASSERT_EQ(advancedNotificationService_->snoozeDelayTimerList_.size(), 0);
 }
 }  // namespace Notification
 }  // namespace OHOS

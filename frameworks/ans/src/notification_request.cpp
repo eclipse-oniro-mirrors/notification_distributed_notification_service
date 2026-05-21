@@ -1099,7 +1099,6 @@ void NotificationRequest::ToJsonExt(nlohmann::json &jsonObject) const
     jsonObject["snoozeDelayTime"]    = snoozeDelayTime_;
     jsonObject["isSnoozeTrigger"]    = isSnoozeTrigger_;
     jsonObject["isRemoveAllowed"]   = isRemoveAllowed_;
-    jsonObject["badgeNumber"]   = badgeNumber_;
     jsonObject["appMessageId"] = appMessageId_;
 }
 
@@ -2650,10 +2649,6 @@ void NotificationRequest::ConvertJsonToNum(NotificationRequest *target, const nl
 
     if (jsonObject.find("creatorInstanceKey") != jsonEnd && jsonObject.at("creatorInstanceKey").is_number_integer()) {
         target->creatorInstanceKey_ = jsonObject.at("creatorInstanceKey").get<int32_t>();
-    }
-
-    if (jsonObject.find("badgeNumber") != jsonEnd && jsonObject.at("badgeNumber").is_number_integer()) {
-        target->badgeNumber_ = jsonObject.at("badgeNumber").get<uint32_t>();
     }
     if (jsonObject.find("hashCodeGenerateType") != jsonEnd &&
         jsonObject.at("hashCodeGenerateType").is_number_integer()) {

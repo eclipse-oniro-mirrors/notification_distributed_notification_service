@@ -421,7 +421,7 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDbCommon(const Noti
         NotificationAnalyticsUtil::ReportModifyEvent(message.Message("convert option failed"));
         return ERR_ANS_TASK_ERR;
     }
-    
+
     std::string encryptValue;
     ErrCode errorCode = AesGcmHelper::Encrypt(jsonObject.dump(), encryptValue);
     if (errorCode != ERR_OK) {
