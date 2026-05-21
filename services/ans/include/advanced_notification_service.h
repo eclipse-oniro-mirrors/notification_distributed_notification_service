@@ -2365,6 +2365,7 @@ private:
     AnsStatus AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record,
         bool isSystemApp, bool isUpdateByOwner, const bool isAgentController);
     ErrCode DuplicateMsgControl(const sptr<NotificationRequest> &request);
+    ErrCode DuplicateMsgControlBySa(const sptr<NotificationRequest> &request);
     void RemoveExpiredUniqueKey();
     void RemoveExpiredDistributedUniqueKey();
     void RemoveExpiredLocalUniqueKey();

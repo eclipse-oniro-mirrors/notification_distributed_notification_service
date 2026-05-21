@@ -836,7 +836,10 @@ AnsStatus AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifi
                 }
             }
         }
-
+        if (DuplicateMsgControlBySa(record->request) == ERR_ANS_DUPLICATE_MSG) {
+            (void)PublishRemoveDuplicateEvent(record);
+            return;
+        }
         NotificationAnalyticsUtil::ReportSAPublishSuccessEvent(record->request, ipcUid);
         if (!request->IsDoNotDisturbByPassed()) {
             CheckDoNotDisturbProfile(record);
@@ -916,6 +919,22 @@ ErrCode AdvancedNotificationService::DuplicateMsgControl(const sptr<Notification
         uniqueKeyList_.emplace_back(std::make_pair(std::chrono::system_clock::now(), uniqueKey));
         distributedUniqueKeyList_.emplace_back(std::make_pair(std::chrono::system_clock::now(), distributedUniqueKey));
     }
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::DuplicateMsgControlBySa(const sptr<NotificationRequest> &request)
+{
+    if (request->IsCommonLiveView() || request->GetAppMessageId().empty()) {
+        return ERR_OK;
+    }
+    RemoveExpiredUniqueKey();
+    std::string uniqueKey = request->GenerateUniqueKey();
+    if (IsDuplicateMsg(uniqueKeyList_, uniqueKey)) {
+        ANS_LOGE("SA duplicate msg, no need to notify, key is %{public}s, appmessageId is %{public}s",
+            request->GetKey().c_str(), request->GetAppMessageId().c_str());
+        return ERR_ANS_DUPLICATE_MSG;
+    }
+    uniqueKeyList_.emplace_back(std::make_pair(std::chrono::system_clock::now(), uniqueKey));
     return ERR_OK;
 }
 
