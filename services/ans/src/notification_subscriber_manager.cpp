@@ -30,7 +30,7 @@
 #include "common_event_publish_info.h"
 #include "ipc_skeleton.h"
 #include "notification_flags.h"
-#include "notification_ai_extension_wrapper.h"
+#include "voice_extension_wrapper.h"
 #include "notification_constant.h"
 #include "notification_config_parse.h"
 #include "notification_extension_wrapper.h"
@@ -792,7 +792,7 @@ int32_t NotificationSubscriberManager::GetVoiceContentInfo(const sptr<Notificati
         return ERR_OK;
     }
     std::string externInfo;
-    int32_t voiceResult = NOTIFICATION_AI_EXTENSION_WRAPPER->GenerateVoiceContent(request, content, externInfo);
+    int32_t voiceResult = VOICE_EXTENSION_WRAPPER.GenerateVoiceContent(request, content, externInfo);
     ANS_LOGI("Get voice content %{public}zu, %{public}s, %{public}d, %{public}s %{public}s.", flagsMap->size(),
         deviceList.c_str(), voiceResult, content.c_str(), externInfo.c_str());
     if (voiceResult != ERR_OK) {
@@ -959,7 +959,7 @@ void NotificationSubscriberManager::NotifyVoiceNotificationCanceled(const sptr<N
     if (request == nullptr || !request->IsCommonLiveView() || request->GetConsumedDeviceFlag() == 0) {
         return;
     }
-    NOTIFICATION_AI_EXTENSION_WRAPPER->NotifyVoiceEvent(
+    VOICE_EXTENSION_WRAPPER.NotifyVoiceEvent(
         NotificationConstant::EVENT_NOTIFICATION_REMOVED, request);
 }
 

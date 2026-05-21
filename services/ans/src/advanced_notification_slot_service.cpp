@@ -42,6 +42,7 @@
 #include "notification_config_parse.h"
 #include "notification_extension_wrapper.h"
 #include "notification_ai_extension_wrapper.h"
+#include "voice_extension_wrapper.h"
 #include "notification_analytics_util.h"
 #include "all_scenarios_extension_wrapper.h"
 
@@ -1526,7 +1527,7 @@ ErrCode AdvancedNotificationService::SyncAdditionConfig(
 #endif
 #ifdef NOTIFICATION_VOICE_BROADCAST_ENABLE
     if (key == VOICE_BROADCAST_CONFIG_RULE_KEY) {
-        int32_t syncResult = NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateVoiceConfig(value);
+        int32_t syncResult = VOICE_EXTENSION_WRAPPER.UpdateVoiceConfig(value);
         message.ErrorCode(syncResult);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGI("Sync voice config: %{public}d, key: %{public}s", syncResult, key.c_str());
