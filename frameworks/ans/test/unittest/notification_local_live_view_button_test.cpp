@@ -270,5 +270,182 @@ HWTEST_F(NotificationLocalLiveViewButtonTest, Dump_00001, Function | SmallTest |
 
     EXPECT_EQ(rrc->Dump(), "");
 }
+
+HWTEST_F(NotificationLocalLiveViewButtonTest, GetAllButtonIconResource_00001, Function | SmallTest | Level1)
+{
+    auto button = std::make_shared<NotificationLocalLiveViewButton>();
+    auto resource = std::make_shared<ResourceManager::Resource>();
+    resource->id = 1;
+    resource->bundleName = "bundleName";
+    resource->moduleName = "moduleName";
+    button->addSingleButtonIconResource(resource);
+    EXPECT_EQ(button->GetAllButtonIconResource().size(), 1);
+    EXPECT_NE(button->GetAllButtonIconResource()[0], nullptr);
+    EXPECT_EQ(button->GetAllButtonIconResource()[0]->bundleName, "bundleName");
+}
+
+HWTEST_F(NotificationLocalLiveViewButtonTest, addSingleButtonIconResource_00001, Function | SmallTest | Level1)
+{
+    auto button = std::make_shared<NotificationLocalLiveViewButton>();
+    auto resource1 = std::make_shared<ResourceManager::Resource>();
+    auto resource2 = std::make_shared<ResourceManager::Resource>();
+    auto resource3 = std::make_shared<ResourceManager::Resource>();
+    auto resource4 = std::make_shared<ResourceManager::Resource>();
+    button->addSingleButtonIconResource(resource1);
+    button->addSingleButtonIconResource(resource2);
+    button->addSingleButtonIconResource(resource3);
+    button->addSingleButtonIconResource(resource4);
+    EXPECT_EQ(button->GetAllButtonIconResource().size(), 4);
+}
+
+HWTEST_F(NotificationLocalLiveViewButtonTest, ClearButtonIcons_00001, Function | SmallTest | Level1)
+{
+    auto button = std::make_shared<NotificationLocalLiveViewButton>();
+    auto pixelMap = std::make_shared<Media::PixelMap>();
+    button->addSingleButtonIcon(pixelMap);
+    EXPECT_EQ(button->GetAllButtonIcons().size(), 1);
+    button->ClearButtonIcons();
+    EXPECT_EQ(button->GetAllButtonIcons().size(), 0);
+}
+
+HWTEST_F(NotificationLocalLiveViewButtonTest, ClearButtonIconsResource_00001, Function | SmallTest | Level1)
+{
+    auto button = std::make_shared<NotificationLocalLiveViewButton>();
+    auto resource = std::make_shared<ResourceManager::Resource>();
+    button->addSingleButtonIconResource(resource);
+    EXPECT_EQ(button->GetAllButtonIconResource().size(), 1);
+    button->ClearButtonIconsResource();
+    EXPECT_EQ(button->GetAllButtonIconResource().size(), 0);
+}
+
+HWTEST_F(NotificationLocalLiveViewButtonTest, ToJson_00003, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject;
+    auto button = std::make_shared<NotificationLocalLiveViewButton>();
+    button->addSingleButtonName("button1");
+    auto resource = std::make_shared<ResourceManager::Resource>();
+    resource->id = 1;
+    resource->bundleName = "bundleName";
+    resource->moduleName = "moduleName";
+    button->addSingleButtonIconResource(resource);
+    EXPECT_EQ(button->ToJson(jsonObject), true);
+    EXPECT_TRUE(jsonObject.contains("iconResources"));
+    EXPECT_EQ(jsonObject["iconResources"].size(), 1);
+}
+
+HWTEST_F(NotificationLocalLiveViewButtonTest, FromJson_00004, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{{"names", {"button1", "button2"}},
+        {"iconResources", {nlohmann::json{{"bundleName", "bundleName"}, {"moduleName", "moduleName"}, {"id", 123}}}}};
+    auto button = NotificationLocalLiveViewButton::FromJson(jsonObject);
+    EXPECT_NE(button, nullptr);
+    EXPECT_EQ(button->GetAllButtonNames().size(), 2);
+    EXPECT_EQ(button->GetAllButtonIconResource().size(), 1);
+    EXPECT_EQ(button->GetAllButtonIconResource()[0]->bundleName, "bundleName");
+    EXPECT_EQ(button->GetAllButtonIconResource()[0]->moduleName, "moduleName");
+    EXPECT_EQ(button->GetAllButtonIconResource()[0]->id, 123);
+}
+
+HWTEST_F(NotificationLocalLiveViewButtonTest, FromJson_00005, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{{"names", {"button1"}},
+        {"iconResources", {nlohmann::json{{"bundleName", "bundleName"}}}}};
+    auto button = NotificationLocalLiveViewButton::FromJson(jsonObject);
+    EXPECT_NE(button, nullptr);
+    EXPECT_EQ(button->GetAllButtonIconResource().size(), 0);
+}
+
+HWTEST_F(NotificationLocalLiveViewButtonTest, Marshalling_00003, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationLocalLiveViewButton>();
+    button->addSingleButtonName("button1");
+    auto resource = std::make_shared<ResourceManager::Resource>();
+    resource->id = 1;
+    resource->bundleName = "bundleName";
+    resource->moduleName = "moduleName";
+    button->addSingleButtonIconResource(resource);
+    EXPECT_EQ(button->Marshalling(parcel), true);
+}
+
+HWTEST_F(NotificationLocalLiveViewButtonTest, Marshalling_00004, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationLocalLiveViewButton>();
+    auto resource1 = std::make_shared<ResourceManager::Resource>();
+    auto resource2 = std::make_shared<ResourceManager::Resource>();
+    auto resource3 = std::make_shared<ResourceManager::Resource>();
+    button->addSingleButtonIconResource(resource1);
+    button->addSingleButtonIconResource(resource2);
+    button->addSingleButtonIconResource(resource3);
+    EXPECT_EQ(button->Marshalling(parcel), true);
+}
+
+HWTEST_F(NotificationLocalLiveViewButtonTest, Unmarshalling_00004, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteStringVector({"button1", "button2"});
+    parcel.WriteUint64(0);
+    parcel.WriteUint64(1);
+    parcel.WriteStringVector({"bundleName", "moduleName", "123"});
+    
+    auto button = NotificationLocalLiveViewButton::Unmarshalling(parcel);
+    EXPECT_NE(button, nullptr);
+    EXPECT_EQ(button->GetAllButtonNames().size(), 2);
+    EXPECT_EQ(button->GetAllButtonIconResource().size(), 1);
+    EXPECT_EQ(button->GetAllButtonIconResource()[0]->bundleName, "bundleName");
+    EXPECT_EQ(button->GetAllButtonIconResource()[0]->moduleName, "moduleName");
+}
+
+HWTEST_F(NotificationLocalLiveViewButtonTest, Unmarshalling_00005, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteStringVector({"button1"});
+    parcel.WriteUint64(0);
+    parcel.WriteUint64(2);
+    parcel.WriteStringVector({"bundleName", "moduleName", "123"});
+    parcel.WriteStringVector({"bundleName2", "moduleName2", "456"});
+    
+    auto button = NotificationLocalLiveViewButton::Unmarshalling(parcel);
+    EXPECT_NE(button, nullptr);
+    EXPECT_EQ(button->GetAllButtonIconResource().size(), 2);
+}
+
+HWTEST_F(NotificationLocalLiveViewButtonTest, Unmarshalling_00006, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteStringVector({"button1"});
+    parcel.WriteUint64(0);
+    parcel.WriteUint64(1);
+    parcel.WriteStringVector({"bundleName", "moduleName"});
+    
+    auto button = NotificationLocalLiveViewButton::Unmarshalling(parcel);
+    EXPECT_EQ(button, nullptr);
+}
+
+HWTEST_F(NotificationLocalLiveViewButtonTest, Unmarshalling_00007, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteStringVector({"button1"});
+    parcel.WriteUint64(0);
+    parcel.WriteUint64(1);
+    parcel.WriteStringVector({"bundleName", "moduleName", "invalid"});
+    
+    auto button = NotificationLocalLiveViewButton::Unmarshalling(parcel);
+    EXPECT_EQ(button, nullptr);
+}
+
+HWTEST_F(NotificationLocalLiveViewButtonTest, Unmarshalling_00008, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteStringVector({"button1"});
+    parcel.WriteUint64(5);
+    auto pixelMap = std::make_shared<Media::PixelMap>();
+    parcel.WriteParcelable(pixelMap.get());
+    parcel.WriteUint64(0);
+    
+    auto button = NotificationLocalLiveViewButton::Unmarshalling(parcel);
+    EXPECT_EQ(button, nullptr);
+}
 }
 }
