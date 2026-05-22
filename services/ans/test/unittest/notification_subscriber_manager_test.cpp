@@ -28,9 +28,7 @@
 #include "ans_subscriber_listener.h"
 #include "mock_i_remote_object.h"
 #include "notification_ai_extension_wrapper.h"
-#define private public
 #include "voice_extension_wrapper.h"
-#undef private
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
 using namespace testing::ext;
