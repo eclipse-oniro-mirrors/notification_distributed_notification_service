@@ -24,23 +24,30 @@
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
-        Notification::NotificationFlags notificationFlags;
-        // test IsSoundEnabled function
+        uint32_t reminderFlags = fdp->ConsumeIntegral<uint32_t>();
+        Notification::NotificationFlags notificationFlags(reminderFlags);
+        bool lightScreenEnabled = fdp->ConsumeBool();
+        bool statusIconEnabled = fdp->ConsumeBool();
+        notificationFlags.SetLightScreenEnabled(lightScreenEnabled);
+        notificationFlags.IsLightScreenEnabled();
+        notificationFlags.SetStatusIconEnabled(statusIconEnabled);
+        notificationFlags.IsStatusIconEnabled();
+        notificationFlags.SetReminderFlags(reminderFlags);
+        notificationFlags.GetReminderFlags();
         notificationFlags.IsSoundEnabled();
-        // test IsVibrationEnabled function
         notificationFlags.IsVibrationEnabled();
-        // test Dump function
         notificationFlags.Dump();
-        // test ToJson function
         nlohmann::json jsonObject;
-        if (jsonObject.is_null() or !jsonObject.is_object()) {
-            return false;
-        }
+        jsonObject["soundEnabled"] = fdp->ConsumeIntegral<uint8_t>();
+        jsonObject["vibrationEnabled"] = fdp->ConsumeIntegral<uint8_t>();
+        jsonObject["lockScreenEnabled"] = fdp->ConsumeIntegral<uint8_t>();
+        jsonObject["bannerEnabled"] = fdp->ConsumeIntegral<uint8_t>();
+        jsonObject["reminderFlags"] = fdp->ConsumeIntegral<uint32_t>();
         notificationFlags.ToJson(jsonObject);
-        notificationFlags.FromJson(jsonObject);
-        // test Unmarshalling function
+        Notification::NotificationFlags::FromJson(jsonObject);
         Parcel parcel;
-        notificationFlags.Unmarshalling(parcel);
+        notificationFlags.Marshalling(parcel);
+        Notification::NotificationFlags::Unmarshalling(parcel);
         notificationFlags.ReadFromParcel(parcel);
         return true;
     }
