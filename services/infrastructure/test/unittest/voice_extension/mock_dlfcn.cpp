@@ -69,8 +69,8 @@ void ResetMockDlfcn()
 }  // namespace Notification
 }  // namespace OHOS
 
-extern void* __real_dlopen(const char* filename, int flag);
-extern void* __wrap_dlopen(const char* filename, int flag)
+extern "C" void* __real_dlopen(const char* filename, int flag);
+extern "C" void* __wrap_dlopen(const char* filename, int flag)
 {
     if (filename != nullptr && strcmp(filename, VOICE_SO_NAME) == 0) {
         if (g_mockDlfcn.dlopenSuccess) {
@@ -81,8 +81,8 @@ extern void* __wrap_dlopen(const char* filename, int flag)
     return __real_dlopen(filename, flag);
 }
 
-extern void* __real_dlsym(void* handle, const char* symbol);
-extern void* __wrap_dlsym(void* handle, const char* symbol)
+extern "C" void* __real_dlsym(void* handle, const char* symbol);
+extern "C" void* __wrap_dlsym(void* handle, const char* symbol)
 {
     if (handle == MOCK_HANDLE) {
         if (strcmp(symbol, "GenerateVoiceContent") == 0 && g_mockDlfcn.dlsymSuccessMap["GenerateVoiceContent"]) {
@@ -99,8 +99,8 @@ extern void* __wrap_dlsym(void* handle, const char* symbol)
     return __real_dlsym(handle, symbol);
 }
 
-extern int __real_dlclose(void* handle);
-extern int __wrap_dlclose(void* handle)
+extern "C" int __real_dlclose(void* handle);
+extern "C" int __wrap_dlclose(void* handle)
 {
     if (handle == MOCK_HANDLE) {
         g_mockDlfcn.dlcloseCalled = true;
