@@ -434,5 +434,112 @@ HWTEST_F(NotificationExtensionWrapperTest, NotificationContentControl_00003, Tes
     // Assert
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: BannerControlFromProfile_00001
+ * @tc.desc: Test BannerControlFromProfile when bannerControlFromProfile_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationExtensionWrapperTest, BannerControlFromProfile_00001, TestSize.Level0)
+{
+    // Arrange
+    ExtensionWrapper wrapper;
+    wrapper.bannerControlFromProfile_ = nullptr;
+    std::string bundleName = "testBundle";
+    int32_t userId = 100;
+    bool enabled = false;
+
+    // Act
+    int32_t result = wrapper.BannerControlFromProfile(bundleName, userId, enabled);
+
+    // Assert
+    EXPECT_EQ(result, -1);
+    EXPECT_FALSE(enabled);
+}
+
+/**
+ * @tc.name: BannerControlFromProfile_00002
+ * @tc.desc: Test BannerControlFromProfile when bannerControlFromProfile_ returns ERR_OK with enabled=true
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationExtensionWrapperTest, BannerControlFromProfile_00002, TestSize.Level0)
+{
+    // Arrange
+    ExtensionWrapper wrapper;
+    auto mockBannerControlFromProfile = [](const std::string &bundleName,
+        const int32_t &userId, bool &enabled) {
+        enabled = true;
+        return 0;
+    };
+    wrapper.bannerControlFromProfile_ = mockBannerControlFromProfile;
+    std::string bundleName = "testBundle";
+    int32_t userId = 100;
+    bool enabled = false;
+
+    // Act
+    int32_t result = wrapper.BannerControlFromProfile(bundleName, userId, enabled);
+
+    // Assert
+    EXPECT_EQ(result, 0);
+    EXPECT_TRUE(enabled);
+}
+
+/**
+ * @tc.name: BannerControlFromProfile_00003
+ * @tc.desc: Test BannerControlFromProfile when bannerControlFromProfile_ returns ERR_OK with enabled=false
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationExtensionWrapperTest, BannerControlFromProfile_00003, TestSize.Level0)
+{
+    // Arrange
+    ExtensionWrapper wrapper;
+    auto mockBannerControlFromProfile = [](const std::string &bundleName,
+        const int32_t &userId, bool &enabled) {
+        enabled = false;
+        return 0;
+    };
+    wrapper.bannerControlFromProfile_ = mockBannerControlFromProfile;
+    std::string bundleName = "testBundle";
+    int32_t userId = 100;
+    bool enabled = true;
+
+    // Act
+    int32_t result = wrapper.BannerControlFromProfile(bundleName, userId, enabled);
+
+    // Assert
+    EXPECT_EQ(result, 0);
+    EXPECT_FALSE(enabled);
+}
+
+/**
+ * @tc.name: BannerControlFromProfile_00004
+ * @tc.desc: Test BannerControlFromProfile when bannerControlFromProfile_ returns error
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationExtensionWrapperTest, BannerControlFromProfile_00004, TestSize.Level0)
+{
+    // Arrange
+    ExtensionWrapper wrapper;
+    auto mockBannerControlFromProfile = [](const std::string &bundleName,
+        const int32_t &userId, bool &enabled) {
+        enabled = false;
+        return -1;
+    };
+    wrapper.bannerControlFromProfile_ = mockBannerControlFromProfile;
+    std::string bundleName = "testBundle";
+    int32_t userId = 100;
+    bool enabled = true;
+
+    // Act
+    int32_t result = wrapper.BannerControlFromProfile(bundleName, userId, enabled);
+
+    // Assert
+    EXPECT_EQ(result, -1);
+    EXPECT_FALSE(enabled);
+}
 }   //namespace Notification
 }   //namespace OHOS

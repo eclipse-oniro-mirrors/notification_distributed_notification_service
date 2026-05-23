@@ -1379,5 +1379,33 @@ HWTEST_F(NotificationAnalyticsUtilTest, MakeRequestBundle_002, Function | SmallT
     ASSERT_EQ(request->GetOwnerBundleName(), "owner.bundle");
     ASSERT_EQ(request->GetCreatorBundleName(), "creator.bundle");
 }
+
+/**
+ * @tc.name: EventSceneId_SCENE_34_001
+ * @tc.desc: Test EventSceneId::SCENE_34 exists and can be used
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, EventSceneId_SCENE_34_001, Function | SmallTest | Level1)
+{
+    HaMetaMessage message(EventSceneId::SCENE_34, EventBranchId::BRANCH_0);
+    ASSERT_EQ(message.sceneId_, static_cast<uint32_t>(EventSceneId::SCENE_34));
+    ASSERT_EQ(message.branchId_, static_cast<uint32_t>(EventBranchId::BRANCH_0));
+}
+
+/**
+ * @tc.name: EventSceneId_SCENE_34_002
+ * @tc.desc: Test HaMetaMessage with SCENE_34 for IsBannerEnabled scenario
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, EventSceneId_SCENE_34_002, Function | SmallTest | Level1)
+{
+    HaMetaMessage message(EventSceneId::SCENE_34, EventBranchId::BRANCH_0);
+    std::string errMessage = "not in profile,  bundleName :testBundle";
+    message.Message(errMessage);
+    ASSERT_EQ(message.sceneId_, static_cast<uint32_t>(EventSceneId::SCENE_34));
+    ASSERT_TRUE(message.message_.find("testBundle") != std::string::npos);
+}
 }
 }

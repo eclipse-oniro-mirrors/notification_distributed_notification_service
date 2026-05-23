@@ -45,5 +45,29 @@ HWTEST_F(NotificationConfigParseTest, IsReportTrustBundles_100, Function | Small
     trustBundls = NotificationConfigParse::GetInstance()->IsReportTrustBundles("com.ohos.test");
     ASSERT_EQ(trustBundls, true);
 }
+
+/**
+ * @tc.name: IsBannerEnabled_00001
+ * @tc.desc: Test IsBannerEnabled when extensionWrapper is nullptr.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationConfigParseTest, IsBannerEnabled_00001, Function | SmallTest | Level1)
+{
+    NotificationConfigParse::GetInstance()->IsBannerEnabled("testBundle");
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: IsBannerEnabled_00002
+ * @tc.desc: Test IsBannerEnabled with empty bundleName.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationConfigParseTest, IsBannerEnabled_00002, Function | SmallTest | Level1)
+{
+    bool result = NotificationConfigParse::GetInstance()->IsBannerEnabled("");
+    EXPECT_FALSE(result);
+}
 }   //namespace Notification
 }   //namespace OHOS
