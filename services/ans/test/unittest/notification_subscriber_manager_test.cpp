@@ -28,6 +28,7 @@
 #include "ans_subscriber_listener.h"
 #include "mock_i_remote_object.h"
 #include "notification_ai_extension_wrapper.h"
+#include "voice_extension_wrapper.h"
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
 using namespace testing::ext;
@@ -35,23 +36,6 @@ using namespace testing;
 
 namespace OHOS {
 namespace Notification {
-
-int32_t NotificationAiExtensionWrapper::GenerateVoiceContent(
-    const sptr<NotificationRequest>& requests, std::string& content, std::string& externInfo)
-{
-    return ERR_OK;
-}
-
-int32_t NotificationAiExtensionWrapper::UpdateVoiceConfig(const std::string& configs)
-{
-    return ERR_OK;
-}
-
-int32_t NotificationAiExtensionWrapper::NotifyVoiceEvent(const std::string& event,
-    const sptr<NotificationRequest>& request)
-{
-    return ERR_OK;
-}
 
 class MockAnsSubscriberTest : public MockAnsSubscriber  {
 public:
