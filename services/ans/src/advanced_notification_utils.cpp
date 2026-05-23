@@ -1611,10 +1611,11 @@ AnsStatus AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Not
 AnsStatus AdvancedNotificationService::PrePublishRequest(const sptr<NotificationRequest> &request)
 {
     ErrCode result = ERR_OK;
-    if (!InitPublishProcess()) {
+    auto publishProcess = GetPublishProcess(request->GetSlotType());
+    if (publishProcess == nullptr) {
         return AnsStatus(ERR_ANS_NO_MEMORY, "ERR_ANS_NO_MEMORY");
     }
-    AnsStatus ansStatus = publishProcess_[request->GetSlotType()]->PublishPreWork(request, false);
+    AnsStatus ansStatus = publishProcess->PublishPreWork(request, false);
     if (!ansStatus.Ok()) {
         ansStatus.AppendSceneBranch(EventSceneId::SCENE_9, EventBranchId::BRANCH_0, "publish prework failed");
         return ansStatus;

@@ -290,38 +290,56 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
 
 bool AdvancedNotificationService::InitPublishProcess()
 {
-    if (publishProcess_.size() > 0) {
-        return true;
-    }
+    {
+        std::lock_guard<ffrt::mutex> lock(publishProcessMutex_);
+        if (publishProcess_.size() > 0) {
+            return true;
+        }
 
-    std::shared_ptr<LivePublishProcess> livePublishProcess = LivePublishProcess::GetInstance();
-    if (livePublishProcess == nullptr) {
-        ANS_LOGE("InitPublishProcess fail as livePublishProcess is nullptr.");
-        return false;
+        std::shared_ptr<LivePublishProcess> livePublishProcess = LivePublishProcess::GetInstance();
+        if (livePublishProcess == nullptr) {
+            ANS_LOGE("InitPublishProcess fail as livePublishProcess is nullptr.");
+            return false;
+        }
+        publishProcess_.insert_or_assign(NotificationConstant::SlotType::LIVE_VIEW, livePublishProcess);
+        std::shared_ptr<CommonNotificationPublishProcess> commonNotificationPublishProcess =
+            CommonNotificationPublishProcess::GetInstance();
+        if (commonNotificationPublishProcess == nullptr) {
+            ANS_LOGE("InitPublishProcess fail as commonNotificationPublishProcess is nullptr.");
+            publishProcess_.clear();
+            return false;
+        }
+        publishProcess_.insert_or_assign(
+            NotificationConstant::SlotType::SOCIAL_COMMUNICATION, commonNotificationPublishProcess);
+        publishProcess_.insert_or_assign(
+            NotificationConstant::SlotType::SERVICE_REMINDER, commonNotificationPublishProcess);
+        publishProcess_.insert_or_assign(
+            NotificationConstant::SlotType::CONTENT_INFORMATION, commonNotificationPublishProcess);
+        publishProcess_.insert_or_assign(
+            NotificationConstant::SlotType::OTHER, commonNotificationPublishProcess);
+        publishProcess_.insert_or_assign(
+            NotificationConstant::SlotType::CUSTOM, commonNotificationPublishProcess);
+        publishProcess_.insert_or_assign(
+            NotificationConstant::SlotType::CUSTOMER_SERVICE, commonNotificationPublishProcess);
+        publishProcess_.insert_or_assign(
+            NotificationConstant::SlotType::EMERGENCY_INFORMATION, commonNotificationPublishProcess);
     }
-    publishProcess_.insert_or_assign(NotificationConstant::SlotType::LIVE_VIEW, livePublishProcess);
-    std::shared_ptr<CommonNotificationPublishProcess> commonNotificationPublishProcess =
-        CommonNotificationPublishProcess::GetInstance();
-    if (commonNotificationPublishProcess == nullptr) {
-        ANS_LOGE("InitPublishProcess fail as commonNotificationPublishProcess is nullptr.");
-        publishProcess_.clear();
-        return false;
-    }
-    publishProcess_.insert_or_assign(
-        NotificationConstant::SlotType::SOCIAL_COMMUNICATION, commonNotificationPublishProcess);
-    publishProcess_.insert_or_assign(
-        NotificationConstant::SlotType::SERVICE_REMINDER, commonNotificationPublishProcess);
-    publishProcess_.insert_or_assign(
-        NotificationConstant::SlotType::CONTENT_INFORMATION, commonNotificationPublishProcess);
-    publishProcess_.insert_or_assign(
-        NotificationConstant::SlotType::OTHER, commonNotificationPublishProcess);
-    publishProcess_.insert_or_assign(
-        NotificationConstant::SlotType::CUSTOM, commonNotificationPublishProcess);
-    publishProcess_.insert_or_assign(
-        NotificationConstant::SlotType::CUSTOMER_SERVICE, commonNotificationPublishProcess);
-    publishProcess_.insert_or_assign(
-        NotificationConstant::SlotType::EMERGENCY_INFORMATION, commonNotificationPublishProcess);
     return true;
+}
+
+std::shared_ptr<BasePublishProcess> AdvancedNotificationService::GetPublishProcess(
+    NotificationConstant::SlotType slotType)
+{
+    if (!InitPublishProcess()) {
+        return nullptr;
+    }
+    std::lock_guard<ffrt::mutex> lock(publishProcessMutex_);
+    auto it = publishProcess_.find(slotType);
+    if (it == publishProcess_.end()) {
+        ANS_LOGE("No publish process for slot type %{public}d", static_cast<int32_t>(slotType));
+        return nullptr;
+    }
+    return it->second;
 }
 
 ErrCode AdvancedNotificationService::IsAllowedNotifyForBundle(const sptr<NotificationBundleOption>

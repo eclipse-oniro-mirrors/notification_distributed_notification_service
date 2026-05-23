@@ -183,14 +183,14 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         return ansStatus.GetErrCode();
     }
 
-    if (!InitPublishProcess()) {
-        return ERR_ANS_NO_MEMORY;
-    }
-
     request->SetCreateTime(GetCurrentTime());
     
     bool isUpdateByOwnerAllowed = IsUpdateSystemLiveviewByOwner(request);
-    AnsStatus ansStatus = publishProcess_[request->GetSlotType()]->PublishPreWork(request, isUpdateByOwnerAllowed);
+    auto publishProcess = GetPublishProcess(request->GetSlotType());
+    if (publishProcess == nullptr) {
+        return ERR_ANS_NO_MEMORY;
+    }
+    AnsStatus ansStatus = publishProcess->PublishPreWork(request, isUpdateByOwnerAllowed);
     if (!ansStatus.Ok()) {
         ansStatus.AppendSceneBranch(EventSceneId::SCENE_1, EventBranchId::BRANCH_0, "publish prework failed");
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
@@ -215,7 +215,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     }
     CheckRemovalWantAgent(request);
     do {
-        ansStatus = publishProcess_[request->GetSlotType()]->PublishNotificationByApp(request);
+        ansStatus = publishProcess->PublishNotificationByApp(request);
         if (!ansStatus.Ok()) {
             NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
             break;

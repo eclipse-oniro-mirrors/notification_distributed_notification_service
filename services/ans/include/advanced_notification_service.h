@@ -1775,6 +1775,11 @@ public:
     bool InitPublishProcess();
 
     /**
+     * @brief Get publish process by slot type, with lazy initialization.
+     */
+    std::shared_ptr<BasePublishProcess> GetPublishProcess(NotificationConstant::SlotType slotType);
+
+    /**
     * @brief Recover LiveView from DB.
     */
     void RecoverLiveViewFromDb(int32_t userId = -1);
@@ -2649,6 +2654,7 @@ private:
     Infra::FfrtQueueImpl notificationSvrQueue_;
     Infra::TimerImpl timerImpl_;
     std::map<NotificationConstant::SlotType, std::shared_ptr<BasePublishProcess>> publishProcess_;
+    ffrt::mutex publishProcessMutex_;
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;
     DistributedKv::DistributedKvDataManager dataManager_;
