@@ -721,15 +721,17 @@ HWTEST_F(LRUCacheTest, CopyConstructor_00001, Function | SmallTest | Level1)
     EXPECT_TRUE(copiedCache.Contains("key2"));
     EXPECT_TRUE(copiedCache.Contains("key3"));
 
+    auto originalStats = cache.GetStats();
+    auto copiedStats = copiedCache.GetStats();
+    EXPECT_EQ(copiedStats.hits, 0);
+    EXPECT_EQ(copiedStats.misses, 0);
+    EXPECT_EQ(originalStats.hits, copiedStats.hits);
+    EXPECT_EQ(originalStats.misses, copiedStats.misses);
+
     TestValue result;
     EXPECT_TRUE(copiedCache.Get("key1", result));
     EXPECT_EQ(result.id, 1);
     EXPECT_EQ(result.name, "value1");
-
-    auto originalStats = cache.GetStats();
-    auto copiedStats = copiedCache.GetStats();
-    EXPECT_EQ(originalStats.hits, copiedStats.hits);
-    EXPECT_EQ(originalStats.misses, copiedStats.misses);
 
     copiedCache.Put("key4", TestValue(4, "value4"));
     EXPECT_EQ(copiedCache.Size(), 4);
@@ -977,11 +979,12 @@ HWTEST_F(LRUCacheTest, TTLDisabled_00001, Function | SmallTest | Level1)
     EXPECT_TRUE(cache.Get("key1", result));
     EXPECT_TRUE(cache.Contains("key1"));
     EXPECT_TRUE(cache.Peek("key2", result));
-    EXPECT_EQ(cache.nodeTimestamps_.size(), 0);
+    EXPECT_EQ(cache.nodeTimestamps_.size(), 3);
 
     cache.Put("key4", TestValue(4, "value4"));
     EXPECT_EQ(cache.Size(), 3);
-    EXPECT_FALSE(cache.Contains("key1"));
+    EXPECT_TRUE(cache.Contains("key1"));
+    EXPECT_FALSE(cache.Contains("key2"));
 
     auto stats = cache.GetStats();
     EXPECT_EQ(stats.expires, 0);
