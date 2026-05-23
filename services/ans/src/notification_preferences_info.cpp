@@ -425,7 +425,7 @@ bool NotificationPreferencesInfo::GetBundleInfo(
 
 void NotificationPreferencesInfo::SetSilentReminderInfo(SilentReminderInfo &info)
 {
-    std::string bundleKey = info.bundleName.append(std::to_string(info.uid));
+    std::string bundleKey = info.bundleName + std::to_string(info.uid);
     silentReminderInfos_.insert_or_assign(bundleKey, info);
 }
 
@@ -458,7 +458,7 @@ bool NotificationPreferencesInfo::RemoveBundleInfo(const sptr<NotificationBundle
     return bundleCache_.Remove(bundleKey);
 }
 
-bool NotificationPreferencesInfo::IsExsitBundleInfo(const sptr<NotificationBundleOption> &bundleOption) const
+bool NotificationPreferencesInfo::IsExsitBundleInfo(const sptr<NotificationBundleOption> &bundleOption)
 {
     std::string bundleKey = GenerateBundleKey(bundleOption->GetBundleName(), bundleOption->GetUid());
     return bundleCache_.Contains(bundleKey);
@@ -867,13 +867,5 @@ void NotificationPreferencesInfo::GetCacheStats(size_t& hitCount, size_t& missCo
     missCount = stats.misses;
 }
 
-void NotificationPreferencesInfo::EvictExpiredCache()
-{
-    size_t evictedCount = bundleCache_.EvictExpired();
-    if (evictedCount > 0) {
-        ANS_LOGI("LRU cache expired eviction: evicted %{public}zu entries",
-            evictedCount);
-    }
-}
 }  // namespace Notification
 }  // namespace OHOS

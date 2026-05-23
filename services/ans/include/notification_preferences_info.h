@@ -328,7 +328,7 @@ public:
      * @param bundleOption Indicates the bundle info label.
      * @return Whether to exsist bundle info.
      */
-    bool IsExsitBundleInfo(const sptr<NotificationBundleOption> &bundleOption) const;
+    bool IsExsitBundleInfo(const sptr<NotificationBundleOption> &bundleOption);
 
     /**
      * clear bundle info in the of preferences info.
@@ -397,10 +397,9 @@ public:
     void UpdateNotificationStatisticsTime(int64_t offsetTime);
     std::vector<NotificationStatistics> GetNotificationStatisticsAll();
 
-    // LRU Cache internal management (used by expiry task)
+    // LRU Cache internal management
     size_t GetCacheSize() const;
     void GetCacheStats(size_t& hitCount, size_t& missCount) const;
-    void EvictExpiredCache();
 
 private:
     std::string GenerateBundleKey(const std::string& bundleName, int32_t uid) const;

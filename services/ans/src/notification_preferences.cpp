@@ -34,6 +34,7 @@
 #include "os_account_manager_helper.h"
 #include "notification_analytics_util.h"
 #include "notification_config_parse.h"
+#include "itimer_info.h"
 #include "system_sound_helper.h"
 #include "os_account_manager.h"
 #ifdef ALL_SCENARIO_COLLABORATION
@@ -62,7 +63,11 @@ NotificationPreferences::NotificationPreferences()
         NotificationAnalyticsUtil::ReportModifyEvent(message);
     }
     InitSettingFromDisturbDB();
-    StartCacheExpiryTask();
+}
+
+NotificationPreferences::~NotificationPreferences()
+{
+    preferncesDB_ = nullptr;
 }
 
 std::shared_ptr<NotificationPreferences> NotificationPreferences::GetInstance()
@@ -70,8 +75,7 @@ std::shared_ptr<NotificationPreferences> NotificationPreferences::GetInstance()
     if (instance_ == nullptr) {
         std::lock_guard<ffrt::mutex> lock(instanceMutex_);
         if (instance_ == nullptr) {
-            auto instance = std::make_shared<NotificationPreferences>();
-            instance_ = instance;
+            instance_ = std::make_shared<NotificationPreferences>();
         }
     }
     return instance_;
@@ -3166,29 +3170,6 @@ int32_t NotificationPreferences::GetKvFromDb(
     return preferncesDB_->GetKvFromDb(key, value, userId, retCode);
 }
 #endif
-
-void NotificationPreferences::StartCacheExpiryTask()
-{
-    constexpr uint64_t HEARTBEAT_INTERVAL_US = 120 * 1000 * 1000;  // 120 seconds
-
-    cacheExpiryTask_ = ffrt::submit_h([this]() {
-        std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
-
-        // Use LRU cache's built-in TTL eviction
-        preferencesInfo_.EvictExpiredCache();
-
-        // Reschedule next eviction check
-        StartCacheExpiryTask();
-    }, {}, {}, ffrt::task_attr().delay(HEARTBEAT_INTERVAL_US));
-}
-
-void NotificationPreferences::StopCacheExpiryTask()
-{
-    if (cacheExpiryTask_) {
-        ffrt::skip(cacheExpiryTask_);
-        cacheExpiryTask_ = nullptr;
-    }
-}
 
 ErrCode NotificationPreferences::SetCollaborationBlockList(const std::string& blockListJson)
 {

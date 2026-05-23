@@ -50,8 +50,8 @@ public:
     using TimePoint = std::chrono::steady_clock::time_point;
 
     struct Config {
-        size_t maxSize = 50;
-        std::chrono::minutes ttl = std::chrono::minutes(2);
+        size_t maxSize = 100;
+        std::chrono::minutes ttl = std::chrono::minutes(5);
         bool enableTTL = true;
     };
 
@@ -74,6 +74,7 @@ public:
           lruList_(other.lruList_),
           cache_(other.cache_),
           nodeTimestamps_(other.nodeTimestamps_),
+          lastEvictionTime_(other.lastEvictionTime_),
           hitCount_(other.hitCount_),
           missCount_(other.missCount_),
           evictCount_(other.evictCount_),
@@ -94,6 +95,7 @@ public:
             lruList_ = other.lruList_;
             cache_ = other.cache_;
             nodeTimestamps_ = other.nodeTimestamps_;
+            lastEvictionTime_ = other.lastEvictionTime_;
             hitCount_ = other.hitCount_;
             missCount_ = other.missCount_;
             evictCount_ = other.evictCount_;
@@ -116,18 +118,27 @@ public:
      */
     bool Get(const K& key, V& value)
     {
+        MaybeEvictExpired();
         auto it = cache_.find(key);
         if (it == cache_.end()) {
             ++missCount_;
             return false;
         }
         if (config_.enableTTL) {
-            auto age = Clock::now() - nodeTimestamps_[key];
-            if (age > config_.ttl) {
-                Remove(key);
-                ++expireCount_;
+            auto tsIt = nodeTimestamps_.find(key);
+            if (tsIt == nodeTimestamps_.end()) {
+                RemoveInternal(key);
+                ++missCount_;
                 return false;
             }
+            auto age = Clock::now() - tsIt->second;
+            if (age > config_.ttl) {
+                RemoveInternal(key);
+                ++expireCount_;
+                ++missCount_;
+                return false;
+            }
+            tsIt->second = Clock::now();
         }
         Touch(it);
         value = it->second.value;
@@ -141,15 +152,22 @@ public:
      * @param value Output value if found.
      * @return true if found, false otherwise.
      */
-    bool Peek(const K& key, V& value) const
+    bool Peek(const K& key, V& value)
     {
         auto it = cache_.find(key);
         if (it == cache_.end()) {
             return false;
         }
         if (config_.enableTTL) {
-            auto age = Clock::now() - nodeTimestamps_.at(key);
+            auto tsIt = nodeTimestamps_.find(key);
+            if (tsIt == nodeTimestamps_.end()) {
+                RemoveInternal(key);
+                return false;
+            }
+            auto age = Clock::now() - tsIt->second;
             if (age > config_.ttl) {
+                RemoveInternal(key);
+                ++expireCount_;
                 return false;
             }
         }
@@ -171,6 +189,7 @@ public:
             nodeTimestamps_[key] = Clock::now();
             return;
         }
+        MaybeEvictExpired();
         if (cache_.size() >= config_.maxSize) {
             EvictLRU();
         }
@@ -193,6 +212,7 @@ public:
             nodeTimestamps_[key] = Clock::now();
             return;
         }
+        MaybeEvictExpired();
         if (cache_.size() >= config_.maxSize) {
             EvictLRU();
         }
@@ -225,24 +245,33 @@ public:
         lruList_.clear();
         cache_.clear();
         nodeTimestamps_.clear();
+        lastEvictionTime_ = TimePoint{};
     }
 
     /**
      * @brief Check if the cache contains a key.
      * @return true if the key exists and is not expired, false otherwise.
      */
-    bool Contains(const K& key) const
+    bool Contains(const K& key)
     {
+        auto it = cache_.find(key);
+        if (it == cache_.end()) {
+            return false;
+        }
         if (config_.enableTTL) {
             auto tsIt = nodeTimestamps_.find(key);
-            if (tsIt != nodeTimestamps_.end()) {
-                auto age = Clock::now() - tsIt->second;
-                if (age > config_.ttl) {
-                    return false;
-                }
+            if (tsIt == nodeTimestamps_.end()) {
+                RemoveInternal(key);
+                return false;
+            }
+            auto age = Clock::now() - tsIt->second;
+            if (age > config_.ttl) {
+                RemoveInternal(key);
+                ++expireCount_;
+                return false;
             }
         }
-        return cache_.find(key) != cache_.end();
+        return true;
     }
 
     /**
@@ -305,11 +334,15 @@ public:
                 expiredKeys.push_back(entry.first);
             }
         }
+        if (expiredKeys.empty()) {
+            return 0;
+        }
         size_t evictedCount = expiredKeys.size();
         for (const auto& key : expiredKeys) {
-            Remove(key);
+            RemoveInternal(key);
             ++expireCount_;
         }
+        lastEvictionTime_ = now;
         return evictedCount;
     }
 
@@ -329,6 +362,7 @@ public:
     void UpdateConfig(const Config& config)
     {
         config_ = config;
+        EvictExpired();
         while (cache_.size() > config_.maxSize) {
             EvictLRU();
         }
@@ -338,8 +372,9 @@ public:
      * @brief Get all keys currently in the cache.
      * @return Vector of keys.
      */
-    std::vector<K> GetAllKeys() const
+    std::vector<K> GetAllKeys()
     {
+        MaybeEvictExpired();
         std::vector<K> keys;
         keys.reserve(cache_.size());
         for (const auto& entry : cache_) {
@@ -368,12 +403,36 @@ private:
         ++evictCount_;
     }
 
+    void RemoveInternal(const K& key)
+    {
+        auto it = cache_.find(key);
+        if (it == cache_.end()) {
+            return;
+        }
+        lruList_.erase(it->second.listIt);
+        cache_.erase(it);
+        nodeTimestamps_.erase(key);
+    }
+
+    void MaybeEvictExpired()
+    {
+        if (!config_.enableTTL || nodeTimestamps_.empty()) {
+            return;
+        }
+        auto now = Clock::now();
+        if (lastEvictionTime_ != TimePoint{} && (now - lastEvictionTime_) < config_.ttl) {
+            return;
+        }
+        EvictExpired();
+    }
+
 private:
     Config config_;
 
     std::list<K> lruList_;
     std::unordered_map<K, Node> cache_;
     std::unordered_map<K, TimePoint> nodeTimestamps_;
+    TimePoint lastEvictionTime_;
 
     size_t hitCount_ = 0;
     size_t missCount_ = 0;
