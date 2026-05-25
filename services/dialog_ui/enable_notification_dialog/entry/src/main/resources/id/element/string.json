@@ -62,6 +62,13 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"cjy_click_detail",
+            "value":"Lihat perincian >>",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

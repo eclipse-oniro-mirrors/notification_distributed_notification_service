@@ -47,6 +47,10 @@
         {
             "name":"ban_affect",
             "value":"[TS_1151004]_\nIf you select Deny, you won't receive chat message notifications from this app."
+        },
+        {
+            "name":"cjy_click_detail",
+            "value":"[TS_1203948]View details >>"
         }
     ]
 }
