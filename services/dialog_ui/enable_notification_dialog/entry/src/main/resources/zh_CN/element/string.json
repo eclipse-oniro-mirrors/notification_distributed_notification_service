@@ -74,6 +74,13 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"cjy_click_detail",
+            "value":"点击查看详情",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

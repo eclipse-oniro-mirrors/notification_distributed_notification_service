@@ -74,6 +74,13 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"cjy_click_detail",
+            "value":"عرض التفاصيབརྡབས་ནས་ཞིབ་ཕྲའི་གནས་ཚུལ་ལ་ལྟ་ཞིབ་བྱེད།",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }
