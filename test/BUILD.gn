@@ -29,3 +29,29 @@ group("systemtest") {
     #"systemtest\acts\ansDump:ansDumpTest",
   ]
 }
+
+group("distributed_notification_service_unit_test") {
+  testonly = true
+
+  deps = [
+    "//base/notification/distributed_notification_service/services/reminder/test/unittest:unittest",
+    "//base/notification/distributed_notification_service/services/ans/test/unittest:unittest",
+    "//base/notification/distributed_notification_service/services/distributed/test/unittest:ans_unit_test",
+    "//base/notification/distributed_notification_service/services/domain:unittest",
+    "//base/notification/distributed_notification_service/services/infrastructure:unittest",
+    "//base/notification/distributed_notification_service/services/test/moduletest:moduletest",
+    "//base/notification/distributed_notification_service/frameworks/test/moduletest:moduletest",
+    "//base/notification/distributed_notification_service/frameworks/reminder/test/unittest:unittest",
+    "//base/notification/distributed_notification_service/frameworks/ans/test/unittest:unittest",
+    "//base/notification/distributed_notification_service/frameworks/core/test/unittest:unittest",
+    "//base/notification/distributed_notification_service/frameworks/extension/test/unittest:unittest",
+    "//base/notification/distributed_notification_service/tools:unittest",
+    "//base/notification/distributed_notification_service/test/bechmarktest:benchmarktest",
+  ]
+}
+
+group("distributed_notification_service_fuzz_test") {
+  testonly = true
+
+  deps = [ "//base/notification/distributed_notification_service/test/fuzztest:fuzztest" ]
+}
