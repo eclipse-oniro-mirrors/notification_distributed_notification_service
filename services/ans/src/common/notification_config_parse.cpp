@@ -568,6 +568,35 @@ bool __attribute__((weak)) NotificationConfigParse::GetCloneExpiredTime(int32_t&
     return true;
 }
 
+bool __attribute__((weak)) NotificationConfigParse::GetDataCloneBundleName(std::string &bundleName)
+{
+    nlohmann::json root;
+    std::string jsonPoint = "/";
+    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
+    jsonPoint.append("/");
+    jsonPoint.append(CFG_KEY_DATACLONE_BUNDLE_NAME);
+    if (!GetConfigJson(jsonPoint, root)) {
+        ANS_LOGE("Failed to get JsonPoint CCM config file.");
+        return false;
+    }
+    if (root.find(CFG_KEY_NOTIFICATION_SERVICE) == root.end()) {
+        ANS_LOGE("Failed to find notificationService in CCM config.");
+        return false;
+    }
+    nlohmann::json jsonItem = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_DATACLONE_BUNDLE_NAME];
+    if (jsonItem.is_null() || !jsonItem.is_string()) {
+        ANS_LOGE("datacloneBundleName is missing or not a string in CCM config.");
+        return false;
+    }
+    bundleName = jsonItem.get<std::string>();
+    if (bundleName.empty()) {
+        ANS_LOGE("datacloneBundleName is empty in CCM config.");
+        return false;
+    }
+    ANS_LOGI("Got datacloneBundleName from CCM: %{public}s.", bundleName.c_str());
+    return true;
+}
+
 bool __attribute__((weak)) NotificationConfigParse::GetCollaborativeDeleteTypeByDevice(std::map<std::string,
     std::map<std::string, std::unordered_set<std::string>>>& resultMap) const
 {

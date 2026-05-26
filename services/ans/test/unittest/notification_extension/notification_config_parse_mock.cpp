@@ -212,6 +212,11 @@ bool NotificationConfigParse::GetNotificationExtensionEnabledBundlesWriteList(
 {
     return true;
 }
+
+bool NotificationConfigParse::GetDataCloneBundleName(std::string& bundleName)
+{
+    return false;
+}
 } // namespace Notification
 } // namespace OHOS
 
