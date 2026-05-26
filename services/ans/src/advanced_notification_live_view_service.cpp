@@ -75,6 +75,15 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
                 NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, ansStatus.BuildMessage(true));
                 continue;
             }
+#ifndef ANS_FEATURE_DIST_NOTIFICATION_PERSIST
+            // 宏关闭时：非 LiveView 通知不恢复，直接从 DB 删除以保证向后兼容
+            if (!requestObj.request->IsCommonLiveView()) {
+                int32_t userId = requestObj.request->GetReceiverUserId();
+                DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
+                    requestObj.request->GetSecureKey(), userId);
+                continue;
+            }
+#endif
             if (IsCanRecoverSnooze(record)) {
                 continue;
             }
