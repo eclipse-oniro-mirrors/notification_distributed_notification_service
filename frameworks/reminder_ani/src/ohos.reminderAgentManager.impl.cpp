@@ -152,17 +152,17 @@ int32_t PublishReminderSync(::ohos::reminderAgentManager::manager::ParamReminder
     if (!helper.CreateReminder(reminderReq, reminder)) {
         int32_t ret = ReminderAgentManagerNapi::Common::ERR_REMINDER_INVALID_PARAM;
         ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret, helper.GetErrorMsg()));
-        HistogramBoolReport("BackgroundTasksKit.APICall.publishReminder", false);
+        HistogramBoolReport("BackgroundTasksKit.reminderAgentManager.publishReminder", false);
         return -1;
     }
     int32_t reminderId = -1;
     int32_t ret = OHOS::Notification::ReminderHelper::PublishReminder(*reminder, reminderId);
     if (ret != ERR_OK) {
         ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
-        HistogramBoolReport("BackgroundTasksKit.APICall.publishReminder", false);
+        HistogramBoolReport("BackgroundTasksKit.reminderAgentManager.publishReminder", false);
         return -1;
     }
-    HistogramBoolReport("BackgroundTasksKit.APICall.publishReminder", true);
+    HistogramBoolReport("BackgroundTasksKit.reminderAgentManager.publishReminder", true);
     return reminderId;
 }
 

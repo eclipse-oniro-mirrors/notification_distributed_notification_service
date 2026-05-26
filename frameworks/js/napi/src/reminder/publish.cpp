@@ -1034,7 +1034,7 @@ napi_value PublishReminderInner(napi_env env, napi_callback_info info, bool isTh
     AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
     if (!asynccallbackinfo) {
         ANSR_LOGE("Low memory.");
-        HistogramBoolReport("BackgroundTasksKit.APICall.publishReminder", false);
+        HistogramBoolReport("BackgroundTasksKit.reminderAgentManager.publishReminder", false);
         return NotificationNapi::Common::NapiGetNull(env);
     }
     std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
@@ -1043,7 +1043,7 @@ napi_value PublishReminderInner(napi_env env, napi_callback_info info, bool isTh
     Parameters params;
     if (ParseParameters(env, info, params, *asynccallbackinfo, isThrow) == nullptr) {
         napi_create_int32(env, -1, &(asynccallbackinfo->result));
-        HistogramBoolReport("BackgroundTasksKit.APICall.publishReminder", false);
+        HistogramBoolReport("BackgroundTasksKit.reminderAgentManager.publishReminder", false);
         return DealErrorReturn(env, asynccallbackinfo->callback, asynccallbackinfo->result, isThrow);
     }
 
@@ -1082,7 +1082,7 @@ napi_value PublishReminderInner(napi_env env, napi_callback_info info, bool isTh
                 } else {
                     napi_create_int32(env, -1, &(asynccallbackinfo->result));
                 }
-                HistogramBoolReport("BackgroundTasksKit.APICall.publishReminder",
+                HistogramBoolReport("BackgroundTasksKit.reminderAgentManager.publishReminder",
                     asynccallbackinfo->info.errorCode == ERR_OK);
 
                 ReminderCommon::ReturnCallbackPromise(
