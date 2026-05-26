@@ -2479,6 +2479,9 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SetNotificationRequestToDbCommon_4
  */
 HWTEST_F(AdvancedNotificationServiceUnitTest, SetNotificationRequestToDbCommon_500, Function | SmallTest | Level1)
 {
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    IPCSkeleton::SetCallingUid(5557);
     advancedNotificationService_->notificationList_.clear();
     sptr<NotificationRequest> request = new NotificationRequest(1);
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
