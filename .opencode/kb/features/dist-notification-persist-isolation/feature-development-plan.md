@@ -11,6 +11,7 @@
 通过编译宏 `ANS_FEATURE_DIST_NOTIFICATION_PERSIST` 隔离以下路径：
 1. **非 LiveView 通知的 DB 写入路径**：`SetNotificationRequestToDbCommon()` 中非 LiveView 分支
 2. **稍后提醒(Snooze)的 DB 写入路径**：`SetEncryptToDB()` 函数体
+3. **非 LiveView 通知的恢复路径**：`RecoverLiveViewFromDb()` 中宏关闭时删除非 LiveView 记录
 
 为轻量设备等不支持分布式通知持久化的产品提供按需裁剪能力,同时保证三方实况(LiveView)持久化功能不受任何影响。
 
@@ -19,24 +20,27 @@
 ✅ **包含(Scope In)**：
 - 非 LiveView 通知的 DB 写入隔离（`SetNotificationRequestToDbCommon` else 分支）
 - Snooze 的 DB 写入隔离（`SetEncryptToDB` 函数体）
+- 非 LiveView 通知的恢复路径隔离（`RecoverLiveViewFromDb` 中宏关闭时删除非 LiveView 记录以保证向后兼容）
 - 编译宏声明（gni 变量 + BUILD.gn defines + C++ 宏）
 
 ❌ **不包含(Scope Out)**：
 - 三方实况（IsCommonLiveView）持久化（保持不变）
 - 系统实况（IsSystemLiveView）持久化（保持不变）
 - DB 删除路径（保留,以便清理可能的残留数据）
-- **所有恢复路径**（保持不变,不做编译宏隔离）
+- Snooze 恢复路径中的定时器启动（`StartSnoozeTimer` 保持不变）
 - 单元测试更新
 - 运行时配置
 
-> **变更记录**：用户在开发计划确认阶段明确指示"恢复的时候不做编译宏隔离"，因此原方案中的 Snooze 恢复隔离（`IsCanRecoverSnooze` L78-L80、`StartSnoozeTimer` L126）已被移除。最终隔离点从 4 处缩减为 2 处。
+> **变更记录**：
+> - v1：原方案包含 Snooze 恢复隔离（`IsCanRecoverSnooze` L78-L80、`StartSnoozeTimer` L126），用户终审移除，隔离点从 4→2。
+> - v2：用户追加方案变更——为保证向后兼容，宏关闭时恢复路径中遇到非 LiveView 记录直接从 DB 删除，不再恢复。隔离点从 2→3。
 
 ### 1.3 关键约束
 
 - **编译宏默认值**：`false`（默认关闭）
 - **宏独立**：与 `ANS_FEATURE_ORIGINAL_DISTRIBUTED` 等其他 feature flag 相互独立
 - **返回值约束**：宏关闭时,隔离路径返回成功（`ERR_OK` 或 `true`）,调用方无需改动
-- **向后兼容**：不考虑,默认关闭
+- **向后兼容**：宏关闭时，恢复路径中遇到已持久化的非 LiveView 记录直接从 DB 删除，保证旧数据不残留
 
 ### 1.4 开发者交互确认摘要
 
@@ -47,7 +51,8 @@
 | **P3** | 文件与集成 | 5 个文件（F1-F5）,`notification_extension_test` 也添加 define |
 | **P4** | 任务拆分 | 原 7 任务,用户要求合并后 T004 包含 F4 所有隔离点 |
 | **P5** | 测试执行 | `test_first=false`,静态验证,无编译验证,验证清单充分 |
-| **用户终审** | 方案确认 | **恢复路径全部不隔离**,移除 F4-1/F4-2,隔离点从 4→2,任务 7→5 |
+| **用户终审** | 方案确认 | 恢复路径不做编译宏隔离,移除 F4-1/F4-2,隔离点从 4→2,任务 7→5 |
+| **方案变更 v2** | 向后兼容 | 宏关闭时恢复路径中非 LiveView 记录直接从 DB 删除,隔离点从 2→3 |
 
 ---
 
@@ -64,7 +69,7 @@ flowchart TB
     end
 
     subgraph "Implementation Layer (F4, F5)"
-        F4[advanced_notification_live_view_service.cpp<br/>1 isolation point]
+        F4[advanced_notification_live_view_service.cpp<br/>2 isolation points]
         F5[snooze_delay_manager.cpp<br/>1 isolation point]
     end
 
@@ -74,12 +79,14 @@ flowchart TB
     F2 -->|ANS_FEATURE_DIST_NOTIFICATION_PERSIST| F5
     F3 -->|ENSURE BUILD TEST| F4
 
-    subgraph "Isolated Code Paths (2 total)"
-        I3["F4-1: SetNotificationRequestToDbCommon<br/>non-LiveView branch<br/>(L407-L442)"]
-        I4["F5-1: SetEncryptToDB() function body<br/>(L191-L224)"]
+    subgraph "Isolated Code Paths (3 total)"
+        I1["F4-1: RecoverLiveViewFromDb<br/>non-LiveView delete on recovery<br/>(L78-L86 #ifndef)"]
+        I3["F4-2: SetNotificationRequestToDbCommon<br/>non-LiveView branch<br/>(L416-L451 #ifdef)"]
+        I4["F5-1: SetEncryptToDB() function body<br/>(L193-L224 #ifdef)"]
     end
 
-    F4 -->|F4-1| I3
+    F4 -->|F4-1| I1
+    F4 -->|F4-2| I3
     F5 -->|F5-1| I4
 ```
 
@@ -103,7 +110,7 @@ BUILD.gn (defines += "ANS_FEATURE_DIST_NOTIFICATION_PERSIST")
 **不改变任何现有架构**,仅通过编译宏隔离特定分支：
 
 1. **写入路径隔离**：`SetNotificationRequestToDbCommon()` 与 `SetEncryptToDB()` 的函数体用 `#ifdef` 包裹,宏关闭时函数仍被调用但函数体为空操作
-2. **恢复路径**：**保持原样,不做编译宏隔离**。`IsCanRecoverSnooze()` 与 `StartSnoozeTimer()` 等恢复相关代码不受影响
+2. **恢复路径隔离**：`RecoverLiveViewFromDb()` 中用 `#ifndef` 检查非 LiveView 记录,宏关闭时直接从 DB 删除并 continue,不恢复。保证向后兼容——已持久化的旧数据不会残留
 
 **保留的调用链**：
 - 宏关闭时,`SetNotificationRequestToDbCommon()` 仍然被调用,但函数体为空（`#else return ERR_OK`）,调用方无需改动
@@ -164,13 +171,38 @@ BUILD.gn (defines += "ANS_FEATURE_DIST_NOTIFICATION_PERSIST")
 
 ---
 
-### 3.4 F4: `advanced_notification_live_view_service.cpp` 隔离（1 处）
+### 3.4 F4: `advanced_notification_live_view_service.cpp` 隔离（2 处）
 
 **文件路径**：`services/ans/src/advanced_notification_live_view_service.cpp`
 
-> **变更记录**：用户在终审阶段明确"恢复路径全部不做编译宏隔离"，因此原计划中的 F4-1（`IsCanRecoverSnooze` L78-L80）和 F4-2（`StartSnoozeTimer` L126）两处隔离点已移除，仅保留 F4-1（即原 F4-3 写入路径）。
+> **变更记录**：
+> - v1：仅 1 处隔离（写入路径），恢复路径不做隔离
+> - v2：新增 1 处恢复路径隔离（宏关闭时删除非 LiveView 记录），隔离点从 1→2
 
-#### F4-1: 非 LiveView 写入路径隔离（L407-L442）
+#### F4-1: 恢复路径非 LiveView 删除隔离（L78-L86）
+
+**当前位置**：`RecoverLiveViewFromDb()` 函数内部,在 `FillNotificationRecord` 成功后、`IsCanRecoverSnooze` 之前：
+
+**修改后代码**：
+```cpp
+            }
+#ifndef ANS_FEATURE_DIST_NOTIFICATION_PERSIST
+            // 宏关闭时：非 LiveView 通知不恢复，直接从 DB 删除以保证向后兼容
+            if (!requestObj.request->IsCommonLiveView()) {
+                int32_t userId = requestObj.request->GetReceiverUserId();
+                DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
+                    requestObj.request->GetSecureKey(), userId);
+                continue;
+            }
+#endif
+            if (IsCanRecoverSnooze(record)) {
+```
+
+**宏关闭时行为**：非 LiveView 记录（包括 Snooze）不恢复,直接从 DB 删除并 continue,跳过后续所有恢复操作。保证向后兼容——已持久化的旧数据不会残留。
+
+**宏开启时行为**：`#ifndef` 块被编译器剔除,恢复流程与原代码完全一致。
+
+#### F4-2: 非 LiveView 写入路径隔离（L416-L451）
 
 **当前位置**：`SetNotificationRequestToDbCommon()` 函数内部,L407-L442（`IsCommonLiveView()` 之后,函数末尾之前）
 
@@ -405,7 +437,7 @@ flowchart TD
     subgraph Phase2["Phase 2: Parallel Implementation (3 tasks)"]
         T002[T002: services/ans/BUILD.gn<br/>add defines block]
         T003[T003: test/unittest/BUILD.gn<br/>notification_extension_test defines]
-        T004[T004: live_view_service.cpp<br/>1 isolation point]
+        T004[T004: live_view_service.cpp<br/>2 isolation points]
     end
 
     subgraph Phase3["Phase 3: Snooze Isolation + Validation"]
@@ -429,7 +461,7 @@ flowchart TD
 2. **Phase 2（T002-T004）**：3 个并行任务
    - T002：添加主服务 BUILD.gn 的 defines 块
    - T003：添加测试 BUILD.gn 的 defines 块
-   - T004：隔离 `advanced_notification_live_view_service.cpp` 的写入路径（1 处）
+   - T004：隔离 `advanced_notification_live_view_service.cpp` 的写入路径（1 处）+ 恢复路径（1 处）
 3. **Phase 3（T005）**：隔离 `snooze_delay_manager.cpp` 的写入路径 + 静态语法验证
 4. **完成**：所有文件修改完毕,进入集成测试阶段
 
@@ -450,14 +482,16 @@ flowchart TD
 
 ### 5.1 任务列表
 
-> **变更记录**：用户在终审阶段将原 7 任务缩减为 5 任务——移除恢复路径隔离（F4-1/F4-2），合并 T005/T006 为新的 T005。
+> **变更记录**：
+> - v1：用户在终审阶段将原 7 任务缩减为 5 任务——移除恢复路径隔离（F4-1/F4-2），合并 T005/T006 为新的 T005。
+> - v2：追加恢复路径非 LiveView 删除隔离（F4-1），T004 隔离点从 1→2，总隔离点从 2→3。
 
 | ID | 任务名称 | 类型 | 修改文件 | 依赖 | 风险 |
 |----|---------|------|---------|------|------|
 | T001 | gni 变量声明 | config | F1: `notification.gni` | 无 | low |
 | T002 | 主服务 BUILD.gn defines | config | F2: `services/ans/BUILD.gn` | T001 | low |
 | T003 | 测试 BUILD.gn defines | config | F3: `services/ans/test/unittest/BUILD.gn` | T001 | low |
-| T004 | F4: 非 LiveView 写入路径隔离 | core_implementation | F4: `advanced_notification_live_view_service.cpp`（1 处） | T001 | medium |
+| T004 | F4: 非 LiveView 写入路径 + 恢复路径隔离 | core_implementation | F4: `advanced_notification_live_view_service.cpp`（2 处） | T001 | medium |
 | T005 | F5: Snooze 写入隔离 + 静态验证 | core + validation | F5: `snooze_delay_manager.cpp` + 只读 F1-F5 | T002, T003, T004 | medium |
 
 ### 5.2 DAG 任务图
@@ -467,7 +501,7 @@ graph TD
     T001[T001: gni 变量声明<br/>notification.gni]:::config
     T002[T002: 主服务 BUILD.gn defines<br/>services/ans/BUILD.gn]:::config
     T003[T003: 测试 BUILD.gn defines<br/>test/unittest/BUILD.gn]:::config
-    T004[T004: F4: 写入路径隔离<br/>1 isolation point]:::impl
+    T004[T004: F4: 写入+恢复路径隔离<br/>2 isolation points]:::impl
     T005[T005: F5: Snooze 写入隔离<br/>+ 静态验证]:::impl
 
     T001 --> T002
@@ -543,15 +577,15 @@ graph TD
 |------|---------|---------|
 | 1 | `notification.gni` 变量名拼写正确,默认值为 `false` | grep 检查 |
 | 2 | 两个 BUILD.gn 中 `if` / `defines +=` 格式正确,宏名与 cpp 中 `#ifdef` 完全一致 | grep 检查 |
-| 3 | F4 中 1 处 `#ifdef` / `#else` / `#endif` 严格配对,位置准确 | 读取代码检查 |
+| 3 | F4 中 2 处 `#ifdef`/`#ifndef` / `#else` / `#endif` 严格配对,位置准确 | 读取代码检查 |
 | 4 | F5 中 1 处 `#ifdef` / `#else` / `#endif` 严格配对,位置准确 | 读取代码检查 |
 | 5 | F5 的 `SetEncryptToDB()` `#else` 分支返回 `true`,不引用任何被 ifdef 保护的局部变量 | 读取代码检查 |
-| 6 | F4 的恢复路径（`RecoverLiveViewFromDb()`）未被修改 | diff 验证 |
+| 6 | F4 的恢复路径 `#ifndef` 非LiveView删除逻辑正确：`IsCommonLiveView()` 检查 + `DoubleDeleteNotificationFromDb()` + `continue` | 读取代码检查 |
 | 7 | F5 的 `SetEncryptToDB()` 函数签名与闭合括号保持在 `#ifdef` 外 | 读取代码检查 |
 
 **额外验证（防御性）**：
 - 8. 删除路径未被修改：diff 验证 `DeleteSnoozeNotificationFromDB()`, `ProcForDeleteNotificationFromDb()` 等函数未添加 `#ifdef`
-- 9. 检查所有 `#ifdef ANS_FEATURE_DIST_NOTIFICATION_PERSIST` 出现次数,应当恰好为 2 次（F4-1 + F5-1）
+- 9. 检查所有 `#ifdef ANS_FEATURE_DIST_NOTIFICATION_PERSIST` 出现次数,应当恰好为 2 次（F4-2 + F5-1）；检查 `#ifndef ANS_FEATURE_DIST_NOTIFICATION_PERSIST` 出现次数,应当恰好为 1 次（F4-1）
 
 ### 6.3 功能验证方向（如构建环境可用时）
 
@@ -572,20 +606,20 @@ graph TD
 | 验收编号 | 验收标准 | 编译宏状态 | 验证方式 |
 |---------|---------|----------|---------|
 | AT-1 | 非 LiveView 通知发布时,DB 中无对应写入记录 | 关闭 | 功能测试（如可构建） |
-| AT-2 | 进程重启后,非 LiveView 通知不恢复、不展示 | 关闭 | 功能测试（如可构建） |
+| AT-2 | 进程重启后,非 LiveView 通知不恢复、不展示,且旧数据从 DB 中被删除 | 关闭 | 功能测试（如可构建） |
 | AT-3 | Snooze 通知发布时,本次会话内"稍后提醒"仍生效 | 关闭 | 功能测试（如可构建） |
 | AT-4 | 三方 LiveView 通知发布时,DB 正常写入 | 关闭/开启 | 功能测试 |
 | AT-5 | 进程重启后,三方 LiveView 通知正常恢复 | 关闭/开启 | 功能测试 |
 | AT-6 | 非 LiveView 通知发布时,DB 正常写入 | 开启 | 功能测试（如可构建） |
 | AT-7 | 进程重启后,非 LiveView 通知正常恢复 | 开启 | 功能测试（如可构建） |
-| AT-8 | 静态语法验证 7 项全部通过 | 任意 | 静态验证（T005） |
+| AT-8 | 静态语法验证 7 项全部通过（含恢复路径 #ifndef 验证） | 任意 | 静态验证（T005） |
 
 ### 6.5 任务级验收证据
 
 - **T001**：`notification.gni` 中 `distributed_notification_service_feature_dist_notification_persist = false` 存在
 - **T002**：`services/ans/BUILD.gn` 中 `ANS_FEATURE_DIST_NOTIFICATION_PERSIST` 条件块存在
 - **T003**：`services/ans/test/unittest/BUILD.gn` 中 `notification_extension_test` target 包含同一宏
-- **T004**：`advanced_notification_live_view_service.cpp` 中 1 处隔离点正确,`#ifdef` 配对完整,恢复路径未改动
+- **T004**：`advanced_notification_live_view_service.cpp` 中 2 处隔离点正确,`#ifdef`/`#ifndef` 配对完整,恢复路径 `#ifndef` 非LiveView删除逻辑正确
 - **T005**：`snooze_delay_manager.cpp` 中 `SetEncryptToDB()` 隔离正确 + 7 项静态验证全部通过
 
 ---
@@ -594,7 +628,7 @@ graph TD
 
 ### 7.1 需要更新的文档
 
-- **架构决策文档**：同步更新 `RecoverLiveViewFromDb()` 隔离范围（本次确认恢复路径非 Snooze 部分不隔离,与最初架构文档描述的"恢复隔离"有所调整）
+- **架构决策文档**：同步更新 `RecoverLiveViewFromDb()` 隔离范围（v2 变更：恢复路径新增 `#ifndef` 非LiveView删除隔离，保证向后兼容）
 - **AGENTS.md**：可选,提及 `ANS_FEATURE_DIST_NOTIFICATION_PERSIST` 编译宏
 
 ### 7.2 示例代码
@@ -620,7 +654,7 @@ bool AdvancedNotificationService::SetEncryptToDB(const NotificationRequestDb &re
 
 | 风险 | 等级 | 应对策略 |
 |------|------|---------|
-| 存量产品未开启宏导致行为变更 | 低 | 用户已确认不考虑兼容性,各产品按需在构建配置中开启 |
+| 存量产品未开启宏导致行为变更 | 低 | 宏关闭时恢复路径会删除非 LiveView 旧数据,保证向后兼容——旧数据不残留 |
 | `#ifdef` 条件遗漏导致部分路径未隔离 | 中 | 7 项静态验证检查清单,逐项核对 |
 | 误隔离 LiveView 路径 | 低 | F4-3 仅包裹 `IsCommonLiveView()` 之后的 else 分支,LiveView 分支不受影响 |
 | 变量跨 ifdef 引用导致编译错误 | 低 | 所有 `#else` 分支不引用 ifdef 内变量,使用字面量 |
@@ -632,10 +666,11 @@ bool AdvancedNotificationService::SetEncryptToDB(const NotificationRequestDb &re
 
 | 维度 | 原架构文档描述 | 最终开发方案 | 变更原因 |
 |------|--------------|-----------|---------|
-| **恢复路径（全部）** | "RecoverLiveViewFromDb 中非 LiveView 恢复逻辑的隔离" | **所有恢复路径保持原样，不做编译宏隔离**（包括 Snooze 恢复） | 用户终审明确：恢复的时候不做编译宏隔离 |
+| **恢复路径（非 LiveView）** | "RecoverLiveViewFromDb 中非 LiveView 恢复逻辑的隔离" | **新增 #ifndef 非LiveView删除隔离**：宏关闭时非 LiveView 记录从 DB 删除并 continue | v2 变更：保证向后兼容,旧数据不残留 |
+| **恢复路径（Snooze）** | "RecoverLiveViewFromDb 中 Snooze 恢复逻辑的隔离" | **保持原样,不做编译宏隔离**（`IsCanRecoverSnooze`、`StartSnoozeTimer` 不受影响） | 用户终审明确：Snooze 恢复不做编译宏隔离 |
 | **Snooze 删除路径** | 未提及 | 保留原样,不隔离 | P3+终审确认：与架构文档"删除路径保留"策略一致 |
 | **Snooze 写入** | 未提及 | 新增隔离点（`SetEncryptToDB`） | 用户需求扩展 |
-| **隔离点总数** | 最初 4 处（F4×3 + F5×1）| **最终 2 处**（F4×1 + F5×1）| 移除恢复路径隔离 |
+| **隔离点总数** | 最初 4 处（F4×3 + F5×1）| **最终 3 处**（F4×2 + F5×1）| v1 移除 Snooze 恢复隔离→2处；v2 新增非LiveView删除→3处 |
 | **任务数** | 最初 7 个（T001-T007）| **最终 5 个**（T001-T005）| 恢复隔离和独立验证任务移除 |
 
 ---
@@ -647,10 +682,10 @@ bool AdvancedNotificationService::SetEncryptToDB(const NotificationRequestDb &re
 | F1 | `notification.gni` | 0 | L69 | 新增 gni 变量声明 |
 | F2 | `services/ans/BUILD.gn` | 0 | L245-L247 | 新增条件 defines 块 |
 | F3 | `services/ans/test/unittest/BUILD.gn` | 0 | L2160-L2162 | 新增条件 defines 块（notification_extension_test） |
-| F4 | `services/ans/src/advanced_notification_live_view_service.cpp` | **1** | L407-L442 | 1 处 #ifdef 包裹（非 LiveView 写入） |
-| F5 | `services/ans/src/snooze_delay_manager.cpp` | **1** | L191-L224 | 1 处 #ifdef 包裹函数体 |
+| F4 | `services/ans/src/advanced_notification_live_view_service.cpp` | **2** | L78-L86 (#ifndef), L416-L451 (#ifdef) | 1 处 #ifndef 非LiveView删除（恢复路径）+ 1 处 #ifdef 包裹（非 LiveView 写入） |
+| F5 | `services/ans/src/snooze_delay_manager.cpp` | **1** | L193-L224 | 1 处 #ifdef 包裹函数体 |
 
-> 总计 **2 处隔离点**，恢复路径全部不隔离。
+> 总计 **3 处隔离点**：2 处写入路径 #ifdef + 1 处恢复路径 #ifndef。
 
 ## 附录 B: 验证项汇总（最终版）
 
@@ -658,10 +693,10 @@ bool AdvancedNotificationService::SetEncryptToDB(const NotificationRequestDb &re
 |-------|---------|---------|
 | 1. gni 变量名与默认值 | 必选 | F1 |
 | 2. BUILD.gn defines 格式 | 必选 | F2, F3 |
-| 3. F4 隔离点配对完整（1 处） | 必选 | F4 |
+| 3. F4 隔离点配对完整（2 处：#ifndef + #ifdef） | 必选 | F4 |
 | 4. F5 隔离点配对完整（1 处） | 必选 | F5 |
 | 5. `#else` 分支不引用 ifdef 内变量 | 必选 | F5 |
-| 6. 恢复路径未被修改 | 必选 | F4 |
+| 6. F4 恢复路径 #ifndef 非LiveView删除逻辑正确 | 必选 | F4 |
 | 7. F5 函数签名与闭合括号保留 | 必选 | F5 |
 | 8. 删除路径未被修改 | 可选（防御性） | F4, F5 |
-| 9. `#ifdef` 出现总次数 = **2** | 可选（防御性） | F4, F5 |
+| 9. `#ifdef` 出现总次数 = **2**，`#ifndef` 出现总次数 = **1** | 可选（防御性） | F4, F5 |
