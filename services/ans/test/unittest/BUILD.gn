@@ -2157,6 +2157,10 @@ ohos_unittest("notification_extension_test") {
     defines += [ "ANS_FEATURE_PRIORITY_NOTIFICATION" ]
   }
 
+  if (distributed_notification_service_feature_dist_notification_persist) {
+    defines += [ "ANS_FEATURE_DIST_NOTIFICATION_PERSIST" ]
+  }
+
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${frameworks_module_ans_path}:ans_manager_stub",
