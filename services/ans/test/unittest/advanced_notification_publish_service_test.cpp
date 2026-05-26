@@ -265,6 +265,8 @@ HWTEST_F(AnsPublishServiceTest, Publish_00009, Function | SmallTest | Level1)
 
     auto ret = advancedNotificationService_->Publish(label, request);
     ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingUid(5557);
     ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
     ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 
@@ -2491,6 +2493,8 @@ HWTEST_F(AnsPublishServiceTest, CollaboratePublish_00003, Function | SmallTest |
  */
 HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00001, Function | SmallTest | Level1)
 {
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingUid(5557);
     auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(nullptr);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
@@ -2515,6 +2519,8 @@ HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00001, Funct
  */
 HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00002, Function | SmallTest | Level1)
 {
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingUid(5557);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetCreatorUid(0);
     auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
@@ -2530,6 +2536,8 @@ HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00002, Funct
  */
 HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00003, Function | SmallTest | Level1)
 {
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingUid(5557);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetCreatorUid(1);
     request->SetCreatorBundleName("testBundle");
@@ -2555,6 +2563,8 @@ HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00003, Funct
  */
 HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00004, Function | SmallTest | Level1)
 {
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingUid(5557);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetCreatorUid(1);
     request->SetCreatorBundleName("testBundle");
@@ -2573,6 +2583,8 @@ HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00004, Funct
  */
 HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00005, Function | SmallTest | Level1)
 {
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingUid(5557);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetCreatorUid(1);
     request->SetCreatorBundleName("testBundle");
@@ -2588,6 +2600,83 @@ HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00005, Funct
     ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
 
     EXTENTION_WRAPPER->notificationContentControl_ = originalNotificationContentControl;
+}
+
+/**
+ * @tc.name: PublishNotificationForIndirectProxy_00006
+ * @tc.desc: Test PublishNotificationForIndirectProxy,
+ *  permission check failed, expected ERR_ANS_PERMISSION_DENIED
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00006, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(false);
+    IPCSkeleton::SetCallingUid(5557);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorUid(1);
+    request->SetCreatorBundleName("testBundle");
+
+    auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: PublishNotificationForIndirectProxy_00007
+ * @tc.desc: Test PublishNotificationForIndirectProxy,
+ *  not native token (HAP token), expected ERR_ANS_NOT_SYSTEM_SERVICE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00007, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    IPCSkeleton::SetCallingUid(5557);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorUid(1);
+    request->SetCreatorBundleName("testBundle");
+
+    auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_NOT_SYSTEM_SERVICE);
+}
+
+/**
+ * @tc.name: PublishNotificationForIndirectProxy_00008
+ * @tc.desc: Test PublishNotificationForIndirectProxy,
+ *  uid is not ANCO_UID (5557), expected ERR_ANS_NOT_SYSTEM_SERVICE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00008, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    IPCSkeleton::SetCallingUid(1000);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorUid(1);
+    request->SetCreatorBundleName("testBundle");
+
+    auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_NOT_SYSTEM_SERVICE);
+}
+
+/**
+ * @tc.name: PublishNotificationForIndirectProxy_00009
+ * @tc.desc: Test PublishNotificationForIndirectProxy,
+ *  permission and uid check passed, native token with ANCO_UID,
+ *  request is nullptr, expected ERR_ANS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00009, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    IPCSkeleton::SetCallingUid(5557);
+
+    auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(nullptr);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**

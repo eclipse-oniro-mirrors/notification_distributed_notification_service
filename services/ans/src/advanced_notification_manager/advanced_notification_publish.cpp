@@ -41,6 +41,7 @@ namespace Notification {
 
 constexpr char FOUNDATION_BUNDLE_NAME[] = "ohos.global.systemres";
 constexpr int32_t RESSCHED_UID = 1096;
+constexpr int32_t ANCO_UID = 5557;
 constexpr int32_t OPERATION_TYPE_COMMON_EVENT = 4;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 
@@ -309,6 +310,17 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     OHOS::HiviewDFX::HiTraceId traceId = OHOS::HiviewDFX::HiTraceChain::GetId();
     ANS_LOGD("called");
 
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission denied.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (!isSubSystem || callingUid != ANCO_UID) {
+        ANS_LOGE("not subsystem or wrong callingUid. callingUid = %{public}d", callingUid);
+        return ERR_ANS_NOT_SYSTEM_SERVICE;
+    }
+
     auto fullTokenID = IPCSkeleton::GetCallingFullTokenID();
     if (Security::AccessToken::AccessTokenKit::IsAtomicServiceByFullTokenID(fullTokenID)) {
         ANS_LOGE("AtomicService is not allowed to publish notification");
@@ -330,11 +342,6 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         return ansStatus.GetErrCode();
     }
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
-    bool isSystemApp = AccessTokenHelper::IsSystemApp();
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(tokenCaller);
-    if (!isSystemApp  && !isSubsystem && request->GetExtendInfo() != nullptr) {
-        request->SetExtendInfo(nullptr);
-    }
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
     // SA not support sound
