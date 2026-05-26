@@ -32,8 +32,9 @@ ScreenManagerDynamicWrapper& ScreenManagerDynamicWrapper::GetInstance()
 
 NotificationScreenPowerState ScreenManagerDynamicWrapper::GetScreenPower()
 {
-    IPCSkeleton::ResetCallingIdentity();
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
     Rosen::ScreenPowerState powerState = Rosen::ScreenManager::GetInstance().GetScreenPower();
+    IPCSkeleton::SetCallingIdentity(identity);
     ANS_LOGI("GetScreenPower result: %{public}d", static_cast<int32_t>(powerState));
 
     switch (powerState) {
