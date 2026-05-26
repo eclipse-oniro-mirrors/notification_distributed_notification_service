@@ -26,6 +26,9 @@ namespace Mock {
 bool MockGetApplicationContextReturnNull(bool isNull);
 void MockResetApplicationContextState();
 
+void MockCreateBundleContextReturnNull(bool isNull);
+void MockResetCreateBundleContextState();
+
 std::shared_ptr<ApplicationContext> GetMockApplicationContext();
 
 void MockSetApplicationContext(std::shared_ptr<ApplicationContext> context);

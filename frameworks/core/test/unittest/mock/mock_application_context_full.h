@@ -23,6 +23,9 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace Mock {
 
+void MockCreateBundleContextReturnNull(bool isNull);
+void MockResetCreateBundleContextState();
+
 class MockApplicationContext : public ApplicationContext {
 public:
     MockApplicationContext();
