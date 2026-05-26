@@ -4499,6 +4499,23 @@ HWTEST_F(AdvancedNotificationServiceTest, IsCanRecoverCommonTest_004, Function |
 }
 
 /**
+ * @tc.number    : IsCanRecoverCommonTest_005
+ * @tc.name      : IsCanRecoverCommon
+ * @tc.desc      : Test IsCanRecoverCommon for non-LiveView notification when macro is off
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsCanRecoverCommonTest_005, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsCanRecoverCommonTest_005 test start";
+    sptr<NotificationRequest> request = new NotificationRequest(1);
+#ifdef ANS_FEATURE_DIST_NOTIFICATION_PERSIST
+    ASSERT_EQ(advancedNotificationService_->IsCanRecoverCommon(request), true);
+#else
+    ASSERT_EQ(advancedNotificationService_->IsCanRecoverCommon(request), false);
+#endif
+    GTEST_LOG_(INFO) << "IsCanRecoverCommonTest_005 test end";
+}
+
+/**
  * @tc.number    : ProcForDeleteNotificationFromDb_0001
  * @tc.name      : ProcForDeleteNotificationFromDb
  * @tc.desc      : Test RecoverLiveViewFromDb and isSystemLiveView.

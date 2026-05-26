@@ -80,7 +80,7 @@ flowchart TB
     F3 -->|ENSURE BUILD TEST| F4
 
     subgraph "Isolated Code Paths (3 total)"
-        I1["F4-1: RecoverLiveViewFromDb<br/>non-LiveView delete on recovery<br/>(L78-L86 #ifndef)"]
+        I1["F4-1: IsCanRecoverCommon<br/>non-LiveView recovery skip<br/>(L313-L318 #ifdef/#else)"]
         I3["F4-2: SetNotificationRequestToDbCommon<br/>non-LiveView branch<br/>(L416-L451 #ifdef)"]
         I4["F5-1: SetEncryptToDB() function body<br/>(L193-L224 #ifdef)"]
     end
@@ -110,7 +110,7 @@ BUILD.gn (defines += "ANS_FEATURE_DIST_NOTIFICATION_PERSIST")
 **不改变任何现有架构**,仅通过编译宏隔离特定分支：
 
 1. **写入路径隔离**：`SetNotificationRequestToDbCommon()` 与 `SetEncryptToDB()` 的函数体用 `#ifdef` 包裹,宏关闭时函数仍被调用但函数体为空操作
-2. **恢复路径隔离**：`RecoverLiveViewFromDb()` 中用 `#ifndef` 检查非 LiveView 记录,宏关闭时直接从 DB 删除并 continue,不恢复。保证向后兼容——已持久化的旧数据不会残留
+2. **恢复路径隔离**：`IsCanRecoverCommon()` 中用 `#ifdef/#else/#endif` 包裹非 LiveView 分支,宏关闭时返回 `false`,外层 `RecoverLiveViewFromDb` 的 `!IsCanRecoverCommon` 分支自动删除 DB 记录。保证向后兼容——已持久化的旧数据不会残留
 
 **保留的调用链**：
 - 宏关闭时,`SetNotificationRequestToDbCommon()` 仍然被调用,但函数体为空（`#else return ERR_OK`）,调用方无需改动
@@ -179,28 +179,40 @@ BUILD.gn (defines += "ANS_FEATURE_DIST_NOTIFICATION_PERSIST")
 > - v1：仅 1 处隔离（写入路径），恢复路径不做隔离
 > - v2：新增 1 处恢复路径隔离（宏关闭时删除非 LiveView 记录），隔离点从 1→2
 
-#### F4-1: 恢复路径非 LiveView 删除隔离（L78-L86）
+#### F4-1: 恢复路径非 LiveView 拦截隔离（IsCanRecoverCommon L313-L318）
 
-**当前位置**：`RecoverLiveViewFromDb()` 函数内部,在 `FillNotificationRecord` 成功后、`IsCanRecoverSnooze` 之前：
+**当前位置**：`IsCanRecoverCommon()` 函数内部,在 `IsCommonLiveView()` 分支之后、过期检查之前：
 
 **修改后代码**：
 ```cpp
-            }
-#ifndef ANS_FEATURE_DIST_NOTIFICATION_PERSIST
-            // 宏关闭时：非 LiveView 通知不恢复，直接从 DB 删除以保证向后兼容
-            if (!requestObj.request->IsCommonLiveView()) {
-                int32_t userId = requestObj.request->GetReceiverUserId();
-                DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
-                    requestObj.request->GetSecureKey(), userId);
-                continue;
-            }
+    if (request->IsCommonLiveView()) {
+        return IsLiveViewCanRecover(request);
+    }
+
+#ifdef ANS_FEATURE_DIST_NOTIFICATION_PERSIST
+    // 宏开启时：非 LiveView 通知允许恢复（走过期检查 + 去重逻辑）
+    if (request->GetAutoDeletedTime() != NotificationConstant::INVALID_AUTO_DELETE_TIME &&
+        GetCurrentTime() > request->GetAutoDeletedTime()) {
+        ANS_LOGE("The notification has expired.");
+        return false;
+    }
+    DuplicateMsgControl(request);
+    return true;
+#else
+    // 宏关闭时：非 LiveView 通知不允许恢复，返回 false
+    // 外层 RecoverLiveViewFromDb 会通过 !IsCanRecoverCommon 分支删除 DB 记录
+    ANS_LOGI("Non-LiveView notification recovery skipped when macro is off.");
+    return false;
 #endif
-            if (IsCanRecoverSnooze(record)) {
 ```
 
-**宏关闭时行为**：非 LiveView 记录（包括 Snooze）不恢复,直接从 DB 删除并 continue,跳过后续所有恢复操作。保证向后兼容——已持久化的旧数据不会残留。
+**宏关闭时行为**：非 LiveView 通知（包括 Snooze）在 `IsCanRecoverCommon` 中直接返回 `false`，外层 `RecoverLiveViewFromDb` 的 `!IsCanRecoverCommon` 分支（L60-L67）会自动调用 `DoubleDeleteNotificationFromDb` 删除 DB 记录。保证向后兼容——已持久化的旧数据不会残留。
 
-**宏开启时行为**：`#ifndef` 块被编译器剔除,恢复流程与原代码完全一致。
+**宏开启时行为**：`#ifdef` 块包含原有的过期检查和去重逻辑，恢复流程与原代码完全一致。
+
+**设计优势**：
+- 复用已有的 `!IsCanRecoverCommon` 分支的 DB 删除逻辑（L60-L67），不需要手动重复调用 `DoubleDeleteNotificationFromDb`
+- 恢复判断逻辑集中在一个函数内，而不是分散在调用方循环体中
 
 #### F4-2: 非 LiveView 写入路径隔离（L416-L451）
 
@@ -577,10 +589,10 @@ graph TD
 |------|---------|---------|
 | 1 | `notification.gni` 变量名拼写正确,默认值为 `false` | grep 检查 |
 | 2 | 两个 BUILD.gn 中 `if` / `defines +=` 格式正确,宏名与 cpp 中 `#ifdef` 完全一致 | grep 检查 |
-| 3 | F4 中 2 处 `#ifdef`/`#ifndef` / `#else` / `#endif` 严格配对,位置准确 | 读取代码检查 |
+| 3 | F4 中 2 处 `#ifdef` / `#else` / `#endif` 严格配对,位置准确 | 读取代码检查 |
 | 4 | F5 中 1 处 `#ifdef` / `#else` / `#endif` 严格配对,位置准确 | 读取代码检查 |
 | 5 | F5 的 `SetEncryptToDB()` `#else` 分支返回 `true`,不引用任何被 ifdef 保护的局部变量 | 读取代码检查 |
-| 6 | F4 的恢复路径 `#ifndef` 非LiveView删除逻辑正确：`IsCommonLiveView()` 检查 + `DoubleDeleteNotificationFromDb()` + `continue` | 读取代码检查 |
+| 6 | F4-1 恢复路径 `IsCanRecoverCommon` #ifdef/#else 非LiveView拦截逻辑正确：宏关闭返回 false,外层自动删除 DB 记录 | 读取代码检查 |
 | 7 | F5 的 `SetEncryptToDB()` 函数签名与闭合括号保持在 `#ifdef` 外 | 读取代码检查 |
 
 **额外验证（防御性）**：
@@ -666,7 +678,7 @@ bool AdvancedNotificationService::SetEncryptToDB(const NotificationRequestDb &re
 
 | 维度 | 原架构文档描述 | 最终开发方案 | 变更原因 |
 |------|--------------|-----------|---------|
-| **恢复路径（非 LiveView）** | "RecoverLiveViewFromDb 中非 LiveView 恢复逻辑的隔离" | **新增 #ifndef 非LiveView删除隔离**：宏关闭时非 LiveView 记录从 DB 删除并 continue | v2 变更：保证向后兼容,旧数据不残留 |
+| **恢复路径（非 LiveView）** | "RecoverLiveViewFromDb 中非 LiveView 恢复逻辑的隔离" | **在 IsCanRecoverCommon 中 #ifdef/#else 非LiveView拦截**：宏关闭时返回 false,外层自动删除 DB 记录 | v2 变更：保证向后兼容,旧数据不残留；复用已有删除逻辑,更内聚 |
 | **恢复路径（Snooze）** | "RecoverLiveViewFromDb 中 Snooze 恢复逻辑的隔离" | **保持原样,不做编译宏隔离**（`IsCanRecoverSnooze`、`StartSnoozeTimer` 不受影响） | 用户终审明确：Snooze 恢复不做编译宏隔离 |
 | **Snooze 删除路径** | 未提及 | 保留原样,不隔离 | P3+终审确认：与架构文档"删除路径保留"策略一致 |
 | **Snooze 写入** | 未提及 | 新增隔离点（`SetEncryptToDB`） | 用户需求扩展 |
@@ -682,10 +694,10 @@ bool AdvancedNotificationService::SetEncryptToDB(const NotificationRequestDb &re
 | F1 | `notification.gni` | 0 | L69 | 新增 gni 变量声明 |
 | F2 | `services/ans/BUILD.gn` | 0 | L245-L247 | 新增条件 defines 块 |
 | F3 | `services/ans/test/unittest/BUILD.gn` | 0 | L2160-L2162 | 新增条件 defines 块（notification_extension_test） |
-| F4 | `services/ans/src/advanced_notification_live_view_service.cpp` | **2** | L78-L86 (#ifndef), L416-L451 (#ifdef) | 1 处 #ifndef 非LiveView删除（恢复路径）+ 1 处 #ifdef 包裹（非 LiveView 写入） |
+| F4 | `services/ans/src/advanced_notification_live_view_service.cpp` | **2** | L313-L318 (#ifdef/#else), L414-L453 (#ifdef/#else) | 1 处 #ifdef/#else 非LiveView恢复拦截（IsCanRecoverCommon）+ 1 处 #ifdef/#else 包裹（非 LiveView 写入） |
 | F5 | `services/ans/src/snooze_delay_manager.cpp` | **1** | L193-L224 | 1 处 #ifdef 包裹函数体 |
 
-> 总计 **3 处隔离点**：2 处写入路径 #ifdef + 1 处恢复路径 #ifndef。
+> 总计 **3 处隔离点**：3 处 #ifdef/#else/#endif（F4-1 恢复拦截 + F4-2 写入隔离 + F5-1 Snooze写入隔离）。
 
 ## 附录 B: 验证项汇总（最终版）
 
@@ -693,10 +705,10 @@ bool AdvancedNotificationService::SetEncryptToDB(const NotificationRequestDb &re
 |-------|---------|---------|
 | 1. gni 变量名与默认值 | 必选 | F1 |
 | 2. BUILD.gn defines 格式 | 必选 | F2, F3 |
-| 3. F4 隔离点配对完整（2 处：#ifndef + #ifdef） | 必选 | F4 |
+| 3. F4 隔离点配对完整（2 处：#ifdef/#else） | 必选 | F4 |
 | 4. F5 隔离点配对完整（1 处） | 必选 | F5 |
 | 5. `#else` 分支不引用 ifdef 内变量 | 必选 | F5 |
-| 6. F4 恢复路径 #ifndef 非LiveView删除逻辑正确 | 必选 | F4 |
+| 6. F4-1 恢复路径 IsCanRecoverCommon #ifdef/#else 非LiveView拦截逻辑正确 | 必选 | F4 |
 | 7. F5 函数签名与闭合括号保留 | 必选 | F5 |
 | 8. 删除路径未被修改 | 可选（防御性） | F4, F5 |
-| 9. `#ifdef` 出现总次数 = **2**，`#ifndef` 出现总次数 = **1** | 可选（防御性） | F4, F5 |
+| 9. `#ifdef` 出现总次数 = **3**（F4-1 + F4-2 + F5-1） | 可选（防御性） | F4, F5 |
