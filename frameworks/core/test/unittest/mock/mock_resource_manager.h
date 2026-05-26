@@ -28,9 +28,13 @@ namespace Global {
 namespace Resource {
 namespace Mock {
 
+extern bool g_mockGetResourceManagerReturnNull;
+
 void MockGetRawFileDescriptorFail(bool fail);
 void MockGetRawFileDescriptorReturn(int fd, long offset, long length);
 void MockCloseRawFileDescriptorFail(bool fail);
+void MockGetResourceManagerReturnNull(bool isNull);
+void MockResetGetResourceManagerState();
 void MockResetResourceManagerState();
 
 class MockResourceManager : public ResourceManager {

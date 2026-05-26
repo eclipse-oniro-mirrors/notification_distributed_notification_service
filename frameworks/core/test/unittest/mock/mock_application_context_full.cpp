@@ -16,9 +16,23 @@
 #include "mock_application_context_full.h"
 #include "mock_resource_manager.h"
 
+namespace {
+bool g_mockCreateBundleContextReturnNull = false;
+}
+
 namespace OHOS {
 namespace AbilityRuntime {
 namespace Mock {
+
+void MockCreateBundleContextReturnNull(bool isNull)
+{
+    g_mockCreateBundleContextReturnNull = isNull;
+}
+
+void MockResetCreateBundleContextState()
+{
+    g_mockCreateBundleContextReturnNull = false;
+}
 
 MockApplicationContext::MockApplicationContext()
 {
@@ -27,6 +41,9 @@ MockApplicationContext::MockApplicationContext()
 
 std::shared_ptr<Context> MockApplicationContext::CreateBundleContext(const std::string &bundleName)
 {
+    if (g_mockCreateBundleContextReturnNull) {
+        return nullptr;
+    }
     return std::make_shared<MockContext>(bundleName);
 }
 
@@ -57,6 +74,9 @@ std::shared_ptr<Context> MockContext::CreateBundleContext(const std::string &bun
 
 std::shared_ptr<Global::Resource::ResourceManager> MockContext::GetResourceManager() const
 {
+    if (OHOS::Global::Resource::Mock::g_mockGetResourceManagerReturnNull) {
+        return nullptr;
+    }
     return mockResourceManager_;
 }
 

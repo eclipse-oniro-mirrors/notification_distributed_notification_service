@@ -122,9 +122,17 @@ ErrCode ImagePixelmapHelper::InitRawfileData()
     auto appContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
     if (appContext == nullptr) {
         ANS_LOGE("Get appContext nullptr.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    if (!appContext->CreateBundleContext(bundleName)) {
+        ANS_LOGE("CreateBundleContext failed.");
+        return ERR_ANS_PERMISSION_DENIED;
     }
     resourceManager_ = appContext->CreateBundleContext(bundleName)->GetResourceManager();
+    if (!resourceManager_) {
+        ANS_LOGE("Get resourceManager nullptr.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
     auto result = resourceManager_->GetRawFileDescriptor(imageFile_, rawFileDesc_);
     if (result != ERR_OK) {
         ANS_LOGE("GetRawFileDescriptor fail.");

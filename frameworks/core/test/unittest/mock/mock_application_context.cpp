@@ -36,6 +36,7 @@ void MockResetApplicationContextState()
 {
     g_mockApplicationContextReturnNull = false;
     g_mockApplicationContext = nullptr;
+    MockResetCreateBundleContextState();
 }
 
 std::shared_ptr<ApplicationContext> GetMockApplicationContext()

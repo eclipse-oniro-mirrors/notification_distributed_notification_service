@@ -30,6 +30,8 @@ namespace Global {
 namespace Resource {
 namespace Mock {
 
+bool g_mockGetResourceManagerReturnNull = false;
+
 void MockGetRawFileDescriptorFail(bool fail)
 {
     g_mockGetRawFileDescriptorFail = fail;
@@ -47,6 +49,16 @@ void MockCloseRawFileDescriptorFail(bool fail)
     g_mockCloseRawFileDescriptorFail = fail;
 }
 
+void MockGetResourceManagerReturnNull(bool isNull)
+{
+    g_mockGetResourceManagerReturnNull = isNull;
+}
+
+void MockResetGetResourceManagerState()
+{
+    g_mockGetResourceManagerReturnNull = false;
+}
+
 void MockResetResourceManagerState()
 {
     g_mockGetRawFileDescriptorFail = false;
@@ -54,6 +66,7 @@ void MockResetResourceManagerState()
     g_mockRawFileDescriptorOffset = 0;
     g_mockRawFileDescriptorLength = DEFAULT_FILE_LENGTH;
     g_mockCloseRawFileDescriptorFail = false;
+    g_mockGetResourceManagerReturnNull = false;
 }
 
 MockResourceManager::MockResourceManager()

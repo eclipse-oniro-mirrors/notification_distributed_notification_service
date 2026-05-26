@@ -36,7 +36,9 @@ public:
     static void SetUpTestCase()
     {
         AbilityRuntime::Mock::MockResetApplicationContextState();
+        AbilityRuntime::Mock::MockResetCreateBundleContextState();
         Global::Resource::Mock::MockResetResourceManagerState();
+        Global::Resource::Mock::MockResetGetResourceManagerState();
         Notification::Mock::MockResetImageNativeState();
     }
     
@@ -45,14 +47,18 @@ public:
     void SetUp()
     {
         AbilityRuntime::Mock::MockResetApplicationContextState();
+        AbilityRuntime::Mock::MockResetCreateBundleContextState();
         Global::Resource::Mock::MockResetResourceManagerState();
+        Global::Resource::Mock::MockResetGetResourceManagerState();
         Notification::Mock::MockResetImageNativeState();
     }
     
     void TearDown()
     {
         AbilityRuntime::Mock::MockResetApplicationContextState();
+        AbilityRuntime::Mock::MockResetCreateBundleContextState();
         Global::Resource::Mock::MockResetResourceManagerState();
+        Global::Resource::Mock::MockResetGetResourceManagerState();
         Notification::Mock::MockResetImageNativeState();
     }
 };
@@ -98,7 +104,7 @@ HWTEST_F(ImagePixelmapHelperTest, Init_00003, Function | SmallTest | Level1)
     request->SetOwnerBundleName("com.test");
     ImagePixelmapHelper helper(request, "test.png");
     ErrCode ret = helper.Init();
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -338,6 +344,58 @@ HWTEST_F(ImagePixelmapHelperTest, GetImageSourceInfo_00001, Function | SmallTest
     helper.Init();
     EXPECT_EQ(helper.imageWidth_, 100u);
     EXPECT_EQ(helper.imageHeight_, 100u);
+}
+
+/**
+ * @tc.name: Init_00011
+ * @tc.desc: Test Init when CreateBundleContext returns nullptr.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(ImagePixelmapHelperTest, Init_00011, Function | SmallTest | Level1)
+{
+    AbilityRuntime::Mock::MockCreateBundleContextReturnNull(true);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    ImagePixelmapHelper helper(request, "test.png");
+    ErrCode ret = helper.Init();
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: Init_00012
+ * @tc.desc: Test Init when GetResourceManager returns nullptr.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(ImagePixelmapHelperTest, Init_00012, Function | SmallTest | Level1)
+{
+    Global::Resource::Mock::MockGetResourceManagerReturnNull(true);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    ImagePixelmapHelper helper(request, "test.png");
+    ErrCode ret = helper.Init();
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: Init_00013
+ * @tc.desc: Test Init when CreateBundleContext and GetResourceManager succeed.
+ *            This test verifies the normal path execution of Line 131 and 136.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(ImagePixelmapHelperTest, Init_00013, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    ImagePixelmapHelper helper(request, "test.png");
+    
+    helper.Init();
+    
+    EXPECT_NE(helper.resourceManager_, nullptr);
+    
+    EXPECT_NE(helper.rawFileDesc_.fd, 0);
 }
 
 }  // namespace Notification
