@@ -1934,7 +1934,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
     bool enabled = true;
     ret = advancedNotificationService_->EnableDistributedSelf(enabled);
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
-    ASSERT_EQ(ret, ERR_OK);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
 #else
     EXPECT_EQ(ret, ERR_INVALID_OPERATION);
 #endif

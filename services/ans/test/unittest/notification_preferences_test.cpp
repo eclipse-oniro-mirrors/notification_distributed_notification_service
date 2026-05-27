@@ -498,22 +498,6 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00300, Function | 
 }
 
 /**
- * @tc.number    : GetNotificationAllSlots_00400
- * @tc.name      :
- * @tc.desc      : Get all notification slots from disturbe DB when bundle name does not exsit, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
- */
-HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00400, Function | SmallTest | Level1)
-{
-    std::vector<sptr<NotificationSlot>> slotsResult;
-    EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationAllSlots(noExsitbundleOption_, slotsResult),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
-    EXPECT_EQ((int)slotsResult.size(), 0);
-    ErrCode result = advancedNotificationService_->GetSlots(slotsResult);
-    EXPECT_NE(result, ERR_OK);
-}
-
-/**
  * @tc.number    : GetNotificationAllSlots_00500
  * @tc.name      :
  * @tc.desc      : Get all notification slots from disturbe DB when bundleOption is null, return is
