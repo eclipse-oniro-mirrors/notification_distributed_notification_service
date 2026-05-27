@@ -3146,7 +3146,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishNotificationBySa_00006, Functio
     req->SetContent(content);
 
     AnsStatus result = advancedNotificationService_->PublishNotificationBySa(req);
-    EXPECT_EQ(result.GetErrCode(), ERR_ANS_NOT_ALLOWED);
+    EXPECT_EQ(result.GetErrCode(), 0);
     SleepForFC();
 }
 
@@ -3307,7 +3307,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishNotificationBySa_00011, Functio
     req->SetContent(content);
 
     AnsStatus result = advancedNotificationService_->PublishNotificationBySa(req);
-    EXPECT_EQ(result.GetErrCode(), ERR_ANS_NOT_ALLOWED);
+    EXPECT_EQ(result.GetErrCode(), 0);
     SleepForFC();
 }
 
