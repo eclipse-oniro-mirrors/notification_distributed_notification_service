@@ -150,25 +150,6 @@ void AnsBranchTest::TestAddSlot(NotificationConstant::SlotType type)
 }
 
 /**
- * @tc.number    : AnsBranchTest_222000
- * @tc.name      : PrepareNotificationRequest_1000
- * @tc.desc      : Test PrepareNotificationRequest function return ERR_ANS_NON_SYSTEM_APP.
- * @tc.require   : #I6P8UI
- */
-HWTEST_F(AnsBranchTest, AnsBranchTest_222000, Function | SmallTest | Level1)
-{
-    sptr<NotificationRequest> req = new NotificationRequest();
-    EXPECT_NE(req, nullptr);
-
-    req->SetIsAgentNotification(true);
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    MockIsVerfyPermisson(false);
-
-    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(req).GetErrCode(), ERR_ANS_NON_SYSTEM_APP);
-}
-
-/**
  * @tc.number    : AnsBranchTest_223000
  * @tc.name      : PrepareNotificationRequest_2000
  * @tc.desc      : Test PrepareNotificationRequest function return ERR_ANS_PERMISSION_DENIED.

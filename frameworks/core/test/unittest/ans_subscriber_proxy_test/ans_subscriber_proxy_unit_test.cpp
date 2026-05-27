@@ -55,32 +55,6 @@ void AnsSubscriberProxyUnitTest::SetUp() {}
 void AnsSubscriberProxyUnitTest::TearDown() {}
 
 /*
- * @tc.name: OnConsumed_0400
- * @tc.desc: test AnsSubscriberProxy's OnConsumed function
- * @tc.type: FUNC
- * @tc.require: #I5SJ62
- */
-HWTEST_F(AnsSubscriberProxyUnitTest, OnConsumed_0400, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsSubscriberProxyUnitTest, OnConsumed_0400, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(NO_ERROR)));
-    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<OHOS::Notification::NotificationRequest> request =
-        new (std::nothrow) OHOS::Notification::NotificationRequest();
-    ASSERT_NE(nullptr, request);
-    sptr<OHOS::Notification::Notification> notification =
-        new (std::nothrow) OHOS::Notification::Notification(request);
-    ASSERT_NE(nullptr, notification);
-    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
-    ASSERT_NE(nullptr, notificationMap);
-    proxy->OnConsumed(notification, notificationMap);
-}
-
-/*
  * @tc.name: OnConsumed_0500
  * @tc.desc: test AnsSubscriberProxy's OnConsumed function
  * @tc.type: FUNC

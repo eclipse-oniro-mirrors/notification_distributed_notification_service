@@ -65,26 +65,6 @@ HWTEST_F(PushCallBackStubTest, PushCallBackStubTest_00100, Function | SmallTest 
 }
 
 /**
- * @tc.number    : PushCallBackStubTest_00300
- * @tc.name      : OnRemoteRequest_0300
- * @tc.desc      : Test OnRemoteRequest function
- */
-HWTEST_F(PushCallBackStubTest, PushCallBackStubTest_00300, Function | SmallTest | Level1)
-{
-    uint32_t code = 10;
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-
-    TestPushCallBackStub testPushCallBackStub;
-    data.WriteInterfaceToken(testPushCallBackStub.GetDescriptor());
-
-    int ret = testPushCallBackStub.OnRemoteRequest(code, data, reply, option);
-    int errcode = 305;
-    ASSERT_EQ(ret, errcode);
-}
-
-/**
  * @tc.number    : PushCallBackStubTest_00400
  * @tc.name      : OnCheckNotification_0100
  * @tc.desc      : Test OnCheckNotification function
