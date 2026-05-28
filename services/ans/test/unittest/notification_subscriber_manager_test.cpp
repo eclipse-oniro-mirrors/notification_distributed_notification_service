@@ -457,6 +457,36 @@ HWTEST_F(NotificationSubscriberManagerTest, AddSubscriber_001, Level1)
         subscriber, nullptr, testAnsSubscriber->subscribedFlags_), (int)ERR_ANS_INVALID_PARAM);
 }
 
+/**
+ * @tc.number    : AddSubscriber_002
+ * @tc.name      : AddSubscriber and params is nullptr
+ * @tc.desc      : Test AddSubscriber .he
+ */
+HWTEST_F(NotificationSubscriberManagerTest, AddSubscriber_002, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    auto isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+    sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
+    info->AddDeviceType("current");
+    std::vector<NotificationConstant::SlotType> slotTypes;
+    slotTypes.push_back(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    info->SetSlotTypes(slotTypes);
+
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriber(subscriber, info, testAnsSubscriber->subscribedFlags_),
+        (int)ERR_OK);
+
+    sptr<NotificationSortingMap> notificationMap(new NotificationSortingMap());
+    notificationSubscriberManager.NotifyUpdated(notificationMap);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_TRUE(isCallback);
+
+    ASSERT_EQ(notificationSubscriberManager.RemoveSubscriber(subscriber, nullptr), (int)ERR_OK);
+}
+
 HWTEST_F(NotificationSubscriberManagerTest, NotifyUpdate_SubscribedFlagsFalse, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;

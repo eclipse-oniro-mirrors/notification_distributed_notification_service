@@ -102,6 +102,26 @@ void AdvancedNotificationRingToneServiceTest::TearDown()
 }
 
 /**
+ * @tc.number    : SetRingtoneInfoByBundle_00001
+ * @tc.name      : SetRingtoneInfoByBundle
+ * @tc.desc      : Test SetRingtoneInfoByBundle
+ */
+HWTEST_F(AdvancedNotificationRingToneServiceTest, SetRingtoneInfoByBundle_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(true);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundle", 1);
+    ASSERT_NE(bundleOption, nullptr);
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
+    ASSERT_NE(ringtoneInfo, nullptr);
+    ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    auto ret = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
  * @tc.number    : SetRingtoneInfoByBundle_00002
  * @tc.name      : SetRingtoneInfoByBundle
  * @tc.desc      : Test SetRingtoneInfoByBundle
