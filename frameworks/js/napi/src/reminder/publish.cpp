@@ -24,6 +24,9 @@
 #include "reminder_request_calendar.h"
 #include "reminder_request_timer.h"
 #include "securec.h"
+#ifdef ANS_FEATURE_API_METRICS_HISTOGRAM
+#include "histogram_plugin_macros.h"
+#endif
 
 namespace OHOS {
 namespace ReminderAgentNapi {
@@ -73,6 +76,13 @@ struct Parameters {
         = NotificationNapi::NotificationConstant::SlotType::CONTENT_INFORMATION;
     std::shared_ptr<ReminderRequest> reminder = nullptr;
 };
+
+void HistogramBoolReport(const std::string& name, const bool isSuccess)
+{
+#ifdef ANS_FEATURE_API_METRICS_HISTOGRAM
+    HISTOGRAM_BOOLEAN(name.c_str(), isSuccess);
+#endif
+}
 
 napi_value GetCallback(const napi_env &env, const napi_value &value, AsyncCallbackInfo &asyncCallbackInfo)
 {
@@ -1024,6 +1034,7 @@ napi_value PublishReminderInner(napi_env env, napi_callback_info info, bool isTh
     AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
     if (!asynccallbackinfo) {
         ANSR_LOGE("Low memory.");
+        HistogramBoolReport("BackgroundTasksKit.reminderAgentManager.publishReminder", false);
         return NotificationNapi::Common::NapiGetNull(env);
     }
     std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
@@ -1032,6 +1043,7 @@ napi_value PublishReminderInner(napi_env env, napi_callback_info info, bool isTh
     Parameters params;
     if (ParseParameters(env, info, params, *asynccallbackinfo, isThrow) == nullptr) {
         napi_create_int32(env, -1, &(asynccallbackinfo->result));
+        HistogramBoolReport("BackgroundTasksKit.reminderAgentManager.publishReminder", false);
         return DealErrorReturn(env, asynccallbackinfo->callback, asynccallbackinfo->result, isThrow);
     }
 
@@ -1070,6 +1082,8 @@ napi_value PublishReminderInner(napi_env env, napi_callback_info info, bool isTh
                 } else {
                     napi_create_int32(env, -1, &(asynccallbackinfo->result));
                 }
+                HistogramBoolReport("BackgroundTasksKit.reminderAgentManager.publishReminder",
+                    asynccallbackinfo->info.errorCode == ERR_OK);
 
                 ReminderCommon::ReturnCallbackPromise(
                     env, asynccallbackinfo->info, asynccallbackinfo->result, asynccallbackinfo->isThrow);
