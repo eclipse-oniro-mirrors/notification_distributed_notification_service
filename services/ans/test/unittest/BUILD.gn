@@ -1953,6 +1953,10 @@ ohos_unittest("advanced_notification_service_unit_test") {
     defines += [ "ANS_FEATURE_NOTIFICATION_STATISTICS" ]
   }
 
+  if (distributed_notification_service_feature_dist_notification_persist) {
+    defines += [ "ANS_FEATURE_DIST_NOTIFICATION_PERSIST" ]
+  }
+
   external_deps = [
     "ability_base:configuration",
     "ability_base:zuri",
