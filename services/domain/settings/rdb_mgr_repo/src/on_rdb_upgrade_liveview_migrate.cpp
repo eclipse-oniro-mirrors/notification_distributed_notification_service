@@ -115,9 +115,17 @@ bool OnRdbUpgradeLiveviewMigrate(const std::string &oldValue, std::string &newVa
 {
     // Decrypt the value
     std::string decryptedValue;
-    AesGcmHelper::Decrypt(decryptedValue, oldValue);
+    int32_t ret = AesGcmHelper::Decrypt(decryptedValue, oldValue);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Decrypt failed");
+        return false;
+    }
     // Parse JSON
-    nlohmann::json jsonObject = nlohmann::json::parse(decryptedValue);
+    if (decryptedValue.empty() || !nlohmann::json::accept(decryptedValue)) {
+        ANS_LOGE("Invalid json");
+        return false;
+    }
+    nlohmann::json jsonObject = nlohmann::json::parse(decryptedValue, nullptr, false);
     if (!UpdateRequestByJsonObject(jsonObject)) {
         ANS_LOGE("UpdateRequestByJsonObject failed");
         return false;
