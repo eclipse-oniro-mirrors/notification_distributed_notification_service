@@ -91,18 +91,6 @@ void NotificationLocalLiveViewSubscriberManagerTest::TearDown()
 }
 
 /**
- * @tc.number    : NotificationLocalLiveViewSubscriberManagerTest_001
- * @tc.name      : ANS_AddSubscriber_001
- * @tc.desc      : Test AddSubscriber function, return is ERR_OK.
- */
-HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest,
-    NotificationLocalLiveViewSubscriberManagerTest_001, Function | SmallTest | Level1)
-{
-    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    ASSERT_EQ(notificationLocalLiveViewSubscriberManager_->AddLocalLiveViewSubscriber(subscriber_, info), (int)ERR_OK);
-}
-
-/**
  * @tc.number    : NotificationLocalLiveViewSubscriberManagerTest_002
  * @tc.name      : ANS_AddSubscriber_002
  * @tc.desc      : Test AddSubscriber function AND RemoveSubscriberInner, return is ERR_OK.

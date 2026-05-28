@@ -177,7 +177,7 @@ HWTEST_F(NotificationBundleOptionTest, DistributedBundleOption_00001, Function |
     EXPECT_EQ(rrc->GetAppLabel(), "label");
 
     std::string dumpstr =
-        "DistributedBundleOption{ bundleName = BundleName, uid = 10, enable = 1, notification = 1, label = label}";
+        "DistributedBundleOption{ bundleName = BundleName, uid = 10, enable = 1, notification = 1, label = label }";
     EXPECT_EQ(rrc->Dump(), dumpstr);
 
     Parcel parcel;

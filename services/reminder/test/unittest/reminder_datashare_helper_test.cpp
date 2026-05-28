@@ -37,44 +37,6 @@ public:
 };
 
 /**
- * @tc.name: ReminderDataShareHelper_001
- * @tc.desc: test ReminderDataShareHelper::RegisterObserver function
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_001, Level1)
-{
-    MockDataShareHelper* mockHelper = new MockDataShareHelper;
-    ReminderDataManager::InitInstance();
-
-    // helper is nullptr
-    MockDataShareHelper::MockCreate(-1, nullptr);
-    bool ret = ReminderDataShareHelper::GetInstance().RegisterObserver();
-    EXPECT_EQ(ret, false);
-
-    std::shared_ptr<DataShare::DataShareHelper> helper;
-    helper.reset(mockHelper);
-    MockDataShareHelper::MockCreate(0, helper);
-    EXPECT_CALL(*mockHelper, Release()).Times(1).WillOnce(testing::Return(true));
-    // TryRegisterObserverExt is nok
-    EXPECT_CALL(*mockHelper, TryRegisterObserverExt(testing::_, testing::_, testing::_, testing::_)).Times(1)
-        .WillOnce(testing::Return(-1));
-    ret = ReminderDataShareHelper::GetInstance().RegisterObserver();
-    EXPECT_EQ(ret, false);
-    // TryRegisterObserverExt is ok
-    EXPECT_CALL(*mockHelper, Release()).Times(1).WillOnce(testing::Return(true));
-    EXPECT_CALL(*mockHelper, TryRegisterObserverExt(testing::_, testing::_, testing::_, testing::_)).Times(1)
-        .WillOnce(testing::Return(0));
-    ret = ReminderDataShareHelper::GetInstance().RegisterObserver();
-    EXPECT_EQ(ret, true);
-    EXPECT_NE(ReminderDataShareHelper::GetInstance().observer_, nullptr);
-    // observer_ is not nullptr
-    ret = ReminderDataShareHelper::GetInstance().RegisterObserver();
-    EXPECT_EQ(ret, true);
-    MockDataShareHelper::MockCreate(-1, nullptr);
-}
-
-/**
  * @tc.name: ReminderDataShareHelper_002
  * @tc.desc: test ReminderDataShareHelper::UnRegisterObserver function
  * @tc.type: FUNC

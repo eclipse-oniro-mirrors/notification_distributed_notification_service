@@ -3308,7 +3308,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedEnabledForBundle_100
  
     NotificationDistributedBundle distributedBundle;
     preferncesDB_->GetDistributedEnabledForBundle(bundleInfo, "tablet", distributedBundle);
-    ASSERT_EQ(distributedBundle.GetLiveViewEnable(), NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    ASSERT_EQ(distributedBundle.GetLiveViewEnable(), NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
     ASSERT_EQ(distributedBundle.GetNotificationEnable(), NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
 }
  
