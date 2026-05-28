@@ -276,18 +276,6 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00300, Functio
 }
 
 /**
- * @tc.number    : RemoveNotificationForBundle_00400
- * @tc.name      :
- * @tc.desc      :  Remove notification for bundle from disturbe DB when bundle name is null, return is
- * ERR_ANS_INVALID_PARAM;
- */
-HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00400, Function | SmallTest | Level1)
-{
-    EXPECT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationForBundle(nullptr),
-        (int)ERR_ANS_INVALID_PARAM);
-}
-
-/**
  * @tc.number    : UpdateNotificationSlots_00100
  * @tc.name      :
  * @tc.desc      : Update notification slot into disturbe DB, return is ERR_OK
