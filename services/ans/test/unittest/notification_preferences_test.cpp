@@ -276,6 +276,36 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00300, Functio
 }
 
 /**
+ * @tc.number    : RemoveNotificationForBundle_00400
+ * @tc.name      :
+ * @tc.desc      :  Remove notification for bundle from disturbe DB when bundle name is null, return is
+ * ERR_ANS_INVALID_PARAM;
+ */
+HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00400, Function | SmallTest | Level1)
+{
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationForBundle(nullptr),
+        (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : UpdateNotificationSlots_00100
+ * @tc.name      :
+ * @tc.desc      : Update notification slot into disturbe DB, return is ERR_OK
+ */
+HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00100, Function | SmallTest | Level1)
+{
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
+    std::vector<sptr<NotificationSlot>> slots;
+    slots.push_back(slot);
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption_, slots), (int)ERR_OK);
+    std::string des("This is a description.");
+    slot->SetDescription(des);
+    slots.clear();
+    slots.push_back(slot);
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->UpdateNotificationSlots(bundleOption_, slots), (int)ERR_OK);
+}
+
+/**
  * @tc.number    : UpdateNotificationSlots_00200
  * @tc.name      :
  * @tc.desc      : Update notification slot into disturbe DB when bundleName is null, return is ERR_ANS_INVALID_PARAM
@@ -465,6 +495,22 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00300, Function | 
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationAllSlots(bundleEmptyOption_, slotsResult),
         (int)ERR_ANS_INVALID_PARAM);
     EXPECT_EQ((int)slotsResult.size(), 0);
+}
+
+/**
+ * @tc.number    : GetNotificationAllSlots_00400
+ * @tc.name      :
+ * @tc.desc      : Get all notification slots from disturbe DB when bundle name does not exsit, return is
+ * ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
+ */
+HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00400, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationSlot>> slotsResult;
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationAllSlots(noExsitbundleOption_, slotsResult),
+        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
+    EXPECT_EQ((int)slotsResult.size(), 0);
+    ErrCode result = advancedNotificationService_->GetSlots(slotsResult);
+    EXPECT_NE(result, ERR_OK);
 }
 
 /**
