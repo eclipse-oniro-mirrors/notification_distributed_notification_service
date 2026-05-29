@@ -25,6 +25,7 @@ using NotificationSubscribeInfo = OHOS::Notification::NotificationSubscribeInfo;
 using SlotType = OHOS::Notification::NotificationConstant::SlotType;
 
 bool GetVoiceContentOption(ani_env *env, ani_object value, NotificationSubscribeInfo &info);
+bool GetPictureOption(ani_env *env, ani_object value, NotificationSubscribeInfo &info);
 bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, NotificationSubscribeInfo &info);
 } // namespace NotificationSts
 } // OHOS

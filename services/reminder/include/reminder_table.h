@@ -189,6 +189,8 @@ public:
     static constexpr const char* RING_CHANNEL = "ring_channel";
     static constexpr const char* FORCE_DISTRIBUTED = "force_distributed";
     static constexpr const char* NOT_DISTRIBUTED = "not_distributed";
+    static constexpr const char* TIME_ZONE_TYPE = "time_zone_type";
+    static constexpr const char* NOTIFICATION_REQUEST_PROXY = "notification_request_proxy";
 
 public:
     static void InitDbColumns();

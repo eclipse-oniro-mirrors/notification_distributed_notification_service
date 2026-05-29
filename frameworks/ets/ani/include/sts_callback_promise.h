@@ -41,7 +41,9 @@ void AniPromiseReject(ani_env *env, const ani_resolver &resolver, const int32_t 
 
 void AniPromiseResolve(ani_env *env, const ani_resolver &resolver, const ani_object &result);
 
-ani_object AniJumpCbError(ani_env *env, const ani_ref &callback, const int32_t &errorCode);
+ani_object AniGetPromiseWithReject(ani_env *env, const int32_t errorCode);
+
+ani_object AniJumpCbError(ani_env *env, const ani_object &callback, const int32_t errorCode);
 } // namespace NotificationSts
 } // OHOS
 #endif

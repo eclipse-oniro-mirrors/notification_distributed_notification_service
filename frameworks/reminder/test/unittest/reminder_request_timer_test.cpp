@@ -139,12 +139,17 @@ HWTEST_F(ReminderRequestTimerTest, SetInitInfo_001, Function | SmallTest | Level
 HWTEST_F(ReminderRequestTimerTest, UpdateNextReminder_001, Function | SmallTest | Level1)
 {
     ReminderRequestTimer timer(1);
+    uint64_t now = timer.GetNowInstantMilli();
+    timer.SetTriggerTimeInMilli(now + 2000 * ReminderRequest::MILLI_SECONDS);
+    EXPECT_EQ(timer.UpdateNextReminder(), true);
+    timer.SetTriggerTimeInMilli(now - 2000 * ReminderRequest::MILLI_SECONDS);
     EXPECT_EQ(timer.UpdateNextReminder(), false);
     timer.SetRepeatInfo(500, 0);
     EXPECT_EQ(timer.UpdateNextReminder(), true);
     timer.SetRepeatInfo(500, 10);
     EXPECT_EQ(timer.UpdateNextReminder(), true);
-    timer.SetRepeatInfo(500, 10, 0);
+    timer.SetTriggerTimeInMilli(now - 2000 * ReminderRequest::MILLI_SECONDS);
+    timer.SetRepeatInfo(500, 10, -2);
     EXPECT_EQ(timer.UpdateNextReminder(), false);
 }
 
@@ -157,12 +162,14 @@ HWTEST_F(ReminderRequestTimerTest, UpdateNextReminder_001, Function | SmallTest 
 HWTEST_F(ReminderRequestTimerTest, PreGetNextTriggerTimeIgnoreSnooze_001, Function | SmallTest | Level1)
 {
     ReminderRequestTimer timer(1);
-    EXPECT_EQ(timer.PreGetNextTriggerTimeIgnoreSnooze(true, true), ReminderRequest::INVALID_LONG_LONG_VALUE);
-    timer.SetRepeatInfo(500, 10, 0);
-    EXPECT_EQ(timer.PreGetNextTriggerTimeIgnoreSnooze(true, true), ReminderRequest::INVALID_LONG_LONG_VALUE);
-    timer.SetRepeatInfo(500, 10, 1);
     timer.SetTriggerTimeInMilli(5000);
+    EXPECT_EQ(timer.PreGetNextTriggerTimeIgnoreSnooze(true, true), ReminderRequest::INVALID_LONG_LONG_VALUE);
+    timer.SetRepeatInfo(500, 0, 0);
     EXPECT_EQ(timer.PreGetNextTriggerTimeIgnoreSnooze(true, true), 5000);
+    timer.SetRepeatInfo(500, 10, 1);
+    EXPECT_EQ(timer.PreGetNextTriggerTimeIgnoreSnooze(true, true), 5000);
+    timer.SetRepeatInfo(500, 10, -2);
+    EXPECT_EQ(timer.PreGetNextTriggerTimeIgnoreSnooze(true, true), ReminderRequest::INVALID_LONG_LONG_VALUE);
 }
 
 /**

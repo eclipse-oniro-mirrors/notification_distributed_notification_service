@@ -41,6 +41,7 @@ namespace Notification {
 
 constexpr char FOUNDATION_BUNDLE_NAME[] = "ohos.global.systemres";
 constexpr int32_t RESSCHED_UID = 1096;
+constexpr int32_t ANCO_UID = 5557;
 constexpr int32_t OPERATION_TYPE_COMMON_EVENT = 4;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 
@@ -183,14 +184,14 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         return ansStatus.GetErrCode();
     }
 
-    if (!InitPublishProcess()) {
-        return ERR_ANS_NO_MEMORY;
-    }
-
     request->SetCreateTime(GetCurrentTime());
     
     bool isUpdateByOwnerAllowed = IsUpdateSystemLiveviewByOwner(request);
-    AnsStatus ansStatus = publishProcess_[request->GetSlotType()]->PublishPreWork(request, isUpdateByOwnerAllowed);
+    auto publishProcess = GetPublishProcess(request->GetSlotType());
+    if (publishProcess == nullptr) {
+        return ERR_ANS_NO_MEMORY;
+    }
+    AnsStatus ansStatus = publishProcess->PublishPreWork(request, isUpdateByOwnerAllowed);
     if (!ansStatus.Ok()) {
         ansStatus.AppendSceneBranch(EventSceneId::SCENE_1, EventBranchId::BRANCH_0, "publish prework failed");
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
@@ -215,7 +216,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     }
     CheckRemovalWantAgent(request);
     do {
-        ansStatus = publishProcess_[request->GetSlotType()]->PublishNotificationByApp(request);
+        ansStatus = publishProcess->PublishNotificationByApp(request);
         if (!ansStatus.Ok()) {
             NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
             break;
@@ -309,6 +310,17 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     OHOS::HiviewDFX::HiTraceId traceId = OHOS::HiviewDFX::HiTraceChain::GetId();
     ANS_LOGD("called");
 
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission denied.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (!isSubSystem || callingUid != ANCO_UID) {
+        ANS_LOGE("not subsystem or wrong callingUid. callingUid = %{public}d", callingUid);
+        return ERR_ANS_NOT_SYSTEM_SERVICE;
+    }
+
     auto fullTokenID = IPCSkeleton::GetCallingFullTokenID();
     if (Security::AccessToken::AccessTokenKit::IsAtomicServiceByFullTokenID(fullTokenID)) {
         ANS_LOGE("AtomicService is not allowed to publish notification");
@@ -330,11 +342,6 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         return ansStatus.GetErrCode();
     }
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
-    bool isSystemApp = AccessTokenHelper::IsSystemApp();
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(tokenCaller);
-    if (!isSystemApp  && !isSubsystem && request->GetExtendInfo() != nullptr) {
-        request->SetExtendInfo(nullptr);
-    }
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
     // SA not support sound
@@ -345,8 +352,14 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     int32_t uid = request->GetCreatorUid();
     request->SetOwnerUid(uid);
     request->SetOwnerBundleName(bundle);
-    if (!EXTENTION_WRAPPER->NotificationContentControl(request)) {
-        ANS_LOGE("NotificationContentControl fail, bundle = %{public}s", bundle.c_str());
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+        ANS_LOGE("GetActiveUserId is false");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+    if (!EXTENTION_WRAPPER->NotificationContentControl(request, userId)) {
+        ANS_LOGE("NotificationContentControl fail, bundle: %{public}s, userId: %{public}d", bundle.c_str(), userId);
         return ERR_ANS_NOT_ALLOWED;
     }
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();

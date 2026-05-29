@@ -41,8 +41,6 @@ public:
     typedef int32_t (*NOTIFY_PRIORITY_EVENT)(const std::string &event,
         const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
         const std::vector<sptr<NotificationRequest>> &requests);
-    typedef int32_t (*GENERATE_VOICE_CONTENT)(const sptr<NotificationRequest>& requests,
-        std::string& content);
     void Init();
     int32_t SyncRules(const std::string &rules);
     int32_t UpdateNotification(
@@ -53,7 +51,6 @@ public:
     int32_t NotifyPriorityEvent(const std::string &event,
         const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
         const std::vector<sptr<NotificationRequest>> &requests);
-    int32_t GenerateVoiceContent(const sptr<NotificationRequest>& requests, std::string& content);
 
     enum ErrorCode : int32_t {
         ERR_FAIL = -1,
@@ -71,7 +68,6 @@ private:
     SYNC_RULES syncRules_ = nullptr;
     SYNC_BUNDLE_KEYWORDS syncBundleKeywords_ = nullptr;
     NOTIFY_PRIORITY_EVENT notifyPriorityEvent_ = nullptr;
-    GENERATE_VOICE_CONTENT generateVoiceContent_ = nullptr;
 };
 
 #define NOTIFICATION_AI_EXTENSION_WRAPPER \

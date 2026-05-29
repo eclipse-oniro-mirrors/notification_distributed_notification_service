@@ -60,7 +60,7 @@ static const std::unordered_map<int32_t, std::string> ANS_ERROR_CODE_MESSAGE_MAP
     {ERROR_NOT_IMPL_EXTENSIONABILITY,
         "The application does not implement the NotificationSubscriberExtensionAbility"},
     {ERROR_AWARNESS_SUGGESTIONS_CLOSED, "The \"Awareness & suggestions\" switch of the location-based service is off"},
-    {ERR_NOTIFICATION_NOT_SUPPORT, "The notification is not supported"},
+    {ERR_NOTIFICATION_NOT_SUPPORT, "This notification is not supported"},
 };
 
 static std::vector<std::pair<uint32_t, int32_t>> errorsConvert = {

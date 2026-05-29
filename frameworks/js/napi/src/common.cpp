@@ -385,46 +385,165 @@ napi_value Common::GetSubscriberVoiceContentOption(
     return NapiGetNull(env);
 }
 
+napi_value Common::GetSubscriberPictureOption(
+    const napi_env &env, const napi_value &value, NotificationSubscribeInfo &subscriberInfo)
+{
+    bool hasProperty = false;
+    napi_valuetype valuetype = napi_undefined;
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "pictureOptions", &hasProperty));
+    if (!hasProperty) {
+        return NapiGetNull(env);
+    }
+
+    napi_value nPictureOption = nullptr;
+    NAPI_CALL(env, napi_get_named_property(env, value, "pictureOptions", &nPictureOption));
+    NAPI_CALL(env, napi_typeof(env, nPictureOption, &valuetype));
+    if (valuetype != napi_object) {
+        ANS_LOGE("Wrong argument type. Object expected for pictureOption.");
+        return nullptr;
+    }
+
+    napi_value nPicList = nullptr;
+    bool hasPicList = false;
+    NAPI_CALL(env, napi_has_named_property(env, nPictureOption, "preparseLiveViewPicList", &hasPicList));
+    if (!hasPicList) {
+        return NapiGetNull(env);
+    }
+
+    NAPI_CALL(env, napi_get_named_property(env, nPictureOption, "preparseLiveViewPicList", &nPicList));
+    bool isArray = false;
+    NAPI_CALL(env, napi_is_array(env, nPicList, &isArray));
+    if (!isArray) {
+        ANS_LOGE("Property preparseLiveViewPicList is expected to be an array.");
+        return nullptr;
+    }
+
+    uint32_t length = 0;
+    NAPI_CALL(env, napi_get_array_length(env, nPicList, &length));
+    for (uint32_t i = 0; i < length; ++i) {
+        napi_value nPic = nullptr;
+        char str[STR_MAX_SIZE] = {0};
+        size_t strLen = 0;
+        napi_get_element(env, nPicList, i, &nPic);
+        NAPI_CALL(env, napi_typeof(env, nPic, &valuetype));
+        if (valuetype != napi_string) {
+            ANS_LOGE("Wrong argument type. String expected.");
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_get_value_string_utf8(env, nPic, str, STR_MAX_SIZE - 1, &strLen));
+        subscriberInfo.pictureOption.preparseLiveViewPicList.emplace_back(str);
+    }
+    subscriberInfo.hasSubscribeInfo = true;
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetSubscriberBundleNames(
+    const napi_env &env, const napi_value &value, NotificationSubscribeInfo &subscriberInfo)
+{
+    bool hasProperty = false;
+    bool isArray = false;
+    napi_valuetype valuetype = napi_undefined;
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "bundleNames", &hasProperty));
+    if (!hasProperty) {
+        return NapiGetNull(env);
+    }
+
+    napi_value nBundleNames = nullptr;
+    uint32_t length = 0;
+    napi_get_named_property(env, value, "bundleNames", &nBundleNames);
+    napi_is_array(env, nBundleNames, &isArray);
+    if (!isArray) {
+        ANS_LOGE("Property bundleNames is expected to be an array.");
+        return nullptr;
+    }
+    napi_get_array_length(env, nBundleNames, &length);
+    if (length == 0) {
+        ANS_LOGE("The array is empty.");
+        return nullptr;
+    }
+    for (uint32_t i = 0; i < length; ++i) {
+        napi_value nBundleName = nullptr;
+        char str[STR_MAX_SIZE] = {0};
+        size_t strLen = 0;
+        napi_get_element(env, nBundleNames, i, &nBundleName);
+        NAPI_CALL(env, napi_typeof(env, nBundleName, &valuetype));
+        if (valuetype != napi_string) {
+            ANS_LOGE("Wrong argument type. String expected.");
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_get_value_string_utf8(env, nBundleName, str, STR_MAX_SIZE - 1, &strLen));
+        subscriberInfo.bundleNames.emplace_back(str);
+        subscriberInfo.hasSubscribeInfo = true;
+    }
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetSubscriberSlotTypes(
+    const napi_env &env, const napi_value &value, NotificationSubscribeInfo &subscriberInfo)
+{
+    bool hasSlotTypes = false;
+    bool isArray = false;
+    napi_valuetype valuetype = napi_undefined;
+    uint32_t length = 0;
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "slotTypes", &hasSlotTypes));
+    if (!hasSlotTypes) {
+        return NapiGetNull(env);
+    }
+
+    napi_value nSlotTypes = nullptr;
+    napi_get_named_property(env, value, "slotTypes", &nSlotTypes);
+    napi_is_array(env, nSlotTypes, &isArray);
+    if (!isArray) {
+        ANS_LOGE("Property slotTypes is expected to be an array.");
+        std::string msg = "Incorrect parameter types.The type of slotTypes must be array.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    napi_get_array_length(env, nSlotTypes, &length);
+    if (length == 0) {
+        ANS_LOGE("The array is empty.");
+        std::string msg = "Incorrect parameters are left unspecified. The slotTypes list length is zero.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    for (uint32_t i = 0; i < length; ++i) {
+        napi_value nSlotType = nullptr;
+        int32_t slotType = 0;
+        napi_get_element(env, nSlotTypes, i, &nSlotType);
+        NAPI_CALL(env, napi_typeof(env, nSlotType, &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types.The type of slotType must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        napi_get_value_int32(env, nSlotType, &slotType);
+        NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
+        if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), outType)) {
+            std::string msg = "Incorrect parameter types.slotType name must be in enum.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        subscriberInfo.slotTypes.emplace_back(outType);
+        subscriberInfo.hasSubscribeInfo = true;
+    }
+    return NapiGetNull(env);
+}
+
 napi_value Common::GetNotificationSubscriberInfo(
     const napi_env &env, const napi_value &value, NotificationSubscribeInfo &subscriberInfo)
 {
     ANS_LOGD("called");
-    uint32_t length = 0;
-    size_t strLen = 0;
     bool hasProperty = false;
-    bool isArray = false;
-    bool hasSlotTypes = false;
     napi_valuetype valuetype = napi_undefined;
-    // bundleNames?: Array<string>
-    NAPI_CALL(env, napi_has_named_property(env, value, "bundleNames", &hasProperty));
-    if (hasProperty) {
-        napi_value nBundleNames = nullptr;
-        napi_get_named_property(env, value, "bundleNames", &nBundleNames);
-        napi_is_array(env, nBundleNames, &isArray);
-        if (!isArray) {
-            ANS_LOGE("Property bundleNames is expected to be an array.");
-            return nullptr;
-        }
-        napi_get_array_length(env, nBundleNames, &length);
-        if (length == 0) {
-            ANS_LOGE("The array is empty.");
-            return nullptr;
-        }
-        for (uint32_t i = 0; i < length; ++i) {
-            napi_value nBundleName = nullptr;
-            char str[STR_MAX_SIZE] = {0};
-            napi_get_element(env, nBundleNames, i, &nBundleName);
-            NAPI_CALL(env, napi_typeof(env, nBundleName, &valuetype));
-            if (valuetype != napi_string) {
-                ANS_LOGE("Wrong argument type. String expected.");
-                return nullptr;
-            }
-            NAPI_CALL(env, napi_get_value_string_utf8(env, nBundleName, str, STR_MAX_SIZE - 1, &strLen));
-            subscriberInfo.bundleNames.emplace_back(str);
-            subscriberInfo.hasSubscribeInfo = true;
-        }
+
+    if (!GetSubscriberBundleNames(env, value, subscriberInfo)) {
+        return nullptr;
     }
-    // userId?: number
     NAPI_CALL(env, napi_has_named_property(env, value, "userId", &hasProperty));
     if (hasProperty) {
         napi_value nUserId = nullptr;
@@ -437,7 +556,6 @@ napi_value Common::GetNotificationSubscriberInfo(
         NAPI_CALL(env, napi_get_value_int32(env, nUserId, &subscriberInfo.userId));
         subscriberInfo.hasSubscribeInfo = true;
     }
-    // deviceType?: number
     NAPI_CALL(env, napi_has_named_property(env, value, "deviceType", &hasProperty));
     if (hasProperty) {
         napi_value nDeviceType = nullptr;
@@ -457,7 +575,6 @@ napi_value Common::GetNotificationSubscriberInfo(
         subscriberInfo.deviceType = str;
         subscriberInfo.hasSubscribeInfo = true;
     }
-    // filterType?: number
     NAPI_CALL(env, napi_has_named_property(env, value, "filterLimit", &hasProperty));
     if (hasProperty) {
         napi_value nFilterType = nullptr;
@@ -470,48 +587,13 @@ napi_value Common::GetNotificationSubscriberInfo(
         NAPI_CALL(env, napi_get_value_uint32(env, nFilterType, &subscriberInfo.filterType));
         subscriberInfo.hasSubscribeInfo = true;
     }
-    // slotTypes?: Array<notificationManager.SlotType>
-    NAPI_CALL(env, napi_has_named_property(env, value, "slotTypes", &hasSlotTypes));
-    if (hasSlotTypes) {
-        napi_value nSlotTypes = nullptr;
-        napi_get_named_property(env, value, "slotTypes", &nSlotTypes);
-        napi_is_array(env, nSlotTypes, &isArray);
-        if (!isArray) {
-            ANS_LOGE("Property slotTypes is expected to be an array.");
-            std::string msg = "Incorrect parameter types.The type of slotTypes must be array.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-            return nullptr;
-        }
-        napi_get_array_length(env, nSlotTypes, &length);
-        if (length == 0) {
-            ANS_LOGE("The array is empty.");
-            std::string msg = "Incorrect parameters are left unspecified. The slotTypes list length is zero.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-            return nullptr;
-        }
-        for (uint32_t i = 0; i < length; ++i) {
-            napi_value nSlotType = nullptr;
-            int32_t slotType = 0;
-            napi_get_element(env, nSlotTypes, i, &nSlotType);
-            NAPI_CALL(env, napi_typeof(env, nSlotType, &valuetype));
-            if (valuetype != napi_number) {
-                ANS_LOGE("Wrong argument type. Number expected.");
-                std::string msg = "Incorrect parameter types.The type of slotType must be number.";
-                Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-                return nullptr;
-            }
-            napi_get_value_int32(env, nSlotType, &slotType);
-            NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
-            if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), outType)) {
-                std::string msg = "Incorrect parameter types.slotType name must be in enum.";
-                Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-                return nullptr;
-            }
-            subscriberInfo.slotTypes.emplace_back(outType);
-            subscriberInfo.hasSubscribeInfo = true;
-        }
+    if (!GetSubscriberSlotTypes(env, value, subscriberInfo)) {
+        return nullptr;
     }
     if (!GetSubscriberVoiceContentOption(env, value, subscriberInfo)) {
+        return nullptr;
+    }
+    if (!GetSubscriberPictureOption(env, value, subscriberInfo)) {
         return nullptr;
     }
     return NapiGetNull(env);

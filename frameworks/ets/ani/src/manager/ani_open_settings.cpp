@@ -32,8 +32,6 @@ static std::atomic<bool> isExist = false;
 const int32_t ERR__INVALID_WANT = 1011;
 bool GetOpenSettingsInfo(ani_env *env, ani_object content, std::shared_ptr<OpenSettingsInfo> &info)
 {
-    ANS_LOGD("enter");
-
     ani_status status = ANI_OK;
     ani_boolean stageMode = ANI_FALSE;
     status = OHOS::AbilityRuntime::IsStageContext(env, content, stageMode);
@@ -147,7 +145,6 @@ ani_object StsNotificationSettingResult(ani_env *env, std::shared_ptr<OpenSettin
 
 void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSettingsInfo> info)
 {
-    ANS_LOGD("StsAsyncCompleteCallbackOpenSettings called");
     if (env == nullptr) {
         ANS_LOGE("env is null");
         return;
@@ -189,33 +186,30 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
 
 ani_object AniOpenNotificationSettings(ani_env *env, ani_object content)
 {
-    ANS_LOGD("sts AniOpenNotificationSettings call");
     std::shared_ptr<OpenSettingsInfo> info = std::make_shared<OpenSettingsInfo>();
     if (!GetOpenSettingsInfo(env, content, info)) {
         HistogramBoolReport("NotificationKit.APICall.openNotificationSettings", false);
         ANS_LOGE("sts AniOpenNotificationSettings GetOpenSettingsInfo fail");
-        return nullptr;
+        return NotificationSts::GetNullObject(env);
     }
     if (info->context == nullptr) {
         HistogramBoolReport("NotificationKit.APICall.openNotificationSettings", false);
-        ANS_LOGE("sts AniOpenNotificationSettings context is null");
-        NotificationSts::ThrowInternerErrorWithLogE(env, "");
-        return nullptr;
+        NotificationSts::ThrowInternerErrorWithLogE(env, "AniOpenNotificationSettings context is null");
+        return NotificationSts::GetNullObject(env);
     }
     std::string bundleName {""};
     if (isExist.exchange(true)) {
         HistogramBoolReport("NotificationKit.APICall.openNotificationSettings", false);
-        ANS_LOGE("sts AniOpenNotificationSettings ERROR_SETTING_WINDOW_EXIST");
         OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_SETTING_WINDOW_EXIST,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_SETTING_WINDOW_EXIST));
-        return nullptr;
+        return NotificationSts::GetNullObject(env);
     }
     ani_object aniPromise {};
     ani_resolver aniResolver {};
     if (ANI_OK != env->Promise_New(&aniResolver, &aniPromise)) {
         HistogramBoolReport("NotificationKit.APICall.openNotificationSettings", false);
         ANS_LOGE("Promise_New faild");
-        return nullptr;
+        return NotificationSts::GetNullObject(env);
     }
     info->resolver = aniResolver;
     bool success = CreateSettingsUIExtension(info->context, bundleName, env, info);
@@ -229,40 +223,36 @@ ani_object AniOpenNotificationSettings(ani_env *env, ani_object content)
         ANS_LOGE("error, code is %{public}d.", info->errorCode);
         StsAsyncCompleteCallbackOpenSettings(env, info);
         isExist.store(false);
-        return nullptr;
+        return NotificationSts::GetNullObject(env);
     }
-    ANS_LOGD("sts AniOpenNotificationSettings end");
     HistogramBoolReport("NotificationKit.APICall.openNotificationSettings", true);
     return aniPromise;
 }
 
 ani_object AniOpenNotificationSettingsWithResult(ani_env *env, ani_object content)
 {
-    ANS_LOGD("sts AniOpenNotificationSettingsWithResult call");
     std::shared_ptr<OpenSettingsInfo> info = std::make_shared<OpenSettingsInfo>();
     if (!GetOpenSettingsInfo(env, content, info)) {
         ANS_LOGE("sts AniOpenNotificationSettingsWithResult GetOpenSettingsInfo fail");
-        return nullptr;
+        return NotificationSts::GetNullObject(env);
     }
     if (info->context == nullptr) {
-        ANS_LOGE("sts AniOpenNotificationSettingsWithResult context is null");
-        NotificationSts::ThrowInternerErrorWithLogE(env, "");
-        return nullptr;
+        NotificationSts::ThrowInternerErrorWithLogE(env, "AniOpenNotificationSettingsWithResult context is null");
+        return NotificationSts::GetNullObject(env);
     }
     info->isWithResult = true;
     std::string bundleName {""};
     if (isExist.exchange(true)) {
-        ANS_LOGE("sts AniOpenNotificationSettingsWithResult ERROR_SETTING_WINDOW_EXIST");
         OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_SETTING_WINDOW_EXIST,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_SETTING_WINDOW_EXIST));
-        return nullptr;
+        return NotificationSts::GetNullObject(env);
     }
     ani_object aniPromise {};
     ani_resolver aniResolver {};
     if (ANI_OK != env->Promise_New(&aniResolver, &aniPromise)) {
         ANS_LOGE("Promise_New faild");
         isExist.store(false);
-        return nullptr;
+        return NotificationSts::GetNullObject(env);
     }
     info->resolver = aniResolver;
     bool success = CreateSettingsUIExtension(info->context, bundleName, env, info);
@@ -275,10 +265,8 @@ ani_object AniOpenNotificationSettingsWithResult(ani_env *env, ani_object conten
         ANS_LOGE("error, code is %{public}d.", info->errorCode);
         StsAsyncCompleteCallbackOpenSettings(env, info);
         isExist.store(false);
-        return nullptr;
+        return NotificationSts::GetNullObject(env);
     }
-    ANS_LOGD("sts AniOpenNotificationSettingsWithResult end");
-
     return aniPromise;
 }
 

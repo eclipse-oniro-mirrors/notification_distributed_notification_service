@@ -2344,6 +2344,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetStatisticsByBundle_103, Functio
     ASSERT_EQ(ret, ERR_OK);
 }
 
+#ifdef ANS_FEATURE_DIST_NOTIFICATION_PERSIST
 /**
  * @tc.name: SetNotificationRequestToDbCommon_100
  * @tc.desc: Test SetNotificationRequestToDbCommon when VerifyNativeToken true.
@@ -2479,6 +2480,9 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SetNotificationRequestToDbCommon_4
  */
 HWTEST_F(AdvancedNotificationServiceUnitTest, SetNotificationRequestToDbCommon_500, Function | SmallTest | Level1)
 {
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    IPCSkeleton::SetCallingUid(5557);
     advancedNotificationService_->notificationList_.clear();
     sptr<NotificationRequest> request = new NotificationRequest(1);
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
@@ -2636,6 +2640,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SetSnoozeDelayTimeToDB_100, Functi
     auto result = advancedNotificationService_->SetSnoozeDelayTimeToDB(100, record);
     ASSERT_EQ(result, false);
 }
+#endif
 
 #ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
 /**

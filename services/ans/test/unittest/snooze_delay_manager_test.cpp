@@ -288,9 +288,11 @@ HWTEST_F(AnsSnoozeDelayTest, ExcuteSnoozeNotification_00005, Function | SmallTes
  */
 HWTEST_F(AnsSnoozeDelayTest, SnoozeNotificationConsumed_00001, Function | SmallTest | Level1)
 {
+    int32_t uid = 50;
     sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
     sptr<Notification> notification(new (std::nothrow) Notification(request));
     auto normalContent = std::make_shared<NotificationNormalContent>();
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("MyTestBundle", uid);
     normalContent->SetContentType(1);
     auto content = std::make_shared<NotificationContent>(normalContent);
     request->SetContent(content);
@@ -299,11 +301,13 @@ HWTEST_F(AnsSnoozeDelayTest, SnoozeNotificationConsumed_00001, Function | SmallT
     record1->request = request;
     record1->notification = notification;
     record1->request->SetUpdateOnly(true);
+    record1->bundleOption = bundleOption;
     advancedNotificationService_->SnoozeNotificationConsumed(nullptr);
     advancedNotificationService_->SnoozeNotificationConsumed(record1);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
 
     advancedNotificationService_->notificationList_.push_back(record1);
+    advancedNotificationService_->SetSilentReminderEnabledInner(bundleOption, true);
     advancedNotificationService_->SnoozeNotificationConsumed(record1);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 }

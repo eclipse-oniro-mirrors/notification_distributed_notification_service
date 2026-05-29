@@ -17,6 +17,7 @@
 #include "sts_common.h"
 #include "ans_log_wrapper.h"
 #include "sts_notification_manager.h"
+#include "picture_option.h"
 
 namespace OHOS {
 namespace NotificationSts {
@@ -75,6 +76,32 @@ bool GetVoiceContentOption(ani_env *env, ani_object value, NotificationSubscribe
     return true;
 }
 
+bool GetPictureOption(ani_env *env, ani_object value, NotificationSubscribeInfo &info)
+{
+    ani_boolean isUndefined = ANI_TRUE;
+    ani_ref pictureOptionRef = nullptr;
+    ani_status status = GetPropertyRef(env, value, "pictureOptions", isUndefined, pictureOptionRef);
+    if (status != ANI_OK) {
+        ANS_LOGE("GetPropertyRef pictureOptions failed");
+        return false;
+    }
+    if (isUndefined == ANI_TRUE) {
+        return true;
+    }
+    std::vector<std::string> picList;
+    if (GetPropertyStringArray(env, static_cast<ani_object>(pictureOptionRef),
+        "preparseLiveViewPicList", picList) != ANI_OK) {
+        ANS_LOGE("GetPropertyStringArray preparseLiveViewPicList failed");
+        return false;
+    }
+    sptr<OHOS::Notification::PictureOption> pictureOption =
+        new (std::nothrow) OHOS::Notification::PictureOption(picList);
+    if (pictureOption != nullptr) {
+        info.SetPictureOption(pictureOption);
+    }
+    return true;
+}
+
 bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, NotificationSubscribeInfo &info)
 {
     ANS_LOGD("enter");
@@ -114,7 +141,9 @@ bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, Notificatio
     if (!GetVoiceContentOption(env, value, info)) {
         return false;
     }
-
+    if (!GetPictureOption(env, value, info)) {
+        return false;
+    }
     ANS_LOGD("userId %{public}d deviceType %{public}s filterLimit %{public}d voiceContentOption %{public}s",
         info.GetAppUserId(), info.GetDeviceType().c_str(), info.GetFilterType(),
         info.GetVoiceContentOption() != nullptr ? "enabled" : "null");

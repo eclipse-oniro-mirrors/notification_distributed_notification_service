@@ -523,18 +523,6 @@ HWTEST_F(ReminderRequestTest, GetRingDuration_00100, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: SetNextTriggerTime_00100
- * @tc.desc: Test SetNextTriggerTime parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5QVYA
- */
-HWTEST_F(ReminderRequestTest, SetNextTriggerTime_00100, Function | SmallTest | Level1)
-{
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    EXPECT_EQ(rrc->SetNextTriggerTime(), false);
-}
-
-/**
  * @tc.name: Marshalling_00100
  * @tc.desc: Test Marshalling parameters.
  * @tc.type: FUNC
@@ -771,6 +759,16 @@ HWTEST_F(ReminderRequestTest, OnTimeZoneChange_00001, Function | SmallTest | Lev
     } else {
         EXPECT_EQ(rrc->OnTimeZoneChange(), true);
     }
+    time_t now;
+    (void)time(&now);
+    rrc->SetTimeZoneType(ReminderRequest::TimeZoneType::FIXED_TIME_ZONE);
+    EXPECT_EQ(rrc->OnTimeZoneChange(), false);
+    EXPECT_EQ(rrc->GetTriggerTimeWithDST(0, now), now);
+    rrc->SetTimeZoneType(ReminderRequest::TimeZoneType::SYSTEM_TIME_ZONE);
+    EXPECT_GE(rrc->OnTimeZoneChange(), 0);
+    EXPECT_GE(rrc->GetTriggerTimeWithDST(0, now), now);
+    rrc->SetTimeZoneType(ReminderRequest::TimeZoneType::DEFAULT);
+    EXPECT_GE(rrc->OnTimeZoneChange(), 0);
 }
 
 /**
@@ -1940,36 +1938,6 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00007, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: MarshallingWantParameters_00001
- * @tc.desc: Test MarshallingWantParameters parameters.
- * @tc.type: FUNC
- * @tc.require: issue#I94VJT
- */
-HWTEST_F(ReminderRequestTest, MarshallingWantParameters_00001, Function | SmallTest | Level1)
-{
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    AAFwk::WantParams params1;
-    Parcel p1;
-    bool ret = rrc->MarshallingWantParameters(p1, params1);
-    EXPECT_EQ(ret, true);
-
-    std::string key = "key";
-    std::string value = "value";
-    params1.SetParam(key, AAFwk::String::Box(value));
-    Parcel p2;
-    ret = rrc->MarshallingWantParameters(p2, params1);
-    EXPECT_EQ(ret, true);
-
-    AAFwk::WantParams params2;
-    ret = rrc->ReadWantParametersFromParcel(p1, params2);
-    EXPECT_EQ(ret, true);
-
-    ret = rrc->ReadWantParametersFromParcel(p2, params2);
-    EXPECT_EQ(ret, true);
-    EXPECT_EQ(params2.GetStringParam(key), value);
-}
-
-/**
  * @tc.name: WantAgentStr_00001
  * @tc.desc: Test want agent str parameters.
  * @tc.type: FUNC
@@ -2436,7 +2404,7 @@ HWTEST_F(ReminderRequestTest, ReminderRequestTest_007, Function | SmallTest | Le
 
 /**
  * @tc.name: ReminderRequestTest_008
- * @tc.desc: Test MarshallingActionButton parameters.
+ * @tc.desc: Test SetActionButton parameters.
  * @tc.type: FUNC
  * @tc.require: issueI8CDH3
  */
@@ -2445,22 +2413,18 @@ HWTEST_F(ReminderRequestTest, ReminderRequestTest_008, Function | SmallTest | Le
     ReminderRequestChild child;
     child.SetActionButton("test1", ReminderRequest::ActionButtonType::CLOSE, "test1",
         nullptr, nullptr);
-    Parcel p;
-    child.MarshallingActionButton(p);
     EXPECT_EQ(child.actionButtonMap_.size(), 1);
     
     child.actionButtonMap_.clear();
     auto wantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
     child.SetActionButton("test2", ReminderRequest::ActionButtonType::SNOOZE, "test2",
         wantAgent, nullptr);
-    child.MarshallingActionButton(p);
     EXPECT_EQ(child.actionButtonMap_.size(), 1);
     
     child.actionButtonMap_.clear();
     auto update = std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
     child.SetActionButton("test3", ReminderRequest::ActionButtonType::CUSTOM, "test3",
         wantAgent, update);
-    child.MarshallingActionButton(p);
     EXPECT_EQ(child.actionButtonMap_.size(), 1);
 }
 
@@ -2541,6 +2505,145 @@ HWTEST_F(ReminderRequestTest, ReminderRequestTest_012, Function | SmallTest | Le
     EXPECT_EQ(child.IsNotDistributed(), false);
     child.SetNotDistributed(true);
     EXPECT_EQ(child.IsNotDistributed(), true);
+}
+
+/**
+ * @tc.name: SerializeNotificationRequestProxy_00001
+ * @tc.desc: Serialize default NotificationRequestProxy yields JSON containing appMessageId and isAlertOnce.
+ * @tc.type: FUNC
+ * @tc.require: issueI9NOTIFYPROXY
+ */
+HWTEST_F(ReminderRequestTest, SerializeNotificationRequestProxy_00001, Function | SmallTest | Level1)
+{
+    ReminderRequestChild child;
+    std::string json = child.SerializeNotificationRequestProxy();
+    EXPECT_NE(json.find("\"appMessageId\""), std::string::npos);
+    EXPECT_NE(json.find("\"isAlertOnce\""), std::string::npos);
+    EXPECT_NE(json.find("false"), std::string::npos);
+}
+
+/**
+ * @tc.name: SerializeDeserializeNotificationRequestProxy_RoundTrip_00001
+ * @tc.desc: Set proxy, serialize, deserialize on another instance, fields match.
+ * @tc.type: FUNC
+ * @tc.require: issueI9NOTIFYPROXY
+ */
+HWTEST_F(ReminderRequestTest, SerializeDeserializeNotificationRequestProxy_RoundTrip_00001,
+    Function | SmallTest | Level1)
+{
+    ReminderRequestChild src;
+    ReminderRequest::NotificationRequestProxy in {};
+    in.appMessageId = "app-msg-001";
+    in.isAlertOnce = true;
+    src.SetNotificationRequestProxy(in);
+    std::string json = src.SerializeNotificationRequestProxy();
+
+    ReminderRequestChild dst;
+    ReminderRequest::NotificationRequestProxy stale {};
+    stale.appMessageId = "stale";
+    stale.isAlertOnce = false;
+    dst.SetNotificationRequestProxy(stale);
+    dst.DeserializeNotificationRequestProxy(json);
+
+    ReminderRequest::NotificationRequestProxy out = dst.GetNotificationRequestProxy();
+    EXPECT_EQ(out.appMessageId, "app-msg-001");
+    EXPECT_TRUE(out.isAlertOnce);
+}
+
+/**
+ * @tc.name: DeserializeNotificationRequestProxy_Empty_00001
+ * @tc.desc: Deserialize empty string does not modify existing proxy.
+ * @tc.type: FUNC
+ * @tc.require: issueI9NOTIFYPROXY
+ */
+HWTEST_F(ReminderRequestTest, DeserializeNotificationRequestProxy_Empty_00001, Function | SmallTest | Level1)
+{
+    ReminderRequestChild child;
+    ReminderRequest::NotificationRequestProxy in {};
+    in.appMessageId = "unchanged";
+    in.isAlertOnce = true;
+    child.SetNotificationRequestProxy(in);
+    child.DeserializeNotificationRequestProxy("");
+    ReminderRequest::NotificationRequestProxy out = child.GetNotificationRequestProxy();
+    EXPECT_EQ(out.appMessageId, "unchanged");
+    EXPECT_TRUE(out.isAlertOnce);
+}
+
+/**
+ * @tc.name: DeserializeNotificationRequestProxy_InvalidJson_00001
+ * @tc.desc: Deserialize invalid JSON leaves proxy unchanged.
+ * @tc.type: FUNC
+ * @tc.require: issueI9NOTIFYPROXY
+ */
+HWTEST_F(ReminderRequestTest, DeserializeNotificationRequestProxy_InvalidJson_00001, Function | SmallTest | Level1)
+{
+    ReminderRequestChild child;
+    ReminderRequest::NotificationRequestProxy in {};
+    in.appMessageId = "keep-me";
+    in.isAlertOnce = true;
+    child.SetNotificationRequestProxy(in);
+    child.DeserializeNotificationRequestProxy("{not valid json");
+    ReminderRequest::NotificationRequestProxy out = child.GetNotificationRequestProxy();
+    EXPECT_EQ(out.appMessageId, "keep-me");
+    EXPECT_TRUE(out.isAlertOnce);
+}
+
+/**
+ * @tc.name: DeserializeNotificationRequestProxy_OnlyAppMessageId_00001
+ * @tc.desc: JSON with only appMessageId resets isAlertOnce to false.
+ * @tc.type: FUNC
+ * @tc.require: issueI9NOTIFYPROXY
+ */
+HWTEST_F(ReminderRequestTest, DeserializeNotificationRequestProxy_OnlyAppMessageId_00001,
+    Function | SmallTest | Level1)
+{
+    ReminderRequestChild child;
+    ReminderRequest::NotificationRequestProxy in {};
+    in.appMessageId = "was-true";
+    in.isAlertOnce = true;
+    child.SetNotificationRequestProxy(in);
+    child.DeserializeNotificationRequestProxy("{\"appMessageId\":\"only-id\"}");
+    ReminderRequest::NotificationRequestProxy out = child.GetNotificationRequestProxy();
+    EXPECT_EQ(out.appMessageId, "only-id");
+    EXPECT_FALSE(out.isAlertOnce);
+}
+
+/**
+ * @tc.name: DeserializeNotificationRequestProxy_IntegerIsAlertOnce_00001
+ * @tc.desc: isAlertOnce accepts integer 0 and non-zero as boolean.
+ * @tc.type: FUNC
+ * @tc.require: issueI9NOTIFYPROXY
+ */
+HWTEST_F(ReminderRequestTest, DeserializeNotificationRequestProxy_IntegerIsAlertOnce_00001,
+    Function | SmallTest | Level1)
+{
+    ReminderRequestChild child;
+    child.DeserializeNotificationRequestProxy("{\"appMessageId\":\"\",\"isAlertOnce\":1}");
+    EXPECT_TRUE(child.GetNotificationRequestProxy().isAlertOnce);
+    child.DeserializeNotificationRequestProxy("{\"appMessageId\":\"\",\"isAlertOnce\":0}");
+    EXPECT_FALSE(child.GetNotificationRequestProxy().isAlertOnce);
+}
+
+/**
+ * @tc.name: SerializeDeserializeNotificationRequestProxy_EscapedQuote_00001
+ * @tc.desc: appMessageId containing double quote round-trips through JSON.
+ * @tc.type: FUNC
+ * @tc.require: issueI9NOTIFYPROXY
+ */
+HWTEST_F(ReminderRequestTest, SerializeDeserializeNotificationRequestProxy_EscapedQuote_00001,
+    Function | SmallTest | Level1)
+{
+    ReminderRequestChild src;
+    ReminderRequest::NotificationRequestProxy in {};
+    in.appMessageId = "a\"b";
+    in.isAlertOnce = false;
+    src.SetNotificationRequestProxy(in);
+    std::string json = src.SerializeNotificationRequestProxy();
+
+    ReminderRequestChild dst;
+    dst.DeserializeNotificationRequestProxy(json);
+    EXPECT_EQ(dst.GetNotificationRequestProxy().appMessageId, "a\"b");
+    EXPECT_FALSE(dst.GetNotificationRequestProxy().isAlertOnce);
 }
 }
 }

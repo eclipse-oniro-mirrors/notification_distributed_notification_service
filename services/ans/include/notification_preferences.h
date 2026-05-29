@@ -27,13 +27,15 @@
 #include "notification_clone_bundle_info.h"
 #include "notification_clone_priority_info.h"
 #include "notification_constant.h"
+#include "ffrt.h"
+#include <set>
 
 namespace OHOS {
 namespace Notification {
 class NotificationPreferences final {
 public:
     NotificationPreferences();
-    ~NotificationPreferences() = default;
+    ~NotificationPreferences();
     /**
      * @brief Get NotificationPreferences instance object.
      */
@@ -64,9 +66,6 @@ public:
     ErrCode DeleteStatisticsByBundle(const int32_t userId, const std::string &bundleName, int32_t packageId);
 
     ErrCode TimerCleanExperData();
-
-    void StartCacheExpiryTask();
-    void StopCacheExpiryTask();
 
     ErrCode QueryStatisticsByBundle(const sptr<NotificationBundleOption>& bundle,
         int32_t &recentCount, int64_t &lastTime);
@@ -778,9 +777,44 @@ public:
     ErrCode RemoveExtensionSubscriptionBundles(
         const sptr<NotificationBundleOption>& bundleOption, const std::vector<sptr<NotificationBundleOption>>& bundles);
 
-private:
-    bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,
-        const sptr<NotificationBundleOption> &bundleOption, NotificationPreferencesInfo::BundleInfo &info) const;
+    /**
+     * @brief Set collaboration block list from JSON string.
+     *
+     * @param blockListJson Indicates the JSON string containing block list.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetCollaborationBlockList(const std::string& blockListJson);
+
+    /**
+     * @brief Check if collaboration is allowed for a specific bundle and uid.
+     *
+     * @param bundleName Indicates the bundle name.
+     * @param uid Indicates the uid (contains userId and appIndex information).
+     * @return Returns true if collaboration is allowed, false otherwise.
+     */
+    bool IsCollaborationAllowed(const std::string& bundleName, int32_t uid);
+
+ private:
+     bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,
+         const sptr<NotificationBundleOption> &bundleOption, NotificationPreferencesInfo::BundleInfo &info) const;
+    
+    /**
+     * @brief Parse block list from JSON string.
+     *
+     * @param jsonData Indicates the JSON string.
+     * @param blockList Indicates the parsed block list (bundleName, appIndex pairs).
+     * @param userId Indicates the parsed userId from JSON.
+     * @return Returns true on success, false on failure.
+     */
+    bool ParseBlockListJson(const std::string& jsonData,
+        std::set<std::pair<std::string, int32_t>>& blockList, int32_t& userId);
+    
+    /**
+     * @brief Load collaboration block list from database for a specific user.
+     *
+     * @param userId Indicates the user ID to load.
+     */
+    void LoadCollaborationBlockListFromDb(int32_t userId);
     ErrCode CheckSlotForCreateSlot(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationSlot> &slot, NotificationPreferencesInfo &preferencesInfo) const;
     ErrCode CheckSlotForRemoveSlot(const sptr<NotificationBundleOption> &bundleOption,
@@ -814,7 +848,17 @@ private:
     bool isKioskMode_ = false;
     bool isKioskTrustListUpdate_ = false;
     bool isRestrictedTrustListUpdate_ = false;
-    ffrt::task_handle cacheExpiryTask_ = nullptr;
+
+    // Collaboration block list cache (multi-user support)
+    // Key: userId, Value: set of (bundleName, appIndex) pairs
+    std::map<int32_t, std::set<std::pair<std::string, int32_t>>> collaborationBlockListCache_;
+
+    // Lazy loading flags for each user (per-user loading)
+    // Key: userId, Value: true if loaded, false if not loaded
+    std::map<int32_t, bool> collaborationBlockListLoadedMap_;
+
+    // Use ffrt::mutex for thread safety
+    ffrt::mutex collaborationBlockListMutex_;
 };
 }  // namespace Notification
 }  // namespace OHOS

@@ -524,7 +524,37 @@ HWTEST_F(NotificationRequestTest, ConvertJsonToString_0100, Level1)
     int32_t myNotificationId = 10;
     NotificationRequest notificationRequest(myNotificationId);
 
-    nlohmann::json jsonObject;
+    nlohmann::json jsonObject = nlohmann::json{
+        {"appMessageId", 10},
+    };
+    Notification::NotificationRequest* target = new Notification::NotificationRequest(myNotificationId);
+
+    notificationRequest.ConvertJsonToString(target, jsonObject);
+    notificationRequest.ConvertJsonToEnum(target, jsonObject);
+    notificationRequest.ConvertJsonToBool(target, jsonObject);
+    notificationRequest.ConvertJsonToPixelMap(target, jsonObject);
+    bool result1 = notificationRequest.ConvertJsonToNotificationContent(target, jsonObject);
+    bool result2 = notificationRequest.ConvertJsonToNotificationActionButton(target, jsonObject);
+    bool result3 = notificationRequest.ConvertJsonToNotificationFlags(target, jsonObject);
+    EXPECT_EQ(result1, true);
+    EXPECT_EQ(result2, true);
+    EXPECT_EQ(result3, true);
+}
+
+/**
+ * @tc.name: ConvertJsonToString_0200
+ * @tc.desc: ConvertJsonToString when appMessageId is string
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToString_0200, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    nlohmann::json jsonObject = nlohmann::json{
+        {"appMessageId", "test"},
+    };
     Notification::NotificationRequest* target = new Notification::NotificationRequest(myNotificationId);
 
     notificationRequest.ConvertJsonToString(target, jsonObject);
@@ -1600,6 +1630,108 @@ HWTEST_F(NotificationRequestTest, ConvertObjectsToJson_0003, Level1)
     nlohmann::json jsonObject;
     auto result = request.ConvertObjectsToJson(jsonObject);
     EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationContent_0100
+ * @tc.desc: ConvertJsonToNotificationContent when OwnerUid not DEFAULT_UID
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationContent_0100, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    nlohmann::json jsonObject = nlohmann::json{
+        {"wantAgent", 1},
+        {"removalWantAgent", 1},
+    };
+    Notification::NotificationRequest* target = new Notification::NotificationRequest(myNotificationId);
+    target->SetOwnerUid(22);
+    Notification::NotificationRequest::ConvertJsonToWantAgent(target, jsonObject);
+    bool result1 = notificationRequest.ConvertJsonToNotificationContent(target, jsonObject);
+    EXPECT_EQ(result1, true);
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationContent_0200
+ * @tc.desc: ConvertJsonToNotificationContent when OwnerUid is DEFAULT_UID
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationContent_0200, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    nlohmann::json jsonObject = nlohmann::json{
+        {"wantAgent", 1},
+        {"removalWantAgent", 1},
+    };
+    Notification::NotificationRequest* target = new Notification::NotificationRequest(myNotificationId);
+    target->SetOwnerUid(0);
+    Notification::NotificationRequest::ConvertJsonToWantAgent(target, jsonObject);
+    bool result1 = notificationRequest.ConvertJsonToNotificationContent(target, jsonObject);
+    EXPECT_EQ(result1, true);
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationContent_0300
+ * @tc.desc: ConvertJsonToNotificationContent when OwnerUid not DEFAULT_UID
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationContent_0300, Level1)
+{
+    int32_t myNotificationId = 10;
+    Notification::NotificationRequest* request = new Notification::NotificationRequest(myNotificationId);
+    auto multiLineContent = std::make_shared<NotificationMultiLineContent>();
+    auto wantAgent = std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
+    multiLineContent->SetLineWantAgents({wantAgent, wantAgent});
+    multiLineContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::MULTILINE));
+    multiLineContent->SetLineWantAgentStrs({"test001", "test002"});
+    std::shared_ptr<NotificationContent> notificationContent = std::make_shared<NotificationContent>(multiLineContent);
+    request->SetContent(notificationContent);
+    nlohmann::json jsonObject = nlohmann::json{
+        {"wantAgent", 1},
+        {"removalWantAgent", 1},
+    };
+    bool result1 = request->ConvertObjectsToJson(jsonObject);
+    EXPECT_EQ(result1, true);
+    Notification::NotificationRequest* target = new Notification::NotificationRequest(myNotificationId);
+    target->SetOwnerUid(22);
+    Notification::NotificationRequest::ConvertJsonToWantAgent(target, jsonObject);
+    bool result2 = Notification::NotificationRequest::ConvertJsonToNotificationContent(target, jsonObject);
+    EXPECT_EQ(result2, true);
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationContent_0400
+ * @tc.desc: ConvertJsonToNotificationContent when OwnerUid is DEFAULT_UID
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationContent_0400, Level1)
+{
+    int32_t myNotificationId = 10;
+    Notification::NotificationRequest* request = new Notification::NotificationRequest(myNotificationId);
+    auto multiLineContent = std::make_shared<NotificationMultiLineContent>();
+    auto wantAgent = std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
+    multiLineContent->SetLineWantAgents({wantAgent, wantAgent});
+    multiLineContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::MULTILINE));
+    multiLineContent->SetLineWantAgentStrs({"test001", "test002"});
+    std::shared_ptr<NotificationContent> notificationContent = std::make_shared<NotificationContent>(multiLineContent);
+    request->SetContent(notificationContent);
+    nlohmann::json jsonObject = nlohmann::json{
+        {"wantAgent", "test"},
+        {"removalWantAgent", "test"},
+    };
+    bool result1 = request->ConvertObjectsToJson(jsonObject);
+    EXPECT_EQ(result1, true);
+    Notification::NotificationRequest* target = new Notification::NotificationRequest(myNotificationId);
+    target->SetOwnerUid(0);
+    Notification::NotificationRequest::ConvertJsonToWantAgent(target, jsonObject);
+    bool result2 = Notification::NotificationRequest::ConvertJsonToNotificationContent(target, jsonObject);
+    EXPECT_EQ(result2, true);
 }
 } // namespace Notification
 } // namespace OHOS

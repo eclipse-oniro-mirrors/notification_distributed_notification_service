@@ -16,6 +16,7 @@
 #include "ans_dialog_callback_stub.h"
 #include "errors.h"
 #include "notification_slot.h"
+#include "picture_option.h"
 #include "refbase.h"
 #include <cstdint>
 #include <gtest/gtest.h>
@@ -2691,6 +2692,22 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0700, Function | MediumT
 }
 
 /*
+ * @tc.name: SubscribeNotification_1000
+ * @tc.desc: test SubscribeNotification with PictureOption set.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_1000, Function | MediumTest | Level1)
+{
+    auto subscriber = TestAnsSubscriber();
+    auto info = NotificationSubscribeInfo();
+    sptr<PictureOption> pictureOption = new PictureOption({"pic1", "pic2"});
+    info.SetPictureOption(pictureOption);
+    ErrCode ret = ans_->SubscribeNotification(subscriber, info);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
  * @tc.name: UnSubscribeNotification_0500
  * @tc.desc: test UnSubscribeNotification normal.
  * @tc.type: FUNC
@@ -2761,6 +2778,24 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0900, Function | MediumT
     ErrCode ret1 = ans_->SubscribeNotification(subscriberPtr, nullptr);
     EXPECT_EQ(ret1, ERR_OK);
     ErrCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, nullptr);
+    EXPECT_EQ(ret2, ERR_OK);
+}
+
+/*
+ * @tc.name: SubscribeNotification_1100
+ * @tc.desc: test SubscribeNotification with PictureOption set for shared_ptr subscriber.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_1100, Function | MediumTest | Level1)
+{
+    std::shared_ptr<TestAnsSubscriber> subscriberPtr = std::make_shared<TestAnsSubscriber>();
+    sptr<NotificationSubscribeInfo> infoPtr = new (std::nothrow) NotificationSubscribeInfo();
+    sptr<PictureOption> pictureOption = new PictureOption({"pic1"});
+    infoPtr->SetPictureOption(pictureOption);
+    ErrCode ret1 = ans_->SubscribeNotification(subscriberPtr, infoPtr);
+    EXPECT_EQ(ret1, ERR_OK);
+    ErrCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, infoPtr);
     EXPECT_EQ(ret2, ERR_OK);
 }
  
@@ -3312,6 +3347,26 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationv26_0900, Function | Medi
     ErrCode ret1 = ans_->SubscribeNotificationV26(subscriberPtr, nullptr);
     EXPECT_EQ(ret1, ERR_OK);
     ErrCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, nullptr);
+    EXPECT_EQ(ret2, ERR_OK);
+}
+
+/*
+ * @tc.name: SubscribeNotificationv26_1000
+ * @tc.desc: test SubscribeNotificationV26 with PictureOption set.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationv26_1000, Function | MediumTest | Level1)
+{
+    sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
+    MockGetAnsManagerProxy(proxy);
+    std::shared_ptr<TestAnsSubscriber> subscriberPtr = std::make_shared<TestAnsSubscriber>();
+    sptr<NotificationSubscribeInfo> infoPtr = new (std::nothrow) NotificationSubscribeInfo();
+    sptr<PictureOption> pictureOption = new PictureOption({"pic1", "pic2", "pic3"});
+    infoPtr->SetPictureOption(pictureOption);
+    ErrCode ret1 = ans_->SubscribeNotificationV26(subscriberPtr, infoPtr);
+    EXPECT_EQ(ret1, ERR_OK);
+    ErrCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, infoPtr);
     EXPECT_EQ(ret2, ERR_OK);
 }
 

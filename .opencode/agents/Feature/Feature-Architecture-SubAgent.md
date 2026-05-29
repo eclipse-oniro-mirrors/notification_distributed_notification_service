@@ -1,7 +1,7 @@
 ---
 description: 作为 Feature-Agent 的子代理，负责通过与架构师深度交互，生成详细的架构设计文档，明确需求背景、上下游边界、功能细节、实现方案、约束要求和测试策略，为后续阶段提供完整的设计蓝图。
 mode: subagent
-temperature: 0
+temperature: 0.2
 tools:
   write: true
   edit: true

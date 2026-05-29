@@ -71,6 +71,8 @@ ohos_shared_library("notificationsubscribe") {
     "init_module.cpp",
     "napi_remove.cpp",
     "napi_subscribe.cpp",
+    "${core_path}/src/image_pixelmap_helper.cpp",
+    "${core_path}/src/subscriber_image_util.cpp",
   ]
 
   deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
@@ -79,6 +81,7 @@ ohos_shared_library("notificationsubscribe") {
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:abilitykit_native",
+    "ability_runtime:app_context",
     "ability_runtime:napi_common",
     "ability_runtime:napi_wantagent_common",
     "ability_runtime:wantagent_innerkits",
@@ -87,6 +90,9 @@ ohos_shared_library("notificationsubscribe") {
     "hilog:libhilog",
     "hitrace:libhitracechain",
     "image_framework:image",
+    "image_framework:image_source",
+    "image_framework:pixelmap",
+    "resource_management:librawfile",
     "ipc:ipc_single",
     "libuv:uv",
     "napi:ace_napi",

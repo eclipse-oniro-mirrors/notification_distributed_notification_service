@@ -155,6 +155,7 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->groupId_ = other.groupId_;
     this->customRingUri_ = other.customRingUri_;
     this->ringChannel_ = other.ringChannel_;
+    this->timeZoneType_ = other.timeZoneType_;
     this->creatorBundleName_ = other.creatorBundleName_;
     this->titleResourceId_ = other.titleResourceId_;
     this->contentResourceId_ = other.contentResourceId_;
@@ -162,6 +163,7 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->snoozeContentResourceId_ = other.snoozeContentResourceId_;
     this->forceDistributed_ = other.forceDistributed_;
     this->notDistributed_ = other.notDistributed_;
+    this->notificationRequestProxy_ = other.notificationRequestProxy_;
 }
 
 ReminderRequest::ReminderRequest(int32_t reminderId)
@@ -480,6 +482,17 @@ bool ReminderRequest::OnTerminate()
 
 bool ReminderRequest::OnTimeZoneChange()
 {
+    if (timeZoneType_ == TimeZoneType::FIXED_TIME_ZONE) {
+        return false;
+    }
+    if (timeZoneType_ == TimeZoneType::SYSTEM_TIME_ZONE) {
+        uint64_t recomposed = PreGetNextTriggerTimeIgnoreSnooze(true, false);
+        if (recomposed == INVALID_LONG_LONG_VALUE) {
+            ANSR_LOGW("SYSTEM_TIME_ZONE OnTimeZoneChange: no valid next trigger.");
+            return false;
+        }
+        return HandleTimeZoneChange(triggerTimeInMilli_, recomposed, recomposed);
+    }
     time_t oldZoneTriggerTime = static_cast<time_t>(triggerTimeInMilli_ / MILLI_SECONDS);
     struct tm *localOriTime = localtime(&oldZoneTriggerTime);
     if (localOriTime == nullptr) {
@@ -852,6 +865,16 @@ int32_t ReminderRequest::GetCreatorUid() const
     return creatorUid_;
 }
 
+ReminderRequest::NotificationRequestProxy ReminderRequest::GetNotificationRequestProxy() const
+{
+    return notificationRequestProxy_;
+}
+
+void ReminderRequest::SetNotificationRequestProxy(const NotificationRequestProxy& proxy)
+{
+    notificationRequestProxy_ = proxy;
+}
+
 std::string ReminderRequest::GetContent() const
 {
     return content_;
@@ -962,6 +985,16 @@ void ReminderRequest::SetRingChannel(const RingChannel type)
 ReminderRequest::RingChannel ReminderRequest::GetRingChannel() const
 {
     return ringChannel_;
+}
+
+void ReminderRequest::SetTimeZoneType(TimeZoneType type)
+{
+    timeZoneType_ = type;
+}
+
+ReminderRequest::TimeZoneType ReminderRequest::GetTimeZoneType() const
+{
+    return timeZoneType_;
 }
 
 void ReminderRequest::SetRingLoop(const bool isRingLoop)
@@ -1084,11 +1117,6 @@ bool ReminderRequest::UpdateNextReminder()
     return false;
 }
 
-bool ReminderRequest::SetNextTriggerTime()
-{
-    return false;
-}
-
 void ReminderRequest::SetWantAgentStr(const std::string& wantStr)
 {
     wantAgentStr_ = wantStr;
@@ -1164,7 +1192,58 @@ void ReminderRequest::UpdateNotificationMaxScreenWantAgent(NotificationRequest& 
     notificationRequest.SetMaxScreenWantAgent(wantAgent);
 }
 
-bool ReminderRequest::MarshallingActionButton(Parcel& parcel) const
+bool ReminderRequest::Marshalling(Parcel &parcel) const
+{
+    return false;
+}
+
+bool ReminderRequest::WriteEnumToParcel(Parcel& parcel) const
+{
+    int32_t slotType = static_cast<int32_t>(slotType_);
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, slotType, "slotType");
+    int32_t snoozeSlotType = static_cast<int32_t>(snoozeSlotType_);
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, snoozeSlotType, "snoozeSlotType");
+    int32_t ringChannel = static_cast<int32_t>(ringChannel_);
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, ringChannel, "ringChannel");
+    int32_t timeZoneType = static_cast<int32_t>(timeZoneType_);
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, timeZoneType, "timeZoneType");
+    return true;
+}
+
+bool ReminderRequest::WriteStringToParcel(Parcel& parcel) const
+{
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, content_, "content");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, expiredContent_, "expiredContent");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, snoozeContent_, "snoozeContent");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, title_, "title");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, customButtonUri_, "customButtonUri");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, groupId_, "groupId");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, customRingUri_, "customRingUri");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, creatorBundleName_, "creatorBundleName");
+    return true;
+}
+
+bool ReminderRequest::WriteWantAgentToParcel(Parcel& parcel) const
+{
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->abilityName, "wantAgentInfo's abilityName");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->pkgName, "wantAgentInfo's pkgName");
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->uri, "wantAgentInfo's uri");
+    if (wantAgentInfo_->parameters.Size() == 0) {
+        if (!parcel.WriteInt32(VALUE_NULL)) {
+            return false;
+        }
+    } else {
+        if (!parcel.WriteInt32(VALUE_OBJECT)) {
+            return false;
+        }
+        if (!parcel.WriteParcelable(&wantAgentInfo_->parameters)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ReminderRequest::WriteActionButtonToParcel(Parcel& parcel) const
 {
     // write map
     uint64_t actionButtonMapSize = static_cast<uint64_t>(actionButtonMap_.size());
@@ -1197,51 +1276,34 @@ bool ReminderRequest::MarshallingActionButton(Parcel& parcel) const
     return true;
 }
 
-bool ReminderRequest::MarshallingWantParameters(Parcel& parcel, const AAFwk::WantParams& params) const
+bool ReminderRequest::WriteNotificationRequestProxyToParcel(Parcel& parcel) const
 {
-    if (params.Size() == 0) {
-        if (!parcel.WriteInt32(VALUE_NULL)) {
-            return false;
-        }
-    } else {
-        if (!parcel.WriteInt32(VALUE_OBJECT)) {
-            return false;
-        }
-        if (!parcel.WriteParcelable(&params)) {
-            return false;
-        }
-    }
+    WRITE_STRING_RETURN_FALSE_LOG(parcel, notificationRequestProxy_.appMessageId,
+        "notificationRequestProxy's appMessageId");
+    WRITE_BOOL_RETURN_FALSE_LOG(parcel, notificationRequestProxy_.isAlertOnce,
+        "notificationRequestProxy's isAlertOnce");
     return true;
-}
-
-bool ReminderRequest::Marshalling(Parcel &parcel) const
-{
-    return false;
 }
 
 bool ReminderRequest::WriteParcel(Parcel &parcel) const
 {
-    // write enum
     uint8_t reminderType = static_cast<uint8_t>(reminderType_);
     WRITE_UINT8_RETURN_FALSE_LOG(parcel, reminderType, "reminderType");
-    // write string
-    WRITE_STRING_RETURN_FALSE_LOG(parcel, content_, "content");
-    WRITE_STRING_RETURN_FALSE_LOG(parcel, expiredContent_, "expiredContent");
-    WRITE_STRING_RETURN_FALSE_LOG(parcel, snoozeContent_, "snoozeContent");
-    WRITE_STRING_RETURN_FALSE_LOG(parcel, title_, "title");
-    WRITE_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->abilityName, "wantAgentInfo's abilityName");
-    WRITE_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->pkgName, "wantAgentInfo's pkgName");
-    WRITE_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->uri, "wantAgentInfo's uri");
-    if (!MarshallingWantParameters(parcel, wantAgentInfo_->parameters)) {
-        ANSR_LOGE("Failed to write wantAgentInfo's parameters");
+    // write enum
+    if (!WriteEnumToParcel(parcel)) {
         return false;
     }
+    // write string
+    if (!WriteStringToParcel(parcel)) {
+        return false;
+    }
+    // write wantAgentInfo_
+    if (!WriteWantAgentToParcel(parcel)) {
+        return false;
+    }
+    // write maxScreenWantAgentInfo_
     WRITE_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->abilityName, "maxScreenWantAgentInfo's abilityName");
     WRITE_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->pkgName, "maxScreenWantAgentInfo's pkgName");
-    WRITE_STRING_RETURN_FALSE_LOG(parcel, customButtonUri_, "customButtonUri");
-    WRITE_STRING_RETURN_FALSE_LOG(parcel, groupId_, "groupId");
-    WRITE_STRING_RETURN_FALSE_LOG(parcel, customRingUri_, "customRingUri");
-    WRITE_STRING_RETURN_FALSE_LOG(parcel, creatorBundleName_, "creatorBundleName");
 
     // write bool
     WRITE_BOOL_RETURN_FALSE_LOG(parcel, isExpired_, "isExpired");
@@ -1250,31 +1312,29 @@ bool ReminderRequest::WriteParcel(Parcel &parcel) const
     WRITE_BOOL_RETURN_FALSE_LOG(parcel, notDistributed_, "notDistributed");
 
     // write int
-    WRITE_INT64_RETURN_FALSE_LOG(parcel, autoDeletedTime_, "autoDeletedTime");
-    WRITE_INT32_RETURN_FALSE_LOG(parcel, reminderId_, "reminderId");
-    WRITE_INT32_RETURN_FALSE_LOG(parcel, notificationId_, "notificationId");
-
-    WRITE_UINT64_RETURN_FALSE_LOG(parcel, triggerTimeInMilli_, "triggerTimeInMilli");
-    WRITE_UINT64_RETURN_FALSE_LOG(parcel, timeIntervalInMilli_, "timeIntervalInMilli");
-    WRITE_UINT64_RETURN_FALSE_LOG(parcel, ringDurationInMilli_, "ringDurationInMilli");
-    WRITE_UINT64_RETURN_FALSE_LOG(parcel, reminderTimeInMilli_, "reminderTimeInMilli");
     WRITE_UINT8_RETURN_FALSE_LOG(parcel, snoozeTimes_, "snoozeTimes");
     WRITE_UINT8_RETURN_FALSE_LOG(parcel, snoozeTimesDynamic_, "snoozeTimesDynamic");
     WRITE_UINT8_RETURN_FALSE_LOG(parcel, state_, "state");
 
-    int32_t slotType = static_cast<int32_t>(slotType_);
-    WRITE_INT32_RETURN_FALSE_LOG(parcel, slotType, "slotType");
-
-    int32_t snoozeSlotType = static_cast<int32_t>(snoozeSlotType_);
-    WRITE_INT32_RETURN_FALSE_LOG(parcel, snoozeSlotType, "snoozeSlotType");
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, reminderId_, "reminderId");
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, notificationId_, "notificationId");
     WRITE_INT32_RETURN_FALSE_LOG(parcel, titleResourceId_, "titleResourceId");
     WRITE_INT32_RETURN_FALSE_LOG(parcel, contentResourceId_, "contentResourceId");
     WRITE_INT32_RETURN_FALSE_LOG(parcel, expiredContentResourceId_, "expiredContentResourceId");
     WRITE_INT32_RETURN_FALSE_LOG(parcel, snoozeContentResourceId_, "snoozeContentResourceId");
-    int32_t ringChannel = static_cast<int32_t>(ringChannel_);
-    WRITE_INT32_RETURN_FALSE_LOG(parcel, ringChannel, "ringChannel");
 
-    if (!MarshallingActionButton(parcel)) {
+    WRITE_INT64_RETURN_FALSE_LOG(parcel, autoDeletedTime_, "autoDeletedTime");
+    WRITE_UINT64_RETURN_FALSE_LOG(parcel, triggerTimeInMilli_, "triggerTimeInMilli");
+    WRITE_UINT64_RETURN_FALSE_LOG(parcel, timeIntervalInMilli_, "timeIntervalInMilli");
+    WRITE_UINT64_RETURN_FALSE_LOG(parcel, ringDurationInMilli_, "ringDurationInMilli");
+    WRITE_UINT64_RETURN_FALSE_LOG(parcel, reminderTimeInMilli_, "reminderTimeInMilli");
+
+    // write actionButtonMap_
+    if (!WriteActionButtonToParcel(parcel)) {
+        return false;
+    }
+    // write notificationRequestProxy_
+    if (!WriteNotificationRequestProxyToParcel(parcel)) {
         return false;
     }
     return true;
@@ -1302,6 +1362,61 @@ ReminderRequest *ReminderRequest::Unmarshalling(Parcel &parcel)
         reminderRequest = nullptr;
     }
     return reminderRequest;
+}
+
+bool ReminderRequest::ReadEnumFromParcel(Parcel& parcel)
+{
+    int32_t slotType = static_cast<int32_t>(NotificationConstant::SlotType::OTHER);
+    READ_INT32_RETURN_FALSE_LOG(parcel, slotType, "slotType");
+    slotType_ = static_cast<NotificationConstant::SlotType>(slotType);
+
+    int32_t snoozeSlotType = static_cast<int32_t>(NotificationConstant::SlotType::OTHER);
+    READ_INT32_RETURN_FALSE_LOG(parcel, snoozeSlotType, "snoozeSlotType");
+    snoozeSlotType_ = static_cast<NotificationConstant::SlotType>(snoozeSlotType);
+
+    int32_t ringChannel = static_cast<int32_t>(ReminderRequest::RingChannel::ALARM);
+    READ_INT32_RETURN_FALSE_LOG(parcel, ringChannel, "ringChannel");
+    ringChannel_ = static_cast<ReminderRequest::RingChannel>(ringChannel);
+
+    int32_t timeZoneType = static_cast<int32_t>(ReminderRequest::TimeZoneType::DEFAULT);
+    READ_INT32_RETURN_FALSE_LOG(parcel, timeZoneType, "timeZoneType");
+    timeZoneType_ = static_cast<ReminderRequest::TimeZoneType>(timeZoneType);
+    return true;
+}
+
+bool ReminderRequest::ReadStringFromParcel(Parcel& parcel)
+{
+    READ_STRING_RETURN_FALSE_LOG(parcel, content_, "content");
+    READ_STRING_RETURN_FALSE_LOG(parcel, expiredContent_, "expiredContent");
+    READ_STRING_RETURN_FALSE_LOG(parcel, snoozeContent_, "snoozeContent");
+    READ_STRING_RETURN_FALSE_LOG(parcel, title_, "title");
+    READ_STRING_RETURN_FALSE_LOG(parcel, customButtonUri_, "customButtonUri");
+    READ_STRING_RETURN_FALSE_LOG(parcel, groupId_, "groupId");
+    READ_STRING_RETURN_FALSE_LOG(parcel, customRingUri_, "customRingUri");
+    READ_STRING_RETURN_FALSE_LOG(parcel, creatorBundleName_, "creatorBundleName");
+    return true;
+}
+
+bool ReminderRequest::ReadWantAgentFromParcel(Parcel& parcel)
+{
+    READ_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->abilityName, "wantAgentInfo's abilityName");
+    READ_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->pkgName, "wantAgentInfo's pkgName");
+    READ_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->uri, "wantAgentInfo's uri");
+    int empty = VALUE_NULL;
+    if (!parcel.ReadInt32(empty)) {
+        return false;
+    }
+    if (empty == VALUE_OBJECT) {
+        auto params = parcel.ReadParcelable<AAFwk::WantParams>();
+        if (params != nullptr) {
+            wantAgentInfo_->parameters = *params;
+            delete params;
+            params = nullptr;
+        } else {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool ReminderRequest::ReadActionButtonFromParcel(Parcel& parcel)
@@ -1342,84 +1457,68 @@ bool ReminderRequest::ReadActionButtonFromParcel(Parcel& parcel)
     return true;
 }
 
-bool ReminderRequest::ReadWantParametersFromParcel(Parcel& parcel, AAFwk::WantParams& wantParams)
+bool ReminderRequest::ReadNotificationRequestProxyFromParcel(Parcel& parcel)
 {
-    int empty = VALUE_NULL;
-    if (!parcel.ReadInt32(empty)) {
-        return false;
-    }
-    if (empty == VALUE_OBJECT) {
-        auto params = parcel.ReadParcelable<AAFwk::WantParams>();
-        if (params != nullptr) {
-            wantParams = *params;
-            delete params;
-            params = nullptr;
-        } else {
-            return false;
-        }
-    }
+    READ_STRING_RETURN_FALSE_LOG(parcel, notificationRequestProxy_.appMessageId,
+        "notificationRequestProxy's appMessageId");
+    READ_BOOL_RETURN_FALSE_LOG(parcel, notificationRequestProxy_.isAlertOnce,
+        "notificationRequestProxy's isAlertOnce");
     return true;
 }
 
 bool ReminderRequest::ReadFromParcel(Parcel &parcel)
 {
-    READ_STRING_RETURN_FALSE_LOG(parcel, content_, "content");
-    READ_STRING_RETURN_FALSE_LOG(parcel, expiredContent_, "expiredContent");
-    READ_STRING_RETURN_FALSE_LOG(parcel, snoozeContent_, "snoozeContent");
-    READ_STRING_RETURN_FALSE_LOG(parcel, title_, "title");
-    READ_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->abilityName, "wantAgentInfo's abilityName");
-    READ_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->pkgName, "wantAgentInfo's pkgName");
-    READ_STRING_RETURN_FALSE_LOG(parcel, wantAgentInfo_->uri, "wantAgentInfo's uri");
-    if (!ReadWantParametersFromParcel(parcel, wantAgentInfo_->parameters)) {
-        ANSR_LOGE("Failed to write wantAgentInfo's parameters");
+    // read enum
+    if (!ReadEnumFromParcel(parcel)) {
         return false;
     }
+    // read string
+    if (!ReadStringFromParcel(parcel)) {
+        return false;
+    }
+    // read wantAgentInfo_
+    if (!ReadWantAgentFromParcel(parcel)) {
+        return false;
+    }
+    // read maxScreenWantAgentInfo_
     READ_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->abilityName, "maxScreenWantAgentInfo's abilityName");
     READ_STRING_RETURN_FALSE_LOG(parcel, maxScreenWantAgentInfo_->pkgName, "maxScreenWantAgentInfo's pkgName");
-    READ_STRING_RETURN_FALSE_LOG(parcel, customButtonUri_, "customButtonUri");
-    READ_STRING_RETURN_FALSE_LOG(parcel, groupId_, "groupId");
-    READ_STRING_RETURN_FALSE_LOG(parcel, customRingUri_, "customRingUri");
-    READ_STRING_RETURN_FALSE_LOG(parcel, creatorBundleName_, "creatorBundleName");
 
+    // read bool
     READ_BOOL_RETURN_FALSE_LOG(parcel, isExpired_, "isExpired");
     READ_BOOL_RETURN_FALSE_LOG(parcel, tapDismissed_, "tapDismissed");
     READ_BOOL_RETURN_FALSE_LOG(parcel, forceDistributed_, "forceDistributed");
     READ_BOOL_RETURN_FALSE_LOG(parcel, notDistributed_, "notDistributed");
 
-    READ_INT64_RETURN_FALSE_LOG(parcel, autoDeletedTime_, "autoDeletedTime");
+    // read int
+    READ_UINT8_RETURN_FALSE_LOG(parcel, snoozeTimes_, "snoozeTimes");
+    READ_UINT8_RETURN_FALSE_LOG(parcel, snoozeTimesDynamic_, "snoozeTimesDynamic");
+    READ_UINT8_RETURN_FALSE_LOG(parcel, state_, "state");
 
     int32_t tempReminderId = -1;
     READ_INT32_RETURN_FALSE_LOG(parcel, tempReminderId, "reminderId");
     reminderId_ = (tempReminderId == -1) ? reminderId_ : tempReminderId;
 
     READ_INT32_RETURN_FALSE_LOG(parcel, notificationId_, "notificationId");
+    READ_INT32_RETURN_FALSE_LOG(parcel, titleResourceId_, "titleResourceId");
+    READ_INT32_RETURN_FALSE_LOG(parcel, contentResourceId_, "contentResourceId");
+    READ_INT32_RETURN_FALSE_LOG(parcel, expiredContentResourceId_, "expiredContentResourceId");
+    READ_INT32_RETURN_FALSE_LOG(parcel, snoozeContentResourceId_, "snoozeContentResourceId");
 
+    READ_INT64_RETURN_FALSE_LOG(parcel, autoDeletedTime_, "autoDeletedTime");
     READ_UINT64_RETURN_FALSE_LOG(parcel, triggerTimeInMilli_, "triggerTimeInMilli");
     READ_UINT64_RETURN_FALSE_LOG(parcel, timeIntervalInMilli_, "timeIntervalInMilli");
     READ_UINT64_RETURN_FALSE_LOG(parcel, ringDurationInMilli_, "ringDurationInMilli");
     READ_UINT64_RETURN_FALSE_LOG(parcel, reminderTimeInMilli_, "reminderTimeInMilli");
 
-    READ_UINT8_RETURN_FALSE_LOG(parcel, snoozeTimes_, "snoozeTimes");
-    READ_UINT8_RETURN_FALSE_LOG(parcel, snoozeTimesDynamic_, "snoozeTimesDynamic");
-    READ_UINT8_RETURN_FALSE_LOG(parcel, state_, "state");
-    int32_t slotType = static_cast<int32_t>(NotificationConstant::SlotType::OTHER);
-    READ_INT32_RETURN_FALSE_LOG(parcel, slotType, "slotType");
-    slotType_ = static_cast<NotificationConstant::SlotType>(slotType);
-
-    int32_t snoozeSlotType = static_cast<int32_t>(NotificationConstant::SlotType::OTHER);
-    READ_INT32_RETURN_FALSE_LOG(parcel, snoozeSlotType, "snoozeSlotType");
-    snoozeSlotType_ = static_cast<NotificationConstant::SlotType>(snoozeSlotType);
-    READ_INT32_RETURN_FALSE_LOG(parcel, titleResourceId_, "titleResourceId");
-    READ_INT32_RETURN_FALSE_LOG(parcel, contentResourceId_, "contentResourceId");
-    READ_INT32_RETURN_FALSE_LOG(parcel, expiredContentResourceId_, "expiredContentResourceId");
-    READ_INT32_RETURN_FALSE_LOG(parcel, snoozeContentResourceId_, "snoozeContentResourceId");
-    int32_t ringChannel = static_cast<int32_t>(ReminderRequest::RingChannel::ALARM);
-    READ_INT32_RETURN_FALSE_LOG(parcel, ringChannel, "ringChannel");
-    ringChannel_ = static_cast<ReminderRequest::RingChannel>(ringChannel);
+    // read actionButtonMap_
     if (!ReadActionButtonFromParcel(parcel)) {
         return false;
     }
-
+    // read notificationRequestProxy_
+    if (!ReadNotificationRequestProxyFromParcel(parcel)) {
+        return false;
+    }
     return true;
 }
 
@@ -1484,6 +1583,40 @@ std::string ReminderRequest::SerializeButtonInfo() const
         isFirst = false;
     }
     return info;
+}
+
+std::string ReminderRequest::SerializeNotificationRequestProxy() const
+{
+    nlohmann::json root;
+    root["appMessageId"] = notificationRequestProxy_.appMessageId;
+    root["isAlertOnce"] = notificationRequestProxy_.isAlertOnce;
+    return root.dump(INDENT, ' ', false, nlohmann::json::error_handler_t::replace);
+}
+
+void ReminderRequest::DeserializeNotificationRequestProxy(const std::string& jsonStr)
+{
+    if (jsonStr.empty()) {
+        return;
+    }
+    if (!nlohmann::json::accept(jsonStr)) {
+        ANSR_LOGW("notificationRequestProxy is not valid json.");
+        return;
+    }
+    nlohmann::json root = nlohmann::json::parse(jsonStr, nullptr, false);
+    if (root.is_discarded()) {
+        ANSR_LOGW("notificationRequestProxy parse failed.");
+        return;
+    }
+    notificationRequestProxy_ = {};
+    GetJsonValue<std::string>(root, "appMessageId", notificationRequestProxy_.appMessageId);
+    if (root.contains("isAlertOnce")) {
+        const auto& flag = root["isAlertOnce"];
+        if (flag.is_boolean()) {
+            notificationRequestProxy_.isAlertOnce = flag.get<bool>();
+        } else if (flag.is_number_integer()) {
+            notificationRequestProxy_.isAlertOnce = (flag.get<int>() != 0);
+        }
+    }
 }
 
 uint64_t ReminderRequest::GetNowInstantMilli() const
@@ -1791,6 +1924,8 @@ void ReminderRequest::UpdateNotificationCommon(NotificationRequest& notification
     notificationRequest.SetNotDistributed(notDistributed_);
     notificationRequest.SetForceDistributed(forceDistributed_);
     notificationRequest.SetAutoDeletedTime(autoDeletedTime_);
+    notificationRequest.SetAppMessageId(notificationRequestProxy_.appMessageId);
+    notificationRequest.SetAlertOneTime(notificationRequestProxy_.isAlertOnce);
     auto notificationNormalContent = std::make_shared<NotificationNormalContent>();
     notificationNormalContent->SetText(displayContent_);
     notificationNormalContent->SetTitle(title_);
@@ -1935,6 +2070,9 @@ bool ReminderRequest::IsRepeatDaysOfWeek(int32_t day) const
 
 time_t ReminderRequest::GetTriggerTimeWithDST(const time_t now, const time_t nextTriggerTime) const
 {
+    if (timeZoneType_ == TimeZoneType::FIXED_TIME_ZONE) {
+        return nextTriggerTime;
+    }
     time_t triggerTime = nextTriggerTime;
     struct tm nowLocal;
     struct tm nextLocal;

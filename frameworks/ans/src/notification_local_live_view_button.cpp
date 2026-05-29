@@ -268,7 +268,7 @@ bool NotificationLocalLiveViewButton::ReadFromParcel(Parcel &parcel)
         resource->bundleName = iconsResource[RESOURCE_BUNDLENAME_INDEX];
         resource->moduleName = iconsResource[RESOURCE_MODULENAME_INDEX];
         std::stringstream sin(iconsResource[RESOURCE_ID_INDEX]);
-        int32_t checknum;
+        uint32_t checknum;
         if (!(sin >> checknum)) {
             ANS_LOGE("Invalid input for button icons resource");
             return false;

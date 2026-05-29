@@ -62,6 +62,13 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"cjy_click_detail",
+            "value":"Voir les détails >>",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

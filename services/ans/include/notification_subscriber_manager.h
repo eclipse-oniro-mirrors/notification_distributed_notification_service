@@ -294,6 +294,7 @@ private:
     template <typename T>
     void SendCommonEvent(
         const uint32_t eventType, const std::map<sptr<NotificationBundleOption>, T> &params, int32_t code);
+    void NotifyVoiceNotificationCanceled(const sptr<NotificationRequest>& request);
 
 private:
     ffrt::mutex subscriberRecordListMutex_;

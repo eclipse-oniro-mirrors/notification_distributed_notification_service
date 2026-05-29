@@ -62,7 +62,6 @@ void AdvancedNotificationServiceAbility::OnStart()
     g_saStartBootTime = timer->GetBootTimeMs();
     service_ = AdvancedNotificationService::GetInstance();
     service_->CreateDialogManager();
-    service_->InitPublishProcess();
     
     if (!Publish(service_)) {
         return;

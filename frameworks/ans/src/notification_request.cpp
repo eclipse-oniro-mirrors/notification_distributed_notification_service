@@ -1098,6 +1098,35 @@ void NotificationRequest::ToJsonExt(nlohmann::json &jsonObject) const
     jsonObject["distributedHashCode"]    = distributedHashCode_;
     jsonObject["snoozeDelayTime"]    = snoozeDelayTime_;
     jsonObject["isSnoozeTrigger"]    = isSnoozeTrigger_;
+    jsonObject["isRemoveAllowed"]   = isRemoveAllowed_;
+    jsonObject["badgeNumber"]   = badgeNumber_;
+    jsonObject["appMessageId"] = appMessageId_;
+}
+
+void NotificationRequest::ConvertJsonToWantAgent(
+    NotificationRequest *target, const nlohmann::json &jsonObject)
+{
+    const auto &jsonEnd = jsonObject.cend();
+    if (jsonObject.find("wantAgent") != jsonEnd && jsonObject.at("wantAgent").is_string()) {
+        auto wantAgentValue  = jsonObject.at("wantAgent").get<std::string>();
+        int32_t targetUid = -1;
+        if (target->GetOwnerUid() != DEFAULT_UID) {
+            targetUid = target->GetOwnerUid();
+        }
+        ANS_LOGI("wantAgent Fromjson, uid = %{public}d ", targetUid);
+        target->wantAgent_ = AbilityRuntime::WantAgent::WantAgentHelper::FromString(wantAgentValue, targetUid);
+    }
+
+    if (jsonObject.find("removalWantAgent") != jsonEnd && jsonObject.at("removalWantAgent").is_string()) {
+        auto wantAgentValue  = jsonObject.at("removalWantAgent").get<std::string>();
+        int32_t targetUid = -1;
+        if (target->GetOwnerUid() != DEFAULT_UID) {
+            targetUid = target->GetOwnerUid();
+        }
+        ANS_LOGI("removalWantAgent Fromjson, uid = %{public}d ", targetUid);
+        target->removalWantAgent_ =
+            AbilityRuntime::WantAgent::WantAgentHelper::FromString(wantAgentValue, targetUid);
+    }
 }
 
 NotificationRequest *NotificationRequest::FromJson(const nlohmann::json &jsonObject)
@@ -1126,15 +1155,7 @@ NotificationRequest *NotificationRequest::FromJson(const nlohmann::json &jsonObj
 
     ConvertJsonToBool(pRequest, jsonObject);
 
-    if (jsonObject.find("wantAgent") != jsonEnd && jsonObject.at("wantAgent").is_string()) {
-        auto wantAgentValue  = jsonObject.at("wantAgent").get<std::string>();
-        int32_t targetUid = -1;
-        if (pRequest->GetOwnerUid() != DEFAULT_UID) {
-            targetUid = pRequest->GetOwnerUid();
-        }
-        ANS_LOGI("wantAgent Fromjson, uid = %{public}d ", targetUid);
-        pRequest->wantAgent_ = AbilityRuntime::WantAgent::WantAgentHelper::FromString(wantAgentValue, targetUid);
-    }
+    ConvertJsonToWantAgent(pRequest, jsonObject);
 
     if (!ConvertJsonToNotificationContent(pRequest, jsonObject)) {
         delete pRequest;
@@ -2436,10 +2457,19 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->groupInfo_ = other.groupInfo_;
 }
 
-bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
+void NotificationRequest::ConvertObjectsToJsonOhters(nlohmann::json &jsonObject) const
 {
     jsonObject["wantAgent"] = wantAgent_ ? AbilityRuntime::WantAgent::WantAgentHelper::ToString(wantAgent_) : "";
+    jsonObject["removalWantAgent"] = removalWantAgent_ ?
+        AbilityRuntime::WantAgent::WantAgentHelper::ToString(removalWantAgent_) : "";
+    jsonObject["smallIcon"] = AnsImageUtil::PackImage(littleIcon_);
+    jsonObject["largeIcon"] = AnsImageUtil::PackImage(bigIcon_);
+    jsonObject["overlayIcon"] = overlayIcon_ ? AnsImageUtil::PackImage(overlayIcon_) : "";
+}
 
+bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
+{
+    ConvertObjectsToJsonOhters(jsonObject);
     nlohmann::json contentObj;
     if (notificationContent_) {
         if (!NotificationJsonConverter::ConvertToJson(notificationContent_.get(), contentObj)) {
@@ -2478,10 +2508,6 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
         extendInfoStr = wWrapper.ToString();
     }
     jsonObject["extendInfo"] = extendInfoStr;
-    
-    jsonObject["smallIcon"] = AnsImageUtil::PackImage(littleIcon_);
-    jsonObject["largeIcon"] = AnsImageUtil::PackImage(bigIcon_);
-    jsonObject["overlayIcon"] = overlayIcon_ ? AnsImageUtil::PackImage(overlayIcon_) : "";
 
     nlohmann::json optObj;
     if (!NotificationJsonConverter::ConvertToJson(&distributedOptions_, optObj)) {
@@ -2686,6 +2712,10 @@ void NotificationRequest::ConvertJsonToString(NotificationRequest *target, const
         target->creatorBundleName_ = jsonObject.at("creatorBundleName").get<std::string>();
     }
 
+    if (jsonObject.find("appMessageId") != jsonEnd && jsonObject.at("appMessageId").is_string()) {
+        target->appMessageId_ = jsonObject.at("appMessageId").get<std::string>();
+    }
+
     SubConvertJsonToString(target, jsonObject);
 }
 
@@ -2848,7 +2878,28 @@ bool NotificationRequest::ConvertJsonToNotificationContent(
             target->notificationContent_ = std::shared_ptr<NotificationContent>(pContent);
         }
     }
-
+    if (target->notificationContent_ == nullptr) {
+        return true;
+    }
+    int32_t targetUid = -1;
+    if (target->GetOwnerUid() != DEFAULT_UID) {
+        targetUid = target->GetOwnerUid();
+    }
+    if (target->notificationContent_->GetContentType() == NotificationContent::Type::MULTILINE) {
+        std::vector<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> lineWantAgents;
+        std::shared_ptr<NotificationMultiLineContent> content =
+            std::static_pointer_cast<NotificationMultiLineContent>(
+                target->notificationContent_->GetNotificationContent());
+        if (content != nullptr) {
+            std::vector<std::string> lineWantAgentStrs = content->GetLineWantAgentStrs();
+            for (const auto &item : lineWantAgentStrs) {
+                std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+                    AbilityRuntime::WantAgent::WantAgentHelper::FromString(item, targetUid);
+                lineWantAgents.push_back(wantAgent);
+            }
+            content->SetLineWantAgents(lineWantAgents);
+        }
+    }
     return true;
 }
 
@@ -3646,6 +3697,11 @@ void NotificationRequest::AdddeviceStatu(const std::string &deviceType,
 const std::map<std::string, std::string> NotificationRequest::GetdeviceStatus() const
 {
     return deviceStatus_;
+}
+
+uint32_t NotificationRequest::GetConsumedDeviceFlag()
+{
+    return consumedDeviceFlag_;
 }
 
 void NotificationRequest::AddConsumedDevices(const std::string &deviceType)

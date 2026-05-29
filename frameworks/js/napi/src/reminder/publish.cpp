@@ -24,6 +24,9 @@
 #include "reminder_request_calendar.h"
 #include "reminder_request_timer.h"
 #include "securec.h"
+#ifdef ANS_FEATURE_API_METRICS_HISTOGRAM
+#include "histogram_plugin_macros.h"
+#endif
 
 namespace OHOS {
 namespace ReminderAgentNapi {
@@ -73,6 +76,13 @@ struct Parameters {
         = NotificationNapi::NotificationConstant::SlotType::CONTENT_INFORMATION;
     std::shared_ptr<ReminderRequest> reminder = nullptr;
 };
+
+void HistogramBoolReport(const std::string& name, const bool isSuccess)
+{
+#ifdef ANS_FEATURE_API_METRICS_HISTOGRAM
+    HISTOGRAM_BOOLEAN(name.c_str(), isSuccess);
+#endif
+}
 
 napi_value GetCallback(const napi_env &env, const napi_value &value, AsyncCallbackInfo &asyncCallbackInfo)
 {
@@ -719,21 +729,32 @@ void ParseMaxScreenWantAgent(const napi_env &env, const ReminderRequest &reminde
     napi_set_named_property(env, maxScreenWantAgentInfo, MAX_SCREEN_WANT_AGENT_ABILITY, info);
 }
 
+void ParseNotificationRequestProxyOut(const napi_env &env, const ReminderRequest &reminder, napi_value &result)
+{
+    napi_value proxyObj = nullptr;
+    napi_create_object(env, &proxyObj);
+    napi_set_named_property(env, result, REMINDER_NOTIFICATION_REQUEST_PROXY, proxyObj);
+
+    ReminderRequest::NotificationRequestProxy proxy = reminder.GetNotificationRequestProxy();
+    napi_value field = nullptr;
+    napi_create_string_utf8(env, proxy.appMessageId.c_str(), NAPI_AUTO_LENGTH, &field);
+    napi_set_named_property(env, proxyObj, REMINDER_NOTIFICATION_REQUEST_PROXY_APP_MESSAGE_ID, field);
+    napi_get_boolean(env, proxy.isAlertOnce, &field);
+    napi_set_named_property(env, proxyObj, REMINDER_NOTIFICATION_REQUEST_PROXY_IS_ALERT_ONCE, field);
+}
+
 napi_value SetValidReminder(const napi_env &env, ReminderRequest &reminder, napi_value &result)
 {
-    ANSR_LOGD("called");
     napi_value value = nullptr;
-
     napi_create_string_utf8(env, reminder.Dump().c_str(), NAPI_AUTO_LENGTH, &value);
     napi_set_named_property(env, result, "reminder", value);
 
     // type
-    ReminderRequest::ReminderType type = reminder.GetReminderType();
-    napi_create_int32(env, static_cast<int32_t>(type), &value);
+    napi_create_int32(env, static_cast<int32_t>(reminder.GetReminderType()), &value);
     napi_set_named_property(env, result, REMINDER_TYPE, value);
 
     // reminder
-    ParseReminder(env, type, reminder, result);
+    ParseReminder(env, reminder.GetReminderType(), reminder, result);
 
     // title
     napi_create_string_utf8(env, reminder.GetTitle().c_str(), NAPI_AUTO_LENGTH, &value);
@@ -796,9 +817,14 @@ napi_value SetValidReminder(const napi_env &env, ReminderRequest &reminder, napi
     napi_set_named_property(env, result, CUSTOM_RING_URI, value);
 
     // type
-    ReminderRequest::RingChannel channel = reminder.GetRingChannel();
-    napi_create_int32(env, static_cast<int32_t>(channel), &value);
+    napi_create_int32(env, static_cast<int32_t>(reminder.GetRingChannel()), &value);
     napi_set_named_property(env, result, RING_CHANNEL, value);
+
+    napi_create_int32(env, static_cast<int32_t>(reminder.GetTimeZoneType()), &value);
+    napi_set_named_property(env, result, REMINDER_TIME_ZONE_TYPE, value);
+
+    // notificationRequestProxy (aligns with NotificationRequest appMessageId / alertOneTime)
+    ParseNotificationRequestProxyOut(env, reminder, result);
 
     // wantAgent
     ParseWantAgent(env, reminder, result);
@@ -1008,6 +1034,7 @@ napi_value PublishReminderInner(napi_env env, napi_callback_info info, bool isTh
     AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
     if (!asynccallbackinfo) {
         ANSR_LOGE("Low memory.");
+        HistogramBoolReport("BackgroundTasksKit.reminderAgentManager.publishReminder", false);
         return NotificationNapi::Common::NapiGetNull(env);
     }
     std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
@@ -1016,6 +1043,7 @@ napi_value PublishReminderInner(napi_env env, napi_callback_info info, bool isTh
     Parameters params;
     if (ParseParameters(env, info, params, *asynccallbackinfo, isThrow) == nullptr) {
         napi_create_int32(env, -1, &(asynccallbackinfo->result));
+        HistogramBoolReport("BackgroundTasksKit.reminderAgentManager.publishReminder", false);
         return DealErrorReturn(env, asynccallbackinfo->callback, asynccallbackinfo->result, isThrow);
     }
 
@@ -1054,6 +1082,8 @@ napi_value PublishReminderInner(napi_env env, napi_callback_info info, bool isTh
                 } else {
                     napi_create_int32(env, -1, &(asynccallbackinfo->result));
                 }
+                HistogramBoolReport("BackgroundTasksKit.reminderAgentManager.publishReminder",
+                    asynccallbackinfo->info.errorCode == ERR_OK);
 
                 ReminderCommon::ReturnCallbackPromise(
                     env, asynccallbackinfo->info, asynccallbackinfo->result, asynccallbackinfo->isThrow);

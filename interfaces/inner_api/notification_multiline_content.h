@@ -18,6 +18,7 @@
 
 #include "notification_basic_content.h"
 #include "want_agent.h"
+#include "want_agent_helper.h"
 #include "parcel.h"
 
 namespace OHOS {
@@ -92,6 +93,10 @@ public:
      */
     std::vector<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> GetLineWantAgents();
 
+    void SetLineWantAgentStrs(std::vector<std::string> lineWantAgentStrs);
+ 
+    std::vector<std::string> GetLineWantAgentStrs();
+
     /**
      * @brief Returns a string representation of the object.
      *
@@ -151,6 +156,7 @@ private:
     std::string briefText_ {};
     std::vector<std::string> allLines_ {};
     std::vector<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> lineWantAgents_ {};
+    std::vector<std::string> lineWantAgentStrs_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS

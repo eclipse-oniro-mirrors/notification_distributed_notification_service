@@ -23,6 +23,16 @@
 
 namespace OHOS {
 namespace Notification {
+bool AdvancedNotificationPriorityHelper::IsCollaborationNotification(const sptr<NotificationRequest> &request)
+{
+    auto extendInfo = request->GetExtendInfo();
+    AAFwk::IBoolean* ao = nullptr;
+    if (extendInfo != nullptr) {
+        ao = AAFwk::IBoolean::Query(extendInfo->GetParam(ANS_EXTENDINFO_INFO_PRE + EXTENDINFO_FLAG));
+    }
+    return ao != nullptr && AAFwk::Boolean::Unbox(ao);
+}
+
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
 void AdvancedNotificationPriorityHelper::UpdatePriorityType(const sptr<NotificationRequest> &request)
 {
@@ -49,16 +59,6 @@ void AdvancedNotificationPriorityHelper::UpdatePriorityType(const sptr<Notificat
         message.Message("cmd: " + cmd);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
     }
-}
-
-bool AdvancedNotificationPriorityHelper::IsCollaborationNotification(const sptr<NotificationRequest> &request)
-{
-    auto extendInfo = request->GetExtendInfo();
-    AAFwk::IBoolean* ao = nullptr;
-    if (extendInfo != nullptr) {
-        ao = AAFwk::IBoolean::Query(extendInfo->GetParam(ANS_EXTENDINFO_INFO_PRE + EXTENDINFO_FLAG));
-    }
-    return ao != nullptr && AAFwk::Boolean::Unbox(ao);
 }
 
 void AdvancedNotificationPriorityHelper::SetPriorityTypeToExtendInfo(const sptr<NotificationRequest> &request)

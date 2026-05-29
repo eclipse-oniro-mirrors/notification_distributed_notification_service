@@ -243,6 +243,14 @@ void SmartReminderCenter::ParseReminderFilterCode(
 
 bool SmartReminderCenter::IsCollaborationAllowed(const sptr<NotificationRequest>& request) const
 {
+    std::string bundleName = request->GetOwnerBundleName();
+    int32_t uid = request->GetOwnerUid();
+    if (!NotificationPreferences::GetInstance()->IsCollaborationAllowed(bundleName, uid)) {
+        ANS_LOGI("Collaboration blocked for bundle: %{public}s, uid: %{public}d",
+            bundleName.c_str(), uid);
+        return false;
+    }
+
     if (!request->IsSystemApp()) {
         ANS_LOGD("IsSystemApp <%{public}d> allowed to collaborate.", request->IsSystemApp());
         return true;

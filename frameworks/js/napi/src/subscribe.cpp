@@ -14,6 +14,7 @@
  */
 
 #include "subscribe.h"
+#include "subscriber_image_util.h"
 #include "ans_inner_errors.h"
 #include <mutex>
 #include <uv.h>
@@ -491,6 +492,7 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
         ANS_LOGE("null sortingMap");
         return;
     }
+    SubscriberImageUtil::ProcessPictureOption(request, GetPictureOption());
     auto notificationFlags = request->GetNotificationRequest().GetFlags();
     ANS_LOGI("OnConsume key=%{public}s,sortingMap size=%{public}zu,notificationFlag=%{public}s",
         request->GetKey().c_str(), sortingMap->GetKey().size(),

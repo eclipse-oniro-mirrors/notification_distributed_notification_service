@@ -71,6 +71,7 @@ ohos_unittest("ans_test") {
     "${frameworks_module_ans_path}/test/unittest/notification_sorting_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_statistics_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_subscribe_info_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/notification_subscriber_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_template_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_time_test.cpp",
@@ -79,6 +80,7 @@ ohos_unittest("ans_test") {
     "${frameworks_module_ans_path}/test/unittest/notification_voice_content_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/push_promise_callback_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/voice_content_option_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/picture_option_test.cpp",
   ]
 
   cflags = [

@@ -60,6 +60,7 @@ enum EventSceneId {
     SCENE_31 = 31,
     SCENE_32 = 32,
     SCENE_33 = 33,
+    SCENE_34 = 34,
 };
 
 enum EventBranchId {
@@ -261,6 +262,9 @@ public:
     static void ReportCustomizeInfo(const nlohmann::json& data, int32_t subCode);
 
     static void ReportCloneInfo(const NotificationCloneBundleInfo& cloneBundleInfo);
+
+    static void ReportVoiceBroadcastInfo(int32_t errorCode, const std::string& hashCode,
+        const std::string& externInfo);
 private:
     static void ReportNotificationEvent(const sptr<NotificationRequest>& request,
         EventFwk::Want want, int32_t eventCode, const std::string& reason);

@@ -158,6 +158,9 @@ bool BundleManagerHelper::GetBundleInfos(
 
 int32_t BundleManagerHelper::GetAppIndexByUid(const int32_t uid)
 {
+    if (uid == 100 * 200000 + 1000 + 0) return 0;
+    if (uid == 100 * 200000 + 1000 + 1) return 1;
+    if (uid == 100 * 200000 + 1000 + 2) return 2;
     return 0;
 }
 

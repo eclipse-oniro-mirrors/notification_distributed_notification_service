@@ -19,6 +19,10 @@ export interface VoiceContentOptions {
   enabled?: boolean;
 }
 
+export interface PictureOptions {
+  preparseLiveViewPicList?: Array<string>;
+}
+
 export interface NotificationSubscribeInfo {
     bundleNames?: Array<string>;
     userId?: int;
@@ -26,6 +30,7 @@ export interface NotificationSubscribeInfo {
     filterLimit?: long;
     slotTypes?: Array<notificationManager.SlotType>;
     voiceContentOptions?: VoiceContentOptions;
+    pictureOptions?: PictureOptions;
 }
 
 class NotificationSubscribeInfoInner implements NotificationSubscribeInfo {
@@ -35,4 +40,5 @@ class NotificationSubscribeInfoInner implements NotificationSubscribeInfo {
     public filterLimit?: long;
     public slotTypes?: Array<notificationManager.SlotType>;
     public voiceContentOptions?: VoiceContentOptions;
+    public pictureOptions?: PictureOptions;
 }

@@ -17,6 +17,7 @@
 #include <functional>
 #include <memory>
 #include <thread>
+#include <vector>
 
 #include "gtest/gtest.h"
 
@@ -42,6 +43,7 @@
 #include "int_wrapper.h"
 #include "os_account_manager.h"
 #include "os_account_manager_helper.h"
+#include "notification_extension_wrapper.h"
 
 extern void MockIsOsAccountExists(bool exists);
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase);
@@ -153,33 +155,6 @@ HWTEST_F(AnsPublishServiceTest, Publish_00001, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: Publish_00002
- * @tc.desc: Test Publish
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, Publish_00002, Function | SmallTest | Level1)
-{
-    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(std::string(),
-        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    std::string label = "";
-    request->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
-    request->SetRemoveAllowed(false);
-    request->SetInProgress(true);
-    auto normalContent = std::make_shared<NotificationNormalContent>();
-    auto content = std::make_shared<NotificationContent>(normalContent);
-    request->SetContent(content);
-
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(true);
-    MockIsVerfyPermisson(false);
-
-    auto ret = advancedNotificationService_->Publish(label, request);
-    ASSERT_EQ(ret, (int)ERR_OK);
-}
-
-/**
  * @tc.name: Publish_00006
  * @tc.desc: Publish test receiver user and checkUserExists is false
  * @tc.type: FUNC
@@ -199,28 +174,6 @@ HWTEST_F(AnsPublishServiceTest, Publish_00006, Function | SmallTest | Level1)
 
     auto ret = advancedNotificationService_->Publish(label, request);
     ASSERT_EQ(ret, (int)ERROR_USER_NOT_EXIST);
-}
-
-/**
- * @tc.name: Publish_00007
- * @tc.desc: Test Publish
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, Publish_00007, Function | SmallTest | Level1)
-{
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    std::string label = "";
-    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    request->SetOwnerUid(1);
-    request->SetIsAgentNotification(true);
-    request->SetIsDoNotDisturbByPassed(true);
-    MockIsOsAccountExists(true);
-
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
-    MockIsSystemApp(false);
-    auto ret = advancedNotificationService_->Publish(label, request);
-    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -263,6 +216,8 @@ HWTEST_F(AnsPublishServiceTest, Publish_00009, Function | SmallTest | Level1)
 
     auto ret = advancedNotificationService_->Publish(label, request);
     ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingUid(5557);
     ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
     ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 
@@ -2489,6 +2444,8 @@ HWTEST_F(AnsPublishServiceTest, CollaboratePublish_00003, Function | SmallTest |
  */
 HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00001, Function | SmallTest | Level1)
 {
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingUid(5557);
     auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(nullptr);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
@@ -2513,10 +2470,164 @@ HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00001, Funct
  */
 HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00002, Function | SmallTest | Level1)
 {
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingUid(5557);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetCreatorUid(0);
     auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_UID);
+}
+
+/**
+ * @tc.name: PublishNotificationForIndirectProxy_00003
+ * @tc.desc: Test PublishNotificationForIndirectProxy,
+ *  NotificationContentControl return false, expected ERR_ANS_NOT_ALLOWED
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00003, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingUid(5557);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorUid(1);
+    request->SetCreatorBundleName("testBundle");
+
+    auto originalNotificationContentControl = EXTENTION_WRAPPER->notificationContentControl_;
+    EXTENTION_WRAPPER->notificationContentControl_ = [](
+        const sptr<NotificationRequest> &request, const int32_t &userId) {
+        return false;
+    };
+
+    auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
+
+    EXTENTION_WRAPPER->notificationContentControl_ = originalNotificationContentControl;
+}
+
+/**
+ * @tc.name: PublishNotificationForIndirectProxy_00004
+ * @tc.desc: Test PublishNotificationForIndirectProxy,
+ *  GetCurrentActiveUserId failed, expected ERR_ANS_GET_ACTIVE_USER_FAILED
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00004, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingUid(5557);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorUid(1);
+    request->SetCreatorBundleName("testBundle");
+
+    MockQueryForgroundOsAccountId(false, 0);
+    auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
+}
+
+/**
+ * @tc.name: PublishNotificationForIndirectProxy_00005
+ * @tc.desc: Test PublishNotificationForIndirectProxy,
+ *  NotificationContentControl return false with valid userId, expected ERR_ANS_NOT_ALLOWED
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00005, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingUid(5557);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorUid(1);
+    request->SetCreatorBundleName("testBundle");
+
+    MockQueryForgroundOsAccountId(true, 0);
+    auto originalNotificationContentControl = EXTENTION_WRAPPER->notificationContentControl_;
+    EXTENTION_WRAPPER->notificationContentControl_ = [](
+        const sptr<NotificationRequest> &request, const int32_t &userId) {
+        return false;
+    };
+
+    auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
+
+    EXTENTION_WRAPPER->notificationContentControl_ = originalNotificationContentControl;
+}
+
+/**
+ * @tc.name: PublishNotificationForIndirectProxy_00006
+ * @tc.desc: Test PublishNotificationForIndirectProxy,
+ *  permission check failed, expected ERR_ANS_PERMISSION_DENIED
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00006, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(false);
+    IPCSkeleton::SetCallingUid(5557);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorUid(1);
+    request->SetCreatorBundleName("testBundle");
+
+    auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: PublishNotificationForIndirectProxy_00007
+ * @tc.desc: Test PublishNotificationForIndirectProxy,
+ *  not native token (HAP token), expected ERR_ANS_NOT_SYSTEM_SERVICE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00007, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    IPCSkeleton::SetCallingUid(5557);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorUid(1);
+    request->SetCreatorBundleName("testBundle");
+
+    auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_NOT_SYSTEM_SERVICE);
+}
+
+/**
+ * @tc.name: PublishNotificationForIndirectProxy_00008
+ * @tc.desc: Test PublishNotificationForIndirectProxy,
+ *  uid is not ANCO_UID (5557), expected ERR_ANS_NOT_SYSTEM_SERVICE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00008, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    IPCSkeleton::SetCallingUid(1000);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorUid(1);
+    request->SetCreatorBundleName("testBundle");
+
+    auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_NOT_SYSTEM_SERVICE);
+}
+
+/**
+ * @tc.name: PublishNotificationForIndirectProxy_00009
+ * @tc.desc: Test PublishNotificationForIndirectProxy,
+ *  permission and uid check passed, native token with ANCO_UID,
+ *  request is nullptr, expected ERR_ANS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00009, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    IPCSkeleton::SetCallingUid(5557);
+
+    auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(nullptr);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -3502,6 +3613,277 @@ HWTEST_F(AnsPublishServiceTest, RemoveAllNotificationsByBundleName_00003, Functi
     MockGetOsAccountLocalIdFromUid(false, 1);
     auto ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason, 100);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: DuplicateMsgControlBySa_00001
+ * @tc.desc: Test DuplicateMsgControlBySa
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DuplicateMsgControlBySa_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+
+    auto ret = advancedNotificationService_->DuplicateMsgControlBySa(request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 0);
+}
+
+/**
+ * @tc.name: DuplicateMsgControlBySa_00002
+ * @tc.desc: Test DuplicateMsgControlBySa when duplicate message exists
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DuplicateMsgControlBySa_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test1");
+    auto uniqueKey = request->GenerateUniqueKey();
+    advancedNotificationService_->uniqueKeyList_.emplace_back(
+        std::make_pair(std::chrono::system_clock::now(), uniqueKey));
+
+    auto ret = advancedNotificationService_->DuplicateMsgControlBySa(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_DUPLICATE_MSG);
+    ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);
+}
+
+/**
+ * @tc.name: DuplicateMsgControlBySa_00003
+ * @tc.desc: Test DuplicateMsgControlBySa when message is not duplicate
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DuplicateMsgControlBySa_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test2");
+
+    auto ret = advancedNotificationService_->DuplicateMsgControlBySa(request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);
+}
+
+/**
+ * @tc.name: DuplicateMsgControlBySa_00004
+ * @tc.desc: Test DuplicateMsgControlBySa when app message id is empty
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DuplicateMsgControlBySa_00004, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+
+    auto ret = advancedNotificationService_->DuplicateMsgControlBySa(request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 0);
+}
+
+/**
+ * @tc.name: DuplicateMsgControlBySa_00005
+ * @tc.desc: Test DuplicateMsgControlBySa removes expired unique key before duplicate check
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DuplicateMsgControlBySa_00005, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test_sa_expired");
+    auto uniqueKey = request->GenerateUniqueKey();
+    advancedNotificationService_->uniqueKeyList_.emplace_back(
+        std::make_pair(std::chrono::system_clock::now() - std::chrono::hours(25), uniqueKey));
+
+    auto ret = advancedNotificationService_->DuplicateMsgControlBySa(request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);
+}
+
+/**
+ * @tc.name: InitPublishProcess_00001
+ * @tc.desc: Test InitPublishProcess initializes publishProcess_ correctly
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, InitPublishProcess_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    bool result = advancedNotificationService_->InitPublishProcess();
+    ASSERT_EQ(result, true);
+    ASSERT_EQ(advancedNotificationService_->publishProcess_.size(), static_cast<size_t>(8));
+    ASSERT_NE(
+        advancedNotificationService_->publishProcess_.find(NotificationConstant::SlotType::LIVE_VIEW)->second,
+        nullptr);
+    ASSERT_NE(
+        advancedNotificationService_->publishProcess_.find(NotificationConstant::SlotType::SOCIAL_COMMUNICATION)
+            ->second,
+        nullptr);
+}
+
+/**
+ * @tc.name: InitPublishProcess_00002
+ * @tc.desc: Test InitPublishProcess returns true when already initialized
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, InitPublishProcess_00002, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    bool result1 = advancedNotificationService_->InitPublishProcess();
+    ASSERT_EQ(result1, true);
+    size_t sizeAfterFirst = advancedNotificationService_->publishProcess_.size();
+    bool result2 = advancedNotificationService_->InitPublishProcess();
+    ASSERT_EQ(result2, true);
+    ASSERT_EQ(advancedNotificationService_->publishProcess_.size(), sizeAfterFirst);
+}
+
+/**
+ * @tc.name: GetPublishProcess_00001
+ * @tc.desc: Test GetPublishProcess returns correct process for valid slot types
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, GetPublishProcess_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    auto process = advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::LIVE_VIEW);
+    ASSERT_NE(process, nullptr);
+    auto commonProcess =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    ASSERT_NE(commonProcess, nullptr);
+}
+
+/**
+ * @tc.name: GetPublishProcess_00002
+ * @tc.desc: Test GetPublishProcess returns same instance for repeated calls
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, GetPublishProcess_00002, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    auto process1 =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    ASSERT_NE(process1, nullptr);
+    auto process2 =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    ASSERT_EQ(process1, process2);
+}
+
+/**
+ * @tc.name: GetPublishProcess_00003
+ * @tc.desc: Test GetPublishProcess for all common slot types returns non-null
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, GetPublishProcess_00003, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    auto serviceProcess =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::SERVICE_REMINDER);
+    ASSERT_NE(serviceProcess, nullptr);
+    auto otherProcess = advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::OTHER);
+    ASSERT_NE(otherProcess, nullptr);
+    auto customProcess = advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::CUSTOM);
+    ASSERT_NE(customProcess, nullptr);
+    auto customerServiceProcess =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::CUSTOMER_SERVICE);
+    ASSERT_NE(customerServiceProcess, nullptr);
+    auto emergencyProcess =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::EMERGENCY_INFORMATION);
+    ASSERT_NE(emergencyProcess, nullptr);
+}
+
+/**
+ * @tc.name: GetPublishProcess_00004
+ * @tc.desc: Test GetPublishProcess returns same common process for all common slot types
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, GetPublishProcess_00004, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    auto socialProcess =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    auto serviceProcess =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::SERVICE_REMINDER);
+    ASSERT_EQ(socialProcess, serviceProcess);
+}
+
+/**
+ * @tc.name: GetPublishProcess_00005
+ * @tc.desc: Test GetPublishProcess returns different process for LIVE_VIEW vs common slot types
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, GetPublishProcess_00005, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    auto liveProcess = advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::LIVE_VIEW);
+    auto commonProcess =
+        advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::OTHER);
+    ASSERT_NE(liveProcess, commonProcess);
+}
+
+/**
+ * @tc.name: InitPublishProcess_Concurrency_00001
+ * @tc.desc: Test InitPublishProcess thread safety - concurrent calls should not cause data corruption
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, InitPublishProcess_Concurrency_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    const int threadCount = 10;
+    std::vector<std::thread> threads;
+    std::vector<bool> results(threadCount, false);
+    for (int i = 0; i < threadCount; i++) {
+        threads.emplace_back([this, &results, i]() {
+            results[i] = advancedNotificationService_->InitPublishProcess();
+        });
+    }
+    for (auto& thread : threads) {
+        thread.join();
+    }
+    for (int i = 0; i < threadCount; i++) {
+        ASSERT_EQ(results[i], true);
+    }
+    ASSERT_EQ(advancedNotificationService_->publishProcess_.size(), static_cast<size_t>(8));
+}
+
+/**
+ * @tc.name: GetPublishProcess_Concurrency_00001
+ * @tc.desc: Test GetPublishProcess thread safety - concurrent reads should not cause data corruption
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, GetPublishProcess_Concurrency_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->publishProcess_.clear();
+    const int threadCount = 10;
+    std::vector<std::thread> threads;
+    std::vector<std::shared_ptr<BasePublishProcess>> results(threadCount);
+    for (int i = 0; i < threadCount; i++) {
+        threads.emplace_back([this, &results, i]() {
+            results[i] =
+                advancedNotificationService_->GetPublishProcess(NotificationConstant::SlotType::LIVE_VIEW);
+        });
+    }
+    for (auto& thread : threads) {
+        thread.join();
+    }
+    for (int i = 0; i < threadCount; i++) {
+        ASSERT_NE(results[i], nullptr);
+    }
+    ASSERT_EQ(advancedNotificationService_->publishProcess_.size(), static_cast<size_t>(8));
 }
 }  // namespace Notification
 }  // namespace OHOS

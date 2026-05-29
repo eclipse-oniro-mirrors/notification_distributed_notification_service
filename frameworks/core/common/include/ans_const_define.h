@@ -92,6 +92,8 @@ extern const std::string EXTENDINFO_FLAG;
 extern const std::string EXTENDINFO_PRIORITY_TYPE;
 extern const std::string KIOSK_APP_TRUST_LIST_KEY;
 extern const std::string RESTRICTED_MODE_TRUST_LIST_KEY;
+extern const std::string COLLABORATION_BLOCKLIST;
+extern const std::string VOICE_BROADCAST_CONFIG_RULE_KEY;
 
 const static std::string DEFAULT_TEMPLATE_PATH("/system/etc/notification_template/external.json");
 

@@ -111,14 +111,31 @@ void AniPromiseResolve(ani_env *env, const ani_resolver &resolver, const ani_obj
     }
 }
 
-ani_object AniJumpCbError(ani_env *env, const ani_ref &callback, const int32_t &errorCode)
+ani_object AniGetPromiseWithReject(ani_env *env, const int32_t errorCode)
 {
+    ani_object promise;
+    ani_resolver resolve = nullptr;
+    env->Promise_New(&resolve, &promise);
+    AniPromiseReject(env, resolve, errorCode);
+    return promise;
+}
+
+ani_object AniJumpCbError(ani_env *env, const ani_object &callback, const int32_t errorCode)
+{
+    if (env == nullptr) {
+        ANS_LOGE("AniJumpCbError failed, env is null");
+        return nullptr;
+    }
     if (callback == nullptr) {
-        ani_object promise;
-        ani_resolver resolve = nullptr;
-        env->Promise_New(&resolve, &promise);
-        AniPromiseReject(env, resolve, errorCode);
-        return promise;
+        return AniGetPromiseWithReject(env, errorCode);
+    }
+    ani_boolean isUndefined;
+    if (env->Reference_IsUndefined(callback, &isUndefined) != ANI_OK) {
+        ANS_LOGE("AniJumpCbError Reference_IsUndefined failed");
+        return nullptr;
+    }
+    if (isUndefined == ANI_TRUE) {
+        return AniGetPromiseWithReject(env, errorCode);
     }
     SetCallback(env, callback, errorCode, nullptr);
     return GetNullObject(env);

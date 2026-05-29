@@ -146,16 +146,17 @@ AnsStatus AdvancedNotificationService::CheckAndPrepareNotificationInfoWithAtomic
 AnsStatus AdvancedNotificationService::ExecutePublishProcess(
     const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed)
 {
-    if (!InitPublishProcess()) {
-        return AnsStatus(ERR_ANS_NO_MEMORY, "InitPublishProcess failed");
+    auto publishProcess = GetPublishProcess(request->GetSlotType());
+    if (publishProcess == nullptr) {
+        return AnsStatus(ERR_ANS_NO_MEMORY, "GetPublishProcess failed");
     }
 
-    AnsStatus ansStatus = publishProcess_[request->GetSlotType()]->PublishPreWork(request, isUpdateByOwnerAllowed);
+    AnsStatus ansStatus = publishProcess->PublishPreWork(request, isUpdateByOwnerAllowed);
     if (!ansStatus.Ok()) {
         return ansStatus;
     }
 
-    ansStatus = publishProcess_[request->GetSlotType()]->PublishNotificationByApp(request);
+    ansStatus = publishProcess->PublishNotificationByApp(request);
     if (!ansStatus.Ok()) {
         return ansStatus;
     }

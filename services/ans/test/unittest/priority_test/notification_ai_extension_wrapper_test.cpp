@@ -111,35 +111,5 @@ HWTEST_F(NotificationAiExtensionWrapperTest, UpdateNotification_0100, Function |
         NOTIFICATION_AI_EXTENSION_WRAPPER->ErrorCode::ERR_FAIL);
     NOTIFICATION_AI_EXTENSION_WRAPPER->InitExtensionWrapper();
 }
-
-/**
- * @tc.name: GenerateVoiceContent_0100
- * @tc.desc: Test GenerateVoiceContent when generateVoiceContent_ nullptr.
- * @tc.type: FUNC
- * @tc.require: I8I6KX
- */
-HWTEST_F(NotificationAiExtensionWrapperTest, GenerateVoiceContent_0100, Function | SmallTest | Level1)
-{
-    NOTIFICATION_AI_EXTENSION_WRAPPER->generateVoiceContent_ = nullptr;
-    sptr<NotificationRequest> request = new NotificationRequest();
-    std::string content;
-    EXPECT_EQ(NOTIFICATION_AI_EXTENSION_WRAPPER->GenerateVoiceContent(request, content),
-        NotificationAiExtensionWrapper::ErrorCode::ERR_FAIL);
-    NOTIFICATION_AI_EXTENSION_WRAPPER->InitExtensionWrapper();
-}
-
-/**
- * @tc.name: GenerateVoiceContent_0200
- * @tc.desc: Test GenerateVoiceContent with valid request.
- * @tc.type: FUNC
- * @tc.require: I8I6KX
- */
-HWTEST_F(NotificationAiExtensionWrapperTest, GenerateVoiceContent_0200, Function | SmallTest | Level1)
-{
-    NOTIFICATION_AI_EXTENSION_WRAPPER->InitExtensionWrapper();
-    std::string content;
-    int32_t result = NOTIFICATION_AI_EXTENSION_WRAPPER->GenerateVoiceContent(nullptr, content);
-    EXPECT_NE(result, ERR_OK);
-}
 }
 }

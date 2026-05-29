@@ -50,8 +50,7 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "${inner_api_path}",
     "${frameworks_path}/test/moduletest/mock/include",
     "${component_path}/services/ans/include/utils",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
   ]
 
   sources = [
@@ -126,8 +125,7 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "${inner_api_path}",
     "${frameworks_path}/test/moduletest/mock/include",
     "${component_path}/services/ans/include/utils",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
   ]
 
   sources = [
@@ -209,8 +207,7 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "${inner_api_path}",
     "${frameworks_path}/test/moduletest/mock/include",
     "${component_path}/services/ans/include/utils",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
   ]
 
   sources = [

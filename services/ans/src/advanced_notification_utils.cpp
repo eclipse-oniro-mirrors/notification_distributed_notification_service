@@ -524,6 +524,7 @@ void AdvancedNotificationService::OnBundleRemovedInner(
             RemoveDoNotDisturbProfileTrustList(bundleOption, userId);
         }
         DeleteDuplicateMsgs(bundleOption);
+        RemoveAllFromSnoozeDelayList(bundleOption);
 #ifdef ALL_SCENARIO_COLLABORATION
         DistributedBundleService::GetInstance().HandleSlaveBundleChange(bundleOption, false);
 #endif
@@ -664,6 +665,7 @@ void AdvancedNotificationService::OnBootSystemCompleted()
     ANS_LOGD("Called.");
     InitNotificationEnableList();
     TryStartReminderAgentService();
+    RecoverLiveViewFromDb();
 #ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
     InitNotificationStatistics();
 #endif
@@ -1185,7 +1187,8 @@ void AdvancedNotificationService::TriggerRemoveWantAgent(const sptr<Notification
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s %{public}d %{public}d", __FUNCTION__, isThirdParty, removeReason);
 
-    if ((request == nullptr) || (request->GetRemovalWantAgent() == nullptr)) {
+    if ((request == nullptr) || (request->GetRemovalWantAgent() == nullptr) ||
+        (removeReason == NotificationConstant::SNOOZE_REASON_DELETE)) {
         return;
     }
 
@@ -1608,10 +1611,11 @@ AnsStatus AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Not
 AnsStatus AdvancedNotificationService::PrePublishRequest(const sptr<NotificationRequest> &request)
 {
     ErrCode result = ERR_OK;
-    if (!InitPublishProcess()) {
+    auto publishProcess = GetPublishProcess(request->GetSlotType());
+    if (publishProcess == nullptr) {
         return AnsStatus(ERR_ANS_NO_MEMORY, "ERR_ANS_NO_MEMORY");
     }
-    AnsStatus ansStatus = publishProcess_[request->GetSlotType()]->PublishPreWork(request, false);
+    AnsStatus ansStatus = publishProcess->PublishPreWork(request, false);
     if (!ansStatus.Ok()) {
         ansStatus.AppendSceneBranch(EventSceneId::SCENE_9, EventBranchId::BRANCH_0, "publish prework failed");
         return ansStatus;
@@ -1750,9 +1754,8 @@ ErrCode AdvancedNotificationService::UpdateNotificationSwitchState(
         }
     }
 
-    bool isSystemDefaultState = (currentState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
-                            currentState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
-    if (isSystemDefaultState && (currentState != targetState)) {
+    if (currentState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF &&
+        targetState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) {
         ANS_LOGI("Updating system default state for %{public}s : %{public}d -> %{public}d",
             bundleOption->GetBundleName().c_str(),
             static_cast<int32_t>(currentState),
@@ -1760,7 +1763,7 @@ ErrCode AdvancedNotificationService::UpdateNotificationSwitchState(
         message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid())
             + "_st" + std::to_string(static_cast<int32_t>(targetState))).BranchId(BRANCH_10);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        enable = (targetState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) ? true : false;
+        enable = true;
         return AdvancedNotificationService::GetInstance()->SetDefaultNotificationEnabled(
             bundleOption, enable);
     }

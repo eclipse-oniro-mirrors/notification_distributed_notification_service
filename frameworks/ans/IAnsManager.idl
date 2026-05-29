@@ -315,6 +315,8 @@ interface OHOS.Notification.IAnsManager {
 
     [ipcincapacity 1024] void SetAdditionConfig([in] String key, [in] String value);
 
+    void UpdateInnerConfig([in] String configKey, [in] String configValue);
+
     void SetBundlePriorityConfig([in] sptr<NotificationBundleOption> bundleOption, [in] String value);
 
     void GetBundlePriorityConfig([in] sptr<NotificationBundleOption> bundleOption, [out] String value);

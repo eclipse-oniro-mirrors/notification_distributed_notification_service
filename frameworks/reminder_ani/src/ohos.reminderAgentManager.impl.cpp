@@ -22,10 +22,20 @@
 #include "reminder_helper.h"
 #include "notification_helper.h"
 #include "reminder_ani_common.h"
+#ifdef ANS_FEATURE_API_METRICS_HISTOGRAM
+#include "histogram_plugin_macros.h"
+#endif
 
 using namespace OHOS;
 
 namespace {
+static void HistogramBoolReport(const std::string& name, const bool isSuccess)
+{
+#ifdef ANS_FEATURE_API_METRICS_HISTOGRAM
+    HISTOGRAM_BOOLEAN(name.c_str(), isSuccess);
+#endif
+}
+
 static bool CheckReminderId(int32_t reminderId,
     int32_t ret = ReminderAgentManagerNapi::Common::ERR_REMINDER_INVALID_PARAM)
 {
@@ -142,14 +152,17 @@ int32_t PublishReminderSync(::ohos::reminderAgentManager::manager::ParamReminder
     if (!helper.CreateReminder(reminderReq, reminder)) {
         int32_t ret = ReminderAgentManagerNapi::Common::ERR_REMINDER_INVALID_PARAM;
         ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret, helper.GetErrorMsg()));
+        HistogramBoolReport("BackgroundTasksKit.reminderAgentManager.publishReminder", false);
         return -1;
     }
     int32_t reminderId = -1;
     int32_t ret = OHOS::Notification::ReminderHelper::PublishReminder(*reminder, reminderId);
     if (ret != ERR_OK) {
         ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::GetErrCodeMsg(ret));
+        HistogramBoolReport("BackgroundTasksKit.reminderAgentManager.publishReminder", false);
         return -1;
     }
+    HistogramBoolReport("BackgroundTasksKit.reminderAgentManager.publishReminder", true);
     return reminderId;
 }
 

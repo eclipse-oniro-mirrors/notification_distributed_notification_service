@@ -470,7 +470,8 @@ bool WrapBundleOptionMap(ani_env *env, ani_object &outAniObj,
     const std::map<sptr<Notification::NotificationBundleOption>, int64_t> &bundleMap)
 {
     outAniObj = nullptr;
-    outAniObj = CreateMapObject(env, "std.core.Map", ":");
+    outAniObj = CreateMapObject(env, "std.core.Map",
+        "X{C{std.core.Iterable}C{std.core.Null}C{std.core.ReadonlyArray}}:");
     if (outAniObj == nullptr) {
         return false;
     }

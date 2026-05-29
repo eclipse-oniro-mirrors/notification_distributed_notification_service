@@ -37,6 +37,12 @@ enum RingChannel: i32 {
     RING_CHANNEL_NOTIFICATION = 2
 }
 
+enum TimeZoneType: i32 {
+    DEFAULT = 0,
+    FIXED_TIME_ZONE = 1,
+    SYSTEM_TIME_ZONE = 2
+}
+
 union ParamType {
     string_t: String;
     double_t: f64;
@@ -79,6 +85,11 @@ struct LocalDateTime {
     second: Optional<i32>;
 }
 
+struct NotificationRequestProxy {
+    appMessageId: Optional<String>;
+    isAlertOnce: Optional<bool>;
+}
+
 struct ReminderRequest {
     reminderType: ReminderType;
     actionButton: Optional<Array<ActionButton>>;
@@ -105,6 +116,8 @@ struct ReminderRequest {
     customRingUri: Optional<String>;
     notDistributed: Optional<bool>;
     forceDistributed: Optional<bool>;
+    fixedTimeZone: Optional<TimeZoneType>;
+    notificationRequestProxy: Optional<NotificationRequestProxy>;
 }
 
 struct ReminderRequestCalendar {

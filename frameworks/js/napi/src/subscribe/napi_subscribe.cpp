@@ -22,6 +22,7 @@
 #include <new>
 #include "distributed_operation_callback.h"
 #include "notification_operation_info.h"
+#include "picture_option.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -115,6 +116,17 @@ void SubscribeNotificationAsyncWork(napi_env env, void *data)
             subscribeInfo->AddDeviceType(callbackinfo->subscriberInfo.deviceType);
             subscribeInfo->SetSlotTypes(callbackinfo->subscriberInfo.slotTypes);
             subscribeInfo->SetFilterType(callbackinfo->subscriberInfo.filterType);
+            if (callbackinfo->subscriberInfo.voiceContentOption.enabled) {
+                sptr<OHOS::Notification::VoiceContentOption> voiceContentOption =
+                    new (std::nothrow) OHOS::Notification::VoiceContentOption(true);
+                subscribeInfo->SetVoiceContentOption(voiceContentOption);
+            }
+            if (callbackinfo->subscriberInfo.pictureOption.preparseLiveViewPicList.size() > 0) {
+                sptr<OHOS::Notification::PictureOption> pictureOption =
+                    new (std::nothrow) OHOS::Notification::PictureOption(
+                        callbackinfo->subscriberInfo.pictureOption.preparseLiveViewPicList);
+                subscribeInfo->SetPictureOption(pictureOption);
+            }
             callbackinfo->info.errorCode =
                 NotificationHelper::SubscribeNotificationV26(callbackinfo->objectInfo, subscribeInfo);
         } else {
@@ -278,6 +290,12 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
                         sptr<OHOS::Notification::VoiceContentOption> voiceContentOption =
                             new (std::nothrow) OHOS::Notification::VoiceContentOption(true);
                         subscribeInfo->SetVoiceContentOption(voiceContentOption);
+                    }
+                    if (!asynccallbackinfo->subscriberInfo.pictureOption.preparseLiveViewPicList.empty()) {
+                        sptr<OHOS::Notification::PictureOption> pictureOption =
+                            new (std::nothrow) OHOS::Notification::PictureOption(
+                                asynccallbackinfo->subscriberInfo.pictureOption.preparseLiveViewPicList);
+                        subscribeInfo->SetPictureOption(pictureOption);
                     }
                     asynccallbackinfo->info.errorCode =
                         NotificationHelper::SubscribeNotification(asynccallbackinfo->objectInfo, subscribeInfo);

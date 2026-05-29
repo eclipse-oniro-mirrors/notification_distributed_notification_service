@@ -24,6 +24,7 @@
 #include "notification_sorting.h"
 #include "notification_sorting_map.h"
 #include "notification_operation_info.h"
+#include "picture_option.h"
 
 namespace OHOS {
 namespace Notification {
@@ -187,6 +188,10 @@ public:
 
     std::string GetDeviceType() const;
 
+    void SetPictureOption(const sptr<PictureOption> &pictureOption);
+
+    sptr<PictureOption> GetPictureOption() const;
+
     void SetSubscribedFlags(const uint32_t subscribedMethod);
     uint32_t GetSubscribedFlags() const;
 
@@ -279,6 +284,7 @@ private:
 private:
     sptr<SubscriberImpl> impl_ = nullptr;
     std::string deviceType_;
+    sptr<PictureOption> pictureOption_;
     uint32_t subscribedFlags_ = 0xffffffff;
     friend class AnsNotification;
 };

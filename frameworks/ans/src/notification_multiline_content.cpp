@@ -69,6 +69,17 @@ std::vector<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> NotificationM
     return lineWantAgents_;
 }
 
+void NotificationMultiLineContent::SetLineWantAgentStrs(
+    std::vector<std::string> lineWantAgentStrs)
+{
+    lineWantAgentStrs_ = lineWantAgentStrs;
+}
+ 
+std::vector<std::string> NotificationMultiLineContent::GetLineWantAgentStrs()
+{
+    return lineWantAgentStrs_;
+}
+
 std::string NotificationMultiLineContent::Dump()
 {
     std::string lines {};
@@ -95,6 +106,12 @@ bool NotificationMultiLineContent::ToJson(nlohmann::json &jsonObject) const
     jsonObject["expandedTitle"] = expandedTitle_;
     jsonObject["briefText"]     = briefText_;
     jsonObject["allLines"]      = nlohmann::json(allLines_);
+    std::vector<std::string> lineWantAgentStrs;
+    for (const auto &item : lineWantAgents_) {
+        std::string wangAgent = item ? AbilityRuntime::WantAgent::WantAgentHelper::ToString(item) : "";
+        lineWantAgentStrs.push_back(wangAgent);
+    }
+    jsonObject["lineWantAgents"] = nlohmann::json(lineWantAgentStrs);
 
     return true;
 }
@@ -125,6 +142,10 @@ NotificationMultiLineContent *NotificationMultiLineContent::FromJson(const nlohm
 
     if (jsonObject.find("allLines") != jsonEnd && jsonObject.at("allLines").is_array()) {
         pContent->allLines_ = jsonObject.at("allLines").get<std::vector<std::string>>();
+    }
+
+    if (jsonObject.find("lineWantAgents") != jsonEnd && jsonObject.at("lineWantAgents").is_array()) {
+        pContent->lineWantAgentStrs_  = jsonObject.at("lineWantAgents").get<std::vector<std::string>>();
     }
 
     return pContent;

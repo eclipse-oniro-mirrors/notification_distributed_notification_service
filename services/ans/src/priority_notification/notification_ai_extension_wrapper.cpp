@@ -21,6 +21,7 @@
 #include "ans_const_define.h"
 #include "notification_bundle_option.h"
 #include "notification_preferences.h"
+#include "voice_extension_wrapper.h"
 
 namespace OHOS::Notification {
 const std::string EXTENSION_NOTIFICATION_AI_PATH = "libnotification_ai.z.so";
@@ -69,11 +70,6 @@ void NotificationAiExtensionWrapper::InitExtensionWrapper()
     notifyPriorityEvent_ = (NOTIFY_PRIORITY_EVENT)dlsym(ExtensionHandle_, "NotifyPriorityEvent");
     if (notifyPriorityEvent_ == nullptr) {
         ANS_LOGE("failed to notify priority event extension %{public}s.", dlerror());
-        return;
-    }
-    generateVoiceContent_ = (GENERATE_VOICE_CONTENT)dlsym(ExtensionHandle_, "GenerateVoiceContent");
-    if (generateVoiceContent_ == nullptr) {
-        ANS_LOGE("failed to generate voice content %{public}s.", dlerror());
         return;
     }
 
@@ -127,6 +123,14 @@ void NotificationAiExtensionWrapper::Init()
             ANS_LOGE("sync ai rules failed");
         }
     }
+
+#ifdef NOTIFICATION_VOICE_BROADCAST_ENABLE
+    std::string voiceConfigs = NotificationPreferences::GetInstance()->GetAdditionalConfig(
+        VOICE_BROADCAST_CONFIG_RULE_KEY);
+    if (!voiceConfigs.empty()) {
+        VOICE_EXTENSION_WRAPPER.UpdateVoiceConfig(voiceConfigs);
+    }
+#endif
 }
 
 int32_t NotificationAiExtensionWrapper::SyncRules(const std::string &rules)
@@ -160,13 +164,4 @@ int32_t NotificationAiExtensionWrapper::NotifyPriorityEvent(
     return notifyPriorityEvent_(event, bundleOptions, requests);
 }
 
-int32_t __attribute__((weak)) NotificationAiExtensionWrapper::GenerateVoiceContent(
-    const sptr<NotificationRequest>& requests, std::string& content)
-{
-    if (generateVoiceContent_ == nullptr) {
-        ANS_LOGE("Generate voice content wrapper symbol failed");
-        return ErrorCode::ERR_FAIL;
-    }
-    return generateVoiceContent_(requests, content);
-}
 }  // namespace OHOS::Notification

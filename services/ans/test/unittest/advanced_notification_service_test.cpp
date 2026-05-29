@@ -4341,6 +4341,54 @@ HWTEST_F(AdvancedNotificationServiceTest, RecoverLiveViewFromDb_0006, Function |
 }
 
 /**
+ * @tc.number    : RecoverLiveViewFromDb_0007
+ * @tc.name      : RecoverLiveViewFromDb
+ * @tc.desc      : Test RecoverLiveViewFromDb and bundleName is empty.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, RecoverLiveViewFromDb_0007, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "RecoverLiveViewFromDb_0007 test start";
+
+    advancedNotificationService_->notificationList_.clear();
+    int32_t uid = 100;
+    sptr<NotificationRequest> request = new NotificationRequest(1);
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    normalContent->SetContentType(1);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    request->SetContent(content);
+    request->SetCreatorUid(uid);
+    request->SetCreatorUserId(uid);
+    request->SetLabel("test_7");
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    auto epoch = std::chrono::system_clock::now().time_since_epoch();
+    auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
+    int64_t time = curTime + 3600 * 1000;
+    request->SetAutoDeletedTime(time);
+    std::shared_ptr<NotificationFlags> flags = std::make_shared<NotificationFlags>();
+    flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetLockScreenEnabled(NotificationConstant::FlagStatus::OPEN);
+    flags->SetBannerEnabled(NotificationConstant::FlagStatus::OPEN);
+    request->SetFlags(flags);
+
+    std::string bundleName;
+    
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, uid);
+    AdvancedNotificationService::NotificationRequestDb requestDbObj =
+        { .request = request, .bundleOption = bundleOption };
+    auto result = advancedNotificationService_->SetNotificationRequestToDbCommon(requestDbObj);
+    ASSERT_EQ(result, ERR_OK);
+    advancedNotificationService_->RecoverLiveViewFromDb(uid);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+    SleepForFC();
+    result =
+        advancedNotificationService_->DoubleDeleteNotificationFromDb(request->GetKey(), request->GetSecureKey(), uid);
+    ASSERT_EQ(result, ERR_OK);
+
+    GTEST_LOG_(INFO) << "RecoverLiveViewFromDb_0007 test end";
+}
+
+/**
  * @tc.number    : SetNotificationRequestToDb_0001
  * @tc.name      : SetNotificationRequestToDb
  * @tc.desc      : Test SetNotificationRequestToDb and isLocalLiveView.
@@ -4448,6 +4496,23 @@ HWTEST_F(AdvancedNotificationServiceTest, IsCanRecoverCommonTest_004, Function |
     request->SetLabel("test_001");
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     ASSERT_EQ(advancedNotificationService_->IsCanRecoverCommon(request), false);
+}
+
+/**
+ * @tc.number    : IsCanRecoverCommonTest_005
+ * @tc.name      : IsCanRecoverCommon
+ * @tc.desc      : Test IsCanRecoverCommon for non-LiveView notification when macro is off
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsCanRecoverCommonTest_005, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsCanRecoverCommonTest_005 test start";
+    sptr<NotificationRequest> request = new NotificationRequest(1);
+#ifdef ANS_FEATURE_DIST_NOTIFICATION_PERSIST
+    ASSERT_EQ(advancedNotificationService_->IsCanRecoverCommon(request), true);
+#else
+    ASSERT_EQ(advancedNotificationService_->IsCanRecoverCommon(request), false);
+#endif
+    GTEST_LOG_(INFO) << "IsCanRecoverCommonTest_005 test end";
 }
 
 /**

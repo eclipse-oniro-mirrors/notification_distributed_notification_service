@@ -168,6 +168,12 @@ void ExtensionWrapper::InitExtentionWrapper()
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
+    bannerControlFromProfile_ = (BANNER_CONTROL_FROM_PROFILE)dlsym(extensionWrapperHandle_,
+        "BannerControlFromProfile");
+    if (bannerControlFromProfile_ == nullptr) {
+        ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
+        return;
+    }
     ANS_LOGI("extension wrapper init success");
 }
 
@@ -354,13 +360,22 @@ bool ExtensionWrapper::NotificationDialogControl()
     return result;
 }
 
-bool ExtensionWrapper::NotificationContentControl(const sptr<NotificationRequest> &request)
+bool ExtensionWrapper::NotificationContentControl(const sptr<NotificationRequest> &request, const int32_t &userId)
 {
     if (notificationContentControl_ == nullptr) {
         ANS_LOGE("NotificationContentControl wrapper symbol failed");
         return true;
     }
-    return notificationContentControl_(request);
+    return notificationContentControl_(request, userId);
+}
+
+int32_t ExtensionWrapper::BannerControlFromProfile(const std::string &bundleName, const int32_t &userId, bool &enabled)
+{
+    if (bannerControlFromProfile_ == nullptr) {
+        ANS_LOGE("BannerControlFromProfile wrapper symbol failed");
+        return -1;
+    }
+    return bannerControlFromProfile_(bundleName, userId, enabled);
 }
 
 int32_t ExtensionWrapper::convertToDelType(int32_t deleteReason)

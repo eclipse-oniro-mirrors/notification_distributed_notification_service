@@ -88,6 +88,7 @@
         "bundle_framework",
         "time_service",
         "safwk",
+        "media_foundation",
         "ability_runtime",
         "ability_base",
         "audio_framework",
@@ -131,7 +132,8 @@
         "background_task_mgr",
         "window_manager",
         "graphic_2d",
-        "api_metrics"
+        "api_metrics",
+        "ets_frontend"
       ],
       "third_party": [
         "libuv",

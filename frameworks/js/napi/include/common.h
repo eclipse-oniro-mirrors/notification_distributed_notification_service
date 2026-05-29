@@ -94,6 +94,10 @@ struct VoiceContentOption {
     bool enabled = false;
 };
 
+struct PictureOption {
+    std::vector<std::string> preparseLiveViewPicList;
+};
+
 struct NotificationSubscribeInfo {
     std::vector<std::string> bundleNames;
     int32_t userId = 0;
@@ -102,6 +106,7 @@ struct NotificationSubscribeInfo {
     std::vector<NotificationConstant::SlotType> slotTypes;
     uint32_t filterType = 0;
     VoiceContentOption voiceContentOption;
+    PictureOption pictureOption;
 };
 
 struct CallbackPromiseInfo {
@@ -677,6 +682,15 @@ public:
      * @return Returns null object if success, returns null value otherwise
      */
     static napi_value GetSubscriberVoiceContentOption(
+        const napi_env &env, const napi_value &value, NotificationSubscribeInfo &subscriberInfo);
+
+    static napi_value GetSubscriberPictureOption(
+        const napi_env &env, const napi_value &value, NotificationSubscribeInfo &subscriberInfo);
+
+    static napi_value GetSubscriberBundleNames(
+        const napi_env &env, const napi_value &value, NotificationSubscribeInfo &subscriberInfo);
+
+    static napi_value GetSubscriberSlotTypes(
         const napi_env &env, const napi_value &value, NotificationSubscribeInfo &subscriberInfo);
 
     /**

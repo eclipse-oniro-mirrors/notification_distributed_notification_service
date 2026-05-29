@@ -774,6 +774,11 @@ ErrCode NotificationHelper::SetAdditionConfig(const std::string &key, const std:
     return DelayedSingleton<AnsNotification>::GetInstance()->SetAdditionConfig(key, value);
 }
 
+ErrCode NotificationHelper::UpdateInnerConfig(const std::string &configKey, const std::string &configValue)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->UpdateInnerConfig(configKey, configValue);
+}
+
 ErrCode NotificationHelper::SetPriorityEnabled(const bool enabled)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetPriorityEnabled(enabled);

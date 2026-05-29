@@ -37,13 +37,11 @@ ReminderRequestCalendar::ReminderRequestCalendar(const tm &dateTime, const std::
     SetRepeatDaysOfWeek(true, daysOfWeek);
     SetSnoozeTimes(DEFAULT_SNOOZE_TIMES);
 
-    // 2. should SetNextTriggerTime() after constructor
     InitDateTime(dateTime);
 }
 
 ReminderRequestCalendar::ReminderRequestCalendar(const ReminderRequestCalendar &other) : ReminderRequest(other)
 {
-    dateTime_ = other.dateTime_;
     firstDesignateYear_ = other.firstDesignateYear_;
     firstDesignateMonth_ = other.firstDesignateMonth_;
     firstDesignateDay_ = other.firstDesignateDay_;
@@ -193,28 +191,6 @@ bool ReminderRequestCalendar::InitTriggerTime()
     return true;
 }
 
-bool ReminderRequestCalendar::SetNextTriggerTime()
-{
-    hour_ = static_cast<uint8_t>(dateTime_.tm_hour);
-    minute_ = static_cast<uint8_t>(dateTime_.tm_min);
-    uint64_t nextTriggerTime = INVALID_LONG_LONG_VALUE;
-    if ((nextTriggerTime = GetNextTriggerTime()) != INVALID_LONG_LONG_VALUE) {
-        time_t target = static_cast<time_t>(nextTriggerTime / MILLI_SECONDS);
-        (void)localtime_r(&target, &dateTime_);
-    } else {
-        ANSR_LOGW("Not exist next trigger time, please check the param of ReminderRequestCalendar constructor.");
-        return false;
-    }
-
-    // set the time information (used to transfer to proxy service) which is decided to trigger firstly.
-    year_ = static_cast<uint16_t>(GetActualTime(TimeTransferType::YEAR, dateTime_.tm_year));
-    month_ = static_cast<uint8_t>(GetActualTime(TimeTransferType::MONTH, dateTime_.tm_mon));
-    day_ = static_cast<uint8_t>(dateTime_.tm_mday);
-    second_ = 0;
-    SetTriggerTimeInMilli(nextTriggerTime);
-    return true;
-}
-
 uint8_t ReminderRequestCalendar::GetDaysOfMonth(const uint16_t &year, const uint8_t &month)
 {
     uint8_t days;
@@ -302,6 +278,22 @@ bool ReminderRequestCalendar::OnDateTimeChange()
         SetTriggerTimeInMilli(triggerTime);
         return false;
     }
+}
+
+bool ReminderRequestCalendar::OnTimeZoneChange()
+{
+    if (GetTimeZoneType() == TimeZoneType::FIXED_TIME_ZONE) {
+        time_t t = static_cast<time_t>(GetTriggerTimeInMilli() / MILLI_SECONDS);
+        struct tm dateTime;
+        (void)localtime_r(&t, &dateTime);
+        year_ = static_cast<uint16_t>(GetActualTime(TimeTransferType::YEAR, dateTime.tm_year));
+        month_ = static_cast<uint8_t>(GetActualTime(TimeTransferType::MONTH, dateTime.tm_mon));
+        day_ = static_cast<uint8_t>(dateTime.tm_mday);
+        hour_ = static_cast<uint8_t>(dateTime.tm_hour);
+        minute_ = static_cast<uint8_t>(dateTime.tm_min);
+        second_ = static_cast<uint8_t>(dateTime.tm_sec);
+    }
+    return ReminderRequest::OnTimeZoneChange();
 }
 
 bool ReminderRequestCalendar::IsRepeat() const
@@ -482,27 +474,8 @@ uint64_t ReminderRequestCalendar::GetTimeInstantMilli(
     return ReminderRequest::GetDurationSinceEpochInMilli(target);
 }
 
-void ReminderRequestCalendar::InitDateTime()
-{
-    dateTime_.tm_year = GetCTime(TimeTransferType::YEAR, year_);
-    dateTime_.tm_mon = GetCTime(TimeTransferType::MONTH, month_);
-    dateTime_.tm_mday = static_cast<int>(day_);
-    dateTime_.tm_hour = static_cast<int>(hour_);
-    dateTime_.tm_min = static_cast<int>(minute_);
-    dateTime_.tm_sec = static_cast<int>(second_);
-    dateTime_.tm_isdst = -1;
-}
-
 void ReminderRequestCalendar::InitDateTime(const tm &dateTime)
 {
-    dateTime_.tm_year = dateTime.tm_year;
-    dateTime_.tm_mon = dateTime.tm_mon;
-    dateTime_.tm_mday = dateTime.tm_mday;
-    dateTime_.tm_hour = dateTime.tm_hour;
-    dateTime_.tm_min = dateTime.tm_min;
-    dateTime_.tm_sec = dateTime.tm_sec;
-    dateTime_.tm_isdst = -1;
-
     year_ = static_cast<uint16_t>(GetActualTime(TimeTransferType::YEAR, dateTime.tm_year));
     month_ = static_cast<uint8_t>(GetActualTime(TimeTransferType::MONTH, dateTime.tm_mon));
     day_ = static_cast<uint8_t>(dateTime.tm_mday);
@@ -510,7 +483,8 @@ void ReminderRequestCalendar::InitDateTime(const tm &dateTime)
     minute_ = static_cast<uint8_t>(dateTime.tm_min);
     second_ = static_cast<uint8_t>(dateTime.tm_sec);
 
-    time_t time = mktime(&dateTime_);
+    struct tm dateTimeCopy = dateTime;
+    time_t time = mktime(&dateTimeCopy);
     if (time == -1) {
         startDateTime_ = 0;
     } else {
@@ -730,8 +704,6 @@ bool ReminderRequestCalendar::ReadFromParcel(Parcel &parcel)
         READ_UINT64_RETURN_FALSE_LOG(parcel, startDateTime_, "startDateTime");
         READ_UINT64_RETURN_FALSE_LOG(parcel, endDateTime_, "endDateTime");
         READ_UINT64_RETURN_FALSE_LOG(parcel, lastStartDateTime_, "lastStartDateTime");
-
-        InitDateTime();
 
         READ_UINT16_RETURN_FALSE_LOG(parcel, firstDesignateYear_, "firstDesignateYear");
         READ_UINT8_RETURN_FALSE_LOG(parcel, firstDesignateMonth_, "firstDesignateMonth");

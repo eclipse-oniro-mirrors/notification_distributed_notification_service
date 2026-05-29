@@ -98,6 +98,8 @@ ohos_shared_library("notification") {
     "src/remove.cpp",
     "src/slot.cpp",
     "src/subscribe.cpp",
+    "${core_path}/src/image_pixelmap_helper.cpp",
+    "${core_path}/src/subscriber_image_util.cpp",
     "src/unsubscribe.cpp",
   ]
 
@@ -146,6 +148,9 @@ ohos_shared_library("notification") {
     "hilog:libhilog",
     "hitrace:libhitracechain",
     "image_framework:image",
+    "image_framework:image_source",
+    "image_framework:pixelmap",
+    "resource_management:librawfile",
     "ipc:ipc_single",
     "json:nlohmann_json_static",
     "libuv:uv",

@@ -24,10 +24,10 @@
 namespace OHOS {
 namespace Notification {
 class AdvancedNotificationPriorityHelper : public DelayedSingleton<AdvancedNotificationPriorityHelper> {
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
 public:
+bool IsCollaborationNotification(const sptr<NotificationRequest> &request);
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
     void UpdatePriorityType(const sptr<NotificationRequest> &request);
-    bool IsCollaborationNotification(const sptr<NotificationRequest> &request);
     void SetPriorityTypeToExtendInfo(const sptr<NotificationRequest> &request);
     ErrCode RefreshPriorityType(const std::string &command,
         const std::vector<sptr<NotificationRequest>> originRequests, std::vector<int32_t> &results);

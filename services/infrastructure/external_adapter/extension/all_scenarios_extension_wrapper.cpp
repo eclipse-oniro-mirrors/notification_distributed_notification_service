@@ -28,14 +28,14 @@ AllScenariosExtensionWrapper& AllScenariosExtensionWrapper::GetInstance()
 
 AllScenariosExtensionWrapper::AllScenariosExtensionWrapper()
 {
-    InitExtentionWrapper();
+    InitExtensionWrapper();
 }
 AllScenariosExtensionWrapper::~AllScenariosExtensionWrapper()
 {
-    CloseExtentionWrapper();
+    CloseExtensionWrapper();
 }
 
-void AllScenariosExtensionWrapper::InitExtentionWrapper()
+void AllScenariosExtensionWrapper::InitExtensionWrapper()
 {
     ExtensionHandle_ = dlopen(EXTENTION_LIVEVIEW_ALL_SCENARIOS_PATH.c_str(), RTLD_NOW);
     if (ExtensionHandle_ == nullptr) {
@@ -92,7 +92,7 @@ void AllScenariosExtensionWrapper::InitExtentionWrapper()
     ANS_LOGI("liveview all scenarios extension wrapper init success");
 }
 
-void AllScenariosExtensionWrapper::CloseExtentionWrapper()
+void AllScenariosExtensionWrapper::CloseExtensionWrapper()
 {
     if (ExtensionHandle_ != nullptr) {
         dlclose(ExtensionHandle_);

@@ -14,6 +14,7 @@
  */
 #include "sts_subscribe.h"
 
+#include "subscriber_image_util.h"
 #include "ans_log_wrapper.h"
 #include "notification_helper.h"
 #include "sts_throw_erro.h"
@@ -137,6 +138,7 @@ void StsSubscriberInstance::OnConsumed(
         ANS_LOGE("AttachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
+    SubscriberImageUtil::ProcessPictureOption(request, GetPictureOption());
     std::vector<ani_ref> vec;
     ani_object obj;
     if (WarpSubscribeCallbackData(etsEnv, request, sortingMap, -1, obj)) {
@@ -1114,8 +1116,8 @@ sptr<StsNotificationOperationInfo> GetOperationInfoForDistributeOperation(
             ANS_LOGD("operationInfo is valid");
             return nullptr;
         }
-        ANS_LOGD("OperationInfo %{public}s, %{public}s, %{public}d, %{public}d",
-            info->GetActionName().c_str(), info->GetUserInput().c_str(),
+        ANS_LOGD("OperationInfo %{public}s, %{public}d, %{public}d",
+            info->GetActionName().c_str(),
             info->GetOperationType(), info->GetBtnIndex());
     } else {
         info->SetOperationType(OperationType::DISTRIBUTE_OPERATION_JUMP);

@@ -28,8 +28,7 @@ ohos_unittest("ans_unit_test") {
     "${services_path}/../framworks/core/include",
     "/${services_path}/ans/include/utils",
     "/${services_path}/ans/include/notification_extension",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
   ]
 
   defines = []
@@ -150,9 +149,8 @@ ohos_unittest("notification_preferences_database_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "${services_path}/../framworks/core/include",
     "/${services_path}/ans/include/utils/",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
   ]
 
   defines = []
@@ -250,9 +248,8 @@ ohos_unittest("notification_preferences_database_two_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "${services_path}/../framworks/core/include",
     "/${services_path}/ans/include/utils/",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
   ]
 
   defines = []
@@ -338,9 +335,8 @@ ohos_unittest("notification_subscriber_manager_test") {
     "${services_path}/../frameworks/core/test/unittest/mock",
     "${services_path}/../framworks/core/include",
     "/${services_path}/ans/include/utils",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/rdb/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
+     "${services_path}/infrastructure/external_adapter/rdb/include",
   ]
 
   defines = []
@@ -452,9 +448,8 @@ ohos_unittest("notification_service_test") {
     "/${services_path}/ans/include/utils",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
   ]
 
   defines = []
@@ -462,6 +457,10 @@ ohos_unittest("notification_service_test") {
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_live_view_service_test.cpp",
+    "advanced_notification_manager_test/advanced_notification_cancel_test.cpp",
+    "advanced_notification_manager_test/advanced_notification_publish_test.cpp",
+    "advanced_notification_manager_test/advanced_notification_query_test.cpp",
+    "advanced_notification_manager_test/advanced_notification_atomic_service_test.cpp",
     "advanced_notification_service_test.cpp",
     "advanced_notification_slot_service_test.cpp",
     "advanced_notification_utils_test.cpp",
@@ -564,8 +563,7 @@ ohos_unittest("notification_clone_test") {
     "/${services_path}/ans/include/utils/",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
   ]
 
   defines = []
@@ -579,6 +577,97 @@ ohos_unittest("notification_clone_test") {
     "clone_test/notification_clone_manager_test.cpp",
     "clone_test/notification_clone_priority_service_test.cpp",
     "clone_test/notification_clone_util_test.cpp",
+    "mock/blob.cpp",
+    "mock/distributed_kv_data_manager.cpp",
+    "mock/mock_accesstoken_kit.cpp",
+    "mock/mock_bundle_manager_helper.cpp",
+    "mock/mock_bundle_mgr.cpp",
+    "mock/mock_event_handler.cpp",
+    "mock/mock_ipc.cpp",
+    "mock/mock_notification_clone_util.cpp",
+    "mock/mock_push_callback_stub.cpp",
+    "mock/mock_single_kv_store.cpp",
+    "notification_dialog_test/mock_os_account_manager_annex.cpp",
+  ]
+
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/ans:ans_service_sources",
+  ]
+
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
+    deps += [ "${services_path}/distributed:libans_distributed" ]
+    include_dirs += [ "${services_path}/distributed/include" ]
+  }
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_manager",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
+    "bluetooth:btframework",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
+    "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
+    "image_framework:image_native",
+    "ipc:ipc_core",
+    "kv_store:distributeddata_inner",
+    "os_account:os_account_innerkits",
+    "player_framework:media_client",
+    "relational_store:native_rdb",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "time_service:time_client",
+  ]
+  if (ans_device_manager_enable &&
+      distributed_notification_service_feature_watch) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
+
+  if (device_usage) {
+    external_deps += [ "device_usage_statistics:usagestatsinner" ]
+    defines += [ "DEVICE_USAGE_STATISTICS_ENABLE" ]
+  }
+
+  version_script = "${services_path}/ans/libans.map"
+  cflags = []
+  if (hisysevent_usage) {
+    external_deps += [ "hisysevent:libhisysevent" ]
+    cflags += [ "-DHAS_HISYSEVENT_PART" ]
+  }
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
+ohos_unittest("clone_subscriber_unit_test") {
+  module_out_path = module_output_path
+  include_dirs = [
+    ".",
+    "include",
+    "/${services_path}/ans/include",
+    "/${services_path}/ans/include/utils/",
+    "${services_path}/ans/test/unittest/mock/include",
+    "${services_path}/infrastructure/interfaces",
+  ]
+
+  defines = []
+
+  sources = [
+    "${test_path}/mock/mock_tokenid_kit.cpp",
+    "clone_test/clone_start_event_subscriber_test.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
@@ -670,8 +759,7 @@ ohos_unittest("notification_publish_service_test") {
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
   ]
 
   defines = []
@@ -781,8 +869,7 @@ ohos_unittest("notification_service_publish_test") {
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
   ]
 
   defines = []
@@ -872,9 +959,8 @@ ohos_unittest("notification_preferences_second_test") {
     ".",
     "/${services_path}/ans/include",
     "/${services_path}/ans/include/utils/",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
   ]
 
   defines = []
@@ -914,9 +1000,8 @@ ohos_unittest("notification_preferences_test") {
     "/${services_path}/ans/include/utils/",
     "${services_path}/ans/include/notification_extension",
     "${services_path}/ans/test/unittest/mock/include",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
   ]
 
   use_exceptions = true
@@ -1078,8 +1163,7 @@ ohos_unittest("bundle_manager_helper_branch_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
   ]
 
   sources = [
@@ -1193,15 +1277,13 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils",
-    "${services_path}/infrastructure/external_adapter/extension/include",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
   ]
 
   defines = []
 
   sources = [
-    "${services_path}/infrastructure/external_adapter/ffrt/src/ffrt_queue_impl.cpp",
+    "${services_path}/infrastructure/external_adapter/ffrt/ffrt_queue_impl.cpp",
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "mock/mock_accesstoken_kit.cpp",
     "mock/mock_ipc.cpp",
@@ -1268,8 +1350,7 @@ ohos_unittest("advanced_notification_ringtone_service_test") {
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
   ]
 
   defines = []
@@ -1362,8 +1443,7 @@ ohos_unittest("advanced_notification_geofence_service_test") {
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
   ]
 
   defines = []
@@ -1456,8 +1536,7 @@ ohos_unittest("advanced_notification_service_branch_test") {
     "/${services_path}/ans/include",
     "/${services_path}/ans/include/utils/",
     "${services_path}/ans/test/unittest/mock/include",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
   ]
 
   defines = []
@@ -1533,9 +1612,8 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils",
     "${services_path}/domain/settings/rdb_mgr_repo/include",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
   ]
 
   sources = [
@@ -1595,8 +1673,7 @@ ohos_unittest("push_callback_stub_test") {
     ".",
     "include",
     "/${services_path}/ans/include",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
   ]
 
   sources = [ "push_callback_stub_test.cpp" ]
@@ -1649,9 +1726,8 @@ ohos_unittest("notification_rdb_data_mgr_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
   ]
 
   sources = [
@@ -1709,8 +1785,7 @@ ohos_unittest("notification_config_parse_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
+    "${services_path}/infrastructure/interfaces",
   ]
 
   sources = [
@@ -1922,9 +1997,8 @@ ohos_unittest("advanced_notification_service_unit_test") {
     "mock/include",
     "/${services_path}/ans/include",
     "/${services_path}/ans/include/utils/",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
   ]
 
   sources = [
@@ -1968,6 +2042,10 @@ ohos_unittest("advanced_notification_service_unit_test") {
 
   if (distributed_notification_service_feature_notification_statistics) {
     defines += [ "ANS_FEATURE_NOTIFICATION_STATISTICS" ]
+  }
+
+  if (distributed_notification_service_feature_dist_notification_persist) {
+    defines += [ "ANS_FEATURE_DIST_NOTIFICATION_PERSIST" ]
   }
 
   external_deps = [
@@ -2015,6 +2093,7 @@ ohos_unittest("common_utils_test") {
   sources = [
     "common_utils/aes_gcm_helper_test.cpp",
     "common_utils/notification_analytics_util_test.cpp",
+    "common_utils/system_sound_helper_test.cpp",
     "mock/mock_common_event_manager.cpp",
   ]
   use_exceptions = true
@@ -2055,13 +2134,12 @@ ohos_unittest("notification_extension_test") {
     ".",
     "mock/include",
     "/${services_path}/ans/include",
+    "/${services_path}/ans/include/clone",
     "/${services_path}/ans/include/utils",
     "/${services_path}/ans/include/notification_extension",
     "${services_path}/domain/settings/rdb_mgr_repo/include",
-    "${services_path}/infrastructure/external_adapter/extension/include",
-    "${services_path}/infrastructure/external_adapter/ffrt/include",
+    "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
-    "${services_path}/infrastructure/external_adapter/timer/include",
   ]
 
   sources = [
@@ -2096,6 +2174,7 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/advanced_notification_subscriber_service.cpp",
     "${services_path}/ans/src/advanced_notification_utils.cpp",
     "${services_path}/ans/src/badge_manager/badge_manager.cpp",
+    "${services_path}/ans/src/clone/clone_start_event_subscriber.cpp",
     "${services_path}/ans/src/clone/dh_notification_clone_bundle_service.cpp",
     "${services_path}/ans/src/clone/notification_clone_bundle_info.cpp",
     "${services_path}/ans/src/clone/notification_clone_bundle_service.cpp",
@@ -2174,6 +2253,10 @@ ohos_unittest("notification_extension_test") {
   defines = []
   if (distributed_notification_service_feature_priority_notification) {
     defines += [ "ANS_FEATURE_PRIORITY_NOTIFICATION" ]
+  }
+
+  if (distributed_notification_service_feature_dist_notification_persist) {
+    defines += [ "ANS_FEATURE_DIST_NOTIFICATION_PERSIST" ]
   }
 
   deps = [
@@ -2269,6 +2352,7 @@ group("unittest") {
     ":advanced_notification_service_unit_test",
     ":ans_unit_test",
     ":bundle_manager_helper_branch_test",
+    ":clone_subscriber_unit_test",
     ":common_utils_test",
     ":lru_cache_test",
     ":notification_clone_test",

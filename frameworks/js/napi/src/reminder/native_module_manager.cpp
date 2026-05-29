@@ -46,6 +46,22 @@ napi_value ReminderAgentManagerInit(napi_env env, napi_value exports)
     return exports;
 }
 
+void InitTimeZoneType(napi_env env, napi_value &objTimeZoneType)
+{
+    napi_value prop = nullptr;
+    if (napi_create_int32(env, static_cast<int32_t>(ReminderRequest::TimeZoneType::DEFAULT), &prop) == napi_ok) {
+        napi_set_named_property(env, objTimeZoneType, "DEFAULT", prop);
+    }
+    if (napi_create_int32(env, static_cast<int32_t>(ReminderRequest::TimeZoneType::FIXED_TIME_ZONE), &prop) ==
+        napi_ok) {
+        napi_set_named_property(env, objTimeZoneType, "FIXED_TIME_ZONE", prop);
+    }
+    if (napi_create_int32(env, static_cast<int32_t>(ReminderRequest::TimeZoneType::SYSTEM_TIME_ZONE), &prop) ==
+        napi_ok) {
+        napi_set_named_property(env, objTimeZoneType, "SYSTEM_TIME_ZONE", prop);
+    }
+}
+
 napi_value ConstantInit(napi_env env, napi_value exports)
 {
     ANSR_LOGD("called");
@@ -87,10 +103,14 @@ napi_value ConstantInit(napi_env env, napi_value exports)
         napi_set_named_property(env, objRingChannel, "RING_CHANNEL_NOTIFICATION", prop);
     }
 
+    napi_value objTimeZoneType = nullptr;
+    napi_create_object(env, &objTimeZoneType);
+    InitTimeZoneType(env, objTimeZoneType);
     napi_property_descriptor exportFuncs[] = {
         DECLARE_NAPI_PROPERTY("ReminderType", objReminderType),
         DECLARE_NAPI_PROPERTY("ActionButtonType", objButtonType),
         DECLARE_NAPI_PROPERTY("RingChannel", objRingChannel),
+        DECLARE_NAPI_PROPERTY("TimeZoneType", objTimeZoneType),
     };
 
     napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);

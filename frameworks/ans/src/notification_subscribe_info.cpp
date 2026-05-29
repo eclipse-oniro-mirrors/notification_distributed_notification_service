@@ -22,6 +22,7 @@
 #include "parcel.h"                       // for Parcel
 #include "refbase.h"
 #include "voice_content_option.h"
+#include "picture_option.h"
 
 namespace OHOS {
 namespace Notification {
@@ -42,6 +43,7 @@ NotificationSubscribeInfo::NotificationSubscribeInfo(const NotificationSubscribe
     slotTypes_ = subscribeInfo.GetSlotTypes();
     filterType_ = subscribeInfo.GetFilterType();
     voiceContentOption_ = subscribeInfo.GetVoiceContentOption();
+    pictureOption_ = subscribeInfo.GetPictureOption();
 }
 
 void NotificationSubscribeInfo::AddAppName(const std::string appName)
@@ -108,6 +110,20 @@ bool NotificationSubscribeInfo::MarshallingVoiceContentOption(Parcel &parcel) co
     return true;
 }
 
+bool NotificationSubscribeInfo::MarshallingPictureOption(Parcel &parcel) const
+{
+    bool hasPicture = (pictureOption_ != nullptr);
+    if (!parcel.WriteBool(hasPicture)) {
+        ANS_LOGE("Can't write hasPictureOption");
+        return false;
+    }
+    if (hasPicture && !pictureOption_->Marshalling(parcel)) {
+        ANS_LOGE("Can't write pictureOption_");
+        return false;
+    }
+    return true;
+}
+
 bool NotificationSubscribeInfo::Marshalling(Parcel &parcel) const
 {
     // write appNames_
@@ -166,7 +182,7 @@ bool NotificationSubscribeInfo::Marshalling(Parcel &parcel) const
     if (!MarshallingVoiceContentOption(parcel)) {
         return false;
     }
-    return true;
+    return MarshallingPictureOption(parcel);
 }
 
 NotificationSubscribeInfo *NotificationSubscribeInfo::Unmarshalling(Parcel &parcel)
@@ -190,24 +206,46 @@ uint32_t NotificationSubscribeInfo::GetSubscribedFlags() const
     return subscribedFlags_;
 }
 
+bool NotificationSubscribeInfo::ReadVoiceContentOptionFromParcel(Parcel &parcel)
+{
+    bool hasVoiceContentOption = parcel.ReadBool();
+    if (hasVoiceContentOption) {
+        voiceContentOption_ = VoiceContentOption::Unmarshalling(parcel);
+        if (voiceContentOption_ == nullptr) {
+            ANS_LOGE("Failed to unmarshal voiceContentOption_");
+            return false;
+        }
+    }
+    return true;
+}
+
+bool NotificationSubscribeInfo::ReadPictureOptionFromParcel(Parcel &parcel)
+{
+    bool hasPictureOption = parcel.ReadBool();
+    if (hasPictureOption) {
+        pictureOption_ = PictureOption::Unmarshalling(parcel);
+        if (pictureOption_ == nullptr) {
+            ANS_LOGE("Failed to unmarshal pictureOption_");
+            return false;
+        }
+    }
+    return true;
+}
+
 bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
 {
-    // read appNames_
     if (!parcel.ReadStringVector(&appNames_)) {
         ANS_LOGE("Can't read appNames_");
         return false;
     }
-    //read deviceType_
     if (!parcel.ReadString(deviceType_)) {
         ANS_LOGE("Can't read deviceType_");
         return false;
     }
-    //read userId_
     if (!parcel.ReadInt32(userId_)) {
         ANS_LOGE("Can't read userId_");
         return false;
     }
-    //read slotTypes_
     uint32_t size = 0;
     if (!parcel.ReadUint32(size)) {
         ANS_LOGE("Can't read size");
@@ -224,30 +262,19 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
             return false;
         }
         slotTypes_.emplace_back(static_cast<NotificationConstant::SlotType>(slotType));
-        }
-    // read filterType_
+    }
     if (!parcel.ReadUint32(filterType_)) {
         ANS_LOGE("Can't read filterType_");
         return false;
     }
-
-    // read needNotifyApplicationChanged_
     needNotifyApplicationChanged_ = parcel.ReadBool();
-    // read needNotifyResponse
     needNotifyResponse_ = parcel.ReadBool();
-    // read isSubscribeSelf_
     isSubscribeSelf_ = parcel.ReadBool();
     subscribedFlags_ = parcel.ReadUint32();
-
-    bool hasVoiceContentOption = parcel.ReadBool();
-    if (hasVoiceContentOption) {
-        voiceContentOption_ = VoiceContentOption::Unmarshalling(parcel);
-        if (voiceContentOption_ == nullptr) {
-            ANS_LOGE("Failed to unmarshal voiceContentOption_");
-            return false;
-        }
+    if (!ReadVoiceContentOptionFromParcel(parcel)) {
+        return false;
     }
-    return true;
+    return ReadPictureOptionFromParcel(parcel);
 }
 
 std::string NotificationSubscribeInfo::Dump()
@@ -266,6 +293,19 @@ std::string NotificationSubscribeInfo::Dump()
     if (voiceContentOption_ != nullptr) {
         voiceContentOption = voiceContentOption_->GetEnabled() ? "enabled" : "disabled";
     }
+    std::string pictureOption = "null";
+    if (pictureOption_ != nullptr) {
+        std::vector<std::string> picList = pictureOption_->GetPreparseLiveViewPicList();
+        if (!picList.empty()) {
+            pictureOption = "[";
+            for (const auto &pic : picList) {
+                pictureOption += pic + ", ";
+            }
+            pictureOption += "]";
+        } else {
+            pictureOption = "[]";
+        }
+    }
     return "NotificationSubscribeInfo{ "
             "appNames = [" + appNames + "]" +
             "deviceType = " + deviceType_ +
@@ -276,6 +316,7 @@ std::string NotificationSubscribeInfo::Dump()
             "needResponse = " + std::to_string(needNotifyResponse_) +
             "isSubscribeSelf = " + std::to_string(isSubscribeSelf_) +
             "voiceContentOption = " + voiceContentOption +
+            "pictureOption = " + pictureOption +
             " }";
 }
 
@@ -357,6 +398,16 @@ void NotificationSubscribeInfo::SetVoiceContentOption(const sptr<VoiceContentOpt
 sptr<VoiceContentOption> NotificationSubscribeInfo::GetVoiceContentOption() const
 {
     return voiceContentOption_;
+}
+
+void NotificationSubscribeInfo::SetPictureOption(const sptr<PictureOption> &option)
+{
+    pictureOption_ = option;
+}
+
+sptr<PictureOption> NotificationSubscribeInfo::GetPictureOption() const
+{
+    return pictureOption_;
 }
 }  // namespace Notification
 }  // namespace OHOS

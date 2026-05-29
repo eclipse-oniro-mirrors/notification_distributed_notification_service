@@ -336,8 +336,6 @@ AdvancedNotificationService::AdvancedNotificationService()
     notificationSlotFilter_ = std::make_shared<NotificationSlotFilter>();
     StartFilters();
 
-    RecoverLiveViewFromDb();
-
     ISystemEvent iSystemEvent = {
         std::bind(&AdvancedNotificationService::onBundleRemovedByUserId,
             this, std::placeholders::_1, std::placeholders::_2),
@@ -689,10 +687,12 @@ AnsStatus AdvancedNotificationService::FillNotificationRecord(
     SetNotificationRemindType(record->notification, true);
 
     record->bundleOption = requestdbObj.bundleOption;
-    AnsStatus ansStatus = AssignValidNotificationSlot(record, record->bundleOption);
-    if (!ansStatus.Ok()) {
-        ANS_LOGE("Assign valid notification slot failed!");
-        return ansStatus;
+    if (!record->bundleOption->GetBundleName().empty()) {
+        AnsStatus ansStatus = AssignValidNotificationSlot(record, record->bundleOption);
+        if (!ansStatus.Ok()) {
+            ANS_LOGE("Assign valid notification slot failed!");
+            return ansStatus;
+        }
     }
 
     return AnsStatus();
@@ -824,7 +824,13 @@ AnsStatus __attribute__((weak)) AdvancedNotificationService::PublishPreparedNoti
     } else {
         isThirdparty = true;
     }
-    if (!EXTENTION_WRAPPER->NotificationContentControl(request)) {
+    
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId)!= ERR_OK) {
+        ANS_LOGE("GetActiveUserId is false");
+        return AnsStatus(ERR_ANS_GET_ACTIVE_USER_FAILED, "ERR_ANS_GET_ACTIVE_USER_FAILED");
+    }
+    if (!EXTENTION_WRAPPER->NotificationContentControl(request, userId)) {
         ANS_LOGE("NotificationContentControl fail");
         return AnsStatus(ERR_ANS_NOT_ALLOWED, "NotificationContentControl fail");
     }
@@ -1633,7 +1639,8 @@ std::vector<std::string> AdvancedNotificationService::GetNotificationKeys(
 
     for (auto record : notificationList_) {
         if ((bundleOption != nullptr) &&
-            (record->bundleOption->GetUid() != bundleOption->GetUid())) {
+            (record->bundleOption->GetUid() != bundleOption->GetUid()) &&
+            (record->request->GetOwnerUid() != bundleOption->GetUid())) {
             continue;
         }
         keys.push_back(record->notification->GetKey());
@@ -1643,7 +1650,8 @@ std::vector<std::string> AdvancedNotificationService::GetNotificationKeys(
         std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
         for (const auto &record : triggerNotificationList_) {
             if ((bundleOption != nullptr) &&
-                (record->bundleOption->GetUid() != bundleOption->GetUid())) {
+                (record->bundleOption->GetUid() != bundleOption->GetUid()) &&
+                (record->request->GetOwnerUid() != bundleOption->GetUid())) {
                 continue;
             }
             keys.push_back(record->notification->GetKey());

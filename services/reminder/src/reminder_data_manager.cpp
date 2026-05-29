@@ -1119,6 +1119,7 @@ void ReminderDataManager::StartRecentReminder()
     sptr<ReminderRequest> reminder = GetRecentReminder();
     if (reminder == nullptr) {
         ANSR_LOGE("No reminder need to start");
+        StopTimerLocked(TimerType::TRIGGER_TIMER);
         SetActiveReminder(reminder);
         return;
     }

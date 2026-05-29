@@ -1,7 +1,7 @@
 ---
 description: 作为 Feature-Agent 的子代理，负责在所有任务执行完毕后，汇总整个需求实现过程的信息，产出一份完整的功能总结文档和测试报告，供后续开发者理解、审计和决策参考。
 mode: subagent
-temperature: 0
+temperature: 0.2
 tools:
   write: true
   edit: true

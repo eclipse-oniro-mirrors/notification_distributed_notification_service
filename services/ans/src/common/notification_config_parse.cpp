@@ -23,6 +23,9 @@
 #endif
 #include "notification_slot.h"
 #include "file_utils.h"
+#include "notification_extension_wrapper.h"
+#include "os_account_manager_helper.h"
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -197,13 +200,41 @@ bool __attribute__((weak)) NotificationConfigParse::IsDistributedReplyEnabled(co
 
 bool __attribute__((weak)) NotificationConfigParse::IsBannerEnabled(const std::string bundleName) const
 {
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    ErrCode errCode = OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    bool profileEnabled = false;
+    bool report = false;
+    if (errCode == ERR_OK) {
+        int32_t ret = EXTENTION_WRAPPER->BannerControlFromProfile(bundleName, userId, profileEnabled);
+        ANS_LOGW("BannerControlFromProfile enable: %{public}d, ret: %{public}d", profileEnabled, ret);
+        if (ret == ERR_OK && profileEnabled == true) {
+            return true;
+        }
+        report = ret == ERR_OK ? true : false;
+    }
+    
+    std::string errMessage = "not in profile,  bundleName :";
+    errMessage.append(bundleName);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_34, EventBranchId::BRANCH_0);
     std::shared_ptr<NotificationAppPrivileges> appPrivileges = GetAppPrivileges(bundleName);
     if (appPrivileges != nullptr && appPrivileges->IsBannerEnabled()) {
+        if (report) {
+            errMessage.append(" IsBannerEnabled");
+            NotificationAnalyticsUtil::ReportModifyEvent(message.Message(errMessage));
+        }
         return true;
     }
 #ifdef ENABLE_ANS_ADDITIONAL_CONTROL
     int32_t ctrlResult = EXTENTION_WRAPPER->BannerControl(bundleName);
-    return (ctrlResult == ERR_OK) ? true : false;
+    if (ctrlResult == ERR_OK) {
+        if (report) {
+            errMessage.append(" BannerControl");
+            NotificationAnalyticsUtil::ReportModifyEvent(message.Message(errMessage));
+        }
+        return true;
+    } else {
+        return false;
+    }
 #else
     return false;
 #endif
@@ -534,6 +565,35 @@ bool __attribute__((weak)) NotificationConfigParse::GetCloneExpiredTime(int32_t&
     }
 
     days = jsonItem.get<int32_t>();
+    return true;
+}
+
+bool __attribute__((weak)) NotificationConfigParse::GetDataCloneBundleName(std::string &bundleName)
+{
+    nlohmann::json root;
+    std::string jsonPoint = "/";
+    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
+    jsonPoint.append("/");
+    jsonPoint.append(CFG_KEY_DATACLONE_BUNDLE_NAME);
+    if (!GetConfigJson(jsonPoint, root)) {
+        ANS_LOGE("Failed to get JsonPoint CCM config file.");
+        return false;
+    }
+    if (root.find(CFG_KEY_NOTIFICATION_SERVICE) == root.end()) {
+        ANS_LOGE("Failed to find notificationService in CCM config.");
+        return false;
+    }
+    nlohmann::json jsonItem = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_DATACLONE_BUNDLE_NAME];
+    if (jsonItem.is_null() || !jsonItem.is_string()) {
+        ANS_LOGE("datacloneBundleName is missing or not a string in CCM config.");
+        return false;
+    }
+    bundleName = jsonItem.get<std::string>();
+    if (bundleName.empty()) {
+        ANS_LOGE("datacloneBundleName is empty in CCM config.");
+        return false;
+    }
+    ANS_LOGI("Got datacloneBundleName from CCM: %{public}s.", bundleName.c_str());
     return true;
 }
 

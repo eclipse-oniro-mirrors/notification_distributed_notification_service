@@ -27,5 +27,7 @@ group("unittest") {
     "ans_subscriber_listener_test:unittest",
     "dialog_status_data_test:unittest",
     "ans_manager_death_recipient_test:unittest",
+    "subscriber_image_util_test:unittest",
+    "image_pixelmap_helper_test:unittest",
   ]
 }

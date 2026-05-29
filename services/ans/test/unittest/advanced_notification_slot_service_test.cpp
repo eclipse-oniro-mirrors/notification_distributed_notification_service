@@ -19,6 +19,7 @@
 #include <thread>
 
 #include "gtest/gtest.h"
+#include "nlohmann/json.hpp"
 
 #define private public
 #include "advanced_notification_service.h"
@@ -1252,5 +1253,169 @@ HWTEST_F(AnsSlotServiceTest, GetReminderInfoByBundles_0400, Function | SmallTest
     ret = advancedNotificationService_->SetReminderInfoByBundles(reminderInfo);
     ASSERT_EQ(ret, (int)ERR_OK);
 }
+
+/**
+ * @tc.name: UpdateInnerConfig_00001
+ * @tc.desc: Test UpdateInnerConfig permission and param check
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, UpdateInnerConfig_00001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(false);
+    
+    std::string configKey = "add_voice_summary_count";
+    std::string configValue = "";
+    auto ret = advancedNotificationService_->UpdateInnerConfig(configKey, configValue);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    ret = advancedNotificationService_->UpdateInnerConfig(configKey, configValue);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    
+    MockIsVerfyPermisson(true);
+    ret = advancedNotificationService_->UpdateInnerConfig("", configValue);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+
+    configKey = "invalid_key";
+    ret = advancedNotificationService_->UpdateInnerConfig(configKey, configValue);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: UpdateInnerConfig_00002
+ * @tc.desc: Test UpdateInnerConfig normal call flow
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, UpdateInnerConfig_00002, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    
+    NotificationPreferences::GetInstance()->SetKvToDb(
+        "notification_voice_summary_count", "", 100);
+    
+    std::string configKey = "add_voice_summary_count";
+    std::string configValue = "";
+    auto ret = advancedNotificationService_->UpdateInnerConfig(configKey, configValue);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: UpdateVoiceUpdate_00001
+ * @tc.desc: Test UpdateVoiceUpdate param check and abnormal data handling
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, UpdateVoiceUpdate_00001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    
+    std::string configKey = "add_voice_summary_count";
+    NotificationPreferences::GetInstance()->SetKvToDb(
+        "notification_voice_summary_count", "", 100);
+    auto ret = advancedNotificationService_->UpdateVoiceUpdate(configKey);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    
+    std::string invalidJson = "invalid_json";
+    NotificationPreferences::GetInstance()->SetKvToDb(
+        "notification_voice_summary_count", invalidJson, 100);
+    ret = advancedNotificationService_->UpdateVoiceUpdate(configKey);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    
+    nlohmann::json jsonData;
+    jsonData["invalid_field"] = "test";
+    NotificationPreferences::GetInstance()->SetKvToDb(
+        "notification_voice_summary_count", jsonData.dump(), 100);
+    ret = advancedNotificationService_->UpdateVoiceUpdate(configKey);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    
+    jsonData.clear();
+    jsonData["date"] = "string_value";
+    jsonData["count"] = "string_value";
+    NotificationPreferences::GetInstance()->SetKvToDb(
+        "notification_voice_summary_count", jsonData.dump(), 100);
+    ret = advancedNotificationService_->UpdateVoiceUpdate(configKey);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: UpdateVoiceUpdate_00002
+ * @tc.desc: Test UpdateVoiceUpdate normal count increment
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, UpdateVoiceUpdate_00002, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    
+    std::string configKey = "add_voice_summary_count";
+    auto now = std::chrono::system_clock::now();
+    time_t nowTime = std::chrono::system_clock::to_time_t(now);
+    struct tm localTime = {0};
+    localtime_r(&nowTime, &localTime);
+    int64_t currentDate = (localTime.tm_year + 1900) * 10000 + (localTime.tm_mon + 1) * 100 + localTime.tm_mday;
+    
+    nlohmann::json jsonData;
+    jsonData["date"] = currentDate;
+    jsonData["count"] = 10;
+    
+    NotificationPreferences::GetInstance()->SetKvToDb(
+        "notification_voice_summary_count", jsonData.dump(), 100);
+    
+    auto ret = advancedNotificationService_->UpdateVoiceUpdate(configKey);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: UpdateVoiceUpdate_00003
+ * @tc.desc: Test UpdateVoiceUpdate exceed limit and cross-day reset
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, UpdateVoiceUpdate_00003, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    
+    std::string configKey = "add_voice_summary_count";
+    auto now = std::chrono::system_clock::now();
+    time_t nowTime = std::chrono::system_clock::to_time_t(now);
+    struct tm localTime = {0};
+    localtime_r(&nowTime, &localTime);
+    int64_t currentDate = (localTime.tm_year + 1900) * 10000 + (localTime.tm_mon + 1) * 100 + localTime.tm_mday;
+    
+    nlohmann::json jsonData;
+    jsonData["date"] = currentDate;
+    jsonData["count"] = 30;
+    
+    NotificationPreferences::GetInstance()->SetKvToDb(
+        "notification_voice_summary_count", jsonData.dump(), 100);
+    
+    auto ret = advancedNotificationService_->UpdateVoiceUpdate(configKey);
+    ASSERT_EQ(ret, (int)ERR_ANS_VOICE_SUMMARY_COUNT_EXCEEDED);
+    
+    int64_t oldDate = 20200101;
+    jsonData["date"] = oldDate;
+    jsonData["count"] = 30;
+    
+    NotificationPreferences::GetInstance()->SetKvToDb(
+        "notification_voice_summary_count", jsonData.dump(), 100);
+    
+    ret = advancedNotificationService_->UpdateVoiceUpdate(configKey);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
 }  // namespace Notification
 }  // namespace OHOS

@@ -76,6 +76,8 @@ void ReminderStrategy::AppendValuesBucket(const sptr<ReminderRequest>& reminder,
     values.PutString(ReminderBaseTable::NOT_DISTRIBUTED, reminder->IsNotDistributed() ? "true" : "false");
     values.PutString(ReminderBaseTable::CREATOR_BUNDLE_NAME, reminder->GetCreatorBundleName());
     values.PutInt(ReminderBaseTable::CREATOR_UID, reminder->GetCreatorUid());
+    values.PutInt(ReminderBaseTable::TIME_ZONE_TYPE, static_cast<int32_t>(reminder->GetTimeZoneType()));
+    values.PutString(ReminderBaseTable::NOTIFICATION_REQUEST_PROXY, reminder->SerializeNotificationRequestProxy());
 }
 
 void ReminderStrategy::RecoverTimeFromOldVersion(sptr<ReminderRequest>& reminder,
@@ -403,6 +405,15 @@ void ReminderStrategy::RecoverFromDb(sptr<ReminderRequest>& reminder,
     std::string notDistributed;
     ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::NOT_DISTRIBUTED, notDistributed);
     reminder->SetNotDistributed(notDistributed == "true" ? true : false);
+
+    int32_t timeZoneTypeVal = static_cast<int32_t>(ReminderRequest::TimeZoneType::DEFAULT);
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::TIME_ZONE_TYPE, timeZoneTypeVal);
+    reminder->SetTimeZoneType(static_cast<ReminderRequest::TimeZoneType>(timeZoneTypeVal));
+
+    std::string notificationRequestProxyJson;
+    ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::NOTIFICATION_REQUEST_PROXY,
+        notificationRequestProxyJson);
+    reminder->DeserializeNotificationRequestProxy(notificationRequestProxyJson);
 }
 
 void ReminderTimerStrategy::AppendValuesBucket(const sptr<ReminderRequest>& reminder,

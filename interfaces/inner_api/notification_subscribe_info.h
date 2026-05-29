@@ -20,6 +20,7 @@
 #include "notification_constant.h"
 #include "refbase.h"
 #include "voice_content_option.h"
+#include "picture_option.h"
 
 namespace OHOS {
 namespace Notification {
@@ -210,9 +211,16 @@ public:
 
     sptr<VoiceContentOption> GetVoiceContentOption() const;
 
+    void SetPictureOption(const sptr<PictureOption> &option);
+
+    sptr<PictureOption> GetPictureOption() const;
+
 private:
     bool ReadFromParcel(Parcel &parcel);
+    bool ReadVoiceContentOptionFromParcel(Parcel &parcel);
+    bool ReadPictureOptionFromParcel(Parcel &parcel);
     bool MarshallingVoiceContentOption(Parcel &parcel) const;
+    bool MarshallingPictureOption(Parcel &parcel) const;
     void SetSubscriberBundleName(const std::string &bundleName);
     std::string GetSubscriberBundleName() const;
     /**
@@ -247,6 +255,7 @@ private:
     bool needNotifyResponse_ = false;
     bool isSubscribeSelf_ = false;
     sptr<VoiceContentOption> voiceContentOption_;
+    sptr<PictureOption> pictureOption_;
     friend class NotificationSubscriberManager;
 };
 }  // namespace Notification

@@ -19,6 +19,7 @@
 #include <iomanip>
 #include <sstream>
 
+#include "nlohmann/json.hpp"
 #include "access_token_helper.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
@@ -41,6 +42,7 @@
 #include "notification_config_parse.h"
 #include "notification_extension_wrapper.h"
 #include "notification_ai_extension_wrapper.h"
+#include "voice_extension_wrapper.h"
 #include "notification_analytics_util.h"
 #include "all_scenarios_extension_wrapper.h"
 
@@ -49,6 +51,9 @@ namespace Notification {
 namespace {
     constexpr char CALL_UI_BUNDLE[] = "com.ohos.callui";
     constexpr char LIVEVIEW_CONFIG_KEY[] = "APP_LIVEVIEW_CONFIG";
+    constexpr char ADD_VOICE_SUMMARY_COUNT_KEY[] = "add_voice_summary_count";
+    constexpr char NOTIFICATION_VOICE_SUMMARY_COUNT[] = "notification_voice_summary_count";
+    constexpr int32_t MAX_VOICE_SUMMARY_COUNT_PER_DAY = 30;
     constexpr uint32_t NOTIFICATION_SETTING_FLAG_BASE = 0x17;
     constexpr uint32_t NOTIFICATION_SETTING_SILENT = 0;
     constexpr int32_t MAX_LIVEVIEW_CONFIG_SIZE = 60;
@@ -66,6 +71,22 @@ namespace {
         NotificationConstant::LITEWEARABLE_DEVICE_TYPE,
         NotificationConstant::WEARABLE_DEVICE_TYPE
     };
+    constexpr int32_t YEAR_MULTIPLIER = 10000;
+    constexpr int32_t MONTH_MULTIPLIER = 100;
+    constexpr int32_t YEAR_BASE = 1900;
+
+    int64_t GetLocalDateInteger()
+    {
+        auto now = std::chrono::system_clock::now();
+        time_t nowTime = std::chrono::system_clock::to_time_t(now);
+        struct tm localTime = {0};
+        if (localtime_r(&nowTime, &localTime) == nullptr) {
+            ANS_LOGE("Failed to get local time");
+            return 0;
+        }
+        return (localTime.tm_year + YEAR_BASE) * YEAR_MULTIPLIER +
+            (localTime.tm_mon + 1) * MONTH_MULTIPLIER + localTime.tm_mday;
+    }
 
     static const std::vector<std::string> VALID_ADDITION_CONFIG = {
         CTRL_LIST_KEY,
@@ -76,7 +97,9 @@ namespace {
         CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG_KEY,
         PROXY_PKG_KEY,
         KIOSK_APP_TRUST_LIST_KEY,
-        RESTRICTED_MODE_TRUST_LIST_KEY
+        RESTRICTED_MODE_TRUST_LIST_KEY,
+        COLLABORATION_BLOCKLIST,
+        VOICE_BROADCAST_CONFIG_RULE_KEY
     };
 }
 
@@ -1385,14 +1408,90 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
             result = ERR_ANS_INVALID_PARAM;
             return;
         }
+        if (key == COLLABORATION_BLOCKLIST) {
+            result = NotificationPreferences::GetInstance()->SetCollaborationBlockList(value);
+            if (result != ERR_OK) {
+                ANS_LOGE("SetCollaborationBlockList failed: %{public}d", result);
+                return;
+            }
+        }
         result = NotificationPreferences::GetInstance()->SetKvToDb(key, value, SUBSCRIBE_USER_INIT);
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set addition config.");
-    ANS_LOGI("Set addition config result: %{public}d, key: %{public}s, value: %{public}s",
-        result, key.c_str(), value.c_str());
+    ANS_LOGI("Set addition config result: %{public}d, key: %{public}s.", result, key.c_str());
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
+}
+
+ErrCode AdvancedNotificationService::UpdateVoiceUpdate(const std::string &configKey)
+{
+    int32_t userId = 0;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+        ANS_LOGE("GetCurrentActiveUserId failed");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+
+    int64_t todayDate = GetLocalDateInteger();
+    std::string storedData;
+    ErrCode result = NotificationPreferences::GetInstance()->GetKvFromDb(
+        NOTIFICATION_VOICE_SUMMARY_COUNT, storedData, userId);
+    
+    int32_t currentCount = 0;
+    int64_t storedDate = todayDate;
+    if (result == ERR_OK && !storedData.empty() && nlohmann::json::accept(storedData)) {
+        nlohmann::json jsonData = nlohmann::json::parse(storedData);
+        if (jsonData.contains("date") && jsonData["date"].is_number_integer()) {
+            storedDate = jsonData["date"].get<int64_t>();
+        }
+        if (jsonData.contains("count") && jsonData["count"].is_number_integer()) {
+            currentCount = jsonData["count"].get<int32_t>();
+        }
+    }
+    
+    if (storedDate == todayDate) {
+        currentCount++;
+        if (currentCount > MAX_VOICE_SUMMARY_COUNT_PER_DAY) {
+            ANS_LOGW("Voice summary count exceeded limit: %{public}d", currentCount);
+            return ERR_ANS_VOICE_SUMMARY_COUNT_EXCEEDED;
+        }
+    } else {
+        currentCount = 1;
+        storedDate = todayDate;
+    }
+    
+    nlohmann::json newJsonData;
+    newJsonData["date"] = storedDate;
+    newJsonData["count"] = currentCount;
+    std::string newData = newJsonData.dump();
+    
+    result = NotificationPreferences::GetInstance()->SetKvToDb(NOTIFICATION_VOICE_SUMMARY_COUNT, newData, userId);
+    ANS_LOGI("Update voice summary count result: %{public}d, %{public}d, %{public}s.",
+        result, userId, newData.c_str());
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::UpdateInnerConfig(const std::string &configKey, const std::string &configValue)
+{
+    ANS_LOGI("UpdateInnerConfig: configKey=%{public}s, configValue=%{public}s", configKey.c_str(), configValue.c_str());
+    
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubSystem) {
+        ANS_LOGE("Caller is not native process, not allowed to call UpdateInnerConfig");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission denied, need OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER permission");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (configKey.empty() || configKey != ADD_VOICE_SUMMARY_COUNT_KEY) {
+        ANS_LOGE("Invalid config key: %{public}s.", configKey.c_str());
+        return ERR_ANS_INVALID_PARAM;
+    }
+    
+    return UpdateVoiceUpdate(configKey);
 }
 
 ErrCode AdvancedNotificationService::SyncAdditionConfig(
@@ -1422,6 +1521,17 @@ ErrCode AdvancedNotificationService::SyncAdditionConfig(
             return ERR_ANS_SERVICE_NOT_READY;
         }
         if (syncResult != NotificationAiExtensionWrapper::ErrorCode::ERR_OK) {
+            return ERR_ANS_INVALID_PARAM;
+        }
+    }
+#endif
+#ifdef NOTIFICATION_VOICE_BROADCAST_ENABLE
+    if (key == VOICE_BROADCAST_CONFIG_RULE_KEY) {
+        int32_t syncResult = VOICE_EXTENSION_WRAPPER.UpdateVoiceConfig(value);
+        message.ErrorCode(syncResult);
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        ANS_LOGI("Sync voice config: %{public}d, key: %{public}s", syncResult, key.c_str());
+        if (syncResult != ERR_OK) {
             return ERR_ANS_INVALID_PARAM;
         }
     }

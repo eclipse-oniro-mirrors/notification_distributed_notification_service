@@ -59,7 +59,6 @@ namespace OHOS {
         reminderRequest.GetReminderType();
         reminderRequest.GetRingDuration();
         reminderRequest.UpdateNextReminder();
-        reminderRequest.SetNextTriggerTime();
         Parcel parcel;
         reminderRequest.InitServerObj();
         return reminderRequest.IsAlerting();

@@ -687,6 +687,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode UpdateInnerConfig(const std::string& configKey, const std::string& configValue) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode SetPriorityEnabled(const bool enabled) override
     {
         return ERR_ANS_INVALID_PARAM;

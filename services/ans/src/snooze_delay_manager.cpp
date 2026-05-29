@@ -15,6 +15,7 @@
 
 #include "advanced_notification_service.h"
 
+#include "advanced_notification_priority_helper.h"
 #include "accesstoken_kit.h"
 #include "access_token_helper.h"
 #include "advanced_notification_inline.h"
@@ -58,9 +59,10 @@ ErrCode AdvancedNotificationService::SnoozeNotification(const std::string &hashC
         result = ExcuteSnoozeNotification(hashCode, triggerTime);
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Serial queue is valid");
-    NotificationAnalyticsUtil::ReportModifyEvent(
-        message.Message(hashCode + " snooze " + std::to_string(delayTime) + "s").BranchId(BRANCH_5));
-
+    if (result == ERR_OK) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.Message(hashCode + " snooze " + std::to_string(delayTime) + "s").BranchId(BRANCH_5));
+    }
     return result;
 }
 
@@ -83,8 +85,10 @@ ErrCode AdvancedNotificationService::ExcuteSnoozeNotification(const std::string 
             message.ErrorCode(ERR_ANS_NOTIFICATION_NOT_EXISTS).BranchId(BRANCH_3));
         return ERR_ANS_NOTIFICATION_NOT_EXISTS;
     }
+    bool isCollaboration =
+        AdvancedNotificationPriorityHelper::GetInstance()->IsCollaborationNotification(outRecord->request);
     if (outRecord->request->IsCommonLiveView() || outRecord->request->IsSystemLiveView() ||
-        !outRecord->notification->IsRemoveAllowed()) {
+        !outRecord->notification->IsRemoveAllowed() || isCollaboration) {
         ANS_LOGE("notification is not supported to snooze");
         message.Message(hashCode + " is not supported to snooze");
         NotificationAnalyticsUtil::ReportModifyEvent(
@@ -140,6 +144,21 @@ void AdvancedNotificationService::SnoozeNotificationConsumed(const std::shared_p
         ANS_LOGE("No subscriber to notify.");
         return;
     }
+    record->request->SetDeliveryTime(GetCurrentTime());
+    CheckDoNotDisturbProfile(record);
+    NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    NotificationPreferences::GetInstance()->IsSilentReminderEnabled(record->bundleOption, enableStatus);
+    if (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
+        enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) {
+        record->notification->SetEnableLight(false);
+        record->notification->SetEnableSound(false);
+        record->notification->SetEnableVibration(false);
+        record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false);
+        record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, false);
+        record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
+        record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
+        record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
+    }
     if (AssignToNotificationList(record) != ERR_OK) {
         return;
     }
@@ -171,6 +190,7 @@ bool AdvancedNotificationService::IsCanRecoverSnooze(const std::shared_ptr<Notif
 
 bool AdvancedNotificationService::SetEncryptToDB(const NotificationRequestDb &requestDb)
 {
+#ifdef ANS_FEATURE_DIST_NOTIFICATION_PERSIST
     auto request = requestDb.request;
     auto bundleOption = requestDb.bundleOption;
     if (!request || !bundleOption) {
@@ -202,6 +222,9 @@ bool AdvancedNotificationService::SetEncryptToDB(const NotificationRequestDb &re
     }
 
     return true;
+#else
+    return true;
+#endif
 }
 
 void AdvancedNotificationService::TriggerSnoozeDelay()

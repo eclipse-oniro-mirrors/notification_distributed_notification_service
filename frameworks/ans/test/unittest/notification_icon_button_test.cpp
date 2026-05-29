@@ -206,5 +206,140 @@ HWTEST_F(NotificationIconButtonTest, Dump_00001, Function | SmallTest | Level1)
     rrc->SetName("test");
     EXPECT_EQ(rrc->Dump(), "NotificationIconButton {name = test, text = , hidePanel = 0 }");
 }
+
+HWTEST_F(NotificationIconButtonTest, ClearButtonIconsResource_00001, Function | SmallTest | Level1)
+{
+    auto button = std::make_shared<NotificationIconButton>();
+    button->ClearButtonIconsResource();
+    EXPECT_EQ(button->GetIconImage(), nullptr);
+    EXPECT_EQ(button->GetIconResource(), nullptr);
+}
+
+HWTEST_F(NotificationIconButtonTest, WriteIconToParcel_00001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationIconButton>();
+    EXPECT_EQ(button->WriteIconToParcel(parcel), true);
+}
+
+HWTEST_F(NotificationIconButtonTest, WriteIconToParcel_00002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationIconButton>();
+    auto pixelMap = std::make_shared<Media::PixelMap>();
+    button->SetIconImage(pixelMap);
+    EXPECT_EQ(button->WriteIconToParcel(parcel), false);
+}
+
+HWTEST_F(NotificationIconButtonTest, WriteIconToParcel_00003, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationIconButton>();
+    auto resource = std::make_shared<ResourceManager::Resource>();
+    resource->id = 1;
+    resource->bundleName = "bundleName";
+    resource->moduleName = "moduleName";
+    button->SetIconResource(resource);
+    EXPECT_EQ(button->WriteIconToParcel(parcel), true);
+}
+
+HWTEST_F(NotificationIconButtonTest, ReadResourceFromParcel_00001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationIconButton>();
+    std::shared_ptr<ResourceManager::Resource> resourceObj;
+    parcel.WriteStringVector({"bundleName", "moduleName", "123"});
+    EXPECT_EQ(button->ReadResourceFromParcel(parcel, resourceObj), true);
+    EXPECT_NE(resourceObj, nullptr);
+    EXPECT_EQ(resourceObj->bundleName, "bundleName");
+    EXPECT_EQ(resourceObj->moduleName, "moduleName");
+}
+
+HWTEST_F(NotificationIconButtonTest, ReadResourceFromParcel_00002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationIconButton>();
+    std::shared_ptr<ResourceManager::Resource> resourceObj;
+    parcel.WriteStringVector({"bundleName", "moduleName"});
+    EXPECT_EQ(button->ReadResourceFromParcel(parcel, resourceObj), false);
+}
+
+HWTEST_F(NotificationIconButtonTest, ReadResourceFromParcel_00003, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationIconButton>();
+    std::shared_ptr<ResourceManager::Resource> resourceObj;
+    parcel.WriteStringVector({"bundleName", "moduleName", "invalid"});
+    EXPECT_EQ(button->ReadResourceFromParcel(parcel, resourceObj), false);
+}
+
+HWTEST_F(NotificationIconButtonTest, Marshalling_00003, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationIconButton>();
+    button->SetText("text");
+    button->SetName("name");
+    button->SetHidePanel(true);
+    auto pixelMap = std::make_shared<Media::PixelMap>();
+    button->SetIconImage(pixelMap);
+    EXPECT_EQ(button->Marshalling(parcel), false);
+}
+
+HWTEST_F(NotificationIconButtonTest, Marshalling_00004, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationIconButton>();
+    button->SetText("text");
+    button->SetName("name");
+    auto resource = std::make_shared<ResourceManager::Resource>();
+    resource->id = 1;
+    resource->bundleName = "bundleName";
+    resource->moduleName = "moduleName";
+    button->SetIconResource(resource);
+    EXPECT_EQ(button->Marshalling(parcel), true);
+}
+
+HWTEST_F(NotificationIconButtonTest, Unmarshalling_00003, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteString("text");
+    parcel.WriteString("name");
+    parcel.WriteBool(true);
+    parcel.WriteBool(true);
+    auto pixelMap = std::make_shared<Media::PixelMap>();
+    parcel.WriteParcelable(pixelMap.get());
+    parcel.WriteBool(false);
+    
+    auto button = NotificationIconButton::Unmarshalling(parcel);
+    EXPECT_EQ(button, nullptr);
+}
+
+HWTEST_F(NotificationIconButtonTest, Unmarshalling_00004, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteString("text");
+    parcel.WriteString("name");
+    parcel.WriteBool(true);
+    parcel.WriteBool(false);
+    parcel.WriteBool(true);
+    parcel.WriteStringVector({"bundleName", "moduleName", "123"});
+    
+    auto button = NotificationIconButton::Unmarshalling(parcel);
+    EXPECT_NE(button, nullptr);
+    EXPECT_EQ(button->GetText(), "text");
+    EXPECT_EQ(button->GetName(), "name");
+    EXPECT_EQ(button->GetHidePanel(), true);
+    EXPECT_NE(button->GetIconResource(), nullptr);
+}
+
+HWTEST_F(NotificationIconButtonTest, FromJson_00004, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{{"text", "text"}, {"name", "name"}, {"hidePanel", true}};
+    auto button = NotificationIconButton::FromJson(jsonObject);
+    EXPECT_NE(button, nullptr);
+    EXPECT_EQ(button->GetText(), "text");
+    EXPECT_EQ(button->GetName(), "name");
+    EXPECT_EQ(button->GetHidePanel(), true);
+}
 }
 }

@@ -20,6 +20,7 @@
 #include "hitrace_meter_adapter.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "picture_option.h"
 
 namespace OHOS {
 namespace Notification {
@@ -40,6 +41,16 @@ void NotificationSubscriber::SetDeviceType(const std::string &deviceType)
 std::string NotificationSubscriber::GetDeviceType() const
 {
     return deviceType_;
+}
+
+void NotificationSubscriber::SetPictureOption(const sptr<PictureOption> &pictureOption)
+{
+    pictureOption_ = pictureOption;
+}
+
+sptr<PictureOption> NotificationSubscriber::GetPictureOption() const
+{
+    return pictureOption_;
 }
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED

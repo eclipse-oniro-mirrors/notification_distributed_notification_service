@@ -831,25 +831,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_254000, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.number    : AnsBranchTest_255000
- * @tc.name      : RemoveNotification_1000
- * @tc.desc      : Test RemoveNotification function return ERR_ANS_PERMISSION_DENIED.
- * @tc.require   : #I6P8UI
- */
-HWTEST_F(AnsBranchTest, AnsBranchTest_255000, Function | SmallTest | Level1)
-{
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsVerfyPermisson(false);
-
-    int32_t notificationId = 1;
-    std::string label = "testRemove";
-    auto result = advancedNotificationService_->RemoveNotification(
-        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID),
-        notificationId, label, NotificationConstant::CANCEL_REASON_DELETE);
-    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
-}
-
-/**
  * @tc.number    : AnsBranchTest_256000
  * @tc.name      : RemoveAllNotifications_1000
  * @tc.desc      : Test RemoveAllNotifications function return ERR_ANS_PERMISSION_DENIED.

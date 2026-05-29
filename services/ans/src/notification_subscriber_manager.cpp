@@ -30,7 +30,7 @@
 #include "common_event_publish_info.h"
 #include "ipc_skeleton.h"
 #include "notification_flags.h"
-#include "notification_ai_extension_wrapper.h"
+#include "voice_extension_wrapper.h"
 #include "notification_constant.h"
 #include "notification_config_parse.h"
 #include "notification_extension_wrapper.h"
@@ -266,6 +266,7 @@ void NotificationSubscriberManager::BatchNotifyConsumed(const std::vector<sptr<N
     AppExecFwk::EventHandler::Callback batchNotifyConsumedFunc = std::bind(
         &NotificationSubscriberManager::BatchNotifyConsumedInner,
         this, newNotifications, notificationMap, record);
+    notificationSubQueue_->submit(batchNotifyConsumedFunc);
 #else
     AppExecFwk::EventHandler::Callback batchNotifyConsumedFunc = std::bind(
         &NotificationSubscriberManager::BatchNotifyConsumedInner,
@@ -790,13 +791,15 @@ int32_t NotificationSubscriberManager::GetVoiceContentInfo(const sptr<Notificati
     if (voiceFlag.empty()) {
         return ERR_OK;
     }
-    int32_t voiceResult = NOTIFICATION_AI_EXTENSION_WRAPPER->GenerateVoiceContent(request, content);
-    ANS_LOGI("Get voice content %{public}zu, %{public}s, %{public}d, %{public}s.", flagsMap->size(),
-        deviceList.c_str(), voiceResult, content.c_str());
+    std::string externInfo;
+    int32_t voiceResult = VOICE_EXTENSION_WRAPPER.GenerateVoiceContent(request, content, externInfo);
+    ANS_LOGI("Get voice content %{public}zu, %{public}s, %{public}d, %{public}s %{public}s.", flagsMap->size(),
+        deviceList.c_str(), voiceResult, content.c_str(), externInfo.c_str());
     if (voiceResult != ERR_OK) {
         content.clear();
         voiceFlag.clear();
     }
+    NotificationAnalyticsUtil::ReportVoiceBroadcastInfo(voiceResult, notification->GetKey(), externInfo);
     return voiceResult;
 }
 
@@ -951,6 +954,15 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(
     }
 }
 
+void NotificationSubscriberManager::NotifyVoiceNotificationCanceled(const sptr<NotificationRequest>& request)
+{
+    if (request == nullptr || !request->IsCommonLiveView() || request->GetConsumedDeviceFlag() == 0) {
+        return;
+    }
+    VOICE_EXTENSION_WRAPPER.NotifyVoiceEvent(
+        NotificationConstant::EVENT_NOTIFICATION_REMOVED, request);
+}
+
 void NotificationSubscriberManager::NotifyCanceledInner(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
@@ -984,6 +996,7 @@ void NotificationSubscriberManager::NotifyCanceledInner(
     NOTIFICATION_AI_EXTENSION_WRAPPER->NotifyPriorityEvent(
         NotificationConstant::EVENT_NOTIFICATION_REMOVED, bundleOptions, requests);
 #endif
+    NotifyVoiceNotificationCanceled(notification->GetNotificationRequestPoint());
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);
         if (IsSubscribedBysubscriber(record, notification) && IsSubscribedByDeviceType(record, notification, true) &&
@@ -1175,6 +1188,7 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
         if (notification->GetNotificationRequestPoint() != nullptr) {
             bool liveView = notification->GetNotificationRequestPoint()->IsCommonLiveView();
             HaOperationMessage(liveView).SyncDelete(notification->GetKey());
+            NotifyVoiceNotificationCanceled(notification->GetNotificationRequestPoint());
         }
     }
     ANS_LOGI("CancelNotification key = %{public}s", notificationKeys.c_str());

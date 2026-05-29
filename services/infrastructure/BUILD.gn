@@ -41,15 +41,20 @@ ohos_shared_library("ans_base") {
     "external_adapter/account/iaccount_manager_impl.cpp",
     "external_adapter/bms/src/bundle_manager_repository_impl.cpp",
     "external_adapter/bms/src/bundle_service_connector.cpp",
-    "external_adapter/extension/src/all_scenarios_extension_wrapper.cpp",
-    "external_adapter/ffrt/src/ffrt_queue_impl.cpp",
-    "external_adapter/timer/src/timer_impl.cpp",
+    "external_adapter/extension/all_scenarios_extension_wrapper.cpp",
+    "external_adapter/extension/voice_extension_wrapper.cpp",
+    "external_adapter/ffrt/ffrt_queue_impl.cpp",
+    "external_adapter/timer/timer_impl.cpp",
   ]
 
   defines = []
 
   if (distributed_notification_service_feature_notification_multi_foreground_user) {
     defines += [ "NOTIFICATION_MULTI_FOREGROUND_USER" ]
+  }
+
+  if (distributed_notification_service_feature_ai_engine) {
+    defines += [ "NOTIFICATION_VOICE_BROADCAST_ENABLE" ]
   }
 
   configs = [
@@ -83,5 +88,8 @@ ohos_shared_library("ans_base") {
 
 group("unittest") {
   testonly = true
-  deps = [ "external_adapter\rdb:ans_base_rdb_unittest" ]
+  deps = [
+    "external_adapter\rdb:ans_base_rdb_unittest",
+    "test/unittest/voice_extension:unittest",
+  ]
 }

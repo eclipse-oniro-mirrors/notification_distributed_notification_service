@@ -82,7 +82,7 @@ uint64_t ReminderRequestTimer::PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepe
     if (repeatIntervalInSeconds_ <= 0) {
         return ReminderRequest::INVALID_LONG_LONG_VALUE;
     }
-    if (repeatCount_ != 0 && remainedRepeatCount_ <= 0) {
+    if (repeatCount_ != 0 && remainedRepeatCount_ < 0) {
         return ReminderRequest::INVALID_LONG_LONG_VALUE;
     }
     return GetTriggerTimeInMilli();
@@ -106,6 +106,13 @@ bool ReminderRequestTimer::UpdateNextReminder()
     time_t now;
     (void)time(&now);
     uint64_t nowInMilli = ReminderRequest::GetDurationSinceEpochInMilli(now);
+    uint64_t tirggerTimeInNilli = GetTriggerTimeInMilli();
+    if (tirggerTimeInNilli > nowInMilli) {
+        SetExpired(false);
+        return true;
+    }
+    ANSR_LOGI("repeatInterval: %{public}" PRIu64 ", repeatCount: %{public}d, remainedRepeatCount: %{public}d",
+        repeatIntervalInSeconds_, repeatCount_, remainedRepeatCount_);
     if (repeatIntervalInSeconds_ > 0) {
         if (repeatCount_ == 0) {
             SetTriggerTimeInMilli(nowInMilli + repeatIntervalInSeconds_ * MILLI_SECONDS);
