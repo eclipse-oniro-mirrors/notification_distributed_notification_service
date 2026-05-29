@@ -17,10 +17,12 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_SYSTEM_EVENT_OBSERVER_H
 
 #include <functional>
+#include <memory>
 
 #include "common_event_subscriber.h"
 #include "refbase.h"
 
+#include "clone/clone_start_event_subscriber.h"
 #include "interface_system_event.h"
 #include "system_event_subscriber.h"
 
@@ -51,6 +53,7 @@ private:
     void OnBootSystemCompletedEventInner(const EventFwk::CommonEventData &data);
 private:
     std::shared_ptr<SystemEventSubscriber> subscriber_ = nullptr;
+    std::shared_ptr<CloneStartEventSubscriber> cloneStartSubscriber_ = nullptr;
     ISystemEvent callbacks_;
 };
 }  // namespace Notification

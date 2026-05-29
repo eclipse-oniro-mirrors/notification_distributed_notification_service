@@ -19,8 +19,10 @@
 #include "advanced_notification_service.h"
 #include "ans_const_define.h"
 #include "bundle_constants.h"
+#include "clone_start_event_subscriber.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
+#include "notification_config_parse.h"
 #include "notification_preferences.h"
 #include "notification_ai_extension_wrapper.h"
 #include "notification_clone_manager.h"
@@ -32,11 +34,9 @@
 
 namespace OHOS {
 namespace Notification {
-static const std::string CLONE_EVENT_START = "usual.event.clone.startTransfer";
 SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callbacks_(callbacks)
 {
     EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(CLONE_EVENT_START);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
@@ -65,11 +65,23 @@ SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callba
         commonEventSubscribeInfo, std::bind(&SystemEventObserver::OnReceiveEvent, this, std::placeholders::_1));
 
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+
+    std::string dataCloneBundleName;
+    if (!NotificationConfigParse::GetInstance()->GetDataCloneBundleName(dataCloneBundleName)) {
+        ANS_LOGW("Failed to get dataClone bundle name from CCM, use empty string as default.");
+    }
+    EventFwk::MatchingSkills cloneMatchingSkills;
+    cloneMatchingSkills.AddEvent(CloneStartEventSubscriber::CLONE_EVENT_START);
+    EventFwk::CommonEventSubscribeInfo cloneSubscribeInfo(cloneMatchingSkills);
+    cloneSubscribeInfo.SetPublisherBundleName(dataCloneBundleName);
+    cloneStartSubscriber_ = std::make_shared<CloneStartEventSubscriber>(cloneSubscribeInfo);
+    EventFwk::CommonEventManager::SubscribeCommonEvent(cloneStartSubscriber_);
 }
 
 SystemEventObserver::~SystemEventObserver()
 {
     EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriber_);
+    EventFwk::CommonEventManager::UnSubscribeCommonEvent(cloneStartSubscriber_);
 }
 
 sptr<NotificationBundleOption> SystemEventObserver::GetBundleOption(AAFwk::Want want)
@@ -189,8 +201,6 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         }
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_RESTORE_START) {
         NotificationCloneManager::GetInstance().OnRestoreStart(want);
-    } else if (action == CLONE_EVENT_START) {
-        NotificationCloneManager::GetInstance().OnRestoreEnd();
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_KIOSK_MODE_ON) {
         NotificationPreferences::GetInstance()->SetKioskModeStatus(true);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_KIOSK_MODE_OFF) {

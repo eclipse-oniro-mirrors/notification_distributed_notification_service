@@ -55,6 +55,7 @@ public:
     bool IsDistributedReplyEnabled(const std::string& bundleName) const;
     void GetFlowCtrlConfigFromCCM(FlowControlThreshold &threshold);
     bool GetSmartReminderEnableList(std::vector<std::string>& deviceTypes);
+    bool GetDataCloneBundleName(std::string &bundleName);
     bool GetMirrorNotificationEnabledStatus(std::vector<std::string>& deviceTypes);
     bool GetAppAndDeviceRelationMap(std::map<std::string, std::string>& relationMap);
     std::unordered_set<std::string> GetCollaborativeDeleteType() const;
@@ -121,6 +122,7 @@ public:
     constexpr static const char* PEER_DEVICE_TYPE = "peerDeviceType";
     constexpr static const char* DELETE_SLOT_TYPE = "deleteSlotTypes";
     constexpr static const char* CFG_KEY_CLONE_EXPIRED_TIME = "cloneExpiredTime";
+    constexpr static const char* CFG_KEY_DATACLONE_BUNDLE_NAME = "datacloneBundleName";
 };
 } // namespace Notification
 } // namespace OHOS
