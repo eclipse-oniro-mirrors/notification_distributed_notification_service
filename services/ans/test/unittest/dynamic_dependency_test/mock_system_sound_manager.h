@@ -32,10 +32,10 @@ public:
     MOCK_METHOD(std::shared_ptr<RingtonePlayer>, GetSpecificRingTonePlayer,
         (const std::shared_ptr<AbilityRuntime::Context> &context,
             const RingtoneType ringtoneType, std::string &ringtoneUri), ());
-    MOCK_METHOD(std::shared_ptr<RingtonePlayer>, GetMockHapticRingTonePlayer,
+    MOCK_METHOD(std::shared_ptr<RingtonePlayer>, GetMockHapticRingtonePlayer,
         (const std::shared_ptr<AbilityRuntime::Context> &context, const RingtoneType ringtoneType,
         std::string &ringtoneUri), ());
-    MOCK_METHOD(std::shared_ptr<RingtonePlayer>, GetMockHapticRingTonePlayer,
+    MOCK_METHOD(std::shared_ptr<RingtonePlayer>, GetMockHapticRingtonePlayer,
         (const std::shared_ptr<AbilityRuntime::Context> &context, std::string &hapticUri), ());
     MOCK_METHOD(int32_t, SetRingtoneUri, (const std::shared_ptr<AbilityRuntime::Context> &context,
         const std::string &uri, RingtoneType ringtoneType), ());
