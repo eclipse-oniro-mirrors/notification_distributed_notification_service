@@ -50,7 +50,6 @@ ohos_unittest("ans_unit_test") {
     "mock/mock_swing_callback_stub.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
     "notification_hisysevent_test.cpp",
-    "notification_local_live_view_subscriber_manager_test.cpp",
     "notification_slot_filter_test.cpp",
     "permission_filter_test.cpp",
     "priority_test/advanced_notification_priority_helper_test.cpp",
@@ -359,7 +358,6 @@ ohos_unittest("notification_subscriber_manager_test") {
     "mock/mock_single_kv_store.cpp",
     "mock/mock_swing_callback_stub.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
-    "notification_subscriber_manager_test.cpp",
   ]
 
   deps = [
@@ -936,7 +934,6 @@ ohos_unittest("notification_preferences_test") {
     "mock/mock_single_kv_store.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
     "notification_preferences_info_test.cpp",
-    "notification_preferences_test.cpp",
   ]
 
   if (distributed_notification_service_feature_all_scenario_collaboration) {
@@ -1930,7 +1927,6 @@ ohos_unittest("advanced_notification_service_unit_test") {
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_service_test/advanced_notification_distributed_manager_service_test.cpp",
-    "advanced_notification_service_test/advanced_notification_service_unit_test.cpp",
     "advanced_notification_service_test/advanced_notification_system_live_view_service_test.cpp",
     "distributed_device_status_test.cpp",
     "mock/mock_accesstoken_kit.cpp",
@@ -2264,6 +2260,7 @@ group("unittest") {
     ":access_token_helper_test",
     ":advanced_datashare_observer_unit_test",
     ":advanced_notification_geofence_service_test",
+    ":advanced_notification_service_unit_test",
     ":ans_unit_test",
     ":bundle_manager_helper_branch_test",
     ":common_utils_test",
@@ -2283,6 +2280,7 @@ group("unittest") {
     ":notification_service_publish_test",
     ":notification_service_test",
     ":notification_subscriber_manager_branch_test",
+    ":notification_subscriber_manager_test",
     ":os_account_manager_helper_test",
     ":push_callback_stub_test",
     "advanced_notification_service_test:unittest",
