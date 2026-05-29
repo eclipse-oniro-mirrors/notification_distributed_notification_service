@@ -190,6 +190,7 @@ bool AdvancedNotificationService::IsCanRecoverSnooze(const std::shared_ptr<Notif
 
 bool AdvancedNotificationService::SetEncryptToDB(const NotificationRequestDb &requestDb)
 {
+#ifdef ANS_FEATURE_DIST_NOTIFICATION_PERSIST
     auto request = requestDb.request;
     auto bundleOption = requestDb.bundleOption;
     if (!request || !bundleOption) {
@@ -221,6 +222,9 @@ bool AdvancedNotificationService::SetEncryptToDB(const NotificationRequestDb &re
     }
 
     return true;
+#else
+    return true;
+#endif
 }
 
 void AdvancedNotificationService::TriggerSnoozeDelay()

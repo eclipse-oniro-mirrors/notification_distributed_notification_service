@@ -2344,6 +2344,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetStatisticsByBundle_103, Functio
     ASSERT_EQ(ret, ERR_OK);
 }
 
+#ifdef ANS_FEATURE_DIST_NOTIFICATION_PERSIST
 /**
  * @tc.name: SetNotificationRequestToDbCommon_100
  * @tc.desc: Test SetNotificationRequestToDbCommon when VerifyNativeToken true.
@@ -2639,6 +2640,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SetSnoozeDelayTimeToDB_100, Functi
     auto result = advancedNotificationService_->SetSnoozeDelayTimeToDB(100, record);
     ASSERT_EQ(result, false);
 }
+#endif
 
 #ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
 /**

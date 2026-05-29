@@ -310,6 +310,7 @@ bool AdvancedNotificationService::IsCanRecoverCommon(const sptr<NotificationRequ
         return IsLiveViewCanRecover(request);
     }
 
+#ifdef ANS_FEATURE_DIST_NOTIFICATION_PERSIST
     if (request->GetAutoDeletedTime() != NotificationConstant::INVALID_AUTO_DELETE_TIME &&
         GetCurrentTime() > request->GetAutoDeletedTime()) {
         ANS_LOGE("The notification has expired.");
@@ -317,6 +318,10 @@ bool AdvancedNotificationService::IsCanRecoverCommon(const sptr<NotificationRequ
     }
     DuplicateMsgControl(request);
     return true;
+#else
+    ANS_LOGI("Non-LiveView notification recovery skipped when macro is off.");
+    return false;
+#endif
 }
 
 int32_t AdvancedNotificationService::SetNotificationRequestToDb(const NotificationRequestDb &requestDb)
@@ -404,6 +409,7 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDbCommon(const Noti
         return SetNotificationRequestToDb(requestDb);
     }
 
+#ifdef ANS_FEATURE_DIST_NOTIFICATION_PERSIST
     ANS_LOGD("Enter.");
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_3).
         BundleName(request->GetCreatorBundleName()).NotificationId(request->GetNotificationId());
@@ -440,6 +446,9 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDbCommon(const Noti
     }
 
     return result;
+#else
+    return ERR_OK;
+#endif
 }
 
 int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
