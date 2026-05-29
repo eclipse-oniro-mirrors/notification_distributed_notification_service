@@ -30,6 +30,7 @@
 #undef protected
 
 extern void MockIsOsAccountExists(bool mockRet);
+extern int32_t StringToInt(const std::string &str);
 
 using namespace testing::ext;
 namespace OHOS {
@@ -4373,5 +4374,126 @@ HWTEST_F(NotificationPreferencesTest, IsCollaborationAllowed_00008, Function | S
     EXPECT_EQ(isAllowed0, true);
 }
 
+// ========== Notification Switch Tests ==========
+
+/**
+ * @tc.name: SetNotificationSwitch_00100
+ * @tc.desc: Test SetNotificationSwitch with normal parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetNotificationSwitch_00100, Function | SmallTest | Level1)
+{
+    std::string switchName = NotificationConstant::NotificationSwitch::DEAL;
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    int32_t userId = 100;
+    auto res = NotificationPreferences::GetInstance()->SetNotificationSwitch(switchName, state, userId);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: SetNotificationSwitch_00200
+ * @tc.desc: Test SetNotificationSwitch when DB operation fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetNotificationSwitch_00200, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
+    std::string switchName = NotificationConstant::NotificationSwitch::DEAL;
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    int32_t userId = 100;
+    auto res = notificationPreferences.SetNotificationSwitch(switchName, state, userId);
+    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: SetNotificationSwitch_00300
+ * @tc.desc: Test SetNotificationSwitch with LOGISTICS switch type
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetNotificationSwitch_00300, Function | SmallTest | Level1)
+{
+    std::string switchName = NotificationConstant::NotificationSwitch::LOGISTICS;
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    int32_t userId = 100;
+    auto res = NotificationPreferences::GetInstance()->SetNotificationSwitch(switchName, state, userId);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: GetNotificationSwitch_00100
+ * @tc.desc: Test GetNotificationSwitch with normal parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetNotificationSwitch_00100, Function | SmallTest | Level1)
+{
+    std::string switchName = NotificationConstant::NotificationSwitch::DEAL;
+    int32_t userId = 100;
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    auto res = NotificationPreferences::GetInstance()->GetNotificationSwitch(switchName, userId, state);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: GetNotificationSwitch_00200
+ * @tc.desc: Test GetNotificationSwitch when DB operation fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetNotificationSwitch_00200, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
+    std::string switchName = NotificationConstant::NotificationSwitch::DEAL;
+    int32_t userId = 100;
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    auto res = notificationPreferences.GetNotificationSwitch(switchName, userId, state);
+    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: GetAllNotificationSwitchInfo_00100
+ * @tc.desc: Test GetAllNotificationSwitchInfo with null preferncesDB_
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetAllNotificationSwitchInfo_00100, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferncesDB_ = nullptr;
+    int32_t userId = 100;
+    std::vector<NotificationCloneNotificationSwitchInfo> notificationSwitchInfos;
+    notificationPreferences.GetAllNotificationSwitchInfo(userId, notificationSwitchInfos);
+    EXPECT_EQ(notificationSwitchInfos.size(), 0);
+}
+
+/**
+ * @tc.name: GetAllNotificationSwitchInfo_00200
+ * @tc.desc: Test GetAllNotificationSwitchInfo with DB operation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetAllNotificationSwitchInfo_00200, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
+    int32_t userId = 100;
+    std::vector<NotificationCloneNotificationSwitchInfo> notificationSwitchInfos;
+    notificationPreferences.GetAllNotificationSwitchInfo(userId, notificationSwitchInfos);
+    EXPECT_EQ(notificationSwitchInfos.size(), 0);
+}
+
+/**
+ * @tc.name: GetAllNotificationSwitchInfo_00300
+ * @tc.desc: Test GetAllNotificationSwitchInfo with GetInstance
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetAllNotificationSwitchInfo_00300, Function | SmallTest | Level1)
+{
+    int32_t userId = 100;
+    std::vector<NotificationCloneNotificationSwitchInfo> notificationSwitchInfos;
+    NotificationPreferences::GetInstance()->GetAllNotificationSwitchInfo(userId, notificationSwitchInfos);
+    EXPECT_GE(notificationSwitchInfos.size(), 0);
+}
 }  // namespace Notification
 }  // namespace OHOS

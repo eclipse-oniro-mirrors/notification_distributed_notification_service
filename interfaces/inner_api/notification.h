@@ -16,6 +16,7 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_H
 
+#include "notification_classification.h"
 #include "notification_request.h"
 #include "notification_voice_content.h"
 #include "parcel.h"
@@ -352,6 +353,19 @@ public:
      */
     std::shared_ptr<NotificationVoiceContent> GetVoiceContent() const;
 
+    /**
+     * @brief Sets the classification payload attached to this notification callback.
+     *
+     * @param notificationClassification Indicates the classification payload.
+     */
+    void SetNotificationClassification(const sptr<NotificationClassification> &notificationClassification);
+
+    /**
+     * @brief Obtains the optional classification payload attached to this notification callback.
+     *
+     * @return Returns the classification payload if present; returns nullptr otherwise.
+     */
+    sptr<NotificationClassification> GetNotificationClassification() const;
 private:
     Notification();
     void SetEnableSound(const bool &enable);
@@ -400,6 +414,7 @@ private:
     std::vector<int64_t> vibrationStyle_ {};
     uint64_t autoDeletedTimerId_ {0};
     std::shared_ptr<NotificationVoiceContent> voiceContent_ {nullptr};
+    sptr<NotificationClassification> notificationClassification_ {nullptr};
 
     friend class AdvancedNotificationService;
     friend class NotificationSlotFilter;

@@ -23,6 +23,7 @@
 #include "ans_subscriber_listener.h"
 #include "ans_badgequery_listener.h"
 #include "ians_manager.h"
+#include "notification_classification.h"
 #include "notification_extension_subscription_info.h"
 #include "notification_local_live_view_subscriber.h"
 #include "notification_parameters.h"
@@ -1268,6 +1269,26 @@ public:
      * @return Returns update priority type of notification result.
      */
     ErrCode TriggerUpdatePriorityType(const NotificationRequest &request);
+
+    ErrCode SetNotificationSwitch(const std::string &switchName, bool switchState, int32_t userId);
+
+    ErrCode GetNotificationSwitch(
+        const std::string &switchName, int32_t userId, NotificationConstant::SWITCH_STATE &switchState);
+
+    /**
+     * @brief Triggers asynchronous update of AI extension notification result.
+     *
+     * This method is called by the closed-source AI library when the classification
+     * result is ready after timeout. It asynchronously updates the notification with
+     * the extension result and notifies subscribers.
+     *
+     * @param request Indicates the NotificationRequest object for setting the notification content.
+     *                This parameter must be specified.
+     * @param notificationClassification Indicates the AI extension result containing aggregation type.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode TriggerUpdateAiExtNotification(const sptr<NotificationRequest> &request,
+        const sptr<NotificationClassification> &notificationClassification);
 
     /**
      * @brief Sets whether to allow a specified application to publish notifications cross

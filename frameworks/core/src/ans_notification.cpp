@@ -2622,6 +2622,18 @@ ErrCode AnsNotification::TriggerUpdatePriorityType(const NotificationRequest &re
     return proxy->TriggerUpdatePriorityType(notificationRequest);
 }
 
+ErrCode AnsNotification::TriggerUpdateAiExtNotification(const sptr<NotificationRequest> &request,
+    const sptr<NotificationClassification> &notificationClassification)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->TriggerUpdateAiExtNotification(request, notificationClassification);
+}
+
 ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
     const std::string &deviceType, const bool enabled, const bool isNotification)
 {
@@ -3930,6 +3942,31 @@ ErrCode AnsNotification::SnoozeNotification(const std::string &hashCode, const i
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->SnoozeNotification(hashCode, delayTime);
+}
+
+ErrCode AnsNotification::SetNotificationSwitch(const std::string &switchName, bool switchState, int32_t userId)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->SetNotificationSwitch(switchName, switchState, userId);
+}
+
+ErrCode AnsNotification::GetNotificationSwitch(
+    const std::string &switchName, int32_t userId, NotificationConstant::SWITCH_STATE &switchState)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    int32_t state = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    ErrCode result = proxy->GetNotificationSwitch(switchName, userId, state);
+    switchState = static_cast<NotificationConstant::SWITCH_STATE>(state);
+    return result;
 }
 }  // namespace Notification
 }  // namespace OHOS

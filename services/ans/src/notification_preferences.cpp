@@ -33,6 +33,7 @@
 #include "nlohmann/json.hpp"
 #include "os_account_manager_helper.h"
 #include "notification_analytics_util.h"
+#include "notification_clone_notification_switch_info.h"
 #include "notification_config_parse.h"
 #include "itimer_info.h"
 #include "system_sound_helper.h"
@@ -1742,6 +1743,79 @@ ErrCode NotificationPreferences::GetPriorityStrategyByBundle(
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->GetPriorityStrategyByBundle(bundleOption, strategy);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::SetNotificationSwitch(const std::string &switchName,
+    const NotificationConstant::SWITCH_STATE &state, const int32_t userId)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    bool storeDBResult = preferncesDB_->SetNotificationSwitch(switchName, state, userId);
+    ANS_LOGI("SetNotificationSwitch switchName: %{public}s, userId: %{public}d, state: %{public}d, result: %{public}d",
+        switchName.c_str(), userId, static_cast<int32_t>(state), storeDBResult);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::GetNotificationSwitch(const std::string &switchName,
+    const int32_t userId, NotificationConstant::SWITCH_STATE &state)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    // Default state: SYSTEM_DEFAULT_ON (aggregation is enabled by default)
+    state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    bool storeDBResult = preferncesDB_->GetNotificationSwitch(switchName, userId, state);
+    ANS_LOGI("GetNotificationSwitch switchName: %{public}s, userId: %{public}d, state: %{public}d, result: %{public}d",
+        switchName.c_str(), userId, static_cast<int32_t>(state), storeDBResult);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+int32_t StringToInt(const std::string &str)
+{
+    int32_t value = 0;
+    if (!str.empty()) {
+        value = atoi(str.c_str());
+    }
+    return value;
+}
+
+void NotificationPreferences::GetAllNotificationSwitchInfo(const int32_t userId,
+    std::vector<NotificationCloneNotificationSwitchInfo> &notificationSwitchInfos)
+{
+    ANS_LOGD("GetAllNotificationSwitchInfo called for userId: %{public}d", userId);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("preferncesDB_ is nullptr");
+        return;
+    }
+
+    std::unordered_map<std::string, std::string> dbNotificationSwitchInfos;
+    if (!preferncesDB_->GetAllNotificationSwitchInfo(userId, dbNotificationSwitchInfos)) {
+        ANS_LOGW("GetAllNotificationSwitchInfo failed %{public}d.", userId);
+        return;
+    }
+
+    ANS_LOGI("Get all notification switch info %{ public}zu", dbNotificationSwitchInfos.size());
+    std::set<std::string> notificationSwitchSet;
+    for (const auto &iter : dbNotificationSwitchInfos) {
+        auto begin = iter.first.find(KEY_UNDER_LINE);
+        auto end = iter.first.rfind(KEY_UNDER_LINE);
+        std::string switchName = iter.first.substr(begin + 1, end - begin - 1);
+        NotificationCloneNotificationSwitchInfo notificationSwitchInfo;
+        notificationSwitchInfo.SetSwitchName(switchName);
+        notificationSwitchSet.insert(switchName);
+        notificationSwitchInfo.SetSwitchState(
+            static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(iter.second)));
+        notificationSwitchInfos.push_back(notificationSwitchInfo);
+    }
+    // Clone default behavior to new device
+    for (const auto &validType : NotificationConstant::NotificationSwitch::VALID_NOTIFICATION_SWITCH_SET) {
+        if (notificationSwitchSet.find(validType) == notificationSwitchSet.end()) {
+            NotificationCloneNotificationSwitchInfo notificationSwitchInfo;
+            notificationSwitchInfo.SetSwitchName(validType);
+            notificationSwitchInfo.SetSwitchState(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+            notificationSwitchInfos.push_back(notificationSwitchInfo);
+        }
+    }
 }
 
 ErrCode NotificationPreferences::SetDistributedEnabled(

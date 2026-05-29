@@ -105,6 +105,7 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/notification_capsule.cpp",
     "${frameworks_module_ans_path}/src/notification_check_info.cpp",
     "${frameworks_module_ans_path}/src/notification_check_request.cpp",
+    "${frameworks_module_ans_path}/src/notification_classification.cpp",
     "${frameworks_module_ans_path}/src/notification_constant.cpp",
     "${frameworks_module_ans_path}/src/notification_content.cpp",
     "${frameworks_module_ans_path}/src/notification_conversational_content.cpp",
@@ -141,16 +142,17 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/notification_statistics.cpp",
     "${frameworks_module_ans_path}/src/notification_subscribe_info.cpp",
     "${frameworks_module_ans_path}/src/notification_subscriber.cpp",
+    "${frameworks_module_ans_path}/src/notification_switch_changed_callback_data.cpp",
     "${frameworks_module_ans_path}/src/notification_template.cpp",
     "${frameworks_module_ans_path}/src/notification_time.cpp",
     "${frameworks_module_ans_path}/src/notification_trigger.cpp",
     "${frameworks_module_ans_path}/src/notification_unified_group_info.cpp",
     "${frameworks_module_ans_path}/src/notification_user_input.cpp",
     "${frameworks_module_ans_path}/src/notification_voice_content.cpp",
-    "${frameworks_module_ans_path}/src/voice_content_option.cpp",
     "${frameworks_module_ans_path}/src/picture_option.cpp",
     "${frameworks_module_ans_path}/src/push_callback_stub.cpp",
     "${frameworks_module_ans_path}/src/push_promise_callback.cpp",
+    "${frameworks_module_ans_path}/src/voice_content_option.cpp",
   ]
 
   public_configs = [ ":ans_innerkits_public_config" ]

@@ -42,6 +42,7 @@
 #include "bundle_manager_helper.h"
 #include "mock_bundle_mgr.h"
 #include "notification_extension_wrapper.h"
+#include "notification_classification_mgr.h"
 #include "os_account_manager.h"
 #include "os_account_manager_helper.h"
 
@@ -1521,6 +1522,40 @@ HWTEST_F(AnsUtilsTest, RemoveDoNotDisturbProfileTrustList_00002, Function | Smal
 
     preferencesInfo->GetAllDoNotDisturbProfiles(userId, profiles);
     EXPECT_EQ(profiles.size(), 0);
+}
+
+/**
+ * @tc.name: ClassificationMgr_Remove_CancelDistributedNotification_00001
+ * @tc.desc: Test ClassificationMgr Remove in CancelDistributedNotification.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ClassificationMgr_Remove_CancelDistributedNotification_00001, Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    std::string key = "utils_cancel_distributed_test_key";
+    sptr<NotificationClassification> classification = new NotificationClassification();
+    NotificationClassificationMgr::GetInstance().AddOrUpdate(key, classification);
+    EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Exists(key));
+    EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Remove(key));
+    EXPECT_FALSE(NotificationClassificationMgr::GetInstance().Exists(key));
+}
+
+/**
+ * @tc.name: ClassificationMgr_Remove_DeleteAllByUserStopped_00001
+ * @tc.desc: Test ClassificationMgr Remove in DeleteAllByUserStopped.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ClassificationMgr_Remove_DeleteAllByUserStopped_00001, Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    std::string key = "utils_delete_all_user_stopped_test_key";
+    sptr<NotificationClassification> classification = new NotificationClassification();
+    NotificationClassificationMgr::GetInstance().AddOrUpdate(key, classification);
+    EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Exists(key));
+    EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Remove(key));
+    EXPECT_FALSE(NotificationClassificationMgr::GetInstance().Exists(key));
 }
 }  // namespace Notification
 }  // namespace OHOS

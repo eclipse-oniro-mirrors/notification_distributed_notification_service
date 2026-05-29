@@ -87,6 +87,7 @@
 #include "advanced_notdisturb_enabled_observer.h"
 #include "advanced_notdisturb_white_list_observer.h"
 #include "advanced_datashare_observer.h"
+#include "notification_classification_mgr.h"
 #include "notification_extension_wrapper.h"
 
 namespace OHOS {
@@ -335,6 +336,10 @@ AdvancedNotificationService::AdvancedNotificationService()
     permissonFilter_ = std::make_shared<PermissionFilter>();
     notificationSlotFilter_ = std::make_shared<NotificationSlotFilter>();
     StartFilters();
+
+    std::function<void(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &)> callback =
+        std::bind(&AdvancedNotificationService::OnSubscriberAddWithSilentReplay, this, std::placeholders::_1);
+    NotificationSubscriberManager::GetInstance()->RegisterOnSubscriberAddCallback(callback);
 
     ISystemEvent iSystemEvent = {
         std::bind(&AdvancedNotificationService::onBundleRemovedByUserId,
@@ -1761,6 +1766,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
             CancelWantAgent(notification);
             ProcForDeleteNotificationFromDb(record);
             notificationList_.remove(record);
+            NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
             if (IsSaCreateSystemLiveViewAsBundle(record,
                 record->notification->GetNotificationRequest().GetCreatorUid())) {
                 SendLiveViewUploadHiSysEvent(record, UploadStatus::END);
@@ -1802,6 +1808,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
         DeleteNotificationFromDb(record, removeReason, isCancel);
         CancelWantAgent(notification);
         notificationList_.remove(record);
+        NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
         return ERR_OK;
     }
     RemoveFromDelayedNotificationList(key);
@@ -1828,6 +1835,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
 
             notification = record->notification;
             notificationList_.remove(record);
+            NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
             return ERR_OK;
         }
     }
@@ -2287,6 +2295,7 @@ void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode,
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, nullptr, reason);
             ProcForDeleteNotificationFromDb(record);
             notificationList_.remove(record);
+            NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
             break;
         }
     }
@@ -2473,6 +2482,7 @@ void AdvancedNotificationService::RemoveNotificationList(const std::shared_ptr<N
 {
     ProcForDeleteNotificationFromDb(record);
     notificationList_.remove(record);
+    NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
 }
 
 PushCallbackRecipient::PushCallbackRecipient() {}

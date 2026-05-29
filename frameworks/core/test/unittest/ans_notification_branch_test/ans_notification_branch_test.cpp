@@ -838,6 +838,24 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode TriggerUpdateAiExtNotification(const sptr<NotificationRequest> &request,
+        const sptr<NotificationClassification> &notificationClassification) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetNotificationSwitch(const std::string &switchName,
+        bool state, const int32_t userId) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetNotificationSwitch(const std::string &switchName,
+        const int32_t userId, int32_t &state) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
         const std::string &deviceType, const bool isNotifictaion, int32_t &enabled) override
     {

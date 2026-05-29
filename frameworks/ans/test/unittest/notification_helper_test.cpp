@@ -26,6 +26,7 @@
 #include "ans_inner_errors.h"
 #include "errors.h"
 #include "notification_helper.h"
+#include "notification_classification.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 
@@ -1805,6 +1806,125 @@ HWTEST_F(NotificationHelperTest, SnoozeNotification_0100, Function | SmallTest |
     hashCode = "test123";
     delayTime = 24 * 3600 + 100;
     ret = notificationHelper.SnoozeNotification(hashCode, delayTime);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TriggerUpdateAiExtNotification_0100
+ * @tc.desc: Test TriggerUpdateAiExtNotification with nullptr request.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, TriggerUpdateAiExtNotification_0100, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = nullptr;
+    sptr<NotificationClassification> notificationClassification = nullptr;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.TriggerUpdateAiExtNotification(request, notificationClassification);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: TriggerUpdateAiExtNotification_0200
+ * @tc.desc: Test TriggerUpdateAiExtNotification with valid request and classification.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, TriggerUpdateAiExtNotification_0200, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<NotificationClassification> notificationClassification =
+        new (std::nothrow) NotificationClassification("classification", "subClassification");
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.TriggerUpdateAiExtNotification(request, notificationClassification);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: SetNotificationSwitch_0100
+ * @tc.desc: Test SetNotificationSwitch with parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetNotificationSwitch_0100, Function | SmallTest | Level1)
+{
+    std::string switchName = "testSwitch";
+    bool switchState = true;
+    int32_t userId = 100;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetNotificationSwitch(switchName, switchState, userId);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetNotificationSwitch_0200
+ * @tc.desc: Test SetNotificationSwitch with empty switchName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetNotificationSwitch_0200, Function | SmallTest | Level1)
+{
+    std::string switchName = "";
+    bool switchState = true;
+    int32_t userId = 100;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.SetNotificationSwitch(switchName, switchState, userId);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetNotificationSwitch_0100
+ * @tc.desc: Test GetNotificationSwitch with bundleOption.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, GetNotificationSwitch_0100, Function | SmallTest | Level1)
+{
+    NotificationBundleOption bundleOption;
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.GetNotificationSwitch(bundleOption, state);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetNotificationSwitch_0200
+ * @tc.desc: Test GetNotificationSwitch with bundleOption that has bundleName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, GetNotificationSwitch_0200, Function | SmallTest | Level1)
+{
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(100);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.GetNotificationSwitch(bundleOption, state);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetNotificationSwitch_0300
+ * @tc.desc: Test GetNotificationSwitch with switchName and userId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, GetNotificationSwitch_0300, Function | SmallTest | Level1)
+{
+    std::string switchName = "testSwitch";
+    int32_t userId = 100;
+    NotificationConstant::SWITCH_STATE switchState = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.GetNotificationSwitch(switchName, userId, switchState);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetNotificationSwitch_0400
+ * @tc.desc: Test GetNotificationSwitch with empty switchName and userId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, GetNotificationSwitch_0400, Function | SmallTest | Level1)
+{
+    std::string switchName = "";
+    int32_t userId = 100;
+    NotificationConstant::SWITCH_STATE switchState = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.GetNotificationSwitch(switchName, userId, switchState);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
 }

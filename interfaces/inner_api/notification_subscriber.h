@@ -23,6 +23,7 @@
 #include "notification_request.h"
 #include "notification_sorting.h"
 #include "notification_sorting_map.h"
+#include "notification_switch_changed_callback_data.h"
 #include "notification_operation_info.h"
 #include "picture_option.h"
 
@@ -97,6 +98,17 @@ public:
      * @param enable Indicates the switch state.
      */
     virtual void OnEnabledSilentReminderChanged(const std::shared_ptr<EnabledSilentReminderCallbackData> &callbackData)
+    {
+        return;
+    };
+
+    /**
+    * @brief Callback when the notification switch is changed.
+    *
+    * @param callbackData Indicates the switch callback payload.
+    */
+    virtual void OnNotificationSwitchChanged(
+        const std::shared_ptr<NotificationSwitchChangedCallbackData> &callbackData)
     {
         return;
     };
@@ -255,6 +267,8 @@ private:
 
         ErrCode OnEnabledPriorityByBundleChanged(
             const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData) override;
+
+        ErrCode OnNotificationSwitchChanged(const sptr<NotificationSwitchChangedCallbackData> &callbackData) override;
 
         ErrCode OnSystemUpdate(const sptr<Notification> &notification) override;
 

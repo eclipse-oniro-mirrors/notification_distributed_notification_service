@@ -1750,6 +1750,21 @@ public:
     ErrCode TriggerUpdatePriorityType(const sptr<NotificationRequest> &request) override;
 
     /**
+     * @brief Triggers asynchronous update of AI extension notification result.
+     *
+     * This method is called by the closed-source AI library when the classification
+     * result is ready after timeout. It asynchronously updates the notification with
+     * the extension result and notifies subscribers.
+     *
+     * @param request Indicates the NotificationRequest object for setting the notification content.
+     *                This parameter must be specified.
+     * @param notificationClassification Indicates the AI extension result containing aggregation type.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode TriggerUpdateAiExtNotification(const sptr<NotificationRequest> &request,
+        const sptr<NotificationClassification> &notificationClassification) override;
+
+    /**
      * @brief Cancels a published agent notification.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
@@ -2074,7 +2089,11 @@ public:
     ErrCode SetNotDisturbWhiteList(int32_t userId);
     void RefreshNotDisturbEnableState();
     void RefreshNotDisturbWhiteList();
+    ErrCode SetNotificationSwitch(const std::string &switchName,
+        bool state, const int32_t userId) override;
 
+    ErrCode GetNotificationSwitch(const std::string &switchName,
+        const int32_t userId, int32_t &state) override;
 private:
     struct RecentInfo {
         std::list<std::shared_ptr<RecentNotification>> list;
@@ -2316,6 +2335,8 @@ private:
     ErrCode RemoveNotificationFromRecordList(const std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     ErrCode OnSubscriberAdd(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record,
         const int32_t userId);
+    ErrCode OnSubscriberAddWithSilentReplay(
+        const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record);
     bool IsLiveViewCanRecover(const sptr<NotificationRequest> request);
     bool IsCanRecoverCommon(const sptr<NotificationRequest> request);
     AnsStatus FillNotificationRecord(const NotificationRequestDb &requestdbObj,

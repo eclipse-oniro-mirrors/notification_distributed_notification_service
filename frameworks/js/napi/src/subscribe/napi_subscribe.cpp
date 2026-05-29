@@ -116,7 +116,7 @@ void SubscribeNotificationAsyncWork(napi_env env, void *data)
             subscribeInfo->AddDeviceType(callbackinfo->subscriberInfo.deviceType);
             subscribeInfo->SetSlotTypes(callbackinfo->subscriberInfo.slotTypes);
             subscribeInfo->SetFilterType(callbackinfo->subscriberInfo.filterType);
-            if (callbackinfo->subscriberInfo.voiceContentOption.enabled) {
+if (callbackinfo->subscriberInfo.voiceContentOption.enabled) {
                 sptr<OHOS::Notification::VoiceContentOption> voiceContentOption =
                     new (std::nothrow) OHOS::Notification::VoiceContentOption(true);
                 subscribeInfo->SetVoiceContentOption(voiceContentOption);
@@ -127,6 +127,8 @@ void SubscribeNotificationAsyncWork(napi_env env, void *data)
                         callbackinfo->subscriberInfo.pictureOption.preparseLiveViewPicList);
                 subscribeInfo->SetPictureOption(pictureOption);
             }
+            subscribeInfo->SetEnableClassification(callbackinfo->subscriberInfo.enableClassification);
+            subscribeInfo->SetNeedSilentReplayOnSubscribe(callbackinfo->subscriberInfo.needSilentReplayOnSubscribe);
             callbackinfo->info.errorCode =
                 NotificationHelper::SubscribeNotificationV26(callbackinfo->objectInfo, subscribeInfo);
         } else {
@@ -286,6 +288,9 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
                     subscribeInfo->AddDeviceType(asynccallbackinfo->subscriberInfo.deviceType);
                     subscribeInfo->SetSlotTypes(asynccallbackinfo->subscriberInfo.slotTypes);
                     subscribeInfo->SetFilterType(asynccallbackinfo->subscriberInfo.filterType);
+                    subscribeInfo->SetEnableClassification(asynccallbackinfo->subscriberInfo.enableClassification);
+                    subscribeInfo->SetNeedSilentReplayOnSubscribe(
+                        asynccallbackinfo->subscriberInfo.needSilentReplayOnSubscribe);
                     if (asynccallbackinfo->subscriberInfo.voiceContentOption.enabled) {
                         sptr<OHOS::Notification::VoiceContentOption> voiceContentOption =
                             new (std::nothrow) OHOS::Notification::VoiceContentOption(true);

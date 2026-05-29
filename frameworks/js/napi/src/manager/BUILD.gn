@@ -90,6 +90,7 @@ ohos_shared_library("notificationmanager") {
     "napi_get_active.cpp",
     "napi_get_notification_parameters.cpp",
     "napi_local_live_view.cpp",
+    "napi_notification_switch.cpp",
     "napi_open_settings.cpp",
     "napi_priority.cpp",
     "napi_publish.cpp",

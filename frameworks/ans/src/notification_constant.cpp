@@ -56,7 +56,31 @@ const char* NotificationConstant::PriorityNotificationType::KEY_PROGRESS = "KEY_
 const char* NotificationConstant::PriorityNotificationType::PUBLIC_EVENT = "PUBLIC_EVENT";
 const char* NotificationConstant::PriorityNotificationType::IOT_WARNING = "IOT_WARNING";
 const char* NotificationConstant::PriorityNotificationType::CUSTOM_KEYWORD = "CUSTOM_KEYWORD";
+const char* NotificationConstant::PriorityNotificationType::E_COMMERCE_LOGISTICS = "E_COMMERCE_LOGISTICS";
 
+const char* NotificationConstant::AggregationType::OTHER = "OTHER";
+const char* NotificationConstant::AggregationType::DEAL = "DEAL";
+const char* NotificationConstant::AggregationType::LOGISTICS = "LOGISTICS";
+
+const std::vector<std::string> NotificationConstant::AggregationType::VALID_AGGREGATION_TYPE_LIST = {
+    NotificationConstant::AggregationType::OTHER,
+    NotificationConstant::AggregationType::DEAL,
+    NotificationConstant::AggregationType::LOGISTICS
+};
+
+const char* NotificationConstant::NotificationSwitch::INVALID = "INVALID";
+const char* NotificationConstant::NotificationSwitch::DEAL = "DEAL";
+const char* NotificationConstant::NotificationSwitch::LOGISTICS = "LOGISTICS";
+
+const std::set<std::string> NotificationConstant::NotificationSwitch::VALID_NOTIFICATION_SWITCH_SET = {
+    NotificationConstant::NotificationSwitch::DEAL,
+    NotificationConstant::NotificationSwitch::LOGISTICS
+};
+
+bool NotificationConstant::NotificationSwitch::IsValidNotificationSwitch(const std::string& switchType)
+{
+    return VALID_NOTIFICATION_SWITCH_SET.find(switchType) != VALID_NOTIFICATION_SWITCH_SET.end();
+}
 const char* NotificationConstant::EVENT_PRIORITY_INTELLIGENT_SWITCH = "notification.event.PRIORITY_INTELLIGENT_SWITCH";
 const char* NotificationConstant::EVENT_PRIORITY_SWITCH_BY_BUNDLE = "notification.event.PRIORITY_SWITCH_BY_BUNDLE";
 const char* NotificationConstant::EVENT_PRIORITY_STRATEGY_BY_BUNDLE = "notification.event.PRIORITY_STRATEGY_BY_BUNDLE";

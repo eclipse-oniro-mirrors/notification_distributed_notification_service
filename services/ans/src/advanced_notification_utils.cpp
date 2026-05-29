@@ -52,6 +52,7 @@
 #include "system_sound_helper.h"
 #include "advanced_notification_inline.h"
 #include "notification_analytics_util.h"
+#include "notification_classification_mgr.h"
 #include "notification_clone_disturb_service.h"
 #include "notification_clone_bundle_service.h"
 #include "advanced_notification_flow_control_service.h"
@@ -990,6 +991,7 @@ void AdvancedNotificationService::OnDistributedDelete(
                 (record->notification->GetLabel() == label) && (record->notification->GetId() == id)) {
                 notification = record->notification;
                 notificationList_.remove(record);
+                NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
                 break;
             }
         }
@@ -1326,6 +1328,7 @@ void AdvancedNotificationService::DeleteAllByUserStopped(int32_t userId)
                 ProcForDeleteNotificationFromDb(record);
                 notification = record->notification;
                 notificationList_.remove(record);
+                NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
                 break;
             }
         }

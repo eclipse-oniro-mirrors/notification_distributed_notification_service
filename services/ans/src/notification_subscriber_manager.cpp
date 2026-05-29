@@ -19,6 +19,7 @@
 #include <memory>
 #include <set>
 
+#include "advanced_notification_ai_extension_manager.h"
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
 #include "advanced_notification_priority_helper.h"
 #endif
@@ -31,6 +32,8 @@
 #include "ipc_skeleton.h"
 #include "notification_flags.h"
 #include "voice_extension_wrapper.h"
+#include "notification_ai_extension_wrapper.h"
+#include "notification_classification_mgr.h"
 #include "notification_constant.h"
 #include "notification_config_parse.h"
 #include "notification_extension_wrapper.h"
@@ -542,7 +545,8 @@ void NotificationSubscriberManager::NotifyEnabledWatchChanged(const uint32_t wat
     notificationSubQueue_->submit(func);
 }
 
-void NotificationSubscriberManager::NotifySystemUpdate(const sptr<Notification> &notification)
+void NotificationSubscriberManager::NotifySystemUpdate(const sptr<Notification> &notification,
+    const sptr<NotificationClassification>& notificationClassification)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notificationSubQueue_ == nullptr) {
@@ -550,7 +554,8 @@ void NotificationSubscriberManager::NotifySystemUpdate(const sptr<Notification> 
         return;
     }
     AppExecFwk::EventHandler::Callback func =
-        std::bind(&NotificationSubscriberManager::NotifySystemUpdateInner, this, notification);
+        std::bind(&NotificationSubscriberManager::NotifySystemUpdateInner,
+        this, notification, notificationClassification);
     notificationSubQueue_->submit(func);
 }
 
@@ -583,6 +588,9 @@ void NotificationSubscriberManager::OnRemoteDied(const wptr<IRemoteObject> &obje
             {
                 std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
                 subscriberRecordList_.remove(record);
+            }
+            if (record->enableClassification) {
+                DecrementAggregationSubscriberCount();
             }
             if (record->isSubscribeSelf) {
                 AdvancedNotificationService::GetInstance()->RemoveSystemLiveViewNotificationsOfSa(subscriberUid);
@@ -658,6 +666,8 @@ void NotificationSubscriberManager::AddRecordInfo(
     record->needNotifyResponse = subscribeInfo->GetNeedNotifyResponse();
     record->isSubscribeSelf = subscribeInfo->GetIsSubscribeSelf();
     record->subscribedFlags_ = subscribeInfo->GetSubscribedFlags();
+    record->enableClassification = subscribeInfo->GetEnableClassification();
+    record->needSilentReplayOnSubscribe = subscribeInfo->GetNeedSilentReplayOnSubscribe();
 }
 
 void NotificationSubscriberManager::RemoveRecordInfo(
@@ -701,7 +711,12 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
             std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
             subscriberRecordList_.push_back(record);
         }
-
+        if (subscribeInfo->GetEnableClassification()) {
+            IncrementAggregationSubscriberCount();
+        }
+        if (subscribeInfo->GetNeedSilentReplayOnSubscribe() && onSubscriberAddCallback_ != nullptr) {
+            onSubscriberAddCallback_(record);
+        }
         if (subscribeInfo->GetSubscribedFlags() &
             NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABL_WATCH_CHANGED) {
             int watchState = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->GetDeviceStatus(
@@ -717,9 +732,6 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
     }
 
     AddRecordInfo(record, subscribeInfo);
-    if (onSubscriberAddCallback_ != nullptr) {
-        onSubscriberAddCallback_(record);
-    }
 
     if (subscribeInfo->GetDeviceType() == NotificationConstant::WEARABLE_DEVICE_TYPE ||
         subscribeInfo->GetDeviceType() == NotificationConstant::LITEWEARABLE_DEVICE_TYPE) {
@@ -751,6 +763,9 @@ ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
         {
             std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
             subscriberRecordList_.remove(record);
+        }
+        if (record->enableClassification) {
+            DecrementAggregationSubscriberCount();
         }
         if (record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_DISCONNECTED) {
             record->subscriber->OnDisconnected();
@@ -811,9 +826,11 @@ void NotificationSubscriberManager::NotifyConsumedInner(const sptr<Notification>
         return;
     }
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-    AdvancedNotificationPriorityHelper::GetInstance()->UpdatePriorityType(notification->GetNotificationRequestPoint());
-#endif
+    std::vector<sptr<NotificationClassification>> notificationClassifications = {nullptr};
+    std::vector<sptr<NotificationRequest>> requests = {notification->GetNotificationRequestPoint()};
+    AdvancedNotificationAiExtensionManager::GetInstance()->UpdateNotification(requests, notificationClassifications);
+    NotificationClassificationMgr::GetInstance().AddOrUpdate(
+        notification->GetKey(), notificationClassifications.at(0));
     std::string content;
     std::set<std::string> voiceFlag;
     GetVoiceContentInfo(notification, voiceFlag, content);
@@ -830,6 +847,9 @@ void NotificationSubscriberManager::NotifyConsumedInner(const sptr<Notification>
             auto notificationStub = GenerateSubscribedNotification(record, notification, deviceVoiceContent);
             if (notificationStub == nullptr) {
                 continue;
+            }
+            if (record->enableClassification && notificationClassifications.size() > 0) {
+                notificationStub->SetNotificationClassification(notificationClassifications.at(0));
             }
             notification->GetNotificationRequestPoint()->AddConsumedDevices(record->deviceType);
             auto request = notificationStub->GetNotificationRequestPoint();
@@ -922,10 +942,6 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(
         if (notification == nullptr) {
             continue;
         }
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-        AdvancedNotificationPriorityHelper::GetInstance()->UpdatePriorityType(
-            notification->GetNotificationRequestPoint());
-#endif
         bool wearableFlag = false;
         bool headsetFlag = false;
         bool keyNodeFlag = false;
@@ -934,6 +950,10 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(
             auto notificationStub = GenerateSubscribedNotification(record, notification);
             if (notificationStub == nullptr) {
                 continue;
+            }
+            if (record->enableClassification) {
+                auto classifcation = NotificationClassificationMgr::GetInstance().Get(notification->GetKey());
+                notificationStub->SetNotificationClassification(classifcation);
             }
             notification->GetNotificationRequestPoint()->AddConsumedDevices(record->deviceType);
             currNotifications.emplace_back(notificationStub);
@@ -1457,7 +1477,8 @@ void NotificationSubscriberManager::NotifyEnabledWatchStatusChangedInner(const u
     NotifySubscribers(userId, &IAnsSubscriber::OnEnabledWatchStatusChanged, watchStatus);
 }
 
-void NotificationSubscriberManager::NotifySystemUpdateInner(const sptr<Notification> &notification)
+void NotificationSubscriberManager::NotifySystemUpdateInner(const sptr<Notification> &notification,
+    const sptr<NotificationClassification>& notificationClassification)
 {
     if (notification == nullptr) {
         ANS_LOGE("NotifySystemUpdateInner fail, null notification");
@@ -1469,8 +1490,19 @@ void NotificationSubscriberManager::NotifySystemUpdateInner(const sptr<Notificat
         ANS_LOGE("Current user acquisition failed");
         return;
     }
-    NotifySubscribers(userId, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_SYSTEM_UPDATE,
-        &IAnsSubscriber::OnSystemUpdate, notification);
+    auto flags = NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_SYSTEM_UPDATE;
+    for (auto& record : subscriberRecordList_) {
+        if (IsNeedNotifySubscribers(record, userId) && (record->subscribedFlags_ & flags)) {
+            auto notificationStub = GenerateSubscribedNotification(record, notification);
+            if (notificationStub == nullptr) {
+                continue;
+            }
+            if (record->enableClassification) {
+                notificationStub->SetNotificationClassification(notificationClassification);
+            }
+            record->subscriber->OnSystemUpdate(notificationStub);
+        }
+    }
 }
 
 void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbackData> &badgeData)
@@ -1626,6 +1658,53 @@ ErrCode NotificationSubscriberManager::DistributeOperationTask(const sptr<Notifi
         result = ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
     return result;
+}
+
+void NotificationSubscriberManager::IncrementAggregationSubscriberCount()
+{
+    int32_t currentCount = aggregationSubscriberCount_.fetch_add(1, std::memory_order_relaxed);
+    ANS_LOGI("Increment aggregation subscriber count, current count: %{public}d", currentCount + 1);
+}
+
+void NotificationSubscriberManager::DecrementAggregationSubscriberCount()
+{
+    int32_t currentCount = aggregationSubscriberCount_.load(std::memory_order_relaxed);
+    if (currentCount > 0) {
+        aggregationSubscriberCount_.fetch_sub(1, std::memory_order_relaxed);
+        ANS_LOGI("Decrement aggregation subscriber count, current count: %{public}d", currentCount - 1);
+    } else {
+        ANS_LOGW("Aggregation subscriber count is already 0, cannot decrement");
+    }
+}
+
+int32_t NotificationSubscriberManager::GetAggregationSubscriberCount() const
+{
+    return aggregationSubscriberCount_.load(std::memory_order_relaxed);
+}
+
+void NotificationSubscriberManager::NotifyNotificationSwitchChanged(
+    const sptr<NotificationSwitchChangedCallbackData> &callbackData)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("null queue");
+        return;
+    }
+    AppExecFwk::EventHandler::Callback func =
+        std::bind(&NotificationSubscriberManager::NotifyNotificationSwitchChangedInner, this, callbackData);
+    notificationSubQueue_->submit(func);
+}
+
+void NotificationSubscriberManager::NotifyNotificationSwitchChangedInner(
+    const sptr<NotificationSwitchChangedCallbackData> &callbackData)
+{
+    if (callbackData == nullptr) {
+        ANS_LOGE("null callbackData");
+        return;
+    }
+    int32_t userId = callbackData->GetUserId();
+    NotifySubscribers(userId, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_NOTIFICATION_SWITCH_CHANGED,
+        &IAnsSubscriber::OnNotificationSwitchChanged, callbackData);
 }
 }  // namespace Notification
 }  // namespace OHOS

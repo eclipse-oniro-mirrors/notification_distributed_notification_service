@@ -15,6 +15,7 @@
 
 #include "ans_dialog_callback_stub.h"
 #include "errors.h"
+#include "notification_classification.h"
 #include "notification_slot.h"
 #include "picture_option.h"
 #include "refbase.h"
@@ -3428,6 +3429,172 @@ HWTEST_F(AnsNotificationUnitTest, SnoozeNotification_0300, Function | MediumTest
     int64_t delayTime = 10;
     ErrCode ret1 = ans_->SnoozeNotification(hashCode, delayTime);
     EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: TriggerUpdateAiExtNotification_0100
+ * @tc.desc: test TriggerUpdateAiExtNotification with null proxy.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, TriggerUpdateAiExtNotification_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject_ = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject_);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject_);
+    ASSERT_NE(nullptr, proxy);
+    MockGetAnsManagerProxy(nullptr);
+    bool res = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(res, false);
+
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<NotificationClassification> classification = new (std::nothrow) NotificationClassification();
+    ErrCode ret = ans_->TriggerUpdateAiExtNotification(request, classification);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: TriggerUpdateAiExtNotification_0200
+ * @tc.desc: test TriggerUpdateAiExtNotification success.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, TriggerUpdateAiExtNotification_0200, Function | MediumTest | Level1)
+{
+    sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
+    MockGetAnsManagerProxy(proxy);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<NotificationClassification> classification = new (std::nothrow) NotificationClassification();
+    ErrCode ret = ans_->TriggerUpdateAiExtNotification(request, classification);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: SetNotificationSwitch_0100
+ * @tc.desc: test SetNotificationSwitch with null proxy.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetNotificationSwitch_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject_ = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject_);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject_);
+    ASSERT_NE(nullptr, proxy);
+    MockGetAnsManagerProxy(nullptr);
+    bool res = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(res, false);
+
+    ErrCode ret = ans_->SetNotificationSwitch("switchName", true, 100);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: SetNotificationSwitch_0200
+ * @tc.desc: test SetNotificationSwitch success.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetNotificationSwitch_0200, Function | MediumTest | Level1)
+{
+    sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
+    MockGetAnsManagerProxy(proxy);
+    ErrCode ret = ans_->SetNotificationSwitch("switchName", true, 100);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: GetNotificationSwitch_0100
+ * @tc.desc: test GetNotificationSwitch with null proxy.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetNotificationSwitch_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject_ = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject_);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject_);
+    ASSERT_NE(nullptr, proxy);
+    MockGetAnsManagerProxy(nullptr);
+    bool res = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(res, false);
+
+    NotificationConstant::SWITCH_STATE switchState;
+    ErrCode ret = ans_->GetNotificationSwitch("switchName", 100, switchState);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: GetNotificationSwitch_0200
+ * @tc.desc: test GetNotificationSwitch success.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetNotificationSwitch_0200, Function | MediumTest | Level1)
+{
+    sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
+    MockGetAnsManagerProxy(proxy);
+    NotificationConstant::SWITCH_STATE switchState;
+    ErrCode ret = ans_->GetNotificationSwitch("switchName", 100, switchState);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: GetNotificationSwitch_0300
+ * @tc.desc: test GetNotificationSwitch with empty bundleName.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetNotificationSwitch_0300, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundleOption;
+    NotificationConstant::SWITCH_STATE state;
+    ErrCode ret = ans_->GetNotificationSwitch(bundleOption, state);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetNotificationSwitch_0400
+ * @tc.desc: test GetNotificationSwitch with null proxy.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetNotificationSwitch_0400, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject_ = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject_);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject_);
+    ASSERT_NE(nullptr, proxy);
+    MockGetAnsManagerProxy(nullptr);
+    bool res = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(res, false);
+
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    NotificationConstant::SWITCH_STATE state;
+    ErrCode ret = ans_->GetNotificationSwitch(bundleOption, state);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: GetNotificationSwitch_0500
+ * @tc.desc: test GetNotificationSwitch success.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetNotificationSwitch_0500, Function | MediumTest | Level1)
+{
+    sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
+    MockGetAnsManagerProxy(proxy);
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    NotificationConstant::SWITCH_STATE state;
+    ErrCode ret = ans_->GetNotificationSwitch(bundleOption, state);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS

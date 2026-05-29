@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_CONSTANT_H
 
 #include <string>
+#include <set>
 
 namespace OHOS {
 namespace Notification {
@@ -107,6 +108,7 @@ public:
         SUBSCRIBE_ON_ENABL_WATCH_CHANGED = 1 << 16,
         SUBSCRIBE_ON_ENABLEDSILENTREMINDER_CHANGED = 1 << 17,
         SUBSCRIBE_ON_VOICE_CONTENT = 1 << 18,
+        SUBSCRIBE_ON_NOTIFICATION_SWITCH_CHANGED = 1 << 19,
     };
 
     enum DistributedDeleteType {
@@ -682,9 +684,71 @@ public:
         static const char* CUSTOM_KEYWORD;
 
         /**
+         * E_COMMERCE_LOGISTICS
+         */
+        static const char* E_COMMERCE_LOGISTICS;
+
+        /**
          * Use to verify the priority type
          */
         static const std::vector<std::string> VALID_PRIORITY_TYPE_LIST;
+    };
+
+    /**
+     * Indicates aggregation notification type
+     */
+    class AggregationType {
+    public:
+        /**
+         * Indicates OTHER type notification (non-aggregation)
+         */
+        static const char* OTHER;
+
+        /**
+         * Indicates DEAL notification (transaction alert)
+         */
+        static const char* DEAL;
+
+        /**
+         * Indicates LOGISTICS notification
+         */
+        static const char* LOGISTICS;
+
+        /**
+         * Use to verify the aggregation type
+         */
+        static const std::vector<std::string> VALID_AGGREGATION_TYPE_LIST;
+    };
+
+    /**
+     * Indicates notification switch
+     */
+    class NotificationSwitch {
+    public:
+        /**
+         * Indicates INVALID type notification switch
+         */
+        static const char* INVALID;
+
+        /**
+         * Indicates DEAL notification switch
+         */
+        static const char* DEAL;
+
+        /**
+         * Indicates LOGISTICS notification switch
+         */
+        static const char* LOGISTICS;
+
+        /**
+         * Use to verify the switch type
+         */
+        static const std::set<std::string> VALID_NOTIFICATION_SWITCH_SET;
+
+        /**
+         * Use to verify the switch type
+         */
+        static bool IsValidNotificationSwitch(const std::string& switchType);
     };
 
     // maximum display time for geofence notification

@@ -125,6 +125,35 @@ void StsSubscriberInstance::OnCanceled(
     }
     ANS_LOGD("done");
 }
+
+void StsSubscriberInstance::OnNotificationSwitchChanged(
+    const std::shared_ptr<NotificationSwitchChangedCallbackData> &callbackData)
+{
+    ANS_LOGD("OnNotificationSwitchChanged enter");
+    ani_env* etsEnv;
+    ani_status aniResult = ANI_ERROR;
+    ani_options aniArgs { 0, nullptr };
+    aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
+    if (aniResult != ANI_OK) {
+        ANS_LOGE("AttachCurrentThread error. result: %{public}d.", aniResult);
+        return;
+    }
+    std::vector<ani_ref> vec;
+    ani_object obj;
+    if (WrapNotificationSwitchChangedCallbackData(etsEnv, callbackData, obj)) {
+        vec.push_back(obj);
+        CallFunction(etsEnv, "onNotificationSwitchChanged", vec);
+    } else {
+        ANS_LOGE("WrapNotificationSwitchChangedCallbackData failed");
+    }
+    aniResult = vm_->DetachCurrentThread();
+    if (aniResult != ANI_OK) {
+        ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
+        return;
+    }
+    ANS_LOGD("OnNotificationSwitchChanged done");
+}
+
 void StsSubscriberInstance::OnConsumed(
     const std::shared_ptr<OHOS::Notification::Notification> &request,
     const std::shared_ptr<NotificationSortingMap> &sortingMap)
@@ -747,6 +776,9 @@ void SubscriberInstanceManager::FillSubscribedFlags(
     }
     if (subscriberInfo->HasFunctionImplemented(env, "onSystemUpdate")) {
         subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_SYSTEM_UPDATE;
+    }
+    if (subscriberInfo->HasFunctionImplemented(env, "onNotificationSwitchChanged")) {
+        subscribedFlags |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_NOTIFICATION_SWITCH_CHANGED;
     }
 }
 

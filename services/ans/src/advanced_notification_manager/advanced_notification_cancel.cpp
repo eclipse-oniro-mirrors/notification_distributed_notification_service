@@ -22,6 +22,7 @@
 #include "ipc_skeleton.h"
 #include "notification_analytics_util.h"
 #include "notification_bundle_option.h"
+#include "notification_classification_mgr.h"
 #include "notification_constant.h"
 #include "notification_local_live_view_content.h"
 #include "notification_subscriber_manager.h"
@@ -531,6 +532,7 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
                 (record->notification->GetId() == notificationId) && (record->notification->GetLabel() == label)) {
                 notification = record->notification;
                 notificationList_.remove(record);
+                NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
                 result = ERR_OK;
                 break;
             }
@@ -627,6 +629,7 @@ ErrCode AdvancedNotificationService::ExcuteRemoveNotification(const sptr<Notific
 
             DeleteNotificationFromDb(record, removeReason, false);
             notificationList_.remove(record);
+            NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
             result = ERR_OK;
             break;
         }
@@ -725,6 +728,7 @@ void AdvancedNotificationService::ExcuteRemoveAllNotificationsInner(const sptr<N
     for (auto record : removeList) {
         ProcForDeleteNotificationFromDb(record);
         notificationList_.remove(record);
+        NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
         if (record->notification != nullptr) {
             ANS_LOGD("record->notification is not nullptr.");
             UpdateRecentNotification(record->notification, true, reason);
@@ -875,6 +879,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
         }
         ProcForDeleteNotificationFromDb(record);
         notificationList_.remove(record);
+        NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
         if (record->notification != nullptr) {
             ANS_LOGD("record->notification is not nullptr.");
             UpdateRecentNotification(record->notification, true, reason);
@@ -1228,6 +1233,7 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotificationsByDeviceId(
         }
         for (auto deleteRecord : deleteRecords) {
             notificationList_.remove(deleteRecord);
+            NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove notifications by deviceId.");
@@ -1267,6 +1273,7 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
         }
         for (auto deleteRecord : deleteRecords) {
             notificationList_.remove(deleteRecord);
+            NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove distributed notifications.");
@@ -1325,6 +1332,7 @@ void AdvancedNotificationService::RemoveDistributedNotificationsByBundle(
         }
         for (auto deleteRecord : deleteRecords) {
             notificationList_.remove(deleteRecord);
+            NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return, "Remove distributed notifications.");
@@ -1374,6 +1382,7 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
         }
         for (auto deleteRecord : deleteRecords) {
             notificationList_.remove(deleteRecord);
+            NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove distributed notifications.");
@@ -1405,6 +1414,7 @@ ErrCode AdvancedNotificationService::RemoveAllDistributedNotifications(
 
         for (auto deleteRecord : deleteRecords) {
             notificationList_.remove(deleteRecord);
+            NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove all distributed notifications.");

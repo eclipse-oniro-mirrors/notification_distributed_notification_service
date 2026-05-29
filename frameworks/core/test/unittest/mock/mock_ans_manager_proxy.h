@@ -301,6 +301,10 @@ public:
     MOCK_METHOD1(RegisterBadgeQueryCallback, ErrCode(const sptr<IBadgeQueryCallback>&));
     MOCK_METHOD0(UnRegisterBadgeQueryCallback, ErrCode());
     MOCK_METHOD2(GetNotificationSwitch, ErrCode(const sptr<NotificationBundleOption>&, int32_t&));
+    MOCK_METHOD3(GetNotificationSwitch, ErrCode(const std::string&, int32_t, int32_t&));
+    MOCK_METHOD3(SetNotificationSwitch, ErrCode(const std::string&, bool, int32_t));
+    MOCK_METHOD2(TriggerUpdateAiExtNotification,
+        ErrCode(const sptr<NotificationRequest>&, const sptr<NotificationClassification>&));
     MOCK_METHOD2(GetStatisticsByBundle, ErrCode(
         const std::vector<sptr<NotificationBundleOption>>&, std::vector<NotificationStatistics>&));
     MOCK_METHOD2(SnoozeNotification, ErrCode(const std::string&, const int64_t));

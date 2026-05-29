@@ -27,6 +27,7 @@
 #include "notification_clone_disturb_service.h"
 #include "notification_clone_bundle_service.h"
 #include "notification_clone_geofence_switch.h"
+#include "notification_clone_notification_switch.h"
 #include "notification_clone_priority_service.h"
 #include "notification_clone_util.h"
 #include "dh_notification_clone_bundle_service.h"
@@ -52,6 +53,7 @@ constexpr const char* CLONE_ITEM_PRIORITY_INFO = "notificationPriority";
 constexpr const char* BACKUP_CONFIG_FILE_PATH = "/data/service/el1/public/notification/backup_config.conf";
 constexpr const char* EVENT_NAME = "usual.event.ANCO_RESTORE_START";
 constexpr const char* EVENT_PUBLISHER_PERMISSION = "ohos.permission.RECEIVE_BMS_BROKER_MESSAGES";
+constexpr const char* CLONE_ITEM_NOTIFICATION_SWITCH = "notificationSwitch";
 
 std::shared_ptr<AncoRestoreStartEventSubscriber> AncoRestoreStartEventSubscriber::create()
 {
@@ -264,6 +266,8 @@ NotificationCloneManager::NotificationCloneManager()
     cloneTemplates.push_back(std::make_pair(CLONE_ITEM_DISTURB, NotificationCloneDisturb::GetInstance()));
     cloneTemplates.push_back(std::make_pair(CLONE_ITEM_PRIORITY_INFO, NotificationClonePriority::GetInstance()));
     cloneTemplates.push_back(std::make_pair(CLONE_GEOFENCE, NotificationCloneGeofenceSwitch::GetInstance()));
+    cloneTemplates.push_back(std::make_pair(
+        CLONE_ITEM_NOTIFICATION_SWITCH, NotificationCloneNotificationSwitch::GetInstance()));
 
     restoreStartEventSubscriber_ = AncoRestoreStartEventSubscriber::create();
     if (!EventFwk::CommonEventManager::SubscribeCommonEvent(restoreStartEventSubscriber_)) {

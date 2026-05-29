@@ -31,6 +31,8 @@ export interface NotificationSubscribeInfo {
     slotTypes?: Array<notificationManager.SlotType>;
     voiceContentOptions?: VoiceContentOptions;
     pictureOptions?: PictureOptions;
+    enableClassification?: boolean;
+    needSilentReplayOnSubscribe?: boolean;
 }
 
 class NotificationSubscribeInfoInner implements NotificationSubscribeInfo {
@@ -41,4 +43,6 @@ class NotificationSubscribeInfoInner implements NotificationSubscribeInfo {
     public slotTypes?: Array<notificationManager.SlotType>;
     public voiceContentOptions?: VoiceContentOptions;
     public pictureOptions?: PictureOptions;
+    public enableClassification?: boolean;
+    public needSilentReplayOnSubscribe?: boolean;
 }

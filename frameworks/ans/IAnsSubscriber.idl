@@ -22,6 +22,7 @@ sequenceable OHOS.Notification.EnabledSilentReminderCallbackData;
 sequenceable OHOS.Notification.BadgeNumberCallbackData;
 sequenceable OHOS.Notification.NotificationOperationInfo;
 sequenceable OHOS.Notification.NotificationApplicationChangeInfo;
+sequenceable OHOS.Notification.NotificationSwitchChangedCallbackData;
 interface OHOS.Notification.IAnsSubscriber {
     [oneway] void OnConnected();
 
@@ -47,6 +48,7 @@ interface OHOS.Notification.IAnsSubscriber {
     [oneway] void OnDoNotDisturbDateChange([in] sptr<NotificationDoNotDisturbDate> date);
     [oneway] void OnEnabledNotificationChanged([in] sptr<EnabledNotificationCallbackData> callbackData);
     [oneway] void OnEnabledSilentReminderChanged([in] sptr<EnabledSilentReminderCallbackData> callbackData);
+    [oneway] void OnNotificationSwitchChanged([in] sptr<NotificationSwitchChangedCallbackData> callbackData);
     [oneway] void OnBadgeChanged([in] sptr<BadgeNumberCallbackData> badgeData);
     [oneway] void OnBadgeEnabledChanged([in] sptr<EnabledNotificationCallbackData> callbackData);
     [oneway] void OnApplicationInfoNeedChanged([in] sptr<NotificationApplicationChangeInfo> applicationChangeInfo);

@@ -290,7 +290,29 @@ napi_value Common::SetEnabledSilentReminderCallbackData(const napi_env &env,
 
     return NapiGetBoolean(env, true);
 }
-    
+
+napi_value Common::SetNotificationSwitchChangedCallbackData(const napi_env &env,
+    const NotificationSwitchChangedCallbackData &data, napi_value &result)
+{
+    ANS_LOGD("called");
+    // switchName: string
+    napi_value switchNameNapi = nullptr;
+    napi_create_string_utf8(env, data.GetSwitchName().c_str(), NAPI_AUTO_LENGTH, &switchNameNapi);
+    napi_set_named_property(env, result, "switchName", switchNameNapi);
+
+    // userId: number
+    napi_value userIdNapi = nullptr;
+    napi_create_int32(env, data.GetUserId(), &userIdNapi);
+    napi_set_named_property(env, result, "userId", userIdNapi);
+
+    // enableStatus: number
+    napi_value enableStatusNapi = nullptr;
+    napi_create_int32(env, static_cast<int32_t>(data.GetEnableStatus()), &enableStatusNapi);
+    napi_set_named_property(env, result, "enableStatus", enableStatusNapi);
+
+    return NapiGetBoolean(env, true);
+}
+
 napi_value Common::SetEnabledPriorityNotificationByBundleCallbackData(const napi_env &env,
     const EnabledPriorityNotificationByBundleCallbackData &data, napi_value &result)
 {
@@ -309,6 +331,23 @@ napi_value Common::SetEnabledPriorityNotificationByBundleCallbackData(const napi
     napi_value enableNapi = nullptr;
     napi_create_int32(env, static_cast<int32_t>(data.GetEnableStatus()), &enableNapi);
     napi_set_named_property(env, result, "enableStatus", enableNapi);
+
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetNotificationClassification(
+    const napi_env &env, const NotificationClassification &data, napi_value &result)
+{
+    ANS_LOGD("called");
+    // classification: string
+    napi_value classificationNapi = nullptr;
+    napi_create_string_utf8(env, data.GetClassification().c_str(), NAPI_AUTO_LENGTH, &classificationNapi);
+    napi_set_named_property(env, result, "classification", classificationNapi);
+
+    // subClassification: string
+    napi_value subClassificationNapi = nullptr;
+    napi_create_string_utf8(env, data.GetSubClassification().c_str(), NAPI_AUTO_LENGTH, &subClassificationNapi);
+    napi_set_named_property(env, result, "subClassification", subClassificationNapi);
 
     return NapiGetBoolean(env, true);
 }
@@ -595,6 +634,34 @@ napi_value Common::GetNotificationSubscriberInfo(
     }
     if (!GetSubscriberPictureOption(env, value, subscriberInfo)) {
         return nullptr;
+    }
+    NAPI_CALL(env, napi_has_named_property(env, value, "enableClassification", &hasProperty));
+    if (hasProperty) {
+        napi_value nEnableClassification = nullptr;
+        napi_get_named_property(env, value, "enableClassification", &nEnableClassification);
+        NAPI_CALL(env, napi_typeof(env, nEnableClassification, &valuetype));
+        if (valuetype != napi_boolean) {
+            ANS_LOGE("Wrong argument type. Boolean expected.");
+            return nullptr;
+        }
+        bool enableClassification = false;
+        NAPI_CALL(env, napi_get_value_bool(env, nEnableClassification, &enableClassification));
+        subscriberInfo.enableClassification = enableClassification;
+        subscriberInfo.hasSubscribeInfo = true;
+    }
+    NAPI_CALL(env, napi_has_named_property(env, value, "needSilentReplayOnSubscribe", &hasProperty));
+    if (hasProperty) {
+        napi_value nNeedSilentReplayOnSubscribe = nullptr;
+        napi_get_named_property(env, value, "needSilentReplayOnSubscribe", &nNeedSilentReplayOnSubscribe);
+        NAPI_CALL(env, napi_typeof(env, nNeedSilentReplayOnSubscribe, &valuetype));
+        if (valuetype != napi_boolean) {
+            ANS_LOGE("Wrong argument type. Boolean expected.");
+            return nullptr;
+        }
+        bool needSilentReplayOnSubscribe = false;
+        NAPI_CALL(env, napi_get_value_bool(env, nNeedSilentReplayOnSubscribe, &needSilentReplayOnSubscribe));
+        subscriberInfo.needSilentReplayOnSubscribe = needSilentReplayOnSubscribe;
+        subscriberInfo.hasSubscribeInfo = true;
     }
     return NapiGetNull(env);
 }

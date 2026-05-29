@@ -46,6 +46,8 @@ export interface NotificationSubscriber {
 
     onEnabledPriorityByBundleChanged?: (callbackData: EnabledPriorityNotificationByBundleCallbackData) => void;
 
+    onNotificationSwitchChanged?: NotificationSwitchChangedCallback;
+
     onBadgeChanged?: (data: BadgeNumberCallbackData) => void;
 
     onBadgeEnabledChanged?: BadgeEnabledChangedCallback;
@@ -91,6 +93,16 @@ export interface VoiceContent {
     textContent?: string;
 }
 
+export interface NotificationClassification {
+  readonly classification: string;
+  readonly subClassification: string;
+}
+
+class NotificationClassificationInner implements NotificationClassification {
+  public readonly classification: string = "";
+  public readonly subClassification: string = "";
+}
+
 export interface SubscribeCallbackData {
     readonly request: NotificationRequest;
     readonly sortingMap?: NotificationSortingMap;
@@ -98,6 +110,7 @@ export interface SubscribeCallbackData {
     readonly sound?: string;
     readonly vibrationValues?: Array<long>;
     voiceContent?: VoiceContent;
+    readonly notificationClassification?: NotificationClassification;
 }
 
 class VoiceContentInner implements VoiceContent {
@@ -163,6 +176,7 @@ class SubscribeCallbackDataInner implements SubscribeCallbackData {
     public readonly sound?: string;
     public readonly vibrationValues?: Array<long>;
     public voiceContent?: VoiceContent;
+    public readonly notificationClassification?: NotificationClassification;
 }
 
 export interface EnabledNotificationCallbackData {
@@ -226,6 +240,20 @@ class BadgeNumberCallbackDataInner implements BadgeNumberCallbackData {
     public readonly appInstanceKey?: string;
 }
 
+export interface NotificationSwitchChangedCallbackData {
+  readonly userId: int;
+  readonly switchName: string;
+  readonly enableStatus: notificationManager.SwitchState;
+}
+
+class NotificationSwitchChangedCallbackDataInner implements NotificationSwitchChangedCallbackData {
+  public readonly userId: int = -1;
+  public readonly switchName: string = "";
+  public readonly enableStatus: notificationManager.SwitchState = notificationManager.SwitchState.SYSTEM_DEFAULT_OFF;
+}
+
 export type BadgeEnabledChangedCallback = (data: EnabledNotificationCallbackData) => void;
 
 export type EnabledSilentReminderChangedCallback = (data: EnabledSilentReminderCallbackData) => void;
+
+export type NotificationSwitchChangedCallback = (callbackData: NotificationSwitchChangedCallbackData) => void;

@@ -178,7 +178,7 @@ HWTEST_F(NotificationSubscribeInfoTest, Dump_00001, Function | SmallTest | Level
             "deviceType = " + deviceType +
             "userId = " + std::to_string(userId) +
             "slotTypes = []needNotify = 0filterType = 0needResponse = 0isSubscribeSelf = 0voiceContentOption = null" +
-            "pictureOption = null }";
+            "pictureOption = nullenableClassification = 0needSilentReplayOnSubscribe = 0 }";
     EXPECT_EQ(res, rrc->Dump());
 }
 
@@ -676,6 +676,212 @@ HWTEST_F(NotificationSubscribeInfoTest, PictureOption_WithVoiceContentOption_000
     ASSERT_NE(result->GetVoiceContentOption(), nullptr);
     EXPECT_EQ(result->GetPictureOption()->GetPreparseLiveViewPicList().size(), 1u);
     EXPECT_EQ(result->GetVoiceContentOption()->GetEnabled(), true);
+    delete result;
+}
+
+/**
+ * @tc.name: SetEnableClassification_00001
+ * @tc.desc: Test SetEnableClassification and GetEnableClassification with true.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, SetEnableClassification_00001, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
+    rrc->SetEnableClassification(true);
+    EXPECT_EQ(rrc->GetEnableClassification(), true);
+}
+
+/**
+ * @tc.name: SetEnableClassification_00002
+ * @tc.desc: Test SetEnableClassification and GetEnableClassification with false (default).
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, SetEnableClassification_00002, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
+    EXPECT_EQ(rrc->GetEnableClassification(), false);
+    rrc->SetEnableClassification(false);
+    EXPECT_EQ(rrc->GetEnableClassification(), false);
+}
+
+/**
+ * @tc.name: SetNeedSilentReplayOnSubscribe_00001
+ * @tc.desc: Test SetNeedSilentReplayOnSubscribe and GetNeedSilentReplayOnSubscribe with true.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, SetNeedSilentReplayOnSubscribe_00001, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
+    rrc->SetNeedSilentReplayOnSubscribe(true);
+    EXPECT_EQ(rrc->GetNeedSilentReplayOnSubscribe(), true);
+}
+
+/**
+ * @tc.name: SetNeedSilentReplayOnSubscribe_00002
+ * @tc.desc: Test SetNeedSilentReplayOnSubscribe and GetNeedSilentReplayOnSubscribe with false (default).
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, SetNeedSilentReplayOnSubscribe_00002, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
+    EXPECT_EQ(rrc->GetNeedSilentReplayOnSubscribe(), false);
+    rrc->SetNeedSilentReplayOnSubscribe(false);
+    EXPECT_EQ(rrc->GetNeedSilentReplayOnSubscribe(), false);
+}
+
+/**
+ * @tc.name: Marshalling_EnableClassification_00001
+ * @tc.desc: Test Marshalling with enableClassification set to true.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, Marshalling_EnableClassification_00001, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
+    rrc->SetEnableClassification(true);
+    rrc->SetNeedSilentReplayOnSubscribe(true);
+    Parcel parcel;
+    EXPECT_EQ(rrc->Marshalling(parcel), true);
+}
+
+/**
+ * @tc.name: Unmarshalling_EnableClassification_00001
+ * @tc.desc: Test Unmarshalling roundtrip with enableClassification=true and needSilentReplayOnSubscribe=true.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, Unmarshalling_EnableClassification_00001, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
+    rrc->SetEnableClassification(true);
+    rrc->SetNeedSilentReplayOnSubscribe(true);
+    Parcel parcel;
+    rrc->Marshalling(parcel);
+    parcel.RewindRead(0);
+    NotificationSubscribeInfo *result = NotificationSubscribeInfo::Unmarshalling(parcel);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetEnableClassification(), true);
+    EXPECT_EQ(result->GetNeedSilentReplayOnSubscribe(), true);
+    delete result;
+}
+
+/**
+ * @tc.name: Unmarshalling_EnableClassification_00002
+ * @tc.desc: Test Unmarshalling roundtrip with default values (enableClassification=false, needSilentReplayOnSubscribe=false).
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, Unmarshalling_EnableClassification_00002, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
+    Parcel parcel;
+    rrc->Marshalling(parcel);
+    parcel.RewindRead(0);
+    NotificationSubscribeInfo *result = NotificationSubscribeInfo::Unmarshalling(parcel);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetEnableClassification(), false);
+    EXPECT_EQ(result->GetNeedSilentReplayOnSubscribe(), false);
+    delete result;
+}
+
+/**
+ * @tc.name: CopyConstructor_EnableClassification_00001
+ * @tc.desc: Test copy constructor preserves enableClassification and needSilentReplayOnSubscribe.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, CopyConstructor_EnableClassification_00001, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
+    rrc->SetEnableClassification(true);
+    rrc->SetNeedSilentReplayOnSubscribe(true);
+    NotificationSubscribeInfo copyInfo(*rrc);
+    EXPECT_EQ(copyInfo.GetEnableClassification(), true);
+    EXPECT_EQ(copyInfo.GetNeedSilentReplayOnSubscribe(), true);
+}
+
+/**
+ * @tc.name: CopyConstructor_EnableClassification_00002
+ * @tc.desc: Test copy constructor with default values (false).
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, CopyConstructor_EnableClassification_00002, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
+    NotificationSubscribeInfo copyInfo(*rrc);
+    EXPECT_EQ(copyInfo.GetEnableClassification(), false);
+    EXPECT_EQ(copyInfo.GetNeedSilentReplayOnSubscribe(), false);
+}
+
+/**
+ * @tc.name: Dump_EnableClassification_00001
+ * @tc.desc: Test Dump output includes enableClassification and needSilentReplayOnSubscribe.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, Dump_EnableClassification_00001, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
+    rrc->SetEnableClassification(true);
+    rrc->SetNeedSilentReplayOnSubscribe(true);
+    std::string dump = rrc->Dump();
+    EXPECT_NE(dump.find("enableClassification = 1"), std::string::npos);
+    EXPECT_NE(dump.find("needSilentReplayOnSubscribe = 1"), std::string::npos);
+}
+
+/**
+ * @tc.name: Dump_EnableClassification_00002
+ * @tc.desc: Test Dump output with default values (enableClassification=0, needSilentReplayOnSubscribe=0).
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, Dump_EnableClassification_00002, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    auto rrc = std::make_shared<NotificationSubscribeInfo>(subscribeInfo);
+    std::string dump = rrc->Dump();
+    EXPECT_NE(dump.find("enableClassification = 0"), std::string::npos);
+    EXPECT_NE(dump.find("needSilentReplayOnSubscribe = 0"), std::string::npos);
+}
+
+/**
+ * @tc.name: EnableClassification_Integration_00001
+ * @tc.desc: Test full integration with enableClassification and needSilentReplayOnSubscribe.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, EnableClassification_Integration_00001, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    subscribeInfo.SetEnableClassification(true);
+    subscribeInfo.SetNeedSilentReplayOnSubscribe(true);
+    subscribeInfo.AddAppName("app1");
+    subscribeInfo.AddDeviceType("device");
+
+    Parcel parcel;
+    EXPECT_EQ(subscribeInfo.Marshalling(parcel), true);
+    parcel.RewindRead(0);
+
+    NotificationSubscribeInfo* result = NotificationSubscribeInfo::Unmarshalling(parcel);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetEnableClassification(), true);
+    EXPECT_EQ(result->GetNeedSilentReplayOnSubscribe(), true);
+    EXPECT_EQ(result->GetAppNames().size(), 1u);
     delete result;
 }
 

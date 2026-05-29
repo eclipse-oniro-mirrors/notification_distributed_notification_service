@@ -15,6 +15,7 @@
 #include "sts_subscriber.h"
 
 #include "ans_log_wrapper.h"
+#include "notification_classification.h"
 #include "sts_common.h"
 #include "sts_request.h"
 #include "sts_sorting_map.h"
@@ -23,6 +24,54 @@
 namespace OHOS {
 namespace NotificationSts {
 const int32_t NO_DELETE_REASON = -1;
+
+bool SetNotificationClassification(ani_env *env, const std::shared_ptr<NotificationSts> &request, ani_object &outObj)
+{
+    ANS_LOGD("SetNotificationClassification enter");
+    ani_status status = ANI_OK;
+    auto notificationClassification = request->GetNotificationClassification();
+    if (notificationClassification != nullptr) {
+        ani_class cls;
+        ani_object notificationClassificationObj;
+        if (!CreateClassObjByClassName(env, "notification.notificationSubscriber.NotificationClassificationInner",
+            cls, notificationClassificationObj)) {
+            ANS_LOGE("Create extension result class failed.");
+            return false;
+        }
+
+        std::string classification = notificationClassification->GetClassification();
+        ani_string classificationObj;
+        if (ANI_OK != GetAniStringByString(env, classification, classificationObj) || classificationObj == nullptr) {
+            ANS_LOGE("classification create faild");
+            return false;
+        }
+
+        if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(
+            notificationClassificationObj, "classification", classificationObj))) {
+            ANS_LOGE("set classification faild. status %{public}d", status);
+        }
+
+        std::string subClassification = notificationClassification->GetSubClassification();
+        ani_string subClassificationObj;
+        if (ANI_OK != GetAniStringByString(
+            env, subClassification, subClassificationObj) || subClassificationObj == nullptr) {
+            ANS_LOGE("subClassification create faild");
+            return false;
+        }
+
+        if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(
+            notificationClassificationObj, "subClassification", subClassificationObj))) {
+            ANS_LOGE("set subClassification faild. status %{public}d", status);
+        }
+
+        if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(
+            outObj, "notificationClassification", notificationClassificationObj))) {
+            ANS_LOGE("Object set notificationClassification failed. status %{public}d", status);
+            return false;
+        }
+    }
+    return true;
+}
 
 bool SetNotificationRequest(ani_env *env, const std::shared_ptr<NotificationSts> &request, ani_object &outObj)
 {
@@ -200,11 +249,15 @@ bool WarpSubscribeCallbackData(
     }
     // vibrationValues?: Array<long>
     if (!SetVibrationValues(env, request, outObj)) {
-        ANS_LOGE("SetSound faild");
+        ANS_LOGE("SetVibrationValues faild");
     }
     // voiceContent?: {textContent: string}
     if (!SetVoiceContent(env, request, outObj)) {
         ANS_LOGE("SetVoiceContent faild");
+    }
+    // notificationClassification?: NotificationClassification
+    if (!SetNotificationClassification(env, request, outObj)) {
+        ANS_LOGE("SetNotificationClassification faild");
     }
     return true;
 }
@@ -331,6 +384,48 @@ bool WrapEnabledPriorityNotificationCallbackData(
         ANS_LOGE("set enable faild. status %{public}d", status);
         return false;
     }
+    return true;
+}
+
+bool WrapNotificationSwitchChangedCallbackData(ani_env *env,
+    const std::shared_ptr<NotificationSwitchChangedCallbackData> &callbackData, ani_object &outObj)
+{
+    ANS_LOGD("WrapNotificationSwitchChangedCallbackData enter");
+    if (env == nullptr || callbackData == nullptr) {
+        ANS_LOGE("invalid parameter value");
+        return false;
+    }
+    ani_class cls;
+    const char *className = "notification.notificationSubscriber.NotificationSwitchChangedCallbackDataInner";
+    if (!CreateClassObjByClassName(env, className, cls, outObj)) {
+        ANS_LOGE("CreateClassObjByClassName failed");
+        return false;
+    }
+
+    // Set type field (string)
+    if (!SetFieldString(env, cls, outObj, "switchName", callbackData->GetSwitchName())) {
+        ANS_LOGE("SetFieldString type failed");
+        return false;
+    }
+
+    // Set userId field (int)
+    if (!SetFieldInt(env, cls, outObj, "userId", static_cast<ani_int>(callbackData->GetUserId()))) {
+        ANS_LOGE("userId set failed");
+        return false;
+    }
+
+    // Set state field (enum)
+    ani_enum_item switchStateItem {};
+    NotificationConstant::SWITCH_STATE switchState = callbackData->GetEnableStatus();
+    if (!SwitchStateCToEts(env, switchState, switchStateItem)) {
+        ANS_LOGE("SwitchStateCToEts failed");
+        return false;
+    }
+    if (!SetPropertyByRef(env, outObj, "enableStatus", switchStateItem)) {
+        ANS_LOGE("set state failed");
+        return false;
+    }
+
     return true;
 }
 

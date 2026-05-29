@@ -19,6 +19,7 @@
 #include <mutex>
 #include <uv.h>
 #include "hitrace_util.h"
+#include "notification_classification.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -43,6 +44,7 @@ const std::string SYSTEM_UPDATE = "OnSystemUpdate";
 const std::string BADGE_CHANGED = "OnBadgeChanged";
 const std::string BADGE_ENABLED_CHANGED = "OnBadgeEnabledChanged";
 const std::string BATCH_CANCEL = "onBatchCancel";
+const std::string NOTIFICATION_SWITCH_CHANGED = "OnNotificationSwitchChanged";
 
 enum class Type {
     UNKNOWN,
@@ -61,7 +63,8 @@ enum class Type {
     ENABLE_PRIORITY_CHANGED,
     ENABLE_PRIORITY_BY_BUNDLE_CHANGED,
     SYSTEM_UPDATE,
-    ENABLE_SILENT_REMINDER_CHANGED
+    ENABLE_SILENT_REMINDER_CHANGED,
+    NOTIFICATION_SWITCH_CHANGED
 };
 
 struct NotificationReceiveDataWorker {
@@ -72,6 +75,7 @@ struct NotificationReceiveDataWorker {
     EnabledNotificationCallbackData callbackData;
     EnabledSilentReminderCallbackData silentReminderCallbackData;
     EnabledPriorityNotificationByBundleCallbackData priorityCallbackData;
+    NotificationSwitchChangedCallbackData notificationSwitchChangedCallbackData;
     BadgeNumberCallbackData badge;
     int32_t deleteReason = 0;
     bool priorityEnable = false;
@@ -157,6 +161,17 @@ napi_value SetSubscribeCallbackData(const napi_env &env,
         napi_set_named_property(env, result, "voiceContent", voiceContentResult);
     }
 
+    // notificationClassification
+    auto notificationClassification = request->GetNotificationClassification();
+    if (notificationClassification != nullptr) {
+        napi_value notificationClassificationNapi = nullptr;
+        napi_create_object(env, &notificationClassificationNapi);
+        if (!Common::SetNotificationClassification(env, *notificationClassification, notificationClassificationNapi)) {
+            ANS_LOGE("SetNotificationClassification call failed");
+            return Common::NapiGetBoolean(env, false);
+        }
+        napi_set_named_property(env, result, "notificationClassification", notificationClassificationNapi);
+    }
     return Common::NapiGetBoolean(env, true);
 }
 
@@ -196,6 +211,11 @@ void SubscriberInstance::SubDeleteRef()
     if (systemUpdateCallbackInfo_.ref != nullptr) {
         napi_delete_reference(systemUpdateCallbackInfo_.env, systemUpdateCallbackInfo_.ref);
         systemUpdateCallbackInfo_.ref = nullptr;
+    }
+
+    if (notificationSwitchChangedCallbackInfo_.ref != nullptr) {
+        napi_delete_reference(notificationSwitchChangedCallbackInfo_.env, notificationSwitchChangedCallbackInfo_.ref);
+        notificationSwitchChangedCallbackInfo_.ref = nullptr;
     }
 }
 
@@ -919,6 +939,66 @@ void SubscriberInstance::OnEnabledSilentReminderChanged(
 
     CallThreadSafeFunc(dataWorker);
 };
+void ThreadSafeOnNotificationSwitchChanged(napi_env env, napi_value jsCallback, void* context, void* data)
+{
+    ANS_LOGD("called");
+
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
+    if (dataWorkerData == nullptr) {
+        ANS_LOGE("null dataWorkerData");
+        return;
+    }
+    auto subscriber = dataWorkerData->subscriber.lock();
+    if (subscriber == nullptr) {
+        ANS_LOGE("null subscriber");
+        return;
+    }
+    napi_value result = nullptr;
+    napi_handle_scope scope;
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok || scope == nullptr) {
+        ANS_LOGE("status: %{public}d", status);
+        return;
+    }
+    napi_create_object(env, &result);
+
+    if (!Common::SetNotificationSwitchChangedCallbackData(
+        env, dataWorkerData->notificationSwitchChangedCallbackData, result)) {
+        ANS_LOGE("SetNotificationSwitchChangedCallbackData failed");
+        result = Common::NapiGetNull(env);
+    }
+
+    Common::SetCallback(env, subscriber->GetCallbackInfo(NOTIFICATION_SWITCH_CHANGED).ref, result);
+    napi_close_handle_scope(env, scope);
+}
+
+void SubscriberInstance::OnNotificationSwitchChanged(
+    const std::shared_ptr<NotificationSwitchChangedCallbackData> &callbackData)
+{
+    ANS_LOGD("called");
+
+    if (notificationSwitchChangedCallbackInfo_.ref == nullptr ||
+        notificationSwitchChangedCallbackInfo_.env == nullptr) {
+        return;
+    }
+
+    if (callbackData == nullptr) {
+        ANS_LOGE("null callbackData");
+        return;
+    }
+
+    NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
+    if (dataWorker == nullptr) {
+        ANS_LOGE("null dataWorker");
+        return;
+    }
+
+    dataWorker->notificationSwitchChangedCallbackData = *callbackData;
+    dataWorker->type = Type::NOTIFICATION_SWITCH_CHANGED;
+    dataWorker->subscriber = std::static_pointer_cast<SubscriberInstance>(shared_from_this());
+
+    CallThreadSafeFunc(dataWorker);
+}
 
 void ThreadSafeOnEnabledPriorityChanged(napi_env env, napi_value jsCallback, void* context, void* data)
 {
@@ -1293,6 +1373,17 @@ SubscriberInstance::CallbackInfo SubscriberInstance::GetEnabledSilentReminderCal
     return enabledSilentReminderCallbackInfo_;
 }
 
+void SubscriberInstance::SetNotificationSwitchChangedCallbackInfo(const napi_env &env, const napi_ref &ref)
+{
+    notificationSwitchChangedCallbackInfo_.env = env;
+    notificationSwitchChangedCallbackInfo_.ref = ref;
+}
+
+SubscriberInstance::CallbackInfo SubscriberInstance::GetNotificationSwitchChangedCallbackInfo()
+{
+    return notificationSwitchChangedCallbackInfo_;
+}
+
 void SubscriberInstance::SetEnabledPriorityCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
     enabledPriorityCallbackInfo_.env = env;
@@ -1418,6 +1509,8 @@ void SubscriberInstance::SetCallbackInfo(const napi_env &env, const std::string 
         SetSystemUpdateCallbackInfo(env, ref);
     } else if (type == ENABLE_SILENT_REMINDER_CHANGED) {
         SetEnabledSilentReminderCallbackInfo(env, ref);
+    } else if (type == NOTIFICATION_SWITCH_CHANGED) {
+        SetNotificationSwitchChangedCallbackInfo(env, ref);
     } else {
         ANS_LOGW("type is error");
     }
@@ -1459,6 +1552,8 @@ SubscriberInstance::CallbackInfo SubscriberInstance::GetCallbackInfo(const std::
         return GetSystemUpdateCallbackInfo();
     } else if (type == ENABLE_SILENT_REMINDER_CHANGED) {
         return GetEnabledSilentReminderCallbackInfo();
+    } else if (type == NOTIFICATION_SWITCH_CHANGED) {
+        return GetNotificationSwitchChangedCallbackInfo();
     } else {
         ANS_LOGW("type is error");
         return {nullptr, nullptr};
@@ -1549,6 +1644,9 @@ void ThreadSafeCommon(napi_env env, napi_value jsCallback, void* context, void* 
             break;
         case Type::ENABLE_SILENT_REMINDER_CHANGED:
             ThreadSafeOnEnabledSilentReminderChanged(env, jsCallback, context, data);
+            break;
+        case Type::NOTIFICATION_SWITCH_CHANGED:
+            ThreadSafeOnNotificationSwitchChanged(env, jsCallback, context, data);
             break;
         default:
             break;
@@ -1764,6 +1862,23 @@ napi_value GetNotificationSubscriber(
         napi_create_reference(env, nOnEnabledSilentReminderChanged, 1, &result);
         subscriberInfo.subscriber->SetCallbackInfo(env, ENABLE_SILENT_REMINDER_CHANGED, result);
         subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLEDSILENTREMINDER_CHANGED;
+    }
+
+    // onNotificationSwitchChanged?: (callbackData: NotificationSwitchChangedCallbackData) => void
+    NAPI_CALL(env, napi_has_named_property(env, value, "onNotificationSwitchChanged", &hasProperty));
+    if (hasProperty) {
+        napi_value nOnNotificationSwitchChanged = nullptr;
+        napi_get_named_property(env, value, "onNotificationSwitchChanged", &nOnNotificationSwitchChanged);
+        NAPI_CALL(env, napi_typeof(env, nOnNotificationSwitchChanged, &valuetype));
+        if (valuetype != napi_function) {
+            ANS_LOGE("Wrong argument type. Function expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be function.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        napi_create_reference(env, nOnNotificationSwitchChanged, 1, &result);
+        subscriberInfo.subscriber->SetCallbackInfo(env, NOTIFICATION_SWITCH_CHANGED, result);
+        subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_NOTIFICATION_SWITCH_CHANGED;
     }
 
     // onEnabledPriorityChanged?: (enable: boolean) => void
@@ -2020,6 +2135,9 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
                     OHOS::Notification::NotificationSubscribeInfo subscribeInfo;
                     subscribeInfo.AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
                     subscribeInfo.AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
+                    subscribeInfo.SetEnableClassification(asynccallbackinfo->subscriberInfo.enableClassification);
+                    subscribeInfo.SetNeedSilentReplayOnSubscribe(
+                        asynccallbackinfo->subscriberInfo.needSilentReplayOnSubscribe);
                     asynccallbackinfo->info.errorCode =
                         NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo), subscribeInfo);
                 } else {

@@ -23,6 +23,7 @@
 #include "notification_do_not_disturb_date.h"
 #include "notification_do_not_disturb_profile.h"
 #include "enabled_notification_callback_data.h"
+#include "notification_classification.h"
 #include "notification_extension_subscription_info.h"
 #include "notification_live_view_content.h"
 #include "notification_parameters.h"
@@ -1445,6 +1446,21 @@ public:
     static ErrCode TriggerUpdatePriorityType(const NotificationRequest &request);
 
     /**
+     * @brief Triggers asynchronous update of AI extension notification result.
+     *
+     * This method is called by the closed-source AI library when the classification
+     * result is ready after timeout. It asynchronously updates the notification with
+     * the extension result and notifies subscribers.
+     *
+     * @param request Indicates the NotificationRequest object for setting the notification content.
+     *                This parameter must be specified.
+     * @param notificationClassification Indicates the AI extension result containing aggregation type.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode TriggerUpdateAiExtNotification(const sptr<NotificationRequest> &request,
+        const sptr<NotificationClassification> &notificationClassification);
+
+    /**
      * @brief Cancels a published agent notification.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
@@ -1923,6 +1939,11 @@ public:
      * @return Returns set result.
      */
     static ErrCode SnoozeNotification(const std::string &hashCode, const int64_t delayTime);
+
+    static ErrCode SetNotificationSwitch(const std::string &switchName, bool switchState, int32_t userId);
+
+    static ErrCode GetNotificationSwitch(
+        const std::string &switchName, int32_t userId, NotificationConstant::SWITCH_STATE &switchState);
 };
 }  // namespace Notification
 }  // namespace OHOS

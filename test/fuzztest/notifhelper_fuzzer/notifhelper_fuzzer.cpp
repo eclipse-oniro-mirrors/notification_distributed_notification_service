@@ -24,6 +24,8 @@
 #include "mock_notification_donotdisturb_profile.h"
 #include "notification_disable.h"
 #include "mock_notification_operation_info.h"
+#include "notification_classification.h"
+#include "notification_request.h"
 
 namespace OHOS {
 namespace Notification {
@@ -166,6 +168,24 @@ constexpr int32_t MAX_USER_ID = 100;
         return true;
     }
 
+    bool TestSwitchAndAiExtOperations(FuzzedDataProvider* fdp, NotificationHelper& notificationHelper)
+    {
+        sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+        sptr<NotificationClassification> classification =
+            new (std::nothrow) NotificationClassification(fdp->ConsumeRandomLengthString(),
+                fdp->ConsumeRandomLengthString());
+        notificationHelper.TriggerUpdateAiExtNotification(request, classification);
+
+        std::string switchName = fdp->ConsumeRandomLengthString();
+        bool switchState = fdp->ConsumeBool();
+        int32_t userId = fdp->ConsumeIntegralInRange<int32_t>(MIN_USER_ID, MAX_USER_ID);
+        notificationHelper.SetNotificationSwitch(switchName, switchState, userId);
+
+        NotificationConstant::SWITCH_STATE getState;
+        notificationHelper.GetNotificationSwitch(switchName, userId, getState);
+        return true;
+    }
+
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
         NotificationHelper notificationHelper;
@@ -173,6 +193,7 @@ constexpr int32_t MAX_USER_ID = 100;
         TestExtensionOperations(fdp, notificationHelper);
         TestGeofenceOperations(fdp, notificationHelper);
         TestPriorityOperations(fdp, notificationHelper);
+        TestSwitchAndAiExtOperations(fdp, notificationHelper);
         return true;
     }
 }

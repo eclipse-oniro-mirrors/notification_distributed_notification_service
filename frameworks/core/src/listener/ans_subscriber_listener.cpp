@@ -235,6 +235,23 @@ ErrCode SubscriberListener::OnEnabledPriorityByBundleChanged(
     return ERR_OK;
 }
 
+ErrCode SubscriberListener::OnNotificationSwitchChanged(
+    const sptr<NotificationSwitchChangedCallbackData> &callbackData)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    auto subscriber = subscriber_.lock();
+    if (subscriber == nullptr) {
+        ANS_LOGE("null subscriber");
+        return ERR_INVALID_DATA;
+    }
+    if (callbackData == nullptr) {
+        ANS_LOGE("null callbackData");
+        return ERR_INVALID_DATA;
+    }
+    subscriber->OnNotificationSwitchChanged(std::make_shared<NotificationSwitchChangedCallbackData>(*callbackData));
+    return ERR_OK;
+}
+
 ErrCode SubscriberListener::OnEnabledWatchStatusChanged(uint32_t watchStatus)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);

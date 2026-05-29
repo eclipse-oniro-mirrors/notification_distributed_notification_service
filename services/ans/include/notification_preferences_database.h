@@ -615,7 +615,12 @@ public:
         const sptr<NotificationBundleOption> &bundleOption, const std::string &configValue);
     bool GetBundlePriorityConfig(const sptr<NotificationBundleOption> &bundleOption, std::string &configValue);
     bool GetRestrictedModeTrustList(NotificationPreferencesInfo &info);
-
+    bool SetNotificationSwitch(const std::string &switchName,
+        const NotificationConstant::SWITCH_STATE &state, const int32_t userId);
+    bool GetNotificationSwitch(const std::string &switchName,
+        const int32_t userId, NotificationConstant::SWITCH_STATE &state);
+    bool GetAllNotificationSwitchInfo(const int32_t userId,
+        std::unordered_map<std::string, std::string>& notificationSwitchInfos);
 private:
     bool CheckRdbStore();
 

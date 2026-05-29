@@ -431,6 +431,10 @@ export default namespace notificationManager {
     export native function nativeGetPriorityStrategyByBundles(bundles: Array<BundleOption>): Promise<Map<BundleOption, long>>;
     export native function nativeGetNotificationStatisticsByBundle(bundles: Array<BundleOption>): Promise<Array<NotificationStatistics>>;
     export native function nativeSetNotificationSnooze(hashCode: string, delayTime: long): Promise<void>;
+    export native function nativeSetNotificationSwitch(
+        switchName: string, switchState: boolean, userId: int): Promise<void>;
+    export native function nativeGetNotificationSwitch(
+        switchName: string, userId: int): Promise<SwitchState>;
 
     function isInvalidParameter(doNotDisturbDate: DoNotDisturbDate): BusinessError
     {
@@ -3046,6 +3050,30 @@ export default namespace notificationManager {
         let result: Promise<void>;
         try {
             result = nativeSetNotificationSnooze(hashCode, delayTime);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
+    }
+
+    export function setNotificationSwitch(switchName: string, switchState: boolean, userId: int): Promise<void>
+    {
+        let result: Promise<void>;
+        try {
+            result = nativeSetNotificationSwitch(switchName, switchState, userId);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
+    }
+
+    export function getNotificationSwitch(switchName: string, userId: int): Promise<SwitchState>
+    {
+        let result: Promise<SwitchState>;
+        try {
+            result = nativeGetNotificationSwitch(switchName, userId);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
             throw error;

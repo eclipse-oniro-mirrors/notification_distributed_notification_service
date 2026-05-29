@@ -208,6 +208,81 @@ HWTEST_F(AdvancedNotificationPriorityHelperTest, UpdatePriorityType_0100, Functi
     AdvancedNotificationPriorityHelper::GetInstance()->UpdatePriorityType(request);
     EXPECT_EQ(request->GetPriorityNotificationType(), NotificationConstant::PriorityNotificationType::OTHER);
 }
+
+/**
+ * @tc.name: BuildPriorityCommand_0100
+ * @tc.desc: Test BuildPriorityCommand with valid request.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationPriorityHelperTest, BuildPriorityCommand_0100, Function | SmallTest | Level1)
+{
+    std::string bundleName = "bundleName";
+    int32_t uid = 1000;
+    NotificationConstant::SWITCH_STATE priorityStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    sptr<NotificationBundleOption> notification = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+    NotificationPreferences::GetInstance()->PutPriorityEnabledByBundleV2(notification, priorityStatus);
+    NotificationPreferences::GetInstance()->PutPriorityStrategyByBundle(notification, 1);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorBundleName(bundleName);
+    request->SetCreatorUid(uid);
+    request->SetOwnerBundleName("");
+    request->SetOwnerUid(uid);
+    std::string cmdType = NotificationAiExtensionWrapper::UPDATE_AGGREGATION_TYPE;
+    nlohmann::json command;
+    AdvancedNotificationPriorityHelper::GetInstance()->BuildPriorityCommand(cmdType, request, command);
+    EXPECT_TRUE(command.contains(cmdType));
+}
+
+/**
+ * @tc.name: BuildPriorityCommand_0200
+ * @tc.desc: Test BuildPriorityCommand with priority disabled.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationPriorityHelperTest, BuildPriorityCommand_0200, Function | SmallTest | Level1)
+{
+    std::string bundleName = "bundleName";
+    int32_t uid = 1000;
+    NotificationConstant::SWITCH_STATE priorityStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    sptr<NotificationBundleOption> notification = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+    NotificationPreferences::GetInstance()->PutPriorityEnabledByBundleV2(notification, priorityStatus);
+    NotificationPreferences::GetInstance()->PutPriorityStrategyByBundle(notification, 1);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorBundleName(bundleName);
+    request->SetCreatorUid(uid);
+    request->SetOwnerBundleName("");
+    request->SetOwnerUid(uid);
+    std::string cmdType = NotificationAiExtensionWrapper::UPDATE_AGGREGATION_TYPE;
+    nlohmann::json command;
+    AdvancedNotificationPriorityHelper::GetInstance()->BuildPriorityCommand(cmdType, request, command);
+    EXPECT_FALSE(command.contains(cmdType));
+}
+
+/**
+ * @tc.name: BuildPriorityCommand_0300
+ * @tc.desc: Test BuildPriorityCommand with STATUS_ALL_PRIORITY strategy.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationPriorityHelperTest, BuildPriorityCommand_0300, Function | SmallTest | Level1)
+{
+    std::string bundleName = "bundleName";
+    int32_t uid = 1000;
+    NotificationConstant::SWITCH_STATE priorityStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    sptr<NotificationBundleOption> notification = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+    NotificationPreferences::GetInstance()->PutPriorityEnabledByBundleV2(notification, priorityStatus);
+    NotificationPreferences::GetInstance()->PutPriorityStrategyByBundle(notification, 32);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorBundleName(bundleName);
+    request->SetCreatorUid(uid);
+    request->SetOwnerBundleName("");
+    request->SetOwnerUid(uid);
+    std::string cmdType = NotificationAiExtensionWrapper::UPDATE_AGGREGATION_TYPE;
+    nlohmann::json command;
+    AdvancedNotificationPriorityHelper::GetInstance()->BuildPriorityCommand(cmdType, request, command);
+    EXPECT_FALSE(command.contains(cmdType));
+}
 #endif
 }
 }

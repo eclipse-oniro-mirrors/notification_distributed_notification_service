@@ -16,6 +16,7 @@
 #define private public
 #define protected public
 #include "notification.h"
+#include "notification_classification.h"
 #undef private
 #undef protected
 #include "notification_fuzzer.h"
@@ -52,6 +53,10 @@ namespace OHOS {
         notification.IsFloatingIcon();
         notification.GetRemindType();
         notification.IsRemoveAllowed();
+        sptr<Notification::NotificationClassification> classification =
+            new Notification::NotificationClassification(stringData, stringData);
+        notification.SetNotificationClassification(classification);
+        notification.GetNotificationClassification();
         Parcel parcel;
         return notification.MarshallingBool(parcel);
     }
