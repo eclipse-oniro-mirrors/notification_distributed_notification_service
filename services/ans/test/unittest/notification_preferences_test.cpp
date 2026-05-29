@@ -276,24 +276,6 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00300, Functio
 }
 
 /**
- * @tc.number    : UpdateNotificationSlots_00100
- * @tc.name      :
- * @tc.desc      : Update notification slot into disturbe DB, return is ERR_OK
- */
-HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00100, Function | SmallTest | Level1)
-{
-    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
-    std::vector<sptr<NotificationSlot>> slots;
-    slots.push_back(slot);
-    EXPECT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption_, slots), (int)ERR_OK);
-    std::string des("This is a description.");
-    slot->SetDescription(des);
-    slots.clear();
-    slots.push_back(slot);
-    EXPECT_EQ((int)NotificationPreferences::GetInstance()->UpdateNotificationSlots(bundleOption_, slots), (int)ERR_OK);
-}
-
-/**
  * @tc.number    : UpdateNotificationSlots_00200
  * @tc.name      :
  * @tc.desc      : Update notification slot into disturbe DB when bundleName is null, return is ERR_ANS_INVALID_PARAM

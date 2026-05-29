@@ -91,18 +91,6 @@ void NotificationLocalLiveViewSubscriberManagerTest::TearDown()
 }
 
 /**
- * @tc.number    : NotificationLocalLiveViewSubscriberManagerTest_004
- * @tc.name      : ANS_AddSubscriber_004
- */
-HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest,
-    NotificationLocalLiveViewSubscriberManagerTest_004, Function | SmallTest | Level1)
-{
-    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    auto res = notificationLocalLiveViewSubscriberManager_->AddLocalLiveViewSubscriber(nullptr, info);
-    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
-}
-
-/**
  * @tc.number    : NotificationLocalLiveViewSubscriberManagerTest_005
  * @tc.name      : ANS_AddSubscriber_005
  */

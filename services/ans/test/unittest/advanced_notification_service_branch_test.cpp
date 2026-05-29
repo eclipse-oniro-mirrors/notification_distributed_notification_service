@@ -150,6 +150,35 @@ void AnsBranchTest::TestAddSlot(NotificationConstant::SlotType type)
 }
 
 /**
+ * @tc.number    : AnsBranchTest_223000
+ * @tc.name      : PrepareNotificationRequest_2000
+ * @tc.desc      : Test PrepareNotificationRequest function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_223000, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+
+    req->SetIsAgentNotification(true);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(false);
+    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(req).GetErrCode(), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_224000
+ * @tc.name      : Publish_1000
+ * @tc.desc      : Test Publish function req is false.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_224000, Function | SmallTest | Level1)
+{
+    std::string label = "publish's label";
+    ASSERT_EQ(advancedNotificationService_->Publish(label, nullptr), ERR_ANS_INVALID_PARAM);
+}
+
+/**
  * @tc.number    : AnsBranchTest_225000
  * @tc.name      : CancelAsBundle_1000
  * @tc.desc      : Test CancelAsBundle function return ERR_ANS_NON_SYSTEM_APP.
