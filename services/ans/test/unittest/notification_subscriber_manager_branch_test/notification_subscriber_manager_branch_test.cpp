@@ -1482,6 +1482,47 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_07
 }
 
 /**
+ * @tc.number  : AdvancedNotificationService_07500
+ * @tc.name    : AdvancedNotificationService_07500
+ * @tc.desc    : Test UpdateTriggerRequest function
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_07500, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    sptr<NotificationRequest> request1(new (std::nothrow) NotificationRequest());
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    ASSERT_NE(request, nullptr);
+    request->SetDeliveryTime(0);
+    request->notificationContentType_ = NotificationContent::Type::LOCAL_LIVE_VIEW;
+    request1 = nullptr;
+    advancedNotificationService.UpdateTriggerRequest(request1);
+    advancedNotificationService.UpdateTriggerRequest(request);
+    EXPECT_EQ(request->GetDeliveryTime(), 0);
+    request->SetContent(nullptr);
+    request->notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+    request->slotType_ = NotificationConstant::SlotType::LIVE_VIEW;
+    advancedNotificationService.UpdateTriggerRequest(request);
+    EXPECT_EQ(request->GetDeliveryTime(), 0);
+    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
+    ASSERT_NE(mediaContent, nullptr);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(mediaContent);
+    ASSERT_NE(content, nullptr);
+    request->SetContent(content);
+    request->notificationTrigger_ = nullptr;
+    request->notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+    request->slotType_ = NotificationConstant::SlotType::LIVE_VIEW;
+    advancedNotificationService.UpdateTriggerRequest(request);
+    EXPECT_NE(request->GetDeliveryTime(), 0);
+    content->content_ = nullptr;
+    request->SetContent(content);
+    request->SetDeliveryTime(0);
+    request->notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+    request->slotType_ = NotificationConstant::SlotType::LIVE_VIEW;
+    advancedNotificationService.UpdateTriggerRequest(request);
+    EXPECT_EQ(request->GetDeliveryTime(), 0);
+}
+
+/**
  * @tc.number  : AdvancedNotificationService_07600
  * @tc.name    : AdvancedNotificationService_07600
  * @tc.desc    : Test ParseGeofenceNotificationFromDb functionand result == ERR_OK

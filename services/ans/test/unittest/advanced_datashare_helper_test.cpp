@@ -301,6 +301,29 @@ HWTEST_F(AdvancedDatashareHelperTest, QueryContact_0008, Function | SmallTest | 
     EXPECT_EQ(ret, 1);
 }
 
+HWTEST_F(AdvancedDatashareHelperTest, isRepeatCall_0001, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    MockIsFailedToCreateDataShareHelper(true);
+    MockIsFailedToQueryDataShareResultSet(true);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string phoneNumber = "11111111111";
+
+    bool ret = advancedDatashareHelper.isRepeatCall(phoneNumber);
+    EXPECT_EQ(ret, 0);
+
+    MockIsFailedToCreateDataShareHelper(false);
+    ret = advancedDatashareHelper.isRepeatCall(phoneNumber);
+    EXPECT_EQ(ret, 0);
+
+    MockIsFailedToQueryDataShareResultSet(false);
+    MockSetRowCount(1);
+    MockIsFailedGoToFirstRow(0);
+    ret = advancedDatashareHelper.isRepeatCall(phoneNumber);
+    EXPECT_EQ(ret, 0);
+}
+
 /**
  * @tc.name: IsPCModeEnabled_001
  * @tc.desc: Test IsPCModeEnabled returns initial false value

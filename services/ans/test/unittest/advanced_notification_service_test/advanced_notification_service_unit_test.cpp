@@ -2345,6 +2345,37 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetStatisticsByBundle_103, Functio
 }
 
 /**
+ * @tc.name: SetNotificationRequestToDbCommon_100
+ * @tc.desc: Test SetNotificationRequestToDbCommon when VerifyNativeToken true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SetNotificationRequestToDbCommon_100, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "SetNotificationRequestToDb_100 test start";
+    advancedNotificationService_->notificationList_.clear();
+    sptr<MockNotificationRequest> request = new MockNotificationRequest();
+    EXPECT_CALL(*request, ToJson(testing::_))
+        .WillOnce(testing::DoAll(
+            testing::SetArgReferee<0>(nlohmann::json{{"status", "success"}}),
+            testing::Return(false)
+        ));
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    normalContent->SetTitle("title_1");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    request->SetContent(content);
+    request->SetCreatorUid(100);
+    request->SetCreatorUserId(100);
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::string bundleName = "BundleName_04";
+    int32_t uid = 100;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, uid);
+    AdvancedNotificationService::NotificationRequestDb requestDbObj =
+        { .request = request, .bundleOption = bundleOption };
+    auto result = advancedNotificationService_->SetNotificationRequestToDbCommon(requestDbObj);
+    ASSERT_EQ(result, (int)ERR_ANS_TASK_ERR);
+}
+
+/**
  * @tc.name: SetNotificationRequestToDbCommon_200
  * @tc.desc: Test SetNotificationRequestToDbCommon when VerifyNativeToken true.
  * @tc.type: FUNC
