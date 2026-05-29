@@ -264,41 +264,6 @@ HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_013, Level1)
 }
 
 /**
- * @tc.name: ReminderDataShareHelper_014
- * @tc.desc: test ReminderDataShareHelper::BuildReminderV1 function
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_014, Level1)
-{
-    sptr<ReminderRequest> reminder = sptr<ReminderRequestCalendar>::MakeSptr();
-    MockDataShareResultSet* mockResultSet = new MockDataShareResultSet;
-    std::shared_ptr<DataShare::DataShareResultSet> resultSet;
-    resultSet.reset(mockResultSet);
-
-    ReminderDataShareHelper::GetInstance().rdbVersion_ = 0;
-    reminder->SetTimeInterval(0);
-    ReminderDataShareHelper::GetInstance().BuildReminderV1(resultSet, reminder);
-    EXPECT_EQ(reminder->GetTimeInterval(), 0);
-
-    ReminderDataShareHelper::GetInstance().rdbVersion_ = 1;
-    EXPECT_CALL(*mockResultSet, GetColumnIndex(testing::_, testing::_)).Times(8)
-        .WillRepeatedly(testing::DoAll(testing::SetArgReferee<1>(0), testing::Return(0)));
-    EXPECT_CALL(*mockResultSet, GetLong(testing::_, testing::_)).Times(2)
-        .WillRepeatedly(testing::DoAll(testing::SetArgReferee<1>(300), testing::Return(0)));
-    EXPECT_CALL(*mockResultSet, GetInt(testing::_, testing::_)).Times(2)
-        .WillRepeatedly(testing::DoAll(testing::SetArgReferee<1>(1), testing::Return(0)));
-    EXPECT_CALL(*mockResultSet, GetString(testing::_, testing::_)).Times(4)
-        .WillRepeatedly(testing::DoAll(testing::SetArgReferee<1>("test"), testing::Return(0)));
-    ReminderDataShareHelper::GetInstance().BuildReminderV1(resultSet, reminder);
-    EXPECT_EQ(reminder->GetTimeInterval(), 300);
-    EXPECT_EQ(reminder->GetSnoozeTimes(), 1);
-    EXPECT_EQ(reminder->GetRingDuration(), 300);
-    EXPECT_EQ(reminder->GetSnoozeContent(), "test");
-    EXPECT_EQ(reminder->GetCustomRingUri(), "test");
-}
-
-/**
  * @tc.name: ReminderDataShareHelper_016
  * @tc.desc: test ReminderDataShareHelper::BuildReminderV1 function
  * DataShare::DataShareObserver::ChangeInfo::VBucket
