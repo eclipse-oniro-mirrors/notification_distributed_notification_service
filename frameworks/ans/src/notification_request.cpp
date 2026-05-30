@@ -1106,6 +1106,11 @@ void NotificationRequest::ToJsonExt(nlohmann::json &jsonObject) const
 void NotificationRequest::ConvertJsonToWantAgent(
     NotificationRequest *target, const nlohmann::json &jsonObject)
 {
+    if (target == nullptr) {
+        ANS_LOGE("target is nullptr");
+        return;
+    }
+    
     const auto &jsonEnd = jsonObject.cend();
     if (jsonObject.find("wantAgent") != jsonEnd && jsonObject.at("wantAgent").is_string()) {
         auto wantAgentValue  = jsonObject.at("wantAgent").get<std::string>();
@@ -2574,6 +2579,11 @@ bool NotificationRequest::ConvertGroupInfoToJson(nlohmann::json &jsonObject) con
 void NotificationRequest::ConvertJsonToNumExt(
     NotificationRequest *target, const nlohmann::json &jsonObject)
 {
+    if (target == nullptr) {
+        ANS_LOGE("target is nullptr");
+        return;
+    }
+    
     const auto &jsonEnd = jsonObject.cend();
 
     if (jsonObject.find("updateDeadLine") != jsonEnd && jsonObject.at("updateDeadLine").is_number_integer()) {
@@ -2721,6 +2731,11 @@ void NotificationRequest::ConvertJsonToString(NotificationRequest *target, const
 
 void NotificationRequest::SubConvertJsonToString(NotificationRequest *target, const nlohmann::json &jsonObject)
 {
+    if (target == nullptr) {
+        ANS_LOGE("target is nullptr");
+        return;
+    }
+    
     const auto &jsonEnd = jsonObject.cend();
     if (jsonObject.find("distributedHashCode") != jsonEnd && jsonObject.at("distributedHashCode").is_string()) {
         target->distributedHashCode_ = jsonObject.at("distributedHashCode").get<std::string>();
@@ -2820,6 +2835,11 @@ void NotificationRequest::ConvertJsonToBool(NotificationRequest *target, const n
 
 void NotificationRequest::ConvertJsonToBoolExt(NotificationRequest *target, const nlohmann::json &jsonObject)
 {
+    if (target == nullptr) {
+        ANS_LOGE("target is nullptr");
+        return;
+    }
+    
     const auto &jsonEnd = jsonObject.cend();
 
     if (jsonObject.find("isAgent") != jsonEnd && jsonObject.at("isAgent").is_boolean()) {
@@ -3093,6 +3113,16 @@ bool NotificationRequest::IsUpdateLiveView() const
 
 ErrCode NotificationRequest::CheckVersion(const sptr<NotificationRequest> &oldRequest) const
 {
+    if (oldRequest == nullptr) {
+        ANS_LOGE("oldRequest is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    
+    if (notificationContent_ == nullptr) {
+        ANS_LOGE("notificationContent_ is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    
     auto content = notificationContent_->GetNotificationContent();
     auto liveView = std::static_pointer_cast<NotificationLiveViewContent>(content);
     auto oldContent = oldRequest->GetContent()->GetNotificationContent();
@@ -3192,6 +3222,16 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
 
 void NotificationRequest::UpdateExtraInfo(const sptr<NotificationRequest> &oldRequest)
 {
+    if (oldRequest == nullptr) {
+        ANS_LOGE("oldRequest is nullptr");
+        return;
+    }
+    
+    if (notificationContent_ == nullptr) {
+        ANS_LOGE("notificationContent_ is nullptr");
+        return;
+    }
+    
     auto content = notificationContent_->GetNotificationContent();
     if (content == nullptr) {
         return;
@@ -3232,6 +3272,16 @@ void NotificationRequest::UpdateExtraInfo(const sptr<NotificationRequest> &oldRe
 
 void NotificationRequest::IncrementalUpdateLiveview(const sptr<NotificationRequest> &oldRequest)
 {
+    if (oldRequest == nullptr) {
+        ANS_LOGE("oldRequest is nullptr");
+        return;
+    }
+    
+    if (notificationContent_ == nullptr) {
+        ANS_LOGE("notificationContent_ is nullptr");
+        return;
+    }
+    
     auto content = notificationContent_->GetNotificationContent();
     auto newLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
     auto newExtraInfo = newLiveViewContent->GetExtraInfo();
