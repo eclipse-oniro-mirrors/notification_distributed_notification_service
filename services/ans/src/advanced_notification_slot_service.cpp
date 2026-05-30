@@ -1463,7 +1463,7 @@ ErrCode AdvancedNotificationService::UpdateVoiceUpdate(const std::string &config
     nlohmann::json newJsonData;
     newJsonData["date"] = storedDate;
     newJsonData["count"] = currentCount;
-    std::string newData = newJsonData.dump();
+    std::string newData = newJsonData.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
     
     result = NotificationPreferences::GetInstance()->SetKvToDb(NOTIFICATION_VOICE_SUMMARY_COUNT, newData, userId);
     ANS_LOGI("Update voice summary count result: %{public}d, %{public}d, %{public}s.",

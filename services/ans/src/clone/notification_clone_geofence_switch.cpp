@@ -55,7 +55,8 @@ ErrCode NotificationCloneGeofenceSwitch::OnBackup(nlohmann::json &jsonObject)
     NotificationPreferences::GetInstance()->IsGeofenceEnabled(enable);
     jsonObject[NOTIFICATION_GEOFENCE_ENABLE] = enable ? 1 : 0;
     // 将enable转换为json对象
-    ANS_LOGD("Notification bundle list %{public}s", jsonObject.dump().c_str());
+    ANS_LOGD("Notification bundle list %{public}s",
+        jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace).c_str());
     return ERR_OK;
 }
 

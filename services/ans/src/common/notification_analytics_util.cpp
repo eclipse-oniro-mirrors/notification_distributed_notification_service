@@ -294,7 +294,7 @@ std::string HaOperationMessage::ToJson()
         notificationData.ToJson(jsonMessage);
         jsonObject["notification"] =  jsonMessage;
     }
-    return jsonObject.dump();
+    return jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
 }
 
 void SetPublishTime(const std::string& hashCode, const std::vector<std::string>& deviceTypes,

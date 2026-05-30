@@ -123,7 +123,7 @@ bool OnRdbUpgradeLiveviewMigrate(const std::string &oldValue, std::string &newVa
         return false;
     }
     // Encrypt the updated value
-    AesGcmHelper::Encrypt(jsonObject.dump(), newValue);
+    AesGcmHelper::Encrypt(jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), newValue);
     return true; // Indicate successful migration
 }
 }

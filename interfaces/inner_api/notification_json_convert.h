@@ -71,7 +71,7 @@ public:
             ANS_LOGE("Converter : Cannot convert to JSON object");
             return false;
         }
-        jsonString = jsonObject.dump();
+        jsonString = jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
 
         return true;
     }

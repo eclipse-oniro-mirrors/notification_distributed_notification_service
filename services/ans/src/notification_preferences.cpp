@@ -2596,7 +2596,7 @@ ErrCode NotificationPreferences::SetDistributedDevicelist(std::vector<std::strin
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     nlohmann::json deviceTypesJson = deviceTypes;
-    std::string deviceTypesjsonString = deviceTypesJson.dump();
+    std::string deviceTypesjsonString = deviceTypesJson.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
     storeDBResult = preferncesDB_->PutDistributedDevicelist(deviceTypesjsonString, userId);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }

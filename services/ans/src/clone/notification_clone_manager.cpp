@@ -110,7 +110,7 @@ static std::string SetBackUpReply()
     resultInfo.emplace_back(errorInfo);
     reply["resultInfo"] = resultInfo;
 
-    return reply.dump();
+    return reply.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
 }
 
 int32_t NotificationCloneManager::OnBackup(MessageParcel& data, MessageParcel& reply)
@@ -137,7 +137,7 @@ int32_t NotificationCloneManager::OnBackup(MessageParcel& data, MessageParcel& r
         jsonObject[iter->first] = jsonItem;
     }
 
-    if (SaveConfig(jsonObject.dump()) != ERR_OK) {
+    if (SaveConfig(jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace)) != ERR_OK) {
         message.Message("SaveConfig failed.");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ANS_CLONE_ERROR;

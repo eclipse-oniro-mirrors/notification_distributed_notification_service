@@ -248,7 +248,7 @@ bool RdbStoreDataCallBackNotificationStorage::ProcessRow(
         NativeRdb::ValuesBucket valuesBucket;
         valuesBucket.PutString(NOTIFICATION_KEY, resultKey);
         std::string encryptValue;
-        AesGcmHelper::Encrypt(jsonObject.dump(), encryptValue);
+        AesGcmHelper::Encrypt(jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), encryptValue);
         valuesBucket.PutString(NOTIFICATION_VALUE, encryptValue);
         int32_t ret = rdbStore.InsertWithConflictResolution(rowId, tableName, valuesBucket,
             NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);

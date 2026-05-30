@@ -504,7 +504,7 @@ void NotificationSubscriberManager::SendCommonEvent(
                         {"uid", param.first->GetUid()}, {"enable", enabled}};
                     jsonObject.emplace_back(jsonNode);
                 }
-                want.SetParam("switches", jsonObject.dump());
+                want.SetParam("switches", jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace));
                 want.SetAction(NotificationConstant::EVENT_PRIORITY_SWITCH_BY_BUNDLE);
             }
             break;
@@ -515,7 +515,7 @@ void NotificationSubscriberManager::SendCommonEvent(
                         {"uid", param.first->GetUid()}, {"strategy", param.second}};
                     jsonObject.emplace_back(jsonNode);
                 }
-                want.SetParam("strategies", jsonObject.dump());
+                want.SetParam("strategies", jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace));
                 want.SetAction(NotificationConstant::EVENT_PRIORITY_STRATEGY_BY_BUNDLE);
             }
             break;

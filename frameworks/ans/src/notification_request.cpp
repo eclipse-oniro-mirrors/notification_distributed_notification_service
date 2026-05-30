@@ -938,7 +938,7 @@ bool NotificationRequest::CollaborationToJson(std::string& data) const
         return false;
     }
 
-    data = jsonObject.dump();
+    data = jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
     return true;
 }
 
