@@ -107,7 +107,7 @@ public:
             return nullptr;
         }
 
-        auto jsonObject = nlohmann::json::parse(jsonString, nullptr, false);
+        auto jsonObject = nlohmann::json::parse(jsonString);
         if (jsonObject.is_null() or !jsonObject.is_object()) {
             ANS_LOGE("Converter : Invalid JSON object");
             return nullptr;
