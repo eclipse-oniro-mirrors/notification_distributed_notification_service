@@ -273,7 +273,7 @@ std::string NotificationPreferencesInfo::BundleInfo::GetExtensionSubscriptionInf
         itemcopy->ToJson(jsonNode);
         jsonObject.emplace_back(jsonNode);
     }
-    return jsonObject.dump();
+    return jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
 }
 
 void NotificationPreferencesInfo::BundleInfo::SetExtensionSubscriptionInfos(
@@ -344,7 +344,7 @@ std::string NotificationPreferencesInfo::BundleInfo::GetExtensionSubscriptionBun
         item->ToJson(jsonNode);
         jsonObject.emplace_back(jsonNode);
     }
-    return jsonObject.dump();
+    return jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
 }
 
 void NotificationPreferencesInfo::BundleInfo::SetExtensionSubscriptionBundles(

@@ -235,7 +235,7 @@ void PushCallBackProxy::HandleEventControl(
         ANS_LOGE("This event has not eventControl");
         return;
     }
-    pushCallBackParam->eventControl = jsonObject.at(event).dump();
+    pushCallBackParam->eventControl = jsonObject.at(event).dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
 }
 } // namespace Notification
 } // namespace OHOS

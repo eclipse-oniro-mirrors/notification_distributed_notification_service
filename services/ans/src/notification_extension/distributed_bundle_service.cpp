@@ -314,7 +314,7 @@ void DistributedBundleService::PublishDistributedStateChange(
             return;
         }
         nlohmann::json targetBundle = {{"bundle", bundleOption->GetBundleName()}, {"uid", bundleOption->GetUid()}};
-        want.SetParam("targetBundle", targetBundle.dump());
+        want.SetParam("targetBundle", targetBundle.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace));
     }
 
     EventFwk::CommonEventData commonData;

@@ -79,7 +79,7 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     root["ability.want.params.uiExtensionType"] = uiExtensionType;
     root["innerLake"] = innerLake;
     root["easyAbroad"] = easyAbroad;
-    std::string command  = root.dump();
+    std::string command  = root.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
     
     auto connection_ = sptr<SystemDialogConnectStb>(new (std::nothrow) SystemDialogConnectStb(command));
     if (connection_ == nullptr) {

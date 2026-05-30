@@ -120,7 +120,7 @@ std::string NotificationDisable::ToJson()
     jsonObject[DISABLED] = disabled_;
     jsonObject[BUNDLELIST] = nlohmann::json(bundleList_);
     jsonObject[USERID] = userId_;
-    return jsonObject.dump();
+    return jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
 }
 
 void NotificationDisable::FromJson(const std::string &jsonObj)

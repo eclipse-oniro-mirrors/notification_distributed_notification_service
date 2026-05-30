@@ -3445,7 +3445,7 @@ bool NotificationPreferencesDatabase::PutExtensionSubscriptionClonedInvalidBundl
     }
     
     int32_t result = rdbDataManager_->InsertData(KEY_EXTENSION_SUBSCRIPTION_CLONEDATA,
-        jsonNodes.dump(), userId);
+        jsonNodes.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), userId);
     return (result == NativeRdb::E_OK);
 }
 
@@ -3743,7 +3743,7 @@ bool NotificationPreferencesDatabase::UpdateClonePriorityInfos(
             std::to_string(static_cast<int32_t>(cloneInfo.GetClonePriorityType()));
         nlohmann::json jsonNode;
         cloneInfo.ToJson(jsonNode);
-        values.emplace(key, jsonNode.dump());
+        values.emplace(key, jsonNode.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace));
     }
     return UpdateCloneToDisturbeDB(userId, values);
 }
@@ -3846,7 +3846,7 @@ bool NotificationPreferencesDatabase::UpdateBatchCloneBundleInfo(const int32_t &
         nlohmann::json jsonNode;
         std::string key = cloneBundle + info.GetBundleName() + std::to_string(info.GetAppIndex());
         info.ToJson(jsonNode);
-        values.emplace(key, jsonNode.dump());
+        values.emplace(key, jsonNode.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace));
     }
     return UpdateCloneToDisturbeDB(userId, values);
 }

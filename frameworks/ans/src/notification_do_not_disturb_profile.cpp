@@ -122,7 +122,7 @@ std::string NotificationDoNotDisturbProfile::ToJson()
 {
     nlohmann::json jsonObject;
     GetProfileJson(jsonObject);
-    return jsonObject.dump();
+    return jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
 }
 
 void NotificationDoNotDisturbProfile::GetProfileJson(nlohmann::json &jsonObject) const

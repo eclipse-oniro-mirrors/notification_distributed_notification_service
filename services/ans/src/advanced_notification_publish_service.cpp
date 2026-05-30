@@ -1148,11 +1148,11 @@ ErrCode AdvancedNotificationService::PublishExtensionServiceStateChange(
                 });
             }
         }
-        want.SetParam("enabledBundles", enabledBundlesJson.dump());
+        want.SetParam("enabledBundles", enabledBundlesJson.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace));
     }
 
     nlohmann::json targetBundle = {{"bundle", bundleOption->GetBundleName()}, {"uid", bundleOption->GetUid()}};
-    want.SetParam("targetBundle", targetBundle.dump());
+    want.SetParam("targetBundle", targetBundle.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace));
 
     EventFwk::CommonEventData commonData;
     commonData.SetWant(want);

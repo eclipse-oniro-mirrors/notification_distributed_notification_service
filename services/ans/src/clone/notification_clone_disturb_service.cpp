@@ -57,7 +57,7 @@ ErrCode NotificationCloneDisturb::OnBackup(nlohmann::json &jsonObject)
         profiles[index]->GetProfileJson(jsonNode);
         jsonObject.emplace_back(jsonNode);
     }
-    ANS_LOGD("Notification disturb profile list %{public}s", jsonObject.dump().c_str());
+    ANS_LOGD("Notification disturb profile list %{public}s", jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace).c_str());
     return ERR_OK;
 }
 
@@ -89,7 +89,7 @@ void NotificationCloneDisturb::OnRestore(const nlohmann::json &jsonObject, std::
         if (item == nullptr) {
             return;
         }
-        item->FromJson(profile.dump());
+        item->FromJson(profile.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace));
         profiles_.push_back(item);
     }
 

@@ -373,7 +373,7 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
     }
     
     std::string encryptValue;
-    ErrCode errorCode = AesGcmHelper::Encrypt(jsonObject.dump(), encryptValue);
+    ErrCode errorCode = AesGcmHelper::Encrypt(jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), encryptValue);
     if (errorCode != ERR_OK) {
         ANS_LOGE("SetNotificationRequestToDb encrypt error");
         return static_cast<int>(errorCode);
@@ -429,7 +429,7 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDbCommon(const Noti
     }
     
     std::string encryptValue;
-    ErrCode errorCode = AesGcmHelper::Encrypt(jsonObject.dump(), encryptValue);
+    ErrCode errorCode = AesGcmHelper::Encrypt(jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), encryptValue);
     if (errorCode != ERR_OK) {
         ANS_LOGE("SetNotificationRequestToDb encrypt error");
         return static_cast<int>(errorCode);

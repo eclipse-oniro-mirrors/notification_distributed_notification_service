@@ -2255,7 +2255,7 @@ AnsStatus AdvancedNotificationService::PushCheck(const sptr<NotificationRequest>
         }
     }
 
-    ErrCode result = pushCallBack->OnCheckNotification(jsonObject.dump(), pushCallBackParam);
+    ErrCode result = pushCallBack->OnCheckNotification(jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), pushCallBackParam);
     if (result != ERR_OK) {
         AnsStatus ansStatus = HandlePushCheckFailed(request, result);
         if (!ansStatus.Ok()) {

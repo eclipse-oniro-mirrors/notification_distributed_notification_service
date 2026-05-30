@@ -63,7 +63,7 @@ ErrCode DhNotificationCloneBundle::OnBackup(nlohmann::json &jsonObject)
         jsonObject.emplace_back(jsonNode);
         ANS_LOGD("Event dh bundle backup %{public}s.", cloneBundles[index].Dump().c_str());
     }
-    ANS_LOGD("dh Notification bundle list %{public}s", jsonObject.dump().c_str());
+    ANS_LOGD("dh Notification bundle list %{public}s", jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace).c_str());
     return ERR_OK;
 }
 

@@ -130,7 +130,7 @@ std::string NotificationRingtoneInfo::ToJson()
     jsonObject[RINGTONE_INFO_RINGTONE_TITLE] = ringtoneTitle_;
     jsonObject[RINGTONE_INFO_RINGTONE_FILE_NAME] = ringtoneFileName_;
     jsonObject[RINGTONE_INFO_RINGTONE_URI] = ringtoneUri_;
-    return jsonObject.dump();
+    return jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
 }
 
 void NotificationRingtoneInfo::FromJson(const std::string &jsonObj)

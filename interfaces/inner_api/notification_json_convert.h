@@ -71,7 +71,7 @@ public:
             ANS_LOGE("Converter : Cannot convert to JSON object");
             return false;
         }
-        jsonString = jsonObject.dump();
+        jsonString = jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
 
         return true;
     }
@@ -107,7 +107,7 @@ public:
             return nullptr;
         }
 
-        auto jsonObject = nlohmann::json::parse(jsonString);
+        auto jsonObject = nlohmann::json::parse(jsonString, nullptr, false);
         if (jsonObject.is_null() or !jsonObject.is_object()) {
             ANS_LOGE("Converter : Invalid JSON object");
             return nullptr;
