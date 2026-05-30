@@ -62,7 +62,8 @@ ErrCode NotificationCloneBundle::OnBackup(nlohmann::json &jsonObject)
         jsonObject.emplace_back(jsonNode);
         ANS_LOGD("Event bundle backup %{public}s.", cloneBundles[index].Dump().c_str());
     }
-    ANS_LOGD("Notification bundle list %{public}s", jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace).c_str());
+    ANS_LOGD("Notification bundle list %{public}s",
+        jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace).c_str());
     return ERR_OK;
 }
 
