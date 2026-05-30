@@ -846,6 +846,13 @@ ErrCode NotificationHelper::TriggerUpdatePriorityType(const NotificationRequest 
 #endif
 }
 
+ErrCode NotificationHelper::TriggerUpdateAiExtNotification(const sptr<NotificationRequest> &request,
+    const sptr<NotificationClassification> &notificationClassification)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->TriggerUpdateAiExtNotification(
+        request, notificationClassification);
+}
+
 ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
     const std::string deviceId)
 {
@@ -1143,6 +1150,17 @@ ErrCode NotificationHelper::GetStatisticsByBundle(const std::vector<Notification
 ErrCode NotificationHelper::SnoozeNotification(const std::string &hashCode, const int64_t delayTime)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SnoozeNotification(hashCode, delayTime);
+}
+
+ErrCode NotificationHelper::SetNotificationSwitch(const std::string &switchName, bool switchState, int32_t userId)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationSwitch(switchName, switchState, userId);
+}
+
+ErrCode NotificationHelper::GetNotificationSwitch(
+    const std::string &switchName, int32_t userId, NotificationConstant::SWITCH_STATE &switchState)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSwitch(switchName, userId, switchState);
 }
 }  // namespace Notification
 }  // namespace OHOS

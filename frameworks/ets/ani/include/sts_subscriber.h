@@ -21,6 +21,7 @@
 #include "enabled_silent_reminder_callback_data.h"
 #include "enabled_priority_notification_by_bundle_callback_data.h"
 #include "badge_number_callback_data.h"
+#include "notification_switch_changed_callback_data.h"
 #include "sts_sorting_map.h"
 
 namespace OHOS {
@@ -50,6 +51,8 @@ bool WrapEnabledPriorityNotificationCallbackData(
     ani_env *env, const std::shared_ptr<EnabledNotificationCallbackData> &callbackData, ani_object &outObj);
 bool WrapEnabledPriorityNotificationByBundleCallbackData(ani_env *env,
     const std::shared_ptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData, ani_object &outObj);
+bool WrapNotificationSwitchChangedCallbackData(ani_env *env,
+    const std::shared_ptr<NotificationSwitchChangedCallbackData> &callbackData, ani_object &outObj);
 bool WarpBadgeNumberCallbackData(
     ani_env *env, const std::shared_ptr<BadgeNumberCallbackData> &badgeData, ani_object &outObj);
 bool SetVoiceContent(ani_env *env, const std::shared_ptr<NotificationSts> &request, ani_object &outObj);

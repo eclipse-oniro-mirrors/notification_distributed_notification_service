@@ -91,6 +91,7 @@ group("fuzztest") {
     "servicesetnotificationsenabledbyuser_fuzzer:ServiceSetNotificationsEnabledByUserFuzzTest",
     "servicesetnotificationsenabledforallbundles_fuzzer:ServiceSetNotificationsEnabledForAllBundlesFuzzTest",
     "servicesetnotificationsenabledforspecialbundle_fuzzer:ServiceSetNotificationsEnabledForSpecialBundleFuzzTest",
+    "servicesetnotificationswitch_fuzzer:ServiceSetNotificationSwitchFuzzTest",
     "servicesetringtoneinfobybundle_fuzzer:ServiceSetRingtoneInfoByBundleFuzzTest",
     "servicesetshowbadgeenabledforbundle_fuzzer:ServiceSetShowBadgeEnabledForBundleFuzzTest",
     "servicesetslotflagsasbundle_fuzzer:ServiceSetSlotFlagsAsBundleFuzzTest",
@@ -102,6 +103,7 @@ group("fuzztest") {
     "servicesubscribe_fuzzer:ServiceSubscribeFuzzTest",
     "servicesubscribelocalliveview_fuzzer:ServiceSubscribeLocalLiveViewFuzzTest",
     "servicesubscribenotification_fuzzer:ServiceSubscribeNotificationFuzzTest",
+    "servicetriggerupdateaiextnotification_fuzzer:ServiceTriggerUpdateAiExtNotificationFuzzTest",
     "serviceunsubscribe_fuzzer:ServiceUnsubscribeFuzzTest",
     "serviceupdateslots_fuzzer:ServiceUpdateSlotsFuzzTest",
   ]

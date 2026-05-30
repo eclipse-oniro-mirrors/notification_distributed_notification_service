@@ -28,6 +28,9 @@
 #include "ans_subscriber_listener.h"
 #include "mock_i_remote_object.h"
 #include "notification_ai_extension_wrapper.h"
+#include "notification_classification.h"
+#include "notification_classification_mgr.h"
+#include "notification_switch_changed_callback_data.h"
 #include "voice_extension_wrapper.h"
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
@@ -132,6 +135,17 @@ private:
         }
 
         void OnEnabledWatchStatusChanged(const uint32_t watchStatus) override
+        {
+            isCallback_ = true;
+        }
+
+        void OnNotificationSwitchChanged(
+            const std::shared_ptr<NotificationSwitchChangedCallbackData> &callbackData) override
+        {
+            isCallback_ = true;
+        }
+
+        void OnSystemUpdate(const std::shared_ptr<Notification> &request) override
         {
             isCallback_ = true;
         }
@@ -2337,8 +2351,461 @@ HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_WithV
     sptr<Notification> result = notificationSubscriberManager.GenerateSubscribedNotification(record,
         notification, voiceContent);
     
-    EXPECT_NE(nullptr, result);
+EXPECT_NE(nullptr, result);
     EXPECT_NE(nullptr, result->GetVoiceContent());
+    EXPECT_EQ(result->GetVoiceContent()->GetTextContent(), voiceContent);
+}
+
+/**
+ * @tc.name: NotifyConsumedInner_006
+ * @tc.desc: Test NotifyConsumedInner with enableClassification=true subscriber
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_006, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->SetSubscribedFlags(0xFFFFFFFF);
+    subscribeInfo->SetEnableClassification(true);
+    notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(DEFAULT_UID);
+    request->SetOwnerBundleName("test1");
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetNotificationId(1);
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    auto content = std::make_shared<NotificationContent>(normalContent);
+    request->SetContent(content);
+    sptr<Notification> notification = new Notification(request);
+    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
+
+    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap);
+
+    auto isCall = subscriber->IsCalled();
+    ASSERT_TRUE(isCall);
+    NotificationClassificationMgr::GetInstance().Clear();
+}
+
+/**
+ * @tc.name: BatchNotifyConsumedInner_004
+ * @tc.desc: Test BatchNotifyConsumedInner with enableClassification=true and ClassificationMgr pre-populated
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_004, Level1)
+{
+    sptr<MockAnsSubscriber> mockSubscriber = new MockAnsSubscriber(new MockIRemoteObject());
+    EXPECT_CALL(*mockSubscriber, OnConsumedList(_, _)).Times(1);
+
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("test");
+    request->SetNotificationId(1);
+    sptr<Notification> notification = new Notification(request);
+
+    sptr<NotificationClassification> classification = new NotificationClassification("DEAL", "LOGISTICS");
+    NotificationClassificationMgr::GetInstance().AddOrUpdate(notification->GetKey(), classification);
+
+    std::vector<sptr<OHOS::Notification::Notification>> notifications;
+    notifications.emplace_back(notification);
+    notifications.emplace_back(nullptr);
+    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
+
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager_->CreateSubscriberRecord(mockSubscriber);
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppName("test");
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->SetSubscribedFlags(0xFFFFFFFF);
+    subscribeInfo->SetEnableClassification(true);
+    notificationSubscriberManager_->AddRecordInfo(record, subscribeInfo);
+    notificationSubscriberManager_->BatchNotifyConsumedInner(notifications, notificationMap, record);
+
+    NotificationClassificationMgr::GetInstance().Clear();
+}
+
+/**
+ * @tc.name: AddSubscriberInner_NeedSilentReplayOnSubscribe_001
+ * @tc.desc: Test AddSubscriberInner calls onSubscriberAddCallback_ when needSilentReplayOnSubscribe=true
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, AddSubscriberInner_NeedSilentReplayOnSubscribe_001, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    bool callbackCalled = false;
+    std::function<void(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &)> callback =
+        [&callbackCalled](const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record) {
+            callbackCalled = true;
+        };
+    notificationSubscriberManager.RegisterOnSubscriberAddCallback(callback);
+
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->SetSubscribedFlags(0xFFFFFFFF);
+    subscribeInfo->SetNeedSilentReplayOnSubscribe(true);
+
+    ErrCode result = notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
+
+    ASSERT_EQ(result, ERR_OK);
+    ASSERT_TRUE(callbackCalled);
+}
+
+/**
+ * @tc.name: AddSubscriberInner_NeedSilentReplayOnSubscribe_002
+ * @tc.desc: Test AddSubscriberInner does NOT call onSubscriberAddCallback_ when needSilentReplayOnSubscribe=false
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, AddSubscriberInner_NeedSilentReplayOnSubscribe_002, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    bool callbackCalled = false;
+    std::function<void(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &)> callback =
+        [&callbackCalled](const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record) {
+            callbackCalled = true;
+        };
+    notificationSubscriberManager.RegisterOnSubscriberAddCallback(callback);
+
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->SetSubscribedFlags(0xFFFFFFFF);
+    subscribeInfo->SetNeedSilentReplayOnSubscribe(false);
+
+    ErrCode result = notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
+
+    ASSERT_EQ(result, ERR_OK);
+    ASSERT_FALSE(callbackCalled);
+}
+
+/**
+ * @tc.name: AddSubscriberInner_NeedSilentReplayOnSubscribe_003
+ * @tc.desc: Test AddSubscriberInner does NOT call callback when needSilentReplayOnSubscribe=true but callback is nullptr
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, AddSubscriberInner_NeedSilentReplayOnSubscribe_003, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->SetSubscribedFlags(0xFFFFFFFF);
+    subscribeInfo->SetNeedSilentReplayOnSubscribe(true);
+
+    ErrCode result = notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
+
+    ASSERT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: AddSubscriberInner_EnableClassification_001
+ * @tc.desc: Test AddSubscriberInner increments aggregationSubscriberCount when enableClassification=true
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, AddSubscriberInner_EnableClassification_001, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    notificationSubscriberManager.aggregationSubscriberCount_ = 0;
+
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->SetSubscribedFlags(0xFFFFFFFF);
+    subscribeInfo->SetEnableClassification(true);
+
+    ErrCode result = notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
+
+    ASSERT_EQ(result, ERR_OK);
+    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 1);
+}
+
+/**
+ * @tc.name: AddSubscriberInner_EnableClassification_002
+ * @tc.desc: Test AddSubscriberInner does NOT increment aggregationSubscriberCount when enableClassification=false
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, AddSubscriberInner_EnableClassification_002, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    notificationSubscriberManager.aggregationSubscriberCount_ = 0;
+
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->SetSubscribedFlags(0xFFFFFFFF);
+    subscribeInfo->SetEnableClassification(false);
+
+    ErrCode result = notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
+
+    ASSERT_EQ(result, ERR_OK);
+    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 0);
+}
+
+/**
+ * @tc.name: OnRemoteDied_EnableClassificationTrue
+ * @tc.desc: Test OnRemoteDied decrements aggregationSubscriberCount when enableClassification=true
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, OnRemoteDied_EnableClassificationTrue, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    notificationSubscriberManager.notificationSubQueue_ = std::make_shared<ffrt::queue>("test");
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberUid = 456;
+    record->enableClassification = true;
+    notificationSubscriberManager.aggregationSubscriberCount_ = 1;
+    notificationSubscriberManager.subscriberRecordList_.push_back(record);
+
+    notificationSubscriberManager.OnRemoteDied(subscriber->AsObject());
+
+    EXPECT_EQ(notificationSubscriberManager.subscriberRecordList_.size(), 0);
+    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 0);
+}
+
+/**
+ * @tc.name: OnRemoteDied_EnableClassificationFalse
+ * @tc.desc: Test OnRemoteDied does NOT decrement aggregationSubscriberCount when enableClassification=false
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, OnRemoteDied_EnableClassificationFalse, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    notificationSubscriberManager.notificationSubQueue_ = std::make_shared<ffrt::queue>("test");
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberUid = 457;
+    record->enableClassification = false;
+    notificationSubscriberManager.aggregationSubscriberCount_ = 1;
+    notificationSubscriberManager.subscriberRecordList_.push_back(record);
+
+    notificationSubscriberManager.OnRemoteDied(subscriber->AsObject());
+
+    EXPECT_EQ(notificationSubscriberManager.subscriberRecordList_.size(), 0);
+    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 1);
+}
+
+/**
+ * @tc.name: IncrementAggregationSubscriberCount_001
+ * @tc.desc: Test IncrementAggregationSubscriberCount increments the count
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, IncrementAggregationSubscriberCount_001, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    notificationSubscriberManager.aggregationSubscriberCount_ = 0;
+
+    notificationSubscriberManager.IncrementAggregationSubscriberCount();
+    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 1);
+
+    notificationSubscriberManager.IncrementAggregationSubscriberCount();
+    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 2);
+}
+
+/**
+ * @tc.name: DecrementAggregationSubscriberCount_001
+ * @tc.desc: Test DecrementAggregationSubscriberCount decrements the count when > 0
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, DecrementAggregationSubscriberCount_001, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    notificationSubscriberManager.aggregationSubscriberCount_ = 2;
+
+    notificationSubscriberManager.DecrementAggregationSubscriberCount();
+    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 1);
+
+    notificationSubscriberManager.DecrementAggregationSubscriberCount();
+    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 0);
+}
+
+/**
+ * @tc.name: DecrementAggregationSubscriberCount_002
+ * @tc.desc: Test DecrementAggregationSubscriberCount does NOT decrement when count is 0
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, DecrementAggregationSubscriberCount_002, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    notificationSubscriberManager.aggregationSubscriberCount_ = 0;
+
+    notificationSubscriberManager.DecrementAggregationSubscriberCount();
+    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 0);
+}
+
+/**
+ * @tc.name: GetAggregationSubscriberCount_001
+ * @tc.desc: Test GetAggregationSubscriberCount returns the current count
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, GetAggregationSubscriberCount_001, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    notificationSubscriberManager.aggregationSubscriberCount_ = 0;
+    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 0);
+
+    notificationSubscriberManager.aggregationSubscriberCount_ = 5;
+    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 5);
+}
+
+/**
+ * @tc.name: NotifySystemUpdate_001
+ * @tc.desc: Test NotifySystemUpdateInner with nullptr notification returns early
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifySystemUpdate_001, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<Notification> notification = nullptr;
+    sptr<NotificationClassification> classification = nullptr;
+
+    notificationSubscriberManager.NotifySystemUpdateInner(notification, classification);
+
+    ASSERT_EQ(notification, nullptr);
+}
+
+/**
+ * @tc.name: NotifySystemUpdate_002
+ * @tc.desc: Test NotifySystemUpdate with notification and classification (enableClassification=true)
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifySystemUpdate_002, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    auto isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+
+    sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
+    info->AddAppUserId(SUBSCRIBE_USER_ALL);
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
+    info->SetEnableClassification(true);
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
+
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(DEFAULT_UID);
+    request->SetOwnerBundleName("test1");
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    auto content = std::make_shared<NotificationContent>(normalContent);
+    request->SetContent(content);
+    sptr<Notification> notification = new Notification(request);
+    sptr<NotificationClassification> classification = new NotificationClassification("DEAL", "LOGISTICS");
+
+    notificationSubscriberManager.NotifySystemUpdate(notification, classification);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+}
+
+/**
+ * @tc.name: NotifySystemUpdate_003
+ * @tc.desc: Test NotifySystemUpdate with notification only (default nullptr classification)
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifySystemUpdate_003, Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    auto isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+
+    sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
+    info->AddAppUserId(SUBSCRIBE_USER_ALL);
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
+
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(DEFAULT_UID);
+    request->SetOwnerBundleName("test1");
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    auto content = std::make_shared<NotificationContent>(normalContent);
+    request->SetContent(content);
+    sptr<Notification> notification = new Notification(request);
+
+    notificationSubscriberManager.NotifySystemUpdate(notification);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+}
+
+/**
+ * @tc.name: NotifyNotificationSwitchChanged_001
+ * @tc.desc: Test NotifyNotificationSwitchChanged with valid callback data triggers callback
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyNotificationSwitchChanged_001, Level1)
+{
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    auto isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
+    info->AddAppUserId(100);
+    testAnsSubscriber->SetSubscribedFlags(
+        NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_NOTIFICATION_SWITCH_CHANGED);
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
+
+    sptr<NotificationSwitchChangedCallbackData> callbackData =
+        new NotificationSwitchChangedCallbackData("DEAL", 100,
+            NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    notificationSubscriberManager.NotifyNotificationSwitchChanged(callbackData);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_TRUE(isCallback);
+}
+
+/**
+ * @tc.name: NotifyNotificationSwitchChanged_002
+ * @tc.desc: Test NotifyNotificationSwitchChanged with subscribedFlags not including SWITCH_CHANGED
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyNotificationSwitchChanged_002, Level1)
+{
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    testAnsSubscriber->SetSubscribedFlags(0);
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    auto isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
+
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
+    info->AddAppUserId(100);
+    info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
+
+    sptr<NotificationSwitchChangedCallbackData> callbackData =
+        new NotificationSwitchChangedCallbackData("DEAL", 100,
+            NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    notificationSubscriberManager.NotifyNotificationSwitchChanged(callbackData);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_FALSE(isCallback);
 }
 
 /**

@@ -67,6 +67,10 @@ Notification::Notification(const Notification &other)
     if (other.voiceContent_ != nullptr) {
         voiceContent_ = std::make_shared<NotificationVoiceContent>(*other.voiceContent_);
     }
+    if (other.notificationClassification_ != nullptr) {
+        notificationClassification_ = new (std::nothrow) NotificationClassification(
+            *other.notificationClassification_);
+    }
 }
 
 Notification::~Notification()
@@ -386,6 +390,16 @@ bool Notification::MarshallingParcelable(Parcel &parcel) const
         }
     }
 
+    bool hasNotificationClassification = (notificationClassification_ != nullptr);
+    if (!parcel.WriteBool(hasNotificationClassification)) {
+        ANS_LOGE("Failed to write hasNotificationClassification");
+        return false;
+    }
+
+    if (hasNotificationClassification && !parcel.WriteStrongParcelable(notificationClassification_)) {
+        ANS_LOGE("Failed to write notificationClassification");
+        return false;
+    }
     return true;
 }
 
@@ -491,6 +505,14 @@ bool Notification::ReadFromParcelParcelable(Parcel &parcel)
         }
     }
 
+    bool hasNotificationClassification = parcel.ReadBool();
+    if (hasNotificationClassification) {
+        notificationClassification_ = parcel.ReadStrongParcelable<NotificationClassification>();
+        if (notificationClassification_ == nullptr) {
+            ANS_LOGE("Notification classification read parcel error.");
+            return false;
+        }
+    }
     return true;
 }
 
@@ -594,6 +616,8 @@ std::string Notification::Dump() const
             ", postTime = " + std::to_string(postTime_) +
             ", sound = " + (sound_ == nullptr ? "nullptr" : sound_->ToString()) +
             ", vibrationStyle = [" + vibrationStyle + "]" +
+            ", notificationClassification = " +
+            (notificationClassification_ == nullptr ? "nullptr" : notificationClassification_->Dump()) +
             ", updateTimer = " + std::to_string(updateTimerId_) +
             ", finishTimer = " + std::to_string(finishTimerId_) +
             ", archiveTimer = " + std::to_string(archiveTimerId_) +
@@ -648,6 +672,17 @@ void Notification::SetVoiceContent(const std::shared_ptr<NotificationVoiceConten
 std::shared_ptr<NotificationVoiceContent> Notification::GetVoiceContent() const
 {
     return voiceContent_;
+}
+
+void Notification::SetNotificationClassification(
+    const sptr<NotificationClassification> &notificationClassification)
+{
+    notificationClassification_ = notificationClassification;
+}
+
+sptr<NotificationClassification> Notification::GetNotificationClassification() const
+{
+    return notificationClassification_;
 }
 
 void Notification::SetAutoDeletedTimer(uint64_t autoDeletedTimerId)

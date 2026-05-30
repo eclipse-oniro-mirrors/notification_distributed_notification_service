@@ -23,6 +23,7 @@
 #include "notification_sorting.h"
 #include "notification_sorting_map.h"
 #include "notification_subscriber.h"
+#include "notification_switch_changed_callback_data.h"
 
 namespace OHOS {
 namespace Notification {
@@ -70,6 +71,8 @@ public:
 
     ErrCode OnEnabledPriorityByBundleChanged(
         const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData) override;
+
+    ErrCode OnNotificationSwitchChanged(const sptr<NotificationSwitchChangedCallbackData> &callbackData) override;
 
     ErrCode OnEnabledWatchStatusChanged(uint32_t watchStatus) override;
 

@@ -17,6 +17,7 @@
 
 #include "common.h"
 #include "notification_constant.h"
+#include "notification_switch_changed_callback_data.h"
 #include "enabled_silent_reminder_callback_data.h"
 #include "ffrt.h"
 
@@ -155,6 +156,16 @@ public:
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override;
 
     /**
+     * @brief Callback when the notification switch is changed.
+     *
+     * @param callbackData Indicates the NotificationSwitchChangedCallbackData object.
+     * @syscap SystemCapability.Notification.Notification
+     * @since 26.0.0
+     */
+    virtual void OnNotificationSwitchChanged(
+        const std::shared_ptr<NotificationSwitchChangedCallbackData> &callbackData) override;
+
+    /**
      * @brief The callback function on the badge number changed.
      *
      * @param badgeData Indicates the BadgeNumberCallbackData object.
@@ -220,6 +231,7 @@ private:
     void SetEnabledPriorityByBundleCallbackInfo(const napi_env &env, const napi_ref &ref);
     void SetSystemUpdateCallbackInfo(const napi_env &env, const napi_ref &ref);
     void SetEnabledSilentReminderCallbackInfo(const napi_env &env, const napi_ref &ref);
+    void SetNotificationSwitchChangedCallbackInfo(const napi_env &env, const napi_ref &ref);
 
     CallbackInfo GetCancelCallbackInfo();
     CallbackInfo GetConsumeCallbackInfo();
@@ -238,6 +250,7 @@ private:
     CallbackInfo GetBatchCancelCallbackInfo();
     CallbackInfo GetSystemUpdateCallbackInfo();
     CallbackInfo GetEnabledSilentReminderCallbackInfo();
+    CallbackInfo GetNotificationSwitchChangedCallbackInfo();
 
     void CallThreadSafeFunc(void *data);
     void SubDeleteRef();
@@ -263,6 +276,7 @@ private:
     CallbackInfo setBadgeEnabledCallbackInfo_;
     CallbackInfo batchCancelCallbackInfo_;
     CallbackInfo enabledSilentReminderCallbackInfo_;
+    CallbackInfo notificationSwitchChangedCallbackInfo_;
 };
 
 struct SubscriberInstancesInfo {

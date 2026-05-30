@@ -31,6 +31,7 @@
 #include "time_service_client.h"
 #include "notification_timer_info.h"
 #include "advanced_notification_inline.h"
+#include "message_parcel.h"
 #include <cstdint>
 #include <memory>
 #include "notification_analytics_util.h"
@@ -265,6 +266,53 @@ ErrCode AdvancedNotificationService::OnSubscriberAdd(
     }
     ANS_LOGI("Consume notification count is %{public}zu %{public}d.", notifications.size(), userId);
     NotificationSubscriberManager::GetInstance()->BatchNotifyConsumed(notifications, sortingMap, record);
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::OnSubscriberAddWithSilentReplay(
+    const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record)
+{
+    notificationSvrQueue_.Submit(std::bind([=]() {
+        sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
+        std::vector<sptr<Notification>> notifications;
+        for (auto notificationRecord : notificationList_) {
+            if (notificationRecord == nullptr || notificationRecord->notification == nullptr ||
+                notificationRecord->notification->GetNotificationRequestPoint() == nullptr) {
+                continue;
+            }
+            MessageParcel parcel;
+            if (!parcel.WriteParcelable(notificationRecord->notification)) {
+                ANS_LOGE("SilentReplay writeParcelable failed.");
+                continue;
+            }
+            sptr<Notification> notification = parcel.ReadParcelable<Notification>();
+            if (notification == nullptr) {
+                ANS_LOGE("SilentReplay readParcelable failed.");
+                continue;
+            }
+            auto request = notification->GetNotificationRequestPoint();
+            if (request == nullptr) {
+                ANS_LOGE("SilentReplay request is nullptr.");
+                continue;
+            }
+            request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false);
+            request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
+            if (!request->IsCommonLiveView()) {
+                request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, false);
+                request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
+                request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
+            }
+            notifications.emplace_back(notification);
+        }
+
+        if (notifications.empty()) {
+            ANS_LOGI("No notification to consume");
+            return;
+        }
+        ANS_LOGI("Consume notification count is %{public}zu.", notifications.size());
+        NotificationSubscriberManager::GetInstance()->BatchNotifyConsumed(notifications, sortingMap, record);
+        return;
+    }));
     return ERR_OK;
 }
 

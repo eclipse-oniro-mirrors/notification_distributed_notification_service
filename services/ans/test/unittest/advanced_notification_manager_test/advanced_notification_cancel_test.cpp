@@ -18,6 +18,10 @@
 #include "advanced_notification_service.h"
 #include "notification_bundle_option.h"
 #include "notification_request.h"
+#include "notification_classification_mgr.h"
+#include "notification_content.h"
+#include "notification_normal_content.h"
+#include "notification_live_view_content.h"
 
 using namespace testing::ext;
 
@@ -192,6 +196,171 @@ HWTEST_F(AdvancedNotificationCancelTest, IsReasonClickDelete_OtherReason_00001, 
     auto service = GetService();
     auto result = service->IsReasonClickDelete(NotificationConstant::CANCEL_REASON_DELETE);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ClassificationMgr_Remove_CancelContinuousTask_00001
+ * @tc.desc: Test ClassificationMgr Remove in CancelContinuousTaskNotification.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_CancelContinuousTask_00001, Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetNotificationId(1);
+    auto content = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationLiveViewContent>());
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    auto record = service->MakeNotificationRecord(request, bundle);
+    service->AddToNotificationList(record);
+    std::string key = record->notification->GetKey();
+    sptr<NotificationClassification> classification = new NotificationClassification();
+    NotificationClassificationMgr::GetInstance().AddOrUpdate(key, classification);
+    EXPECT_EQ(NotificationClassificationMgr::GetInstance().Size(), 1);
+}
+
+/**
+ * @tc.name: ClassificationMgr_Remove_RemoveNotification_00001
+ * @tc.desc: Test ClassificationMgr Remove in RemoveNotification.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveNotification_00001, Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetNotificationId(1);
+    auto content = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationNormalContent>());
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    auto record = service->MakeNotificationRecord(request, bundle);
+    service->AddToNotificationList(record);
+    std::string key = record->notification->GetKey();
+    sptr<NotificationClassification> classification = new NotificationClassification();
+    NotificationClassificationMgr::GetInstance().AddOrUpdate(key, classification);
+    EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Exists(key));
+}
+
+/**
+ * @tc.name: ClassificationMgr_Remove_RemoveAllForDisable_00001
+ * @tc.desc: Test ClassificationMgr Remove in ExcuteRemoveAllNotificationsInner.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveAllForDisable_00001, Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetNotificationId(1);
+    auto content = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationNormalContent>());
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    auto record = service->MakeNotificationRecord(request, bundle);
+    service->AddToNotificationList(record);
+    std::string key = record->notification->GetKey();
+    sptr<NotificationClassification> classification = new NotificationClassification();
+    NotificationClassificationMgr::GetInstance().AddOrUpdate(key, classification);
+    EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Exists(key));
+}
+
+/**
+ * @tc.name: ClassificationMgr_Remove_RemoveBySlot_00001
+ * @tc.desc: Test ClassificationMgr Remove in RemoveNotificationBySlot.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveBySlot_00001, Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetNotificationId(1);
+    auto content = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationNormalContent>());
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    auto record = service->MakeNotificationRecord(request, bundle);
+    service->AddToNotificationList(record);
+    std::string key = record->notification->GetKey();
+    sptr<NotificationClassification> classification = new NotificationClassification();
+    NotificationClassificationMgr::GetInstance().AddOrUpdate(key, classification);
+    EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Exists(key));
+}
+
+/**
+ * @tc.name: ClassificationMgr_Remove_RemoveByDeviceId_00001
+ * @tc.desc: Test ClassificationMgr Remove in RemoveNotificationsByDeviceId.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveByDeviceId_00001, Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    EXPECT_EQ(NotificationClassificationMgr::GetInstance().Size(), 0);
+}
+
+/**
+ * @tc.name: ClassificationMgr_Remove_RemoveDistributedNotifications_00001
+ * @tc.desc: Test ClassificationMgr Remove in RemoveDistributedNotifications.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveDistributedNotifications_00001, Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    EXPECT_EQ(NotificationClassificationMgr::GetInstance().Size(), 0);
+}
+
+/**
+ * @tc.name: ClassificationMgr_Remove_RemoveDistributedByBundle_00001
+ * @tc.desc: Test ClassificationMgr Remove in RemoveDistributedNotificationsByBundle.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveDistributedByBundle_00001, Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    EXPECT_EQ(NotificationClassificationMgr::GetInstance().Size(), 0);
+}
+
+/**
+ * @tc.name: ClassificationMgr_Remove_RemoveAllDistributed_00001
+ * @tc.desc: Test ClassificationMgr Remove in RemoveAllDistributedNotifications.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveAllDistributed_00001, Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    EXPECT_EQ(NotificationClassificationMgr::GetInstance().Size(), 0);
+}
+
+/**
+ * @tc.name: ClassificationMgr_Remove_BasicOperation_00001
+ * @tc.desc: Test ClassificationMgr Remove basic operation.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_BasicOperation_00001, Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    std::string key = "cancel_test_key";
+    sptr<NotificationClassification> classification = new NotificationClassification();
+    NotificationClassificationMgr::GetInstance().AddOrUpdate(key, classification);
+    EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Exists(key));
+    EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Remove(key));
+    EXPECT_FALSE(NotificationClassificationMgr::GetInstance().Exists(key));
 }
 
 }  // namespace Notification

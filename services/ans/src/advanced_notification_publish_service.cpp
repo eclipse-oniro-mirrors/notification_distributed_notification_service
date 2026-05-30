@@ -60,6 +60,7 @@
 #include "datashare_predicates.h"
 #include "notification_config_parse.h"
 #include "advanced_notification_flow_control_service.h"
+#include "notification_classification_mgr.h"
 #include "notification_operation_info.h"
 #include "notification_operation_service.h"
 #include "notification_extension_wrapper.h"
@@ -566,6 +567,7 @@ ErrCode AdvancedNotificationService::ExcuteCancelGroupCancel(
         for (auto record : removeList) {
             ProcForDeleteNotificationFromDb(record);
             notificationList_.remove(record);
+            NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
             if (record->notification != nullptr) {
                 UpdateRecentNotification(record->notification, true, reason);
                 notifications.emplace_back(record->notification);
@@ -659,6 +661,7 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
         std::vector<uint64_t> timerIds;
         for (auto record : removeList) {
             notificationList_.remove(record);
+            NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
             ProcForDeleteNotificationFromDb(record);
 
             if (record->notification != nullptr) {
@@ -1432,6 +1435,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(
                 continue;
             }
             notificationList_.remove(record);
+            NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
             if (record->notification != nullptr) {
                 ANS_LOGD("record->notification is not nullptr.");
                 UpdateRecentNotification(record->notification, true, reason);

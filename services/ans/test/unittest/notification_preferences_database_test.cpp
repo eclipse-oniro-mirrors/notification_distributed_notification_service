@@ -3417,5 +3417,114 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseDistributedInfoFromDB_0300, T
     std::string bundleKey = preferncesDB_->GenerateBundleLablel(bundleInfo);
     preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey, bundleInfo.GetBundleUid());
 }
+
+/**
+ * @tc.name: SetNotificationSwitch_00100
+ * @tc.desc: Test SetNotificationSwitch with valid parameters, expect true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetNotificationSwitch_00100, Function | SmallTest | Level1)
+{
+    std::string switchName = "DEAL";
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    int32_t userId = 100;
+    bool ret = preferncesDB_->SetNotificationSwitch(switchName, state, userId);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: SetNotificationSwitch_00200
+ * @tc.desc: Test SetNotificationSwitch with different SWITCH_STATE values, expect true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetNotificationSwitch_00200, Function | SmallTest | Level1)
+{
+    std::string switchName = "LOGISTICS";
+    NotificationConstant::SWITCH_STATE stateOn = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    NotificationConstant::SWITCH_STATE stateOff = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    int32_t userId = 100;
+    EXPECT_TRUE(preferncesDB_->SetNotificationSwitch(switchName, stateOn, userId));
+    EXPECT_TRUE(preferncesDB_->SetNotificationSwitch(switchName, stateOff, userId));
+}
+
+/**
+ * @tc.name: SetNotificationSwitch_00300
+ * @tc.desc: Test SetNotificationSwitch when rdbDataManager_ is nullptr, expect false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetNotificationSwitch_00300, Function | SmallTest | Level1)
+{
+    std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
+        std::make_shared<NotificationPreferencesDatabase>();
+    notificationPreferencesDatabase->rdbDataManager_ = nullptr;
+    std::string switchName = "DEAL";
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    int32_t userId = 100;
+    bool ret = notificationPreferencesDatabase->SetNotificationSwitch(switchName, state, userId);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: GetNotificationSwitch_00100
+ * @tc.desc: Test GetNotificationSwitch after SetNotificationSwitch, verify state matches
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetNotificationSwitch_00100, Function | SmallTest | Level1)
+{
+    std::string switchName = "DEAL";
+    NotificationConstant::SWITCH_STATE setState = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    int32_t userId = 100;
+    EXPECT_TRUE(preferncesDB_->SetNotificationSwitch(switchName, setState, userId));
+
+    NotificationConstant::SWITCH_STATE getState = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    bool ret = preferncesDB_->GetNotificationSwitch(switchName, userId, getState);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(getState, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+}
+
+/**
+ * @tc.name: GetNotificationSwitch_00200
+ * @tc.desc: Test GetNotificationSwitch when switch not set, verify default state SYSTEM_DEFAULT_ON
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetNotificationSwitch_00200, Function | SmallTest | Level1)
+{
+    std::string switchName = "NOT_SET_SWITCH";
+    int32_t userId = 100;
+    NotificationConstant::SWITCH_STATE getState = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    bool ret = preferncesDB_->GetNotificationSwitch(switchName, userId, getState);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(getState, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+}
+
+/**
+ * @tc.name: GetAllNotificationSwitchInfo_00100
+ * @tc.desc: Test GetAllNotificationSwitchInfo with valid userId, expect true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationSwitchInfo_00100, Function | SmallTest | Level1)
+{
+    int32_t userId = 100;
+    std::unordered_map<std::string, std::string> notificationSwitchInfos;
+    bool ret = preferncesDB_->GetAllNotificationSwitchInfo(userId, notificationSwitchInfos);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: GetAllNotificationSwitchInfo_00200
+ * @tc.desc: Test GetAllNotificationSwitchInfo after setting switches, verify data exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationSwitchInfo_00200, Function | SmallTest | Level1)
+{
+    std::string switchName = "DEAL";
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    int32_t userId = 100;
+    EXPECT_TRUE(preferncesDB_->SetNotificationSwitch(switchName, state, userId));
+
+    std::unordered_map<std::string, std::string> notificationSwitchInfos;
+    bool ret = preferncesDB_->GetAllNotificationSwitchInfo(userId, notificationSwitchInfos);
+    EXPECT_TRUE(ret);
+}
 }  // namespace Notification
 }  // namespace OHOS

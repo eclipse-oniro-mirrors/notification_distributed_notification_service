@@ -324,7 +324,8 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     "notificationBundleOption = null, agentBundle = null, notificationTrigger = null, creatorUserId = -1, "
     "ownerUserId = -1, receiverUserId = -1, updateDeadLine = 0, finishDeadLine = 0, triggerDeadLine = 0, sound = , "
     "distributed = 0: flag: 0, unifiedGroupInfo_ = null, groupInfo_ = null }, postTime = 0, "
-    "sound = nullptr, vibrationStyle = [], updateTimer = 0, finishTimer = 0, archiveTimer = 0 }";
+    "sound = nullptr, vibrationStyle = [], notificationClassification = nullptr, "
+    "updateTimer = 0, finishTimer = 0, archiveTimer = 0 }";
     EXPECT_EQ(rrc->Dump(), ret);
 }
 
@@ -736,6 +737,153 @@ HWTEST_F(NotificationTest, NotificationVoiceContentMarshalling_00002, Function |
     auto result = Notification::Unmarshalling(parcel);
     EXPECT_NE(result, nullptr);
     EXPECT_EQ(result->GetVoiceContent(), nullptr);
+}
+
+/**
+ * @tc.name: SetNotificationClassification_00001
+ * @tc.desc: Test SetNotificationClassification and GetNotificationClassification roundtrip.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationTest, SetNotificationClassification_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto notification = std::make_shared<Notification>(request);
+    sptr<NotificationClassification> classification = new NotificationClassification("DEAL", "LOGISTICS");
+    notification->SetNotificationClassification(classification);
+
+    auto result = notification->GetNotificationClassification();
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->GetClassification(), "DEAL");
+    EXPECT_EQ(result->GetSubClassification(), "LOGISTICS");
+}
+
+/**
+ * @tc.name: SetNotificationClassification_00002
+ * @tc.desc: Test GetNotificationClassification returns nullptr when not set.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationTest, SetNotificationClassification_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto notification = std::make_shared<Notification>(request);
+    EXPECT_EQ(notification->GetNotificationClassification(), nullptr);
+
+    notification->SetNotificationClassification(nullptr);
+    EXPECT_EQ(notification->GetNotificationClassification(), nullptr);
+}
+
+/**
+ * @tc.name: Marshalling_00004
+ * @tc.desc: Test Marshalling and Unmarshalling with notificationClassification field.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationTest, Marshalling_00004, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(mediaContent);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetContent(content);
+    auto notification = std::make_shared<Notification>(request);
+    sptr<NotificationClassification> classification = new NotificationClassification("DEAL", "LOGISTICS");
+    notification->SetNotificationClassification(classification);
+
+    EXPECT_EQ(notification->Marshalling(parcel), true);
+
+    auto result = Notification::Unmarshalling(parcel);
+    EXPECT_NE(result, nullptr);
+    auto resultClassification = result->GetNotificationClassification();
+    EXPECT_NE(resultClassification, nullptr);
+    EXPECT_EQ(resultClassification->GetClassification(), "DEAL");
+    EXPECT_EQ(resultClassification->GetSubClassification(), "LOGISTICS");
+}
+
+/**
+ * @tc.name: Marshalling_00005
+ * @tc.desc: Test Marshalling and Unmarshalling without notificationClassification (nullptr).
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationTest, Marshalling_00005, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(mediaContent);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetContent(content);
+    auto notification = std::make_shared<Notification>(request);
+    notification->SetNotificationClassification(nullptr);
+
+    EXPECT_EQ(notification->Marshalling(parcel), true);
+
+    auto result = Notification::Unmarshalling(parcel);
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->GetNotificationClassification(), nullptr);
+}
+
+/**
+ * @tc.name: NotificationCopyConstructor_00001
+ * @tc.desc: Test copy constructor preserves notificationClassification field.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationTest, NotificationCopyConstructor_00001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(mediaContent);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetContent(content);
+    auto notification = std::make_shared<Notification>(request);
+    sptr<NotificationClassification> classification = new NotificationClassification("DEAL", "LOGISTICS");
+    notification->SetNotificationClassification(classification);
+
+    Notification copy(*notification);
+    auto copyClassification = copy.GetNotificationClassification();
+    EXPECT_NE(copyClassification, nullptr);
+    EXPECT_EQ(copyClassification->GetClassification(), "DEAL");
+    EXPECT_EQ(copyClassification->GetSubClassification(), "LOGISTICS");
+}
+
+/**
+ * @tc.name: NotificationCopyConstructor_00002
+ * @tc.desc: Test copy constructor with nullptr notificationClassification.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationTest, NotificationCopyConstructor_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetNotificationId(1);
+    auto notification = std::make_shared<Notification>(request);
+
+    Notification copy(*notification);
+    EXPECT_EQ(copy.GetNotificationClassification(), nullptr);
+}
+
+/**
+ * @tc.name: Dump_00003
+ * @tc.desc: Test Dump output includes notificationClassification when set.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationTest, Dump_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto notification = std::make_shared<Notification>(request);
+    sptr<NotificationClassification> classification = new NotificationClassification("DEAL", "LOGISTICS");
+    notification->SetNotificationClassification(classification);
+
+    std::string dump = notification->Dump();
+    EXPECT_NE(dump.find("notificationClassification"), std::string::npos);
+    EXPECT_NE(dump.find("DEAL"), std::string::npos);
+    EXPECT_NE(dump.find("LOGISTICS"), std::string::npos);
 }
 } // namespace Notification
 } // namespace OHOS

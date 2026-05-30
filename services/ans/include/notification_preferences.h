@@ -25,6 +25,7 @@
 #include <memory>
 #include <mutex>
 #include "notification_clone_bundle_info.h"
+#include "notification_clone_notification_switch_info.h"
 #include "notification_clone_priority_info.h"
 #include "notification_constant.h"
 #include "ffrt.h"
@@ -794,6 +795,14 @@ public:
      */
     bool IsCollaborationAllowed(const std::string& bundleName, int32_t uid);
 
+    ErrCode SetNotificationSwitch(const std::string &switchName,
+        const NotificationConstant::SWITCH_STATE &state, const int32_t userId);
+
+    ErrCode GetNotificationSwitch(const std::string &switchName,
+        const int32_t userId, NotificationConstant::SWITCH_STATE &state);
+
+    void GetAllNotificationSwitchInfo(const int32_t userId,
+        std::vector<NotificationCloneNotificationSwitchInfo> &notificationSwitchInfos);
  private:
      bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,
          const sptr<NotificationBundleOption> &bundleOption, NotificationPreferencesInfo::BundleInfo &info) const;

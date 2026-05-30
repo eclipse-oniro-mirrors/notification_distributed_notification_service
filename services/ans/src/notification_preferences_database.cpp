@@ -340,6 +340,11 @@ static const char* const KEY_PRIORITY_NOTIFICATION_SWITCH_FOR_BUNDLE_V2 = "prior
 static const char* const KEY_PRIORITY_STRATEGY_FOR_BUNDLE = "priorityStrategyForBundle";
 
 /**
+ * Indicates that disturbe key which notification switch.
+ */
+static const char* const KEY_NOTIFICATION_SWITCH = "notificationSwitch";
+
+/**
  * Indicates the target device's authorization status.
  */
 static const char* const KEY_ENABLE_DISTRIBUTED_AUTH_STATUS = "enabledDistributedAuthStatus";
@@ -2765,6 +2770,72 @@ bool NotificationPreferencesDatabase::GetBundlePriorityConfig(
     });
     ANS_LOGI("GetBundlePriorityConfig key: %{public}s, result: %{public}d", key.c_str(), result);
     return result;
+}
+
+bool NotificationPreferencesDatabase::SetNotificationSwitch(const std::string &switchName,
+    const NotificationConstant::SWITCH_STATE &state, const int32_t userId)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    // Key format: notificationSwitch_<switchName>_<userId>
+    // Example: notificationSwitch_DEAL_100
+    std::string key = std::string(KEY_NOTIFICATION_SWITCH).append(KEY_UNDER_LINE)
+        .append(switchName).append(KEY_UNDER_LINE).append(std::to_string(userId));
+    int32_t result = PutDataToDB(key, static_cast<int32_t>(state), userId);
+    ANS_LOGI("SetNotificationSwitch key: %{public}s, state: %{public}d, result: %{public}d",
+        key.c_str(), static_cast<int32_t>(state), result);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::GetNotificationSwitch(const std::string &switchName,
+    const int32_t userId, NotificationConstant::SWITCH_STATE &state)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    // Key format: notificationSwitch_<switchName>_<userId>
+    // Example: notificationSwitch_DEAL_100
+    std::string key = std::string(KEY_NOTIFICATION_SWITCH).append(KEY_UNDER_LINE)
+        .append(switchName).append(KEY_UNDER_LINE).append(std::to_string(userId));
+    bool result = false;
+    // Default state: SYSTEM_DEFAULT_ON (aggregation is enabled by default)
+    state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                // No data in DB, use default state
+                result = true;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = true;
+                state = static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(value));
+                break;
+            }
+            default:
+                result = false;
+                break;
+        }
+    });
+    ANS_LOGI("GetNotificationSwitch key: %{public}s, state: %{public}d, result: %{public}d",
+        key.c_str(), static_cast<int32_t>(state), result);
+    return result;
+}
+
+bool NotificationPreferencesDatabase::GetAllNotificationSwitchInfo(const int32_t userId,
+    std::unordered_map<std::string, std::string>& notificationSwitchInfos)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+
+    int32_t result = rdbDataManager_->QueryDataBeginWithKey(KEY_NOTIFICATION_SWITCH, notificationSwitchInfos, userId);
+    if (result == NativeRdb::E_EMPTY_VALUES_BUCKET) {
+        ANS_LOGI("Empty clone info.");
+        return true;
+    }
+    if (result != NativeRdb::E_OK) {
+        return false;
+    }
+    return true;
 }
 
 bool NotificationPreferencesDatabase::PutPriorityIntelligentEnabled(const NotificationConstant::SWITCH_STATE enabled)

@@ -29,8 +29,9 @@ bool IsCollaborationNotification(const sptr<NotificationRequest> &request);
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
     void UpdatePriorityType(const sptr<NotificationRequest> &request);
     void SetPriorityTypeToExtendInfo(const sptr<NotificationRequest> &request);
-    ErrCode RefreshPriorityType(const std::string &command,
+    ErrCode RefreshPriorityType(const std::string &cmdType,
         const std::vector<sptr<NotificationRequest>> originRequests, std::vector<int32_t> &results);
+    void BuildPriorityCommand(std::string& cmdType, const sptr<NotificationRequest> &request, nlohmann::json &command);
 #endif
 };
 }  // namespace Notification

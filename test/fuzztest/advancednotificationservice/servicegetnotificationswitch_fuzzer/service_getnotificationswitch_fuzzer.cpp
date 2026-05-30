@@ -37,6 +37,14 @@ namespace Notification {
         bundleOption->SetUid(uidDefaultValue);
         int32_t switchValue;
         service->GetNotificationSwitch(bundleOption, switchValue);
+
+        std::string switchName = fuzzData->ConsumeRandomLengthString();
+        int32_t userId = fuzzData->ConsumeIntegral<int32_t>();
+        int32_t switchState;
+        service->GetNotificationSwitch(switchName, userId, switchState);
+
+        bool setState = fuzzData->ConsumeBool();
+        service->SetNotificationSwitch(switchName, setState, userId);
         return true;
     }
 }

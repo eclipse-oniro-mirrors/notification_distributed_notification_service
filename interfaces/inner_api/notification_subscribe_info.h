@@ -215,6 +215,13 @@ public:
 
     sptr<PictureOption> GetPictureOption() const;
 
+    void SetEnableClassification(bool enableClassification);
+
+    bool GetEnableClassification() const;
+
+    void SetNeedSilentReplayOnSubscribe(bool needSilentReplayOnSubscribe);
+
+    bool GetNeedSilentReplayOnSubscribe() const;
 private:
     bool ReadFromParcel(Parcel &parcel);
     bool ReadVoiceContentOptionFromParcel(Parcel &parcel);
@@ -256,6 +263,8 @@ private:
     bool isSubscribeSelf_ = false;
     sptr<VoiceContentOption> voiceContentOption_;
     sptr<PictureOption> pictureOption_;
+    bool enableClassification_ = false;
+    bool needSilentReplayOnSubscribe_ = false;
     friend class NotificationSubscriberManager;
 };
 }  // namespace Notification

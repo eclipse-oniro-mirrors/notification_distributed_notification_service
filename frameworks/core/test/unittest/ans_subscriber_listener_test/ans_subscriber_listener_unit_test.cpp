@@ -56,6 +56,10 @@ public:
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {}
  
+    void OnNotificationSwitchChanged(
+        const std::shared_ptr<NotificationSwitchChangedCallbackData> &callbackData) override
+    {}
+
     void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>> &requestList,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override
     {}
@@ -93,6 +97,10 @@ public:
         const std::shared_ptr<NotificationSortingMap> &sortingMap) override
     {}
  
+    void OnNotificationSwitchChanged(
+        const std::shared_ptr<NotificationSwitchChangedCallbackData> &callbackData) override
+    {}
+
     void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>> &requestList,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override
     {}
@@ -739,6 +747,47 @@ HWTEST_F(SubscriberListenerTest, OnOperationResponse_0200, Function | MediumTest
     int32_t funcResult;
     ErrCode result = listener->OnOperationResponse(operationInfo, funcResult);
     EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name      : OnNotificationSwitchChanged_0100
+ * @tc.desc      : Test OnNotificationSwitchChanged invalid data
+ */
+HWTEST_F(SubscriberListenerTest, OnNotificationSwitchChanged_0100, Function | MediumTest | Level1)
+{
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(nullptr);
+    sptr<NotificationSwitchChangedCallbackData> callbackData =
+        new (std::nothrow) NotificationSwitchChangedCallbackData(
+            "deal", 100, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    ErrCode result = listener->OnNotificationSwitchChanged(callbackData);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name      : OnNotificationSwitchChanged_0200
+ * @tc.desc      : Test OnNotificationSwitchChanged success
+ */
+HWTEST_F(SubscriberListenerTest, OnNotificationSwitchChanged_0200, Function | MediumTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    sptr<NotificationSwitchChangedCallbackData> callbackData =
+        new (std::nothrow) NotificationSwitchChangedCallbackData(
+            "deal", 100, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    ErrCode result = listener->OnNotificationSwitchChanged(callbackData);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name      : OnNotificationSwitchChanged_0300
+ * @tc.desc      : Test OnNotificationSwitchChanged null callbackData
+ */
+HWTEST_F(SubscriberListenerTest, OnNotificationSwitchChanged_0300, Function | MediumTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    ErrCode result = listener->OnNotificationSwitchChanged(nullptr);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
 }
 }  // namespace Notification
 }  // namespace OHOS

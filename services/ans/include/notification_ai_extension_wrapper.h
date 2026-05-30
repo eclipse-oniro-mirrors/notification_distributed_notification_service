@@ -21,7 +21,9 @@
 
 #include "refbase.h"
 #include "singleton.h"
+#include "nlohmann/json.hpp"
 #include "notification.h"
+#include "notification_classification.h"
 #include "notification_request.h"
 
 namespace OHOS::Notification {
@@ -34,8 +36,9 @@ public:
     typedef int32_t (*SYNC_RULES)(const std::string &rules);
     typedef int32_t (*UPDATE_NOTIFICATION)(
         const std::vector<sptr<NotificationRequest>> &requests,
-        const std::string &command, std::vector<int32_t> &results,
-        const uint32_t aiStatus, const std::vector<int64_t> strategies);
+        const std::vector<nlohmann::json> &commands,
+        std::vector<sptr<NotificationClassification>> &notificationClassifications,
+        std::vector<int32_t> &results);
     typedef int32_t (*SYNC_BUNDLE_KEYWORDS)(
         const sptr<NotificationBundleOption> &bundleOption, const std::string &keyword);
     typedef int32_t (*NOTIFY_PRIORITY_EVENT)(const std::string &event,
@@ -45,8 +48,9 @@ public:
     int32_t SyncRules(const std::string &rules);
     int32_t UpdateNotification(
         const std::vector<sptr<NotificationRequest>> &requests,
-        const std::string &command, std::vector<int32_t> &results,
-        const uint32_t aiStatus, const std::vector<int64_t> strategies);
+        const std::vector<nlohmann::json> &commands,
+        std::vector<sptr<NotificationClassification>> &notificationClassifications,
+        std::vector<int32_t> &results);
     int32_t SyncBundleKeywords(const sptr<NotificationBundleOption> &bundleOption, const std::string &keyword);
     int32_t NotifyPriorityEvent(const std::string &event,
         const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
@@ -60,6 +64,7 @@ public:
     static constexpr const char *UPDATE_PRIORITY_TYPE = "update.priorityNotificationType";
     static constexpr const char *REFRESH_KEYWORD_PRIORITY_TYPE = "refresh.keyword.priorityNotificationType";
     static constexpr const char *REFRESH_SWITCH_PRIORITY_TYPE = "refresh.switch.priorityNotificationType";
+    static constexpr const char *UPDATE_AGGREGATION_TYPE = "update.aggregationNotificationType";
 
 private:
     void* ExtensionHandle_ = nullptr;

@@ -24,6 +24,7 @@
 #include "ani_slot.h"
 #include "ani_local_live_view.h"
 #include "ani_notification_enable.h"
+#include "ani_notification_switch.h"
 #include "ani_get_notification_parameters.h"
 #include "ani_on.h"
 #include "ani_open_settings.h"
@@ -118,6 +119,10 @@ static std::array kitManagerFunctions = {
         reinterpret_cast<void *>(AniSetSilentReminderEnabled)},
     ani_native_function {"nativeIsSilentReminderEnabled", nullptr,
         reinterpret_cast<void *>(AniIsSilentReminderEnabled)},
+    ani_native_function {"nativeSetNotificationSwitch", nullptr,
+        reinterpret_cast<void *>(AniSetNotificationSwitch)},
+    ani_native_function {"nativeGetNotificationSwitch", nullptr,
+        reinterpret_cast<void *>(AniGetNotificationSwitch)},
     ani_native_function {"nativeSetNotificationSnooze", nullptr,
         reinterpret_cast<void *>(AniSetNotificationSnooze)},
     ani_native_function {"nativeGetNotificationStatisticsByBundle", nullptr,

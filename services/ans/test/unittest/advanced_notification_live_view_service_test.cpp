@@ -1411,5 +1411,45 @@ HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_00010, Functio
     advancedNotificationService_->AddAppObserver(newRequest);
     advancedNotificationService_->RemoveCommonLiveViewNotification(100);
 }
+
+/**
+ * @tc.name: OnSubscriberAddWithSilentReplay_00001
+ * @tc.desc: Test OnSubscriberAddWithSilentReplay with empty notification list
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAddWithSilentReplay_00001, Function | SmallTest | Level1)
+{
+    auto record = NotificationSubscriberManager::GetInstance()->CreateSubscriberRecord(nullptr);
+    advancedNotificationService_->notificationList_.clear();
+    auto ret = advancedNotificationService_->OnSubscriberAddWithSilentReplay(record);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    ASSERT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: OnSubscriberAddWithSilentReplay_00002
+ * @tc.desc: Test OnSubscriberAddWithSilentReplay with notification in list
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAddWithSilentReplay_00002, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto notificationRecord = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(notificationRecord);
+
+    auto record = NotificationSubscriberManager::GetInstance()->CreateSubscriberRecord(nullptr);
+    auto ret = advancedNotificationService_->OnSubscriberAddWithSilentReplay(record);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    ASSERT_EQ(ret, ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

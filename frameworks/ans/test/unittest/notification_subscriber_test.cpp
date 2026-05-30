@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 #include "notification_subscriber.h"
+#include "notification_switch_changed_callback_data.h"
 #include "picture_option.h"
 #undef private
 #undef protected
@@ -43,6 +44,18 @@ public:
     void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override {}
     void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>> &requestList,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override {}
+    void OnNotificationSwitchChanged(
+        const std::shared_ptr<NotificationSwitchChangedCallbackData> &callbackData) override
+    {
+        switchChangedCallbackData_ = callbackData;
+    }
+    std::shared_ptr<NotificationSwitchChangedCallbackData> GetSwitchChangedCallbackData() const
+    {
+        return switchChangedCallbackData_;
+    }
+
+private:
+    std::shared_ptr<NotificationSwitchChangedCallbackData> switchChangedCallbackData_;
 };
 
 class NotificationSubscriberTest : public testing::Test {
@@ -149,6 +162,95 @@ HWTEST_F(NotificationSubscriberTest, PictureOption_MemoryTest_00001, Function | 
     sptr<PictureOption> result = subscriber.GetPictureOption();
     ASSERT_NE(result, nullptr);
     EXPECT_EQ(result->GetPreparseLiveViewPicList().size(), 1u);
+}
+
+/**
+ * @tc.name: OnNotificationSwitchChanged_00001
+ * @tc.desc: Test OnNotificationSwitchChanged callback with valid data.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscriberTest, OnNotificationSwitchChanged_00001, Function | SmallTest | Level1)
+{
+    MockNotificationSubscriber subscriber;
+    auto callbackData = std::make_shared<NotificationSwitchChangedCallbackData>(
+        "deal", 100, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    subscriber.OnNotificationSwitchChanged(callbackData);
+    auto result = subscriber.GetSwitchChangedCallbackData();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetSwitchName(), "deal");
+    EXPECT_EQ(result->GetUserId(), 100);
+    EXPECT_EQ(result->GetEnableStatus(), NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+}
+
+/**
+ * @tc.name: OnNotificationSwitchChanged_00002
+ * @tc.desc: Test OnNotificationSwitchChanged callback with SYSTEM_DEFAULT_OFF state.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscriberTest, OnNotificationSwitchChanged_00002, Function | SmallTest | Level1)
+{
+    MockNotificationSubscriber subscriber;
+    auto callbackData = std::make_shared<NotificationSwitchChangedCallbackData>(
+        "logistics", 200, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    subscriber.OnNotificationSwitchChanged(callbackData);
+    auto result = subscriber.GetSwitchChangedCallbackData();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetSwitchName(), "logistics");
+    EXPECT_EQ(result->GetUserId(), 200);
+    EXPECT_EQ(result->GetEnableStatus(), NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+}
+
+/**
+ * @tc.name: OnNotificationSwitchChanged_00003
+ * @tc.desc: Test OnNotificationSwitchChanged callback with nullptr data.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscriberTest, OnNotificationSwitchChanged_00003, Function | SmallTest | Level1)
+{
+    MockNotificationSubscriber subscriber;
+    subscriber.OnNotificationSwitchChanged(nullptr);
+    EXPECT_EQ(subscriber.GetSwitchChangedCallbackData(), nullptr);
+}
+
+/**
+ * @tc.name: OnNotificationSwitchChanged_00004
+ * @tc.desc: Test OnNotificationSwitchChanged callback with SYSTEM_DEFAULT_ON state.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscriberTest, OnNotificationSwitchChanged_00004, Function | SmallTest | Level1)
+{
+    MockNotificationSubscriber subscriber;
+    auto callbackData = std::make_shared<NotificationSwitchChangedCallbackData>(
+        "deal", 300, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+    subscriber.OnNotificationSwitchChanged(callbackData);
+    auto result = subscriber.GetSwitchChangedCallbackData();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetSwitchName(), "deal");
+    EXPECT_EQ(result->GetUserId(), 300);
+    EXPECT_EQ(result->GetEnableStatus(), NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+}
+
+/**
+ * @tc.name: OnNotificationSwitchChanged_00005
+ * @tc.desc: Test OnNotificationSwitchChanged callback with USER_MODIFIED_OFF state.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscriberTest, OnNotificationSwitchChanged_00005, Function | SmallTest | Level1)
+{
+    MockNotificationSubscriber subscriber;
+    auto callbackData = std::make_shared<NotificationSwitchChangedCallbackData>(
+        "logistics", 400, NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+    subscriber.OnNotificationSwitchChanged(callbackData);
+    auto result = subscriber.GetSwitchChangedCallbackData();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetSwitchName(), "logistics");
+    EXPECT_EQ(result->GetUserId(), 400);
+    EXPECT_EQ(result->GetEnableStatus(), NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
 }
 
 }  // namespace Notification

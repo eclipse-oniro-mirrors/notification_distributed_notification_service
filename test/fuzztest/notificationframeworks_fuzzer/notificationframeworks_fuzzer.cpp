@@ -26,6 +26,7 @@
 #include "notification.h"
 #include "ans_notification.h"
 #include "notification_button_option.h"
+#include "notification_classification.h"
 
 namespace OHOS {
 namespace Notification {
@@ -86,6 +87,17 @@ public:
 
         NotificationConstant::SWITCH_STATE state;
         ans.GetNotificationSwitch(bundle, state);
+
+        std::string switchName = fdp->ConsumeRandomLengthString();
+        int32_t switchUserId = fdp->ConsumeIntegral<int32_t>();
+        NotificationConstant::SWITCH_STATE switchState;
+        ans.GetNotificationSwitch(switchName, switchUserId, switchState);
+        ans.SetNotificationSwitch(switchName, true, switchUserId);
+
+        sptr<NotificationRequest> aiExtRequest = new (std::nothrow) NotificationRequest();
+        sptr<NotificationClassification> aiExtClassification =
+            new (std::nothrow) NotificationClassification(str, str);
+        ans.TriggerUpdateAiExtNotification(aiExtRequest, aiExtClassification);
 
         FuzzTestSubscriber subscriber;
         auto info = NotificationSubscribeInfo();

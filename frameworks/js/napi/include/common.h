@@ -21,11 +21,13 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 #include "notification_button_option.h"
+#include "notification_classification.h"
 #include "notification_flags.h"
 #include "notification_helper.h"
 #include "notification_local_live_view_button.h"
 #include "notification_parameters.h"
 #include "notification_progress.h"
+#include "notification_switch_changed_callback_data.h"
 #include "notification_time.h"
 #include "ans_convert_enum.h"
 #include "ffrt.h"
@@ -107,6 +109,8 @@ struct NotificationSubscribeInfo {
     uint32_t filterType = 0;
     VoiceContentOption voiceContentOption;
     PictureOption pictureOption;
+    bool enableClassification = false;
+    bool needSilentReplayOnSubscribe = false;
 };
 
 struct CallbackPromiseInfo {
@@ -639,6 +643,17 @@ public:
      */
     static napi_value SetEnabledSilentReminderCallbackData(const napi_env &env,
         const EnabledSilentReminderCallbackData &data, napi_value &result);
+
+    /**
+     * @brief Sets a js object by specified NotificationSwitchChangedCallbackData object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param data Indicates a NotificationSwitchChangedCallbackData object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetNotificationSwitchChangedCallbackData(const napi_env &env,
+        const NotificationSwitchChangedCallbackData &data, napi_value &result);
 
     /**
      * @brief Sets a js object by specified EnabledPriorityNotificationByBundleCallbackData object
@@ -2069,6 +2084,17 @@ public:
     static int32_t GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id);
     static napi_value SetNotificationSettings(const napi_env &env, uint32_t slotFlags, napi_value &result);
     static void HistogramBoolReport(const std::string &name, const bool isSuccess);
+
+    /**
+     * @brief Sets a js object by specified NotificationClassification object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param data Indicates a NotificationClassification object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetNotificationClassification(
+        const napi_env &env, const NotificationClassification &data, napi_value &result);
 private:
     static const int32_t ARGS_ONE = 1;
     static const int32_t ARGS_TWO = 2;

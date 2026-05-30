@@ -16,12 +16,15 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "nlohmann/json.hpp"
+
 #define private public
 #define protected public
 #include "notification_ai_extension_wrapper.h"
 #undef private
 #undef protected
 #include "ans_const_define.h"
+#include "notification_classification.h"
 #include "notification_preferences.h"
 
 using namespace testing::ext;
@@ -102,14 +105,88 @@ HWTEST_F(NotificationAiExtensionWrapperTest, UpdateNotification_0100, Function |
 {
     NOTIFICATION_AI_EXTENSION_WRAPPER->updateNotification_ = nullptr;
     std::vector<sptr<NotificationRequest>> requests;
+    std::vector<nlohmann::json> commands;
+    std::vector<sptr<NotificationClassification>> notificationClassifications;
     std::vector<int32_t> results;
-    std::vector<int64_t> strategies;
-    uint32_t aiStatus = 0;
     NOTIFICATION_AI_EXTENSION_WRAPPER->Init();
     EXPECT_EQ(NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateNotification(requests,
-        NotificationAiExtensionWrapper::REFRESH_KEYWORD_PRIORITY_TYPE, results, aiStatus, strategies),
+        commands, notificationClassifications, results),
         NOTIFICATION_AI_EXTENSION_WRAPPER->ErrorCode::ERR_FAIL);
     NOTIFICATION_AI_EXTENSION_WRAPPER->InitExtensionWrapper();
+}
+
+/**
+ * @tc.name: UpdateNotification_0200
+ * @tc.desc: Test UpdateNotification with valid commands and notificationClassifications.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationAiExtensionWrapperTest, UpdateNotification_0200, Function | SmallTest | Level1)
+{
+    NOTIFICATION_AI_EXTENSION_WRAPPER->updateNotification_ = nullptr;
+    std::vector<sptr<NotificationRequest>> requests;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    requests.push_back(request);
+    std::vector<nlohmann::json> commands;
+    nlohmann::json command = nlohmann::json::object();
+    nlohmann::json params = nlohmann::json::object();
+    params["strategy"] = 1;
+    command[NotificationAiExtensionWrapper::UPDATE_AGGREGATION_TYPE] = params;
+    command["aiStatus"] = 1;
+    commands.push_back(command);
+    std::vector<sptr<NotificationClassification>> notificationClassifications;
+    notificationClassifications.push_back(nullptr);
+    std::vector<int32_t> results;
+    EXPECT_EQ(NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateNotification(requests,
+        commands, notificationClassifications, results),
+        NOTIFICATION_AI_EXTENSION_WRAPPER->ErrorCode::ERR_FAIL);
+    NOTIFICATION_AI_EXTENSION_WRAPPER->InitExtensionWrapper();
+}
+
+/**
+ * @tc.name: UPDATE_AGGREGATION_TYPE_0100
+ * @tc.desc: Test UPDATE_AGGREGATION_TYPE constant value.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationAiExtensionWrapperTest, UPDATE_AGGREGATION_TYPE_0100, Function | SmallTest | Level1)
+{
+    EXPECT_EQ(NotificationAiExtensionWrapper::UPDATE_AGGREGATION_TYPE, "update.aggregationNotificationType");
+}
+
+/**
+ * @tc.name: UPDATE_PRIORITY_TYPE_0100
+ * @tc.desc: Test UPDATE_PRIORITY_TYPE constant value.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationAiExtensionWrapperTest, UPDATE_PRIORITY_TYPE_0100, Function | SmallTest | Level1)
+{
+    EXPECT_EQ(NotificationAiExtensionWrapper::UPDATE_PRIORITY_TYPE, "update.priorityNotificationType");
+}
+
+/**
+ * @tc.name: REFRESH_KEYWORD_PRIORITY_TYPE_0100
+ * @tc.desc: Test REFRESH_KEYWORD_PRIORITY_TYPE constant value.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationAiExtensionWrapperTest, REFRESH_KEYWORD_PRIORITY_TYPE_0100, Function | SmallTest | Level1)
+{
+    EXPECT_EQ(NotificationAiExtensionWrapper::REFRESH_KEYWORD_PRIORITY_TYPE,
+        "refresh.keyword.priorityNotificationType");
+}
+
+/**
+ * @tc.name: REFRESH_SWITCH_PRIORITY_TYPE_0100
+ * @tc.desc: Test REFRESH_SWITCH_PRIORITY_TYPE constant value.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationAiExtensionWrapperTest, REFRESH_SWITCH_PRIORITY_TYPE_0100, Function | SmallTest | Level1)
+{
+    EXPECT_EQ(NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE,
+        "refresh.switch.priorityNotificationType");
 }
 }
 }

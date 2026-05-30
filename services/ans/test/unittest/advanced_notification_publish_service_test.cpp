@@ -44,6 +44,7 @@
 #include "os_account_manager.h"
 #include "os_account_manager_helper.h"
 #include "notification_extension_wrapper.h"
+#include "notification_classification_mgr.h"
 
 extern void MockIsOsAccountExists(bool exists);
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase);
@@ -3884,6 +3885,57 @@ HWTEST_F(AnsPublishServiceTest, GetPublishProcess_Concurrency_00001, Function | 
         ASSERT_NE(results[i], nullptr);
     }
     ASSERT_EQ(advancedNotificationService_->publishProcess_.size(), static_cast<size_t>(8));
+}
+
+/**
+ * @tc.name: ClassificationMgr_Remove_CancelGroup_00001
+ * @tc.desc: Test ClassificationMgr Remove in CancelGroupNotification.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, ClassificationMgr_Remove_CancelGroup_00001, Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    std::string key = "publish_cancel_group_test_key";
+    sptr<NotificationClassification> classification = new NotificationClassification();
+    NotificationClassificationMgr::GetInstance().AddOrUpdate(key, classification);
+    EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Exists(key));
+    EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Remove(key));
+    EXPECT_FALSE(NotificationClassificationMgr::GetInstance().Exists(key));
+}
+
+/**
+ * @tc.name: ClassificationMgr_Remove_RemoveGroupByBundle_00001
+ * @tc.desc: Test ClassificationMgr Remove in RemoveGroupByBundle.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, ClassificationMgr_Remove_RemoveGroupByBundle_00001, Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    std::string key = "publish_remove_group_bundle_test_key";
+    sptr<NotificationClassification> classification = new NotificationClassification();
+    NotificationClassificationMgr::GetInstance().AddOrUpdate(key, classification);
+    EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Exists(key));
+    EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Remove(key));
+    EXPECT_FALSE(NotificationClassificationMgr::GetInstance().Exists(key));
+}
+
+/**
+ * @tc.name: ClassificationMgr_Remove_RemoveAllByBundle_00001
+ * @tc.desc: Test ClassificationMgr Remove in RemoveAllNotificationsByBundle.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, ClassificationMgr_Remove_RemoveAllByBundle_00001, Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    std::string key = "publish_remove_all_bundle_test_key";
+    sptr<NotificationClassification> classification = new NotificationClassification();
+    NotificationClassificationMgr::GetInstance().AddOrUpdate(key, classification);
+    EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Exists(key));
+    EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Remove(key));
+    EXPECT_FALSE(NotificationClassificationMgr::GetInstance().Exists(key));
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -144,6 +144,23 @@ bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, Notificatio
     if (!GetPictureOption(env, value, info)) {
         return false;
     }
+
+    ani_boolean enableClassificationUndefined = ANI_TRUE;
+    bool enableClassification = false;
+    if (GetPropertyBool(env, value, "enableClassification",
+        enableClassificationUndefined, enableClassification) == ANI_OK
+        && enableClassificationUndefined != ANI_TRUE) {
+        info.SetEnableClassification(enableClassification);
+    }
+
+    ani_boolean needSilentReplayOnSubscribeUndefined = ANI_TRUE;
+    bool needSilentReplayOnSubscribe = false;
+    if (GetPropertyBool(env, value, "needSilentReplayOnSubscribe",
+        needSilentReplayOnSubscribeUndefined, needSilentReplayOnSubscribe) == ANI_OK
+        && needSilentReplayOnSubscribeUndefined != ANI_TRUE) {
+        info.SetNeedSilentReplayOnSubscribe(needSilentReplayOnSubscribe);
+    }
+
     ANS_LOGD("userId %{public}d deviceType %{public}s filterLimit %{public}d voiceContentOption %{public}s",
         info.GetAppUserId(), info.GetDeviceType().c_str(), info.GetFilterType(),
         info.GetVoiceContentOption() != nullptr ? "enabled" : "null");

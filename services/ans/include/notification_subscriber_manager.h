@@ -16,6 +16,7 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_INCLUDE_NOTIFICATION_SUBSCRIBER_MANAGER_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_INCLUDE_NOTIFICATION_SUBSCRIBER_MANAGER_H
 
+#include <atomic>
 #include <list>
 #include <memory>
 #include <mutex>
@@ -36,6 +37,7 @@
 #include "notification_request.h"
 #include "notification_sorting_map.h"
 #include "notification_subscribe_info.h"
+#include "notification_switch_changed_callback_data.h"
 
 namespace OHOS {
 namespace Notification {
@@ -56,6 +58,8 @@ public:
         std::set<NotificationConstant::SlotType> slotTypes {};
         bool isSubscribeSelf = false;
         uint32_t subscribedFlags_ {0};
+        bool enableClassification = false;
+        bool needSilentReplayOnSubscribe = false;
     };
 
     /**
@@ -152,11 +156,26 @@ public:
         const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData);
 
     /**
+     * @brief Notify when the aggregation switch is changed.
+     *
+     * @param callbackData Indicates the NotificationSwitchChangedCallbackData object.
+     */
+    void NotifyNotificationSwitchChanged(const sptr<NotificationSwitchChangedCallbackData> &callbackData);
+
+    /**
+     * @brief Gets the aggregation subscriber count.
+     * Used to determine whether to call the AI extension for classification.
+     * @return Returns the count of subscribers with aggregation capability.
+     */
+    int32_t GetAggregationSubscriberCount() const;
+
+    /**
      * @brief notify when the system properties of notification changed.
      *
      * @param notification Indicates the Notification object.
      */
-    void NotifySystemUpdate(const sptr<Notification> &notification);
+    void NotifySystemUpdate(const sptr<Notification> &notification,
+        const sptr<NotificationClassification>& notificationClassification = nullptr);
 
     /**
      * @brief Notify all subscribers on badge enabled state changed.
@@ -224,6 +243,9 @@ public:
 
     void NotifyRefreshPriorityConfig(const std::vector<sptr<NotificationRequest>> &requests);
 private:
+    void IncrementAggregationSubscriberCount();
+    void DecrementAggregationSubscriberCount();
+    void NotifyNotificationSwitchChangedInner(const sptr<NotificationSwitchChangedCallbackData> &callbackData);
     void NotifyApplicationInfochangedInner(const sptr<NotificationApplicationChangeInfo>& applicationChangeInfo);
     std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const wptr<IRemoteObject> &object);
     std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const sptr<IAnsSubscriber> &subscriber);
@@ -257,7 +279,8 @@ private:
     void NotifyEnabledPriorityChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     void NotifyEnabledPriorityByBundleChangedInner(
         const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData);
-    void NotifySystemUpdateInner(const sptr<Notification> &notification);
+    void NotifySystemUpdateInner(const sptr<Notification> &notification,
+        const sptr<NotificationClassification>& notificationClassification = nullptr);
     void NotifyBadgeEnabledChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     bool IsSystemUser(int32_t userId);
     bool IsSubscribedBysubscriber(
@@ -305,6 +328,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> recipient_ {};
     std::shared_ptr<ffrt::queue> notificationSubQueue_ = nullptr;
     std::function<void(const std::shared_ptr<SubscriberRecord> &)> onSubscriberAddCallback_ = nullptr;
+    std::atomic<int32_t> aggregationSubscriberCount_ {0};
 
     DECLARE_DELAYED_SINGLETON(NotificationSubscriberManager);
     DISALLOW_COPY_AND_MOVE(NotificationSubscriberManager);

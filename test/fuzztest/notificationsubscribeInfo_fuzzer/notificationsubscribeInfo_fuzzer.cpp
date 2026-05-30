@@ -31,8 +31,16 @@ namespace OHOS {
         sotificationSubscribeInfo.AddAppUserId(userId);
         sotificationSubscribeInfo.GetAppUserId();
         sotificationSubscribeInfo.Dump();
+        bool enableClassification = fdp->ConsumeBool();
+        sotificationSubscribeInfo.SetEnableClassification(enableClassification);
+        sotificationSubscribeInfo.GetEnableClassification();
+        bool needSilentReplay = fdp->ConsumeBool();
+        sotificationSubscribeInfo.SetNeedSilentReplayOnSubscribe(needSilentReplay);
+        sotificationSubscribeInfo.GetNeedSilentReplayOnSubscribe();
         Parcel parcel;
-        return sotificationSubscribeInfo.Marshalling(parcel);
+        sotificationSubscribeInfo.Marshalling(parcel);
+        sotificationSubscribeInfo.Unmarshalling(parcel);
+        return true;
     }
 }
 

@@ -35,6 +35,7 @@ sequenceable OHOS.Notification.NotificationOperationInfo;
 sequenceable OHOS.Notification.Notification;
 sequenceable OHOS.Notification.NotificationButtonOption;
 sequenceable OHOS.Notification.NotificationCheckRequest;
+sequenceable OHOS.Notification.NotificationClassification;
 sequenceable OHOS.Notification.NotificationRingtoneInfo;
 sequenceable OHOS.Notification.NotificationDistributedBundle;
 sequenceable OHOS.Notification.NotificationParameters;
@@ -352,6 +353,9 @@ interface OHOS.Notification.IAnsManager {
 
     void TriggerUpdatePriorityType([in] sptr<NotificationRequest> request);
 
+    void TriggerUpdateAiExtNotification([in] sptr<NotificationRequest> request,
+        [in] sptr<NotificationClassification> notificationClassification);
+
     void SetDistributedBundleOption(
         [in] sptr<DistributedBundleOption>[] bundles, [in] String deviceType);
 
@@ -481,4 +485,8 @@ interface OHOS.Notification.IAnsManager {
     void GetStatisticsByBundle([in] sptr<NotificationBundleOption>[] bundleOptions, [out] NotificationStatistics[] statistics);
 
     void SnoozeNotification([in] String hashCode, [in] long delayTime);
+
+    void SetNotificationSwitch([in] String switchName, [in] boolean switchState, [in] int userId);
+ 
+    void GetNotificationSwitch([in] String switchName, [in] int userId, [out] int switchState);
 }

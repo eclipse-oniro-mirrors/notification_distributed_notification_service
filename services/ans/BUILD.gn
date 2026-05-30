@@ -76,6 +76,7 @@ ohos_source_set("ans_service_sources") {
   include_dirs = [
     "${services_path}/ans/include",
     "${services_path}/ans/include/clone",
+    "${services_path}/ans/include/aggregation_notification",
     "${services_path}/ans/include/notification_extension",
     "${services_path}/ans/include/utils",
     "${services_path}/ans/src",
@@ -107,6 +108,7 @@ ohos_source_set("ans_service_sources") {
     "src/advanced_datashare_observer.cpp",
     "src/advanced_notdisturb_enabled_observer.cpp",
     "src/advanced_notdisturb_white_list_observer.cpp",
+    "src/advanced_notification_ai_extension_manager.cpp",
     "src/advanced_notification_clone_service.cpp",
     "src/advanced_notification_event_service.cpp",
     "src/advanced_notification_extension_subscription.cpp",
@@ -129,15 +131,19 @@ ohos_source_set("ans_service_sources") {
     "src/advanced_notification_slot_service.cpp",
     "src/advanced_notification_subscriber_service.cpp",
     "src/advanced_notification_utils.cpp",
+    "src/aggregation_notification/advanced_notification_aggregation_helper.cpp",
+    "src/aggregation_notification/advanced_notification_aggregation_service.cpp",
     "src/badge_manager/badge_manager.cpp",
     "src/bundle_manager_helper.cpp",
+    "src/clone/clone_start_event_subscriber.cpp",
     "src/clone/dh_notification_clone_bundle_service.cpp",
     "src/clone/notification_clone_bundle_info.cpp",
     "src/clone/notification_clone_bundle_service.cpp",
     "src/clone/notification_clone_disturb_service.cpp",
     "src/clone/notification_clone_geofence_switch.cpp",
     "src/clone/notification_clone_manager.cpp",
-    "src/clone/clone_start_event_subscriber.cpp",
+    "src/clone/notification_clone_notification_switch.cpp",
+    "src/clone/notification_clone_notification_switch_info.cpp",
     "src/clone/notification_clone_priority_info.cpp",
     "src/clone/notification_clone_priority_service.cpp",
     "src/clone/notification_clone_util.cpp",
@@ -184,6 +190,7 @@ ohos_source_set("ans_service_sources") {
     "src/system_event_observer.cpp",
     "src/system_live_view/advanced_notification_system_live_view_service.cpp",
     "src/telephony_extension_wrapper.cpp",
+    "src/utils/notification_classification_mgr.cpp",
     "src/utils/notification_liveview_utils.cpp",
     "src/utils/notification_load_utils.cpp",
   ]
@@ -247,6 +254,10 @@ ohos_source_set("ans_service_sources") {
 
   if (distributed_notification_service_feature_dist_notification_persist) {
     defines += [ "ANS_FEATURE_DIST_NOTIFICATION_PERSIST" ]
+  }
+
+  if (distributed_notification_service_feature_aggregation_notification) {
+    defines += [ "ANS_FEATURE_AGGREGATION_NOTIFICATION" ]
   }
 
   external_deps = [

@@ -29,6 +29,7 @@
 #include "napi_geofence_enabled.h"
 #include "napi_get_active.h"
 #include "napi_get_notification_parameters.h"
+#include "napi_notification_switch.h"
 #include "napi_publish.h"
 #include "napi_remove_group.h"
 #include "napi_ringtone_info_by_bundle.h"
@@ -108,6 +109,8 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setTargetDeviceStatus", NapiSetTargetDeviceStatus),
         DECLARE_NAPI_FUNCTION("requestEnableNotification", NapiRequestEnableNotification),
         DECLARE_NAPI_FUNCTION("getNotificationSetting", NapiGetNotificationSettings),
+        DECLARE_NAPI_FUNCTION("setNotificationSwitch", NapiSetNotificationSwitch),
+        DECLARE_NAPI_FUNCTION("getNotificationSwitch", NapiGetNotificationSwitch),
         DECLARE_NAPI_FUNCTION("setSilentReminderEnabled", NapiSetSilentReminderEnabled),
         DECLARE_NAPI_FUNCTION("isSilentReminderEnabled", NapiIsSilentReminderEnabled),
         DECLARE_NAPI_FUNCTION("setRingtoneInfoByBundle", NapiSetRingtoneInfoByBundle),

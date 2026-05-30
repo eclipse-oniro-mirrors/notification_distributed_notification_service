@@ -259,6 +259,18 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledPriorityByBundleChanged
     return ERR_OK;
 }
 
+ErrCode NotificationSubscriber::SubscriberImpl::OnNotificationSwitchChanged(
+    const sptr<NotificationSwitchChangedCallbackData> &callbackData)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (callbackData == nullptr) {
+        ANS_LOGE("null callbackData");
+        return ERR_INVALID_DATA;
+    }
+    subscriber_.OnNotificationSwitchChanged(std::make_shared<NotificationSwitchChangedCallbackData>(*callbackData));
+    return ERR_OK;
+}
+
 ErrCode NotificationSubscriber::SubscriberImpl::OnSystemUpdate(const sptr<Notification> &notification)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);

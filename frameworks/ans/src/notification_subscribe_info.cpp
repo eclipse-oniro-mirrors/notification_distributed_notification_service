@@ -44,6 +44,8 @@ NotificationSubscribeInfo::NotificationSubscribeInfo(const NotificationSubscribe
     filterType_ = subscribeInfo.GetFilterType();
     voiceContentOption_ = subscribeInfo.GetVoiceContentOption();
     pictureOption_ = subscribeInfo.GetPictureOption();
+    enableClassification_ = subscribeInfo.GetEnableClassification();
+    needSilentReplayOnSubscribe_ = subscribeInfo.GetNeedSilentReplayOnSubscribe();
 }
 
 void NotificationSubscribeInfo::AddAppName(const std::string appName)
@@ -182,7 +184,18 @@ bool NotificationSubscribeInfo::Marshalling(Parcel &parcel) const
     if (!MarshallingVoiceContentOption(parcel)) {
         return false;
     }
-    return MarshallingPictureOption(parcel);
+    if (!MarshallingPictureOption(parcel)) {
+        return false;
+    }
+    if (!parcel.WriteBool(enableClassification_)) {
+        ANS_LOGE("Can't write enableClassification");
+        return false;
+    }
+    if (!parcel.WriteBool(needSilentReplayOnSubscribe_)) {
+        ANS_LOGE("Can't write needSilentReplayOnSubscribe");
+        return false;
+    }
+    return true;
 }
 
 NotificationSubscribeInfo *NotificationSubscribeInfo::Unmarshalling(Parcel &parcel)
@@ -274,7 +287,12 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
     if (!ReadVoiceContentOptionFromParcel(parcel)) {
         return false;
     }
-    return ReadPictureOptionFromParcel(parcel);
+    if (!ReadPictureOptionFromParcel(parcel)) {
+        return false;
+    }
+    enableClassification_ = parcel.ReadBool();
+    needSilentReplayOnSubscribe_ = parcel.ReadBool();
+    return true;
 }
 
 std::string NotificationSubscribeInfo::Dump()
@@ -317,6 +335,8 @@ std::string NotificationSubscribeInfo::Dump()
             "isSubscribeSelf = " + std::to_string(isSubscribeSelf_) +
             "voiceContentOption = " + voiceContentOption +
             "pictureOption = " + pictureOption +
+             "enableClassification = " + std::to_string(enableClassification_) +
+             "needSilentReplayOnSubscribe = " + std::to_string(needSilentReplayOnSubscribe_) +
             " }";
 }
 
@@ -408,6 +428,26 @@ void NotificationSubscribeInfo::SetPictureOption(const sptr<PictureOption> &opti
 sptr<PictureOption> NotificationSubscribeInfo::GetPictureOption() const
 {
     return pictureOption_;
+}
+
+void NotificationSubscribeInfo::SetEnableClassification(bool enableClassification)
+{
+    enableClassification_ = enableClassification;
+}
+
+bool NotificationSubscribeInfo::GetEnableClassification() const
+{
+    return enableClassification_;
+}
+
+void NotificationSubscribeInfo::SetNeedSilentReplayOnSubscribe(bool needSilentReplayOnSubscribe)
+{
+    needSilentReplayOnSubscribe_ = needSilentReplayOnSubscribe;
+}
+
+bool NotificationSubscribeInfo::GetNeedSilentReplayOnSubscribe() const
+{
+    return needSilentReplayOnSubscribe_;
 }
 }  // namespace Notification
 }  // namespace OHOS

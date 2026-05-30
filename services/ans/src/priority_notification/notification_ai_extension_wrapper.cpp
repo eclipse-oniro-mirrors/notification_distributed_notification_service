@@ -92,15 +92,15 @@ void NotificationAiExtensionWrapper::CloseExtensionWrapper()
 
 int32_t NotificationAiExtensionWrapper::UpdateNotification(
     const std::vector<sptr<NotificationRequest>> &requests,
-    const std::string &command, std::vector<int32_t> &results,
-    const uint32_t aiStatus, const std::vector<int64_t> strategies)
+    const std::vector<nlohmann::json> &commands,
+    std::vector<sptr<NotificationClassification>> &notificationClassifications,
+    std::vector<int32_t> &results)
 {
     if (updateNotification_ == nullptr) {
         ANS_LOGE("update priority notification wrapper symbol failed");
         return ErrorCode::ERR_FAIL;
     }
-    
-    return updateNotification_(requests, command, results, aiStatus, strategies);
+    return updateNotification_(requests, commands, notificationClassifications, results);
 }
 
 void NotificationAiExtensionWrapper::Init()
