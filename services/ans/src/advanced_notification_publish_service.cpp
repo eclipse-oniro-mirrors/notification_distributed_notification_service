@@ -1148,7 +1148,8 @@ ErrCode AdvancedNotificationService::PublishExtensionServiceStateChange(
                 });
             }
         }
-        want.SetParam("enabledBundles", enabledBundlesJson.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace));
+        want.SetParam("enabledBundles",
+            enabledBundlesJson.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace));
     }
 
     nlohmann::json targetBundle = {{"bundle", bundleOption->GetBundleName()}, {"uid", bundleOption->GetUid()}};
