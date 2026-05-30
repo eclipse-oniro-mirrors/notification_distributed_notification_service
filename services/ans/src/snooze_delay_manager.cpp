@@ -208,7 +208,8 @@ bool AdvancedNotificationService::SetEncryptToDB(const NotificationRequestDb &re
         return false;
     }
     std::string encryptValue;
-    ErrCode errorCode = AesGcmHelper::Encrypt(jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), encryptValue);
+    ErrCode errorCode = AesGcmHelper::Encrypt(
+        jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), encryptValue);
     if (errorCode != ERR_OK) {
         ANS_LOGE("SetSnoozeDelayTimeToDB encrypt error %{public}d", errorCode);
         return false;
