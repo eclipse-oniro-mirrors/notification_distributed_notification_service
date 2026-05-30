@@ -395,7 +395,8 @@ ErrCode AdvancedNotificationService::SetTriggerNotificationRequestToDb(
     jsonObject["isSystemApp"] = requestDb.isSystemApp;
 
     std::string encryptValue;
-    ErrCode errorCode = AesGcmHelper::Encrypt(jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), encryptValue);
+    ErrCode errorCode = AesGcmHelper::Encrypt(
+        jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), encryptValue);
     if (errorCode != ERR_OK) {
         ANS_LOGE("SetTriggerNotificationRequestToDb encrypt error");
         return static_cast<int>(errorCode);
