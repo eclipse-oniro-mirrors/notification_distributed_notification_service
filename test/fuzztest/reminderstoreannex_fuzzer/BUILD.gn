@@ -48,6 +48,7 @@ ohos_fuzztest("ReminderStoreAnnexFuzzTest") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "hilog:libhilog",
+    "icu:shared_icuuc",
     "image_framework:image_native",
     "relational_store:native_rdb",
   ]

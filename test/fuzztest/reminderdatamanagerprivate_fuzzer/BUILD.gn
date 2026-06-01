@@ -52,6 +52,7 @@ ohos_fuzztest("ReminderDataManagerPrivateFuzzTest") {
     "data_share:datashare_common",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "icu:shared_icuuc",
     "image_framework:image_native",
     "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
