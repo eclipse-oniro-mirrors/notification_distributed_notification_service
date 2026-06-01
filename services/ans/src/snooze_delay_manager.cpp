@@ -294,18 +294,19 @@ bool AdvancedNotificationService::StartSnoozeTimer()
     timerImpl_.DestroyTimer();
     CreateSnoozeTimer();
     timerImpl_.StartTimer(triggerTime);
-    
     return true;
 }
 
 int64_t AdvancedNotificationService::GetEarliestTriggerTime()
 {
     std::lock_guard<ffrt::mutex> locker(snoozeNotificationMutex_);
-    if (!snoozeDelayTimerList_.empty()) {
-        auto iter = snoozeDelayTimerList_.begin();
+    for (auto iter = snoozeDelayTimerList_.begin(); iter != snoozeDelayTimerList_.end();) {
+        if ((*iter) == nullptr || (*iter)->request == nullptr) {
+            iter = snoozeDelayTimerList_.erase(iter);
+            continue;
+        }
         return (*iter)->request->GetSnoozeDelayTime();
     }
-
     return 0;
 }
 
@@ -325,10 +326,7 @@ void AdvancedNotificationService::SetNextSnoozeTimer(int64_t currentTime)
     {
         std::lock_guard<ffrt::mutex> locker(snoozeNotificationMutex_);
         for (auto it = snoozeDelayTimerList_.begin(); it != snoozeDelayTimerList_.end();) {
-            if ((*it)->request == nullptr) {
-                continue;
-            }
-            if ((*it)->request->GetSnoozeDelayTime() < currentTime) {
+            if ((*it) == nullptr || (*it)->request == nullptr || (*it)->request->GetSnoozeDelayTime() < currentTime) {
                 it = snoozeDelayTimerList_.erase(it);
             } else {
                 break;
@@ -346,12 +344,13 @@ void AdvancedNotificationService::RemoveAllFromSnoozeDelayList(const sptr<Notifi
     {
         std::lock_guard<ffrt::mutex> locker(snoozeNotificationMutex_);
         for (auto it = snoozeDelayTimerList_.begin(); it != snoozeDelayTimerList_.end();) {
-            if ((*it) == nullptr || (*it)->bundleOption == nullptr) {
+            if ((*it) == nullptr || (*it)->bundleOption == nullptr || (*it)->request == nullptr) {
                 ++it;
                 continue;
             }
-            if ((*it)->bundleOption->GetBundleName() == bundle->GetBundleName() &&
-                (*it)->bundleOption->GetUid() == bundle->GetUid()) {
+            if (((*it)->bundleOption->GetBundleName() == bundle->GetBundleName() &&
+                (*it)->bundleOption->GetUid() == bundle->GetUid()) ||
+                ((*it)->request->GetOwnerUid() == bundle->GetUid())) {
                 DeleteSnoozeNotificationFromDB(*it);
                 it = snoozeDelayTimerList_.erase(it);
             } else {
