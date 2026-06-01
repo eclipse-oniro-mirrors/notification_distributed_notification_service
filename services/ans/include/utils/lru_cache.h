@@ -50,7 +50,7 @@ public:
     using TimePoint = std::chrono::steady_clock::time_point;
 
     struct Config {
-        size_t maxSize = 100;
+        size_t maxSize = 0;  // 0 means no capacity limit, only TTL controls eviction
         std::chrono::minutes ttl = std::chrono::minutes(5);
         bool enableTTL = true;
     };
@@ -190,7 +190,7 @@ public:
             return;
         }
         MaybeEvictExpired();
-        if (cache_.size() >= config_.maxSize) {
+        if (config_.maxSize > 0 && cache_.size() >= config_.maxSize) {
             EvictLRU();
         }
         lruList_.emplace_front(key);
@@ -213,7 +213,7 @@ public:
             return;
         }
         MaybeEvictExpired();
-        if (cache_.size() >= config_.maxSize) {
+        if (config_.maxSize > 0 && cache_.size() >= config_.maxSize) {
             EvictLRU();
         }
         lruList_.emplace_front(key);
@@ -363,8 +363,10 @@ public:
     {
         config_ = config;
         EvictExpired();
-        while (cache_.size() > config_.maxSize) {
-            EvictLRU();
+        if (config_.maxSize > 0) {
+            while (cache_.size() > config_.maxSize) {
+                EvictLRU();
+            }
         }
     }
 
