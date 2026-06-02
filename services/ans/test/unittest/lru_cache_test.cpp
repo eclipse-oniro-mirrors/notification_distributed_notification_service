@@ -1040,9 +1040,71 @@ HWTEST_F(LRUCacheTest, GetConfig_DefaultValues_00001, Function | SmallTest | Lev
 
     auto config = cache.GetConfig();
 
-    EXPECT_EQ(config.maxSize, 100);
+    EXPECT_EQ(config.maxSize, 0);
     EXPECT_EQ(config.ttl, std::chrono::minutes(5));
     EXPECT_TRUE(config.enableTTL);
+}
+
+/**
+ * @tc.name: Put_MaxSizeZero_NoCapacityLimit_00001
+ * @tc.desc: Test that maxSize=0 means no capacity limit, entries are not evicted by size
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Put_MaxSizeZero_NoCapacityLimit_00001, Function | SmallTest | Level1)
+{
+    typename LRUCache<std::string, TestValue>::Config config;
+    config.maxSize = 0;  // No capacity limit
+    config.enableTTL = false;  // Disable TTL so entries persist
+    LRUCache<std::string, TestValue> cache(config);
+
+    // Insert more than the old default (100) entries
+    for (size_t i = 0; i < 200; i++) {
+        cache.Put("key" + std::to_string(i), TestValue(i, "value" + std::to_string(i)));
+    }
+
+    // All 200 entries should still be in cache (no capacity eviction)
+    EXPECT_EQ(cache.Size(), 200);
+    EXPECT_EQ(cache.GetStats().evictions, 0);
+
+    // Verify all entries are accessible
+    for (size_t i = 0; i < 200; i++) {
+        TestValue val;
+        EXPECT_TRUE(cache.Get("key" + std::to_string(i), val));
+        EXPECT_EQ(val.id, i);
+    }
+}
+
+/**
+ * @tc.name: UpdateConfig_MaxSizeZero_NoEviction_00001
+ * @tc.desc: Test that UpdateConfig with maxSize=0 does not evict entries
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, UpdateConfig_MaxSizeZero_NoEviction_00001, Function | SmallTest | Level1)
+{
+    typename LRUCache<std::string, TestValue>::Config config;
+    config.maxSize = 5;
+    config.enableTTL = false;
+    LRUCache<std::string, TestValue> cache(config);
+
+    for (size_t i = 0; i < 5; i++) {
+        cache.Put("key" + std::to_string(i), TestValue(i, "value" + std::to_string(i)));
+    }
+    EXPECT_EQ(cache.Size(), 5);
+
+    // Update to maxSize=0 (no limit) — should not evict anything
+    config.maxSize = 0;
+    cache.UpdateConfig(config);
+
+    EXPECT_EQ(cache.Size(), 5);
+    EXPECT_EQ(cache.GetStats().evictions, 0);
+
+    // Can now add more entries beyond old limit
+    for (size_t i = 5; i < 20; i++) {
+        cache.Put("key" + std::to_string(i), TestValue(i, "value" + std::to_string(i)));
+    }
+    EXPECT_EQ(cache.Size(), 20);
 }
 
 /**
