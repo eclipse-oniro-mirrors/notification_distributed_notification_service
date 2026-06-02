@@ -990,8 +990,8 @@ void AdvancedNotificationService::OnDistributedDelete(
                 (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
                 (record->notification->GetLabel() == label) && (record->notification->GetId() == id)) {
                 notification = record->notification;
-                notificationList_.remove(record);
                 NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+                notificationList_.remove(record);
                 break;
             }
         }
@@ -1327,8 +1327,8 @@ void AdvancedNotificationService::DeleteAllByUserStopped(int32_t userId)
                 (record->notification->GetRecvUserId() == ZERO_USER_ID))) {
                 ProcForDeleteNotificationFromDb(record);
                 notification = record->notification;
-                notificationList_.remove(record);
                 NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+                notificationList_.remove(record);
                 break;
             }
         }

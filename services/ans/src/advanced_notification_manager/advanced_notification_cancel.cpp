@@ -531,8 +531,8 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
             if ((record->bundleOption->GetBundleName().empty()) && (record->bundleOption->GetUid() == uid) &&
                 (record->notification->GetId() == notificationId) && (record->notification->GetLabel() == label)) {
                 notification = record->notification;
-                notificationList_.remove(record);
                 NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+                notificationList_.remove(record);
                 result = ERR_OK;
                 break;
             }
@@ -628,8 +628,8 @@ ErrCode AdvancedNotificationService::ExcuteRemoveNotification(const sptr<Notific
             isThirdParty = record->isThirdparty;
 
             DeleteNotificationFromDb(record, removeReason, false);
-            notificationList_.remove(record);
             NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+            notificationList_.remove(record);
             result = ERR_OK;
             break;
         }
@@ -727,8 +727,8 @@ void AdvancedNotificationService::ExcuteRemoveAllNotificationsInner(const sptr<N
     std::vector<uint64_t> timerIds;
     for (auto record : removeList) {
         ProcForDeleteNotificationFromDb(record);
-        notificationList_.remove(record);
         NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+        notificationList_.remove(record);
         if (record->notification != nullptr) {
             ANS_LOGD("record->notification is not nullptr.");
             UpdateRecentNotification(record->notification, true, reason);
@@ -878,8 +878,8 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
             continue;
         }
         ProcForDeleteNotificationFromDb(record);
-        notificationList_.remove(record);
         NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+        notificationList_.remove(record);
         if (record->notification != nullptr) {
             ANS_LOGD("record->notification is not nullptr.");
             UpdateRecentNotification(record->notification, true, reason);
@@ -1232,8 +1232,8 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotificationsByDeviceId(
                 notifications, nullptr, removeReason);
         }
         for (auto deleteRecord : deleteRecords) {
-            notificationList_.remove(deleteRecord);
             NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
+            notificationList_.remove(deleteRecord);
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove notifications by deviceId.");
@@ -1272,8 +1272,8 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
                 notifications, nullptr, removeReason);
         }
         for (auto deleteRecord : deleteRecords) {
-            notificationList_.remove(deleteRecord);
             NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
+            notificationList_.remove(deleteRecord);
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove distributed notifications.");
@@ -1331,8 +1331,8 @@ void AdvancedNotificationService::RemoveDistributedNotificationsByBundle(
                 notifications, nullptr, NotificationConstant::DISTRIBUTED_APPLICATION_ENABLE_REASON_DELETE);
         }
         for (auto deleteRecord : deleteRecords) {
-            notificationList_.remove(deleteRecord);
             NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
+            notificationList_.remove(deleteRecord);
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return, "Remove distributed notifications.");
@@ -1381,8 +1381,8 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
                 notifications, nullptr, removeReason);
         }
         for (auto deleteRecord : deleteRecords) {
-            notificationList_.remove(deleteRecord);
             NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
+            notificationList_.remove(deleteRecord);
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove distributed notifications.");
@@ -1413,8 +1413,8 @@ ErrCode AdvancedNotificationService::RemoveAllDistributedNotifications(
         }
 
         for (auto deleteRecord : deleteRecords) {
-            notificationList_.remove(deleteRecord);
             NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
+            notificationList_.remove(deleteRecord);
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove all distributed notifications.");
