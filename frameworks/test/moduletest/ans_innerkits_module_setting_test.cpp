@@ -47,10 +47,20 @@ public:
 sptr<AdvancedNotificationService> AnsInnerKitsModuleSettingTest::service_;
 void AnsInnerKitsModuleSettingTest::SetUpTestCase()
 {
-    RemoteNativeToken::SetNativeToken("ans_innerkits_module_setting_test");
-    service_ = OHOS::Notification::AdvancedNotificationService::GetInstance();
-    OHOS::ISystemAbilityManager::SAExtraProp saExtraProp;
-    systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service_, saExtraProp);
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 0,
+        .aclsNum = 0,
+        .dcaps = nullptr,
+        .perms = nullptr,
+        .acls = nullptr,
+        .aplStr = "system_basic",
+    };
+
+    uint64_t tokenId;
+    infoInstance.processName = "ans_innerkits_module_setting_test";
+    tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
 }
 
 void AnsInnerKitsModuleSettingTest::TearDownTestCase()

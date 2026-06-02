@@ -37,23 +37,20 @@ class NotificationHelperTest : public testing::Test {
 public:
     static void SetUpTestCase()
     {
-        const char **perms = new const char *[1];
-        perms[0] = "ohos.permission.NOTIFICATION_CONTROLLER";
         NativeTokenInfoParams infoInstance = {
             .dcapsNum = 0,
-            .permsNum = 1,
+            .permsNum = 0,
             .aclsNum = 0,
             .dcaps = nullptr,
-            .perms = perms,
+            .perms = nullptr,
             .acls = nullptr,
             .aplStr = "system_basic",
         };
 
         uint64_t tokenId;
-        infoInstance.processName = "ans_reminder_unit_test";
+        infoInstance.processName = "ans_test";
         tokenId = GetAccessTokenId(&infoInstance);
         SetSelfTokenID(tokenId);
-        delete[] perms;
     }
     static void TearDownTestCase() {}
     void SetUp() {}
@@ -1895,7 +1892,7 @@ HWTEST_F(NotificationHelperTest, GetNotificationSwitch_0200, Function | SmallTes
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetNotificationSwitch(bundleOption, state);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
 
 /**

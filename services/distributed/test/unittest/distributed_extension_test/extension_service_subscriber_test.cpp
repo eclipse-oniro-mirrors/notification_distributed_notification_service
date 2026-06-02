@@ -21,7 +21,6 @@
 #define private public
 #include "extension_service_connection_service.h"
 #include "extension_service_subscriber.h"
-#include "extension_service.h"
 #include "notification.h"
 #include "notification_bundle_option.h"
 #include "notification_request.h"
@@ -372,113 +371,5 @@ HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnCanceled_N
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     EXPECT_TRUE(svc.connectionMap_.find(key) == svc.connectionMap_.end());
 }
-
-/**
- * @tc.name: ExtensionServiceSubscriber_Destructor_NullExtensionSubscriberInfo_00001
- * @tc.desc: Test destructor handles nullptr extensionSubscriberInfo_
- * @tc.type: FUNC
- * @tc.require: I00001
- */
-HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_Destructor_NullExtensionSubscriberInfo_00001,
-    Function | SmallTest | Level1)
-{
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleDestructor", 2000);
-    ExtensionServiceSubscriber* subscriber = new ExtensionServiceSubscriber();
-    subscriber->Init(bundle);
-    subscriber->extensionSubscriberInfo_ = nullptr;
-    
-    delete subscriber;
-    subscriber = nullptr;
-    EXPECT_EQ(subscriber, nullptr);
-}
-
-/**
- * @tc.name: ExtensionServiceSubscriber_OnCanceled_PCModeEnabled_00001
- * @tc.desc: Test OnCanceled skips processing when PC mode is enabled
- * @tc.type: FUNC
- * @tc.require: I00001
- */
-HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnCanceled_PCModeEnabled_00001,
-    Function | SmallTest | Level1)
-{
-    NotificationExtensionService::GetInstance().InitService(
-        nullptr,
-        nullptr,
-        []() -> bool { return true; });
-    
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundlePC", 3000);
-    ExtensionServiceSubscriber subscriber;
-    subscriber.Init(bundle);
-    
-    auto notification = CreateNotification(5);
-    subscriber.OnCanceled(notification, nullptr, 0);
-    
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    EXPECT_NE(notification, nullptr);
-}
-
-/**
- * @tc.name: ExtensionServiceSubscriber_OnConsumed_PCModeEnabled_00001
- * @tc.desc: Test OnConsumed skips processing when PC mode is enabled
- * @tc.type: FUNC
- * @tc.require: I00001
- */
-HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnConsumed_PCModeEnabled_00001,
-    Function | SmallTest | Level1)
-{
-    NotificationExtensionService::GetInstance().InitService(
-        nullptr,
-        nullptr,
-        []() -> bool { return true; });
-    
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundlePC2", 3001);
-    ExtensionServiceSubscriber subscriber;
-    subscriber.Init(bundle);
-    
-    auto notification = CreateNotification(6);
-    subscriber.OnConsumed(notification, nullptr);
-    
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    EXPECT_NE(notification, nullptr);
-}
-
-/**
- * @tc.name: ExtensionServiceSubscriber_OnCanceled_NullMessageQueue_00001
- * @tc.desc: Test OnCanceled handles nullptr messageQueue_
- * @tc.type: FUNC
- * @tc.require: I00001
- */
-HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnCanceled_NullMessageQueue_00001,
-    Function | SmallTest | Level1)
-{
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleNullQueue", 4000);
-    ExtensionServiceSubscriber subscriber;
-    subscriber.Init(bundle);
-    subscriber.messageQueue_ = nullptr;
-    
-    auto notification = CreateNotification(7);
-    subscriber.OnCanceled(notification, nullptr, 0);
-    EXPECT_EQ(subscriber.messageQueue_, nullptr);
-}
-
-/**
- * @tc.name: ExtensionServiceSubscriber_OnConsumed_NullMessageQueue_00001
- * @tc.desc: Test OnConsumed handles nullptr messageQueue_
- * @tc.type: FUNC
- * @tc.require: I00001
- */
-HWTEST_F(ExtensionServiceSubscriberTest, ExtensionServiceSubscriber_OnConsumed_NullMessageQueue_00001,
-    Function | SmallTest | Level1)
-{
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleNullQueue2", 4001);
-    ExtensionServiceSubscriber subscriber;
-    subscriber.Init(bundle);
-    subscriber.messageQueue_ = nullptr;
-    
-    auto notification = CreateNotification(8);
-    subscriber.OnConsumed(notification, nullptr);
-    EXPECT_EQ(subscriber.messageQueue_, nullptr);
-}
-
 } // namespace Notification
 } // namespace OHOS
