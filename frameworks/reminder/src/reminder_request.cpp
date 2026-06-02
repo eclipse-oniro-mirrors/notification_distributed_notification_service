@@ -489,6 +489,7 @@ bool ReminderRequest::OnTimeZoneChange()
         uint64_t recomposed = PreGetNextTriggerTimeIgnoreSnooze(true, false);
         if (recomposed == INVALID_LONG_LONG_VALUE) {
             ANSR_LOGW("SYSTEM_TIME_ZONE OnTimeZoneChange: no valid next trigger.");
+            SetExpired(true);
             return false;
         }
         return HandleTimeZoneChange(triggerTimeInMilli_, recomposed, recomposed);

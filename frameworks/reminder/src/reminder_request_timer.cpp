@@ -82,9 +82,6 @@ uint64_t ReminderRequestTimer::PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepe
     if (repeatIntervalInSeconds_ <= 0) {
         return ReminderRequest::INVALID_LONG_LONG_VALUE;
     }
-    if (repeatCount_ != 0 && remainedRepeatCount_ < 0) {
-        return ReminderRequest::INVALID_LONG_LONG_VALUE;
-    }
     return GetTriggerTimeInMilli();
 }
 

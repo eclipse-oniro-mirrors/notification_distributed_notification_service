@@ -166,10 +166,6 @@ HWTEST_F(ReminderRequestTimerTest, PreGetNextTriggerTimeIgnoreSnooze_001, Functi
     EXPECT_EQ(timer.PreGetNextTriggerTimeIgnoreSnooze(true, true), ReminderRequest::INVALID_LONG_LONG_VALUE);
     timer.SetRepeatInfo(500, 0, 0);
     EXPECT_EQ(timer.PreGetNextTriggerTimeIgnoreSnooze(true, true), 5000);
-    timer.SetRepeatInfo(500, 10, 1);
-    EXPECT_EQ(timer.PreGetNextTriggerTimeIgnoreSnooze(true, true), 5000);
-    timer.SetRepeatInfo(500, 10, -2);
-    EXPECT_EQ(timer.PreGetNextTriggerTimeIgnoreSnooze(true, true), ReminderRequest::INVALID_LONG_LONG_VALUE);
 }
 
 /**

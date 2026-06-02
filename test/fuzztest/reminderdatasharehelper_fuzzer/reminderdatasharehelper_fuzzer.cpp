@@ -24,6 +24,8 @@ namespace OHOS {
     {
         int32_t id = fdp->ConsumeIntegral<int32_t>();
         std::string bundleName = fdp->ConsumeRandomLengthString();
+        std::string key = fdp->ConsumeRandomLengthString();
+        bool bval = fdp->ConsumeBool();
         constexpr uint64_t seconds = 1200;
         sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(seconds);
 
@@ -44,6 +46,10 @@ namespace OHOS {
         auto result = helper.CreateDataShareHelper(Notification::ReminderCalendarShareTable::PROXY);
         helper.CreateReminder(info);
         helper.InitNormalInfo(reminder);
+        std::string value;
+        Uri uri(bundleName);
+        helper.Query(uri, key, value);
+        helper.ResetTaskFlag(bval);
         return true;
     }
 }

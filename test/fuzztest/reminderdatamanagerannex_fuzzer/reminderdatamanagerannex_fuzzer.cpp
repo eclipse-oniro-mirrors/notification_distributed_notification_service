@@ -69,9 +69,6 @@ void DoSomethingInterestingWithManager(FuzzedDataProvider* fdp)
     manager->GenPredicates(predicates, equalToVector);
     DataShare::DataShareValuesBucket valuesBucket;
     manager->GenValuesBucket(valuesBucket, equalToVector);
-    std::string uri = fdp->ConsumeRandomLengthString();
-    std::string dstBundleName;
-    manager->GenDstBundleName(dstBundleName, uri);
     manager->InitServiceHandler();
     manager->CancelNotification(reminder);
     manager->CancelAllReminders(userId);

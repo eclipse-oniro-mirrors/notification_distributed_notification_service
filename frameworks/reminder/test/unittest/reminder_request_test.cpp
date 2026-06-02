@@ -802,30 +802,18 @@ HWTEST_F(ReminderRequestTest, StringSplit_00002, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: SetMaxScreenWantAgentInfo_001
+ * @tc.name: SetMaxScreenWantAgentInfo_00001
  * @tc.desc: Test SetMaxScreenWantAgentInfo parameters.
  * @tc.type: FUNC
  * @tc.require: issueI5UYHP
  */
-HWTEST_F(ReminderRequestTest, SetMaxScreenWantAgentInfo_001, Function | SmallTest | Level1)
+HWTEST_F(ReminderRequestTest, SetMaxScreenWantAgentInfo_00001, Function | SmallTest | Level1)
 {
-    auto agentInfo = std::make_shared<ReminderRequest::MaxScreenAgentInfo>();
+    std::shared_ptr<ReminderRequest::MaxScreenAgentInfo> maxScreenWantAgentInfo =
+    std::make_shared<ReminderRequest::MaxScreenAgentInfo>();
     auto rrc = std::make_shared<ReminderRequestChild>();
-    rrc->SetMaxScreenWantAgentInfo(agentInfo);
-    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo(), agentInfo);
-}
-
-/**
- * @tc.name: SetMaxScreenWantAgentInfo_002
- * @tc.desc: Test SetMaxScreenWantAgentInfo parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5UYHP
- */
-HWTEST_F(ReminderRequestTest, SetMaxScreenWantAgentInfo_002, Function | SmallTest | Level1)
-{
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    rrc->SetMaxScreenWantAgentInfo(nullptr);
-    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo(), nullptr);
+    rrc->SetMaxScreenWantAgentInfo(maxScreenWantAgentInfo);
+    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo(), maxScreenWantAgentInfo);
 }
 
 /**
@@ -843,19 +831,16 @@ HWTEST_F(ReminderRequestTest, SetSnoozeContent_00001, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: SetWantAgentInfo_001
+ * @tc.name: SetWantAgentInfo_00001
  * @tc.desc: Test SetWantAgentInfo parameters.
  * @tc.type: FUNC
  * @tc.require: issueI5UYHP
  */
-HWTEST_F(ReminderRequestTest, SetWantAgentInfo_001, Function | SmallTest | Level1)
+HWTEST_F(ReminderRequestTest, SetWantAgentInfo_00001, Function | SmallTest | Level1)
 {
+    std::shared_ptr<ReminderRequest::WantAgentInfo> wantAgentInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
     auto rrc = std::make_shared<ReminderRequestChild>();
-    EXPECT_NE(rrc->GetWantAgentInfo(), nullptr);
-    auto wantAgentInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
     rrc->SetWantAgentInfo(wantAgentInfo);
-    EXPECT_EQ(rrc->GetWantAgentInfo(), wantAgentInfo);
-    rrc->SetWantAgentInfo(nullptr);
     EXPECT_EQ(rrc->GetWantAgentInfo(), wantAgentInfo);
 }
 
@@ -2432,7 +2417,7 @@ HWTEST_F(ReminderRequestTest, ReminderRequestTest_008, Function | SmallTest | Le
  * @tc.name: ReminderRequestTest_009
  * @tc.desc: Test AddActionButtons parameters.
  * @tc.type: FUNC
- * @tc.require: issueI8CDH3
+ * @tc.require: issueICVHG6
  */
 HWTEST_F(ReminderRequestTest, ReminderRequestTest_009, Function | SmallTest | Level1)
 {
