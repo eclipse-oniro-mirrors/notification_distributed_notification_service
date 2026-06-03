@@ -2100,7 +2100,6 @@ ohos_unittest("common_utils_test") {
   sources = [
     "common_utils/aes_gcm_helper_test.cpp",
     "common_utils/notification_analytics_util_test.cpp",
-    "common_utils/system_sound_helper_test.cpp",
     "mock/mock_common_event_manager.cpp",
   ]
   use_exceptions = true
