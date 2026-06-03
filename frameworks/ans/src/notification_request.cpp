@@ -2274,6 +2274,10 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
 void NotificationRequest::ConvertJsonToNumExt(
     NotificationRequest *target, const nlohmann::json &jsonObject)
 {
+    if (target == nullptr) {
+        ANS_LOGE("target is nullptr");
+        return;
+    }
     const auto &jsonEnd = jsonObject.cend();
 
     if (jsonObject.find("updateDeadLine") != jsonEnd && jsonObject.at("updateDeadLine").is_number_integer()) {
@@ -2488,6 +2492,10 @@ void NotificationRequest::ConvertJsonToBool(NotificationRequest *target, const n
 
 void NotificationRequest::ConvertJsonToBoolExt(NotificationRequest *target, const nlohmann::json &jsonObject)
 {
+    if (target == nullptr) {
+        ANS_LOGE("target is nullptr");
+        return;
+    }
     const auto &jsonEnd = jsonObject.cend();
 
     if (jsonObject.find("isAgent") != jsonEnd && jsonObject.at("isAgent").is_boolean()) {
@@ -2696,6 +2704,15 @@ bool NotificationRequest::IsSystemLiveView() const
 
 ErrCode NotificationRequest::CheckVersion(const sptr<NotificationRequest> &oldRequest) const
 {
+    if (oldRequest == nullptr) {
+        ANS_LOGE("oldRequest is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (notificationContent_ == nullptr) {
+        ANS_LOGE("notificationContent_ is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
     auto content = notificationContent_->GetNotificationContent();
     auto liveView = std::static_pointer_cast<NotificationLiveViewContent>(content);
     auto oldContent = oldRequest->GetContent()->GetNotificationContent();
@@ -2793,6 +2810,15 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
 
 void NotificationRequest::IncrementalUpdateLiveview(const sptr<NotificationRequest> &oldRequest)
 {
+    if (oldRequest == nullptr) {
+        ANS_LOGE("oldRequest is nullptr");
+        return;
+    }
+
+    if (notificationContent_ == nullptr) {
+        ANS_LOGE("notificationContent_ is nullptr");
+        return;
+    }
     auto content = notificationContent_->GetNotificationContent();
     auto newLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
     auto newExtraInfo = newLiveViewContent->GetExtraInfo();
