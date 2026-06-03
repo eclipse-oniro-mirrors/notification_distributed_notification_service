@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "reminder_utils.h"
 #include "reminder_data_manager.h"
 #include "reminder_request_timer.h"
 #include "reminderdatamanagerpublic_fuzzer.h"
@@ -33,6 +34,7 @@ void DoSomethingInterestingWithManager(FuzzedDataProvider* fdp)
 
     manager->LoadReminderFromDb();
     sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(SECONDS);
+    reminder->SetReminderId(SECONDS);
     bool value = fdp->ConsumeBool();
     manager->ShowReminder(reminder, value, value, value, value);
     Notification::NotificationRequest notificationRequest;
@@ -51,20 +53,19 @@ void DoSomethingInterestingWithManager(FuzzedDataProvider* fdp)
     auto actionButtonType = static_cast<Notification::ReminderRequest::ActionButtonType>(type);
     manager->CheckNeedNotifyStatus(reminder, actionButtonType);
     manager->GetFullPath(reason);
-    uint32_t uid = fdp->ConsumeIntegral<int32_t>();
-    manager->IsActionButtonDataShareValid(reminder, uid);
     int32_t id = fdp->ConsumeIntegral<int32_t>();
+    manager->IsActionButtonDataShareValid(reminder, static_cast<uint32_t>(id));
     manager->RemoveReminderLocked(id, value);
     manager->GetResourceMgr(reason, id);
     manager->CloseCustomRingFileDesc(id, reason);
     manager->ReportSysEvent(reminder);
-    int64_t time = fdp->ConsumeIntegral<int64_t>();
+    int64_t time = Notification::GetCurrentTime();
     manager->ReportTimerEvent(time, value);
     manager->ReportUserDataSizeEvent();
     manager->LoadShareReminders();
     auto channel = static_cast<Notification::ReminderRequest::RingChannel>(type);
     manager->ConvertRingChannel(channel);
-    manager->CheckSoundConfig(reminder, uid);
+    manager->CheckSoundConfig(reminder, static_cast<uint32_t>(id));
     std::map<std::string, sptr<Notification::ReminderRequest>> reminders;
     manager->UpdateShareReminders(reminders);
     std::vector<sptr<Notification::ReminderRequest>> remindersFromDb;

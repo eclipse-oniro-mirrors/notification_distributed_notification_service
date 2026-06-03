@@ -364,6 +364,7 @@ void ReminderDataManager::OnUnlockScreen()
     bool expected = false;
     if (isScreenUnLocked_.compare_exchange_strong(expected, true)) {
         ANSR_LOGI("First unlock screen.");
+        ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_BOOT_COMPLETE);
         ffrt::task_attr taskAttr;
         taskAttr.delay(FIRST_QUERY_DELAY);
         auto callback = []() {
@@ -409,6 +410,7 @@ void ReminderDataManager::OnUserSwitch(const int32_t& userId)
         ANSR_LOGE("Reminder service not ready.");
         return;
     }
+    isScreenUnLocked_ = false;
     auto callback = []() {
         auto manager = ReminderDataManager::GetInstance();
         if (manager == nullptr) {
@@ -699,8 +701,6 @@ void ReminderDataManager::UpdateAppDatabase(const sptr<ReminderRequest> &reminde
         return;
     }
     // gen uri equalTo valuesBucket
-    Uri uri(uriStr);
-
     DataShare::DataSharePredicates predicates;
     std::vector<std::string> equalToVector = ReminderRequest::StringSplit(
         actionButtonMap.at(actionButtonType).dataShareUpdate->equalTo, ReminderRequest::SEP_BUTTON_VALUE_TYPE);
@@ -712,6 +712,7 @@ void ReminderDataManager::UpdateAppDatabase(const sptr<ReminderRequest> &reminde
     GenValuesBucket(valuesBucket, valuesBucketVector);
 
     // update app store
+    Uri uri(actionButtonMap.at(actionButtonType).dataShareUpdate->uri);
     int retVal = dataShareHelper->Update(uri, predicates, valuesBucket);
     if (retVal > 0) {
         // update success

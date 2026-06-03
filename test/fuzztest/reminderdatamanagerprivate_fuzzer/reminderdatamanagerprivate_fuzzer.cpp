@@ -39,6 +39,7 @@ void DoSomethingInterestingWithManager(FuzzedDataProvider* fdp)
     manager->CloseRemindersByGroupId(reminderId, bundleName, bundleName);
     sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(SECONDS);
     reminder->InitUserId(userId);
+    reminder->SetReminderId(SECONDS);
     manager->CheckReminderLimitExceededLocked(uid, reminder);
     manager->CloseReminder(reminder, value);
     uint8_t type = fdp->ConsumeIntegral<uint8_t>() % MAX_TIMER_TYPE;
@@ -59,7 +60,6 @@ void DoSomethingInterestingWithManager(FuzzedDataProvider* fdp)
     manager->IsMatchedForGroupIdAndPkgName(reminder, bundleName, bundleName);
     manager->IsAllowedNotify(reminder);
     manager->IsReminderAgentReady();
-    manager->SetPlayerParam(reminder);
     manager->PlaySoundAndVibrationLocked(reminder);
     manager->StopSoundAndVibrationLocked(reminder);
     manager->RemoveFromShowedReminders(reminder);
