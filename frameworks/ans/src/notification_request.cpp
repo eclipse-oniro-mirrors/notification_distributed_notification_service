@@ -2091,6 +2091,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
             ANS_LOGE("null notificationContent");
             return false;
         }
+        notificationContentType_ = notificationContent_->GetContentType();
     }
 
     auto vsize = parcel.ReadUint64();

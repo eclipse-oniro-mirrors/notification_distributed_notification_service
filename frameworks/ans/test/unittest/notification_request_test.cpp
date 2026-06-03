@@ -21,7 +21,10 @@
 #include "ans_inner_errors.h"
 #include "notification_conversational_content.h"
 #include "notification_live_view_content.h"
+#include "notification_long_text_content.h"
 #include "notification_multiline_content.h"
+#include "notification_normal_content.h"
+#include "notification_picture_content.h"
 #include "notification_request.h"
 #include "pixel_map.h"
 #undef private
@@ -1732,6 +1735,147 @@ HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationContent_0400, Level1)
     Notification::NotificationRequest::ConvertJsonToWantAgent(target, jsonObject);
     bool result2 = Notification::NotificationRequest::ConvertJsonToNotificationContent(target, jsonObject);
     EXPECT_EQ(result2, true);
+}
+
+/**
+ * @tc.name: ReadFromParcel_ContentTypeSync_0100
+ * @tc.desc: Test ReadFromParcel syncs notificationContentType_ from notificationContent_ with BASIC_TEXT type
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ReadFromParcel_ContentTypeSync_0100, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    normalContent->SetText("test text");
+    normalContent->SetTitle("test title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    notificationRequest.SetContent(content);
+
+    Parcel parcel;
+    auto marshallingResult = notificationRequest.Marshalling(parcel);
+    EXPECT_EQ(marshallingResult, true);
+
+    auto *unmarshalledRequest = NotificationRequest::Unmarshalling(parcel);
+    ASSERT_NE(unmarshalledRequest, nullptr);
+    EXPECT_EQ(unmarshalledRequest->GetNotificationType(), NotificationContent::Type::BASIC_TEXT);
+    EXPECT_NE(unmarshalledRequest->GetContent(), nullptr);
+    EXPECT_EQ(unmarshalledRequest->GetContent()->GetContentType(), NotificationContent::Type::BASIC_TEXT);
+    EXPECT_EQ(unmarshalledRequest->notificationContentType_,
+        unmarshalledRequest->notificationContent_->GetContentType());
+    delete unmarshalledRequest;
+}
+
+/**
+ * @tc.name: ReadFromParcel_ContentTypeSync_0200
+ * @tc.desc: Test ReadFromParcel syncs notificationContentType_ from notificationContent_ with LONG_TEXT type
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ReadFromParcel_ContentTypeSync_0200, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    auto longTextContent = std::make_shared<NotificationLongTextContent>("long text content");
+    longTextContent->SetTitle("long title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(longTextContent);
+    notificationRequest.SetContent(content);
+
+    Parcel parcel;
+    auto marshallingResult = notificationRequest.Marshalling(parcel);
+    EXPECT_EQ(marshallingResult, true);
+
+    auto *unmarshalledRequest = NotificationRequest::Unmarshalling(parcel);
+    ASSERT_NE(unmarshalledRequest, nullptr);
+    EXPECT_EQ(unmarshalledRequest->GetNotificationType(), NotificationContent::Type::LONG_TEXT);
+    EXPECT_NE(unmarshalledRequest->GetContent(), nullptr);
+    EXPECT_EQ(unmarshalledRequest->GetContent()->GetContentType(), NotificationContent::Type::LONG_TEXT);
+    EXPECT_EQ(unmarshalledRequest->notificationContentType_,
+        unmarshalledRequest->notificationContent_->GetContentType());
+    delete unmarshalledRequest;
+}
+
+/**
+ * @tc.name: ReadFromParcel_ContentTypeSync_0300
+ * @tc.desc: Test ReadFromParcel syncs notificationContentType_ from notificationContent_ with MULTILINE type
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ReadFromParcel_ContentTypeSync_0300, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    auto multiLineContent = std::make_shared<NotificationMultiLineContent>();
+    multiLineContent->SetText("multiline text");
+    multiLineContent->SetTitle("multiline title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(multiLineContent);
+    notificationRequest.SetContent(content);
+
+    Parcel parcel;
+    auto marshallingResult = notificationRequest.Marshalling(parcel);
+    EXPECT_EQ(marshallingResult, true);
+
+    auto *unmarshalledRequest = NotificationRequest::Unmarshalling(parcel);
+    ASSERT_NE(unmarshalledRequest, nullptr);
+    EXPECT_EQ(unmarshalledRequest->GetNotificationType(), NotificationContent::Type::MULTILINE);
+    EXPECT_NE(unmarshalledRequest->GetContent(), nullptr);
+    EXPECT_EQ(unmarshalledRequest->GetContent()->GetContentType(), NotificationContent::Type::MULTILINE);
+    EXPECT_EQ(unmarshalledRequest->notificationContentType_,
+        unmarshalledRequest->notificationContent_->GetContentType());
+    delete unmarshalledRequest;
+}
+
+/**
+ * @tc.name: ReadFromParcel_ContentTypeSync_0400
+ * @tc.desc: Test ReadFromParcel syncs notificationContentType_ from notificationContent_ with PICTURE type
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ReadFromParcel_ContentTypeSync_0400, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    auto pictureContent = std::make_shared<NotificationPictureContent>();
+    pictureContent->SetText("picture text");
+    pictureContent->SetTitle("picture title");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(pictureContent);
+    notificationRequest.SetContent(content);
+
+    Parcel parcel;
+    auto marshallingResult = notificationRequest.Marshalling(parcel);
+    EXPECT_EQ(marshallingResult, true);
+
+    auto *unmarshalledRequest = NotificationRequest::Unmarshalling(parcel);
+    ASSERT_NE(unmarshalledRequest, nullptr);
+    EXPECT_EQ(unmarshalledRequest->GetNotificationType(), NotificationContent::Type::PICTURE);
+    EXPECT_NE(unmarshalledRequest->GetContent(), nullptr);
+    EXPECT_EQ(unmarshalledRequest->GetContent()->GetContentType(), NotificationContent::Type::PICTURE);
+    EXPECT_EQ(unmarshalledRequest->notificationContentType_,
+        unmarshalledRequest->notificationContent_->GetContentType());
+    delete unmarshalledRequest;
+}
+
+/**
+ * @tc.name: ReadFromParcel_ContentTypeSync_0500
+ * @tc.desc: Test ReadFromParcel without notificationContent_ keeps notificationContentType_ from parcel
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ReadFromParcel_ContentTypeSync_0500, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+
+    Parcel parcel;
+    auto marshallingResult = notificationRequest.Marshalling(parcel);
+    EXPECT_EQ(marshallingResult, true);
+
+    auto *unmarshalledRequest = NotificationRequest::Unmarshalling(parcel);
+    ASSERT_NE(unmarshalledRequest, nullptr);
+    EXPECT_EQ(unmarshalledRequest->GetContent(), nullptr);
+    EXPECT_EQ(unmarshalledRequest->GetNotificationType(), NotificationContent::Type::NONE);
+    delete unmarshalledRequest;
 }
 } // namespace Notification
 } // namespace OHOS
