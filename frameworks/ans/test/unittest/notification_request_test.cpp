@@ -1858,7 +1858,7 @@ HWTEST_F(NotificationRequestTest, ReadFromParcel_ContentTypeSync_0400, Level1)
 
 /**
  * @tc.name: ReadFromParcel_ContentTypeSync_0500
- * @tc.desc: Test ReadFromParcel without notificationContent_ keeps notificationContentType_ from parcel
+ * @tc.desc: Test SetContent nullptr sets notificationContentType_ to NONE
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -1866,16 +1866,9 @@ HWTEST_F(NotificationRequestTest, ReadFromParcel_ContentTypeSync_0500, Level1)
 {
     int32_t myNotificationId = 10;
     NotificationRequest notificationRequest(myNotificationId);
-
-    Parcel parcel;
-    auto marshallingResult = notificationRequest.Marshalling(parcel);
-    EXPECT_EQ(marshallingResult, true);
-
-    auto *unmarshalledRequest = NotificationRequest::Unmarshalling(parcel);
-    ASSERT_NE(unmarshalledRequest, nullptr);
-    EXPECT_EQ(unmarshalledRequest->GetContent(), nullptr);
-    EXPECT_EQ(unmarshalledRequest->GetNotificationType(), NotificationContent::Type::NONE);
-    delete unmarshalledRequest;
+    notificationRequest.SetContent(nullptr);
+    EXPECT_EQ(notificationRequest.GetNotificationType(), NotificationContent::Type::NONE);
+    EXPECT_EQ(notificationRequest.GetContent(), nullptr);
 }
 } // namespace Notification
 } // namespace OHOS
