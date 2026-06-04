@@ -466,6 +466,11 @@ void SettingsModalExtensionCallback::OnReleaseNew(int32_t releaseCode)
 void SettingsModalExtensionCallback::OnError(int32_t code, const std::string& name, const std::string& message)
 {
     ANS_LOGD("called, code = %{public}d,name = %{public}s, message = %{public}s", code, name.c_str(), message.c_str());
+    if (code == 1011) {
+        ReleaseOrErrorHandle(ERROR_SYSTEM_CAP_ERROR);
+        ProcessStatusChanged(ERROR_SYSTEM_CAP_ERROR);
+        return;
+    }
     ReleaseOrErrorHandle(code);
     ProcessStatusChanged(code);
 }
