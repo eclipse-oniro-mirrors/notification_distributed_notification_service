@@ -650,11 +650,6 @@ void ModalExtensionCallback::OnRelease(int32_t releaseCode)
 void ModalExtensionCallback::OnError(int32_t code, const std::string& name, const std::string& message)
 {
     ANS_LOGD("called, name = %{public}s, message = %{public}s", name.c_str(), message.c_str());
-    if (code == 1011) {
-        ReleaseOrErrorHandle(ERROR_SYSTEM_CAP_ERROR);
-        NotificationHelper::RemoveEnableNotificationDialog();
-        return;
-    }
     ReleaseOrErrorHandle(code);
     NotificationHelper::RemoveEnableNotificationDialog();
 }

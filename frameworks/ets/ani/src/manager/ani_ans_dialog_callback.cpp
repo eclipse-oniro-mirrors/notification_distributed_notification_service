@@ -125,7 +125,7 @@ void ModalExtensionCallback::OnRelease(int32_t releaseCode)
 void ModalExtensionCallback::OnError(int32_t code, const std::string& name, const std::string& message)
 {
     ANS_LOGE("OnError, name = %{public}s, message = %{public}s", name.c_str(), message.c_str());
-    ReleaseOrErrorHandle(CJSystemapi::Notification::ERROR_SYSTEM_CAP_ERROR);
+    ReleaseOrErrorHandle(code);
     NotificationHelper::RemoveEnableNotificationDialog();
 }
 

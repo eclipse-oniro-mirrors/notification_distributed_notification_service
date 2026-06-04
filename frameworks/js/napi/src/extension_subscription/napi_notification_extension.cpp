@@ -29,6 +29,7 @@ const int NAPI_SET_USER_GRANTED_STATE_MAX_PARA = 2;
 const int NAPI_GET_USER_GRANTED_ENABLE_BUNDLES_MAX_PARA = 1;
 const int NAPI_SET_USER_GRANTED_BUNDLE_STATE_MAX_PARA = 3;
 const int OPEN_NOTIFICATION_SETTINGS_MAX_PARA = 1;
+const int32_t ERR_INVALID_WANT = 1011;
 static napi_env subenv_ = nullptr;
 static AsyncCallbackInfoOpenSettings* subcallbackInfo_ = nullptr;
 static JsAnsCallbackComplete* subcomplete_ = nullptr;
@@ -672,8 +673,9 @@ void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
         result = NapiNotificationSettingResult(env, data);
     }
     int32_t errorCode = ERR_OK;
-    if (asynccallbackinfo->info.errorCode == ERROR_SETTING_WINDOW_EXIST) {
-        errorCode = ERROR_SETTING_WINDOW_EXIST;
+    if (asynccallbackinfo->info.errorCode == ERROR_SETTING_WINDOW_EXIST ||
+        asynccallbackinfo->info.errorCode == ERROR_SYSTEM_CAP_ERROR) {
+        errorCode = asynccallbackinfo->info.errorCode;
     } else {
         errorCode = asynccallbackinfo->info.errorCode ==
             ERR_OK ? ERR_OK : OHOS::Notification::ErrorToExternal(asynccallbackinfo->info.errorCode);
@@ -1439,7 +1441,7 @@ void SettingsSubModalExtensionCallback::OnReleaseNew(int32_t releaseCode)
 void SettingsSubModalExtensionCallback::OnError(int32_t code, const std::string& name, const std::string& message)
 {
     ANS_LOGD("called, code = %{public}d,name = %{public}s, message = %{public}s", code, name.c_str(), message.c_str());
-    if (code == 1011) {
+    if (code == ERR_INVALID_WANT) {
         ReleaseOrErrorHandle(ERROR_SYSTEM_CAP_ERROR);
         ProcessStatusChangedSub(ERROR_SYSTEM_CAP_ERROR);
         return;
