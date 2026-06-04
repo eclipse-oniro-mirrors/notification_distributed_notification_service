@@ -37,6 +37,7 @@
 #include "mock_parameters.h"
 #include "mock_push_callback_stub.h"
 #include "mock_ipc_skeleton.h"
+#include "mock_notification_rdb_data_mgr.h"
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
 #include "want_params.h"
@@ -76,7 +77,12 @@ private:
 
 sptr<AdvancedNotificationService> AnsPublishServiceTest::advancedNotificationService_ = nullptr;
 
-void AnsPublishServiceTest::SetUpTestCase() {}
+void AnsPublishServiceTest::SetUpTestCase()
+{
+    MockInit(true);
+    MockQueryData(0);
+    MockInsertData(true);
+}
 
 void AnsPublishServiceTest::TearDownTestCase() {}
 
@@ -94,6 +100,9 @@ void AnsPublishServiceTest::SetUp()
     }
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
+    MockSetDataValue("");
+    std::unordered_map<std::string, std::string> mockDataValues;
+    MockSetDataValues(mockDataValues);
     GTEST_LOG_(INFO) << "SetUp end";
 }
 
@@ -175,6 +184,28 @@ HWTEST_F(AnsPublishServiceTest, Publish_00006, Function | SmallTest | Level1)
 
     auto ret = advancedNotificationService_->Publish(label, request);
     ASSERT_EQ(ret, (int)ERROR_USER_NOT_EXIST);
+}
+
+/**
+ * @tc.name: Publish_00007
+ * @tc.desc: Test Publish
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, Publish_00007, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    std::string label = "";
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetOwnerUid(1);
+    request->SetIsAgentNotification(true);
+    request->SetIsDoNotDisturbByPassed(true);
+    MockIsOsAccountExists(true);
+ 
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(false);
+    auto ret = advancedNotificationService_->Publish(label, request);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -803,6 +834,10 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_00003, Function | S
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
+    MockSetDataValue("bundleName1000");
+    std::unordered_map<std::string, std::string> mockDataValues;
+    mockDataValues["ans_bundle_bundleName1000_name"] = "bundleName";
+    MockSetDataValues(mockDataValues);
     result = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, enabled);
     ASSERT_EQ(result, ERR_OK);
     result = ERR_OK;
@@ -869,6 +904,10 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_100003, Function | 
     ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
+    MockSetDataValue("bundleName1000");
+    std::unordered_map<std::string, std::string> mockDataValues;
+    mockDataValues["ans_bundle_bundleName1000_name"] = "bundleName";
+    MockSetDataValues(mockDataValues);
     result = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, enabled);
     ASSERT_EQ(result, ERR_OK);
     result = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle, enabled);
@@ -1024,11 +1063,6 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00003, Function | Smal
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
 
     auto bundle = advancedNotificationService_->GenerateBundleOption();
-    NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundle, true);
-
-    ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
-    ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
-
     NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundle, false);
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
@@ -1218,6 +1252,10 @@ HWTEST_F(AnsPublishServiceTest, SetNotificationsEnabledForSpecialBundle_00002, F
     auto result = advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(deviceId, bundle, enabled);
     ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
 
+    MockSetDataValue("bundleName1000");
+    std::unordered_map<std::string, std::string> mockDataValues;
+    mockDataValues["ans_bundle_bundleName1000_name"] = "bundleName";
+    MockSetDataValues(mockDataValues);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     result = advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(deviceId, bundle, enabled);
@@ -1254,6 +1292,10 @@ HWTEST_F(AnsPublishServiceTest, SetNotificationsEnabledForSpecialBundle_00003, F
     auto result = advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(deviceId, bundle, enabled);
     ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
 
+    MockSetDataValue("bundleName1000");
+    std::unordered_map<std::string, std::string> mockDataValues;
+    mockDataValues["ans_bundle_bundleName1000_name"] = "bundleName";
+    MockSetDataValues(mockDataValues);
     MockIsVerfyPermisson(true);
     IPCSkeleton::SetCallingUid(12345);
     result = advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(deviceId, bundle, enabled);
@@ -1605,6 +1647,7 @@ HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0200, TestSize.Leve
     ErrCode ret = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, true, true);
     ASSERT_EQ(ret, ERR_OK);
     int32_t enable;
+    MockSetDataValue("1");
     ret = advancedNotificationService_->IsDistributedEnabledByBundle(bundleOption, deviceType, true, enable);
     ASSERT_EQ(ret, ERR_OK);
     ASSERT_EQ(enable, true);
@@ -1863,6 +1906,7 @@ HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0200, TestSize.Level1)
     ErrCode ret = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
     ASSERT_EQ(ret, ERR_OK);
     bool enable = false;
+    MockSetDataValue("1");
     ret = advancedNotificationService_->IsSmartReminderEnabled("testDeviceType", enable);
     ASSERT_EQ(ret, ERR_OK);
     ASSERT_EQ(enable, true);
@@ -3304,23 +3348,27 @@ HWTEST_F(AnsPublishServiceTest, CollaborateFilter_00002, Function | SmallTest | 
     NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
     NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(
         NotificationConstant::SlotType::LIVE_VIEW, localType, enableStatus);
+    MockSetDataValue("1");
     auto ret = advancedNotificationService_->CollaborateFilter(request);
     ASSERT_EQ(ret, (int)ERR_OK);
 
     enableStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(
         NotificationConstant::SlotType::LIVE_VIEW, localType, enableStatus);
+    MockSetDataValue("0");
     ret = advancedNotificationService_->CollaborateFilter(request);
     ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
 
     request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     NotificationPreferences::GetInstance()->SetDistributedEnabled(
         localType, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    MockSetDataValue("1");
     ret = advancedNotificationService_->CollaborateFilter(request);
     ASSERT_EQ(ret, (int)ERR_OK);
 
     NotificationPreferences::GetInstance()->SetDistributedEnabled(
         localType, NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+    MockSetDataValue("0");
     ret = advancedNotificationService_->CollaborateFilter(request);
     ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
 

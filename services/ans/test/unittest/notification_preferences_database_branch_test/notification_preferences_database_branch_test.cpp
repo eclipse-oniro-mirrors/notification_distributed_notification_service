@@ -20,18 +20,9 @@
 #define private public
 #define protected public
 #include "notification_preferences_database.h"
+#include "mock_notification_rdb_data_mgr.h"
 #undef private
 #undef protected
-
-extern void MockInit(bool mockRet);
-extern void MockQueryData(int32_t mockRet);
-extern void MockInsertData(bool mockRet);
-extern void MockInsertBatchData(bool mockRet);
-extern void MockQueryDataBeginWithKey(bool mockRet);
-extern void MockDeleteBatchData(bool mockRet);
-extern void MockDeleteData(bool mockRet);
-extern void MockDropTable(bool mockRet);
-extern void MockSetDataValue(std::string value);
 
 using namespace testing::ext;
 namespace OHOS {

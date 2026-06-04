@@ -12,10 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "mock_notification_rdb_data_mgr.h"
+
 #include "notification_rdb_data_mgr.h"
 #include "notification_rdb_mgr.h"
 #include "rdb_errno.h"
 
+namespace OHOS {
+namespace Notification {
 namespace {
     bool g_mockInitRet = true;
     int32_t g_mockQueryDataRet = 0;
@@ -27,6 +32,7 @@ namespace {
     bool g_mockQueryAllData = true;
     bool g_mockDropTable = true;
     std::string g_mockDataValue;
+    std::unordered_map<std::string, std::string> g_mockDataValues;
 }
 
 void MockInit(bool mockRet)
@@ -42,6 +48,11 @@ void MockQueryData(int32_t mockRet)
 void MockSetDataValue(std::string value)
 {
     g_mockDataValue = value;
+}
+
+void MockSetDataValues(std::unordered_map<std::string, std::string> &values)
+{
+    g_mockDataValues = values;
 }
 
 void MockInsertData(bool mockRet)
@@ -78,8 +89,7 @@ void MockDropTable(bool mockRet)
 {
     g_mockDropTable = mockRet;
 }
-namespace OHOS {
-namespace Notification {
+
 int32_t NotificationDataMgr::Init()
 {
     if (g_mockInitRet == false) {
@@ -125,6 +135,7 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
     if (g_mockQueryDataBeginWithKeyRet == false) {
         return NativeRdb::E_ERROR;
     }
+    values = g_mockDataValues;
     return NativeRdb::E_OK;
 }
 
@@ -149,6 +160,7 @@ int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::s
     if (g_mockQueryAllData == false) {
         return NativeRdb::E_ERROR;
     }
+    values = g_mockDataValues;
     return NativeRdb::E_OK;
 }
 
@@ -206,6 +218,7 @@ int32_t NotificationRdbMgr::QueryDataBeginWithKey(
     if (g_mockQueryDataBeginWithKeyRet == false) {
         return NativeRdb::E_ERROR;
     }
+    values = g_mockDataValues;
     return NativeRdb::E_OK;
 }
 
@@ -230,6 +243,7 @@ int32_t NotificationRdbMgr::QueryAllData(std::unordered_map<std::string, std::st
     if (g_mockQueryAllData == false) {
         return NativeRdb::E_ERROR;
     }
+    values = g_mockDataValues;
     return NativeRdb::E_OK;
 }
 
