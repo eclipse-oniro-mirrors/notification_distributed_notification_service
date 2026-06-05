@@ -101,7 +101,7 @@ napi_value NapiSnoozeNotification(napi_env env, napi_callback_info info)
     int64_t delayTime = 0;
     if (ParseSnoozeParameters(env, info, hashCode, delayTime) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
-        return Common::NapiGetUndefined(env);
+        return Common::NapiRejectError(env, ERROR_PARAM_INVALID);
     }
     AsyncCallbackInfoSnooze *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoSnooze {

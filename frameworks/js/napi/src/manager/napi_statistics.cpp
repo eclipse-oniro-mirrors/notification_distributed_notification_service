@@ -145,7 +145,7 @@ napi_value NapiGetNotificationStatisticsByBundle(napi_env env, napi_callback_inf
     std::vector<NotificationBundleOption> bundles;
     if (ParseBundlesParameters(env, info, bundles) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
-        return Common::NapiGetUndefined(env);
+        return Common::NapiRejectError(env, ERROR_PARAM_INVALID);
     }
     AsyncCallbackInfoStatistics *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoStatistics {.env = env, .asyncWork = nullptr, .bundles = bundles};

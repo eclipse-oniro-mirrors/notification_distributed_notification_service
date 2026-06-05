@@ -981,7 +981,7 @@ napi_value NapiNotificationExtensionOpenSubscriptionSettingsWithResult(napi_env 
     OpenSettingsParams params {};
     if (ParseOpenSettingsParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
-        return Common::NapiGetUndefined(env);
+        return Common::NapiRejectError(env, ERROR_PARAM_INVALID);
     }
 
     AsyncCallbackInfoOpenSettings *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoOpenSettings {
