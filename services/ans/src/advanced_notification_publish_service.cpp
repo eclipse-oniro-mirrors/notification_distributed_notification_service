@@ -566,8 +566,8 @@ ErrCode AdvancedNotificationService::ExcuteCancelGroupCancel(
         std::vector<uint64_t> timerIds;
         for (auto record : removeList) {
             ProcForDeleteNotificationFromDb(record);
-            notificationList_.remove(record);
             NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+            notificationList_.remove(record);
             if (record->notification != nullptr) {
                 UpdateRecentNotification(record->notification, true, reason);
                 notifications.emplace_back(record->notification);
@@ -660,8 +660,8 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
         std::vector<sptr<Notification>> notifications;
         std::vector<uint64_t> timerIds;
         for (auto record : removeList) {
-            notificationList_.remove(record);
             NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+            notificationList_.remove(record);
             ProcForDeleteNotificationFromDb(record);
 
             if (record->notification != nullptr) {
@@ -1434,8 +1434,8 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(
                 ANS_LOGE("record is nullptr");
                 continue;
             }
-            notificationList_.remove(record);
             NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+            notificationList_.remove(record);
             if (record->notification != nullptr) {
                 ANS_LOGD("record->notification is not nullptr.");
                 UpdateRecentNotification(record->notification, true, reason);
