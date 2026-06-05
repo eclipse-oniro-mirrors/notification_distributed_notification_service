@@ -385,6 +385,11 @@ void SettingsModalExtensionCallback::OnReleaseNew(int32_t releaseCode)
 void SettingsModalExtensionCallback::OnError(int32_t code, const std::string& name, const std::string& message)
 {
     ANS_LOGE("OnError, code = %{public}d,name = %{public}s, message = %{public}s", code, name.c_str(), message.c_str());
+    if (code == ERR__INVALID_WANT) {
+        ReleaseOrErrorHandle(OHOS::Notification::ERROR_SYSTEM_CAP_ERROR);
+        ProcessStatusChanged(OHOS::Notification::ERROR_SYSTEM_CAP_ERROR, false);
+        return;
+    }
     ReleaseOrErrorHandle(code);
     ProcessStatusChanged(code, false);
 }
