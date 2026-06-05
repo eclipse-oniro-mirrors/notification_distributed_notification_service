@@ -23,6 +23,7 @@
 
 namespace OHOS {
 namespace NotificationNapi {
+const int32_t SUBSRIBE_NOTIFICATION_MAX_PARA = 2;
 const int32_t SUBSRIBE_MAX_PARA = 3;
 const int32_t NO_DELETE_REASON = -1;
 const int32_t DISTRIBUTE_JUMP_PARA = 1;
@@ -2090,6 +2091,52 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
         napi_create_reference(env, argv[PARAM2], 1, &callback);
     }
 
+    return Common::NapiGetNull(env);
+}
+
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
+    NotificationSubscribeInfo &subscriberInfo, std::shared_ptr<SubscriberInstance> &subscriber)
+{
+    size_t argc = SUBSRIBE_NOTIFICATION_MAX_PARA;
+    napi_value argv[SUBSRIBE_NOTIFICATION_MAX_PARA] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    if (argc < 1) {
+        ANS_LOGE("Wrong number of arguments");
+        return nullptr;
+    }
+    napi_valuetype valuetype = napi_undefined;
+    // argv[0]:subscriber
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
+    if (valuetype != napi_object) {
+        ANS_LOGE("Wrong argument type for arg0. NotificationSubscriber object expected.");
+        return nullptr;
+    }
+    SubscriberInstancesInfo subscriberInstancesInfo;
+    if (!HasNotificationSubscriber(env, argv[PARAM0], subscriberInstancesInfo)) {
+        if (GetNotificationSubscriber(env, argv[PARAM0], subscriberInstancesInfo) == nullptr) {
+            ANS_LOGE("NotificationSubscriber parse failed");
+            return nullptr;
+        }
+        if (!AddSubscriberInstancesInfo(env, subscriberInstancesInfo)) {
+            ANS_LOGE("AddSubscriberInstancesInfo add failed");
+            return nullptr;
+        }
+    }
+    subscriber = subscriberInstancesInfo.subscriber;
+    // argv[1]:NotificationSubscribeInfo
+    if (argc >= SUBSRIBE_NOTIFICATION_MAX_PARA) {
+        NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
+        if ((valuetype != napi_object)) {
+            ANS_LOGE("Wrong argument type for arg1. NotificationSubscriber object expected.");
+            return nullptr;
+        }
+
+        if (Common::GetNotificationSubscriberInfo(env, argv[PARAM1], subscriberInfo) == nullptr) {
+            ANS_LOGE("NotificationSubscribeInfo parse failed");
+            return nullptr;
+        }
+    }
     return Common::NapiGetNull(env);
 }
 

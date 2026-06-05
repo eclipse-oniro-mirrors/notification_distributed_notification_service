@@ -108,8 +108,7 @@ napi_value NapiSnoozeNotification(napi_env env, napi_callback_info info)
             .env = env, .asyncWork = nullptr, .hashCode = hashCode, .delayTime = delayTime,
         };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
-        return Common::JSParaError(env, nullptr);
+        return Common::NapiRejectError(env, ERROR_INTERNAL_ERROR);
     }
 
     napi_value promise = nullptr;

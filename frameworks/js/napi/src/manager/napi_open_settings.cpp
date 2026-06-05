@@ -171,7 +171,7 @@ napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info)
     AsyncCallbackInfoOpenSettings *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoOpenSettings {
             .env = env, .params = params};
     if (!asynccallbackinfo) {
-        return Common::JSParaError(env, nullptr);
+        return Common::NapiRejectError(env, ERROR_INTERNAL_ERROR);
     }
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);

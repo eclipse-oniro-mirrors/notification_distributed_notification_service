@@ -988,7 +988,7 @@ napi_value NapiNotificationExtensionOpenSubscriptionSettingsWithResult(napi_env 
         .env = env, .params = params
     };
     if (!asynccallbackinfo) {
-        return Common::JSParaError(env, nullptr);
+        return Common::NapiRejectError(env, ERROR_INTERNAL_ERROR);
     }
     asynccallbackinfo->isWithResult = true;
     napi_value promise = nullptr;
