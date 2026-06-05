@@ -29,6 +29,7 @@
 #include "mock_time_service_client.h"
 #include "mock_datashare.h"
 #include "mock_notification_request.h"
+#include "mock_notification_rdb_data_mgr.h"
 
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
@@ -37,8 +38,6 @@
 #include "advanced_notdisturb_white_list_observer.h"
 
 extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
-extern void MockInsertData(bool mockRet);
-extern void MockInit(bool mockRet);
 extern void MockEncrypt(bool mockRet);
 
 using namespace testing::ext;
