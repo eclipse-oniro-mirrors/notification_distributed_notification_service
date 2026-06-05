@@ -1,8 +1,8 @@
 # 执行模板
 
-本文件包含 Feature-Execute-SubAgent 使用的执行阶段模板。
+本文件包含 Execute Skill 使用的执行阶段模板。
 
-**重要约定**：所有过程文档存放在 `.opencode/kb/features/${feature-name}/` 目录下，其中 `${feature-name}` 为需求名称。
+**重要约定**：所有过程文档存放在 `{kb_dir}/` 目录下，该目录由调用方指定。
 
 ## 1. 执行前确认模板
 
@@ -10,7 +10,6 @@
 [EXECUTE-CONFIRM] 准备执行任务:
 - 任务ID: <task_id>
 - 任务类型: <task_type>
-- Wave: <wave_id>
 - 可写文件: <files_write列表>
 - 只读文件: <files_read列表>
 - 验收标准: <acceptance_criteria列表>
@@ -28,7 +27,7 @@
 - 任务ID: <task_id>
 - 问题: <具体问题>
 
-请等待 Feature-Agent 决策。
+请等待调用方决策。
 ```
 
 ---
@@ -53,12 +52,10 @@
 - 任务ID: <task_id>
 - 任务名称: <task_name>
 - 任务类型: <task_type>
-- Wave: <wave_id>
 - 实际修改文件: <files_changed列表>
-- 验收标准验证: <全部通过/部分通过>
-- 已移交 Verify 子代理验证
+- 已移交 Review Skill 检视
 
-任务总结文档: .opencode/kb/features/${feature-name}/feature-<task-name>.md
+任务总结文档: {kb_dir}/<task-name>.md
 
 **执行摘要**:
 - 新增代码行数: <N>
@@ -80,7 +77,6 @@
 [EXECUTE-FAILED] 任务执行失败:
 - 任务ID: <task_id>
 - 任务类型: <task_type>
-- Wave: <wave_id>
 - 失败原因: <失败类型>
 - 失败详情: <详细错误信息>
 - 当前重试次数: <retry_count>
@@ -94,7 +90,7 @@
 
 ## 6. 状态汇报说明
 
-Execute 子代理在完成任务后，必须向主代理汇报以下信息，供主代理更新状态文件：
+Execute Skill 在完成任务后，必须向调用方汇报以下信息，供调用方更新状态文件：
 
 ### 任务完成时汇报
 
@@ -102,11 +98,10 @@ Execute 子代理在完成任务后，必须向主代理汇报以下信息，供
 {
   "task_id": "<task_id>",
   "task_name": "<task_name>",
-  "status": "done",
+  "status": "executed",
   "files_changed": ["<实际修改文件列表>"],
-  "verified": true,
   "completed_at": "<ISO时间戳>",
-  "task_summary": ".opencode/kb/features/${feature-name}/feature-<task-name>.md",
+  "task_summary": "{kb_dir}/<task-name>.md",
   "execution_details": {
     "new_files": <N>,
     "modified_files": <M>,
@@ -116,6 +111,8 @@ Execute 子代理在完成任务后，必须向主代理汇报以下信息，供
   }
 }
 ```
+
+**状态说明**：`executed` 表示代码开发已完成，等待 Review 和 Build 验证。调用方根据 Review/Build 结果决定最终状态（`done` / `failed`）。`reviewed` 和 `build_verified` 字段由调用方在 Review 和 Build 完成后设置。
 
 ### 任务失败时汇报
 
@@ -129,7 +126,7 @@ Execute 子代理在完成任务后，必须向主代理汇报以下信息，供
   "needs_retry": true/false,
   "completed_at": "<ISO时间戳>",
   "failure_details": {
-    "error_type": "<OUT_OF_SCOPE/COMPILE_ERROR/TEST_FAILURE/ACCEPTANCE_NOT_MET/QUALITY_VIOLATION>",
+    "error_type": "<OUT_OF_SCOPE/QUALITY_VIOLATION/INTERFACE_INCOMPATIBLE/COMPILE_ERROR/LINK_ERROR/DEPENDENCY_MISSING/GN_CONFIG_ERROR>",
     "error_message": "<详细错误信息>",
     "files_involved": ["<相关文件列表>"],
     "suggested_fix": "<建议修复方案>"
@@ -137,4 +134,4 @@ Execute 子代理在完成任务后，必须向主代理汇报以下信息，供
 }
 ```
 
-**注意**：Execute 子代理**不直接更新状态文件**，只向主代理汇报结果，由主代理统一维护状态。
+**注意**：Execute Skill **不直接更新状态文件**，只向调用方汇报结果，由调用方统一维护状态。

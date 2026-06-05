@@ -1,22 +1,22 @@
 # 文档输出模板
 
-本文件包含 Feature-Doc-SubAgent 使用的文档输出模板。
+本文件包含 Doc Skill 使用的文档输出模板。
 
 **重要约定**：
-- 所有过程文档存放在 `.opencode/kb/features/${feature-name}/` 目录下
-- `${feature-name}` 是需求名称，用作目录名
+- 所有过程文档存放在 `{kb_dir}/` 目录下，该目录由调用方指定
+- `{name}` 是需求/问题名称，用作目录名
 - 模板中的路径需要替换为实际路径
 
 ## 1. 功能总结文档模板
 
-文件路径：`.opencode/kb/features/${feature-name}/${feature-name}.md`
+文件路径：`{kb_dir}/summary.md`
 
-实际路径示例：`.opencode/kb/features/notification-group-management/notification-group-management.md`
+实际路径示例：`{kb_dir}/summary.md`
 
-**注意**：`${feature-name}` 是需求名称，用作目录名和文件名
+**注意**：`{name}` 是需求/问题名称，用作目录名
 
 ```markdown
-# Feature Summary - <feature-name>
+# Summary - <name>
 
 ## 1. 功能概述
 
@@ -42,14 +42,14 @@
 |---------|------|------|
 | NotificationGroup | 新增类 | 分组管理 |
 
-## 3. Wave 执行摘要
+## 3. 任务执行摘要
 
-| Wave | 名称 | 状态 | 说明 |
-|------|------|------|------|
-| wave-1 | core_implementation | ✅ | 核心功能实现完成 |
-| wave-2 | extended_features | ✅ | 扩展功能实现完成 |
-| wave-3 | test_validation | ✅ | 测试验证完成 |
-| wave-4 | documentation | ✅ | 文档更新完成 |
+| 类型 | 任务数 | 状态 | 说明 |
+|------|--------|------|------|
+| 核心实现 | <N> | ✅ | 核心功能实现完成 |
+| 扩展功能 | <N> | ✅ | 扩展功能实现完成 |
+| 测试验证 | <N> | ✅ | 测试验证完成 |
+| 文档完善 | <N> | ✅ | 文档更新完成 |
 
 ## 4. 功能实现说明
 
@@ -92,7 +92,8 @@
 
 | 阶段 | 时间 | 决策 | 摘要 |
 |------|------|------|------|
-| Goal | <时间> | approved | <摘要> |
+| Architecture | <时间> | approved | <摘要> |
+| Dev-Design | <时间> | approved | <摘要> |
 | Plan | <时间> | approved | <摘要> |
 
 ## 8. 各任务执行结果
@@ -124,14 +125,14 @@
 
 ---
 
-## 2. 功能测试报告模板
+## 2. 测试报告模板
 
-文件路径：`.opencode/kb/features/${feature-name}/feature-test-report.md`
+文件路径：`{kb_dir}/test-report.md`
 
-实际路径示例：`.opencode/kb/features/notification-group-management/feature-test-report.md`
+实际路径示例：`{kb_dir}/test-report.md`
 
 ```markdown
-# Feature Test Report - <feature-name>
+# Test Report - <name>
 
 ## 1. 测试概述
 
@@ -220,17 +221,19 @@
 ## 3. Doc 完成后通知模板
 
 ```text
-[DOC-COMPLETE] 文档子代理已完成:
-- 功能总结: feature/<feature-name>.md
-- 测试报告: feature/feature-test-report.md
+[DOC-COMPLETE] Doc 已完成:
+- 功能总结: {kb_dir}/summary.md
+- 测试报告: {kb_dir}/test-report.md
 - 包含完整的功能说明、架构图、测试覆盖、审批历史
 
-需求实现流程已完成。
+工作流已完成。
 
 所有文档位置:
-- .opencode/kb/features/${feature-name}/${feature-name}.md (功能总结)
-- .opencode/kb/features/${feature-name}/feature-test-report.md (测试报告)
-- .opencode/kb/features/${feature-name}/feature-architecture.md (架构设计)
-- .opencode/kb/features/${feature-name}/feature-dev-design.md (开发设计方案)
-- .opencode/kb/features/${feature-name}/feature-plan.md (任务计划)
+- {kb_dir}/summary.md (功能总结)
+- {kb_dir}/test-report.md (测试报告)
+- {kb_dir}/architecture.md (架构设计)
+- {kb_dir}/dev-design.md (开发设计方案)
+- {kb_dir}/plan.md (任务计划)
+- {kb_dir}/review-log.md (检视日志)
+- {kb_dir}/build-log.md (编译日志)
 ```
