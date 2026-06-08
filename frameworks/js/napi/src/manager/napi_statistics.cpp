@@ -142,17 +142,15 @@ void AsyncCompleteCallbackNapiGetStatisticsByBundle(napi_env env, napi_status st
 
 napi_value NapiGetNotificationStatisticsByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("NapiGetNotificationStatisticsByBundle");
     std::vector<NotificationBundleOption> bundles;
     if (ParseBundlesParameters(env, info, bundles) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
-        return Common::NapiGetUndefined(env);
+        return Common::NapiRejectError(env, ERROR_PARAM_INVALID);
     }
     AsyncCallbackInfoStatistics *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoStatistics {.env = env, .asyncWork = nullptr, .bundles = bundles};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
-        return Common::JSParaError(env, nullptr);
+        return Common::NapiRejectError(env, ERROR_INTERNAL_ERROR);
     }
 
     napi_value promise = nullptr;
@@ -162,7 +160,6 @@ napi_value NapiGetNotificationStatisticsByBundle(napi_env env, napi_callback_inf
 
     napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGD("Napi get Statistics by bundle work excute.");
             AsyncCallbackInfoStatistics *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoStatistics *>(data);
             if (asynccallbackinfo) {

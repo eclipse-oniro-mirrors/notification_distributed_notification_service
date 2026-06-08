@@ -312,6 +312,8 @@ napi_value Subscribe(napi_env env, napi_callback_info info);
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     NotificationSubscribeInfo &subscriberInfo, std::shared_ptr<SubscriberInstance> &subscriber, napi_ref &callback);
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
+    NotificationSubscribeInfo &subscriberInfo, std::shared_ptr<SubscriberInstance> &subscriber);
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, std::string &hashCode,
     napi_value& thisVar, OperationInfo& operationInfo);
 }  // namespace NotificationNapi

@@ -190,39 +190,28 @@ void NapiSubscribeNotificationAsyncWork(napi_env env,
 
 napi_value NapiSubscribeNotification(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("called");
-    napi_ref callback = nullptr;
     std::shared_ptr<SubscriberInstance> objectInfo = nullptr;
     NotificationSubscribeInfo subscriberInfo;
-    if (ParseParameters(env, info, subscriberInfo, objectInfo, callback) == nullptr) {
+    if (ParseParameters(env, info, subscriberInfo, objectInfo) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
-        return Common::NapiGetUndefined(env);
+        return Common::NapiRejectError(env, ERROR_PARAM_INVALID);
     }
 
     AsyncCallbackInfoSubscribe *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoSubscribe {
         .env = env, .asyncWork = nullptr, .objectInfo = objectInfo, .subscriberInfo = subscriberInfo
     };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
-        return Common::JSParaError(env, callback);
+        return Common::NapiRejectError(env, ERROR_INTERNAL_ERROR);
     }
     napi_value promise = nullptr;
-    Common::PaddingCallbackPromiseInfo(env, callback, asynccallbackinfo->info, promise);
-
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "subscribeNotification", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
     NapiSubscribeNotificationAsyncWork(env, resourceName, asynccallbackinfo);
-    bool isCallback = asynccallbackinfo->info.isCallback;
     napi_add_env_cleanup_hook(env, ClearEnvCallback, objectInfo.get());
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-
-    if (isCallback) {
-        ANS_LOGD("null isCallback");
-        return Common::NapiGetNull(env);
-    } else {
-        return promise;
-    }
+    return promise;
 }
 
 napi_value NapiSubscribe(napi_env env, napi_callback_info info)
