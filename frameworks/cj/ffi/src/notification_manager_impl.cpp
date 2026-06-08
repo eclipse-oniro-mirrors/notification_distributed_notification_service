@@ -125,10 +125,18 @@ namespace CJSystemapi {
         CArrayNotificationSlotsV2 notificationSlots = { .head = nullptr, .size = 0 };
         std::vector<sptr<NotificationSlot>> slots;
         errCode = ErrorToExternal(NotificationHelper::GetNotificationSlots(slots));
+        if (errCode != SUCCESS_CODE) {
+            return notificationSlots;
+        }
+        if (slots.size() > INT32_MAX / sizeof(CNotificationSlotV2)) {
+            errCode = ERROR_INTERNAL_ERROR;
+            return notificationSlots;
+        }
         CNotificationSlotV2* head =
             reinterpret_cast<CNotificationSlotV2 *>(malloc(sizeof(CNotificationSlotV2) * slots.size()));
         if (head == nullptr) {
             LOGE("null head");
+            errCode = ERROR_NO_MEMORY;
             return notificationSlots;
         }
         int32_t count = 0;
@@ -143,7 +151,7 @@ namespace CJSystemapi {
             }
             count++;
         }
-        notificationSlots.size = static_cast<int64_t>(slots.size());
+        notificationSlots.size = static_cast<int64_t>(count);
         notificationSlots.head = head;
         return notificationSlots;
     }
