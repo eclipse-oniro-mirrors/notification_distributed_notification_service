@@ -241,6 +241,15 @@ napi_value Common::JSParaError(const napi_env &env, const napi_ref &callback)
     return promise;
 }
 
+napi_value Common::NapiRejectError(const napi_env &env, const int32_t errCode)
+{
+    napi_value promise = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_create_promise(env, &deferred, &promise);
+    SetPromise(env, deferred, errCode, Common::NapiGetNull(env), false);
+    return promise;
+}
+
 napi_value Common::ParseParaOnlyCallback(const napi_env &env, const napi_callback_info &info, napi_ref &callback)
 {
     ANS_LOGD("called");

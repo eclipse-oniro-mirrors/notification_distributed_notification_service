@@ -232,6 +232,15 @@ public:
     static napi_value JSParaError(const napi_env &env, const napi_ref &callback);
 
     /**
+     * @brief Gets the returned result by the callback or reject when an error occurs
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param errCode Indicates specified err code
+     * @return Returns promise with reject error
+     */
+    static napi_value NapiRejectError(const napi_env &env, const int32_t errCode);
+
+    /**
      * @brief Parses a single parameter for callback
      *
      * @param env Indicates the environment that the API is invoked under
