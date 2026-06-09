@@ -140,31 +140,46 @@ bool AdvancedNotificationService::SetSnoozeDelayTimeToDB(const int64_t delayTime
 
 void AdvancedNotificationService::SnoozeNotificationConsumed(const std::shared_ptr<NotificationRecord> &record)
 {
-    if (record == nullptr) {
+    if (record == nullptr || record->request == nullptr) {
         ANS_LOGE("No subscriber to notify.");
         return;
     }
     record->request->SetDeliveryTime(GetCurrentTime());
-    CheckDoNotDisturbProfile(record);
+    auto recordNew = std::make_shared<NotificationRecord>();
+    recordNew->isNeedFlowCtrl = false;
+    recordNew->request = new (std::nothrow) NotificationRequest(*(record->request));
+    ANS_COND_DO_ERR(recordNew->request == nullptr, return, "NotificationRequest malloc error.");
+    std::shared_ptr<NotificationFlags> flags = record->request->GetFlags() == nullptr ?
+        nullptr : std::make_shared<NotificationFlags>(record->request->GetFlags()->GetReminderFlags());
+    auto notificationFlagsOfDevices =
+        std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
+    recordNew->request->SetFlags(flags);
+    (*notificationFlagsOfDevices)[NotificationConstant::CURRENT_DEVICE_TYPE] = flags;
+    recordNew->request->SetDeviceFlags(notificationFlagsOfDevices);
+    recordNew->request->SetBadgeNumber(0);
+    recordNew->notification = new (std::nothrow) Notification(recordNew->request);
+    ANS_COND_DO_ERR(recordNew->notification == nullptr, return, "Notification malloc error.");
+    CheckDoNotDisturbProfile(recordNew);
     NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     NotificationPreferences::GetInstance()->IsSilentReminderEnabled(record->bundleOption, enableStatus);
     if (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
         enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) {
-        record->notification->SetEnableLight(false);
-        record->notification->SetEnableSound(false);
-        record->notification->SetEnableVibration(false);
-        record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false);
-        record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, false);
-        record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
-        record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
-        record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
+        recordNew->notification->SetEnableLight(false);
+        recordNew->notification->SetEnableSound(false);
+        recordNew->notification->SetEnableVibration(false);
+        recordNew->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false);
+        recordNew->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, false);
+        recordNew->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
+        recordNew->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
+        recordNew->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
     }
     if (AssignToNotificationList(record) != ERR_OK) {
         return;
     }
 
     sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-    NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
+    NotificationSubscriberManager::GetInstance()->NotifyConsumed(recordNew->notification, sortingMap);
+    UpdateInNotificationList(record);
 }
 
 void AdvancedNotificationService::DeleteSnoozeNotificationFromDB(const std::shared_ptr<NotificationRecord> &record)
