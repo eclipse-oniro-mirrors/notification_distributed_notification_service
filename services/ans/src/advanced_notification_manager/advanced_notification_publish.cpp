@@ -31,6 +31,7 @@
 #include "os_account_manager.h"
 #include "os_account_manager_helper.h"
 #include "string_wrapper.h"
+#include "int_wrapper.h"
 #include "hitrace_util.h"
 #include "uri.h"
 #include "uri_permission_manager_client.h"
@@ -150,6 +151,41 @@ bool AdvancedNotificationService::GrantSoundPermission(const sptr<NotificationRe
     return result == ERR_OK;
 }
 
+bool AdvancedNotificationService::IsAtomicServiceCreateOrUpdateByUninstall(
+    const sptr<NotificationRequest> &request)
+{
+    int32_t atomicInstallStatus = PKG_INSTALL_STATUS_UNKMOWN;
+    request->GetAtomicServiceInstallStatus(atomicInstallStatus);
+    if (atomicInstallStatus == PKG_INSTALL_STATUS_UNKMOWN) {
+        return false;
+    }
+
+    if (request->IsAtomicServiceNotification()) {
+        ANS_LOGI("IsAtomicServiceNotification");
+        return true;
+    }
+
+    if (atomicInstallStatus == PKG_INSTALL_STATUS_INSTALL) {
+        std::shared_ptr<NotificationRecord> atomicRecord = nullptr;
+        bool needUpdateAtomicRecord = false;
+        auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
+            atomicRecord = GetFromNotificationListByAtomicServiceKey(request);
+            if (atomicRecord != nullptr) {
+                ANS_LOGI("atomicRecord Exist");
+                auto extendInfo = request->GetExtendInfo();
+                if (extendInfo != nullptr) {
+                    extendInfo->SetParam("autoServiceInstallStatus", AAFwk::Integer::Box(PKG_INSTALL_STATUS_UNINSTALL));
+                }
+                needUpdateAtomicRecord = true;
+            }
+            return;
+        }));
+        ANS_COND_DO_ERR(submitResult != ERR_OK, return false, "GetFromNotificationListByAtomicServiceKey.");
+        return needUpdateAtomicRecord;
+    }
+    return false;
+}
+
 ErrCode AdvancedNotificationService::Publish(const std::string &label, const sptr<NotificationRequest> &request)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
@@ -175,7 +211,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         return CollaboratePublish(request);
     }
 
-    if (request->IsAtomicServiceNotification()) {
+    if (IsAtomicServiceCreateOrUpdateByUninstall(request)) {
         AnsStatus ansStatus = AtomicServicePublish(request);
         if (!ansStatus.Ok()) {
             NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));

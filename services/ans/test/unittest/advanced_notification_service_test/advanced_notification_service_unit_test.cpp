@@ -32,6 +32,7 @@
 
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
+#include "int_wrapper.h"
 #include "mock_push_callback_stub.h"
 #include "advanced_notdisturb_enabled_observer.h"
 #include "advanced_notdisturb_white_list_observer.h"
@@ -1466,6 +1467,206 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetFromDelayedNotificationList_100
 
     ASSERT_EQ(res1, record);
     ASSERT_EQ(res2, nullptr);
+}
+
+static sptr<NotificationRequest> CreateAtomicServiceRequest(
+    int32_t notificationId, const std::string &bundleName, int32_t uid, int32_t userId, int32_t installStatus)
+{
+    sptr<NotificationRequest> request = new NotificationRequest(notificationId);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    request->SetIsAgentNotification(true);
+    request->SetOwnerBundleName(bundleName);
+    request->SetOwnerUid(uid);
+    request->SetOwnerUserId(userId);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("autoServiceInstallStatus", AAFwk::Integer::Box(installStatus));
+    request->SetExtendInfo(extendInfo);
+    return request;
+}
+
+static std::shared_ptr<NotificationRecord> CreateAtomicServiceRecord(
+    int32_t notificationId, const std::string &bundleName, int32_t uid, int32_t userId)
+{
+    sptr<NotificationRequest> request = new NotificationRequest(notificationId);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    request->SetIsAgentNotification(true);
+    request->SetOwnerBundleName(bundleName);
+    request->SetOwnerUid(uid);
+    request->SetOwnerUserId(userId);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->isAtomicService = true;
+    return record;
+}
+
+/**
+ * @tc.name: GetFromNotificationListByAtomicServiceKey_00001
+ * @tc.desc: test GetFromNotificationListByAtomicServiceKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    GetFromNotificationListByAtomicServiceKey_00001, Function | SmallTest | Level1)
+{
+    sptr request = CreateAtomicServiceRequest(1, "com.test.bundle", 100, 100, 0);
+    auto record = CreateAtomicServiceRecord(1, "com.test.bundle", 100, 100);
+    record->request->SetLabel("testLabel");
+    request->SetLabel("testLabel");
+    advancedNotificationService_->notificationList_.push_back(record);
+
+    auto result = advancedNotificationService_->GetFromNotificationListByAtomicServiceKey(request);
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->request->GetNotificationId(), 1);
+}
+
+/**
+ * @tc.name: GetFromNotificationListByAtomicServiceKey_00002
+ * @tc.desc: test GetFromNotificationListByAtomicServiceKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    GetFromNotificationListByAtomicServiceKey_00002, Function | SmallTest | Level1)
+{
+    sptr request = CreateAtomicServiceRequest(1, "com.test.bundle", 100, 100, 0);
+    request->SetLabel("testLabel");
+    auto record = CreateAtomicServiceRecord(2, "com.other.bundle", 200, 200);
+    record->request->SetLabel("otherLabel");
+    advancedNotificationService_->notificationList_.push_back(record);
+
+    auto result = advancedNotificationService_->GetFromNotificationListByAtomicServiceKey(request);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetFromNotificationListByAtomicServiceKey_00003
+ * @tc.desc: test GetFromNotificationListByAtomicServiceKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    GetFromNotificationListByAtomicServiceKey_00003, Function | SmallTest | Level1)
+{
+    sptr request = CreateAtomicServiceRequest(1, "com.test.bundle", 100, 100, 0);
+    request->SetLabel("testLabel");
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = new NotificationRequest(1);
+    record->request->SetOwnerBundleName("com.test.bundle");
+    record->request->SetNotificationId(1);
+    record->request->SetOwnerUserId(100);
+    record->request->SetLabel("testLabel");
+    record->isAtomicService = false;
+    advancedNotificationService_->notificationList_.push_back(record);
+
+    auto result = advancedNotificationService_->GetFromNotificationListByAtomicServiceKey(request);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetFromNotificationListByAtomicServiceKey_00004
+ * @tc.desc: test GetFromNotificationListByAtomicServiceKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    GetFromNotificationListByAtomicServiceKey_00004, Function | SmallTest | Level1)
+{
+    sptr request = CreateAtomicServiceRequest(1, "com.test.bundle", 100, 100, 0);
+    request->SetLabel("testLabel");
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = new NotificationRequest(1);
+    record->request->SetOwnerBundleName("com.test.bundle");
+    record->request->SetNotificationId(1);
+    record->request->SetOwnerUserId(100);
+    record->request->SetLabel("testLabel");
+    record->isAtomicService = true;
+    advancedNotificationService_->notificationList_.push_back(record);
+
+    auto result = advancedNotificationService_->GetFromNotificationListByAtomicServiceKey(request);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetFromNotificationListByAtomicServiceKey_00005
+ * @tc.desc: test GetFromNotificationListByAtomicServiceKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    GetFromNotificationListByAtomicServiceKey_00005, Function | SmallTest | Level1)
+{
+    sptr request = CreateAtomicServiceRequest(1, "com.test.bundle", DEFAULT_UID, INVALID_USER_ID, 0);
+    request->SetLabel("testLabel");
+
+    auto result = advancedNotificationService_->GetFromNotificationListByAtomicServiceKey(request);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: IsAtomicServiceCreateOrUpdateByUninstall_00001
+ * @tc.desc: test IsAtomicServiceCreateOrUpdateByUninstall
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    IsAtomicServiceCreateOrUpdateByUninstall_00001, Function | SmallTest | Level1)
+{
+    sptr request = CreateAtomicServiceRequest(1, "com.test.bundle", 100, 100, PKG_INSTALL_STATUS_UNKMOWN);
+
+    bool result = advancedNotificationService_->IsAtomicServiceCreateOrUpdateByUninstall(request);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: IsAtomicServiceCreateOrUpdateByUninstall_00002
+ * @tc.desc: test IsAtomicServiceCreateOrUpdateByUninstall
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    IsAtomicServiceCreateOrUpdateByUninstall_00002, Function | SmallTest | Level1)
+{
+    sptr request = CreateAtomicServiceRequest(1, "com.test.bundle", 100, 100, PKG_INSTALL_STATUS_UNINSTALL);
+
+    bool result = advancedNotificationService_->IsAtomicServiceCreateOrUpdateByUninstall(request);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: IsAtomicServiceCreateOrUpdateByUninstall_00003
+ * @tc.desc: test IsAtomicServiceCreateOrUpdateByUninstall
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    IsAtomicServiceCreateOrUpdateByUninstall_00003, Function | SmallTest | Level1)
+{
+    sptr request = CreateAtomicServiceRequest(1, "com.test.bundle", 100, 100, PKG_INSTALL_STATUS_INSTALL);
+    request->SetLabel("testLabel");
+    auto record = CreateAtomicServiceRecord(1, "com.test.bundle", 100, 100);
+    record->request->SetLabel("testLabel");
+    advancedNotificationService_->notificationList_.push_back(record);
+
+    bool result = advancedNotificationService_->IsAtomicServiceCreateOrUpdateByUninstall(request);
+    EXPECT_EQ(result, true);
+    auto extendInfo = request->GetExtendInfo();
+    if (extendInfo != nullptr) {
+        int32_t status = extendInfo->GetIntParam("autoServiceInstallStatus", PKG_INSTALL_STATUS_UNKMOWN);
+        EXPECT_EQ(status, PKG_INSTALL_STATUS_UNINSTALL);
+    }
+}
+
+/**
+ * @tc.name: IsAtomicServiceCreateOrUpdateByUninstall_00004
+ * @tc.desc: test IsAtomicServiceCreateOrUpdateByUninstall
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    IsAtomicServiceCreateOrUpdateByUninstall_00004, Function | SmallTest | Level1)
+{
+    sptr request = CreateAtomicServiceRequest(1, "com.test.bundle", 100, 100, PKG_INSTALL_STATUS_INSTALL);
+    request->SetLabel("testLabel");
+
+    bool result = advancedNotificationService_->IsAtomicServiceCreateOrUpdateByUninstall(request);
+    EXPECT_EQ(result, false);
 }
 
 /**
