@@ -23,13 +23,14 @@
 #include "ani_ans_dialog_callback.h"
 #include "sts_common.h"
 #include "sts_slot.h"
+#include "ws_common.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace OHOS::Notification;
 using namespace OHOS::NotificationSts;
 static std::atomic<bool> isExist = false;
-const int32_t ERR__INVALID_WANT = 1011;
+
 bool GetOpenSettingsInfo(ani_env *env, ani_object content, std::shared_ptr<OpenSettingsInfo> &info)
 {
     ani_status status = ANI_OK;
@@ -153,8 +154,6 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
     int32_t errorCode = ERR_OK;
     if (info->errorCode == OHOS::Notification::ERROR_SETTING_WINDOW_EXIST) {
         errorCode = OHOS::Notification::ERROR_SETTING_WINDOW_EXIST;
-    } else if (info->errorCode == ERR__INVALID_WANT) {
-        errorCode = ERR__INVALID_WANT;
     } else {
         errorCode = info->errorCode ==
             ERR_OK ? ERR_OK : NotificationSts::GetExternalCode(info->errorCode);
@@ -373,7 +372,7 @@ void SettingsModalExtensionCallback::OnReleaseNew(int32_t releaseCode)
 void SettingsModalExtensionCallback::OnError(int32_t code, const std::string& name, const std::string& message)
 {
     ANS_LOGE("OnError, code = %{public}d,name = %{public}s, message = %{public}s", code, name.c_str(), message.c_str());
-    if (code == ERR__INVALID_WANT) {
+    if (code == static_cast<int32_t>(OHOS::Rosen::WSError::WS_ERROR_START_UI_EXTENSION_ABILITY_FAILED)) {
         ReleaseOrErrorHandle(OHOS::Notification::ERROR_SYSTEM_CAP_ERROR);
         ProcessStatusChanged(OHOS::Notification::ERROR_SYSTEM_CAP_ERROR, false);
         return;

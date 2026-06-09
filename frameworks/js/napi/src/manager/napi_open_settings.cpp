@@ -17,10 +17,10 @@
 #include <uv.h>
 #include "napi_base_context.h"
 #include "ans_inner_errors.h"
+#include "ws_common.h"
 
 namespace OHOS {
 namespace NotificationNapi {
-const int32_t ERR_INVALID_WANT = 1011;
 const int OPEN_NOTIFICATION_SETTINGS_MAX_PARA = 1;
 static napi_env env_ = nullptr;
 static AsyncCallbackInfoOpenSettings* callbackInfo_ = nullptr;
@@ -468,7 +468,7 @@ void SettingsModalExtensionCallback::OnReleaseNew(int32_t releaseCode)
 void SettingsModalExtensionCallback::OnError(int32_t code, const std::string& name, const std::string& message)
 {
     ANS_LOGD("called, code = %{public}d,name = %{public}s, message = %{public}s", code, name.c_str(), message.c_str());
-    if (code == ERR_INVALID_WANT) {
+    if (code == static_cast<int32_t>(OHOS::Rosen::WSError::WS_ERROR_START_UI_EXTENSION_ABILITY_FAILED)) {
         ReleaseOrErrorHandle(ERROR_SYSTEM_CAP_ERROR);
         ProcessStatusChanged(ERROR_SYSTEM_CAP_ERROR);
         return;
