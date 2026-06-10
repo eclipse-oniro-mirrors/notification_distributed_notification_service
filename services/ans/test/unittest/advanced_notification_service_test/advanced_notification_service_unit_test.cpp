@@ -19,6 +19,7 @@
 #define private public
 
 #include "advanced_notification_service.h"
+#include "ans_service_errors.h"
 #include "advanced_datashare_helper.h"
 #include "notification_check_request.h"
 
@@ -45,7 +46,6 @@ using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 namespace Notification {
-
 class AdvancedNotificationServiceUnitTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -90,7 +90,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_100, Fu
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(nullptr);
 
-    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -105,7 +105,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_200, Fu
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(nullptr);
 
-    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -124,7 +124,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_300, Fu
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
-    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -146,7 +146,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_400, Fu
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
-    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -169,7 +169,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_500, Fu
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
-    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INVALID_UID);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_INVALID_UID);
 }
 
 /**
@@ -193,7 +193,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_600, Fu
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
-    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
 }
 
 /**
@@ -264,7 +264,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_900, Fu
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
-    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INVALID_UID);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_INVALID_UID);
 }
 
 /**
@@ -288,7 +288,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_1000, F
 
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
-    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INVALID_UID);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_INVALID_UID);
 }
 
 /**
@@ -370,7 +370,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, AssignToNotificationList_200, Func
 
     auto ret = advancedNotificationService_->AssignToNotificationList(record);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -422,7 +422,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationInfoTest_100, F
     sptr<NotificationBundleOption> bundleOption = nullptr;
     auto ret = advancedNotificationService_->PrepareNotificationInfo(nullptr, bundleOption);
 
-    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -441,7 +441,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationInfoTest_200, F
 
     auto ret = advancedNotificationService_->PrepareNotificationInfo(request, bundleOption);
 
-    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -458,7 +458,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationInfoTest_300, F
 
     auto ret = advancedNotificationService_->PrepareNotificationInfo(request, bundleOption);
 
-    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -523,7 +523,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, StartFinishTimer_100, Function | S
     auto ret = advancedNotificationService_->StartFinishTimer(record, duration.count(),
         NotificationConstant::TRIGGER_EIGHT_HOUR_REASON_DELETE);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_TASK_ERR);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_TASK_ERR);
     MockCreateTimerFailed(false);
 }
 
@@ -566,7 +566,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, StartUpdateTimer_100, Function | S
     auto ret = advancedNotificationService_->StartUpdateTimer(record, duration.count(),
         NotificationConstant::MAX_UPDATE_TIME);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_TASK_ERR);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_TASK_ERR);
     MockCreateTimerFailed(false);
 }
 
@@ -606,7 +606,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SetUpdateTimer_100, Function | Sma
 
     auto ret = advancedNotificationService_->SetUpdateTimer(record);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_TASK_ERR);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_TASK_ERR);
     MockCreateTimerFailed(false);
 }
 
@@ -679,7 +679,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, StartAutoDeletedTimer_100, Functio
 
     auto ret = advancedNotificationService_->StartAutoDeletedTimer(record);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_TASK_ERR);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_TASK_ERR);
     MockCreateTimerFailed(false);
 }
 
@@ -777,7 +777,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, CheckPublishPreparedNotification_2
 
     auto ret = advancedNotificationService_->CheckPublishPreparedNotification(record, false);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NO_MEMORY);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NO_MEMORY);
 }
 
 /**
@@ -795,7 +795,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, CheckPublishPreparedNotification_3
 
     auto ret = advancedNotificationService_->CheckPublishPreparedNotification(record, false);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -813,7 +813,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, ReplyDistributeOperation_100, Func
 
     auto ret = advancedNotificationService_->ReplyDistributeOperation(hashCode, result);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -831,7 +831,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, ReplyDistributeOperation_200, Func
 
     auto ret = advancedNotificationService_->ReplyDistributeOperation(hashCode, result);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -850,7 +850,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, ReplyDistributeOperation_300, Func
 
     auto ret = advancedNotificationService_->ReplyDistributeOperation(hashCode, result);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -887,7 +887,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetNotificationRequestByHashCode_1
 
     auto ret = advancedNotificationService_->GetNotificationRequestByHashCode(hashCode, request);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -905,7 +905,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetNotificationRequestByHashCode_2
 
     auto ret = advancedNotificationService_->GetNotificationRequestByHashCode(hashCode, request);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -925,7 +925,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetNotificationRequestByHashCode_3
 
     auto ret = advancedNotificationService_->GetNotificationRequestByHashCode(hashCode, request);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1174,7 +1174,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationList_100, Fu
     auto res = advancedNotificationService_->RemoveFromNotificationList(bundleOption, notificationKey,
         record->notification, 8, false);
 
-    ASSERT_EQ(res, (int)ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
+    ASSERT_EQ(res, (int)ERR_ANS_INNER_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
 }
 
 /**
@@ -1244,7 +1244,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationList_400, Fu
 
     auto res = advancedNotificationService_->RemoveFromNotificationList(key, record->notification, false, 8);
 
-    ASSERT_EQ(res, (int)ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
+    ASSERT_EQ(res, (int)ERR_ANS_INNER_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
 }
 
 
@@ -1397,7 +1397,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationListForDelet
 
     auto res = advancedNotificationService_->RemoveFromNotificationListForDeleteAll(key, userId, record->notification);
 
-    ASSERT_EQ(res, (int)ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
+    ASSERT_EQ(res, (int)ERR_ANS_INNER_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
 }
 
 /**
@@ -1418,7 +1418,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationListForDelet
 
     auto res = advancedNotificationService_->RemoveFromNotificationListForDeleteAll(key, userId, record->notification);
 
-    ASSERT_EQ(res, (int)ERR_ANS_NOTIFICATION_IS_UNREMOVABLE);
+    ASSERT_EQ(res, (int)ERR_ANS_INNER_NOTIFICATION_IS_UNREMOVABLE);
 }
 
 /**
@@ -1482,7 +1482,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetAllNotificationsBySlotType_100,
 
     auto res = advancedNotificationService_->GetAllNotificationsBySlotType(notifications, slotType);
 
-    ASSERT_EQ(res, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(res, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -1501,7 +1501,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetAllNotificationsBySlotType_200,
 
     auto res = advancedNotificationService_->GetAllNotificationsBySlotType(notifications, slotType);
 
-    ASSERT_EQ(res, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(res, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -1522,7 +1522,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetAllNotificationsBySlotType_300,
 
     auto res = advancedNotificationService_->GetAllNotificationsBySlotType(notifications, slotType);
 
-    ASSERT_EQ(res, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(res, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1605,7 +1605,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetAllNotificationsBySlotType_700,
     std::vector<sptr<Notification>> notifications;
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
     auto res = advancedNotificationService_->GetAllNotificationsBySlotType(notifications, slotType);
-    ASSERT_EQ(res, (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
+    ASSERT_EQ(res, (int)ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
     MockQueryForgroundOsAccountId(true, 0);
 }
 
@@ -1699,7 +1699,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, RegisterPushCallback_100, Function
 
     auto res = advancedNotificationService_->RegisterPushCallback(pushCallback, notificationCheckRequest);
 
-    ASSERT_EQ(res, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(res, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -1881,7 +1881,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, CheckSoundPermission_100, Function
 
     auto ret = advancedNotificationService_->CheckSoundPermission(request, bundleOption);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1935,7 +1935,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, CheckLongTermLiveView_200, Functio
 
     auto ret = advancedNotificationService_->CheckLongTermLiveView(request, "");
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
@@ -1953,7 +1953,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, RegisterSwingCallback_100, Functio
 
     auto ret = advancedNotificationService_->RegisterSwingCallback(swingCallback);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -1969,7 +1969,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, RegisterSwingCallback_200, Functio
 
     auto ret = advancedNotificationService_->RegisterSwingCallback(swingCallback);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -2005,7 +2005,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, UpdateNotificationTimerByUid_100, 
 
     auto ret = advancedNotificationService_->UpdateNotificationTimerByUid(uid, isPaused);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NOT_SYSTEM_SERVICE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NOT_SYSTEM_SERVICE);
 }
 
 /**
@@ -2023,7 +2023,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, UpdateNotificationTimerByUid_200, 
 
     auto ret = advancedNotificationService_->UpdateNotificationTimerByUid(uid, isPaused);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -2057,7 +2057,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, DisableNotificationFeature_100, Fu
 
     auto ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -2074,7 +2074,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, DisableNotificationFeature_200, Fu
 
     auto ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -2093,7 +2093,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, DisableNotificationFeature_300, Fu
 
     auto ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -2189,9 +2189,9 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, IsDoNotDisturbEnabled_NoPermission
     bool isEnabled = false;
     MockIsVerfyPermisson(false);
     auto ret = advancedNotificationService_->IsDoNotDisturbEnabled(userId, isEnabled);
-    ASSERT_EQ(ret, ERROR_PERMISSION_DENIED);
+    ASSERT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
 }
- 
+
 /**
  * @tc.name: IsDoNotDisturbEnabled_200
  * @tc.desc: Test IsDoNotDisturbEnabled_200 when dataShareHelper succeeded to query.
@@ -2209,11 +2209,11 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, IsDoNotDisturbEnabled_200, Functio
     MockIsVerfyPermisson(true);
     advancedNotificationService_->RefreshNotDisturbEnableState();
     auto ret = advancedNotificationService_->IsDoNotDisturbEnabled(userId, isEnabled);
- 
+
     ASSERT_EQ(ret, ERR_OK);
     DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->SetIsDataShareReady(false);
 }
- 
+
 /**
  * @tc.name: IsNotifyAllowedInDoNotDisturb_100
  * @tc.desc: Test IsNotifyAllowedInDoNotDisturb_100 when caller has no permission.
@@ -2225,9 +2225,9 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, IsNotifyAllowedInDoNotDisturb_100,
     int32_t userId = 100;
     MockIsVerfyPermisson(false);
     auto ret = advancedNotificationService_->IsNotifyAllowedInDoNotDisturb(userId, isEnabled);
-    ASSERT_EQ(ret, ERROR_PERMISSION_DENIED);
+    ASSERT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
 }
- 
+
 /**
  * @tc.name: IsNotifyAllowedInDoNotDisturb_200
  * @tc.desc: Test IsNotifyAllowedInDoNotDisturb_200 when dataShareHelper succeeded to query.
@@ -2245,10 +2245,10 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, IsNotifyAllowedInDoNotDisturb_200,
     MockIsVerfyPermisson(true);
     advancedNotificationService_->RefreshNotDisturbWhiteList();
     auto ret = advancedNotificationService_->IsNotifyAllowedInDoNotDisturb(userId, isEnabled);
- 
+
     ASSERT_EQ(ret, ERR_OK);
 }
- 
+
 /**
  * @tc.name: IsDoNotDisturbEnabled_300
  * @tc.desc: Test IsDoNotDisturbEnabled_300 when caller has permission.
@@ -2265,7 +2265,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, IsDoNotDisturbEnabled_300, Functio
         enabledObserver->OnChange();
     }
     enabledObserver = nullptr;
-    
+
     sptr<AdvancedNotdisturbWhiteListObserver> observer = new (std::nothrow) AdvancedNotdisturbWhiteListObserver();
     if (observer != nullptr) {
         observer->OnChange();
@@ -2285,7 +2285,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetStatisticsByBundle_100, Functio
     std::vector<NotificationStatistics> statistics;
     MockIsSystemApp(false);
     auto ret = advancedNotificationService_->GetStatisticsByBundle(bundleOptions, statistics);
-    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -2300,7 +2300,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetStatisticsByBundle_101, Functio
     MockIsSystemApp(true);
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
     auto ret = advancedNotificationService_->GetStatisticsByBundle(bundleOptions, statistics);
-    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -2316,7 +2316,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetStatisticsByBundle_102, Functio
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     MockIsVerfyPermisson(false);
     auto ret = advancedNotificationService_->GetStatisticsByBundle(bundleOptions, statistics);
-    ASSERT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -2372,7 +2372,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SetNotificationRequestToDbCommon_1
     AdvancedNotificationService::NotificationRequestDb requestDbObj =
         { .request = request, .bundleOption = bundleOption };
     auto result = advancedNotificationService_->SetNotificationRequestToDbCommon(requestDbObj);
-    ASSERT_EQ(result, (int)ERR_ANS_TASK_ERR);
+    ASSERT_EQ(result, (int)ERR_ANS_INNER_TASK_ERR);
 }
 
 /**
@@ -2405,7 +2405,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SetNotificationRequestToDbCommon_2
     AdvancedNotificationService::NotificationRequestDb requestDbObj =
         { .request = request, .bundleOption = bundleOption };
     auto result = advancedNotificationService_->SetNotificationRequestToDbCommon(requestDbObj);
-    ASSERT_EQ(result, (int)ERR_ANS_TASK_ERR);
+    ASSERT_EQ(result, (int)ERR_ANS_INNER_TASK_ERR);
 }
 
 /**
@@ -2439,7 +2439,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SetNotificationRequestToDbCommon_3
     AdvancedNotificationService::NotificationRequestDb requestDbObj =
         { .request = request, .bundleOption = bundleOption };
     auto result = advancedNotificationService_->SetNotificationRequestToDbCommon(requestDbObj);
-    ASSERT_EQ(result, (int)ERR_ANS_ENCRYPT_FAIL);
+    ASSERT_EQ(result, (int)ERR_ANS_INNER_ENCRYPT_FAIL);
     MockEncrypt(true);
 }
 

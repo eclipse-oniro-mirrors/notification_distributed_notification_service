@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #define private public
 #define protected public
 #include "notification_preferences.h"
@@ -64,7 +65,7 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedDevicelist_0200, Function | 
     std::vector<std::string> deviceTypes;
     int32_t userId = 100;
     auto ret = notificationPreferences.SetDistributedDevicelist(deviceTypes, userId);
-    ASSERT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    ASSERT_EQ(ret, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -78,7 +79,7 @@ HWTEST_F(NotificationPreferencesTest, GetDistributedDevicelist_0100, Function | 
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     std::vector<std::string> deviceTypes;
     auto ret = notificationPreferences.GetDistributedDevicelist(deviceTypes);
-    ASSERT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    ASSERT_EQ(ret, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -110,7 +111,7 @@ HWTEST_F(NotificationPreferencesTest, GetDistributedDevicelist_0300, Function | 
     notificationPreferences.preferncesDB_->PutDistributedDevicelist(deviceTypesjsonString, userId);
     std::vector<std::string> deviceTypes;
     auto ret = notificationPreferences.GetDistributedDevicelist(deviceTypes);
-    ASSERT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    ASSERT_EQ(ret, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -126,7 +127,7 @@ HWTEST_F(NotificationPreferencesTest, GetDistributedDevicelist_0400, Function | 
     notificationPreferences.preferncesDB_->PutDistributedDevicelist(deviceTypesjsonString, userId);
     std::vector<std::string> deviceTypes;
     auto ret = notificationPreferences.GetDistributedDevicelist(deviceTypes);
-    ASSERT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    ASSERT_EQ(ret, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -142,7 +143,7 @@ HWTEST_F(NotificationPreferencesTest, GetDistributedDevicelist_0500, Function | 
     notificationPreferences.preferncesDB_->PutDistributedDevicelist(deviceTypesjsonString, userId);
     std::vector<std::string> deviceTypes;
     auto ret = notificationPreferences.GetDistributedDevicelist(deviceTypes);
-    ASSERT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    ASSERT_EQ(ret, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -158,7 +159,7 @@ HWTEST_F(NotificationPreferencesTest, GetDistributedDevicelist_0600, Function | 
     notificationPreferences.preferncesDB_->PutDistributedDevicelist(deviceTypesjsonString, userId);
     std::vector<std::string> deviceTypes;
     auto ret = notificationPreferences.GetDistributedDevicelist(deviceTypes);
-    ASSERT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    ASSERT_EQ(ret, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -174,7 +175,7 @@ HWTEST_F(NotificationPreferencesTest, GetDistributedDevicelist_0700, Function | 
     notificationPreferences.preferncesDB_->PutDistributedDevicelist(deviceTypesjsonString, userId);
     std::vector<std::string> deviceTypes;
     auto ret = notificationPreferences.GetDistributedDevicelist(deviceTypes);
-    ASSERT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    ASSERT_EQ(ret, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -208,7 +209,7 @@ HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionInfos_0100, Functi
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
     NotificationPreferences notificationPreferences;
     auto ret = notificationPreferences.GetExtensionSubscriptionInfos(bundleOption, infos);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -222,7 +223,7 @@ HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionInfos_0200, Functi
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
     NotificationPreferences notificationPreferences;
     auto ret = notificationPreferences.GetExtensionSubscriptionInfos(bundleOption, infos);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -251,7 +252,7 @@ HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionInfos_0100, Functi
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
     NotificationPreferences notificationPreferences;
     auto ret = notificationPreferences.SetExtensionSubscriptionInfos(bundleOption, infos);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -265,7 +266,7 @@ HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionInfos_0200, Functi
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
     NotificationPreferences notificationPreferences;
     auto ret = notificationPreferences.SetExtensionSubscriptionInfos(bundleOption, infos);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -314,7 +315,7 @@ HWTEST_F(NotificationPreferencesTest, ClearExtensionSubscriptionInfos_0100, Func
     infos.clear();
     ret = notificationPreferences.ClearExtensionSubscriptionInfos(bundleOption);
     EXPECT_EQ(ret, ERR_OK);
-    
+
     ret = notificationPreferences.GetExtensionSubscriptionInfos(bundleOption, infos);
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_TRUE(infos.empty());
@@ -330,7 +331,7 @@ HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionEnabled_0100, Test
     NotificationPreferences notificationPreferences;
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     auto ret = notificationPreferences.GetExtensionSubscriptionEnabled(nullptr, state);
-    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -344,7 +345,7 @@ HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionEnabled_0200, Test
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("", 100);
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     auto ret = notificationPreferences.GetExtensionSubscriptionEnabled(bundleOption, state);
-    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -357,12 +358,12 @@ HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionEnabled_0100, Test
     NotificationPreferences notificationPreferences;
     auto ret = notificationPreferences.SetExtensionSubscriptionEnabled(nullptr,
         NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
-    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("", 100);
     auto ret2 = notificationPreferences.SetExtensionSubscriptionEnabled(bundleOption,
         NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
-    ASSERT_EQ(ret2, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret2, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -374,11 +375,11 @@ HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionEnabled_0200, Test
 {
     NotificationPreferences notificationPreferences;
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
-    
+
     auto ret1 = notificationPreferences.SetExtensionSubscriptionEnabled(bundleOption,
         NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     ASSERT_EQ(ret1, ERR_OK);
-    
+
     NotificationConstant::SWITCH_STATE state;
     auto getRet = notificationPreferences.GetExtensionSubscriptionEnabled(bundleOption, state);
     ASSERT_EQ(getRet, ERR_OK);
@@ -410,7 +411,7 @@ HWTEST_F(NotificationPreferencesTest, SetRingtoneInfoByBundle_0100, TestSize.Lev
     ringtoneInfo->SetRingtoneFileName("fileName");
     ringtoneInfo->SetRingtoneUri("uri");
     auto ret = notificationPreferences.SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
-    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -448,7 +449,7 @@ HWTEST_F(NotificationPreferencesTest, GetRingtoneInfoByBundle_0100, TestSize.Lev
     ringtoneInfo->SetRingtoneFileName("fileName");
     ringtoneInfo->SetRingtoneUri("uri");
     auto ret = notificationPreferences.GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
-    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -470,7 +471,7 @@ HWTEST_F(NotificationPreferencesTest, GetRingtoneInfoByBundle_0200, TestSize.Lev
     ASSERT_EQ(setRet, ERR_OK);
     sptr<NotificationRingtoneInfo> getResult = nullptr;
     auto getRet = notificationPreferences.GetRingtoneInfoByBundle(bundleOption, getResult);
-    ASSERT_EQ(getRet, ERR_ANS_NO_CUSTOM_RINGTONE_INFO);
+    ASSERT_EQ(getRet, ERR_ANS_INNER_NO_CUSTOM_RINGTONE_INFO);
 }
 
 /**
@@ -512,7 +513,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveRingtoneInfoByBundle_0100, TestSize.
 
     sptr<NotificationRingtoneInfo> ringtoneInfoResult = nullptr;
     auto getRet = notificationPreferences.GetRingtoneInfoByBundle(bundleOption, ringtoneInfoResult);
-    ASSERT_EQ(getRet, ERR_ANS_NO_CUSTOM_RINGTONE_INFO);
+    ASSERT_EQ(getRet, ERR_ANS_INNER_NO_CUSTOM_RINGTONE_INFO);
 }
 
 HWTEST_F(NotificationPreferencesTest, RemoveRingtoneInfoByBundle_0200, TestSize.Level1)
@@ -532,7 +533,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveRingtoneInfoByBundle_0200, TestSize.
 
     sptr<NotificationRingtoneInfo> ringtoneInfoResult = nullptr;
     auto getRet = notificationPreferences.GetRingtoneInfoByBundle(bundleOption, ringtoneInfoResult);
-    ASSERT_EQ(getRet, ERR_ANS_NO_CUSTOM_RINGTONE_INFO);
+    ASSERT_EQ(getRet, ERR_ANS_INNER_NO_CUSTOM_RINGTONE_INFO);
 }
 
 HWTEST_F(NotificationPreferencesTest, RemoveRingtoneInfoByBundle_0300, TestSize.Level1)
@@ -552,7 +553,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveRingtoneInfoByBundle_0300, TestSize.
 
     sptr<NotificationRingtoneInfo> ringtoneInfoResult = nullptr;
     auto getRet = notificationPreferences.GetRingtoneInfoByBundle(bundleOption, ringtoneInfoResult);
-    ASSERT_EQ(getRet, ERR_ANS_NO_CUSTOM_RINGTONE_INFO);
+    ASSERT_EQ(getRet, ERR_ANS_INNER_NO_CUSTOM_RINGTONE_INFO);
 }
 } // namespace Notification
 } // namespace OHOS

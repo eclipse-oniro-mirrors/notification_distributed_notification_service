@@ -16,11 +16,15 @@
 #include "napi_sync_config.h"
 #include "common.h"
 #include "napi_common_util.h"
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "ans_log_wrapper.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 namespace {
     constexpr int8_t SETADDITION_CONFIG_NUM = 2;
 }
@@ -48,7 +52,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < SETADDITION_CONFIG_NUM) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -58,7 +62,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (valuetype != napi_string) {
         ANS_LOGE("Argument type error. String expected.");
         std::string msg = "Incorrect parameter types.The type of param must be string.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     char keyStr[STR_MAX_SIZE] = {0};
@@ -71,7 +75,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (valuetype != napi_string) {
         ANS_LOGE("Argument type error. String expected.");
         std::string msg = "Incorrect parameter types.The type of param must be string.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
 
@@ -107,7 +111,7 @@ napi_value NapiSetAdditionConfig(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     ConfigParams paras {};
     if (ParseParameters(env, info, paras) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -117,7 +121,7 @@ napi_value NapiSetAdditionConfig(napi_env env, napi_callback_info info)
         .params = paras
     };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;
@@ -132,8 +136,9 @@ napi_value NapiSetAdditionConfig(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiSetAdditionConfig work excute.");
             AsyncCallbackInfoConfig *asynccallbackinfo = static_cast<AsyncCallbackInfoConfig *>(data);
             if (asynccallbackinfo) {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::SetAdditionConfig(
-                        asynccallbackinfo->params.key, asynccallbackinfo->params.value);
+                    asynccallbackinfo->info.errorCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->SetAdditionConfig(
+                            asynccallbackinfo->params.key, asynccallbackinfo->params.value);
             }
         }, AsyncSetConfigComplete, (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
 

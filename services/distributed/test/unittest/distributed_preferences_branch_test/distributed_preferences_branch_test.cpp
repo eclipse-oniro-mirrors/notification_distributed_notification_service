@@ -18,6 +18,7 @@
 #include "gtest/gtest.h"
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #define private public
 #include "distributed_preferences.h"
 #include "distributed_preferences_info.h"
@@ -125,7 +126,7 @@ HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_0060
 {
     bool isEnable = true;
     MockPutToDistributedDB(false);
-    EXPECT_EQ(distributedPreferences_->SetDistributedEnable(isEnable), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+    EXPECT_EQ(distributedPreferences_->SetDistributedEnable(isEnable), ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -137,7 +138,8 @@ HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_0070
 {
     sptr<NotificationBundleOption> bundleOption = nullptr;
     bool isEnable = true;
-    EXPECT_EQ(distributedPreferences_->SetDistributedBundleEnable(bundleOption, isEnable), ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(distributedPreferences_->SetDistributedBundleEnable(
+        bundleOption, isEnable), ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -151,7 +153,7 @@ HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_0080
     bool isEnable = true;
     MockPutToDistributedDB(false);
     EXPECT_EQ(distributedPreferences_->SetDistributedBundleEnable(bundleOption, isEnable),
-        ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+        ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -163,7 +165,8 @@ HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_0090
 {
     sptr<NotificationBundleOption> bundleOption = nullptr;
     bool isEnable = true;
-    EXPECT_EQ(distributedPreferences_->GetDistributedBundleEnable(bundleOption, isEnable), ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(distributedPreferences_->GetDistributedBundleEnable(
+        bundleOption, isEnable), ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -174,7 +177,7 @@ HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_0090
 HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_01000, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundleOption = nullptr;
-    EXPECT_EQ(distributedPreferences_->DeleteDistributedBundleInfo(bundleOption), ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(distributedPreferences_->DeleteDistributedBundleInfo(bundleOption), ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -187,7 +190,8 @@ HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_0110
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("<bundleName>", 783);
     MockDeleteToDistributedDB(false);
     EXPECT_EQ(
-        distributedPreferences_->DeleteDistributedBundleInfo(bundleOption), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+        distributedPreferences_->DeleteDistributedBundleInfo(bundleOption),
+        ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -198,7 +202,8 @@ HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_0110
 HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_01200, Function | SmallTest | Level1)
 {
     MockClearDatabase(false);
-    EXPECT_EQ(distributedPreferences_->ClearDataInRestoreFactorySettings(), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+    EXPECT_EQ(distributedPreferences_->ClearDataInRestoreFactorySettings(),
+        ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -211,7 +216,8 @@ HWTEST_F(DistributedPreferencesBranchTest, DistributedPreferencesBranchTest_0130
     MockPutToDistributedDB(false);
     int32_t userId = 1;
     bool enabled = true;
-    EXPECT_EQ(distributedPreferences_->SetSyncEnabledWithoutApp(userId, enabled), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+    EXPECT_EQ(distributedPreferences_->SetSyncEnabledWithoutApp(userId, enabled),
+        ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 }  // namespace Notification
 }  // namespace OHOS

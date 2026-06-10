@@ -25,7 +25,7 @@ struct CallbackPromiseInfo {
     ani_resolver resolve = nullptr;
     ani_ref callback = nullptr;
     bool isCallback = false;
-    int returnCode = 0;
+    int32_t returnCode = 0;
     ani_object result = nullptr;
 };
 

@@ -15,7 +15,8 @@
 #include "ani_get_notification_parameters.h"
 
 #include "ans_log_wrapper.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "sts_request.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -23,6 +24,8 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackInfoNotificationParameters* asyncCallbackInfo)
 {
@@ -94,7 +97,7 @@ void HandleGetNotificationParametersComplete(ani_env* env, WorkStatus status, vo
     if (!NotificationSts::WrapNotificationParameters(envCurr, asyncCallbackInfo->parameters,
         asyncCallbackInfo->info.result)) {
         ANS_LOGE("Create NotificationParameters failed");
-        asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+        asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
     }
     NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
     DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
@@ -137,8 +140,9 @@ ani_object AniGetNotificationParameters(ani_env *env, ani_int id, ani_string lab
         [](ani_env* env, void* data) {
             auto asyncData = static_cast<AsyncCallbackInfoNotificationParameters*>(data);
             if (asyncData) {
-                asyncData->info.returnCode = Notification::NotificationHelper::GetNotificationParameters(
-                    asyncData->notificationId, asyncData->label, asyncData->parameters);
+                asyncData->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationParameters(
+                        asyncData->notificationId, asyncData->label, asyncData->parameters);
             }
         },
         HandleGetNotificationParametersComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));

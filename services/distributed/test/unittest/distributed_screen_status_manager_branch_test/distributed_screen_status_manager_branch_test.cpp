@@ -20,6 +20,7 @@
 #include "distributed_screen_status_manager.h"
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "mock_single_kv_store.h"
 
 extern void MockInitDeviceManager(bool mockRet);
@@ -212,7 +213,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1100, Funct
     // set kvStore_ is nullptr
     distributedScreenStatusManager.kvStore_ = nullptr;
     bool isUsing = true;
-    EXPECT_EQ(ERR_ANS_DISTRIBUTED_OPERATION_FAILED, distributedScreenStatusManager.CheckRemoteDevicesIsUsing(isUsing));
+    EXPECT_EQ(ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED,
+        distributedScreenStatusManager.CheckRemoteDevicesIsUsing(isUsing));
 }
 
 /**
@@ -234,7 +236,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1200, Funct
     // set KvStoreFlowControl is false
     MockKvStoreFlowControl(false);
     bool isUsing = true;
-    EXPECT_EQ(ERR_ANS_DISTRIBUTED_OPERATION_FAILED, distributedScreenStatusManager.CheckRemoteDevicesIsUsing(isUsing));
+    EXPECT_EQ(ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED,
+        distributedScreenStatusManager.CheckRemoteDevicesIsUsing(isUsing));
 }
 
 /**
@@ -258,7 +261,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1300, Funct
     // set ret != ERR_OK
     MockGetTrustedDeviceList(true);
     bool isUsing = true;
-    EXPECT_EQ(ERR_ANS_DISTRIBUTED_GET_INFO_FAILED, distributedScreenStatusManager.CheckRemoteDevicesIsUsing(isUsing));
+    EXPECT_EQ(ERR_ANS_INNER_DISTRIBUTED_GET_INFO_FAILED,
+        distributedScreenStatusManager.CheckRemoteDevicesIsUsing(isUsing));
 }
 
 /**
@@ -284,7 +288,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1400, Funct
     // set status != DistributedKv::Status::SUCCESS
     MockGetEntries(false);
     bool isUsing = true;
-    EXPECT_EQ(ERR_ANS_DISTRIBUTED_GET_INFO_FAILED, distributedScreenStatusManager.CheckRemoteDevicesIsUsing(isUsing));
+    EXPECT_EQ(ERR_ANS_INNER_DISTRIBUTED_GET_INFO_FAILED,
+        distributedScreenStatusManager.CheckRemoteDevicesIsUsing(isUsing));
 }
 
 /**
@@ -355,7 +360,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1700, Funct
     // set KvStoreFlowControl is false
     MockKvStoreFlowControl(false);
     bool screenOn = true;
-    EXPECT_EQ(ERR_ANS_DISTRIBUTED_OPERATION_FAILED, distributedScreenStatusManager.SetLocalScreenStatus(screenOn));
+    EXPECT_EQ(ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED,
+        distributedScreenStatusManager.SetLocalScreenStatus(screenOn));
 }
 
 /**
@@ -376,7 +382,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1800, Funct
     // set ret != ERR_OK
     MockGetLocalDevice(true);
     bool screenOn = true;
-    EXPECT_EQ(ERR_ANS_DISTRIBUTED_GET_INFO_FAILED, distributedScreenStatusManager.SetLocalScreenStatus(screenOn));
+    EXPECT_EQ(ERR_ANS_INNER_DISTRIBUTED_GET_INFO_FAILED,
+        distributedScreenStatusManager.SetLocalScreenStatus(screenOn));
 }
 
 /**
@@ -397,7 +404,8 @@ HWTEST_F(DistributedScreenStatusManagerBranchTest, DistributedScreen_1900, Funct
     // set ret == ERR_OK
     MockGetLocalDevice(false);
     bool screenOn = true;
-    EXPECT_EQ(ERR_ANS_DISTRIBUTED_OPERATION_FAILED, distributedScreenStatusManager.SetLocalScreenStatus(screenOn));
+    EXPECT_EQ(ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED,
+        distributedScreenStatusManager.SetLocalScreenStatus(screenOn));
 }
 }  // namespace Notification
 }  // namespace OHOS

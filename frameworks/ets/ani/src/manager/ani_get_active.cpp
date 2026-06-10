@@ -14,7 +14,9 @@
  */
 #include "ani_get_active.h"
 
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "ans_service_errors.h"
+#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_request.h"
@@ -23,6 +25,8 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackActiveInfo* asyncCallbackInfo)
 {
     ANS_LOGD("Delete AsyncCallbackActiveInfo Without Promise");
@@ -99,7 +103,7 @@ void GetInfoForGetActiveByFilter(ani_env* envCurr, AsyncCallbackActiveInfo* asyn
         if (!NotificationSts::WarpNotificationRequest(envCurr,
             asyncCallbackInfo->notificationRequest.GetRefPtr(), requestCls, asyncCallbackInfo->info.result)) {
             ANS_LOGE("WarpNotificationRequest failed");
-            asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
         }
     }
 }
@@ -125,7 +129,7 @@ void HandleGetActiveFunctionComplete(ani_env* env, WorkStatus status, void* data
                 envCurr, asyncCallbackInfo->notifications);
             if (arrayNotificationObj == nullptr) {
                 ANS_LOGE("arrayNotificationObj is nullptr");
-                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             } else {
                 asyncCallbackInfo->info.result = static_cast<ani_object>(arrayNotificationObj);
             }
@@ -136,7 +140,7 @@ void HandleGetActiveFunctionComplete(ani_env* env, WorkStatus status, void* data
                 asyncCallbackInfo->requests);
             if (arrayRequestObj == nullptr) {
                 ANS_LOGE("arrayRequestObj is nullptr");
-                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             } else {
                 asyncCallbackInfo->info.result = static_cast<ani_object>(arrayRequestObj);
             }
@@ -180,8 +184,9 @@ ani_object AniGetActiveNotificationCount(ani_env *env, ani_object callback)
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackActiveInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetActiveNotificationNums(
-                    asyncCallbackInfo->notificationNums);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotificationNums(
+                        asyncCallbackInfo->notificationNums);
             }
         },
         HandleGetActiveFunctionComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -223,8 +228,9 @@ ani_object AniGetAllActiveNotifications(ani_env *env, ani_object callback)
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackActiveInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetAllActiveNotifications(
-                    asyncCallbackInfo->notifications);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetAllActiveNotifications(
+                        asyncCallbackInfo->notifications);
             }
         },
         HandleGetActiveFunctionComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -266,8 +272,9 @@ ani_object AniGetActiveNotifications(ani_env *env, ani_object callback)
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackActiveInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetActiveNotifications(
-                    asyncCallbackInfo->requests);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotifications(
+                        asyncCallbackInfo->requests);
             }
         },
         HandleGetActiveFunctionComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -286,16 +293,17 @@ void ExecuteGetActiveNotificationByFilter(ani_env* env, void* data)
 {
     auto asyncCallbackInfo = static_cast<AsyncCallbackActiveInfo*>(data);
     if (asyncCallbackInfo) {
-        asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetActiveNotificationByFilter(
-            asyncCallbackInfo->liveViewFilter, asyncCallbackInfo->notificationRequest);
+        asyncCallbackInfo->info.returnCode =
+            DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotificationByFilter(
+                asyncCallbackInfo->liveViewFilter, asyncCallbackInfo->notificationRequest);
         ani_env *envCurr = nullptr;
         if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, &envCurr) != ANI_OK || envCurr == nullptr) {
             ANS_LOGE("GetEnv failed");
             return;
         }
         if (asyncCallbackInfo->info.returnCode != ERR_OK &&
-            asyncCallbackInfo->info.returnCode != Notification::ERR_ANS_NOTIFICATION_NOT_EXISTS) {
-            ANS_LOGE("AniGetActiveNotificationByFilter error, errorCode: %{public}d",
+            asyncCallbackInfo->info.returnCode != ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS) {
+            ANS_LOGE("AniGetActiveNotificationByFilter error, errorCode: %{public}u",
                 asyncCallbackInfo->info.returnCode);
             return;
         }

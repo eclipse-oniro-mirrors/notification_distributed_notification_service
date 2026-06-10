@@ -2179,6 +2179,7 @@ ohos_unittest("notification_preferences_test") {
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
     "notification_preferences_info_test.cpp",
     "notification_preferences_test.cpp",
+    "${core_path}/common/src/ans_service_errors.cpp",
   ]
 
   if (distributed_notification_service_feature_all_scenario_collaboration) {

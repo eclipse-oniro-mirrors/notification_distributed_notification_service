@@ -22,6 +22,7 @@
 #include "push_callback_proxy.h"
 #include "singleton.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "nlohmann/json.hpp"
 
 using namespace OHOS::AppExecFwk;
@@ -52,25 +53,25 @@ ErrCode PushCallBackStub::ConvertPushCheckCodeToErrCode(int32_t pushCheckCode)
             errCode = ERR_OK;
             break;
         case PushCheckErrCode::FIXED_PARAMETER_INVALID:
-            errCode = ERR_ANS_TASK_ERR;
+            errCode = ERR_ANS_INNER_TASK_ERR;
             break;
         case PushCheckErrCode::NETWORK_UNREACHABLE:
-            errCode = ERR_ANS_PUSH_CHECK_NETWORK_UNREACHABLE;
+            errCode = ERR_ANS_INNER_PUSH_CHECK_NETWORK_UNREACHABLE;
             break;
         case PushCheckErrCode::SPECIFIED_NOTIFICATIONS_FAILED:
-            errCode = ERR_ANS_PUSH_CHECK_FAILED;
+            errCode = ERR_ANS_INNER_PUSH_CHECK_FAILED;
             break;
         case PushCheckErrCode::SYSTEM_ERROR:
-            errCode = ERR_ANS_TASK_ERR;
+            errCode = ERR_ANS_INNER_TASK_ERR;
             break;
         case PushCheckErrCode::OPTIONAL_PARAMETER_INVALID:
-            errCode = ERR_ANS_PUSH_CHECK_EXTRAINFO_INVALID;
+            errCode = ERR_ANS_INNER_PUSH_CHECK_EXTRAINFO_INVALID;
             break;
         case PushCheckErrCode::PUSH_CHECK_WEAK_NETWORK:
-            errCode = ERR_ANS_CHECK_WEAK_NETWORK;
+            errCode = ERR_ANS_INNER_CHECK_WEAK_NETWORK;
             break;
         default:
-            errCode = ERR_ANS_PUSH_CHECK_FAILED;
+            errCode = ERR_ANS_INNER_PUSH_CHECK_FAILED;
             break;
     }
     return errCode;
@@ -86,7 +87,7 @@ int PushCallBackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
     switch (code) {
         case static_cast<uint32_t>(NotificationInterfaceCode::ON_CHECK_NOTIFICATION): {
             auto notificationData = data.ReadString();
-            int32_t checkResult = ERR_ANS_TASK_ERR;
+            int32_t checkResult = ERR_ANS_INNER_TASK_ERR;
 
             std::shared_ptr<PushCallBackParam> pushCallBackParam = std::make_shared<PushCallBackParam>();
             int32_t result = this->OnCheckNotification(notificationData, pushCallBackParam);

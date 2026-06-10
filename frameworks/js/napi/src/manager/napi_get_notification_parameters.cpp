@@ -15,14 +15,17 @@
 
 #include "napi_get_notification_parameters.h"
 
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "napi_common_util.h"
 #include "napi_common_want.h"
 #include <memory>
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 namespace {
 constexpr int32_t GET_NOTIFICATION_PARAMS_MAX_PARAM = 2;
 constexpr int32_t GET_NOTIFICATION_PARAMS_MIN_PARAM = 1;
@@ -62,7 +65,7 @@ napi_value ParseParameters(napi_env env, napi_callback_info info, int32_t &notif
 
     if (argc < GET_NOTIFICATION_PARAMS_MIN_PARAM) {
         ANS_LOGE("Wrong number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -72,7 +75,7 @@ napi_value ParseParameters(napi_env env, napi_callback_info info, int32_t &notif
         NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &notificationId));
     } else {
         ANS_LOGE("Wrong argument type. Notification id should be number");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -96,7 +99,7 @@ napi_value NapiGetNotificationParameters(napi_env env, napi_callback_info info)
     int32_t notificationId = 0;
     std::string label = "";
     if (ParseParameters(env, info, notificationId, label) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -104,7 +107,7 @@ napi_value NapiGetNotificationParameters(napi_env env, napi_callback_info info)
         .env = env, .asyncWork = nullptr, .notificationId = notificationId, .label = label};
     if (!asynccallbackinfo) {
         ANS_LOGE("Failed to create AsyncCallbackInfoNotificationParameters");
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
 
@@ -122,10 +125,9 @@ napi_value NapiGetNotificationParameters(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiGetNotificationParameters work execute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoNotificationParameters *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationParameters(
-                    asynccallbackinfo->notificationId,
-                    asynccallbackinfo->label,
-                    asynccallbackinfo->parameters);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationParameters(
+                        asynccallbackinfo->notificationId, asynccallbackinfo->label, asynccallbackinfo->parameters);
             }
         },
         AsyncCompleteCallbackNapiGetNotificationParameters,

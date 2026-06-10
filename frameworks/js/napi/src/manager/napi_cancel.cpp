@@ -15,17 +15,21 @@
 
 #include "napi_cancel.h"
 
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "cancel.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 napi_value NapiCancel(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("called");
     ParametersInfoCancel paras;
     if (ParseParameters(env, info, paras) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -38,7 +42,7 @@ napi_value NapiCancel(napi_env env, napi_callback_info info)
         .hasOption = paras.hasOption
     };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;
@@ -56,12 +60,14 @@ napi_value NapiCancel(napi_env env, napi_callback_info info)
 
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->hasOption) {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::CancelAsBundleWithAgent(
-                        asynccallbackinfo->option, asynccallbackinfo->id);
+                    asynccallbackinfo->info.errorCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundleWithAgent(
+                            asynccallbackinfo->option, asynccallbackinfo->id);
                 } else {
                     std::string instanceKey = Common::GetAppInstanceKey();
-                    asynccallbackinfo->info.errorCode = NotificationHelper::CancelNotification(
-                        asynccallbackinfo->label, asynccallbackinfo->id, instanceKey);
+                    asynccallbackinfo->info.errorCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->CancelNotification(
+                            asynccallbackinfo->label, asynccallbackinfo->id, instanceKey);
                 }
             }
         },
@@ -99,13 +105,13 @@ napi_value NapiCancelAll(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoCancel {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -123,7 +129,7 @@ napi_value NapiCancelAll(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::CancelAllNotifications(instanceKey);
+                    DelayedSingleton<AnsNotification>::GetInstance()->CancelAllNotifications(instanceKey);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -160,14 +166,14 @@ napi_value NapiCancelGroup(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     ParametersInfoCancelGroup params {};
     if (ParseParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     AsyncCallbackInfoCancelGroup *asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoCancelGroup {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -185,8 +191,9 @@ napi_value NapiCancelGroup(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 ANS_LOGI("cancel groupName=%{public}s", asynccallbackinfo->params.groupName.c_str());
                 std::string instanceKey = Common::GetAppInstanceKey();
-                asynccallbackinfo->info.errorCode = NotificationHelper::CancelGroup(
-                    asynccallbackinfo->params.groupName, instanceKey);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->CancelGroup(
+                        asynccallbackinfo->params.groupName, instanceKey);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -223,7 +230,7 @@ napi_value NapiCancelAsBundle(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     ParametersInfoCancelAsBundle paras;
     if (ParseParameters(env, info, paras) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -236,7 +243,7 @@ napi_value NapiCancelAsBundle(napi_env env, napi_callback_info info)
         .hasOption = paras.hasOption
     };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;
@@ -254,11 +261,14 @@ napi_value NapiCancelAsBundle(napi_env env, napi_callback_info info)
 
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->hasOption) {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::CancelAsBundle(
-                        asynccallbackinfo->option, asynccallbackinfo->id);
+                    asynccallbackinfo->info.errorCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundle(
+                            asynccallbackinfo->option, asynccallbackinfo->id);
                 } else {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::CancelAsBundle(
-                        asynccallbackinfo->id, asynccallbackinfo->representativeBundle, asynccallbackinfo->userId);
+                    asynccallbackinfo->info.errorCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundle(
+                            asynccallbackinfo->id, asynccallbackinfo->representativeBundle,
+                            asynccallbackinfo->userId);
                 }
             }
         },

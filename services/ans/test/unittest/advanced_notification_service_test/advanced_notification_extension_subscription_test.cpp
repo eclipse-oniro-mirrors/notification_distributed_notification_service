@@ -20,6 +20,7 @@
 #define private public
 
 #include "advanced_notification_service.h"
+#include "ans_service_errors.h"
 #include "advanced_datashare_helper.h"
 #include "notification_bluetooth_helper.h"
 #include "notification_check_request.h"
@@ -39,7 +40,6 @@ using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 namespace Notification {
-
 NotificationLoadUtils::~NotificationLoadUtils()
 {
     proxyHandle_ = nullptr;
@@ -87,7 +87,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSub
     MockIsVerfyPermisson(false);
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
     auto ret = advancedNotificationService_->NotificationExtensionSubscribe(infos);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -102,7 +102,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSub
     MockIsVerfyPermisson(true);
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
     auto ret = advancedNotificationService_->NotificationExtensionSubscribe(infos);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -120,7 +120,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSub
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
     infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo());
     auto ret = advancedNotificationService_->NotificationExtensionSubscribe(infos);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
     MockIsNonBundleName(false);
 }
 
@@ -146,7 +146,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSub
     MockIsNeedHapModuleInfos(true);
     advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->NotificationExtensionSubscribe(infos);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
     MockIsVerfyPermisson(false);
     MockIsNeedHapModuleInfos(false);
 }
@@ -170,7 +170,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSub
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
     infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo());
     auto ret = advancedNotificationService_->NotificationExtensionSubscribe(infos);
-    EXPECT_EQ(ret, (int)ERR_ANS_NOT_IMPL_EXTENSIONABILITY);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_NOT_IMPL_EXTENSIONABILITY);
 }
 
 /**
@@ -215,7 +215,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, ProcessExtensionSubscrip
     MockHandsFreeAudioGatewayGetDeviceStateEnabled(true);
     ErrCode ret = ERR_OK;
     advancedNotificationService_->ProcessExtensionSubscriptionInfos(nullptr, infos, ret);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_TRUE(info->IsHfp());
     MockHandsFreeAudioGatewayGetDeviceStateEnabled(false);
 }
@@ -292,7 +292,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionUns
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     MockIsVerfyPermisson(false);
     auto ret = advancedNotificationService_->NotificationExtensionUnsubscribe();
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -308,7 +308,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionUns
     MockIsVerfyPermisson(true);
     MockIsNonBundleName(true);
     auto ret = advancedNotificationService_->NotificationExtensionUnsubscribe();
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
     MockIsNonBundleName(false);
 }
 
@@ -324,7 +324,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionUns
     MockIsVerfyPermisson(true);
     advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->NotificationExtensionUnsubscribe();
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -359,7 +359,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetSubscribeInfo_0100, F
     MockIsVerfyPermisson(false);
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
     auto ret = advancedNotificationService_->GetSubscribeInfo(infos);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -375,7 +375,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetSubscribeInfo_0200, F
     MockIsNonBundleName(true);
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
     auto ret = advancedNotificationService_->GetSubscribeInfo(infos);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
     MockIsNonBundleName(false);
 }
 
@@ -391,7 +391,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetSubscribeInfo_0300, F
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
     advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->GetSubscribeInfo(infos);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -425,7 +425,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, IsUserGranted_00100, Fun
     bool isEnabled = false;
     MockIsVerfyPermisson(false);
     ErrCode ret = advancedNotificationService_->IsUserGranted(isEnabled);
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -440,7 +440,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, IsUserGranted_00200, Fun
     MockIsVerfyPermisson(true);
     MockIsNonBundleName(true);
     auto ret = advancedNotificationService_->IsUserGranted(isEnabled);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     MockIsNonBundleName(false);
 }
 
@@ -456,7 +456,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, IsUserGranted_00300, Fun
     MockIsVerfyPermisson(true);
     advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->IsUserGranted(isEnabled);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -491,7 +491,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedState_0100
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     ErrCode ret = advancedNotificationService_->GetUserGrantedState(targetBundle, enabled);
-    EXPECT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(ret, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -509,7 +509,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedState_0200
     MockIsVerfyPermisson(false);
 
     ErrCode ret = advancedNotificationService_->GetUserGrantedState(targetBundle, enabled);
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -527,7 +527,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedState_0300
     MockIsVerfyPermisson(true);
 
     ErrCode ret = advancedNotificationService_->GetUserGrantedState(targetBundle, enabled);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE_OPTION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE_OPTION);
 }
 
 /**
@@ -547,14 +547,14 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedState_0400
     advancedNotificationService_->notificationSvrQueue_.Reset();
 
     ErrCode ret = advancedNotificationService_->GetUserGrantedState(targetBundle, enabled);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     MockIsNeedHapModuleInfos(false);
 }
 
 /**
  * @tc.number    : GetUserGrantedState_0500
- * @tc.name      : GetUserGrantedState ERR_ANS_INVALID_BUNDLE_OPTION
- * @tc.desc      : Test GetUserGrantedState ERR_ANS_INVALID_BUNDLE_OPTION case
+ * @tc.name      : GetUserGrantedState ERR_ANS_INNER_INVALID_BUNDLE_OPTION
+ * @tc.desc      : Test GetUserGrantedState ERR_ANS_INNER_INVALID_BUNDLE_OPTION case
  */
 HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedState_0500, Function | SmallTest | Level1)
 {
@@ -567,10 +567,10 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedState_0500
     MockIsVerfyPermisson(true);
 
     ErrCode ret = advancedNotificationService_->GetUserGrantedState(invalidBundle, enabled);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE_OPTION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE_OPTION);
 
     ret = advancedNotificationService_->GetUserGrantedState(targetBundle, enabled);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE_OPTION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE_OPTION);
 }
 
 /**
@@ -606,7 +606,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedState_0100
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     ErrCode ret = advancedNotificationService_->SetUserGrantedState(targetBundle, enabled);
-    EXPECT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(ret, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -624,7 +624,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedState_0200
     MockIsVerfyPermisson(false);
 
     ErrCode ret = advancedNotificationService_->SetUserGrantedState(targetBundle, enabled);
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -642,7 +642,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedState_0300
     MockIsVerfyPermisson(true);
 
     ErrCode ret = advancedNotificationService_->SetUserGrantedState(targetBundle, enabled);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE_OPTION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE_OPTION);
 }
 
 /**
@@ -662,14 +662,14 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedState_0400
     advancedNotificationService_->notificationSvrQueue_.Reset();
 
     ErrCode ret = advancedNotificationService_->SetUserGrantedState(targetBundle, enabled);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     MockIsNeedHapModuleInfos(false);
 }
 
 /**
  * @tc.number    : SetUserGrantedState_0500
- * @tc.name      : SetUserGrantedState ERR_ANS_INVALID_BUNDLE_OPTION
- * @tc.desc      : Test SetUserGrantedState ERR_ANS_INVALID_BUNDLE_OPTION case
+ * @tc.name      : SetUserGrantedState ERR_ANS_INNER_INVALID_BUNDLE_OPTION
+ * @tc.desc      : Test SetUserGrantedState ERR_ANS_INNER_INVALID_BUNDLE_OPTION case
  */
 HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedState_0500, Function | SmallTest | Level1)
 {
@@ -682,10 +682,10 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedState_0500
     MockIsVerfyPermisson(true);
 
     ErrCode ret = advancedNotificationService_->SetUserGrantedState(invalidBundle, enabled);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE_OPTION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE_OPTION);
 
     ret = advancedNotificationService_->SetUserGrantedState(targetBundle, enabled);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE_OPTION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE_OPTION);
 }
 
 /**
@@ -727,20 +727,20 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedEnabledBun
     MockIsSystemApp(false);
     MockIsVerfyPermisson(true);
     ErrCode ret = advancedNotificationService_->GetUserGrantedEnabledBundles(bundle, enabledBundles);
-    EXPECT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(ret, ERR_ANS_INNER_NON_SYSTEM_APP);
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
     ret = advancedNotificationService_->GetUserGrantedEnabledBundles(bundle, extensionBundles);
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
     ret = advancedNotificationService_->GetUserGrantedEnabledBundles(nullptr, enabledBundles);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE_OPTION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE_OPTION);
 
     ret = advancedNotificationService_->GetUserGrantedEnabledBundles(invalidBundle, enabledBundles);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE_OPTION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE_OPTION);
 }
 
 /**
@@ -759,7 +759,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedEnabledBun
     MockIsNeedHapModuleInfos(true);
     advancedNotificationService_->notificationSvrQueue_.Reset();
     ErrCode ret = advancedNotificationService_->GetUserGrantedEnabledBundles(bundle, enabledBundles);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     MockIsNeedHapModuleInfos(false);
 }
 
@@ -795,7 +795,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedEnabledBun
     MockIsVerfyPermisson(false);
     std::vector<sptr<NotificationBundleOption>> bundles;
     ErrCode ret = advancedNotificationService_->GetUserGrantedEnabledBundlesForSelf(bundles);
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -812,7 +812,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedEnabledBun
     MockIsVerfyPermisson(true);
     MockIsNonBundleName(true);
     auto ret = advancedNotificationService_->GetUserGrantedEnabledBundlesForSelf(bundles);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     MockIsNonBundleName(false);
 }
 
@@ -831,7 +831,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetUserGrantedEnabledBun
     advancedNotificationService_->notificationSvrQueue_.Reset();
 
     auto ret = advancedNotificationService_->GetUserGrantedEnabledBundlesForSelf(bundles);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -873,7 +873,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedBundleStat
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test.bundle", 1001);
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     auto ret = advancedNotificationService_->SetUserGrantedBundleState(nullptr, extensionBundles, true);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE_OPTION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE_OPTION);
 }
 
 /**
@@ -892,7 +892,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedBundleStat
     MockIsVerfyPermisson(false);
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test.bundle", 1001);
     ErrCode ret = advancedNotificationService_->SetUserGrantedBundleState(bundle, extensionBundles, true);
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -911,7 +911,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedBundleStat
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", NON_SYSTEM_APP_UID);
     advancedNotificationService_->notificationSvrQueue_.Reset();
     ErrCode ret = advancedNotificationService_->SetUserGrantedBundleState(bundle, extensionBundles, true);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     MockIsNeedHapModuleInfos(false);
 }
 
@@ -935,13 +935,13 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedBundleStat
 
     ErrCode ret = advancedNotificationService_->SetUserGrantedBundleState(
         invalidBundle, invalidextensionBundles, true);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE_OPTION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE_OPTION);
 
     ret = advancedNotificationService_->SetUserGrantedBundleState(bundle, invalidextensionBundles, true);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE_OPTION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE_OPTION);
 
     ret = advancedNotificationService_->SetUserGrantedBundleState(bundle, extensionBundles, true);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE_OPTION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE_OPTION);
 }
 
 /**
@@ -976,7 +976,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, SetUserGrantedBundleStat
     };
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", NON_SYSTEM_APP_UID);
     ErrCode ret = advancedNotificationService_->SetUserGrantedBundleState(bundle, extensionBundles, true);
-    EXPECT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(ret, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -990,7 +990,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetAllSubscriptionBundle
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     ErrCode ret = advancedNotificationService_->GetAllSubscriptionBundles(bundles);
-    EXPECT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(ret, ERR_ANS_INNER_NON_SYSTEM_APP);
     EXPECT_TRUE(bundles.empty());
 }
 
@@ -1006,7 +1006,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, GetAllSubscriptionBundle
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
     ErrCode ret = advancedNotificationService_->GetAllSubscriptionBundles(bundles);
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
     EXPECT_TRUE(bundles.empty());
 }
 
@@ -1034,7 +1034,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, CanOpenSubscribeSettings
 {
     MockIsVerfyPermisson(false);
     ErrCode ret = advancedNotificationService_->CanOpenSubscribeSettings();
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -1046,7 +1046,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, CanOpenSubscribeSettings
 {
     MockIsVerfyPermisson(true);
     ErrCode ret = advancedNotificationService_->CanOpenSubscribeSettings();
-    EXPECT_EQ(ret, ERR_ANS_NOT_IMPL_EXTENSIONABILITY);
+    EXPECT_EQ(ret, ERR_ANS_INNER_NOT_IMPL_EXTENSIONABILITY);
 }
 
 /**

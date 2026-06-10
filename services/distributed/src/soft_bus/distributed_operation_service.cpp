@@ -18,6 +18,7 @@
 #include "response_box.h"
 #include "match_box.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "notification_helper.h"
 #include "distributed_data_define.h"
 #include "distributed_device_service.h"
@@ -118,14 +119,14 @@ static ErrCode GetNotificationButtonWantPtr(const std::string& hashCode, const s
     auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
     if (result != ERR_OK || notificationRequest == nullptr) {
         ANS_LOGE("Check notificationRequest is null.");
-        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+        return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     }
 
     request = notificationRequest;
     auto actionButtons = notificationRequest->GetActionButtons();
     if (actionButtons.empty()) {
         ANS_LOGE("Check actionButtons is null.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::shared_ptr<NotificationActionButton> button = nullptr;
@@ -139,31 +140,31 @@ static ErrCode GetNotificationButtonWantPtr(const std::string& hashCode, const s
 
     if (button == nullptr) {
         ANS_LOGE("Check user input is null %{public}s.", actionName.c_str());
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     if (button->GetUserInput() != nullptr) {
         userInputKey = button->GetUserInput()->GetInputKey();
     }
     if (userInputKey.empty()) {
         ANS_LOGE("Check userInputKey is null.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgentPtr = button->GetWantAgent();
     if (wantAgentPtr == nullptr) {
         ANS_LOGE("Check wantAgentPtr is null.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::shared_ptr<AbilityRuntime::WantAgent::PendingWant> pendingWantPtr = wantAgentPtr->GetPendingWant();
     if (pendingWantPtr == nullptr) {
         ANS_LOGE("Check pendingWantPtr is null.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     wantPtr = pendingWantPtr->GetWant(pendingWantPtr->GetTarget());
     if (wantPtr == nullptr) {
         ANS_LOGE("Check wantPtr is null.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     return ERR_OK;
 }
@@ -245,10 +246,11 @@ int32_t DistributedOperationService::TriggerReplyApplication(const std::string& 
 
     if (wantPtr->GetBoolParam(AAFwk::Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
         ANS_LOGE("Not support foreground.");
-        AnalyticsUtil::GetInstance().AbnormalReporting(MODIFY_ERROR_EVENT_CODE, ERR_ANS_DISTRIBUTED_OPERATION_FAILED,
-            BRANCH4_ID, "reply foreground failed");
-        TriggerReplyWantAgent(request, actionName, ERR_ANS_DISTRIBUTED_OPERATION_FAILED, "reply foreground failed");
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        AnalyticsUtil::GetInstance().AbnormalReporting(
+            MODIFY_ERROR_EVENT_CODE, ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED, BRANCH4_ID, "reply foreground failed");
+        TriggerReplyWantAgent(request, actionName,
+            ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED, "reply foreground failed");
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
 
     auto ret = AbilityManagerHelper::GetInstance().ConnectAbility(hashCode, *wantPtr, userInputKey, userInput);
@@ -261,7 +263,7 @@ int32_t DistributedOperationService::TriggerReplyApplication(const std::string& 
         TriggerReplyWantAgent(request, actionName, ret, "ability reply failed");
         AnalyticsUtil::GetInstance().AbnormalReporting(MODIFY_ERROR_EVENT_CODE, ret,
             BRANCH4_ID, "ability reply failed");
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     return ERR_OK;
 }
@@ -330,7 +332,7 @@ int32_t DistributedOperationService::OnOperationResponse(
     std::shared_ptr<NotificationResponseBox> responseBox = std::make_shared<NotificationResponseBox>();
     if (operationInfo == nullptr) {
         ANS_LOGE("Invalid param");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     ANS_LOGI("dans OnResponse %{public}s", operationInfo->Dump().c_str());
     auto hashCode = operationInfo->GetHashCode();
@@ -342,7 +344,7 @@ int32_t DistributedOperationService::OnOperationResponse(
     if (type == OperationType::DISTRIBUTE_OPERATION_REPLY) {
         if (!responseBox->SetMessageType(NOTIFICATION_RESPONSE_REPLY_SYNC)) {
             ANS_LOGE("dans OnResponse SetMessageType failed");
-            return ERR_ANS_TASK_ERR;
+            return ERR_ANS_INNER_TASK_ERR;
         }
         responseBox->SetActionName(operationInfo->GetActionName());
         responseBox->SetUserInput(operationInfo->GetUserInput());
@@ -362,7 +364,7 @@ int32_t DistributedOperationService::OnOperationResponse(
     responseBox->SetLocalDeviceId(localDevice.deviceId_);
     if (!responseBox->Serialize()) {
         ANS_LOGE("dans OnResponse serialize failed");
-        return ERR_ANS_TASK_ERR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
 
     LaunchProjectionApp(device, localDevice);
@@ -370,7 +372,7 @@ int32_t DistributedOperationService::OnOperationResponse(
         device.deviceId_, MODIFY_ERROR_EVENT_CODE);
     if (result != ERR_OK) {
         ANS_LOGE("dans OnResponse send message failed result: %{public}d", result);
-        result = ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        result = ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     return result;
 }

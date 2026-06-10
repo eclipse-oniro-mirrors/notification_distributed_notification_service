@@ -18,7 +18,7 @@
 #include <tuple>
 #include <vector>
 
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "notification_config_parse.h"
 
 namespace OHOS {
@@ -116,10 +116,10 @@ void FlowControlService::InitGlobalFlowControl()
             FlowControlSceneType::GLOBAL_SYSTEM_NORMAL_CREATE,
             threshold_.maxCreateNumPerSecond,
             {
-                .msg = "GLOBAL_SYSTEM_NORMAL_CREATE flow control", 
+                .msg = "GLOBAL_SYSTEM_NORMAL_CREATE flow control",
                 .sceneId = EventSceneId::SCENE_4,
                 .EventBranchId = EventBranchId::BRANCH_0,
-                .errCode = ERR_ANS_OVER_MAX_ACTIVE_PERSECOND
+                .errCode = ERR_ANS_INNER_OVER_MAX_ACTIVE_PERSECOND
             }
         },
         {
@@ -129,17 +129,17 @@ void FlowControlService::InitGlobalFlowControl()
                 .msg = "GLOBAL_SYSTEM_NORMAL_UPDATE flow control",
                 .sceneId = EventSceneId::SCENE_4,
                 .EventBranchId = EventBranchId::BRANCH_1,
-                .errCode = ERR_ANS_OVER_MAX_UPDATE_PERSECOND
+                .errCode = ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND
             }
         },
         {
             FlowControlSceneType::GLOBAL_SYSTEM_LIVEVIEW_CREATE,
             threshold_.maxCreateNumPerSecond,
             {
-                .msg = "GLOBAL_SYSTEM_LIVEVIEW_CREATE flow control", 
+                .msg = "GLOBAL_SYSTEM_LIVEVIEW_CREATE flow control",
                 .sceneId = EventSceneId::SCENE_4,
                 .EventBranchId = EventBranchId::BRANCH_2,
-                .errCode = ERR_ANS_OVER_MAX_ACTIVE_PERSECOND
+                .errCode = ERR_ANS_INNER_OVER_MAX_ACTIVE_PERSECOND
             }
         },
         {
@@ -149,17 +149,17 @@ void FlowControlService::InitGlobalFlowControl()
                 .msg = "GLOBAL_SYSTEM_LIVEVIEW_UPDATE flow control",
                 .sceneId = EventSceneId::SCENE_4,
                 .EventBranchId = EventBranchId::BRANCH_3,
-                .errCode = ERR_ANS_OVER_MAX_UPDATE_PERSECOND
+                .errCode = ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND
             }
         },
         {
             FlowControlSceneType::GLOBAL_THIRD_PART_NORMAL_CREATE,
             threshold_.maxCreateNumPerSecond,
             {
-                .msg = "GLOBAL_THIRD_PART_NORMAL_CREATE flow control", 
+                .msg = "GLOBAL_THIRD_PART_NORMAL_CREATE flow control",
                 .sceneId = EventSceneId::SCENE_4,
                 .EventBranchId = EventBranchId::BRANCH_4,
-                .errCode = ERR_ANS_OVER_MAX_ACTIVE_PERSECOND
+                .errCode = ERR_ANS_INNER_OVER_MAX_ACTIVE_PERSECOND
             }
         },
         {
@@ -169,17 +169,17 @@ void FlowControlService::InitGlobalFlowControl()
                 .msg = "GLOBAL_THIRD_PART_NORMAL_UPDATE flow control",
                 .sceneId = EventSceneId::SCENE_4,
                 .EventBranchId = EventBranchId::BRANCH_5,
-                .errCode = ERR_ANS_OVER_MAX_UPDATE_PERSECOND
+                .errCode = ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND
             }
         },
         {
             FlowControlSceneType::GLOBAL_THIRD_PART_LIVEVIEW_CREATE,
             threshold_.maxCreateNumPerSecond,
             {
-                .msg = "GLOBAL_THIRD_PART_LIVEVIEW_CREATE flow control", 
+                .msg = "GLOBAL_THIRD_PART_LIVEVIEW_CREATE flow control",
                 .sceneId = EventSceneId::SCENE_4,
                 .EventBranchId = EventBranchId::BRANCH_6,
-                .errCode = ERR_ANS_OVER_MAX_ACTIVE_PERSECOND
+                .errCode = ERR_ANS_INNER_OVER_MAX_ACTIVE_PERSECOND
             }
         },
         {
@@ -189,7 +189,7 @@ void FlowControlService::InitGlobalFlowControl()
                 .msg = "GLOBAL_THIRD_PART_LIVEVIEW_UPDATE flow control",
                 .sceneId = EventSceneId::SCENE_4,
                 .EventBranchId = EventBranchId::BRANCH_7,
-                .errCode = ERR_ANS_OVER_MAX_UPDATE_PERSECOND
+                .errCode = ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND
             }
         },
     };
@@ -208,10 +208,10 @@ void FlowControlService::InitCallerFlowControl()
             FlowControlSceneType::CALLER_SYSTEM_NORMAL_CREATE,
             threshold_.maxCreateNumPerSecondPerApp,
             {
-                .msg = "CALLER_SYSTEM_NORMAL_CREATE flow control", 
+                .msg = "CALLER_SYSTEM_NORMAL_CREATE flow control",
                 .sceneId = EventSceneId::SCENE_4,
                 .EventBranchId = EventBranchId::BRANCH_8,
-                .errCode = ERR_ANS_OVER_MAX_ACTIVE_PERSECOND
+                .errCode = ERR_ANS_INNER_OVER_MAX_ACTIVE_PERSECOND
             }
         },
         {
@@ -221,17 +221,17 @@ void FlowControlService::InitCallerFlowControl()
                 .msg = "CALLER_SYSTEM_NORMAL_UPDATE flow control",
                 .sceneId = EventSceneId::SCENE_4,
                 .EventBranchId = EventBranchId::BRANCH_9,
-                .errCode = ERR_ANS_OVER_MAX_UPDATE_PERSECOND
+                .errCode = ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND
             }
         },
         {
             FlowControlSceneType::CALLER_SYSTEM_LIVEVIEW_CREATE,
             threshold_.maxCreateNumPerSecondPerApp,
             {
-                .msg = "CALLER_SYSTEM_LIVEVIEW_CREATE flow control", 
+                .msg = "CALLER_SYSTEM_LIVEVIEW_CREATE flow control",
                 .sceneId = EventSceneId::SCENE_4,
                 .EventBranchId = EventBranchId::BRANCH_10,
-                .errCode = ERR_ANS_OVER_MAX_ACTIVE_PERSECOND
+                .errCode = ERR_ANS_INNER_OVER_MAX_ACTIVE_PERSECOND
             }
         },
         {
@@ -241,17 +241,17 @@ void FlowControlService::InitCallerFlowControl()
                 .msg = "CALLER_SYSTEM_LIVEVIEW_UPDATE flow control",
                 .sceneId = EventSceneId::SCENE_4,
                 .EventBranchId = EventBranchId::BRANCH_11,
-                .errCode = ERR_ANS_OVER_MAX_UPDATE_PERSECOND
+                .errCode = ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND
             }
         },
         {
             FlowControlSceneType::CALLER_THIRD_PART_NORMAL_CREATE,
             threshold_.maxCreateNumPerSecondPerApp,
             {
-                .msg = "CALLER_THIRD_PART_NORMAL_CREATE flow control", 
+                .msg = "CALLER_THIRD_PART_NORMAL_CREATE flow control",
                 .sceneId = EventSceneId::SCENE_4,
                 .EventBranchId = EventBranchId::BRANCH_12,
-                .errCode = ERR_ANS_OVER_MAX_ACTIVE_PERSECOND
+                .errCode = ERR_ANS_INNER_OVER_MAX_ACTIVE_PERSECOND
             }
         },
         {
@@ -261,17 +261,17 @@ void FlowControlService::InitCallerFlowControl()
                 .msg = "CALLER_THIRD_PART_NORMAL_UPDATE flow control",
                 .sceneId = EventSceneId::SCENE_4,
                 .EventBranchId = EventBranchId::BRANCH_13,
-                .errCode = ERR_ANS_OVER_MAX_UPDATE_PERSECOND
+                .errCode = ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND
             }
         },
         {
             FlowControlSceneType::CALLER_THIRD_PART_LIVEVIEW_CREATE,
             threshold_.maxCreateNumPerSecondPerApp,
             {
-                .msg = "CALLER_THIRD_PART_LIVEVIEW_CREATE flow control", 
+                .msg = "CALLER_THIRD_PART_LIVEVIEW_CREATE flow control",
                 .sceneId = EventSceneId::SCENE_4,
                 .EventBranchId = EventBranchId::BRANCH_14,
-                .errCode = ERR_ANS_OVER_MAX_ACTIVE_PERSECOND
+                .errCode = ERR_ANS_INNER_OVER_MAX_ACTIVE_PERSECOND
             }
         },
         {
@@ -281,7 +281,7 @@ void FlowControlService::InitCallerFlowControl()
                 .msg = "CALLER_THIRD_PART_LIVEVIEW_UPDATE flow control",
                 .sceneId = EventSceneId::SCENE_4,
                 .EventBranchId = EventBranchId::BRANCH_15,
-                .errCode = ERR_ANS_OVER_MAX_UPDATE_PERSECOND
+                .errCode = ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND
             }
         },
     };

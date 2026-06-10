@@ -15,6 +15,7 @@
 
 #include "common.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #ifdef ANS_FEATURE_API_METRICS_HISTOGRAM
 #include "histogram_plugin_macros.h"
@@ -57,16 +58,20 @@ napi_value Common::NapiGetUndefined(napi_env env)
 
 napi_value Common::CreateErrorValue(napi_env env, int32_t errCode, bool newType)
 {
-    ANS_LOGD("called, errorCode[%{public}d]", errCode);
+    ANS_LOGD("called, errorCode[%{public}u]", errCode);
     napi_value error = Common::NapiGetNull(env);
     if (errCode == ERR_OK && newType) {
         return error;
     }
 
-    napi_value code = nullptr;
-    napi_create_int32(env, errCode, &code);
+    std::string errMsg = OHOS::Notification::GetInnerErrMessage(errCode);
+    int32_t externalCode = OHOS::Notification::InnerErrorToExternal(errCode);
+    ANS_LOGI("CreateErrorValue: innerCode=%{public}u, externalCode=%{public}d, msg=%{public}s",
+        errCode, externalCode, errMsg.c_str());
 
-    std::string errMsg = OHOS::Notification::GetAnsErrMessage(errCode);
+    napi_value code = nullptr;
+    napi_create_int32(env, externalCode, &code);
+
     napi_value message = nullptr;
     napi_create_string_utf8(env, errMsg.c_str(), NAPI_AUTO_LENGTH, &message);
 
@@ -77,18 +82,22 @@ napi_value Common::CreateErrorValue(napi_env env, int32_t errCode, bool newType)
 
 napi_value Common::CreateErrorValue(napi_env env, int32_t errCode, std::string &msg)
 {
-    ANS_LOGD("called, errorCode[%{public}d]", errCode);
+    ANS_LOGD("called, errorCode[%{public}u]", errCode);
     napi_value error = Common::NapiGetNull(env);
     if (errCode == ERR_OK) {
         return error;
     }
 
-    napi_value code = nullptr;
-    napi_create_int32(env, errCode, &code);
+    std::string errMsg = OHOS::Notification::GetInnerErrMessage(errCode);
+    int32_t externalCode = OHOS::Notification::InnerErrorToExternal(errCode);
+    ANS_LOGI("CreateErrorValue: innerCode=%{public}u, externalCode=%{public}d, msg=%{public}s extra=%{public}s",
+        errCode, externalCode, errMsg.c_str(), msg.c_str());
 
-    std::string errMsg = OHOS::Notification::GetAnsErrMessage(errCode);
+    napi_value code = nullptr;
+    napi_create_int32(env, externalCode, &code);
+
     napi_value message = nullptr;
-    napi_create_string_utf8(env, errMsg.append(" ").append(msg).c_str(), NAPI_AUTO_LENGTH, &message);
+    napi_create_string_utf8(env, (errMsg + " " + msg).c_str(), NAPI_AUTO_LENGTH, &message);
 
     napi_create_error(env, nullptr, message, &error);
     napi_set_named_property(env, error, "code", code);
@@ -107,6 +116,60 @@ void Common::NapiThrow(napi_env env, int32_t errCode, std::string &msg)
     ANS_LOGD("called");
 
     napi_throw(env, CreateErrorValue(env, errCode, msg));
+}
+
+napi_value Common::CreateErrorValueLegacy(napi_env env, int32_t errCode, bool newType)
+{
+    ANS_LOGD("called, errorCode[%{public}d]", errCode);
+    napi_value error = Common::NapiGetNull(env);
+    if (errCode == ERR_OK && newType) {
+        return error;
+    }
+
+    napi_value code = nullptr;
+    napi_create_int32(env, errCode, &code);
+
+    std::string errMsg = OHOS::Notification::GetExternalErrMessage(errCode);
+    napi_value message = nullptr;
+    napi_create_string_utf8(env, errMsg.c_str(), NAPI_AUTO_LENGTH, &message);
+
+    napi_create_error(env, nullptr, message, &error);
+    napi_set_named_property(env, error, "code", code);
+    return error;
+}
+
+napi_value Common::CreateErrorValueLegacy(napi_env env, int32_t errCode, std::string &msg)
+{
+    ANS_LOGD("called, errorCode[%{public}d]", errCode);
+    napi_value error = Common::NapiGetNull(env);
+    if (errCode == ERR_OK) {
+        return error;
+    }
+
+    napi_value code = nullptr;
+    napi_create_int32(env, errCode, &code);
+
+    std::string errMsg = OHOS::Notification::GetExternalErrMessage(errCode);
+    napi_value message = nullptr;
+    napi_create_string_utf8(env, errMsg.append(" ").append(msg).c_str(), NAPI_AUTO_LENGTH, &message);
+
+    napi_create_error(env, nullptr, message, &error);
+    napi_set_named_property(env, error, "code", code);
+    return error;
+}
+
+void Common::NapiThrowLegacy(napi_env env, int32_t errCode)
+{
+    ANS_LOGD("called");
+
+    napi_throw(env, CreateErrorValueLegacy(env, errCode, true));
+}
+
+void Common::NapiThrowLegacy(napi_env env, int32_t errCode, std::string &msg)
+{
+    ANS_LOGD("called");
+
+    napi_throw(env, CreateErrorValueLegacy(env, errCode, msg));
 }
 
 napi_value Common::GetCallbackErrorValue(napi_env env, int32_t errCode)
@@ -138,7 +201,7 @@ void Common::PaddingCallbackPromiseInfo(
 
 void Common::ReturnCallbackPromise(const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result)
 {
-    ANS_LOGD("start, errorCode=%{public}d", info.errorCode);
+    ANS_LOGD("start, errorCode=%{public}u", info.errorCode);
     if (info.isCallback) {
         SetCallback(env, info.callback, info.errorCode, result, false);
     } else {
@@ -260,7 +323,7 @@ napi_value Common::ParseParaOnlyCallback(const napi_env &env, const napi_callbac
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < ONLY_CALLBACK_MIN_PARA) {
         ANS_LOGE("Wrong number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -280,8 +343,8 @@ napi_value Common::ParseParaOnlyCallback(const napi_env &env, const napi_callbac
 
 void Common::CreateReturnValue(const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result)
 {
-    ANS_LOGD("start, errorCode=%{public}d", info.errorCode);
-    int32_t errorCode = info.errorCode == ERR_OK ? ERR_OK : ErrorToExternal(info.errorCode);
+    ANS_LOGD("start, errorCode=%{public}u", info.errorCode);
+    int32_t errorCode = info.errorCode;
     if (info.isCallback) {
         SetCallback(env, info.callback, errorCode, result, true);
     } else {
@@ -302,7 +365,7 @@ napi_value Common::NapiReturnCapErrCb(napi_env env, napi_callback_info info)
         NAPI_CALL(env, napi_typeof(env, argv[i], &valuetype));
         if (valuetype == napi_function) {
             napi_create_reference(env, argv[i], 1, &callback);
-            SetCallback(env, callback, ERROR_SYSTEM_CAP_ERROR, nullptr, false);
+            SetCallback(env, callback, ERR_ANS_INNER_DEVICE_NOT_SUPPORT, nullptr, false);
             napi_delete_reference(env, callback);
             return NapiGetNull(env);
         }
@@ -316,7 +379,7 @@ napi_value Common::NapiReturnCapErr(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     napi_deferred deferred = nullptr;
     napi_create_promise(env, &deferred, &promise);
-    SetPromise(env, deferred, ERROR_SYSTEM_CAP_ERROR, Common::NapiGetNull(env), false);
+    SetPromise(env, deferred, ERR_ANS_INNER_DEVICE_NOT_SUPPORT, Common::NapiGetNull(env), false);
     return promise;
 }
 

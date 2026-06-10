@@ -22,7 +22,6 @@
 #include "reminder_state_callback_stub.h"
 
 #include "ffrt.h"
-#include "ians_manager.h"
 #include "notification_slot.h"
 #include "notification_constant.h"
 
@@ -158,8 +157,6 @@ private:
      * @return Returns add notification slot result.
      */
     ErrCode AddSlotByType(const NotificationConstant::SlotType &slotType);
-
-    sptr<IAnsManager> GetAnsManagerProxy();
 
     sptr<IReminderAgentService> GetReminderServiceProxy();
 

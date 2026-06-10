@@ -35,9 +35,9 @@ void PaddingCallbackPromiseInfo(ani_env *env, ani_ref &callback, CallbackPromise
 
 void CreateReturnData(ani_env *env, const CallbackPromiseInfo &info)
 {
-    ANS_LOGD("start, errorCode=%{public}d", info.returnCode);
-    int32_t errorCode = info.returnCode == ERR_OK ? ERR_OK : GetExternalCode(info.returnCode);
-    
+    ANS_LOGD("start, errorCode=%{public}u", info.returnCode);
+    int32_t errorCode = info.returnCode;
+
     if (info.isCallback) {
         SetCallback(env, info.callback, errorCode, info.result);
     } else {
@@ -52,7 +52,7 @@ std::vector<ani_ref> GetCallBackData(
     ani_object data = (result == nullptr) ? GetNullObject(env) : result;
     std::vector<ani_ref> args;
     if (errorCode != ERR_OK) {
-        ani_object errorObj = CreateError(env, errorCode, FindAnsErrMsg(errorCode));
+        ani_object errorObj = CreateError(env, errorCode);
         ani_ref undefRef;
         ani_status status = env->GetUndefined(&undefRef);
         if (status != ANI_OK) {
@@ -94,7 +94,7 @@ void SetPromise(ani_env *env, const ani_resolver &resolver, const int32_t &error
 void AniPromiseReject(ani_env *env, const ani_resolver &resolver, const int32_t &errorCode)
 {
     ani_status status = ANI_OK;
-    ani_object errorObj = CreateError(env, errorCode, FindAnsErrMsg(errorCode));
+    ani_object errorObj = CreateError(env, errorCode);
     status = env->PromiseResolver_Reject(resolver, static_cast<ani_error>(errorObj));
     if (ANI_OK != status) {
         ANS_LOGE("AniPromiseReject failed,status = %{public}d", status);

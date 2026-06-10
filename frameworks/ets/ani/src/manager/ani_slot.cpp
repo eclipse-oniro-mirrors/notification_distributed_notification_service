@@ -17,7 +17,8 @@
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "sts_bundle_option.h"
 #include "sts_slot.h"
 #include "notification_slot.h"
@@ -26,6 +27,8 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackSlotInfo* asyncCallbackInfo)
 {
     ANS_LOGD("Delete AsyncCallbackSlotInfo Without Promise");
@@ -109,7 +112,7 @@ void HandleSlotFunctionCallbackComplete(ani_env* env, WorkStatus status, void* d
                 asyncCallbackInfo->slotFlags);
             if (asyncCallbackInfo->info.result == nullptr) {
                 ANS_LOGE("CreateLong for slotFlags failed");
-                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             }
             break;
         }
@@ -118,7 +121,7 @@ void HandleSlotFunctionCallbackComplete(ani_env* env, WorkStatus status, void* d
             ani_array outAniObj;
             if (!NotificationSts::WrapNotificationSlotArray(envCurr, asyncCallbackInfo->slots, outAniObj)) {
                 ANS_LOGE("WrapNotificationSlotArray failed");
-                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             }
             asyncCallbackInfo->info.result = static_cast<ani_object>(outAniObj);
             break;
@@ -128,7 +131,7 @@ void HandleSlotFunctionCallbackComplete(ani_env* env, WorkStatus status, void* d
                 NotificationSts::CreateBoolean(envCurr, asyncCallbackInfo->param.isEnabled);
             if (asyncCallbackInfo->info.result == nullptr) {
                 ANS_LOGE("CreateBoolean for isEnabled failed");
-                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             }
             break;
         }
@@ -161,7 +164,7 @@ void HandleSlotFunctionCallbackComplete1(ani_env* env, WorkStatus status, void* 
                 asyncCallbackInfo->slot, asyncCallbackInfo->info.result) ||
                 asyncCallbackInfo->info.result == nullptr) {
                 ANS_LOGE("WrapNotificationSlot failed");
-                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             }
             break;
         }
@@ -170,7 +173,7 @@ void HandleSlotFunctionCallbackComplete1(ani_env* env, WorkStatus status, void* 
                 asyncCallbackInfo->slotNum);
             if (asyncCallbackInfo->info.result == nullptr) {
                 ANS_LOGE("CreateLong for slotNum failed");
-                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             }
             break;
         }
@@ -179,7 +182,7 @@ void HandleSlotFunctionCallbackComplete1(ani_env* env, WorkStatus status, void* 
                 asyncCallbackInfo->slotFlags, asyncCallbackInfo->info.result) ||
                 asyncCallbackInfo->info.result == nullptr) {
                 ANS_LOGE("WrapGetNotificationSetting failed");
-                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             }
             break;
         }
@@ -260,8 +263,9 @@ ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption, ani_object
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetNotificationSlotsForBundle(
-                    asyncCallbackInfo->param.option, asyncCallbackInfo->slots);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotsForBundle(
+                        asyncCallbackInfo->param.option, asyncCallbackInfo->slots);
             }
         },
         HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -308,8 +312,9 @@ ani_object AniAddSlots(ani_env *env, ani_object notificationSlotArrayObj, ani_ob
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::AddNotificationSlots(
-                    asyncCallbackInfo->param.slots);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->AddNotificationSlots(
+                        asyncCallbackInfo->param.slots);
             }
         },
         HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -355,8 +360,9 @@ ani_object AniAddSlotByNotificationSlot(ani_env *env, ani_object notificationSlo
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::AddNotificationSlot(
-                    asyncCallbackInfo->param.slot);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->AddNotificationSlot(
+                        asyncCallbackInfo->param.slot);
             }
         },
         HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -402,8 +408,9 @@ ani_object AniAddSlotBySlotType(ani_env *env, ani_enum_item enumObj, ani_object 
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::AddSlotByType(
-                    asyncCallbackInfo->param.slotType);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->AddSlotByType(
+                        asyncCallbackInfo->param.slotType);
             }
         },
         HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -450,8 +457,9 @@ ani_object AniGetSlot(ani_env *env, ani_enum_item enumObj, ani_object callback)
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetNotificationSlot(
-                    asyncCallbackInfo->param.slotType, asyncCallbackInfo->slot);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlot(
+                        asyncCallbackInfo->param.slotType, asyncCallbackInfo->slot);
             }
         },
         HandleSlotFunctionCallbackComplete1, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -493,8 +501,9 @@ ani_object AniGetSlots(ani_env *env, ani_object callback)
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetNotificationSlots(
-                    asyncCallbackInfo->slots);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlots(
+                        asyncCallbackInfo->slots);
             }
         },
         HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -540,8 +549,9 @@ ani_object AniRemoveSlot(ani_env *env, ani_enum_item enumObj, ani_object callbac
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::RemoveNotificationSlot(
-                    asyncCallbackInfo->param.slotType);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotificationSlot(
+                        asyncCallbackInfo->param.slotType);
             }
         },
         HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -583,7 +593,8 @@ ani_object AniRemoveAllSlots(ani_env *env, ani_object callback)
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::RemoveAllSlots();
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->RemoveAllSlots();
             }
         },
         HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -614,7 +625,7 @@ ani_object AniSetSlotByBundle(ani_env *env, ani_object bundleOptionObj, ani_obje
         return nullptr;
     }
 
-    asyncCallbackInfo->slot = new (std::nothrow) Notification::NotificationSlot(asyncCallbackInfo->param.slot);
+    asyncCallbackInfo->slot = new (std::nothrow) NotificationSlot(asyncCallbackInfo->param.slot);
     if (asyncCallbackInfo->slot == nullptr) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo->slot is nullptr");
         DeleteCallBackInfo(env, asyncCallbackInfo);
@@ -639,8 +650,9 @@ ani_object AniSetSlotByBundle(ani_env *env, ani_object bundleOptionObj, ani_obje
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::UpdateNotificationSlots(
-                    asyncCallbackInfo->param.option, asyncCallbackInfo->slots);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->UpdateNotificationSlots(
+                        asyncCallbackInfo->param.option, asyncCallbackInfo->slots);
             }
         },
         HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -687,8 +699,9 @@ ani_object AniGetSlotNumByBundle(ani_env *env, ani_object bundleOption, ani_obje
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetNotificationSlotNumAsBundle(
-                    asyncCallbackInfo->param.option, asyncCallbackInfo->slotNum);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotNumAsBundle(
+                        asyncCallbackInfo->param.option, asyncCallbackInfo->slotNum);
             }
         },
         HandleSlotFunctionCallbackComplete1, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -713,12 +726,12 @@ ani_object AniSetNotificationEnableSlot(ani_env *env, ani_object bundleOption, a
         return nullptr;
     }
     if (!NotificationSts::UnwrapBundleOption(env, bundleOption, asyncCallbackInfo->param.option)) {
-        NotificationSts::ThrowInternerErrorWithLogE(env, "AniSetNotificationEnableSlot ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowInternerErrorWithLogE(env, "AniSetNotificationEnableSlot ERR_ANS_INNER_TASK_ERR");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
     if (!NotificationSts::SlotTypeEtsToC(env, type, asyncCallbackInfo->param.slotType)) {
-        NotificationSts::ThrowInternerErrorWithLogE(env, "AniSetNotificationEnableSlot ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowInternerErrorWithLogE(env, "AniSetNotificationEnableSlot ERR_ANS_INNER_TASK_ERR");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
@@ -741,9 +754,10 @@ ani_object AniSetNotificationEnableSlot(ani_env *env, ani_object bundleOption, a
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetEnabledForBundleSlot(
-                    asyncCallbackInfo->param.option, asyncCallbackInfo->param.slotType,
-                    asyncCallbackInfo->param.isEnabled, asyncCallbackInfo->param.isForceControl);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetEnabledForBundleSlot(
+                        asyncCallbackInfo->param.option, asyncCallbackInfo->param.slotType,
+                        asyncCallbackInfo->param.isEnabled, asyncCallbackInfo->param.isForceControl);
             }
         },
         HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -789,9 +803,10 @@ ani_object AniSetNotificationEnableSlotWithForce(ani_env *env, ani_object parame
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetEnabledForBundleSlot(
-                    asyncCallbackInfo->param.option, asyncCallbackInfo->param.slotType,
-                    asyncCallbackInfo->param.isEnabled, asyncCallbackInfo->param.isForceControl);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetEnabledForBundleSlot(
+                        asyncCallbackInfo->param.option, asyncCallbackInfo->param.slotType,
+                        asyncCallbackInfo->param.isEnabled, asyncCallbackInfo->param.isForceControl);
             }
         },
         HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -839,9 +854,10 @@ ani_object AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, a
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetEnabledForBundleSlot(
-                    asyncCallbackInfo->param.option, asyncCallbackInfo->param.slotType,
-                    asyncCallbackInfo->param.isEnabled);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetEnabledForBundleSlot(
+                        asyncCallbackInfo->param.option, asyncCallbackInfo->param.slotType,
+                        asyncCallbackInfo->param.isEnabled);
             }
         },
         HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -888,8 +904,9 @@ ani_object AniGetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_object call
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetNotificationSlotFlagsAsBundle(
-                    asyncCallbackInfo->param.option, asyncCallbackInfo->slotFlags);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotFlagsAsBundle(
+                        asyncCallbackInfo->param.option, asyncCallbackInfo->slotFlags);
             }
         },
         HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -936,8 +953,9 @@ ani_object AniSetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_long slotFl
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetNotificationSlotFlagsAsBundle(
-                    asyncCallbackInfo->param.option, asyncCallbackInfo->slotFlags);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationSlotFlagsAsBundle(
+                        asyncCallbackInfo->param.option, asyncCallbackInfo->slotFlags);
             }
         },
         HandleSlotFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -985,8 +1003,10 @@ ani_object AniGetSlotByBundle(ani_env *env, ani_object bundleOption, ani_enum_it
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetNotificationSlotForBundle(
-                    asyncCallbackInfo->param.option, asyncCallbackInfo->param.slotType, asyncCallbackInfo->slot);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotForBundle(
+                        asyncCallbackInfo->param.option, asyncCallbackInfo->param.slotType,
+                        asyncCallbackInfo->slot);
             }
         },
         HandleSlotFunctionCallbackComplete1, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -1028,8 +1048,9 @@ ani_object AniGetNotificationSetting(ani_env *env, ani_object callback)
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetNotificationSettings(
-                    asyncCallbackInfo->slotFlags);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSettings(
+                        asyncCallbackInfo->slotFlags);
             }
         },
         HandleSlotFunctionCallbackComplete1, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));

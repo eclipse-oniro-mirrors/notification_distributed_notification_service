@@ -89,7 +89,7 @@ ani_status GetStsActionButtonByUserInput(ani_env *env, ani_object param,
         return ANI_ERROR;
     }
     ani_boolean isUndefind = ANI_TRUE;
-    std::shared_ptr<Notification::NotificationUserInput> userInput = nullptr;
+    std::shared_ptr<OHOS::Notification::NotificationUserInput> userInput = nullptr;
     ani_ref userInputRef;
     if (ANI_OK == GetPropertyRef(env, param, "userInput", isUndefind, userInputRef) && isUndefind == ANI_FALSE) {
         UnwrapNotificationUserInput(env, static_cast<ani_object>(userInputRef), userInput);

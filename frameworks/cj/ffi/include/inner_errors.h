@@ -142,6 +142,11 @@ const int32_t ERROR_REJECTED_WITH_DISABLE_NOTIFICATION =
 const int32_t ERROR_NETWORK_UNREACHABLE          = 2300007;    // Network unreachable.
 const int32_t ERROR_BUNDLE_NOT_FOUND             = 17700001;   // The specified bundle name was not found.
 
+/**
+ * @deprecated Use InnerErrorToExternal() from ans_service_errors.h instead.
+ * The CJ layer now calls AnsNotification directly and uses InnerErrorToExternal()
+ * for error code conversion. This mapping table is incomplete and will not be maintained.
+ */
 int32_t ErrorToExternal(uint32_t errCode);
 } // namespace Notification
 } // namespace CJSystemapi

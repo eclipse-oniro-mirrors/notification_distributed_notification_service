@@ -21,7 +21,7 @@
 #include "distributed_operation_service.h"
 #undef private
 #undef protected
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -47,7 +47,7 @@ HWTEST_F(DistributedOperationServiceTest, OnOperationResponse_0100, Function | S
     DistributedDeviceInfo device;
     device.deviceType_ = DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1;
     auto result = DistributedOperationService::GetInstance().OnOperationResponse(operationInfo, device);
-    EXPECT_EQ(result, ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+    EXPECT_EQ(result, ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -63,7 +63,7 @@ HWTEST_F(DistributedOperationServiceTest, OnOperationResponse_0200, Function | S
     DistributedDeviceInfo device;
     device.deviceType_ = DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE;
     auto result = DistributedOperationService::GetInstance().OnOperationResponse(operationInfo, device);
-    EXPECT_EQ(result, ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+    EXPECT_EQ(result, ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 #endif
 }

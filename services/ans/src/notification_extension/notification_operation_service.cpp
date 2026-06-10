@@ -18,7 +18,7 @@
 #include "ans_log_wrapper.h"
 #include "notification_analytics_util.h"
 #include "time_service_client.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "distributed_extension_service.h"
 
 namespace OHOS {
@@ -135,7 +135,7 @@ void DistributedOperationService::HandleOperationTimeOut(const std::string& hash
     }
 
     operationQueue_->submit_h([&, hashCode]() {
-        ReplyOperationResponse(hashCode, ERR_ANS_OPERATION_TIMEOUT);
+        ReplyOperationResponse(hashCode, ERR_ANS_INNER_OPERATION_TIMEOUT);
     });
 }
 }

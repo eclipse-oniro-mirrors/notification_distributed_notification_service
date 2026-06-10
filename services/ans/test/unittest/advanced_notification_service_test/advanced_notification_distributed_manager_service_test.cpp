@@ -19,6 +19,7 @@
 #define private public
 
 #include "advanced_notification_service.h"
+#include "ans_service_errors.h"
 #include "advanced_datashare_helper.h"
 #include "notification_check_request.h"
 #include "notification_constant.h"
@@ -33,7 +34,6 @@ using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 namespace Notification {
-
 class AdvancedNotificationDistMgrServiceTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -81,7 +81,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDistributedEnabledBySlot_100
     bool enabled = false;
     auto ret = advancedNotificationService_->SetDistributedEnabledBySlot(slotTypeInt, deviceType, enabled);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -100,7 +100,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, IsDistributedEnabledBySlot_100,
 
     auto ret = advancedNotificationService_->IsDistributedEnabledBySlot(slotTypeInt, deviceType, enabled);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -119,7 +119,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, IsDistributedEnabledBySlot_200,
 
     auto ret = advancedNotificationService_->IsDistributedEnabledBySlot(slotTypeInt, deviceType, enabled);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -156,7 +156,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetTargetDeviceStatus_100, Func
 
     auto ret = advancedNotificationService_->GetTargetDeviceStatus(deviceType, status);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -175,7 +175,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperationParamCheck_1
 
     auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -191,7 +191,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperationParamCheck_2
     operationInfo->SetOperationType(static_cast<OperationType>(5));
     sptr<IAnsOperationCallback> callback = nullptr;
     auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -213,7 +213,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperation_100, Functi
 
     auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -235,7 +235,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperation_200, Functi
 
     auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -261,7 +261,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperation_300, Functi
 
     auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -312,7 +312,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperation_500, Functi
     operationInfo->SetOperationType(OperationType::DISTRIBUTE_OPERATION_REPLY);
     sptr<IAnsOperationCallback> callback = nullptr;
     auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -338,7 +338,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperation_600, Functi
     operationInfo->SetOperationType(OperationType::DISTRIBUTE_OPERATION_REPLY);
     sptr<IAnsOperationCallback> callback = nullptr;
     auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -380,7 +380,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceStatus_100, Func
 
     auto ret = advancedNotificationService_->SetTargetDeviceStatus(deviceType, status, deviceId);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -401,7 +401,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceStatus_200, Func
 
     auto ret = advancedNotificationService_->SetTargetDeviceStatus(deviceType, status, controlFlag, deviceId, userId);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -422,7 +422,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceStatus_300, Func
 
     auto ret = advancedNotificationService_->SetTargetDeviceStatus(deviceType, status, controlFlag, deviceId, userId);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -444,7 +444,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceStatus_400, Func
 
     auto ret = advancedNotificationService_->SetTargetDeviceStatus(deviceType, status, controlFlag, deviceId, userId);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -511,7 +511,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceBundleList_100, 
     auto ret = advancedNotificationService_->SetTargetDeviceBundleList(deviceType, deviceId, operatorType,
         bundleList, labelList);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -533,7 +533,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceBundleList_200, 
     auto ret = advancedNotificationService_->SetTargetDeviceBundleList(deviceType, deviceId, operatorType,
         bundleList, labelList);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -556,7 +556,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceBundleList_300, 
     auto ret = advancedNotificationService_->SetTargetDeviceBundleList(deviceType, deviceId, operatorType,
         bundleList, labelList);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -574,7 +574,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetMutilDeviceStatus_100, Funct
     std::string deviceId = "";
 
     auto ret = advancedNotificationService_->GetMutilDeviceStatus(deviceType, flag, deviceId, userId);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -591,7 +591,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetTargetDeviceBundleList_100, 
     std::vector<std::string> bundles;
     std::vector<std::string> labels;
     auto ret = advancedNotificationService_->GetTargetDeviceBundleList(deviceType, deviceId, bundles, labels);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -611,7 +611,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceSwitch_100, Func
     auto ret = advancedNotificationService_->SetTargetDeviceSwitch(
         deviceType, deviceId, notificaitonEnable, liveViewEnable);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -633,7 +633,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceSwitch_200, Func
     auto ret = advancedNotificationService_->SetTargetDeviceSwitch(
         deviceType, deviceId, notificaitonEnable, liveViewEnable);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -655,7 +655,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceSwitch_300, Func
     auto ret = advancedNotificationService_->SetTargetDeviceSwitch(
         deviceType, deviceId, notificaitonEnable, liveViewEnable);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -673,7 +673,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetAllDistribuedEnabledBundles_
 
     auto ret = advancedNotificationService_->GetAllDistribuedEnabledBundles(deviceType, bundleOptions);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -692,7 +692,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetAllDistribuedEnabledBundles_
 
     auto ret = advancedNotificationService_->GetAllDistribuedEnabledBundles(deviceType, bundleOptions);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -727,7 +727,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDistributedEnabledByBundle_1
 
     auto ret = advancedNotificationService_->SetDistributedEnabledByBundle(bundleOption, deviceType, enabled, true);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -758,26 +758,26 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedBundleListByType_
     MockIsSystemApp(false);
     std::vector<DistributedBundleOption> enableList;
     auto ret = advancedNotificationService_->GetDistributedBundleListByType(true, enableList);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     ret = advancedNotificationService_->GetDistributedBundleListByType(true, enableList);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsSystemApp(true);
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     ret = advancedNotificationService_->GetDistributedBundleListByType(true, enableList);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     ret = advancedNotificationService_->GetDistributedBundleListByType(true, enableList);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
     ret = advancedNotificationService_->GetDistributedBundleListByType(true, enableList);
     ASSERT_EQ(ret, (int)ERR_OK);
 }
- 
+
 /**
  * @tc.name: GetDistributedBundleInfo_100
  * @tc.desc: Test GetDistributedBundleInfo when caller has invalid parameters.
@@ -790,7 +790,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedBundleInfo_100, F
     std::vector<sptr<NotificationBundleOption>> bundleOption;
     std::vector<DistributedNotificationBundleInfo> bundleInfoList;
     auto ret = advancedNotificationService_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("com.test.demo", 20020001);
     bundleOption.push_back(bundle);
@@ -798,20 +798,20 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedBundleInfo_100, F
     MockIsSystemApp(false);
     std::vector<DistributedBundleOption> enableList;
     ret = advancedNotificationService_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     ret = advancedNotificationService_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsSystemApp(true);
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     ret = advancedNotificationService_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     ret = advancedNotificationService_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
     ret = advancedNotificationService_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
@@ -833,7 +833,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDistributedEnabled_100, Func
 
     auto ret = advancedNotificationService_->SetDistributedEnabled(deviceType, enabled);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -869,7 +869,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, IsDistributedEnabled_100, Funct
 
     auto ret = advancedNotificationService_->IsDistributedEnabled(deviceType, enabled);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -904,7 +904,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedAbility_100, Func
 
     auto ret = advancedNotificationService_->GetDistributedAbility(abilityId);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -924,7 +924,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedAuthStatus_100, F
 
     auto ret = advancedNotificationService_->GetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -966,7 +966,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedAuthStatus_300, F
 
     auto ret = advancedNotificationService_->GetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -986,7 +986,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDistributedAuthStatus_100, F
 
     auto ret = advancedNotificationService_->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -1028,7 +1028,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDistributedAuthStatus_300, F
 
     auto ret = advancedNotificationService_->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -1042,7 +1042,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, UpdateDistributedDeviceList_100
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     auto ret = advancedNotificationService_->UpdateDistributedDeviceList("testDeviceType");
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -1074,7 +1074,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, UpdateDistributedDeviceList_300
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
     auto ret = advancedNotificationService_->UpdateDistributedDeviceList("testDeviceType");
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -1088,7 +1088,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedDevicelist_0100, 
     MockIsSystemApp(false);
     std::vector<std::string> deviceTypes;
     auto ret = advancedNotificationService_->GetDistributedDevicelist(deviceTypes);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -1101,20 +1101,20 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDeviceDistributedBundleList_
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     auto ret = advancedNotificationService_->SetDeviceDistributedBundleList(
         static_cast<int32_t>(DistributedBundleChangeType::INIT_DEVICE_CONNECT), {});
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
- 
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
+
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     MockIsVerfyPermisson(false);
     ret = advancedNotificationService_->SetDeviceDistributedBundleList(
         static_cast<int32_t>(DistributedBundleChangeType::INIT_DEVICE_CONNECT), {});
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
- 
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
+
     MockIsVerfyPermisson(true);
     ret = advancedNotificationService_->SetDeviceDistributedBundleList(
         static_cast<int32_t>(DistributedBundleChangeType::INIT_DEVICE_CONNECT), {});
     ASSERT_EQ(ret, (int)ERR_OK);
 }
- 
+
 /**
  * @tc.name: SetTargetDeviceAbility_0100
  * @tc.desc: Test SetTargetDeviceAbility.
@@ -1124,13 +1124,13 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceAbility_0100, Fu
 {
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     auto ret = advancedNotificationService_->SetTargetDeviceAbility("tablet", 1);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
- 
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
+
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     MockIsVerfyPermisson(false);
     ret = advancedNotificationService_->SetTargetDeviceAbility("tablet", 1);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
- 
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
+
     MockIsVerfyPermisson(true);
     ret = advancedNotificationService_->SetTargetDeviceAbility("tablet", 1);
     ASSERT_EQ(ret, (int)ERR_OK);
@@ -1146,16 +1146,16 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetLocalDistributedBundleList_0
     std::vector<NotificationDistributedBundle> bundles;
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     auto ret = advancedNotificationService_->GetLocalDistributedBundleList("tablet", bundles);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     MockIsVerfyPermisson(false);
     ret = advancedNotificationService_->GetLocalDistributedBundleList("tablet", bundles);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
     ret = advancedNotificationService_->GetLocalDistributedBundleList("wearable", bundles);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     ret = advancedNotificationService_->GetLocalDistributedBundleList("tablet", bundles);
     ASSERT_EQ(ret, (int)ERR_OK);
@@ -1178,7 +1178,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetSmartReminderEnabled_00001, 
     bool enabled = true;
 
     auto ret = advancedNotificationService_->SetSmartReminderEnabled(deviceType, enabled);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -1196,7 +1196,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetSmartReminderEnabled_00002, 
     bool enabled = true;
 
     auto ret = advancedNotificationService_->SetSmartReminderEnabled(deviceType, enabled);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -1231,7 +1231,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, IsSmartReminderEnabled_00001, F
     bool enabled = false;
 
     auto ret = advancedNotificationService_->IsSmartReminderEnabled(deviceType, enabled);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -1249,7 +1249,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, IsSmartReminderEnabled_00002, F
     bool enabled = false;
 
     auto ret = advancedNotificationService_->IsSmartReminderEnabled(deviceType, enabled);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -1267,7 +1267,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, IsSmartReminderEnabled_00003, F
     bool enabled = false;
 
     auto ret = advancedNotificationService_->IsSmartReminderEnabled(deviceType, enabled);
-    ASSERT_NE(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_NE(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -1320,7 +1320,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDistributedBundleOption_0000
     std::string deviceType = "tablet";
 
     auto ret = advancedNotificationService_->SetDistributedBundleOption(bundles, deviceType);
-    ASSERT_NE(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_NE(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -1338,7 +1338,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDistributedBundleOption_0000
     std::string deviceType = "tablet";
 
     auto ret = advancedNotificationService_->SetDistributedBundleOption(bundles, deviceType);
-    ASSERT_NE(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_NE(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -1356,7 +1356,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, IsDistributedEnabledByBundle_00
 
     auto ret = advancedNotificationService_->IsDistributedEnabledByBundle(
         bundleOption, deviceType, isNotification, enabled);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -1377,7 +1377,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, IsDistributedEnabledByBundle_00
 
     auto ret = advancedNotificationService_->IsDistributedEnabledByBundle(
         bundleOption, deviceType, isNotification, enabled);
-    ASSERT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_NE(ret, (int)ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -1393,7 +1393,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDeviceRemindType_00001, Func
     int32_t remindTypeInt = 0;
 
     auto ret = advancedNotificationService_->GetDeviceRemindType(remindTypeInt);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -1410,7 +1410,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDeviceRemindType_00002, Func
     int32_t remindTypeInt = 0;
 
     auto ret = advancedNotificationService_->GetDeviceRemindType(remindTypeInt);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -1428,7 +1428,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, ReplyDistributeOperation_00001,
     int32_t result = ERR_OK;
 
     auto ret = advancedNotificationService_->ReplyDistributeOperation(hashCode, result);
-    ASSERT_NE(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_NE(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -1460,7 +1460,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, IsDistributedEnabled_Bool_00001
     bool enabled = false;
 
     auto ret = advancedNotificationService_->IsDistributedEnabled(enabled);
-    ASSERT_NE(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_NE(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 }  // namespace Notification

@@ -21,7 +21,7 @@
 
 #include "accesstoken_kit.h"
 #include "ans_const_define.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "common_event_manager.h"
 #include "common_event_publish_info.h"
@@ -71,7 +71,7 @@ ErrCode AdvancedNotificationService::IsDistributedEnabled(bool &enabled)
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Is distributed enabled.");
     return result;
 #else
-    return ERR_INVALID_OPERATION;
+    return ERR_ANS_INNER_INVALID_OPERATION;
 #endif
 }
 
@@ -84,16 +84,16 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("IsSystemApp is false.");
-        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append("Not SystemApp");
+        message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).Append("Not SystemApp");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission Denied.");
-        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append("No permission");
+        message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Append("No permission");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     NotificationConstant::SWITCH_STATE enableStatus = enabled ?
@@ -148,12 +148,12 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledBySlot(
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("IsSystemApp is bogus.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("no permission");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
@@ -172,11 +172,11 @@ ErrCode AdvancedNotificationService::EnableDistributed(bool enabled)
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("VerifyNativeToken and IsSystemApp is false.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     ErrCode result = ERR_OK;
@@ -188,7 +188,7 @@ ErrCode AdvancedNotificationService::EnableDistributed(bool enabled)
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Enable distributed.");
     return result;
 #else
-    return ERR_INVALID_OPERATION;
+    return ERR_ANS_INNER_INVALID_OPERATION;
 #endif
 }
 
@@ -200,25 +200,25 @@ ErrCode AdvancedNotificationService::EnableDistributedByBundle(
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("AccessTokenHelper::CheckPermission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         ANS_LOGD("Create bundle failed.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     bool appInfoEnable = true;
     GetDistributedEnableInApplicationInfo(bundle, appInfoEnable);
     if (!appInfoEnable) {
         ANS_LOGD("Get from bms is %{public}d", appInfoEnable);
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     ErrCode result = ERR_OK;
@@ -233,7 +233,7 @@ ErrCode AdvancedNotificationService::EnableDistributedByBundle(
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Enable distributed bundle.");
     return result;
 #else
-    return ERR_INVALID_OPERATION;
+    return ERR_ANS_INNER_INVALID_OPERATION;
 #endif
 }
 
@@ -243,14 +243,14 @@ ErrCode AdvancedNotificationService::EnableDistributedSelf(const bool enabled)
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     bool appInfoEnable = true;
     GetDistributedEnableInApplicationInfo(bundleOption, appInfoEnable);
     if (!appInfoEnable) {
         ANS_LOGD("Get from bms is %{public}d", appInfoEnable);
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     ErrCode result = ERR_OK;
@@ -262,7 +262,7 @@ ErrCode AdvancedNotificationService::EnableDistributedSelf(const bool enabled)
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Enable distributed self.");
     return result;
 #else
-    return ERR_INVALID_OPERATION;
+    return ERR_ANS_INNER_INVALID_OPERATION;
 #endif
 }
 
@@ -274,17 +274,17 @@ ErrCode AdvancedNotificationService::IsDistributedEnableByBundle(
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         ANS_LOGD("Failed to create bundle.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     bool appInfoEnable = true;
@@ -307,7 +307,7 @@ ErrCode AdvancedNotificationService::IsDistributedEnableByBundle(
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Is distributed bundle enable.");
     return result;
 #else
-    return ERR_INVALID_OPERATION;
+    return ERR_ANS_INNER_INVALID_OPERATION;
 #endif
 }
 
@@ -317,10 +317,10 @@ ErrCode AdvancedNotificationService::GetTargetDeviceStatus(const std::string &de
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem) {
         ANS_LOGD("isSubsystem is bogus.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
     if (deviceType.empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     uint32_t result = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->GetDeviceStatus(deviceType);
@@ -335,7 +335,7 @@ ErrCode DistributeOperationParamCheck(const sptr<NotificationOperationInfo>& ope
 {
     if (operationInfo == nullptr || operationInfo->GetHashCode().empty()) {
         ANS_LOGE("hashCode is empty.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     OperationType operationType = operationInfo->GetOperationType();
@@ -343,18 +343,18 @@ ErrCode DistributeOperationParamCheck(const sptr<NotificationOperationInfo>& ope
         operationType != OperationType::DISTRIBUTE_OPERATION_REPLY &&
         operationType != OperationType::DISTRIBUTE_OPERATION_JUMP_BY_TYPE) {
         ANS_LOGE("operation type is error.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("is not system app.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("not have permission.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     return ERR_OK;
 }
@@ -391,7 +391,7 @@ ErrCode AdvancedNotificationService::DistributeOperation(const sptr<Notification
     NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result));
     return result;
 #else
-    return ERR_ANS_INVALID_PARAM;
+    return ERR_ANS_INNER_INVALID_PARAM;
 #endif
 }
 
@@ -413,7 +413,7 @@ ErrCode AdvancedNotificationService::DistributeOperationInner(const sptr<Notific
         return NotificationSubscriberManager::GetInstance()->DistributeOperation(operationInfo, request);
     }
     ANS_LOGI("DistributeOperation not exist hashcode.");
-    return ERR_ANS_INVALID_PARAM;
+    return ERR_ANS_INNER_INVALID_PARAM;
 }
 
 ErrCode AdvancedNotificationService::ReplyDistributeOperation(const std::string& hashCode, const int32_t result)
@@ -421,23 +421,23 @@ ErrCode AdvancedNotificationService::ReplyDistributeOperation(const std::string&
 #ifdef ALL_SCENARIO_COLLABORATION
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("Check permission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     if (hashCode.empty()) {
         ANS_LOGE("Hash code is invalid.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     ANS_LOGI("Reply operation key %{public}s %{public}d.", hashCode.c_str(), result);
     DistributedOperationService::GetInstance().ReplyOperationResponse(hashCode, result);
     return ERR_OK;
 #else
-    return ERR_ANS_INVALID_PARAM;
+    return ERR_ANS_INNER_INVALID_PARAM;
 #endif
 }
 
@@ -449,10 +449,10 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem) {
         ANS_LOGD("isSubsystem is bogus.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
     if (deviceType.empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     DelayedSingleton<DistributedDeviceStatus>::GetInstance()->SetDeviceStatus(deviceType, status_,
@@ -465,18 +465,18 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (deviceType.empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("isSubsystem is bogus.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("Check permission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     if (deviceType == NotificationConstant::PAD_DEVICE_TYPE || deviceType == NotificationConstant::PC_DEVICE_TYPE ||
@@ -496,17 +496,17 @@ ErrCode AdvancedNotificationService::SetTargetDeviceBundleList(const std::string
 {
 #ifdef ALL_SCENARIO_COLLABORATION
     if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("AccessTokenHelper::CheckPermission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     return DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(deviceType, deviceId,
         operatorType, bundleList, labelList);
 #else
-    return ERR_ANS_INVALID_PARAM;
+    return ERR_ANS_INNER_INVALID_PARAM;
 #endif
 }
 
@@ -515,53 +515,53 @@ ErrCode AdvancedNotificationService::SetDeviceDistributedBundleList(int32_t type
 {
 #ifdef ALL_SCENARIO_COLLABORATION
     if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("AccessTokenHelper::CheckPermission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     return DistributedBundleService::GetInstance().SetDeviceDistributedBundleList(
         static_cast<DistributedBundleChangeType>(type), bundles);
 #else
-    return ERR_ANS_INVALID_PARAM;
+    return ERR_ANS_INNER_INVALID_PARAM;
 #endif
 }
- 
+
 ErrCode AdvancedNotificationService::SetTargetDeviceAbility(const std::string& deviceType, const int32_t ability)
 {
 #ifdef ALL_SCENARIO_COLLABORATION
     if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("AccessTokenHelper::CheckPermission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     DistributedDeviceDataService::GetInstance().SetDeviceAbility(deviceType, ability);
     return ERR_OK;
 #else
-    return ERR_ANS_INVALID_PARAM;
+    return ERR_ANS_INNER_INVALID_PARAM;
 #endif
 }
- 
+
 ErrCode AdvancedNotificationService::GetLocalDistributedBundleList(const std::string& deviceType,
     std::vector<NotificationDistributedBundle>& bundles)
 {
 #ifdef ALL_SCENARIO_COLLABORATION
     if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGW("AccessTokenHelper::CheckPermission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     if (deviceType != NotificationConstant::PAD_DEVICE_TYPE && deviceType != NotificationConstant::PC_DEVICE_TYPE) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     int32_t userId = DEFAULT_USER_ID;
@@ -569,7 +569,7 @@ ErrCode AdvancedNotificationService::GetLocalDistributedBundleList(const std::st
     NotificationPreferences::GetInstance()->GetLocalDistributedBundles(deviceType, userId, bundles);
     return ERR_OK;
 #else
-    return ERR_ANS_INVALID_PARAM;
+    return ERR_ANS_INNER_INVALID_PARAM;
 #endif
 }
 
@@ -578,13 +578,13 @@ ErrCode AdvancedNotificationService::GetMutilDeviceStatus(const std::string &dev
 {
 #ifdef ALL_SCENARIO_COLLABORATION
     if (deviceType.empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("isSubsystem is bogus.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     DeviceStatus deviceStatus = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->GetMultiDeviceStatus(
@@ -593,7 +593,7 @@ ErrCode AdvancedNotificationService::GetMutilDeviceStatus(const std::string &dev
     deviceId = deviceStatus.deviceId;
     return ERR_OK;
 #else
-    return ERR_ANS_INVALID_PARAM;
+    return ERR_ANS_INNER_INVALID_PARAM;
 #endif
 }
 
@@ -602,19 +602,19 @@ ErrCode AdvancedNotificationService::GetTargetDeviceBundleList(const std::string
 {
 #ifdef ALL_SCENARIO_COLLABORATION
     if (deviceType.empty() || deviceId.empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("isSubsystem is bogus.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     return DistributedDeviceDataService::GetInstance().GetTargetDeviceBundleList(deviceType, deviceId,
         bundleList, labelList);
 #else
-    return ERR_ANS_INVALID_PARAM;
+    return ERR_ANS_INNER_INVALID_PARAM;
 #endif
 }
 
@@ -623,17 +623,17 @@ ErrCode AdvancedNotificationService::SetTargetDeviceSwitch(const std::string& de
 {
 #ifdef ALL_SCENARIO_COLLABORATION
     if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("AccessTokenHelper::CheckPermission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     return DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch(deviceType, deviceId,
         notificaitonEnable, liveViewEnable);
 #else
-    return ERR_ANS_INVALID_PARAM;
+    return ERR_ANS_INNER_INVALID_PARAM;
 #endif
 }
 
@@ -643,7 +643,7 @@ ErrCode AdvancedNotificationService::GetAllDistribuedEnabledBundles(
     ANS_LOGD("Called.");
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     int32_t userId = 100;
@@ -671,16 +671,16 @@ ErrCode AdvancedNotificationService::SetSmartReminderEnabled(const std::string &
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("IsSystemApp is false.");
-        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append(" Not SystemApp");
+        message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).Append(" Not SystemApp");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission Denied.");
-        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append(" Permission Denied");
+        message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Append(" Permission Denied");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     ErrCode result = NotificationPreferences::GetInstance()->SetSmartReminderEnabled(deviceType, enabled);
 
@@ -697,12 +697,12 @@ ErrCode AdvancedNotificationService::IsSmartReminderEnabled(const std::string &d
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("IsSystemApp is bogus.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("no permission");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     return NotificationPreferences::GetInstance()->IsSmartReminderEnabled(deviceType, enabled);
 }
@@ -716,7 +716,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledForCollaboration(
 #if defined(ALL_SCENARIO_COLLABORATION) && !defined(DISTRIBUTED_FEATURE_MASTER)
     if (bundleOption->GetBundleName().empty() || bundleOption->GetUid() <= 0) {
         ANS_LOGE("invalid bundle info.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     auto type = isNotification ? DistributedBundleChangeType::COLLABORATION_NOTIFICATION_ENABLE :
         DistributedBundleChangeType::COLLABORATION_LIVEVIEW_ENABLE;
@@ -734,7 +734,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledForCollaboration(
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         ANS_LOGE("bundle is nullptr");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     auto type = enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
         NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
@@ -752,8 +752,8 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr) {
         ANS_LOGE("BundleOption is null.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_BUNDLE));
-        return ERR_ANS_INVALID_BUNDLE;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_BUNDLE));
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
@@ -761,14 +761,16 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("IsSystemApp is false.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).BranchId(BRANCH_11));
-        return ERR_ANS_NON_SYSTEM_APP;
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).BranchId(BRANCH_11));
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission Denied.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_12));
-        return ERR_ANS_PERMISSION_DENIED;
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).BranchId(BRANCH_12));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     ErrCode result = ERR_OK;
@@ -778,13 +780,13 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
         sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
         if (bundle == nullptr) {
             ANS_LOGE("bundle is nullptr");
-            return ERR_ANS_INVALID_BUNDLE;
+            return ERR_ANS_INNER_INVALID_BUNDLE;
         }
         auto type = enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
             NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
         result = NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle, deviceType, true, type);
     }
-    
+
     ANS_LOGI("%{public}s_%{public}d, deviceType: %{public}s, enabled: %{public}s, "
         "SetDistributedEnabledByBundle result: %{public}d", bundleOption->GetBundleName().c_str(),
         bundleOption->GetUid(), deviceType.c_str(), std::to_string(enabled).c_str(), result);
@@ -799,37 +801,37 @@ ErrCode AdvancedNotificationService::GetDistributedBundleListByType(const bool i
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("IsSystemApp is false.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission Denied.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 #ifdef ALL_SCENARIO_COLLABORATION
     DistributedBundleService::GetInstance().GetDistributedBundleListByType(isNotification, enableList);
 #endif
     return ERR_OK;
 }
- 
+
 ErrCode AdvancedNotificationService::GetDistributedBundleInfo(
     const std::vector<sptr<NotificationBundleOption>>& bundleOption,
     std::vector<DistributedNotificationBundleInfo>& bundleInfoList)
 {
     if (bundleOption.empty()) {
         ANS_LOGE("BundleOption is empty.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("IsSystemApp is false.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission Denied.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 #ifdef ALL_SCENARIO_COLLABORATION
     DistributedBundleService::GetInstance().GetDistributedBundleInfo(bundleOption, bundleInfoList);
@@ -845,29 +847,33 @@ ErrCode AdvancedNotificationService::SetDistributedBundleOption(
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundles.empty()) {
         ANS_LOGE("bundles is null.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.Message("bundles null").ErrorCode(ERR_ANS_INVALID_PARAM));
-        return ERR_ANS_INVALID_PARAM;
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.Message("bundles null").ErrorCode(ERR_ANS_INNER_INVALID_PARAM));
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     if (deviceType.empty()) {
         ANS_LOGE("deviceType is null.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.Message("device null").ErrorCode(ERR_ANS_INVALID_PARAM));
-        return ERR_ANS_INVALID_PARAM;
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.Message("device null").ErrorCode(ERR_ANS_INNER_INVALID_PARAM));
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("IsSystemApp is false.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).BranchId(BRANCH_11));
-        return ERR_ANS_NON_SYSTEM_APP;
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).BranchId(BRANCH_11));
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission Denied.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_12));
-        return ERR_ANS_PERMISSION_DENIED;
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).BranchId(BRANCH_12));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
-    
+
     std::vector<sptr<DistributedBundleOption>> affectBundleOption;
     ANS_LOGD("deviceType: %{public}s",  deviceType.c_str());
     for (auto distributedBundle : bundles) {
@@ -881,8 +887,8 @@ ErrCode AdvancedNotificationService::SetDistributedBundleOption(
         if (bundleOption == nullptr) {
             ANS_LOGE("bundleOption is null");
             NotificationAnalyticsUtil::ReportModifyEvent(
-                message.Message("batch").ErrorCode(ERR_ANS_NO_MEMORY).BranchId(BRANCH_13));
-            return ERR_ANS_NO_MEMORY;
+                message.Message("batch").ErrorCode(ERR_ANS_INNER_NO_MEMORY).BranchId(BRANCH_13));
+            return ERR_ANS_INNER_NO_MEMORY;
         }
         sptr<NotificationBundleOption> returnOption = GenerateValidBundleOption(bundleOption);
         if (returnOption == nullptr) {
@@ -898,10 +904,10 @@ ErrCode AdvancedNotificationService::SetDistributedBundleOption(
     if (affectBundleOption.empty()) {
         ANS_LOGE("no bundle is afffect");
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(
-            ERR_ANS_DISTRIBUTED_OPERATION_FAILED).BranchId(BRANCH_13));
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+            ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED).BranchId(BRANCH_13));
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
-     
+
     ErrCode result = NotificationPreferences::GetInstance()->SetDistributedBundleOption(
         affectBundleOption, deviceType);
 
@@ -920,17 +926,17 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<Not
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("IsSystemApp is bogus.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("no permission");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     return NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(bundle, deviceType,
@@ -944,16 +950,16 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("Not system app or SA!");
-        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append("Not SystemApp");
+        message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).Append("Not SystemApp");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("no permission");
-        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append("No permission");
+        message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Append("No permission");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     auto result = NotificationPreferences::GetInstance()->SetDistributedEnabled(deviceType,
@@ -1002,12 +1008,12 @@ ErrCode AdvancedNotificationService::IsDistributedEnabled(const std::string &dev
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Not system app or SA!");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("no permission");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     NotificationConstant::SWITCH_STATE enableStatus;
@@ -1024,7 +1030,7 @@ ErrCode AdvancedNotificationService::GetDistributedAbility(int32_t &abilityId)
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("IsSystemApp is bogus.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     abilityId = static_cast<int32_t>(NotificationConstant::DANS_SUPPORT_STATUS::UNSUPPORT);
@@ -1045,12 +1051,12 @@ ErrCode AdvancedNotificationService::GetDistributedAuthStatus(
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("IsSystemApp is bogus.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("no permission");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     auto result = NotificationPreferences::GetInstance()->GetDistributedAuthStatus(deviceType, deviceId,
@@ -1067,19 +1073,19 @@ ErrCode AdvancedNotificationService::UpdateDistributedDeviceList(const std::stri
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("IsSystemApp is bogus.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("no permission");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
     auto result = OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     if (result != ERR_OK) {
         ANS_LOGD("GetCurrentActiveUserId fail %{public}d.", result);
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
 
     std::vector<std::string> deviceTypes;
@@ -1118,12 +1124,12 @@ ErrCode AdvancedNotificationService::SetDistributedAuthStatus(
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("IsSystemApp is bogus.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("no permission");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     auto result =
@@ -1140,12 +1146,12 @@ ErrCode AdvancedNotificationService::GetDistributedDevicelist(std::vector<std::s
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Not system app or SA!");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("no permission");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     return NotificationPreferences::GetInstance()->GetDistributedDevicelist(deviceTypes);
 }
@@ -1156,11 +1162,11 @@ ErrCode AdvancedNotificationService::GetDeviceRemindType(int32_t& remindTypeInt)
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
@@ -1169,7 +1175,7 @@ ErrCode AdvancedNotificationService::GetDeviceRemindType(int32_t& remindTypeInt)
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get device remind type.");
     return ERR_OK;
 #else
-    return ERR_INVALID_OPERATION;
+    return ERR_ANS_INNER_INVALID_OPERATION;
 #endif
 }
 
@@ -1180,12 +1186,12 @@ ErrCode AdvancedNotificationService::SetSyncNotificationEnabledWithoutApp(const 
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("AccessTokenHelper::CheckPermission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     ErrCode result = ERR_OK;
@@ -1197,7 +1203,7 @@ ErrCode AdvancedNotificationService::SetSyncNotificationEnabledWithoutApp(const 
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set sync enable app.");
     return result;
 #else
-    return ERR_INVALID_OPERATION;
+    return ERR_ANS_INNER_INVALID_OPERATION;
 #endif
 }
 
@@ -1208,11 +1214,11 @@ ErrCode AdvancedNotificationService::GetSyncNotificationEnabledWithoutApp(const 
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     ErrCode result = ERR_OK;
@@ -1224,7 +1230,7 @@ ErrCode AdvancedNotificationService::GetSyncNotificationEnabledWithoutApp(const 
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get sync enable app.");
     return result;
 #else
-    return ERR_INVALID_OPERATION;
+    return ERR_ANS_INNER_INVALID_OPERATION;
 #endif
 }
 }  // namespace Notification

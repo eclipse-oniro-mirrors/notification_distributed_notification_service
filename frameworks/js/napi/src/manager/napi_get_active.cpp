@@ -15,7 +15,10 @@
 
 #include "napi_get_active.h"
 
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "get_active.h"
 #include "napi_common_util.h"
 #include "napi_common_want.h"
@@ -23,6 +26,7 @@
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 void AsyncCompleteCallbackNapiGetAllActiveNotifications(napi_env env, napi_status status, void *data)
 {
     ANS_LOGD("called");
@@ -58,7 +62,7 @@ void AsyncCompleteCallbackNapiGetAllActiveNotifications(napi_env env, napi_statu
             ANS_LOGD("getAllActiveNotifications count=%{public}d", count);
             result = arr;
             if ((count == 0) && (asynccallbackinfo->notifications.size() > 0)) {
-                asynccallbackinfo->info.errorCode = ERROR;
+                asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
                 result = Common::NapiGetNull(env);
             }
         }
@@ -79,14 +83,14 @@ napi_value NapiGetAllActiveNotifications(napi_env env, napi_callback_info info)
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
         ANS_LOGD("null ParseParaOnlyCallback");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoActive {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         ANS_LOGD("null asynccallbackinfo");
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -104,7 +108,8 @@ napi_value NapiGetAllActiveNotifications(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::GetAllActiveNotifications(asynccallbackinfo->notifications);
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetAllActiveNotifications(
+                        asynccallbackinfo->notifications);
             }
         },
         AsyncCompleteCallbackNapiGetAllActiveNotifications,
@@ -156,7 +161,7 @@ void AsyncCompleteCallbackNapiGetActiveNotifications(napi_env env, napi_status s
             ANS_LOGD("getActiveNotifications count=%{public}d", count);
             result = arr;
             if ((count == 0) && (asynccallbackinfo->requests.size() > 0)) {
-                asynccallbackinfo->info.errorCode = ERROR;
+                asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
                 result = Common::NapiGetNull(env);
             }
         }
@@ -177,14 +182,14 @@ napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
         ANS_LOGD("null ParseParaOnlyCallback");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoActive {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         ANS_LOGD("Create asynccallbackinfo failed.");
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -203,7 +208,7 @@ napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::GetActiveNotifications(
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotifications(
                         asynccallbackinfo->requests, instanceKey);
             }
         },
@@ -254,7 +259,7 @@ napi_value NapiGetActiveNotificationCount(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -277,7 +282,8 @@ napi_value NapiGetActiveNotificationCount(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::GetActiveNotificationNums(asynccallbackinfo->num);
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotificationNums(
+                        asynccallbackinfo->num);
                 ANS_LOGD("getActiveNotificationCount count=%{public}" PRIu64 "", asynccallbackinfo->num);
             }
         },
@@ -346,7 +352,7 @@ napi_value ParseGetLiveViewParams(const napi_env &env, const napi_callback_info 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
     if (argc < ARGS_ONE) {
         ANS_LOGE("Wrong number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -354,12 +360,12 @@ napi_value ParseGetLiveViewParams(const napi_env &env, const napi_callback_info 
     if (!AppExecFwk::IsTypeForNapiValue(env, argv[0], napi_object)) {
         ANS_LOGE("Wrong filter type. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     if (ParseGetLiveViewFilter(env, argv[0], filter) == nullptr) {
         ANS_LOGE("Parse filter from param failed.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -382,8 +388,9 @@ void AsyncGetLiveViewExecute(napi_env env, void *data)
 
     auto asyncLiveViewCallBackInfo = static_cast<AsyncLiveViewCallBackInfo *>(data);
     if (asyncLiveViewCallBackInfo) {
-        asyncLiveViewCallBackInfo->info.errorCode = NotificationHelper::GetActiveNotificationByFilter(
-            asyncLiveViewCallBackInfo->filter, asyncLiveViewCallBackInfo->notificationRequest);
+        asyncLiveViewCallBackInfo->info.errorCode =
+            DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotificationByFilter(
+                asyncLiveViewCallBackInfo->filter, asyncLiveViewCallBackInfo->notificationRequest);
     }
 }
 
@@ -429,7 +436,7 @@ napi_value NapiGetActiveNotificationByFilter(napi_env env, napi_callback_info in
     auto asyncLiveViewCallBackInfo = new (std::nothrow) AsyncLiveViewCallBackInfo {.env = env, .asyncWork = nullptr};
     if (asyncLiveViewCallBackInfo == nullptr) {
         ANS_LOGE("null asyncLiveViewCallBackInfo");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
     napi_ref callback = nullptr;
@@ -437,7 +444,7 @@ napi_value NapiGetActiveNotificationByFilter(napi_env env, napi_callback_info in
         ANS_LOGE("null ParseGetLiveViewParams");
         delete asyncLiveViewCallBackInfo;
         asyncLiveViewCallBackInfo = nullptr;
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
     napi_value promise = nullptr;

@@ -32,6 +32,7 @@
 #include "advanced_notification_service.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
 #include "ans_result_data_synchronizer.h"
@@ -157,7 +158,7 @@ HWTEST_F(AdvancedNotificationAggregationServiceTest, SetNotificationSwitch_00001
     MockSystemApp();
     ErrCode result = advancedNotificationService_->SetNotificationSwitch(
         NotificationConstant::NotificationSwitch::INVALID, true, 100);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -170,7 +171,7 @@ HWTEST_F(AdvancedNotificationAggregationServiceTest, SetNotificationSwitch_00002
 {
     MockSystemApp();
     ErrCode result = advancedNotificationService_->SetNotificationSwitch("", true, 100);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -187,7 +188,7 @@ HWTEST_F(AdvancedNotificationAggregationServiceTest, SetNotificationSwitch_00003
 
     ErrCode result = advancedNotificationService_->SetNotificationSwitch(
         NotificationConstant::NotificationSwitch::DEAL, true, 100);
-    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(result, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -204,7 +205,7 @@ HWTEST_F(AdvancedNotificationAggregationServiceTest, SetNotificationSwitch_00004
 
     ErrCode result = advancedNotificationService_->SetNotificationSwitch(
         NotificationConstant::NotificationSwitch::DEAL, true, 100);
-    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -220,7 +221,7 @@ HWTEST_F(AdvancedNotificationAggregationServiceTest, SetNotificationSwitch_00005
 
     ErrCode result = advancedNotificationService_->SetNotificationSwitch(
         NotificationConstant::NotificationSwitch::DEAL, true, MAX_USER_ID);
-    EXPECT_EQ(result, ERR_ANS_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
 
     MockIsOsAccountExists(true);
 }
@@ -269,7 +270,7 @@ HWTEST_F(AdvancedNotificationAggregationServiceTest, GetNotificationSwitch_00001
     int32_t state = 0;
     ErrCode result = advancedNotificationService_->GetNotificationSwitch(
         NotificationConstant::NotificationSwitch::INVALID, 100, state);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -283,7 +284,7 @@ HWTEST_F(AdvancedNotificationAggregationServiceTest, GetNotificationSwitch_00002
     MockSystemApp();
     int32_t state = 0;
     ErrCode result = advancedNotificationService_->GetNotificationSwitch("", 100, state);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -301,7 +302,7 @@ HWTEST_F(AdvancedNotificationAggregationServiceTest, GetNotificationSwitch_00003
     int32_t state = 0;
     ErrCode result = advancedNotificationService_->GetNotificationSwitch(
         NotificationConstant::NotificationSwitch::DEAL, 100, state);
-    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(result, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -319,7 +320,7 @@ HWTEST_F(AdvancedNotificationAggregationServiceTest, GetNotificationSwitch_00004
     int32_t state = 0;
     ErrCode result = advancedNotificationService_->GetNotificationSwitch(
         NotificationConstant::NotificationSwitch::DEAL, 100, state);
-    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -336,7 +337,7 @@ HWTEST_F(AdvancedNotificationAggregationServiceTest, GetNotificationSwitch_00005
     int32_t state = 0;
     ErrCode result = advancedNotificationService_->GetNotificationSwitch(
         NotificationConstant::NotificationSwitch::DEAL, MAX_USER_ID, state);
-    EXPECT_EQ(result, ERR_ANS_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
 
     MockIsOsAccountExists(true);
 }
@@ -370,12 +371,13 @@ HWTEST_F(AdvancedNotificationAggregationServiceTest, GetNotificationSwitch_00006
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(AdvancedNotificationAggregationServiceTest, TriggerUpdateAiExtNotification_00001, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationAggregationServiceTest, TriggerUpdateAiExtNotification_00001,
+    Function | SmallTest | Level1)
 {
     MockSystemApp();
     sptr<NotificationClassification> classification = new NotificationClassification("DEAL", "LOGISTICS");
     ErrCode result = advancedNotificationService_->TriggerUpdateAiExtNotification(nullptr, classification);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -384,7 +386,8 @@ HWTEST_F(AdvancedNotificationAggregationServiceTest, TriggerUpdateAiExtNotificat
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(AdvancedNotificationAggregationServiceTest, TriggerUpdateAiExtNotification_00002, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationAggregationServiceTest, TriggerUpdateAiExtNotification_00002,
+    Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
@@ -393,7 +396,7 @@ HWTEST_F(AdvancedNotificationAggregationServiceTest, TriggerUpdateAiExtNotificat
     sptr<NotificationRequest> request = new NotificationRequest();
     sptr<NotificationClassification> classification = new NotificationClassification("DEAL", "LOGISTICS");
     ErrCode result = advancedNotificationService_->TriggerUpdateAiExtNotification(request, classification);
-    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(result, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -402,7 +405,8 @@ HWTEST_F(AdvancedNotificationAggregationServiceTest, TriggerUpdateAiExtNotificat
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(AdvancedNotificationAggregationServiceTest, TriggerUpdateAiExtNotification_00003, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationAggregationServiceTest, TriggerUpdateAiExtNotification_00003, \
+    Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
@@ -411,7 +415,7 @@ HWTEST_F(AdvancedNotificationAggregationServiceTest, TriggerUpdateAiExtNotificat
     sptr<NotificationRequest> request = new NotificationRequest();
     sptr<NotificationClassification> classification = new NotificationClassification("DEAL", "LOGISTICS");
     ErrCode result = advancedNotificationService_->TriggerUpdateAiExtNotification(request, classification);
-    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -420,7 +424,8 @@ HWTEST_F(AdvancedNotificationAggregationServiceTest, TriggerUpdateAiExtNotificat
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(AdvancedNotificationAggregationServiceTest, TriggerUpdateAiExtNotification_00004, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationAggregationServiceTest, TriggerUpdateAiExtNotification_00004, \
+    Function | SmallTest | Level1)
 {
     MockNativeToken();
 

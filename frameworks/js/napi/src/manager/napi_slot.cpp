@@ -15,17 +15,21 @@
 
 #include "napi_slot.h"
 
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "slot.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 napi_value NapiAddSlot(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("called");
     ParametersInfoAddSlot paras;
     if (ParseParametersByAddSlot(env, info, paras) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -54,10 +58,13 @@ napi_value NapiAddSlot(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoAddSlot *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->isAddSlotByType) {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::AddSlotByType(asynccallbackinfo->inType);
+                    asynccallbackinfo->info.errorCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->AddSlotByType(
+                            asynccallbackinfo->inType);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        NotificationHelper::AddNotificationSlot(asynccallbackinfo->slot);
+                        DelayedSingleton<AnsNotification>::GetInstance()->AddNotificationSlot(
+                            asynccallbackinfo->slot);
                 }
             }
         },
@@ -95,7 +102,7 @@ napi_value NapiAddSlots(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     ParametersInfoAddSlots paras;
     if (ParseParametersByAddSlots(env, info, paras) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -103,7 +110,7 @@ napi_value NapiAddSlots(napi_env env, napi_callback_info info)
         new (std::nothrow) AsyncCallbackInfoAddSlots {.env = env, .asyncWork = nullptr, .slots = paras.slots};
     if (!asynccallbackinfo) {
         ANS_LOGD("null asynccallbackinfo");
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;
@@ -119,7 +126,9 @@ napi_value NapiAddSlots(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiAddSlots work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoAddSlots *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::AddNotificationSlots(asynccallbackinfo->slots);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->AddNotificationSlots(
+                        asynccallbackinfo->slots);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -156,7 +165,7 @@ napi_value NapiSetSlotByBundle(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     ParametersInfoSetSlotByBundle params {};
     if (ParseParametersSetSlotByBundle(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -178,8 +187,9 @@ napi_value NapiSetSlotByBundle(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiSetSlotByBundle work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoSetSlotByBundle *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::UpdateNotificationSlots(
-                    asynccallbackinfo->params.option, asynccallbackinfo->params.slots);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->UpdateNotificationSlots(
+                        asynccallbackinfo->params.option, asynccallbackinfo->params.slots);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -211,7 +221,6 @@ napi_value NapiSetSlotByBundle(napi_env env, napi_callback_info info)
     }
 }
 
-
 void AsyncCompleteCallbackNapiGetSlot(napi_env env, napi_status status, void *data)
 {
     ANS_LOGD("called");
@@ -227,7 +236,7 @@ void AsyncCompleteCallbackNapiGetSlot(napi_env env, napi_status status, void *da
             if (asynccallbackinfo->slot != nullptr) {
                 napi_create_object(env, &result);
                 if (!Common::SetNotificationSlot(env, *asynccallbackinfo->slot, result)) {
-                    asynccallbackinfo->info.errorCode = ERROR;
+                    asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
                     result = Common::NapiGetNull(env);
                 }
             }
@@ -248,7 +257,7 @@ napi_value NapiGetSlot(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     ParametersInfoGetSlot paras;
     if (ParseParametersByGetSlot(env, info, paras) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -271,7 +280,8 @@ napi_value NapiGetSlot(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoGetSlot *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::GetNotificationSlot(asynccallbackinfo->outType, asynccallbackinfo->slot);
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlot(
+                        asynccallbackinfo->outType, asynccallbackinfo->slot);
             }
         },
         AsyncCompleteCallbackNapiGetSlot,
@@ -294,14 +304,14 @@ napi_value NapiGetSlotNumByBundle(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     ParametersInfoGetSlotNumByBundle params {};
     if (ParseParametersGetSlotNumByBundle(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     AsyncCallbackInfoGetSlotNumByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoGetSlotNumByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -317,8 +327,9 @@ napi_value NapiGetSlotNumByBundle(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiGetSlotNumByBundle work excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlotNumByBundle *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationSlotNumAsBundle(
-                    asynccallbackinfo->params.option, asynccallbackinfo->num);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotNumAsBundle(
+                        asynccallbackinfo->params.option, asynccallbackinfo->num);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -386,7 +397,7 @@ void AsyncCompleteCallbackNapiGetSlots(napi_env env, napi_status status, void *d
             ANS_LOGD("count : %{public}zu", count);
             result = arr;
             if ((count == 0) && (asynccallbackinfo->slots.size() > 0)) {
-                asynccallbackinfo->info.errorCode = ERROR;
+                asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
                 result = Common::NapiGetNull(env);
             }
         }
@@ -406,7 +417,7 @@ napi_value NapiGetSlots(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -427,7 +438,9 @@ napi_value NapiGetSlots(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiGetSlots word excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlots *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationSlots(asynccallbackinfo->slots);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlots(
+                        asynccallbackinfo->slots);
             }
         },
         AsyncCompleteCallbackNapiGetSlots,
@@ -477,7 +490,7 @@ void AsyncCompleteCallbackNapiGetSlotsByBundle(napi_env env, napi_status status,
             ANS_LOGD("count = %{public}zu", count);
             result = arr;
             if ((count == 0) && (asynccallbackinfo->slots.size() > 0)) {
-                asynccallbackinfo->info.errorCode = ERROR;
+                asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
                 result = Common::NapiGetNull(env);
             }
         }
@@ -497,14 +510,14 @@ napi_value NapiGetSlotsByBundle(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     ParametersInfoGetSlotsByBundle params {};
     if (ParseParametersGetSlotsByBundle(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     AsyncCallbackInfoGetSlotsByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoGetSlotsByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -520,8 +533,9 @@ napi_value NapiGetSlotsByBundle(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiGetSlotsByBundle work excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlotsByBundle *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationSlotsForBundle(
-                    asynccallbackinfo->params.option, asynccallbackinfo->slots);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotsForBundle(
+                        asynccallbackinfo->params.option, asynccallbackinfo->slots);
             }
         },
         AsyncCompleteCallbackNapiGetSlotsByBundle,
@@ -555,7 +569,7 @@ void AsyncCompleteCallbackNapiGetSlotByBundle(napi_env env, napi_status status, 
             if (asynccallbackinfo->slot != nullptr) {
                 napi_create_object(env, &result);
                 if (!Common::SetNotificationSlot(env, *asynccallbackinfo->slot, result)) {
-                    asynccallbackinfo->info.errorCode = ERROR;
+                    asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
                     result = Common::NapiGetNull(env);
                 }
             }
@@ -576,14 +590,14 @@ napi_value NapiGetSlotByBundle(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     ParametersInfoGetSlotByBundle params {};
     if (ParseParametersGetSlotByBundle(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     AsyncCallbackInfoGetSlotByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoGetSlotByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -599,8 +613,10 @@ napi_value NapiGetSlotByBundle(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiGetSlotByBundle work excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlotByBundle *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationSlotForBundle(
-                    asynccallbackinfo->params.option, asynccallbackinfo->params.outType, asynccallbackinfo->slot);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotForBundle(
+                        asynccallbackinfo->params.option, asynccallbackinfo->params.outType,
+                        asynccallbackinfo->slot);
             }
         },
         AsyncCompleteCallbackNapiGetSlotByBundle,
@@ -623,7 +639,7 @@ napi_value NapiRemoveSlot(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     ParametersInfoRemoveSlot paras;
     if (ParseParametersByRemoveSlot(env, info, paras) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -647,7 +663,8 @@ napi_value NapiRemoveSlot(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoRemoveSlot *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::RemoveNotificationSlot(asynccallbackinfo->outType);
+                    DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotificationSlot(
+                        asynccallbackinfo->outType);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -684,7 +701,7 @@ napi_value NapiRemoveAllSlots(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -705,7 +722,8 @@ napi_value NapiRemoveAllSlots(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiRemoveAllSlots work excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoRemoveAllSlots *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::RemoveAllSlots();
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->RemoveAllSlots();
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -742,14 +760,14 @@ napi_value NapiEnableNotificationSlot(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     ParametersInfoEnableSlot params {};
     if (ParseParametersEnableSlot(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     AsyncCallbackInfoInfoEnableSlot *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoInfoEnableSlot {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -765,11 +783,12 @@ napi_value NapiEnableNotificationSlot(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiEnableNotificationSlot work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoInfoEnableSlot *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::SetEnabledForBundleSlot(
-                    asynccallbackinfo->params.option,
-                    asynccallbackinfo->params.outType,
-                    asynccallbackinfo->params.enable,
-                    asynccallbackinfo->params.isForceControl);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetEnabledForBundleSlot(
+                        asynccallbackinfo->params.option,
+                        asynccallbackinfo->params.outType,
+                        asynccallbackinfo->params.enable,
+                        asynccallbackinfo->params.isForceControl);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -806,14 +825,14 @@ napi_value NapiIsEnableNotificationSlot(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     ParametersInfoIsEnableSlot params {};
     if (ParseParametersIsEnableSlot(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     AsyncCallbackInfoInfoIsEnableSlot *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoInfoIsEnableSlot {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -829,8 +848,10 @@ napi_value NapiIsEnableNotificationSlot(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiIsEnableNotificationSlot work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoInfoIsEnableSlot *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetEnabledForBundleSlot(
-                    asynccallbackinfo->params.option, asynccallbackinfo->params.outType, asynccallbackinfo->isEnable);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetEnabledForBundleSlot(
+                        asynccallbackinfo->params.option, asynccallbackinfo->params.outType,
+                        asynccallbackinfo->isEnable);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -869,14 +890,14 @@ napi_value NapiSetSlotFlagsByBundle(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     ParametersInfoSetSlotFlagsByBundle params {};
     if (ParseParametersSetSlotFlagsByBundle(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     AsyncCallbackInfoSetSlotFlagsByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoSetSlotFlagsByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -892,8 +913,9 @@ napi_value NapiSetSlotFlagsByBundle(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiSetSlotFlagsByBundle work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoSetSlotFlagsByBundle *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::SetNotificationSlotFlagsAsBundle(
-                    asynccallbackinfo->params.option, asynccallbackinfo->params.slotFlags);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationSlotFlagsAsBundle(
+                        asynccallbackinfo->params.option, asynccallbackinfo->params.slotFlags);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -930,14 +952,14 @@ napi_value NapiGetSlotFlagsByBundle(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     ParametersInfoGetSlotFlagsByBundle params {};
     if (ParseParametersGetSlotFlagsByBundle(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     AsyncCallbackInfoGetSlotFlagsByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoGetSlotFlagsByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -953,8 +975,9 @@ napi_value NapiGetSlotFlagsByBundle(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiGetSlotFlagsByBundle work excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlotFlagsByBundle *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationSlotFlagsAsBundle(
-                    asynccallbackinfo->params.option, asynccallbackinfo->slotFlags);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotFlagsAsBundle(
+                        asynccallbackinfo->params.option, asynccallbackinfo->slotFlags);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -1000,7 +1023,7 @@ void AsyncCompleteCallbackNapiGetNotificationSettings(napi_env env, napi_status 
         napi_value result = Common::NapiGetNull(env);
         napi_create_object(env, &result);
         if (!Common::SetNotificationSettings(env, asynccallbackinfo->slotFlags, result)) {
-            asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+            asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         }
         Common::CreateReturnValue(env, asynccallbackinfo->info, result);
         if (asynccallbackinfo->info.callback != nullptr) {
@@ -1020,7 +1043,7 @@ napi_value NapiGetNotificationSettings(napi_env env, napi_callback_info info)
     AsyncCallbackInfoGetNotificationSettings *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoGetNotificationSettings {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -1036,8 +1059,9 @@ napi_value NapiGetNotificationSettings(napi_env env, napi_callback_info info)
             ANS_LOGD("getNotificationSettings work excute.");
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetNotificationSettings *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationSettings(
-                    asynccallbackinfo->slotFlags);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSettings(
+                        asynccallbackinfo->slotFlags);
             }
         },
         AsyncCompleteCallbackNapiGetNotificationSettings,

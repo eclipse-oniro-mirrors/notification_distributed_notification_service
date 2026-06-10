@@ -19,6 +19,7 @@
 #include "advanced_notification_flow_control_service.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 
 using namespace testing::ext;
 
@@ -110,7 +111,7 @@ HWTEST_F(FlowControlServiceTest, FlowControl_200, Function | SmallTest | Level1)
     ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_ACTIVE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -143,7 +144,7 @@ HWTEST_F(FlowControlServiceTest, FlowControl_300, Function | SmallTest | Level1)
     ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -176,7 +177,7 @@ HWTEST_F(FlowControlServiceTest, FlowControl_400, Function | SmallTest | Level1)
     ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_ACTIVE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -209,7 +210,7 @@ HWTEST_F(FlowControlServiceTest, FlowControl_500, Function | SmallTest | Level1)
     ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -242,7 +243,7 @@ HWTEST_F(FlowControlServiceTest, FlowControl_600, Function | SmallTest | Level1)
     ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_ACTIVE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -275,7 +276,7 @@ HWTEST_F(FlowControlServiceTest, FlowControl_700, Function | SmallTest | Level1)
     ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -308,7 +309,7 @@ HWTEST_F(FlowControlServiceTest, FlowControl_800, Function | SmallTest | Level1)
     ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_ACTIVE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -341,7 +342,7 @@ HWTEST_F(FlowControlServiceTest, FlowControl_900, Function | SmallTest | Level1)
     ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -364,7 +365,7 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1000, Function | SmallTest | Level1
     ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, false);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_ACTIVE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -387,7 +388,7 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1100, Function | SmallTest | Level1
     ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, true);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -410,7 +411,7 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1200, Function | SmallTest | Level1
     ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, false);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_ACTIVE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -433,7 +434,7 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1300, Function | SmallTest | Level1
     ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, true);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -456,7 +457,7 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1400, Function | SmallTest | Level1
     ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, false);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_ACTIVE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -479,7 +480,7 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1500, Function | SmallTest | Level1
     ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, true);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -502,7 +503,7 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1600, Function | SmallTest | Level1
     ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, false);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_ACTIVE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
@@ -525,7 +526,7 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1700, Function | SmallTest | Level1
     ASSERT_EQ(ansStatus.GetErrCode(), ERR_OK);
 
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, true);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 }  // namespace Notification

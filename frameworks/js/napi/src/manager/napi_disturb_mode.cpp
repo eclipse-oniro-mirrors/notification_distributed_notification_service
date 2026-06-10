@@ -14,26 +14,30 @@
  */
 #include "napi_disturb_mode.h"
 
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "disturb_mode.h"
 
 const int SUBSCRIBE_MAX_PARA = 1;
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("called");
 
     SetDoNotDisturbDateParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     AsyncCallbackInfoSetDoNotDisturb *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoSetDoNotDisturb {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -48,11 +52,13 @@ napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
             AsyncCallbackInfoSetDoNotDisturb *asynccallbackinfo = static_cast<AsyncCallbackInfoSetDoNotDisturb *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasUserId) {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::SetDoNotDisturbDate(
-                        asynccallbackinfo->params.userId, asynccallbackinfo->params.date);
+                    asynccallbackinfo->info.errorCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->SetDoNotDisturbDate(
+                            asynccallbackinfo->params.userId, asynccallbackinfo->params.date);
                 } else {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::SetDoNotDisturbDate(
-                        asynccallbackinfo->params.date);
+                    asynccallbackinfo->info.errorCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->SetDoNotDisturbDate(
+                            asynccallbackinfo->params.date);
                 }
 
                 ANS_LOGI("SetDoNotDisturbDate date=%{public}s,code=%{public}d,hasUserId=%{public}d",
@@ -93,13 +99,13 @@ napi_value NapiAddDoNotDisturbProfiles(napi_env env, napi_callback_info info)
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (!ParseProfilesParameters(env, info, profiles, userId)) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
     AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoDoNotDisturbProfile{.env = env, .asyncWork = nullptr, .profiles = profiles, .userId = userId};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -114,11 +120,13 @@ napi_value NapiAddDoNotDisturbProfiles(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoDoNotDisturbProfile *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->userId != SUBSCRIBE_USER_INIT) {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::AddDoNotDisturbProfiles(
-                        asynccallbackinfo->profiles, asynccallbackinfo->userId);
+                    asynccallbackinfo->info.errorCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->AddDoNotDisturbProfiles(
+                            asynccallbackinfo->profiles, asynccallbackinfo->userId);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        NotificationHelper::AddDoNotDisturbProfiles(asynccallbackinfo->profiles);
+                        DelayedSingleton<AnsNotification>::GetInstance()->AddDoNotDisturbProfiles(
+                            asynccallbackinfo->profiles);
                 }
             }
         },
@@ -145,14 +153,14 @@ napi_value NapiRemoveDoNotDisturbProfiles(napi_env env, napi_callback_info info)
     int32_t userId = SUBSCRIBE_USER_INIT;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
     if (!ParseProfilesParameters(env, info, profiles, userId)) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
     AsyncCallbackInfoDoNotDisturbProfile *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoDoNotDisturbProfile{.env = env, .asyncWork = nullptr, .profiles = profiles,
             .userId = userId};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -168,11 +176,12 @@ napi_value NapiRemoveDoNotDisturbProfiles(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->userId != SUBSCRIBE_USER_INIT) {
                     asynccallbackinfo->info.errorCode =
-                    NotificationHelper::RemoveDoNotDisturbProfiles(asynccallbackinfo->profiles,
-                        asynccallbackinfo->userId);
+                        DelayedSingleton<AnsNotification>::GetInstance()->RemoveDoNotDisturbProfiles(
+                            asynccallbackinfo->profiles, asynccallbackinfo->userId);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        NotificationHelper::RemoveDoNotDisturbProfiles(asynccallbackinfo->profiles);
+                        DelayedSingleton<AnsNotification>::GetInstance()->RemoveDoNotDisturbProfiles(
+                            asynccallbackinfo->profiles);
                 }
             }
         },
@@ -206,7 +215,7 @@ void AsyncCompleteCallbackNapiGetDoNotDisturbDate(napi_env env, napi_status stat
         if (asynccallbackinfo->info.errorCode == ERR_OK) {
             napi_create_object(env, &result);
             if (!Common::SetDoNotDisturbDate(env, asynccallbackinfo->date, result)) {
-                asynccallbackinfo->info.errorCode = ERROR;
+                asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
             }
         }
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
@@ -225,14 +234,14 @@ napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
 
     GetDoNotDisturbDateParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     AsyncCallbackInfoGetDoNotDisturb *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoGetDoNotDisturb {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -250,11 +259,13 @@ napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoGetDoNotDisturb *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasUserId) {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::GetDoNotDisturbDate(
-                        asynccallbackinfo->params.userId, asynccallbackinfo->date);
+                    asynccallbackinfo->info.errorCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbDate(
+                            asynccallbackinfo->params.userId, asynccallbackinfo->date);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        NotificationHelper::GetDoNotDisturbDate(asynccallbackinfo->date);
+                        DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbDate(
+                            asynccallbackinfo->date);
                 }
 
                 ANS_LOGI("GetDoNotDisturbDate code=%{public}d,date=%{public}s, hasUserId=%{public}d",
@@ -283,7 +294,7 @@ napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -292,7 +303,7 @@ napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
         .env = env, .asyncWork = nullptr, .callback = callback};
 
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -310,7 +321,8 @@ napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoSupportDoNotDisturb *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::DoesSupportDoNotDisturbMode(asynccallbackinfo->isSupported);
+                    DelayedSingleton<AnsNotification>::GetInstance()->DoesSupportDoNotDisturbMode(
+                        asynccallbackinfo->isSupported);
                 ANS_LOGI("supportDoNotDisturbMode code=%{public}d,isSupported=%{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->isSupported);
             }
@@ -366,7 +378,7 @@ void AsyncCompleteCallbackNapiGetDoNotDisturbProfile(napi_env env, napi_status s
         if (asynccallbackinfo->data != nullptr) {
             napi_create_object(env, &result);
             if (!Common::SetDoNotDisturbProfile(env, *asynccallbackinfo->data, result)) {
-                asynccallbackinfo->info.errorCode = ERROR;
+                asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
                 result = Common::NapiGetNull(env);
             }
         }
@@ -387,7 +399,7 @@ napi_value NapiGetDoNotDisturbProfile(napi_env env, napi_callback_info info)
     int32_t userId = SUBSCRIBE_USER_INIT;
     GetDoNotDisturbProfileParams params {};
     if (ParseParameters(env, info, params, userId) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -395,7 +407,7 @@ napi_value NapiGetDoNotDisturbProfile(napi_env env, napi_callback_info info)
         new (std::nothrow) AsyncCallbackInfoGetDoNotDisturbProfile {.env = env, .asyncWork = nullptr, .params = params,
             .userId = userId};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -412,11 +424,14 @@ napi_value NapiGetDoNotDisturbProfile(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetDoNotDisturbProfile *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->userId != SUBSCRIBE_USER_INIT) {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::GetDoNotDisturbProfile(
-                        asynccallbackinfo->params.profileId, asynccallbackinfo->data, asynccallbackinfo->userId);
+                    asynccallbackinfo->info.errorCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbProfile(
+                            asynccallbackinfo->params.profileId, asynccallbackinfo->data,
+                            asynccallbackinfo->userId);
                 } else {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::GetDoNotDisturbProfile(
-                        asynccallbackinfo->params.profileId, asynccallbackinfo->data);
+                    asynccallbackinfo->info.errorCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbProfile(
+                            asynccallbackinfo->params.profileId, asynccallbackinfo->data);
                 }
             }
         },

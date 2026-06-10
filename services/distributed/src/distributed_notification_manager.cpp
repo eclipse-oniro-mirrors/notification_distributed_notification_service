@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_trace_wrapper.h"
 #include "distributed_data_define.h"
@@ -323,22 +324,22 @@ ErrCode DistributedNotificationManager::Publish(
     std::string key;
     if (!GenerateLocalDistributedKey(bundleName, label, id, key)) {
         ANS_LOGE("Failed to generate distributed key.");
-        return ERR_ANS_DISTRIBUTED_GET_INFO_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_GET_INFO_FAILED;
     }
 
     std::string value;
     if (!NotificationJsonConverter::ConvertToJsonString(request, value)) {
         ANS_LOGE("convert request to json failed. key:%{public}s", key.c_str());
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
 
     if (database_ == nullptr) {
         ANS_LOGE("database_ is nullptr.");
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     if (!database_->PutToDistributedDB(key, value)) {
         ANS_LOGE("put to distributed DB failed. key:%{public}s", key.c_str());
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
 
     return ERR_OK;
@@ -351,22 +352,22 @@ ErrCode DistributedNotificationManager::Update(
     std::string key;
     if (!GenerateLocalDistributedKey(bundleName, label, id, key)) {
         ANS_LOGE("Generate distributed key failed.");
-        return ERR_ANS_DISTRIBUTED_GET_INFO_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_GET_INFO_FAILED;
     }
 
     std::string value;
     if (!NotificationJsonConverter::ConvertToJsonString(request, value)) {
         ANS_LOGE("convert request to json failed. key:%{public}s", key.c_str());
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
 
     if (database_ == nullptr) {
         ANS_LOGE("database_ is invalid.");
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     if (!database_->PutToDistributedDB(key, value)) {
         ANS_LOGE("put to distributed DB failed. key:%{public}s", key.c_str());
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     return ERR_OK;
 }
@@ -378,16 +379,16 @@ ErrCode DistributedNotificationManager::Delete(const std::string &bundleName, co
     std::string key;
     if (!GenerateLocalDistributedKey(bundleName, label, id, key)) {
         ANS_LOGE("Generate distributed key failed.");
-        return ERR_ANS_DISTRIBUTED_GET_INFO_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_GET_INFO_FAILED;
     }
 
     if (database_ == nullptr) {
         ANS_LOGE("database_ is nullptr.");
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     if (!database_->DeleteToDistributedDB(key)) {
         ANS_LOGE("Failed to DeleteToDistributedDB. key:%{public}s", key.c_str());
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     return ERR_OK;
 }
@@ -403,11 +404,11 @@ ErrCode DistributedNotificationManager::DeleteRemoteNotification(
 
     if (database_ == nullptr) {
         ANS_LOGE("database_ is invalid.");
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     if (!database_->DeleteToDistributedDB(key)) {
         ANS_LOGE("delete to distributed DB failed. key:%{public}s", StringAnonymous(key).c_str());
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     return ERR_OK;
 }
@@ -417,7 +418,7 @@ ErrCode DistributedNotificationManager::RegisterCallback(const IDistributedCallb
     ANS_LOGD("start");
     if (distributedQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     callback_ = callback;
@@ -440,11 +441,11 @@ ErrCode DistributedNotificationManager::GetCurrentDistributedNotification(
     std::vector<DistributedDatabase::Entry> entries;
     if (database_ == nullptr) {
         ANS_LOGE("database_ is invalid.");
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     if (!database_->GetEntriesFromDistributedDB(prefixKey, entries)) {
         ANS_LOGE("GetEntriesFromDistributedDB failed.");
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
 
     for (auto index : entries) {
@@ -472,10 +473,10 @@ ErrCode DistributedNotificationManager::GetLocalDeviceInfo(DistributedDatabase::
     ANS_LOGD("start");
     if (database_ == nullptr) {
         ANS_LOGE("database_ is invalid.");
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     if (!database_->GetLocalDeviceInfo(deviceInfo)) {
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
 
     return ERR_OK;
@@ -486,11 +487,11 @@ ErrCode DistributedNotificationManager::OnDistributedKvStoreDeathRecipient()
     ANS_LOGD("start");
     if (database_ == nullptr) {
         ANS_LOGE("database_ is invalid.");
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     if (!database_->RecreateDistributedDB()) {
         ANS_LOGE("RecreateDistributedDB failed.");
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     return ERR_OK;
 }

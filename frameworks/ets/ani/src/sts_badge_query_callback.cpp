@@ -233,7 +233,6 @@ bool StsBadgeQueryCallBackManager::MakeBadgeQueryCallBackInfo(ani_env *env, ani_
     return true;
 }
 
-
 bool StsBadgeQueryCallBackManager::AddBadgeQueryCallBackInfo(int32_t userId,
     std::shared_ptr<StsBadgeQueryCallBack> &badgeQueryCallback)
 {
@@ -261,7 +260,7 @@ void StsBadgeQueryCallBackManager::AniOnBadgeNumberQuery(ani_env *env, ani_fn_ob
     bool isFnUndefine = IsUndefine(env, fn);
     if (isFnUndefine) {
         ANS_LOGD("BadgeQueryCallback is undefine");
-        OHOS::NotificationSts::ThrowError(env, ERROR_PARAM_INVALID, "BadgeQueryCallback is undefine");
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_INVALID_PARAM, "BadgeQueryCallback is undefine");
         return;
     }
     int32_t uid = IPCSkeleton::GetCallingUid();
@@ -275,7 +274,7 @@ void StsBadgeQueryCallBackManager::AniOnBadgeNumberQuery(ani_env *env, ani_fn_ob
     }
 
     if (!CheckCallerIsSystemApp()) {
-        OHOS::NotificationSts::ThrowErrorWithCode(env, ERROR_NOT_SYSTEM_APP);
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_NON_SYSTEM_APP);
         return;
     }
 
@@ -291,12 +290,9 @@ void StsBadgeQueryCallBackManager::AniOnBadgeNumberQuery(ani_env *env, ani_fn_ob
     ErrCode status = ERR_OK;
     status = NotificationHelper::RegisterBadgeQueryCallback(objectInfo);
     if (status != ERR_OK) {
-        int32_t externalErrorCode = GetExternalCode(status);
-        externalErrorCode = (externalErrorCode == ERR_OK) ? status : externalErrorCode;
-        ANS_LOGD("AniOnBadgeNumberQuery faild. UserId %{public}d status %{public}d ErrorToExternal %{public}d",
-            userId, status, externalErrorCode);
-        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
-        OHOS::NotificationSts::ThrowError(env, externalErrorCode, msg);
+        ANS_LOGD("AniOnBadgeNumberQuery faild. UserId %{public}d status %{public}d",
+            userId, status);
+        OHOS::NotificationSts::ThrowErrorWithCode(env, status);
         return;
     }
     ANS_LOGD("AniOnBadgeNumberQuery end");
@@ -317,7 +313,7 @@ void StsBadgeQueryCallBackManager::AniOffBadgeNumberQuery(ani_env *env)
     }
 
     if (!CheckCallerIsSystemApp()) {
-        OHOS::NotificationSts::ThrowErrorWithCode(env, ERROR_NOT_SYSTEM_APP);
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_NON_SYSTEM_APP);
         return;
     }
 
@@ -331,12 +327,9 @@ void StsBadgeQueryCallBackManager::AniOffBadgeNumberQuery(ani_env *env)
     ErrCode status = ERR_OK;
     status = NotificationHelper::UnRegisterBadgeQueryCallback(callback);
     if (status != ERR_OK) {
-        int32_t externalErrorCode = GetExternalCode(status);
-        externalErrorCode = (externalErrorCode == ERR_OK) ? status : externalErrorCode;
-        ANS_LOGE("AniOnBadgeNumberQuery faild. UserId %{public}d status %{public}d ErrorToExternal %{public}d",
-            userId, status, externalErrorCode);
-        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
-        OHOS::NotificationSts::ThrowError(env, externalErrorCode, msg);
+        ANS_LOGE("AniOffBadgeNumberQuery faild. UserId %{public}d status %{public}d",
+            userId, status);
+        OHOS::NotificationSts::ThrowErrorWithCode(env, status);
     }
     callback->Clean(env);
     DelBadgeQueryCallBackInfo(userId);

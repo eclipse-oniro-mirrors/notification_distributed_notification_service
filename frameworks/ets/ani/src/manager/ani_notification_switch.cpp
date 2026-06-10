@@ -16,7 +16,8 @@
 #include "ani_notification_switch.h"
 
 #include "ans_log_wrapper.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "sts_common.h"
 #include "sts_notification_manager.h"
 #include "sts_throw_erro.h"
@@ -24,6 +25,8 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 
 namespace {
 void DeleteCallBackInfoWithoutPromise(ani_env *env,
@@ -80,8 +83,7 @@ bool CheckCompleteEnvironment(ani_env **envCurr,
         ANS_LOGE("GetEnv failed");
         return false;
     }
-    if (asyncCallbackInfo->info.returnCode != ERR_OK &&
-        asyncCallbackInfo->info.returnCode != Notification::ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED) {
+    if (asyncCallbackInfo->info.returnCode != ERR_OK) {
         NotificationSts::CreateReturnData(*envCurr, asyncCallbackInfo->info);
         DeleteCallBackInfoWithoutPromise(*envCurr, asyncCallbackInfo);
         return false;
@@ -111,22 +113,13 @@ void HandleNotificationSwitchCallbackComplete(ani_env *env, WorkStatus status, v
         return;
     }
 
-    if (asyncCallbackInfo->info.returnCode == Notification::ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED) {
-        int32_t errorCode = Notification::ERROR_INTERNAL_ERROR;
-        std::string errMsg = "Internal error. Database operation failed.";
-        ani_object errorObj = NotificationSts::CreateError(envCurr, errorCode, errMsg);
-        envCurr->PromiseResolver_Reject(asyncCallbackInfo->info.resolve, static_cast<ani_error>(errorObj));
-        DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
-        return;
-    }
-
     if (asyncCallbackInfo->functionType == GET_NOTIFICATION_SWITCH) {
         ani_enum_item switchStateItem = nullptr;
-        auto switchState = static_cast<Notification::NotificationConstant::SWITCH_STATE>(
+        auto switchState = static_cast<NotificationConstant::SWITCH_STATE>(
             asyncCallbackInfo->enableStatus);
         if (!NotificationSts::SwitchStateCToEts(envCurr, switchState, switchStateItem)) {
             ANS_LOGE("SwitchStateCToEts failed");
-            asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
         } else {
             asyncCallbackInfo->info.result = static_cast<ani_object>(switchStateItem);
         }
@@ -143,12 +136,12 @@ ani_object AniSetNotificationSwitch(ani_env *env, ani_string switchName, ani_boo
     };
     if (asyncCallbackInfo == nullptr) {
         ANS_LOGE("asyncCallbackInfo is nullptr");
-        return NotificationSts::AniJumpCbError(env, nullptr, Notification::ERROR_NO_MEMORY);
+        return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_NO_MEMORY);
     }
     if (NotificationSts::GetStringByAniString(env, switchName, asyncCallbackInfo->switchName) != ANI_OK) {
         ANS_LOGE("GetStringByAniString failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, nullptr, Notification::ERROR_PARAM_INVALID);
+        return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_INVALID_PARAM);
     }
     asyncCallbackInfo->switchState = NotificationSts::AniBooleanToBool(switchState);
     asyncCallbackInfo->userId = userId;
@@ -160,14 +153,16 @@ ani_object AniSetNotificationSwitch(ani_env *env, ani_string switchName, ani_boo
     if (aniStatus != ANI_OK) {
         ANS_LOGE("GetVM failed, status: %{public}d", aniStatus);
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, nullptr, Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_TASK_ERR);
     }
     WorkStatus workStatus = CreateAsyncWork(env,
         [](ani_env *env, void *data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackNotificationSwitchInfo *>(data);
             if (asyncCallbackInfo != nullptr) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetNotificationSwitch(
-                    asyncCallbackInfo->switchName, asyncCallbackInfo->switchState, asyncCallbackInfo->userId);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationSwitch(
+                        asyncCallbackInfo->switchName, asyncCallbackInfo->switchState,
+                        asyncCallbackInfo->userId);
             }
         },
         HandleNotificationSwitchCallbackComplete,
@@ -175,7 +170,7 @@ ani_object AniSetNotificationSwitch(ani_env *env, ani_string switchName, ani_boo
     if (workStatus != WorkStatus::OK || QueueAsyncWork(env, asyncCallbackInfo->asyncWork) != WorkStatus::OK) {
         ANS_LOGE("CreateAsyncWork or QueueAsyncWork failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, nullptr, Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_TASK_ERR);
     }
     return promise;
 }
@@ -187,12 +182,12 @@ ani_object AniGetNotificationSwitch(ani_env *env, ani_string switchName, ani_int
     };
     if (asyncCallbackInfo == nullptr) {
         ANS_LOGE("asyncCallbackInfo is nullptr");
-        return NotificationSts::AniJumpCbError(env, nullptr, Notification::ERROR_NO_MEMORY);
+        return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_NO_MEMORY);
     }
     if (NotificationSts::GetStringByAniString(env, switchName, asyncCallbackInfo->switchName) != ANI_OK) {
         ANS_LOGE("GetStringByAniString failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, nullptr, Notification::ERROR_PARAM_INVALID);
+        return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_INVALID_PARAM);
     }
     asyncCallbackInfo->userId = userId;
     asyncCallbackInfo->functionType = GET_NOTIFICATION_SWITCH;
@@ -204,16 +199,18 @@ ani_object AniGetNotificationSwitch(ani_env *env, ani_string switchName, ani_int
     if (aniStatus != ANI_OK) {
         ANS_LOGE("GetVM failed, status: %{public}d", aniStatus);
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, nullptr, Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_TASK_ERR);
     }
     WorkStatus workStatus = CreateAsyncWork(env,
         [](ani_env *env, void *data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackNotificationSwitchInfo *>(data);
             if (asyncCallbackInfo != nullptr) {
-                Notification::NotificationConstant::SWITCH_STATE switchState =
-                    Notification::NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetNotificationSwitch(
-                    asyncCallbackInfo->switchName, asyncCallbackInfo->userId, switchState);
+                NotificationConstant::SWITCH_STATE switchState =
+                    NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSwitch(
+                        asyncCallbackInfo->switchName, asyncCallbackInfo->userId,
+                        switchState);
                 asyncCallbackInfo->enableStatus = static_cast<int32_t>(switchState);
             }
         },
@@ -222,7 +219,7 @@ ani_object AniGetNotificationSwitch(ani_env *env, ani_string switchName, ani_int
     if (workStatus != WorkStatus::OK || QueueAsyncWork(env, asyncCallbackInfo->asyncWork) != WorkStatus::OK) {
         ANS_LOGE("CreateAsyncWork or QueueAsyncWork failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, nullptr, Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_TASK_ERR);
     }
     return promise;
 }

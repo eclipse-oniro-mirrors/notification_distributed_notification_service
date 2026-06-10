@@ -16,6 +16,7 @@
 #include "distributed_screen_status_manager.h"
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "device_manager.h"
 #include "distributed_preferences.h"
@@ -175,12 +176,12 @@ ErrCode DistributedScreenStatusManager::CheckRemoteDevicesIsUsing(bool &isUsing)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (!CheckKvDataManager() || kvStore_ == nullptr) {
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
 
     if (!KvManagerFlowControl() || !KvStoreFlowControl()) {
         ANS_LOGE("flow control.");
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
 
     std::vector<DistributedHardware::DmDeviceInfo> devInfoList;
@@ -188,7 +189,7 @@ ErrCode DistributedScreenStatusManager::CheckRemoteDevicesIsUsing(bool &isUsing)
     if (ret != ERR_OK) {
         ANS_LOGE("Get trust device list failed ret = %{public}d", ret);
         kvDataManager_.reset();
-        return ERR_ANS_DISTRIBUTED_GET_INFO_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_GET_INFO_FAILED;
     }
 
     DistributedKv::Key prefixKey("");
@@ -197,7 +198,7 @@ ErrCode DistributedScreenStatusManager::CheckRemoteDevicesIsUsing(bool &isUsing)
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("kvStore GetEntries() failed ret = 0x%{public}x", status);
         kvStore_.reset();
-        return ERR_ANS_DISTRIBUTED_GET_INFO_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_GET_INFO_FAILED;
     }
 
     for (auto entry : entries) {
@@ -225,19 +226,19 @@ ErrCode DistributedScreenStatusManager::SetLocalScreenStatus(bool screenOn)
     ANS_LOGD("called, screenOn:%{public}s", screenOn ? "true" : "false");
     localScreenOn_ = screenOn;
     if (kvStore_ == nullptr) {
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
 
     if (!KvManagerFlowControl() || !KvStoreFlowControl()) {
         ANS_LOGE("flow control.");
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
 
     DistributedHardware::DmDeviceInfo localDevice;
     int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetLocalDeviceInfo(APP_ID, localDevice);
     if (ret != ERR_OK) {
         ANS_LOGE("Get trust local device info failed ret = %{public}d", ret);
-        return ERR_ANS_DISTRIBUTED_GET_INFO_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_GET_INFO_FAILED;
     }
 
     DistributedKv::Key kvStoreKey = GenerateDistributedKey(localDevice.deviceId);
@@ -245,7 +246,7 @@ ErrCode DistributedScreenStatusManager::SetLocalScreenStatus(bool screenOn)
     DistributedKv::Status status = kvStore_->Put(kvStoreKey, kvStoreValue);
     if (status != DistributedKv::Status::SUCCESS) {
         ANS_LOGE("kvStore Put() failed ret = 0x%{public}x", status);
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
 
     return ERR_OK;

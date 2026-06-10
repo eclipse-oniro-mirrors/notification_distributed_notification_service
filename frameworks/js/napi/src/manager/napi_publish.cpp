@@ -15,12 +15,16 @@
 
 #include "napi_publish.h"
 
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "publish.h"
 #include "hitrace_util.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 
 napi_value NapiPublish(napi_env env, napi_callback_info info)
 {
@@ -29,7 +33,7 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
     ParametersInfoPublish params;
     if (ParseParameters(env, info, params) == nullptr) {
         Common::HistogramBoolReport("NotificationKit.APICall.publish", false);
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -38,7 +42,7 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
     if (!asynccallbackinfo) {
         Common::HistogramBoolReport("NotificationKit.APICall.publish", false);
         ANS_LOGD("null asynccallbackinfo");
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     asynccallbackinfo->request = params.request;
@@ -60,8 +64,9 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
                     asynccallbackinfo->request.GetNotificationId(),
                     asynccallbackinfo->request.GetContent()->GetContentType());
                 std::string instanceKey = Common::GetAppInstanceKey();
-                asynccallbackinfo->info.errorCode = NotificationHelper::PublishNotification(
-                    asynccallbackinfo->request, instanceKey);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(
+                        asynccallbackinfo->request, instanceKey);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -103,7 +108,7 @@ napi_value NapiShowNotification(napi_env env, napi_callback_info info)
     ParametersInfoPublish params;
     if (ParseShowOptions(env, info, params) == nullptr) {
         ANS_LOGD("parse showOptions failed");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -130,7 +135,8 @@ napi_value NapiShowNotification(napi_env env, napi_callback_info info)
                     asynccallbackinfo->request.GetContent()->GetContentType());
                 std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::PublishNotification(asynccallbackinfo->request, instanceKey);
+                    DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(
+                        asynccallbackinfo->request, instanceKey);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -160,14 +166,14 @@ napi_value NapiPublishAsBundle(napi_env env, napi_callback_info info)
     TraceChainUtil traceChain = TraceChainUtil();
     ParametersInfoPublish params;
     if (ParsePublishAsBundleParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     napi_value promise = nullptr;
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoPublish {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
 
@@ -188,9 +194,9 @@ napi_value NapiPublishAsBundle(napi_env env, napi_callback_info info)
                         "%{public}d",
                     asynccallbackinfo->request.GetNotificationId(),
                     asynccallbackinfo->request.GetContent()->GetContentType());
-
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::PublishNotification(asynccallbackinfo->request);
+                    DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(
+                        asynccallbackinfo->request);
             }
         },
         [](napi_env env, napi_status status, void *data) {

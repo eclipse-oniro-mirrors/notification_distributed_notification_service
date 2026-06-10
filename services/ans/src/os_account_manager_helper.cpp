@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "ans_log_wrapper.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "errors.h"
 #include "ipc_skeleton.h"
 #include "os_account_manager_helper.h"
@@ -49,7 +49,7 @@ ErrCode OsAccountManagerHelper::GetCurrentCallingUserId(int32_t &userId)
             " ret " + std::to_string(ret));
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("Get userId failed, callingUid = <%{public}d>, code is %{public}d", callingUid, ret);
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     ANS_LOGD("Get userId Success, callingUid = <%{public}d> userId = <%{public}d>", callingUid, userId);
     return ERR_OK;

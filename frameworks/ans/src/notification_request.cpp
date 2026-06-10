@@ -17,6 +17,7 @@
 
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_image_util.h"
 #include "ans_log_wrapper.h"
 #include "errors.h"
@@ -3113,12 +3114,12 @@ ErrCode NotificationRequest::CheckVersion(const sptr<NotificationRequest> &oldRe
 {
     if (oldRequest == nullptr) {
         ANS_LOGE("oldRequest is nullptr");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     
     if (notificationContent_ == nullptr) {
         ANS_LOGE("notificationContent_ is nullptr");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     
     auto content = notificationContent_->GetNotificationContent();
@@ -3133,13 +3134,13 @@ ErrCode NotificationRequest::CheckVersion(const sptr<NotificationRequest> &oldRe
         ANS_LOGE("Invalid version, creator bundle name %{public}s, id %{public}d, "
             "old version %{public}u, new version %{public}u.", GetCreatorBundleName().c_str(),
             GetNotificationId(), oldLiveView->GetVersion(), liveView->GetVersion());
-        return ERR_ANS_EXPIRED_NOTIFICATION;
+        return ERR_ANS_INNER_EXPIRED_NOTIFICATION;
     }
     if (oldLiveView->GetVersion() >= liveView->GetVersion()) {
         ANS_LOGE("Live view has finished, creator bundle name %{public}s, id %{public}d, "
             "old version %{public}u, new version %{public}u.", GetCreatorBundleName().c_str(),
             GetNotificationId(), oldLiveView->GetVersion(), liveView->GetVersion());
-        return ERR_ANS_EXPIRED_NOTIFICATION;
+        return ERR_ANS_INNER_EXPIRED_NOTIFICATION;
     }
     return ERR_OK;
 }
@@ -3150,7 +3151,7 @@ ErrCode NotificationRequest::CheckNotificationRequest(const sptr<NotificationReq
         if ((oldRequest != nullptr) && oldRequest->IsCommonLiveView()) {
             ANS_LOGE("Invalid new request param, slot type %{public}d, content type %{public}d.",
                 GetSlotType(), GetNotificationType());
-            return ERR_ANS_INVALID_PARAM;
+            return ERR_ANS_INNER_INVALID_PARAM;
         }
         return ERR_OK;
     }
@@ -3163,7 +3164,7 @@ ErrCode NotificationRequest::CheckNotificationRequest(const sptr<NotificationReq
         if (status != StatusType::LIVE_VIEW_CREATE) {
             ANS_LOGE("Doesn't exist live view, bundle name %{public}s, id %{public}d.",
                 GetCreatorBundleName().c_str(), GetNotificationId());
-            return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+            return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
         }
         return ERR_OK;
     }
@@ -3171,13 +3172,13 @@ ErrCode NotificationRequest::CheckNotificationRequest(const sptr<NotificationReq
     if (!oldRequest->IsCommonLiveView()) {
         ANS_LOGE("Invalid old request param, slot type %{public}d, content type %{public}d.",
             oldRequest->GetSlotType(), oldRequest->GetNotificationType());
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     if (status == StatusType::LIVE_VIEW_CREATE) {
         ANS_LOGW("Repeat create live view, bundle name %{public}s, id %{public}d.",
             GetCreatorBundleName().c_str(), GetNotificationId());
-        return ERR_ANS_REPEAT_CREATE;
+        return ERR_ANS_INNER_REPEAT_CREATE;
     }
 
     auto oldContent = oldRequest->GetContent()->GetNotificationContent();
@@ -3186,7 +3187,7 @@ ErrCode NotificationRequest::CheckNotificationRequest(const sptr<NotificationReq
     if (oldStatus == StatusType::LIVE_VIEW_END) {
         ANS_LOGW("Live view has finished, bundle name %{public}s, id %{public}d.",
             GetCreatorBundleName().c_str(), GetNotificationId());
-        return ERR_ANS_END_NOTIFICATION;
+        return ERR_ANS_INNER_END_NOTIFICATION;
     }
 
     return CheckVersion(oldRequest);
@@ -3484,7 +3485,7 @@ ErrCode NotificationRequest::CheckImageSizeForConverSation(std::shared_ptr<Notif
     auto picture = conversationalContent->GetMessageUser().GetPixelMap();
     if (CheckImageOverSizeForPixelMap(picture, MAX_ICON_SIZE)) {
         ANS_LOGE("The size of picture in ConversationalContent's message user exceeds limit");
-        return ERR_ANS_ICON_OVER_SIZE;
+        return ERR_ANS_INNER_ICON_OVER_SIZE;
     }
 
     auto messages = conversationalContent->GetAllConversationalMessages();
@@ -3495,7 +3496,7 @@ ErrCode NotificationRequest::CheckImageSizeForConverSation(std::shared_ptr<Notif
         auto img = msg->GetSender().GetPixelMap();
         if (CheckImageOverSizeForPixelMap(img, MAX_ICON_SIZE)) {
             ANS_LOGE("The size of picture in ConversationalContent's message exceeds limit");
-            return ERR_ANS_ICON_OVER_SIZE;
+            return ERR_ANS_INNER_ICON_OVER_SIZE;
         }
     }
     return ERR_OK;
@@ -3507,7 +3508,7 @@ ErrCode NotificationRequest::CheckImageSizeForPicture(std::shared_ptr<Notificati
     auto bigPicture = pictureContent->GetBigPicture();
     if (CheckImageOverSizeForPixelMap(bigPicture, MAX_PICTURE_SIZE)) {
         ANS_LOGE("The size of big picture in PictureContent exceeds limit");
-        return ERR_ANS_PICTURE_OVER_SIZE;
+        return ERR_ANS_INNER_PICTURE_OVER_SIZE;
     }
     return ERR_OK;
 }
@@ -3520,16 +3521,16 @@ ErrCode NotificationRequest::CheckImageSizeForLiveView(std::shared_ptr<Notificat
     for (const auto &pixelMapRecord : pictureMap) {
         if (pixelMapRecord.second.empty()) {
             ANS_LOGE("Picture key exist, but picture content is empty.");
-            return ERR_ANS_INVALID_PARAM;
+            return ERR_ANS_INNER_INVALID_PARAM;
         }
         if (pixelMapRecord.second.size() > MAX_LIVE_VIEW_ICON_NUM) {
             ANS_LOGE("Picture key exist, but picture content count exceeds limit.");
-            return ERR_ANS_INVALID_PARAM;
+            return ERR_ANS_INNER_INVALID_PARAM;
         }
         for (const auto &pixelMap : pixelMapRecord.second) {
             if (!collaborateFlag && CheckImageOverSizeForPixelMap(pixelMap, MAX_ICON_SIZE)) {
                 ANS_LOGE("The size of big picture in PictureContent exceeds limit.");
-                return ERR_ANS_ICON_OVER_SIZE;
+                return ERR_ANS_INNER_ICON_OVER_SIZE;
             }
         }
     }
@@ -3676,7 +3677,7 @@ ErrCode NotificationRequest::CheckLockScreenPictureSizeForLiveView(std::shared_p
     auto lockScreenPicture = content->GetLockScreenPicture();
     if (CheckImageOverSizeForPixelMap(lockScreenPicture, MAX_PICTURE_SIZE)) {
         ANS_LOGE("The size of lockScreen picture in live view exceeds limit");
-        return ERR_ANS_PICTURE_OVER_SIZE;
+        return ERR_ANS_INNER_PICTURE_OVER_SIZE;
     }
     return ERR_OK;
 }

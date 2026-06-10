@@ -18,13 +18,13 @@
 #define private public
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "mock_distributed_operation_callback.h"
 #include "notification_operation_service.h"
 #include "mock_distributed_operation_callback.h"
 
 namespace OHOS {
 namespace Notification {
-
 using namespace testing::ext;
 
 class DistributedOperationServiceTest : public testing::Test {
@@ -84,7 +84,7 @@ HWTEST_F(DistributedOperationServiceTest, DeviceData_00002, Function | SmallTest
     // time out operation result.
     sleep(1);
     int32_t result = MockOperationCallback::GetOperationResult();
-    ASSERT_EQ(result, (int)ERR_ANS_OPERATION_TIMEOUT);
+    ASSERT_EQ(result, (int)ERR_ANS_INNER_OPERATION_TIMEOUT);
 }
 
 /**

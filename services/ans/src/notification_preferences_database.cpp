@@ -20,7 +20,6 @@
 #include <sstream>
 
 #include "ans_const_define.h"
-#include "ans_inner_errors.h"
 #include "os_account_manager_helper.h"
 #include "ans_log_wrapper.h"
 #include "ans_trace_wrapper.h"
@@ -318,7 +317,7 @@ static const char* const KEY_PRIORITY_NOTIFICATION_SWITCH = "priorityNotificatio
  * Indicates that priority notification switch for bundle.
  */
 static const char* const KEY_PRIORITY_NOTIFICATION_SWITCH_FOR_BUNDLE = "priorityNotificationSwitchForBundle";
- 
+
 /**
  * Indicates that priority config for bundle.
  */
@@ -442,7 +441,7 @@ bool NotificationPreferencesDatabase::QueryStatisticsByBundle(
     auto beginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(targetUtc.time_since_epoch());
     int64_t beginTime = beginDuration.count();
     int32_t result = rdbDataManager_->QueryStatisticsByBundle(bundleUid, userId, beginTime, recentCount, lastTime);
-    
+
     return result == NativeRdb::E_OK ? true : false;
 }
 
@@ -1348,7 +1347,7 @@ void NotificationPreferencesDatabase::GetDistributedEnabledForClone(const int32_
         bundleItem.SetCollaborationSwitch(collaborationSwitch);
     }
 }
- 
+
 void NotificationPreferencesDatabase::GetDistributedEnabledForBundle(
     const NotificationPreferencesInfo::BundleInfo& bundleInfo,
     const std::string& deviceType, NotificationDistributedBundle& distributedBundle)
@@ -1364,7 +1363,7 @@ void NotificationPreferencesDatabase::GetDistributedEnabledForBundle(
     }
     ANS_LOGI("Get distributed enabled %{public}s", distributedBundle.Dump().c_str());
 }
- 
+
 void NotificationPreferencesDatabase::ParseDistributedInfoFromDB(const std::string& deviceType, const int32_t &userId,
     const std::unordered_map<std::string, std::string> &values, std::vector<NotificationDistributedBundle>& bundles)
 {
@@ -1946,7 +1945,6 @@ void NotificationPreferencesDatabase::ParseSlotLedLightColor(
 void NotificationPreferencesDatabase::ParseSlotLockscreenVisibleness(
     sptr<NotificationSlot> &slot, const std::string &value) const
 {
-
     ANS_LOGD("ParseSlotLockscreenVisibleness slot visible is %{public}s.", value.c_str());
     NotificationConstant::VisiblenessType visible =
         static_cast<NotificationConstant::VisiblenessType>(StringToInt(value));
@@ -2252,7 +2250,7 @@ bool NotificationPreferencesDatabase::RemoveSilentEnabledDbByBundle(std::string 
         ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
- 
+
     std::string key = GenerateSilentReminderKey(
         {bundleName, uid, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF});
     int32_t userId = -1;
@@ -2262,7 +2260,7 @@ bool NotificationPreferencesDatabase::RemoveSilentEnabledDbByBundle(std::string 
         ANS_LOGE("Delete Silent db info failed, bundle[%{public}s:%{public}d]", bundleName.c_str(), uid);
         return false;
     }
- 
+
     ANS_LOGI("Remove Silent db info, bundle[%{public}s:%{public}d]", bundleName.c_str(), uid);
     return true;
 }
@@ -2560,7 +2558,7 @@ bool NotificationPreferencesDatabase::PutDistributedBundleOption(
         ANS_LOGE("get exist distributed switch error");
         return false;
     }
-    
+
     bool retResult = true;
     std::unordered_map<std::string, std::string> values;
     for (auto bundleOption : bundles) {
@@ -3229,7 +3227,7 @@ bool NotificationPreferencesDatabase::IsSilentReminderEnabled(
         ANS_LOGE("Bundle name is null.");
         return false;
     }
- 
+
     std::string key = GenerateSilentReminderKey(silentReminderInfo);
     bool result = false;
     int32_t userId = -1;
@@ -3514,7 +3512,7 @@ bool NotificationPreferencesDatabase::PutExtensionSubscriptionClonedInvalidBundl
         itemNode[KEY_EXTENSION_SUBSCRIPTION_CLONEDATA_INVALID_BUNDLE_PROPERTY] = invalidBundlesNode;
         jsonNodes.emplace_back(itemNode);
     }
-    
+
     int32_t result = rdbDataManager_->InsertData(KEY_EXTENSION_SUBSCRIPTION_CLONEDATA,
         jsonNodes.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), userId);
     return (result == NativeRdb::E_OK);
@@ -4245,7 +4243,7 @@ bool NotificationPreferencesDatabase::GetAllDistribuedEnabledBundles(int32_t use
         ANS_LOGE("Get failed, key %{public}s,result %{public}d.", key.c_str(), result);
         return NativeRdb::E_ERROR;
     }
- 
+
     for (auto& Item : values) {
         if (!static_cast<bool>(StringToInt(Item.second))) {
             continue;
@@ -4262,7 +4260,7 @@ bool NotificationPreferencesDatabase::GetAllDistribuedEnabledBundles(int32_t use
     }
     return true;
 }
- 
+
 void NotificationPreferencesDatabase::StringSplit(const std::string content, char delim,
     std::vector<std::string>& result) const
 {

@@ -19,6 +19,7 @@
 #define private public
 
 #include "advanced_notification_service.h"
+#include "ans_service_errors.h"
 #include "advanced_datashare_helper.h"
 #include "notification_check_request.h"
 
@@ -32,7 +33,6 @@ using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 namespace Notification {
-
 class AdvancedNotificationSysLiveviewServiceTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -79,7 +79,7 @@ HWTEST_F(AdvancedNotificationSysLiveviewServiceTest, GetNotificationById_100, Fu
 
     auto ret = advancedNotificationService_->GetNotificationById(bundle, notificationId, notification);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -127,7 +127,7 @@ HWTEST_F(AdvancedNotificationSysLiveviewServiceTest, GetNotificationById_300, Fu
 
     auto ret = advancedNotificationService_->GetNotificationById(bundle, notificationId, notification);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -147,7 +147,7 @@ HWTEST_F(AdvancedNotificationSysLiveviewServiceTest, SubscribeLocalLiveView_100,
 
     auto ret = advancedNotificationService_->SubscribeLocalLiveView(subscriber, info, isNative);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -165,7 +165,7 @@ HWTEST_F(AdvancedNotificationSysLiveviewServiceTest, SubscribeLocalLiveView_200,
 
     auto ret = advancedNotificationService_->SubscribeLocalLiveView(subscriber, info, isNative);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**

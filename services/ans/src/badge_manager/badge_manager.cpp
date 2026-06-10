@@ -14,6 +14,7 @@
  */
 
 #include "advanced_notification_service.h"
+#include "ans_service_errors.h"
 
 #include "errors.h"
 #include "ans_log_wrapper.h"
@@ -29,7 +30,6 @@
 
 namespace OHOS {
 namespace Notification {
-
 constexpr int32_t BADGE_NUM_LIMIT = 0;
 constexpr int32_t INVALID_BADGE_NUMBER = -1;
 ffrt::mutex AdvancedNotificationService::badgeQueryMutex_;
@@ -42,7 +42,7 @@ ErrCode AdvancedNotificationService::SetNotificationBadgeNum(int32_t num)
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGD("null bundleOption");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_OK;
@@ -61,23 +61,23 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundles(
     ANS_LOGD("SetShowBadgeEnabledForBundles call");
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_0);
     if (bundleOptions.empty()) {
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_BUNDLE));
-        return ERR_ANS_INVALID_BUNDLE;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_BUNDLE));
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("IsSystemApp is false.");
-        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).BranchId(BRANCH_1);
+        message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).BranchId(BRANCH_1);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission Denied.");
-        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_2);
+        message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).BranchId(BRANCH_2);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     ErrCode result = ERR_OK;
@@ -111,8 +111,8 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_13, EventBranchId::BRANCH_0);
     if (bundleOption == nullptr) {
         ANS_LOGE("null bundleOption");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_BUNDLE));
-        return ERR_ANS_INVALID_BUNDLE;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_BUNDLE));
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
@@ -121,22 +121,22 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("IsSystemApp is false.");
-        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).BranchId(BRANCH_1);
+        message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).BranchId(BRANCH_1);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission Denied.");
-        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_2);
+        message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).BranchId(BRANCH_2);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         ANS_LOGE("null bundle");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_OK;
@@ -175,22 +175,22 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(const sptr<Not
     ANS_LOGD("called");
     if (synchronizer == nullptr) {
         ANS_LOGE("synchronizer is null");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("VerifyNativeToken is bogus.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         ANS_LOGE("null bundle");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
@@ -198,7 +198,7 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(const sptr<Not
         ErrCode result = ERR_OK;
         bool enabled = false;
         result = NotificationPreferences::GetInstance()->IsShowBadge(bundle, enabled);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             enabled = true;
         }
@@ -215,21 +215,21 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("VerifyNativeToken is bogus.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         ANS_LOGE("null bundle");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("called");
         result = NotificationPreferences::GetInstance()->IsShowBadge(bundle, enabled);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             enabled = true;
         }
@@ -247,13 +247,14 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundles(
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("IsSystemApp is false.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NON_SYSTEM_APP));
-        return ERR_ANS_NON_SYSTEM_APP;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP));
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission Denied.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_1));
-        return ERR_ANS_PERMISSION_DENIED;
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     ErrCode result = ERR_OK;
@@ -265,7 +266,7 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundles(
             }
             bool enable = false;
             result = NotificationPreferences::GetInstance()->IsShowBadge(bundle, enable);
-            if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+            if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
                 result = ERR_OK;
                 enable = true;
             }
@@ -292,11 +293,11 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabled(const sptr<IAnsResultDa
     ANS_LOGD("called");
     if (synchronizer == nullptr) {
         ANS_LOGE("synchronizer is null");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
@@ -304,7 +305,7 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabled(const sptr<IAnsResultDa
         ErrCode result = ERR_OK;
         bool enabled = false;
         result = NotificationPreferences::GetInstance()->IsShowBadge(bundleOption, enabled);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             enabled = true;
         }
@@ -319,14 +320,14 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
     ANS_LOGD("called");
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("called");
         result = NotificationPreferences::GetInstance()->IsShowBadge(bundleOption, enabled);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             enabled = true;
         }
@@ -345,7 +346,7 @@ ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, const s
         bundleName, instanceKey, callingUid, badgeNumber);
     if (badgeData == nullptr) {
         ANS_LOGE("null badgeData");
-        return ERR_ANS_NO_MEMORY;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
 
     auto submitResult = notificationSvrQueue_.Submit([badgeData]() {
@@ -362,19 +363,19 @@ ErrCode AdvancedNotificationService::SetBadgeNumberForDhByBundle(
 {
     if (bundleOption == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     if (bundleOption->GetBundleName().empty()) {
         ANS_LOGE("SetBadgeNumberForDhByBundle Invalid bundle name.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     if (bundleOption->GetUid() <= DEFAULT_UID) {
         ANS_LOGE("SetBadgeNumberForDhByBundle invalid uid");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     if (badgeNumber < BADGE_NUM_LIMIT) {
         ANS_LOGE("SetBadgeNumberForDhByBundle invalid badgeNumber");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     ANS_LOGI("SetBadgeNumberForDhByBundle bundleName = %{public}s uid = %{public}d",
         bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
@@ -384,17 +385,17 @@ ErrCode AdvancedNotificationService::SetBadgeNumberForDhByBundle(
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append(" Not system app.");
+        message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).Append(" Not system app.");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("Not system app.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
             bundleOption->GetBundleName(), bundleOption->GetUid(), badgeNumber);
     if (badgeData == nullptr) {
         ANS_LOGE("null badgeData");
-        return ERR_ANS_NO_MEMORY;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
 
     auto submitResult = notificationSvrQueue_.Submit([badgeData]() {
@@ -410,7 +411,7 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
     const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_6);
     message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
@@ -418,10 +419,10 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append(" Not system app.");
+        message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).Append(" Not system app.");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("Not system app.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     sptr<NotificationBundleOption> bundle = bundleOption;
@@ -440,10 +441,10 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
         bool isAgent = false;
         isAgent = IsAgentRelationship(bundleName, bundle->GetBundleName());
         if (!isAgent) {
-            message.ErrorCode(ERR_ANS_NO_AGENT_SETTING).Append(" No agent setting.");
+            message.ErrorCode(ERR_ANS_INNER_NO_AGENT_SETTING).Append(" No agent setting.");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
             ANS_LOGE("No agent setting.");
-            return ERR_ANS_NO_AGENT_SETTING;
+            return ERR_ANS_INNER_NO_AGENT_SETTING;
         }
     }
 
@@ -451,7 +452,7 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
             bundle->GetBundleName(), bundle->GetUid(), badgeNumber);
     if (badgeData == nullptr) {
         ANS_LOGE("Failed to create badge number callback data.");
-        return ERR_ANS_NO_MEMORY;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
 
     auto submitResult = notificationSvrQueue_.Submit([badgeData]() {
@@ -469,8 +470,8 @@ ErrCode AdvancedNotificationService::GetBadgeNumber(int32_t &badgeNumber)
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         message.Message("null bundleOption");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM));
-        return ERR_ANS_INVALID_BUNDLE;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM));
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
@@ -508,7 +509,7 @@ ErrCode AdvancedNotificationService::GetBadgeNumber(int32_t &badgeNumber)
     NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_5));
     ANS_LOGD("Bundle(%{public}s_%{public}d) get badgenumber %{public}d", bundleOption->GetBundleName().c_str(),
         bundleOption->GetUid(), badgeNumber);
-    return badgeNumber < BADGE_NUM_LIMIT ? ERR_ANS_TASK_ERR : ERR_OK;
+    return badgeNumber < BADGE_NUM_LIMIT ? ERR_ANS_INNER_TASK_ERR : ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::RegisterBadgeQueryCallback(const sptr<IBadgeQueryCallback> &badgeQueryCallback)
@@ -519,22 +520,23 @@ ErrCode AdvancedNotificationService::RegisterBadgeQueryCallback(const sptr<IBadg
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Not system app or SA.");
         message.Message("Not systemApp or SA.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NON_SYSTEM_APP));
-        return ERR_ANS_NON_SYSTEM_APP;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP));
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied.");
         message.Message("Permission denied.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_7));
-        return ERR_ANS_PERMISSION_DENIED;
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).BranchId(BRANCH_7));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     if (badgeQueryCallback == nullptr) {
         ANS_LOGE("badgeQueryCallback is null.");
         message.Message("badgeQueryCallback is null.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_8));
-        return ERR_ANS_INVALID_PARAM;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM).BranchId(BRANCH_8));
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
@@ -542,7 +544,7 @@ ErrCode AdvancedNotificationService::RegisterBadgeQueryCallback(const sptr<IBadg
     sptr<IBadgeQueryCallback> callBack = iface_cast<IBadgeQueryCallback>(badgeQueryCallback->AsObject());
     if (callBack == nullptr) {
         ANS_LOGE("callBack is null");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     {
         std::lock_guard<ffrt::mutex> lock(badgeQueryMutex_);
@@ -562,15 +564,16 @@ ErrCode AdvancedNotificationService::UnRegisterBadgeQueryCallback()
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Not system app or SA.");
         message.Message("Not systemApp or SA.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NON_SYSTEM_APP));
-        return ERR_ANS_NON_SYSTEM_APP;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP));
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied.");
         message.Message("Permission denied.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_11));
-        return ERR_ANS_PERMISSION_DENIED;
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).BranchId(BRANCH_11));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;

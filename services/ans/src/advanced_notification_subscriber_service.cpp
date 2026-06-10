@@ -21,7 +21,7 @@
 
 #include "accesstoken_kit.h"
 #include "ans_const_define.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_trace_wrapper.h"
 #include "errors.h"
@@ -40,7 +40,6 @@
 
 namespace OHOS {
 namespace Notification {
-
 ErrCode AdvancedNotificationService::Subscribe(const sptr<IAnsSubscriber> &subscriber, uint32_t subscribedFlags)
 {
     return Subscribe(subscriber, nullptr, subscribedFlags);
@@ -54,19 +53,19 @@ ErrCode AdvancedNotificationService::Subscribe(
     ErrCode errCode = ERR_OK;
     do {
         if (subscriber == nullptr) {
-            errCode = ERR_ANS_INVALID_PARAM;
+            errCode = ERR_ANS_INNER_INVALID_PARAM;
             break;
         }
 
         bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
         if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
             ANS_LOGE("Client is not a system app or subsystem");
-            errCode = ERR_ANS_NON_SYSTEM_APP;
+            errCode = ERR_ANS_INNER_NON_SYSTEM_APP;
             break;
         }
 
         if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-            errCode = ERR_ANS_PERMISSION_DENIED;
+            errCode = ERR_ANS_INNER_PERMISSION_DENIED;
             break;
         }
 
@@ -100,19 +99,19 @@ ErrCode AdvancedNotificationService::SubscribeNotification(
     ErrCode errCode = ERR_OK;
     do {
         if (subscriber == nullptr) {
-            errCode = ERR_ANS_INVALID_PARAM;
+            errCode = ERR_ANS_INNER_INVALID_PARAM;
             break;
         }
 
         bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
         if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
             ANS_LOGE("Client is not a system app or subsystem");
-            errCode = ERR_ANS_NON_SYSTEM_APP;
+            errCode = ERR_ANS_INNER_NON_SYSTEM_APP;
             break;
         }
 
         if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_SYSTEM_SUBSCRIBER)) {
-            errCode = ERR_ANS_PERMISSION_DENIED;
+            errCode = ERR_ANS_INNER_PERMISSION_DENIED;
             break;
         }
 
@@ -140,19 +139,19 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<IAnsSubscriber> &s
     sptr<NotificationSubscribeInfo> sptrInfo = new (std::nothrow) NotificationSubscribeInfo();
     if (sptrInfo == nullptr) {
         ANS_LOGE("Failed to create sptrInfo");
-        return ERR_ANS_NO_MEMORY;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     ErrCode errCode = ERR_OK;
     do {
         if (subscriber == nullptr) {
-            errCode = ERR_ANS_INVALID_PARAM;
+            errCode = ERR_ANS_INNER_INVALID_PARAM;
             break;
         }
 
         bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
         if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
             ANS_LOGE("Client is not a system app or subsystem");
-            errCode = ERR_ANS_NON_SYSTEM_APP;
+            errCode = ERR_ANS_INNER_NON_SYSTEM_APP;
             break;
         }
         // subscribeSelf doesn't need OHOS_PERMISSION_NOTIFICATION_CONTROLLER permission
@@ -192,15 +191,15 @@ ErrCode AdvancedNotificationService::Unsubscribe(
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Client is not a system app or subsystem");
-        message.Message("Unsubscribe notification: " + std::to_string(ERR_ANS_NON_SYSTEM_APP));
+        message.Message("Unsubscribe notification: " + std::to_string(ERR_ANS_INNER_NON_SYSTEM_APP));
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (subscriber == nullptr) {
-        message.Message("Unsubscribe notification: " + std::to_string(ERR_ANS_INVALID_PARAM));
+        message.Message("Unsubscribe notification: " + std::to_string(ERR_ANS_INNER_INVALID_PARAM));
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ErrCode errCode = NotificationSubscriberManager::GetInstance()->RemoveSubscriber(subscriber, info);

@@ -19,7 +19,7 @@
 #include "access_token_helper.h"
 #include "ans_log_wrapper.h"
 #include "ans_trace_wrapper.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "errors.h"
 #include "ipc_skeleton.h"
 
@@ -38,20 +38,20 @@ ErrCode AdvancedNotificationService::TriggerLocalLiveView(const sptr<Notificatio
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("AccessTokenHelper::CheckPermission is bogus.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
-    ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    ErrCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
@@ -69,7 +69,7 @@ ErrCode AdvancedNotificationService::GetNotificationById(const sptr<Notification
     const int32_t notificationId, sptr<Notification> &notification)
 {
     if (bundle == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     for (auto record : notificationList_) {
         if (record->request->GetAgentBundle() != nullptr) {
@@ -88,7 +88,7 @@ ErrCode AdvancedNotificationService::GetNotificationById(const sptr<Notification
             }
         }
     }
-    return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
 }
 
 ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
@@ -110,13 +110,13 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
             bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
             if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
                 ANS_LOGE("Client is not a system app or subsystem.");
-                errCode = ERR_ANS_NON_SYSTEM_APP;
+                errCode = ERR_ANS_INNER_NON_SYSTEM_APP;
                 break;
             }
         }
 
         if (subscriber == nullptr) {
-            errCode = ERR_ANS_INVALID_PARAM;
+            errCode = ERR_ANS_INNER_INVALID_PARAM;
             break;
         }
 
@@ -151,7 +151,7 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(
             NotificationContent::Type::LIVE_VIEW, recordList);
         if (recordList.size() == 0) {
             ANS_LOGE("Empty list");
-            result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+            result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
             return;
         }
         result = RemoveNotificationFromRecordList(recordList);

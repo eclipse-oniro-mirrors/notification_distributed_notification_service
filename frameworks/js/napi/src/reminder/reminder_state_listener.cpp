@@ -375,7 +375,7 @@ void JsReminderStateListener::CompleteCb(napi_env env, ReminderStateCbInfo* info
     napi_value callResult = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_get_undefined(env, &undefined));
     NAPI_CALL_RETURN_VOID(env, napi_get_reference_value(env, cbInfo->callback, &callback));
-    
+
     int32_t count = 0;
     napi_create_array(env, &array);
     for (const auto& state : cbInfo->states) {

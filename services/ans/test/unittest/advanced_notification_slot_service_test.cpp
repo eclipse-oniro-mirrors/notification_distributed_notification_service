@@ -24,6 +24,7 @@
 #define private public
 #include "advanced_notification_service.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_result_data_synchronizer.h"
 #include "accesstoken_kit.h"
@@ -116,7 +117,7 @@ HWTEST_F(AnsSlotServiceTest, AddSlots_00001, Function | SmallTest | Level1)
     sptr<NotificationSlot> slot = new NotificationSlot(slotType);
     slots.push_back(slot);
     advancedNotificationService_->notificationSvrQueue_.Reset();
-    ASSERT_EQ(advancedNotificationService_->AddSlots(slots), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->AddSlots(slots), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -129,7 +130,7 @@ HWTEST_F(AnsSlotServiceTest, GetSlots_00001, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationSlot>> slots;
     advancedNotificationService_->notificationSvrQueue_.Reset();
-    ASSERT_EQ(advancedNotificationService_->GetSlots(slots), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->GetSlots(slots), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -144,7 +145,7 @@ HWTEST_F(AnsSlotServiceTest, GetSlotsByBundle_00001, Function | SmallTest | Leve
     MockIsVerfyPermisson(true);
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationBundleOption> bundle = nullptr;
-    ASSERT_EQ(advancedNotificationService_->GetSlotsByBundle(bundle, slots), (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->GetSlotsByBundle(bundle, slots), (int)ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -160,7 +161,7 @@ HWTEST_F(AnsSlotServiceTest, GetSlotsByBundle_00002, Function | SmallTest | Leve
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
     advancedNotificationService_->notificationSvrQueue_.Reset();
-    ASSERT_EQ(advancedNotificationService_->GetSlotsByBundle(bundle, slots), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->GetSlotsByBundle(bundle, slots), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -195,11 +196,11 @@ HWTEST_F(AnsSlotServiceTest, UpdateSlots_00001, Function | SmallTest | Level1)
     MockIsVerfyPermisson(true);
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationBundleOption> bundle = nullptr;
-    ASSERT_EQ(advancedNotificationService_->UpdateSlots(bundle, slots), (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->UpdateSlots(bundle, slots), (int)ERR_ANS_INNER_INVALID_BUNDLE);
 
     bundle = new NotificationBundleOption("test", 1);
     advancedNotificationService_->notificationSvrQueue_.Reset();
-    ASSERT_EQ(advancedNotificationService_->UpdateSlots(bundle, slots), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->UpdateSlots(bundle, slots), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -219,7 +220,7 @@ HWTEST_F(AnsSlotServiceTest, UpdateSlots_00002, Function | SmallTest | Level1)
 
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
     auto ret = advancedNotificationService_->UpdateSlots(bundle, slots);
-    ASSERT_EQ(ret, (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
 
 /**
@@ -232,7 +233,7 @@ HWTEST_F(AnsSlotServiceTest, RemoveAllSlots_00001, Function | SmallTest | Level1
 {
     advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->RemoveAllSlots();
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -267,7 +268,7 @@ HWTEST_F(AnsSlotServiceTest, GetEnabledForBundleSlotSelf_00001, Function | Small
     advancedNotificationService_->notificationSvrQueue_.Reset();
     enable = false;
     res = advancedNotificationService_->GetEnabledForBundleSlotSelf(slotType, enable);
-    ASSERT_EQ(res, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(res, (int)ERR_ANS_INNER_INVALID_PARAM);
     ASSERT_FALSE(enable);
 }
 
@@ -284,11 +285,11 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00001, Function | SmallTest | Lev
     std::string key = RING_TRUST_PKG_KEY;
     std::string value = "";
     auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
- 
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
+
     MockIsSystemApp(true);
     ret = advancedNotificationService_->SetAdditionConfig(key, value);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
@@ -297,7 +298,7 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00001, Function | SmallTest | Lev
 
     advancedNotificationService_->notificationSvrQueue_.Reset();
     ret = advancedNotificationService_->SetAdditionConfig(key, value);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -329,7 +330,7 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00003, Function | SmallTest | Lev
     MockIsVerfyPermisson(true);
     std::string key = "";
     std::string value = "";
- 
+
     auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
     ASSERT_EQ(ret, (int)ERR_OK);
 }
@@ -382,7 +383,7 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00006, Function | SmallTest | Lev
     std::string key = RESTRICTED_MODE_TRUST_LIST_KEY;
     std::string value = R"([{}])";
     auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -399,7 +400,7 @@ HWTEST_F(AnsSlotServiceTest, GetAllLiveViewEnabledBundles_00001, Function | Smal
     NotificationBundleOption bundleOption("GetAllLiveViewEnabledBundles_00001", 999);
     bundleOptions.push_back(bundleOption);
     auto ret = advancedNotificationService_->GetAllLiveViewEnabledBundles(bundleOptions);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
@@ -408,7 +409,7 @@ HWTEST_F(AnsSlotServiceTest, GetAllLiveViewEnabledBundles_00001, Function | Smal
 
     advancedNotificationService_->notificationSvrQueue_.Reset();
     ret = advancedNotificationService_->GetAllLiveViewEnabledBundles(bundleOptions);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -426,7 +427,7 @@ HWTEST_F(AnsSlotServiceTest, GetAllLiveViewEnabledBundles_00002, Function | Smal
     bundleOptions.push_back(bundleOption);
     int32_t userId = 100;
     auto ret = advancedNotificationService_->GetAllLiveViewEnabledBundles(bundleOptions, userId);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
@@ -435,7 +436,7 @@ HWTEST_F(AnsSlotServiceTest, GetAllLiveViewEnabledBundles_00002, Function | Smal
 
     advancedNotificationService_->notificationSvrQueue_.Reset();
     ret = advancedNotificationService_->GetAllLiveViewEnabledBundles(bundleOptions, userId);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
@@ -443,7 +444,7 @@ HWTEST_F(AnsSlotServiceTest, GetAllLiveViewEnabledBundles_00002, Function | Smal
     OHOS::AccountSA::OsAccountManager::IsOsAccountExists(0, isOsAccountExists);
     MockIsOsAccountExists(false);
     ret = advancedNotificationService_->GetAllLiveViewEnabledBundles(bundleOptions, -99);
-    EXPECT_EQ(ret, (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
     MockIsOsAccountExists(isOsAccountExists);
 }
 
@@ -465,7 +466,7 @@ HWTEST_F(AnsSlotServiceTest, GetEnabledForBundleSlot_00001, Function | SmallTest
     advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->GetEnabledForBundleSlot(
         bundleOption, slotType, enanle);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 
@@ -481,11 +482,11 @@ HWTEST_F(AnsSlotServiceTest, GetSlotFlagsAsBundle_00001, Function | SmallTest | 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 1);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 
     uint32_t flag = 0;
     ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -501,11 +502,11 @@ HWTEST_F(AnsSlotServiceTest, GetSlotFlagsAsBundle_00002, Function | SmallTest | 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
     auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 1);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 
     uint32_t flag = 0;
     ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -521,11 +522,11 @@ HWTEST_F(AnsSlotServiceTest, GetSlotFlagsAsBundle_00003, Function | SmallTest | 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
     auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 1);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_BUNDLE);
 
     uint32_t flag = 0;
     ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -542,11 +543,11 @@ HWTEST_F(AnsSlotServiceTest, GetSlotFlagsAsBundle_00004, Function | SmallTest | 
     MockIsVerfyPermisson(true);
     advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 1);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     uint32_t flag = 0;
     ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -560,15 +561,15 @@ HWTEST_F(AnsSlotServiceTest, AddSlotByType_00001, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     MockIsVerfyPermisson(false);
-    
+
     auto ret = advancedNotificationService_->AddSlotByType(
         NotificationConstant::SlotType::EMERGENCY_INFORMATION);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     ret = advancedNotificationService_->AddSlotByType(
         NotificationConstant::SlotType::LIVE_VIEW);
     ASSERT_EQ(ret, (int)ERR_OK);
-    
+
     ret = advancedNotificationService_->AddSlotByType(
         NotificationConstant::SlotType::LIVE_VIEW);
     ASSERT_EQ(ret, (int)ERR_OK);
@@ -692,10 +693,10 @@ HWTEST_F(AnsSlotServiceTest, GetSlotByType_00001, Function | SmallTest | Level1)
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CUSTOMER_SERVICE;
     advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->AddSlotByType(slotType);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     ret = advancedNotificationService_->GetSlotByType(slotType, slot);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -709,7 +710,7 @@ HWTEST_F(AnsSlotServiceTest, RemoveSlotByType_00001, Function | SmallTest | Leve
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CUSTOMER_SERVICE;
     advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->RemoveSlotByType(slotType);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -732,7 +733,7 @@ HWTEST_F(AnsSlotServiceTest, RemoveSlotByType_00002, Function | SmallTest | Leve
 
     MockIsSystemApp(false);
     auto ret = advancedNotificationService_->RemoveSlotByType(slotType);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -750,7 +751,7 @@ HWTEST_F(AnsSlotServiceTest, GetSlotNumAsBundle_00001, Function | SmallTest | Le
     advancedNotificationService_->notificationSvrQueue_.Reset();
     uint64_t num = 0;
     auto ret = advancedNotificationService_->GetSlotNumAsBundle(bundle, num);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -767,7 +768,7 @@ HWTEST_F(AnsSlotServiceTest, GetSlotByBundle_00001, Function | SmallTest | Level
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     auto ret = advancedNotificationService_->GetSlotByBundle(bundle, slotType, slot);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -786,15 +787,15 @@ HWTEST_F(AnsSlotServiceTest, GetSlotByBundle_00002, Function | SmallTest | Level
     MockIsVerfyPermisson(false);
 
     auto ret = advancedNotificationService_->GetSlotByBundle(bundle, slotType, slot);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
     ret = advancedNotificationService_->GetSlotByBundle(bundle, slotType, slot);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_BUNDLE);
 
     bundle = new NotificationBundleOption("test", 1);
     ret = advancedNotificationService_->GetSlotByBundle(bundle, slotType, slot);
-    ASSERT_EQ(ret, (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
 
 /**
@@ -820,12 +821,12 @@ HWTEST_F(AnsSlotServiceTest, GetSlotByBundle_00003, Function | SmallTest | Level
     sptr<NotificationSlot> slotOut;
     NotificationConstant::SlotType slotTypeTemp = NotificationConstant::SlotType::ILLEGAL_TYPE;
     ret = advancedNotificationService_->GetSlotByBundle(bundle, slotTypeTemp, slotOut);
-    ASSERT_EQ(ret, (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
     ASSERT_EQ(slotOut, nullptr);
 
     advancedNotificationService_->notificationSvrQueue_.Reset();
     ret = advancedNotificationService_->GetSlotByBundle(bundle, slotTypeTemp, slot);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 
@@ -842,7 +843,7 @@ HWTEST_F(AnsSlotServiceTest, UpdateSlotReminderModeBySlotFlags_00001, Function |
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     auto ret = advancedNotificationService_->UpdateSlotReminderModeBySlotFlags(bundle, slotFlags);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -881,7 +882,7 @@ HWTEST_F(AnsSlotServiceTest, UpdateSlotReminderModeBySlotFlags_00003, Function |
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test555", 555);
 
     auto ret = advancedNotificationService_->UpdateSlotReminderModeBySlotFlags(bundle, slotFlags);
-    ASSERT_EQ(ret, (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
 
 /**
@@ -1002,7 +1003,7 @@ HWTEST_F(AnsSlotServiceTest, GetNotificationSettings_00003, Function | SmallTest
     auto ret = advancedNotificationService->GetNotificationSettings(flag);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1018,7 +1019,7 @@ HWTEST_F(AnsSlotServiceTest, GetNotificationSettings_00004, Function | SmallTest
     auto ret = advancedNotificationService_->GetNotificationSettings(flag);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsNonBundleName(false);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -1172,10 +1173,10 @@ HWTEST_F(AnsSlotServiceTest, GetReminderInfoByBundles_0100, Function | SmallTest
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     auto ret = advancedNotificationService_->GetReminderInfoByBundles(bundles, reminders);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 
     ret = advancedNotificationService_->SetReminderInfoByBundles(reminderInfo);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -1197,10 +1198,10 @@ HWTEST_F(AnsSlotServiceTest, GetReminderInfoByBundles_0200, Function | SmallTest
     MockIsVerfyPermisson(false);
 
     auto ret = advancedNotificationService_->GetReminderInfoByBundles(bundles, reminders);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 
     ret = advancedNotificationService_->SetReminderInfoByBundles(reminderInfo);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -1223,10 +1224,10 @@ HWTEST_F(AnsSlotServiceTest, GetReminderInfoByBundles_0300, Function | SmallTest
     advancedNotificationService_->notificationSvrQueue_.Reset();
 
     auto ret = advancedNotificationService_->GetReminderInfoByBundles(bundles, reminders);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     ret = advancedNotificationService_->SetReminderInfoByBundles(reminderInfo);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1265,25 +1266,25 @@ HWTEST_F(AnsSlotServiceTest, UpdateInnerConfig_00001, Function | SmallTest | Lev
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     MockIsVerfyPermisson(false);
-    
+
     std::string configKey = "add_voice_summary_count";
     std::string configValue = "";
     auto ret = advancedNotificationService_->UpdateInnerConfig(configKey, configValue);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
-    
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
+
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
     ret = advancedNotificationService_->UpdateInnerConfig(configKey, configValue);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
-    
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
+
     MockIsVerfyPermisson(true);
     ret = advancedNotificationService_->UpdateInnerConfig("", configValue);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     configKey = "invalid_key";
     ret = advancedNotificationService_->UpdateInnerConfig(configKey, configValue);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1297,10 +1298,10 @@ HWTEST_F(AnsSlotServiceTest, UpdateInnerConfig_00002, Function | SmallTest | Lev
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    
+
     NotificationPreferences::GetInstance()->SetKvToDb(
         "notification_voice_summary_count", "", 100);
-    
+
     std::string configKey = "add_voice_summary_count";
     std::string configValue = "";
     auto ret = advancedNotificationService_->UpdateInnerConfig(configKey, configValue);
@@ -1318,26 +1319,26 @@ HWTEST_F(AnsSlotServiceTest, UpdateVoiceUpdate_00001, Function | SmallTest | Lev
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    
+
     std::string configKey = "add_voice_summary_count";
     NotificationPreferences::GetInstance()->SetKvToDb(
         "notification_voice_summary_count", "", 100);
     auto ret = advancedNotificationService_->UpdateVoiceUpdate(configKey);
     ASSERT_EQ(ret, (int)ERR_OK);
-    
+
     std::string invalidJson = "invalid_json";
     NotificationPreferences::GetInstance()->SetKvToDb(
         "notification_voice_summary_count", invalidJson, 100);
     ret = advancedNotificationService_->UpdateVoiceUpdate(configKey);
     ASSERT_EQ(ret, (int)ERR_OK);
-    
+
     nlohmann::json jsonData;
     jsonData["invalid_field"] = "test";
     NotificationPreferences::GetInstance()->SetKvToDb(
         "notification_voice_summary_count", jsonData.dump(), 100);
     ret = advancedNotificationService_->UpdateVoiceUpdate(configKey);
     ASSERT_EQ(ret, (int)ERR_OK);
-    
+
     jsonData.clear();
     jsonData["date"] = "string_value";
     jsonData["count"] = "string_value";
@@ -1358,21 +1359,21 @@ HWTEST_F(AnsSlotServiceTest, UpdateVoiceUpdate_00002, Function | SmallTest | Lev
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    
+
     std::string configKey = "add_voice_summary_count";
     auto now = std::chrono::system_clock::now();
     time_t nowTime = std::chrono::system_clock::to_time_t(now);
     struct tm localTime = {0};
     localtime_r(&nowTime, &localTime);
     int64_t currentDate = (localTime.tm_year + 1900) * 10000 + (localTime.tm_mon + 1) * 100 + localTime.tm_mday;
-    
+
     nlohmann::json jsonData;
     jsonData["date"] = currentDate;
     jsonData["count"] = 10;
-    
+
     NotificationPreferences::GetInstance()->SetKvToDb(
         "notification_voice_summary_count", jsonData.dump(), 100);
-    
+
     auto ret = advancedNotificationService_->UpdateVoiceUpdate(configKey);
     ASSERT_EQ(ret, (int)ERR_OK);
 }
@@ -1388,31 +1389,31 @@ HWTEST_F(AnsSlotServiceTest, UpdateVoiceUpdate_00003, Function | SmallTest | Lev
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    
+
     std::string configKey = "add_voice_summary_count";
     auto now = std::chrono::system_clock::now();
     time_t nowTime = std::chrono::system_clock::to_time_t(now);
     struct tm localTime = {0};
     localtime_r(&nowTime, &localTime);
     int64_t currentDate = (localTime.tm_year + 1900) * 10000 + (localTime.tm_mon + 1) * 100 + localTime.tm_mday;
-    
+
     nlohmann::json jsonData;
     jsonData["date"] = currentDate;
     jsonData["count"] = 30;
-    
+
     NotificationPreferences::GetInstance()->SetKvToDb(
         "notification_voice_summary_count", jsonData.dump(), 100);
-    
+
     auto ret = advancedNotificationService_->UpdateVoiceUpdate(configKey);
-    ASSERT_EQ(ret, (int)ERR_ANS_VOICE_SUMMARY_COUNT_EXCEEDED);
-    
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_VOICE_SUMMARY_COUNT_EXCEEDED);
+
     int64_t oldDate = 20200101;
     jsonData["date"] = oldDate;
     jsonData["count"] = 30;
-    
+
     NotificationPreferences::GetInstance()->SetKvToDb(
         "notification_voice_summary_count", jsonData.dump(), 100);
-    
+
     ret = advancedNotificationService_->UpdateVoiceUpdate(configKey);
     ASSERT_EQ(ret, (int)ERR_OK);
 }

@@ -112,7 +112,7 @@ ani_status UnwarpNotificationExtensionSubscribeInfo(
 
     ANS_LOGD("UnwarpNotificationExtensionSubscribeInfo success - addr: %{public}s, type: %{public}d",
         info->GetAddr().c_str(), static_cast<int>(info->GetType()));
-    
+
     return status;
 }
 
@@ -155,7 +155,7 @@ ani_status UnwarpNotificationExtensionSubscribeInfoArrayByAniObj(ani_env *env, a
 }
 
 bool WrapNotificationExtensionSubscribeInfo(
-    ani_env* env, sptr<Notification::NotificationExtensionSubscriptionInfo> info, ani_object& outAniObj)
+    ani_env* env, sptr<NotificationExtensionSubscriptionInfo> info, ani_object& outAniObj)
 {
     ANS_LOGD("WrapNotificationExtensionSubscribeInfo call");
     if (env == nullptr || info == nullptr) {
@@ -187,7 +187,7 @@ bool WrapNotificationExtensionSubscribeInfo(
 }
 
 bool WrapNotificationExtensionSubscribeInfoArray(ani_env* env,
-    const std::vector<sptr<Notification::NotificationExtensionSubscriptionInfo>>& infos, ani_object& outAniObj)
+    const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos, ani_object& outAniObj)
 {
     ANS_LOGD("WrapNotificationExtensionSubscribeInfoArray call");
     if (env == nullptr) {

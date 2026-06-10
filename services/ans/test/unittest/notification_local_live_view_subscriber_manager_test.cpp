@@ -21,6 +21,7 @@
 #include "notification_local_live_view_subscriber_manager.h"
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 
 using namespace testing::ext;
 using namespace testing;
@@ -141,7 +142,7 @@ HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest,
 {
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     auto res = notificationLocalLiveViewSubscriberManager_->AddLocalLiveViewSubscriber(nullptr, info);
-    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -154,8 +155,8 @@ HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest,
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     notificationLocalLiveViewSubscriberManager_->notificationButtonQueue_ = nullptr;
     auto res = notificationLocalLiveViewSubscriberManager_->AddLocalLiveViewSubscriber(subscriber_, info);
-    
-    ASSERT_EQ(res, ERR_ANS_TASK_ERR);
+
+    ASSERT_EQ(res, ERR_ANS_INNER_TASK_ERR);
 }
 
 /**
@@ -167,7 +168,7 @@ HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest,
 {
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     auto res = notificationLocalLiveViewSubscriberManager_->RemoveLocalLiveViewSubscriber(nullptr, info);
-    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -180,7 +181,7 @@ HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest,
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     notificationLocalLiveViewSubscriberManager_->notificationButtonQueue_ = nullptr;
     auto res = notificationLocalLiveViewSubscriberManager_->RemoveLocalLiveViewSubscriber(subscriber_, info);
-    ASSERT_EQ(res, ERR_ANS_TASK_ERR);
+    ASSERT_EQ(res, ERR_ANS_INNER_TASK_ERR);
 }
 
 /**

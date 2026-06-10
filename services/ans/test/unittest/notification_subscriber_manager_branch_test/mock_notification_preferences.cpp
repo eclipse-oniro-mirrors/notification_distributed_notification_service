@@ -16,6 +16,7 @@
 #include "notification_preferences.h"
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 
 namespace {
     bool g_mockGetNotificationSlotRet = true;
@@ -38,7 +39,7 @@ ErrCode NotificationPreferences::GetNotificationSlot(const sptr<NotificationBund
     const NotificationConstant::SlotType &type, sptr<NotificationSlot> &slot)
 {
     if (g_mockGetNotificationSlotRet == false) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     return ERR_OK;
 }

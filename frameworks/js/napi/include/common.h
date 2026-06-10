@@ -23,6 +23,8 @@
 #include "notification_button_option.h"
 #include "notification_classification.h"
 #include "notification_flags.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "notification_helper.h"
 #include "notification_local_live_view_button.h"
 #include "notification_parameters.h"
@@ -858,7 +860,7 @@ public:
      */
     static napi_value GetNotificationExtraInfo(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
-    
+
     /**
      * @brief Gets the extendInfo of NotificationRequest object from specified js object
      *
@@ -2050,6 +2052,10 @@ public:
     static bool IsValidRemoveReason(int32_t reasonType);
     static void NapiThrow(napi_env env, int32_t errCode);
     static void NapiThrow(napi_env env, int32_t errCode, std::string &msg);
+    static void NapiThrowLegacy(napi_env env, int32_t errCode);
+    static void NapiThrowLegacy(napi_env env, int32_t errCode, std::string &msg);
+    static napi_value CreateErrorValueLegacy(napi_env env, int32_t errCode, bool newType);
+    static napi_value CreateErrorValueLegacy(napi_env env, int32_t errCode, std::string &msg);
     static napi_value NapiReturnCapErrCb(napi_env env, napi_callback_info info);
     static napi_value NapiReturnCapErr(napi_env env, napi_callback_info info);
     static napi_value NapiReturnFalseCb(napi_env env, napi_callback_info info);

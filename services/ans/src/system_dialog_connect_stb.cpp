@@ -16,7 +16,6 @@
 #include "ability_connect_callback_interface.h"
 #include "ability_manager_client.h"
 #include "ans_log_wrapper.h"
-#include "ans_inner_errors.h"
 #include "common_event_manager.h"
 #include "advanced_notification_service.h"
 #include "notification_bundle_option.h"
@@ -26,7 +25,6 @@ constexpr int32_t SIGNAL_NUM = 3;
 
 namespace OHOS {
 namespace Notification {
-
 void SystemDialogConnectStb::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
     const sptr<IRemoteObject> &remoteObject, int32_t resultCode)
 {

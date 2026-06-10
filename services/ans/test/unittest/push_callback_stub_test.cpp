@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "message_option.h"
 #include "message_parcel.h"
 #include "parcel.h"
@@ -136,7 +137,7 @@ HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00200, Function | S
     int pushCheckCode = 1;
     TestPushCallBackStub testPushCallBackStub;
     ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
-    ASSERT_EQ(ret, (int)ERR_ANS_TASK_ERR);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_TASK_ERR);
 }
 
 /**
@@ -149,7 +150,7 @@ HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00300, Function | S
     int pushCheckCode = 2;
     TestPushCallBackStub testPushCallBackStub;
     ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
-    ASSERT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_NETWORK_UNREACHABLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PUSH_CHECK_NETWORK_UNREACHABLE);
 }
 
 /**
@@ -162,7 +163,7 @@ HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00400, Function | S
     int pushCheckCode = 3;
     TestPushCallBackStub testPushCallBackStub;
     ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
-    ASSERT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_FAILED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PUSH_CHECK_FAILED);
 }
 
 /**
@@ -175,7 +176,7 @@ HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00500, Function | S
     int pushCheckCode = 4;
     TestPushCallBackStub testPushCallBackStub;
     ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
-    ASSERT_EQ(ret, (int)ERR_ANS_TASK_ERR);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_TASK_ERR);
 }
 
 /**
@@ -188,7 +189,7 @@ HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00600, Function | S
     int pushCheckCode = 5;
     TestPushCallBackStub testPushCallBackStub;
     ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
-    ASSERT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_EXTRAINFO_INVALID);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PUSH_CHECK_EXTRAINFO_INVALID);
 }
 
 /**
@@ -201,7 +202,7 @@ HWTEST_F(PushCallBackStubTest, ConvertPushCheckCodeToErrCode_00700, Function | S
     int pushCheckCode = -1;
     TestPushCallBackStub testPushCallBackStub;
     ErrCode ret = testPushCallBackStub.ConvertPushCheckCodeToErrCode(pushCheckCode);
-    ASSERT_EQ(ret, (int)ERR_ANS_PUSH_CHECK_FAILED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PUSH_CHECK_FAILED);
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -111,6 +111,7 @@ enum ErrorCode : uint32_t {
     ERR_ANS_NOTIFICATION_SNOOZE_NOTALLOWED,
     ERR_ANS_CUSTOM_EXTENSION_EXISTS_CHECK_FAILED,
     ERR_ANS_CUSTOM_EXTENSION_RIGHTS_CHECK_FAILED,
+    ERR_ANS_USER_NOT_EXIST,
 };
 
 enum ReminderErrorCode : uint32_t {
@@ -173,8 +174,6 @@ const int32_t ERR_NOTIFICATION_NOT_SUPPORT       = 1600028;    // This notificat
 const int32_t ERROR_NETWORK_UNREACHABLE          = 2300007;    // Network unreachable.
 const int32_t ERROR_BUNDLE_NOT_FOUND             = 17700001;   // The specified bundle name was not found.
 
-int32_t ErrorToExternal(uint32_t errCode);
-std::string GetAnsErrMessage(uint32_t errCode, std::string defaultMsg = "");
 }  // namespace Notification
 }  // namespace OHOS
 

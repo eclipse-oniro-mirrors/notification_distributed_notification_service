@@ -908,7 +908,7 @@ napi_value Common::GetNotificationSmallIcon(const napi_env &env, const napi_valu
         if (valuetype != napi_object) {
             ANS_LOGE("Argument type is not object.");
             std::string msg = "Incorrect parameter types. The type of smallIcon must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
@@ -939,7 +939,7 @@ napi_value Common::GetNotificationLargeIcon(const napi_env &env, const napi_valu
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types. The type of largeIcon must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
@@ -971,7 +971,7 @@ napi_value Common::GetNotificationOverlayIcon(
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types. The type of overlayIcon must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
@@ -1094,7 +1094,7 @@ napi_value Common::GetNotificationId(const napi_env &env, const napi_value &valu
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types. The type of id must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, result, &notificationId);
@@ -1124,7 +1124,7 @@ napi_value Common::GetNotificationSlotType(const napi_env &env, const napi_value
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types.The type of param must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, result, &slotType);
@@ -1145,7 +1145,7 @@ napi_value Common::GetNotificationSlotType(const napi_env &env, const napi_value
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types. The type of slotType must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, result, &slotType);
@@ -1180,7 +1180,7 @@ napi_value Common::GetNotificationIsOngoing(const napi_env &env, const napi_valu
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
             std::string msg = "Incorrect parameter types. The type of isOngoing must be bool.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &isOngoing);
@@ -1207,7 +1207,7 @@ napi_value Common::GetNotificationIsUnremovable(
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
             std::string msg = "Incorrect parameter types. The type of isUnremovable must be bool.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &isUnremovable);
@@ -1234,7 +1234,7 @@ napi_value Common::GetNotificationDeliveryTime(
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types. The type of deliveryTime must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int64(env, result, &deliveryTime);
@@ -1261,7 +1261,7 @@ napi_value Common::GetNotificationtapDismissed(
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
             std::string msg = "Incorrect parameter types. The type of tapDismissed must be bool.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &tapDismissed);
@@ -1287,7 +1287,7 @@ napi_value Common::GetNotificationWantAgent(const napi_env &env, const napi_valu
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types. The type of wantAgent must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_unwrap(env, result, (void **)&wantAgent);
@@ -1318,7 +1318,7 @@ napi_value Common::GetNotificationExtraInfo(const napi_env &env, const napi_valu
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types. The type of extraInfo must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         AAFwk::WantParams wantParams;
@@ -1348,7 +1348,7 @@ napi_value Common::GetNotificationExtendInfo(const napi_env &env, const napi_val
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types. The type of extendInfo must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         AAFwk::WantParams wantParams;
@@ -1379,7 +1379,7 @@ napi_value Common::GetNotificationGroupName(const napi_env &env, const napi_valu
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
             std::string msg = "Incorrect parameter types. The type of groupName must be string.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         char str[STR_MAX_SIZE] = {0};
@@ -1407,7 +1407,7 @@ napi_value Common::GetNotificationRemovalWantAgent(
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types. The type of removalWantAgent must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_unwrap(env, result, (void **)&wantAgent);
@@ -1447,7 +1447,7 @@ napi_value Common::GetNotificationMaxScreenWantAgent(
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types. The type of maxScreenWantAgent must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_unwrap(env, result, (void **)&wantAgent);
@@ -1480,7 +1480,7 @@ napi_value Common::GetNotificationAutoDeletedTime(
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types. The type of deliveryTime must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int64(env, result, &autoDeletedTime);
@@ -1507,7 +1507,7 @@ napi_value Common::GetNotificationClassification(
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
             std::string msg = "Incorrect parameter types. The type of classification must be string.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         char str[STR_MAX_SIZE] = {0};
@@ -1531,7 +1531,7 @@ napi_value Common::GetNotificationAppMessageId(
     if (appMessageIdValue == nullptr) {
         ANS_LOGE("Wrong argument type. String expected.");
         std::string msg = "Incorrect parameter types. The type of appMessageId must be string.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
@@ -1553,7 +1553,7 @@ napi_value Common::GetNotificationSound(
     if (soundValue == nullptr) {
         ANS_LOGE("null soundValue");
         std::string msg = "Incorrect parameter types. The type of sound must be string.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
@@ -1578,7 +1578,7 @@ napi_value Common::GetNotificationColor(const napi_env &env, const napi_value &v
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types. The type of color must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, result, &color);
@@ -1609,7 +1609,7 @@ napi_value Common::GetNotificationColorEnabled(
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
             std::string msg = "Incorrect parameter types. The type of colorEnabled must be bool.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &colorEnabled);
@@ -1636,7 +1636,7 @@ napi_value Common::GetNotificationIsAlertOnce(
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
             std::string msg = "Incorrect parameter types. The type of isAlertOnce must be bool.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &isAlertOnce);
@@ -1663,7 +1663,7 @@ napi_value Common::GetNotificationIsStopwatch(
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
             std::string msg = "Incorrect parameter types. The type of isStopwatch must be bool.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &isStopwatch);
@@ -1690,7 +1690,7 @@ napi_value Common::GetNotificationIsCountDown(
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
             std::string msg = "Incorrect parameter types. The type of isCountDown must be bool.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &isCountDown);
@@ -1717,7 +1717,7 @@ napi_value Common::GetNotificationStatusBarText(
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
             std::string msg = "Incorrect parameter types. The type of statusBarText must be string.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         char str[STR_MAX_SIZE] = {0};
@@ -1744,7 +1744,7 @@ napi_value Common::GetNotificationLabel(const napi_env &env, const napi_value &v
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
             std::string msg = "Incorrect parameter types. The type of label must be string.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         char str[STR_MAX_SIZE] = {0};
@@ -1772,7 +1772,7 @@ napi_value Common::GetNotificationBadgeIconStyle(
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types. The type of badgeIconStyle must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, result, &badgeIconStyle);
@@ -1799,7 +1799,7 @@ napi_value Common::GetNotificationShowDeliveryTime(
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
             std::string msg = "Incorrect parameter types. The type of showDeliveryTime must be bool.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &showDeliveryTime);
@@ -1824,7 +1824,7 @@ napi_value Common::GetNotificationIsUpdateOnly(
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
             std::string msg = "Incorrect parameter types. The type of updateOnly must be bool.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &isUpdateOnly);
@@ -1851,7 +1851,7 @@ napi_value Common::GetNotificationIsRemoveAllowed(
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
             std::string msg = "Incorrect parameter types. The type of isRemoveAllowed must be bool.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &isRemoveAllowed);
@@ -1878,7 +1878,7 @@ napi_value Common::GetNotificationForceDistributed(
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
             std::string msg = "Incorrect parameter types. The type of forceDistributed must be bool.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &forceDistributed);
@@ -1905,7 +1905,7 @@ napi_value Common::GetNotificationIsNotDistributed(
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
             std::string msg = "Incorrect parameter types. The type of notDistributed must be bool.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &notDistributed);
@@ -1950,7 +1950,7 @@ napi_value Common::GetNotificationActionButtons(
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types. The type of actionButtons must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
 
@@ -2021,7 +2021,7 @@ napi_value Common::GetNotificationActionButtonsDetailedBasicInfo(
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type. Object expected.");
         std::string msg = "Incorrect parameter types. The type of wantAgent must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     napi_unwrap(env, value, (void **)&wantAgentPtr);
@@ -2039,7 +2039,7 @@ napi_value Common::GetNotificationActionButtonsDetailedBasicInfo(
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types. The type of icon must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         pixelMap = Media::PixelMapNapi::GetPixelMap(env, value);
@@ -2075,7 +2075,7 @@ napi_value Common::GetNotificationActionButtonsDetailedByExtras(
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types. The type of extras must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         AAFwk::WantParams wantParams;
@@ -2104,7 +2104,7 @@ napi_value Common::GetNotificationBadgeNumber(
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types. The type of badgeNumber must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
 
@@ -2133,7 +2133,7 @@ napi_value Common::GetNotificationUnifiedGroupInfo(
     if (info == nullptr) {
         ANS_LOGE("Wrong argument type. object expected.");
         std::string msg = "Incorrect parameter types. The type of unifiedGroupInfo must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     std::shared_ptr<NotificationUnifiedGroupInfo> unifiedGroupInfo = std::make_shared<NotificationUnifiedGroupInfo>();
@@ -2196,7 +2196,7 @@ napi_value Common::GetNotificationControlFlags(
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types. The type of notificationControlFlags must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
 
@@ -2223,7 +2223,7 @@ napi_value Common::GetNotificationPriorityNotificationType(
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
             std::string msg = "Incorrect parameter types. The type of priorityNotificationType must be string.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
 

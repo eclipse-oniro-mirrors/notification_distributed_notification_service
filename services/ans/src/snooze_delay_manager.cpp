@@ -21,7 +21,7 @@
 #include "advanced_notification_inline.h"
 #include "aes_gcm_helper.h"
 #include "ans_const_define.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_trace_wrapper.h"
 #include "ans_permission_def.h"
 
@@ -43,14 +43,15 @@ ErrCode AdvancedNotificationService::SnoozeNotification(const std::string &hashC
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Is Not systemApp");
         message.Message("Not systemApp.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NON_SYSTEM_APP));
-        return ERR_ANS_NON_SYSTEM_APP;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP));
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied.");
         message.Message("Permission denied.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_1));
-        return ERR_ANS_PERMISSION_DENIED;
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     ErrCode result = ERR_OK;
@@ -82,8 +83,8 @@ ErrCode AdvancedNotificationService::ExcuteSnoozeNotification(const std::string 
         ANS_LOGE("notification is not exists");
         message.Message(hashCode + " is not exists");
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_NOTIFICATION_NOT_EXISTS).BranchId(BRANCH_3));
-        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+            message.ErrorCode(ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS).BranchId(BRANCH_3));
+        return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     }
     bool isCollaboration =
         AdvancedNotificationPriorityHelper::GetInstance()->IsCollaborationNotification(outRecord->request);
@@ -92,8 +93,8 @@ ErrCode AdvancedNotificationService::ExcuteSnoozeNotification(const std::string 
         ANS_LOGE("notification is not supported to snooze");
         message.Message(hashCode + " is not supported to snooze");
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_NOTIFICATION_SNOOZE_NOTALLOWED).BranchId(BRANCH_4));
-        return ERR_ANS_NOTIFICATION_SNOOZE_NOTALLOWED;
+            message.ErrorCode(ERR_ANS_INNER_NOTIFICATION_SNOOZE_NOTALLOWED).BranchId(BRANCH_4));
+        return ERR_ANS_INNER_NOTIFICATION_SNOOZE_NOTALLOWED;
     }
 
     ErrCode result = ERR_OK;
@@ -107,9 +108,9 @@ ErrCode AdvancedNotificationService::ExcuteSnoozeNotification(const std::string 
         NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
     }
     if (!SetSnoozeDelayTimeToDB(delayTime, outRecord)) {
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
-    
+
     StartSnoozeTimer();
     return ERR_OK;
 }

@@ -14,7 +14,8 @@
  */
 #include "ani_publish.h"
 
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_bundle_option.h"
 #include "sts_throw_erro.h"
@@ -23,6 +24,8 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackPublishInfo* asyncCallbackInfo)
 {
     ANS_LOGD("Delete AsyncCallbackPublishInfo Without Promise");
@@ -112,8 +115,9 @@ void ExecutePublishWork(ani_env* env, void* data)
 {
     auto asyncCallbackInfo = static_cast<AsyncCallbackPublishInfo*>(data);
     if (asyncCallbackInfo) {
-        asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::PublishNotification(
-            *(asyncCallbackInfo->notificationRequest));
+        asyncCallbackInfo->info.returnCode =
+            DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(
+                *(asyncCallbackInfo->notificationRequest));
     }
 }
 

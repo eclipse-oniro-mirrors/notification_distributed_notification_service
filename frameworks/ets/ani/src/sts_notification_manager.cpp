@@ -223,16 +223,16 @@ bool StsDoNotDisturbTypeUtils::StsToC(const STSDoNotDisturbType inType,
 {
     switch (inType) {
         case STSDoNotDisturbType::TYPE_NONE:
-            outType = Notification::NotificationConstant::DoNotDisturbType::NONE;
+            outType = OHOS::Notification::NotificationConstant::DoNotDisturbType::NONE;
             break;
         case STSDoNotDisturbType::TYPE_ONCE:
-            outType = Notification::NotificationConstant::DoNotDisturbType::ONCE;
+            outType = OHOS::Notification::NotificationConstant::DoNotDisturbType::ONCE;
             break;
         case STSDoNotDisturbType::TYPE_DAILY:
-            outType = Notification::NotificationConstant::DoNotDisturbType::DAILY;
+            outType = OHOS::Notification::NotificationConstant::DoNotDisturbType::DAILY;
             break;
         case STSDoNotDisturbType::TYPE_CLEARLY:
-            outType = Notification::NotificationConstant::DoNotDisturbType::CLEARLY;
+            outType = OHOS::Notification::NotificationConstant::DoNotDisturbType::CLEARLY;
             break;
         default:
             ANS_LOGE("STSDoNotDisturbType %{public}d is an invalid value", inType);
@@ -587,7 +587,7 @@ bool ContentTypeCToEts(ani_env *env, ContentType contentType, ani_enum_item &enu
 }
 
 bool DoNotDisturbTypeEtsToC(ani_env *env, ani_enum_item enumItem,
-    Notification::NotificationConstant::DoNotDisturbType &doNotDisturbType)
+    OHOS::Notification::NotificationConstant::DoNotDisturbType &doNotDisturbType)
 {
     ANS_LOGD("DoNotDisturbTypeEtsToC call");
     STSDoNotDisturbType stsDoNotDisturbType = TYPE_NONE;

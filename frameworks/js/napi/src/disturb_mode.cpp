@@ -35,7 +35,7 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
     NAPI_CALL(env, napi_has_named_property(env, argv, "type", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Wrong argument type. Property type expected.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
     napi_get_named_property(env, argv, "type", &value);
@@ -43,7 +43,7 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
     if (valuetype != napi_number) {
         ANS_LOGE("Wrong argument type. Number expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     int type = 0;
@@ -51,7 +51,7 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
     napi_get_value_int32(env, value, &type);
     ANS_LOGI("get doNodDistrurbDate type:%{public}d", type);
     if (!AnsEnumUtil::DoNotDisturbTypeJSToC(DoNotDisturbType(type), outType)) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
     params.date.SetDoNotDisturbType(outType);
@@ -60,7 +60,7 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
     NAPI_CALL(env, napi_has_named_property(env, argv, "begin", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Wrong argument type. Property type expected.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
     double begin = 0;
@@ -70,7 +70,7 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
     if (!isDate) {
         ANS_LOGE("Wrong argument type. Date expected.");
         std::string msg = "Incorrect parameter types.The type of param must be date.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     napi_get_date_value(env, value, &begin);
@@ -80,7 +80,7 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
     NAPI_CALL(env, napi_has_named_property(env, argv, "end", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Wrong argument type. Property type expected.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
     double end = 0;
@@ -90,7 +90,7 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
     if (!isDate) {
         ANS_LOGE("Wrong argument type. Date expected.");
         std::string msg = "Incorrect parameter types.The type of param must be date.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     napi_get_date_value(env, value, &end);
@@ -191,7 +191,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < SET_DISTURB_MIN_PARA) {
         ANS_LOGE("Wrong argument type. Property type expected.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -200,11 +200,11 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type. Property type expected.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
     if (GetDoNotDisturbDate(env, argv[PARAM0], params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -247,7 +247,7 @@ bool ParseProfilesParameters(
     NAPI_CALL_BASE(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL), false);
     if (argc != DISTURB_PROFILES_PARA) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return false;
     }
     napi_valuetype valuetype = napi_undefined;
@@ -256,7 +256,7 @@ bool ParseProfilesParameters(
     if (!isArray) {
         ANS_LOGE("Wrong argument type. Array expected.");
         std::string msg = "Incorrect parameter types.The type of param must be array.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
     uint32_t length = 0;
@@ -264,7 +264,7 @@ bool ParseProfilesParameters(
     if (length == 0) {
         ANS_LOGD("The array is empty.");
         std::string msg = "Mandatory parameters are left unspecified. The array is empty.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
     for (size_t index = 0; index < length; index++) {
@@ -274,7 +274,7 @@ bool ParseProfilesParameters(
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types.The type of param must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return false;
         }
         sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
@@ -299,7 +299,7 @@ bool ParseProfilesParameters(const napi_env &env, const napi_callback_info &info
     NAPI_CALL_BASE(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL), false);
     if (argc < DISTURB_PROFILES_PARA) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return false;
     }
     napi_valuetype valuetype = napi_undefined;
@@ -308,7 +308,7 @@ bool ParseProfilesParameters(const napi_env &env, const napi_callback_info &info
     if (!isArray) {
         ANS_LOGE("Wrong argument type. Array expected.");
         std::string msg = "Incorrect parameter types.The type of param must be array.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
     uint32_t length = 0;
@@ -316,7 +316,7 @@ bool ParseProfilesParameters(const napi_env &env, const napi_callback_info &info
     if (length == 0) {
         ANS_LOGD("The array is empty.");
         std::string msg = "Mandatory parameters are left unspecified. The array is empty.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
     for (size_t index = 0; index < length; index++) {
@@ -326,7 +326,7 @@ bool ParseProfilesParameters(const napi_env &env, const napi_callback_info &info
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types.The type of param must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return false;
         }
         sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
@@ -344,7 +344,7 @@ bool ParseProfilesParameters(const napi_env &env, const napi_callback_info &info
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types.The type of param must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return false;
         }
         NAPI_CALL_BASE(env, napi_get_value_int32(env, argv[PARAM1], &userId), false);

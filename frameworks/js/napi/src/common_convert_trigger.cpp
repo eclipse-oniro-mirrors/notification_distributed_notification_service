@@ -41,7 +41,7 @@ napi_value Common::GetNotificationTrigger(
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types. The type of trigger must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
 
@@ -106,7 +106,7 @@ napi_value Common::GetNotificationTriggerType(const napi_env &env, const napi_va
     if (valuetype != napi_number) {
         ANS_LOGE("type Wrong argument type. Number expected.");
         std::string msg = "Incorrect parameter types. The type of type must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     int32_t type = 0;
@@ -114,7 +114,7 @@ napi_value Common::GetNotificationTriggerType(const napi_env &env, const napi_va
     NotificationConstant::TriggerType cTriggerType;
     if (!AnsEnumUtil::TriggerTypeJSToC(static_cast<TriggerType>(type), cTriggerType)) {
         ANS_LOGE("type is invalid.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID);
         return nullptr;
     }
     notificationTrigger->SetTriggerType(cTriggerType);
@@ -138,7 +138,7 @@ napi_value Common::GetNotificationTriggerDisplayTime(const napi_env &env, const 
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types. The type of displayTime must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         int32_t displayTime = NotificationConstant::MIN_GEOFENCE_DISPLAY_TIME_S - 1;
@@ -148,7 +148,7 @@ napi_value Common::GetNotificationTriggerDisplayTime(const napi_env &env, const 
             std::string msg = std::string("Invalid displayTime. The displayTime must be in range ") +
                 std::to_string(NotificationConstant::MIN_GEOFENCE_DISPLAY_TIME_S) + "s to " +
                 std::to_string(NotificationConstant::MAX_GEOFENCE_DISPLAY_TIME_S) + "s.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         if (displayTime > NotificationConstant::MAX_GEOFENCE_DISPLAY_TIME_S) {
@@ -183,7 +183,7 @@ napi_value Common::GetNotificationGeofence(const napi_env &env, const napi_value
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type. Object expected.");
         std::string msg = "Incorrect parameter types. The type of condition must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     std::shared_ptr<NotificationGeofence> geofence = std::make_shared<NotificationGeofence>();
@@ -257,7 +257,7 @@ napi_value Common::GetNotificationGeofenceByLongitude(const napi_env &env, const
     if (valuetype != napi_number) {
         ANS_LOGE("Wrong argument type. Number expected.");
         std::string msg = "Incorrect parameter types. The type of longitude must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     napi_get_value_double(env, result, &longitude);
@@ -267,7 +267,7 @@ napi_value Common::GetNotificationGeofenceByLongitude(const napi_env &env, const
         std::string msg = std::string("Invalid longitude. The longitude must be in range ") +
             std::to_string(NotificationConstant::MIN_GEOFENCE_LONGITUDE) + " to " +
             std::to_string(NotificationConstant::MAX_GEOFENCE_LONGITUDE) + ".";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     geofence->SetLongitude(longitude);
@@ -294,7 +294,7 @@ napi_value Common::GetNotificationGeofenceByLatitude(const napi_env &env, const 
     if (valuetype != napi_number) {
         ANS_LOGE("Wrong argument type. Number expected.");
         std::string msg = "Incorrect parameter types. The type of latitude must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     napi_get_value_double(env, result, &latitude);
@@ -304,7 +304,7 @@ napi_value Common::GetNotificationGeofenceByLatitude(const napi_env &env, const 
         std::string msg = std::string("Invalid latitude. The latitude must be in range ") +
             std::to_string(NotificationConstant::MIN_GEOFENCE_LATITUDE) + " to " +
             std::to_string(NotificationConstant::MAX_GEOFENCE_LATITUDE) + ".";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     geofence->SetLatitude(latitude);
@@ -331,7 +331,7 @@ napi_value Common::GetNotificationGeofenceByRadius(const napi_env &env, const na
     if (valuetype != napi_number) {
         ANS_LOGE("Wrong argument type. Number expected.");
         std::string msg = "Incorrect parameter types. The type of radius must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     napi_get_value_double(env, result, &radius);
@@ -341,7 +341,7 @@ napi_value Common::GetNotificationGeofenceByRadius(const napi_env &env, const na
         std::string msg = std::string("Invalid radius. The radius must be in range ") +
             std::to_string(NotificationConstant::MIN_GEOFENCE_RADIUS) + " to " +
             std::to_string(NotificationConstant::MAX_GEOFENCE_RADIUS) + ".";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     geofence->SetRadius(radius);
@@ -365,7 +365,7 @@ napi_value Common::GetNotificationGeofenceByNumber(const napi_env &env, const na
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types. The type of delayTime must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, result, &delayTime);
@@ -375,7 +375,7 @@ napi_value Common::GetNotificationGeofenceByNumber(const napi_env &env, const na
             std::string msg = std::string("Invalid delayTime. The delayTime must be in range ") +
                 std::to_string(NotificationConstant::MIN_GEOFENCE_DELAY_TIME_S) + "s to " +
                 std::to_string(NotificationConstant::MAX_GEOFENCE_DELAY_TIME_S) + "s.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         geofence->SetDelayTime(delayTime);
@@ -422,7 +422,7 @@ napi_value Common::GetNotificationGeofenceByCoordinateSystemType(const napi_env 
     if (valuetype != napi_number) {
         ANS_LOGE("Wrong argument coordinateSystemType. Number expected.");
         std::string msg = "Incorrect parameter types. The type of coordinateSystemType must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     napi_get_value_int32(env, result, &coordinateSystemType);
@@ -430,7 +430,7 @@ napi_value Common::GetNotificationGeofenceByCoordinateSystemType(const napi_env 
     if (!AnsEnumUtil::CoordinateSystemTypeJSToC(static_cast<CoordinateSystemType>(coordinateSystemType),
         cCoordinateSystemType)) {
         ANS_LOGE("coordinateSystemType is invalid.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID);
         return nullptr;
     }
     geofence->SetCoordinateSystemType(cCoordinateSystemType);
@@ -457,14 +457,14 @@ napi_value Common::GetNotificationGeofenceByMonitorEvent(const napi_env &env, co
     if (valuetype != napi_number) {
         ANS_LOGE("Wrong argument type. Number expected.");
         std::string msg = "Incorrect parameter types. The type of monitorEvent must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     napi_get_value_int32(env, result, &monitorEvent);
     NotificationConstant::MonitorEvent cMonitorEvent;
     if (!AnsEnumUtil::MonitorEventJSToC(static_cast<MonitorEvent>(monitorEvent), cMonitorEvent)) {
         ANS_LOGE("monitorEvent is invalid.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID);
         return nullptr;
     }
     geofence->SetMonitorEvent(cMonitorEvent);

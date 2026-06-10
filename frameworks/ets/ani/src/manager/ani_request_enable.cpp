@@ -17,7 +17,9 @@
 #include "ani_ans_dialog_callback.h"
 #include "ans_log_wrapper.h"
 #include "ets_error_utils.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "ans_service_errors.h"
+#include "singleton.h"
 #include "ani_common_util.h"
 #include "sts_common.h"
 #include "sts_throw_erro.h"
@@ -39,7 +41,7 @@ bool GetEnableNotificationInfo(ani_env *env, ani_object content, std::shared_ptr
     if (ANI_OK != status || stageMode != ANI_TRUE) {
         ANS_LOGE("Only support stage mode");
         std::string msg = "Incorrect parameter types.Only support stage mode.";
-        OHOS::NotificationSts::ThrowError(env, ERROR_PARAM_INVALID, msg);
+        OHOS::NotificationSts::ThrowError(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return false;
     }
     info->stageMode = true;
@@ -56,19 +58,21 @@ void RequestEnableExecute(std::shared_ptr<EnableNotificationInfo> &info)
     sptr<AnsDialogHostClient> client = nullptr;
     if (!AnsDialogHostClient::CreateIfNullptr(client)) {
         ANS_LOGE("create client fail");
-        info->errorCode = ERR_ANS_DIALOG_IS_POPPING;
+        info->errorCode = ERR_ANS_INNER_DIALOG_IS_POPPING;
         return;
     }
     if (client == nullptr) {
         ANS_LOGE("client is nullptr");
-        info->errorCode = ERROR_INTERNAL_ERROR;
+        info->errorCode = ERR_ANS_INNER_TASK_ERR;
         return;
     }
     if (info->context != nullptr) {
         ANS_LOGD("stage mode");
         bool canPop = false;
         std::string bundleName = "";
-        ErrCode errCode = NotificationHelper::CanPopEnableNotificationDialog(client, canPop, bundleName);
+        uint32_t errCode =
+            DelayedSingleton<AnsNotification>::GetInstance()->CanPopEnableNotificationDialog(
+                client, canPop, bundleName);
         ANS_LOGI("errCode=%{public}d,canPop=%{public}d", errCode, canPop);
         if (canPop == false) {
             info->errorCode = errCode;
@@ -79,7 +83,10 @@ void RequestEnableExecute(std::shared_ptr<EnableNotificationInfo> &info)
     } else {
         ANS_LOGD("un stage mode");
         std::string deviceId {""};
-        info->errorCode = NotificationHelper::RequestEnableNotification(deviceId, client, info->callerToken);
+        uint32_t svcErrCode =
+            DelayedSingleton<AnsNotification>::GetInstance()->RequestEnableNotification(
+                deviceId, client, info->callerToken);
+        info->errorCode = svcErrCode;
     }
     ANS_LOGI("request enable, code:%{public}d.", info->errorCode);
 }
@@ -89,10 +96,9 @@ void StsAsyncCompleteCallbackRequestEnableNotification(ani_env *env, std::shared
     ANS_LOGD("enter");
     if (env == nullptr || info == nullptr) return;
     ani_status status;
-    int32_t errorCode = info->errorCode ==
-        ERR_OK ? ERR_OK : NotificationSts::GetExternalCode(info->errorCode);
+    int32_t errorCode = info->errorCode;
     if (errorCode == ERR_OK) {
-        ANS_LOGD("Resolve. errorCode %{public}d", errorCode);
+        ANS_LOGD("Resolve. errorCode %{public}u", errorCode);
         ani_object ret = OHOS::AppExecFwk::CreateInt(env, errorCode);
         if (ret == nullptr) {
             ANS_LOGE("createInt faild");
@@ -102,10 +108,9 @@ void StsAsyncCompleteCallbackRequestEnableNotification(ani_env *env, std::shared
             ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
         }
     } else {
-        std::string errMsg = OHOS::NotificationSts::FindAnsErrMsg(errorCode);
-        ANS_LOGD("reject. errorCode %{public}d errMsg %{public}s", errorCode, errMsg.c_str());
+        ANS_LOGD("reject. errorCode %{public}u", errorCode);
         ani_error rejection =
-            static_cast<ani_error>(OHOS::NotificationSts::CreateError(env, errorCode, errMsg));
+            static_cast<ani_error>(OHOS::NotificationSts::CreateError(env, errorCode));
         if (ANI_OK != (status = env->PromiseResolver_Reject(info->resolver, rejection))) {
             ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
         }
@@ -168,14 +173,14 @@ void RequestEnableComplete(ani_env *env, std::shared_ptr<EnableNotificationInfo>
     if (!info->bundleName.empty()) {
         bool success = CreateUIExtension(info);
         if (success) {
-            info->errorCode = ERR_ANS_DIALOG_POP_SUCCEEDED;
+            info->errorCode = ERR_ANS_INNER_DIALOG_POP_SUCCEEDED;
         } else {
-            info->errorCode = ERROR_INTERNAL_ERROR;
+            info->errorCode = ERR_ANS_INNER_TASK_ERR;
             AnsDialogHostClient::Destroy();
-            NotificationHelper::RemoveEnableNotificationDialog();
+            DelayedSingleton<AnsNotification>::GetInstance()->RemoveEnableNotificationDialog();
         }
     }
-    if (info->errorCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
+    if (info->errorCode != ERR_ANS_INNER_DIALOG_POP_SUCCEEDED) {
         ANS_LOGE("error, code is %{public}d.", info->errorCode);
         AnsDialogHostClient::Destroy();
         StsAsyncCompleteCallbackRequestEnableNotification(env, info);
@@ -188,7 +193,7 @@ void RequestEnableComplete(ani_env *env, std::shared_ptr<EnableNotificationInfo>
     ) {
         ANS_LOGE("error");
         AnsDialogHostClient::Destroy();
-        info->errorCode = ERROR_INTERNAL_ERROR;
+        info->errorCode = ERR_ANS_INNER_TASK_ERR;
         StsAsyncCompleteCallbackRequestEnableNotification(env, info);
         return;
     }
@@ -215,7 +220,7 @@ ani_object AniRequestEnableNotification(ani_env *env, ani_object content)
     RequestEnableComplete(env, info);
     ANS_LOGD("RequestEnableNotification done");
     NotificationSts::HistogramBoolReport(
-        "NotificationKit.APICall.requestEnableNotification", info->errorCode == ERR_ANS_DIALOG_POP_SUCCEEDED);
+        "NotificationKit.APICall.requestEnableNotification", info->errorCode == ERR_ANS_INNER_DIALOG_POP_SUCCEEDED);
     return aniPromise;
 }
 }

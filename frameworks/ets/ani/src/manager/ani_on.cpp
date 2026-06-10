@@ -21,7 +21,8 @@
 #include "ani_push_callback.h"
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 
 #ifdef ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW
 constexpr const char* TYPE_STRING = "checkNotification";
@@ -46,15 +47,13 @@ int32_t getNotificationCheckRequestParam(ani_env *env, ani_object checkRequestOb
     checkRequest = new (std::nothrow) NotificationCheckRequest();
     if (checkRequest == nullptr) {
         ANS_LOGE("new NotificationCheckRequest fail");
-        int32_t errCode = OHOS::Notification::ERROR_INTERNAL_ERROR;
-        OHOS::NotificationSts::ThrowErrorWithInvalidParam(env);
-        return errCode;
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_TASK_ERR);
+        return ERR_ANS_INNER_TASK_ERR;
     }
     if (!OHOS::NotificationSts::UnWarpNotificationCheckRequest(env, checkRequestObj, checkRequest)) {
         ANS_LOGE("InvalidParam 'checkRequest'");
-        int32_t errCode = OHOS::Notification::ERROR_PARAM_INVALID;
-        OHOS::NotificationSts::ThrowErrorWithInvalidParam(env);
-        return errCode;
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_INVALID_PARAM);
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     return ERR_OK;
 }
@@ -67,9 +66,8 @@ ani_int AniOn(ani_env *env, ani_string type, ani_fn_object fn, ani_object checkR
     ani_status status = NotificationSts::GetStringByAniString(env, type, typeStr);
     if (status != ANI_OK || typeStr.compare(TYPE_STRING)) {
         ANS_LOGE("InvalidParam 'type'");
-        int32_t errCode = OHOS::Notification::ERROR_PARAM_INVALID;
-        OHOS::NotificationSts::ThrowErrorWithInvalidParam(env);
-        return errCode;
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_INVALID_PARAM);
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     if (NotificationSts::IsUndefine(env, checkRequestObj)) {
         ANS_LOGI("Old function param, don't need register.");
@@ -82,29 +80,29 @@ ani_int AniOn(ani_env *env, ani_string type, ani_fn_object fn, ani_object checkR
         return errCode;
     }
     if (!CheckCallerIsSystemApp()) {
-        OHOS::NotificationSts::ThrowErrorWithCode(env, ERROR_NOT_SYSTEM_APP);
-        return ERROR_NOT_SYSTEM_APP;
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_NON_SYSTEM_APP);
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     sptr<StsPushCallBack> stsPushCallBack_ = new (std::nothrow) StsPushCallBack(env);
     if (stsPushCallBack_ == nullptr) {
         ANS_LOGE("new stsPushCallBack_ failed");
-        OHOS::NotificationSts::ThrowErrorWithCode(env, ERROR_INTERNAL_ERROR);
-        return ERROR_INTERNAL_ERROR;
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_TASK_ERR);
+        return ERR_ANS_INNER_TASK_ERR;
     }
     NotificationConstant::SlotType outSlotType = checkRequest->GetSlotType();
     stsPushCallBack_->SetJsPushCallBackObject(env, outSlotType, fn);
-    auto result = NotificationHelper::RegisterPushCallback(stsPushCallBack_->AsObject(), checkRequest);
-    if (result != ERR_OK) {
-        int32_t externalCode = ERR_OK ? ERR_OK : NotificationSts::GetExternalCode(result);
-        ANS_LOGE("Register failed, result is %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowErrorWithCode(env, externalCode);
-        return externalCode;
+    InnerErrorCode svcResult = DelayedSingleton<AnsNotification>::GetInstance()->RegisterPushCallback(
+        stsPushCallBack_->AsObject(), checkRequest);
+    if (svcResult != ERR_ANS_INNER_OK) {
+        ANS_LOGE("Register failed, result is %{public}d", svcResult);
+        OHOS::NotificationSts::ThrowErrorWithCode(env, svcResult);
+        return svcResult;
     }
     ANS_LOGD("done");
-    return result;
+    return ERR_OK;
 #else
-    int32_t errCode = OHOS::Notification::ERROR_SYSTEM_CAP_ERROR;
+    int32_t errCode = OHOS::Notification::ERR_ANS_INNER_DEVICE_NOT_SUPPORT;
     OHOS::NotificationSts::ThrowErrorWithCode(env, errCode);
     return errCode;
 #endif
@@ -118,24 +116,22 @@ ani_int AniOff(ani_env *env, ani_string type, ani_fn_object fn)
     ani_status status = NotificationSts::GetStringByAniString(env, type, typeStr);
     if (status != ANI_OK || typeStr.compare(TYPE_STRING)) {
         ANS_LOGE("InvalidParam 'type'");
-        int32_t errCode = OHOS::Notification::ERROR_PARAM_INVALID;
-        OHOS::NotificationSts::ThrowErrorWithInvalidParam(env);
-        return errCode;
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_INVALID_PARAM);
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     if (!CheckCallerIsSystemApp()) {
-        OHOS::NotificationSts::ThrowErrorWithCode(env, ERROR_NOT_SYSTEM_APP);
-        return ERROR_NOT_SYSTEM_APP;
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_NON_SYSTEM_APP);
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
     if (!NotificationSts::IsUndefine(env, fn)) {
-        int32_t errCode = OHOS::Notification::ERROR_PARAM_INVALID;
-        OHOS::NotificationSts::ThrowErrorWithInvalidParam(env);
-        return errCode;
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_INVALID_PARAM);
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
-    int32_t ret = NotificationHelper::UnregisterPushCallback();
-    ANS_LOGD("done. ret %{public}d", ret);
+    DelayedSingleton<AnsNotification>::GetInstance()->UnregisterPushCallback();
+    ANS_LOGD("done.");
     return ERR_OK;
 #else
-    int32_t errCode = OHOS::Notification::ERROR_SYSTEM_CAP_ERROR;
+    int32_t errCode = OHOS::Notification::ERR_ANS_INNER_DEVICE_NOT_SUPPORT;
     OHOS::NotificationSts::ThrowErrorWithCode(env, errCode);
     return errCode;
 #endif

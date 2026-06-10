@@ -19,7 +19,7 @@
 #include <sstream>
 
 #include "ans_const_define.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_trace_wrapper.h"
 #include "access_token_helper.h"
@@ -199,12 +199,12 @@ ErrCode AdvancedNotificationService::CheckCommonParams()
 {
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("Check permission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     return ERR_OK;
@@ -215,7 +215,7 @@ ErrCode AdvancedNotificationService::GetAppTargetBundle(const sptr<NotificationB
 {
     sptr<NotificationBundleOption> clientBundle = GenerateBundleOption();
     if (clientBundle == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     if (bundleOption == nullptr) {
@@ -227,7 +227,7 @@ ErrCode AdvancedNotificationService::GetAppTargetBundle(const sptr<NotificationB
         } else {
             bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
             if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-                return ERR_ANS_NON_SYSTEM_APP;
+                return ERR_ANS_INNER_NON_SYSTEM_APP;
             }
             targetBundle = GenerateValidBundleOption(bundleOption);
         }
@@ -252,7 +252,7 @@ ErrCode AdvancedNotificationService::FillRequestByKeys(const sptr<NotificationRe
     std::shared_ptr<AAFwk::WantParams> requestExtraInfo = std::make_shared<AAFwk::WantParams>();
     if (requestExtraInfo == nullptr) {
         ANS_LOGE("Failed to make extraInfos.");
-        return ERR_ANS_TASK_ERR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     for (const auto &extraInfoKey : extraInfoKeys) {
         auto paramValue = liveViewExtraInfo->GetParam(extraInfoKey);
@@ -275,7 +275,7 @@ ErrCode AdvancedNotificationService::IsAllowedGetNotificationByFilter(
         return ERR_OK;
     }
     ANS_LOGE("Get live view by filter failed because no permission.");
-    return ERR_ANS_PERMISSION_DENIED;
+    return ERR_ANS_INNER_PERMISSION_DENIED;
 }
 
 void AdvancedNotificationService::SetAgentNotification(sptr<NotificationRequest>& notificationRequest,
@@ -712,7 +712,7 @@ ErrCode AdvancedNotificationService::GetTargetRecordList(const int32_t uid, cons
         }
     }
     if (recordList.empty()) {
-        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+        return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     }
     return ERR_OK;
 }
@@ -734,7 +734,7 @@ ErrCode AdvancedNotificationService::GetCommonTargetRecordList(const int32_t uid
         }
     }
     if (recordList.empty()) {
-        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+        return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     }
     return ERR_OK;
 }
@@ -1287,7 +1287,7 @@ void AdvancedNotificationService::OnUserRemoved(const int32_t &userId)
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         std::string message = "not system app.";
         OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 5)
-            .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+            .ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP);
         ReportDeleteFailedEventPush(haMetaMessage, NotificationConstant::USER_REMOVED_REASON_DELETE, message);
         ANS_LOGE("%{public}s", message.c_str());
     }
@@ -1362,14 +1362,14 @@ ErrCode AdvancedNotificationService::DeleteAllByUser(int32_t userId)
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         std::string message = "not system app.";
         OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 5)
-            .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+            .ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP);
         ReportDeleteFailedEventPush(haMetaMessage, NotificationConstant::APP_REMOVE_ALL_USER_REASON_DELETE, message);
         ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("No acl permission.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     return DeleteAllByUserInner(userId, NotificationConstant::APP_REMOVE_ALL_USER_REASON_DELETE);
 }
@@ -1382,10 +1382,10 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
     if (userId <= SUBSCRIBE_USER_INIT) {
         std::string message = "userId is error.";
         OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 6)
-            .ErrorCode(ERR_ANS_INVALID_PARAM);
+            .ErrorCode(ERR_ANS_INNER_INVALID_PARAM);
         ReportDeleteFailedEventPush(haMetaMessage, deleteReason, message);
         ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::shared_ptr<ErrCode> result = std::make_shared<ErrCode>(ERR_OK);
@@ -1446,10 +1446,10 @@ ErrCode AdvancedNotificationService::ShellDump(const std::string &cmd, const std
     auto callerToken = IPCSkeleton::GetCallingTokenID();
     if (!AccessTokenHelper::VerifyShellToken(callerToken) && !AccessTokenHelper::VerifyNativeToken(callerToken)) {
         ANS_LOGE("Not subsystem or shell request");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
-    ErrCode result = ERR_ANS_NOT_ALLOWED;
+    ErrCode result = ERR_ANS_INNER_NOT_ALLOWED;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         if (cmd == ACTIVE_NOTIFICATION_OPTION) {
@@ -1463,7 +1463,7 @@ ErrCode AdvancedNotificationService::ShellDump(const std::string &cmd, const std
         } else if (cmd.substr(0, cmd.find_first_of(" ", 0)) == SET_RECENT_COUNT_OPTION) {
             result = SetRecentNotificationCount(cmd.substr(cmd.find_first_of(" ", 0) + 1));
         } else {
-            result = ERR_ANS_INVALID_PARAM;
+            result = ERR_ANS_INNER_INVALID_PARAM;
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Shell dump");
@@ -1503,7 +1503,7 @@ int AdvancedNotificationService::Dump(int fd, const std::vector<std::u16string> 
     int ret = dprintf(fd, "%s\n", result.c_str());
     if (ret < 0) {
         ANS_LOGE("dprintf error");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     return ERR_OK;
 }
@@ -1565,7 +1565,7 @@ AnsStatus AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Not
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     if (bundleManager == nullptr) {
         ANS_LOGE("failed to get bundleManager!");
-        return AnsStatus(ERR_ANS_INVALID_BUNDLE, "failed to get bundleManager!");
+        return AnsStatus(ERR_ANS_INNER_INVALID_BUNDLE, "failed to get bundleManager!");
     }
     bundle = bundleManager->GetBundleNameByUid(uid);
     ErrCode result = SetRequestBundleInfo(request, uid, bundle);
@@ -1616,7 +1616,7 @@ AnsStatus AdvancedNotificationService::PrePublishRequest(const sptr<Notification
     ErrCode result = ERR_OK;
     auto publishProcess = GetPublishProcess(request->GetSlotType());
     if (publishProcess == nullptr) {
-        return AnsStatus(ERR_ANS_NO_MEMORY, "ERR_ANS_NO_MEMORY");
+        return AnsStatus(ERR_ANS_INNER_NO_MEMORY, "ERR_ANS_INNER_NO_MEMORY");
     }
     AnsStatus ansStatus = publishProcess->PublishPreWork(request, false);
     if (!ansStatus.Ok()) {
@@ -1630,13 +1630,13 @@ AnsStatus AdvancedNotificationService::PrePublishRequest(const sptr<Notification
     }
 
     if (request->GetCreatorUid() <= 0) {
-        return AnsStatus(ERR_ANS_INVALID_UID, "createUid failed" + std::to_string(request->GetCreatorUid()),
+        return AnsStatus(ERR_ANS_INNER_INVALID_UID, "createUid failed" + std::to_string(request->GetCreatorUid()),
             EventSceneId::SCENE_9, EventBranchId::BRANCH_2);
     }
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     if (bundleManager == nullptr) {
         ANS_LOGE("failed to get bundleManager!");
-        return AnsStatus(ERR_ANS_INVALID_BUNDLE, "failed to get bundleManager!");
+        return AnsStatus(ERR_ANS_INNER_INVALID_BUNDLE, "failed to get bundleManager!");
     }
     request->SetCreatorPid(IPCSkeleton::GetCallingPid());
     int32_t userId = SUBSCRIBE_USER_INIT;
@@ -1866,30 +1866,30 @@ ErrCode AdvancedNotificationService::CheckBundleOptionValid(sptr<NotificationBun
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_8);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         ANS_LOGE("Bundle option is invalid.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()));
     int32_t activeUserId = 0;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
         ANS_LOGE("Failed to get active user id.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     if (bundleManager == nullptr) {
-        message.ErrorCode(ERR_ANS_INVALID_BUNDLE).Append("Failed to get bundle manager.");
+        message.ErrorCode(ERR_ANS_INNER_INVALID_BUNDLE).Append("Failed to get bundle manager.");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("Failed to get bundle manager.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     int32_t uid = bundleManager->GetDefaultUidByBundleName(bundleOption->GetBundleName(), activeUserId);
     if (uid == -1) {
         if (bundleOption->GetUid() > DEFAULT_UID) {
             uid = bundleOption->GetUid();
         } else {
-            message.ErrorCode(ERR_ANS_INVALID_BUNDLE).Append("Bundle name was not found.");
+            message.ErrorCode(ERR_ANS_INNER_INVALID_BUNDLE).Append("Bundle name was not found.");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
             ANS_LOGE("The specified bundle name was not found.");
-            return ERR_ANS_INVALID_BUNDLE;
+            return ERR_ANS_INNER_INVALID_BUNDLE;
         }
     }
 
@@ -1985,13 +1985,13 @@ ErrCode AdvancedNotificationService::GetBundleVersionCode(
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         ANS_LOGE("Bundle option is invalid!");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     versionCode = 0;
     int32_t activeUserId = -1;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
         ANS_LOGE("Failed to get active user id!");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
     int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_DEFAULT);
     AppExecFwk::BundleInfo bundleInfo = {};
@@ -1999,7 +1999,7 @@ ErrCode AdvancedNotificationService::GetBundleVersionCode(
         flags, bundleInfo, activeUserId)) {
         ANS_LOGE("Failed to get bundle info, name: %{public}s, userId: %{public}d",
             bundleOption->GetBundleName().c_str(), activeUserId);
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     versionCode = bundleInfo.versionCode;
     return ERR_OK;
@@ -2261,7 +2261,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfoForRingtone(NotificationR
         }
         return;
     }
- 
+
     // clear last clone save ringtone info by current clone ringtone info, that last info is not set.
     NotificationRingtoneInfo lastCloneRingtone;
     NotificationPreferences::GetInstance()->GetCloneRingtoneInfo(userId, cloneBundleInfo, lastCloneRingtone);
@@ -2274,7 +2274,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfoForRingtone(NotificationR
         }
         NotificationPreferences::GetInstance()->DeleteCloneRingtoneInfo(userId, cloneBundleInfo);
     }
- 
+
     // if the application has ringtone before clone, clear the information.
     int64_t curTime = GetCurrentTime();
     int64_t cloneTime = NotificationPreferences::GetInstance()->GetCloneTimeStamp();
@@ -2294,7 +2294,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfoForRingtone(NotificationR
             }
             SystemSoundHelper::GetInstance()->RemoveCustomizedTone(oldRingtoneInfo);
         }
- 
+
         ANS_LOGW("Clone : %{public}d %{public}s", result, oldRingtoneInfo->GetRingtoneUri().c_str());
         NotificationPreferences::GetInstance()->SetRingtoneInfoByBundle(bundle, ringtoneInfoPtr);
     }
@@ -2474,7 +2474,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfoForDistributedEnable(
     NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundleOption,
         NotificationConstant::PAD_DEVICE_TYPE, true, collaborationSwitch.tabletNotification_);
 }
- 
+
 void AdvancedNotificationService::UpdateCloneBundleInfoFoSilentReminder(
     const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle)
 {
@@ -2492,12 +2492,12 @@ ErrCode AdvancedNotificationService::SystemPermissionCheck()
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Not system app or SA!");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("no permission");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     return ERR_OK;
 }
@@ -2571,7 +2571,7 @@ void AdvancedNotificationService::AddAppObserver(const sptr<NotificationRequest>
     auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
         request->GetContent()->GetNotificationContent());
     int32_t pid = static_cast<int32_t>(request->GetCreatorPid());
-    
+
     if (liveViewContent->GetCreatePid() == INVAILD_PROCESS_ID) {
         liveViewContent->SetCreatePid(pid);
     }
@@ -2605,7 +2605,7 @@ void AdvancedNotificationService::AddAppObserver(const sptr<NotificationRequest>
         ANS_LOGE("appObserver RegisterApplicationStateObserver failed, ret=%{public}d.", ret);
         return;
     }
-    
+
     std::lock_guard<std::mutex> lock(appObserverLock_);
     appObserverMap_.insert(std::pair<int32_t, sptr<AppExecFwk::IApplicationStateObserver>>(pid,
         notificationAppObserver));
@@ -2634,7 +2634,7 @@ void AdvancedNotificationService::RemoveAppObserver(const int32_t pid)
     if (ret != ERR_OK) {
         ANS_LOGE("ANS UnRegisterApplicationStateObserver failed, ret=%{public}d.", ret);
     }
-    
+
     appObserverMap_.erase(pid);
 }
 

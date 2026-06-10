@@ -29,6 +29,7 @@ ohos_unittest("ans_test") {
   ]
 
   sources = [
+    "${core_path}/common/src/ans_service_errors.cpp",
     "${frameworks_module_ans_path}/test/unittest/ans_dialog_host_client_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/ans_log_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/enabled_notification_callback_data_test.cpp",

@@ -14,7 +14,8 @@
  */
 #include "ani_support_template.h"
 
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -24,6 +25,8 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackSupportInfo* asyncCallbackInfo)
 {
     ANS_LOGD("Delete AsyncCallbackSupportInfo Without Promise");
@@ -105,7 +108,7 @@ void HandleSupportTemplateComplete(ani_env* env, WorkStatus status, void* data)
         asyncCallbackInfo->info.result = NotificationSts::CreateBoolean(envCurr, asyncCallbackInfo->isSupport);
         if (asyncCallbackInfo->info.result == nullptr) {
             ANS_LOGE("CreateBoolean for isSupport failed");
-            asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
         }
     }
     if (asyncCallbackInfo->isFuncGetDeviceRemindType) {
@@ -113,7 +116,7 @@ void HandleSupportTemplateComplete(ani_env* env, WorkStatus status, void* data)
         bool flag = NotificationSts::DeviceRemindTypeCToEts(envCurr, asyncCallbackInfo->remindType, remindTypeItem);
         if (!flag) {
             ANS_LOGE("Wrap remindTypeItem failed");
-            asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
         } else {
             asyncCallbackInfo->info.result = static_cast<ani_object>(remindTypeItem);
         }
@@ -156,8 +159,9 @@ ani_object AniIsSupportTemplate(ani_env* env, ani_string templateName, ani_objec
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSupportInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::IsSupportTemplate(
-                    asyncCallbackInfo->templateNameStr, asyncCallbackInfo->isSupport);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->IsSupportTemplate(
+                        asyncCallbackInfo->templateNameStr, asyncCallbackInfo->isSupport);
             }
         },
         HandleSupportTemplateComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -199,8 +203,9 @@ ani_object AniGetDeviceRemindType(ani_env *env, ani_object callback)
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSupportInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetDeviceRemindType(
-                    asyncCallbackInfo->remindType);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetDeviceRemindType(
+                        asyncCallbackInfo->remindType);
             }
         },
         HandleSupportTemplateComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));

@@ -180,7 +180,7 @@ napi_value Common::GetNotificationRequestDistributedOptions(const napi_env &env,
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types. The type of distributedOption must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
 
@@ -220,7 +220,7 @@ napi_value Common::GetNotificationIsDistributed(
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
             std::string msg = "Incorrect parameter types. The type of isDistributed must be bool.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &isDistributed);

@@ -15,12 +15,16 @@
 
 #include "napi_statistics.h"
 
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 
 const int GET_STATISTICS_MAX_PARA = 1;
 
@@ -34,7 +38,7 @@ static napi_value ParseBundlesParameters(const napi_env &env, const napi_callbac
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc != GET_STATISTICS_MAX_PARA) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -44,7 +48,7 @@ static napi_value ParseBundlesParameters(const napi_env &env, const napi_callbac
     if (!isArray) {
         ANS_LOGE("Parameter type error. Array expected.");
         std::string msg = "Incorrect parameter types.The type of param must be array.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
 
@@ -53,7 +57,7 @@ static napi_value ParseBundlesParameters(const napi_env &env, const napi_callbac
     if (len == 0) {
         ANS_LOGD("The array is empty.");
         std::string msg = "Mandatory parameters are left unspecified. The array is empty.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
 
@@ -65,12 +69,12 @@ static napi_value ParseBundlesParameters(const napi_env &env, const napi_callbac
         if (valueType != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types.The type of param must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
             return nullptr;
         }
         NotificationBundleOption bundle;
         if (!Common::GetBundleOption(env, nBundle, bundle)) {
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
         bundles.emplace_back(bundle);
@@ -144,13 +148,13 @@ napi_value NapiGetNotificationStatisticsByBundle(napi_env env, napi_callback_inf
 {
     std::vector<NotificationBundleOption> bundles;
     if (ParseBundlesParameters(env, info, bundles) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
-        return Common::NapiRejectError(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
+        return Common::NapiRejectError(env, ERR_ANS_INNER_INVALID_PARAM);
     }
     AsyncCallbackInfoStatistics *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoStatistics {.env = env, .asyncWork = nullptr, .bundles = bundles};
     if (!asynccallbackinfo) {
-        return Common::NapiRejectError(env, ERROR_INTERNAL_ERROR);
+        return Common::NapiRejectError(env, ERR_ANS_INNER_TASK_ERR);
     }
 
     napi_value promise = nullptr;
@@ -163,8 +167,9 @@ napi_value NapiGetNotificationStatisticsByBundle(napi_env env, napi_callback_inf
             AsyncCallbackInfoStatistics *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoStatistics *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetStatisticsByBundle(
-                    asynccallbackinfo->bundles, asynccallbackinfo->statisticsInfos);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetStatisticsByBundle(
+                        asynccallbackinfo->bundles, asynccallbackinfo->statisticsInfos);
             }
         },
         AsyncCompleteCallbackNapiGetStatisticsByBundle,

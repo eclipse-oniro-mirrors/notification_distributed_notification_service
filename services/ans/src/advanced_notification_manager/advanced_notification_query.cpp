@@ -14,6 +14,7 @@
  */
 
 #include "advanced_notification_service.h"
+#include "ans_service_errors.h"
 
 #include "ans_log_wrapper.h"
 #include "ans_permission_def.h"
@@ -53,12 +54,12 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(const std::string &i
     ANS_LOGD("called");
     if (synchronizer == nullptr) {
         ANS_LOGE("synchronizer is null");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     bundleOption->SetAppInstanceKey(instanceKey);
     auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
@@ -84,7 +85,7 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(
     ANS_LOGD("called");
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     bundleOption->SetAppInstanceKey(instanceKey);
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
@@ -110,7 +111,7 @@ ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
@@ -133,17 +134,17 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(const sptr<IAnsRe
     ANS_LOGD("called");
     if (synchronizer == nullptr) {
         ANS_LOGE("synchronizer is null");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     if (callingUid != RSS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("AccessTokenHelper::CheckPermission failed.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
@@ -165,13 +166,13 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
     ANS_LOGD("called");
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     if (callingUid != RSS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("AccessTokenHelper::CheckPermission failed.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
@@ -195,12 +196,12 @@ ErrCode AdvancedNotificationService::GetAllNotificationsBySlotTypeInner(std::vec
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("AccessTokenHelper::CheckPermission failed.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
@@ -234,7 +235,7 @@ ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<s
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGD("GetActiveUserId is false");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
     return GetAllNotificationsBySlotTypeInner(notifications, slotTypeInt, userId);
 }
@@ -245,7 +246,7 @@ ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<s
     ANS_LOGD("called");
     if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
         ANS_LOGE("Check user exists failed.");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
     return GetAllNotificationsBySlotTypeInner(notifications, slotTypeInt, userId);
 }
@@ -257,12 +258,12 @@ ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Check permission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
@@ -287,7 +288,7 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
         bundle = new (std::nothrow) NotificationBundleOption(bundleOption->GetBundleName(), 0);
     }
     if (bundle == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     // get other bundle notification need controller permission
     if (bundle->GetUid() != IPCSkeleton::GetCallingUid()) {
@@ -295,11 +296,11 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
             bundle->GetUid(), IPCSkeleton::GetCallingUid());
         if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
             ANS_LOGE("Get live view by filter failed because check permission is false.");
-            return ERR_ANS_PERMISSION_DENIED;
+            return ERR_ANS_INNER_PERMISSION_DENIED;
         }
     }
 
-    ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    ErrCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("called");
 
@@ -335,10 +336,10 @@ ErrCode AdvancedNotificationService::GetNotificationParameters(
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
-    ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    ErrCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         result = QueryNotificationParameters(notificationId, label, bundleOption, parameters);
     }));
@@ -359,13 +360,13 @@ ErrCode AdvancedNotificationService::QueryNotificationParameters(
         notificationId, bundleOption->GetUid(), label, bundleOption->GetBundleName(), userId);
     if (record == nullptr || record->request == nullptr) {
         ANS_LOGE("Notification record not found");
-        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+        return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     }
 
     parameters = new (std::nothrow) NotificationParameters();
     if (parameters == nullptr) {
         ANS_LOGE("Failed to create NotificationParameters");
-        return ERR_ANS_NO_MEMORY;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
 
     return ExtractWantAgentInfo(record, parameters);
@@ -398,12 +399,12 @@ ErrCode AdvancedNotificationService::GetNotificationRequestByHashCode(
 {
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Check permission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
@@ -420,13 +421,13 @@ ErrCode AdvancedNotificationService::GetUri(sptr<NotificationRequest> &request)
 {
     if (request == nullptr) {
         ANS_LOGE("null request");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
 
     auto additionalData = request->GetAdditionalData();
     if (additionalData == nullptr) {
         ANS_LOGE("null additionalData");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     additionalData = std::make_shared<AAFwk::WantParams>(*additionalData);
     request->SetAdditionalData(additionalData);
@@ -435,7 +436,7 @@ ErrCode AdvancedNotificationService::GetUri(sptr<NotificationRequest> &request)
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = request->GetWantAgent();
     if (!wantAgent) {
         ANS_LOGD("Failed to get wantAgent!");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
 
     std::shared_ptr<AAFwk::Want> want = AbilityRuntime::WantAgent::WantAgentHelper::GetWantFromProxy(wantAgent);
@@ -446,8 +447,8 @@ ErrCode AdvancedNotificationService::GetUri(sptr<NotificationRequest> &request)
         ANS_LOGE("%{public}s", msg.c_str());
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_31, EventBranchId::BRANCH_0);
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERROR_INTERNAL_ERROR).Message(msg.c_str()));
-        return ERROR_INTERNAL_ERROR;
+            message.ErrorCode(ERR_ANS_INNER_TASK_ERR).Message(msg.c_str()));
+        return ERR_ANS_INNER_TASK_ERR;
     }
 
     std::string uri = want->GetUri().ToString();
