@@ -589,6 +589,18 @@ ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<Notific
     if (!isSystemApp  && !isSubsystem && request->GetGroupInfo() != nullptr) {
         request->SetGroupInfo(nullptr);
     }
+
+    auto slotType = request->GetSlotType();
+    auto type = request->GetNotificationType();
+    if ((type == NotificationContent::Type::LIVE_VIEW || type == NotificationContent::Type::LOCAL_LIVE_VIEW) &&
+        slotType != NotificationConstant::SlotType::LIVE_VIEW) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_31);
+        std::string data = std::string("Invalid type: ") + std::to_string(static_cast<int32_t>(slotType)) + " " +
+            std::to_string(static_cast<int32_t>(type));
+        message.ErrorCode(ERR_ANS_INVALID_PARAM).Message(data, true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        return ERR_ANS_INVALID_PARAM;
+    }
     return ERR_OK;
 }
 
