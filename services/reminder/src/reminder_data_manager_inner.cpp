@@ -100,6 +100,9 @@ bool ReminderDataManager::IsActionButtonDataShareValid(const sptr<ReminderReques
     auto actionButtonMap = reminder->GetActionButtons();
     for (auto it = actionButtonMap.begin(); it != actionButtonMap.end(); ++it) {
         ReminderRequest::ActionButtonInfo& buttonInfo = it->second;
+        if (buttonInfo.dataShareUpdate == nullptr) {
+            continue;
+        }
         if (buttonInfo.dataShareUpdate->uri.empty()) {
             continue;
         }

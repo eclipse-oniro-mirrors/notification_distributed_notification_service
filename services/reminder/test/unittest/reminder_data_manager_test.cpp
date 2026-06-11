@@ -1444,5 +1444,25 @@ HWTEST_F(ReminderDataManagerTest, StartVibration_00002, Level1)
     sleep(2);
 #endif
 }
+
+/**
+ * @tc.name: IsActionButtonDataShareValid_001
+ * @tc.desc: test IsActionButtonDataShareValid function
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, IsActionButtonDataShareValid_001, Level1)
+{
+    sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
+    auto buttonWantAgent1 = std::make_shared<ReminderRequest::ButtonWantAgent>();
+    reminder->SetActionButton("title", ReminderRequest::ActionButtonType::CLOSE, "resource",
+        buttonWantAgent1, nullptr);
+    auto buttonWantAgent2 = std::make_shared<ReminderRequest::ButtonWantAgent>();
+    auto datashare = std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
+    reminder->SetActionButton("title", ReminderRequest::ActionButtonType::SNOOZE, "resource",
+        buttonWantAgent2, datashare);
+    auto ret = manager->IsActionButtonDataShareValid(reminder, 0);
+    EXPECT_EQ(ret, true);
+}
 }  // namespace Notification
 }  // namespace OHOS
