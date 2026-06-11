@@ -780,7 +780,7 @@ private:
     /**
      * Max number of reminders limit for one application.
      */
-    static constexpr int16_t MAX_NUM_REMINDER_LIMIT_APP = 30;
+    static constexpr int16_t MAX_NUM_REMINDER_LIMIT_APP = 64;
 
     bool isReminderAgentReady_ = false;
 
