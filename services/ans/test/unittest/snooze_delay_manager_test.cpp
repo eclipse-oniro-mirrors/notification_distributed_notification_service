@@ -313,6 +313,32 @@ HWTEST_F(AnsSnoozeDelayTest, SnoozeNotificationConsumed_00001, Function | SmallT
 }
 
 /**
+ * @tc.name: SnoozeNotificationConsumed_00002
+ * @tc.desc: Test SnoozeNotificationConsumed
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, SnoozeNotificationConsumed_00002, Function | SmallTest | Level1)
+{
+    int32_t uid = 50;
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notification(new (std::nothrow) Notification(request));
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("MyTestBundle", uid);
+    normalContent->SetContentType(1);
+    auto content = std::make_shared<NotificationContent>(normalContent);
+    request->SetContent(content);
+    notification->SetKey("test123");
+    auto record1 = std::make_shared<NotificationRecord>();
+    record1->request = nullptr;
+    record1->notification = notification;
+    record1->bundleOption = bundleOption;
+    advancedNotificationService_->SnoozeNotificationConsumed(nullptr);
+    advancedNotificationService_->SnoozeNotificationConsumed(record1);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+}
+
+/**
  * @tc.name: IsCanRecoverSnooze_00001
  * @tc.desc: Test IsCanRecoverSnooze
  * @tc.type: FUNC

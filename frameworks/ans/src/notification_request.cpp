@@ -2460,6 +2460,8 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->hashCodeGenerateType_ = other.hashCodeGenerateType_;
     this->collaboratedReminderFlag_ = other.collaboratedReminderFlag_;
     this->groupInfo_ = other.groupInfo_;
+    this->snoozeDelayTime_ = other.snoozeDelayTime_;
+    this->isSnoozeTrigger_ = other.isSnoozeTrigger_;
 }
 
 void NotificationRequest::ConvertObjectsToJsonOhters(nlohmann::json &jsonObject) const

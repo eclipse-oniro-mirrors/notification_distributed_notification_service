@@ -87,13 +87,6 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
                     continue;
                 }
             }
-
-            // Turn off ringtone and vibration during recovery process
-            record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false);
-            record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
-            ANS_LOGD("SetFlags-Recovery,key=%{public}s flags = %{public}d",
-                record->request->GetBaseKey("").c_str(),
-                record->request->GetFlags()->GetReminderFlags());
             if (AssignToNotificationList(record) != ERR_OK) {
                 ANS_LOGE("Add notification to record list failed.");
                 continue;
@@ -115,9 +108,6 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
                 }
             } else {
                 StartAutoDeletedTimer(record);
-                record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, false);
-                record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
-                record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
             }
         }
 
@@ -253,7 +243,24 @@ ErrCode AdvancedNotificationService::OnSubscriberAdd(
     for (auto notificationRecord : notificationList_) {
         if (notificationRecord != nullptr &&
             notificationRecord->notification != nullptr) {
-            notifications.emplace_back(notificationRecord->notification);
+            sptr<NotificationRequest> request =
+                new (std::nothrow) NotificationRequest(notificationRecord->notification->GetNotificationRequest());
+            ANS_COND_DO_ERR(request == nullptr, return ERR_ANS_NO_MEMORY, "NotificationRequest malloc error.");
+            std::shared_ptr<NotificationFlags> flags = request->GetFlags() == nullptr ?
+                nullptr : std::make_shared<NotificationFlags>(request->GetFlags()->GetReminderFlags());
+            auto notificationFlagsOfDevices =
+                std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
+            request->SetFlags(flags);
+            (*notificationFlagsOfDevices)[NotificationConstant::CURRENT_DEVICE_TYPE] = flags;
+            request->SetDeviceFlags(notificationFlagsOfDevices);
+            request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false);
+            request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
+            request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, false);
+            request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
+            request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
+            sptr<Notification> notification = new (std::nothrow) Notification(request);
+            ANS_COND_DO_ERR(notification == nullptr, return ERR_ANS_NO_MEMORY, "Notification malloc error.");
+            notifications.emplace_back(notification);
         }
     }
 
