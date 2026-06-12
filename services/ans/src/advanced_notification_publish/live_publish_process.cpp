@@ -98,6 +98,10 @@ bool LivePublishProcess::CheckLocalLiveViewSubscribed(
         return GetLiveViewSubscribeState(uid) || isUpdateByOwnerAllowed;
     }
     if (request->IsCommonLiveView()) {
+        if (request->GetContent() == nullptr || request->GetContent()->GetNotificationContent() == nullptr) {
+            ANS_LOGE("content info null");
+            return false;
+        }
         std::shared_ptr<NotificationLiveViewContent> liveViewContent = nullptr;
         liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
             request->GetContent()->GetNotificationContent());

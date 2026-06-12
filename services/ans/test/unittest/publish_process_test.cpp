@@ -258,5 +258,178 @@ HWTEST_F(PublishProcessTest, LiveCheckLocalLiveViewSubscribed_00001, Function | 
     auto res = progress.CheckLocalLiveViewSubscribed(request, true, 100);
     ASSERT_FALSE(res);
 }
+
+/**
+ * @tc.name: LiveCheckLocalLiveViewSubscribed_00002
+ * @tc.desc: Test CheckLocalLiveViewSubscribed when GetContent is nullptr
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(PublishProcessTest, LiveCheckLocalLiveViewSubscribed_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent =
+        std::make_shared<NotificationLiveViewContent>();
+    std::shared_ptr<NotificationContent> content =
+        std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+
+    LivePublishProcess progress;
+    auto res = progress.CheckLocalLiveViewSubscribed(request, true, 100);
+    ASSERT_TRUE(res);
+}
+
+/**
+ * @tc.name: LiveCheckLocalLiveViewSubscribed_00003
+ * @tc.desc: Test CheckLocalLiveViewSubscribed when GetContent is nullptr for common live view
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(PublishProcessTest, LiveCheckLocalLiveViewSubscribed_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+
+    LivePublishProcess progress;
+    auto res = progress.CheckLocalLiveViewSubscribed(request, true, 100);
+    ASSERT_FALSE(res);
+}
+
+/**
+ * @tc.name: LiveCheckLocalLiveViewSubscribed_00004
+ * @tc.desc: Test CheckLocalLiveViewSubscribed when GetNotificationContent is nullptr for common live view
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(PublishProcessTest, LiveCheckLocalLiveViewSubscribed_00004, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent =
+        std::make_shared<NotificationLiveViewContent>();
+    std::shared_ptr<NotificationContent> content =
+        std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->GetContent()->content_ = nullptr;
+
+    LivePublishProcess progress;
+    auto res = progress.CheckLocalLiveViewSubscribed(request, true, 100);
+    ASSERT_FALSE(res);
+}
+
+/**
+ * @tc.name: LiveCheckLocalLiveViewSubscribed_00005
+ * @tc.desc: Test CheckLocalLiveViewSubscribed with common live view and IsOnlyLocalUpdate true and not subscribed
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(PublishProcessTest, LiveCheckLocalLiveViewSubscribed_00005, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent =
+        std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetIsOnlyLocalUpdate(true);
+    std::shared_ptr<NotificationContent> content =
+        std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+
+    LivePublishProcess progress;
+    auto res = progress.CheckLocalLiveViewSubscribed(request, false, 200);
+    ASSERT_FALSE(res);
+}
+
+/**
+ * @tc.name: LiveCheckLocalLiveViewSubscribed_00006
+ * @tc.desc: Test CheckLocalLiveViewSubscribed with common live view and IsOnlyLocalUpdate false
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(PublishProcessTest, LiveCheckLocalLiveViewSubscribed_00006, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent =
+        std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetIsOnlyLocalUpdate(false);
+    std::shared_ptr<NotificationContent> content =
+        std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+
+    LivePublishProcess progress;
+    auto res = progress.CheckLocalLiveViewSubscribed(request, false, 300);
+    ASSERT_TRUE(res);
+}
+
+/**
+ * @tc.name: LiveCheckLocalLiveViewSubscribed_00007
+ * @tc.desc: Test CheckLocalLiveViewSubscribed with LOCAL_LIVE_VIEW type and subscribed
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(PublishProcessTest, LiveCheckLocalLiveViewSubscribed_00007, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+
+    std::shared_ptr<NotificationLocalLiveViewContent> localLiveViewContent =
+        std::make_shared<NotificationLocalLiveViewContent>();
+    std::shared_ptr<NotificationContent> content =
+        std::make_shared<NotificationContent>(localLiveViewContent);
+    request->SetContent(content);
+
+    LivePublishProcess progress;
+    progress.AddLiveViewSubscriber(100);
+    auto res = progress.CheckLocalLiveViewSubscribed(request, false, 100);
+    ASSERT_TRUE(res);
+    progress.EraseLiveViewSubscriber(100);
+}
+
+/**
+ * @tc.name: LiveCheckLocalLiveViewSubscribed_00008
+ * @tc.desc: Test CheckLocalLiveViewSubscribed with LOCAL_LIVE_VIEW type not subscribed but isUpdateByOwnerAllowed
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(PublishProcessTest, LiveCheckLocalLiveViewSubscribed_00008, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+
+    std::shared_ptr<NotificationLocalLiveViewContent> localLiveViewContent =
+        std::make_shared<NotificationLocalLiveViewContent>();
+    std::shared_ptr<NotificationContent> content =
+        std::make_shared<NotificationContent>(localLiveViewContent);
+    request->SetContent(content);
+
+    LivePublishProcess progress;
+    auto res = progress.CheckLocalLiveViewSubscribed(request, true, 999);
+    ASSERT_TRUE(res);
+}
+
+/**
+ * @tc.name: LiveCheckLocalLiveViewSubscribed_00009
+ * @tc.desc: Test CheckLocalLiveViewSubscribed with LOCAL_LIVE_VIEW type not subscribed and not isUpdateByOwnerAllowed
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(PublishProcessTest, LiveCheckLocalLiveViewSubscribed_00009, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+
+    std::shared_ptr<NotificationLocalLiveViewContent> localLiveViewContent =
+        std::make_shared<NotificationLocalLiveViewContent>();
+    std::shared_ptr<NotificationContent> content =
+        std::make_shared<NotificationContent>(localLiveViewContent);
+    request->SetContent(content);
+
+    LivePublishProcess progress;
+    auto res = progress.CheckLocalLiveViewSubscribed(request, false, 999);
+    ASSERT_FALSE(res);
+}
 }   //namespace Notification
 }   //namespace OHOS
