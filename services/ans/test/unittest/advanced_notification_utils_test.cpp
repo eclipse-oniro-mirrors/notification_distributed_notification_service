@@ -606,6 +606,39 @@ HWTEST_F(AnsUtilsTest, GenerateValidBundleOptionV3_00005, Function | SmallTest |
 }
 
 /**
+ * @tc.name: GenerateValidBundleOptionV3_00006
+ * @tc.desc: Test GenerateValidBundleOptionV3
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GenerateValidBundleOptionV3_00006, Function | SmallTest | Level1)
+{
+    MockQueryForgroundOsAccountId(true, 0);
+    MockSetBundleInfoFailed(false);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test_bundle", 20020010);
+    bundleOption->SetInstanceKey(10);
+    sptr<NotificationBundleOption> result = advancedNotificationService_->GenerateValidBundleOptionV3(nullptr);
+    EXPECT_EQ(result, nullptr);
+}
+
+
+/**
+ * @tc.name: GenerateValidBundleOptionV3_00007
+ * @tc.desc: Test GenerateValidBundleOptionV3
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GenerateValidBundleOptionV3_00007, Function | SmallTest | Level1)
+{
+    MockQueryForgroundOsAccountId(true, 0);
+    MockSetBundleInfoFailed(false);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("", 20020010);
+    bundleOption->SetInstanceKey(10);
+    sptr<NotificationBundleOption> result = advancedNotificationService_->GenerateValidBundleOptionV3(bundleOption);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
  * @tc.name: GetBundleInfoByNotificationBundleOption_00001
  * @tc.desc: Test GetBundleInfoByNotificationBundleOption
  * @tc.type: FUNC

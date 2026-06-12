@@ -1949,6 +1949,10 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleO
 sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleOptionV3(
     const sptr<NotificationBundleOption> &bundleOption)
 {
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("bundleOption or bundle name is invalid!");
+        return nullptr;
+    }
     sptr<NotificationBundleOption> validBundle = GenerateValidBundleOptionV2(bundleOption);
     if (validBundle == nullptr) {
         int32_t activeUserId = -1;
