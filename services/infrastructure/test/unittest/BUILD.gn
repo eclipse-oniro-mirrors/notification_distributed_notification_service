@@ -17,6 +17,7 @@ group("unittest") {
   testonly = true
 
   deps = [
+    "all_scenarios_extension:all_scenarios_extension_wrapper_test",
     "bms:bundle_manager_repository_impl_test",
     "timer:timer_impl_test",
     "voice_extension:voice_extension_wrapper_test",

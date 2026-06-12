@@ -89,6 +89,11 @@ void AllScenariosExtensionWrapper::InitExtensionWrapper()
 
     onNotifyClearNotification_ =
         (ON_NOTIFY_CLEAR_NOTIFICATION)dlsym(ExtensionHandle_, "OnNotifyClearNotification");
+
+    // Optional symbol: old version libliveview.z.so may not contain this symbol,
+    // no nullptr check and early return
+    checkLiveViewRights_ =
+        (CHECK_LIVEVIEW_RIGHTS)dlsym(ExtensionHandle_, "CheckLiveViewRights");
     ANS_LOGI("liveview all scenarios extension wrapper init success");
 }
 
@@ -103,6 +108,7 @@ void AllScenariosExtensionWrapper::CloseExtensionWrapper()
         checkLiveViewConfig_ = nullptr;
         getLiveViewConfigVersion_ = nullptr;
         notifyLiveViewEvent_ = nullptr;
+        checkLiveViewRights_ = nullptr;
     }
     ANS_LOGI("liveview all scenarios extension wrapper close success");
 }
@@ -183,5 +189,18 @@ ErrCode AllScenariosExtensionWrapper::OnNotifyClearNotification(const std::vecto
         return -1;
     }
     return onNotifyClearNotification_(triggerKeys);
+}
+
+ErrCode AllScenariosExtensionWrapper::CheckLiveViewRights(const sptr<NotificationRequest> &request)
+{
+    if (checkLiveViewRights_ == nullptr) {
+        ANS_LOGW("CheckLiveViewRights symbol not loaded, skip rights check");
+        return ERR_OK;
+    }
+    ErrCode result = checkLiveViewRights_(request);
+    if (result != ERR_OK) {
+        ANS_LOGE("CheckLiveViewRights check failed, result: %{public}d", result);
+    }
+    return result;
 }
 }

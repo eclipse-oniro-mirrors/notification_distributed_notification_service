@@ -1478,6 +1478,14 @@ void AdvancedNotificationService::AddToNotificationList(const std::shared_ptr<No
     SortNotificationList();
 }
 
+ErrCode AdvancedNotificationService::CheckCommonLiveViewRights(const sptr<NotificationRequest> &request)
+{
+    if (!request->IsCommonLiveView()) {
+        return ERR_OK;
+    }
+    return Infra::ALL_SCENARIOS_EXTENTION_WRAPPER.CheckLiveViewRights(request);
+}
+
 ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record)
 {
     auto iter = notificationList_.begin();
@@ -1486,6 +1494,13 @@ ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_
             record->request->FillMissingParameters((*iter)->request);
             if (record->request->IsCommonLiveView()) {
                 Infra::ALL_SCENARIOS_EXTENTION_WRAPPER.UpdateLiveviewVoiceContent(record->request);
+            }
+            ErrCode rightsResult = CheckCommonLiveViewRights(record->request);
+            if (rightsResult != ERR_OK) {
+                ANS_LOGE("CheckLiveViewRights failed in update, result: %{public}d", rightsResult);
+                AnsStatus ansStatus(rightsResult, "CheckLiveViewRights failed.");
+                NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, ansStatus.BuildMessage(true));
+                return rightsResult;
             }
             FillLockScreenPicture(record->request, (*iter)->request);
             record->notification->SetAutoDeletedTimer((*iter)->notification->GetAutoDeletedTimer());

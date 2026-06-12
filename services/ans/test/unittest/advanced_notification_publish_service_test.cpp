@@ -47,6 +47,8 @@
 #include "os_account_manager_helper.h"
 #include "notification_extension_wrapper.h"
 #include "notification_classification_mgr.h"
+#include "all_scenarios_extension_wrapper.h"
+#include "notification_live_view_content.h"
 
 extern void MockIsOsAccountExists(bool exists);
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase);
@@ -4153,5 +4155,76 @@ HWTEST_F(AnsPublishServiceTest, SetVersionCodeToExtendInfo_GetBundleVersionCodeF
     EXPECT_EQ(extendInfo, nullptr);
 }
 
+namespace {
+ErrCode MockCheckLiveViewRightsFail(const sptr<NotificationRequest> &request)
+{
+    return ERR_ANS_CUSTOM_EXTENSION_RIGHTS_CHECK_FAILED;
+}
+}  // namespace
+
+/**
+ * @tc.name: CheckCommonLiveViewRights_CommonLiveView_Fail_001
+ * @tc.desc: commonLiveView request with mock returning error, should return the error code.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, CheckCommonLiveViewRights_CommonLiveView_Fail_001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+
+    auto &wrapper = Infra::AllScenariosExtensionWrapper::GetInstance();
+    wrapper.checkLiveViewRights_ = MockCheckLiveViewRightsFail;
+
+    auto ret = advancedNotificationService_->CheckCommonLiveViewRights(request);
+    EXPECT_EQ(ret, ERR_ANS_CUSTOM_EXTENSION_RIGHTS_CHECK_FAILED);
+
+    wrapper.checkLiveViewRights_ = nullptr;
+}
+
+/**
+ * @tc.name: CheckCommonLiveViewRights_CommonLiveView_SkipWhenNull_001
+ * @tc.desc: commonLiveView request with checkLiveViewRights_ nullptr (symbol not loaded),
+ *          should return ERR_OK (skip check).
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, CheckCommonLiveViewRights_CommonLiveView_SkipWhenNull_001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+
+    auto &wrapper = Infra::AllScenariosExtensionWrapper::GetInstance();
+    wrapper.checkLiveViewRights_ = nullptr;
+
+    auto ret = advancedNotificationService_->CheckCommonLiveViewRights(request);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: CheckCommonLiveViewRights_NonCommonLiveView_Skip_001
+ * @tc.desc: non-commonLiveView request, should return ERR_OK without calling checkLiveViewRights_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, CheckCommonLiveViewRights_NonCommonLiveView_Skip_001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+
+    auto &wrapper = Infra::AllScenariosExtensionWrapper::GetInstance();
+    wrapper.checkLiveViewRights_ = MockCheckLiveViewRightsFail;
+
+    auto ret = advancedNotificationService_->CheckCommonLiveViewRights(request);
+    EXPECT_EQ(ret, ERR_OK);
+
+    wrapper.checkLiveViewRights_ = nullptr;
+}
 }  // namespace Notification
 }  // namespace OHOS

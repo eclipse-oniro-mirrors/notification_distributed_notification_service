@@ -2147,6 +2147,7 @@ private:
     ErrCode CheckPublishPreparedNotification(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
     void AddToNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void AddToDelayNotificationList(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode CheckCommonLiveViewRights(const sptr<NotificationRequest> &request);
     ErrCode UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void UpdateInDelayNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode AssignToNotificationList(const std::shared_ptr<NotificationRecord> &record);
