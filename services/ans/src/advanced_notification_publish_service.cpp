@@ -822,7 +822,7 @@ AnsStatus AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifi
     }
 
     SetRequestBySlotType(record->request, bundleOption);
-
+    SetVersionCodeToExtendInfo(request);
     auto submitResult = notificationSvrQueue_.SyncSubmit([&]() {
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER
         if (!bundle.empty() && IsDisableNotification(bundle, record->notification->GetRecvUserId())) {

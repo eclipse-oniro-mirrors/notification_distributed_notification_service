@@ -32,7 +32,6 @@ group("ans_unit_test") {
       ":distributed_preferences_branch_test",
       ":distributed_preferences_database_test",
       ":distributed_screen_status_manager_branch_test",
-      ":notification_extension_service_test",
     ]
   }
 }

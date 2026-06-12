@@ -1557,5 +1557,81 @@ HWTEST_F(AnsUtilsTest, ClassificationMgr_Remove_DeleteAllByUserStopped_00001, Fu
     EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Remove(key));
     EXPECT_FALSE(NotificationClassificationMgr::GetInstance().Exists(key));
 }
+
+/**
+ * @tc.name: GetBundleVersionCode_NullBundleOption_00001
+ * @tc.desc: Test GetBundleVersionCode with nullptr bundleOption.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(AnsUtilsTest, GetBundleVersionCode_NullBundleOption_00001, Function | SmallTest | Level1)
+{
+    uint32_t versionCode = 0;
+    ErrCode ret = advancedNotificationService_->GetBundleVersionCode(nullptr, versionCode);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(versionCode, 0u);
+}
+
+/**
+ * @tc.name: GetBundleVersionCode_EmptyBundleName_00001
+ * @tc.desc: Test GetBundleVersionCode with empty bundle name.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(AnsUtilsTest, GetBundleVersionCode_EmptyBundleName_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("", 1000);
+    uint32_t versionCode = 0;
+    ErrCode ret = advancedNotificationService_->GetBundleVersionCode(bundleOption, versionCode);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(versionCode, 0u);
+}
+
+/**
+ * @tc.name: GetBundleVersionCode_GetActiveUserIdFailed_00001
+ * @tc.desc: Test GetBundleVersionCode when GetCurrentActiveUserId fails.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(AnsUtilsTest, GetBundleVersionCode_GetActiveUserIdFailed_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("com.test.bundle", 1000);
+    uint32_t versionCode = 0;
+    MockQueryForgroundOsAccountId(false, 0);
+    ErrCode ret = advancedNotificationService_->GetBundleVersionCode(bundleOption, versionCode);
+    EXPECT_EQ(ret, ERR_ANS_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(versionCode, 0u);
+    MockQueryForgroundOsAccountId(true, 0);
+}
+
+/**
+ * @tc.name: GetBundleVersionCode_GetBundleInfoFailed_00001
+ * @tc.desc: Test GetBundleVersionCode when GetBundleInfoV9 fails.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(AnsUtilsTest, GetBundleVersionCode_GetBundleInfoFailed_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("invalid.bundle", 1000);
+    uint32_t versionCode = 0;
+    ErrCode ret = advancedNotificationService_->GetBundleVersionCode(bundleOption, versionCode);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(versionCode, 0u);
+}
+
+/**
+ * @tc.name: GetBundleVersionCode_ValidBundle_00001
+ * @tc.desc: Test GetBundleVersionCode with valid bundle option.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(AnsUtilsTest, GetBundleVersionCode_ValidBundle_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("com.test.bundle", 1000);
+    uint32_t versionCode = 0;
+    MockSetBundleInfoFailed(false);
+    ErrCode ret = advancedNotificationService_->GetBundleVersionCode(bundleOption, versionCode);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

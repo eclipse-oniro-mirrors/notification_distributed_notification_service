@@ -1458,7 +1458,6 @@ ohos_unittest("advanced_notification_geofence_service_test") {
   defines = []
 
   sources = [
-    "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_geofence_service_test.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",

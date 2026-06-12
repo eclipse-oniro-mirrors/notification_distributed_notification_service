@@ -31,6 +31,8 @@
 #include "string_wrapper.h"
 #include "array_wrapper.h"
 #include "int_wrapper.h"
+#include "long_wrapper.h"
+#include "pixelmap_cache_manager.h"
 #include "../mock/mock_application_context.h"
 #include "../mock/mock_resource_manager.h"
 #include "../mock/mock_image_native.h"
@@ -55,6 +57,9 @@ public:
         OHOS::Notification::Mock::MockResetImageNativeState();
         OHOS::AbilityRuntime::Mock::MockResetApplicationContextState();
         OHOS::Global::Resource::Mock::MockResetResourceManagerState();
+        auto cacheManager = PixelMapCacheManager::GetInstance();
+        cacheManager->RemoveCache("test_request");
+        cacheManager->RemoveCache("test_request2");
     }
     
     void TearDown()
@@ -62,6 +67,9 @@ public:
         OHOS::Notification::Mock::MockResetImageNativeState();
         OHOS::AbilityRuntime::Mock::MockResetApplicationContextState();
         OHOS::Global::Resource::Mock::MockResetResourceManagerState();
+        auto cacheManager = PixelMapCacheManager::GetInstance();
+        cacheManager->RemoveCache("test_request");
+        cacheManager->RemoveCache("test_request2");
     }
 };
 
@@ -624,6 +632,601 @@ HWTEST_F(SubscriberImageUtilTest, GetPicPathsFromParam_00004, Function | SmallTe
     extraInfo->SetParam("pic1", AAFwk::Integer::Box(123));
     std::vector<std::string> picPaths = SubscriberImageUtil::GetPicPathsFromParam(extraInfo, "pic1");
     EXPECT_TRUE(picPaths.empty());
+}
+
+/**
+ * @tc.name: GetPixelMapByRes_00004
+ * @tc.desc: Test GetPixelMapByRes with versionCode from extendInfo (Long type).
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, GetPixelMapByRes_00004, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockSetImageWidth(100);
+    OHOS::Notification::Mock::MockSetImageHeight(100);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("versionCode", AAFwk::Long::Box(123456L));
+    request->SetExtendInfo(extendInfo);
+    
+    auto pixelMap = SubscriberImageUtil::GetPixelMapByRes(request, "test.png");
+    EXPECT_NE(pixelMap, nullptr);
+    
+    auto cacheManager = PixelMapCacheManager::GetInstance();
+    auto cachedPixelMap = cacheManager->GetCachedPixelMap(request->GetKey(), "123456_test.png");
+    EXPECT_NE(cachedPixelMap, nullptr);
+}
+
+/**
+ * @tc.name: GetPixelMapByRes_00005
+ * @tc.desc: Test GetPixelMapByRes cache hit scenario.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, GetPixelMapByRes_00005, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockSetImageWidth(100);
+    OHOS::Notification::Mock::MockSetImageHeight(100);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("versionCode", AAFwk::Long::Box(123456L));
+    request->SetExtendInfo(extendInfo);
+    
+    auto pixelMap1 = SubscriberImageUtil::GetPixelMapByRes(request, "test.png");
+    EXPECT_NE(pixelMap1, nullptr);
+    
+    auto pixelMap2 = SubscriberImageUtil::GetPixelMapByRes(request, "test.png");
+    EXPECT_NE(pixelMap2, nullptr);
+    EXPECT_EQ(pixelMap1, pixelMap2);
+}
+
+/**
+ * @tc.name: GetPixelMapByRes_00006
+ * @tc.desc: Test GetPixelMapByRes with versionCode=0 should not cache.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, GetPixelMapByRes_00006, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockSetImageWidth(100);
+    OHOS::Notification::Mock::MockSetImageHeight(100);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("versionCode", AAFwk::Long::Box(0L));
+    request->SetExtendInfo(extendInfo);
+    
+    auto pixelMap = SubscriberImageUtil::GetPixelMapByRes(request, "test.png");
+    EXPECT_NE(pixelMap, nullptr);
+    
+    auto cacheManager = PixelMapCacheManager::GetInstance();
+    auto cachedPixelMap = cacheManager->GetCachedPixelMap(request->GetKey(), "0_test.png");
+    EXPECT_EQ(cachedPixelMap, nullptr);
+}
+
+/**
+ * @tc.name: GetPixelMapByRes_00007
+ * @tc.desc: Test GetPixelMapByRes with nullptr extendInfo.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, GetPixelMapByRes_00007, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockSetImageWidth(100);
+    OHOS::Notification::Mock::MockSetImageHeight(100);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    request->SetExtendInfo(nullptr);
+    
+    auto pixelMap = SubscriberImageUtil::GetPixelMapByRes(request, "test.png");
+    EXPECT_NE(pixelMap, nullptr);
+    
+    auto cacheManager = PixelMapCacheManager::GetInstance();
+    auto cachedPixelMap = cacheManager->GetCachedPixelMap(request->GetKey(), "0_test.png");
+    EXPECT_EQ(cachedPixelMap, nullptr);
+}
+
+/**
+ * @tc.name: GetPixelMapByRes_00008
+ * @tc.desc: Test GetPixelMapByRes without versionCode param in extendInfo.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, GetPixelMapByRes_00008, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockSetImageWidth(100);
+    OHOS::Notification::Mock::MockSetImageHeight(100);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("otherParam", AAFwk::String::Box("value"));
+    request->SetExtendInfo(extendInfo);
+    
+    auto pixelMap = SubscriberImageUtil::GetPixelMapByRes(request, "test.png");
+    EXPECT_NE(pixelMap, nullptr);
+    
+    auto cacheManager = PixelMapCacheManager::GetInstance();
+    auto cachedPixelMap = cacheManager->GetCachedPixelMap(request->GetKey(), "0_test.png");
+    EXPECT_EQ(cachedPixelMap, nullptr);
+}
+
+/**
+ * @tc.name: GetPixelMapByRes_00009
+ * @tc.desc: Test GetPixelMapByRes with invalid versionCode type (not Long).
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, GetPixelMapByRes_00009, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockSetImageWidth(100);
+    OHOS::Notification::Mock::MockSetImageHeight(100);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("versionCode", AAFwk::Integer::Box(123456));
+    request->SetExtendInfo(extendInfo);
+    
+    auto pixelMap = SubscriberImageUtil::GetPixelMapByRes(request, "test.png");
+    EXPECT_NE(pixelMap, nullptr);
+    
+    auto cacheManager = PixelMapCacheManager::GetInstance();
+    auto cachedPixelMap = cacheManager->GetCachedPixelMap(request->GetKey(), "0_test.png");
+    EXPECT_EQ(cachedPixelMap, nullptr);
+}
+
+/**
+ * @tc.name: GetPixelMapByRes_00010
+ * @tc.desc: Test GetPixelMapByRes with large versionCode value.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, GetPixelMapByRes_00010, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockSetImageWidth(100);
+    OHOS::Notification::Mock::MockSetImageHeight(100);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    uint32_t largeVersionCode = 3000000000u;
+    extendInfo->SetParam("versionCode", AAFwk::Long::Box(static_cast<long>(largeVersionCode)));
+    request->SetExtendInfo(extendInfo);
+    
+    auto pixelMap = SubscriberImageUtil::GetPixelMapByRes(request, "test.png");
+    EXPECT_NE(pixelMap, nullptr);
+    
+    auto cacheManager = PixelMapCacheManager::GetInstance();
+    auto cachedPixelMap = cacheManager->GetCachedPixelMap(request->GetKey(), "3000000000_test.png");
+    EXPECT_NE(cachedPixelMap, nullptr);
+}
+
+/**
+ * @tc.name: GetPixelMapByRes_00011
+ * @tc.desc: Test GetPixelMapByRes when GetPixelMap returns nullptr.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, GetPixelMapByRes_00011, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockOHImageSourceNativeCreatePixelmapFail(true);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    
+    auto pixelMap = SubscriberImageUtil::GetPixelMapByRes(request, "test.png");
+    EXPECT_EQ(pixelMap, nullptr);
+}
+
+/**
+ * @tc.name: GetPixelMapByRes_00012
+ * @tc.desc: Test GetPixelMapByRes when GetPixelMap fails with error code.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, GetPixelMapByRes_00012, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockOHImageSourceNativeCreateFromRawFileFail(true);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    
+    auto pixelMap = SubscriberImageUtil::GetPixelMapByRes(request, "test.png");
+    EXPECT_EQ(pixelMap, nullptr);
+}
+
+/**
+ * @tc.name: GetPixelMapByRes_00013
+ * @tc.desc: Test GetPixelMapByRes with different image paths for same request.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, GetPixelMapByRes_00013, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockSetImageWidth(100);
+    OHOS::Notification::Mock::MockSetImageHeight(100);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("versionCode", AAFwk::Long::Box(123456L));
+    request->SetExtendInfo(extendInfo);
+    
+    auto pixelMap1 = SubscriberImageUtil::GetPixelMapByRes(request, "image1.png");
+    auto pixelMap2 = SubscriberImageUtil::GetPixelMapByRes(request, "image2.png");
+    
+    EXPECT_NE(pixelMap1, nullptr);
+    EXPECT_NE(pixelMap2, nullptr);
+    
+    auto cacheManager = PixelMapCacheManager::GetInstance();
+    EXPECT_NE(cacheManager->GetCachedPixelMap(request->GetKey(), "123456_image1.png"), nullptr);
+    EXPECT_NE(cacheManager->GetCachedPixelMap(request->GetKey(), "123456_image2.png"), nullptr);
+}
+
+/**
+ * @tc.name: GetPixelMapByRes_00014
+ * @tc.desc: Test GetPixelMapByRes with empty path.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, GetPixelMapByRes_00014, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    
+    auto pixelMap = SubscriberImageUtil::GetPixelMapByRes(request, "");
+    EXPECT_EQ(pixelMap, nullptr);
+}
+
+/**
+ * @tc.name: GetPixelMapByRes_00015
+ * @tc.desc: Test GetPixelMapByRes after cache removal.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, GetPixelMapByRes_00015, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockSetImageWidth(100);
+    OHOS::Notification::Mock::MockSetImageHeight(100);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("versionCode", AAFwk::Long::Box(123456L));
+    request->SetExtendInfo(extendInfo);
+    
+    auto pixelMap1 = SubscriberImageUtil::GetPixelMapByRes(request, "test.png");
+    EXPECT_NE(pixelMap1, nullptr);
+    
+    auto cacheManager = PixelMapCacheManager::GetInstance();
+    cacheManager->RemoveCache(request->GetKey());
+    
+    auto cachedPixelMap = cacheManager->GetCachedPixelMap(request->GetKey(), "123456_test.png");
+    EXPECT_EQ(cachedPixelMap, nullptr);
+    
+    auto pixelMap2 = SubscriberImageUtil::GetPixelMapByRes(request, "test.png");
+    EXPECT_NE(pixelMap2, nullptr);
+    EXPECT_NE(cacheManager->GetCachedPixelMap(request->GetKey(), "123456_test.png"), nullptr);
+}
+
+/**
+ * @tc.name: ProcessPictureOption_00014
+ * @tc.desc: Test ProcessPictureOption with multiple requests in sequence.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, ProcessPictureOption_00014, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockSetImageWidth(100);
+    OHOS::Notification::Mock::MockSetImageHeight(100);
+    
+    sptr<NotificationRequest> request1 = new NotificationRequest();
+    auto liveViewContent1 = std::make_shared<NotificationLiveViewContent>();
+    auto extraInfo1 = std::make_shared<AAFwk::WantParams>();
+    extraInfo1->SetParam("pic1", AAFwk::String::Box("path1.png"));
+    liveViewContent1->SetExtraInfo(extraInfo1);
+    auto content1 = std::make_shared<NotificationContent>(liveViewContent1);
+    request1->SetContent(content1);
+    sptr<Notification> notification1 = new Notification(request1);
+    std::shared_ptr<Notification> sharedNotification1 = std::make_shared<Notification>(*notification1);
+    sptr<PictureOption> pictureOption1 = new PictureOption({"pic1"});
+    
+    SubscriberImageUtil::ProcessPictureOption(sharedNotification1, pictureOption1);
+    EXPECT_EQ(liveViewContent1->GetPicture().size(), 1);
+    
+    sptr<NotificationRequest> request2 = new NotificationRequest();
+    auto liveViewContent2 = std::make_shared<NotificationLiveViewContent>();
+    auto extraInfo2 = std::make_shared<AAFwk::WantParams>();
+    extraInfo2->SetParam("pic2", AAFwk::String::Box("path2.png"));
+    liveViewContent2->SetExtraInfo(extraInfo2);
+    auto content2 = std::make_shared<NotificationContent>(liveViewContent2);
+    request2->SetContent(content2);
+    sptr<Notification> notification2 = new Notification(request2);
+    std::shared_ptr<Notification> sharedNotification2 = std::make_shared<Notification>(*notification2);
+    sptr<PictureOption> pictureOption2 = new PictureOption({"pic2"});
+    
+    SubscriberImageUtil::ProcessPictureOption(sharedNotification2, pictureOption2);
+    EXPECT_EQ(liveViewContent2->GetPicture().size(), 1);
+}
+
+/**
+ * @tc.name: ProcessPictureOption_00015
+ * @tc.desc: Test ProcessPictureOption with failed image loading.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, ProcessPictureOption_00015, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockOHImageSourceNativeCreateFromRawFileFail(true);
+    
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto extraInfo = std::make_shared<AAFwk::WantParams>();
+    extraInfo->SetParam("pic1", AAFwk::String::Box("invalid.png"));
+    liveViewContent->SetExtraInfo(extraInfo);
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    sptr<Notification> notification = new Notification(request);
+    std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
+    sptr<PictureOption> pictureOption = new PictureOption({"pic1"});
+    
+    SubscriberImageUtil::ProcessPictureOption(sharedNotification, pictureOption);
+    EXPECT_EQ(liveViewContent->GetPicture().size(), 0);
+}
+
+/**
+ * @tc.name: ProcessPictureOption_00016
+ * @tc.desc: Test ProcessPictureOption with mixed valid and invalid paths.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, ProcessPictureOption_00016, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockSetImageWidth(100);
+    OHOS::Notification::Mock::MockSetImageHeight(100);
+    
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto extraInfo = std::make_shared<AAFwk::WantParams>();
+    
+    sptr<AAFwk::IArray> array = new AAFwk::Array(3, AAFwk::g_IID_IString);
+    sptr<AAFwk::IInterface> str1 = AAFwk::String::Box("valid1.png");
+    sptr<AAFwk::IInterface> str2 = AAFwk::String::Box("");
+    sptr<AAFwk::IInterface> str3 = AAFwk::String::Box("valid2.png");
+    array->Set(0, str1.GetRefPtr());
+    array->Set(1, str2.GetRefPtr());
+    array->Set(2, str3.GetRefPtr());
+    
+    extraInfo->SetParam("pics", array);
+    liveViewContent->SetExtraInfo(extraInfo);
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    sptr<Notification> notification = new Notification(request);
+    std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
+    sptr<PictureOption> pictureOption = new PictureOption({"pics"});
+    
+    SubscriberImageUtil::ProcessPictureOption(sharedNotification, pictureOption);
+    EXPECT_TRUE(extraInfo->HasParam("pics"));
+    EXPECT_EQ(liveViewContent->GetPicture().size(), 1);
+}
+
+/**
+ * @tc.name: ProcessPictureOption_00017
+ * @tc.desc: Test ProcessPictureOption with versionCode in extendInfo.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, ProcessPictureOption_00017, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockSetImageWidth(100);
+    OHOS::Notification::Mock::MockSetImageHeight(100);
+    
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto extraInfo = std::make_shared<AAFwk::WantParams>();
+    extraInfo->SetParam("pic1", AAFwk::String::Box("test.png"));
+    extraInfo->SetParam("versionCode", AAFwk::Long::Box(123456L));
+    liveViewContent->SetExtraInfo(extraInfo);
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    sptr<Notification> notification = new Notification(request);
+    std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
+    sptr<PictureOption> pictureOption = new PictureOption({"pic1"});
+    
+    SubscriberImageUtil::ProcessPictureOption(sharedNotification, pictureOption);
+    EXPECT_EQ(liveViewContent->GetPicture().size(), 1);
+    
+    auto cacheManager = PixelMapCacheManager::GetInstance();
+    EXPECT_NE(cacheManager->GetCachedPixelMap(request->GetKey(), "123456_test.png"), nullptr);
+}
+
+/**
+ * @tc.name: ProcessPictureOption_00018
+ * @tc.desc: Test ProcessPictureOption called multiple times with same notification.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, ProcessPictureOption_00018, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockSetImageWidth(100);
+    OHOS::Notification::Mock::MockSetImageHeight(100);
+    
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto extraInfo = std::make_shared<AAFwk::WantParams>();
+    extraInfo->SetParam("versionCode", AAFwk::Long::Box(123456L));
+    extraInfo->SetParam("pic1", AAFwk::String::Box("test.png"));
+    liveViewContent->SetExtraInfo(extraInfo);
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    sptr<Notification> notification = new Notification(request);
+    std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
+    sptr<PictureOption> pictureOption = new PictureOption({"pic1"});
+    
+    SubscriberImageUtil::ProcessPictureOption(sharedNotification, pictureOption);
+    EXPECT_EQ(liveViewContent->GetPicture().size(), 1);
+}
+
+/**
+ * @tc.name: ProcessPictureOption_00019
+ * @tc.desc: Test ProcessPictureOption with large image dimensions (> 500).
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, ProcessPictureOption_00019, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockSetImageWidth(600);
+    OHOS::Notification::Mock::MockSetImageHeight(600);
+    
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto extraInfo = std::make_shared<AAFwk::WantParams>();
+    extraInfo->SetParam("pic1", AAFwk::String::Box("large.png"));
+    liveViewContent->SetExtraInfo(extraInfo);
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    sptr<Notification> notification = new Notification(request);
+    std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
+    sptr<PictureOption> pictureOption = new PictureOption({"pic1"});
+    
+    SubscriberImageUtil::ProcessPictureOption(sharedNotification, pictureOption);
+    EXPECT_EQ(liveViewContent->GetPicture().size(), 1);
+}
+
+/**
+ * @tc.name: ProcessPictureOption_00020
+ * @tc.desc: Test ProcessPictureOption with mixed valid and invalid keys.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, ProcessPictureOption_00020, Function | SmallTest | Level1)
+{
+    OHOS::Notification::Mock::MockSetImageWidth(100);
+    OHOS::Notification::Mock::MockSetImageHeight(100);
+    
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto extraInfo = std::make_shared<AAFwk::WantParams>();
+    extraInfo->SetParam("pic1", AAFwk::String::Box("path1.png"));
+    extraInfo->SetParam("pic3", AAFwk::String::Box("path3.png"));
+    liveViewContent->SetExtraInfo(extraInfo);
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    sptr<Notification> notification = new Notification(request);
+    std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
+    sptr<PictureOption> pictureOption = new PictureOption({"pic1", "pic2", "pic3"});
+    
+    SubscriberImageUtil::ProcessPictureOption(sharedNotification, pictureOption);
+    EXPECT_TRUE(extraInfo->HasParam("pic1"));
+    EXPECT_FALSE(extraInfo->HasParam("pic2"));
+    EXPECT_TRUE(extraInfo->HasParam("pic3"));
+    EXPECT_EQ(liveViewContent->GetPicture().size(), 2);
+}
+
+/**
+ * @tc.name: GetPicPathsFromParam_00005
+ * @tc.desc: Test GetPicPathsFromParam with special characters in path.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, GetPicPathsFromParam_00005, Function | SmallTest | Level1)
+{
+    auto extraInfo = std::make_shared<AAFwk::WantParams>();
+    extraInfo->SetParam("pic1", AAFwk::String::Box("test image (1).png"));
+    std::vector<std::string> picPaths = SubscriberImageUtil::GetPicPathsFromParam(extraInfo, "pic1");
+    EXPECT_EQ(picPaths.size(), 1u);
+    EXPECT_EQ(picPaths[0], "test image (1).png");
+}
+
+/**
+ * @tc.name: GetPicPathsFromParam_00006
+ * @tc.desc: Test GetPicPathsFromParam with long path string.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, GetPicPathsFromParam_00006, Function | SmallTest | Level1)
+{
+    auto extraInfo = std::make_shared<AAFwk::WantParams>();
+    std::string longPath = "very/long/path/to/image/file/in/deep/directory/structure/image.png";
+    extraInfo->SetParam("pic1", AAFwk::String::Box(longPath));
+    std::vector<std::string> picPaths = SubscriberImageUtil::GetPicPathsFromParam(extraInfo, "pic1");
+    EXPECT_EQ(picPaths.size(), 1u);
+    EXPECT_EQ(picPaths[0], longPath);
+}
+
+/**
+ * @tc.name: GetPicPathsFromParam_00007
+ * @tc.desc: Test GetPicPathsFromParam with Array containing empty strings.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, GetPicPathsFromParam_00007, Function | SmallTest | Level1)
+{
+    auto extraInfo = std::make_shared<AAFwk::WantParams>();
+    sptr<AAFwk::IArray> array = new AAFwk::Array(3, AAFwk::g_IID_IString);
+    sptr<AAFwk::IInterface> str1 = AAFwk::String::Box("path1.png");
+    sptr<AAFwk::IInterface> str2 = AAFwk::String::Box("");
+    sptr<AAFwk::IInterface> str3 = AAFwk::String::Box("path2.png");
+    array->Set(0, str1.GetRefPtr());
+    array->Set(1, str2.GetRefPtr());
+    array->Set(2, str3.GetRefPtr());
+    extraInfo->SetParam("pic1", array);
+    std::vector<std::string> picPaths = SubscriberImageUtil::GetPicPathsFromParam(extraInfo, "pic1");
+    EXPECT_EQ(picPaths.size(), 2u);
+    EXPECT_EQ(picPaths[0], "path1.png");
+    EXPECT_EQ(picPaths[1], "path2.png");
+}
+
+/**
+ * @tc.name: ExtractFromStringArray_00006
+ * @tc.desc: Test ExtractFromStringArray with large array size.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, ExtractFromStringArray_00006, Function | SmallTest | Level1)
+{
+    constexpr long largeSize = 10;
+    sptr<AAFwk::IArray> array = new AAFwk::Array(largeSize, AAFwk::g_IID_IString);
+    for (long i = 0; i < largeSize; i++) {
+        std::string path = "image" + std::to_string(i) + ".png";
+        sptr<AAFwk::IInterface> str = AAFwk::String::Box(path);
+        array->Set(i, str.GetRefPtr());
+    }
+    sptr<AAFwk::IInterface> param = array;
+    std::vector<std::string> picPaths;
+    bool result = SubscriberImageUtil::ExtractFromStringArray(param, picPaths);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(picPaths.size(), static_cast<size_t>(largeSize));
+}
+
+/**
+ * @tc.name: ExtractFromString_00004
+ * @tc.desc: Test ExtractFromString with long string.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, ExtractFromString_00004, Function | SmallTest | Level1)
+{
+    std::string longPath = "very/long/path/to/image/file/with/many/directories/final_image.png";
+    sptr<AAFwk::IInterface> param = AAFwk::String::Box(longPath);
+    std::vector<std::string> picPaths;
+    bool result = SubscriberImageUtil::ExtractFromString(param, picPaths);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(picPaths.size(), 1u);
+    EXPECT_EQ(picPaths[0], longPath);
+}
+
+/**
+ * @tc.name: ExtractFromString_00005
+ * @tc.desc: Test ExtractFromString with special characters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, ExtractFromString_00005, Function | SmallTest | Level1)
+{
+    std::string specialPath = "path/to/image (1) [test].png";
+    sptr<AAFwk::IInterface> param = AAFwk::String::Box(specialPath);
+    std::vector<std::string> picPaths;
+    bool result = SubscriberImageUtil::ExtractFromString(param, picPaths);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(picPaths.size(), 1u);
+    EXPECT_EQ(picPaths[0], specialPath);
 }
 
 }  // namespace Notification

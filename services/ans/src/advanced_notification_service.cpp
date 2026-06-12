@@ -535,6 +535,7 @@ AnsStatus AdvancedNotificationService::PrepareNotificationInfo(
         bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
 
     SetRequestBySlotType(request, bundleOption);
+    SetVersionCodeToExtendInfo(request);
     return AnsStatus();
 }
 

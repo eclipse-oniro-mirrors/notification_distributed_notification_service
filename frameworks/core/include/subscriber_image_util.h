@@ -33,7 +33,7 @@ public:
         const sptr<PictureOption> &pictureOption);
 
 private:
-    static std::unique_ptr<Media::PixelMap> GetPixelMapByRes(
+    static std::shared_ptr<Media::PixelMap> GetPixelMapByRes(
         const sptr<NotificationRequest> &request,
         const std::string &resPath);
     
