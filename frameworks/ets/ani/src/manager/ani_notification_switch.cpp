@@ -80,7 +80,8 @@ bool CheckCompleteEnvironment(ani_env **envCurr,
         ANS_LOGE("GetEnv failed");
         return false;
     }
-    if (asyncCallbackInfo->info.returnCode != ERR_OK) {
+    if (asyncCallbackInfo->info.returnCode != ERR_OK &&
+        asyncCallbackInfo->info.returnCode != Notification::ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED) {
         NotificationSts::CreateReturnData(*envCurr, asyncCallbackInfo->info);
         DeleteCallBackInfoWithoutPromise(*envCurr, asyncCallbackInfo);
         return false;
@@ -109,6 +110,16 @@ void HandleNotificationSwitchCallbackComplete(ani_env *env, WorkStatus status, v
     if (!CheckCompleteEnvironment(&envCurr, asyncCallbackInfo)) {
         return;
     }
+
+    if (asyncCallbackInfo->info.returnCode == Notification::ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED) {
+        int32_t errorCode = Notification::ERROR_INTERNAL_ERROR;
+        std::string errMsg = "Internal error. Database operation failed.";
+        ani_object errorObj = NotificationSts::CreateError(envCurr, errorCode, errMsg);
+        envCurr->PromiseResolver_Reject(asyncCallbackInfo->info.resolve, static_cast<ani_error>(errorObj));
+        DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
+        return;
+    }
+
     if (asyncCallbackInfo->functionType == GET_NOTIFICATION_SWITCH) {
         ani_enum_item switchStateItem = nullptr;
         auto switchState = static_cast<Notification::NotificationConstant::SWITCH_STATE>(

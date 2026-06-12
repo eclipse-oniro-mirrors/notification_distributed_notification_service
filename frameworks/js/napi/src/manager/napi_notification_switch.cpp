@@ -27,6 +27,21 @@ constexpr size_t SET_NOTIFICATION_SWITCH_MAX_PARA = 3;
 constexpr size_t GET_NOTIFICATION_SWITCH_MIN_PARA = 2;
 constexpr size_t GET_NOTIFICATION_SWITCH_MAX_PARA = 2;
 
+void HandleErrorWithMesssage(napi_env env, CallbackPromiseInfo &info, int32_t errorCode, const std::string &errMsg)
+{
+    napi_value code = nullptr;
+    napi_create_int32(env, errorCode, &code);
+
+    napi_value message = nullptr;
+    napi_create_string_utf8(env, errMsg.c_str(), NAPI_AUTO_LENGTH, &message);
+
+    napi_value error = nullptr;
+    napi_create_error(env, nullptr, message, &error);
+    napi_set_named_property(env, error, "code", code);
+
+    napi_reject_deferred(env, info.deferred, error);
+}
+
 void CleanupAsyncCallback(napi_env env, AsyncCallbackNotificationClassificationSwitch *&asyncCallbackInfo)
 {
     if (asyncCallbackInfo == nullptr) {
@@ -156,7 +171,12 @@ void AsyncCompleteCallbackNapiSetNotificationSwitch(napi_env env, napi_status st
     }
 
     auto *asyncCallbackInfo = static_cast<AsyncCallbackNotificationClassificationSwitch *>(data);
-    Common::CreateReturnValue(env, asyncCallbackInfo->info, Common::NapiGetNull(env));
+    if (asyncCallbackInfo->info.errorCode == ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED) {
+        std::string errMsg = "Internal error. Database operation failed.";
+        HandleErrorWithMesssage(env, asyncCallbackInfo->info, ERROR_INTERNAL_ERROR, errMsg);
+    } else {
+        Common::CreateReturnValue(env, asyncCallbackInfo->info, Common::NapiGetNull(env));
+    }
     CleanupAsyncCallback(env, asyncCallbackInfo);
 }
 
@@ -169,13 +189,18 @@ void AsyncCompleteCallbackNapiGetNotificationSwitch(napi_env env, napi_status st
     }
 
     auto *asyncCallbackInfo = static_cast<AsyncCallbackNotificationClassificationSwitch *>(data);
-    napi_value result = nullptr;
-    if (asyncCallbackInfo->info.errorCode != ERR_OK) {
-        result = Common::NapiGetNull(env);
+    if (asyncCallbackInfo->info.errorCode == ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED) {
+        std::string errMsg = "Internal error. Database operation failed.";
+        HandleErrorWithMesssage(env, asyncCallbackInfo->info, ERROR_INTERNAL_ERROR, errMsg);
     } else {
-        napi_create_int32(env, static_cast<int32_t>(asyncCallbackInfo->params.enableStatus), &result);
+        napi_value result = nullptr;
+        if (asyncCallbackInfo->info.errorCode != ERR_OK) {
+            result = Common::NapiGetNull(env);
+        } else {
+            napi_create_int32(env, static_cast<int32_t>(asyncCallbackInfo->params.enableStatus), &result);
+        }
+        Common::CreateReturnValue(env, asyncCallbackInfo->info, result);
     }
-    Common::CreateReturnValue(env, asyncCallbackInfo->info, result);
     CleanupAsyncCallback(env, asyncCallbackInfo);
 }
 }  // namespace

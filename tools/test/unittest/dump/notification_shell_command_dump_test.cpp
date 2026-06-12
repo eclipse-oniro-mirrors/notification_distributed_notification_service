@@ -626,6 +626,7 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1900, Function | Medium
     EXPECT_EQ(cmd.ExecCommand(), g_enableBundleNameNull);
 }
 
+#ifdef ANM_SUPPORT_DUMP
 /**
  * @tc.number: Anm_Command_Dump_2000
  * @tc.name: RunAsSettingCommand
@@ -647,6 +648,7 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_2000, Function | Medium
     EXPECT_EQ(cmd.RunSetEnableCmd(), cmd.RunAsSettingCommand());
     EXPECT_EQ(cmd.ExecCommand(), g_enableObjectNull);
 }
+#endif
 
 /**
  * @tc.number: Anm_Command_Dump_2100
