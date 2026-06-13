@@ -62,7 +62,13 @@ bool PixelMap::CheckParams(const uint32_t *colors, uint32_t colorLength, int32_t
 
 std::unique_ptr<PixelMap> PixelMap::Create(const InitializationOptions &opts)
 {
-    return nullptr;
+    std::unique_ptr<PixelMap> pixelMap = std::make_unique<PixelMap>();
+    if (pixelMap != nullptr) {
+        pixelMap->imageInfo_.size.width = opts.size.width;
+        pixelMap->imageInfo_.size.height = opts.size.height;
+        pixelMap->imageInfo_.pixelFormat = opts.pixelFormat;
+    }
+    return pixelMap;
 }
 
 void PixelMap::UpdatePixelsAlpha(const AlphaType &alphaType, const PixelFormat &pixelFormat, uint8_t *dstPixels,

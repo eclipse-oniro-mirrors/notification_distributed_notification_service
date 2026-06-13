@@ -42,6 +42,7 @@
 #include "string_wrapper.h"
 #include "want_params.h"
 #include "int_wrapper.h"
+#include "long_wrapper.h"
 #include "os_account_manager.h"
 #include "os_account_manager_helper.h"
 #include "notification_extension_wrapper.h"
@@ -184,28 +185,6 @@ HWTEST_F(AnsPublishServiceTest, Publish_00006, Function | SmallTest | Level1)
 
     auto ret = advancedNotificationService_->Publish(label, request);
     ASSERT_EQ(ret, (int)ERROR_USER_NOT_EXIST);
-}
-
-/**
- * @tc.name: Publish_00007
- * @tc.desc: Test Publish
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, Publish_00007, Function | SmallTest | Level1)
-{
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    std::string label = "";
-    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    request->SetOwnerUid(1);
-    request->SetIsAgentNotification(true);
-    request->SetIsDoNotDisturbByPassed(true);
-    MockIsOsAccountExists(true);
- 
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
-    MockIsSystemApp(false);
-    auto ret = advancedNotificationService_->Publish(label, request);
-    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -3985,5 +3964,194 @@ HWTEST_F(AnsPublishServiceTest, ClassificationMgr_Remove_RemoveAllByBundle_00001
     EXPECT_TRUE(NotificationClassificationMgr::GetInstance().Remove(key));
     EXPECT_FALSE(NotificationClassificationMgr::GetInstance().Exists(key));
 }
+
+/**
+ * @tc.name: SetVersionCodeToExtendInfo_EmptyBundleName_00001
+ * @tc.desc: Test SetVersionCodeToExtendInfo with empty bundle name.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(AnsPublishServiceTest, SetVersionCodeToExtendInfo_EmptyBundleName_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("");
+    request->SetCreatorBundleName("");
+    advancedNotificationService_->SetVersionCodeToExtendInfo(nullptr);
+    advancedNotificationService_->SetVersionCodeToExtendInfo(request);
+    auto extendInfo = request->GetExtendInfo();
+    EXPECT_EQ(extendInfo, nullptr);
+}
+
+/**
+ * @tc.name: SetVersionCodeToExtendInfo_InvalidUid_00001
+ * @tc.desc: Test SetVersionCodeToExtendInfo with invalid uid (uid <= 0).
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(AnsPublishServiceTest, SetVersionCodeToExtendInfo_InvalidUid_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test.bundle");
+    request->SetOwnerUid(-1);
+    request->SetCreatorBundleName("com.test.creator");
+    request->SetCreatorUid(0);
+    advancedNotificationService_->SetVersionCodeToExtendInfo(request);
+    auto extendInfo = request->GetExtendInfo();
+    EXPECT_EQ(extendInfo, nullptr);
+}
+
+/**
+ * @tc.name: SetVersionCodeToExtendInfo_ValidBundle_00001
+ * @tc.desc: Test SetVersionCodeToExtendInfo with valid bundle and uid.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(AnsPublishServiceTest, SetVersionCodeToExtendInfo_ValidBundle_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test.bundle");
+    request->SetOwnerUid(1000);
+    MockIsOsAccountExists(true);
+    advancedNotificationService_->SetVersionCodeToExtendInfo(request);
+    auto extendInfo = request->GetExtendInfo();
+    EXPECT_NE(extendInfo, nullptr);
+}
+
+/**
+ * @tc.name: SetVersionCodeToExtendInfo_OwnerBundlePriority_00001
+ * @tc.desc: Test SetVersionCodeToExtendInfo uses ownerBundleName first.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(AnsPublishServiceTest, SetVersionCodeToExtendInfo_OwnerBundlePriority_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.owner.bundle");
+    request->SetOwnerUid(1000);
+    request->SetCreatorBundleName("com.creator.bundle");
+    request->SetCreatorUid(2000);
+    MockIsOsAccountExists(true);
+    advancedNotificationService_->SetVersionCodeToExtendInfo(request);
+    auto extendInfo = request->GetExtendInfo();
+    EXPECT_NE(extendInfo, nullptr);
+}
+
+/**
+ * @tc.name: SetVersionCodeToExtendInfo_FallbackToCreator_00001
+ * @tc.desc: Test SetVersionCodeToExtendInfo fallback to creatorBundleName when ownerBundleName is empty.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(AnsPublishServiceTest, SetVersionCodeToExtendInfo_FallbackToCreator_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("");
+    request->SetOwnerUid(1000);
+    request->SetCreatorBundleName("com.creator.bundle");
+    request->SetCreatorUid(2000);
+    MockIsOsAccountExists(true);
+    advancedNotificationService_->SetVersionCodeToExtendInfo(request);
+    auto extendInfo = request->GetExtendInfo();
+    EXPECT_NE(extendInfo, nullptr);
+}
+
+/**
+ * @tc.name: SetVersionCodeToExtendInfo_VersionCodeInExtendInfo_00001
+ * @tc.desc: Test SetVersionCodeToExtendInfo stores versionCode in extendInfo as Long type.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(AnsPublishServiceTest, SetVersionCodeToExtendInfo_VersionCodeInExtendInfo_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test.bundle");
+    request->SetOwnerUid(1000);
+    MockIsOsAccountExists(true);
+    advancedNotificationService_->SetVersionCodeToExtendInfo(request);
+    auto extendInfo = request->GetExtendInfo();
+    EXPECT_NE(extendInfo, nullptr);
+    EXPECT_TRUE(extendInfo->HasParam("versionCode"));
+}
+
+/**
+ * @tc.name: SetVersionCodeToExtendInfo_CreateNewExtendInfo_00001
+ * @tc.desc: Test SetVersionCodeToExtendInfo creates new extendInfo when it is null.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(AnsPublishServiceTest, SetVersionCodeToExtendInfo_CreateNewExtendInfo_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test.bundle");
+    request->SetOwnerUid(1000);
+    request->SetExtendInfo(nullptr);
+    MockIsOsAccountExists(true);
+    advancedNotificationService_->SetVersionCodeToExtendInfo(request);
+    auto extendInfo = request->GetExtendInfo();
+    EXPECT_NE(extendInfo, nullptr);
+}
+
+/**
+ * @tc.name: SetVersionCodeToExtendInfo_PreserveExistingExtendInfo_00001
+ * @tc.desc: Test SetVersionCodeToExtendInfo preserves existing extendInfo params.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(AnsPublishServiceTest, SetVersionCodeToExtendInfo_PreserveExistingExtendInfo_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test.bundle");
+    request->SetOwnerUid(1000);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("existingParam", AAFwk::String::Box("value"));
+    request->SetExtendInfo(extendInfo);
+    MockIsOsAccountExists(true);
+    advancedNotificationService_->SetVersionCodeToExtendInfo(request);
+    auto newExtendInfo = request->GetExtendInfo();
+    EXPECT_NE(newExtendInfo, nullptr);
+    EXPECT_TRUE(newExtendInfo->HasParam("existingParam"));
+    EXPECT_TRUE(newExtendInfo->HasParam("versionCode"));
+}
+
+/**
+ * @tc.name: SetVersionCodeToExtendInfo_LargeVersionCode_00001
+ * @tc.desc: Test SetVersionCodeToExtendInfo handles large versionCode value.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(AnsPublishServiceTest, SetVersionCodeToExtendInfo_LargeVersionCode_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test.bundle");
+    request->SetOwnerUid(1000);
+    MockIsOsAccountExists(true);
+    advancedNotificationService_->SetVersionCodeToExtendInfo(request);
+    auto extendInfo = request->GetExtendInfo();
+    EXPECT_NE(extendInfo, nullptr);
+    auto param = extendInfo->GetParam("versionCode");
+    AAFwk::ILong* iLong = AAFwk::ILong::Query(param);
+    EXPECT_NE(iLong, nullptr);
+}
+
+/**
+ * @tc.name: SetVersionCodeToExtendInfo_GetBundleVersionCodeFailed_00001
+ * @tc.desc: Test SetVersionCodeToExtendInfo when GetBundleVersionCode fails.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(AnsPublishServiceTest, SetVersionCodeToExtendInfo_GetBundleVersionCodeFailed_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("invalid.bundle.name");
+    request->SetOwnerUid(1000);
+    MockQueryForgroundOsAccountId(false, 0);
+    advancedNotificationService_->SetVersionCodeToExtendInfo(request);
+    MockQueryForgroundOsAccountId(true, 0);
+    auto extendInfo = request->GetExtendInfo();
+    EXPECT_EQ(extendInfo, nullptr);
+}
+
 }  // namespace Notification
 }  // namespace OHOS

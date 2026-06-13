@@ -99,6 +99,7 @@ ohos_shared_library("notification") {
     "src/slot.cpp",
     "src/subscribe.cpp",
     "${core_path}/src/image_pixelmap_helper.cpp",
+    "${core_path}/src/pixelmap_cache_manager.cpp",
     "${core_path}/src/subscriber_image_util.cpp",
     "src/unsubscribe.cpp",
   ]

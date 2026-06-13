@@ -15,27 +15,19 @@ import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-module_output_path =
-    "${component_name}/distributed_notification_service/unittest"
+module_output_path = "${component_name}/distributed_notification_service/unittest"
 
-ohos_unittest("subscriber_image_util_test") {
+ohos_unittest("pixelmap_cache_manager_test") {
   module_out_path = module_output_path
   include_dirs = [
     "${core_path}/include",
     "${core_path}/common/include",
     "${inner_api_path}",
-    "../mock",
   ]
 
   sources = [
-    "${core_path}/src/subscriber_image_util.cpp",
-    "${core_path}/src/image_pixelmap_helper.cpp",
     "${core_path}/src/pixelmap_cache_manager.cpp",
-    "../mock/mock_application_context.cpp",
-    "../mock/mock_application_context_full.cpp",
-    "../mock/mock_resource_manager.cpp",
-    "../mock/mock_image_native.cpp",
-    "subscriber_image_util_test.cpp",
+    "pixelmap_cache_manager_test.cpp",
   ]
 
   deps = [
@@ -43,21 +35,10 @@ ohos_unittest("subscriber_image_util_test") {
   ]
 
   external_deps = [
-    "ability_base:want",
-    "ability_base:zuri",
-    "ability_runtime:app_context",
-    "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
-    "googletest:gmock_main",
     "hilog:libhilog",
-    "image_framework:image_native",
     "image_framework:image",
-    "image_framework:image_source",
     "image_framework:pixelmap",
-    "ipc:ipc_single",
-    "relational_store:native_rdb",
-    "resource_management:global_resmgr",
-    "resource_management:librawfile",
   ]
 
   subsystem_name = "${subsystem_name}"
@@ -68,5 +49,5 @@ group("unittest") {
   testonly = true
   deps = []
 
-  deps += [ ":subscriber_image_util_test" ]
+  deps += [ ":pixelmap_cache_manager_test" ]
 }

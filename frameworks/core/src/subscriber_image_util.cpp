@@ -17,8 +17,11 @@
 
 #include "ans_log_wrapper.h"
 #include "image_pixelmap_helper.h"
+#include "int_wrapper.h"
+#include "long_wrapper.h"
 #include "notification_content.h"
 #include "notification_live_view_content.h"
+#include "pixelmap_cache_manager.h"
 #include "string_wrapper.h"
 #include "array_wrapper.h"
 
@@ -57,6 +60,7 @@ void SubscriberImageUtil::ProcessPictureOption(
     for (const auto &picPathKey : picList) {
         std::vector<std::string> picPaths = GetPicPathsFromParam(extraInfo, picPathKey);
         if (picPaths.empty()) {
+            ANS_LOGI("picPaths empty");
             continue;
         }
         for (const auto &picPath : picPaths) {
@@ -70,28 +74,38 @@ void SubscriberImageUtil::ProcessPictureOption(
     liveViewContent->SetPicture(pictureMap);
 }
 
-std::unique_ptr<Media::PixelMap> SubscriberImageUtil::GetPixelMapByRes(
+std::shared_ptr<Media::PixelMap> SubscriberImageUtil::GetPixelMapByRes(
     const sptr<NotificationRequest> &request,
     const std::string &resPath)
 {
+    uint32_t versionCode = 0;
+    auto extendInfo = request->GetExtendInfo();
+    if (extendInfo != nullptr && extendInfo->HasParam("versionCode")) {
+        auto param = extendInfo->GetParam("versionCode");
+        AAFwk::ILong* iLong = AAFwk::ILong::Query(param);
+        if (iLong != nullptr) {
+            versionCode = static_cast<uint32_t>(AAFwk::Long::Unbox(iLong));
+        }
+    }
+    std::string requestKey = request->GetKey();
+    std::string cacheKey = std::to_string(versionCode) + "_" + resPath;
+    auto cacheManager = PixelMapCacheManager::GetInstance();
+    auto cachedPixelMap = cacheManager->GetCachedPixelMap(requestKey, cacheKey);
+    if (cachedPixelMap != nullptr) {
+        ANS_LOGI("Cache hit, returning shared for resPath=%{public}s", resPath.c_str());
+        return cachedPixelMap;
+    }
     ImagePixelmapHelper imagePixelmapHelper(request, resPath);
-    ANS_LOGI("GetPixelMapByRes resPath: %{public}s", resPath.c_str());
-    auto ret = imagePixelmapHelper.Init();
-    if (ret != ERR_OK) {
-        ANS_LOGE("init failed pic %{public}s", resPath.c_str());
+    ANS_LOGI("GetPixelMapByRes resPath: %{public}s, versionCode: %{public}u", resPath.c_str(), versionCode);
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    auto ret = imagePixelmapHelper.GetPixelMap(pixelMap);
+    if (ret != ERR_OK || pixelMap == nullptr) {
+        ANS_LOGE("GetPixelMap failed ret: %{public}d, ", ret);
         return nullptr;
     }
-    auto width = imagePixelmapHelper.GetImageWidth();
-    auto height = imagePixelmapHelper.GetImageHeight();
-    Media::InitializationOptions opts;
-    opts.size.width = static_cast<int32_t>(width);
-    opts.size.height = static_cast<int32_t>(height);
-    opts.pixelFormat = Media::PixelFormat::BGRA_8888;
-    opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
-    opts.srcPixelFormat = Media::PixelFormat::BGRA_8888;
-    auto pixelMap = Media::PixelMap::Create(
-        reinterpret_cast<uint32_t *>(imagePixelmapHelper.GetPixelmapBuff()),
-        width * height, 0, width, opts, true);
+    if (versionCode > 0) {
+        cacheManager->CachePixelMap(requestKey, cacheKey, pixelMap);
+    }
     return pixelMap;
 }
 
@@ -101,7 +115,6 @@ std::vector<std::string> SubscriberImageUtil::GetPicPathsFromParam(
 {
     std::vector<std::string> picPaths;
     if (!extraInfo->HasParam(picPathKey)) {
-        ANS_LOGI("No param found, picPathKey: %{public}s", picPathKey.c_str());
         return picPaths;
     }
     auto param = extraInfo->GetParam(picPathKey);

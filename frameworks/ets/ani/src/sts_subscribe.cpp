@@ -14,6 +14,7 @@
  */
 #include "sts_subscribe.h"
 
+#include "pixelmap_cache_manager.h"
 #include "subscriber_image_util.h"
 #include "ans_log_wrapper.h"
 #include "notification_helper.h"
@@ -102,6 +103,10 @@ void StsSubscriberInstance::OnCanceled(
     int32_t deleteReason)
 {
     ANS_LOGD("enter");
+    auto cacheManager = PixelMapCacheManager::GetInstance();
+    if (request != nullptr) {
+        cacheManager->RemoveCache(request->GetKey());
+    }
     ani_env* etsEnv;
     ani_status aniResult = ANI_ERROR;
     ani_options aniArgs { 0, nullptr };
@@ -473,6 +478,12 @@ void StsSubscriberInstance::OnBatchCanceled(
     const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason)
 {
     ANS_LOGD("enter");
+    auto cacheManager = PixelMapCacheManager::GetInstance();
+    for (auto& notification : requestList) {
+        if (notification != nullptr) {
+            cacheManager->RemoveCache(notification->GetKey());
+        }
+    }
     ani_env* etsEnv;
     ani_status aniResult = ANI_ERROR;
     ani_options aniArgs { 0, nullptr };

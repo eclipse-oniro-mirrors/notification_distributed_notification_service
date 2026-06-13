@@ -358,5 +358,269 @@ HWTEST_F(NotificationConfigParseTest, GetNotificationExtensionEnabledBundlesList
     bool result = NotificationConfigParse::GetInstance()->GetNotificationExtensionEnabledBundlesWriteList(bundles);
     EXPECT_TRUE(result);
 }
+
+/**
+ * @tc.name: IsLiveViewEnabled_00001
+ * @tc.desc: Test IsLiveViewEnabled with empty bundleName
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, IsLiveViewEnabled_00001, Function | SmallTest | Level1)
+{
+    std::string bundleName = "";
+    bool result = NotificationConfigParse::GetInstance()->IsLiveViewEnabled(bundleName);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsLiveViewEnabled_00002
+ * @tc.desc: Test IsLiveViewEnabled with valid bundleName
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, IsLiveViewEnabled_00002, Function | SmallTest | Level1)
+{
+    std::string bundleName = "com.ohos.test";
+    NotificationConfigParse::GetInstance()->IsLiveViewEnabled(bundleName);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: IsReminderEnabled_00001
+ * @tc.desc: Test IsReminderEnabled with empty bundleName
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, IsReminderEnabled_00001, Function | SmallTest | Level1)
+{
+    std::string bundleName = "";
+    bool result = NotificationConfigParse::GetInstance()->IsReminderEnabled(bundleName);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsReminderEnabled_00002
+ * @tc.desc: Test IsReminderEnabled with valid bundleName
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, IsReminderEnabled_00002, Function | SmallTest | Level1)
+{
+    std::string bundleName = "com.ohos.test";
+    NotificationConfigParse::GetInstance()->IsReminderEnabled(bundleName);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: IsDistributedReplyEnabled_00001
+ * @tc.desc: Test IsDistributedReplyEnabled with empty bundleName
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, IsDistributedReplyEnabled_00001, Function | SmallTest | Level1)
+{
+    std::string bundleName = "";
+    bool result = NotificationConfigParse::GetInstance()->IsDistributedReplyEnabled(bundleName);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsDistributedReplyEnabled_00002
+ * @tc.desc: Test IsDistributedReplyEnabled with valid bundleName
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, IsDistributedReplyEnabled_00002, Function | SmallTest | Level1)
+{
+    std::string bundleName = "com.ohos.test";
+    NotificationConfigParse::GetInstance()->IsDistributedReplyEnabled(bundleName);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: GetFlowCtrlConfigFromCCM_00001
+ * @tc.desc: Test GetFlowCtrlConfigFromCCM successfully
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, GetFlowCtrlConfigFromCCM_00001, Function | SmallTest | Level1)
+{
+    FlowControlThreshold threshold;
+    NotificationConfigParse::GetInstance()->GetFlowCtrlConfigFromCCM(threshold);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: GetSmartReminderEnableList_00001
+ * @tc.desc: Test GetSmartReminderEnableList fail
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, GetSmartReminderEnableList_00001, Function | SmallTest | Level1)
+{
+    std::vector<std::string> deviceTypes;
+    bool result = NotificationConfigParse::GetInstance()->GetSmartReminderEnableList(deviceTypes);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetMirrorNotificationEnabledStatus_00001
+ * @tc.desc: Test GetMirrorNotificationEnabledStatus fail
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, GetMirrorNotificationEnabledStatus_00001, Function | SmallTest | Level1)
+{
+    std::vector<std::string> deviceTypes;
+    bool result = NotificationConfigParse::GetInstance()->GetMirrorNotificationEnabledStatus(deviceTypes);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetFilterUidAndBundleName_00001
+ * @tc.desc: Test GetFilterUidAndBundleName with empty key
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, GetFilterUidAndBundleName_00001, Function | SmallTest | Level1)
+{
+    std::string key = "";
+    bool result = NotificationConfigParse::GetInstance()->GetFilterUidAndBundleName(key);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetFilterUidAndBundleName_00002
+ * @tc.desc: Test GetFilterUidAndBundleName with valid key
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, GetFilterUidAndBundleName_00002, Function | SmallTest | Level1)
+{
+    std::string key = "testKey";
+    NotificationConfigParse::GetInstance()->GetFilterUidAndBundleName(key);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: GetCloneExpiredTime_00001
+ * @tc.desc: Test GetCloneExpiredTime fail
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, GetCloneExpiredTime_00001, Function | SmallTest | Level1)
+{
+    int32_t days = 0;
+    bool result = NotificationConfigParse::GetInstance()->GetCloneExpiredTime(days);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetDataCloneBundleName_00001
+ * @tc.desc: Test GetDataCloneBundleName successfully
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, GetDataCloneBundleName_00001, Function | SmallTest | Level1)
+{
+    std::string bundleName;
+    bool result = NotificationConfigParse::GetInstance()->GetDataCloneBundleName(bundleName);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: GetCollaborativeDeleteTypeByDevice_00001
+ * @tc.desc: Test GetCollaborativeDeleteTypeByDevice successfully
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, GetCollaborativeDeleteTypeByDevice_00001, Function | SmallTest | Level1)
+{
+    std::map<std::string, std::map<std::string, std::unordered_set<std::string>>> deleteTypes;
+    bool result = NotificationConfigParse::GetInstance()->GetCollaborativeDeleteTypeByDevice(deleteTypes);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsNotificationExtensionLifecycleDestroyTimeConfigured_00001
+ * @tc.desc: Test IsNotificationExtensionLifecycleDestroyTimeConfigured successfully
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, IsNotificationExtensionLifecycleDestroyTimeConfigured_00001,
+    Function | SmallTest | Level1)
+{
+    uint32_t destroyTime = 0;
+    bool result = NotificationConfigParse::GetInstance()->IsNotificationExtensionLifecycleDestroyTimeConfigured(
+        destroyTime);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsNotificationExtensionSubscribeSupportHfp_00001
+ * @tc.desc: Test IsNotificationExtensionSubscribeSupportHfp successfully
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, IsNotificationExtensionSubscribeSupportHfp_00001, Function | SmallTest | Level1)
+{
+    bool supportHfp = false;
+    bool result = NotificationConfigParse::GetInstance()->IsNotificationExtensionSubscribeSupportHfp(supportHfp);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: GetAppPrivileges_00001
+ * @tc.desc: Test GetAppPrivileges with empty bundleName
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, GetAppPrivileges_00001, Function | SmallTest | Level1)
+{
+    std::string bundleName = "";
+    auto result = NotificationConfigParse::GetInstance()->GetAppPrivileges(bundleName);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetAppPrivileges_00002
+ * @tc.desc: Test GetAppPrivileges with valid bundleName
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, GetAppPrivileges_00002, Function | SmallTest | Level1)
+{
+    std::string bundleName = "com.ohos.test";
+    auto result = NotificationConfigParse::GetInstance()->GetAppPrivileges(bundleName);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: GetConfigJson_00001
+ * @tc.desc: Test GetConfigJson with empty key
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, GetConfigJson_00001, Function | SmallTest | Level1)
+{
+    std::string key = "";
+    nlohmann::json configJson;
+    bool result = NotificationConfigParse::GetInstance()->GetConfigJson(key, configJson);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetCurrentSlotReminder_00001
+ * @tc.desc: Test GetCurrentSlotReminder successfully
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, GetCurrentSlotReminder_00001, Function | SmallTest | Level1)
+{
+    std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> currentSlotReminder;
+    NotificationConfigParse::GetInstance()->GetCurrentSlotReminder(currentSlotReminder);
+    EXPECT_TRUE(true);
+}
+
 }   //namespace Notification
 }   //namespace OHOS

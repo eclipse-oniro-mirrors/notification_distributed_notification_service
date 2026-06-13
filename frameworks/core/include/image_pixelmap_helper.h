@@ -28,29 +28,24 @@ public:
     ImagePixelmapHelper(const sptr<NotificationRequest> &request_, const std::string &imagePath);
     ~ImagePixelmapHelper();
 
-    ErrCode Init();
-    uint32_t GetImageWidth();
-    uint32_t GetImageHeight();
-    uint8_t *GetPixelmapBuff();
+    ErrCode GetPixelMap(std::shared_ptr<Media::PixelMap> &pixelMap);
 
 private:
     ErrCode CreateImageSource();
     ErrCode CreatePixelMap();
     ErrCode GetImageSourceInfo();
-    ErrCode ReadPixelData();
     ErrCode InitRawfileData();
 
     OH_ImageSourceNative *imageSource_ = nullptr;
-    OH_PixelmapNative *resPixMap_ = nullptr;
     OH_ImageSource_Info *imageInfo_ = nullptr;
     sptr<NotificationRequest> request_ = nullptr;
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager_ = nullptr;
     Global::Resource::ResourceManager::RawFileDescriptor rawFileDesc_;
 
     std::string imageFile_{};
-    std::unique_ptr<uint8_t[]> pixelmapBuff_;
     uint32_t imageWidth_{0};
     uint32_t imageHeight_{0};
+    std::shared_ptr<Media::PixelMap> pixelMap_;
 };
 }  // namespace Notification
 }  // namespace OHOS

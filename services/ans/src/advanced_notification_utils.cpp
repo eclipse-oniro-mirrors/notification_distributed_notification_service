@@ -1979,6 +1979,32 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleO
 
     return validBundle;
 }
+
+ErrCode AdvancedNotificationService::GetBundleVersionCode(
+    const sptr<NotificationBundleOption> &bundleOption, uint32_t &versionCode)
+{
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("Bundle option is invalid!");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    versionCode = 0;
+    int32_t activeUserId = -1;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
+        ANS_LOGE("Failed to get active user id!");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+    int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_DEFAULT);
+    AppExecFwk::BundleInfo bundleInfo = {};
+    if (!BundleManagerHelper::GetInstance()->GetBundleInfoV9(bundleOption->GetBundleName(),
+        flags, bundleInfo, activeUserId)) {
+        ANS_LOGE("Failed to get bundle info, name: %{public}s, userId: %{public}d",
+            bundleOption->GetBundleName().c_str(), activeUserId);
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    versionCode = bundleInfo.versionCode;
+    return ERR_OK;
+}
+
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 sptr<NotificationBundleOption> AdvancedNotificationService::GenerateCloneValidBundleOption(
     const sptr<NotificationBundleOption> &bundleOption)

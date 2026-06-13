@@ -16,6 +16,7 @@
 #include "mock_image_native.h"
 #include "ans_inner_errors.h"
 #include "raw_file.h"
+#include "pixel_map.h"
 
 namespace {
 const uint32_t DEFAULT_IMAGE_SIZE = 100;
@@ -30,6 +31,8 @@ bool g_mockReadPixelsFail = false;
 bool g_mockImageSourceInfoCreateFail = false;
 bool g_mockImageSourceInfoCreateReturnNull = false;
 bool g_mockDecodingOptionsCreateReturnNull = false;
+bool g_mockGetInnerPixelmapFail = false;
+bool g_mockGetInnerPixelmapReturnNull = false;
 uint32_t g_mockImageWidth = DEFAULT_IMAGE_SIZE;
 uint32_t g_mockImageHeight = DEFAULT_IMAGE_SIZE;
 
@@ -38,7 +41,36 @@ struct MockImageSourceNative {
 };
 
 struct MockPixelmapNative {
-    int dummy = 0;
+    std::shared_ptr<OHOS::Media::PixelMap> mockPixelMap;
+    
+    MockPixelmapNative()
+    {
+        OHOS::Media::InitializationOptions options;
+        options.size.width = g_mockImageWidth;
+        options.size.height = g_mockImageHeight;
+        options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
+        options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+        options.scaleMode = OHOS::Media::ScaleMode::FIT_TARGET_SIZE;
+        options.editable = false;
+        
+        auto uniquePixelMap = OHOS::Media::PixelMap::Create(options);
+        if (uniquePixelMap != nullptr) {
+            mockPixelMap = std::move(uniquePixelMap);
+        }
+    }
+    
+    ~MockPixelmapNative()
+    {
+        mockPixelMap.reset();
+    }
+    
+    std::shared_ptr<OHOS::Media::PixelMap> GetInnerPixelmap()
+    {
+        if (g_mockGetInnerPixelmapFail || g_mockGetInnerPixelmapReturnNull) {
+            return nullptr;
+        }
+        return mockPixelMap;
+    }
 };
 
 struct MockImageSourceInfo {
@@ -113,6 +145,16 @@ void MockOHDecodingOptionsCreateReturnNull(bool returnNull)
     g_mockDecodingOptionsCreateReturnNull = returnNull;
 }
 
+void MockGetInnerPixelmapFail(bool fail)
+{
+    g_mockGetInnerPixelmapFail = fail;
+}
+
+void MockGetInnerPixelmapReturnNull(bool returnNull)
+{
+    g_mockGetInnerPixelmapReturnNull = returnNull;
+}
+
 void MockSetImageWidth(uint32_t width)
 {
     g_mockImageWidth = width;
@@ -136,6 +178,8 @@ void MockResetImageNativeState()
     g_mockImageSourceInfoCreateFail = false;
     g_mockImageSourceInfoCreateReturnNull = false;
     g_mockDecodingOptionsCreateReturnNull = false;
+    g_mockGetInnerPixelmapFail = false;
+    g_mockGetInnerPixelmapReturnNull = false;
     g_mockImageWidth = DEFAULT_IMAGE_SIZE;
     g_mockImageHeight = DEFAULT_IMAGE_SIZE;
     if (g_mockImageSourceNative != nullptr) {

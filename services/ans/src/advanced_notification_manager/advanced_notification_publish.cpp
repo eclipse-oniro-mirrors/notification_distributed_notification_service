@@ -30,6 +30,7 @@
 #include "notification_analytics_util.h"
 #include "os_account_manager.h"
 #include "os_account_manager_helper.h"
+#include "long_wrapper.h"
 #include "string_wrapper.h"
 #include "hitrace_util.h"
 #include "uri.h"
@@ -282,6 +283,41 @@ void AdvancedNotificationService::SetIsFromSAToExtendInfo(const sptr<Notificatio
     return;
 }
 
+void AdvancedNotificationService::SetVersionCodeToExtendInfo(const sptr<NotificationRequest> &request)
+{
+    if (request == nullptr) {
+        return;
+    }
+
+    std::string bundleName = request->GetOwnerBundleName();
+    int32_t uid = request->GetOwnerUid();
+    if (bundleName.empty()) {
+        bundleName = request->GetCreatorBundleName();
+        uid = request->GetCreatorUid();
+    }
+    if (bundleName.empty() || uid <= 0) {
+        ANS_LOGW("Invalid bundle %{public}s or uid %{public}d, skip versionCode",
+            bundleName.empty() ? "empty" : bundleName.c_str(), uid);
+        return;
+    }
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, uid);
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Failed to create bundleOption");
+        return;
+    }
+    uint32_t versionCode = 0;
+    if (GetBundleVersionCode(bundleOption, versionCode) != ERR_OK) {
+        ANS_LOGW("Failed to get versionCode for bundle %{public}s", bundleName.c_str());
+        return;
+    }
+    std::shared_ptr<AAFwk::WantParams> extendInfo = request->GetExtendInfo();
+    if (!extendInfo) {
+        extendInfo = std::make_shared<AAFwk::WantParams>();
+    }
+    extendInfo->SetParam("versionCode", AAFwk::Long::Box(static_cast<long>(versionCode)));
+    request->SetExtendInfo(extendInfo);
+}
+
 void AdvancedNotificationService::SetChainIdToExtraInfo
     (const sptr<NotificationRequest> &request, OHOS::HiviewDFX::HiTraceId traceId)
 {
@@ -383,7 +419,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     }
 
     SetRequestBySlotType(record->request, bundleOption);
-
+    SetVersionCodeToExtendInfo(request);
     auto ipcUid = IPCSkeleton::GetCallingUid();
     auto submitResult = notificationSvrQueue_.SyncSubmit([&]() {
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER

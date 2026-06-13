@@ -35,6 +35,9 @@ void MockOHImageSourceInfoCreateFail(bool fail);
 void MockOHImageSourceInfoCreateReturnNull(bool returnNull);
 void MockOHDecodingOptionsCreateReturnNull(bool returnNull);
 
+void MockGetInnerPixelmapFail(bool fail);
+void MockGetInnerPixelmapReturnNull(bool returnNull);
+
 void MockSetImageWidth(uint32_t width);
 void MockSetImageHeight(uint32_t height);
 

@@ -35,6 +35,7 @@ ohos_shared_library("notification_manager_ani") {
 
   sources = [
     "${core_path}/src/image_pixelmap_helper.cpp",
+    "${core_path}/src/pixelmap_cache_manager.cpp",
     "${core_path}/src/subscriber_image_util.cpp",
     "./src/manager/ani_ans_dialog_callback.cpp",
     "./src/manager/ani_cance.cpp",
@@ -206,6 +207,7 @@ ohos_shared_library("notification_subscribe_ani") {
 
   sources = [
     "${core_path}/src/image_pixelmap_helper.cpp",
+    "${core_path}/src/pixelmap_cache_manager.cpp",
     "${core_path}/src/subscriber_image_util.cpp",
     "./src/sts_action_button.cpp",
     "./src/sts_bundle_option.cpp",

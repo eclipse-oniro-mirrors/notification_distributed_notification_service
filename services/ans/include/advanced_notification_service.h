@@ -2387,6 +2387,7 @@ private:
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
     sptr<NotificationBundleOption> GenerateValidBundleOptionV2(const sptr<NotificationBundleOption> &bundleOption);
     sptr<NotificationBundleOption> GenerateValidBundleOptionV3(const sptr<NotificationBundleOption> &bundleOption);
+    ErrCode GetBundleVersionCode(const sptr<NotificationBundleOption> &bundleOption, uint32_t &versionCode);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
     AnsStatus AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record,
         bool isSystemApp, bool isUpdateByOwner, const bool isAgentController);
@@ -2520,6 +2521,7 @@ private:
 
     void SetChainIdToExtraInfo(const sptr<NotificationRequest> &request, OHOS::HiviewDFX::HiTraceId traceId);
     void SetIsFromSAToExtendInfo(const sptr<NotificationRequest> &request);
+    void SetVersionCodeToExtendInfo(const sptr<NotificationRequest> &request);
 
     ErrCode CheckNotificationRequest(const sptr<NotificationRequest> &request);
     ErrCode CheckNotificationRequestLineWantAgents(const std::shared_ptr<NotificationContent> &content,

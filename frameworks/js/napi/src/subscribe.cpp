@@ -14,6 +14,7 @@
  */
 
 #include "subscribe.h"
+#include "pixelmap_cache_manager.h"
 #include "subscriber_image_util.h"
 #include "ans_inner_errors.h"
 #include <mutex>
@@ -345,6 +346,8 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
         ANS_LOGE("null sortingMap");
         return;
     }
+    auto cacheManager = PixelMapCacheManager::GetInstance();
+    cacheManager->RemoveCache(request->GetKey());
     ANS_LOGI("Cancel Key=%{public}s,sortingMap size=%{public}zu,reason=%{public}d",
         request->GetKey().c_str(), sortingMap->GetKey().size(), deleteReason);
     ANS_LOGD("SubscriberInstance::OnCanceled instanceKey: %{public}s", request->GetInstanceKey().c_str());
@@ -419,9 +422,13 @@ void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS:
         ANS_LOGE("null sortingMap");
         return;
     }
+    auto cacheManager = PixelMapCacheManager::GetInstance();
     std::string notificationKeys = "";
     for (auto notification : requestList) {
         notificationKeys.append(notification->GetKey()).append("-");
+        if (notification != nullptr) {
+            cacheManager->RemoveCache(notification->GetKey());
+        }
     }
     ANS_LOGI("BatchCancel reason=%{public}d,sortingMap size=%{public}zu,keys=%{public}s",
         deleteReason, sortingMap->GetKey().size(), notificationKeys.c_str());

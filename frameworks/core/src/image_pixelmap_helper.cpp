@@ -20,6 +20,7 @@
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "application_context.h"
+#include "pixelmap_native_impl.h"
 
 namespace OHOS {
 namespace Notification {
@@ -32,18 +33,11 @@ ImagePixelmapHelper::ImagePixelmapHelper(const sptr<NotificationRequest> &reques
 
 ImagePixelmapHelper::~ImagePixelmapHelper()
 {
-    pixelmapBuff_ = nullptr;
     imageWidth_ = 0;
     imageHeight_ = 0;
-
     if (imageSource_ != nullptr) {
         OH_ImageSourceNative_Release(imageSource_);
         imageSource_ = nullptr;
-    }
-
-    if (resPixMap_ != nullptr) {
-        OH_PixelmapNative_Release(resPixMap_);
-        resPixMap_ = nullptr;
     }
 
     if (imageInfo_ != nullptr) {
@@ -63,7 +57,7 @@ ImagePixelmapHelper::~ImagePixelmapHelper()
     rawFileDesc_ = {0, 0, 0};
 }
 
-ErrCode ImagePixelmapHelper::Init()
+ErrCode ImagePixelmapHelper::GetPixelMap(std::shared_ptr<Media::PixelMap> &pixelMap)
 {
     if (imageFile_.empty()) {
         ANS_LOGE("Init failed, imagePath is empty.");
@@ -92,28 +86,8 @@ ErrCode ImagePixelmapHelper::Init()
         ANS_LOGE("ImagePixelmapHelper CreatePixelMap failed.");
         return ret;
     }
-
-    ret = ReadPixelData();
-    if (ret != ERR_OK) {
-        ANS_LOGE("ImagePixelmapHelper ReadPixelData failed.");
-        return ret;
-    }
+    pixelMap = pixelMap_;
     return ERR_OK;
-}
-
-uint32_t ImagePixelmapHelper::GetImageWidth()
-{
-    return imageWidth_;
-}
-
-uint32_t ImagePixelmapHelper::GetImageHeight()
-{
-    return imageHeight_;
-}
-
-uint8_t *ImagePixelmapHelper::GetPixelmapBuff()
-{
-    return pixelmapBuff_.get();
 }
 
 ErrCode ImagePixelmapHelper::InitRawfileData()
@@ -156,37 +130,35 @@ ErrCode ImagePixelmapHelper::CreatePixelMap()
 {
     ErrCode ret = GetImageSourceInfo();
     if (ret != ERR_OK) {
-        ANS_LOGE("ImagePixelmapHelper GetImageSourceInfo failed.");
         return ret;
     }
-
     constexpr uint32_t MAX_SIZE = 500;
     uint32_t targetWidth = imageWidth_;
     uint32_t targetHeight = imageHeight_;
-
     if (imageWidth_ > MAX_SIZE || imageHeight_ > MAX_SIZE) {
         float scale = std::min(static_cast<float>(MAX_SIZE) / imageWidth_,
             static_cast<float>(MAX_SIZE) / imageHeight_);
         targetWidth = static_cast<uint32_t>(imageWidth_ * scale);
         targetHeight = static_cast<uint32_t>(imageHeight_ * scale);
-        ANS_LOGI("Start scale image");
+        ANS_LOGI("Start scale image width: %{public}u, height: %{public}u", targetWidth, targetHeight);
     }
 
     OH_DecodingOptions *ops = nullptr;
     OH_DecodingOptions_Create(&ops);
     Image_Size desiredSize = {targetWidth, targetHeight};
     OH_DecodingOptions_SetDesiredSize(ops, &desiredSize);
-    int32_t format = static_cast<int32_t>(Media::PixelFormat::BGRA_8888);
+    int32_t format = static_cast<int32_t>(Media::PixelFormat::ASTC_4x4);
     OH_DecodingOptions_SetPixelFormat(ops, format);
-    OH_DecodingOptions_SetDesiredDynamicRange(ops, IMAGE_DYNAMIC_RANGE_AUTO);
+    OH_PixelmapNative *resPixMap_ = nullptr;
     Image_ErrorCode imageErrCode = OH_ImageSourceNative_CreatePixelmap(imageSource_, ops, &resPixMap_);
     OH_DecodingOptions_Release(ops);
     if (imageErrCode != IMAGE_SUCCESS || resPixMap_ == nullptr) {
         ANS_LOGE("OH_ImageSourceNative_CreatePixelmap failed, errCode: %{public}d.", imageErrCode);
+        OH_PixelmapNative_Release(resPixMap_);
         return ERR_ANS_INVALID_PARAM;
     }
-    imageWidth_ = targetWidth;
-    imageHeight_ = targetHeight;
+    pixelMap_ = resPixMap_->GetInnerPixelmap();
+    OH_PixelmapNative_Release(resPixMap_);
     return ERR_OK;
 }
 
@@ -217,21 +189,6 @@ ErrCode ImagePixelmapHelper::GetImageSourceInfo()
     }
 
     ANS_LOGI("GetImageSourceInfo width:%{public}d, height:%{public}d.", imageWidth_, imageHeight_);
-    return ERR_OK;
-}
-
-ErrCode ImagePixelmapHelper::ReadPixelData()
-{
-    size_t buffSize = static_cast<uint64_t>(imageWidth_) * static_cast<uint64_t>(imageHeight_) *
-        static_cast<uint32_t>(Media::PixelFormat::BGRA_8888);
-    ANS_LOGI("read pixel buff size: %{public}zu.", buffSize);
-
-    pixelmapBuff_ = std::make_unique<uint8_t[]>(buffSize);
-    Image_ErrorCode imageErrCode = OH_PixelmapNative_ReadPixels(resPixMap_, pixelmapBuff_.get(), &buffSize);
-    if (imageErrCode != IMAGE_SUCCESS) {
-        ANS_LOGE("OH_PixelmapNative_ReadPixels failed, errCode: %{public}d.", imageErrCode);
-        return ERR_ANS_INVALID_PARAM;
-    }
     return ERR_OK;
 }
 }  // namespace Notification
