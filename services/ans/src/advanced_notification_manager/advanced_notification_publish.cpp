@@ -36,6 +36,7 @@
 #include "uri.h"
 #include "uri_permission_manager_client.h"
 #include "notification_extension_wrapper.h"
+#include "all_scenarios_extension_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -246,13 +247,19 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
 #ifndef IS_EMULATOR
         if (IsNeedPushCheck(request)) {
             ansStatus = PushCheck(request);
+            if (!ansStatus.Ok()) {
+                NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
+                break;
+            }
+            ErrCode rightsResult = CheckCommonLiveViewRights(request);
+            if (rightsResult != ERR_OK) {
+                ANS_LOGE("CheckLiveViewRights failed, result: %{public}d", rightsResult);
+                ansStatus = AnsStatus(rightsResult, "CheckLiveViewRights failed.");
+                NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
+                break;
+            }
         }
 #endif
-
-        if (!ansStatus.Ok()) {
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
-            break;
-        }
         ansStatus = PublishPreparedNotification(request, bundleOption, isUpdateByOwnerAllowed);
         if (!ansStatus.Ok()) {
             NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));

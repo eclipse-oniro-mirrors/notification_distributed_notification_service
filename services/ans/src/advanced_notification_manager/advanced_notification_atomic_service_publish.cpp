@@ -19,6 +19,7 @@
 #include "access_token_helper.h"
 #include "advanced_notification_flow_control_service.h"
 #include "advanced_notification_inline.h"
+#include "all_scenarios_extension_wrapper.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
@@ -138,6 +139,11 @@ AnsStatus AdvancedNotificationService::CheckAndPrepareNotificationInfoWithAtomic
         AnsStatus ansStatus = PushCheck(request);
         if (!ansStatus.Ok()) {
             return ansStatus;
+        }
+        ErrCode rightsResult = CheckCommonLiveViewRights(request);
+        if (rightsResult != ERR_OK) {
+            ANS_LOGE("CheckLiveViewRights failed in atomic service, result: %{public}d", rightsResult);
+            return AnsStatus(rightsResult, "CheckLiveViewRights failed.");
         }
     }
     return AnsStatus();
