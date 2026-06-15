@@ -245,6 +245,7 @@ ohos_source_set("ans_manager_stub") {
     "i18n:intl_util",
     "image_framework:image_native",
     "ipc:ipc_core",
+    "ability_base:configuration",
     "bundle_framework:appexecfwk_core"
   ]
   subsystem_name = "notification"
@@ -279,6 +280,7 @@ ohos_source_set("ans_manager_proxy") {
     "i18n:intl_util",
     "image_framework:image_native",
     "ipc:ipc_core",
+    "ability_base:configuration",
     "bundle_framework:appexecfwk_core"
   ]
   subsystem_name = "notification"
@@ -322,6 +324,7 @@ ohos_source_set("ans_callback_proxy") {
     "i18n:intl_util",
     "image_framework:image_native",
     "ipc:ipc_core",
+    "ability_base:configuration",
     "bundle_framework:appexecfwk_core"
   ]
   subsystem_name = "notification"
@@ -365,6 +368,7 @@ ohos_source_set("ans_callback_stub") {
     "i18n:intl_util",
     "image_framework:image_native",
     "ipc:ipc_core",
+    "ability_base:configuration",
     "bundle_framework:appexecfwk_core"
   ]
   subsystem_name = "notification"
