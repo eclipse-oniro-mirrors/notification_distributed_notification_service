@@ -219,6 +219,31 @@ void SubscriberInstance::SubDeleteRef()
         napi_delete_reference(notificationSwitchChangedCallbackInfo_.env, notificationSwitchChangedCallbackInfo_.ref);
         notificationSwitchChangedCallbackInfo_.ref = nullptr;
     }
+
+    if (disturbDateCallbackInfo_.ref != nullptr) {
+        napi_delete_reference(disturbDateCallbackInfo_.env, disturbDateCallbackInfo_.ref);
+        disturbDateCallbackInfo_.ref = nullptr;
+    }
+
+    if (disturbChangedCallbackInfo_.ref != nullptr) {
+        napi_delete_reference(disturbChangedCallbackInfo_.env, disturbChangedCallbackInfo_.ref);
+        disturbChangedCallbackInfo_.ref = nullptr;
+    }
+
+    if (enabledSilentReminderCallbackInfo_.ref != nullptr) {
+        napi_delete_reference(enabledSilentReminderCallbackInfo_.env, enabledSilentReminderCallbackInfo_.ref);
+        enabledSilentReminderCallbackInfo_.ref = nullptr;
+    }
+
+    if (setBadgeCallbackInfo_.ref != nullptr) {
+        napi_delete_reference(setBadgeCallbackInfo_.env, setBadgeCallbackInfo_.ref);
+        setBadgeCallbackInfo_.ref = nullptr;
+    }
+
+    if (setBadgeEnabledCallbackInfo_.ref != nullptr) {
+        napi_delete_reference(setBadgeEnabledCallbackInfo_.env, setBadgeEnabledCallbackInfo_.ref);
+        setBadgeEnabledCallbackInfo_.ref = nullptr;
+    }
 }
 
 void SubscriberInstance::DeleteRef()
@@ -1679,6 +1704,23 @@ napi_value GetNotificationSubscriber(
         return nullptr;
     }
 
+    struct SubscriberGuard {
+        const napi_env env;
+        SubscriberInstancesInfo &info;
+        bool active = true;
+        ~SubscriberGuard()
+        {
+            if (active) {
+                info.subscriber->DeleteRef();
+                if (info.ref != nullptr) {
+                    napi_delete_reference(env, info.ref);
+                    info.ref = nullptr;
+                }
+                info.subscriber = nullptr;
+            }
+        }
+    } guard {env, subscriberInfo};
+
     napi_create_reference(env, value, 1, &subscriberInfo.ref);
 
     napi_value resourceName = nullptr;
@@ -1990,6 +2032,7 @@ napi_value GetNotificationSubscriber(
         subscribedFlag |= NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BATCHCANCELED;
     }
     subscriberInfo.subscriber->SetSubscribedFlags(subscribedFlag);
+    guard.active = false;
     return Common::NapiGetNull(env);
 }
 
@@ -2062,6 +2105,12 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
         }
         if (!AddSubscriberInstancesInfo(env, subscriberInstancesInfo)) {
             ANS_LOGE("AddSubscriberInstancesInfo add failed");
+            subscriberInstancesInfo.subscriber->DeleteRef();
+            if (subscriberInstancesInfo.ref != nullptr) {
+                napi_delete_reference(env, subscriberInstancesInfo.ref);
+                subscriberInstancesInfo.ref = nullptr;
+            }
+            subscriberInstancesInfo.subscriber = nullptr;
             return nullptr;
         }
     }
@@ -2124,6 +2173,12 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
         }
         if (!AddSubscriberInstancesInfo(env, subscriberInstancesInfo)) {
             ANS_LOGE("AddSubscriberInstancesInfo add failed");
+            subscriberInstancesInfo.subscriber->DeleteRef();
+            if (subscriberInstancesInfo.ref != nullptr) {
+                napi_delete_reference(env, subscriberInstancesInfo.ref);
+                subscriberInstancesInfo.ref = nullptr;
+            }
+            subscriberInstancesInfo.subscriber = nullptr;
             return nullptr;
         }
     }
