@@ -19,11 +19,9 @@
 #include "accesstoken_kit.h"
 
 namespace OHOS::Notification {
-namespace {
-int32_t g_mockTokenTypeFlag = static_cast<int32_t>(Security::AccessToken::ATokenTypeEnum::TOKEN_INVALID);
-bool g_mockVerfyPermisson = true;
-bool g_isSystemApp = true;
-}
+static int32_t g_mockTokenTypeFlag = static_cast<int32_t>(Security::AccessToken::ATokenTypeEnum::TOKEN_INVALID);
+static bool g_mockVerfyPermisson = true;
+static bool g_isSystemApp = true;
 
 void MockAccesstokenKit::MockGetTokenTypeFlag(const int32_t flag)
 {

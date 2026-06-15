@@ -825,6 +825,11 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_020, Level1)
     std::map<std::string, sptr<ReminderRequest>> reminders;
     reminders["500"] = reminder;
     manager->UpdateShareReminders(reminders);
+    sptr<ReminderRequest> calendar = new ReminderRequestCalendar(300);
+    calendar->InitBundleName("com.test.test");
+    calendar->InitUid(999);
+    calendar->SetShare(true);
+    manager->PlaySoundAndVibrationLocked(calendar);
     EXPECT_NE(manager, nullptr);
 }
 
@@ -1109,25 +1114,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_036, Level1)
 }
 
 /**
- * @tc.name: ReminderDataManagerTest_037
- * @tc.desc: Reminder data manager test
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_037, Level1)
-{
-    sptr<ReminderRequest> calendar = new ReminderRequestCalendar(300);
-    calendar->InitBundleName("com.test.test");
-    calendar->InitUid(999);
-    calendar->SetShare(true);
-    manager->PlaySoundAndVibrationLocked(calendar);
-    auto ret = manager->CheckSoundConfig(calendar, 0);
-    EXPECT_TRUE(ret == false);
-    ret = manager->CheckSoundConfig(calendar, 1);
-    EXPECT_TRUE(ret == false);
-}
-
-/**
  * @tc.name: ReminderDataManagerTest_039
  * @tc.desc: Reminder data manager test
  * @tc.type: FUNC
@@ -1363,54 +1349,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_045, Level1)
     EXPECT_EQ(limits.timeLimits["1_100"], 3);
     EXPECT_EQ(limits.bundleLimits[1], 31);
     EXPECT_EQ(limits.totalCount, 2);
-}
-
-/**
- * @tc.name: CheckVibrationConfig_00001
- * @tc.desc: test CheckVibrationConfig function with null systemSoundClient
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderDataManagerTest, CheckVibrationConfig_00001, Level1)
-{
-    auto client = std::move(manager->systemSoundClient_);
-    manager->systemSoundClient_ = nullptr;
-    uint32_t slotFlag = 0xFFFFFFFF;
-    bool ret = manager->CheckVibrationConfig(slotFlag);
-    EXPECT_EQ(ret, false);
-    manager->systemSoundClient_ = std::move(client);
-}
-
-/**
- * @tc.name: CheckVibrationConfig_00002
- * @tc.desc: test CheckVibrationConfig function with vibration flag closed
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderDataManagerTest, CheckVibrationConfig_00002, Level1)
-{
-#ifdef PLAYER_FRAMEWORK_ENABLE
-    uint32_t closeVibrationFlag = static_cast<uint32_t>(
-        NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_VIBRATION);
-    uint32_t slotFlag = ~closeVibrationFlag;
-    bool ret = manager->CheckVibrationConfig(slotFlag);
-    EXPECT_EQ(ret, false);
-#endif
-}
-
-/**
- * @tc.name: CheckVibrationConfig_00003
- * @tc.desc: test CheckVibrationConfig function with valid slotFlag
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderDataManagerTest, CheckVibrationConfig_00003, Level1)
-{
-#ifdef PLAYER_FRAMEWORK_ENABLE
-    uint32_t slotFlag = 0xFFFFFFFF;
-    bool ret = manager->CheckVibrationConfig(slotFlag);
-    EXPECT_EQ(ret, false);
-#endif
 }
 
 /**

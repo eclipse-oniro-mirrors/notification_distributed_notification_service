@@ -1557,14 +1557,17 @@ void ReminderDataManager::PlaySoundAndVibrationLocked(const sptr<ReminderRequest
         systemSoundClient_ = Media::SystemSoundManagerFactory::CreateSystemSoundManager();
     }
     SetPlayerParam(reminder);
+    bool isInDoNotDisturbMode = IsInDoNotDisturbMode(reminder->GetUserId());
     NotificationBundleOption option(reminder->GetBundleName(), reminder->GetUid());
     uint32_t slotFlag = 0;
     NotificationHelper::GetNotificationSlotFlagsAsBundle(option, slotFlag);
-    if (CheckSoundConfig(reminder, slotFlag)) {
+    int32_t isSilentEnabled = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    NotificationHelper::IsSilentReminderEnabled(option, isSilentEnabled);
+    if (CheckSoundConfig(isInDoNotDisturbMode, isSilentEnabled, slotFlag)) {
         soundPlayer_->PrepareAsync();
         soundPlayer_->Play();
     }
-    if (CheckVibrationConfig(slotFlag)) {
+    if (CheckVibrationConfig(reminder->GetUserId(), isInDoNotDisturbMode, isSilentEnabled, slotFlag)) {
         isVibration_ = true;
         StartVibration();
     }

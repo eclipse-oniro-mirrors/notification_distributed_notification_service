@@ -20,9 +20,7 @@
 #include "iservice_registry.h"
 
 namespace OHOS {
-namespace {
-bool g_mockGetSystemAbilityManagerRet = true;
-}
+static bool g_mockGetSystemAbilityManagerRet = true;
 
 namespace Notification {
 void MockServiceRegistry::MockGetSystemAbilityManager(const bool ret)

@@ -55,10 +55,6 @@ constexpr int32_t TOTAL_MAX_NUMBER_SHOW_AT_ONCE = 500;
 constexpr int32_t TOTAL_MAX_NUMBER_START_EXTENSION = 100;
 constexpr int32_t CONNECT_EXTENSION_INTERVAL = 100;
 static constexpr uint64_t VIBRATION_PERIOD = (uint64_t)1000 * 1000;  // 1000us
-static constexpr const char* USER_SETINGS_DATA_SECURE_URI =
-    "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE_";
-static constexpr const char* FOCUS_MODE_ENABLE_URI = "?Proxy=true&key=focus_mode_enable";
-static constexpr const char* FOCUS_MODE_ENABLE = "focus_mode_enable";
 static constexpr int32_t CONNECT_EXTENSION_MAX_RETRY_TIMES = 3;
 }
 
@@ -541,26 +537,45 @@ void ReminderDataManager::ReportUserDataSizeEvent()
 #endif
 }
 
-bool ReminderDataManager::CheckSoundConfig(const sptr<ReminderRequest> reminder, const uint32_t slotFlag)
+bool ReminderDataManager::IsInDoNotDisturbMode(const int32_t userId)
 {
 #ifdef PLAYER_FRAMEWORK_ENABLE
-    uint32_t closeSoundFlag = static_cast<uint32_t>(
-        NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_SOUND);
-    if (!(slotFlag & closeSoundFlag)) {
-        ANSR_LOGE("Application sound flag is close.");
-        return false;
-    }
-    std::string uriStr = USER_SETINGS_DATA_SECURE_URI + std::to_string(reminder->GetUserId())
-        + FOCUS_MODE_ENABLE_URI;
+    constexpr const char* USER_SETINGS_DATA_SECURE_URI =
+        "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE_";
+    constexpr const char* FOCUS_MODE_ENABLE_URI = "?Proxy=true&key=focus_mode_enable";
+    constexpr const char* FOCUS_MODE_ENABLE = "focus_mode_enable";
+    std::string uriStr = USER_SETINGS_DATA_SECURE_URI + std::to_string(userId) + FOCUS_MODE_ENABLE_URI;
     Uri enableUri(uriStr);
     std::string enable;
     bool ret = ReminderDataShareHelper::GetInstance().Query(enableUri, FOCUS_MODE_ENABLE, enable);
     if (!ret) {
         ANSR_LOGE("Query focus mode enable failed.");
-        return false;
+        return true;
     }
     if (enable.compare("1") == 0) {
         ANSR_LOGI("Currently not is do not disurb mode.");
+        return true;
+    }
+#endif
+    return false;
+}
+
+bool ReminderDataManager::CheckSoundConfig(const bool isInDoNotDisturbMode, const int32_t isSilentEnabled,
+    const uint32_t slotFlag)
+{
+#ifdef PLAYER_FRAMEWORK_ENABLE
+    if (isInDoNotDisturbMode) {
+        return false;
+    }
+    if (isSilentEnabled == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) ||
+        isSilentEnabled == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+        ANSR_LOGW("The application has enabled silent notifications.");
+        return false;
+    }
+    uint32_t closeSoundFlag = static_cast<uint32_t>(
+        NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_SOUND);
+    if (!(slotFlag & closeSoundFlag)) {
+        ANSR_LOGE("Application sound flag is close.");
         return false;
     }
 #endif
@@ -585,9 +600,49 @@ void ReminderDataManager::StartVibration()
 #endif
 }
 
-bool ReminderDataManager::CheckVibrationConfig(const uint32_t slotFlag)
+bool ReminderDataManager::GetSettingsData(const int32_t userId)
 {
 #ifdef PLAYER_FRAMEWORK_ENABLE
+    constexpr const char* USER_SETINGS_DATA_URI =
+        "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_";
+    constexpr const char* VIBRATE_ENABLE_URI = "?Proxy=true&key=hw_vibrate_when_ringing";
+    constexpr const char* VIBRATE_ENABLE = "hw_vibrate_when_ringing";
+    std::string uriStr = USER_SETINGS_DATA_URI + std::to_string(userId) + VIBRATE_ENABLE_URI;
+    Uri enableUri(uriStr);
+    std::string enable;
+    bool ret = ReminderDataShareHelper::GetInstance().Query(enableUri, VIBRATE_ENABLE, enable);
+    if (!ret) {
+        ANSR_LOGE("Query vibrate enable failed.");
+        return false;
+    }
+    if (enable.compare("0") == 0) {
+        ANSR_LOGI("Vibrate enable value is 0.");
+        return false;
+    }
+#endif
+    return true;
+}
+
+bool ReminderDataManager::CheckVibrationConfig(const int32_t userId, const bool isInDoNotDisturbMode,
+    const int32_t isSilentEnabled, const uint32_t slotFlag)
+{
+#ifdef PLAYER_FRAMEWORK_ENABLE
+    // 免打扰开关
+    if (isInDoNotDisturbMode) {
+        return false;
+    }
+    // 静默通知开关
+    if (isSilentEnabled == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) ||
+        isSilentEnabled == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+        ANSR_LOGW("The application has enabled silent notifications.");
+        return false;
+    }
+    // 响铃时振动开关
+    bool vibrateSettingEnable = GetSettingsData(userId);
+    if (!vibrateSettingEnable) {
+        return false;
+    }
+    // 振动配置信息
     if (systemSoundClient_ == nullptr) {
         return false;
     }
