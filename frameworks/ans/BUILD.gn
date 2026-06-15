@@ -226,6 +226,7 @@ ohos_source_set("ans_manager_stub") {
     cfi_cross_dso = true
     debug = false
   }
+  branch_protector_ret = "pac_ret"
   public_configs = [ ":ans_innerkits_config" ]
   output_values = get_target_outputs(":ans_manager_interface")
   sources = filter_include(output_values, [ "*ans_manager_stub.cpp" ])
@@ -261,6 +262,7 @@ ohos_source_set("ans_manager_proxy") {
     cfi_cross_dso = true
     debug = false
   }
+  branch_protector_ret = "pac_ret"
   public_configs = [ ":ans_innerkits_config" ]
   output_values = get_target_outputs(":ans_manager_interface")
   sources = filter_include(output_values, [ "*ans_manager_proxy.cpp" ])
@@ -296,6 +298,7 @@ ohos_source_set("ans_callback_proxy") {
     cfi_cross_dso = true
     debug = false
   }
+  branch_protector_ret = "pac_ret"
   public_configs = [ ":ans_innerkits_config" ]
   output_values = get_target_outputs(":ans_manager_interface")
   sources = filter_include(output_values,
@@ -340,6 +343,7 @@ ohos_source_set("ans_callback_stub") {
     cfi_cross_dso = true
     debug = false
   }
+  branch_protector_ret = "pac_ret"
   public_configs = [ ":ans_innerkits_config" ]
   output_values = get_target_outputs(":ans_manager_interface")
   sources = filter_include(output_values,

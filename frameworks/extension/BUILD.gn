@@ -37,6 +37,7 @@ ohos_source_set("notification_subscriber_proxy") {
     cfi_cross_dso = true
     debug = false
   }
+  branch_protector_ret = "pac_ret"
   public_configs = [ ":notification_subscriber_ipc_public_config" ]
   output_values = get_target_outputs(":notification_subscriber_interface")
   sources = filter_include(output_values, [ "*_proxy.cpp" ])
@@ -64,6 +65,7 @@ ohos_source_set("notification_subscriber_stub") {
     cfi_cross_dso = true
     debug = false
   }
+  branch_protector_ret = "pac_ret"
   public_configs = [ ":notification_subscriber_ipc_public_config" ]
   output_values = get_target_outputs(":notification_subscriber_interface")
   sources = filter_include(output_values, [ "*_stub.cpp" ])
