@@ -37,7 +37,7 @@ class PriorityManagerServiceTest : public testing::Test {
 public:
     static void SetUpTestCase() {}
     static void TearDownTestCase() {}
-    void SetUp()
+    void SetUp() override
     {
         MockIsVerfyPermisson(true);
         MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);

@@ -111,6 +111,8 @@ void AnsPublishServiceTest::SetUp()
 
 void AnsPublishServiceTest::TearDown()
 {
+    constexpr int sleepMs = 500;
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
     delete advancedNotificationService_;
     advancedNotificationService_ = nullptr;
     GTEST_LOG_(INFO) << "TearDown";
