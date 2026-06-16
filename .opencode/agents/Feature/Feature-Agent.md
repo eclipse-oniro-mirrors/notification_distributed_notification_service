@@ -696,7 +696,7 @@ permission:
        - files_changed: [<所有任务修改文件的并集>]
        - test_commands: [<编译/测试命令并集>]
 
-     Build 子代理使用 openharmony-build skill 执行真实编译:
+      Build 子代理使用 build skill 执行真实编译:
      - 确定编译命令（优先使用 test_commands 并集，否则按文件变更推断）
      - 检查快速重建条件（BUILD.gn 变更时禁止 --fast-rebuild）
      - 执行编译并记录结果
