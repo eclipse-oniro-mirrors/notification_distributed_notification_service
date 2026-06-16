@@ -210,7 +210,7 @@ HWTEST_F(HealthWhiteListUtilTest, AddExtendFlagForRequest_500, Function | SmallT
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetOwnerBundleName("testBundleName");
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    shared_ptr<AAFwk::WantParams> extendInfo = std::make_shared<AAFwk::WantParams>();
+    std::shared_ptr<AAFwk::WantParams> extendInfo = std::make_shared<AAFwk::WantParams>();
     request->SetExtendInfo(extendInfo);
     sptr<Notification> notification = new Notification(request);
     notifications.push_back(notification);
