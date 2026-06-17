@@ -75,7 +75,11 @@ sptr<AdvancedNotificationService> AnsBranchTest::advancedNotificationService_ = 
 
 void AnsBranchTest::SetUpTestCase() {}
 
-void AnsBranchTest::TearDownTestCase() {}
+void AnsBranchTest::TearDownTestCase()
+{
+    constexpr int sleepMs = 1000;
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
+}
 
 void AnsBranchTest::SetUp()
 {

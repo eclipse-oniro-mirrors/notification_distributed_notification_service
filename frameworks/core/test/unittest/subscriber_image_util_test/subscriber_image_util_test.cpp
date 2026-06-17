@@ -52,7 +52,7 @@ public:
     
     static void TearDownTestCase() {}
     
-    void SetUp()
+    void SetUp() override
     {
         OHOS::Notification::Mock::MockResetImageNativeState();
         OHOS::AbilityRuntime::Mock::MockResetApplicationContextState();
@@ -62,7 +62,7 @@ public:
         cacheManager->RemoveCache("test_request2");
     }
     
-    void TearDown()
+    void TearDown() override
     {
         OHOS::Notification::Mock::MockResetImageNativeState();
         OHOS::AbilityRuntime::Mock::MockResetApplicationContextState();

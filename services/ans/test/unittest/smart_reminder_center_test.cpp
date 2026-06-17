@@ -38,7 +38,11 @@ public:
     ~SmartReminderCenterTest()
     {}
     static void SetUpTestCas(void) {};
-    static void TearDownTestCase(void) {};
+    static void TearDownTestCase(void)
+    {
+        constexpr int sleepMs = 1000;
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
+    }
     void SetUp();
     void TearDown() {};
 public:

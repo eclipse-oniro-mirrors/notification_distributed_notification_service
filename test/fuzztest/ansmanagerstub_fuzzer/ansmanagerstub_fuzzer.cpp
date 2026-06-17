@@ -322,7 +322,9 @@ namespace OHOS {
         sptr<Notification::ISwingCallBack> swingCallBack = new Notification::SwingCallBackProxy(nullptr);
         service->RegisterSwingCallback(swingCallBack->AsObject());
 #endif
-
+        service->SelfClean();
+        constexpr int sleepMs = 1000;
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
         return true;
     }
 }

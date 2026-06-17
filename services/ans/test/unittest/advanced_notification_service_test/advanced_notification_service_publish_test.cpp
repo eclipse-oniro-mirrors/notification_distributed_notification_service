@@ -108,6 +108,8 @@ void AdvancedNotificationServiceTest::SetUp()
 void AdvancedNotificationServiceTest::TearDown()
 {
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
+    constexpr int sleepMs = 500;
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
     advancedNotificationService_ = nullptr;
     GTEST_LOG_(INFO) << "TearDown";
 }

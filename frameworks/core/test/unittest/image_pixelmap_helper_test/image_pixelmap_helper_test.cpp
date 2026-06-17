@@ -44,7 +44,7 @@ public:
     
     static void TearDownTestCase() {}
     
-    void SetUp()
+    void SetUp() override
     {
         AbilityRuntime::Mock::MockResetApplicationContextState();
         AbilityRuntime::Mock::MockResetCreateBundleContextState();
@@ -53,7 +53,7 @@ public:
         Notification::Mock::MockResetImageNativeState();
     }
     
-    void TearDown()
+    void TearDown() override
     {
         AbilityRuntime::Mock::MockResetApplicationContextState();
         AbilityRuntime::Mock::MockResetCreateBundleContextState();

@@ -29,7 +29,11 @@ namespace Notification {
 class NotificationPreferencesTest : public testing::Test {
 public:
     static void SetUpTestCase(){};
-    static void TearDownTestCase() {}
+    static void TearDownTestCase()
+    {
+        constexpr int sleepMs = 1000;
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
+    }
     void SetUp(){};
     void TearDown(){};
 };
