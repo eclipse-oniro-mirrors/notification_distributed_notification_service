@@ -2197,6 +2197,7 @@ ohos_unittest("notification_preferences_test") {
   }
 
   external_deps = [
+    "ability_runtime:dataobs_manager",
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:abilitykit_native",
@@ -3064,6 +3065,7 @@ ohos_unittest("advanced_datashare_observer_unit_test") {
   ]
 
   external_deps = [
+    "ability_runtime:dataobs_manager",
     "c_utils:utils",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
@@ -3205,6 +3207,7 @@ ohos_unittest("advanced_notification_service_unit_test") {
   }
 
   external_deps = [
+    "ability_runtime:dataobs_manager",
     "ability_base:configuration",
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
