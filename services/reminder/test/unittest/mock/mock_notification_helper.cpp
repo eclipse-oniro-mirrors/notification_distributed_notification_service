@@ -19,13 +19,11 @@
 #include "common_event_manager.h"
 
 namespace OHOS {
-namespace {
-bool g_mockIsAllowUseReminder = true;
-bool g_mockIsAllowedNotify = true;
-bool g_mockSubscribeCommonEventRet = true;
-int32_t g_mockIsAllowedNotifyRet = 0;
-int32_t g_mockSubscribeNotificationRet = 0;
-}
+static bool g_mockIsAllowUseReminder = true;
+static bool g_mockIsAllowedNotify = true;
+static bool g_mockSubscribeCommonEventRet = true;
+static int32_t g_mockIsAllowedNotifyRet = 0;
+static int32_t g_mockSubscribeNotificationRet = 0;
 
 namespace Notification {
 void MockNotificationHelper::MockIsAllowUseReminder(const bool isAllowUseReminder)

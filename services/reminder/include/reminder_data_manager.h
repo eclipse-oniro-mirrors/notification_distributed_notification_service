@@ -539,10 +539,11 @@ private:
     void PlaySoundAndVibrationLocked(const sptr<ReminderRequest>& reminder);
     void StopSoundAndVibrationLocked(const sptr<ReminderRequest>& reminder);
     void SetAlertingReminder(const sptr<ReminderRequest>& reminder);
+    bool IsInDoNotDisturbMode(const int32_t userId);
     // sound
     std::string GetFullPath(const std::string& path);
     void SetPlayerParam(const sptr<ReminderRequest> reminder);
-    bool CheckSoundConfig(const sptr<ReminderRequest> reminder, const uint32_t slotFlag);
+    bool CheckSoundConfig(const bool isInDoNotDisturbMode, const int32_t isSilentEnabled, const uint32_t slotFlag);
     int32_t ConvertRingChannel(ReminderRequest::RingChannel channel);
 
     /**
@@ -558,7 +559,9 @@ private:
 
     // vibration
     void StartVibration();
-    bool CheckVibrationConfig(const uint32_t slotFlag);
+    bool GetSettingsData(const int32_t userId);
+    bool CheckVibrationConfig(const int32_t userId, const bool isInDoNotDisturbMode,
+        const int32_t isSilentEnabled, const uint32_t slotFlag);
 
     /**
      * Remove from showed reminder vector.

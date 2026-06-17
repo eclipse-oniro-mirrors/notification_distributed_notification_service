@@ -18,12 +18,10 @@
 #include "reminder_bundle_manager_helper.h"
 
 namespace OHOS::Notification {
-namespace {
-bool g_mockGetBundleInfoRet = false;
-int32_t g_mockGetDefaultUidByBundleNameRet = 0;
-std::string g_mockGetBundleNameByUidRet;
-AppExecFwk::BundleInfo g_mockBundleInfo;
-}
+static bool g_mockGetBundleInfoRet = false;
+static int32_t g_mockGetDefaultUidByBundleNameRet = 0;
+static std::string g_mockGetBundleNameByUidRet;
+static AppExecFwk::BundleInfo g_mockBundleInfo;
 
 void MockReminderBundleManagerHelper::MockGetBundleNameByUid(const std::string& ret)
 {

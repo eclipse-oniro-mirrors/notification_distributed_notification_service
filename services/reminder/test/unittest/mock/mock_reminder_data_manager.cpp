@@ -18,19 +18,17 @@
 #include "reminder_data_manager.h"
 
 namespace OHOS::Notification {
-namespace {
-int32_t g_mockPublishReminderRet = 0;
-int32_t g_mockUpdateReminderRet = 0;
-int32_t g_mockCancelReminderRet = 0;
-int32_t g_mockCancelAllRemindersRet = 0;
-int32_t g_mockCancelReminderOnDisplayRet = 0;
-int32_t g_mockAddExcludeDateRet = 0;
-int32_t g_mockDelExcludeDatesRet = 0;
-int32_t g_mockGetExcludeDatesRet = 0;
-int32_t g_mockQueryActiveReminderCountRet = 0;
-int32_t g_mockRegisterReminderStateRet = 0;
-int32_t g_mockUnRegisterReminderStateRet = 0;
-}
+static int32_t g_mockPublishReminderRet = 0;
+static int32_t g_mockUpdateReminderRet = 0;
+static int32_t g_mockCancelReminderRet = 0;
+static int32_t g_mockCancelAllRemindersRet = 0;
+static int32_t g_mockCancelReminderOnDisplayRet = 0;
+static int32_t g_mockAddExcludeDateRet = 0;
+static int32_t g_mockDelExcludeDatesRet = 0;
+static int32_t g_mockGetExcludeDatesRet = 0;
+static int32_t g_mockQueryActiveReminderCountRet = 0;
+static int32_t g_mockRegisterReminderStateRet = 0;
+static int32_t g_mockUnRegisterReminderStateRet = 0;
 
 bool MockReminderDataManager::callCancelAllReminders_ = false;
 bool MockReminderDataManager::callRefreshRemindersDueToSysTimeChange_ = false;
