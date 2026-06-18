@@ -661,7 +661,7 @@ void AdvancedNotificationService::GenerateSlotReminderMode(const sptr<Notificati
     }
 
     std::string bundleName = (bundle == nullptr) ? "" : bundle->GetBundleName();
-    ANS_LOGI("The reminder mode of %{public}d is %{public}d in %{public}s,specifiedSlot:%{public}d default:%{public}u",
+    ANS_LOGI("slotMode type=%{public}d mode=%{public}d bundle=%{public}s,%{public}d,%{public}u",
         slot->GetType(), slot->GetReminderMode(), bundleName.c_str(), isSpecifiedSlot, defaultSlotFlags);
 }
 
@@ -690,7 +690,7 @@ void UpdateScreenReminderFlag(uint32_t& slotReminderMode, NotificationConstant::
     uint32_t config = DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(type);
     uint32_t lightBit = (config & NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG);
     slotReminderMode |=  lightBit;
-    ANS_LOGI("Update screen: %{public}d, %{public}d, %{public}d, %{public}d, %{public}d.",
+    ANS_LOGI("UpdateScreen:%{public}d,%{public}d,%{public}d,%{public}d,%{public}d.",
         type, config, before, lightBit, slotReminderMode);
 }
 
@@ -765,8 +765,6 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     } else {
         request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG, false);
     }
-    ANS_LOGI("SetFlags-init,Key=%{public}s flags=%{public}d",
-        request->GetBaseKey("").c_str(), request->GetFlags()->GetReminderFlags());
     HandleFlagsWithRequest(request, bundleOption);
 }
 
@@ -776,8 +774,6 @@ void AdvancedNotificationService::HandleFlagsWithRequest(const sptr<Notification
     NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     if (request->IsCommonLiveView()) {
         Infra::ALL_SCENARIOS_EXTENTION_WRAPPER.UpdateLiveviewReminderFlags(request);
-        ANS_LOGI("SetFlags- UpdateLiveviewReminderFlags Key=%{public}s flags = %{public}d",
-            request->GetBaseKey("").c_str(), request->GetFlags()->GetReminderFlags());
         Infra::ALL_SCENARIOS_EXTENTION_WRAPPER.UpdateLiveviewVoiceContent(request);
     } else if (!request->IsSystemLiveView()) {
         NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
@@ -789,7 +785,7 @@ void AdvancedNotificationService::HandleFlagsWithRequest(const sptr<Notification
             request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false, unAffectDevices);
         }
     }
-    ANS_LOGI("SetFlags- HandleFlag Key=%{public}s flags = %{public}d class = %{public}s silent = %{public}d",
+    ANS_LOGI("SetFlags key=%{public}s flags=%{public}d cls=%{public}s silent=%{public}d",
         request->GetBaseKey("").c_str(), request->GetFlags()->GetReminderFlags(),
         request->GetClassification().c_str(), enableStatus);
     if (request->GetClassification() == NotificationConstant::ANS_VOIP &&
@@ -1418,7 +1414,7 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
         result = NotificationPreferences::GetInstance()->SetKvToDb(key, value, SUBSCRIBE_USER_INIT);
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set addition config.");
-    ANS_LOGI("Set addition config result: %{public}d, key: %{public}s.", result, key.c_str());
+    ANS_LOGI("addCfg ret=%{public}d key=%{public}s", result, key.c_str());
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;

@@ -2083,7 +2083,7 @@ void AdvancedNotificationService::CloseAlert(const std::shared_ptr<NotificationR
     record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
     record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
     record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
-    ANS_LOGI("SetFlags-CloseAlert, Key=%{public}s flags = %{public}d",
+    ANS_LOGI("closeAlert key=%{public}s flags=%{public}d",
         record->request->GetBaseKey("").c_str(),
         record->request->GetFlags()->GetReminderFlags());
 }

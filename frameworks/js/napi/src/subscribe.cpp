@@ -547,9 +547,9 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
     }
     SubscriberImageUtil::ProcessPictureOption(request, GetPictureOption());
     auto notificationFlags = request->GetNotificationRequest().GetFlags();
-    ANS_LOGI("OnConsume key=%{public}s,sortingMap size=%{public}zu,notificationFlag=%{public}s",
+    ANS_LOGI("onConsume key=%{public}s n=%{public}zu flags=%{public}d",
         request->GetKey().c_str(), sortingMap->GetKey().size(),
-        notificationFlags == nullptr ? "null" : notificationFlags->Dump().c_str());
+        notificationFlags == nullptr ? -1 : static_cast<int>(notificationFlags->GetReminderFlags()));
     ANS_LOGD("OnConsumed instanceKey: %{public}s", request->GetInstanceKey().c_str());
 
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
@@ -1232,8 +1232,8 @@ void SubscriberInstance::OnBadgeChanged(
         ANS_LOGE("null dataWorker");
         return;
     }
-    ANS_LOGI("BadgeChanged bundle:%{public}s,uid:%{public}d,badgeNum:%{public}d", badgeData->GetBundle().c_str(),
-        badgeData->GetUid(), badgeData->GetBadgeNumber());
+    ANS_LOGI("badgeChg %{public}s uid=%{public}d n=%{public}d",
+        badgeData->GetBundle().c_str(), badgeData->GetUid(), badgeData->GetBadgeNumber());
     dataWorker->badge = *badgeData;
     dataWorker->type = Type::BADGE_CHANGED;
     dataWorker->subscriber = std::static_pointer_cast<SubscriberInstance>(shared_from_this());

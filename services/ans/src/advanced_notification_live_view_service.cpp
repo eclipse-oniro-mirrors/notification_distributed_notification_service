@@ -402,7 +402,7 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
     }
 
     if (content->GetIsOnlyLocalUpdate()) {
-        ANS_LOGI("Not saving notification request to db for common live view with isOnlyLocalUpdate set to true.");
+        ANS_LOGI("skipDb in localUpdate");
         return ERR_OK;
     }
     if (content->GetRemoveOnProcessExitState() ==

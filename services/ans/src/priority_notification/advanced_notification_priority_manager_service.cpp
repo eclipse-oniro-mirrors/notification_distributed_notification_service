@@ -431,8 +431,7 @@ ErrCode AdvancedNotificationService::GetPriorityEnabledByBundles(
         priorityEnable[bundleOption] = (priorityStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
             priorityStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     }
-    ANS_LOGI("GetPriorityEnabledByBundles result %{public}d, priorityEnable size: %{public}d.",
-        result, static_cast<int32_t>(priorityEnable.size()));
+    ANS_LOGI("prioEn ret=%{public}d n=%{public}d", result, static_cast<int32_t>(priorityEnable.size()));
     return result;
 }
 
@@ -507,8 +506,7 @@ ErrCode AdvancedNotificationService::GetPriorityStrategyByBundles(
         result = ERR_OK;
         strategies[bundleOption] = strategy;
     }
-    ANS_LOGI("GetPriorityStrategyByBundles result %{public}d, strategies size: %{public}d.",
-        result, static_cast<int32_t>(strategies.size()));
+    ANS_LOGI("prioStgy ret=%{public}d n=%{public}d", result, static_cast<int32_t>(strategies.size()));
     return result;
 }
 

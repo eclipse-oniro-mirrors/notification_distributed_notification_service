@@ -57,7 +57,7 @@ ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, 
             }
         }
         deviceStatus_.EnsureInsert(WEARABLE, wearableStatus);
-        ANS_LOGI("update lite wearable status %{public}u %{public}u", wearableStatus, status);
+        ANS_LOGI("liteWearStat:%{public}u", wearableStatus);
     }
     deviceStatus_.EnsureInsert(deviceType, oldStatus);
 
@@ -66,7 +66,7 @@ ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, 
         NotificationSubscriberManager::GetInstance()->NotifyEnabledWatchChanged(watchState);
     }
 
-    ANS_LOGI("update %{public}s status %{public}u %{public}u", deviceType.c_str(), oldStatus, status);
+    ANS_LOGI("devStUpdate %{public}s %{public}u %{public}u", deviceType.c_str(), oldStatus, status);
     return ERR_OK;
 }
 

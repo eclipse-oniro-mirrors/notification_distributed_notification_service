@@ -774,7 +774,7 @@ napi_value NapiGetPriorityStrategyByBundles(napi_env env, napi_callback_info inf
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::GetPriorityStrategyByBundles(
                     asynccallbackinfo->bundles, asynccallbackinfo->priorityStrategy);
-                ANS_LOGI("GetPriorityStrategyByBundles errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+                ANS_LOGI("prioStrategyCb ret=%{public}d", asynccallbackinfo->info.errorCode);
             }
         },
         AsyncCompleteCallbackNapiGetPriorityStrategyByBundles,

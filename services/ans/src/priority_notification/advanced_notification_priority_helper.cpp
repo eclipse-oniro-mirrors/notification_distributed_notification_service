@@ -40,7 +40,6 @@ void AdvancedNotificationPriorityHelper::UpdatePriorityType(const sptr<Notificat
         ANS_LOGE("UpdatePriorityType request is nullptr");
         return;
     }
-    ANS_LOGI("priorityNotificationType: %{public}s", request->GetPriorityNotificationType().c_str());
     if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW || IsCollaborationNotification(request)) {
         return;
     }
@@ -50,7 +49,7 @@ void AdvancedNotificationPriorityHelper::UpdatePriorityType(const sptr<Notificat
     RefreshPriorityType(cmd, { request }, results);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_27);
     for (int32_t result : results) {
-        ANS_LOGI("UpdateNotification cmd: %{public}s, code: %{public}d, priorityType: %{public}s",
+        ANS_LOGI("prioUpdate cmd=%{public}s code=%{public}d type=%{public}s",
             cmd.c_str(), result, request->GetPriorityNotificationType().c_str());
         if (result == NOTIFICATION_AI_EXTENSION_WRAPPER->ErrorCode::ERR_OK) {
             continue;

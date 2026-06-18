@@ -531,8 +531,9 @@ AnsStatus AdvancedNotificationService::PrepareNotificationInfo(
         return AnsStatus(ERR_ANS_INVALID_BUNDLE, "bundleoption null");
     }
     SetClassificationWithVoip(request);
-    ANS_LOGI("prepareNotificationInfo bundleName=%{public}s,uid=%{public}d",
-        bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
+    ANS_LOGI("prepNtf %{public}s uid=%{public}d cls=%{public}s",
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(),
+        request->GetClassification().c_str());
 
     SetRequestBySlotType(request, bundleOption);
     SetVersionCodeToExtendInfo(request);
@@ -808,7 +809,7 @@ AnsStatus __attribute__((weak)) AdvancedNotificationService::PublishPreparedNoti
     bool isSilent = enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
         enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
     EXTENTION_WRAPPER->HandlePrivilegeMessage(bundleOption, request, isAgentController, isSilent);
-    ANS_LOGI("SetFlags- HandlePrivilege Key = %{public}s flags = %{public}d",
+    ANS_LOGI("handlePriv key=%{public}s flags=%{public}d",
         request->GetBaseKey("").c_str(), request->GetFlags()->GetReminderFlags());
 #endif
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1);
@@ -941,7 +942,7 @@ void AdvancedNotificationService::QueryDoNotDisturbProfile(const int32_t &userId
         return;
     }
     if (enable != DO_NOT_DISTURB_MODE) {
-        ANS_LOGI("Currently not is do not disturb mode");
+        ANS_LOGI("notDndMode");
         return;
     }
     Uri idUri(datashareHelper->GetFocusModeProfileUri(userId));
@@ -2561,7 +2562,6 @@ void AdvancedNotificationService::SetClassificationWithVoip(const sptr<Notificat
         return;
     }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
-        ANS_LOGI("set classification empty");
         request->SetClassification("");
         return;
     }

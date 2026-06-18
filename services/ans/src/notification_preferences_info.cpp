@@ -804,7 +804,7 @@ bool NotificationPreferencesInfo::GetUserDisableNotificationInfo(
         notificationDisable.SetDisabled(itr->second.disabled);
         notificationDisable.SetBundleList(itr->second.bundleList);
     } else {
-        ANS_LOGE("userDisableNotificationInfo not found for userId: %{public}d", userId);
+        ANS_LOGE("getUserDisableInfo userId=%{public}d notFound", userId);
         return false;
     }
     return true;

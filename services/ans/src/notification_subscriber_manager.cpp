@@ -1110,7 +1110,7 @@ sptr<Notification> NotificationSubscriberManager::GenerateSubscribedNotification
         auto flagIter = flagsMap->find(deviceType);
         if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
             request->SetFlags(flagIter->second);
-            ANS_LOGI("SetFlags-final,key=%{public}s flags= %{public}d deviceType:%{public}s",
+            ANS_LOGI("flagsFinal key=%{public}s flags=%{public}d dev=%{public}s",
                 request->GetBaseKey("").c_str(), request->GetFlags()->GetReminderFlags(), deviceType.c_str());
         }
     }
@@ -1160,7 +1160,7 @@ bool NotificationSubscriberManager::IsSubscribedByDeviceType(const std::shared_p
     if (deviceType.size() <= 0 || deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
         return true;
     }
-    ANS_LOGE("Cannot find deviceFlags,notificationKey = %{public}s, deviceType: %{public}s, bundle:%{public}s.",
+    ANS_LOGE("noDevFlags key=%{public}s dev=%{public}s bundle=%{public}s",
         request->GetBaseKey("").c_str(), deviceType.c_str(), record->subscriberBundleName_.c_str());
     return false;
 #else

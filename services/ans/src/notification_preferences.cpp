@@ -3199,7 +3199,7 @@ bool NotificationPreferences::IsKioskMode()
     AAFwk::KioskStatus kioskStatus;
     auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetKioskStatus(kioskStatus));
     if (ret != ERR_OK) {
-        ANS_LOGE("Get KioskStatus failed");
+        ANS_LOGE("kioskStaFail");
         return isKioskMode_;
     }
     isKioskMode_ = kioskStatus.isKioskMode_;

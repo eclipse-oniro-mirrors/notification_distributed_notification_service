@@ -616,7 +616,7 @@ napi_value NapiSetDistributedEnabledBySlot(napi_env env, napi_callback_info info
                     asynccallbackinfo->params.slot,
                     asynccallbackinfo->params.deviceType,
                     asynccallbackinfo->params.enable);
-                ANS_LOGI("set distributedEnabledBySlot code=%{public}d", asynccallbackinfo->info.errorCode);
+                ANS_LOGI("distSlotCb ret=%{public}d", asynccallbackinfo->info.errorCode);
             }
         },
         AsyncCompleteCallbackNapiSetDistributedEnabledBySlot,
