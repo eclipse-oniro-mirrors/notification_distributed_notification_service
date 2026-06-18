@@ -1,7 +1,7 @@
 ---
 name: openharmony-build
-description: Use for OpenHarmony build execution and diagnosis, including 编译OpenHarmony/完整代码/测试/SDK/host/最小模拟器/全量模拟器/部件独立编译/测试列表, plus full product builds, targeted component/test builds, fast rebuilds, hb independent builds, and build.log failure analysis.
-version: 0.9.0
+description: Use for OpenHarmony build execution and diagnosis, including 编译OpenHarmony/完整代码/测试/SDK/host/最小模拟器/全量模拟器/部件独立编译/测试列表, plus full product builds, targeted component/test builds, fast rebuilds, hb independent builds, background builds with progress polling, and build.log failure analysis.
+version: 1.0.0
 ---
 
 # OpenHarmony Build Skill
@@ -83,6 +83,24 @@ Helper:
 ```bash
 bash <skill-dir>/scripts/check_fast_rebuild.sh 30 "$OH_ROOT"
 ```
+
+## Background Build
+
+For long-running builds, use background execution with progress polling:
+
+```bash
+# Start build in background
+bash <skill-dir>/scripts/start_background_build.sh <product> "$OH_ROOT" <build_command>
+
+# Poll for completion with adaptive delay (10s-300s based on progress)
+bash <skill-dir>/scripts/poll_build.sh <product> "$OH_ROOT" [max_wait_seconds]
+```
+
+The `poll_build.sh` script:
+- Parses ninja progress `[current/total]` from build log
+- Uses adaptive delay: 300s at start, decreasing to 10s near completion
+- Returns exit codes: 0=success, 1=failed, 2=timeout, 3=process not found
+- Default timeout: 7200s (120 minutes)
 
 ## Independent Component Build
 
@@ -175,6 +193,8 @@ Scripts:
 - `scripts/find_recent_errors.sh`: quick recent error scan.
 - `scripts/check_fast_rebuild.sh`: decide whether `--fast-rebuild` is appropriate.
 - `scripts/build_test_list.sh`: build targets listed in `unittest_targets.txt`.
+- `scripts/start_background_build.sh`: launch build in background with PID tracking.
+- `scripts/poll_build.sh`: poll build progress with adaptive delay (10s-300s).
 
 References:
 
