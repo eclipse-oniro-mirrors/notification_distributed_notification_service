@@ -24,7 +24,7 @@ namespace Notification {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
         auto service = AdvancedNotificationService::GetInstance();
-        bool enabled;
+        bool enabled = fuzzData->ConsumeBool();
         service->IsGeofenceEnabled(enabled);
         return true;
     }

@@ -28,6 +28,7 @@ namespace OHOS {
         std::make_shared<Notification::NotificationNormalContent>();
         std::shared_ptr<Notification::NotificationLongTextContent> longTextContent =
         std::make_shared<Notification::NotificationLongTextContent>();
+        longTextContent->SetLongText(fdp->ConsumeRandomLengthString());
         std::shared_ptr<Notification::NotificationPictureContent> pictureContent =
         std::make_shared<Notification::NotificationPictureContent>();
         Notification::NotificationContent notificationContent(normalContent);

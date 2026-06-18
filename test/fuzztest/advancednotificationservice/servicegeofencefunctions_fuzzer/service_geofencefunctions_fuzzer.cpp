@@ -112,7 +112,7 @@ namespace {
         service->OnNotifyDelayedNotificationInner(parameter, record);
     }
 
-    void CallRecordRelatedFunctions(FuzzedDataProvider *fuzzData,
+    void CallRecordRelatedFunctions(
         const std::shared_ptr<NotificationRecord> &record,
         const sptr<AdvancedNotificationService> &service)
     {
@@ -122,7 +122,7 @@ namespace {
         service->TriggerNotificationRecordFilter(record);
     }
 
-    void CallRequestRelatedFunctions(FuzzedDataProvider *fuzzData,
+    void CallRequestRelatedFunctions(
         const sptr<NotificationRequest> &request,
         const sptr<NotificationBundleOption> bundleOption,
         const sptr<AdvancedNotificationService> &service)
@@ -182,8 +182,8 @@ namespace {
         auto isUpdateByOwner = fuzzData->ConsumeBool();
         service->GeneratePublishNotificationParameter(request, bundleOption, isUpdateByOwner, outParameter);
         CallParameterRelatedFunctions(fuzzData, record, service);
-        CallRecordRelatedFunctions(fuzzData, record, service);
-        CallRequestRelatedFunctions(fuzzData, request, bundleOption, service);
+        CallRecordRelatedFunctions(record, service);
+        CallRequestRelatedFunctions(request, bundleOption, service);
         service->SelfClean();
         return true;
     }

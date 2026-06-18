@@ -26,6 +26,7 @@ namespace OHOS {
     {
         std::shared_ptr<Notification::NotificationBasicContent> notificationBasicContent =
             std::make_shared<Notification::NotificationBasicContent>();
+        notificationBasicContent->SetText(fdp->ConsumeRandomLengthString());
         // test GetAdditionalText function
         notificationBasicContent->GetAdditionalText();
         // test GetText function

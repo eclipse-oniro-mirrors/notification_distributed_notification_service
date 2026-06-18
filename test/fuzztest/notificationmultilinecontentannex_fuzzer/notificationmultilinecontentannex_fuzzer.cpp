@@ -25,6 +25,7 @@ namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
         Notification::NotificationMultiLineContent notificationMultiLineContent;
+        notificationMultiLineContent.SetExpandedTitle(fdp->ConsumeRandomLengthString());
         nlohmann::json jsonObject;
         notificationMultiLineContent.ToJson(jsonObject);
         notificationMultiLineContent.FromJson(jsonObject);

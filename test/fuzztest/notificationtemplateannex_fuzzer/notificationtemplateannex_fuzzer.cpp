@@ -26,6 +26,7 @@ namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
         Notification::MessageUser messageUser;
+        messageUser.SetKey(fdp->ConsumeRandomLengthString());
         Notification::NotificationConversationalContent NotificationConversationalContent(messageUser);
         return true;
     }

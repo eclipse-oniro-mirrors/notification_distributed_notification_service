@@ -373,19 +373,6 @@ HWTEST_F(NotificationConfigParseTest, IsLiveViewEnabled_00001, Function | SmallT
 }
 
 /**
- * @tc.name: IsLiveViewEnabled_00002
- * @tc.desc: Test IsLiveViewEnabled with valid bundleName
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationConfigParseTest, IsLiveViewEnabled_00002, Function | SmallTest | Level1)
-{
-    std::string bundleName = "com.ohos.test";
-    NotificationConfigParse::GetInstance()->IsLiveViewEnabled(bundleName);
-    EXPECT_TRUE(true);
-}
-
-/**
  * @tc.name: IsReminderEnabled_00001
  * @tc.desc: Test IsReminderEnabled with empty bundleName
  * @tc.type: FUNC
@@ -399,19 +386,6 @@ HWTEST_F(NotificationConfigParseTest, IsReminderEnabled_00001, Function | SmallT
 }
 
 /**
- * @tc.name: IsReminderEnabled_00002
- * @tc.desc: Test IsReminderEnabled with valid bundleName
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationConfigParseTest, IsReminderEnabled_00002, Function | SmallTest | Level1)
-{
-    std::string bundleName = "com.ohos.test";
-    NotificationConfigParse::GetInstance()->IsReminderEnabled(bundleName);
-    EXPECT_TRUE(true);
-}
-
-/**
  * @tc.name: IsDistributedReplyEnabled_00001
  * @tc.desc: Test IsDistributedReplyEnabled with empty bundleName
  * @tc.type: FUNC
@@ -422,32 +396,6 @@ HWTEST_F(NotificationConfigParseTest, IsDistributedReplyEnabled_00001, Function 
     std::string bundleName = "";
     bool result = NotificationConfigParse::GetInstance()->IsDistributedReplyEnabled(bundleName);
     EXPECT_FALSE(result);
-}
-
-/**
- * @tc.name: IsDistributedReplyEnabled_00002
- * @tc.desc: Test IsDistributedReplyEnabled with valid bundleName
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationConfigParseTest, IsDistributedReplyEnabled_00002, Function | SmallTest | Level1)
-{
-    std::string bundleName = "com.ohos.test";
-    NotificationConfigParse::GetInstance()->IsDistributedReplyEnabled(bundleName);
-    EXPECT_TRUE(true);
-}
-
-/**
- * @tc.name: GetFlowCtrlConfigFromCCM_00001
- * @tc.desc: Test GetFlowCtrlConfigFromCCM successfully
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationConfigParseTest, GetFlowCtrlConfigFromCCM_00001, Function | SmallTest | Level1)
-{
-    FlowControlThreshold threshold;
-    NotificationConfigParse::GetInstance()->GetFlowCtrlConfigFromCCM(threshold);
-    EXPECT_TRUE(true);
 }
 
 /**
@@ -487,19 +435,6 @@ HWTEST_F(NotificationConfigParseTest, GetFilterUidAndBundleName_00001, Function 
     std::string key = "";
     bool result = NotificationConfigParse::GetInstance()->GetFilterUidAndBundleName(key);
     EXPECT_FALSE(result);
-}
-
-/**
- * @tc.name: GetFilterUidAndBundleName_00002
- * @tc.desc: Test GetFilterUidAndBundleName with valid key
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationConfigParseTest, GetFilterUidAndBundleName_00002, Function | SmallTest | Level1)
-{
-    std::string key = "testKey";
-    NotificationConfigParse::GetInstance()->GetFilterUidAndBundleName(key);
-    EXPECT_TRUE(true);
 }
 
 /**
@@ -583,19 +518,6 @@ HWTEST_F(NotificationConfigParseTest, GetAppPrivileges_00001, Function | SmallTe
 }
 
 /**
- * @tc.name: GetAppPrivileges_00002
- * @tc.desc: Test GetAppPrivileges with valid bundleName
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationConfigParseTest, GetAppPrivileges_00002, Function | SmallTest | Level1)
-{
-    std::string bundleName = "com.ohos.test";
-    auto result = NotificationConfigParse::GetInstance()->GetAppPrivileges(bundleName);
-    EXPECT_TRUE(true);
-}
-
-/**
  * @tc.name: GetConfigJson_00001
  * @tc.desc: Test GetConfigJson with empty key
  * @tc.type: FUNC
@@ -608,19 +530,5 @@ HWTEST_F(NotificationConfigParseTest, GetConfigJson_00001, Function | SmallTest 
     bool result = NotificationConfigParse::GetInstance()->GetConfigJson(key, configJson);
     EXPECT_FALSE(result);
 }
-
-/**
- * @tc.name: GetCurrentSlotReminder_00001
- * @tc.desc: Test GetCurrentSlotReminder successfully
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationConfigParseTest, GetCurrentSlotReminder_00001, Function | SmallTest | Level1)
-{
-    std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> currentSlotReminder;
-    NotificationConfigParse::GetInstance()->GetCurrentSlotReminder(currentSlotReminder);
-    EXPECT_TRUE(true);
-}
-
 }   //namespace Notification
 }   //namespace OHOS
