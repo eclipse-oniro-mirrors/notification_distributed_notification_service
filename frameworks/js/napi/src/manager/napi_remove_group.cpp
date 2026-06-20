@@ -14,11 +14,15 @@
  */
 #include <optional>
 
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "napi_remove_group.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 namespace {
     const int REMOVE_GROUP_BY_BUNDLE_MIN_PARA = 2;
     const int REMOVE_GROUP_BY_BUNDLE_MAX_PARA = 3;
@@ -36,7 +40,7 @@ napi_value ParseParameters(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < REMOVE_GROUP_BY_BUNDLE_MIN_PARA) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -45,13 +49,13 @@ napi_value ParseParameters(
     if (valuetype != napi_object) {
         ANS_LOGE("Argument type error. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
         ANS_LOGE("null retValue");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -60,7 +64,7 @@ napi_value ParseParameters(
     if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
         ANS_LOGE("Wrong argument type. String number boolean expected.");
         std::string msg = "Incorrect parameter types.The type of param must be string or number or boolean.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     if (valuetype == napi_string) {
@@ -114,14 +118,14 @@ napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     RemoveParamsGroupByBundle params {};
     if (ParseParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     AsyncCallbackInfoRemoveGroupByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoRemoveGroupByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -142,8 +146,9 @@ napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
                     asynccallbackinfo->params.option.GetBundleName().c_str(),
                     asynccallbackinfo->params.option.GetUid(),
                     asynccallbackinfo->params.groupName.c_str());
-                asynccallbackinfo->info.errorCode = NotificationHelper::RemoveGroupByBundle(
-                    asynccallbackinfo->params.option, asynccallbackinfo->params.groupName);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->RemoveGroupByBundle(
+                        asynccallbackinfo->params.option, asynccallbackinfo->params.groupName);
             }
         },
         AsyncCompleteCallbackNapiRemoveGroupByBundle,

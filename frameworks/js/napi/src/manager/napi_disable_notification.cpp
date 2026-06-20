@@ -16,17 +16,21 @@
 #include "napi_disable_notification.h"
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "disable_notification.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 napi_value NapiDisableNotificationFeature(napi_env env, napi_callback_info info)
 {
 #ifdef DISABLE_NOTIFICATION_FEATURE_ENABLE
     ANS_LOGD("called");
     NotificationDisable paras;
     if (!ParseDisableNotificationParameters(env, info, paras)) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -34,7 +38,7 @@ napi_value NapiDisableNotificationFeature(napi_env env, napi_callback_info info)
         .env = env, .asyncWork = nullptr, .disableNotification = paras
     };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -50,7 +54,8 @@ napi_value NapiDisableNotificationFeature(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoDisableNotification *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::DisableNotificationFeature(asynccallbackinfo->disableNotification);
+                    DelayedSingleton<AnsNotification>::GetInstance()->DisableNotificationFeature(
+                        asynccallbackinfo->disableNotification);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -69,7 +74,7 @@ napi_value NapiDisableNotificationFeature(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     return promise;
 #else
-    Common::NapiThrow(env, ERROR_SYSTEM_CAP_ERROR);
+    Common::NapiThrow(env, ERR_ANS_INNER_DEVICE_NOT_SUPPORT);
     return Common::NapiGetUndefined(env);
 #endif
 }

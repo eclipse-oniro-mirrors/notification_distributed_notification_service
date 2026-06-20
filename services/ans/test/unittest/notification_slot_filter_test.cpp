@@ -19,9 +19,10 @@
 #define private public
 #define protected public
 #include "notification_slot.h"
-#undef private 
+#undef private
 #undef protected
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "notification_slot_filter.h"
 #include "notification_subscribe_info.h"
 
@@ -82,7 +83,7 @@ HWTEST_F(NotificationSlotFilterTest, NotificationSlotFilterTest_00300, Function 
     NotificationSlotFilter notificationSlotFilter;
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     AnsStatus ansStatus = notificationSlotFilter.OnPublish(record);
-    ASSERT_EQ(ansStatus.GetErrCode(), ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST);
 }
 
 

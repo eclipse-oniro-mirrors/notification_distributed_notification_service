@@ -17,6 +17,7 @@
 #include "distributed_unlock_listener_oper_service.h"
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
 #include "notification_helper.h"
@@ -236,13 +237,13 @@ ErrCode UnlockListenerOperService::GetNtfBtnWantAgentPtr(const std::string& hash
     auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
     if (result != ERR_OK || notificationRequest == nullptr) {
         ANS_LOGE("Check notificationRequest is null.");
-        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+        return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     }
 
     auto actionButtons = notificationRequest->GetActionButtons();
     if (actionButtons.empty() || actionButtons.size() <= static_cast<unsigned long>(btnIndex) || btnIndex < 0) {
         ANS_LOGE("Check actionButtons is null.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::shared_ptr<NotificationActionButton> clickedBtn;
@@ -251,7 +252,7 @@ ErrCode UnlockListenerOperService::GetNtfBtnWantAgentPtr(const std::string& hash
         btnIndex + replyBtnNum < static_cast<int32_t>(actionButtons.size()); i++) {
         if (actionButtons[i] == nullptr) {
             ANS_LOGE("NotificationRequest button is invalid, button index: %{public}d.", i);
-            return ERR_ANS_INVALID_PARAM;
+            return ERR_ANS_INNER_INVALID_PARAM;
         }
         if (actionButtons[i]->GetUserInput() != nullptr) {
             replyBtnNum++;
@@ -263,12 +264,12 @@ ErrCode UnlockListenerOperService::GetNtfBtnWantAgentPtr(const std::string& hash
     }
     if (clickedBtn == nullptr) {
         ANS_LOGE("NotificationRequest btnIndex is invalid.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     wantAgentPtr = clickedBtn->GetWantAgent();
     if (wantAgentPtr == nullptr) {
         ANS_LOGE("Check wantAgentPtr is null.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     return ERR_OK;
 }

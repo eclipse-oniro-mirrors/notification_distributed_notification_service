@@ -14,30 +14,12 @@
  */
 #include "sts_throw_erro.h"
 
+#include "ans_service_errors.h"
+
 namespace OHOS {
 namespace NotificationSts {
 constexpr const char *BUSINESS_ERROR_CLASS = "@ohos.base.BusinessError";
 constexpr const char *ERROR_CLASS_NAME = "std.core.Error";
-
-int32_t GetExternalCode(const uint32_t errCode)
-{
-    int32_t externalCode = ERROR_INTERNAL_ERROR;
-    switch (errCode) {
-        case ERROR_PERMISSION_DENIED:
-        case ERROR_NOT_SYSTEM_APP:
-        case ERROR_PARAM_INVALID:
-        case ERROR_SYSTEM_CAP_ERROR:
-        case ERROR_INTERNAL_ERROR:
-        case ERROR_DIALOG_IS_POPPING:
-        case ERROR_NO_MEMORY:
-            externalCode = static_cast<int32_t>(errCode);
-            break;
-        default:
-            externalCode = ErrorToExternal(errCode);
-            break;
-    }
-    return externalCode;
-}
 
 void ThrowError(ani_env *env, ani_object err)
 {
@@ -93,12 +75,21 @@ ani_object WrapError(ani_env *env, const std::string &msg)
     return obj;
 }
 
-ani_object CreateError(ani_env *env, ani_int code, const std::string &msg)
+ani_object CreateError(ani_env *env, int32_t errCode)
+{
+    std::string errMsg = FindAnsErrMsg(errCode);
+    return CreateError(env, errCode, errMsg);
+}
+
+ani_object CreateError(ani_env *env, int32_t errCode, const std::string &msg)
 {
     if (env == nullptr) {
         ANS_LOGE("null env");
         return nullptr;
     }
+    int32_t externalCode = OHOS::Notification::InnerErrorToExternal(errCode);
+    ANS_LOGI("CreateError: innerCode=%{public}d, externalCode=%{public}d, msg=%{public}s",
+        errCode, externalCode, msg.c_str());
     ani_status status = ANI_ERROR;
     ani_class cls = nullptr;
     if ((status = env->FindClass(BUSINESS_ERROR_CLASS, &cls)) != ANI_OK) {
@@ -116,11 +107,12 @@ ani_object CreateError(ani_env *env, ani_int code, const std::string &msg)
         return nullptr;
     }
     ani_object obj = nullptr;
-    if ((status = env->Object_New(cls, method, &obj, code, error)) != ANI_OK) {
+    if ((status = env->Object_New(cls, method, &obj, externalCode, error)) != ANI_OK) {
         ANS_LOGE("Object_New failed %{public}d", status);
         return nullptr;
     }
     return obj;
 }
+
 }
 }

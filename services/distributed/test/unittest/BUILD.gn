@@ -377,6 +377,7 @@ ohos_unittest("distributed_screen_status_manager_branch_test") {
   ]
 
   sources = [
+    "${core_path}/common/src/ans_service_errors.cpp",
     "distributed_database_branch_test/mock_device_manager_impl.cpp",
     "distributed_screen_status_manager_branch_test/distributed_screen_status_manager_branch_test.cpp",
     "distributed_screen_status_manager_branch_test/mock_distributed_flow_control.cpp",
@@ -478,6 +479,7 @@ ohos_unittest("distributed_preferences_branch_test") {
   include_dirs = [ "/${services_path}/distributed/include" ]
 
   sources = [
+    "${core_path}/common/src/ans_service_errors.cpp",
     "distributed_preferences_branch_test/distributed_preferences_branch_test.cpp",
     "distributed_preferences_branch_test/mock_distributed_preferences_database.cpp",
   ]

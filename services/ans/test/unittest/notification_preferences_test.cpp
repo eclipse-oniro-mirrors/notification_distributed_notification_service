@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_ut_constant.h"
 #define private public
 #define protected public
@@ -105,7 +106,8 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00100, Function | Sma
 /**
  * @tc.number    : AddNotificationSlots_00200
  * @tc.name      :
- * @tc.desc      : Add a notification slot into distrube DB when bundleName is null, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Add a notification slot into disturb DB when bundleName is null, return is
+ *                 ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00200, Function | SmallTest | Level1)
 {
@@ -113,26 +115,26 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00200, Function | Sma
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationSlots(bundleEmptyOption_, slots),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : AddNotificationSlots_00300
  * @tc.name      :
- * @tc.desc      : Add a notification slot into distrube DB when slots is null, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Add a notification slot into distrube DB when slots is null, return is ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00300, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationSlot>> slots;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption_, slots),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : AddNotificationSlots_00400
  * @tc.name      :
  * @tc.desc      : Add a notification slot into distrube DB when slot is nullptr in vector, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST.
+ * ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST.
  */
 HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00400, Function | SmallTest | Level1)
 {
@@ -140,7 +142,7 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00400, Function | Sma
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption_, slots),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST);
 }
 
 /**
@@ -163,7 +165,7 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00500, Function | Sma
 /**
  * @tc.number    : AddNotificationSlots_00600
  * @tc.name      :
- * @tc.desc      : Add a notification slot into distrube DB , return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Add a notification slot into distrube DB , return is ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00600, Function | SmallTest | Level1)
 {
@@ -171,7 +173,7 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00600, Function | Sma
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationSlots(nullptr, slots),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -196,35 +198,35 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00200, Function | S
 {
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationSlot(
                   bundleEmptyOption_, NotificationConstant::SlotType::OTHER),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : RemoveNotificationSlot_00300
  * @tc.name      :
  * @tc.desc      : Remove a notification slot from disturbe DB when bundle name does not exsit, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST
+ * ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST
  */
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00300, Function | SmallTest | Level1)
 {
     TestAddNotificationSlot();
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationSlot(
                   noExsitbundleOption_, NotificationConstant::SlotType::OTHER),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
 
 /**
  * @tc.number    : RemoveNotificationSlot_00400
  * @tc.name      :
  * @tc.desc      : Remove a notification slot from disturbe DB when slot type does not exsit, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST
+ * ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST
  */
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00400, Function | SmallTest | Level1)
 {
     TestAddNotificationSlot();
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationSlot(
                   bundleOption_, NotificationConstant::SlotType::SERVICE_REMINDER),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
 
 /**
@@ -237,7 +239,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00500, Function | S
     TestAddNotificationSlot();
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationSlot(
                   nullptr, NotificationConstant::SlotType::OTHER),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -256,36 +258,36 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00100, Functio
  * @tc.number    : RemoveNotificationForBundle_00200
  * @tc.name      :
  * @tc.desc      :  Remove notification for bundle from disturbe DB when bundle name is null, return is
- * ERR_ANS_INVALID_PARAM;
+ * ERR_ANS_INNER_INVALID_PARAM;
  */
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00200, Function | SmallTest | Level1)
 {
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationForBundle(bundleEmptyOption_),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : RemoveNotificationForBundle_00300
  * @tc.name      :
  * @tc.desc      :  Remove notification for bundle from disturbe DB when bundle name is null, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
+ * ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
  */
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00300, Function | SmallTest | Level1)
 {
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationForBundle(noExsitbundleOption_),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
 
 /**
  * @tc.number    : RemoveNotificationForBundle_00400
  * @tc.name      :
  * @tc.desc      :  Remove notification for bundle from disturbe DB when bundle name is null, return is
- * ERR_ANS_INVALID_PARAM;
+ * ERR_ANS_INNER_INVALID_PARAM;
  */
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00400, Function | SmallTest | Level1)
 {
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationForBundle(nullptr),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -309,7 +311,8 @@ HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00100, Function | 
 /**
  * @tc.number    : UpdateNotificationSlots_00200
  * @tc.name      :
- * @tc.desc      : Update notification slot into disturbe DB when bundleName is null, return is ERR_ANS_INVALID_PARAM
+ * @tc.desc      : Update notification slot into disturb DB when bundleName is null, return is
+ *                 ERR_ANS_INNER_INVALID_PARAM
  */
 HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00200, Function | SmallTest | Level1)
 {
@@ -317,26 +320,26 @@ HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00200, Function | 
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->UpdateNotificationSlots(bundleEmptyOption_, slots),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : UpdateNotificationSlots_00300
  * @tc.name      :
- * @tc.desc      : Update notification slot into disturbe DB when slots is null, return is ERR_ANS_INVALID_PARAM
+ * @tc.desc      : Update notification slot into disturbe DB when slots is null, return is ERR_ANS_INNER_INVALID_PARAM
  */
 HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00300, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationSlot>> slots;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->UpdateNotificationSlots(bundleOption_, slots),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : UpdateNotificationSlots_00400
  * @tc.name      :
  * @tc.desc      : Update notification slot into disturbe DB when bundle does not exsit, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST
+ * ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST
  */
 HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00400, Function | SmallTest | Level1)
 {
@@ -344,14 +347,14 @@ HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00400, Function | 
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->UpdateNotificationSlots(noExsitbundleOption_, slots),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
 
 /**
  * @tc.number    : UpdateNotificationSlots_00500
  * @tc.name      :
  * @tc.desc      : Update notification slot into disturbe DB when slot type does not exsit, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST
+ * ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST
  */
 HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00500, Function | SmallTest | Level1)
 {
@@ -359,13 +362,14 @@ HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00500, Function | 
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->UpdateNotificationSlots(noExsitbundleOption_, slots),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
 
 /**
  * @tc.number    : UpdateNotificationSlots_00600
  * @tc.name      :
- * @tc.desc      : Update notification slot into disturbe DB when bundleName is null, return is ERR_ANS_INVALID_PARAM
+ * @tc.desc      : Update notification slot into disturb DB when bundleName is null, return is
+ *                 ERR_ANS_INNER_INVALID_PARAM
  */
 HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00600, Function | SmallTest | Level1)
 {
@@ -373,7 +377,7 @@ HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00600, Function | 
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->UpdateNotificationSlots(nullptr, slots),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -394,21 +398,21 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationSlot_00100, Function | Smal
  * @tc.number    : GetNotificationSlot_00200
  * @tc.name      :
  * @tc.desc      : Update notification slot group into disturbe DB when bundle name is null, return is
- * ERR_ANS_INVALID_PARAM
+ * ERR_ANS_INNER_INVALID_PARAM
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationSlot_00200, Function | SmallTest | Level1)
 {
     sptr<NotificationSlot> slot;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationSlot(
                   bundleEmptyOption_, NotificationConstant::SlotType::OTHER, slot),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : GetNotificationSlot_00300
  * @tc.name      :
  * @tc.desc      : Update notification slot group into disturbe DB when slot type does not exsit, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST
+ * ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationSlot_00300, Function | SmallTest | Level1)
 {
@@ -416,14 +420,14 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationSlot_00300, Function | Smal
     sptr<NotificationSlot> slot;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationSlot(
                   bundleOption_, NotificationConstant::SlotType::CONTENT_INFORMATION, slot),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
 
 /**
  * @tc.number    : GetNotificationSlot_00400
  * @tc.name      :
  * @tc.desc      : Update notification slot group into disturbe DB when bundle name does not exsit, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST
+ * ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationSlot_00400, Function | SmallTest | Level1)
 {
@@ -431,21 +435,21 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationSlot_00400, Function | Smal
     sptr<NotificationSlot> slot;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationSlot(
                   noExsitbundleOption_, NotificationConstant::SlotType::OTHER, slot),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
 
 /**
  * @tc.number    : GetNotificationSlot_00500
  * @tc.name      :
  * @tc.desc      : Update notification slot group into disturbe DB when bundleOption is null, return is
- * ERR_ANS_INVALID_PARAM
+ * ERR_ANS_INNER_INVALID_PARAM
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationSlot_00500, Function | SmallTest | Level1)
 {
     sptr<NotificationSlot> slot;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationSlot(
                   nullptr, NotificationConstant::SlotType::OTHER, slot),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -488,13 +492,13 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00200, Function | 
  * @tc.number    : GetNotificationAllSlots_00300
  * @tc.name      :
  * @tc.desc      : Get all notification slots from disturbe DB when bundle name is null, return is
- * ERR_ANS_INVALID_PARAM
+ * ERR_ANS_INNER_INVALID_PARAM
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00300, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationSlot>> slotsResult;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationAllSlots(bundleEmptyOption_, slotsResult),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ((int)slotsResult.size(), 0);
 }
 
@@ -502,13 +506,13 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00300, Function | 
  * @tc.number    : GetNotificationAllSlots_00400
  * @tc.name      :
  * @tc.desc      : Get all notification slots from disturbe DB when bundle name does not exsit, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
+ * ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00400, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationSlot>> slotsResult;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationAllSlots(noExsitbundleOption_, slotsResult),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
     EXPECT_EQ((int)slotsResult.size(), 0);
     ErrCode result = advancedNotificationService_->GetSlots(slotsResult);
     EXPECT_NE(result, ERR_OK);
@@ -518,13 +522,13 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00400, Function | 
  * @tc.number    : GetNotificationAllSlots_00500
  * @tc.name      :
  * @tc.desc      : Get all notification slots from disturbe DB when bundleOption is null, return is
- * ERR_ANS_INVALID_PARAM
+ * ERR_ANS_INNER_INVALID_PARAM
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationAllSlots_00500, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationSlot>> slotsResult;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationAllSlots(nullptr, slotsResult),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ((int)slotsResult.size(), 0);
 }
 
@@ -541,12 +545,13 @@ HWTEST_F(NotificationPreferencesTest, SetShowBadge_00100, Function | SmallTest |
 /**
  * @tc.number    : SetShowBadge_00200
  * @tc.name      :
- * @tc.desc      : Set bundle show badge into disturbe DB when bundle name is null, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Set bundle show badge into disturbe DB when bundle name is null, return is
+ *                 ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, SetShowBadge_00200, Function | SmallTest | Level1)
 {
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->SetShowBadge(bundleEmptyOption_, true),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
     auto result = bundleEmptyOption_->GetBundleName();
     EXPECT_EQ(result, "");
 }
@@ -554,12 +559,13 @@ HWTEST_F(NotificationPreferencesTest, SetShowBadge_00200, Function | SmallTest |
 /**
  * @tc.number    : SetShowBadge_00300
  * @tc.name      :
- * @tc.desc      : Set bundle show badge into disturbe DB when bundle name is null, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Set bundle show badge into disturbe DB when bundle name is null, return is
+ *                 ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, SetShowBadge_00300, Function | SmallTest | Level1)
 {
     EXPECT_EQ(
-        (int)NotificationPreferences::GetInstance()->SetShowBadge(nullptr, true), (int)ERR_ANS_INVALID_PARAM);
+        (int)NotificationPreferences::GetInstance()->SetShowBadge(nullptr, true), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -585,19 +591,20 @@ HWTEST_F(NotificationPreferencesTest, IsShowBadge_00200, Function | SmallTest | 
 {
     bool enable = false;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->IsShowBadge(bundleEmptyOption_, enable),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : IsShowBadge_00300
  * @tc.name      :
- * @tc.desc      : Get bunlde show badge from disturbe DB when bundleOption is null, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Get bundle show badge from disturb DB when bundleOption is null, return is
+ *                 ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, IsShowBadge_00300, Function | SmallTest | Level1)
 {
     bool enable = false;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->IsShowBadge(nullptr, enable),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -614,25 +621,27 @@ HWTEST_F(NotificationPreferencesTest, SetImportance_00100, Function | SmallTest 
 /**
  * @tc.number    : SetImportance_00200
  * @tc.name      :
- * @tc.desc      : Set bundle importance into disturbe DB when bundle name is null, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Set bundle importance into disturbe DB when bundle name is null, return is
+ *                 ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, SetImportance_00200, Function | SmallTest | Level1)
 {
     int importance = 1;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->SetImportance(bundleEmptyOption_, importance),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : SetImportance_00300
  * @tc.name      :
- * @tc.desc      : Set bundle importance into disturbe DB when bundleOption is null, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Set bundle importance into disturb DB when bundleOption is null, return is
+ *                 ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, SetImportance_00300, Function | SmallTest | Level1)
 {
     int importance = 1;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->SetImportance(nullptr, importance),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -653,25 +662,27 @@ HWTEST_F(NotificationPreferencesTest, GetImportance_00100, Function | SmallTest 
 /**
  * @tc.number    : GetImportance_00200
  * @tc.name      :
- * @tc.desc      : Get bundle importance from disturbe DB when bundle name is null, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Get bundle importance from disturbe DB when bundle name is null, return is
+ *                 ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, GetImportance_00200, Function | SmallTest | Level1)
 {
     int getImportance = 0;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetImportance(bundleEmptyOption_, getImportance),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : GetImportance_00300
  * @tc.name      :
- * @tc.desc      : Get bundle importance from disturbe DB when bundleOption is null, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Get bundle importance from disturb DB when bundleOption is null, return is
+ *                 ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, GetImportance_00300, Function | SmallTest | Level1)
 {
     int getImportance = 0;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetImportance(nullptr, getImportance),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -688,25 +699,27 @@ HWTEST_F(NotificationPreferencesTest, SetTotalBadgeNums_00100, Function | SmallT
 /**
  * @tc.number    : SetTotalBadgeNums_00200
  * @tc.name      :
- * @tc.desc      : Set total badge nums into disturbe DB when bundle name is null, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Set total badge nums into disturbe DB when bundle name is null, return is
+ *                 ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, SetTotalBadgeNums_00200, Function | SmallTest | Level1)
 {
     int num = 1;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->SetTotalBadgeNums(bundleEmptyOption_, num),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : SetTotalBadgeNums_00300
  * @tc.name      :
- * @tc.desc      : Set total badge nums into disturbe DB when bundle name is null, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Set total badge nums into disturbe DB when bundle name is null, return is
+ *                 ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, SetTotalBadgeNums_00300, Function | SmallTest | Level1)
 {
     int num = 1;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->SetTotalBadgeNums(nullptr, num),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -727,25 +740,27 @@ HWTEST_F(NotificationPreferencesTest, GetTotalBadgeNums_00100, Function | SmallT
 /**
  * @tc.number    : GetTotalBadgeNums_00200
  * @tc.name      :
- * @tc.desc      : Get total badge nums from disturbe DB when bundle name is null, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Get total badge nums from disturbe DB when bundle name is null, return is
+ *                 ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, GetTotalBadgeNums_00200, Function | SmallTest | Level1)
 {
     int totalBadgeNum = 0;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetTotalBadgeNums(bundleEmptyOption_, totalBadgeNum),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : GetTotalBadgeNums_00300
  * @tc.name      :
- * @tc.desc      : Get total badge nums from disturbe DB when bundleOption is null, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Get total badge nums from disturbe DB when bundleOption is null, return is
+ *                 ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, GetTotalBadgeNums_00300, Function | SmallTest | Level1)
 {
     int totalBadgeNum = 0;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetTotalBadgeNums(nullptr, totalBadgeNum),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -763,24 +778,24 @@ HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabledForBundle_00100, Fu
  * @tc.number    : SetNotificationsEnabledForBundle_00200
  * @tc.name      :
  * @tc.desc      : Set notification enable for bundle into disturbe DB when bundle name is null, return is
- * ERR_ANS_INVALID_PARAM.
+ * ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabledForBundle_00200, Function | SmallTest | Level1)
 {
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleEmptyOption_,
-        static_cast<NotificationConstant::SWITCH_STATE>(0)), (int)ERR_ANS_INVALID_PARAM);
+        static_cast<NotificationConstant::SWITCH_STATE>(0)), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : SetNotificationsEnabledForBundle_00300
  * @tc.name      :
  * @tc.desc      : Set notification enable for bundle into disturbe DB when bundleOption is null, return is
- * ERR_ANS_INVALID_PARAM.
+ * ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabledForBundle_00300, Function | SmallTest | Level1)
 {
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(nullptr,
-        static_cast<NotificationConstant::SWITCH_STATE>(0)), (int)ERR_ANS_INVALID_PARAM);
+        static_cast<NotificationConstant::SWITCH_STATE>(0)), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -803,26 +818,26 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabledForBundle_00100, Fu
  * @tc.number    : GetNotificationsEnabledForBundle_00200
  * @tc.name      :
  * @tc.desc      : Get notification enable for bundle from disturbe DB when bundle name is null, return is
- * ERR_ANS_INVALID_PARAM.
+ * ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabledForBundle_00200, Function | SmallTest | Level1)
 {
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleEmptyOption_,
-        state), (int)ERR_ANS_INVALID_PARAM);
+        state), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : GetNotificationsEnabledForBundle_00300
  * @tc.name      :
  * @tc.desc      : Get notification enable for bundle from disturbe DB when bundleOption is null, return is
- * ERR_ANS_INVALID_PARAM.
+ * ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabledForBundle_00300, Function | SmallTest | Level1)
 {
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(nullptr, state),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -838,12 +853,12 @@ HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabled_00100, Function | 
 /**
  * @tc.number    : SetNotificationsEnabled_00200
  * @tc.name      :
- * @tc.desc      : Set enable notification into disturbe DB, when userId is -1, return is ERR_ANS_INVALID_PARAM
+ * @tc.desc      : Set enable notification into disturbe DB, when userId is -1, return is ERR_ANS_INNER_INVALID_PARAM
  */
 HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabled_00200, Function | SmallTest | Level1)
 {
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabled(TEST_SUBSCRIBE_USER_INIT, true),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -873,20 +888,21 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabled_00200, Function | 
 
     enable = false;
     EXPECT_EQ(
-        (int)NotificationPreferences::GetInstance()->GetNotificationsEnabled(101, enable), (int)ERR_ANS_INVALID_PARAM);
+        (int)NotificationPreferences::GetInstance()->GetNotificationsEnabled(101, enable),
+        (int)ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_FALSE(enable);
 }
 
 /**
  * @tc.number    : GetNotificationsEnabled_00300
  * @tc.name      :
- * @tc.desc      : Get enable notification from disturbe DB, when userId is -1, return is ERR_ANS_INVALID_PARAM
+ * @tc.desc      : Get enable notification from disturbe DB, when userId is -1, return is ERR_ANS_INNER_INVALID_PARAM
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabled_00300, Function | SmallTest | Level1)
 {
     bool enable = false;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationsEnabled(TEST_SUBSCRIBE_USER_INIT, enable),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -911,7 +927,7 @@ HWTEST_F(NotificationPreferencesTest, SetDoNotDisturbDate_00100, Function | Smal
 /**
  * @tc.number    : SetDoNotDisturbDate_00200
  * @tc.name      :
- * @tc.desc      : Set disturbe mode into disturbe DB, when userId is -1, return is ERR_ANS_INVALID_PARAM
+ * @tc.desc      : Set disturbe mode into disturbe DB, when userId is -1, return is ERR_ANS_INNER_INVALID_PARAM
  */
 HWTEST_F(NotificationPreferencesTest, SetDoNotDisturbDate_00200, Function | SmallTest | Level1)
 {
@@ -925,7 +941,7 @@ HWTEST_F(NotificationPreferencesTest, SetDoNotDisturbDate_00200, Function | Smal
         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::ONCE, beginDate, endDate);
 
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->SetDoNotDisturbDate(TEST_SUBSCRIBE_USER_INIT, date),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -977,19 +993,19 @@ HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbDate_00200, Function | Smal
 
     sptr<NotificationDoNotDisturbDate> getExsitDate;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetDoNotDisturbDate(
-        NON_SYSTEM_APP_UID, getExsitDate), (int)ERR_ANS_INVALID_PARAM);
+        NON_SYSTEM_APP_UID, getExsitDate), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : GetDoNotDisturbDate_00300
  * @tc.name      :
- * @tc.desc      : Get disturbe mode from disturbe DB, when userId is -1, return is ERR_ANS_INVALID_PARAM
+ * @tc.desc      : Get disturbe mode from disturbe DB, when userId is -1, return is ERR_ANS_INNER_INVALID_PARAM
  */
 HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbDate_00300, Function | SmallTest | Level1)
 {
     sptr<NotificationDoNotDisturbDate> getDate;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetDoNotDisturbDate(TEST_SUBSCRIBE_USER_INIT, getDate),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1004,7 +1020,7 @@ HWTEST_F(NotificationPreferencesTest, SetHasPoppedDialog_00100, Function | Small
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundleOption_, hasPopped), (int)ERR_OK);
 
     auto res = NotificationPreferences::GetInstance()->SetHasPoppedDialog(nullptr, hasPopped);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1032,11 +1048,11 @@ HWTEST_F(NotificationPreferencesTest, PutNotificationStatistics_00100, Function 
 {
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("", 100);
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->PutNotificationStatistics(
-        100, bundle), ERR_ANS_INVALID_PARAM);
+        100, bundle), ERR_ANS_INNER_INVALID_PARAM);
 
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->PutNotificationStatistics(
-        100, nullptr), ERR_ANS_INVALID_PARAM);
-    
+        100, nullptr), ERR_ANS_INNER_INVALID_PARAM);
+
     sptr<NotificationBundleOption> bundle01 = new NotificationBundleOption("testBundle", 100);
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->PutNotificationStatistics(
         100, bundle01), ERR_OK);
@@ -1054,7 +1070,7 @@ HWTEST_F(NotificationPreferencesTest, PutNotificationStatistics_00200, Function 
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
     auto ret = notificationPreferences.PutNotificationStatistics(100, bundle);
-    EXPECT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -1112,7 +1128,7 @@ HWTEST_F(NotificationPreferencesTest, CleanExperData_00200, Function | SmallTest
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
     auto ret = notificationPreferences.CleanExperData(100);
-    EXPECT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -1141,7 +1157,7 @@ HWTEST_F(NotificationPreferencesTest, DeleteStatisticsByBundle_00200, Function |
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
     auto ret = notificationPreferences.DeleteStatisticsByBundle(100, "testBundle", 100);
-    EXPECT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -1155,7 +1171,7 @@ HWTEST_F(NotificationPreferencesTest, QueryStatisticsByBundle_00100, Function | 
     int32_t recentCount = 0;
     int64_t lastTime = 0;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->QueryStatisticsByBundle(nullptr,
-        recentCount, lastTime), ERR_ANS_INVALID_PARAM);
+        recentCount, lastTime), ERR_ANS_INNER_INVALID_PARAM);
 
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->QueryStatisticsByBundle(bundle,
         recentCount, lastTime), ERR_OK);
@@ -1253,126 +1269,126 @@ HWTEST_F(NotificationPreferencesTest, UpdateStatisticsAll_00200, Function | Smal
  * @tc.number    : AddNotificationBundleProperty_00100
  * @tc.name      : AddNotificationBundleProperty
  * @tc.desc      : Add a notification BundleProperty into distrube DB when bundleOption is null,
- *                 return is ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED.
+ *                 return is ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, AddNotificationBundleProperty_00100, Function | SmallTest | Level1)
 {
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationBundleProperty(bundleOption_),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
  * @tc.number    : AddNotificationBundleProperty_00200
  * @tc.name      : AddNotificationBundleProperty
  * @tc.desc      : Add a notification BundleProperty into distrube DB when bundlename is null,
- *                 return is ERR_ANS_INVALID_PARAM.
+ *                 return is ERR_ANS_INNER_INVALID_PARAM.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, AddNotificationBundleProperty_00200, Function | SmallTest | Level1)
 {
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationBundleProperty(bundleEmptyOption_),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : AddNotificationBundleProperty_00300
  * @tc.name      : AddNotificationBundleProperty
  * @tc.desc      : Add a notification BundleProperty into distrube DB when bundlename is null,
- *                 return is ERR_ANS_INVALID_PARAM.
+ *                 return is ERR_ANS_INNER_INVALID_PARAM.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, AddNotificationBundleProperty_00300, Function | SmallTest | Level1)
 {
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->AddNotificationBundleProperty(nullptr),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : RemoveNotificationAllSlots_00100
  * @tc.name      : RemoveNotificationAllSlots
  * @tc.desc      : Test RemoveNotificationAllSlots function when bundlename is null,
- *                 return is ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
+ *                 return is ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationAllSlots_00100, Function | SmallTest | Level1)
 {
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationAllSlots(bundleOption_),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
 
 /**
  * @tc.number    : RemoveNotificationAllSlots_00200
  * @tc.name      : RemoveNotificationAllSlots
  * @tc.desc      : Test RemoveNotificationAllSlots function when bundleOption is null,
- *                 return is ERR_ANS_INVALID_PARAM.
+ *                 return is ERR_ANS_INNER_INVALID_PARAM.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationAllSlots_00200, Function | SmallTest | Level1)
 {
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationAllSlots(bundleEmptyOption_),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : RemoveNotificationAllSlots_00300
  * @tc.name      : RemoveNotificationAllSlots
  * @tc.desc      : Test RemoveNotificationAllSlots function when bundleOption is null,
- *                 return is ERR_ANS_INVALID_PARAM.
+ *                 return is ERR_ANS_INNER_INVALID_PARAM.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, RemoveNotificationAllSlots_00300, Function | SmallTest | Level1)
 {
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->RemoveNotificationAllSlots(nullptr),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : GetNotificationSlotsNumForBundle_00100
  * @tc.name      : GetNotificationSlotsNumForBundle
  * @tc.desc      : Test GetNotificationSlotsNumForBundle function when bundlename is null,
- *                 return is ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
+ *                 return is ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationSlotsNumForBundle_00100, Function | SmallTest | Level1)
 {
     uint64_t num = 1;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationSlotsNumForBundle(bundleOption_, num),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
 
 /**
  * @tc.number    : GetNotificationSlotsNumForBundle_00200
  * @tc.name      : GetNotificationSlotsNumForBundle
  * @tc.desc      : Test GetNotificationSlotsNumForBundle function when bundleOption is null,
- *                 return is ERR_ANS_INVALID_PARAM.
+ *                 return is ERR_ANS_INNER_INVALID_PARAM.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationSlotsNumForBundle_00200, Function | SmallTest | Level1)
 {
     uint64_t num = 2;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationSlotsNumForBundle(bundleEmptyOption_, num),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : GetNotificationSlotsNumForBundle_00300
  * @tc.name      : GetNotificationSlotsNumForBundle
  * @tc.desc      : Test GetNotificationSlotsNumForBundle function when bundleOption is null,
- *                 return is ERR_ANS_INVALID_PARAM.
+ *                 return is ERR_ANS_INNER_INVALID_PARAM.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationSlotsNumForBundle_00300, Function | SmallTest | Level1)
 {
     uint64_t num = 2;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationSlotsNumForBundle(nullptr, num),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : CheckSlotForCreateSlot_00100
  * @tc.name      : CheckSlotForCreateSlot
- * @tc.desc      : Test CheckSlotForCreateSlot function when slot is null, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Test CheckSlotForCreateSlot function when slot is null, return is ERR_ANS_INNER_INVALID_PARAM.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, CheckSlotForCreateSlot_00100, Function | SmallTest | Level1)
@@ -1380,7 +1396,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForCreateSlot_00100, Function | S
     NotificationPreferencesInfo info;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->CheckSlotForCreateSlot(bundleOption_, nullptr, info),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST);
 }
 
 /**
@@ -1401,7 +1417,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForCreateSlot_00200, Function | S
  * @tc.number    : CheckSlotForRemoveSlot_00100
  * @tc.name      : CheckSlotForRemoveSlot
  * @tc.desc      : Test CheckSlotForRemoveSlot function after add a notification slot,
- * return is ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
+ * return is ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00100, Function | SmallTest | Level1)
@@ -1415,7 +1431,8 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00100, Function | S
 /**
  * @tc.number    : CheckSlotForRemoveSlot_00200
  * @tc.name      : CheckSlotForRemoveSlot
- * @tc.desc      : Test CheckSlotForRemoveSlot function, return is ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST,
+ * @tc.desc      : Test CheckSlotForRemoveSlot function, return is
+ *                  ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST,
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00200, Function | SmallTest | Level1)
@@ -1423,7 +1440,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00200, Function | S
     NotificationPreferencesInfo info;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->CheckSlotForRemoveSlot(
         bundleOption_, NotificationConstant::SlotType::OTHER, info),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
 
 /**
@@ -1438,7 +1455,7 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForRemoveSlot_00300, Function | S
     TestAddNotificationSlot(info);
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->CheckSlotForRemoveSlot(
         bundleOption_, NotificationConstant::SlotType::CONTENT_INFORMATION, info),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
 
 /*
@@ -1455,13 +1472,13 @@ HWTEST_F(NotificationPreferencesTest, SetSmartReminderEnabled_0100, TestSize.Lev
 
 /*
  * @tc.name: SetSmartReminderEnabled_0200
- * @tc.desc: test SetSmartReminderEnabled with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test SetSmartReminderEnabled with parameters, expect errorCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(NotificationPreferencesTest, SetSmartReminderEnabled_0200, TestSize.Level1)
 {
     ErrCode res = NotificationPreferences::GetInstance()->SetSmartReminderEnabled("", true);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1479,20 +1496,20 @@ HWTEST_F(NotificationPreferencesTest, IsSmartReminderEnabled_0100, TestSize.Leve
 
 /**
  * @tc.name: IsSmartReminderEnabled_0200
- * @tc.desc: test IsSmartReminderEnabled with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test IsSmartReminderEnabled with parameters, expect errorCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(NotificationPreferencesTest, IsSmartReminderEnabled_0200, TestSize.Level1)
 {
     bool enable = true;
     ErrCode result = NotificationPreferences::GetInstance()->IsSmartReminderEnabled("", enable);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : CheckSlotForUpdateSlot_00100
  * @tc.name      : CheckSlotForUpdateSlot
- * @tc.desc      : Test CheckSlotForUpdateSlot function when slot is null, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Test CheckSlotForUpdateSlot function when slot is null, return is ERR_ANS_INNER_INVALID_PARAM.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00100, Function | SmallTest | Level1)
@@ -1500,14 +1517,14 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00100, Function | S
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     NotificationPreferencesInfo info;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->CheckSlotForUpdateSlot(bundleOption_, nullptr, info),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : CheckSlotForUpdateSlot_00200
  * @tc.name      : CheckSlotForUpdateSlot
  * @tc.desc      : Test CheckSlotForUpdateSlot function when bundle not existed, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
+ * ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00200, Function | SmallTest | Level1)
@@ -1515,14 +1532,14 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00200, Function | S
     NotificationPreferencesInfo info;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->CheckSlotForUpdateSlot(bundleOption_, slot, info),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST);
 }
 
 /**
  * @tc.number    : CheckSlotForUpdateSlot_00300
  * @tc.name      : CheckSlotForUpdateSlot
  * @tc.desc      : Test CheckSlotForUpdateSlot function when slot is different type, return is
- * ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST.
+ * ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST.
  * @tc.require   : issueI5SR8J
  */
 HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00300, Function | SmallTest | Level1)
@@ -1531,21 +1548,21 @@ HWTEST_F(NotificationPreferencesTest, CheckSlotForUpdateSlot_00300, Function | S
     TestAddNotificationSlot(info);
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::CONTENT_INFORMATION);
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->CheckSlotForUpdateSlot(bundleOption_, slot, info),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
 
 /**
  * @tc.number    : GetAllNotificationEnabledBundles_00100
  * @tc.name      : GetAllNotificationEnabledBundles
  * @tc.desc      : Get all notification enable bundle in DB when db is null,
- *                 return is ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED.
+ *                 return is ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED.
  * @tc.require   : issueI92VGR
  */
 HWTEST_F(NotificationPreferencesTest, GetAllNotificationEnabledBundles_00100, Function | SmallTest | Level1)
 {
     std::vector<NotificationBundleOption> bundleOption;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetAllNotificationEnabledBundles(bundleOption),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -1561,7 +1578,7 @@ HWTEST_F(NotificationPreferencesTest, GetAllNotificationEnabledBundles_00200, Fu
     profiles.clear();
     notificationPreferences.preferncesDB_ = nullptr;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetAllNotificationEnabledBundles(bundleOption, userId),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -1573,7 +1590,7 @@ HWTEST_F(NotificationPreferencesTest, GetAllNotificationEnabledBundles_00300, Fu
     std::vector<NotificationBundleOption> bundleOption;
     int32_t userId = 100;
     EXPECT_EQ((int)NotificationPreferences::GetInstance()->GetAllNotificationEnabledBundles(bundleOption, userId),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -1608,7 +1625,7 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledByBundle_0100, TestSi
 
 /*
  * @tc.name: SetDistributedEnabledByBundle_0200
- * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledByBundle_0200, TestSize.Level1)
@@ -1618,7 +1635,7 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledByBundle_0200, TestSi
 
     ErrCode res = NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundleOption,
         deviceType, true, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1638,7 +1655,7 @@ HWTEST_F(NotificationPreferencesTest, IsDistributedEnabledByBundle_0100, TestSiz
 
 /**
  * @tc.name: IsDistributedEnabledByBundle_0200
- * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(NotificationPreferencesTest, IsDistributedEnabledByBundle_0200, TestSize.Level1)
@@ -1648,7 +1665,7 @@ HWTEST_F(NotificationPreferencesTest, IsDistributedEnabledByBundle_0200, TestSiz
     int32_t enable;
     ErrCode result = NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(bundleOption,
         deviceType, true, enable);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1678,7 +1695,7 @@ HWTEST_F(NotificationPreferencesTest, AddDoNotDisturbProfiles_0200, TestSize.Lev
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
     profiles.clear();
     auto res = NotificationPreferences::GetInstance()->AddDoNotDisturbProfiles(userId, profiles);
-    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(res, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -1725,7 +1742,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveDoNotDisturbProfiles_0200, TestSize.
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
     profiles.clear();
     auto res = NotificationPreferences::GetInstance()->RemoveDoNotDisturbProfiles(userId, profiles);
-    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(res, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -1755,11 +1772,11 @@ HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbProfile_0200, TestSize.Leve
     int32_t userId = 1;
     sptr<NotificationDoNotDisturbProfile> profile;
     auto res = NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(profileId, userId, profile);
-    EXPECT_EQ(res, ERR_ANS_NO_PROFILE_TEMPLATE);
-    int32_t externalRes = ErrorToExternal(res);
+    EXPECT_EQ(res, ERR_ANS_INNER_NO_PROFILE_TEMPLATE);
+    int32_t externalRes = InnerErrorToExternal(res);
     EXPECT_EQ(externalRes, ERROR_NO_PROFILE_TEMPLATE);
     std::string defaultMsg = "Default error message";
-    string errMsg = GetAnsErrMessage(externalRes, defaultMsg);
+    string errMsg = GetExternalErrMessage(externalRes, defaultMsg);
     EXPECT_EQ(errMsg, "The do-not-disturb profile does not exist");
 }
 
@@ -1816,7 +1833,7 @@ HWTEST_F(NotificationPreferencesTest, SetDisableNotificationInfo_0100, TestSize.
 HWTEST_F(NotificationPreferencesTest, SetDisableNotificationInfo_0200, TestSize.Level1)
 {
     auto res = NotificationPreferences::GetInstance()->SetDisableNotificationInfo(nullptr);
-    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(res, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -1859,13 +1876,13 @@ HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionBundles_001, Funct
     NotificationPreferences notificationPreferences;
     sptr<NotificationBundleOption> nullBundle = nullptr;
     std::vector<sptr<NotificationBundleOption>> bundles;
-    
+
     auto ret = notificationPreferences.GetExtensionSubscriptionBundles(nullBundle, bundles);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
-    
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
+
     sptr<NotificationBundleOption> emptyBundle = new NotificationBundleOption("", 100);
     ret = notificationPreferences.GetExtensionSubscriptionBundles(emptyBundle, bundles);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1878,7 +1895,7 @@ HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionBundles_002, Funct
     NotificationPreferences notificationPreferences;
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
     std::vector<sptr<NotificationBundleOption>> bundles;
-    
+
     auto ret = notificationPreferences.GetExtensionSubscriptionBundles(bundleOption, bundles);
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_TRUE(bundles.empty());
@@ -1893,13 +1910,13 @@ HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionBundles_002, Funct
 {
     NotificationPreferences notificationPreferences;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
     std::vector<sptr<NotificationBundleOption>> bundles;
     profiles.clear();
     notificationPreferences.preferncesDB_ = nullptr;
     auto ret = notificationPreferences.SetExtensionSubscriptionBundles(bundleOption, bundles);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_READY);
 }
 
 /**
@@ -1911,13 +1928,13 @@ HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionBundles_003, Funct
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
     std::vector<sptr<NotificationBundleOption>> bundles;
     bundles.push_back(new NotificationBundleOption("extension.bundle", 101));
-    
+
     auto ret = notificationPreferences.SetExtensionSubscriptionBundles(bundleOption, bundles);
-    EXPECT_TRUE(ret == ERR_OK || ret == ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_TRUE(ret == ERR_OK || ret == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -1929,12 +1946,12 @@ HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionBundles_004, Funct
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
     std::vector<sptr<NotificationBundleOption>> bundles;
-    
+
     auto ret = notificationPreferences.SetExtensionSubscriptionBundles(bundleOption, bundles);
-    EXPECT_TRUE(ret == ERR_OK || ret == ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_TRUE(ret == ERR_OK || ret == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -1945,13 +1962,13 @@ HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionBundles_004, Funct
 HWTEST_F(NotificationPreferencesTest, AddExtensionSubscriptionBundles_002, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
     std::vector<sptr<NotificationBundleOption>> bundles;
     notificationPreferences.preferncesDB_ = nullptr;
-    
+
     auto ret = notificationPreferences.AddExtensionSubscriptionBundles(bundleOption, bundles);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_READY);
 }
 
  /**
@@ -1962,57 +1979,57 @@ HWTEST_F(NotificationPreferencesTest, AddExtensionSubscriptionBundles_002, Funct
 HWTEST_F(NotificationPreferencesTest, RemoveExtensionSubscriptionBundles_002, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
     std::vector<sptr<NotificationBundleOption>> bundles;
     notificationPreferences.preferncesDB_ = nullptr;
     auto ret = notificationPreferences.RemoveExtensionSubscriptionBundles(bundleOption, bundles);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_READY);
 }
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionClonedInvalidBundles_001, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
     std::vector<sptr<NotificationBundleOption>> bundles;
     bundles.push_back(new NotificationBundleOption("bundle1", 1001));
     bundles.push_back(new NotificationBundleOption("bundle2", 1002));
     notificationPreferences.preferncesDB_ = nullptr;
     auto ret = notificationPreferences.SetExtensionSubscriptionClonedInvalidBundles(100, bundleOption, bundles);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_READY);
 }
 
 HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionClonedInvalidBundles_002, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     sptr<NotificationBundleOption> bundleOption = nullptr;
     std::vector<sptr<NotificationBundleOption>> bundles;
     bundles.push_back(new NotificationBundleOption("bundle1", 1001));
     bundles.push_back(new NotificationBundleOption("bundle2", 1002));
     notificationPreferences.preferncesDB_ = nullptr;
     auto ret = notificationPreferences.SetExtensionSubscriptionClonedInvalidBundles(100, bundleOption, bundles);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionClonedInvalidBundles_003, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("", 100);
     std::vector<sptr<NotificationBundleOption>> bundles;
     bundles.push_back(new NotificationBundleOption("bundle1", 1001));
     bundles.push_back(new NotificationBundleOption("bundle2", 1002));
     notificationPreferences.preferncesDB_ = nullptr;
     auto ret = notificationPreferences.SetExtensionSubscriptionClonedInvalidBundles(100, bundleOption, bundles);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionClonedInvalidBundles_004, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
     std::vector<sptr<NotificationBundleOption>> bundles;
     auto ret = notificationPreferences.SetExtensionSubscriptionClonedInvalidBundles(100, bundleOption, bundles);
@@ -2022,7 +2039,7 @@ HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionClonedInvalidBundl
 HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionClonedInvalidBundles_005, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
     std::vector<sptr<NotificationBundleOption>> bundles;
     bundles.push_back(new NotificationBundleOption("bundle1", 1001));
@@ -2034,38 +2051,38 @@ HWTEST_F(NotificationPreferencesTest, SetExtensionSubscriptionClonedInvalidBundl
 HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionCloneUpdatedBundles_001, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     sptr<NotificationBundleOption> bundleOption = nullptr;
     std::vector<sptr<NotificationBundleOption>> bundles;
     auto ret = notificationPreferences.GetExtensionSubscriptionCloneUpdatedBundles(100, bundleOption, bundles);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionCloneUpdatedBundles_002, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("", 100);
     std::vector<sptr<NotificationBundleOption>> bundles;
     auto ret = notificationPreferences.GetExtensionSubscriptionCloneUpdatedBundles(100, bundleOption, bundles);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionCloneUpdatedBundles_003, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
     std::vector<sptr<NotificationBundleOption>> bundles;
     notificationPreferences.preferncesDB_ = nullptr;
     auto ret = notificationPreferences.GetExtensionSubscriptionCloneUpdatedBundles(100, bundleOption, bundles);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_READY);
 }
 
 HWTEST_F(NotificationPreferencesTest, GetExtensionSubscriptionCloneUpdatedBundles_004, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
     std::vector<sptr<NotificationBundleOption>> insertBundles;
     insertBundles.push_back(new NotificationBundleOption("bundle1", 1001));
@@ -2093,7 +2110,7 @@ HWTEST_F(NotificationPreferencesTest, ClearExtensionSubscriptionClonedInvalidBun
 
     notificationPreferences.preferncesDB_ = nullptr;
     auto ret = notificationPreferences.ClearExtensionSubscriptionClonedInvalidBundles(100);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_READY);
 }
 
 HWTEST_F(NotificationPreferencesTest, ClearExtensionSubscriptionClonedInvalidBundles_002, Function | SmallTest | Level1)
@@ -2113,37 +2130,37 @@ HWTEST_F(NotificationPreferencesTest, ClearExtensionSubscriptionClonedInvalidBun
 HWTEST_F(NotificationPreferencesTest, RemoveExtensionSubscriptionCloneUpdatedBundles_001, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     sptr<NotificationBundleOption> bundleOption = nullptr;
     auto ret = notificationPreferences.RemoveExtensionSubscriptionCloneUpdatedBundles(100, bundleOption);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 HWTEST_F(NotificationPreferencesTest, RemoveExtensionSubscriptionCloneUpdatedBundles_002, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("", 100);
     std::vector<sptr<NotificationBundleOption>> bundles;
     auto ret = notificationPreferences.RemoveExtensionSubscriptionCloneUpdatedBundles(100, bundleOption);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 HWTEST_F(NotificationPreferencesTest, RemoveExtensionSubscriptionCloneUpdatedBundles_003, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
     std::vector<sptr<NotificationBundleOption>> bundles;
     notificationPreferences.preferncesDB_ = nullptr;
     auto ret = notificationPreferences.RemoveExtensionSubscriptionCloneUpdatedBundles(100, bundleOption);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_READY);
 }
 
 HWTEST_F(NotificationPreferencesTest, RemoveExtensionSubscriptionCloneUpdatedBundles_004, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
     std::vector<sptr<NotificationBundleOption>> insertBundles;
     insertBundles.push_back(new NotificationBundleOption("bundle1", 1001));
@@ -2171,7 +2188,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveExtensionSubscriptionCloneUpdatedBun
 HWTEST_F(NotificationPreferencesTest, RemoveExtensionSubscriptionCloneUpdatedBundles_005, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("test.bundle", 100);
     std::vector<sptr<NotificationBundleOption>> insertBundles;
     sptr<NotificationBundleOption> bundle1 = new NotificationBundleOption("bundle", 1001);
@@ -2362,7 +2379,7 @@ HWTEST_F(NotificationPreferencesTest, UpdateDoNotDisturbProfiles_00300, Function
     NotificationPreferences notificationPreferences;
     notificationPreferences.UpdateCloneBundleInfo(userId, cloneBundleInfo);
     auto res =notificationPreferences.UpdateDoNotDisturbProfiles(userId, profileId, name, bundleList);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 
     NotificationBundleOption bundleOne;
     bundleOne.SetBundleName("test1");
@@ -2371,11 +2388,11 @@ HWTEST_F(NotificationPreferencesTest, UpdateDoNotDisturbProfiles_00300, Function
 
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     res = notificationPreferences.UpdateDoNotDisturbProfiles(userId, profileId, name, bundleList);
-    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(res, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 
     notificationPreferences.preferncesDB_ = nullptr;
     res = notificationPreferences.UpdateDoNotDisturbProfiles(userId, profileId, name, bundleList);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_READY);
 }
 
  /**
@@ -2423,7 +2440,7 @@ HWTEST_F(NotificationPreferencesTest, GetTemplateSupported_00100, Function | Sma
     bool support = false;
     auto res = NotificationPreferences::GetInstance()->GetTemplateSupported(
         "", support);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -2569,7 +2586,7 @@ HWTEST_F(NotificationPreferencesTest, UpdateBatchCloneBundleInfo_00100, Function
     NotificationPreferences::GetInstance()->GetAllCloneBundleInfo(
         100, cloneBundleInfoRes);
     EXPECT_EQ(cloneBundleInfoRes.size(), cloneBundleInfos.size());
-    
+
     std::vector<sptr<NotificationDoNotDisturbProfile>> profilesInfos;
     NotificationPreferences::GetInstance()->GetAllCloneProfileInfo(
         100, profilesInfos);
@@ -2669,7 +2686,7 @@ HWTEST_F(NotificationPreferencesTest, SetHashCodeRule_00300, Function | SmallTes
     MockIsOsAccountExists(false);
     int32_t userId = -99;
     auto res = NotificationPreferences::GetInstance()->SetHashCodeRule(100, 1, userId);
-    ASSERT_EQ(res, ERR_ANS_GET_ACTIVE_USER_FAILED);
+    ASSERT_EQ(res, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
     MockIsOsAccountExists(isOsAccountExists);
 }
 
@@ -2718,7 +2735,7 @@ HWTEST_F(NotificationPreferencesTest, AddDoNotDisturbProfiles_0400, TestSize.Lev
     profiles.emplace_back(nullptr);
     int32_t userId = 1;
     auto res = notificationPreferences.AddDoNotDisturbProfiles(userId, profiles);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
     profiles.clear();
 
     sptr<NotificationDoNotDisturbProfile> profile(new (std::nothrow) NotificationDoNotDisturbProfile());
@@ -2733,7 +2750,7 @@ HWTEST_F(NotificationPreferencesTest, AddDoNotDisturbProfiles_0400, TestSize.Lev
 
     notificationPreferences.preferncesDB_ = nullptr;
     res = notificationPreferences.AddDoNotDisturbProfiles(userId, profiles);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_READY);
 }
 
 /**
@@ -2759,12 +2776,12 @@ HWTEST_F(NotificationPreferencesTest, RemoveDoNotDisturbProfiles_0400, TestSize.
     int32_t userId = 1;
     NotificationPreferences notificationPreferences;
     auto res = notificationPreferences.RemoveDoNotDisturbProfiles(userId, profiles);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
     profiles.clear();
 
     notificationPreferences.preferncesDB_ = nullptr;
     res = notificationPreferences.RemoveDoNotDisturbProfiles(userId, profiles);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_READY);
 }
 
 /**
@@ -2784,7 +2801,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationAllSlots_00400, Function
 
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     res = notificationPreferences.RemoveNotificationAllSlots(bundleOption_);
-    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(res, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 
@@ -2805,7 +2822,7 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationBundleProperty_00400, Funct
 
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     res = notificationPreferences.AddNotificationBundleProperty(bundleOption_);
-    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(res, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -2829,7 +2846,7 @@ HWTEST_F(NotificationPreferencesTest, SetDoNotDisturbDate_00300, Function | Smal
     EXPECT_EQ(res, ERR_OK);
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     res = notificationPreferences.SetDoNotDisturbDate(SYSTEM_APP_UID, date);
-    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(res, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -2852,7 +2869,7 @@ HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00700, Function | 
     slots.clear();
     slots.push_back(slot);
     res = notificationPreferences.UpdateNotificationSlots(bundleOption_, slots);
-    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(res, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -2863,7 +2880,7 @@ HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00700, Function | 
 HWTEST_F(NotificationPreferencesTest, SetNotificationSlotFlagsForBundle_00100, Function | SmallTest | Level1)
 {
     auto res = NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(nullptr, 63);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 
@@ -2884,7 +2901,7 @@ HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00700, Function | Sma
     EXPECT_EQ(res, ERR_OK);
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     res = notificationPreferences.AddNotificationSlots(bundleOption_, slots);
-    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(res, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -2905,7 +2922,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00600, Function | S
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     res = notificationPreferences.RemoveNotificationSlot(bundleOption_,
         NotificationConstant::SlotType::OTHER);
-    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(res, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -2925,7 +2942,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00500, Functio
 
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     res = notificationPreferences.RemoveNotificationForBundle(bundleOption_);
-    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(res, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -2933,7 +2950,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00500, Functio
  * @tc.desc: Test NullDeviceType
  * 1. Declare a string variable deviceType and leave it empty
  * 2. Call the SetDistributedEnabledBySlot/IsDistributedEnabledBySlot/SetSubscriberExistFlag/GetSubscriberExistFlag
- * 3. EXPECT that res is equal to ERR_ANS_INVALID_PARAM
+ * 3. EXPECT that res is equal to ERR_ANS_INNER_INVALID_PARAM
  * @tc.type: FUNC
  */
 HWTEST_F(NotificationPreferencesTest, NullDeviceTypeTest_001, Function | SmallTest | Level1)
@@ -2946,13 +2963,13 @@ HWTEST_F(NotificationPreferencesTest, NullDeviceTypeTest_001, Function | SmallTe
 
     NotificationConstant::SWITCH_STATE enabled = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
     res = notificationPreferences.SetDistributedEnabledBySlot(slotType, deviceType, enabled);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
     res = notificationPreferences.IsDistributedEnabledBySlot(slotType, deviceType, enabled);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
     res = notificationPreferences.SetSubscriberExistFlag(deviceType, flag);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
     res = notificationPreferences.GetSubscriberExistFlag(deviceType, flag);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -2980,28 +2997,28 @@ HWTEST_F(NotificationPreferencesTest, NullDeviceTypeTest_001, Function | SmallTe
     info->SetProfileName("test");
 
     res = notificationPreferences.SetKvToDb(key, value, userId);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_READY);
 
     res = notificationPreferences.SetByteToDb(key, vecValue, userId);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_READY);
 
     res = notificationPreferences.GetKvFromDb(key, value, userId);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_READY);
 
     res = notificationPreferences.GetByteFromDb(key, vecValue, userId);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_READY);
 
     res = notificationPreferences.GetBatchKvsFromDbContainsKey(key, mapValue, userId);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_READY);
 
     res = notificationPreferences.GetBatchKvsFromDb(key, mapValue, userId);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_READY);
 
     res = notificationPreferences.DeleteKvFromDb(key, userId);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_READY);
 
     res = notificationPreferences.DeleteBatchKvFromDb(keys, userId);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_READY);
 
     resStr = notificationPreferences.GetAdditionalConfig(key);
     EXPECT_EQ(resStr.size(), 0);
@@ -3057,13 +3074,13 @@ HWTEST_F(NotificationPreferencesTest, NullPreferncesDBTest_002, TestSize.Level1)
     EXPECT_EQ(res, false);
 
     res = notificationPreferences.SetDisableNotificationInfo(notificationDisable);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_READY);
 
     res = notificationPreferences.SetSubscriberExistFlag(NotificationConstant::HEADSET_DEVICE_TYPE, flag);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_READY);
 
     res = notificationPreferences.GetSubscriberExistFlag(NotificationConstant::HEADSET_DEVICE_TYPE, flag);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_READY);
 
     res = notificationPreferences.GetBundleRemoveFlag(bundleOption, slotType, 0);
     EXPECT_EQ(res, true);
@@ -3088,7 +3105,7 @@ HWTEST_F(NotificationPreferencesTest, GetBundleRemoveFlag_001, Function | SmallT
 
     res = notificationPreferences.SetBundleRemoveFlag(bundleOption, slotType, 0);
     EXPECT_EQ(res, true);
-    
+
     res = notificationPreferences.GetBundleRemoveFlag(bundleOption, slotType, 0);
     EXPECT_EQ(res, true);
 }
@@ -3317,7 +3334,7 @@ HWTEST_F(NotificationPreferencesTest, GetRestrictedModeTrustList_001, Function |
     auto ret = notificationPreferences.GetRestrictedModeTrustList(resultList);
     EXPECT_EQ(ret, true);
 }
- 
+
 /**
  * @tc.name: GetRestrictedModeTrustList_002
  * @tc.desc: Test GetRestrictedModeTrustList
@@ -3331,7 +3348,7 @@ HWTEST_F(NotificationPreferencesTest, GetRestrictedModeTrustList_002, Function |
     auto ret = notificationPreferences.GetRestrictedModeTrustList(resultList);
     EXPECT_EQ(ret, false);
 }
- 
+
 /**
  * @tc.name: GetRestrictedModeTrustList_003
  * @tc.desc: Test GetRestrictedModeTrustList
@@ -3341,7 +3358,7 @@ HWTEST_F(NotificationPreferencesTest, GetRestrictedModeTrustList_003, Function |
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
- 
+
     std::string key = "restricted_mode_trust_list";
     std::string value = R"([])";
     int32_t userId = -1;
@@ -3351,7 +3368,7 @@ HWTEST_F(NotificationPreferencesTest, GetRestrictedModeTrustList_003, Function |
     auto ret = notificationPreferences.GetRestrictedModeTrustList(resultList);
     EXPECT_EQ(ret, true);
 }
- 
+
 /**
  * @tc.name: GetRestrictedModeTrustList_004
  * @tc.desc: Test GetRestrictedModeTrustList
@@ -3361,7 +3378,7 @@ HWTEST_F(NotificationPreferencesTest, GetRestrictedModeTrustList_004, Function |
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
- 
+
     std::string key = "restricted_mode_trust_list";
     std::string value = R"(invalid json string)";
     int32_t userId = -1;
@@ -3371,7 +3388,7 @@ HWTEST_F(NotificationPreferencesTest, GetRestrictedModeTrustList_004, Function |
     auto ret = notificationPreferences.GetRestrictedModeTrustList(resultList);
     EXPECT_EQ(ret, false);
 }
- 
+
 /**
  * @tc.name: GetRestrictedModeTrustList_005
  * @tc.desc: Test GetRestrictedModeTrustList
@@ -3381,7 +3398,7 @@ HWTEST_F(NotificationPreferencesTest, GetRestrictedModeTrustList_005, Function |
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
- 
+
     std::string key = "restricted_mode_trust_list";
     std::string value = R"([{"userId":100,"trustList":["bundle1","bundle2"]}])";
     int32_t userId = -1;
@@ -3391,7 +3408,7 @@ HWTEST_F(NotificationPreferencesTest, GetRestrictedModeTrustList_005, Function |
     auto ret = notificationPreferences.GetRestrictedModeTrustList(resultList);
     EXPECT_EQ(ret, true);
 }
- 
+
 /**
  * @tc.name: SetRestrictedModeTrustList_001
  * @tc.desc: Test SetRestrictedModeTrustList
@@ -3405,7 +3422,7 @@ HWTEST_F(NotificationPreferencesTest, SetRestrictedModeTrustList_001, Function |
     auto result = notificationPreferences.SetRestrictedModeTrustList(value);
     EXPECT_TRUE(result);
 }
- 
+
 /**
  * @tc.name: SetRestrictedModeTrustList_002
  * @tc.desc: Test SetRestrictedModeTrustList
@@ -3419,7 +3436,7 @@ HWTEST_F(NotificationPreferencesTest, SetRestrictedModeTrustList_002, Function |
     auto result = notificationPreferences.SetRestrictedModeTrustList(value);
     EXPECT_FALSE(result);
 }
- 
+
 /**
  * @tc.name: SetRestrictedModeTrustList_003
  * @tc.desc: Test SetRestrictedModeTrustList
@@ -3433,7 +3450,7 @@ HWTEST_F(NotificationPreferencesTest, SetRestrictedModeTrustList_003, Function |
     auto result = notificationPreferences.SetRestrictedModeTrustList(value);
     EXPECT_FALSE(result);
 }
- 
+
 /**
  * @tc.name: SetRestrictedModeTrustList_004
  * @tc.desc: Test SetRestrictedModeTrustList
@@ -3447,7 +3464,7 @@ HWTEST_F(NotificationPreferencesTest, SetRestrictedModeTrustList_004, Function |
     auto result = notificationPreferences.SetRestrictedModeTrustList(value);
     EXPECT_FALSE(result);
 }
- 
+
 /**
  * @tc.name: SetRestrictedModeTrustList_005
  * @tc.desc: Test SetRestrictedModeTrustList
@@ -3602,7 +3619,7 @@ HWTEST_F(NotificationPreferencesTest, SetGeofenceEnabled_001, Function | SmallTe
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = nullptr;
     auto ret = notificationPreferences.SetGeofenceEnabled(false);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_READY);
 }
 
 /**
@@ -3616,7 +3633,7 @@ HWTEST_F(NotificationPreferencesTest, SetGeofenceEnabled_002, Function | SmallTe
     notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     auto ret = notificationPreferences.SetGeofenceEnabled(false);
-    EXPECT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -3630,7 +3647,7 @@ HWTEST_F(NotificationPreferencesTest, IsGeofenceEnabled_001, Function | SmallTes
     notificationPreferences.preferncesDB_ = nullptr;
     bool enabled = false;
     auto ret = notificationPreferences.IsGeofenceEnabled(enabled);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_READY);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_READY);
 }
 
 /**
@@ -3645,7 +3662,7 @@ HWTEST_F(NotificationPreferencesTest, IsGeofenceEnabled_002, Function | SmallTes
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     bool enabled = false;
     auto ret = notificationPreferences.IsGeofenceEnabled(enabled);
-    EXPECT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -3662,7 +3679,7 @@ HWTEST_F(NotificationPreferencesTest, IsPriorityEnabledByBundle_001, Function | 
     bundleOption->SetUid(1000);
     NotificationConstant::PriorityEnableStatus enableStatus;
     auto ret = notificationPreferences.IsPriorityEnabledByBundle(bundleOption, enableStatus);
-    EXPECT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -3677,7 +3694,7 @@ HWTEST_F(NotificationPreferencesTest, IsPriorityEnabledByBundle_002, Function | 
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     NotificationConstant::PriorityEnableStatus enableStatus;
     auto ret = notificationPreferences.IsPriorityEnabledByBundle(nullptr, enableStatus);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -3694,7 +3711,7 @@ HWTEST_F(NotificationPreferencesTest, GetBundlePriorityConfig_001, Function | Sm
     bundleOption->SetUid(1000);
     std::string configValue;
     auto ret = notificationPreferences.GetBundlePriorityConfig(bundleOption, configValue);
-    EXPECT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -3709,7 +3726,7 @@ HWTEST_F(NotificationPreferencesTest, GetBundlePriorityConfig_002, Function | Sm
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     std::string configValue;
     auto ret = notificationPreferences.GetBundlePriorityConfig(nullptr, configValue);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -3724,7 +3741,7 @@ HWTEST_F(NotificationPreferencesTest, PutPriorityEnabledByBundleV2_001, Function
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     NotificationConstant::SWITCH_STATE priorityStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     auto ret = notificationPreferences.PutPriorityEnabledByBundleV2(nullptr, priorityStatus);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -3739,7 +3756,7 @@ HWTEST_F(NotificationPreferencesTest, GetPriorityEnabledByBundleV2_001, Function
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     NotificationConstant::SWITCH_STATE priorityStatus;
     auto ret = notificationPreferences.GetPriorityEnabledByBundleV2(nullptr, priorityStatus);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -3754,7 +3771,7 @@ HWTEST_F(NotificationPreferencesTest, PutPriorityStrategyByBundle_001, Function 
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     int64_t strategy = 32;
     auto ret = notificationPreferences.PutPriorityStrategyByBundle(nullptr, strategy);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -3769,7 +3786,7 @@ HWTEST_F(NotificationPreferencesTest, GetPriorityStrategyByBundle_001, Function 
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     int64_t strategy = 32;
     auto ret = notificationPreferences.GetPriorityStrategyByBundle(nullptr, strategy);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -3843,7 +3860,7 @@ HWTEST_F(NotificationPreferencesTest, SetAncoApplicationUserIdWithBundleOption_0
 {
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundle", 1000);
     std::vector<int32_t> testUserIds = {0, 100, 999999};
-    
+
     for (auto userId : testUserIds) {
         EXPECT_NO_THROW({
             NotificationPreferences::GetInstance()->SetAncoApplicationUserId(bundleOption, userId);
@@ -3864,7 +3881,7 @@ HWTEST_F(NotificationPreferencesTest, SetAncoApplicationUserIdWithBundleOption_0
         "com.example.test3"
     };
     int32_t testUserId = 100;
-    
+
     for (auto bundleName : testBundleNames) {
         sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, 1000);
         EXPECT_EQ(bundleOption->GetBundleName(), bundleName);
@@ -3885,7 +3902,7 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00001, Function 
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
-    
+
     std::string blockListJson = R"({
         "userId" : 100,
         "bundleList" : [
@@ -3912,11 +3929,11 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00002, Function 
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
-    
+
     std::string emptyBlockListJson = "{\"userId\":100,\"bundleList\":[]}";
     auto ret = notificationPreferences.SetCollaborationBlockList(emptyBlockListJson);
     EXPECT_EQ(ret, ERR_OK);
-    
+
     std::string testBundleName = "com.test.bundle";
     int32_t testUid = 100 * 200000 + 1000;
     bool isAllowed = notificationPreferences.IsCollaborationAllowed(testBundleName, testUid);
@@ -3932,19 +3949,19 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00003, Function 
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
-    
+
     std::string firstBlockListJson = "{\"userId\":100,\"bundleList\":[{\"bundleName\":\"com.bundle1\",\"index\":1}]}";
     auto ret = notificationPreferences.SetCollaborationBlockList(firstBlockListJson);
     EXPECT_EQ(ret, ERR_OK);
-    
+
     std::string secondBlockListJson = "{\"userId\":100,\"bundleList\":[{\"bundleName\":\"com.bundle2\",\"index\":2}]}";
     ret = notificationPreferences.SetCollaborationBlockList(secondBlockListJson);
     EXPECT_EQ(ret, ERR_OK);
-    
+
     int32_t uid1 = 100 * 200000 + 1000 + 1;
     bool isAllowed = notificationPreferences.IsCollaborationAllowed("com.bundle1", uid1);
     EXPECT_EQ(isAllowed, true);
-    
+
     int32_t uid2 = 100 * 200000 + 1000 + 2;
     isAllowed = notificationPreferences.IsCollaborationAllowed("com.bundle2", uid2);
     EXPECT_EQ(isAllowed, false);
@@ -3958,10 +3975,10 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00003, Function 
 HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00004, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     std::string invalidJson = "{\"bundleList\":[{\"bundleName\":\"com.example\",\"index\":1}]}";
     auto ret = notificationPreferences.SetCollaborationBlockList(invalidJson);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -3972,10 +3989,10 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00004, Function 
 HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00005, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     std::string invalidJson = "{\"userId\":0,\"bundleList\":[{\"bundleName\":\"com.example\",\"index\":1}]}";
     auto ret = notificationPreferences.SetCollaborationBlockList(invalidJson);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -3986,10 +4003,10 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00005, Function 
 HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00006, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     std::string emptyJson = "";
     auto ret = notificationPreferences.SetCollaborationBlockList(emptyJson);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -4000,10 +4017,10 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00006, Function 
 HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00007, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     std::string malformedJson = "{\"userId\":100,\"bundleList\":[invalid";
     auto ret = notificationPreferences.SetCollaborationBlockList(malformedJson);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -4014,10 +4031,10 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00007, Function 
 HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00008, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     std::string invalidJson = "{\"userId\":100}";
     auto ret = notificationPreferences.SetCollaborationBlockList(invalidJson);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -4029,7 +4046,7 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00009, Function 
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
-    
+
     std::string blockListJson = "{\"userId\":100,\"bundleList\":[{\"index\":1}]}";
     auto ret = notificationPreferences.SetCollaborationBlockList(blockListJson);
     EXPECT_EQ(ret, ERR_OK);
@@ -4044,7 +4061,7 @@ HWTEST_F(NotificationPreferencesTest, IsCollaborationAllowed_00001, Function | S
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
-    
+
     std::string blockListJson = R"({
         "userId" : 100,
         "bundleList" : [
@@ -4059,15 +4076,15 @@ HWTEST_F(NotificationPreferencesTest, IsCollaborationAllowed_00001, Function | S
         ]
     })";
     notificationPreferences.SetCollaborationBlockList(blockListJson);
-    
+
     int32_t uid1 = 100 * 200000 + 1000 + 1;
     bool isAllowed1 = notificationPreferences.IsCollaborationAllowed("com.example.blocked1", uid1);
     EXPECT_EQ(isAllowed1, false);
-    
+
     int32_t uid2 = 100 * 200000 + 1000 + 2;
     bool isAllowed2 = notificationPreferences.IsCollaborationAllowed("com.example.blocked2", uid2);
     EXPECT_EQ(isAllowed2, false);
-    
+
     int32_t uid3 = 100 * 200000 + 1000;
     bool isAllowed3 = notificationPreferences.IsCollaborationAllowed("com.example.allowed", uid3);
     EXPECT_EQ(isAllowed3, true);
@@ -4082,7 +4099,7 @@ HWTEST_F(NotificationPreferencesTest, IsCollaborationAllowed_00002, Function | S
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
-    
+
     std::string blockListJson = R"({
         "userId" : 100,
         "bundleList" : [
@@ -4098,15 +4115,15 @@ HWTEST_F(NotificationPreferencesTest, IsCollaborationAllowed_00002, Function | S
     })";
     auto ret = notificationPreferences.SetCollaborationBlockList(blockListJson);
     EXPECT_EQ(ret, ERR_OK);
-    
+
     int32_t uid1 = 100 * 200000 + 1000 + 1;
     bool isAllowed = notificationPreferences.IsCollaborationAllowed("com.bundle1", uid1);
     EXPECT_EQ(isAllowed, false);
-    
+
     int32_t uid2 = 100 * 200000 + 1000 + 2;
     isAllowed = notificationPreferences.IsCollaborationAllowed("com.bundle2", uid2);
     EXPECT_EQ(isAllowed, false);
-    
+
     int32_t uid3 = 100 * 200000 + 1000;
     isAllowed = notificationPreferences.IsCollaborationAllowed("com.bundle3", uid3);
     EXPECT_EQ(isAllowed, true);
@@ -4120,7 +4137,7 @@ HWTEST_F(NotificationPreferencesTest, IsCollaborationAllowed_00002, Function | S
 HWTEST_F(NotificationPreferencesTest, IsCollaborationAllowed_00003, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     int32_t uid = 100 * 200000 + 1000;
     bool isAllowed = notificationPreferences.IsCollaborationAllowed("", uid);
     EXPECT_EQ(isAllowed, true);
@@ -4135,7 +4152,7 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00010, Function 
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
-    
+
     std::string blockListJson = R"({
         "userId" : 100,
         "bundleList" : [
@@ -4150,7 +4167,7 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00010, Function 
     })";
     auto ret = notificationPreferences.SetCollaborationBlockList(blockListJson);
     EXPECT_EQ(ret, ERR_OK);
-    
+
     int32_t uid = 100 * 200000 + 1000 + 1;
     bool isAllowed = notificationPreferences.IsCollaborationAllowed("com.example.valid", uid);
     EXPECT_EQ(isAllowed, false);
@@ -4165,7 +4182,7 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00011, Function 
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
-    
+
     std::string blockListJson = R"({
         "userId" : 100,
         "bundleList" : [
@@ -4181,7 +4198,7 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00011, Function 
     })";
     auto ret = notificationPreferences.SetCollaborationBlockList(blockListJson);
     EXPECT_EQ(ret, ERR_OK);
-    
+
     int32_t uid = 100 * 200000 + 1000 + 2;
     bool isAllowed = notificationPreferences.IsCollaborationAllowed("com.example.valid", uid);
     EXPECT_EQ(isAllowed, false);
@@ -4196,7 +4213,7 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00012, Function 
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
-    
+
     std::string blockListJson = R"({
         "userId" : 100,
         "bundleList" : [
@@ -4208,7 +4225,7 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00012, Function 
     })";
     auto ret = notificationPreferences.SetCollaborationBlockList(blockListJson);
     EXPECT_EQ(ret, ERR_OK);
-    
+
     int32_t uid = 100 * 200000 + 1000 + 0;
     bool isAllowed = notificationPreferences.IsCollaborationAllowed("com.example.test", uid);
     EXPECT_EQ(isAllowed, false);
@@ -4223,7 +4240,7 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00013, Function 
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
-    
+
     std::string blockListJson = R"({
         "userId" : 100,
         "bundleList" : [
@@ -4234,7 +4251,7 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00013, Function 
     })";
     auto ret = notificationPreferences.SetCollaborationBlockList(blockListJson);
     EXPECT_EQ(ret, ERR_OK);
-    
+
     int32_t uid = 100 * 200000 + 1000 + 0;
     bool isAllowed = notificationPreferences.IsCollaborationAllowed("com.example.test", uid);
     EXPECT_EQ(isAllowed, false);
@@ -4250,7 +4267,7 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00014, Function 
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
-    
+
     std::string blockListJson = R"({
         "userId" : 100,
         "bundleList" : [
@@ -4261,7 +4278,7 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00014, Function 
         ]
     })";
     auto ret = notificationPreferences.SetCollaborationBlockList(blockListJson);
-    EXPECT_EQ(ret, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -4272,7 +4289,7 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00014, Function 
 HWTEST_F(NotificationPreferencesTest, IsCollaborationAllowed_00004, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     int32_t invalidUid = -1;
     bool isAllowed = notificationPreferences.IsCollaborationAllowed("com.example.test", invalidUid);
     EXPECT_EQ(isAllowed, true);
@@ -4286,7 +4303,7 @@ HWTEST_F(NotificationPreferencesTest, IsCollaborationAllowed_00004, Function | S
 HWTEST_F(NotificationPreferencesTest, IsCollaborationAllowed_00005, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    
+
     int32_t uidWithInvalidUserId = 0 * 200000 + 1000;
     bool isAllowed = notificationPreferences.IsCollaborationAllowed("com.example.test", uidWithInvalidUserId);
     EXPECT_EQ(isAllowed, true);
@@ -4301,7 +4318,7 @@ HWTEST_F(NotificationPreferencesTest, IsCollaborationAllowed_00006, Function | S
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
-    
+
     std::string blockListJson = R"({
         "userId" : 100,
         "bundleList" : [
@@ -4312,16 +4329,16 @@ HWTEST_F(NotificationPreferencesTest, IsCollaborationAllowed_00006, Function | S
         ]
     })";
     notificationPreferences.SetCollaborationBlockList(blockListJson);
-    
+
     EXPECT_EQ(notificationPreferences.collaborationBlockListLoadedMap_[100], true);
-    
+
     notificationPreferences.collaborationBlockListLoadedMap_.erase(100);
     notificationPreferences.collaborationBlockListCache_.erase(100);
-    
+
     int32_t uid = 100 * 200000 + 1000 + 1;
     bool isAllowed = notificationPreferences.IsCollaborationAllowed("com.example.lazyload", uid);
     EXPECT_EQ(isAllowed, false);
-    
+
     EXPECT_EQ(notificationPreferences.collaborationBlockListLoadedMap_[100], true);
 }
 
@@ -4334,7 +4351,7 @@ HWTEST_F(NotificationPreferencesTest, IsCollaborationAllowed_00007, Function | S
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = nullptr;
-    
+
     int32_t uid = 100 * 200000 + 1000 + 1;
     bool isAllowed = notificationPreferences.IsCollaborationAllowed("com.example.test", uid);
     EXPECT_EQ(isAllowed, true);
@@ -4349,7 +4366,7 @@ HWTEST_F(NotificationPreferencesTest, IsCollaborationAllowed_00008, Function | S
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
-    
+
     std::string blockListJson = R"({
         "userId" : 100,
         "bundleList" : [
@@ -4360,18 +4377,46 @@ HWTEST_F(NotificationPreferencesTest, IsCollaborationAllowed_00008, Function | S
         ]
     })";
     notificationPreferences.SetCollaborationBlockList(blockListJson);
-    
+
     int32_t uid1 = 100 * 200000 + 1000 + 1;
     bool isAllowed1 = notificationPreferences.IsCollaborationAllowed("com.example.clone", uid1);
     EXPECT_EQ(isAllowed1, false);
-    
+
     int32_t uid2 = 100 * 200000 + 1000 + 2;
     bool isAllowed2 = notificationPreferences.IsCollaborationAllowed("com.example.clone", uid2);
     EXPECT_EQ(isAllowed2, true);
-    
+
     int32_t uid0 = 100 * 200000 + 1000 + 0;
     bool isAllowed0 = notificationPreferences.IsCollaborationAllowed("com.example.clone", uid0);
     EXPECT_EQ(isAllowed0, true);
+}
+
+/**
+ * @tc.name: SetCollaborationBlockList_00015
+ * @tc.desc: Test SetCollaborationBlockList with userId = 0 should fail (ZERO_USERID validation)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00015, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+
+    std::string invalidJson = "{\"userId\":0,\"bundleList\":[{\"bundleName\":\"com.example\",\"index\":1}]}";
+    auto ret = notificationPreferences.SetCollaborationBlockList(invalidJson);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetCollaborationBlockList_00016
+ * @tc.desc: Test SetCollaborationBlockList with userId = -1 should fail
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00016, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+
+    std::string invalidJson = "{\"userId\":-1,\"bundleList\":[{\"bundleName\":\"com.example\",\"index\":1}]}";
+    auto ret = notificationPreferences.SetCollaborationBlockList(invalidJson);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 // ========== Notification Switch Tests ==========
@@ -4404,7 +4449,7 @@ HWTEST_F(NotificationPreferencesTest, SetNotificationSwitch_00200, Function | Sm
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
     int32_t userId = 100;
     auto res = notificationPreferences.SetNotificationSwitch(switchName, state, userId);
-    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(res, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
@@ -4449,7 +4494,7 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationSwitch_00200, Function | Sm
     int32_t userId = 100;
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     auto res = notificationPreferences.GetNotificationSwitch(switchName, userId, state);
-    EXPECT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(res, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**

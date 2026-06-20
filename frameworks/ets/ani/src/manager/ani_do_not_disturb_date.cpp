@@ -14,7 +14,8 @@
  */
 #include "ani_do_not_disturb_date.h"
 
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -23,6 +24,8 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackDisturbInfo* asyncCallbackInfo)
 {
     ANS_LOGD("Delete AsyncCallbackDisturbInfo Without Promise");
@@ -106,7 +109,7 @@ void HandleDoDisturbDataCallbackComplete(ani_env* env, WorkStatus status, void* 
                 NotificationSts::CreateBoolean(envCurr, asyncCallbackInfo->isSupportDoNotDisturbMode);
             if (asyncCallbackInfo->info.result == nullptr) {
                 ANS_LOGE("CreateBoolean for isSupportDoNotDisturbMode failed");
-                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             }
             break;
         }
@@ -117,7 +120,7 @@ void HandleDoDisturbDataCallbackComplete(ani_env* env, WorkStatus status, void* 
             if (!OHOS::NotificationSts::WarpNotificationDoNotDisturbDate(envCurr,
                 datePtr, asyncCallbackInfo->info.result)) {
                 ANS_LOGE("WarpNotificationDoNotDisturbDate failed");
-                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             }
             break;
         }
@@ -159,8 +162,9 @@ ani_object AniSetDoNotDisturbDate(ani_env *env, ani_object date, ani_object call
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackDisturbInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetDoNotDisturbDate(
-                    asyncCallbackInfo->doNotDisturbDate);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetDoNotDisturbDate(
+                        asyncCallbackInfo->doNotDisturbDate);
             }
         },
         HandleDoDisturbDataCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -206,8 +210,9 @@ ani_object AniSetDoNotDisturbDateWithId(ani_env *env, ani_object date, ani_int u
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackDisturbInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetDoNotDisturbDate(
-                    asyncCallbackInfo->userId, asyncCallbackInfo->doNotDisturbDate);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetDoNotDisturbDate(
+                        asyncCallbackInfo->userId, asyncCallbackInfo->doNotDisturbDate);
             }
         },
         HandleDoDisturbDataCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -249,8 +254,9 @@ ani_object AniGetDoNotDisturbDate(ani_env *env, ani_object callback)
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackDisturbInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetDoNotDisturbDate(
-                    asyncCallbackInfo->doNotDisturbDate);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbDate(
+                        asyncCallbackInfo->doNotDisturbDate);
             }
         },
         HandleDoDisturbDataCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -293,8 +299,9 @@ ani_object AniGetDoNotDisturbDateWithId(ani_env *env, ani_int userId, ani_object
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackDisturbInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetDoNotDisturbDate(
-                    asyncCallbackInfo->userId, asyncCallbackInfo->doNotDisturbDate);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbDate(
+                        asyncCallbackInfo->userId, asyncCallbackInfo->doNotDisturbDate);
             }
         },
         HandleDoDisturbDataCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -336,8 +343,9 @@ ani_object AniIsSupportDoNotDisturbMode(ani_env *env, ani_object callback)
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackDisturbInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::DoesSupportDoNotDisturbMode(
-                    asyncCallbackInfo->isSupportDoNotDisturbMode);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->DoesSupportDoNotDisturbMode(
+                        asyncCallbackInfo->isSupportDoNotDisturbMode);
             }
         },
         HandleDoDisturbDataCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));

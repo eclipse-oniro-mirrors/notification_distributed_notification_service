@@ -30,7 +30,7 @@ bool ParseDisabledParameters(const napi_env &env, const napi_value &value, bool 
     if (valuetype != napi_boolean) {
         ANS_LOGE("wrong argument type. Bool expected");
         std::string msg = "Incorrect parameter types.The type of disabled must be boolean.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
     napi_get_value_bool(env, value, &disabled);
@@ -45,7 +45,7 @@ bool ParseBundleListParameters(const napi_env &env, const napi_value &value, std
     if (!isArray) {
         ANS_LOGE("wrong argument type. Array expected");
         std::string msg = "Incorrect parameter types.The type of bundle list must be array.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
     uint32_t length = 0;
@@ -53,7 +53,7 @@ bool ParseBundleListParameters(const napi_env &env, const napi_value &value, std
     if (length == 0) {
         ANS_LOGE("the bundle list length is zero");
         std::string msg = "Mandatory parameters are left unspecified. The bundle list length is zero.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
     napi_valuetype valuetype = napi_undefined;
@@ -64,7 +64,7 @@ bool ParseBundleListParameters(const napi_env &env, const napi_value &value, std
         if (valuetype != napi_string) {
             ANS_LOGE("wrong bundle name type");
             std::string msg = "Incorrect parameter types.The type of bundle name must be string.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return false;
         }
         char str[STR_MAX_SIZE] = {0};
@@ -73,7 +73,7 @@ bool ParseBundleListParameters(const napi_env &env, const napi_value &value, std
         if (std::strlen(str) == 0) {
             ANS_LOGE("bundle name length is zero");
             std::string msg = "Mandatory parameters are left unspecified.The bundle name length is zero.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return false;
         }
         bundleList.emplace_back(str);
@@ -87,13 +87,13 @@ bool ParseUserIdParameters(const napi_env &env, const napi_value &value, int32_t
     if (status != napi_ok) {
         ANS_LOGE("Failed to parse the third parameter as number");
         std::string msg = "Third argument must be a number";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
     if (userId < 0 || userId > MAX_USER_ID) {
         ANS_LOGE("Invalid userId");
         std::string msg = "UserId must be a non-negative integer and less than " + std::to_string(MAX_USER_ID);
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
     return true;
@@ -111,7 +111,7 @@ bool ParseDisableNotificationParameters(
         ANS_LOGE("wrong number of arguments");
         std::string msg =
             "Wrong number of arguments. Expected 2 or 3, but get " + std::to_string(argc);
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
     // argv[0]: disabled

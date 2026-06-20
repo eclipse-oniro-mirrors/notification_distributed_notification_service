@@ -19,11 +19,11 @@
 #include "errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 
 namespace OHOS {
 namespace Notification {
 namespace Infra {
-
 FfrtQueueImpl::FfrtQueueImpl(const std::string queueName) : name_(queueName)
 {
     queue_ = std::make_shared<ffrt::queue>(name_.c_str());
@@ -85,7 +85,7 @@ int32_t FfrtQueueImpl::Submit(const std::function<void()>& func)
 {
     if (queue_ == nullptr) {
         ANS_LOGE("Invalid queue %{public}s", name_.c_str());
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     queue_->submit(func);
@@ -96,7 +96,7 @@ int32_t FfrtQueueImpl::Submit(const std::function<void()>&& func)
 {
     if (queue_ == nullptr) {
         ANS_LOGE("Invalid queue %{public}s", name_.c_str());
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     queue_->submit(std::move(func));
@@ -107,7 +107,7 @@ int32_t FfrtQueueImpl::Submit(const std::function<void()>& func, const int64_t d
 {
     if (queue_ == nullptr) {
         ANS_LOGE("Invalid queue %{public}s %{public}s", name_.c_str(), taskName.c_str());
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     queue_->submit(func, ffrt::task_attr().name(taskName.c_str()).delay(delayTime));
@@ -118,7 +118,7 @@ int32_t FfrtQueueImpl::Submit(const std::function<void()>&& func, const int64_t 
 {
     if (queue_ == nullptr) {
         ANS_LOGE("Invalid queue %{public}s %{public}s", name_.c_str(), taskName.c_str());
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     queue_->submit(std::move(func), ffrt::task_attr().name(taskName.c_str()).delay(delayTime));
@@ -129,7 +129,7 @@ int32_t FfrtQueueImpl::SyncSubmit(std::function<void()>& func)
 {
     if (queue_ == nullptr) {
         ANS_LOGE("Invalid queue %{public}s", name_.c_str());
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ffrt::task_handle handler = queue_->submit_h(func);
@@ -142,7 +142,7 @@ int32_t FfrtQueueImpl::SyncSubmit(std::function<void()>&& func)
 {
     if (queue_ == nullptr) {
         ANS_LOGE("Invalid queue %{public}s", name_.c_str());
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ffrt::task_handle handler = queue_->submit_h(std::move(func));

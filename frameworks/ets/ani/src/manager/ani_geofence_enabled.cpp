@@ -16,7 +16,8 @@
 #include "ani_geofence_enabled.h"
 
 #include "ans_log_wrapper.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "sts_common.h"
 #include "sts_notification_manager.h"
 #include "sts_throw_erro.h"
@@ -24,6 +25,8 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackGeofenceInfo* asyncCallbackInfo)
 {
     ANS_LOGD("Delete AsyncCallbackGeofenceInfo Without Promise");
@@ -117,8 +120,9 @@ ani_object AniSetGeofenceEnabled(ani_env *env, ani_boolean enabled, ani_object c
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackGeofenceInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetGeofenceEnabled(
-                    asyncCallbackInfo->isGeofence);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetGeofenceEnabled(
+                        asyncCallbackInfo->isGeofence);
             }
         },
         [](ani_env* env, WorkStatus status, void* data) {
@@ -160,7 +164,7 @@ void HandleIsGeofenceEnabledComplete(ani_env* env, WorkStatus workStatus, void* 
     asyncCallbackInfo->info.result = NotificationSts::CreateBoolean(envCurr, asyncCallbackInfo->isGeofence);
     if (asyncCallbackInfo->info.result == nullptr) {
         ANS_LOGE("CreateBoolean for isGeofence failed");
-        asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+        asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
     }
     NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
     DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
@@ -192,8 +196,9 @@ ani_object AniIsGeofenceEnabled(ani_env *env, ani_object callback)
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackGeofenceInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::IsGeofenceEnabled(
-                    asyncCallbackInfo->isGeofence);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->IsGeofenceEnabled(
+                        asyncCallbackInfo->isGeofence);
             }
         },
         HandleIsGeofenceEnabledComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));

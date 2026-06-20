@@ -18,6 +18,7 @@
 
 #define private public
 #include "advanced_notification_service.h"
+#include "ans_service_errors.h"
 #include "advanced_datashare_helper.h"
 #include "notification_check_request.h"
 #include "notification_preferences.h"
@@ -82,7 +83,7 @@ HWTEST_F(AdvancedNotificationBadgeManagerTest, SetNotificationBadgeNum_0100, Fun
     EXPECT_EQ(ret, ERR_OK);
     advancedNotificationService_->notificationSvrQueue_.Reset();
     ret = advancedNotificationService_->SetNotificationBadgeNum(num);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -94,7 +95,7 @@ HWTEST_F(AdvancedNotificationBadgeManagerTest, SetShowBadgeEnabledForBundles_010
 {
     std::map<sptr<NotificationBundleOption>, bool> bundleOptions;
     auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundles(bundleOptions);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -131,7 +132,7 @@ HWTEST_F(AdvancedNotificationBadgeManagerTest, SetShowBadgeEnabledForBundles_030
     MockIsSystemApp(false);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundles(bundleOptions);
-    EXPECT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(ret, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -147,7 +148,7 @@ HWTEST_F(AdvancedNotificationBadgeManagerTest, SetShowBadgeEnabledForBundles_040
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
     auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundles(bundleOptions);
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -164,7 +165,7 @@ HWTEST_F(AdvancedNotificationBadgeManagerTest, SetShowBadgeEnabledForBundles_050
     MockIsVerfyPermisson(true);
     advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundles(bundleOptions);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -192,7 +193,7 @@ HWTEST_F(AdvancedNotificationBadgeManagerTest, GetShowBadgeEnabledForBundles_020
     MockIsSystemApp(false);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
-    EXPECT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(ret, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -207,7 +208,7 @@ HWTEST_F(AdvancedNotificationBadgeManagerTest, GetShowBadgeEnabledForBundles_030
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
     auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -223,7 +224,7 @@ HWTEST_F(AdvancedNotificationBadgeManagerTest, GetShowBadgeEnabledForBundles_040
     MockIsVerfyPermisson(true);
     advancedNotificationService_->notificationSvrQueue_.Reset();
     auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 }  // namespace Notification
 }  // namespace OHOS

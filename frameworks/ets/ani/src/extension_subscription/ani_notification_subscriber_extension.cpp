@@ -14,7 +14,8 @@
  */
 #include "ani_notification_subscriber_extension.h"
 
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -23,7 +24,9 @@
 
 namespace OHOS {
 namespace NotificationExtensionSubScriptionSts {
+using OHOS::Notification::AnsNotification;
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
 void DeleteCallBackInfoWithoutPromise(ani_env *env, AsyncCallbackInfoNotificationExtension *asyncCallbackInfo)
 {
     ANS_LOGD("Delete AsyncCallbackInfoNotificationExtension Without Promise");
@@ -93,7 +96,7 @@ ani_object AniSubscribe(ani_env *env, ani_object notificationInfoArrayobj)
         env, notificationInfoArrayobj, asyncCallbackInfo->subscriptionInfo);
     if (statusParam != ANI_OK) {
         ANS_LOGE("UnwarpNotificationExtensionSubscribeInfoArrayByAniObj failed with %{public}d", statusParam);
-        NotificationSts::ThrowErrorWithInvalidParam(env);
+        NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_INVALID_PARAM);
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
@@ -115,8 +118,9 @@ ani_object AniSubscribe(ani_env *env, ani_object notificationInfoArrayobj)
         [](ani_env *env, void *data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::NotificationExtensionSubscribe(
-                    asyncCallbackInfo->subscriptionInfo);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->NotificationExtensionSubscribe(
+                        asyncCallbackInfo->subscriptionInfo);
             }
         },
         HandleAsyncCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -158,7 +162,7 @@ ani_object AniUnsubscribe(ani_env *env)
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    Notification::NotificationHelper::NotificationExtensionUnsubscribe();
+                    DelayedSingleton<AnsNotification>::GetInstance()->NotificationExtensionUnsubscribe();
             }
         },
         HandleAsyncCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -200,7 +204,8 @@ ani_object AniGetSubscribeInfo(ani_env *env)
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    Notification::NotificationHelper::GetSubscribeInfo(asyncCallbackInfo->subscriptionInfo);
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetSubscribeInfo(
+                        asyncCallbackInfo->subscriptionInfo);
             }
         },
         HandleAsyncCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -242,7 +247,8 @@ ani_object AniGetAllSubscriptionBundles(ani_env *env)
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    Notification::NotificationHelper::GetAllSubscriptionBundles(asyncCallbackInfo->bundles);
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetAllSubscriptionBundles(
+                        asyncCallbackInfo->bundles);
             }
         },
         HandleAsyncCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -284,7 +290,7 @@ ani_object AniIsUserGranted(ani_env *env)
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    Notification::NotificationHelper::IsUserGranted(asyncCallbackInfo->enabled);
+                    DelayedSingleton<AnsNotification>::GetInstance()->IsUserGranted(asyncCallbackInfo->enabled);
             }
         },
         HandleAsyncCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -310,7 +316,7 @@ ani_object AniGetUserGrantedState(ani_env *env, ani_object bundleOption)
     if (!NotificationSts::UnwrapBundleOption(env, bundleOption, asyncCallbackInfo->targetBundle) ||
         asyncCallbackInfo->targetBundle.GetBundleName().empty()) {
         ANS_LOGE("UnwrapBundleOption failed");
-        NotificationSts::ThrowErrorWithInvalidParam(env);
+        NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_INVALID_PARAM);
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
@@ -332,8 +338,9 @@ ani_object AniGetUserGrantedState(ani_env *env, ani_object bundleOption)
         [](ani_env *env, void *data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetUserGrantedState(
-                    asyncCallbackInfo->targetBundle, asyncCallbackInfo->enabled);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedState(
+                        asyncCallbackInfo->targetBundle, asyncCallbackInfo->enabled);
             }
         },
         HandleAsyncCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -359,7 +366,7 @@ ani_object AniSetUserGrantedState(ani_env *env, ani_object bundleOption, ani_boo
     if (!NotificationSts::UnwrapBundleOption(env, bundleOption, asyncCallbackInfo->targetBundle) ||
         asyncCallbackInfo->targetBundle.GetBundleName().empty()) {
         ANS_LOGE("UnwrapBundleOption failed");
-        NotificationSts::ThrowErrorWithInvalidParam(env);
+        NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_INVALID_PARAM);
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
@@ -382,8 +389,9 @@ ani_object AniSetUserGrantedState(ani_env *env, ani_object bundleOption, ani_boo
         [](ani_env *env, void *data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetUserGrantedState(
-                    asyncCallbackInfo->targetBundle, asyncCallbackInfo->enabled);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetUserGrantedState(
+                        asyncCallbackInfo->targetBundle, asyncCallbackInfo->enabled);
             }
         },
         HandleAsyncCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -409,7 +417,7 @@ ani_object AniGetUserGrantedEnabledBundles(ani_env *env, ani_object bundleOption
     if (!NotificationSts::UnwrapBundleOption(env, bundleOption, asyncCallbackInfo->targetBundle) ||
         asyncCallbackInfo->targetBundle.GetBundleName().empty()) {
         ANS_LOGE("UnwrapBundleOption failed");
-        NotificationSts::ThrowErrorWithInvalidParam(env);
+        NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_INVALID_PARAM);
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
@@ -431,8 +439,9 @@ ani_object AniGetUserGrantedEnabledBundles(ani_env *env, ani_object bundleOption
         [](ani_env *env, void *data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetUserGrantedEnabledBundles(
-                    asyncCallbackInfo->targetBundle, asyncCallbackInfo->bundles);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedEnabledBundles(
+                        asyncCallbackInfo->targetBundle, asyncCallbackInfo->bundles);
             }
         },
         HandleAsyncCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -474,7 +483,8 @@ ani_object AniGetUserGrantedEnabledBundlesForSelf(ani_env *env)
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    Notification::NotificationHelper::GetUserGrantedEnabledBundlesForSelf(asyncCallbackInfo->bundles);
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedEnabledBundlesForSelf(
+                        asyncCallbackInfo->bundles);
             }
         },
         HandleAsyncCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -500,14 +510,14 @@ ani_object AniSetUserGrantedBundleState(ani_env *env, ani_object bundleOption, a
     if (!NotificationSts::UnwrapBundleOption(env, bundleOption, asyncCallbackInfo->targetBundle) ||
         asyncCallbackInfo->targetBundle.GetBundleName().empty()) {
         ANS_LOGE("UnwrapBundleOption failed");
-        NotificationSts::ThrowErrorWithInvalidParam(env);
+        NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_INVALID_PARAM);
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
     std::vector<BundleOption> bundlesArray;
     if (!NotificationSts::UnwrapArrayBundleOption(env, bundles, bundlesArray) || bundlesArray.empty()) {
         ANS_LOGE("UnwrapArrayBundleOption failed");
-        NotificationSts::ThrowErrorWithInvalidParam(env);
+        NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_INVALID_PARAM);
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
@@ -533,8 +543,9 @@ ani_object AniSetUserGrantedBundleState(ani_env *env, ani_object bundleOption, a
         [](ani_env *env, void *data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetUserGrantedBundleState(
-                    asyncCallbackInfo->targetBundle, asyncCallbackInfo->bundles, asyncCallbackInfo->enabled);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetUserGrantedBundleState(
+                        asyncCallbackInfo->targetBundle, asyncCallbackInfo->bundles, asyncCallbackInfo->enabled);
             }
         },
         HandleAsyncCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -584,7 +595,7 @@ void HandleAsyncCallbackCompleteInner(ani_env *envCurr, AsyncCallbackInfoNotific
             if (!NotificationSts::WrapNotificationExtensionSubscribeInfoArray(
                 envCurr, asyncCallbackInfo->subscriptionInfo, asyncCallbackInfo->info.result)) {
                 ANS_LOGE("WrapNotificationExtensionSubscribeInfoArray failed");
-                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             }
             break;
         case NotificationExtensionFunctionType::GET_ALL_SUBSCRIPTION_BUNDLES:
@@ -593,7 +604,7 @@ void HandleAsyncCallbackCompleteInner(ani_env *envCurr, AsyncCallbackInfoNotific
                 envCurr, asyncCallbackInfo->bundles, asyncCallbackInfo->info.result) ||
                 asyncCallbackInfo->info.result == nullptr) {
                 ANS_LOGE("GetAniArrayBundleOptionV2 failed");
-                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             }
             break;
         case NotificationExtensionFunctionType::IS_USER_GRANTED:
@@ -601,7 +612,7 @@ void HandleAsyncCallbackCompleteInner(ani_env *envCurr, AsyncCallbackInfoNotific
             asyncCallbackInfo->info.result = NotificationSts::CreateBoolean(envCurr, asyncCallbackInfo->enabled);
             if (asyncCallbackInfo->info.result == nullptr) {
                 ANS_LOGE("CreateBoolean failed");
-                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             }
             break;
         case NotificationExtensionFunctionType::GET_USER_GRANTED_ENABLED_BUNDLES_FOR_SELF:
@@ -609,7 +620,7 @@ void HandleAsyncCallbackCompleteInner(ani_env *envCurr, AsyncCallbackInfoNotific
                 envCurr, asyncCallbackInfo->bundles, asyncCallbackInfo->info.result) ||
                 asyncCallbackInfo->info.result == nullptr) {
                 ANS_LOGE("SetAniArrayGrantedBundleInfo failed");
-                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             }
             break;
         default:

@@ -25,6 +25,7 @@
 #include "notification_preferences.h"
 #include "notification_extension_wrapper.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_subscriber_listener.h"
 #include "mock_i_remote_object.h"
 #include "notification_ai_extension_wrapper.h"
@@ -39,7 +40,6 @@ using namespace testing;
 
 namespace OHOS {
 namespace Notification {
-
 class MockAnsSubscriberTest : public MockAnsSubscriber  {
 public:
     explicit MockAnsSubscriberTest(const sptr<IRemoteObject>& remote) : MockAnsSubscriber(remote) {};
@@ -225,7 +225,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
 /**
  * @tc.number    : NotificationSubscriberManagerTest_002
  * @tc.name      : ANS_AddSubscriber_0100
- * @tc.desc      : Test AddSubscriber function when subscriber is nullptr, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Test AddSubscriber function when subscriber is nullptr, return is ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_002, Level1)
 {
@@ -238,7 +238,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
     // Test AddSubscriber function.
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(nullptr, info, testAnsSubscriber_.subscribedFlags_),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -264,7 +264,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
 /**
  * @tc.number    : NotificationSubscriberManagerTest_004
  * @tc.name      : ANS_AddSubscriber_0100
- * @tc.desc      : Test RemoveSubscriber function when subscriber is nullptr, return is ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Test RemoveSubscriber function when subscriber is nullptr, return is ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_004, Level1)
 {
@@ -278,7 +278,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
 
     // Test RemoveSubscriber function.
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    ASSERT_EQ(notificationSubscriberManager_->RemoveSubscriber(nullptr, info), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(notificationSubscriberManager_->RemoveSubscriber(nullptr, info), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -468,7 +468,7 @@ HWTEST_F(NotificationSubscriberManagerTest, AddSubscriber_001, Level1)
     sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
 
     ASSERT_EQ(notificationSubscriberManager.AddSubscriber(
-        subscriber, nullptr, testAnsSubscriber->subscribedFlags_), (int)ERR_ANS_INVALID_PARAM);
+        subscriber, nullptr, testAnsSubscriber->subscribedFlags_), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1306,12 +1306,12 @@ HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_SubscribedFlagsF
 HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_002, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
-    ASSERT_EQ((int)ERR_ANS_TASK_ERR, notificationSubscriberManager.DistributeOperation(nullptr, nullptr));
+    ASSERT_EQ((int)ERR_ANS_INNER_TASK_ERR, notificationSubscriberManager.DistributeOperation(nullptr, nullptr));
 }
 
 /**
  * @tc.number    : DistributeOperation_003
- * @tc.name      : test DistributeOperation ERR_ANS_DISTRIBUTED_OPERATION_FAILED
+ * @tc.name      : test DistributeOperation ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED
  */
 HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_003, Level1)
 {
@@ -1326,7 +1326,7 @@ HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_003, Level1)
     record->subscribedFlags_ = 0xFFFFFFFF;
     notificationSubscriberManager.subscriberRecordList_.push_back(nullptr);
     notificationSubscriberManager.subscriberRecordList_.push_back(record);
-    ASSERT_EQ((int)ERR_ANS_DISTRIBUTED_OPERATION_FAILED,
+    ASSERT_EQ((int)ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED,
         notificationSubscriberManager.DistributeOperation(operationInfo, request));
 }
 
@@ -2278,7 +2278,7 @@ HWTEST_F(NotificationSubscriberManagerTest, GetVoiceContentInfo_00004, Function 
     (*flagsMap)["tablet"] = flags;
     request->SetDeviceFlags(flagsMap);
     sptr<Notification> notification = new Notification(request);
-    
+
     sptr<IAnsSubscriber> subscriber = new MockAnsSubscriber(new MockIRemoteObject());
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
@@ -2286,7 +2286,7 @@ HWTEST_F(NotificationSubscriberManagerTest, GetVoiceContentInfo_00004, Function 
     record->deviceType = "tablet";
     record->subscribedFlags_ = NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONSUMED;
     notificationSubscriberManager.subscriberRecordList_.push_back(record);
-    
+
     std::set<std::string> voiceFlag;
     std::string content;
     int32_t result = notificationSubscriberManager.GetVoiceContentInfo(notification, voiceFlag, content);
@@ -2309,7 +2309,7 @@ HWTEST_F(NotificationSubscriberManagerTest, GetVoiceContentInfo_00005, Function 
     (*flagsMap)["tablet"] = flags;
     request->SetDeviceFlags(flagsMap);
     sptr<Notification> notification = new Notification(request);
-    
+
     sptr<IAnsSubscriber> subscriber = new MockAnsSubscriber(new MockIRemoteObject());
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
@@ -2318,7 +2318,7 @@ HWTEST_F(NotificationSubscriberManagerTest, GetVoiceContentInfo_00005, Function 
     record->subscribedFlags_ = NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_VOICE_CONTENT |
         NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONSUMED;
     notificationSubscriberManager.subscriberRecordList_.push_back(record);
-    
+
     std::set<std::string> voiceFlag;
     std::string content;
     int32_t result = notificationSubscriberManager.GetVoiceContentInfo(notification, voiceFlag, content);
@@ -2339,18 +2339,18 @@ HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_WithV
     request->SetCreatorUserId(101);
     request->SetCreatorUid(101);
     sptr<Notification> notification = new Notification(request);
-    
+
     sptr<IAnsSubscriber> subscriber = new MockAnsSubscriber(new MockIRemoteObject());
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
         notificationSubscriberManager.CreateSubscriberRecord(subscriber);
     record->subscriberBundleName_ = "subscriberManagerTestBundleName";
     record->deviceType = "testDevice";
-    
+
     std::string voiceContent = "Test voice content";
     sptr<Notification> result = notificationSubscriberManager.GenerateSubscribedNotification(record,
         notification, voiceContent);
-    
+
 EXPECT_NE(nullptr, result);
     EXPECT_NE(nullptr, result->GetVoiceContent());
     EXPECT_EQ(result->GetVoiceContent()->GetTextContent(), voiceContent);
@@ -2484,7 +2484,8 @@ HWTEST_F(NotificationSubscriberManagerTest, AddSubscriberInner_NeedSilentReplayO
 
 /**
  * @tc.name: AddSubscriberInner_NeedSilentReplayOnSubscribe_003
- * @tc.desc: Test AddSubscriberInner does NOT call callback when needSilentReplayOnSubscribe=true but callback is nullptr
+ * @tc.desc: Test AddSubscriberInner does NOT call callback when
+ *          needSilentReplayOnSubscribe=true but callback is nullptr
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -2822,18 +2823,18 @@ HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_WithE
     request->SetCreatorUserId(101);
     request->SetCreatorUid(101);
     sptr<Notification> notification = new Notification(request);
-    
+
     sptr<IAnsSubscriber> subscriber = new MockAnsSubscriber(new MockIRemoteObject());
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
         notificationSubscriberManager.CreateSubscriberRecord(subscriber);
     record->subscriberBundleName_ = "subscriberManagerTestBundleName";
     record->deviceType = "testDevice";
-    
+
     std::string voiceContent = "";
     sptr<Notification> result = notificationSubscriberManager.GenerateSubscribedNotification(record,
         notification, voiceContent);
-    
+
     EXPECT_NE(nullptr, result);
     EXPECT_EQ(nullptr, result->GetVoiceContent());
 }
@@ -2853,7 +2854,7 @@ HWTEST_F(NotificationSubscriberManagerTest, GetVoiceContentInfo_00006, Function 
     (*flagsMap)["tablet"] = flags;
     request->SetDeviceFlags(flagsMap);
     sptr<Notification> notification = new Notification(request);
-    
+
     sptr<IAnsSubscriber> subscriber = new MockAnsSubscriber(new MockIRemoteObject());
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
@@ -2861,7 +2862,7 @@ HWTEST_F(NotificationSubscriberManagerTest, GetVoiceContentInfo_00006, Function 
     record->deviceType = NotificationConstant::CURRENT_DEVICE_TYPE;
     record->subscribedFlags_ = NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_VOICE_CONTENT;
     notificationSubscriberManager.subscriberRecordList_.push_back(record);
-    
+
     std::set<std::string> voiceFlag;
     std::string content;
     int32_t result = notificationSubscriberManager.GetVoiceContentInfo(notification, voiceFlag, content);
@@ -2884,7 +2885,7 @@ HWTEST_F(NotificationSubscriberManagerTest, GetVoiceContentInfo_00007, Function 
     (*flagsMap)["phone"] = flags;
     request->SetDeviceFlags(flagsMap);
     sptr<Notification> notification = new Notification(request);
-    
+
     sptr<IAnsSubscriber> subscriber = new MockAnsSubscriber(new MockIRemoteObject());
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
@@ -2892,7 +2893,7 @@ HWTEST_F(NotificationSubscriberManagerTest, GetVoiceContentInfo_00007, Function 
     record->deviceType = "tablet";
     record->subscribedFlags_ = NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_VOICE_CONTENT;
     notificationSubscriberManager.subscriberRecordList_.push_back(record);
-    
+
     std::set<std::string> voiceFlag;
     std::string content;
     int32_t result = notificationSubscriberManager.GetVoiceContentInfo(notification, voiceFlag, content);
@@ -2916,7 +2917,7 @@ HWTEST_F(NotificationSubscriberManagerTest, GetVoiceContentInfo_00008, Function 
     (*flagsMap)["phone"] = flags;
     request->SetDeviceFlags(flagsMap);
     sptr<Notification> notification = new Notification(request);
-    
+
     std::set<std::string> voiceFlag;
     std::string content;
     NotificationSubscriberManager notificationSubscriberManager;
@@ -2941,23 +2942,23 @@ HWTEST_F(NotificationSubscriberManagerTest, GetVoiceContentInfo_00009, Function 
     (*flagsMap)["tablet"] = flags;
     request->SetDeviceFlags(flagsMap);
     sptr<Notification> notification = new Notification(request);
-    
+
     NotificationSubscriberManager notificationSubscriberManager;
-    
+
     sptr<IAnsSubscriber> subscriber1 = new MockAnsSubscriber(new MockIRemoteObject());
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record1 =
         notificationSubscriberManager.CreateSubscriberRecord(subscriber1);
     record1->deviceType = NotificationConstant::CURRENT_DEVICE_TYPE;
     record1->subscribedFlags_ = NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_VOICE_CONTENT;
     notificationSubscriberManager.subscriberRecordList_.push_back(record1);
-    
+
     sptr<IAnsSubscriber> subscriber2 = new MockAnsSubscriber(new MockIRemoteObject());
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record2 =
         notificationSubscriberManager.CreateSubscriberRecord(subscriber2);
     record2->deviceType = "tablet";
     record2->subscribedFlags_ = NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_VOICE_CONTENT;
     notificationSubscriberManager.subscriberRecordList_.push_back(record2);
-    
+
     std::set<std::string> voiceFlag;
     std::string content;
     int32_t result = notificationSubscriberManager.GetVoiceContentInfo(notification, voiceFlag, content);
@@ -2981,18 +2982,18 @@ HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_WithV
     request->SetCreatorUserId(101);
     request->SetCreatorUid(101);
     sptr<Notification> notification = new Notification(request);
-    
+
     sptr<IAnsSubscriber> subscriber = new MockAnsSubscriber(new MockIRemoteObject());
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
         notificationSubscriberManager.CreateSubscriberRecord(subscriber);
     record->subscriberBundleName_ = "subscriberManagerTestBundleName";
     record->deviceType = "testDevice";
-    
+
     std::string voiceContent = "这是一个测试播报内容";
     sptr<Notification> result = notificationSubscriberManager.GenerateSubscribedNotification(record,
         notification, voiceContent);
-    
+
     EXPECT_NE(nullptr, result);
     EXPECT_NE(nullptr, result->GetVoiceContent());
     EXPECT_EQ(result->GetVoiceContent()->GetTextContent(), voiceContent);
@@ -3012,18 +3013,19 @@ HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_WithV
     request->SetCreatorUserId(101);
     request->SetCreatorUid(101);
     sptr<Notification> notification = new Notification(request);
-    
+
     sptr<IAnsSubscriber> subscriber = new MockAnsSubscriber(new MockIRemoteObject());
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
         notificationSubscriberManager.CreateSubscriberRecord(subscriber);
     record->subscriberBundleName_ = "subscriberManagerTestBundleName";
     record->deviceType = "testDevice";
-    
-    std::string voiceContent = "这是一段很长的测试播报内容，用于验证系统对长文本的处理能力";
+
+    std::string voiceContent =
+        "这是一段很长的测试播报内容，用于验证系统对长文本的处理能力";
     sptr<Notification> result = notificationSubscriberManager.GenerateSubscribedNotification(record,
         notification, voiceContent);
-    
+
     EXPECT_NE(nullptr, result);
     EXPECT_NE(nullptr, result->GetVoiceContent());
     EXPECT_EQ(result->GetVoiceContent()->GetTextContent(), voiceContent);

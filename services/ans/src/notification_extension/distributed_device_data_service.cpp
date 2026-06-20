@@ -16,12 +16,11 @@
 #include "distributed_device_data_service.h"
 
 #include "ans_log_wrapper.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "distributed_data_define.h"
 
 namespace OHOS {
 namespace Notification {
-
 DistributedDeviceDataService& DistributedDeviceDataService::GetInstance()
 {
     static DistributedDeviceDataService distributedDeviceDataService;
@@ -57,7 +56,7 @@ int32_t DistributedDeviceDataService::SetDeviceSyncSwitch(const std::string& dev
     if (deviceType.empty() || deviceId.empty()) {
         ANS_LOGW("Set device failed %{public}s %{public}d %{public}d", StringAnonymous(deviceId).c_str(),
             notificationEnable, liveViewEnable);
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     DeviceData deviceData;
     deviceData.deviceType = deviceType;
@@ -105,7 +104,7 @@ int32_t DistributedDeviceDataService::SetTargetDeviceBundleList(const std::strin
     if (deviceType.empty() || deviceId.empty() || operatorType != BundleListOperationType::ADD_BUNDLES) {
         ANS_LOGW("Set device failed %{public}s %{public}d", StringAnonymous(deviceId).c_str(),
             operatorType);
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     DeviceData deviceData;
@@ -135,7 +134,7 @@ int32_t DistributedDeviceDataService::GetTargetDeviceBundleList(const std::strin
         }
     }
     ANS_LOGW("Get bundle %{public}s %{public}s", deviceType.c_str(), StringAnonymous(deviceId).c_str());
-    return ERR_ANS_INVALID_PARAM;
+    return ERR_ANS_INNER_INVALID_PARAM;
 }
 
 bool DistributedDeviceDataService::CheckDeviceBundleExist(const std::string& deviceType, const std::string& deviceId,
@@ -193,7 +192,7 @@ bool DistributedDeviceDataService::CheckDeviceAbility(const std::string& deviceT
         ability, enable, deviceType.c_str());
     return enable;
 }
- 
+
 void DistributedDeviceDataService::SetDeviceAbility(const std::string& deviceType, int32_t ability)
 {
     std::lock_guard<ffrt::mutex> lock(abilityLock_);

@@ -21,7 +21,7 @@
 
 #include "nlohmann/json.hpp"
 #include "access_token_helper.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_trace_wrapper.h"
 #include "ans_permission_def.h"
@@ -109,20 +109,20 @@ ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<Notificatio
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     if (slots.size() == 0) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ErrCode result = ERR_OK;
@@ -158,14 +158,14 @@ ErrCode AdvancedNotificationService::GetSlots(std::vector<sptr<NotificationSlot>
     std::vector<sptr<NotificationSlot>> slots_temp;
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->GetNotificationAllSlots(bundleOption, slots);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             slots.clear();
         }
@@ -194,24 +194,24 @@ ErrCode AdvancedNotificationService::GetSlotsByBundle(
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("IsSystemApp is false.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         ANS_LOGD("GenerateValidBundleOption failed.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->GetNotificationAllSlots(bundle, slots);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             slots.clear();
         }
@@ -241,17 +241,17 @@ ErrCode AdvancedNotificationService::GetSlotByBundle(
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("IsSystemApp is false.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundleOption == nullptr) {
         ANS_LOGD("Failed to generateBundleOption.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_OK;
@@ -283,25 +283,25 @@ ErrCode AdvancedNotificationService::UpdateSlots(
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("AccessTokenHelper::CheckPermission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->UpdateNotificationSlots(bundle, slots);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-            result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
+        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+            result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Update slots by bundle.");
@@ -320,7 +320,7 @@ ErrCode AdvancedNotificationService::RemoveAllSlots()
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGD("GenerateBundleOption defeat.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_24);
@@ -338,7 +338,7 @@ ErrCode AdvancedNotificationService::RemoveAllSlots()
         }
 
         result = NotificationPreferences::GetInstance()->RemoveNotificationAllSlots(bundleOption);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
         }
 
@@ -367,12 +367,12 @@ ErrCode AdvancedNotificationService::AddSlotByType(int32_t slotTypeInt)
 
     if (!AccessTokenHelper::IsSystemApp() && slotType == NotificationConstant::SlotType::EMERGENCY_INFORMATION) {
         ANS_LOGE("Non system app used illegal slot type.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_OK;
@@ -408,7 +408,7 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlotSelf(int32_t slotTyp
     message.Message("st:" + std::to_string(slotType) + "en:" + std::to_string(enabled));
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_OK;
@@ -439,24 +439,24 @@ ErrCode AdvancedNotificationService::GetSlotFlagsAsBundle(const sptr<Notificatio
     ANS_LOGD("called");
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         ANS_LOGD("Bundle is null.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundle, slotFlags);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             slotFlags = DEFAULT_SLOT_FLAGS;
         }
@@ -472,14 +472,14 @@ ErrCode AdvancedNotificationService::GetNotificationSettings(uint32_t &slotFlags
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGD("Failed to generateBundleOption.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundleOption, slotFlags);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             slotFlags = DEFAULT_SLOT_FLAGS;
         }
@@ -492,7 +492,7 @@ ErrCode AdvancedNotificationService::GetNotificationSettings(uint32_t &slotFlags
         }
         bool isShowBadge = false;
         result = NotificationPreferences::GetInstance()->IsShowBadge(bundleOption, isShowBadge);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST || isShowBadge) {
+        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST || isShowBadge) {
             result = ERR_OK;
             slotFlags |= BADGENUMBER_SHOW_FLAG;
         }
@@ -514,7 +514,7 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
     ANS_LOGD("called");
     if (bundleOption == nullptr) {
         ANS_LOGE("BundleOption is null.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_2);
@@ -523,22 +523,22 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("IsSystemApp is false.");
-        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append(" Not SystemApp");
+        message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).Append(" Not SystemApp");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied.");
-        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append(" Permission denied");
+        message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Append(" Permission denied");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         ANS_LOGE("Bundle is null.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     uint32_t setFlags = slotFlags;
@@ -572,8 +572,8 @@ AnsStatus AdvancedNotificationService::AssignValidNotificationSlot(const std::sh
     sptr<NotificationSlot> slot;
     NotificationConstant::SlotType slotType = record->request->GetSlotType();
     ErrCode result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slot);
-    if ((result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) ||
-        (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST)) {
+    if ((result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) ||
+        (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST)) {
         slot = new (std::nothrow) NotificationSlot(slotType);
         if (slot == nullptr) {
             ANS_LOGE("Failed to create NotificationSlot instance");
@@ -598,7 +598,7 @@ AnsStatus AdvancedNotificationService::AssignValidNotificationSlot(const std::sh
             DelayedSingleton<NotificationConfigParse>::GetInstance()->IsLiveViewEnabled(bundleName)))) {
             record->slot = slot;
         } else {
-            result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED;
+            result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_ENABLED;
             ANS_LOGE("Type[%{public}d] slot enable closed", slotType);
         }
     }
@@ -637,8 +637,8 @@ ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
     }
 
     ret = NotificationPreferences::GetInstance()->UpdateNotificationSlots(bundle, slots);
-    if (ret == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-        ret = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
+    if (ret == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+        ret = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
     }
     return ret;
 }
@@ -805,7 +805,7 @@ ErrCode AdvancedNotificationService::GetSlotByType(int32_t slotTypeInt, sptr<Not
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGD("Failed to generateBundleOption.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     sptr<NotificationSlot> slotFromDb = nullptr;
@@ -834,7 +834,7 @@ ErrCode AdvancedNotificationService::RemoveSlotByType(int32_t slotTypeInt)
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_23);
@@ -866,24 +866,24 @@ ErrCode AdvancedNotificationService::GetSlotNumAsBundle(
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         ANS_LOGD("Bundle is null.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         result = NotificationPreferences::GetInstance()->GetNotificationSlotsNumForBundle(bundle, num);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             num = 0;
         }
@@ -905,7 +905,7 @@ ErrCode AdvancedNotificationService::AddSlotThenPublishEvent(
         allowed = (state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
             state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     }
-    if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+    if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
         result = ERR_OK;
         allowed = CheckApiCompatibility(bundle);
         SetDefaultNotificationEnabled(bundle, allowed);
@@ -941,12 +941,12 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlotInner(
 {
     sptr<NotificationSlot> slot;
     ErrCode result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundle, slotType, slot);
-    if (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST ||
-        result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+    if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST ||
+        result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
         slot = new (std::nothrow) NotificationSlot(slotType);
         if (slot == nullptr) {
             ANS_LOGE("Failed to create NotificationSlot ptr.");
-            return ERR_ANS_NO_MEMORY;
+            return ERR_ANS_INNER_NO_MEMORY;
         }
         GenerateSlotReminderMode(slot, bundleOption);
         return AddSlotThenPublishEvent(slot, bundle, slotInfo.GetEnable(),
@@ -980,7 +980,7 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_4);
@@ -1013,16 +1013,16 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("VerifyNativeToken and isSystemApp failed.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_OK;
@@ -1060,7 +1060,7 @@ ErrCode AdvancedNotificationService::SetDefaultSlotForBundle(const sptr<Notifica
     }
 
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty() || bundleOption->GetUid() <= 0) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_5);
@@ -1070,12 +1070,12 @@ ErrCode AdvancedNotificationService::SetDefaultSlotForBundle(const sptr<Notifica
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         sptr<NotificationSlot> slot;
         result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slot);
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST ||
-            result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST ||
+            result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             slot = new (std::nothrow) NotificationSlot(slotType);
             if (slot == nullptr) {
                 ANS_LOGE("Failed to create NotificationSlot ptr.");
-                result = ERR_ANS_NO_MEMORY;
+                result = ERR_ANS_INNER_NO_MEMORY;
                 return;
             }
             GenerateSlotReminderMode(slot, bundleOption);
@@ -1216,12 +1216,12 @@ ErrCode AdvancedNotificationService::SetCheckConfig(int32_t response, const std:
 {
     if (key != LIVEVIEW_CONFIG_KEY) {
         ANS_LOGE("Invalid key %{public}s.", key.c_str());
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
         ANS_LOGE("Permission denied.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&, response, requestId, value]() {
@@ -1267,12 +1267,12 @@ ErrCode AdvancedNotificationService::GetLiveViewConfig(const std::vector<std::st
 {
     if (bundleList.empty() || bundleList.size() > MAX_LIVEVIEW_CONFIG_SIZE) {
         ANS_LOGE("Invalid param %{public}zu.", bundleList.size());
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     int32_t result = ERR_OK;
@@ -1282,21 +1282,21 @@ ErrCode AdvancedNotificationService::GetLiveViewConfig(const std::vector<std::st
             std::lock_guard<ffrt::mutex> lock(pushMutex_);
             if (pushCallBacks_.find(NotificationConstant::SlotType::LIVE_VIEW) == pushCallBacks_.end()) {
                 ANS_LOGE("No push check.");
-                result = ERR_ANS_PUSH_CHECK_UNREGISTERED;
+                result = ERR_ANS_INNER_PUSH_CHECK_UNREGISTERED;
                 return;
             }
             pushCallBack = pushCallBacks_[NotificationConstant::SlotType::LIVE_VIEW];
         }
         if (pushCallBack == nullptr) {
             ANS_LOGE("Invalid push check function.");
-            result = ERR_ANS_PUSH_CHECK_UNREGISTERED;
+            result = ERR_ANS_INNER_PUSH_CHECK_UNREGISTERED;
             return;
         }
         auto param = std::make_shared<LiveViewCheckParam>(bundleList);
         auto requestId = NotificationLiveViewUtils::GetInstance().AddLiveViewCheckData(param);
         int32_t res = pushCallBack->OnCheckLiveView(requestId, bundleList);
         if (res != ERR_OK) {
-            result = ERR_ANS_PUSH_CHECK_FAILED;
+            result = ERR_ANS_INNER_PUSH_CHECK_FAILED;
             ANS_LOGE("Push check failed %{public}d %{public}zu.", res, bundleList.size());
             NotificationLiveViewUtils::GetInstance().EraseLiveViewCheckData(requestId);
         }
@@ -1312,7 +1312,7 @@ ErrCode AdvancedNotificationService::GetAllLiveViewEnabledBundlesInner(
     ANS_LOGD("Called.");
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&, userId]() {
@@ -1341,7 +1341,7 @@ ErrCode AdvancedNotificationService::GetAllLiveViewEnabledBundles(
 {
     if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
         ANS_LOGE("Check user exists failed.");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
     return GetAllLiveViewEnabledBundlesInner(bundleOption, userId);
 }
@@ -1376,15 +1376,15 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Not system app or SA!");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER) &&
         !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_MANAGE_EDM_POLICY)) {
         ANS_LOGE("Permission denied.");
-        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append(" Permission denied");
+        message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Append(" Permission denied");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     if (key.empty() ||
         std::find(VALID_ADDITION_CONFIG.begin(), VALID_ADDITION_CONFIG.end(), key) == VALID_ADDITION_CONFIG.end()) {
@@ -1405,7 +1405,7 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
         ANS_LOGD("ffrt enter!");
         if (key == RESTRICTED_MODE_TRUST_LIST_KEY &&
             !NotificationPreferences::GetInstance()->SetRestrictedModeTrustList(value)) {
-            result = ERR_ANS_INVALID_PARAM;
+            result = ERR_ANS_INNER_INVALID_PARAM;
             return;
         }
         if (key == COLLABORATION_BLOCKLIST) {
@@ -1429,14 +1429,14 @@ ErrCode AdvancedNotificationService::UpdateVoiceUpdate(const std::string &config
     int32_t userId = 0;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGE("GetCurrentActiveUserId failed");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
 
     int64_t todayDate = GetLocalDateInteger();
     std::string storedData;
     ErrCode result = NotificationPreferences::GetInstance()->GetKvFromDb(
         NOTIFICATION_VOICE_SUMMARY_COUNT, storedData, userId);
-    
+
     int32_t currentCount = 0;
     int64_t storedDate = todayDate;
     if (result == ERR_OK && !storedData.empty() && nlohmann::json::accept(storedData)) {
@@ -1448,23 +1448,23 @@ ErrCode AdvancedNotificationService::UpdateVoiceUpdate(const std::string &config
             currentCount = jsonData["count"].get<int32_t>();
         }
     }
-    
+
     if (storedDate == todayDate) {
         currentCount++;
         if (currentCount > MAX_VOICE_SUMMARY_COUNT_PER_DAY) {
             ANS_LOGW("Voice summary count exceeded limit: %{public}d", currentCount);
-            return ERR_ANS_VOICE_SUMMARY_COUNT_EXCEEDED;
+            return ERR_ANS_INNER_VOICE_SUMMARY_COUNT_EXCEEDED;
         }
     } else {
         currentCount = 1;
         storedDate = todayDate;
     }
-    
+
     nlohmann::json newJsonData;
     newJsonData["date"] = storedDate;
     newJsonData["count"] = currentCount;
     std::string newData = newJsonData.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
-    
+
     result = NotificationPreferences::GetInstance()->SetKvToDb(NOTIFICATION_VOICE_SUMMARY_COUNT, newData, userId);
     ANS_LOGI("Update voice summary count result: %{public}d, %{public}d, %{public}s.",
         result, userId, newData.c_str());
@@ -1474,23 +1474,23 @@ ErrCode AdvancedNotificationService::UpdateVoiceUpdate(const std::string &config
 ErrCode AdvancedNotificationService::UpdateInnerConfig(const std::string &configKey, const std::string &configValue)
 {
     ANS_LOGI("UpdateInnerConfig: configKey=%{public}s, configValue=%{public}s", configKey.c_str(), configValue.c_str());
-    
+
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem) {
         ANS_LOGE("Caller is not native process, not allowed to call UpdateInnerConfig");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
-    
+
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied, need OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER permission");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     if (configKey.empty() || configKey != ADD_VOICE_SUMMARY_COUNT_KEY) {
         ANS_LOGE("Invalid config key: %{public}s.", configKey.c_str());
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
-    
+
     return UpdateVoiceUpdate(configKey);
 }
 
@@ -1518,10 +1518,10 @@ ErrCode AdvancedNotificationService::SyncAdditionConfig(
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGI("Sync addition config to ai result: %{public}d, key: %{public}s", syncResult, key.c_str());
         if (syncResult == NOTIFICATION_AI_EXTENSION_WRAPPER->ErrorCode::ERR_FAIL) {
-            return ERR_ANS_SERVICE_NOT_READY;
+            return ERR_ANS_INNER_SERVICE_NOT_READY;
         }
         if (syncResult != NotificationAiExtensionWrapper::ErrorCode::ERR_OK) {
-            return ERR_ANS_INVALID_PARAM;
+            return ERR_ANS_INNER_INVALID_PARAM;
         }
     }
 #endif
@@ -1532,7 +1532,7 @@ ErrCode AdvancedNotificationService::SyncAdditionConfig(
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGI("Sync voice config: %{public}d, key: %{public}s", syncResult, key.c_str());
         if (syncResult != ERR_OK) {
-            return ERR_ANS_INVALID_PARAM;
+            return ERR_ANS_INNER_INVALID_PARAM;
         }
     }
 #endif

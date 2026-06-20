@@ -15,12 +15,16 @@
 
 #include "napi_reminder_info.h"
 
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 
 const int GET_REMINDER_INFO_MAX_PARA = 1;
 const int SET_REMINDER_INFO_MAX_PARA = 1;
@@ -35,7 +39,7 @@ napi_value ParseBundlesParameters(const napi_env &env, const napi_callback_info 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc != GET_REMINDER_INFO_MAX_PARA) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -45,7 +49,7 @@ napi_value ParseBundlesParameters(const napi_env &env, const napi_callback_info 
     if (!isArray) {
         ANS_LOGE("Parameter type error. Array expected.");
         std::string msg = "Incorrect parameter types.The type of param must be array.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
 
@@ -54,7 +58,7 @@ napi_value ParseBundlesParameters(const napi_env &env, const napi_callback_info 
     if (len == 0) {
         ANS_LOGD("The array is empty.");
         std::string msg = "Mandatory parameters are left unspecified. The array is empty.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
 
@@ -66,12 +70,12 @@ napi_value ParseBundlesParameters(const napi_env &env, const napi_callback_info 
         if (valueType != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types.The type of param must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
             return nullptr;
         }
         NotificationBundleOption bundle;
         if (!Common::GetBundleOption(env, nBundle, bundle)) {
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
         bundles.emplace_back(bundle);
@@ -89,7 +93,7 @@ napi_value ParseReminderInfoParameters(const napi_env &env, const napi_callback_
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc != SET_REMINDER_INFO_MAX_PARA) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -99,7 +103,7 @@ napi_value ParseReminderInfoParameters(const napi_env &env, const napi_callback_
     if (!isArray) {
         ANS_LOGE("Parameter type error. Array expected.");
         std::string msg = "Incorrect parameter types.The type of param must be array.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
 
@@ -108,7 +112,7 @@ napi_value ParseReminderInfoParameters(const napi_env &env, const napi_callback_
     if (len == 0) {
         ANS_LOGD("The array is empty.");
         std::string msg = "Mandatory parameters are left unspecified. The array is empty.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
 
@@ -120,12 +124,12 @@ napi_value ParseReminderInfoParameters(const napi_env &env, const napi_callback_
         if (valueType != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types.The type of param must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
             return nullptr;
         }
         NotificationReminderInfo info;
         if (!Common::GetReminderInfo(env, nInfo, info)) {
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
         reminderInfo.emplace_back(info);
@@ -218,14 +222,14 @@ napi_value NapiGetReminderInfoByBundles(napi_env env, napi_callback_info info)
     ANS_LOGD("NapiGetReminderInfoByBundles");
     std::vector<NotificationBundleOption> bundles;
     if (ParseBundlesParameters(env, info, bundles) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     AsyncCallbackInfoReminderInfo *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoReminderInfo {.env = env, .asyncWork = nullptr, .bundles = bundles};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
 
@@ -240,8 +244,9 @@ napi_value NapiGetReminderInfoByBundles(napi_env env, napi_callback_info info)
             AsyncCallbackInfoReminderInfo *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoReminderInfo *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetReminderInfoByBundles(
-                    asynccallbackinfo->bundles, asynccallbackinfo->reminderInfo);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetReminderInfoByBundles(
+                        asynccallbackinfo->bundles, asynccallbackinfo->reminderInfo);
             }
         },
         AsyncCompleteCallbackNapiGetReminderInfoByBundles,
@@ -256,7 +261,7 @@ napi_value NapiSetReminderInfoByBundles(napi_env env, napi_callback_info info)
     ANS_LOGD("NapiSetReminderInfoByBundles");
     std::vector<NotificationReminderInfo> reminderInfo;
     if (ParseReminderInfoParameters(env, info, reminderInfo) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -264,7 +269,7 @@ napi_value NapiSetReminderInfoByBundles(napi_env env, napi_callback_info info)
         new (std::nothrow) AsyncCallbackInfoReminderInfo {
             .env = env, .asyncWork = nullptr, .reminderInfo = reminderInfo};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
 
@@ -279,8 +284,9 @@ napi_value NapiSetReminderInfoByBundles(napi_env env, napi_callback_info info)
             AsyncCallbackInfoReminderInfo *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoReminderInfo *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::SetReminderInfoByBundles(
-                    asynccallbackinfo->reminderInfo);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetReminderInfoByBundles(
+                        asynccallbackinfo->reminderInfo);
             }
         },
         AsyncCompleteCallbackNapiSetReminderInfoByBundles,

@@ -14,12 +14,16 @@
  */
 
 #include "napi_ringtone_info_by_bundle.h"
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 namespace {
 const int RINGTONE_INFO_BY_BUNDLE_MAX_PARA = 2;
 const int RINGTONE_INFO_BY_BUNDLE_MIN_PARA = 1;
@@ -33,7 +37,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < RINGTONE_INFO_BY_BUNDLE_MIN_PARA) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -43,13 +47,13 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (valuetype != napi_object) {
         ANS_LOGE("Parameter type error. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.bundle);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -59,13 +63,13 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. object expected.");
             std::string msg = "Incorrect parameter types.The type of param must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
             return nullptr;
         }
         auto retValue = Common::GetRingtoneInfo(env, argv[PARAM1], params.ringtoneInfo);
         if (retValue == nullptr) {
             ANS_LOGE("GetRingtoneInfo failed.");
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
     }
@@ -108,7 +112,7 @@ void AsyncCompleteCallbackNapiGetRingtoneInfoByBundle(napi_env env, napi_status 
         } else {
             napi_create_object(env, &result);
             if (!Common::SetRingtoneInfo(env, asynccallbackinfo->params.ringtoneInfo, result)) {
-                asynccallbackinfo->info.errorCode = ERROR;
+                asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
                 result = Common::NapiGetNull(env);
             }
         }
@@ -135,7 +139,7 @@ napi_value NapiSetRingtoneInfoByBundle(napi_env env, napi_callback_info info)
     AsyncCallbackRingtoneInfoByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackRingtoneInfoByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -152,9 +156,10 @@ napi_value NapiSetRingtoneInfoByBundle(napi_env env, napi_callback_info info)
             AsyncCallbackRingtoneInfoByBundle *asynccallbackinfo =
                 static_cast<AsyncCallbackRingtoneInfoByBundle *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::SetRingtoneInfoByBundle(
-                    asynccallbackinfo->params.bundle, asynccallbackinfo->params.ringtoneInfo);
-                ANS_LOGI("SetRingtoneInfoByBundle errorCode=%{public}d", asynccallbackinfo->info.errorCode);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetRingtoneInfoByBundle(
+                        asynccallbackinfo->params.bundle, asynccallbackinfo->params.ringtoneInfo);
+                ANS_LOGI("SetRingtoneInfoByBundle errorCode=%{public}u", asynccallbackinfo->info.errorCode);
             }
         },
         AsyncCompleteCallbackNapiSetRingtoneInfoByBundle,
@@ -177,7 +182,7 @@ napi_value NapiGetRingtoneInfoByBundle(napi_env env, napi_callback_info info)
     AsyncCallbackRingtoneInfoByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackRingtoneInfoByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -194,8 +199,9 @@ napi_value NapiGetRingtoneInfoByBundle(napi_env env, napi_callback_info info)
             AsyncCallbackRingtoneInfoByBundle *asynccallbackinfo =
                 static_cast<AsyncCallbackRingtoneInfoByBundle *>(data);
             if (asynccallbackinfo) {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::GetRingtoneInfoByBundle(
-                        asynccallbackinfo->params.bundle, asynccallbackinfo->params.ringtoneInfo);
+                    asynccallbackinfo->info.errorCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->GetRingtoneInfoByBundle(
+                            asynccallbackinfo->params.bundle, asynccallbackinfo->params.ringtoneInfo);
             }
         },
         AsyncCompleteCallbackNapiGetRingtoneInfoByBundle,

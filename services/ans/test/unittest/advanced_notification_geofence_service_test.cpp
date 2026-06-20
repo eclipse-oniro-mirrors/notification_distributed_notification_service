@@ -493,7 +493,7 @@ HWTEST_F(AnsGeofenceServiceTest, OnNotifyDelayedNotification_00001, Function | S
     parameter.request = nullptr;
 
     auto result = advancedNotificationService_->OnNotifyDelayedNotification(parameter);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -508,7 +508,7 @@ HWTEST_F(AnsGeofenceServiceTest, OnNotifyDelayedNotification_00002, Function | S
     parameter.request = new NotificationRequest();
 
     auto result = advancedNotificationService_->OnNotifyDelayedNotification(parameter);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -523,7 +523,7 @@ HWTEST_F(AnsGeofenceServiceTest, ClearDelayNotification_00001, Function | SmallT
     std::vector<int32_t> userIds;
 
     auto result = advancedNotificationService_->ClearDelayNotification(triggerKeys, userIds);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -538,7 +538,7 @@ HWTEST_F(AnsGeofenceServiceTest, PublishDelayedNotification_00001, Function | Sm
     MockIsVerfyPermisson(false);
 
     auto result = advancedNotificationService_->PublishDelayedNotification("testTriggerKey", TEST_VALID_ID);
-    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -555,7 +555,7 @@ HWTEST_F(AnsGeofenceServiceTest, GetDelayedNotificationParameterByTriggerKey_000
 
     auto result = advancedNotificationService_->GetDelayedNotificationParameterByTriggerKey(
         "testTriggerKey", parameter, record);
-    EXPECT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(result, ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -647,7 +647,7 @@ HWTEST_F(AnsGeofenceServiceTest, SetGeofenceTriggerTimer_00001, Function | Small
     record->notification = new Notification(record->request);
 
     auto result = advancedNotificationService_->SetGeofenceTriggerTimer(record);
-    EXPECT_EQ(result, ERR_ANS_TASK_ERR);
+    EXPECT_EQ(result, ERR_ANS_INNER_TASK_ERR);
 }
 
 /**
@@ -680,7 +680,7 @@ HWTEST_F(AnsGeofenceServiceTest, CheckGeofenceNotificationRequest_00001, Functio
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundle", TEST_VALID_ID);
 
     auto result = advancedNotificationService_->CheckGeofenceNotificationRequest(request, bundleOption);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -712,7 +712,7 @@ HWTEST_F(AnsGeofenceServiceTest, TriggerNotificationRecordFilter_00001, Function
     std::shared_ptr<NotificationRecord> record = nullptr;
 
     auto result = advancedNotificationService_->TriggerNotificationRecordFilter(record);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -727,7 +727,7 @@ HWTEST_F(AnsGeofenceServiceTest, CheckSwitchStatus_00001, Function | SmallTest |
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundle", TEST_VALID_ID);
 
     auto result = advancedNotificationService_->CheckSwitchStatus(request, bundleOption);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**

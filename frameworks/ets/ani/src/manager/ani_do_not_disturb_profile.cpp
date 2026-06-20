@@ -14,7 +14,8 @@
  */
 #include "ani_do_not_disturb_profile.h"
 
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_common.h"
 #include "sts_throw_erro.h"
@@ -22,6 +23,8 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackProfileInfo* asyncCallbackInfo)
 {
     ANS_LOGD("Delete AsyncCallbackProfileInfo Without Promise");
@@ -104,7 +107,7 @@ void HandleDisturbProfileCallbackComplete(ani_env* env, WorkStatus status, void*
         if (!NotificationSts::WrapDoNotDisturbProfile(envCurr,
             asyncCallbackInfo->doNotDisturbProfile, asyncCallbackInfo->info.result)) {
             ANS_LOGE("WrapDoNotDisturbProfile failed");
-            asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
         }
     }
     NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
@@ -142,8 +145,9 @@ ani_object AniAddDoNotDisturbProfile(ani_env *env, ani_object obj, ani_object ca
     WorkStatus workStatus = CreateAsyncWork(env,
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackProfileInfo*>(data);
-            asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::AddDoNotDisturbProfiles(
-                asyncCallbackInfo->profiles);
+            asyncCallbackInfo->info.returnCode =
+                DelayedSingleton<AnsNotification>::GetInstance()->AddDoNotDisturbProfiles(
+                    asyncCallbackInfo->profiles);
         },
         HandleDisturbProfileCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
     if (workStatus != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
@@ -189,8 +193,9 @@ ani_object AniAddDoNotDisturbProfileByUserId(ani_env *env, ani_object obj, ani_i
     WorkStatus workStatus = CreateAsyncWork(env,
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackProfileInfo*>(data);
-            asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::AddDoNotDisturbProfiles(
-                asyncCallbackInfo->profiles, asyncCallbackInfo->userId);
+            asyncCallbackInfo->info.returnCode =
+                DelayedSingleton<AnsNotification>::GetInstance()->AddDoNotDisturbProfiles(
+                    asyncCallbackInfo->profiles, asyncCallbackInfo->userId);
         },
         HandleDisturbProfileCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
     if (workStatus != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
@@ -235,8 +240,9 @@ ani_object AniRemoveDoNotDisturbProfile(ani_env *env, ani_object obj, ani_object
     WorkStatus workStatus = CreateAsyncWork(env,
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackProfileInfo*>(data);
-            asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::RemoveDoNotDisturbProfiles(
-                asyncCallbackInfo->profiles);
+            asyncCallbackInfo->info.returnCode =
+                DelayedSingleton<AnsNotification>::GetInstance()->RemoveDoNotDisturbProfiles(
+                    asyncCallbackInfo->profiles);
         },
         HandleDisturbProfileCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
     if (workStatus != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
@@ -282,8 +288,9 @@ ani_object AniRemoveDoNotDisturbProfileByUserId(ani_env *env, ani_object obj, an
     WorkStatus workStatus = CreateAsyncWork(env,
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackProfileInfo*>(data);
-            asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::RemoveDoNotDisturbProfiles(
-                asyncCallbackInfo->profiles, asyncCallbackInfo->userId);
+            asyncCallbackInfo->info.returnCode =
+                DelayedSingleton<AnsNotification>::GetInstance()->RemoveDoNotDisturbProfiles(
+                    asyncCallbackInfo->profiles, asyncCallbackInfo->userId);
         },
         HandleDisturbProfileCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
     if (workStatus != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
@@ -330,8 +337,9 @@ ani_object AniGetDoNotDisturbProfile(ani_env *env, ani_long id, ani_object callb
     WorkStatus workStatus = CreateAsyncWork(env,
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackProfileInfo*>(data);
-            asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetDoNotDisturbProfile(
-                asyncCallbackInfo->notificationId, asyncCallbackInfo->doNotDisturbProfile);
+            asyncCallbackInfo->info.returnCode =
+                DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbProfile(
+                    asyncCallbackInfo->notificationId, asyncCallbackInfo->doNotDisturbProfile);
         },
         HandleDisturbProfileCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
     if (workStatus != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
@@ -379,8 +387,10 @@ ani_object AniGetDoNotDisturbProfileByUserId(ani_env *env, ani_long id, ani_int 
     WorkStatus workStatus = CreateAsyncWork(env,
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackProfileInfo*>(data);
-            asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetDoNotDisturbProfile(
-                asyncCallbackInfo->notificationId, asyncCallbackInfo->doNotDisturbProfile, asyncCallbackInfo->userId);
+            asyncCallbackInfo->info.returnCode =
+                DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbProfile(
+                    asyncCallbackInfo->notificationId, asyncCallbackInfo->doNotDisturbProfile,
+                    asyncCallbackInfo->userId);
         },
         HandleDisturbProfileCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
     if (workStatus != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {

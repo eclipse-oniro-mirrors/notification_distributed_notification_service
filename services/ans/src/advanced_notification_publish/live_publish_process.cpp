@@ -14,6 +14,7 @@
  */
 
 #include "live_publish_process.h"
+#include "ans_service_errors.h"
 
 #include "access_token_helper.h"
 #include "advanced_notification_service.h"
@@ -50,7 +51,7 @@ AnsStatus LivePublishProcess::PublishPreWork(const sptr<NotificationRequest> &re
 {
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     if (!CheckLocalLiveViewAllowed(request, isUpdateByOwnerAllowed)) {
-        return AnsStatus(ERR_ANS_NON_SYSTEM_APP, "CheckLocalLiveViewAllowed is false",
+        return AnsStatus(ERR_ANS_INNER_NON_SYSTEM_APP, "CheckLocalLiveViewAllowed is false",
             EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     }
 

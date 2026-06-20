@@ -20,7 +20,7 @@
 #include <set>
 
 #include "ans_const_define.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_trace_wrapper.h"
 #include "ipc_skeleton.h"
@@ -71,7 +71,7 @@ ErrCode NotificationLocalLiveViewSubscriberManager::AddLocalLiveViewSubscriber(
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (subscriber == nullptr) {
         ANS_LOGE("null subscriber");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     sptr<NotificationBundleOption> bundleOption;
@@ -83,10 +83,10 @@ ErrCode NotificationLocalLiveViewSubscriberManager::AddLocalLiveViewSubscriber(
         bundle = bundleManager->GetBundleNameByUid(callingUid);
     }
     bundleOption = new (std::nothrow) NotificationBundleOption(bundle, callingUid);
-    ErrCode result = ERR_ANS_TASK_ERR;
+    ErrCode result = ERR_ANS_INNER_TASK_ERR;
     if (bundleOption == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_NO_MEMORY;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     ANS_LOGD("Get userId succeeded, callingUid = <%{public}d> callingPid = <%{public}d> bundleName = <%{public}s>",
         callingUid, callingPid, bundle.c_str());
@@ -111,10 +111,10 @@ ErrCode NotificationLocalLiveViewSubscriberManager::RemoveLocalLiveViewSubscribe
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (subscriber == nullptr) {
         ANS_LOGE("null subscriber");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
-    ErrCode result = ERR_ANS_TASK_ERR;
+    ErrCode result = ERR_ANS_INNER_TASK_ERR;
     if (notificationButtonQueue_ == nullptr) {
         ANS_LOGE("null queue");
         return result;
@@ -169,8 +169,9 @@ void NotificationLocalLiveViewSubscriberManager::OnRemoteDied(const wptr<IRemote
     ANS_LOGD("end");
 }
 
-std::shared_ptr<NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscriberRecord> NotificationLocalLiveViewSubscriberManager::FindSubscriberRecord(
+auto NotificationLocalLiveViewSubscriberManager::FindSubscriberRecord(
     const wptr<IRemoteObject> &object)
+    -> std::shared_ptr<LocalLiveViewSubscriberRecord>
 {
     auto iter = buttonRecordList_.begin();
 
@@ -182,8 +183,9 @@ std::shared_ptr<NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscri
     return nullptr;
 }
 
-std::shared_ptr<NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscriberRecord> NotificationLocalLiveViewSubscriberManager::FindSubscriberRecord(
+auto NotificationLocalLiveViewSubscriberManager::FindSubscriberRecord(
     const sptr<IAnsSubscriberLocalLiveView> &subscriber)
+    -> std::shared_ptr<LocalLiveViewSubscriberRecord>
 {
     auto iter = buttonRecordList_.begin();
 
@@ -195,9 +197,10 @@ std::shared_ptr<NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscri
     return nullptr;
 }
 
-std::shared_ptr<NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscriberRecord> NotificationLocalLiveViewSubscriberManager::CreateSubscriberRecord(
-    const sptr<IAnsSubscriberLocalLiveView> &subscriber,
-    const sptr<NotificationBundleOption> &bundleOption, const int32_t pid)
+auto NotificationLocalLiveViewSubscriberManager::CreateSubscriberRecord(
+    const sptr<IAnsSubscriberLocalLiveView> &subscriber, const sptr<NotificationBundleOption> &bundleOption,
+    const int32_t pid)
+    -> std::shared_ptr<LocalLiveViewSubscriberRecord>
 {
     std::shared_ptr<LocalLiveViewSubscriberRecord> record = std::make_shared<LocalLiveViewSubscriberRecord>();
     // set bundleName and uid
@@ -222,7 +225,7 @@ ErrCode NotificationLocalLiveViewSubscriberManager::AddSubscriberInner(
         record = CreateSubscriberRecord(subscriber, bundleOption, pid);
         if (record == nullptr) {
             ANS_LOGE("null record");
-            return ERR_ANS_NO_MEMORY;
+            return ERR_ANS_INNER_NO_MEMORY;
         }
         buttonRecordList_.push_back(record);
 
@@ -243,7 +246,7 @@ ErrCode NotificationLocalLiveViewSubscriberManager::RemoveSubscriberInner(
 
     if (record == nullptr) {
         ANS_LOGE("null record");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     record->subscriber->AsObject()->RemoveDeathRecipient(recipient_);

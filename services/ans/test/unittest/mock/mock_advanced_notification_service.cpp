@@ -15,6 +15,7 @@
 
 #include "advanced_notification_service.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 
 namespace {
     bool g_mockGetDistributedEnableInApplicationInfoRet = true;
@@ -44,7 +45,7 @@ ErrCode AdvancedNotificationService::GetDistributedEnableInApplicationInfo(
 {
     enable = g_mockAppInfoEnableRet;
     if (g_mockGetDistributedEnableInApplicationInfoRet == false) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     return ERR_OK;
 }

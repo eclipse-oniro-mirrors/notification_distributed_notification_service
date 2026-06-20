@@ -14,7 +14,8 @@
  */
 #include "ani_notification_enable.h"
 
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -22,6 +23,8 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackEnabledInfo* asyncCallbackInfo)
 {
     ANS_LOGD("Delete AsyncCallbackEnabledInfo Without Promise");
@@ -107,7 +110,7 @@ void HandleNotificationEnabledCallbackComplete(ani_env* env, WorkStatus status, 
                 OHOS::NotificationSts::CreateBoolean(envCurr, asyncCallbackInfo->isAllowed);
             if (asyncCallbackInfo->info.result == nullptr) {
                 ANS_LOGE("CreateBoolean for isAllowed failed");
-                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             }
             break;
         }
@@ -117,7 +120,7 @@ void HandleNotificationEnabledCallbackComplete(ani_env* env, WorkStatus status, 
                 NotificationSts::GetAniArrayBundleOption(envCurr, asyncCallbackInfo->bundleOptions);
             if (asyncCallbackInfo->info.result == nullptr) {
                 ANS_LOGE("GetAniArrayBundleOption failed");
-                asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             }
             break;
         }
@@ -133,11 +136,11 @@ ani_object AniIsNotificationEnabled(ani_env *env, ani_object callback)
     auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackEnabledInfo{.asyncWork = nullptr};
     if (!asyncCallbackInfo) {
         ANS_LOGE("asyncCallbackInfo is null");
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
 
     ani_object promise;
@@ -147,22 +150,23 @@ ani_object AniIsNotificationEnabled(ani_env *env, ani_object callback)
     if (aniStatus != ANI_OK) {
         ANS_LOGE("GetVM failed, status: %{public}d", aniStatus);
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     asyncCallbackInfo->functionType = IS_NOTIFICATION_ENABLED;
     WorkStatus status = CreateAsyncWork(env,
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::IsAllowedNotifySelf(
-                    asyncCallbackInfo->isAllowed);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotifySelf(
+                        asyncCallbackInfo->isAllowed);
             }
         },
         HandleNotificationEnabledCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
     if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
         ANS_LOGE("CreateAsyncWork or QueueAsyncWork failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (asyncCallbackInfo->info.callback == nullptr) {
         return promise;
@@ -175,11 +179,11 @@ ani_object AniIsNotificationEnabledWithId(ani_env *env, ani_int userId, ani_obje
     auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackEnabledInfo{.asyncWork = nullptr};
     if (!asyncCallbackInfo) {
         ANS_LOGE("asyncCallbackInfo is null");
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     ani_object promise;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
@@ -188,7 +192,7 @@ ani_object AniIsNotificationEnabledWithId(ani_env *env, ani_int userId, ani_obje
     if (aniStatus != ANI_OK) {
         ANS_LOGE("GetVM failed, status: %{public}d", aniStatus);
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     asyncCallbackInfo->userId = userId;
     asyncCallbackInfo->functionType = IS_NOTIFICATION_ENABLED_WITH_ID;
@@ -196,15 +200,16 @@ ani_object AniIsNotificationEnabledWithId(ani_env *env, ani_int userId, ani_obje
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::IsAllowedNotify(
-                    asyncCallbackInfo->userId, asyncCallbackInfo->isAllowed);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotify(
+                        asyncCallbackInfo->userId, asyncCallbackInfo->isAllowed);
             }
         },
         HandleNotificationEnabledCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
     if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
         ANS_LOGE("CreateAsyncWork or QueueAsyncWork failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (asyncCallbackInfo->info.callback == nullptr) {
         return promise;
@@ -217,16 +222,16 @@ ani_object AniIsNotificationEnabledWithBundleOption(ani_env *env, ani_object bun
     auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackEnabledInfo{.asyncWork = nullptr};
     if (!asyncCallbackInfo) {
         ANS_LOGE("asyncCallbackInfo is null");
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (!NotificationSts::UnwrapBundleOption(env, bundleOption, asyncCallbackInfo->notificationOption)) {
         ANS_LOGE("UnwrapBundleOption failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     ani_object promise;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
@@ -235,22 +240,23 @@ ani_object AniIsNotificationEnabledWithBundleOption(ani_env *env, ani_object bun
     if (aniStatus != ANI_OK) {
         ANS_LOGE("GetVM failed, status: %{public}d", aniStatus);
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     asyncCallbackInfo->functionType = IS_NOTIFICATION_ENABLED_WITH_BUNDLE_OPTION;
     WorkStatus status = CreateAsyncWork(env,
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::IsAllowedNotify(
-                    asyncCallbackInfo->notificationOption, asyncCallbackInfo->isAllowed);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotify(
+                        asyncCallbackInfo->notificationOption, asyncCallbackInfo->isAllowed);
             }
         },
         HandleNotificationEnabledCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
     if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
         ANS_LOGE("CreateAsyncWork or QueueAsyncWork failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (asyncCallbackInfo->info.callback == nullptr) {
         return promise;
@@ -263,17 +269,17 @@ ani_object AniSetNotificationEnable(ani_env *env, ani_object bundleOption, ani_b
     auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackEnabledInfo{.asyncWork = nullptr};
     if (!asyncCallbackInfo) {
         ANS_LOGE("asyncCallbackInfo is null");
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (!NotificationSts::UnwrapBundleOption(env, bundleOption, asyncCallbackInfo->notificationOption)) {
         ANS_LOGE("UnwrapBundleOption failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     asyncCallbackInfo->isAllowed = NotificationSts::AniBooleanToBool(enable);
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     ani_object promise;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
@@ -282,7 +288,7 @@ ani_object AniSetNotificationEnable(ani_env *env, ani_object bundleOption, ani_b
     if (aniStatus != ANI_OK) {
         ANS_LOGE("GetVM failed, status: %{public}d", aniStatus);
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
 
     WorkStatus status = CreateAsyncWork(env,
@@ -291,7 +297,7 @@ ani_object AniSetNotificationEnable(ani_env *env, ani_object bundleOption, ani_b
             if (asyncCallbackInfo) {
                 std::string deviceId {""};
                 asyncCallbackInfo->info.returnCode =
-                    Notification::NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationsEnabledForSpecifiedBundle(
                         asyncCallbackInfo->notificationOption, deviceId, asyncCallbackInfo->isAllowed);
             }
         },
@@ -299,7 +305,7 @@ ani_object AniSetNotificationEnable(ani_env *env, ani_object bundleOption, ani_b
     if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
         ANS_LOGE("CreateAsyncWork or QueueAsyncWork failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (asyncCallbackInfo->info.callback == nullptr) {
         return promise;
@@ -314,13 +320,13 @@ ani_object AniSetSyncNotificationEnabledWithoutApp(ani_env *env, ani_int userId,
     auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackEnabledInfo{.asyncWork = nullptr};
     if (!asyncCallbackInfo) {
         ANS_LOGE("asyncCallbackInfo is null");
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     asyncCallbackInfo->userId = userId;
     asyncCallbackInfo->isAllowed = NotificationSts::AniBooleanToBool(enabled);
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     ani_object promise;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
@@ -329,7 +335,7 @@ ani_object AniSetSyncNotificationEnabledWithoutApp(ani_env *env, ani_int userId,
     if (aniStatus != ANI_OK) {
         ANS_LOGE("GetVM failed, status: %{public}d", aniStatus);
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
 
     WorkStatus status = CreateAsyncWork(env,
@@ -337,7 +343,7 @@ ani_object AniSetSyncNotificationEnabledWithoutApp(ani_env *env, ani_int userId,
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    Notification::NotificationHelper::SetSyncNotificationEnabledWithoutApp(
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetSyncNotificationEnabledWithoutApp(
                         asyncCallbackInfo->userId, asyncCallbackInfo->isAllowed);
             }
         },
@@ -345,14 +351,14 @@ ani_object AniSetSyncNotificationEnabledWithoutApp(ani_env *env, ani_int userId,
     if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
         ANS_LOGE("CreateAsyncWork or QueueAsyncWork failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (asyncCallbackInfo->info.callback == nullptr) {
         return promise;
     }
     return NotificationSts::GetNullObject(env);
 #else
-    return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_SYSTEM_CAP_ERROR);
+    return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_DEVICE_NOT_SUPPORT);
 #endif
 }
 
@@ -361,11 +367,11 @@ ani_object AniGetAllNotificationEnabledBundles(ani_env *env, ani_object callback
     auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackEnabledInfo{.asyncWork = nullptr};
     if (!asyncCallbackInfo) {
         ANS_LOGE("asyncCallbackInfo is null");
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     ani_object promise;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
@@ -374,7 +380,7 @@ ani_object AniGetAllNotificationEnabledBundles(ani_env *env, ani_object callback
     if (aniStatus != ANI_OK) {
         ANS_LOGE("GetVM failed, status: %{public}d", aniStatus);
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     asyncCallbackInfo->functionType = GET_ALL_NOTIFICATION_ENABLED_BUNDLES;
     WorkStatus status = CreateAsyncWork(env,
@@ -382,7 +388,7 @@ ani_object AniGetAllNotificationEnabledBundles(ani_env *env, ani_object callback
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    Notification::NotificationHelper::GetAllNotificationEnabledBundles(
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetAllNotificationEnabledBundles(
                         asyncCallbackInfo->bundleOptions);
             }
         },
@@ -390,7 +396,7 @@ ani_object AniGetAllNotificationEnabledBundles(ani_env *env, ani_object callback
     if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
         ANS_LOGE("CreateAsyncWork or QueueAsyncWork failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (asyncCallbackInfo->info.callback == nullptr) {
         return promise;
@@ -403,12 +409,12 @@ ani_object AniGetAllNotificationEnabledBundlesByUserId(ani_env *env, ani_int use
     auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackEnabledInfo{.asyncWork = nullptr};
     if (!asyncCallbackInfo) {
         ANS_LOGE("asyncCallbackInfo is null");
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     asyncCallbackInfo->userId = userId;
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     ani_object promise;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
@@ -417,7 +423,7 @@ ani_object AniGetAllNotificationEnabledBundlesByUserId(ani_env *env, ani_int use
     if (aniStatus != ANI_OK) {
         ANS_LOGE("GetVM failed, status: %{public}d", aniStatus);
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     asyncCallbackInfo->functionType = GET_ALL_NOTIFICATION_ENABLED_BUNDLES_BY_USER_ID;
     WorkStatus status = CreateAsyncWork(env,
@@ -425,7 +431,7 @@ ani_object AniGetAllNotificationEnabledBundlesByUserId(ani_env *env, ani_int use
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    Notification::NotificationHelper::GetAllNotificationEnabledBundles(
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetAllNotificationEnabledBundles(
                         asyncCallbackInfo->bundleOptions, asyncCallbackInfo->userId);
             }
         },
@@ -433,7 +439,7 @@ ani_object AniGetAllNotificationEnabledBundlesByUserId(ani_env *env, ani_int use
     if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
         ANS_LOGE("CreateAsyncWork or QueueAsyncWork failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (asyncCallbackInfo->info.callback == nullptr) {
         return promise;
@@ -444,11 +450,11 @@ ani_object AniGetAllNotificationEnabledBundlesByUserId(ani_env *env, ani_int use
 ani_boolean AniIsNotificationEnabledSync(ani_env *env)
 {
     bool allowed = false;
-    int returnCode = Notification::NotificationHelper::IsAllowedNotifySelf(allowed);
-    if (returnCode != ERR_OK) {
-        int externalCode = NotificationSts::GetExternalCode(returnCode);
-        ANS_LOGE("AniIsNotificationEnabledSync error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowErrorWithCode(env, externalCode);
+    uint32_t svcCode =
+        DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotifySelf(allowed);
+    if (svcCode != ERR_ANS_INNER_OK) {
+        ANS_LOGE("AniIsNotificationEnabledSync error, errorCode: %{public}u", svcCode);
+        OHOS::NotificationSts::ThrowErrorWithCode(env, svcCode);
         return NotificationSts::BoolToAniBoolean(false);
     }
     return NotificationSts::BoolToAniBoolean(allowed);
@@ -460,12 +466,12 @@ ani_object AniGetSyncNotificationEnabledWithoutApp(ani_env *env, ani_int userId,
     auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackEnabledInfo{.asyncWork = nullptr};
     if (!asyncCallbackInfo) {
         ANS_LOGE("asyncCallbackInfo is null");
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     asyncCallbackInfo->userId = userId;
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     ani_object promise;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
@@ -474,7 +480,7 @@ ani_object AniGetSyncNotificationEnabledWithoutApp(ani_env *env, ani_int userId,
     if (aniStatus != ANI_OK) {
         ANS_LOGE("GetVM failed, status: %{public}d", aniStatus);
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     asyncCallbackInfo->functionType = GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP;
     WorkStatus status = CreateAsyncWork(env,
@@ -482,7 +488,7 @@ ani_object AniGetSyncNotificationEnabledWithoutApp(ani_env *env, ani_int userId,
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    Notification::NotificationHelper::GetSyncNotificationEnabledWithoutApp(
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetSyncNotificationEnabledWithoutApp(
                         asyncCallbackInfo->userId, asyncCallbackInfo->isAllowed);
             }
         },
@@ -490,14 +496,14 @@ ani_object AniGetSyncNotificationEnabledWithoutApp(ani_env *env, ani_int userId,
     if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
         ANS_LOGE("CreateAsyncWork or QueueAsyncWork failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (asyncCallbackInfo->info.callback == nullptr) {
         return promise;
     }
     return NotificationSts::GetNullObject(env);
 #else
-    return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_SYSTEM_CAP_ERROR);
+    return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_DEVICE_NOT_SUPPORT);
 #endif
 }
 
@@ -508,19 +514,19 @@ ani_object AniDisableNotificationFeature(ani_env *env, ani_boolean disabled, ani
     auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackEnabledInfo{.asyncWork = nullptr};
     if (!asyncCallbackInfo) {
         ANS_LOGE("asyncCallbackInfo is null");
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     std::vector<std::string> bundles;
     if (!NotificationSts::GetStringArrayByAniObj(env, bundleList, bundles)) {
         ANS_LOGE("Parse bundleList failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     asyncCallbackInfo->param.SetDisabled(NotificationSts::AniBooleanToBool(disabled));
     asyncCallbackInfo->param.SetBundleList(bundles);
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     ani_object promise;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
@@ -529,29 +535,30 @@ ani_object AniDisableNotificationFeature(ani_env *env, ani_boolean disabled, ani
     if (aniStatus != ANI_OK) {
         ANS_LOGE("GetVM failed, status: %{public}d", aniStatus);
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
 
     WorkStatus status = CreateAsyncWork(env,
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::DisableNotificationFeature(
-                    asyncCallbackInfo->param);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->DisableNotificationFeature(
+                        asyncCallbackInfo->param);
             }
         },
         HandleNotificationEnabledCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
     if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
         ANS_LOGE("CreateAsyncWork or QueueAsyncWork failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (asyncCallbackInfo->info.callback == nullptr) {
         return promise;
     }
     return NotificationSts::GetNullObject(env);
 #else
-    return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_SYSTEM_CAP_ERROR);
+    return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_DEVICE_NOT_SUPPORT);
 #endif
 }
 
@@ -562,19 +569,19 @@ ani_object AniDisableNotificationFeatureWithId(ani_env *env, ani_boolean disable
     auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackEnabledInfo{.asyncWork = nullptr};
     if (!asyncCallbackInfo) {
         ANS_LOGE("asyncCallbackInfo is null");
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     std::vector<std::string> bundles;
     if (!NotificationSts::GetStringArrayByAniObj(env, bundleList, bundles)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     asyncCallbackInfo->param.SetDisabled(NotificationSts::AniBooleanToBool(disabled));
     asyncCallbackInfo->param.SetBundleList(bundles);
     asyncCallbackInfo->param.SetUserId(userId);
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     ani_object promise;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
@@ -583,28 +590,29 @@ ani_object AniDisableNotificationFeatureWithId(ani_env *env, ani_boolean disable
     if (aniStatus != ANI_OK) {
         ANS_LOGE("GetVM failed, status: %{public}d", aniStatus);
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     WorkStatus status = CreateAsyncWork(env,
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::DisableNotificationFeature(
-                    asyncCallbackInfo->param);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->DisableNotificationFeature(
+                        asyncCallbackInfo->param);
             }
         },
         HandleNotificationEnabledCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
     if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
         ANS_LOGE("CreateAsyncWork or QueueAsyncWork failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (asyncCallbackInfo->info.callback == nullptr) {
         return promise;
     }
     return NotificationSts::GetNullObject(env);
 #else
-    return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_SYSTEM_CAP_ERROR);
+    return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_DEVICE_NOT_SUPPORT);
 #endif
 }
 } // namespace NotificationManagerSts

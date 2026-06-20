@@ -17,10 +17,13 @@
 
 #include "ans_log_wrapper.h"
 #include "inner_errors.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 
 bool StsAnsDialogCallback::Init(
     ani_env *env, std::shared_ptr<EnableNotificationInfo> info, StsAnsDialogCallbackComplete *complete)
@@ -77,13 +80,13 @@ int32_t StsAnsDialogCallback::GetErrCodeFromStatus(EnabledDialogStatus status)
         case EnabledDialogStatus::ALLOW_CLICKED:
             return ERR_OK;
         case EnabledDialogStatus::DENY_CLICKED:
-            return CJSystemapi::Notification::ERR_ANS_NOT_ALLOWED;
+            return OHOS::Notification::ERR_ANS_INNER_NOT_ALLOWED;
         case EnabledDialogStatus::CRASHED:
-            return CJSystemapi::Notification::ERROR_INTERNAL_ERROR;
+            return OHOS::Notification::ERR_ANS_INNER_TASK_ERR;
         default:
-            return CJSystemapi::Notification::ERROR_INTERNAL_ERROR;
+            return OHOS::Notification::ERR_ANS_INNER_TASK_ERR;
     }
-    return CJSystemapi::Notification::ERROR_INTERNAL_ERROR;
+    return OHOS::Notification::ERR_ANS_INNER_TASK_ERR;
 }
 
 ModalExtensionCallback::ModalExtensionCallback()
@@ -91,7 +94,6 @@ ModalExtensionCallback::ModalExtensionCallback()
 
 ModalExtensionCallback::~ModalExtensionCallback()
 {}
-
 
 /*
  * when UIExtensionAbility use terminateSelfWithResult
@@ -126,7 +128,7 @@ void ModalExtensionCallback::OnError(int32_t code, const std::string& name, cons
 {
     ANS_LOGE("OnError, name = %{public}s, message = %{public}s", name.c_str(), message.c_str());
     ReleaseOrErrorHandle(code);
-    NotificationHelper::RemoveEnableNotificationDialog();
+    DelayedSingleton<AnsNotification>::GetInstance()->RemoveEnableNotificationDialog();
 }
 
 /*
@@ -145,7 +147,6 @@ void ModalExtensionCallback::OnDestroy()
 {
     ANS_LOGD("OnDestroy");
 }
-
 
 void ModalExtensionCallback::SetSessionId(int32_t sessionId)
 {

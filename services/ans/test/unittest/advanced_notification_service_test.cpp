@@ -31,6 +31,7 @@
 #include "advanced_notification_service.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
 #include "ans_result_data_synchronizer.h"
@@ -287,7 +288,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_02200,
     slots.push_back(slot0);
     ASSERT_EQ((int)advancedNotificationService_->UpdateSlots(
                   new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), slots),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
 
 /**
@@ -456,7 +457,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03400,
     bool allowed = false;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     auto ret = advancedNotificationService_->IsAllowedNotifyForBundle(bundleOption, allowed);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -468,7 +469,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03500,
 {
     int32_t id = 0;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
-    int32_t result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    InnerErrorCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     auto ret = advancedNotificationService_->CancelAsBundleWithAgent(bundleOption, id,
         iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
@@ -506,7 +507,7 @@ HWTEST_F(AdvancedNotificationServiceTest, ANS_AddDoNotDisturbProfiles_0200, Func
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
     int32_t userId = 100;
     auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles, userId);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -521,7 +522,7 @@ HWTEST_F(AdvancedNotificationServiceTest, ANS_AddDoNotDisturbProfiles_0300, Func
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
     int32_t userId = 100;
     auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles, userId);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -552,7 +553,7 @@ HWTEST_F(AdvancedNotificationServiceTest, ANS_AddDoNotDisturbProfiles_0500, Func
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
     int32_t userId = 100;
     auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles, userId);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -568,7 +569,7 @@ HWTEST_F(AdvancedNotificationServiceTest, ANS_AddDoNotDisturbProfiles_0600, Func
     sptr<NotificationDoNotDisturbProfile> date = nullptr;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
     auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles, userId);
-    EXPECT_EQ(ret, (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
     MockIsOsAccountExists(isOsAccountExists);
 }
 
@@ -595,7 +596,7 @@ HWTEST_F(AdvancedNotificationServiceTest, ANS_AddDoNotDisturbProfiles_0800, Func
     sptr<NotificationDoNotDisturbProfile> date = nullptr;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
     auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles);
-    EXPECT_EQ(ret, (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
     MockQueryForgroundOsAccountId(true, 0);
 }
 
@@ -608,7 +609,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03700,
 {
     const std::string key = "key";
     ASSERT_EQ((int)advancedNotificationService_->Delete(key, NotificationConstant::CANCEL_REASON_DELETE),
-              (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+              (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -794,7 +795,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_06300,
     slots.push_back(slot0);
     ASSERT_EQ((int)advancedNotificationService_->UpdateSlots(
                   new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), slots),
-        (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
 
 /**
@@ -822,7 +823,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_06800,
 {
     ASSERT_EQ(advancedNotificationService_->SetShowBadgeEnabledForBundle(
                   new NotificationBundleOption("", SYSTEM_APP_UID), true),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -897,7 +898,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_07800,
 {
     const std::string key = "key";
     ASSERT_EQ((int)advancedNotificationService_->Delete(key, NotificationConstant::CANCEL_REASON_DELETE),
-              (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+              (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -934,7 +935,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_08300,
     EXPECT_EQ((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), info, subscriber->subscribedFlags_),
         (int)ERR_OK);
     ASSERT_EQ((int)advancedNotificationService_->Subscribe(nullptr, info, subscriber->subscribedFlags_),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), nullptr), (int)ERR_OK);
 }
 
@@ -950,7 +951,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000010
     EXPECT_EQ((int)advancedNotificationService_->SubscribeNotification(subscriber->GetImpl(),
         subscriber->subscribedFlags_), (int)ERR_OK);
     ASSERT_EQ((int)advancedNotificationService_->SubscribeNotification(nullptr, info, subscriber->subscribedFlags_),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), nullptr), (int)ERR_OK);
 }
 
@@ -980,7 +981,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000030
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     EXPECT_EQ((int)advancedNotificationService_->SubscribeNotification(subscriber->GetImpl(), info,
-        subscriber->subscribedFlags_), (int)ERR_ANS_NON_SYSTEM_APP);
+        subscriber->subscribedFlags_), (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -996,7 +997,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000040
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     EXPECT_EQ((int)advancedNotificationService_->SubscribeNotification(subscriber->GetImpl(), info,
-        subscriber->subscribedFlags_), (int)ERR_ANS_PERMISSION_DENIED);
+        subscriber->subscribedFlags_), (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -1352,7 +1353,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13100,
     sptr<IAnsDialogCallback> callback = nullptr;
     sptr<IRemoteObject> callerToken = nullptr;
     ASSERT_EQ(advancedNotificationService_->RequestEnableNotification(deviceId, callback, callerToken),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 #ifdef ANM_SUPPORT_DUMP
 /**
@@ -1441,7 +1442,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14300,
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     ASSERT_EQ(ret, ERR_OK);
 #else
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_OPERATION);
 #endif
 }
 
@@ -1461,7 +1462,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14400,
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     ASSERT_EQ(ret, ERR_OK);
 #else
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_OPERATION);
 #endif
 }
 
@@ -1481,21 +1482,22 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14600,
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     ASSERT_EQ(ret, ERR_OK);
 #else
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_OPERATION);
 #endif
 }
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_14800
  * @tc.name      : ANS_IsSpecialUserAllowedNotify_0100
- * @tc.desc      : Test IsSpecialUserAllowedNotify function when the result is ERR_ANS_INVALID_PARAM
+ * @tc.desc      : Test IsSpecialUserAllowedNotify function when the result is ERR_ANS_INNER_INVALID_PARAM
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14800, Function | SmallTest | Level1)
 {
     int32_t userId = 3;
     bool allowed = true;
-    ASSERT_EQ(advancedNotificationService_->IsSpecialUserAllowedNotify(userId, allowed), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->IsSpecialUserAllowedNotify(userId, allowed),
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1527,20 +1529,21 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15000,
 /**
  * @tc.number    : AdvancedNotificationServiceTest_15200
  * @tc.name      : ANS_GetHasPoppedDialog_0100
- * @tc.desc      : Test GetHasPoppedDialog function when the result is ERR_ANS_INVALID_PARAM
+ * @tc.desc      : Test GetHasPoppedDialog function when the result is ERR_ANS_INNER_INVALID_PARAM
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15200, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundleOption = nullptr;
     bool hasPopped = true;
-    ASSERT_EQ(advancedNotificationService_->GetHasPoppedDialog(bundleOption, hasPopped), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->GetHasPoppedDialog(bundleOption, hasPopped),
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 #ifdef ANM_SUPPORT_DUMP
 /**
  * @tc.number    : AdvancedNotificationServiceTest_15300
  * @tc.name      : ANS_ShellDump_0100
- * @tc.desc      : Test ShellDump function when the result is ERR_ANS_INVALID_PARAM
+ * @tc.desc      : Test ShellDump function when the result is ERR_ANS_INNER_INVALID_PARAM
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15300, Function | SmallTest | Level1)
@@ -1549,7 +1552,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15300,
     std::string bundle = "Bundle";
     int32_t userId = 4;
     std::vector<std::string> dumpInfo;
-    ASSERT_EQ(advancedNotificationService_->ShellDump(cmd, bundle, userId, 0, dumpInfo), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->ShellDump(cmd, bundle, userId, 0, dumpInfo),
+        (int)ERR_ANS_INNER_INVALID_PARAM);
     ASSERT_EQ(advancedNotificationService_->ShellDump("active", bundle, userId, 0, dumpInfo), (int)ERR_OK);
     ASSERT_EQ(advancedNotificationService_->ShellDump("recent", bundle, userId, 0, dumpInfo), (int)ERR_OK);
     ASSERT_EQ(advancedNotificationService_->ShellDump("setRecentCount 2", bundle, userId, 0, dumpInfo), (int)ERR_OK);
@@ -1558,7 +1562,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15300,
 /**
  * @tc.number    : ANS_ShellDump_0200
  * @tc.name      : ANS_ShellDump
- * @tc.desc      : Test ShellDump function when the result is ERR_ANS_INVALID_PARAM
+ * @tc.desc      : Test ShellDump function when the result is ERR_ANS_INNER_INVALID_PARAM
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(AdvancedNotificationServiceTest, ANS_ShellDump_0200, Function | SmallTest | Level1)
@@ -1569,7 +1573,7 @@ HWTEST_F(AdvancedNotificationServiceTest, ANS_ShellDump_0200, Function | SmallTe
     std::vector<std::string> dumpInfo;
     AdvancedNotificationService ans;
     ans.notificationSvrQueue_ = nullptr;
-    ASSERT_EQ(ans.ShellDump(cmd, bundle, userId, 0, dumpInfo), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ans.ShellDump(cmd, bundle, userId, 0, dumpInfo), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1643,7 +1647,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16000,
     int32_t notificationId = 0;
     std::string label = "testLabel";
     sptr<NotificationBundleOption> bundleOption = nullptr;
-    int32_t result = ERR_ANS_INVALID_BUNDLE;
+    InnerErrorCode result = ERR_ANS_INNER_INVALID_BUNDLE;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     auto ret = advancedNotificationService_->CancelPreparedNotification(notificationId, label, bundleOption, 8,
         iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
@@ -1669,7 +1673,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_116000
     sptr<NotificationBundleOption> bundleOption = nullptr;
     ASSERT_EQ(advancedNotificationService_->CancelPreparedNotification(
         notificationId, label, bundleOption, 8).GetErrCode(),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -1686,7 +1690,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16200,
     int32_t notificationId = 1;
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 1;
-    int result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    InnerErrorCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     auto ret = advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId,
         iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
@@ -1711,7 +1715,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_116200
     int32_t notificationId = 1;
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 1;
-    int result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    InnerErrorCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     ASSERT_EQ(advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId), result);
 }
 
@@ -1729,7 +1733,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16300,
     int32_t notificationId = 1;
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 0;
-    int result = ERR_ANS_INVALID_UID;
+    InnerErrorCode result = ERR_ANS_INNER_INVALID_UID;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     auto ret = advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId,
         iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
@@ -1754,7 +1758,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_116300
     int32_t notificationId = 1;
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 0;
-    int result = ERR_ANS_INVALID_UID;
+    InnerErrorCode result = ERR_ANS_INNER_INVALID_UID;
     ASSERT_EQ(advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId), result);
 }
 
@@ -1771,7 +1775,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16500,
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     int32_t notificationId = 1;
 
-    int result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    InnerErrorCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     auto ret = advancedNotificationService_->CancelAsBundle(bundleOption, notificationId,
         iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
@@ -1795,7 +1799,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_116500
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     int32_t notificationId = 1;
 
-    int result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    InnerErrorCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     ASSERT_EQ(advancedNotificationService_->CancelAsBundle(bundleOption, notificationId), result);
 }
 
@@ -1831,7 +1835,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16600,
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     slots.push_back(slot);
-    ASSERT_EQ(advancedNotificationService_->AddSlots(slots), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->AddSlots(slots), ERR_ANS_INNER_INVALID_BUNDLE);
     MockIsNonBundleName(false);
     GTEST_LOG_(INFO) << "ANS_AddSlots_0300 test end";
 }
@@ -1847,7 +1851,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16700,
     GTEST_LOG_(INFO) << "ANS_AddSlots_0400 test start";
 
     std::vector<sptr<NotificationSlot>> slots;
-    ASSERT_EQ(advancedNotificationService_->AddSlots(slots), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->AddSlots(slots), ERR_ANS_INNER_INVALID_PARAM);
 
     GTEST_LOG_(INFO) << "ANS_AddSlots_0400 test end";
 }
@@ -1866,7 +1870,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16800,
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     slots.push_back(slot);
-    ASSERT_EQ(advancedNotificationService_->GetSlots(slots), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->GetSlots(slots), ERR_ANS_INNER_INVALID_BUNDLE);
     MockIsNonBundleName(false);
     GTEST_LOG_(INFO) << "ANS_GetSlots_0100 test end";
 }
@@ -1884,7 +1888,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
     MockIsNonBundleName(true);
     MockSystemApp();
 
-    int32_t result = ERR_ANS_INVALID_BUNDLE;
+    InnerErrorCode result = ERR_ANS_INNER_INVALID_BUNDLE;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     auto ret = advancedNotificationService_->GetActiveNotifications("",
         iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
@@ -1896,12 +1900,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
     }
 
     uint64_t num = 1;
-    ASSERT_EQ(advancedNotificationService_->GetActiveNotificationNums(num), ERR_ANS_INVALID_BUNDLE);
-    ASSERT_EQ(advancedNotificationService_->SetNotificationBadgeNum(num), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->GetActiveNotificationNums(num), ERR_ANS_INNER_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->SetNotificationBadgeNum(num), ERR_ANS_INNER_INVALID_BUNDLE);
     int32_t importance = 2;
-    ASSERT_EQ(advancedNotificationService_->GetBundleImportance(importance), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->GetBundleImportance(importance), ERR_ANS_INNER_INVALID_BUNDLE);
 
-    result = ERR_ANS_INVALID_BUNDLE;
+    result = ERR_ANS_INNER_INVALID_BUNDLE;
     synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     ret = advancedNotificationService_->GetShowBadgeEnabled(
         iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
@@ -1913,31 +1917,34 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
     }
 
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::OTHER);
-    ASSERT_EQ(advancedNotificationService_->GetSlotByType(NotificationConstant::OTHER, slot), ERR_ANS_INVALID_BUNDLE);
-    ASSERT_EQ(advancedNotificationService_->RemoveSlotByType(NotificationConstant::OTHER), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->GetSlotByType(NotificationConstant::OTHER, slot),
+        ERR_ANS_INNER_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->RemoveSlotByType(NotificationConstant::OTHER),
+        ERR_ANS_INNER_INVALID_BUNDLE);
 
     std::string deviceId = "DeviceId";
     bool needPop = false;
-    ASSERT_EQ(advancedNotificationService_->IsAllowedNotifySelf(needPop), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->IsAllowedNotifySelf(needPop), ERR_ANS_INNER_INVALID_BUNDLE);
     sptr<NotificationBundleOption> bundleOption;
-    ASSERT_EQ(advancedNotificationService_->IsAllowedNotifySelf(bundleOption, needPop), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->IsAllowedNotifySelf(bundleOption, needPop), ERR_ANS_INNER_INVALID_BUNDLE);
 
-    ASSERT_EQ(advancedNotificationService_->GetAppTargetBundle(bundleOption, bundleOption), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->GetAppTargetBundle(bundleOption, bundleOption),
+        ERR_ANS_INNER_INVALID_BUNDLE);
 
-    ASSERT_EQ(advancedNotificationService_->RemoveAllSlots(), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->RemoveAllSlots(), ERR_ANS_INNER_INVALID_BUNDLE);
 
     ASSERT_EQ(advancedNotificationService_->AddSlotByType(NotificationConstant::SlotType::OTHER),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 
     std::string groupName = "name";
-    ASSERT_EQ(advancedNotificationService_->CancelGroup(groupName, ""), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->CancelGroup(groupName, ""), ERR_ANS_INNER_INVALID_BUNDLE);
 
     bool enabled = true;
     ret = advancedNotificationService_->EnableDistributedSelf(enabled);
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
-    ASSERT_EQ(ret, ERR_OK);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE);
 #else
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_OPERATION);
 #endif
     MockIsNonBundleName(false);
     GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test end";
@@ -1956,14 +1963,14 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_169001
     MockIsNonBundleName(true);
     MockSystemApp();
     std::vector<sptr<NotificationRequest>> notifications;
-    ASSERT_EQ(advancedNotificationService_->GetActiveNotifications(notifications, ""), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->GetActiveNotifications(notifications, ""), ERR_ANS_INNER_INVALID_BUNDLE);
     uint64_t num = 1;
-    ASSERT_EQ(advancedNotificationService_->GetActiveNotificationNums(num), ERR_ANS_INVALID_BUNDLE);
-    ASSERT_EQ(advancedNotificationService_->SetNotificationBadgeNum(num), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->GetActiveNotificationNums(num), ERR_ANS_INNER_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->SetNotificationBadgeNum(num), ERR_ANS_INNER_INVALID_BUNDLE);
     int32_t importance = 2;
-    ASSERT_EQ(advancedNotificationService_->GetBundleImportance(importance), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->GetBundleImportance(importance), ERR_ANS_INNER_INVALID_BUNDLE);
     bool allow = true;
-    ASSERT_EQ(advancedNotificationService_->GetShowBadgeEnabled(allow), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->GetShowBadgeEnabled(allow), ERR_ANS_INNER_INVALID_BUNDLE);
     MockIsNonBundleName(false);
 }
 
@@ -1980,7 +1987,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
     std::string key = "key";
     int32_t removeReason = 0;
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
-    ASSERT_EQ(advancedNotificationService_->Delete(key, removeReason), ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    ASSERT_EQ(advancedNotificationService_->Delete(key, removeReason), ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 
     ASSERT_EQ(advancedNotificationService_->DeleteByBundle(bundleOption), ERR_OK);
 
@@ -2024,11 +2031,11 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
     ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(
         std::string(), bundleOption, enable), ERR_OK);
 
-    ASSERT_EQ(advancedNotificationService_->IsAllowedNotify(enable), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->IsAllowedNotify(enable), ERR_ANS_INNER_INVALID_PARAM);
 
     int32_t notificationId = 1;
     ASSERT_EQ(advancedNotificationService_->RemoveNotification(bundleOption, notificationId,
-        key, removeReason), ERR_ANS_NOTIFICATION_NOT_EXISTS);
+        key, removeReason), ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 
     ASSERT_EQ(advancedNotificationService_->RemoveAllNotifications(bundleOption), ERR_OK);
 
@@ -2039,7 +2046,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
     ASSERT_EQ(advancedNotificationService_->RemoveGroupByBundle(bundleOption, groupName), ERR_OK);
 
     sptr<NotificationDoNotDisturbDate> date = nullptr;
-    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(date), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(date), ERR_ANS_INNER_INVALID_PARAM);
     ASSERT_EQ(advancedNotificationService_->GetDoNotDisturbDate(date), ERR_OK);
 
     ASSERT_EQ(advancedNotificationService_->DoesSupportDoNotDisturbMode(enable), ERR_OK);
@@ -2048,16 +2055,16 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     ASSERT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_OK);
 #else
-    EXPECT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_INVALID_OPERATION);
+    EXPECT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_ANS_INNER_INVALID_OPERATION);
 #endif
 
     int32_t userId = 1;
-    ASSERT_EQ(advancedNotificationService_->IsSpecialUserAllowedNotify(userId, enable), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->IsSpecialUserAllowedNotify(userId, enable), ERR_ANS_INNER_INVALID_PARAM);
 
     ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledByUser(userId, enable), ERR_OK);
 
     ASSERT_EQ(advancedNotificationService_->DeleteAllByUser(userId), ERR_OK);
-    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(userId, date), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(userId, date), ERR_ANS_INNER_INVALID_PARAM);
     ASSERT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_OK);
 
     ASSERT_EQ(advancedNotificationService_->SetEnabledForBundleSlot(bundleOption,
@@ -2086,7 +2093,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_171001
     std::string key = "key";
     int32_t removeReason = 0;
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
-    ASSERT_EQ(advancedNotificationService_->Delete(key, removeReason), ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    ASSERT_EQ(advancedNotificationService_->Delete(key, removeReason), ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 
     ASSERT_EQ(advancedNotificationService_->DeleteByBundle(bundleOption), ERR_OK);
 
@@ -2115,7 +2122,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17300,
 
     ASSERT_EQ(advancedNotificationService_->UpdateSlots(
                 new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), slots),
-        ERR_ANS_INVALID_PARAM);
+        ERR_ANS_INNER_INVALID_PARAM);
 
     GTEST_LOG_(INFO) << "ANS_GetSlotsByBundle_0100 test end";
 }
@@ -2153,7 +2160,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17500,
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     EXPECT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info, subscriber->subscribedFlags_),
         ERR_OK);
-    ASSERT_EQ(advancedNotificationService_->Unsubscribe(nullptr, info), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->Unsubscribe(nullptr, info), ERR_ANS_INNER_INVALID_PARAM);
 
     GTEST_LOG_(INFO) << "Unsubscribe_1000 test end";
 }
@@ -2206,7 +2213,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17800,
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     sptr<NotificationBundleOption> targetBundle = nullptr;
     bundleOption->SetBundleName("test");
-    ASSERT_EQ(advancedNotificationService_->GetAppTargetBundle(bundleOption, targetBundle), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->GetAppTargetBundle(bundleOption, targetBundle),
+        ERR_ANS_INNER_NON_SYSTEM_APP);
 
     GTEST_LOG_(INFO) << "GetAppTargetBundle_3000 test end";
 }
@@ -2300,7 +2308,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18400,
     GTEST_LOG_(INFO) << "SetRecentNotificationCount_1000 test start";
 
     std::string arg = "1100";
-    ASSERT_EQ(advancedNotificationService_->SetRecentNotificationCount(arg), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->SetRecentNotificationCount(arg), ERR_ANS_INNER_INVALID_PARAM);
 
     GTEST_LOG_(INFO) << "SetRecentNotificationCount_1000 test end";
 }
@@ -2386,7 +2394,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18900,
     GTEST_LOG_(INFO) << "CancelGroup_1000 test start";
 
     std::string groupName = "";
-    ASSERT_EQ(advancedNotificationService_->CancelGroup(groupName, ""), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->CancelGroup(groupName, ""), ERR_ANS_INNER_INVALID_PARAM);
 
     GTEST_LOG_(INFO) << "CancelGroup_1000 test end";
 }
@@ -2403,7 +2411,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19000,
 
     std::string groupName = "group";
     sptr<NotificationBundleOption> bundleOption = nullptr;
-    ASSERT_EQ(advancedNotificationService_->RemoveGroupByBundle(bundleOption, groupName), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->RemoveGroupByBundle(bundleOption, groupName), ERR_ANS_INNER_INVALID_PARAM);
 
     GTEST_LOG_(INFO) << "RemoveGroupByBundle_1000 test end";
 }
@@ -2424,7 +2432,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19200,
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     ASSERT_EQ(ret, ERR_OK);
 #else
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_OPERATION);
 #endif
 
     GTEST_LOG_(INFO) << "EnableDistributedByBundle_0100 test end";
@@ -2446,7 +2454,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19300,
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     ASSERT_EQ(ret, ERR_OK);
 #else
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_OPERATION);
 #endif
     GTEST_LOG_(INFO) << "IsDistributedEnableByBundle_0100 test end";
 }
@@ -2467,7 +2475,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19400,
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     ASSERT_EQ(ret, ERR_OK);
 #else
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_OPERATION);
 #endif
 
     GTEST_LOG_(INFO) << "IsDistributedEnableByBundle_0200 test end";
@@ -2488,7 +2496,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19500,
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     ASSERT_EQ(ret, ERR_OK);
 #else
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_OPERATION);
 #endif
 
     GTEST_LOG_(INFO) << "GetDeviceRemindType_0100 test end";
@@ -2852,7 +2860,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0300, Function | S
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
     for (auto record : advancedNotificationService_->notificationList_) {
         std::shared_ptr<NotificationNormalContent> ct = std::static_pointer_cast<NotificationNormalContent>(
-        record->request->GetContent()->GetNotificationContent());
+            record->request->GetContent()->GetNotificationContent());
         ASSERT_EQ(ct->GetTitle(), "title 1");
     }
 }
@@ -2900,7 +2908,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0400, Function | S
     ASSERT_EQ(advancedNotificationService.notificationList_.size(), 1);
     for (auto record : advancedNotificationService.notificationList_) {
         std::shared_ptr<NotificationNormalContent> ct = std::static_pointer_cast<NotificationNormalContent>(
-        record->request->GetContent()->GetNotificationContent());
+            record->request->GetContent()->GetNotificationContent());
         ASSERT_EQ(ct->GetTitle(), "title 1");
     }
 }
@@ -2946,7 +2954,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0500, Function | S
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
     for (auto record : advancedNotificationService_->notificationList_) {
         std::shared_ptr<NotificationNormalContent> ct = std::static_pointer_cast<NotificationNormalContent>(
-        record->request->GetContent()->GetNotificationContent());
+            record->request->GetContent()->GetNotificationContent());
         ASSERT_EQ(ct->GetTitle(), "title 2");
     }
 }
@@ -2991,7 +2999,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20000,
     ASSERT_EQ(advancedNotificationService.notificationList_.size(), 1);
     for (auto record : advancedNotificationService.notificationList_) {
         std::shared_ptr<NotificationNormalContent> ct = std::static_pointer_cast<NotificationNormalContent>(
-        record->request->GetContent()->GetNotificationContent());
+            record->request->GetContent()->GetNotificationContent());
         ASSERT_EQ(ct->GetTitle(), "title 1");
     }
 }
@@ -3033,7 +3041,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0200, Function | S
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
     for (auto record : advancedNotificationService_->notificationList_) {
         std::shared_ptr<NotificationNormalContent> ct = std::static_pointer_cast<NotificationNormalContent>(
-        record->request->GetContent()->GetNotificationContent());
+            record->request->GetContent()->GetNotificationContent());
         ASSERT_EQ(ct->GetTitle(), "title 2");
     }
 }
@@ -3223,12 +3231,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20500,
     GTEST_LOG_(INFO) << "DeleteAllByUser_0100 test start";
 
     int32_t userId = -2;
-    ASSERT_EQ(advancedNotificationService_->DeleteAllByUser(userId), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->DeleteAllByUser(userId), ERR_ANS_INNER_INVALID_PARAM);
 
     sptr<NotificationDoNotDisturbDate> date = nullptr;
-    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(userId, date), ERR_ANS_INVALID_PARAM);
-    ASSERT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_ANS_INVALID_PARAM);
-    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDateByUser(userId, date), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(userId, date), ERR_ANS_INNER_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_ANS_INNER_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDateByUser(userId, date), ERR_ANS_INNER_INVALID_PARAM);
     GTEST_LOG_(INFO) << "DeleteAllByUser_0100 test end";
 }
 
@@ -3532,7 +3540,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21900,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22000, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "UnregisterPushCallback_0200 test start";
-    ASSERT_EQ(advancedNotificationService_->UnregisterPushCallback(), (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->UnregisterPushCallback(), (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 
     GTEST_LOG_(INFO) << "UnregisterPushCallback_0200 test end";
 }
@@ -3549,7 +3557,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22100,
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
-    ASSERT_EQ(advancedNotificationService_->UnregisterPushCallback(), (int)ERR_INVALID_OPERATION);
+    ASSERT_EQ(advancedNotificationService_->UnregisterPushCallback(), (int)ERR_ANS_INNER_INVALID_OPERATION);
 
     GTEST_LOG_(INFO) << "UnregisterPushCallback_0300 test end";
 }
@@ -3565,7 +3573,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22500,
     GTEST_LOG_(INFO) << "PushCheck_0100 test start";
     MockIsVerfyPermisson(false);
     sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest();
-    ASSERT_EQ(advancedNotificationService_->PushCheck(req).GetErrCode(), ERR_ANS_PUSH_CHECK_UNREGISTERED);
+    ASSERT_EQ(advancedNotificationService_->PushCheck(req).GetErrCode(), (int)ERR_ANS_INNER_PUSH_CHECK_UNREGISTERED);
 
     GTEST_LOG_(INFO) << "PushCheck_0100 test end";
 }
@@ -3611,7 +3619,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22600,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00001, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00001 test start";
-    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(nullptr).GetErrCode(), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(nullptr).GetErrCode(),
+        (int)ERR_ANS_INNER_INVALID_PARAM);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00001 test end";
 }
 
@@ -3757,9 +3766,10 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00009,
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CONTENT_INFORMATION;
     bool enabled = false;
-    ErrCode errCode = ERR_ANS_TASK_ERR;
+    ErrCode errCode = ERR_ANS_INNER_TASK_ERR;
     EXPECT_NE(advancedNotificationService_, nullptr);
-    advancedNotificationService_->SendEnableNotificationSlotHiSysEvent(bundleOption, slotType, enabled, errCode);
+    advancedNotificationService_->SendEnableNotificationSlotHiSysEvent(bundleOption, slotType, enabled,
+        static_cast<ErrCode>(errCode));
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00009 test end";
 }
 
@@ -3792,9 +3802,10 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00011,
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00011 test start";
     sptr<NotificationBundleOption> bundleOption = nullptr;
     bool enabled = false;
-    ErrCode errCode = ERR_ANS_TASK_ERR;
+    ErrCode errCode = ERR_ANS_INNER_TASK_ERR;
     EXPECT_NE(advancedNotificationService_, nullptr);
-    advancedNotificationService_->SendEnableNotificationHiSysEvent(bundleOption, enabled, errCode);
+    advancedNotificationService_->SendEnableNotificationHiSysEvent(bundleOption, enabled,
+        static_cast<ErrCode>(errCode));
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00011 test end";
 }
 
@@ -3851,7 +3862,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00014,
     advancedNotificationService_->notificationList_.clear();
     std::vector<std::shared_ptr<NotificationRecord>> recordList;
     ASSERT_EQ(advancedNotificationService_->GetTargetRecordList(uid, pid, slotType, contentType, recordList),
-        ERR_ANS_NOTIFICATION_NOT_EXISTS);
+        ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00014 test end";
 }
 
@@ -3965,7 +3976,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00018,
     int32_t uid = 0;
     int32_t pid = 0;
     ASSERT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName, uid, pid),
-        ERR_ANS_NOTIFICATION_NOT_EXISTS);
+        ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00018 test end";
 }
 
@@ -3997,7 +4008,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00019,
     int32_t uid = 0;
     int32_t pid = 0;
     ASSERT_EQ(advancedNotificationService_->RemoveSystemLiveViewNotifications(bundleName, uid, pid),
-        ERR_ANS_INVALID_PARAM);
+        ERR_ANS_INNER_INVALID_PARAM);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00019 test end";
 }
 /**
@@ -4229,7 +4240,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RecoverLiveViewFromDb_0004, Function |
     request->SetFlags(flags);
 
     std::string bundleName = "BundleName_04";
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, uid);
     AdvancedNotificationService::NotificationRequestDb requestDbObj =
         { .request = request, .bundleOption = bundleOption };
@@ -4373,7 +4384,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RecoverLiveViewFromDb_0007, Function |
     request->SetFlags(flags);
 
     std::string bundleName;
-    
+
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, uid);
     AdvancedNotificationService::NotificationRequestDb requestDbObj =
         { .request = request, .bundleOption = bundleOption };
@@ -4655,7 +4666,8 @@ HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0005, Function | S
 /**
  * @tc.number    : IsNeedPushCheckTest_0006
  * @tc.name      : IsNeedPushCheckTest
- * @tc.desc      : Test notification except live view registered but has inconsistent contentType dont't need push check.
+ * @tc.desc      : Test notification except live view registered but has inconsistent contentType
+ * dont't need push check.
  * @tc.require   : #I6Z5OV
  */
 HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheckTest_0006, Function | SmallTest | Level1)
@@ -4742,7 +4754,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetActiveNotificationByFilter_0001, Fu
     int32_t userId = -1;
 
     ASSERT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundleOption, notificationId, label, userId,
-        extraInfoKeys, req), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+        extraInfoKeys, req), (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 
     GTEST_LOG_(INFO) << "GetActiveNotificationByFilter_0001 test end";
 }
@@ -4757,7 +4769,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetNotificationParameters_100, Functio
     std::string label = "GetNotificationParameters's label";
     sptr<NotificationParameters> parameters = nullptr;
     ASSERT_EQ(advancedNotificationService_->GetNotificationParameters(notificationId, label, parameters),
-        (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+        (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -4851,7 +4863,7 @@ HWTEST_F(AdvancedNotificationServiceTest, IsAllowedRemoveSlot_0004, Function | S
     MockIsSystemApp(false);
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     ASSERT_EQ(advancedNotificationService_->IsAllowedRemoveSlot(bundleOption,
-        NotificationConstant::SlotType::LIVE_VIEW), (int)ERR_ANS_NON_SYSTEM_APP);
+        NotificationConstant::SlotType::LIVE_VIEW), (int)ERR_ANS_INNER_NON_SYSTEM_APP);
     GTEST_LOG_(INFO) << "IsAllowedRemoveSlot_0004 test end";
 }
 
@@ -4881,7 +4893,7 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00001, Function |
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     auto request = new (std::nothrow) NotificationRequest();
 
-    int32_t result = ERR_ANS_INVALID_PARAM;
+    InnerErrorCode result = ERR_ANS_INNER_INVALID_PARAM;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     auto ret = advancedNotificationService_->CancelPreparedNotification(1, "label", bundle, 8,
         iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
@@ -4892,7 +4904,7 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00001, Function |
         ASSERT_EQ(ret, result);
     }
 
-    result = ERR_ANS_INVALID_PARAM;
+    result = ERR_ANS_INNER_INVALID_PARAM;
     synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     ret = advancedNotificationService_->GetActiveNotifications("",
         iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
@@ -4905,13 +4917,13 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00001, Function |
 
     uint64_t num = 0;
     ret = advancedNotificationService_->GetActiveNotificationNums(num);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     int importance = 0;
     ret = advancedNotificationService_->GetBundleImportance(importance);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
-    result = ERR_ANS_INVALID_PARAM;
+    result = ERR_ANS_INNER_INVALID_PARAM;
     synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     ret = advancedNotificationService_->GetAllActiveNotifications(
         iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
@@ -4925,21 +4937,21 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00001, Function |
     std::vector<std::string> keys;
     std::vector<sptr<Notification>> notifications;
     ret = advancedNotificationService_->GetSpecialActiveNotifications(keys, notifications);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     bool enabled = false;
     ret = advancedNotificationService_->IsDistributedEnabled(enabled);
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
-    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 #else
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_OPERATION);
 #endif
 
     ret = advancedNotificationService_->EnableDistributed(enabled);
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
-    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 #else
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_OPERATION);
 #endif
 }
 
@@ -4955,22 +4967,22 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_100001, Function 
     auto request = new (std::nothrow) NotificationRequest();
 
     auto ret = advancedNotificationService_->CancelPreparedNotification(1, "label", bundle, 8).GetErrCode();
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
     std::vector<sptr<NotificationRequest>> requests;
     ret = advancedNotificationService_->GetActiveNotifications(requests, "");
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     uint64_t num = 0;
     ret = advancedNotificationService_->GetActiveNotificationNums(num);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     int importance = 0;
     ret = advancedNotificationService_->GetBundleImportance(importance);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     std::vector<sptr<Notification>> notifications;
     ret = advancedNotificationService_->GetAllActiveNotifications(notifications);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -4987,34 +4999,34 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00002, Function |
 
     auto ret = advancedNotificationService_->EnableDistributedSelf(true);
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
-    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 #else
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_OPERATION);
 #endif
 
     bool enable = false;
     ret = advancedNotificationService_->IsDistributedEnableByBundle(bundle, enable);
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
-    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 #else
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_OPERATION);
 #endif
 
     ret = advancedNotificationService_->GetHasPoppedDialog(bundle1, enable);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     ret = advancedNotificationService_->SetSyncNotificationEnabledWithoutApp(1, enable);
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
-    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 #else
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_OPERATION);
 #endif
 
     ret = advancedNotificationService_->GetSyncNotificationEnabledWithoutApp(1, enable);
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
-    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 #else
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_OPERATION);
 #endif
 
     request->SetIsCoverActionButtons(true);
@@ -5051,7 +5063,7 @@ HWTEST_F(AdvancedNotificationServiceTest, Filter_00001, Function | SmallTest | L
 
     advancedNotificationService_->notificationSlotFilter_ = nullptr;
     auto ret = advancedNotificationService_->Filter(record, true);
-    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -5101,7 +5113,7 @@ HWTEST_F(AdvancedNotificationServiceTest,
     advancedNotificationService_->SetControlFlagsByFlags(request);
     ASSERT_EQ(request, nullptr);
 }
- 
+
 /**
  * @tc.name: SetControlFlagsByFlags_00002
  * @tc.desc: Test SetControlFlagsByFlags
@@ -5135,7 +5147,7 @@ HWTEST_F(AdvancedNotificationServiceTest,
     advancedNotificationService_->SetControlFlagsByFlags(request);
     ASSERT_NE(request->GetFlags(), nullptr);
 }
- 
+
 /**
  * @tc.name: SetControlFlagsByFlags_00004
  * @tc.desc: Test SetControlFlagsByFlags
@@ -5150,20 +5162,20 @@ HWTEST_F(AdvancedNotificationServiceTest,
     uint32_t notificationControlFlags = 1;
     request->SetNotificationControlFlags(notificationControlFlags);
     request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
- 
+
     std::shared_ptr<NotificationFlags> flags = std::make_shared<NotificationFlags>();
     flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
     flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
     flags->SetLockScreenEnabled(NotificationConstant::FlagStatus::OPEN);
     flags->SetBannerEnabled(NotificationConstant::FlagStatus::OPEN);
     request->SetFlags(flags);
- 
+
     advancedNotificationService_->SetControlFlagsByFlags(request);
- 
+
     uint32_t resultFlags = request->GetNotificationControlFlags();
     ASSERT_EQ(resultFlags, notificationControlFlags);
 }
- 
+
 /**
  * @tc.name: SetControlFlagsByFlags_00005
  * @tc.desc: Test SetControlFlagsByFlags
@@ -5181,19 +5193,19 @@ HWTEST_F(AdvancedNotificationServiceTest,
     uint32_t notificationControlFlags = 104;
     request->SetNotificationControlFlags(notificationControlFlags);
     request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
- 
+
     std::shared_ptr<NotificationFlags> flags = std::make_shared<NotificationFlags>();
     flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
     flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
     flags->SetLockScreenEnabled(NotificationConstant::FlagStatus::OPEN);
     flags->SetBannerEnabled(NotificationConstant::FlagStatus::OPEN);
     request->SetFlags(flags);
- 
+
     advancedNotificationService_->SetControlFlagsByFlags(request);
     uint32_t resultFlags = record->request->GetNotificationControlFlags();
     ASSERT_EQ(resultFlags, notificationControlFlags);
 }
- 
+
 /**
  * @tc.name: SetControlFlagsByFlags_00006
  * @tc.desc: Test SetControlFlagsByFlags
@@ -5211,19 +5223,19 @@ HWTEST_F(AdvancedNotificationServiceTest,
     uint32_t notificationControlFlags = 23;
     request->SetNotificationControlFlags(notificationControlFlags);
     request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
- 
+
     std::shared_ptr<NotificationFlags> flags = std::make_shared<NotificationFlags>();
     flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
     flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
     flags->SetLockScreenEnabled(NotificationConstant::FlagStatus::CLOSE);
     flags->SetBannerEnabled(NotificationConstant::FlagStatus::CLOSE);
     request->SetFlags(flags);
- 
+
     advancedNotificationService_->SetControlFlagsByFlags(request);
     uint32_t resultFlags = record->request->GetNotificationControlFlags();
     ASSERT_EQ(resultFlags, notificationControlFlags);
 }
- 
+
 /**
  * @tc.name: SetControlFlagsByFlags_00007
  * @tc.desc: Test SetControlFlagsByFlags
@@ -5241,14 +5253,14 @@ HWTEST_F(AdvancedNotificationServiceTest,
     uint32_t notificationControlFlags = 104;
     request->SetNotificationControlFlags(notificationControlFlags);
     request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
- 
+
     std::shared_ptr<NotificationFlags> flags = std::make_shared<NotificationFlags>();
     flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
     flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
     flags->SetLockScreenEnabled(NotificationConstant::FlagStatus::CLOSE);
     flags->SetBannerEnabled(NotificationConstant::FlagStatus::CLOSE);
     request->SetFlags(flags);
- 
+
     advancedNotificationService_->SetControlFlagsByFlags(request);
     uint32_t resultFlags = record->request->GetNotificationControlFlags();
     ASSERT_EQ((resultFlags & NotificationConstant::ReminderFlag::SOUND_FLAG) > 0, true);
@@ -5306,7 +5318,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RegisterPushCallback_00001, Function |
     sptr<NotificationCheckRequest> request = nullptr;
 
     auto ret = advancedNotificationService_->RegisterPushCallback(pushCallback, request);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
     ret = advancedNotificationService_->RegisterPushCallback(pushCallback, request);
@@ -5331,7 +5343,7 @@ HWTEST_F(AdvancedNotificationServiceTest, UnregisterPushCallback_00001, Function
     MockIsVerfyPermisson(false);
 
     auto ret = advancedNotificationService_->UnregisterPushCallback();
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -5392,7 +5404,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0001,
     GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0001 test start";
 
     std::vector<NotificationBundleOption> vec;
-    ASSERT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec), ERR_ANS_INNER_NON_SYSTEM_APP);
 
     GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0001 test end";
 }
@@ -5413,7 +5425,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0002,
     std::vector<NotificationBundleOption> vec;
     int32_t userId = 100;
     ASSERT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec, userId),
-        ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+        ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 
     GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0002 test end";
 }
@@ -5431,7 +5443,8 @@ HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0003,
     MockIsVerfyPermisson(true);
     std::vector<NotificationBundleOption> vec;
     int32_t userId = 100;
-    ASSERT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec, userId), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec, userId),
+        ERR_ANS_INNER_NON_SYSTEM_APP);
 
     GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0003 test end";
 }
@@ -5451,7 +5464,8 @@ HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0004,
     advancedNotificationService_->notificationSvrQueue_ = Infra::FfrtQueueImpl("NotificationSvrMain");
     std::vector<NotificationBundleOption> vec;
     int32_t userId = 100;
-    ASSERT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec, userId), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec, userId),
+        ERR_ANS_INNER_PERMISSION_DENIED);
 
     GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0004 test end";
 }
@@ -5471,7 +5485,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0005,
     advancedNotificationService_->notificationSvrQueue_.Reset();
     std::vector<NotificationBundleOption> vec;
     int32_t userId = 100;
-    ASSERT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec, userId), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec, userId), ERR_ANS_INNER_INVALID_PARAM);
 
     GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0005 test end";
 }
@@ -5491,7 +5505,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetAllNotificationEnabledBundles_0006,
     int32_t userId = -99;
     std::vector<NotificationBundleOption> vec;
     EXPECT_EQ(advancedNotificationService_->GetAllNotificationEnabledBundles(vec, userId),
-        ERR_ANS_GET_ACTIVE_USER_FAILED);
+        ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
     MockIsOsAccountExists(isOsAccountExists);
 
     GTEST_LOG_(INFO) << "GetAllNotificationEnabledBundles_0006 test end";
@@ -5537,7 +5551,8 @@ HWTEST_F(AdvancedNotificationServiceTest, SetBadgeNumberByBundle_00001, Function
 /**
  * @tc.number    : SetBadgeNumberByBundle_00002
  * @tc.name      : SetBadgeNumberByBundle
- * @tc.desc      : Test SetBadgeNumberByBundle with nullptr bundle option, expect error code ERR_ANS_INVALID_PARAM.
+ * @tc.desc      : Test SetBadgeNumberByBundle with nullptr bundle option, expect error code
+ * @tc.desc      : ERR_ANS_INNER_INVALID_PARAM.
  */
 HWTEST_F(AdvancedNotificationServiceTest, SetBadgeNumberByBundle_00002, Function | SmallTest | Level1)
 {
@@ -5545,7 +5560,8 @@ HWTEST_F(AdvancedNotificationServiceTest, SetBadgeNumberByBundle_00002, Function
     MockIsSystemApp(true);
     sptr<NotificationBundleOption> bundleOption = nullptr;
     int32_t badgeNumber = 1;
-    ASSERT_EQ(advancedNotificationService_->SetBadgeNumberByBundle(bundleOption, badgeNumber), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->SetBadgeNumberByBundle(bundleOption, badgeNumber),
+        ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -5583,7 +5599,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RegisterSwingCallback_00001, Function 
     MockIsVerfyPermisson(false);
     sptr<IRemoteObject> swingCallback = nullptr;
     auto ret = advancedNotificationService_->RegisterSwingCallback(swingCallback);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -5598,7 +5614,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RegisterSwingCallback_00002, Function 
     MockIsVerfyPermisson(true);
     sptr<IRemoteObject> swingCallback = nullptr;
     auto ret = advancedNotificationService_->RegisterSwingCallback(swingCallback);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 #endif
 
@@ -5638,7 +5654,7 @@ HWTEST_F(AdvancedNotificationServiceTest, DisableNotificationFeature_00001, Func
 {
     sptr<NotificationDisable> notificationDisable = nullptr;
     ErrCode ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 
     notificationDisable = new (std::nothrow) NotificationDisable();
     ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
@@ -5700,14 +5716,14 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00001, Function | SmallTest | L
     client = AnsDialogHostClient::GetInstance();
 
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::ALLOW_CLICKED,
-        "test", 1), (int)ERROR_INTERNAL_ERROR);
+        "test", 1), (int)ERR_ANS_INNER_TASK_ERR);
 
     auto ret = advancedNotificationService_->dialogManager_
         ->RequestEnableNotificationDailog(bundleOption, nullptr, client, true, false);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_BUNDLE);
 
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::ALLOW_CLICKED,
-        "test", 1), (int)ERROR_INTERNAL_ERROR);
+        "test", 1), (int)ERR_ANS_INNER_TASK_ERR);
 
     ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfoIfNotExist(bundleOption, nullptr), true);
 
@@ -5715,7 +5731,7 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00001, Function | SmallTest | L
 
     ret = advancedNotificationService_->dialogManager_
         ->RequestEnableNotificationDailog(bundleOption, nullptr, client, true, false);
-    ASSERT_EQ(ret, (int)ERR_ANS_DIALOG_IS_POPPING);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_DIALOG_IS_POPPING);
 
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::ALLOW_CLICKED,
         "test", 1), (int)ERR_OK);
@@ -5734,7 +5750,7 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00002, Function | SmallTest | L
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("test", 1);
     std::string deviceId = "deviceId";
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::DENY_CLICKED,
-        "test", 1), (int)ERROR_INTERNAL_ERROR);
+        "test", 1), (int)ERR_ANS_INNER_TASK_ERR);
     ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfoIfNotExist(bundleOption, nullptr), true);
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::DENY_CLICKED,
         "test", 1), (int)ERR_OK);
@@ -5756,7 +5772,7 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00003, Function | SmallTest | L
     AnsDialogHostClient::CreateIfNullptr(client);
     client = AnsDialogHostClient::GetInstance();
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::DIALOG_CRASHED,
-        "test", 1), (int)ERROR_INTERNAL_ERROR);
+        "test", 1), (int)ERR_ANS_INNER_TASK_ERR);
     ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfoIfNotExist(bundleOption, client), true);
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::DIALOG_CRASHED,
         "test", 1), (int)ERR_OK);
@@ -5792,10 +5808,10 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00005, Function | SmallTest | L
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("test", 1);
     std::string deviceId = "deviceId";
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(
-        DialogStatus::REMOVE_BUNDLE, "test", 1), (int)ERROR_INTERNAL_ERROR);
+        DialogStatus::REMOVE_BUNDLE, "test", 1), (int)ERR_ANS_INNER_TASK_ERR);
     ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfo(bundleOption, nullptr), (int)ERR_OK);
     ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfo(
-        bundleOption, nullptr), (int)ERR_ANS_DIALOG_IS_POPPING);
+        bundleOption, nullptr), (int)ERR_ANS_INNER_DIALOG_IS_POPPING);
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(
         DialogStatus::REMOVE_BUNDLE, "test", 1), (int)ERR_OK);
 }
@@ -5878,7 +5894,7 @@ HWTEST_F(AdvancedNotificationServiceTest, SetRingtoneInfoByBundle_0100, Function
     sptr<NotificationBundleOption> bundleOption = CreateValidBundleOption();
     sptr<NotificationRingtoneInfo> ringtoneInfo = CreateValidRingtoneInfo();
     ErrCode result = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
-    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(result, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -5896,7 +5912,7 @@ HWTEST_F(AdvancedNotificationServiceTest, SetRingtoneInfoByBundle_0200, Function
     sptr<NotificationRingtoneInfo> ringtoneInfo = CreateValidRingtoneInfo();
 
     ErrCode result = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
-    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -5914,7 +5930,7 @@ HWTEST_F(AdvancedNotificationServiceTest, SetRingtoneInfoByBundle_0300, Function
     sptr<NotificationRingtoneInfo> ringtoneInfo = nullptr;
 
     ErrCode result = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -5933,7 +5949,7 @@ HWTEST_F(AdvancedNotificationServiceTest, SetRingtoneInfoByBundle_0400, Function
     ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT);
 
     ErrCode result = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -5951,7 +5967,7 @@ HWTEST_F(AdvancedNotificationServiceTest, SetRingtoneInfoByBundle_0500, Function
     sptr<NotificationRingtoneInfo> ringtoneInfo = CreateValidRingtoneInfo();
 
     ErrCode result = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -5967,7 +5983,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetRingtoneInfoByBundle_0100, Function
     sptr<NotificationRingtoneInfo> ringtoneInfo = nullptr;
 
     ErrCode result = advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
-    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(result, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -5985,7 +6001,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetRingtoneInfoByBundle_0200, Function
     sptr<NotificationRingtoneInfo> ringtoneInfo = nullptr;
 
     ErrCode result = advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
-    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -6003,7 +6019,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetRingtoneInfoByBundle_0300, Function
     sptr<NotificationRingtoneInfo> ringtoneInfo = nullptr;
 
     ErrCode result = advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
@@ -6077,6 +6093,27 @@ HWTEST_F(AdvancedNotificationServiceTest, SetNotificationRemindType_00005, Funct
 #endif
 
 /**
+ * @tc.number    : DisableNotificationFeature_00002
+ * @tc.name      : Test DisableNotificationFeature
+ * @tc.desc      : Test DisableNotificationFeature
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, DisableNotificationFeature_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    int32_t userId = 100;
+    MockQueryAllCreatedOsAccounts(userId);
+    notificationDisable->SetDisabled(true);
+    notificationDisable->SetUserId(userId);
+    auto ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
+    EXPECT_EQ(ret, ERR_OK);
+    userId = MAX_USER_ID;
+    notificationDisable->SetUserId(userId);
+    ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
  * @tc.name      : SetSilentReminderEnabled_00001
  * @tc.number    :
  * @tc.desc      : test SetSilentReminderEnabled
@@ -6085,7 +6122,7 @@ HWTEST_F(AdvancedNotificationServiceTest, SetSilentReminderEnabled_00001, Functi
 {
     AdvancedNotificationService advancedNotificationService;
     ErrCode  ret = advancedNotificationService.SetSilentReminderEnabled(nullptr, true);
-    ASSERT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE);
     std::string bundleName = "test11";
     int32_t uid = -1;
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleName, uid));
@@ -6093,22 +6130,22 @@ HWTEST_F(AdvancedNotificationServiceTest, SetSilentReminderEnabled_00001, Functi
     MockIsSystemApp(false);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     ret = advancedNotificationService.SetSilentReminderEnabled(bo, true);
-    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, ERR_ANS_INNER_NON_SYSTEM_APP);
 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
     ret = advancedNotificationService.SetSilentReminderEnabled(bo, true);
-    ASSERT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
     MockQueryForgroundOsAccountId(false, 0);
     ret = advancedNotificationService.SetSilentReminderEnabled(bo, true);
-    ASSERT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE);
 
     MockQueryForgroundOsAccountId(true, 100);
     advancedNotificationService.notificationSvrQueue_.Reset();
     ret = advancedNotificationService.SetSilentReminderEnabled(bo, true);
-    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -6153,7 +6190,7 @@ HWTEST_F(AdvancedNotificationServiceTest, IsSilentReminderEnabled_00001, Functio
     int32_t enableStatusInt;
 
     ErrCode  ret = advancedNotificationService.IsSilentReminderEnabled(nullptr, enableStatusInt);
-    ASSERT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE);
 
     std::string bundleName = "test11";
     int32_t uid = -1;
@@ -6162,22 +6199,22 @@ HWTEST_F(AdvancedNotificationServiceTest, IsSilentReminderEnabled_00001, Functio
     MockIsSystemApp(false);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
-    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, ERR_ANS_INNER_NON_SYSTEM_APP);
 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
     ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
-    ASSERT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
     MockQueryForgroundOsAccountId(false, 0);
     ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
-    ASSERT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE);
 
     MockQueryForgroundOsAccountId(true, 100);
     advancedNotificationService.notificationSvrQueue_.Reset();
     ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
-    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -6191,14 +6228,14 @@ HWTEST_F(AdvancedNotificationServiceTest, SetSilentReminderEnabledInner_00001, F
     std::string bundleName = "com.example.test";
     int32_t uid = 101;
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleName, uid));
-    
+
     // First set to false to establish initial state
     NotificationPreferences::GetInstance()->SetSilentReminderEnabled(bo, false);
-    
+
     // Then call SetSilentReminderEnabledInner with true
     ErrCode ret = advancedNotificationService.SetSilentReminderEnabledInner(bo, true);
     ASSERT_EQ(ret, ERR_OK);
-    
+
     // Verify the state was changed
     NotificationConstant::SWITCH_STATE state;
     ret = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bo, state);
@@ -6217,14 +6254,14 @@ HWTEST_F(AdvancedNotificationServiceTest, SetSilentReminderEnabledInner_00002, F
     std::string bundleName = "com.example.test2";
     int32_t uid = 102;
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleName, uid));
-    
+
     // First set to true to establish initial state
     NotificationPreferences::GetInstance()->SetSilentReminderEnabled(bo, true);
-    
+
     // Then call SetSilentReminderEnabledInner with false
     ErrCode ret = advancedNotificationService.SetSilentReminderEnabledInner(bo, false);
     ASSERT_EQ(ret, ERR_OK);
-    
+
     // Verify the state was changed
     NotificationConstant::SWITCH_STATE state;
     ret = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bo, state);
@@ -6243,39 +6280,18 @@ HWTEST_F(AdvancedNotificationServiceTest, SetSilentReminderEnabledInner_00003, F
     std::string bundleName = "com.example.test3";
     int32_t uid = 103;
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleName, uid));
-    
+
     // Set to true first
     NotificationPreferences::GetInstance()->SetSilentReminderEnabled(bo, true);
-    
+
     // Call SetSilentReminderEnabledInner with true again (no change)
     ErrCode ret = advancedNotificationService.SetSilentReminderEnabledInner(bo, true);
     ASSERT_EQ(ret, ERR_OK);
-    
+
     // Verify the state is still true but may not trigger callback
     NotificationConstant::SWITCH_STATE state;
     ret = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bo, state);
     ASSERT_EQ(ret, ERR_OK);
-}
-
-/**
- * @tc.number    : DisableNotificationFeature_00002
- * @tc.name      : Test DisableNotificationFeature
- * @tc.desc      : Test DisableNotificationFeature
- * @tc.require   : issueI5S4VP
- */
-HWTEST_F(AdvancedNotificationServiceTest, DisableNotificationFeature_00002, Function | SmallTest | Level1)
-{
-    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
-    int32_t userId = 100;
-    MockQueryAllCreatedOsAccounts(userId);
-    notificationDisable->SetDisabled(true);
-    notificationDisable->SetUserId(userId);
-    auto ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
-    EXPECT_EQ(ret, ERR_OK);
-    userId = MAX_USER_ID;
-    notificationDisable->SetUserId(userId);
-    ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -6287,7 +6303,7 @@ HWTEST_F(AdvancedNotificationServiceTest, SetShowBadgeEnabledForBundles_00001, F
 {
     std::map<sptr<NotificationBundleOption>, bool> bundleOptions;
     auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundles(bundleOptions);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -6360,7 +6376,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RegisterBadgeQueryCallbackTest_0300, F
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
-    ASSERT_EQ(advancedNotificationService_->RegisterBadgeQueryCallback(nullptr), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->RegisterBadgeQueryCallback(nullptr), (int)ERR_ANS_INNER_INVALID_PARAM);
     ASSERT_EQ(advancedNotificationService_->UnRegisterBadgeQueryCallback(), (int)ERR_OK);
 }
 
@@ -6373,7 +6389,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RegisterBadgeQueryCallbackTest_0400, F
 {
     GTEST_LOG_(INFO) << "RegisterBadgeQueryCallbackTest_0400 test start";
     int32_t badgeNumber = 0;
-    ASSERT_EQ(advancedNotificationService_->GetBadgeNumber(badgeNumber), (int)ERR_ANS_TASK_ERR);
+    ASSERT_EQ(advancedNotificationService_->GetBadgeNumber(badgeNumber), (int)ERR_ANS_INNER_TASK_ERR);
     sptr<MockBadgeQueryCallBackStub> badgeQueryCallbackStub = new (std::nothrow)MockBadgeQueryCallBackStub();
     EXPECT_NE(badgeQueryCallbackStub, nullptr);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
@@ -6397,8 +6413,8 @@ HWTEST_F(AdvancedNotificationServiceTest, RegisterBadgeQueryCallbackTest_0500, F
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     ASSERT_EQ(advancedNotificationService_->RegisterBadgeQueryCallback(badgeQueryCallbackStub),
-        (int)ERR_ANS_NON_SYSTEM_APP);
-    ASSERT_EQ(advancedNotificationService_->UnRegisterBadgeQueryCallback(), (int)ERR_ANS_NON_SYSTEM_APP);
+        (int)ERR_ANS_INNER_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->UnRegisterBadgeQueryCallback(), (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -6651,7 +6667,7 @@ HWTEST_F(AdvancedNotificationServiceTest, ANS_RemoveDoNotDisturbProfiles_0200, F
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
     int32_t userId = 100;
     auto ret = advancedNotificationService_->RemoveDoNotDisturbProfiles(profiles, userId);
-    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -6667,7 +6683,7 @@ HWTEST_F(AdvancedNotificationServiceTest, ANS_RemoveDoNotDisturbProfiles_0300, F
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
     int32_t userId = 100;
     auto ret = advancedNotificationService_->RemoveDoNotDisturbProfiles(profiles, userId);
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -6684,7 +6700,7 @@ HWTEST_F(AdvancedNotificationServiceTest, ANS_RemoveDoNotDisturbProfiles_0400, F
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
     int32_t userId = 100;
     auto ret = advancedNotificationService_->RemoveDoNotDisturbProfiles(profiles, userId);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -6704,7 +6720,7 @@ HWTEST_F(AdvancedNotificationServiceTest, ANS_RemoveDoNotDisturbProfiles_0500, F
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
     int32_t userId = -99;
     auto ret = advancedNotificationService_->RemoveDoNotDisturbProfiles(profiles, userId);
-    EXPECT_EQ(ret, (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
     MockIsOsAccountExists(isOsAccountExists);
 }
 
@@ -6723,7 +6739,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetDoNotDisturbProfile_0100, Function 
     EXPECT_NE(profile, nullptr);
     int32_t userId = 100;
     ErrCode result = advancedNotificationService_->GetDoNotDisturbProfile(id, profile, userId);
-    EXPECT_EQ(result, ERR_ANS_NO_PROFILE_TEMPLATE);
+    EXPECT_EQ(result, ERR_ANS_INNER_NO_PROFILE_TEMPLATE);
 }
 
 /**
@@ -6741,7 +6757,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetDoNotDisturbProfile_0200, Function 
     EXPECT_NE(profile, nullptr);
     int32_t userId = 100;
     ErrCode result = advancedNotificationService_->GetDoNotDisturbProfile(id, profile, userId);
-    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(result, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -6759,7 +6775,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetDoNotDisturbProfile_0300, Function 
     EXPECT_NE(profile, nullptr);
     int32_t userId = 100;
     ErrCode result = advancedNotificationService_->GetDoNotDisturbProfile(id, profile, userId);
-    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -6777,7 +6793,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetDoNotDisturbProfile_0400, Function 
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     EXPECT_NE(profile, nullptr);
     ErrCode result = advancedNotificationService_->GetDoNotDisturbProfile(id, profile, userId);
-    EXPECT_EQ(result, ERR_ANS_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
     MockIsOsAccountExists(isOsAccountExists);
 }
 
@@ -6812,22 +6828,22 @@ HWTEST_F(AdvancedNotificationServiceTest, GetDoNotDisturbProfile_0500, Function 
 HWTEST_F(AdvancedNotificationServiceTest, GetNotificationSwitch_0100, Function | SmallTest | Level1)
 {
     MockIsVerfyPermisson(false);
- 
+
     std::string bundlleName = "switchTestBundle";
     int32_t uid = 1000;
     int32_t state;
- 
+
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundlleName, uid);
     ErrCode result = advancedNotificationService_->GetNotificationSwitch(bundleOption, state);
-    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
- 
+    EXPECT_EQ(result, ERR_ANS_INNER_PERMISSION_DENIED);
+
     MockIsVerfyPermisson(true);
     result = advancedNotificationService_->GetNotificationSwitch(nullptr, state);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 
     bundleOption = new (std::nothrow) NotificationBundleOption("", uid);
     result = advancedNotificationService_->GetNotificationSwitch(bundleOption, state);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 
     bundleOption = new (std::nothrow) NotificationBundleOption(bundlleName, uid);
     MockSystemApp();
@@ -6844,7 +6860,8 @@ HWTEST_F(AdvancedNotificationServiceTest, GetNotificationSwitch_0100, Function |
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(AdvancedNotificationServiceTest, Constructor_RegisterOnSubscriberAddCallback_0100, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationServiceTest, Constructor_RegisterOnSubscriberAddCallback_0100,
+    Function | SmallTest | Level1)
 {
     auto service = new (std::nothrow) AdvancedNotificationService();
     ASSERT_NE(service, nullptr);

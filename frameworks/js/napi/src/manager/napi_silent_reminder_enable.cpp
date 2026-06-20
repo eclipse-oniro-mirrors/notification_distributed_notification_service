@@ -15,12 +15,16 @@
 
 #include "napi_silent_reminder_enable.h"
 
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 
 const int SET_SILENT_REMINDER_ENABLE_MAX_PARA = 2;
 const int SET_SILENT_REMINDER_ENABLE_MIN_PARA = 1;
@@ -48,45 +52,45 @@ void AsyncCompleteCallbackNapiSetSilentReminderEnabled(napi_env env, napi_status
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, SilentReminderEnableParams &params)
 {
     ANS_LOGD("enter");
- 
+
     size_t argc = SET_SILENT_REMINDER_ENABLE_MAX_PARA;
     napi_value argv[SET_SILENT_REMINDER_ENABLE_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < SET_SILENT_REMINDER_ENABLE_MIN_PARA) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
- 
+
     // argv[0]: bundleOption
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
         ANS_LOGE("Parameter type error. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
- 
+
     if (argc > SET_SILENT_REMINDER_ENABLE_MIN_PARA) {
         // argv[2]: enable
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
             std::string msg = "Incorrect parameter types.The type of param must be boolean.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
             return nullptr;
         }
         napi_get_value_bool(env, argv[PARAM1], &params.enabled);
     }
- 
+
     return Common::NapiGetNull(env);
 }
 
@@ -95,19 +99,19 @@ napi_value NapiSetSilentReminderEnabled(napi_env env, napi_callback_info info)
     ANS_LOGD("enter");
     SilentReminderEnableParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
- 
+
     AsyncCallbackSilentReminderEnable *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackSilentReminderEnable {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
- 
+
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "setSilentReminderEnabled", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -119,20 +123,21 @@ napi_value NapiSetSilentReminderEnabled(napi_env env, napi_callback_info info)
             AsyncCallbackSilentReminderEnable *asynccallbackinfo =
                 static_cast<AsyncCallbackSilentReminderEnable *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::SetSilentReminderEnabled(
-                    asynccallbackinfo->params.option, asynccallbackinfo->params.enabled);
-                ANS_LOGI("SetSilentReminder errorCode=%{public}d", asynccallbackinfo->info.errorCode);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetSilentReminderEnabled(
+                        asynccallbackinfo->params.option, asynccallbackinfo->params.enabled);
+                ANS_LOGI("SetSilentReminder errorCode=%{public}u", asynccallbackinfo->info.errorCode);
             }
         },
         AsyncCompleteCallbackNapiSetSilentReminderEnabled,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
- 
+
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
- 
+
     return promise;
 }
- 
+
 void AsyncCompleteCallbackNapiIsSilentReminderEnabled(napi_env env, napi_status status, void *data)
 {
     ANS_LOGD("enter");
@@ -159,25 +164,25 @@ void AsyncCompleteCallbackNapiIsSilentReminderEnabled(napi_env env, napi_status 
         asynccallbackinfo = nullptr;
     }
 }
- 
+
 napi_value NapiIsSilentReminderEnabled(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("enter");
     SilentReminderEnableParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
- 
+
     AsyncCallbackSilentReminderEnable *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackSilentReminderEnable {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
- 
+
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "isSmartReminderEnabled", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
@@ -189,16 +194,17 @@ napi_value NapiIsSilentReminderEnabled(napi_env env, napi_callback_info info)
             AsyncCallbackSilentReminderEnable *asynccallbackinfo =
                 static_cast<AsyncCallbackSilentReminderEnable *>(data);
             if (asynccallbackinfo) {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::IsSilentReminderEnabled(
-                        asynccallbackinfo->params.option, asynccallbackinfo->params.enableStatus);
-                ANS_LOGI("isSmartReminder code=%{public}d,status=%{public}d",
+                    asynccallbackinfo->info.errorCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->IsSilentReminderEnabled(
+                            asynccallbackinfo->params.option, asynccallbackinfo->params.enableStatus);
+                ANS_LOGI("isSmartReminder code=%{public}u,status=%{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->params.enableStatus);
             }
         },
         AsyncCompleteCallbackNapiIsSilentReminderEnabled,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
- 
+
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     return promise;
 }

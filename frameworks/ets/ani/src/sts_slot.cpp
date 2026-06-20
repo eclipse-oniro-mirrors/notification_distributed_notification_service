@@ -81,7 +81,7 @@ bool SetOptionalFieldSlotType(
     return true;
 }
 
-bool WrapNotificationSlotByBoolean(ani_env *env, sptr<Notification::NotificationSlot> slot, ani_object &outAniObj)
+bool WrapNotificationSlotByBoolean(ani_env *env, sptr<OHOS::Notification::NotificationSlot> slot, ani_object &outAniObj)
 {
     if (!SetPropertyOptionalByBoolean(env, outAniObj, "badgeFlag", slot->IsShowBadge())) {
         ANS_LOGE("Set badgeFlag fail");
@@ -106,7 +106,7 @@ bool WrapNotificationSlotByBoolean(ani_env *env, sptr<Notification::Notification
     return true;
 }
 
-bool WrapNotificationSlotByString(ani_env *env, sptr<Notification::NotificationSlot> slot, ani_object &outAniObj)
+bool WrapNotificationSlotByString(ani_env *env, sptr<OHOS::Notification::NotificationSlot> slot, ani_object &outAniObj)
 {
     if (!SetPropertyOptionalByString(env, outAniObj, "desc", slot->GetDescription())) {
         ANS_LOGE("Set desc fail");
@@ -119,7 +119,7 @@ bool WrapNotificationSlotByString(ani_env *env, sptr<Notification::NotificationS
     return true;
 }
 
-bool WrapNotificationSlotByInt(ani_env *env, sptr<Notification::NotificationSlot> slot, ani_object &outAniObj)
+bool WrapNotificationSlotByInt(ani_env *env, sptr<OHOS::Notification::NotificationSlot> slot, ani_object &outAniObj)
 {
     if (!SetPropertyOptionalByInt(
         env, outAniObj, "lockscreenVisibility", static_cast<int32_t>(slot->GetLockScreenVisibleness()))) {
@@ -154,8 +154,8 @@ bool WrapGetNotificationSetting(ani_env *env, uint32_t slotFlags, ani_object &ou
         ANS_LOGE("Create class failed");
         return false;
     }
-    bool soundEnabled = slotFlags & Notification::NotificationConstant::ReminderFlag::SOUND_FLAG;
-    bool vibrationEnabled = slotFlags & Notification::NotificationConstant::ReminderFlag::VIBRATION_FLAG;
+    bool soundEnabled = slotFlags & OHOS::Notification::NotificationConstant::ReminderFlag::SOUND_FLAG;
+    bool vibrationEnabled = slotFlags & OHOS::Notification::NotificationConstant::ReminderFlag::VIBRATION_FLAG;
     bool lockScreenEnabled = slotFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG;
     bool bannerEnabled = slotFlags & NotificationConstant::ReminderFlag::BANNER_FLAG;
     bool badgeNumberEnabled = slotFlags & NotificationConstant::ReminderFlag::BADGENUMBER_SHOW_FLAG;
@@ -194,7 +194,7 @@ bool WrapGetNotificationSetting(ani_env *env, uint32_t slotFlags, ani_object &ou
     return true;
 }
 
-bool WrapNotificationSlot(ani_env *env, sptr<Notification::NotificationSlot> slot, ani_object &outAniObj)
+bool WrapNotificationSlot(ani_env *env, sptr<OHOS::Notification::NotificationSlot> slot, ani_object &outAniObj)
 {
     ANS_LOGD("WrapNotificationSlot call");
     if (env == nullptr || slot == nullptr) {
@@ -239,7 +239,7 @@ bool WrapNotificationSlot(ani_env *env, sptr<Notification::NotificationSlot> slo
     return true;
 }
 
-bool WrapNotificationSlotArray(ani_env *env, const std::vector<sptr<Notification::NotificationSlot>>& slots,
+bool WrapNotificationSlotArray(ani_env *env, const std::vector<sptr<OHOS::Notification::NotificationSlot>>& slots,
     ani_array &outAniObj)
 {
     ANS_LOGD("WrapNotificationSlotArray call");
@@ -285,7 +285,7 @@ bool ParseNotificationSlotByBasicType(ani_env *env, ani_object notificationSlotO
     if (GetPropertyInt(env, notificationSlotObj, "lockscreenVisibility", isUndefined, intValue) == ANI_OK
         && isUndefined == ANI_FALSE) {
             slot.SetLockscreenVisibleness(
-                Notification::NotificationConstant::VisiblenessType(intValue));
+                OHOS::Notification::NotificationConstant::VisiblenessType(intValue));
     }
     if (GetPropertyInt(env, notificationSlotObj, "lightColor", isUndefined, intValue) == ANI_OK
         && isUndefined == ANI_FALSE) {
@@ -323,7 +323,8 @@ bool UnwrapNotificationSlot(ani_env *env, ani_object notificationSlotObj, Notifi
     ani_ref notificationTypeRef = {};
     status = GetPropertyRef(env, notificationSlotObj, "notificationType", isUndefined, notificationTypeRef);
     if (status == ANI_OK && isUndefined == ANI_FALSE) {
-        Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
+        OHOS::Notification::NotificationConstant::SlotType slotType =
+            OHOS::Notification::NotificationConstant::SlotType::OTHER;
         if (SlotTypeEtsToC(env, static_cast<ani_enum_item>(notificationTypeRef), slotType)) {
             slot.SetType(slotType);
         }

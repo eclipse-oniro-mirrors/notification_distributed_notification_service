@@ -18,7 +18,7 @@
 #include "accesstoken_kit.h"
 #include "access_token_helper.h"
 #include "ans_const_define.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_permission_def.h"
 
@@ -34,7 +34,6 @@
 
 namespace OHOS {
 namespace Notification {
-
 ErrCode AdvancedNotificationService::SetSilentReminderEnabled(const sptr<NotificationBundleOption> &bundleOption,
     const bool enabled)
 {
@@ -42,28 +41,28 @@ ErrCode AdvancedNotificationService::SetSilentReminderEnabled(const sptr<Notific
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr) {
         ANS_LOGE("BundleOption is null.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_BUNDLE));
-        return ERR_ANS_INVALID_BUNDLE;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_BUNDLE));
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
- 
+
     message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
         " silentReminderEnabled:" + std::to_string(enabled));
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("IsSystemApp is false.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
- 
+
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission Denied.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
- 
+
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         ANS_LOGE("bundle is nullptr");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_BUNDLE));
-        return ERR_ANS_INVALID_BUNDLE;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_BUNDLE));
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_OK;
@@ -75,7 +74,7 @@ ErrCode AdvancedNotificationService::SetSilentReminderEnabled(const sptr<Notific
         "SetSilentReminderEnabled result: %{public}d", bundleOption->GetBundleName().c_str(),
         bundleOption->GetUid(), std::to_string(enabled).c_str(), result);
     NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_3));
- 
+
     return result;
 }
 
@@ -109,24 +108,24 @@ ErrCode AdvancedNotificationService::IsSilentReminderEnabled(const sptr<Notifica
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr) {
         ANS_LOGE("BundleOption is null.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     NotificationConstant::SWITCH_STATE enableStatus;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("IsSystemApp is bogus.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
- 
+
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("no permission");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     ErrCode result = ERR_OK;

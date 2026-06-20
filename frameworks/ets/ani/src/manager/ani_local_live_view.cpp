@@ -14,7 +14,8 @@
  */
 #include "ani_local_live_view.h"
 
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -22,6 +23,8 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackLiveViewInfo* asyncCallbackInfo)
 {
     ANS_LOGD("Delete AsyncCallbackLiveViewInfo Without Promise");
@@ -142,9 +145,11 @@ ani_object AniTriggerSystemLiveView(ani_env *env, ani_object bundleOptionObj, an
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackLiveViewInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::TriggerLocalLiveView(
-                    asyncCallbackInfo->bundleOption,
-                    static_cast<int32_t>(asyncCallbackInfo->notificationId), asyncCallbackInfo->buttonOption);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->TriggerLocalLiveView(
+                        asyncCallbackInfo->bundleOption,
+                        static_cast<int32_t>(asyncCallbackInfo->notificationId),
+                        asyncCallbackInfo->buttonOption);
             }
         },
         HandleLiveViewFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -203,7 +208,7 @@ ani_object AniSubscribeSystemLiveView(ani_env *env, ani_object subscriberObj, an
             auto asyncCallbackInfo = static_cast<AsyncCallbackLiveViewInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    Notification::NotificationHelper::SubscribeLocalLiveViewNotification(
+                    DelayedSingleton<AnsNotification>::GetInstance()->SubscribeLocalLiveViewNotification(
                         *(asyncCallbackInfo->localLiveViewSubscriber), false);
             }
         },

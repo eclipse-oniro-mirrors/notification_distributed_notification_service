@@ -55,7 +55,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
     if (argc < 1) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -64,7 +64,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (valuetype != napi_object) {
         ANS_LOGE("Argument type error. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
@@ -199,7 +199,7 @@ napi_value GetStringProperty(
     if (valuetype != napi_string) {
         ANS_LOGE("Wrong argument type. String expected.");
         std::string msg = "Incorrect parameter types.The type of param must be string.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
@@ -223,7 +223,7 @@ napi_value GetObjectProperty(
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     return Common::NapiGetNull(env);
@@ -373,7 +373,7 @@ napi_value ParsePublishAsBundleParameters(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
     if (argc < 1) {
         ANS_LOGD("Wrong number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
     // argv[0] : NotificationRequest / bundleOption
@@ -382,7 +382,7 @@ napi_value ParsePublishAsBundleParameters(
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
@@ -395,7 +395,7 @@ napi_value ParsePublishAsBundleParameters(
         auto retValue = Common::GetBundleOption(env, argv[PARAM0], option);
         if (retValue == nullptr) {
             ANS_LOGE("GetBundleOption failed.");
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
         params.request.SetOwnerBundleName(option.GetBundleName());
@@ -408,7 +408,7 @@ napi_value ParsePublishAsBundleParameters(
     if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean && valuetype != napi_object) {
         ANS_LOGE("Error argument type. String number boolean object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be string or number or boolean.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     if (argc > PUBLISH_AS_BUNDLEOPTION_MAX) {
@@ -438,7 +438,7 @@ napi_value ParsePublishAsBundleParameters(
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types.The type of param must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         int32_t userId = 0;

@@ -17,6 +17,7 @@
 
 #define private public
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "distributed_data_define.h"
 #include "distributed_bundle_service.h"
@@ -100,7 +101,7 @@ HWTEST_F(DistributedBundleServiceTest, DistributedBundleList_00001, Function | S
     MockBundleManager::MockBundleInterfaceResult(-1);
     auto result = DistributedBundleService::GetInstance().SetDeviceDistributedBundleList(
         DistributedBundleChangeType::MASTER_BUNDLE_ADD, bundles);
-    ASSERT_EQ(result, static_cast<int32_t>(ERR_ANS_TASK_ERR));
+    ASSERT_EQ(result, static_cast<int32_t>(ERR_ANS_INNER_TASK_ERR));
     MockBundleManager::MockBundleInterfaceResult(0);
     result = DistributedBundleService::GetInstance().SetDeviceDistributedBundleList(
         DistributedBundleChangeType::MASTER_BUNDLE_ADD, bundles);
@@ -146,7 +147,7 @@ HWTEST_F(DistributedBundleServiceTest, DistributedBundleList_00002, Function | S
     MockBundleManager::MockBundleInterfaceResult(-1);
     result = DistributedBundleService::GetInstance().SetDeviceDistributedBundleList(
         DistributedBundleChangeType::MASTER_NOTIFICATION_ENABLE, { changeBundle });
-    ASSERT_EQ(result, static_cast<int32_t>(ERR_ANS_TASK_ERR));
+    ASSERT_EQ(result, static_cast<int32_t>(ERR_ANS_INNER_TASK_ERR));
     MockBundleManager::MockBundleInterfaceResult(0);
     result = DistributedBundleService::GetInstance().SetDeviceDistributedBundleList(
         DistributedBundleChangeType::MASTER_LIVEVIEW_ENABLE, { changeBundle });
@@ -256,7 +257,7 @@ HWTEST_F(DistributedBundleServiceTest, DistributedBundleList_00004, Function | S
     changeBundle0.SetBundleLabel("demo0");
     result = DistributedBundleService::GetInstance().SetDeviceDistributedBundleList(
         DistributedBundleChangeType::COLLABORATION_LIVEVIEW_ENABLE, { changeBundle0 });
-    ASSERT_EQ(result, static_cast<int32_t>(ERR_ANS_INVALID_PARAM));
+    ASSERT_EQ(result, static_cast<int32_t>(ERR_ANS_INNER_INVALID_PARAM));
     
     NotificationDistributedBundle changeBundle1 = NotificationDistributedBundle("com.test.demo1", 20002001);
     changeBundle0.SetBundleLabel("demo1");

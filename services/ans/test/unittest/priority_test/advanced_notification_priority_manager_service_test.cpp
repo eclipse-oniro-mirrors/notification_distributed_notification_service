@@ -22,6 +22,7 @@
 #undef private
 #undef protected
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "bool_wrapper.h"
 #include "mock_accesstoken_kit.h"
 
@@ -64,14 +65,14 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabled_0100, Function | SmallTe
 
 /**
  * @tc.name: SetPriorityEnabled_0200
- * @tc.desc: Test SetPriorityEnabled return ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: Test SetPriorityEnabled return ERR_ANS_INNER_PERMISSION_DENIED.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabled_0200, Function | SmallTest | Level1)
 {
     MockIsVerfyPermisson(false);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityEnabled(false), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityEnabled(false), ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -95,7 +96,7 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundle_0100, Function |
 
 /**
  * @tc.name: SetPriorityEnabledByBundle_0200
- * @tc.desc: Test SetPriorityEnabledByBundle return ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: Test SetPriorityEnabledByBundle return ERR_ANS_INNER_PERMISSION_DENIED.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundle_0200, Function | SmallTest | Level1)
@@ -103,12 +104,12 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundle_0200, Function |
     MockIsVerfyPermisson(false);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 200202);
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundle(bundleOption, 2),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
  * @tc.name: SetPriorityEnabledByBundle_0300
- * @tc.desc: Test SetPriorityEnabledByBundle return ERR_ANS_INVALID_BUNDLE.
+ * @tc.desc: Test SetPriorityEnabledByBundle return ERR_ANS_INNER_INVALID_BUNDLE.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundle_0300, Function | SmallTest | Level1)
@@ -116,24 +117,24 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundle_0300, Function |
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     bundleOption->SetBundleName("testBundleName");
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundle(bundleOption, 2),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
  * @tc.name: SetPriorityEnabledByBundle_0400
- * @tc.desc: Test SetPriorityEnabledByBundle return ERR_ANS_INVALID_PARAM.
+ * @tc.desc: Test SetPriorityEnabledByBundle return ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundle_0400, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 200202);
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundle(bundleOption, 3),
-        ERR_ANS_INVALID_PARAM);
+        ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.name: SetPriorityEnabledByBundle_0500
- * @tc.desc: Test SetPriorityEnabledByBundle param ERR_ANS_INVALID_BUNDLE.
+ * @tc.desc: Test SetPriorityEnabledByBundle param ERR_ANS_INNER_INVALID_BUNDLE.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundle_0500, Function | SmallTest | Level1)
@@ -142,12 +143,12 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundle_0500, Function |
     bundleOption->SetBundleName("bundleName");
     bundleOption->SetUid(2000);
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundle(bundleOption, 2),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
  * @tc.name: IsPriorityEnabledByBundle_0100
- * @tc.desc: Test IsPriorityEnabledByBundle return ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: Test IsPriorityEnabledByBundle return ERR_ANS_INNER_PERMISSION_DENIED.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, IsPriorityEnabledByBundle_0100, Function | SmallTest | Level1)
@@ -156,12 +157,12 @@ HWTEST_F(PriorityManagerServiceTest, IsPriorityEnabledByBundle_0100, Function | 
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 200202);
     int32_t enableStatusInt;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->IsPriorityEnabledByBundle(bundleOption, enableStatusInt),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
  * @tc.name: IsPriorityEnabledByBundle_0200
- * @tc.desc: Test IsPriorityEnabledByBundle return ERR_ANS_INVALID_BUNDLE.
+ * @tc.desc: Test IsPriorityEnabledByBundle return ERR_ANS_INNER_INVALID_BUNDLE.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, IsPriorityEnabledByBundle_0200, Function | SmallTest | Level1)
@@ -170,7 +171,7 @@ HWTEST_F(PriorityManagerServiceTest, IsPriorityEnabledByBundle_0200, Function | 
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     bundleOption->SetBundleName("testBundleName");
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->IsPriorityEnabledByBundle(bundleOption, enableStatusInt),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -190,7 +191,7 @@ HWTEST_F(PriorityManagerServiceTest, SetBundlePriorityConfig_0100, Function | Sm
 
 /**
  * @tc.name: SetBundlePriorityConfig_0200
- * @tc.desc: Test SetBundlePriorityConfig return ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: Test SetBundlePriorityConfig return ERR_ANS_INNER_PERMISSION_DENIED.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, SetBundlePriorityConfig_0200, Function | SmallTest | Level1)
@@ -198,12 +199,12 @@ HWTEST_F(PriorityManagerServiceTest, SetBundlePriorityConfig_0200, Function | Sm
     MockIsVerfyPermisson(false);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 200202);
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetBundlePriorityConfig(bundleOption, "keyword1\nkeyword2"),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
  * @tc.name: SetBundlePriorityConfig_0300
- * @tc.desc: Test SetBundlePriorityConfig return ERR_ANS_INVALID_BUNDLE.
+ * @tc.desc: Test SetBundlePriorityConfig return ERR_ANS_INNER_INVALID_BUNDLE.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, SetBundlePriorityConfig_0300, Function | SmallTest | Level1)
@@ -211,12 +212,12 @@ HWTEST_F(PriorityManagerServiceTest, SetBundlePriorityConfig_0300, Function | Sm
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     bundleOption->SetBundleName("testBundleName");
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetBundlePriorityConfig(bundleOption, "keyword1\nkeyword2"),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
  * @tc.name: SetBundlePriorityConfig_0400
- * @tc.desc: Test SetBundlePriorityConfig param ERR_ANS_INVALID_BUNDLE.
+ * @tc.desc: Test SetBundlePriorityConfig param ERR_ANS_INNER_INVALID_BUNDLE.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, SetBundlePriorityConfig_0400, Function | SmallTest | Level1)
@@ -225,7 +226,7 @@ HWTEST_F(PriorityManagerServiceTest, SetBundlePriorityConfig_0400, Function | Sm
     bundleOption->SetBundleName("bundleName");
     bundleOption->SetUid(2000);
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetBundlePriorityConfig(bundleOption, ""),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -242,7 +243,7 @@ HWTEST_F(PriorityManagerServiceTest, SetBundlePriorityConfigInner_0100, Function
 
 /**
  * @tc.name: GetBundlePriorityConfig_0100
- * @tc.desc: Test GetBundlePriorityConfig return ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: Test GetBundlePriorityConfig return ERR_ANS_INNER_PERMISSION_DENIED.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, GetBundlePriorityConfig_0100, Function | SmallTest | Level1)
@@ -251,12 +252,12 @@ HWTEST_F(PriorityManagerServiceTest, GetBundlePriorityConfig_0100, Function | Sm
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 200202);
     std::string value;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->GetBundlePriorityConfig(bundleOption, value),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
  * @tc.name: GetBundlePriorityConfig_0200
- * @tc.desc: Test GetBundlePriorityConfig return ERR_ANS_INVALID_BUNDLE.
+ * @tc.desc: Test GetBundlePriorityConfig return ERR_ANS_INNER_INVALID_BUNDLE.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, GetBundlePriorityConfig_0200, Function | SmallTest | Level1)
@@ -265,7 +266,7 @@ HWTEST_F(PriorityManagerServiceTest, GetBundlePriorityConfig_0200, Function | Sm
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     bundleOption->SetBundleName("testBundleName");
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->GetBundlePriorityConfig(bundleOption, value),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -277,7 +278,8 @@ HWTEST_F(PriorityManagerServiceTest, TriggerUpdatePriorityType_0100, Function | 
 {
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetInnerPriorityNotificationType(NotificationConstant::PriorityNotificationType::PAYMENT_DUE);
-    EXPECT_EQ(AdvancedNotificationService::GetInstance()->TriggerUpdatePriorityType(request), ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(AdvancedNotificationService::GetInstance()->TriggerUpdatePriorityType(request),
+        ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -300,7 +302,7 @@ HWTEST_F(PriorityManagerServiceTest, TriggerUpdatePriorityType_0200, Function | 
 
 /**
  * @tc.name: TriggerUpdatePriorityType_0300
- * @tc.desc: Test TriggerUpdatePriorityType return ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: Test TriggerUpdatePriorityType return ERR_ANS_INNER_PERMISSION_DENIED.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, TriggerUpdatePriorityType_0300, Function | SmallTest | Level1)
@@ -308,7 +310,7 @@ HWTEST_F(PriorityManagerServiceTest, TriggerUpdatePriorityType_0300, Function | 
     MockIsVerfyPermisson(false);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->TriggerUpdatePriorityType(request),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -325,7 +327,8 @@ HWTEST_F(PriorityManagerServiceTest, TriggerUpdatePriorityType_0400, Function | 
     record->notification = notification;
     record->request = request;
     AdvancedNotificationService::GetInstance()->AddToNotificationList(record);
-    EXPECT_EQ(AdvancedNotificationService::GetInstance()->TriggerUpdatePriorityType(request), ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(AdvancedNotificationService::GetInstance()->TriggerUpdatePriorityType(request),
+        ERR_ANS_INNER_INVALID_PARAM);
     AdvancedNotificationService::GetInstance()->RemoveNotificationList(record);
 }
 
@@ -363,7 +366,7 @@ HWTEST_F(PriorityManagerServiceTest, GetRequestsFromNotification_0100, Function 
 
 /**
  * @tc.name: SetPriorityEnabledByBundles_0100
- * @tc.desc: Test SetPriorityEnabledByBundles ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: Test SetPriorityEnabledByBundles ERR_ANS_INNER_PERMISSION_DENIED.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundles_0100, Function | SmallTest | Level1)
@@ -371,12 +374,12 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundles_0100, Function 
     MockIsVerfyPermisson(false);
     std::map<sptr<NotificationBundleOption>, bool> priorityEnable;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundles(priorityEnable),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
  * @tc.name: SetPriorityEnabledByBundles_0200
- * @tc.desc: Test SetPriorityEnabledByBundles param ERR_ANS_INVALID_BUNDLE.
+ * @tc.desc: Test SetPriorityEnabledByBundles param ERR_ANS_INNER_INVALID_BUNDLE.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundles_0200, Function | SmallTest | Level1)
@@ -386,12 +389,12 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundles_0200, Function 
     std::map<sptr<NotificationBundleOption>, bool> priorityEnable;
     priorityEnable[bundleOption] = false;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundles(priorityEnable),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
  * @tc.name: SetPriorityEnabledByBundles_0300
- * @tc.desc: Test SetPriorityEnabledByBundles param ERR_ANS_INVALID_BUNDLE.
+ * @tc.desc: Test SetPriorityEnabledByBundles param ERR_ANS_INNER_INVALID_BUNDLE.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundles_0300, Function | SmallTest | Level1)
@@ -402,7 +405,7 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundles_0300, Function 
     std::map<sptr<NotificationBundleOption>, bool> priorityEnable;
     priorityEnable[bundleOption] = true;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundles(priorityEnable),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -421,7 +424,7 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundles_0400, Function 
 
 /**
  * @tc.name: GetPriorityEnabledByBundles_0100
- * @tc.desc: Test GetPriorityEnabledByBundles ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: Test GetPriorityEnabledByBundles ERR_ANS_INNER_PERMISSION_DENIED.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, GetPriorityEnabledByBundles_0100, Function | SmallTest | Level1)
@@ -430,12 +433,12 @@ HWTEST_F(PriorityManagerServiceTest, GetPriorityEnabledByBundles_0100, Function 
     std::map<sptr<NotificationBundleOption>, bool> priorityEnable;
     std::vector<sptr<NotificationBundleOption>> bundleOptions;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->GetPriorityEnabledByBundles(bundleOptions, priorityEnable),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
  * @tc.name: GetPriorityEnabledByBundles_0200
- * @tc.desc: Test GetPriorityEnabledByBundles param ERR_ANS_INVALID_BUNDLE.
+ * @tc.desc: Test GetPriorityEnabledByBundles param ERR_ANS_INNER_INVALID_BUNDLE.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, GetPriorityEnabledByBundles_0200, Function | SmallTest | Level1)
@@ -446,12 +449,12 @@ HWTEST_F(PriorityManagerServiceTest, GetPriorityEnabledByBundles_0200, Function 
     std::vector<sptr<NotificationBundleOption>> bundleOptions;
     bundleOptions.emplace_back(bundleOption);
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->GetPriorityEnabledByBundles(bundleOptions, priorityEnable),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
  * @tc.name: GetPriorityEnabledByBundles_0300
- * @tc.desc: Test GetPriorityEnabledByBundles param ERR_ANS_INVALID_BUNDLE.
+ * @tc.desc: Test GetPriorityEnabledByBundles param ERR_ANS_INNER_INVALID_BUNDLE.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, GetPriorityEnabledByBundles_0300, Function | SmallTest | Level1)
@@ -463,7 +466,7 @@ HWTEST_F(PriorityManagerServiceTest, GetPriorityEnabledByBundles_0300, Function 
     std::vector<sptr<NotificationBundleOption>> bundleOptions;
     bundleOptions.emplace_back(bundleOption);
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->GetPriorityEnabledByBundles(bundleOptions, priorityEnable),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -484,7 +487,7 @@ HWTEST_F(PriorityManagerServiceTest, GetPriorityEnabledByBundles_0400, Function 
 
 /**
  * @tc.name: SetPriorityIntelligentEnabled_0100
- * @tc.desc: Test SetPriorityIntelligentEnabled ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: Test SetPriorityIntelligentEnabled ERR_ANS_INNER_PERMISSION_DENIED.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, SetPriorityIntelligentEnabled_0100, Function | SmallTest | Level1)
@@ -492,7 +495,7 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityIntelligentEnabled_0100, Functio
     MockIsVerfyPermisson(false);
     bool enabled = true;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityIntelligentEnabled(enabled),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -505,7 +508,7 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityIntelligentEnabled_0200, Functio
     MockQueryForgroundOsAccountId(false, 3);
     bool enabled = true;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityIntelligentEnabled(enabled),
-        ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+        ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
     MockQueryForgroundOsAccountId(true, 0);
 }
 
@@ -523,7 +526,7 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityIntelligentEnabled_0300, Functio
 
 /**
  * @tc.name: IsPriorityIntelligentEnabled_0100
- * @tc.desc: Test IsPriorityIntelligentEnabled ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: Test IsPriorityIntelligentEnabled ERR_ANS_INNER_PERMISSION_DENIED.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, IsPriorityIntelligentEnabled_0100, Function | SmallTest | Level1)
@@ -531,7 +534,7 @@ HWTEST_F(PriorityManagerServiceTest, IsPriorityIntelligentEnabled_0100, Function
     MockIsVerfyPermisson(false);
     bool enabled = true;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->IsPriorityIntelligentEnabled(enabled),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -544,7 +547,7 @@ HWTEST_F(PriorityManagerServiceTest, IsPriorityIntelligentEnabled_0200, Function
     MockQueryForgroundOsAccountId(false, 3);
     bool enabled = true;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->IsPriorityIntelligentEnabled(enabled),
-        ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+        ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
     MockQueryForgroundOsAccountId(true, 0);
 }
 
@@ -562,7 +565,7 @@ HWTEST_F(PriorityManagerServiceTest, IsPriorityIntelligentEnabled_0300, Function
 
 /**
  * @tc.name: SetPriorityStrategyByBundles_0100
- * @tc.desc: Test SetPriorityStrategyByBundles ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: Test SetPriorityStrategyByBundles ERR_ANS_INNER_PERMISSION_DENIED.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, SetPriorityStrategyByBundles_0100, Function | SmallTest | Level1)
@@ -570,12 +573,12 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityStrategyByBundles_0100, Function
     MockIsVerfyPermisson(false);
     std::map<sptr<NotificationBundleOption>, int64_t> strategies;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityStrategyByBundles(strategies),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
  * @tc.name: SetPriorityStrategyByBundles_0200
- * @tc.desc: Test SetPriorityStrategyByBundles ERR_ANS_INVALID_BUNDLE.
+ * @tc.desc: Test SetPriorityStrategyByBundles ERR_ANS_INNER_INVALID_BUNDLE.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, SetPriorityStrategyByBundles_0200, Function | SmallTest | Level1)
@@ -586,12 +589,12 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityStrategyByBundles_0200, Function
     std::map<sptr<NotificationBundleOption>, int64_t> strategies;
     strategies[bundleOption] = 32;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityStrategyByBundles(strategies),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
  * @tc.name: SetPriorityStrategyByBundles_0300
- * @tc.desc: Test SetPriorityStrategyByBundles ERR_ANS_INVALID_PARAM.
+ * @tc.desc: Test SetPriorityStrategyByBundles ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, SetPriorityStrategyByBundles_0300, Function | SmallTest | Level1)
@@ -601,12 +604,12 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityStrategyByBundles_0300, Function
     std::map<sptr<NotificationBundleOption>, int64_t> strategies;
     strategies[bundleOption] = -1;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityStrategyByBundles(strategies),
-        ERR_ANS_INVALID_PARAM);
+        ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.name: SetPriorityStrategyByBundles_0400
- * @tc.desc: Test SetPriorityStrategyByBundles ERR_ANS_INVALID_BUNDLE.
+ * @tc.desc: Test SetPriorityStrategyByBundles ERR_ANS_INNER_INVALID_BUNDLE.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, SetPriorityStrategyByBundles_0400, Function | SmallTest | Level1)
@@ -616,7 +619,7 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityStrategyByBundles_0400, Function
     std::map<sptr<NotificationBundleOption>, int64_t> strategies;
     strategies[bundleOption] = 32;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityStrategyByBundles(strategies),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -635,7 +638,7 @@ HWTEST_F(PriorityManagerServiceTest, SetPriorityStrategyByBundles_0500, Function
 
 /**
  * @tc.name: GetPriorityStrategyByBundles_0100
- * @tc.desc: Test GetPriorityStrategyByBundles ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: Test GetPriorityStrategyByBundles ERR_ANS_INNER_PERMISSION_DENIED.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, GetPriorityStrategyByBundles_0100, Function | SmallTest | Level1)
@@ -644,12 +647,12 @@ HWTEST_F(PriorityManagerServiceTest, GetPriorityStrategyByBundles_0100, Function
     std::map<sptr<NotificationBundleOption>, int64_t> strategies;
     std::vector<sptr<NotificationBundleOption>> bundleOptions;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->GetPriorityStrategyByBundles(bundleOptions, strategies),
-        ERR_ANS_PERMISSION_DENIED);
+        ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
  * @tc.name: GetPriorityStrategyByBundles_0200
- * @tc.desc: Test GetPriorityStrategyByBundles ERR_ANS_INVALID_BUNDLE.
+ * @tc.desc: Test GetPriorityStrategyByBundles ERR_ANS_INNER_INVALID_BUNDLE.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, GetPriorityStrategyByBundles_0200, Function | SmallTest | Level1)
@@ -661,12 +664,12 @@ HWTEST_F(PriorityManagerServiceTest, GetPriorityStrategyByBundles_0200, Function
     std::vector<sptr<NotificationBundleOption>> bundleOptions;
     bundleOptions.emplace_back(bundleOption);
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->GetPriorityStrategyByBundles(bundleOptions, strategies),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
  * @tc.name: GetPriorityStrategyByBundles_0300
- * @tc.desc: Test GetPriorityStrategyByBundles ERR_ANS_INVALID_BUNDLE.
+ * @tc.desc: Test GetPriorityStrategyByBundles ERR_ANS_INNER_INVALID_BUNDLE.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityManagerServiceTest, GetPriorityStrategyByBundles_0300, Function | SmallTest | Level1)
@@ -677,7 +680,7 @@ HWTEST_F(PriorityManagerServiceTest, GetPriorityStrategyByBundles_0300, Function
     std::vector<sptr<NotificationBundleOption>> bundleOptions;
     bundleOptions.emplace_back(bundleOption);
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->GetPriorityStrategyByBundles(bundleOptions, strategies),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -731,7 +734,7 @@ HWTEST_F(PriorityManagerServiceTest, GetValidBundles_0100, Function | SmallTest 
     std::vector<sptr<NotificationBundleOption>> bundleOptions;
     std::vector<sptr<NotificationBundleOption>> validBundleOptions;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->GetValidBundles(bundleOptions, validBundleOptions),
-        ERR_ANS_INVALID_BUNDLE);
+        ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -783,7 +786,7 @@ HWTEST_F(PriorityManagerServiceTest, IsPriorityEnabled_0100, Function | SmallTes
 {
     MockIsVerfyPermisson(false);
     bool enabled = false;
-    EXPECT_EQ(AdvancedNotificationService::GetInstance()->IsPriorityEnabled(enabled), ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(AdvancedNotificationService::GetInstance()->IsPriorityEnabled(enabled), ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**

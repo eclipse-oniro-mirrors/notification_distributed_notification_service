@@ -17,7 +17,7 @@
 #include "access_token_helper.h"
 #include "aes_gcm_helper.h"
 #include "advanced_datashare_helper.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_permission_def.h"
 #include "bluetooth_remote_device.h"
@@ -638,8 +638,8 @@ ErrCode AdvancedNotificationService::GetNotificationExtensionEnabledBundles(
     if (!BundleManagerHelper::GetInstance()->QueryExtensionInfos(extensionInfos, userId)) {
         ANS_LOGE("Failed to QueryExtensionInfos, ret: %{public}d", result);
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_4));
-        return ERR_ANS_INVALID_PARAM;
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).BranchId(BRANCH_4));
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     for (const auto& extensionInfo : extensionInfos) {
@@ -654,7 +654,7 @@ ErrCode AdvancedNotificationService::GetNotificationExtensionEnabledBundles(
             bundleInfo.applicationInfo.accessTokenId, OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
             ANS_LOGW("GetNotificationExtensionEnabledBundles No Permission");
             NotificationAnalyticsUtil::ReportModifyEvent(
-                message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
+                message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
             continue;
         }
 
@@ -677,33 +677,33 @@ ErrCode AdvancedNotificationService::NotificationExtensionSubscribe(
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
-        return ERR_ANS_PERMISSION_DENIED;
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     if (infos.empty()) {
         ANS_LOGE("subscribe list is empty.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create NotificationBundleOption");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_5));
-        return ERR_ANS_INVALID_PARAM;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM).BranchId(BRANCH_5));
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
         ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NOT_IMPL_EXTENSIONABILITY).Message(
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_NOT_IMPL_EXTENSIONABILITY).Message(
             "Not implement NotificationSubscriberExtensionAbility").BranchId(BRANCH_3));
-        return ERR_ANS_NOT_IMPL_EXTENSIONABILITY;
+        return ERR_ANS_INNER_NOT_IMPL_EXTENSIONABILITY;
     }
     if (bundleOption->GetAppIndex() > 0) {
         ANS_LOGE("Clone app cannot subscribe.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message(
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message(
             "Clone app cannot subscribe").BranchId(BRANCH_13));
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     ErrCode result = ERR_OK;
@@ -742,15 +742,15 @@ ErrCode AdvancedNotificationService::NotificationExtensionUnsubscribe()
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
-        return ERR_ANS_PERMISSION_DENIED;
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create NotificationBundleOption");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_5));
-        return ERR_ANS_INVALID_PARAM;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM).BranchId(BRANCH_5));
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ErrCode result = ERR_OK;
@@ -780,15 +780,15 @@ ErrCode AdvancedNotificationService::GetSubscribeInfo(std::vector<sptr<Notificat
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
-        return ERR_ANS_PERMISSION_DENIED;
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create NotificationBundleOption");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_5));
-        return ERR_ANS_INVALID_PARAM;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM).BranchId(BRANCH_5));
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ErrCode result = ERR_OK;
@@ -812,14 +812,14 @@ ErrCode AdvancedNotificationService::GetAllSubscriptionBundles(std::vector<sptr<
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Message("Not systemApp").BranchId(BRANCH_1));
-        return ERR_ANS_NON_SYSTEM_APP;
+            message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).Message("Not systemApp").BranchId(BRANCH_1));
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
-        return ERR_ANS_PERMISSION_DENIED;
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
@@ -840,15 +840,15 @@ ErrCode AdvancedNotificationService::IsUserGranted(bool& isEnabled)
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
-        return ERR_ANS_PERMISSION_DENIED;
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create NotificationBundleOption");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_5));
-        return ERR_ANS_INVALID_PARAM;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM).BranchId(BRANCH_5));
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ErrCode result = ERR_OK;
@@ -875,28 +875,28 @@ ErrCode AdvancedNotificationService::GetUserGrantedState(
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Message("Not systemApp"));
-        return ERR_ANS_NON_SYSTEM_APP;
+            message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).Message("Not systemApp"));
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
-        return ERR_ANS_PERMISSION_DENIED;
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(targetBundle);
     if (bundle == nullptr) {
         ANS_LOGE("Bundle is null.");
         ReportInvalidBundleOption(targetBundle, message);
-        return ERR_ANS_INVALID_BUNDLE_OPTION;
+        return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
     }
 
     if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundle)) {
         ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NOT_IMPL_EXTENSIONABILITY).Message(
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_NOT_IMPL_EXTENSIONABILITY).Message(
             "Not implement NotificationSubscriberExtensionAbility").BranchId(BRANCH_3));
-        return ERR_ANS_INVALID_BUNDLE_OPTION;
+        return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
     }
 
     ErrCode result = ERR_OK;
@@ -924,28 +924,28 @@ ErrCode AdvancedNotificationService::SetUserGrantedState(
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Message("Not systemApp"));
-        return ERR_ANS_NON_SYSTEM_APP;
+            message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).Message("Not systemApp"));
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
-        return ERR_ANS_PERMISSION_DENIED;
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(targetBundle);
     if (bundle == nullptr) {
         ANS_LOGE("Bundle is null.");
         ReportInvalidBundleOption(targetBundle, message);
-        return ERR_ANS_INVALID_BUNDLE_OPTION;
+        return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
     }
 
     if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundle)) {
         ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NOT_IMPL_EXTENSIONABILITY).Message(
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_NOT_IMPL_EXTENSIONABILITY).Message(
             "Not implement NotificationSubscriberExtensionAbility").BranchId(BRANCH_3));
-        return ERR_ANS_INVALID_BUNDLE_OPTION;
+        return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
     }
 
     ErrCode result = ERR_OK;
@@ -964,28 +964,28 @@ ErrCode AdvancedNotificationService::GetUserGrantedEnabledBundles(
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Message("Not systemApp"));
-        return ERR_ANS_NON_SYSTEM_APP;
+            message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).Message("Not systemApp"));
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
-        return ERR_ANS_PERMISSION_DENIED;
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(targetBundle);
     if (bundle == nullptr) {
         ANS_LOGE("Bundle is null.");
         ReportInvalidBundleOption(targetBundle, message);
-        return ERR_ANS_INVALID_BUNDLE_OPTION;
+        return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
     }
 
     if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundle)) {
         ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NOT_IMPL_EXTENSIONABILITY).Message(
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_NOT_IMPL_EXTENSIONABILITY).Message(
             "Not implement NotificationSubscriberExtensionAbility").BranchId(BRANCH_3));
-        return ERR_ANS_INVALID_BUNDLE_OPTION;
+        return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
     }
 
     ErrCode result = ERR_OK;
@@ -1008,15 +1008,15 @@ ErrCode AdvancedNotificationService::GetUserGrantedEnabledBundlesForSelf(
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
-        return ERR_ANS_PERMISSION_DENIED;
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create NotificationBundleOption");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_5));
-        return ERR_ANS_INVALID_PARAM;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM).BranchId(BRANCH_5));
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ErrCode result = ERR_OK;
@@ -1045,21 +1045,21 @@ ErrCode AdvancedNotificationService::SetUserGrantedBundleState(
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Message("Not systemApp"));
-        return ERR_ANS_NON_SYSTEM_APP;
+            message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).Message("Not systemApp"));
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
-        return ERR_ANS_PERMISSION_DENIED;
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOptionV2(targetBundle);
     if (bundle == nullptr) {
         ANS_LOGE("Bundle is null.");
         ReportInvalidBundleOption(targetBundle, message);
-        return ERR_ANS_INVALID_BUNDLE_OPTION;
+        return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
     }
 
     std::vector<sptr<NotificationBundleOption>> enabledBundlesProcessed;
@@ -1068,16 +1068,16 @@ ErrCode AdvancedNotificationService::SetUserGrantedBundleState(
         if (bundleProcessed == nullptr) {
             ANS_LOGE("Failed to create NotificationBundleOption");
             ReportInvalidBundleOption(enabledBundle, message);
-            return ERR_ANS_INVALID_BUNDLE_OPTION;
+            return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
         }
         enabledBundlesProcessed.emplace_back(bundleProcessed);
     }
 
     if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundle)) {
         ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NOT_IMPL_EXTENSIONABILITY).Message(
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_NOT_IMPL_EXTENSIONABILITY).Message(
             "Not implement NotificationSubscriberExtensionAbility").BranchId(BRANCH_3));
-        return ERR_ANS_INVALID_BUNDLE_OPTION;
+        return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
     }
 
     ErrCode result = ERR_OK;
@@ -1094,27 +1094,27 @@ ErrCode AdvancedNotificationService::CanOpenSubscribeSettings()
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
         NotificationAnalyticsUtil::ReportModifyEvent(
-            message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
-        return ERR_ANS_PERMISSION_DENIED;
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create NotificationBundleOption");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_5));
-        return ERR_ANS_INVALID_PARAM;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM).BranchId(BRANCH_5));
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
         ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NOT_IMPL_EXTENSIONABILITY).Message(
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_NOT_IMPL_EXTENSIONABILITY).Message(
             "Not implement NotificationSubscriberExtensionAbility").BranchId(BRANCH_3));
-        return ERR_ANS_NOT_IMPL_EXTENSIONABILITY;
+        return ERR_ANS_INNER_NOT_IMPL_EXTENSIONABILITY;
     }
     if (bundleOption->GetAppIndex() > 0) {
         ANS_LOGE("Clone app cannot open subscription settings.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Message(
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message(
             "Clone app cannot open subscription settings").BranchId(BRANCH_13));
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     return ERR_OK;
 }
@@ -1209,7 +1209,7 @@ void AdvancedNotificationService::ReportInvalidBundleOption(
         msg += targetBundle->GetBundleName() + ", uid: " + std::to_string(targetBundle->GetUid());
     }
     NotificationAnalyticsUtil::ReportModifyEvent(
-        message.ErrorCode(ERR_ANS_INVALID_BUNDLE_OPTION).Message(msg).BranchId(BRANCH_6));
+        message.ErrorCode(ERR_ANS_INNER_INVALID_BUNDLE_OPTION).Message(msg).BranchId(BRANCH_6));
 }
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 std::vector<sptr<NotificationBundleOption>>::iterator AdvancedNotificationService::FindBundleInCache(

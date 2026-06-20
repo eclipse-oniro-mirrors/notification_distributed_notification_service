@@ -20,11 +20,14 @@
 #include "sts_bundle_option.h"
 #include "sts_notification_manager.h"
 #include "sts_notification_statistics.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackStatistics* asyncCallbackInfo)
 {
     if (!asyncCallbackInfo) {
@@ -91,7 +94,7 @@ void HandleStatisticsFunctionCallbackComplete(ani_env* env, WorkStatus status, v
         NotificationSts::GetAniArrayStatisticsInfo(envCurr, asyncCallbackInfo->statisticsInfos);
     if (asyncCallbackInfo->info.result == nullptr) {
         ANS_LOGE("GetAniArrayStatisticsInfo failed");
-        asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+        asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
     }
     NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
     DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
@@ -102,12 +105,12 @@ ani_object AniGetNotificationStatisticsByBundle(ani_env *env, ani_object obj)
 #ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
     auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackStatistics{.asyncWork = nullptr};
     if (!asyncCallbackInfo) {
-        return NotificationSts::AniJumpCbError(env, nullptr, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, nullptr, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (!NotificationSts::UnwrapArrayBundleOption(env, obj, asyncCallbackInfo->bundles)) {
         ANS_LOGE("UnwrapArrayBundleOption failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, nullptr, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, nullptr, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     ani_object promise;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
@@ -116,28 +119,29 @@ ani_object AniGetNotificationStatisticsByBundle(ani_env *env, ani_object obj)
     if (aniStatus != ANI_OK) {
         ANS_LOGE("GetVM failed, status: %{public}d", aniStatus);
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, nullptr, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, nullptr, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     WorkStatus status = CreateAsyncWork(env,
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackStatistics*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetStatisticsByBundle(
-                    asyncCallbackInfo->bundles, asyncCallbackInfo->statisticsInfos);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetStatisticsByBundle(
+                        asyncCallbackInfo->bundles, asyncCallbackInfo->statisticsInfos);
             }
         },
         HandleStatisticsFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
     if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
         ANS_LOGE("CreateAsyncWork or QueueAsyncWork failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
-        return NotificationSts::AniJumpCbError(env, nullptr, OHOS::Notification::ERROR_INTERNAL_ERROR);
+        return NotificationSts::AniJumpCbError(env, nullptr, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
     if (asyncCallbackInfo->info.callback == nullptr) {
         return promise;
     }
     return NotificationSts::GetNullObject(env);
 #else
-    return NotificationSts::AniJumpCbError(env, nullptr, OHOS::Notification::ERROR_SYSTEM_CAP_ERROR);
+    return NotificationSts::AniJumpCbError(env, nullptr, OHOS::Notification::ERR_ANS_INNER_DEVICE_NOT_SUPPORT);
 #endif
 }
 }

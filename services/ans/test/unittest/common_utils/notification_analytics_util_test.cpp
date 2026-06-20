@@ -18,6 +18,7 @@
 #define private public
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "notification_analytics_util.h"
 #include "mock_common_event_manager.h"
 #include "string_wrapper.h"
@@ -28,7 +29,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Notification {
-
 std::string GetClientBundleName()
 {
     return "test.bundle";
@@ -406,10 +406,10 @@ HWTEST_F(NotificationAnalyticsUtilTest, RemoveExpired_001, Function | SmallTest 
     auto now = std::chrono::system_clock::now();
     list.push_back(now);
     EXPECT_EQ(list.size(), 1);
-    
+
     NotificationAnalyticsUtil::RemoveExpired(list, now, 100);
     EXPECT_EQ(list.size(), 1);
-    
+
     NotificationAnalyticsUtil::RemoveExpired(list, now, -1);
     EXPECT_EQ(list.size(), 0);
 }
@@ -486,7 +486,7 @@ HWTEST_F(NotificationAnalyticsUtilTest, NeedReport_300, Function | SmallTest | L
 HWTEST_F(NotificationAnalyticsUtilTest, NeedReport_400, Function | SmallTest | Level1)
 {
     HaMetaMessage message;
-    message.errorCode_ = ERR_ANS_INVALID_PARAM;
+    message.errorCode_ = ERR_ANS_INNER_INVALID_PARAM;
     message.checkfailed_ = true;
 
     auto ret = message.NeedReport();
@@ -503,7 +503,7 @@ HWTEST_F(NotificationAnalyticsUtilTest, Message_001, Function | SmallTest | Leve
 {
     HaMetaMessage message;
     std::string testMessage = "Test message";
-    message.errorCode_ = ERR_ANS_INVALID_PARAM;
+    message.errorCode_ = ERR_ANS_INNER_INVALID_PARAM;
 
     auto& ret = message.Message(testMessage, true);
 
@@ -519,7 +519,7 @@ HWTEST_F(NotificationAnalyticsUtilTest, Message_002, Function | SmallTest | Leve
 {
     HaMetaMessage message;
     std::string testMessage = "Test message";
-    message.errorCode_ = ERR_ANS_INVALID_PARAM;
+    message.errorCode_ = ERR_ANS_INNER_INVALID_PARAM;
 
     auto& ret = message.Message(testMessage, false);
 

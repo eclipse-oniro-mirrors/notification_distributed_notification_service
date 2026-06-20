@@ -18,6 +18,7 @@
 #define protected public
 #include "common_notification_publish_process.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "live_publish_process.h"
 #include "accesstoken_kit.h"
 #include "notification_content.h"
@@ -29,7 +30,6 @@ using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
 namespace OHOS {
 namespace Notification {
-
 extern void MockIsVerfyPermisson(bool isVerify);
 extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
 extern void MockIsSystemAppByFullTokenID(bool isSystemApp);
@@ -62,7 +62,7 @@ HWTEST_F(PublishProcessTest, BaseCommonPublishCheck_00001, Function | SmallTest 
 
     CommonNotificationPublishProcess process;
     auto res = process.CommonPublishCheck(request);
-    ASSERT_EQ(res.GetErrCode(), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(res.GetErrCode(), (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -81,7 +81,7 @@ HWTEST_F(PublishProcessTest, BaseCommonPublishCheck_00002, Function | SmallTest 
 
     CommonNotificationPublishProcess process;
     auto res = process.CommonPublishCheck(request);
-    ASSERT_EQ(res.GetErrCode(), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(res.GetErrCode(), (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -97,7 +97,7 @@ HWTEST_F(PublishProcessTest, BaseCommonPublishProcess_00001, Function | SmallTes
 
     CommonNotificationPublishProcess process;
     auto res = process.CommonPublishProcess(request);
-    ASSERT_EQ(res.GetErrCode(), ERR_ANS_DLP_HAP);
+    ASSERT_EQ(res.GetErrCode(), (int)ERR_ANS_INNER_DLP_HAP);
 }
 
 /**
@@ -114,7 +114,7 @@ HWTEST_F(PublishProcessTest, PublishNotificationByApp_00001, Function | SmallTes
 
     CommonNotificationPublishProcess progress;
     auto res = progress.PublishNotificationByApp(request);
-    ASSERT_EQ(res.GetErrCode(), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(res.GetErrCode(), (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -127,7 +127,7 @@ HWTEST_F(PublishProcessTest, PublishNotificationByApp_00002, Function | SmallTes
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     sptr<NotificationRequest> request(new NotificationRequest(1));
     request->SetInProgress(true);
-    
+
     CommonNotificationPublishProcess progress;
     auto res = progress.PublishNotificationByApp(request);
     ASSERT_EQ(request->IsInProgress(), false);
@@ -143,10 +143,10 @@ HWTEST_F(PublishProcessTest, PublishNotificationByApp_00003, Function | SmallTes
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockDlpType(DlpType::DLP_READ);
     sptr<NotificationRequest> request(new NotificationRequest(1));
-    
+
     CommonNotificationPublishProcess progress;
     auto res = progress.PublishNotificationByApp(request);
-    ASSERT_EQ(res.GetErrCode(), ERR_ANS_DLP_HAP);
+    ASSERT_EQ(res.GetErrCode(), (int)ERR_ANS_INNER_DLP_HAP);
 }
 
 /**
@@ -175,10 +175,10 @@ HWTEST_F(PublishProcessTest, LivePublishPreWork_00002, Function | SmallTest | Le
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     sptr<NotificationRequest> request(new NotificationRequest(1));
-    
+
     LivePublishProcess progress;
     auto res = progress.PublishPreWork(request, true);
-    ASSERT_EQ(res.GetErrCode(), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(res.GetErrCode(), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -197,10 +197,10 @@ HWTEST_F(PublishProcessTest, LivePublishNotificationByApp_00001, Function | Smal
         std::make_shared<NotificationContent>(liveViewContent);
     request->SetContent(content);
     request->SetReceiverUserId(100);
-   
+
     LivePublishProcess progress;
     auto res = progress.PublishPreWork(request, false);
-    ASSERT_EQ(res.GetErrCode(), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(res.GetErrCode(), (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -213,7 +213,7 @@ HWTEST_F(PublishProcessTest, LivePublishNotificationByApp_00002, Function | Smal
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     sptr<NotificationRequest> request(new NotificationRequest(1));
     request->SetInProgress(true);
-    
+
     LivePublishProcess progress;
     auto res = progress.PublishNotificationByApp(request);
     ASSERT_EQ(request->IsInProgress(), false);
@@ -230,10 +230,10 @@ HWTEST_F(PublishProcessTest, LivePublishNotificationByApp_00003, Function | Smal
     MockDlpType(DlpType::DLP_READ);
     sptr<NotificationRequest> request(new NotificationRequest(1));
     request->SetInProgress(true);
-    
+
     LivePublishProcess progress;
     auto res = progress.PublishNotificationByApp(request);
-    ASSERT_EQ(res.GetErrCode(), ERR_ANS_DLP_HAP);
+    ASSERT_EQ(res.GetErrCode(), (int)ERR_ANS_INNER_DLP_HAP);
 }
 
 
@@ -253,7 +253,7 @@ HWTEST_F(PublishProcessTest, LiveCheckLocalLiveViewSubscribed_00001, Function | 
     std::shared_ptr<NotificationContent> content =
         std::make_shared<NotificationContent>(liveViewContent);
     request->SetContent(content);
-    
+
     LivePublishProcess progress;
     auto res = progress.CheckLocalLiveViewSubscribed(request, true, 100);
     ASSERT_FALSE(res);

@@ -22,7 +22,7 @@
 #include "advanced_notification_flow_control_service.h"
 #include "advanced_notification_inline.h"
 #include "ans_const_define.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_trace_wrapper.h"
 #include "ans_status.h"
@@ -40,7 +40,6 @@
 
 namespace OHOS {
 namespace Notification {
-
 constexpr char FOUNDATION_BUNDLE_NAME[] = "ohos.global.systemres";
 constexpr int32_t RESSCHED_UID = 1096;
 constexpr int32_t ANCO_UID = 5557;
@@ -163,7 +162,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     auto fullTokenID = IPCSkeleton::GetCallingFullTokenID();
     if (Security::AccessToken::AccessTokenKit::IsAtomicServiceByFullTokenID(fullTokenID)) {
         ANS_LOGE("AtomicService is not allowed to publish notification");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     SetControlFlagsByFlags(request);
@@ -187,11 +186,11 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     }
 
     request->SetCreateTime(GetCurrentTime());
-    
+
     bool isUpdateByOwnerAllowed = IsUpdateSystemLiveviewByOwner(request);
     auto publishProcess = GetPublishProcess(request->GetSlotType());
     if (publishProcess == nullptr) {
-        return ERR_ANS_NO_MEMORY;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     AnsStatus ansStatus = publishProcess->PublishPreWork(request, isUpdateByOwnerAllowed);
     if (!ansStatus.Ok()) {
@@ -355,27 +354,27 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     if (!isSubSystem || callingUid != ANCO_UID) {
         ANS_LOGE("not subsystem or wrong callingUid. callingUid = %{public}d", callingUid);
-        return ERR_ANS_NOT_SYSTEM_SERVICE;
+        return ERR_ANS_INNER_NOT_SYSTEM_SERVICE;
     }
 
     auto fullTokenID = IPCSkeleton::GetCallingFullTokenID();
     if (Security::AccessToken::AccessTokenKit::IsAtomicServiceByFullTokenID(fullTokenID)) {
         ANS_LOGE("AtomicService is not allowed to publish notification");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_0);
     if (!request) {
         ANS_LOGE("null request");
-        message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Request object is nullptr");
+        message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM).Message("Request object is nullptr");
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     SetChainIdToExtraInfo(request, traceId);
     ErrCode result = ERR_OK;
@@ -399,11 +398,11 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGE("GetActiveUserId is false");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
     if (!EXTENTION_WRAPPER->NotificationContentControl(request, userId)) {
         ANS_LOGE("NotificationContentControl fail, bundle: %{public}s, userId: %{public}d", bundle.c_str(), userId);
-        return ERR_ANS_NOT_ALLOWED;
+        return ERR_ANS_INNER_NOT_ALLOWED;
     }
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = request;
@@ -412,17 +411,17 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     if (record->bundleOption == nullptr || bundleOption == nullptr) {
         ANS_LOGE("null bundleOption");
-        message.ErrorCode(ERR_ANS_NO_MEMORY).Message("Failed to create bundleOption");
+        message.ErrorCode(ERR_ANS_INNER_NO_MEMORY).Message("Failed to create bundleOption");
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ERR_ANS_NO_MEMORY;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     record->bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
     record->notification = new (std::nothrow) Notification(request);
     if (record->notification == nullptr) {
         ANS_LOGE("null notification");
-        message.ErrorCode(ERR_ANS_NO_MEMORY).Message("Failed to create notification");
+        message.ErrorCode(ERR_ANS_INNER_NO_MEMORY).Message("Failed to create notification");
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ERR_ANS_NO_MEMORY;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
 
     SetRequestBySlotType(record->request, bundleOption);
@@ -432,7 +431,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER
         if (IsDisableNotification(bundle, record->notification->GetRecvUserId())) {
             ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
-            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            result = ERR_ANS_INNER_REJECTED_WITH_DISABLE_NOTIFICATION;
             message.BranchId(EventBranchId::BRANCH_1)
                 .ErrorCode(result).Message("bundle in Disable Notification list, bundleName=" + bundle);
             return;
@@ -440,7 +439,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
 #else
         if (IsDisableNotification(bundle)) {
             ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
-            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            result = ERR_ANS_INNER_REJECTED_WITH_DISABLE_NOTIFICATION;
             message.BranchId(EventBranchId::BRANCH_1)
                 .ErrorCode(result).Message("bundle in Disable Notification list, bundleName=" + bundle);
             return;
@@ -448,7 +447,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
 #endif
         if (IsDisableNotificationByRestrictedMode(bundle, record->notification->GetRecvUserId())) {
             ANS_LOGE("bundle(%{public}s) not in trust list.", bundle.c_str());
-            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            result = ERR_ANS_INNER_REJECTED_WITH_DISABLE_NOTIFICATION;
             return;
         }
         AnsStatus status = AssignValidNotificationSlot(record, bundleOption);
@@ -463,7 +462,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         ChangeNotificationByControlFlags(record, isAgentController);
         if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid) &&
         (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
-        record->request->GetContent()->GetNotificationContent())->GetType() == TYPE_CODE_DOWNLOAD)) {
+            record->request->GetContent()->GetNotificationContent())->GetType() == TYPE_CODE_DOWNLOAD)) {
             result = SaPublishSystemLiveViewAsBundle(record);
             if (result == ERR_OK) {
                 SendLiveViewUploadHiSysEvent(record, UploadStatus::CREATE);
@@ -514,7 +513,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
 ErrCode AdvancedNotificationService::PublishAsBundle(
     const sptr<NotificationRequest>& notification, const std::string &representativeBundle)
 {
-    return ERR_INVALID_OPERATION;
+    return ERR_ANS_INNER_INVALID_OPERATION;
 }
 
 ErrCode AdvancedNotificationService::PublishAsBundleWithMaxCapacity(
@@ -529,7 +528,7 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem) {
-        return ERR_ANS_NOT_SYSTEM_SERVICE;
+        return ERR_ANS_INNER_NOT_SYSTEM_SERVICE;
     }
     SetIsFromSAToExtendInfo(request);
 
@@ -594,7 +593,7 @@ ErrCode AdvancedNotificationService::UpdateNotificationTimerByUid(const int32_t 
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     if (!isSubSystem || callingUid != RESSCHED_UID) {
         ANS_LOGE(" callingUid: %{public}d", callingUid);
-        return ERR_ANS_NOT_SYSTEM_SERVICE;
+        return ERR_ANS_INNER_NOT_SYSTEM_SERVICE;
     }
 
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
@@ -608,7 +607,7 @@ ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<Notific
 {
     if (!request) {
         ANSR_LOGE("null request");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
     bool isSystemApp = AccessTokenHelper::IsSystemApp();
@@ -646,11 +645,11 @@ ErrCode AdvancedNotificationService::CheckNotificationRequestLineWantAgents(
         if (lineWantAgents.size() > 0) {
             if (!isSystemComp) {
                 ANS_LOGE("Local wantAgent does not support non system app");
-                return ERR_ANS_NON_SYSTEM_APP;
+                return ERR_ANS_INNER_NON_SYSTEM_APP;
             }
             if (!isAgentController) {
                 ANS_LOGE("LineWantAgents does not support permission denied");
-                return ERR_ANS_PERMISSION_DENIED;
+                return ERR_ANS_INNER_PERMISSION_DENIED;
             }
         }
     }

@@ -12,19 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include "advanced_notification_service.h"
- 
+
 #include "accesstoken_kit.h"
 #include "access_token_helper.h"
 #include "advanced_notification_flow_control_service.h"
 #include "advanced_notification_inline.h"
 #include "all_scenarios_extension_wrapper.h"
 #include "ans_const_define.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_status.h"
- 
+
 #include "hitrace_meter_adapter.h"
 #include "notification_analytics_util.h"
 #include "os_account_manager.h"
@@ -34,7 +34,6 @@
 
 namespace OHOS {
 namespace Notification {
-
 AnsStatus AdvancedNotificationService::AtomicServicePublish(const sptr<NotificationRequest> &request)
 {
     ErrCode result = PermissionVerification();
@@ -73,7 +72,7 @@ ErrCode AdvancedNotificationService::SetCreatorInfoWithAtomicService(const sptr<
         agentBundleName = GetClientBundleName();
         if (agentBundleName.empty()) {
             ANS_LOGE("Failed to GetClientBundleName");
-            return ERR_ANS_INVALID_BUNDLE;
+            return ERR_ANS_INNER_INVALID_BUNDLE;
         }
     }
 
@@ -82,7 +81,7 @@ ErrCode AdvancedNotificationService::SetCreatorInfoWithAtomicService(const sptr<
         std::make_shared<NotificationBundleOption>(agentBundleName, uid);
     if (agentBundle == nullptr) {
         ANS_LOGE("Failed to create agentBundle instance");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     request->SetAgentBundle(agentBundle);
     int32_t pid = IPCSkeleton::GetCallingPid();
@@ -106,7 +105,7 @@ AnsStatus AdvancedNotificationService::CheckAndPrepareNotificationInfoWithAtomic
         return AnsStatus(result, "User is invalid");
     }
     if (request->GetOwnerUserId() <= SUBSCRIBE_USER_INIT || request->GetOwnerBundleName().empty()) {
-        return AnsStatus(ERR_ANS_INVALID_PARAM, "OwnerUserId or OwnerBundleName invalid");
+        return AnsStatus(ERR_ANS_INNER_INVALID_PARAM, "OwnerUserId or OwnerBundleName invalid");
     }
     CheckRemovalWantAgent(request);
     request->SetCreateTime(GetCurrentTime());
@@ -125,7 +124,7 @@ AnsStatus AdvancedNotificationService::CheckAndPrepareNotificationInfoWithAtomic
     bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
         request->GetOwnerUid());
     if (bundleOption == nullptr) {
-        return AnsStatus(ERR_ANS_INVALID_BUNDLE, "create bundleOption failed");
+        return AnsStatus(ERR_ANS_INNER_INVALID_BUNDLE, "create bundleOption failed");
     }
     SetClassificationWithVoip(request);
     request->SetNotDistributed(true);
@@ -154,7 +153,7 @@ AnsStatus AdvancedNotificationService::ExecutePublishProcess(
 {
     auto publishProcess = GetPublishProcess(request->GetSlotType());
     if (publishProcess == nullptr) {
-        return AnsStatus(ERR_ANS_NO_MEMORY, "GetPublishProcess failed");
+        return AnsStatus(ERR_ANS_INNER_NO_MEMORY, "GetPublishProcess failed");
     }
 
     AnsStatus ansStatus = publishProcess->PublishPreWork(request, isUpdateByOwnerAllowed);

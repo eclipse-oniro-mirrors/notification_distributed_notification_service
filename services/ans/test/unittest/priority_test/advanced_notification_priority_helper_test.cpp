@@ -181,7 +181,7 @@ HWTEST_F(AdvancedNotificationPriorityHelperTest, RefreshPriorityType_0500, Funct
     std::vector<int32_t> results;
     EXPECT_EQ(AdvancedNotificationPriorityHelper::GetInstance()->RefreshPriorityType(
         NotificationAiExtensionWrapper::REFRESH_SWITCH_PRIORITY_TYPE, requests, results),
-       ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+       ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
     MockQueryForgroundOsAccountId(true, 0);
 }
 

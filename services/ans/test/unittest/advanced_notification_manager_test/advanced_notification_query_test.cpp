@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 #define private public
 #include "advanced_notification_service.h"
+#include "ans_service_errors.h"
 #include "notification_bundle_option.h"
 #include "notification_request.h"
 #include "notification_record.h"
@@ -25,7 +26,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Notification {
-
 extern void MockIsSystemApp(bool isSystemApp);
 extern void MockIsVerfyPermisson(bool isVerify);
 
@@ -54,9 +54,9 @@ HWTEST_F(AdvancedNotificationQueryTest, GetActiveNotifications_SynchronizerNullp
 {
     auto service = GetService();
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
-    
+
     auto result = service->GetActiveNotifications("", nullptr);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -71,9 +71,9 @@ HWTEST_F(AdvancedNotificationQueryTest, GetAllActiveNotifications_PermissionDeni
     MockIsSystemApp(false);
     auto service = GetService();
     std::vector<sptr<Notification>> notifications;
-    
+
     auto result = service->GetAllActiveNotifications(notifications);
-    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -88,7 +88,7 @@ HWTEST_F(AdvancedNotificationQueryTest, ExtractWantAgentInfo_NullWantAgent_00001
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = new NotificationRequest();
     sptr<NotificationParameters> parameters = new NotificationParameters();
-    
+
     service->ExtractWantAgentInfo(record, parameters);
     EXPECT_NE(parameters, nullptr);
 }
@@ -107,10 +107,10 @@ HWTEST_F(AdvancedNotificationQueryTest,
     auto service = GetService();
     std::vector<sptr<Notification>> notifications;
     int32_t userId = 100;
-    
+
     auto result = service->GetAllNotificationsBySlotType(notifications,
         static_cast<int32_t>(NotificationConstant::SlotType::SERVICE_REMINDER), userId);
-    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -124,7 +124,7 @@ HWTEST_F(AdvancedNotificationQueryTest, QueryNotificationParameters_NullRecord_0
     auto service = GetService();
     sptr<NotificationParameters> parameters = new NotificationParameters();
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
-    
+
     auto result = service->QueryNotificationParameters(1, "testLabel", bundle, parameters);
     EXPECT_NE(result, ERR_OK);
 }

@@ -15,12 +15,16 @@
 
 #include "napi_snooze_notification.h"
 
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 const int GET_SNOOZE_MAX_PARA = 2;
 const int MAX_DELAY_TIME_S = 24 * 3600;
 
@@ -34,7 +38,7 @@ static napi_value ParseSnoozeParameters(const napi_env &env, const napi_callback
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc != GET_SNOOZE_MAX_PARA) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -44,7 +48,7 @@ static napi_value ParseSnoozeParameters(const napi_env &env, const napi_callback
     if (valuetype != napi_string) {
         ANS_LOGE("Parameter type error. string expected.");
         std::string msg = "Incorrect parameter types.The type of param must be string.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     char str[STR_MAX_SIZE] = {0};
@@ -53,7 +57,7 @@ static napi_value ParseSnoozeParameters(const napi_env &env, const napi_callback
     hashCode = str;
     if (hashCode.empty()) {
         ANS_LOGE("hashCode is invalid.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return nullptr;
     }
 
@@ -62,13 +66,13 @@ static napi_value ParseSnoozeParameters(const napi_env &env, const napi_callback
     if (valuetype != napi_number) {
         ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types. The type of delayTime must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_int64(env, argv[1], &delayTime));
     if (delayTime <= 0 || delayTime > MAX_DELAY_TIME_S) {
         ANS_LOGE("delayTime is invalid.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return nullptr;
     }
     return Common::NapiGetNull(env);
@@ -100,15 +104,15 @@ napi_value NapiSnoozeNotification(napi_env env, napi_callback_info info)
     std::string hashCode = "";
     int64_t delayTime = 0;
     if (ParseSnoozeParameters(env, info, hashCode, delayTime) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
-        return Common::NapiRejectError(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
+        return Common::NapiRejectError(env, ERR_ANS_INNER_INVALID_PARAM);
     }
     AsyncCallbackInfoSnooze *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoSnooze {
             .env = env, .asyncWork = nullptr, .hashCode = hashCode, .delayTime = delayTime,
         };
     if (!asynccallbackinfo) {
-        return Common::NapiRejectError(env, ERROR_INTERNAL_ERROR);
+        return Common::NapiRejectError(env, ERR_ANS_INNER_TASK_ERR);
     }
 
     napi_value promise = nullptr;
@@ -122,8 +126,9 @@ napi_value NapiSnoozeNotification(napi_env env, napi_callback_info info)
             AsyncCallbackInfoSnooze *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoSnooze *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::SnoozeNotification(
-                    asynccallbackinfo->hashCode, asynccallbackinfo->delayTime);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SnoozeNotification(
+                        asynccallbackinfo->hashCode, asynccallbackinfo->delayTime);
             }
         },
         AsyncCompleteNapiSnoozeNotification,

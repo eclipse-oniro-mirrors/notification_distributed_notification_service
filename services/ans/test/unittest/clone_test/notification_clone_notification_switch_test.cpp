@@ -61,7 +61,7 @@ HWTEST_F(NotificationCloneNotificationSwitchTest, OnBackup_00001, Function | Sma
     ErrCode result = NotificationCloneNotificationSwitch::GetInstance()->OnBackup(jsonObject);
 
     // Then: Should return ERR_ANS_INVALID_PARAM
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**

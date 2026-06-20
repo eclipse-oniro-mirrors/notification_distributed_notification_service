@@ -24,7 +24,7 @@
 #include "ability_manager_client.h"
 #include "access_token_helper.h"
 #include "ans_const_define.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_trace_wrapper.h"
 #include "ans_permission_def.h"
@@ -92,7 +92,7 @@ ErrCode NotificationPreferences::AddNotificationSlots(
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty() || slots.empty()) {
         message.Message("Invalid param.");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
@@ -116,7 +116,7 @@ ErrCode NotificationPreferences::AddNotificationSlots(
         (!preferncesDB_->PutSlotsToDisturbeDB(bundleOption->GetBundleName(), bundleOption->GetUid(), slots))) {
         message.Message("put slot for to db failed.");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 
     if (result == ERR_OK) {
@@ -138,7 +138,7 @@ ErrCode NotificationPreferences::TimerCleanExperData()
     }
     userIds.push_back(ZERO_USERID);
     if (!preferncesDB_->TimerCleanExperData(userIds)) {
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 
     UpdateStatisticsAll();
@@ -152,7 +152,7 @@ ErrCode NotificationPreferences::CleanExperData(const int32_t userId)
     ErrCode result = ERR_OK;
 
     if (!preferncesDB_->CleanExperDbData(userId)) {
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 
     ANS_LOGD("NotificationPreferences::CleanExperData.result: %{public}d", result);
@@ -166,7 +166,7 @@ ErrCode NotificationPreferences::DeleteStatisticsByBundle(const int32_t userId,
     ErrCode result = ERR_OK;
 
     if (!preferncesDB_->DeleteStatisticsByBundle(userId, bundleName, packageId)) {
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
         return result;
     }
 
@@ -179,7 +179,7 @@ ErrCode NotificationPreferences::QueryStatisticsByBundle(const sptr<Notification
     int32_t &recentCount, int64_t &lastTime)
 {
     if (!bundle) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -192,7 +192,7 @@ ErrCode NotificationPreferences::QueryStatisticsByBundle(const sptr<Notification
 
     if (!preferncesDB_->QueryStatisticsByBundle(bundle->GetUid(), recentCount, lastTime)) {
         ANS_LOGE("NotificationPreferences::QueryStatisticsByBundle failed.");
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
         return result;
     }
     statistics.SetBundleOption(*bundle);
@@ -210,7 +210,7 @@ ErrCode NotificationPreferences::UpdateCustomTimeData(int64_t offsetMs)
     ErrCode result = ERR_OK;
 
     if (!preferncesDB_->UpdateCustomTimeDbData(offsetMs)) {
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
         return result;
     }
     preferencesInfo_.UpdateNotificationStatisticsTime(offsetMs);
@@ -224,7 +224,7 @@ ErrCode NotificationPreferences::DropStatisticsTable(const int32_t userId)
     ErrCode result = ERR_OK;
 
     if (!preferncesDB_->DropStatisticsTable(userId)) {
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 
     UpdateStatisticsAll();
@@ -258,7 +258,7 @@ ErrCode NotificationPreferences::PutNotificationStatistics(const int32_t userId,
     ANS_LOGD("NotificationPreferences::PutNotificationStatistics");
 
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -266,7 +266,7 @@ ErrCode NotificationPreferences::PutNotificationStatistics(const int32_t userId,
 
     int64_t curTime = NotificationAnalyticsUtil::GetCurrentTime();
     if (!preferncesDB_->PutNotificationStatistics(userId, curTime, bundleOption)) {
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
         return result;
     }
     NotificationStatistics statistics;
@@ -283,7 +283,7 @@ ErrCode NotificationPreferences::PutNotificationStatistics(const int32_t userId,
 ErrCode NotificationPreferences::AddNotificationBundleProperty(const sptr<NotificationBundleOption> &bundleOption)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
@@ -293,7 +293,7 @@ ErrCode NotificationPreferences::AddNotificationBundleProperty(const sptr<Notifi
     if (preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo)) {
         preferencesInfo_ = preferencesInfo;
     } else {
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     ANS_LOGD("AddNotificationBundleProperty.result: %{public}d", result);
     return result;
@@ -305,7 +305,7 @@ ErrCode NotificationPreferences::RemoveNotificationSlot(
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_5);
     message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
@@ -321,7 +321,7 @@ ErrCode NotificationPreferences::RemoveNotificationSlot(
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("%{public}s_%{public}d, remove slot failed.",
             bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 
     if (result == ERR_OK) {
@@ -336,7 +336,7 @@ ErrCode NotificationPreferences::RemoveNotificationAllSlots(const sptr<Notificat
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_3);
     message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()));
@@ -348,13 +348,13 @@ ErrCode NotificationPreferences::RemoveNotificationAllSlots(const sptr<Notificat
         bundleInfo.RemoveAllSlots();
         preferencesInfo.SetBundleInfo(bundleInfo);
         if (!preferncesDB_->RemoveAllSlotsFromDisturbeDB(GenerateBundleKey(bundleOption), bundleOption->GetUid())) {
-            result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+            result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
             message.ErrorCode(result).Append(" Db operation failed.");
             ANS_LOGE("%{public}s_%{public}d, Db operation failed.",
                 bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
         }
     } else {
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
         message.ErrorCode(result).Append(" Notification bundle not exist.");
         ANS_LOGE("%{public}s_%{public}d, Notification bundle not exist.",
             bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
@@ -374,7 +374,7 @@ ErrCode NotificationPreferences::RemoveNotificationForBundle(const sptr<Notifica
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
@@ -392,10 +392,10 @@ ErrCode NotificationPreferences::RemoveNotificationForBundle(const sptr<Notifica
         }
         preferencesInfo.RemoveBundleInfo(bundleOption);
         if (!preferncesDB_->RemoveBundleFromDisturbeDB(GenerateBundleKey(bundleOption), bundleOption->GetUid())) {
-            result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+            result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
         }
     } else {
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
     }
 
     if (result == ERR_OK) {
@@ -410,7 +410,7 @@ ErrCode NotificationPreferences::UpdateNotificationSlots(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty() || slots.empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_2)
         .BundleName(bundleOption->GetBundleName());
@@ -430,7 +430,7 @@ ErrCode NotificationPreferences::UpdateNotificationSlots(
         (!preferncesDB_->PutSlotsToDisturbeDB(bundleOption->GetBundleName(), bundleOption->GetUid(), slots))) {
         message.Message("Update put slot for to db failed.");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 
     if (result == ERR_OK) {
@@ -446,7 +446,7 @@ ErrCode __attribute__((weak)) NotificationPreferences::GetNotificationSlot(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ErrCode result = ERR_OK;
@@ -454,11 +454,11 @@ ErrCode __attribute__((weak)) NotificationPreferences::GetNotificationSlot(
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         if (!bundleInfo.GetSlot(type, slot)) {
-            result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
+            result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
         }
     } else {
         ANS_LOGW("bundle not exist");
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
     }
     ANS_LOGD("%{public}s status  = %{public}d ", __FUNCTION__, result);
     return result;
@@ -468,7 +468,7 @@ ErrCode NotificationPreferences::GetNotificationAllSlots(
     const sptr<NotificationBundleOption> &bundleOption, std::vector<sptr<NotificationSlot>> &slots)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ErrCode result = ERR_OK;
@@ -478,7 +478,7 @@ ErrCode NotificationPreferences::GetNotificationAllSlots(
         bundleInfo.GetAllSlots(slots);
     } else {
         ANS_LOGW("Notification bundle does not exsit.");
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
     }
 
     return result;
@@ -488,7 +488,7 @@ ErrCode NotificationPreferences::GetNotificationSlotsNumForBundle(
     const sptr<NotificationBundleOption> &bundleOption, uint64_t &num)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ErrCode result = ERR_OK;
@@ -497,7 +497,7 @@ ErrCode NotificationPreferences::GetNotificationSlotsNumForBundle(
     if (GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         num = static_cast<uint64_t>(bundleInfo.GetAllSlotsSize());
     } else {
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
     }
     return result;
 }
@@ -506,7 +506,7 @@ ErrCode NotificationPreferences::GetNotificationSlotFlagsForBundle(
     const sptr<NotificationBundleOption> &bundleOption, uint32_t &slotFlags)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     return GetBundleProperty(bundleOption, BundleType::BUNDLE_SLOTFLGS_TYPE, slotFlags);
@@ -517,7 +517,7 @@ ErrCode NotificationPreferences::SetNotificationSlotFlagsForBundle(
     const sptr<NotificationBundleOption> &bundleOption, uint32_t slotFlags)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -532,7 +532,7 @@ ErrCode NotificationPreferences::SetNotificationSlotFlagsForBundle(
 ErrCode NotificationPreferences::IsShowBadge(const sptr<NotificationBundleOption> &bundleOption, bool &enable)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     return GetBundleProperty(bundleOption, BundleType::BUNDLE_SHOW_BADGE_TYPE, enable);
 }
@@ -540,7 +540,7 @@ ErrCode NotificationPreferences::IsShowBadge(const sptr<NotificationBundleOption
 ErrCode NotificationPreferences::SetShowBadge(const sptr<NotificationBundleOption> &bundleOption, const bool enable)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
@@ -554,7 +554,7 @@ ErrCode NotificationPreferences::SetShowBadge(const sptr<NotificationBundleOptio
 ErrCode NotificationPreferences::GetImportance(const sptr<NotificationBundleOption> &bundleOption, int32_t &importance)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     return GetBundleProperty(bundleOption, BundleType::BUNDLE_IMPORTANCE_TYPE, importance);
@@ -565,7 +565,7 @@ ErrCode NotificationPreferences::SetImportance(
     const sptr<NotificationBundleOption> &bundleOption, const int32_t &importance)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
@@ -580,7 +580,7 @@ ErrCode NotificationPreferences::GetTotalBadgeNums(
     const sptr<NotificationBundleOption> &bundleOption, int32_t &totalBadgeNum)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     return GetBundleProperty(bundleOption, BundleType::BUNDLE_BADGE_TOTAL_NUM_TYPE, totalBadgeNum);
 }
@@ -589,7 +589,7 @@ ErrCode NotificationPreferences::SetTotalBadgeNums(
     const sptr<NotificationBundleOption> &bundleOption, const int32_t num)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
@@ -604,7 +604,7 @@ ErrCode NotificationPreferences::GetNotificationsEnabledForBundle(
     const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::SWITCH_STATE &state)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     int32_t val = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
     ErrCode result = GetBundleProperty(bundleOption, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, val);
@@ -620,7 +620,7 @@ ErrCode NotificationPreferences::SetNotificationsEnabledForBundle(
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -647,13 +647,13 @@ ErrCode NotificationPreferences::SetNotificationsEnabledForBundle(
 ErrCode NotificationPreferences::GetNotificationsEnabled(const int32_t &userId, bool &enabled)
 {
     if (userId <= SUBSCRIBE_USER_INIT) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ErrCode result = ERR_OK;
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (!preferencesInfo_.GetEnabledAllNotification(userId, enabled)) {
-        result = ERR_ANS_INVALID_PARAM;
+        result = ERR_ANS_INNER_INVALID_PARAM;
     }
     return result;
 }
@@ -661,14 +661,14 @@ ErrCode NotificationPreferences::GetNotificationsEnabled(const int32_t &userId, 
 ErrCode NotificationPreferences::SetNotificationsEnabled(const int32_t &userId, const bool &enabled)
 {
     if (userId <= SUBSCRIBE_USER_INIT) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     preferencesInfo.SetEnabledAllNotification(userId, enabled);
     ErrCode result = ERR_OK;
     if (!preferncesDB_->PutNotificationsEnabled(userId, enabled)) {
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 
     if (result == ERR_OK) {
@@ -680,7 +680,7 @@ ErrCode NotificationPreferences::SetNotificationsEnabled(const int32_t &userId, 
 ErrCode NotificationPreferences::GetHasPoppedDialog(const sptr<NotificationBundleOption> &bundleOption, bool &hasPopped)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     return GetBundleProperty(bundleOption, BundleType::BUNDLE_POPPED_DIALOG_TYPE, hasPopped);
 }
@@ -688,7 +688,7 @@ ErrCode NotificationPreferences::GetHasPoppedDialog(const sptr<NotificationBundl
 ErrCode NotificationPreferences::SetHasPoppedDialog(const sptr<NotificationBundleOption> &bundleOption, bool hasPopped)
 {
     if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
@@ -704,14 +704,14 @@ ErrCode NotificationPreferences::GetDoNotDisturbDate(const int32_t &userId,
     sptr<NotificationDoNotDisturbDate> &date)
 {
     if (userId <= SUBSCRIBE_USER_INIT) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ErrCode result = ERR_OK;
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     if (!preferencesInfo.GetDoNotDisturbDate(userId, date)) {
-        result = ERR_ANS_INVALID_PARAM;
+        result = ERR_ANS_INNER_INVALID_PARAM;
     }
     return result;
 }
@@ -721,7 +721,7 @@ ErrCode NotificationPreferences::SetDoNotDisturbDate(const int32_t &userId,
 {
     ANS_LOGE("called");
     if (userId <= SUBSCRIBE_USER_INIT) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
@@ -729,7 +729,7 @@ ErrCode NotificationPreferences::SetDoNotDisturbDate(const int32_t &userId,
 
     ErrCode result = ERR_OK;
     if (!preferncesDB_->PutDoNotDisturbDate(userId, date)) {
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 
     if (result == ERR_OK) {
@@ -745,7 +745,7 @@ ErrCode NotificationPreferences::AddDoNotDisturbProfiles(
     for (auto profile : profiles) {
         if (profile == nullptr) {
             ANS_LOGE("The profile is nullptr.");
-            return ERR_ANS_INVALID_PARAM;
+            return ERR_ANS_INNER_INVALID_PARAM;
         }
         auto trustList = profile->GetProfileTrustList();
         for (auto& bundleInfo : trustList) {
@@ -761,10 +761,10 @@ ErrCode NotificationPreferences::AddDoNotDisturbProfiles(
     preferencesInfo.AddDoNotDisturbProfiles(userId, profiles);
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("The prefernces db is nullptr.");
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     if (!preferncesDB_->AddDoNotDisturbProfiles(userId, profiles)) {
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     preferencesInfo_ = preferencesInfo;
     return ERR_OK;
@@ -807,7 +807,7 @@ ErrCode NotificationPreferences::RemoveDoNotDisturbProfiles(
     for (auto profile : profiles) {
         if (profile == nullptr) {
             ANS_LOGE("The profile is nullptr.");
-            return ERR_ANS_INVALID_PARAM;
+            return ERR_ANS_INNER_INVALID_PARAM;
         }
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -815,10 +815,10 @@ ErrCode NotificationPreferences::RemoveDoNotDisturbProfiles(
     preferencesInfo.RemoveDoNotDisturbProfiles(userId, profiles);
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("The prefernces db is nullptr.");
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     if (!preferncesDB_->RemoveDoNotDisturbProfiles(userId, profiles)) {
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     preferencesInfo_ = preferencesInfo;
     return ERR_OK;
@@ -847,13 +847,13 @@ ErrCode NotificationPreferences::UpdateDoNotDisturbProfiles(int32_t userId, int6
     ANS_LOGD("called, update Profile %{public}d %{public}s %{public}zu",
         userId, std::to_string(profileId).c_str(), bundleList.size());
     if (bundleList.empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     if (profile == nullptr) {
         ANS_LOGE("profile is nullptr");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
@@ -872,10 +872,10 @@ ErrCode NotificationPreferences::UpdateDoNotDisturbProfiles(int32_t userId, int6
     preferencesInfo.AddDoNotDisturbProfiles(userId, {profile});
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("The prefernces db is nullptr.");
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     if (!preferncesDB_->AddDoNotDisturbProfiles(userId, {profile})) {
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     preferencesInfo_ = preferencesInfo;
     return ERR_OK;
@@ -1116,12 +1116,12 @@ ErrCode NotificationPreferences::GetLiveViewConfigVersion(int32_t& version)
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("the prefernces db is nullptr");
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     if (preferncesDB_->GetLiveViewConfigVersion(version)) {
         return ERR_OK;
     }
-    return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 bool NotificationPreferences::SetLiveViewConfigVersion(const int32_t& version)
@@ -1139,12 +1139,12 @@ ErrCode NotificationPreferences::GetLiveViewRebuildFlag(std::string& flag, int32
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("the prefernces db is nullptr");
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     if (preferncesDB_->GetLiveViewRebuildFlag(flag, userId)) {
         return ERR_OK;
     }
-    return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 bool NotificationPreferences::SetLiveViewRebuildFlag(int32_t userId)
@@ -1180,7 +1180,7 @@ ErrCode NotificationPreferences::GetAllNotificationEnabledBundlesInner(
     ANS_LOGD("called");
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     bool Isuccess = false;
     if (userId == SUBSCRIBE_USER_INIT) {
@@ -1189,7 +1189,7 @@ ErrCode NotificationPreferences::GetAllNotificationEnabledBundlesInner(
         Isuccess = preferncesDB_->GetAllNotificationEnabledBundles(bundleOption, userId);
     }
     if (!Isuccess) {
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     return ERR_OK;
 }
@@ -1205,7 +1205,7 @@ ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(
     ANS_LOGD("called");
     if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
         ANS_LOGE("Check user exists failed.");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
     return GetAllNotificationEnabledBundlesInner(bundleOption, userId);
 }
@@ -1215,7 +1215,7 @@ ErrCode NotificationPreferences::ClearNotificationInRestoreFactorySettings()
     ErrCode result = ERR_OK;
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (!preferncesDB_->RemoveAllDataFromDisturbeDB()) {
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 
     if (result == ERR_OK) {
@@ -1229,7 +1229,7 @@ ErrCode NotificationPreferences::GetDoNotDisturbProfile(
 {
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (!preferencesInfo_.GetDoNotDisturbProfiles(profileId, userId, profile)) {
-        return ERR_ANS_NO_PROFILE_TEMPLATE;
+        return ERR_ANS_INNER_NO_PROFILE_TEMPLATE;
     }
     return ERR_OK;
 }
@@ -1280,7 +1280,7 @@ ErrCode NotificationPreferences::CheckSlotForCreateSlot(const sptr<NotificationB
 {
     if (slot == nullptr) {
         ANS_LOGE("Notification slot is nullptr.");
-        return ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST;
     }
 
     NotificationPreferencesInfo::BundleInfo bundleInfo;
@@ -1309,11 +1309,11 @@ ErrCode NotificationPreferences::CheckSlotForRemoveSlot(const sptr<NotificationB
             preferencesInfo.SetBundleInfo(bundleInfo);
         } else {
             ANS_LOGE("Notification slot type does not exsited.");
-            result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
+            result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
         }
     } else {
         ANS_LOGW("Notification bundle does not exsit.");
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
     }
     return result;
 }
@@ -1323,7 +1323,7 @@ ErrCode NotificationPreferences::CheckSlotForUpdateSlot(const sptr<NotificationB
 {
     if (slot == nullptr) {
         ANS_LOGE("Notification slot is nullptr.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ErrCode result = ERR_OK;
@@ -1336,11 +1336,11 @@ ErrCode NotificationPreferences::CheckSlotForUpdateSlot(const sptr<NotificationB
             preferencesInfo.SetBundleInfo(bundleInfo);
         } else {
             ANS_LOGE("Notification slot type does not exist.");
-            result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
+            result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
         }
     } else {
         ANS_LOGW("Notification bundle does not exsit.");
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
     }
 
     return result;
@@ -1416,7 +1416,7 @@ ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo:
         default:
             break;
     }
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 template <typename T>
@@ -1452,12 +1452,12 @@ ErrCode NotificationPreferences::GetBundleProperty(
                 value = static_cast<int32_t>(bundleInfo.GetExtensionSubscriptionEnabled());
                 break;
             default:
-                result = ERR_ANS_INVALID_PARAM;
+                result = ERR_ANS_INNER_INVALID_PARAM;
                 break;
         }
     } else {
         ANS_LOGW("Notification bundle does not exsit.");
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
     }
     return result;
 }
@@ -1471,26 +1471,26 @@ ErrCode NotificationPreferences::GetTemplateSupported(const std::string& templat
 {
     if (templateName.length() == 0) {
         ANS_LOGE("template name is null.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::ifstream inFile;
     inFile.open(DEFAULT_TEMPLATE_PATH.c_str(), std::ios::in);
     if (!inFile.is_open()) {
         ANS_LOGE("read template config error.");
-        return ERR_ANS_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED;
     }
 
     nlohmann::json jsonObj;
     inFile >> jsonObj;
     if (jsonObj.is_null() || !jsonObj.is_object()) {
         ANS_LOGE("Invalid JSON object");
-        return ERR_ANS_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED;
     }
     if (jsonObj.is_discarded()) {
         ANS_LOGE("template json discarded error.");
         inFile.close();
-        return ERR_ANS_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED;
     }
 
     if (jsonObj.contains(templateName)) {
@@ -1507,7 +1507,7 @@ ErrCode NotificationPreferences::SetDistributedEnabledByBundle(const sptr<Notifi
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -1520,7 +1520,7 @@ ErrCode NotificationPreferences::SetDistributedEnabledByBundle(const sptr<Notifi
     bundleInfo.SetEnableNotification(defaultState);
     bool storeDBResult = preferncesDB_->PutDistributedEnabledForBundle(
         deviceType, isNotification, bundleInfo, enabled);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::SetDistributedBundleOption(
@@ -1539,7 +1539,7 @@ ErrCode NotificationPreferences::SetDistributedBundleOption(
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->PutDistributedBundleOption(bundles, deviceType, userId);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
@@ -1547,7 +1547,7 @@ ErrCode NotificationPreferences::IsDistributedEnabledByBundle(const sptr<Notific
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -1560,7 +1560,7 @@ ErrCode NotificationPreferences::IsDistributedEnabledByBundle(const sptr<Notific
     bundleInfo.SetEnableNotification(defaultState);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->GetDistributedEnabledForBundle(deviceType, isNotification, bundleInfo, enabled);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::SetSilentReminderEnabled(const sptr<NotificationBundleOption> &bundleOption,
@@ -1568,7 +1568,7 @@ ErrCode NotificationPreferences::SetSilentReminderEnabled(const sptr<Notificatio
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -1581,14 +1581,14 @@ ErrCode NotificationPreferences::SetSilentReminderEnabled(const sptr<Notificatio
     if (storeDBResult) {
         preferencesInfo_.SetSilentReminderInfo(silentReminderInfo);
     }
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::IsSilentReminderEnabled(const sptr<NotificationBundleOption> &bundleOption,
     NotificationConstant::SWITCH_STATE &enableStatus)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -1605,7 +1605,7 @@ ErrCode NotificationPreferences::IsSilentReminderEnabled(const sptr<Notification
         enableStatus = silentReminderInfo.enableStatus;
         preferencesInfo_.SetSilentReminderInfo(silentReminderInfo);
     }
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 void NotificationPreferences::RemoveSilentEnabledDbByBundle(const sptr<NotificationBundleOption> &bundleOption)
@@ -1623,7 +1623,7 @@ ErrCode NotificationPreferences::SetPriorityEnabled(const NotificationConstant::
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->PutPriorityEnabled(enableStatus);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::SetPriorityEnabledByBundle(
@@ -1631,12 +1631,12 @@ ErrCode NotificationPreferences::SetPriorityEnabledByBundle(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult =
         preferncesDB_->PutPriorityEnabledForBundle(bundleOption, enableStatus);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::IsPriorityEnabled(NotificationConstant::SWITCH_STATE &enabled)
@@ -1644,7 +1644,7 @@ ErrCode NotificationPreferences::IsPriorityEnabled(NotificationConstant::SWITCH_
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->GetPriorityEnabled(enabled);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::IsPriorityEnabledByBundle(
@@ -1652,11 +1652,11 @@ ErrCode NotificationPreferences::IsPriorityEnabledByBundle(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->GetPriorityEnabledForBundle(bundleOption, enableStatus);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::SetBundlePriorityConfig(
@@ -1664,11 +1664,11 @@ ErrCode NotificationPreferences::SetBundlePriorityConfig(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->SetBundlePriorityConfig(bundleOption, configValue);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::GetBundlePriorityConfig(
@@ -1676,25 +1676,25 @@ ErrCode NotificationPreferences::GetBundlePriorityConfig(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->GetBundlePriorityConfig(bundleOption, configValue);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::PutPriorityIntelligentEnabled(const NotificationConstant::SWITCH_STATE enabled)
 {
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->PutPriorityIntelligentEnabled(enabled);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::GetPriorityIntelligentEnabled(NotificationConstant::SWITCH_STATE &enabled)
 {
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->GetPriorityIntelligentEnabled(enabled);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::PutPriorityEnabledByBundleV2(
@@ -1702,11 +1702,11 @@ ErrCode NotificationPreferences::PutPriorityEnabledByBundleV2(
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         ANS_LOGW("PutPriorityEnabledByBundleV2 fail invalid bundleOption");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->PutPriorityEnabledByBundleV2(bundleOption, priorityStatus);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::GetPriorityEnabledByBundleV2(
@@ -1714,11 +1714,11 @@ ErrCode NotificationPreferences::GetPriorityEnabledByBundleV2(
 {
     if (bundleOption == nullptr) {
         ANS_LOGW("GetPriorityEnabledByBundleV2 fail invalid bundleOption");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->GetPriorityEnabledByBundleV2(bundleOption, priorityStatus);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::PutPriorityStrategyByBundle(
@@ -1726,11 +1726,11 @@ ErrCode NotificationPreferences::PutPriorityStrategyByBundle(
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         ANS_LOGW("PutPriorityStrategyByBundle fail invalid bundleOption");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->PutPriorityStrategyByBundle(bundleOption, strategy);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::GetPriorityStrategyByBundle(
@@ -1738,11 +1738,11 @@ ErrCode NotificationPreferences::GetPriorityStrategyByBundle(
 {
     if (bundleOption == nullptr) {
         ANS_LOGW("GetPriorityStrategyByBundle fail invalid bundleOption");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->GetPriorityStrategyByBundle(bundleOption, strategy);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::SetNotificationSwitch(const std::string &switchName,
@@ -1753,7 +1753,7 @@ ErrCode NotificationPreferences::SetNotificationSwitch(const std::string &switch
     bool storeDBResult = preferncesDB_->SetNotificationSwitch(switchName, state, userId);
     ANS_LOGI("SetNotificationSwitch switchName: %{public}s, userId: %{public}d, state: %{public}d, result: %{public}d",
         switchName.c_str(), userId, static_cast<int32_t>(state), storeDBResult);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::GetNotificationSwitch(const std::string &switchName,
@@ -1766,7 +1766,7 @@ ErrCode NotificationPreferences::GetNotificationSwitch(const std::string &switch
     bool storeDBResult = preferncesDB_->GetNotificationSwitch(switchName, userId, state);
     ANS_LOGI("GetNotificationSwitch switchName: %{public}s, userId: %{public}d, state: %{public}d, result: %{public}d",
         switchName.c_str(), userId, static_cast<int32_t>(state), storeDBResult);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 int32_t StringToInt(const std::string &str)
@@ -1825,7 +1825,7 @@ ErrCode NotificationPreferences::SetDistributedEnabled(
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->PutDistributedEnabled(deviceType, enableStatus);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::IsDistributedEnabled(
@@ -1836,7 +1836,7 @@ ErrCode NotificationPreferences::IsDistributedEnabled(
     bool storeDBResult = true;
     enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     storeDBResult = preferncesDB_->GetDistributedEnabled(deviceType, enableStatus);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::GetDistributedAuthStatus(
@@ -1846,7 +1846,7 @@ ErrCode NotificationPreferences::GetDistributedAuthStatus(
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->GetDistributedAuthStatus(deviceType, deviceId, targetUserId, isAuth);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::SetDistributedAuthStatus(
@@ -1856,33 +1856,33 @@ ErrCode NotificationPreferences::SetDistributedAuthStatus(
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->SetDistributedAuthStatus(deviceType, deviceId, targetUserId, isAuth);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (deviceType.empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->SetSmartReminderEnabled(deviceType, enabled);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (deviceType.empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->IsSmartReminderEnabled(deviceType, enabled);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::SetDistributedEnabledBySlot(const NotificationConstant::SlotType &slotType,
@@ -1890,13 +1890,13 @@ ErrCode NotificationPreferences::SetDistributedEnabledBySlot(const NotificationC
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (deviceType.empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->SetDistributedEnabledBySlot(slotType, deviceType, enabled);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::IsDistributedEnabledBySlot(const NotificationConstant::SlotType &slotType,
@@ -1904,13 +1904,13 @@ ErrCode NotificationPreferences::IsDistributedEnabledBySlot(const NotificationCo
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (deviceType.empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->IsDistributedEnabledBySlot(slotType, deviceType, enabled);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 void NotificationPreferences::InitSettingFromDisturbDB(int32_t userId)
@@ -1999,7 +1999,7 @@ ErrCode NotificationPreferences::SetRingtoneInfoByBundle(const sptr<Notification
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty() || ringtoneInfo == nullptr) {
         ANS_LOGE("Invalid parameters");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -2016,13 +2016,13 @@ ErrCode NotificationPreferences::SetRingtoneInfoByBundle(const sptr<Notification
     bundleInfo.SetRingtoneInfo(ringtoneInfo);
     if (preferncesDB_ == nullptr) {
         ANS_LOGI("Invalid prefernces db.");
-        return ERR_ANS_TASK_ERR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
 
     if (!preferncesDB_->SetRingtoneInfoByBundle(bundleInfo, ringtoneInfo)) {
         ANS_LOGW("Failed set ringtone: %{public}s %{public}d", bundleOption->GetBundleName().c_str(),
             ringtoneInfo->GetRingtoneType());
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     preferencesInfo_.SetBundleInfo(bundleInfo);
     ANS_LOGI("Set ringtone %{public}s %{public}d %{public}s", bundleOption->GetBundleName().c_str(),
@@ -2043,7 +2043,7 @@ ErrCode NotificationPreferences::GetRingtoneInfoByBundle(const sptr<Notification
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         ANS_LOGE("Invalid parameters");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -2051,7 +2051,7 @@ ErrCode NotificationPreferences::GetRingtoneInfoByBundle(const sptr<Notification
     if (!GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         ANS_LOGW("Get info failed %{public}s %{public}d", bundleOption->GetBundleName().c_str(),
             bundleOption->GetUid());
-        return ERR_ANS_INVALID_BUNDLE_OPTION;
+        return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
     }
 
     sptr<NotificationRingtoneInfo> savedRingtoneInfo = bundleInfo.GetRingtoneInfo();
@@ -2066,7 +2066,7 @@ ErrCode NotificationPreferences::GetRingtoneInfoByBundle(const sptr<Notification
 
     if (savedRingtoneInfo->GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT) {
         ANS_LOGW("Ringtone not found %{public}s", bundleOption->GetBundleName().c_str());
-        return ERR_ANS_NO_CUSTOM_RINGTONE_INFO;
+        return ERR_ANS_INNER_NO_CUSTOM_RINGTONE_INFO;
     }
     ringtoneInfo = savedRingtoneInfo;
     ANS_LOGI("Ringtone find : %{public}s %{public}d", bundleOption->GetBundleName().c_str(),
@@ -2274,7 +2274,7 @@ int32_t NotificationPreferences::SetKvToDb(
     const std::string &key, const std::string &value, const int32_t &userId)
 {
     if (preferncesDB_ == nullptr) {
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     if (key == KIOSK_APP_TRUST_LIST_KEY) {
         isKioskTrustListUpdate_ = true;
@@ -2289,7 +2289,7 @@ int32_t NotificationPreferences::SetByteToDb(
     const std::string &key, const std::vector<uint8_t> &value, const int32_t &userId)
 {
     if (preferncesDB_ == nullptr) {
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     return preferncesDB_->SetByteToDb(key, value, userId);
 }
@@ -2298,7 +2298,7 @@ int32_t NotificationPreferences::GetKvFromDb(
     const std::string &key, std::string &value, const int32_t &userId)
 {
     if (preferncesDB_ == nullptr) {
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     return preferncesDB_->GetKvFromDb(key, value, userId);
 }
@@ -2307,7 +2307,7 @@ int32_t NotificationPreferences::GetByteFromDb(
     const std::string &key, std::vector<uint8_t> &value, const int32_t &userId)
 {
     if (preferncesDB_ == nullptr) {
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     return preferncesDB_->GetByteFromDb(key, value, userId);
 }
@@ -2316,7 +2316,7 @@ int32_t NotificationPreferences::GetBatchKvsFromDbContainsKey(
     const std::string &key, std::unordered_map<std::string, std::string> &values, const int32_t &userId)
 {
     if (preferncesDB_ == nullptr) {
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     return preferncesDB_->GetBatchKvsFromDbContainsKey(key, values, userId);
 }
@@ -2325,7 +2325,7 @@ int32_t NotificationPreferences::GetBatchKvsFromDb(
     const std::string &key, std::unordered_map<std::string, std::string> &values, const int32_t &userId)
 {
     if (preferncesDB_ == nullptr) {
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     return preferncesDB_->GetBatchKvsFromDb(key, values, userId);
 }
@@ -2333,7 +2333,7 @@ int32_t NotificationPreferences::GetBatchKvsFromDb(
 int32_t __attribute__((weak)) NotificationPreferences::DeleteKvFromDb(const std::string &key, const int32_t &userId)
 {
     if (preferncesDB_ == nullptr) {
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     return preferncesDB_->DeleteKvFromDb(key, userId);
 }
@@ -2341,7 +2341,7 @@ int32_t __attribute__((weak)) NotificationPreferences::DeleteKvFromDb(const std:
 int32_t NotificationPreferences::DeleteBatchKvFromDb(const std::vector<std::string> &keys,  const int32_t &userId)
 {
     if (preferncesDB_ == nullptr) {
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     return preferncesDB_->DeleteBatchKvFromDb(keys, userId);
 }
@@ -2485,11 +2485,11 @@ ErrCode NotificationPreferences::SetDisableNotificationInfo(const sptr<Notificat
     preferencesInfo_.SetDisableNotificationInfo(notificationDisable);
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("the prefernces db is nullptr");
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     if (!preferncesDB_->SetDisableNotificationInfo(notificationDisable)) {
         ANS_LOGE("db set disable notification info fail");
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 
     return ERR_OK;
@@ -2672,7 +2672,7 @@ ErrCode NotificationPreferences::SetDistributedDevicelist(std::vector<std::strin
     nlohmann::json deviceTypesJson = deviceTypes;
     std::string deviceTypesjsonString = deviceTypesJson.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
     storeDBResult = preferncesDB_->PutDistributedDevicelist(deviceTypesjsonString, userId);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::GetDistributedDevicelist(std::vector<std::string> &deviceTypes)
@@ -2682,7 +2682,7 @@ ErrCode NotificationPreferences::GetDistributedDevicelist(std::vector<std::strin
     std::string value = "";
     auto storeDBResult = preferncesDB_->GetDistributedDevicelist(value);
     if (!storeDBResult) {
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     if (value.empty()) {
         ANS_LOGE("Empty json");
@@ -2691,16 +2691,16 @@ ErrCode NotificationPreferences::GetDistributedDevicelist(std::vector<std::strin
 
     if (!nlohmann::json::accept(value)) {
         ANS_LOGE("Invalid json string");
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     nlohmann::json jsonObject = nlohmann::json::parse(value, nullptr, false);
     if (jsonObject.is_null() || jsonObject.empty()) {
         ANS_LOGE("Invalid JSON object");
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     if (jsonObject.is_discarded() || !jsonObject.is_array()) {
         ANS_LOGE("Parse device type list failed due to data is discarded or not array");
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     deviceTypes = jsonObject.get<std::vector<std::string>>();
     return ERR_OK;
@@ -2713,17 +2713,17 @@ ErrCode NotificationPreferences::GetAllLiveViewEnabledBundles(const int32_t user
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     return preferencesInfo_.GetAllLiveViewEnabledBundles(userId, bundleOption);
 }
- 
+
 ErrCode NotificationPreferences::GetAllDistribuedEnabledBundles(int32_t userId,
     const std::string &deviceType, std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("Called.");
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     if (!preferncesDB_->GetAllDistribuedEnabledBundles(userId, deviceType, bundleOption)) {
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     return ERR_OK;
 }
@@ -2734,7 +2734,7 @@ ErrCode NotificationPreferences::GetExtensionSubscriptionInfos(const sptr<Notifi
     ANS_LOGD("called");
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle option");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
@@ -2754,7 +2754,7 @@ ErrCode NotificationPreferences::SetExtensionSubscriptionInfos(const sptr<Notifi
     ANS_LOGD("called");
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle option");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
@@ -2771,14 +2771,14 @@ ErrCode NotificationPreferences::SetExtensionSubscriptionInfos(const sptr<Notifi
     bundleInfo.SetExtensionSubscriptionInfos(infos);
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("the prefernces db is nullptr");
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     if (preferncesDB_->PutExtensionSubscriptionInfos(bundleInfo)) {
         preferencesInfo.SetBundleInfo(bundleInfo);
         preferencesInfo_ = preferencesInfo;
         return ERR_OK;
     } else {
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 }
 
@@ -2793,11 +2793,11 @@ ErrCode NotificationPreferences::GetExtensionSubscriptionEnabled(
 {
     ANS_LOGD("called");
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     int32_t val = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
     auto result =  GetBundleProperty(bundleOption, BundleType::BUNDLE_EXTENSION_SUBSCRIPTION_ENABLED_TYPE, val);
-    if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+    if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
         result = ERR_OK;
     }
     state = static_cast<NotificationConstant::SWITCH_STATE>(val);
@@ -2809,7 +2809,7 @@ ErrCode NotificationPreferences::SetExtensionSubscriptionEnabled(
 {
     ANS_LOGD("called");
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -2828,7 +2828,7 @@ ErrCode NotificationPreferences::GetExtensionSubscriptionBundles(
     ANS_LOGD("called");
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle option");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
@@ -2848,14 +2848,14 @@ ErrCode NotificationPreferences::SetExtensionSubscriptionBundles(
     ANS_LOGD("called");
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle option");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("the prefernces db is nullptr");
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     if (!GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         bundleInfo.SetBundleName(bundleOption->GetBundleName());
@@ -2871,7 +2871,7 @@ ErrCode NotificationPreferences::SetExtensionSubscriptionBundles(
         preferencesInfo_ = preferencesInfo;
         return ERR_OK;
     } else {
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 }
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
@@ -2881,7 +2881,7 @@ ErrCode NotificationPreferences::SetExtensionSubscriptionClonedInvalidBundles(in
     ANS_LOGD("called");
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle option");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     if (bundles.empty()) {
         return ERR_OK;
@@ -2889,7 +2889,7 @@ ErrCode NotificationPreferences::SetExtensionSubscriptionClonedInvalidBundles(in
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("the prefernces db is nullptr");
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> data;
     preferncesDB_->GetExtensionSubscriptionClonedInvalidBundles(userId, data);
@@ -2910,7 +2910,7 @@ ErrCode NotificationPreferences::SetExtensionSubscriptionClonedInvalidBundles(in
     ANS_LOGI("Has invalid granted bundles size %{public}zu", data.size());
     if (!preferncesDB_->PutExtensionSubscriptionClonedInvalidBundles(userId, data)) {
         ANS_LOGE("Failed to set invalid granted bundles for user:%{public}d", userId);
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     return ERR_OK;
 }
@@ -2920,10 +2920,10 @@ ErrCode NotificationPreferences::ClearExtensionSubscriptionClonedInvalidBundles(
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("the prefernces db is nullptr");
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     if (!preferncesDB_->ClearExtensionSubscriptionClonedInvalidBundles(userId)) {
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     return ERR_OK;
 }
@@ -2933,16 +2933,16 @@ ErrCode NotificationPreferences::GetExtensionSubscriptionCloneUpdatedBundles(int
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle option");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("the prefernces db is nullptr");
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> data;
     if (!preferncesDB_->GetExtensionSubscriptionClonedInvalidBundles(userId, data)) {
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     for (auto &item : data) {
         for (auto &invalidBundle: item.second) {
@@ -2961,17 +2961,17 @@ ErrCode NotificationPreferences::RemoveExtensionSubscriptionCloneUpdatedBundles(
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle option");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("the prefernces db is nullptr");
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     std::map<sptr<NotificationBundleOption>, std::vector<sptr<NotificationBundleOption>>> data;
     if (!preferncesDB_->GetExtensionSubscriptionClonedInvalidBundles(userId, data)) {
         ANS_LOGE("Failed to get invalid granted bundles for user:%{public}d", userId);
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     auto dataItem = data.begin();
     while (dataItem != data.end()) {
@@ -2992,7 +2992,7 @@ ErrCode NotificationPreferences::RemoveExtensionSubscriptionCloneUpdatedBundles(
     }
     if (!preferncesDB_->PutExtensionSubscriptionClonedInvalidBundles(userId, data)) {
         ANS_LOGE("Failed to update invalid granted bundles for user:%{public}d", userId);
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     return ERR_OK;
 }
@@ -3003,14 +3003,14 @@ ErrCode NotificationPreferences::AddExtensionSubscriptionBundles(
     ANS_LOGD("called");
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle option");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("the prefernces db is nullptr");
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     if (!GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         bundleInfo.SetBundleName(bundleOption->GetBundleName());
@@ -3026,7 +3026,7 @@ ErrCode NotificationPreferences::AddExtensionSubscriptionBundles(
         preferencesInfo_ = preferencesInfo;
         return ERR_OK;
     } else {
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 }
 
@@ -3036,14 +3036,14 @@ ErrCode NotificationPreferences::RemoveExtensionSubscriptionBundles(
     ANS_LOGD("called");
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle option");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("the prefernces db is nullptr");
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     if (!GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         bundleInfo.SetBundleName(bundleOption->GetBundleName());
@@ -3059,7 +3059,7 @@ ErrCode NotificationPreferences::RemoveExtensionSubscriptionBundles(
         preferencesInfo_ = preferencesInfo;
         return ERR_OK;
     } else {
-        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
 }
 
@@ -3067,32 +3067,32 @@ ErrCode NotificationPreferences::SetSubscriberExistFlag(const std::string& devic
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (deviceType.empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     if (preferncesDB_ == nullptr) {
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->SetSubscriberExistFlag(deviceType, existFlag);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::GetSubscriberExistFlag(const std::string& deviceType, bool& existFlag)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (deviceType.empty()) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     if (preferncesDB_ == nullptr) {
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->GetSubscriberExistFlag(deviceType, existFlag);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 void NotificationPreferences::SetDistributedEnabledForBundle(const NotificationPreferencesInfo::BundleInfo& bundleInfo)
@@ -3130,7 +3130,7 @@ ErrCode NotificationPreferences::SetHashCodeRule(const int32_t uid, const uint32
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->SetHashCodeRule(uid, type);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::SetHashCodeRule(const int32_t uid, const uint32_t type, const int32_t userId)
@@ -3139,12 +3139,12 @@ ErrCode NotificationPreferences::SetHashCodeRule(const int32_t uid, const uint32
 
     if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
         ANS_LOGE("Check user exists failed.");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->SetHashCodeRule(uid, type, userId);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 uint32_t NotificationPreferences::GetHashCodeRule(const int32_t uid)
@@ -3216,22 +3216,22 @@ ErrCode __attribute__((weak)) NotificationPreferences::SetGeofenceEnabled(bool e
 {
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("Invalid prefernces db.");
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
 
     auto storeDBResult = preferncesDB_->SetGeofenceEnabled(enabled);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::IsGeofenceEnabled(bool &enabled)
 {
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("Invalid prefernces db.");
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
 
     auto storeDBResult = preferncesDB_->IsGeofenceEnabled(enabled);
-    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
@@ -3239,7 +3239,7 @@ int32_t NotificationPreferences::GetKvFromDb(
     const std::string &key, std::string &value, const int32_t &userId, int32_t &retCode)
 {
     if (preferncesDB_ == nullptr) {
-        return ERR_ANS_SERVICE_NOT_READY;
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
     return preferncesDB_->GetKvFromDb(key, value, userId, retCode);
 }
@@ -3252,7 +3252,7 @@ ErrCode NotificationPreferences::SetCollaborationBlockList(const std::string& bl
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (!ParseBlockListJson(blockListJson, blockList, userId)) {
         ANS_LOGE("Failed to parse block list JSON or invalid userId");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     // Step 2: userId is already validated in ParseBlockListJson (exists in system)
@@ -3261,7 +3261,7 @@ ErrCode NotificationPreferences::SetCollaborationBlockList(const std::string& bl
     ErrCode result = ERR_OK;
     if (SetKvToDb(COLLABORATION_BLOCKLIST, blockListJson, userId) != ERR_OK) {
         ANS_LOGE("Failed to save collaboration block list to database for userId %{public}d", userId);
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     } else {
         // Step 4: Update memory cache for this userId
         collaborationBlockListCache_[userId] = blockList;
@@ -3311,7 +3311,7 @@ bool NotificationPreferences::IsCollaborationAllowed(const std::string& bundleNa
             bundleName.c_str(), appIndex, uid, userId);
         return false;
     }
-    
+
     return true;
 }
 
@@ -3354,7 +3354,7 @@ bool NotificationPreferences::ParseBlockListJson(const std::string& jsonData,
         ANS_LOGE("JSON data missing bundleList field or not an array");
         return false;
     }
-    
+
     for (const auto& item : jsonObject["bundleList"]) {
         if (!item.is_object()) {
             ANS_LOGW("Non-object item in bundleList, skipping");
@@ -3395,7 +3395,7 @@ void NotificationPreferences::LoadCollaborationBlockListFromDb(int32_t userId)
         collaborationBlockListLoadedMap_[userId] = true;
         return;
     }
-    
+
     // Parse JSON data
     std::set<std::pair<std::string, int32_t>> blockList;
     int32_t parsedUserId = SUBSCRIBE_USER_INIT;
@@ -3405,7 +3405,7 @@ void NotificationPreferences::LoadCollaborationBlockListFromDb(int32_t userId)
         collaborationBlockListLoadedMap_[userId] = true;
         return;
     }
-    
+
     // Verify parsed userId matches the requested userId
     if (parsedUserId != userId) {
         ANS_LOGW("Parsed userId %{public}d does not match requested userId %{public}d, using empty list",
@@ -3414,7 +3414,7 @@ void NotificationPreferences::LoadCollaborationBlockListFromDb(int32_t userId)
         collaborationBlockListLoadedMap_[userId] = true;
         return;
     }
-    
+
     // Update cache for this userId
     collaborationBlockListCache_[userId] = blockList;
     collaborationBlockListLoadedMap_[userId] = true;

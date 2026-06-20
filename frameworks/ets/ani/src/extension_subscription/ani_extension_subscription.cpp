@@ -19,11 +19,11 @@
 #include "ani_extension_subscription.h"
 #include "ani_open_subscribe_settings.h"
 #include "ans_log_wrapper.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace NotificationExtensionSubScriptionSts {
-
 void AniNotificationExtensionRegistryInit(ani_env *env)
 {
     ANS_LOGD("AniNotificationExtensionRegistryInit call");

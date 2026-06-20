@@ -24,7 +24,7 @@
 #include "advanced_notification_priority_helper.h"
 #endif
 #include "ans_const_define.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_trace_wrapper.h"
 #include "common_event_manager.h"
@@ -52,7 +52,6 @@
 
 namespace OHOS {
 namespace Notification {
-
 const uint32_t FILTETYPE_IM = 1 << 0;
 const uint32_t FILTETYPE_QUICK_REPLY_IM = 2 << 0;
 static const std::string EXTENDINFO_INFO_PRE = "notification_collaboration_";
@@ -88,7 +87,7 @@ ErrCode NotificationSubscriberManager::AddSubscriber(const sptr<IAnsSubscriber> 
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (subscriber == nullptr) {
         ANS_LOGE("null subscriber");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     sptr<NotificationSubscribeInfo> subInfo = subscribeInfo;
@@ -96,7 +95,7 @@ ErrCode NotificationSubscriberManager::AddSubscriber(const sptr<IAnsSubscriber> 
         subInfo = new (std::nothrow) NotificationSubscribeInfo();
         if (subInfo == nullptr) {
             ANS_LOGE("null subInfo");
-            return ERR_ANS_NO_MEMORY;
+            return ERR_ANS_INNER_NO_MEMORY;
         }
     }
     int32_t callingUid = IPCSkeleton().GetCallingUid();
@@ -134,7 +133,7 @@ ErrCode NotificationSubscriberManager::AddSubscriber(const sptr<IAnsSubscriber> 
         subInfo->AddAppUserId(userId);
     }
 
-    ErrCode result = ERR_ANS_TASK_ERR;
+    ErrCode result = ERR_ANS_INNER_TASK_ERR;
     if (notificationSubQueue_ == nullptr) {
         ANS_LOGE("null queue");
         return result;
@@ -170,10 +169,10 @@ ErrCode NotificationSubscriberManager::RemoveSubscriber(
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (subscriber == nullptr) {
         ANS_LOGE("null subscriber");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
-    ErrCode result = ERR_ANS_TASK_ERR;
+    ErrCode result = ERR_ANS_INNER_TASK_ERR;
     if (notificationSubQueue_ == nullptr) {
         ANS_LOGE("null queue");
         return result;
@@ -704,7 +703,7 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
         record = CreateSubscriberRecord(subscriber);
         if (record == nullptr) {
             ANS_LOGE("null record");
-            return ERR_ANS_NO_MEMORY;
+            return ERR_ANS_INNER_NO_MEMORY;
         }
 
         {
@@ -753,7 +752,7 @@ ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
 
     if (record == nullptr) {
         ANS_LOGE("null record");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     RemoveRecordInfo(record, subscribeInfo);
@@ -908,7 +907,7 @@ ErrCode NotificationSubscriberManager::IsDeviceTypeAffordConsume(
         sptr<Notification> notification = new (std::nothrow) Notification(request);
         if (notification == nullptr) {
             ANS_LOGE("null notification");
-            return ERR_ANS_NO_MEMORY;
+            return ERR_ANS_INNER_NO_MEMORY;
         }
         if (IsSubscribedBysubscriber(record, notification) && ConsumeRecordFilter(record, notification)) {
             result = true;
@@ -1620,7 +1619,7 @@ ErrCode NotificationSubscriberManager::DistributeOperation(
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notificationSubQueue_ == nullptr || operationInfo == nullptr) {
         ANS_LOGE("null queue");
-        return ERR_ANS_TASK_ERR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
 
     ErrCode result = ERR_OK;
@@ -1655,7 +1654,7 @@ ErrCode NotificationSubscriberManager::DistributeOperationTask(const sptr<Notifi
                 return result;
             }
         }
-        result = ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        result = ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     return result;
 }

@@ -16,7 +16,7 @@
 #include "advanced_notification_service.h"
 
 #include "access_token_helper.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_trace_wrapper.h"
 #include "ans_permission_def.h"
@@ -37,30 +37,30 @@ ErrCode AdvancedNotificationService::SetRingtoneInfoByBundle(const sptr<Notifica
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Not system app or SA!");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     if (ringtoneInfo == nullptr ||
         ringtoneInfo->GetRingtoneType() < NotificationConstant::RingtoneType::RINGTONE_TYPE_SYSTEM ||
         ringtoneInfo->GetRingtoneType() >= NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT) {
         ANS_LOGE("Invalid bundle name.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     if (bundle->GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     sptr<NotificationBundleOption> bundleOption = GenerateValidBundleOption(bundle);
     if (bundleOption == nullptr) {
         ANS_LOGE("Bundle is null.");
-        return ERR_ANS_INVALID_BUNDLE_OPTION;
+        return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
     }
 
     NotificationPreferences::GetInstance()->RemoveRingtoneInfoByBundle(bundleOption);
@@ -77,23 +77,23 @@ ErrCode AdvancedNotificationService::GetRingtoneInfoByBundle(const sptr<Notifica
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Not system app or SA!");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     if (bundle->GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     sptr<NotificationBundleOption> bundleOption = GenerateValidBundleOption(bundle);
     if (bundleOption == nullptr) {
         ANS_LOGE("Bundle is null.");
-        return ERR_ANS_INVALID_BUNDLE_OPTION;
+        return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
     }
 
     ClearOverTimeRingToneInfo();

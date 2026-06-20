@@ -17,7 +17,7 @@
 
 #include "cpp/task.h"
 #include "errors.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "notification_constant.h"
 #include "notification_record.h"
 #include "notification_request.h"
@@ -171,7 +171,7 @@ ErrCode AdvancedNotificationService::UpdateNotificationTimerInfo(const std::shar
             break;
         default:
             ANS_LOGE("Invalid status %{public}d.", status);
-            return ERR_ANS_INVALID_PARAM;
+            return ERR_ANS_INNER_INVALID_PARAM;
     }
     return result;
 }
@@ -203,7 +203,7 @@ void AdvancedNotificationService::ProcForDeleteNotificationFromDb(const std::sha
         ProcForDeleteLiveView(record);
         return;
     }
-    
+
     int32_t userId = record->request->GetReceiverUserId();
     if (DoubleDeleteNotificationFromDb(record->request->GetKey(),
         record->request->GetSecureKey(), userId) != ERR_OK) {
@@ -235,7 +235,7 @@ ErrCode AdvancedNotificationService::OnSubscriberAdd(
 {
     if (record == nullptr) {
         ANS_LOGE("No subscriber to notify.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
@@ -245,7 +245,7 @@ ErrCode AdvancedNotificationService::OnSubscriberAdd(
             notificationRecord->notification != nullptr) {
             sptr<NotificationRequest> request =
                 new (std::nothrow) NotificationRequest(notificationRecord->notification->GetNotificationRequest());
-            ANS_COND_DO_ERR(request == nullptr, return ERR_ANS_NO_MEMORY, "NotificationRequest malloc error.");
+            ANS_COND_DO_ERR(request == nullptr, return ERR_ANS_INNER_NO_MEMORY, "NotificationRequest malloc error.");
             std::shared_ptr<NotificationFlags> flags = request->GetFlags() == nullptr ?
                 nullptr : std::make_shared<NotificationFlags>(request->GetFlags()->GetReminderFlags());
             auto notificationFlagsOfDevices =
@@ -259,14 +259,14 @@ ErrCode AdvancedNotificationService::OnSubscriberAdd(
             request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
             request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
             sptr<Notification> notification = new (std::nothrow) Notification(request);
-            ANS_COND_DO_ERR(notification == nullptr, return ERR_ANS_NO_MEMORY, "Notification malloc error.");
+            ANS_COND_DO_ERR(notification == nullptr, return ERR_ANS_INNER_NO_MEMORY, "Notification malloc error.");
             notifications.emplace_back(notification);
         }
     }
 
     if (notifications.empty() || currentUserId.count(userId)) {
         ANS_LOGI("No notification to consume %{public}d %{public}zu.", userId, currentUserId.count(userId));
-        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+        return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     }
     if (userId != INVALID_USER_ID) {
         currentUserId.insert(userId);
@@ -417,16 +417,16 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
         ANS_LOGE("Convert request to json object failed, bundle name %{public}s, id %{public}d.",
             request->GetCreatorBundleName().c_str(), request->GetNotificationId());
         NotificationAnalyticsUtil::ReportModifyEvent(message.Message("convert request failed"));
-        return ERR_ANS_TASK_ERR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     auto bundleOption = requestDb.bundleOption;
     if (!NotificationJsonConverter::ConvertToJson(bundleOption, jsonObject)) {
         ANS_LOGE("Convert bundle to json object failed, bundle name %{public}s, id %{public}d.",
             bundleOption->GetBundleName().c_str(), request->GetNotificationId());
         NotificationAnalyticsUtil::ReportModifyEvent(message.Message("convert option failed"));
-        return ERR_ANS_TASK_ERR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
-    
+
     std::string encryptValue;
     ErrCode errorCode = AesGcmHelper::Encrypt(
         jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), encryptValue);
@@ -474,14 +474,14 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDbCommon(const Noti
         ANS_LOGE("Convert request to json object failed, bundle name %{public}s, id %{public}d.",
             request->GetCreatorBundleName().c_str(), request->GetNotificationId());
         NotificationAnalyticsUtil::ReportModifyEvent(message.Message("convert request failed"));
-        return ERR_ANS_TASK_ERR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     auto bundleOption = requestDb.bundleOption;
     if (!NotificationJsonConverter::ConvertToJson(bundleOption, jsonObject)) {
         ANS_LOGE("Convert bundle to json object failed, bundle name %{public}s, id %{public}d.",
             bundleOption->GetBundleName().c_str(), request->GetNotificationId());
         NotificationAnalyticsUtil::ReportModifyEvent(message.Message("convert option failed"));
-        return ERR_ANS_TASK_ERR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
 
     std::string encryptValue;
@@ -632,7 +632,7 @@ ErrCode AdvancedNotificationService::IsAllowedRemoveSlot(const sptr<Notification
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Only sa or systemapp can remove liveview slot.");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     return ERR_OK;
@@ -686,8 +686,8 @@ ErrCode AdvancedNotificationService::GetLockScreenPictureFromDb(NotificationRequ
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_12, EventBranchId::BRANCH_0);
     if (request == nullptr) {
         ANS_LOGE("Request is nullptr");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM));
-        return ERR_ANS_INVALID_PARAM;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM));
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::string key = LOCK_SCREEN_PICTURE_TAG + request->GetKey();
     std::vector<uint8_t> pixelsVec;
@@ -895,7 +895,7 @@ AnsStatus AdvancedNotificationService::UpdateRecordByOwner(
     }
     if (oldRecord == nullptr) {
         ANS_LOGI("notification not exist when update");
-        return AnsStatus(ERR_ANS_NOTIFICATION_NOT_EXISTS, "notification not exist when update");
+        return AnsStatus(ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS, "notification not exist when update");
     }
     auto downloadTemplate = record->notification->GetNotificationRequest().GetTemplate();
     auto content = record->notification->GetNotificationRequest().GetContent();

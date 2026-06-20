@@ -17,6 +17,7 @@
 
 #define private public
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "distributed_data_define.h"
 #include "distributed_extension_service.h"
 #include "distributed_device_manager.h"
@@ -24,7 +25,6 @@
 
 namespace OHOS {
 namespace Notification {
-
 using namespace testing::ext;
 using namespace DistributedHardware;
 
@@ -66,28 +66,28 @@ HWTEST_F(NotificationRingtoneServiceTest, setRingtone_00001, Function | SmallTes
     MockIsSystemApp(false);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     auto result = AdvancedNotificationService::GetInstance().SetRingtoneInfoByBundle(bundle, ringtone);
-    ASSERT_EQ(result, (int32_t)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(result, (int32_t)ERR_ANS_INNER_NON_SYSTEM_APP);
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     result = AdvancedNotificationService::GetInstance().SetRingtoneInfoByBundle(bundle, ringtone);
-    ASSERT_EQ(result, (int32_t)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(result, (int32_t)ERR_ANS_INNER_NON_SYSTEM_APP);
 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
     result = AdvancedNotificationService::GetInstance().SetRingtoneInfoByBundle(bundle, ringtone);
-    ASSERT_EQ(result, (int32_t)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(result, (int32_t)ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
     result = AdvancedNotificationService::GetInstance().SetRingtoneInfoByBundle(bundle, nullptr);
-    ASSERT_EQ(result, (int32_t)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(result, (int32_t)ERR_ANS_INNER_INVALID_PARAM);
 
     result = AdvancedNotificationService::GetInstance().SetRingtoneInfoByBundle(bundle, ringtone);
-    ASSERT_EQ(result, (int32_t)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(result, (int32_t)ERR_ANS_INNER_INVALID_PARAM);
 
     ringtone->SetRingtoneUri("test_uri");
     ringtone->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE);
     result = AdvancedNotificationService::GetInstance().SetRingtoneInfoByBundle(bundle, ringtone);
-    ASSERT_EQ(result, (int32_t)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(result, (int32_t)ERR_ANS_INNER_INVALID_PARAM);
 
     bundle->SetUid(20020201);
     bundle->SetBundleName("com.ohos.demo");
@@ -109,21 +109,21 @@ HWTEST_F(NotificationRingtoneServiceTest, getRingtone_00001, Function | SmallTes
     MockIsSystemApp(false);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     auto result = AdvancedNotificationService::GetInstance().GetRingtoneInfoByBundle(bundle, ringtone);
-    ASSERT_EQ(result, (int32_t)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(result, (int32_t)ERR_ANS_INNER_NON_SYSTEM_APP);
 
     MockIsVerfyPermisson(false);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     result = AdvancedNotificationService::GetInstance().GetRingtoneInfoByBundle(bundle, ringtone);
-    ASSERT_EQ(result, (int32_t)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(result, (int32_t)ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsSystemApp(true);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     result = AdvancedNotificationService::GetInstance().GetRingtoneInfoByBundle(bundle, ringtone);
-    ASSERT_EQ(result, (int32_t)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(result, (int32_t)ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
     result = AdvancedNotificationService::GetInstance().GetRingtoneInfoByBundle(bundle, ringtone);
-    ASSERT_EQ(result, (int32_t)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(result, (int32_t)ERR_ANS_INNER_INVALID_PARAM);
 
     bundle->SetUid(20020200);
     bundle->SetBundleName("com.ohos.demo");

@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "application_context.h"
 #include "pixelmap_native_impl.h"
@@ -61,12 +62,12 @@ ErrCode ImagePixelmapHelper::GetPixelMap(std::shared_ptr<Media::PixelMap> &pixel
 {
     if (imageFile_.empty()) {
         ANS_LOGE("Init failed, imagePath is empty.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     if (request_ == nullptr) {
         ANS_LOGE("Init failed, request is null.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ErrCode ret = InitRawfileData();
@@ -96,16 +97,16 @@ ErrCode ImagePixelmapHelper::InitRawfileData()
     auto appContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
     if (appContext == nullptr) {
         ANS_LOGE("Get appContext nullptr.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     if (!appContext->CreateBundleContext(bundleName)) {
         ANS_LOGE("CreateBundleContext failed.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     resourceManager_ = appContext->CreateBundleContext(bundleName)->GetResourceManager();
     if (!resourceManager_) {
         ANS_LOGE("Get resourceManager nullptr.");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     auto result = resourceManager_->GetRawFileDescriptor(imageFile_, rawFileDesc_);
     if (result != ERR_OK) {
@@ -121,7 +122,7 @@ ErrCode ImagePixelmapHelper::CreateImageSource()
     Image_ErrorCode imageErrCode = OH_ImageSourceNative_CreateFromRawFile(&rawFileDesc, &imageSource_);
     if (imageErrCode != IMAGE_SUCCESS || imageSource_ == nullptr) {
         ANS_LOGE("OH_ImageSourceNative_CreateFromUri failed, errCode: %{public}d.", imageErrCode);
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     return ERR_OK;
 }
@@ -155,7 +156,7 @@ ErrCode ImagePixelmapHelper::CreatePixelMap()
     if (imageErrCode != IMAGE_SUCCESS || resPixMap_ == nullptr) {
         ANS_LOGE("OH_ImageSourceNative_CreatePixelmap failed, errCode: %{public}d.", imageErrCode);
         OH_PixelmapNative_Release(resPixMap_);
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     pixelMap_ = resPixMap_->GetInnerPixelmap();
     OH_PixelmapNative_Release(resPixMap_);
@@ -167,25 +168,25 @@ ErrCode ImagePixelmapHelper::GetImageSourceInfo()
     Image_ErrorCode imageErrCode = OH_ImageSourceInfo_Create(&imageInfo_);
     if (imageErrCode != IMAGE_SUCCESS || imageInfo_ == nullptr) {
         ANS_LOGE("OH_ImageSourceInfo_Create failed, errCode: %{public}d.", imageErrCode);
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     imageErrCode = OH_ImageSourceNative_GetImageInfo(imageSource_, 0, imageInfo_);
     if (imageErrCode != IMAGE_SUCCESS) {
         ANS_LOGE("OH_ImageSourceNative_GetImageInfo failed, errCode: %{public}d.", imageErrCode);
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     imageErrCode = OH_ImageSourceInfo_GetWidth(imageInfo_, &imageWidth_);
     if (imageErrCode != IMAGE_SUCCESS) {
         ANS_LOGE("OH_ImageSourceInfo_GetWidth failed, errCode: %{public}d.", imageErrCode);
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     imageErrCode = OH_ImageSourceInfo_GetHeight(imageInfo_, &imageHeight_);
     if (imageErrCode != IMAGE_SUCCESS) {
         ANS_LOGE("OH_ImageSourceInfo_GetHeight failed, errCode: %{public}d.", imageErrCode);
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ANS_LOGI("GetImageSourceInfo width:%{public}d, height:%{public}d.", imageWidth_, imageHeight_);

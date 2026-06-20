@@ -215,7 +215,7 @@ napi_value ParseParametersByAddSlot(const napi_env &env, const napi_callback_inf
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < 1) {
         ANS_LOGE("Wrong number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -225,7 +225,7 @@ napi_value ParseParametersByAddSlot(const napi_env &env, const napi_callback_inf
     if (valuetype != napi_object && valuetype != napi_number) {
         ANS_LOGE("Wrong argument type. Object or number expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object or number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     if (valuetype == napi_number) {
@@ -265,7 +265,7 @@ napi_value ParseParametersByAddSlots(const napi_env &env, const napi_callback_in
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < 1) {
         ANS_LOGE("Wrong number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -276,7 +276,7 @@ napi_value ParseParametersByAddSlots(const napi_env &env, const napi_callback_in
     if (!isArray) {
         ANS_LOGE("Wrong argument type. Array expected.");
         std::string msg = "Incorrect parameter types.The type of param must be array.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     uint32_t length = 0;
@@ -284,7 +284,7 @@ napi_value ParseParametersByAddSlots(const napi_env &env, const napi_callback_in
     if (length == 0) {
         ANS_LOGE("The array is empty.");
         std::string msg = "Mandatory parameters are left unspecified. The array is empty.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     for (size_t i = 0; i < length; i++) {
@@ -294,7 +294,7 @@ napi_value ParseParametersByAddSlots(const napi_env &env, const napi_callback_in
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types.The type of param must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         NotificationSlot slot;
@@ -329,7 +329,7 @@ napi_value ParseParametersSetSlotByBundle(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < SET_SLOT_AS_BUNDLE_MAX_PARA - 1) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -338,13 +338,13 @@ napi_value ParseParametersSetSlotByBundle(
     if (valuetype != napi_object) {
         ANS_LOGE("Argument type error. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -353,7 +353,7 @@ napi_value ParseParametersSetSlotByBundle(
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     NotificationSlot slot;
@@ -368,7 +368,7 @@ napi_value ParseParametersSetSlotByBundle(
         if (slotPtr == nullptr) {
             ANS_LOGE("Failed to create NotificationSlot ptr");
             std::string msg = "Parameter verification failed. Failed to create NotificationSlot ptr";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         params.slots.emplace_back(slotPtr);
@@ -396,7 +396,7 @@ napi_value ParseParametersByGetSlot(const napi_env &env, const napi_callback_inf
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < 1) {
         ANS_LOGE("Error number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -406,7 +406,7 @@ napi_value ParseParametersByGetSlot(const napi_env &env, const napi_callback_inf
     if (valuetype != napi_number) {
         ANS_LOGE("Error argument type. Number expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     int32_t slotType = 0;
@@ -439,7 +439,7 @@ napi_value ParseParametersGetSlotNumByBundle(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < GET_SLOT_NUM_AS_BUNDLE_MAX_PARA - 1) {
         ANS_LOGE("Error number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -448,13 +448,13 @@ napi_value ParseParametersGetSlotNumByBundle(
     if (valuetype != napi_object) {
         ANS_LOGE("Argument type is error. Object anticipate.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -484,7 +484,7 @@ napi_value ParseParametersSetSlotFlagsByBundle(
         NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
         if (argc < SET_SLOT_AS_BUNDLE_MAX_PARA - 1) {
             ANS_LOGE("Wrong number of arguments.");
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
             return nullptr;
         }
 
@@ -493,13 +493,13 @@ napi_value ParseParametersSetSlotFlagsByBundle(
         if (valuetype != napi_object) {
             ANS_LOGE("Argument type error. Object expected.");
             std::string msg = "Incorrect parameter types.The type of param must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
         if (retValue == nullptr) {
             ANS_LOGE("GetBundleOption failed.");
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
 
@@ -537,7 +537,7 @@ napi_value ParseParametersGetSlotFlagsByBundle(
         NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
         if (argc < GET_SLOTS_AS_BUNDLE_MAX_PARA - 1) {
             ANS_LOGE("Wrong number of arguments");
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
             return nullptr;
         }
 
@@ -546,13 +546,13 @@ napi_value ParseParametersGetSlotFlagsByBundle(
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types.The type of param must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
         if (retValue == nullptr) {
             ANS_LOGE("GetBundleOption failed.");
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
 
@@ -581,7 +581,7 @@ napi_value ParseParametersGetSlotsByBundle(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < GET_SLOTS_AS_BUNDLE_MAX_PARA - 1) {
         ANS_LOGE("Wrong number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -590,13 +590,13 @@ napi_value ParseParametersGetSlotsByBundle(
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -625,7 +625,7 @@ napi_value ParseParametersGetSlotByBundle(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < GET_SLOT_AS_BUNDLE_MAX_PARA - 1) {
         ANS_LOGE("Wrong number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -634,13 +634,13 @@ napi_value ParseParametersGetSlotByBundle(
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -649,7 +649,7 @@ napi_value ParseParametersGetSlotByBundle(
     if (valuetype != napi_number) {
         ANS_LOGD("Wrong argument type. Number expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     int slotType = 0;
@@ -681,7 +681,7 @@ napi_value ParseParametersByRemoveSlot(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < 1) {
         ANS_LOGE("Wrong number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -691,7 +691,7 @@ napi_value ParseParametersByRemoveSlot(
     if (valuetype != napi_number) {
         ANS_LOGE("Wrong argument type. Number expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     int32_t slotType = 0;
@@ -1384,7 +1384,7 @@ napi_value ParseParametersEnableSlot(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, NULL, NULL));
     if (argc < SET_ENABLE_SLOT_MIN_PARA) {
         ANS_LOGD("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -1392,13 +1392,13 @@ napi_value ParseParametersEnableSlot(
     if (!OHOS::AppExecFwk::IsTypeForNapiValue(env, argv[PARAM0], napi_object)) {
         ANS_LOGE("Parameter type is error. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -1406,7 +1406,7 @@ napi_value ParseParametersEnableSlot(
     if (!OHOS::AppExecFwk::IsTypeForNapiValue(env, argv[PARAM1], napi_number)) {
         ANS_LOGE("Parameter type error. Number expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     int slotType = 0;
@@ -1419,7 +1419,7 @@ napi_value ParseParametersEnableSlot(
     if (!OHOS::AppExecFwk::IsTypeForNapiValue(env, argv[PARAM2], napi_boolean)) {
         ANS_LOGE("Wrong argument type. Bool expected.");
         std::string msg = "Incorrect parameter types.The type of param must be boolean.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     napi_get_value_bool(env, argv[PARAM2], &params.enable);
@@ -1519,7 +1519,7 @@ napi_value ParseParametersIsEnableSlot(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < GET_ENABLE_SLOT_MAX_PARA - 1) {
         ANS_LOGD("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -1528,13 +1528,13 @@ napi_value ParseParametersIsEnableSlot(
     if (valuetype != napi_object) {
         ANS_LOGD("Wrong argument type. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -1543,7 +1543,7 @@ napi_value ParseParametersIsEnableSlot(
     if (valuetype != napi_number) {
         ANS_LOGD("Wrong argument type. Number expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     int slotType = 0;

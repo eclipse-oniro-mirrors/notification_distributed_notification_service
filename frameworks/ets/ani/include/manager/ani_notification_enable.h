@@ -35,7 +35,6 @@ enum NotificationEnableFunction {
     GET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP,
 };
 
-
 struct AsyncCallbackEnabledInfo {
     ani_vm* vm = nullptr;
     arkts::concurrency_helpers::AsyncWork* asyncWork = nullptr;

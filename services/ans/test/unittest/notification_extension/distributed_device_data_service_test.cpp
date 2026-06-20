@@ -18,6 +18,7 @@
 #define private public
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "distributed_data_define.h"
 #include "distributed_device_data_service.h"
@@ -61,9 +62,9 @@ HWTEST_F(DistributedDeviceDataServiceTest, DeviceData_00001, Function | SmallTes
 {
     // add device sync switch data failed, because deviceType or deviceId is empty.
     int32_t result = DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch("", "", true, true);
-    ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(result, (int)ERR_ANS_INNER_INVALID_PARAM);
     result = DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch(DEVICE_TYPE, "", true, true);
-    ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(result, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     // add device sync switch data
     result = DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch(DEVICE_TYPE,
@@ -93,9 +94,9 @@ HWTEST_F(DistributedDeviceDataServiceTest, DeviceData_00001, Function | SmallTes
     notification = DistributedDeviceDataService::GetInstance().GetDeviceLiveViewEnable(DEVICE_TYPE, DEVICE_ID);
     ASSERT_EQ(false, notification);
     result = DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch("", DEVICE_ID, true, true);
-    ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(result, (int)ERR_ANS_INNER_INVALID_PARAM);
     result = DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch(DEVICE_TYPE, "", true, true);
-    ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(result, (int)ERR_ANS_INNER_INVALID_PARAM);
     // clear data
     DistributedDeviceDataService::GetInstance().ResetTargetDevice("", DEVICE_ID);
     DistributedDeviceDataService::GetInstance().ResetTargetDevice(DEVICE_TYPE, "");
@@ -116,13 +117,13 @@ HWTEST_F(DistributedDeviceDataServiceTest, DeviceData_00002, Function | SmallTes
     // add device installed bundles failed, because deviceType or deviceId is empty.
     int32_t result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList("",
         DEVICE_ID, BundleListOperationType::ADD_BUNDLES, {}, {});
-    ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(result, (int)ERR_ANS_INNER_INVALID_PARAM);
     result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(DEVICE_TYPE,
         "", BundleListOperationType::ADD_BUNDLES, {}, {});
-    ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(result, (int)ERR_ANS_INNER_INVALID_PARAM);
     result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(DEVICE_TYPE,
         DEVICE_ID, BundleListOperationType::REMOVE_BUNDLES, {}, {});
-    ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(result, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     // add device installed bundles
     std::vector<std::string> bundleList = { "ohos.com.test1", "ohos.com.test2" };

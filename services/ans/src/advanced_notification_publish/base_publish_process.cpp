@@ -18,7 +18,7 @@
 #include "access_token_helper.h"
 #include "ans_const_define.h"
 #include "ans_log_wrapper.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_permission_def.h"
 #include "os_account_manager_helper.h"
 #include "ipc_skeleton.h"
@@ -28,7 +28,6 @@
 
 namespace OHOS {
 namespace Notification {
-
 AnsStatus BasePublishProcess::PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed)
 {
     if (!request->IsRemoveAllowed()) {
@@ -58,7 +57,7 @@ AnsStatus BasePublishProcess::CommonPublishProcess(const sptr<NotificationReques
     Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
     if (AccessTokenHelper::IsDlpHap(callerToken)) {
         ANS_LOGE("DLP hap not allowed to send notifications");
-        return AnsStatus(ERR_ANS_DLP_HAP, "CommonPublishProcess failed",
+        return AnsStatus(ERR_ANS_INNER_DLP_HAP, "CommonPublishProcess failed",
             EventSceneId::SCENE_2, EventBranchId::BRANCH_5);
     }
     return AnsStatus();

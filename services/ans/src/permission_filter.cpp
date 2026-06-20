@@ -15,7 +15,7 @@
 
 #include "permission_filter.h"
 
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "bundle_manager_helper.h"
 #include "notification_preferences.h"
@@ -24,7 +24,6 @@
 
 namespace OHOS {
 namespace Notification {
-
 void PermissionFilter::OnStart()
 {}
 
@@ -42,7 +41,7 @@ AnsStatus PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> 
         enable = (state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
             state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     }
-    if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+    if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
         result = ERR_OK;
         std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
         if (bundleManager != nullptr) {
@@ -63,13 +62,13 @@ AnsStatus PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> 
             isForceControl = slot->GetForceControl();
         } else {
             ANS_LOGE("Notification slot not enable.");
-            return AnsStatus(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED, "Notification slot not enable.",
+            return AnsStatus(ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_ENABLED, "Notification slot not enable.",
                 EventSceneId::SCENE_6, EventBranchId::BRANCH_1);
         }
     } else {
-        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST) {
+        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST) {
             ANS_LOGE("Slot type %{public}d not exist.", slotType);
-            return AnsStatus(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST, "Slot type not exist.",
+            return AnsStatus(ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST, "Slot type not exist.",
                 EventSceneId::SCENE_6, EventBranchId::BRANCH_1);
         }
     }
@@ -77,7 +76,7 @@ AnsStatus PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> 
     if (result == ERR_OK) {
         if (!enable && !isForceControl) {
             ANS_LOGE("Enable notifications for bundle is OFF");
-            return AnsStatus(ERR_ANS_NOT_ALLOWED, "Notifications is off.",
+            return AnsStatus(ERR_ANS_INNER_NOT_ALLOWED, "Notifications is off.",
                 EventSceneId::SCENE_6, EventBranchId::BRANCH_1);
         }
 

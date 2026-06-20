@@ -17,7 +17,9 @@
 
 #include "ans_log_wrapper.h"
 #include "ets_error_utils.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "ans_service_errors.h"
+#include "singleton.h"
 #include "ani_common_util.h"
 #include "sts_throw_erro.h"
 #include "ani_ans_dialog_callback.h"
@@ -41,7 +43,7 @@ bool GetOpenSettingsInfo(ani_env *env, ani_object content, std::shared_ptr<OpenS
         ANS_LOGE("Only support stage mode");
         std::string msg = "Incorrect parameter types.Only support stage mode.";
         ANS_LOGE("sts GetOpenSettingsInfo ERROR_PARAM_INVALID");
-        OHOS::NotificationSts::ThrowError(env, ERROR_PARAM_INVALID, msg);
+        OHOS::NotificationSts::ThrowError(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return false;
     }
     info->context = OHOS::AbilityRuntime::GetStageModeContext(env, content);
@@ -54,7 +56,7 @@ bool CreateUiExtCallback(ani_env *env, std::shared_ptr<SettingsModalExtensionCal
 {
     if (!uiExtCallback->Init(env, info, StsAsyncCompleteCallbackOpenSettings)) {
         ANS_LOGE("Init error");
-        info->errorCode = OHOS::Notification::ERROR_INTERNAL_ERROR;
+        info->errorCode = ERR_ANS_INNER_TASK_ERR;
         StsAsyncCompleteCallbackOpenSettings(env, info);
         return false;
     }
@@ -132,13 +134,14 @@ ani_object StsNotificationSettingResult(ani_env *env, std::shared_ptr<OpenSettin
 {
     ani_object outAniObj = nullptr;
     uint32_t slotFlags = 0;
-    info->errorCode = NotificationHelper::GetNotificationSettings(slotFlags);
+    info->errorCode =
+        DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSettings(slotFlags);
     if (info->errorCode != ERR_OK) {
         return nullptr;
     }
     if (NotificationSts::WrapGetNotificationSetting(env, slotFlags, outAniObj)) {
         ANS_LOGE("WrapGetNotificationSetting failed");
-        info->errorCode = OHOS::Notification::ERROR_INTERNAL_ERROR;
+        info->errorCode = ERR_ANS_INNER_TASK_ERR;
         return nullptr;
     }
     return outAniObj;
@@ -151,12 +154,9 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
         return;
     }
     ani_status status;
-    int32_t errorCode = ERR_OK;
-    if (info->errorCode == OHOS::Notification::ERROR_SETTING_WINDOW_EXIST) {
-        errorCode = OHOS::Notification::ERROR_SETTING_WINDOW_EXIST;
-    } else {
-        errorCode = info->errorCode ==
-            ERR_OK ? ERR_OK : NotificationSts::GetExternalCode(info->errorCode);
+    int32_t errorCode = info->errorCode;
+    if (info->errorCode == ERR_ANS_INNER_OK || info->errorCode == ERR_OK) {
+        errorCode = ERR_OK;
     }
     ani_object ret = nullptr;
     if (errorCode == ERR_OK) {
@@ -165,7 +165,7 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
             ret = StsNotificationSettingResult(env, info);
         }
         if (ret == nullptr) {
-            errorCode = ERROR_INTERNAL_ERROR;
+            errorCode = ERR_ANS_INNER_TASK_ERR;
         }
     }
     if (errorCode == ERR_OK) {
@@ -173,10 +173,9 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
             NotificationSts::ThrowInternerErrorWithLogE(env, "PromiseResolver_Resolve faild.");
         }
     } else {
-        std::string errMsg = OHOS::NotificationSts::FindAnsErrMsg(errorCode);
-        ANS_LOGE("reject. errorCode %{public}d errMsg %{public}s", errorCode, errMsg.c_str());
+        ANS_LOGE("reject. errorCode %{public}u", errorCode);
         ani_error rejection =
-            static_cast<ani_error>(OHOS::NotificationSts::CreateError(env, errorCode, errMsg));
+            static_cast<ani_error>(OHOS::NotificationSts::CreateError(env, errorCode));
         if (ANI_OK != (status = env->PromiseResolver_Reject(info->resolver, rejection))) {
             NotificationSts::ThrowInternerErrorWithLogE(env, "PromiseResolver_Resolve faild.");
         }
@@ -199,8 +198,7 @@ ani_object AniOpenNotificationSettings(ani_env *env, ani_object content)
     std::string bundleName {""};
     if (isExist.exchange(true)) {
         HistogramBoolReport("NotificationKit.APICall.openNotificationSettings", false);
-        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_SETTING_WINDOW_EXIST,
-            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_SETTING_WINDOW_EXIST));
+        OHOS::NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERR_ANS_INNER_SETTING_WINDOW_EXIST);
         return NotificationSts::GetNullObject(env);
     }
     ani_object aniPromise {};
@@ -213,11 +211,11 @@ ani_object AniOpenNotificationSettings(ani_env *env, ani_object content)
     info->resolver = aniResolver;
     bool success = CreateSettingsUIExtension(info->context, bundleName, env, info);
     if (success) {
-        info->errorCode = OHOS::Notification::ERR_ANS_DIALOG_POP_SUCCEEDED;
+        info->errorCode = ERR_ANS_INNER_DIALOG_POP_SUCCEEDED;
     } else {
-        info->errorCode = OHOS::Notification::ERROR_INTERNAL_ERROR;
+        info->errorCode = ERR_ANS_INNER_TASK_ERR;
     }
-    if (info->errorCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
+    if (info->errorCode != ERR_ANS_INNER_DIALOG_POP_SUCCEEDED) {
         HistogramBoolReport("NotificationKit.APICall.openNotificationSettings", false);
         ANS_LOGE("error, code is %{public}d.", info->errorCode);
         StsAsyncCompleteCallbackOpenSettings(env, info);
@@ -242,8 +240,7 @@ ani_object AniOpenNotificationSettingsWithResult(ani_env *env, ani_object conten
     info->isWithResult = true;
     std::string bundleName {""};
     if (isExist.exchange(true)) {
-        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_SETTING_WINDOW_EXIST,
-            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_SETTING_WINDOW_EXIST));
+        OHOS::NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERR_ANS_INNER_SETTING_WINDOW_EXIST);
         return NotificationSts::GetNullObject(env);
     }
     ani_object aniPromise {};
@@ -256,11 +253,11 @@ ani_object AniOpenNotificationSettingsWithResult(ani_env *env, ani_object conten
     info->resolver = aniResolver;
     bool success = CreateSettingsUIExtension(info->context, bundleName, env, info);
     if (success) {
-        info->errorCode = OHOS::Notification::ERR_ANS_DIALOG_POP_SUCCEEDED;
+        info->errorCode = ERR_ANS_INNER_DIALOG_POP_SUCCEEDED;
     } else {
-        info->errorCode = OHOS::Notification::ERROR_INTERNAL_ERROR;
+        info->errorCode = ERR_ANS_INNER_TASK_ERR;
     }
-    if (info->errorCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
+    if (info->errorCode != ERR_ANS_INNER_DIALOG_POP_SUCCEEDED) {
         ANS_LOGE("error, code is %{public}d.", info->errorCode);
         StsAsyncCompleteCallbackOpenSettings(env, info);
         isExist.store(false);
@@ -373,8 +370,8 @@ void SettingsModalExtensionCallback::OnError(int32_t code, const std::string& na
 {
     ANS_LOGE("OnError, code = %{public}d,name = %{public}s, message = %{public}s", code, name.c_str(), message.c_str());
     if (code == static_cast<int32_t>(OHOS::Rosen::WSError::WS_ERROR_START_UI_EXTENSION_ABILITY_FAILED)) {
-        ReleaseOrErrorHandle(OHOS::Notification::ERROR_SYSTEM_CAP_ERROR);
-        ProcessStatusChanged(OHOS::Notification::ERROR_SYSTEM_CAP_ERROR, false);
+        ReleaseOrErrorHandle(OHOS::Notification::ERR_ANS_INNER_DEVICE_NOT_SUPPORT);
+        ProcessStatusChanged(OHOS::Notification::ERR_ANS_INNER_DEVICE_NOT_SUPPORT, false);
         return;
     }
     ReleaseOrErrorHandle(code);
@@ -408,7 +405,6 @@ void SettingsModalExtensionCallback::OnDestroy()
     ANS_LOGI("SettingsModalExtensionCallback OnDestroy");
     isExist.store(false);
 }
-
 
 void SettingsModalExtensionCallback::SetSessionId(int32_t sessionId)
 {

@@ -14,6 +14,7 @@
  */
 
 #include "advanced_notification_service.h"
+#include "ans_service_errors.h"
 
 #include "advanced_notification_priority_helper.h"
 #include "ans_permission_def.h"
@@ -74,20 +75,20 @@ ErrCode AdvancedNotificationService::SetPriorityEnabledByBundle(
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_26);
         message.Message("bundle: " + bundleOption->GetBundleName() + ", id: " +
             std::to_string(bundleOption->GetUid()) + ", en:" + std::to_string(enableStatusInt));
-        message.ErrorCode(ERR_ANS_INVALID_BUNDLE);
+        message.ErrorCode(ERR_ANS_INNER_INVALID_BUNDLE);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     std::string bundleName = BundleManagerHelper::GetInstance()->GetBundleNameByUid(bundle->GetUid());
     if (bundleName.empty() || bundleName != bundle->GetBundleName()) {
         ANS_LOGW("Invalid bundleOption name: %{public}s not match uid: %{public}s-%{public}d.",
             bundle->GetBundleName().c_str(), bundleName.c_str(), bundle->GetUid());
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     if (enableStatusInt < static_cast<int32_t>(NotificationConstant::PriorityEnableStatus::DISABLE) ||
         enableStatusInt > static_cast<int32_t>(NotificationConstant::PriorityEnableStatus::ENABLE)) {
         ANS_LOGE("EnableStatus out of range %{public}d.", enableStatusInt);
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     return SetPriorityEnabledByBundleInner(bundle, enableStatusInt);
 }
@@ -146,7 +147,7 @@ ErrCode AdvancedNotificationService::IsPriorityEnabledByBundle(
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         ANS_LOGE("bundle is nullptr");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     NotificationConstant::PriorityEnableStatus enableStatus =
         NotificationConstant::PriorityEnableStatus::ENABLE_BY_INTELLIGENT;
@@ -167,13 +168,13 @@ ErrCode AdvancedNotificationService::TriggerUpdatePriorityType(const sptr<Notifi
         auto record = GetFromNotificationList(request->GetBaseKey(""));
         if (record == nullptr) {
             ANS_LOGE("TriggerUpdatePriorityType fail, notification not exist");
-            result = ERR_ANS_INVALID_PARAM;
+            result = ERR_ANS_INNER_INVALID_PARAM;
             return;
         }
         auto cacheRequest = record->notification->GetNotificationRequestPoint();
         if (cacheRequest == nullptr) {
             ANS_LOGE("TriggerUpdatePriorityType fail, cache request not exist");
-            result = ERR_ANS_INVALID_PARAM;
+            result = ERR_ANS_INNER_INVALID_PARAM;
             return;
         }
         cacheRequest->SetInnerPriorityNotificationType(request->GetPriorityNotificationType());
@@ -202,15 +203,15 @@ ErrCode AdvancedNotificationService::SetBundlePriorityConfig(
         ANS_LOGE("bundle is nullptr");
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_28);
         message.Message("bundle: " + bundleOption->GetBundleName() + ", id: " + std::to_string(bundleOption->GetUid()));
-        message.ErrorCode(ERR_ANS_INVALID_BUNDLE).Append(" bundle name is empty");
+        message.ErrorCode(ERR_ANS_INNER_INVALID_BUNDLE).Append(" bundle name is empty");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     std::string bundleName = BundleManagerHelper::GetInstance()->GetBundleNameByUid(bundle->GetUid());
     if (bundleName.empty() || bundleName != bundle->GetBundleName()) {
         ANS_LOGW("Invalid bundleOption name: %{public}s not match uid: %{public}s-%{public}d.",
             bundle->GetBundleName().c_str(), bundleName.c_str(), bundle->GetUid());
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     return SetBundlePriorityConfigInner(bundle, value);
 }
@@ -227,7 +228,7 @@ ErrCode AdvancedNotificationService::SetBundlePriorityConfigInner(
         ANS_LOGI("SyncBundleKeywords %{public}s_%{public}d result: %{public}d",
             bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), aiResult);
         if (aiResult == NOTIFICATION_AI_EXTENSION_WRAPPER->ErrorCode::ERR_FAIL) {
-            result = ERR_ANS_SERVICE_NOT_READY;
+            result = ERR_ANS_INNER_SERVICE_NOT_READY;
             return;
         }
         result = NotificationPreferences::GetInstance()->SetBundlePriorityConfig(bundleOption, value);
@@ -258,7 +259,7 @@ ErrCode AdvancedNotificationService::GetBundlePriorityConfig(
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         ANS_LOGE("bundle is nullptr");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     return NotificationPreferences::GetInstance()->GetBundlePriorityConfig(bundle, value);
 }
@@ -304,7 +305,7 @@ ErrCode AdvancedNotificationService::GetValidMapByBundle(const EventBranchId bra
                 iter.first->GetBundleName().c_str(), iter.first->GetUid());
             HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, branchId);
             message.Message("bundle:" + iter.first->GetBundleName() + ", id:" + std::to_string(iter.first->GetUid()));
-            message.ErrorCode(ERR_ANS_INVALID_BUNDLE).Append(" bundle name is empty");
+            message.ErrorCode(ERR_ANS_INNER_INVALID_BUNDLE).Append(" bundle name is empty");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
             continue;
         }
@@ -318,7 +319,7 @@ ErrCode AdvancedNotificationService::GetValidMapByBundle(const EventBranchId bra
     }
     if (validMap.size() == 0) {
         ANS_LOGE("OriginMap is invalid.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     return ERR_OK;
 }
@@ -344,7 +345,7 @@ ErrCode AdvancedNotificationService::GetValidBundles(
     }
     if (validBundleOptions.size() == 0) {
         ANS_LOGE("BundleOptions is invalid.");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     return ERR_OK;
 }
@@ -372,7 +373,7 @@ ErrCode AdvancedNotificationService::SetPriorityEnabledByBundles(
 ErrCode AdvancedNotificationService::SetPriorityEnabledByBundlesInner(
     const std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> &priorityEnable)
 {
-    ErrCode result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    ErrCode result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         std::vector<sptr<NotificationRequest>> requests;
         std::map<sptr<NotificationBundleOption>, bool> effectPriorityEnable;
@@ -419,7 +420,7 @@ ErrCode AdvancedNotificationService::GetPriorityEnabledByBundles(
         return result;
     }
     priorityEnable.clear();
-    result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     for (auto &bundleOption : validBundleOptions) {
         NotificationConstant::SWITCH_STATE priorityStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
         ErrCode dbResult =
@@ -497,7 +498,7 @@ ErrCode AdvancedNotificationService::GetPriorityStrategyByBundles(
         return result;
     }
     strategies.clear();
-    result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     for (auto &bundleOption : validBundleOptions) {
         int64_t strategy = PRIORITY_STRATEGY_DEFAULT;
         ErrCode dbResult = NotificationPreferences::GetInstance()->GetPriorityStrategyByBundle(bundleOption, strategy);
@@ -530,7 +531,7 @@ ErrCode AdvancedNotificationService::SetPriorityStrategyByBundles(
 ErrCode AdvancedNotificationService::SetPriorityStrategyByBundlesInner(
     const std::map<sptr<NotificationBundleOption>, int64_t> &strategies)
 {
-    ErrCode result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    ErrCode result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         std::vector<sptr<NotificationRequest>> requests;
         std::map<sptr<NotificationBundleOption>, int64_t> effectStrategies;
@@ -538,7 +539,7 @@ ErrCode AdvancedNotificationService::SetPriorityStrategyByBundlesInner(
             if (iter.second < 0 || iter.second > PRIORITY_STRATEGY_MAX) {
                 ANS_LOGW("Invalid strategy %{public}d, %{public}s_%{public}d",
                     static_cast<int32_t>(iter.second), iter.first->GetBundleName().c_str(), iter.first->GetUid());
-                result = ERR_ANS_INVALID_PARAM;
+                result = ERR_ANS_INNER_INVALID_PARAM;
                 continue;
             }
             ErrCode dbResult =

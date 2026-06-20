@@ -15,6 +15,7 @@
 
 #include "distributed_subscriber.h"
 
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "distributed_service.h"
 #include "notification_config_parse.h"
@@ -163,7 +164,7 @@ ErrCode DistribuedSubscriber::OnOperationResponse(const std::shared_ptr<Notifica
         StringAnonymous(localDevice_.deviceId_).c_str(), StringAnonymous(operRespDevice.deviceId_).c_str());
     if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH &&
         operRespDevice.deviceId_.compare(peerDevice_.deviceId_) != 0) {
-        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     return DistributedService::GetInstance().OnOperationResponse(operationInfo, peerDevice_);
 }

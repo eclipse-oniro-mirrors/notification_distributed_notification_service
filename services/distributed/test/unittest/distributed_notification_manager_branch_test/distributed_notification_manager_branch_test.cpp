@@ -17,7 +17,7 @@
 
 #include "gtest/gtest.h"
 #define private public
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "distributed_notification_manager.h"
 
 using namespace testing::ext;
@@ -213,7 +213,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
     std::string label = "bb";
     int32_t id = 1;
     sptr<NotificationRequest> request = nullptr;
-    EXPECT_EQ(distributedManager_->Publish(bundleName, label, id, request), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+    EXPECT_EQ(distributedManager_->Publish(bundleName, label, id, request), ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -228,7 +228,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
     std::string label = "bb";
     int32_t id = 1;
     sptr<NotificationRequest> request = nullptr;
-    EXPECT_EQ(distributedManager_->Update(bundleName, label, id, request), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+    EXPECT_EQ(distributedManager_->Update(bundleName, label, id, request), ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -246,7 +246,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
     std::string label = request->GetLabel();
     int32_t id = request->GetNotificationId();
 
-    EXPECT_EQ(distributedManager_->Update(bundleName, label, id, request), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+    EXPECT_EQ(distributedManager_->Update(bundleName, label, id, request), ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -260,7 +260,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
     std::string bundleName = "aa";
     std::string label = "bb";
     int32_t id = 1;
-    EXPECT_EQ(distributedManager_->Delete(bundleName, label, id), ERR_ANS_DISTRIBUTED_GET_INFO_FAILED);
+    EXPECT_EQ(distributedManager_->Delete(bundleName, label, id), ERR_ANS_INNER_DISTRIBUTED_GET_INFO_FAILED);
 }
 
 /**
@@ -275,7 +275,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
     std::string label = "bb";
     int32_t id = 1;
     EXPECT_EQ(distributedManager_->DeleteRemoteNotification(deviceId, bundleName, label, id),
-        ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+        ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -287,8 +287,8 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
 {
     MockGetEntriesFromDistributedDB(false);
     std::vector<sptr<NotificationRequest>> requestList;
-    EXPECT_EQ(
-        distributedManager_->GetCurrentDistributedNotification(requestList), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+    EXPECT_EQ(distributedManager_->GetCurrentDistributedNotification(requestList),
+        ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -313,7 +313,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
 {
     DistributedDatabase::DeviceInfo deviceInfo;
     EXPECT_EQ(
-        distributedManager_->GetLocalDeviceInfo(deviceInfo), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+        distributedManager_->GetLocalDeviceInfo(deviceInfo), ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -324,7 +324,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
 HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManager_01800, Function | SmallTest | Level1)
 {
     EXPECT_EQ(
-        distributedManager_->OnDistributedKvStoreDeathRecipient(), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+        distributedManager_->OnDistributedKvStoreDeathRecipient(), ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -336,7 +336,7 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
 {
     distributedManager_->database_ = nullptr;
     EXPECT_EQ(
-        distributedManager_->OnDistributedKvStoreDeathRecipient(), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+        distributedManager_->OnDistributedKvStoreDeathRecipient(), ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 }  // namespace Notification
 }  // namespace OHOS

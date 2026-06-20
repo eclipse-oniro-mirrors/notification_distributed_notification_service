@@ -18,7 +18,7 @@
 #include <thread>
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #define private public
 #define protected public
 #include "distributed_unlock_listener_oper_service.h"
@@ -59,7 +59,7 @@ HWTEST_F(DistributedUnlockListenerOperServiceTest, TriggerByJumpType_0100, Funct
     UnlockListenerOperService::GetInstance().TriggerByJumpType(hashCode, jumpType, peerDeviceType, btnIndex);
     sptr<NotificationRequest> notificationRequest = nullptr;
     auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
-    EXPECT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+    EXPECT_EQ(result, ERR_ANS_INNER_NON_SYSTEM_APP);
     EXPECT_EQ(notificationRequest, nullptr);
 }
 }

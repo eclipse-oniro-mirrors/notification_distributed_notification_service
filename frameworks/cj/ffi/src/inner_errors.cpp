@@ -19,7 +19,12 @@
 namespace OHOS {
 namespace CJSystemapi {
 namespace Notification {
-    int32_t ErrorToExternal(uint32_t errCode)
+/**
+ * @deprecated This function is deprecated. Use InnerErrorToExternal() from ans_service_errors.h instead.
+ * The CJ layer now calls AnsNotification directly and uses InnerErrorToExternal()
+ * for error code conversion. This mapping table is incomplete and will not be maintained.
+ */
+int32_t ErrorToExternal(uint32_t errCode)
     {
     static std::vector<std::pair<uint32_t, int32_t>> errorsConvert = {
         {ERR_ANS_PERMISSION_DENIED, ERROR_PERMISSION_DENIED},
@@ -68,7 +73,7 @@ namespace Notification {
     LOGI("internal errorCode[%{public}u] to external errorCode[%{public}d]", errCode, externalCode);
     return externalCode;
 }
-    
+
 } // namespace Notification
 } // namespace CJSystemapi
 } // namespace OHOS

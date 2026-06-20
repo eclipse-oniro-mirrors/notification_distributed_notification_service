@@ -28,6 +28,7 @@
 
 #include "ians_dialog_callback.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ffrt.h"
 
 namespace OHOS::Notification {
@@ -77,7 +78,7 @@ public:
 
     /**
      * @return ERR_OK when dialog serivce is requested successfully
-     * @return ERR_ANS_DIALOG_IS_POPPING when dialog is already popped
+     * @return ERR_ANS_INNER_DIALOG_IS_POPPING when dialog is already popped
      * @return ERROR_INTERNAL_ERROR for other errors
      */
     ErrCode RequestEnableNotificationDailog(
@@ -103,7 +104,7 @@ public:
      * @return ERR_OK when add Dialog successfully
      */
     ErrCode AddDialogInfo(const sptr<NotificationBundleOption>& bundle, const sptr<IAnsDialogCallback>& callback);
-    
+
     /*
      * RemoveDialogInfoByBundleOption
      * @return void

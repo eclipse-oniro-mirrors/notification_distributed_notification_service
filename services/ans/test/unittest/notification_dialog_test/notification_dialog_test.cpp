@@ -23,6 +23,7 @@
 #undef private
 #undef protected
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 
 extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
 
@@ -82,7 +83,7 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00300, Function | SmallTest 
         callerToken,
         false,
         false);
-    ASSERT_EQ(result3, ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(result3, ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -109,7 +110,7 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00400, Function | SmallTest 
         callerToken,
         false,
         false);
-    ASSERT_EQ(result3, ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(result3, ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -136,7 +137,7 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00500, Function | SmallTest 
         callerToken,
         true,
         false);
-    ASSERT_EQ(result3, ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(result3, ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**

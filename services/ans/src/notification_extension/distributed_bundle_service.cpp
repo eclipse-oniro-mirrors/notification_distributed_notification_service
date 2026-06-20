@@ -16,7 +16,7 @@
 #include "distributed_bundle_service.h"
 
 #include "ans_log_wrapper.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_const_define.h"
 #include "ans_permission_def.h"
 #include "common_event_manager.h"
@@ -32,7 +32,6 @@
 
 namespace OHOS {
 namespace Notification {
-
 DistributedBundleService& DistributedBundleService::GetInstance()
 {
     static DistributedBundleService distributedBundleService;
@@ -91,7 +90,7 @@ ErrCode DistributedBundleService::HandleMasterBundleAdd(const std::vector<Notifi
 {
     std::vector<NotificationBundleOption> bundleOptions;
     if (!GetCurrentDeviceBundles(bundleOptions)) {
-        return ERR_ANS_TASK_ERR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
 
     std::unique_lock lock(lock_);
@@ -121,7 +120,7 @@ ErrCode DistributedBundleService::HandleMasterEnableChange(DistributedBundleChan
 {
     std::vector<NotificationBundleOption> bundleOptions;
     if (!GetCurrentDeviceBundles(bundleOptions)) {
-        return ERR_ANS_TASK_ERR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
 
     std::unique_lock lock(lock_);
@@ -222,7 +221,7 @@ ErrCode DistributedBundleService::HandleCollaborationEnabelChange(DistributedBun
         std::string key = bundle.GetBundleName() + std::to_string(bundle.GetBundleUid());
         if (bundleList_.find(key) == bundleList_.end()) {
             ANS_LOGI("Collaboration change invalid %{public}s.", key.c_str());
-            return ERR_ANS_INVALID_PARAM;
+            return ERR_ANS_INNER_INVALID_PARAM;
         }
         if (type == DistributedBundleChangeType::COLLABORATION_LIVEVIEW_ENABLE) {
             bundleList_[key].SetLiveViewEnable(bundle.GetLiveViewEnable());
@@ -256,7 +255,7 @@ ErrCode DistributedBundleService::SetDeviceDistributedBundleList(DistributedBund
         case DistributedBundleChangeType::COLLABORATION_LIVEVIEW_ENABLE:
             return HandleCollaborationEnabelChange(type, bundles);
         default:
-            return ERR_ANS_INVALID_PARAM;
+            return ERR_ANS_INNER_INVALID_PARAM;
     }
     return ERR_OK;
 }
@@ -354,7 +353,7 @@ void DistributedBundleService::GetDistributedBundleInfo(const std::vector<sptr<N
     }
     ANS_LOGI("Get bundle info %{public}zu %{public}zu.", bundleOption.size(), bundleInfoList.size());
 }
- 
+
 void DistributedBundleService::GetDistributedBundleListByType(const bool notification,
     std::vector<DistributedBundleOption> &enableList)
 {

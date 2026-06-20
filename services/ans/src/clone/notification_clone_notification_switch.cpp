@@ -16,6 +16,7 @@
 #include "notification_clone_notification_switch.h"
 
 #include "ans_log_wrapper.h"
+#include "ans_service_errors.h"
 #include "notification_clone_util.h"
 #include "notification_constant.h"
 #include "notification_preferences.h"
@@ -37,7 +38,7 @@ ErrCode NotificationCloneNotificationSwitch::OnBackup(nlohmann::json &jsonObject
     int32_t userId = NotificationCloneUtil::GetActiveUserId();
     if (userId < 0) {
         ANS_LOGE("GetActiveUserId failed, userId: %{public}d", userId);
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     std::vector<NotificationCloneNotificationSwitchInfo> notificationSwitchInfos;

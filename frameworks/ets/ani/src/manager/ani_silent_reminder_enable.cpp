@@ -15,7 +15,8 @@
 #include "ani_silent_reminder_enable.h"
 
 #include "ans_log_wrapper.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "sts_common.h"
 #include "sts_notification_manager.h"
 #include "sts_throw_erro.h"
@@ -23,6 +24,8 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackSilentInfo* asyncCallbackInfo)
 {
     ANS_LOGD("Delete AsyncCallbackSilentInfo Without Promise");
@@ -102,11 +105,11 @@ void HandleSilentFunctionCallbackComplete(ani_env* env, WorkStatus status, void*
     }
     if (asyncCallbackInfo->isFuncIsSilentReminderEnabled) {
         ani_enum_item switchStateItem {};
-        Notification::NotificationConstant::SWITCH_STATE switchState =
-            static_cast<Notification::NotificationConstant::SWITCH_STATE>(asyncCallbackInfo->enableStatus);
+        NotificationConstant::SWITCH_STATE switchState =
+            static_cast<NotificationConstant::SWITCH_STATE>(asyncCallbackInfo->enableStatus);
         if (!NotificationSts::SwitchStateCToEts(envCurr, switchState, switchStateItem)) {
             ANS_LOGE("SwitchStateCToEts failed");
-            asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
         } else {
             asyncCallbackInfo->info.result = static_cast<ani_object>(switchStateItem);
         }
@@ -148,8 +151,9 @@ ani_object AniSetSilentReminderEnabled(ani_env *env, ani_object bundleOption, an
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSilentInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetSilentReminderEnabled(
-                    asyncCallbackInfo->option, asyncCallbackInfo->isEnable);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetSilentReminderEnabled(
+                        asyncCallbackInfo->option, asyncCallbackInfo->isEnable);
             }
         },
         HandleSilentFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -196,8 +200,9 @@ ani_object AniIsSilentReminderEnabled(ani_env *env, ani_object bundleOption, ani
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSilentInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::IsSilentReminderEnabled(
-                    asyncCallbackInfo->option, asyncCallbackInfo->enableStatus);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->IsSilentReminderEnabled(
+                        asyncCallbackInfo->option, asyncCallbackInfo->enableStatus);
             }
         },
         HandleSilentFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));

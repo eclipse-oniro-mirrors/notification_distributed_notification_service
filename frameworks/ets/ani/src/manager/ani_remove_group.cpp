@@ -16,15 +16,17 @@
 #include "ani_remove_group.h"
 
 #include "ans_log_wrapper.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "sts_common.h"
 #include "sts_throw_erro.h"
 #include "sts_bundle_option.h"
-#include "notification_helper.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackGroupInfo* asyncCallbackInfo)
 {
     ANS_LOGD("Delete AsyncCallbackGroupInfo Without Promise");
@@ -144,8 +146,9 @@ ani_object AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_str
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackGroupInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::RemoveGroupByBundle(
-                    asyncCallbackInfo->option, asyncCallbackInfo->groupNameStr);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->RemoveGroupByBundle(
+                        asyncCallbackInfo->option, asyncCallbackInfo->groupNameStr);
             }
         },
         HandleRemoveGroupCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
