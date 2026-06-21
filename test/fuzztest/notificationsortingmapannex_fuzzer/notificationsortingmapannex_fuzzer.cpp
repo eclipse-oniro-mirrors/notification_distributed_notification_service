@@ -26,6 +26,7 @@ namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
         Notification::NotificationSortingMap notificationSortingMap;
+        notificationSortingMap.SetKey(fdp->ConsumeRandomLengthString());
         Parcel parcel;
         return notificationSortingMap.Marshalling(parcel);
     }

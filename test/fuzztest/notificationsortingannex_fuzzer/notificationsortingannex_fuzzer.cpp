@@ -26,6 +26,7 @@ namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
         Notification::NotificationSorting notificationSorting;
+        notificationSorting.SetGroupKeyOverride(fdp->ConsumeRandomLengthString());
         Parcel parcel;
         return true;
     }

@@ -25,6 +25,7 @@ namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
         Notification::NotificationPictureContent notificationPictureContent;
+        notificationPictureContent.SetExpandedTitle(fdp->ConsumeRandomLengthString());
         nlohmann::json jsonObject;
         notificationPictureContent.ToJson(jsonObject);
         notificationPictureContent.FromJson(jsonObject);
