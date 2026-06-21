@@ -17,11 +17,11 @@
 
 #include "ans_log_wrapper.h"
 #include "ans_inner_errors.h"
+#include "notification_helper.h"
 #include "reminder_agent_service_proxy.h"
 #include "reminder_service_load_callback.h"
 
 #include "ipc_skeleton.h"
-#include "ans_manager_proxy.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
@@ -31,39 +31,17 @@ static constexpr int32_t REMINDER_AGENT_SERVICE_ID = 3204;
 
 ErrCode ReminderRequestClient::AddSlotByType(const NotificationConstant::SlotType& slotType)
 {
-    sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANSR_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return proxy->AddSlotByType(slotType);
+    return NotificationHelper::AddSlotByType(slotType);
 }
 
 ErrCode ReminderRequestClient::AddNotificationSlot(const NotificationSlot& slot)
 {
-    sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANSR_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    std::vector<sptr<NotificationSlot>> slotsSptr;
-    sptr<NotificationSlot> slotSptr = new (std::nothrow) NotificationSlot(slot);
-    if (slotSptr == nullptr) {
-        ANSR_LOGE("slotSptr is nullptr.");
-        return ERR_ANS_NO_MEMORY;
-    }
-    slotsSptr.emplace_back(slotSptr);
-    return proxy->AddSlots(slotsSptr);
+    return NotificationHelper::AddNotificationSlot(slot);
 }
 
 ErrCode ReminderRequestClient::RemoveNotificationSlot(const NotificationConstant::SlotType& slotType)
 {
-    sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANSR_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return proxy->RemoveSlotByType(slotType);
+    return NotificationHelper::RemoveNotificationSlot(slotType);
 }
 
 ErrCode ReminderRequestClient::PublishReminder(const ReminderRequest& reminder, int32_t& reminderId)
@@ -206,30 +184,6 @@ ErrCode ReminderRequestClient::UnRegisterReminderState(const sptr<ReminderStateC
         listenerRegistered_ = false;
     }
     return ERR_OK;
-}
-
-sptr<IAnsManager> ReminderRequestClient::GetAnsManagerProxy()
-{
-    sptr<ISystemAbilityManager> systemAbilityManager =
-        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (!systemAbilityManager) {
-        ANSR_LOGE("Failed to get system ability mgr.");
-        return nullptr;
-    }
-
-    sptr<IRemoteObject> remoteObject =
-        systemAbilityManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
-    if (!remoteObject) {
-        ANSR_LOGE("Failed to get notification Manager.");
-        return nullptr;
-    }
-
-    sptr<IAnsManager> proxy = iface_cast<IAnsManager>(remoteObject);
-    if ((!proxy) || (!proxy->AsObject())) {
-        ANSR_LOGE("Failed to get notification Manager's proxy");
-        return nullptr;
-    }
-    return proxy;
 }
 
 sptr<IReminderAgentService> ReminderRequestClient::GetReminderServiceProxy()

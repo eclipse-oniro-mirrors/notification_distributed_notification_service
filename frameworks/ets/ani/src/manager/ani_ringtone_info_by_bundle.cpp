@@ -15,7 +15,8 @@
 
 #include "ani_ringtone_info_by_bundle.h"
 
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -24,6 +25,8 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackRingtoneInfo* asyncCallbackInfo)
 {
     ANS_LOGD("Delete AsyncCallbackRingtoneInfo Without Promise");
@@ -106,7 +109,7 @@ void HandleRingtoneFunctionCallbackComplete(ani_env* env, WorkStatus status, voi
             asyncCallbackInfo->ringtoneInfo, asyncCallbackInfo->info.result)
             || asyncCallbackInfo->info.result == nullptr) {
             ANS_LOGE("WrapRingtoneInfo failed");
-            asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
         }
     }
     NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
@@ -150,8 +153,9 @@ ani_object AniSetRingtoneInfoByBundle(ani_env* env, ani_object bundleObj, ani_ob
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackRingtoneInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetRingtoneInfoByBundle(
-                    asyncCallbackInfo->bundle, asyncCallbackInfo->ringtoneInfo);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetRingtoneInfoByBundle(
+                        asyncCallbackInfo->bundle, asyncCallbackInfo->ringtoneInfo);
             }
         },
         HandleRingtoneFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -198,8 +202,9 @@ ani_object AniGetRingtoneInfoByBundle(ani_env *env, ani_object bundleObj, ani_ob
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackRingtoneInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetRingtoneInfoByBundle(
-                    asyncCallbackInfo->bundle, asyncCallbackInfo->ringtoneInfo);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetRingtoneInfoByBundle(
+                        asyncCallbackInfo->bundle, asyncCallbackInfo->ringtoneInfo);
             }
         },
         HandleRingtoneFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));

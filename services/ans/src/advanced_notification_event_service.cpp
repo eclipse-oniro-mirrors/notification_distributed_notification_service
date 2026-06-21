@@ -23,7 +23,6 @@
 #include <sys/statfs.h>
 
 #include "access_token_helper.h"
-#include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_permission_def.h"
 #include "common_event_manager.h"
@@ -40,7 +39,6 @@
 
 namespace OHOS {
 namespace Notification {
-
 static int32_t USER_DATA_SIZE_REPORT_INTERVAL = 24 * NotificationConstant::HOUR_TO_MS;
 static int64_t lastReportTime_ = 0;
 const std::string ANS_COMPONENT_NAME = "distributed_notification_service";

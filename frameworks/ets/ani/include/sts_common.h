@@ -28,6 +28,7 @@
 
 namespace OHOS {
 namespace NotificationSts {
+using namespace OHOS::Notification;
 using namespace arkts::ani_signature;
 
 constexpr int32_t STR_MAX_SIZE = 202;

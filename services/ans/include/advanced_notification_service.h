@@ -21,6 +21,7 @@
 #include <memory>
 #include <mutex>
 #include <set>
+#include "ans_service_errors.h"
 
 #include "event_handler.h"
 #include "event_runner.h"
@@ -61,7 +62,6 @@
 
 namespace OHOS {
 namespace Notification {
-
 static const uint32_t DEFAULT_SLOT_FLAGS = 59; // 0b111011
 static const uint32_t SILENT_REMINDER__SLOT_FLAGS = 32; // 0b100000
 constexpr char REMINDER_CAPABILITY[] = "reminder_capability";
@@ -1543,9 +1543,9 @@ public:
 
     ErrCode SetDeviceDistributedBundleList(int32_t type,
         const std::vector<NotificationDistributedBundle>& bundles) override;
- 
+
     ErrCode SetTargetDeviceAbility(const std::string& deviceType, const int32_t ability) override;
- 
+
     ErrCode GetLocalDistributedBundleList(const std::string& deviceType,
         std::vector<NotificationDistributedBundle>& bundles) override;
 
@@ -1629,7 +1629,7 @@ public:
      *        Uses current foreground active user's userId for database operations.
      *
      * @param configKey Indicates the config key, should be "add_voice_summary_count".
-     * @return Returns ERR_OK if within limit, ERR_ANS_VOICE_SUMMARY_COUNT_EXCEEDED if exceeds limit.
+     * @return Returns ERR_OK if within limit, ERR_ANS_INNER_VOICE_SUMMARY_COUNT_EXCEEDED if exceeds limit.
      */
     ErrCode UpdateVoiceUpdate(const std::string &configKey);
 

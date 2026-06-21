@@ -14,6 +14,7 @@
  */
 
 #include "notification_dialog_manager.h"
+#include "ans_service_errors.h"
 
 #include "common_event_manager.h"
 #include "matching_skills.h"
@@ -106,7 +107,7 @@ ErrCode NotificationDialogManager::RequestEnableNotificationDailog(
     if (!AddDialogInfoIfNotExist(bundle, callback)) {
         ANS_LOGE("Dialog already exists. bundle = %{public}s",
             bundle->GetBundleName().c_str());
-        return ERR_ANS_DIALOG_IS_POPPING;
+        return ERR_ANS_INNER_DIALOG_IS_POPPING;
     }
     ErrCode result = NotificationDialog::StartEnableNotificationDialogAbility(
         NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_BUNDLE,
@@ -150,7 +151,7 @@ ErrCode NotificationDialogManager::OnBundleEnabledStatusChanged(
     }
     if (!result) {
         ANS_LOGE("OnBundleEnabledStatusChanged failed");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     return ERR_OK;
 }
@@ -159,7 +160,7 @@ ErrCode NotificationDialogManager::AddDialogInfo(const sptr<NotificationBundleOp
     const sptr<IAnsDialogCallback>& callback)
 {
     if (!AddDialogInfoIfNotExist(bundle, callback)) {
-        return ERR_ANS_DIALOG_IS_POPPING;
+        return ERR_ANS_INNER_DIALOG_IS_POPPING;
     }
     return ERR_OK;
 }

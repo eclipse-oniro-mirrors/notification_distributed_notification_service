@@ -15,9 +15,13 @@
 
 #include "napi_geofence_enabled.h"
 
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 namespace {
 constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
@@ -31,7 +35,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc != ARGC_ONE) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
     // argv[0]: boolean
@@ -40,7 +44,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (valuetype != napi_boolean) {
         ANS_LOGE("Wrong argument type. Bool expected.");
         std::string msg = "Incorrect parameter types.The type of enabled must be boolean.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     napi_get_value_bool(env, argv[PARAM0], &enabled);
@@ -104,7 +108,7 @@ napi_value NapiSetGeofenceEnabled(napi_env env, napi_callback_info info)
     AsyncCallbackGeofenceEnabled *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackGeofenceEnabled {.env = env, .asyncWork = nullptr, .enabled = enabled};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -121,9 +125,10 @@ napi_value NapiSetGeofenceEnabled(napi_env env, napi_callback_info info)
             AsyncCallbackGeofenceEnabled *asynccallbackinfo =
                 static_cast<AsyncCallbackGeofenceEnabled *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::SetGeofenceEnabled(
-                    asynccallbackinfo->enabled);
-                ANS_LOGI("SetGeofenceEnabled errorCode=%{public}d", asynccallbackinfo->info.errorCode);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetGeofenceEnabled(
+                        asynccallbackinfo->enabled);
+                ANS_LOGI("SetGeofenceEnabled errorCode=%{public}u", asynccallbackinfo->info.errorCode);
             }
         },
         AsyncCompleteCallbackNapiSetGeofenceEnabled,
@@ -140,7 +145,7 @@ napi_value NapiIsGeofenceEnabled(napi_env env, napi_callback_info info)
     AsyncCallbackGeofenceEnabled *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackGeofenceEnabled {.env = env, .asyncWork = nullptr, .enabled = false};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -157,8 +162,9 @@ napi_value NapiIsGeofenceEnabled(napi_env env, napi_callback_info info)
             AsyncCallbackGeofenceEnabled *asynccallbackinfo =
                 static_cast<AsyncCallbackGeofenceEnabled *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::IsGeofenceEnabled(
-                    asynccallbackinfo->enabled);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->IsGeofenceEnabled(
+                        asynccallbackinfo->enabled);
                 ANS_LOGI("IsGeofenceEnabled enabled=%{public}d", asynccallbackinfo->enabled);
             }
         },

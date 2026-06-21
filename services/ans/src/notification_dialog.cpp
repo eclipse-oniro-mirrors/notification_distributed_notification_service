@@ -16,7 +16,7 @@
 #include "notification_dialog.h"
 
 #include "ability_manager_client.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "bundle_manager_helper.h"
 #include "in_process_call_wrapper.h"
@@ -54,20 +54,20 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     if (topBundleName != appBundleName) {
         ANS_LOGW("App isn't in foreground, top %{public}s.", topBundleName.c_str());
         if (!innerLake) {
-            return ERR_ANS_INVALID_BUNDLE;
+            return ERR_ANS_INNER_INVALID_BUNDLE;
         } else {
             std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
             topBundleName = IN_PROCESS_CALL(
                 AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
             if (topBundleName != appBundleName) {
-                return ERR_ANS_INVALID_BUNDLE;
+                return ERR_ANS_INNER_INVALID_BUNDLE;
             }
         }
     }
     ANS_LOGD("called");
-    
+
     AAFwk::Want want;
-    
+
     std::string bundleName = "com.ohos.sceneboard";
     std::string abilityName = "com.ohos.sceneboard.systemdialog";
     want.SetElementName(bundleName, abilityName);
@@ -80,7 +80,7 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     root["innerLake"] = innerLake;
     root["easyAbroad"] = easyAbroad;
     std::string command  = root.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
-    
+
     auto connection_ = sptr<SystemDialogConnectStb>(new (std::nothrow) SystemDialogConnectStb(command));
     if (connection_ == nullptr) {
         ANS_LOGE("new connection error.");

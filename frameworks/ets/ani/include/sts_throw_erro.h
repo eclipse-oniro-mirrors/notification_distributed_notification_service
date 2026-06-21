@@ -19,23 +19,22 @@
 #include <string>
 #include <vector>
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ets_error_utils.h"
 
 namespace OHOS {
 namespace NotificationSts {
-using namespace OHOS::Notification;
-
-int32_t GetExternalCode(const uint32_t errCode);
 
 inline std::string FindAnsErrMsg(const int32_t errCode)
 {
-    return GetAnsErrMessage(errCode);
+    return ::OHOS::Notification::GetInnerErrMessage(errCode);
 }
 
 void ThrowError(ani_env *env, int32_t errCode, const std::string &errorMsg);
 
-ani_object CreateError(ani_env *env, int32_t code, const std::string &msg);
+ani_object CreateError(ani_env *env, int32_t errCode);
+ani_object CreateError(ani_env *env, int32_t errCode, const std::string &msg);
 
 inline void ThrowErrorWithCode(ani_env *env, const int32_t errCode, std::string msg = "")
 {
@@ -45,16 +44,15 @@ inline void ThrowErrorWithCode(ani_env *env, const int32_t errCode, std::string 
 
 inline void ThrowErrorWithInvalidParam(ani_env *env)
 {
-    ThrowErrorWithCode(env, ERROR_PARAM_INVALID);
+    ThrowErrorWithCode(env, ::OHOS::Notification::ERR_ANS_INNER_INVALID_PARAM);
 }
 
 inline void ThrowInternerErrorWithLogE(ani_env *env, std::string logMsg = "")
 {
     ANS_LOGE("ERROR_INTERNAL_ERROR : %{public}s", logMsg.c_str());
-    ThrowErrorWithCode(env, OHOS::Notification::ERROR_INTERNAL_ERROR);
+    ThrowErrorWithCode(env, ::OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
 }
 
 } // namespace NotificationSts
 } // OHOS
 #endif
-

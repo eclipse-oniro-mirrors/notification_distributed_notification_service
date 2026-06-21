@@ -19,6 +19,7 @@
 #define private public
 #define protected public
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "notification_conversational_content.h"
 #include "notification_live_view_content.h"
 #include "notification_long_text_content.h"
@@ -684,7 +685,7 @@ HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0003, Level1)
     auto content = std::make_shared<NotificationContent>(liveContent);
     notificationRequest.SetContent(content);
     ErrCode result = notificationRequest.CheckNotificationRequest(nullptr);
-    EXPECT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(result, ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -707,7 +708,7 @@ HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0004, Level1)
     oldNotificationRequest->SetNotificationId(myNotificationId);
     oldNotificationRequest->SetSlotType(NotificationConstant::SlotType::OTHER);
     ErrCode result = notificationRequest.CheckNotificationRequest(oldNotificationRequest);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -734,7 +735,7 @@ HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0005, Level1)
     auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
     oldNotificationRequest->SetContent(oldContent);
     ErrCode result = notificationRequest.CheckNotificationRequest(oldNotificationRequest);
-    EXPECT_EQ(result, ERR_ANS_END_NOTIFICATION);
+    EXPECT_EQ(result, ERR_ANS_INNER_END_NOTIFICATION);
 }
 
 /**
@@ -761,7 +762,7 @@ HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0006, Level1)
     auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
     oldNotificationRequest->SetContent(oldContent);
     ErrCode result = notificationRequest.CheckNotificationRequest(oldNotificationRequest);
-    EXPECT_EQ(result, ERR_ANS_REPEAT_CREATE);
+    EXPECT_EQ(result, ERR_ANS_INNER_REPEAT_CREATE);
 }
 
 /**
@@ -790,7 +791,7 @@ HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0007, Level1)
     auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
     oldNotificationRequest->SetContent(oldContent);
     ErrCode result = notificationRequest.CheckNotificationRequest(oldNotificationRequest);
-    EXPECT_EQ(result, ERR_ANS_EXPIRED_NOTIFICATION);
+    EXPECT_EQ(result, ERR_ANS_INNER_EXPIRED_NOTIFICATION);
 }
 
 /**
@@ -819,7 +820,7 @@ HWTEST_F(NotificationRequestTest, CheckLiveViewRequestParam_0008, Level1)
     auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
     oldNotificationRequest->SetContent(oldContent);
     ErrCode result = notificationRequest.CheckNotificationRequest(oldNotificationRequest);
-    EXPECT_EQ(result, ERR_ANS_EXPIRED_NOTIFICATION);
+    EXPECT_EQ(result, ERR_ANS_INNER_EXPIRED_NOTIFICATION);
 }
 
 /**
@@ -1187,7 +1188,7 @@ HWTEST_F(NotificationRequestTest, CheckImageSizeForContent_0003, Level1)
     notificationRequest.SetContent(content);
 
     auto result = notificationRequest.CheckImageSizeForContent();
-    EXPECT_EQ(result, ERR_ANS_PICTURE_OVER_SIZE);
+    EXPECT_EQ(result, ERR_ANS_INNER_PICTURE_OVER_SIZE);
 }
 
 /**
@@ -1208,7 +1209,7 @@ HWTEST_F(NotificationRequestTest, CheckImageSizeForContent_0004, Level1)
     notificationRequest.SetContent(content);
 
     auto result = notificationRequest.CheckImageSizeForContent();
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1229,7 +1230,7 @@ HWTEST_F(NotificationRequestTest, CheckImageSizeForContent_0005, Level1)
     notificationRequest.SetContent(content);
 
     auto result = notificationRequest.CheckImageSizeForContent();
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1255,7 +1256,7 @@ HWTEST_F(NotificationRequestTest, CheckImageSizeForContent_0006, Level1)
     notificationRequest.SetContent(content);
 
     auto result = notificationRequest.CheckImageSizeForContent();
-    EXPECT_EQ(result, ERR_ANS_ICON_OVER_SIZE);
+    EXPECT_EQ(result, ERR_ANS_INNER_ICON_OVER_SIZE);
 }
 
 /**

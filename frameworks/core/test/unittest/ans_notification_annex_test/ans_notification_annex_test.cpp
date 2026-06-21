@@ -22,6 +22,7 @@
 #undef private
 #undef protected
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ipc_types.h"
 #include "notification.h"
 #include "singleton.h"
@@ -66,7 +67,7 @@ void AnsNotificationUnitAnnexTest::TearDown() {}
 
 /*
  * @tc.name: GetNotificationSlotNumAsBundle_0200
- * @tc.desc: test GetNotificationSlotNumAsBundle return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.desc: test GetNotificationSlotNumAsBundle return ERR_ANS_INNER_NON_SYSTEM_APP.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -78,13 +79,13 @@ HWTEST_F(AnsNotificationUnitAnnexTest, GetNotificationSlotNumAsBundle_0200, Func
     std::string bundleName = "this is bundleName";
     bundleOption.SetBundleName(bundleName);
     uint64_t num = 10;
-    ErrCode ret1 = ans_->GetNotificationSlotNumAsBundle(bundleOption, num);
-    EXPECT_EQ(ret1, ERR_ANS_NON_SYSTEM_APP);
+    InnerErrorCode ret1 = ans_->GetNotificationSlotNumAsBundle(bundleOption, num);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /*
  * @tc.name: PublishNotification_0100
- * @tc.desc: test PublishNotification ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test PublishNotification ErrCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -94,13 +95,13 @@ HWTEST_F(AnsNotificationUnitAnnexTest, PublishNotification_0100, Function | Medi
     NotificationRequest request;
     request.SetContent(nullptr);
 
-    ErrCode ret1 = ans_->PublishNotification(label, request);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret1 = ans_->PublishNotification(label, request);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
  * @tc.name: PublishNotificationAsBundle_0100
- * @tc.desc: test PublishNotificationAsBundle ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test PublishNotificationAsBundle ErrCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -109,13 +110,13 @@ HWTEST_F(AnsNotificationUnitAnnexTest, PublishNotificationAsBundle_0100, Functio
     std::string representativeBundle = "this is representativeBundle";
     NotificationRequest request;
     request.SetContent(nullptr);
-    ErrCode ret5 = ans_->PublishNotificationAsBundle(representativeBundle, request);
-    EXPECT_EQ(ret5, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret5 = ans_->PublishNotificationAsBundle(representativeBundle, request);
+    EXPECT_EQ(ret5, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
  * @tc.name: PublishNotificationAsBundle_0200
- * @tc.desc: test PublishNotificationAsBundle ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test PublishNotificationAsBundle ErrCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -126,13 +127,13 @@ HWTEST_F(AnsNotificationUnitAnnexTest, PublishNotificationAsBundle_0200, Functio
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
     request.SetContent(content);
-    ErrCode ret5 = ans_->PublishNotificationAsBundle(representativeBundle, request);
+    InnerErrorCode ret5 = ans_->PublishNotificationAsBundle(representativeBundle, request);
     EXPECT_EQ(ret5, ERR_INVALID_OPERATION);
 }
 
 /*
  * @tc.name: RemoveNotification_0100
- * @tc.desc: test RemoveNotification ErrCode ERR_ANS_NON_SYSTEM_APP.
+ * @tc.desc: test RemoveNotification ErrCode ERR_ANS_INNER_NON_SYSTEM_APP.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -144,13 +145,13 @@ HWTEST_F(AnsNotificationUnitAnnexTest, RemoveNotification_0100, Function | Mediu
     bundleOption.SetBundleName(bundleName);
     int32_t notificationId = 2;
     std::string label = "this is label";
-    ErrCode ret3 = ans_->RemoveNotification(bundleOption, notificationId, label, removeReason);
-    EXPECT_EQ(ret3, ERR_ANS_NON_SYSTEM_APP);
+    InnerErrorCode ret3 = ans_->RemoveNotification(bundleOption, notificationId, label, removeReason);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /*
  * @tc.name: RemoveAllNotifications_0200
- * @tc.desc: test RemoveAllNotifications ErrCode ERR_ANS_NON_SYSTEM_APP.
+ * @tc.desc: test RemoveAllNotifications ErrCode ERR_ANS_INNER_NON_SYSTEM_APP.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -159,13 +160,13 @@ HWTEST_F(AnsNotificationUnitAnnexTest, RemoveAllNotifications_0200, Function | M
     NotificationBundleOption bundleOption;
     std::string bundleName = "this is bundleName";
     bundleOption.SetBundleName(bundleName);
-    ErrCode ret3 = ans_->RemoveAllNotifications(bundleOption);
-    EXPECT_EQ(ret3, ERR_ANS_NON_SYSTEM_APP);
+    InnerErrorCode ret3 = ans_->RemoveAllNotifications(bundleOption);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /*
  * @tc.name: RemoveNotificationsByBundle_0200
- * @tc.desc: test RemoveNotificationsByBundle ErrCode ERR_ANS_NON_SYSTEM_APP.
+ * @tc.desc: test RemoveNotificationsByBundle ErrCode ERR_ANS_INNER_NON_SYSTEM_APP.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -174,13 +175,13 @@ HWTEST_F(AnsNotificationUnitAnnexTest, RemoveNotificationsByBundle_0200, Functio
     NotificationBundleOption bundleOption;
     std::string bundleName = "this is bundleName";
     bundleOption.SetBundleName(bundleName);
-    ErrCode ret3 = ans_->RemoveNotificationsByBundle(bundleOption);
-    EXPECT_EQ(ret3, ERR_ANS_NON_SYSTEM_APP);
+    InnerErrorCode ret3 = ans_->RemoveNotificationsByBundle(bundleOption);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /*
  * @tc.name: GetNotificationSlotsForBundle_0200
- * @tc.desc: test GetNotificationSlotsForBundle ErrCode ERR_ANS_NON_SYSTEM_APP.
+ * @tc.desc: test GetNotificationSlotsForBundle ErrCode ERR_ANS_INNER_NON_SYSTEM_APP.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -190,13 +191,13 @@ HWTEST_F(AnsNotificationUnitAnnexTest, GetNotificationSlotsForBundle_0200, Funct
     std::string bundleName = "this is bundleName";
     bundleOption.SetBundleName(bundleName);
     std::vector<sptr<NotificationSlot>> slots;
-    ErrCode ret3 = ans_->GetNotificationSlotsForBundle(bundleOption, slots);
-    EXPECT_EQ(ret3, ERR_ANS_NON_SYSTEM_APP);
+    InnerErrorCode ret3 = ans_->GetNotificationSlotsForBundle(bundleOption, slots);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /*
  * @tc.name: UpdateNotificationSlots_0200
- * @tc.desc: test UpdateNotificationSlots ErrCode ERR_ANS_PERMISSION_DENIED.
+ * @tc.desc: test UpdateNotificationSlots InnerErrorCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -206,13 +207,13 @@ HWTEST_F(AnsNotificationUnitAnnexTest, UpdateNotificationSlots_0200, Function | 
     std::string bundleName = "this is bundleName";
     bundleOption.SetBundleName(bundleName);
     std::vector<sptr<NotificationSlot>> slots;
-    ErrCode ret3 = ans_->UpdateNotificationSlots(bundleOption, slots);
-    EXPECT_EQ(ret3, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret3 = ans_->UpdateNotificationSlots(bundleOption, slots);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
  * @tc.name: RemoveGroupByBundle_0100
- * @tc.desc: test RemoveGroupByBundle ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test RemoveGroupByBundle ErrCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -222,13 +223,13 @@ HWTEST_F(AnsNotificationUnitAnnexTest, RemoveGroupByBundle_0100, Function | Medi
     NotificationBundleOption bundleOption;
     std::string bundleName = "this is bundleName";
     bundleOption.SetBundleName(bundleName);
-    ErrCode ret2 = ans_->RemoveGroupByBundle(bundleOption, groupName);
-    EXPECT_EQ(ret2, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret2 = ans_->RemoveGroupByBundle(bundleOption, groupName);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
  * @tc.name: PublishContinuousTaskNotification_0100
- * @tc.desc: test PublishContinuousTaskNotification ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test PublishContinuousTaskNotification InnerErrorCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -236,13 +237,13 @@ HWTEST_F(AnsNotificationUnitAnnexTest, PublishContinuousTaskNotification_0100, F
 {
     NotificationRequest request;
     request.SetContent(nullptr);
-    ErrCode ret1 = ans_->PublishContinuousTaskNotification(request);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret1 = ans_->PublishContinuousTaskNotification(request);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
  * @tc.name: PublishContinuousTaskNotification_0200
- * @tc.desc: test PublishContinuousTaskNotification ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test PublishContinuousTaskNotification InnerErrorCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -252,8 +253,8 @@ HWTEST_F(AnsNotificationUnitAnnexTest, PublishContinuousTaskNotification_0200, F
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
     request.SetContent(content);
-    ErrCode ret1 = ans_->PublishContinuousTaskNotification(request);
-    EXPECT_EQ(ret1, ERR_ANS_NOT_SYSTEM_SERVICE);
+    InnerErrorCode ret1 = ans_->PublishContinuousTaskNotification(request);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_NOT_SYSTEM_SERVICE);
 }
 
 /*

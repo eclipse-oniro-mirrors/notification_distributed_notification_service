@@ -20,12 +20,15 @@
 #include "sts_bundle_option.h"
 #include "sts_reminder_info.h"
 #include "sts_notification_manager.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "notification_reminder_info.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackReminderInfo* asyncCallbackInfo)
 {
     ANS_LOGD("Delete AsyncCallbackReminderInfo Without Promise");
@@ -108,7 +111,7 @@ void HandleReminderFunctionCallbackComplete(ani_env* env, WorkStatus status, voi
             NotificationSts::GetAniArrayReminderInfo(envCurr, asyncCallbackInfo->reminders);
         if (asyncCallbackInfo->info.result == nullptr) {
             ANS_LOGE("GetAniArrayReminderInfo failed");
-            asyncCallbackInfo->info.returnCode = Notification::ERROR_INTERNAL_ERROR;
+            asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
         }
     }
     NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
@@ -147,8 +150,9 @@ ani_object AniGetReminderInfoByBundles(ani_env *env, ani_object obj, ani_object 
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackReminderInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::GetReminderInfoByBundles(
-                    asyncCallbackInfo->bundles, asyncCallbackInfo->reminders);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetReminderInfoByBundles(
+                        asyncCallbackInfo->bundles, asyncCallbackInfo->reminders);
             }
         },
         HandleReminderFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -194,8 +198,9 @@ ani_object AniSetReminderInfoByBundles(ani_env *env, ani_object obj, ani_object 
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackReminderInfo*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetReminderInfoByBundles(
-                    asyncCallbackInfo->reminders);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetReminderInfoByBundles(
+                        asyncCallbackInfo->reminders);
             }
         },
         HandleReminderFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -211,3 +216,4 @@ ani_object AniSetReminderInfoByBundles(ani_env *env, ani_object obj, ani_object 
 }
 }
 }
+

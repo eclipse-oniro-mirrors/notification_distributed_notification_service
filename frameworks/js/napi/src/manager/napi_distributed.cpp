@@ -15,11 +15,15 @@
 
 #include "napi_distributed.h"
 
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "distributed.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 void AsyncCompleteCallbackNapiIsDistributedEnabled(napi_env env, napi_status status, void *data)
 {
     ANS_LOGD("called");
@@ -68,7 +72,8 @@ napi_value DoIsDistributedEnabledWithDeviceType(napi_env env, napi_callback_info
 
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::IsDistributedEnabled(asynccallbackinfo->deviceType, asynccallbackinfo->enable);
+                    DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabled(
+                        asynccallbackinfo->deviceType, asynccallbackinfo->enable);
                 ANS_LOGI("IsDistributedEnabled device=%{public}s,enable=%{public}d",
                     asynccallbackinfo->deviceType.c_str(), asynccallbackinfo->enable);
             }
@@ -84,7 +89,7 @@ napi_value NapiIsDistributedEnabled(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     EnabledParams params{};
     if (ParseIsDistributedEnabledParams(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -113,7 +118,8 @@ napi_value NapiIsDistributedEnabled(napi_env env, napi_callback_info info)
 
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::IsDistributedEnabled(asynccallbackinfo->enable);
+                    DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabled(
+                        asynccallbackinfo->enable);
                 ANS_LOGI("IsDistributedEnabled enable=%{public}d", asynccallbackinfo->enable);
             }
         },
@@ -142,7 +148,7 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
     EnabledParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
         ANS_LOGD("null ParseParameters");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -150,7 +156,7 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
         new (std::nothrow) AsyncCallbackInfoEnabled {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
         ANS_LOGD("Create asyncCallbackinfo fail.");
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -169,7 +175,8 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
 
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::EnableDistributed(asynccallbackinfo->params.enable);
+                    DelayedSingleton<AnsNotification>::GetInstance()->EnableDistributed(
+                        asynccallbackinfo->params.enable);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -207,14 +214,14 @@ napi_value NapiSetDistributedEnabled(napi_env env, napi_callback_info info)
     EnabledParams params{};
     if (ParseSetDistributedEnabledParams(env, info, params) == nullptr) {
         ANS_LOGD("null ParseSetDistributedEnabledParams");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
     AsyncCallbackInfoEnabled *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoEnabled{ .env = env, .asyncWork = nullptr, .params = params };
     if (!asynccallbackinfo) {
         ANS_LOGD("Create asyncCallbackinfo fail.");
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -228,9 +235,10 @@ napi_value NapiSetDistributedEnabled(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiSetDistributedEnabled work excute.");
             AsyncCallbackInfoEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabled *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::SetDistributedEnabled(
-                    asynccallbackinfo->params.deviceType, asynccallbackinfo->params.enable);
-                ANS_LOGD("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedEnabled(
+                        asynccallbackinfo->params.deviceType, asynccallbackinfo->params.enable);
+                ANS_LOGD("errorCode = %{public}u", asynccallbackinfo->info.errorCode);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -259,7 +267,7 @@ napi_value NapiEnableDistributedByBundle(napi_env env, napi_callback_info info)
 
     EnabledByBundleParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -282,8 +290,9 @@ napi_value NapiEnableDistributedByBundle(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiEnableDistributedByBundle work excute.");
             AsyncCallbackInfoEnabledByBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabledByBundle *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::EnableDistributedByBundle(
-                    asynccallbackinfo->params.option, asynccallbackinfo->params.enable);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->EnableDistributedByBundle(
+                        asynccallbackinfo->params.option, asynccallbackinfo->params.enable);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -321,7 +330,7 @@ napi_value NapiEnableDistributedSelf(napi_env env, napi_callback_info info)
 
     EnabledParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -346,7 +355,8 @@ napi_value NapiEnableDistributedSelf(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoEnabled *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::EnableDistributedSelf(asynccallbackinfo->params.enable);
+                    DelayedSingleton<AnsNotification>::GetInstance()->EnableDistributedSelf(
+                        asynccallbackinfo->params.enable);
                 ANS_LOGI("isEnableDistributedSelf enable=%{public}d", asynccallbackinfo->params.enable);
             }
         },
@@ -412,14 +422,14 @@ napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info
 
     IsEnabledByBundleParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     AsyncCallbackInfoIsEnabledByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoIsEnabledByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -439,15 +449,17 @@ napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info
                 if (asynccallbackinfo->params.hasDeviceType) {
                     int32_t enabledType = 0;
                     std::string deviceType = asynccallbackinfo->params.deviceType;
-                    asynccallbackinfo->info.errorCode = NotificationHelper::IsDistributedEnabledByBundle(
-                        asynccallbackinfo->params.option, deviceType, true, enabledType);
+                    asynccallbackinfo->info.errorCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabledByBundle(
+                            asynccallbackinfo->params.option, deviceType, true, enabledType);
                     asynccallbackinfo->enable = ((enabledType == static_cast<int32_t>(SwitchState::USER_MODIFIED_ON)) ||
                         (enabledType == static_cast<int32_t>(SwitchState::SYSTEM_DEFAULT_ON)));
                     ANS_LOGI("isDistributedEnableByType has deviceType %{public}d code=%{public}d", enabledType,
                         asynccallbackinfo->info.errorCode);
                 } else {
-                    asynccallbackinfo->info.errorCode = NotificationHelper::IsDistributedEnableByBundle(
-                        asynccallbackinfo->params.option, asynccallbackinfo->enable);
+                    asynccallbackinfo->info.errorCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnableByBundle(
+                            asynccallbackinfo->params.option, asynccallbackinfo->enable);
                 }
             }
         },
@@ -482,7 +494,7 @@ void AsyncCompleteCallbackNapiGetDeviceRemindType(napi_env env, napi_status stat
         } else {
             DeviceRemindType outType = DeviceRemindType::IDLE_DONOT_REMIND;
             if (!AnsEnumUtil::DeviceRemindTypeCToJS(asynccallbackinfo->remindType, outType)) {
-                asynccallbackinfo->info.errorCode = ERROR;
+                asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
                 result = Common::NapiGetNull(env);
             }
             napi_create_int32(env, (int32_t)outType, &result);
@@ -504,13 +516,13 @@ napi_value NapiGetDeviceRemindType(napi_env env, napi_callback_info info)
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoGetRemindType {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -528,7 +540,8 @@ napi_value NapiGetDeviceRemindType(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetRemindType *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::GetDeviceRemindType(asynccallbackinfo->remindType);
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetDeviceRemindType(
+                        asynccallbackinfo->remindType);
             }
         },
         AsyncCompleteCallbackNapiGetDeviceRemindType,
@@ -552,14 +565,14 @@ napi_value NapiSetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
 
     EnabledWithoutAppParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::JSParaError(env, params.callback);
     }
 
     AsyncCallbackInfoEnabledWithoutApp *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoEnabledWithoutApp {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -577,8 +590,9 @@ napi_value NapiSetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
             AsyncCallbackInfoEnabledWithoutApp *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoEnabledWithoutApp *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::SetSyncNotificationEnabledWithoutApp(
-                    asynccallbackinfo->params.userId, asynccallbackinfo->params.enable);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetSyncNotificationEnabledWithoutApp(
+                        asynccallbackinfo->params.userId, asynccallbackinfo->params.enable);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -617,7 +631,7 @@ napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
 
     GetEnabledWithoutAppParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::JSParaError(env, params.callback);
     }
 
@@ -625,7 +639,7 @@ napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
         new (std::nothrow) AsyncCallbackInfoGetEnabledWithoutApp {
         .env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -643,8 +657,9 @@ napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
             AsyncCallbackInfoGetEnabledWithoutApp *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoGetEnabledWithoutApp *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetSyncNotificationEnabledWithoutApp(
-                    asynccallbackinfo->params.userId, asynccallbackinfo->enable);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetSyncNotificationEnabledWithoutApp(
+                        asynccallbackinfo->params.userId, asynccallbackinfo->enable);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -688,7 +703,7 @@ napi_value NapiSetTargetDeviceStatus(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     DeviceStatus paras;
     if (ParseParameters(env, info, paras) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -696,7 +711,7 @@ napi_value NapiSetTargetDeviceStatus(napi_env env, napi_callback_info info)
         .env = env, .asyncWork = nullptr, .deviceStatus = paras
     };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;
@@ -711,9 +726,10 @@ napi_value NapiSetTargetDeviceStatus(napi_env env, napi_callback_info info)
             ANS_LOGI("NapiSetTargetDeviceStatus start");
             AsynDeviceStatusConfig *asynccallbackinfo = static_cast<AsynDeviceStatusConfig *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::SetTargetDeviceStatus(
-                    asynccallbackinfo->deviceStatus.deviceType, asynccallbackinfo->deviceStatus.status,
-                    DISTURB_DEFAULT_FLAG);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceStatus(
+                        asynccallbackinfo->deviceStatus.deviceType, asynccallbackinfo->deviceStatus.status,
+                        DISTURB_DEFAULT_FLAG);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -782,7 +798,7 @@ napi_value NapiGetDistributedDeviceList(napi_env env, napi_callback_info info)
     AsynCallbackInfoGetDistributedDeviceList *asynccallbackinfo =
         new (std::nothrow) AsynCallbackInfoGetDistributedDeviceList{ .env = env, .asyncWork = nullptr };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
 
@@ -798,7 +814,8 @@ napi_value NapiGetDistributedDeviceList(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsynCallbackInfoGetDistributedDeviceList *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::GetDistributedDevicelist(asynccallbackinfo->deviceList);
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetDistributedDevicelist(
+                        asynccallbackinfo->deviceList);
             }
         },
         AsyncCompleteCallbackNapiGetDistributedDeviceList, (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);

@@ -15,6 +15,7 @@
 
 #include <memory>
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "gtest/gtest.h"
 #define private public
 #include "distributed_screen_status_manager.h"
@@ -53,7 +54,7 @@ HWTEST_F(DistributedScreenStatusManagerTest, CheckRemoteDevicesIsUsing_00100, Fu
     bool isUsing = true;
 
     EXPECT_EQ(distributedScreenStatusManager_->CheckRemoteDevicesIsUsing(isUsing),
-        ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+        ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 
 /**
@@ -65,7 +66,8 @@ HWTEST_F(DistributedScreenStatusManagerTest, SetLocalScreenStatus_00100, Functio
 {
     bool screenOn = false;
 
-    EXPECT_EQ(distributedScreenStatusManager_->SetLocalScreenStatus(screenOn), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+    EXPECT_EQ(distributedScreenStatusManager_->SetLocalScreenStatus(screenOn),
+        ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED);
 }
 }  // namespace Notification
 }  // namespace OHOS

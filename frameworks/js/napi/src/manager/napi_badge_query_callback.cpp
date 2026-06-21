@@ -24,13 +24,17 @@
 #include "nlohmann/json.hpp"
 #include "napi_common_util.h"
 #include "ans_log_wrapper.h"
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
 #include "accesstoken_kit.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 namespace {
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
@@ -71,13 +75,13 @@ bool CheckCallerIsSystemApp(napi_env env)
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
         ANS_LOGE("current app is not system app, not allow.");
-        Common::NapiThrow(env, ERROR_NOT_SYSTEM_APP);
+        Common::NapiThrow(env, ERR_ANS_INNER_NON_SYSTEM_APP);
         return false;
     }
 
     if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenCaller, OHOS_PERMISSION_NOTIFICATION_CONTROLLER)
         != Security::AccessToken::TypePermissionState::PERMISSION_GRANTED) {
-        Common::NapiThrow(env, ERROR_PERMISSION_DENIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_PERMISSION_DENIED);
         return false;
     }
     return true;
@@ -257,7 +261,7 @@ napi_value GetBadgeQueryCallBackInfo(const napi_env &env, const napi_value &valu
     badgeQueryCallbackInfo = std::make_shared<JSBadgeQueryCallBack>();
     if (badgeQueryCallbackInfo == nullptr) {
         ANS_LOGE("null callback");
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return nullptr;
     }
     napi_create_reference(env, value, 1, &(badgeQueryCallbackInfo->ref));
@@ -280,7 +284,7 @@ bool AddBadgeQueryCallBackInfo(const napi_env &env, const int32_t &userId,
     ANS_LOGD("AddBadgeQueryCallBackInfo called");
     if (badgeQueryCallbackInfo->ref == nullptr) {
         ANS_LOGE("null ref");
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return false;
     }
     std::lock_guard<ffrt::mutex> lock(badgeQueryCallbackInfoMutex_);
@@ -298,7 +302,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, NULL));
     if (argc != ARGC_ONE) {
         ANS_LOGE("Wrong number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -308,7 +312,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     if (valuetype != napi_function) {
         ANS_LOGE("Wrong argument type for arg0. BadgeNumberCallback object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be BadgeNumberCallback.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
 
@@ -361,12 +365,12 @@ napi_value NapiOnBadgeNumberQuery(napi_env env, napi_callback_info info)
     int32_t uid = IPCSkeleton::GetCallingUid();
     if (uid < 0) {
         ANS_LOGE("uid(%{public}d) is invalid", uid);
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::NapiGetUndefined(env);
     }
     int32_t userId = INVALID_USER_ID;
     if (Common::GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::NapiGetUndefined(env);
     }
     if (!CheckCallerIsSystemApp(env)) {
@@ -377,7 +381,7 @@ napi_value NapiOnBadgeNumberQuery(napi_env env, napi_callback_info info)
         return Common::NapiGetUndefined(env);
     }
     if (objectInfo == nullptr) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::NapiGetUndefined(env);
     }
 
@@ -385,7 +389,7 @@ napi_value NapiOnBadgeNumberQuery(napi_env env, napi_callback_info info)
         .env = env, .asyncWork = nullptr, .objectInfo = objectInfo};
     if (!asynccallbackinfo) {
         ANS_LOGE("null asynccallbackinfo");
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::NapiGetUndefined(env);
     }
 
@@ -397,8 +401,9 @@ napi_value NapiOnBadgeNumberQuery(napi_env env, napi_callback_info info)
         [](napi_env env, void *data) {
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackBadgeNumberQuery *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::RegisterBadgeQueryCallback(
-                    asynccallbackinfo->objectInfo);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->RegisterBadgeQueryCallback(
+                        asynccallbackinfo->objectInfo);
             }
         },
         AsyncCompleteCallbackNapiBadgeNumberQuery,
@@ -422,7 +427,7 @@ void AsyncCompleteCallbackNapiOffBadgeNumberQuery(napi_env env, napi_status stat
         ANS_LOGE("null asynccallbackinfo");
         return;
     }
-    
+
     if (asynccallbackinfo->objectInfo) {
         std::lock_guard<ffrt::mutex> lock(asynccallbackinfo->objectInfo->tsfnMutex_);
         napi_threadsafe_function tsfn = asynccallbackinfo->objectInfo->GetThreadSafeFunction();
@@ -449,12 +454,12 @@ napi_value NapiOffBadgeNumberQuery(napi_env env, napi_callback_info info)
     int32_t uid = IPCSkeleton::GetCallingUid();
     if (uid < 0) {
         ANS_LOGE("uid(%{public}d) is invalid", uid);
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::NapiGetUndefined(env);
     }
     int32_t userId = INVALID_USER_ID;
     if (Common::GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::NapiGetUndefined(env);
     }
     if (!CheckCallerIsSystemApp(env)) {
@@ -476,7 +481,7 @@ napi_value NapiOffBadgeNumberQuery(napi_env env, napi_callback_info info)
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackOffBadgeNumberQuery {
         .env = env, .asyncWork = nullptr, .userId = userId, .objectInfo = callback};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::NapiGetUndefined(env);
     }
     napi_value promise = nullptr;
@@ -489,7 +494,8 @@ napi_value NapiOffBadgeNumberQuery(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackOffBadgeNumberQuery *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::UnRegisterBadgeQueryCallback(asynccallbackinfo->objectInfo);
+                    DelayedSingleton<AnsNotification>::GetInstance()->UnRegisterBadgeQueryCallback(
+                        asynccallbackinfo->objectInfo);
             }
         },
         AsyncCompleteCallbackNapiOffBadgeNumberQuery,

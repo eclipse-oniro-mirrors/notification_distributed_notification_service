@@ -22,6 +22,7 @@
 #include <filesystem>
 #include <climits>
 #include <cstdlib>
+#include "ans_service_errors.h"
 
 #include "openssl/evp.h"
 #include "openssl/rand.h"
@@ -134,18 +135,18 @@ ErrCode __attribute__((weak)) AesGcmHelper::Encrypt(const std::string &plainText
 {
     if (plainText.empty()) {
         ANS_LOGE("Can't encrypt empty plain text.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::string key{""};
     bool ret = GenerateKey(key);
     if (!ret) {
         ANS_LOGE("Fail to get key while encrypting.");
-        return ERR_ANS_ENCRYPT_FAIL;
+        return ERR_ANS_INNER_ENCRYPT_FAIL;
     }
     ret = EncryptAesGcm(plainText, cipherText, key);
     if (!ret) {
         ANS_LOGE("Fail to encrypt with AES-GCM.");
-        return ERR_ANS_ENCRYPT_FAIL;
+        return ERR_ANS_INNER_ENCRYPT_FAIL;
     }
     return ERR_OK;
 }
@@ -154,18 +155,18 @@ ErrCode __attribute__((weak)) AesGcmHelper::Decrypt(std::string &plainText, cons
 {
     if (cipherText.empty()) {
         ANS_LOGE("Can't decrypt empty cipher text.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::string key{""};
     bool ret = GenerateKey(key);
     if (!ret) {
         ANS_LOGE("Fail to get key while decrypting");
-        return ERR_ANS_DECRYPT_FAIL;
+        return ERR_ANS_INNER_DECRYPT_FAIL;
     }
     ret = DecryptAesGcm(plainText, cipherText, key);
     if (!ret) {
         ANS_LOGE("Fail to decrypt with AES-GCM.");
-        return ERR_ANS_DECRYPT_FAIL;
+        return ERR_ANS_INNER_DECRYPT_FAIL;
     }
     return ERR_OK;
 }

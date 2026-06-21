@@ -35,7 +35,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < 1) {
         ANS_LOGE("Wrong number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -45,7 +45,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (valuetype != napi_number && valuetype != napi_object) {
         ANS_LOGE("Wrong argument type. Number object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number or object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
@@ -55,7 +55,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         auto retValue = Common::GetBundleOption(env, argv[PARAM0], paras.option);
         if (retValue == nullptr) {
             ANS_LOGE("null retValue");
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
         paras.hasOption = true;
@@ -71,7 +71,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
             valuetype != napi_string && valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. String or function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be string or function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         if (valuetype == napi_number) {
@@ -95,7 +95,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types.The type of param must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM1], &paras.id));
@@ -124,7 +124,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < CANCEL_GROUP_MIN_PARA) {
         ANS_LOGE("Wrong number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -134,7 +134,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
         ANS_LOGE("Wrong argument type. String number boolean expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number or string or boolean.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     if (valuetype == napi_string) {
@@ -359,7 +359,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < 1) {
         ANS_LOGD("Wrong number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -369,7 +369,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (valuetype != napi_number && valuetype != napi_object) {
         ANS_LOGD("Wrong argument type. Number object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     if (argc > CANCEL_AS_BUNDLEOPTION_MAX_PARA) {
@@ -378,7 +378,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         auto retValue = Common::GetBundleOption(env, argv[PARAM0], paras.option);
         if (retValue == nullptr) {
             ANS_LOGE("GetBundleOption failed.");
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
         paras.hasOption = true;
@@ -388,7 +388,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
         ANS_LOGD("Wrong argument type. String number boolean expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number or string or boolean.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     if (argc > CANCEL_AS_BUNDLEOPTION_MAX_PARA) {
@@ -416,7 +416,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types.The type of param must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, argv[PARAM2], &paras.userId);

@@ -22,7 +22,7 @@
 #include <file_ex.h>
 
 #include "accesstoken_kit.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "errors.h"
 
@@ -136,14 +136,15 @@ ErrCode AdvancedNotificationService::PreReminderInfoCheck()
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("IsSystemApp is false");
         message.Message("Not systemApp.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NON_SYSTEM_APP));
-        return ERR_ANS_NON_SYSTEM_APP;
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP));
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied.");
         message.Message("Permission denied.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_1));
-        return ERR_ANS_PERMISSION_DENIED;
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     return ERR_OK;
 }
@@ -172,7 +173,7 @@ ErrCode AdvancedNotificationService::GetReminderInfoByBundles(
 
             // 2、GetNotificationSlotFlagsForBundle
             result = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(validBundle, flags);
-            if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+            if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
                 result = ERR_OK;
                 flags = DEFAULT_SLOT_FLAGS;
             }

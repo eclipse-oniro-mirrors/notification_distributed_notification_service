@@ -14,7 +14,8 @@
  */
 #include "ani_sync_config.h"
 
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -24,6 +25,8 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackConfigInfo* asyncCallbackInfo)
 {
@@ -161,8 +164,9 @@ ani_object AniSetAdditionalConfig(ani_env *env, ani_string key, ani_string value
             auto asyncCallbackInfo = static_cast<AsyncCallbackConfigInfo*>(data);
             if (asyncCallbackInfo) {
                 if (asyncCallbackInfo->result != ERR_OK) {
-                    asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SetAdditionConfig(
-                        asyncCallbackInfo->configkey, asyncCallbackInfo->configValue);
+                    asyncCallbackInfo->info.returnCode =
+                        DelayedSingleton<AnsNotification>::GetInstance()->SetAdditionConfig(
+                            asyncCallbackInfo->configkey, asyncCallbackInfo->configValue);
                     asyncCallbackInfo->result = ERR_OK;
                 }
             }

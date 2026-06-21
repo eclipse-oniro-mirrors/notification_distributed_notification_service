@@ -20,7 +20,7 @@
 #include <sstream>
 
 #include "ans_const_define.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "access_token_helper.h"
 #include "ans_permission_def.h"
@@ -38,23 +38,22 @@
 
 namespace OHOS {
 namespace Notification {
-
 ErrCode AdvancedNotificationService::GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> &date)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
 
     return GetDoNotDisturbDateByUser(userId, date);
@@ -67,16 +66,16 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDate(int32_t userId,
 
     if (userId <= SUBSCRIBE_USER_INIT) {
         ANS_LOGE("Input userId is invalid.");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     return GetDoNotDisturbDateByUser(userId, date);
@@ -126,18 +125,18 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDate(const sptr<Notification
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Not system app!");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Check permission denied!");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGE("No active user found!");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
 
     return SetDoNotDisturbDateByUser(userId, date);
@@ -152,18 +151,18 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDate(int32_t userId,
     message.Message("userId:" + std::to_string(userId));
     if (userId <= SUBSCRIBE_USER_INIT) {
         ANS_LOGE("Input userId is invalidity.");
-        message.ErrorCode(ERR_ANS_INVALID_PARAM);
+        message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     return SetDoNotDisturbDateByUser(userId, date);
@@ -175,7 +174,7 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDateByUser(const int32_t &us
     ANS_LOGD("%{public}s enter, userId = %{public}d", __FUNCTION__, userId);
     if (date == nullptr) {
         ANS_LOGE("Invalid date param");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ErrCode result = ERR_OK;
@@ -192,7 +191,7 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDateByUser(const int32_t &us
             break;
         case NotificationConstant::DoNotDisturbType::CLEARLY:
             if (beginDate >= endDate) {
-                return ERR_ANS_INVALID_PARAM;
+                return ERR_ANS_INNER_INVALID_PARAM;
             }
             break;
         default:
@@ -214,7 +213,7 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDateByUser(const int32_t &us
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("Generate invalid bundle option!");
-        return ERR_ANS_INVALID_BUNDLE;
+        return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
@@ -235,10 +234,10 @@ ErrCode AdvancedNotificationService::AddDoNotDisturbProfilesInner(
     ANS_LOGD("Called.");
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     auto submitResult = notificationSvrQueue_.SyncSubmit(
         std::bind([copyUserId = userId, copyProfiles = profiles]() {
@@ -255,7 +254,7 @@ ErrCode AdvancedNotificationService::AddDoNotDisturbProfiles(
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGE("No active user found.");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
     return AddDoNotDisturbProfilesInner(profiles, userId);
 }
@@ -266,7 +265,7 @@ ErrCode AdvancedNotificationService::AddDoNotDisturbProfiles(
     ANS_LOGD("Called.");
     if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
         ANS_LOGE("Check user exists failed.");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
     return AddDoNotDisturbProfilesInner(profiles, userId);
 }
@@ -277,10 +276,10 @@ ErrCode AdvancedNotificationService::RemoveDoNotDisturbProfilesInner(
     ANS_LOGD("Called.");
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     auto submitResult = notificationSvrQueue_.SyncSubmit(
         std::bind([copyUserId = userId, copyProfiles = profiles]() {
@@ -297,7 +296,7 @@ ErrCode AdvancedNotificationService::RemoveDoNotDisturbProfiles(
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGE("No active user found.");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
     return RemoveDoNotDisturbProfilesInner(profiles, userId);
 }
@@ -308,7 +307,7 @@ ErrCode AdvancedNotificationService::RemoveDoNotDisturbProfiles(
     ANS_LOGD("Called.");
     if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
         ANS_LOGE("Check user exists failed.");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
     return RemoveDoNotDisturbProfilesInner(profiles, userId);
 }
@@ -319,10 +318,10 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbProfileInner(
     ANS_LOGD("Called.");
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     profile = new (std::nothrow) NotificationDoNotDisturbProfile();
@@ -338,7 +337,7 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbProfile(int64_t id, sptr<Not
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
         ANS_LOGE("No active user found.");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
     return GetDoNotDisturbProfileInner(id, profile, userId);
 }
@@ -349,7 +348,7 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbProfile(
     ANS_LOGD("Called.");
     if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
         ANS_LOGE("Check user exists failed.");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
     return GetDoNotDisturbProfileInner(id, profile, userId);
 }
@@ -360,11 +359,11 @@ ErrCode AdvancedNotificationService::DoesSupportDoNotDisturbMode(bool &doesSuppo
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     doesSupport = SUPPORT_DO_NOT_DISTRUB;

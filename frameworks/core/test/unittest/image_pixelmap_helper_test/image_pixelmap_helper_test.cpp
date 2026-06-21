@@ -23,6 +23,7 @@
 #undef protected
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "../mock/mock_application_context.h"
 #include "../mock/mock_resource_manager.h"
 #include "../mock/mock_image_native.h"
@@ -76,7 +77,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00001, Function | SmallTest | Leve
     ImagePixelmapHelper helper(request, "");
     std::shared_ptr<Media::PixelMap> pixelMap;
     ErrCode ret = helper.GetPixelMap(pixelMap);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(pixelMap, nullptr);
 }
 
@@ -91,7 +92,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00002, Function | SmallTest | Leve
     ImagePixelmapHelper helper(nullptr, "test.png");
     std::shared_ptr<Media::PixelMap> pixelMap;
     ErrCode ret = helper.GetPixelMap(pixelMap);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(pixelMap, nullptr);
 }
 
@@ -109,7 +110,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00003, Function | SmallTest | Leve
     ImagePixelmapHelper helper(request, "test.png");
     std::shared_ptr<Media::PixelMap> pixelMap;
     ErrCode ret = helper.GetPixelMap(pixelMap);
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
     EXPECT_EQ(pixelMap, nullptr);
 }
 
@@ -145,7 +146,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00005, Function | SmallTest | Leve
     ImagePixelmapHelper helper(request, "test.png");
     std::shared_ptr<Media::PixelMap> pixelMap;
     ErrCode ret = helper.GetPixelMap(pixelMap);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(pixelMap, nullptr);
 }
 
@@ -163,7 +164,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00006, Function | SmallTest | Leve
     ImagePixelmapHelper helper(request, "test.png");
     std::shared_ptr<Media::PixelMap> pixelMap;
     ErrCode ret = helper.GetPixelMap(pixelMap);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(pixelMap, nullptr);
 }
 
@@ -181,7 +182,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00007, Function | SmallTest | Leve
     ImagePixelmapHelper helper(request, "test.png");
     std::shared_ptr<Media::PixelMap> pixelMap;
     ErrCode ret = helper.GetPixelMap(pixelMap);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(pixelMap, nullptr);
 }
 
@@ -199,7 +200,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00008, Function | SmallTest | Leve
     ImagePixelmapHelper helper(request, "test.png");
     std::shared_ptr<Media::PixelMap> pixelMap;
     ErrCode ret = helper.GetPixelMap(pixelMap);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(pixelMap, nullptr);
 }
 
@@ -274,7 +275,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00012, Function | SmallTest | Leve
     ImagePixelmapHelper helper(request, "test.png");
     std::shared_ptr<Media::PixelMap> pixelMap;
     ErrCode ret = helper.GetPixelMap(pixelMap);
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
     EXPECT_EQ(pixelMap, nullptr);
 }
 
@@ -292,7 +293,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00013, Function | SmallTest | Leve
     ImagePixelmapHelper helper(request, "test.png");
     std::shared_ptr<Media::PixelMap> pixelMap;
     ErrCode ret = helper.GetPixelMap(pixelMap);
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
     EXPECT_EQ(pixelMap, nullptr);
 }
 
@@ -406,7 +407,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00018, Function | SmallTest | Leve
     ImagePixelmapHelper helper(request, "test.png");
     std::shared_ptr<Media::PixelMap> pixelMap;
     ErrCode ret = helper.GetPixelMap(pixelMap);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(pixelMap, nullptr);
 }
 
@@ -424,7 +425,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00019, Function | SmallTest | Leve
     ImagePixelmapHelper helper(request, "test.png");
     std::shared_ptr<Media::PixelMap> pixelMap;
     ErrCode ret = helper.GetPixelMap(pixelMap);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(pixelMap, nullptr);
 }
 
@@ -624,7 +625,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00028, Function | SmallTest | Leve
     ImagePixelmapHelper helper(request, "test.png");
     std::shared_ptr<Media::PixelMap> pixelMap;
     ErrCode ret = helper.GetPixelMap(pixelMap);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(pixelMap, nullptr);
     EXPECT_EQ(helper.pixelMap_, nullptr);
 }
@@ -643,7 +644,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00029, Function | SmallTest | Leve
     ImagePixelmapHelper helper(request, "test.png");
     std::shared_ptr<Media::PixelMap> pixelMap;
     ErrCode ret = helper.GetPixelMap(pixelMap);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(pixelMap, nullptr);
     EXPECT_EQ(helper.pixelMap_, nullptr);
 }
@@ -1037,7 +1038,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00048, Function | SmallTest | Leve
     std::shared_ptr<Media::PixelMap> pixelMap;
     ErrCode ret = helper.GetPixelMap(pixelMap);
     
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(pixelMap, nullptr);
     EXPECT_EQ(helper.pixelMap_, nullptr);
 }
@@ -1235,7 +1236,7 @@ HWTEST_F(ImagePixelmapHelperTest, InitRawfileData_00002, Function | SmallTest | 
     
     ErrCode ret = helper.InitRawfileData();
     
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
     EXPECT_EQ(helper.resourceManager_, nullptr);
 }
 
@@ -1254,7 +1255,7 @@ HWTEST_F(ImagePixelmapHelperTest, InitRawfileData_00003, Function | SmallTest | 
     
     ErrCode ret = helper.InitRawfileData();
     
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
     EXPECT_EQ(helper.resourceManager_, nullptr);
 }
 
@@ -1273,7 +1274,7 @@ HWTEST_F(ImagePixelmapHelperTest, InitRawfileData_00004, Function | SmallTest | 
     
     ErrCode ret = helper.InitRawfileData();
     
-    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
     EXPECT_EQ(helper.resourceManager_, nullptr);
 }
 
@@ -1371,7 +1372,7 @@ HWTEST_F(ImagePixelmapHelperTest, CreateImageSource_00002, Function | SmallTest 
     helper.InitRawfileData();
     ErrCode ret = helper.CreateImageSource();
     
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(helper.imageSource_, nullptr);
 }
 
@@ -1391,7 +1392,7 @@ HWTEST_F(ImagePixelmapHelperTest, CreateImageSource_00003, Function | SmallTest 
     helper.InitRawfileData();
     ErrCode ret = helper.CreateImageSource();
     
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(helper.imageSource_, nullptr);
 }
 
@@ -1457,7 +1458,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetImageSourceInfo_00002, Function | SmallTest
     helper.CreateImageSource();
     ErrCode ret = helper.GetImageSourceInfo();
     
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(helper.imageInfo_, nullptr);
 }
 
@@ -1478,7 +1479,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetImageSourceInfo_00003, Function | SmallTest
     helper.CreateImageSource();
     ErrCode ret = helper.GetImageSourceInfo();
     
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(helper.imageInfo_, nullptr);
 }
 
@@ -1499,7 +1500,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetImageSourceInfo_00004, Function | SmallTest
     helper.CreateImageSource();
     ErrCode ret = helper.GetImageSourceInfo();
     
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1519,7 +1520,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetImageSourceInfo_00005, Function | SmallTest
     helper.CreateImageSource();
     ErrCode ret = helper.GetImageSourceInfo();
     
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1539,7 +1540,7 @@ HWTEST_F(ImagePixelmapHelperTest, GetImageSourceInfo_00006, Function | SmallTest
     helper.CreateImageSource();
     ErrCode ret = helper.GetImageSourceInfo();
     
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1672,7 +1673,7 @@ HWTEST_F(ImagePixelmapHelperTest, CreatePixelMap_00005, Function | SmallTest | L
     helper.CreateImageSource();
     ErrCode ret = helper.CreatePixelMap();
     
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(helper.pixelMap_, nullptr);
 }
 
@@ -1695,7 +1696,7 @@ HWTEST_F(ImagePixelmapHelperTest, CreatePixelMap_00006, Function | SmallTest | L
     helper.CreateImageSource();
     ErrCode ret = helper.CreatePixelMap();
     
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(helper.pixelMap_, nullptr);
 }
 
@@ -1788,7 +1789,7 @@ HWTEST_F(ImagePixelmapHelperTest, CreatePixelMap_00010, Function | SmallTest | L
     helper.CreateImageSource();
     ErrCode ret = helper.CreatePixelMap();
     
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(helper.pixelMap_, nullptr);
 }
 
@@ -1970,7 +1971,7 @@ HWTEST_F(ImagePixelmapHelperTest, CreatePixelMap_00018, Function | SmallTest | L
     
     ErrCode ret = helper.CreatePixelMap();
     
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(helper.pixelMap_, nullptr);
 }
 

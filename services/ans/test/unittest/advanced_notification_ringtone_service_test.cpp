@@ -30,6 +30,7 @@
 #include "advanced_notification_service.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
 #include "ans_result_data_synchronizer.h"
@@ -55,7 +56,6 @@ using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 namespace Notification {
-
 extern void MockIsVerfyPermisson(bool isVerify);
 extern void MockIsSystemApp(bool isSystemApp);
 extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
@@ -118,7 +118,7 @@ HWTEST_F(AdvancedNotificationRingToneServiceTest, SetRingtoneInfoByBundle_00001,
     ASSERT_NE(ringtoneInfo, nullptr);
     ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
     auto ret = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
-    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -136,7 +136,7 @@ HWTEST_F(AdvancedNotificationRingToneServiceTest, SetRingtoneInfoByBundle_00002,
     sptr<NotificationRingtoneInfo> ringtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
     ASSERT_NE(ringtoneInfo, nullptr);
     auto ret = advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
-    ASSERT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -171,7 +171,8 @@ HWTEST_F(AdvancedNotificationRingToneServiceTest, SetRingtoneInfoByBundle_00004,
     MockIsVerfyPermisson(true);
     sptr<NotificationBundleOption> bundleOption = nullptr;
     sptr<NotificationRingtoneInfo> ringtoneInfo = nullptr;
-    ASSERT_EQ(advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo),
+        ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -191,7 +192,7 @@ HWTEST_F(AdvancedNotificationRingToneServiceTest, GetRingtoneInfoByBundle_00001,
     ASSERT_NE(ringtoneInfo, nullptr);
     ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
     auto ret = advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
-    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(ret, ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -210,7 +211,7 @@ HWTEST_F(AdvancedNotificationRingToneServiceTest, GetRingtoneInfoByBundle_00002,
     ASSERT_NE(ringtoneInfo, nullptr);
     ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
     auto ret = advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
-    ASSERT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -228,7 +229,8 @@ HWTEST_F(AdvancedNotificationRingToneServiceTest, GetRingtoneInfoByBundle_00003,
     sptr<NotificationRingtoneInfo> ringtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
     ASSERT_NE(ringtoneInfo, nullptr);
     ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
-    ASSERT_EQ(advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, ringtoneInfo), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, ringtoneInfo),
+        ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**

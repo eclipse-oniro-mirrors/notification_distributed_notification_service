@@ -19,6 +19,7 @@
 #include "notification_shell_command.h"
 #undef private
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ians_manager.h"
 #include "mock_ans_manager_stub.h"
 #include "singleton.h"
@@ -496,7 +497,7 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1300, Function | Medium
 
     NotificationShellCommand cmd(argc, argv);
 
-    EXPECT_EQ(cmd.RunSetEnableCmd(), ERR_ANS_SERVICE_NOT_CONNECTED);
+    EXPECT_EQ(cmd.RunSetEnableCmd(), ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 #endif
 /**

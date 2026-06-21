@@ -42,6 +42,7 @@ ohos_unittest("notification_shell_command_dump_test") {
   include_dirs = []
 
   sources = [
+    "${core_path}/common/src/ans_service_errors.cpp",
     "${tools_path}/dump/src/notification_shell_command.cpp",
     "${tools_path}/dump/src/shell_command.cpp",
     "${tools_path}/test/mock/mock_ans_notification.cpp",

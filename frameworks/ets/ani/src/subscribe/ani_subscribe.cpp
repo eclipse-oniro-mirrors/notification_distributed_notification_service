@@ -16,7 +16,9 @@
 
 #include <thread>
 #include <iostream>
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "ans_service_errors.h"
+#include "singleton.h"
 #include "ani_remove.h"
 #include "ans_log_wrapper.h"
 #include "sts_subscribe.h"
@@ -24,6 +26,7 @@
 
 namespace OHOS {
 namespace NotificationSubScribeSts {
+using OHOS::Notification::AnsNotification;
 static const char *REMOVE_FOR_BUNDLE_SIGNATURE =
     "C{notification.NotificationCommonDef.BundleOption}"
     "C{@ohos.notificationSubscribe.notificationSubscribe.NotificationKey}"
@@ -75,9 +78,9 @@ ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object 
         return nullptr;
     }
     callback->SetVm(vm);
-    int32_t result = Notification::NotificationHelper::DistributeOperation(info, callback);
-    ANS_LOGD("result: %{public}d. ErrorToExternal %{public}d",
-        result, NotificationSts::GetExternalCode(result));
+    OHOS::Notification::InnerErrorCode result =
+        DelayedSingleton<AnsNotification>::GetInstance()->DistributeOperation(info, callback);
+    ANS_LOGD("result: %{public}d", result);
     if (result != ERR_OK || noWithOperationInfo) {
         callback->OnStsOperationCallback(env, result);
     }

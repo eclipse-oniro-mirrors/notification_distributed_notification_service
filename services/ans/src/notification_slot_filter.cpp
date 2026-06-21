@@ -15,7 +15,7 @@
 
 #include "notification_slot_filter.h"
 
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "notification_preferences.h"
 
@@ -57,7 +57,7 @@ AnsStatus NotificationSlotFilter::OnPublish(const std::shared_ptr<NotificationRe
         }
     } else {
         ANS_LOGE("Non valid slot!");
-        return AnsStatus(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST, "Non valid slot!");
+        return AnsStatus(ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_NOT_EXIST, "Non valid slot!");
     }
 
     return AnsStatus();

@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_ut_constant.h"
 #include "notification_preferences.h"
 #include "notification_slot.h"
@@ -73,7 +74,7 @@ HWTEST_F(PermissionFilterTest, PermissionFilterTest_00100, Function | SmallTest 
 /**
  * @tc.number    : PermissionFilterTest_00200
  * @tc.name      :
- * @tc.desc      : Test OnPublish function when NotificationsEnabled is false.Expect return ERR_ANS_NOT_ALLOWED
+ * @tc.desc      : Test OnPublish function when NotificationsEnabled is false.Expect return ERR_ANS_INNER_NOT_ALLOWED
  */
 HWTEST_F(PermissionFilterTest, PermissionFilterTest_00200, Function | SmallTest | Level1)
 {
@@ -97,7 +98,7 @@ HWTEST_F(PermissionFilterTest, PermissionFilterTest_00200, Function | SmallTest 
     record->notification = new Notification(record->request);
     record->slot = slot;
 
-    ASSERT_EQ((int)permissionFilter.OnPublish(record).GetErrCode(), (int)ERR_ANS_NOT_ALLOWED);
+    ASSERT_EQ((int)permissionFilter.OnPublish(record).GetErrCode(), (int)ERR_ANS_INNER_NOT_ALLOWED);
 }
 }  // namespace Notification
 }  // namespace OHOS

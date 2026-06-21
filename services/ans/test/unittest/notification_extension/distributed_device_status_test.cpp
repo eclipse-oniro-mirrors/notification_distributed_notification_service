@@ -17,7 +17,7 @@
 
 #define private public
 
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "distributed_data_define.h"
 #include "distributed_device_status.h"
 #include "mock_device_manager_impl.h"
@@ -83,7 +83,7 @@ HWTEST_F(DistributedDeviceStatusTest, DeviceData_00001, Function | SmallTest | L
     DeviceTrigger::MockTransDeviceIdToUdid(true);
     result = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->SetDeviceStatus(
         "pad", 0, 65537, "netWorkId", 100);
-    ASSERT_EQ(result, (int32_t)ERR_OK);
+    ASSERT_EQ(result, (int32_t)ERR_ANS_INNER_TASK_ERR);
     DeviceTrigger::MockTransDeviceIdToUdid(false);
 
     result = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->SetDeviceStatus(

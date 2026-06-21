@@ -15,17 +15,21 @@
 
 #include "napi_template.h"
 
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "ans_template.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 napi_value NapiIsSupportTemplate(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("called");
     TemplateName params;
     if (ParseParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -48,8 +52,9 @@ napi_value NapiIsSupportTemplate(napi_env env, napi_callback_info info)
             AsyncCallbackInfoTemplate *asyncCallbackinfo = static_cast<AsyncCallbackInfoTemplate *>(data);
 
             if (asyncCallbackinfo) {
-                asyncCallbackinfo->info.errorCode = NotificationHelper::IsSupportTemplate(
-                    asyncCallbackinfo->params.templateName, asyncCallbackinfo->params.support);
+                asyncCallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->IsSupportTemplate(
+                        asyncCallbackinfo->params.templateName, asyncCallbackinfo->params.support);
             }
         },
         [](napi_env env, napi_status status, void *data) {

@@ -30,6 +30,7 @@
 #include "notification_subscriber.h"
 #include "notification_statistics.h"
 #include "want_params.h"
+#include "ans_service_errors.h"
 #include "distributed_bundle_option.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "swing_callback_service.h"
@@ -52,7 +53,7 @@ public:
      *             This parameter must be specified.
      * @return Returns add notification slot result.
      */
-    ErrCode AddNotificationSlot(const NotificationSlot &slot);
+    InnerErrorCode AddNotificationSlot(const NotificationSlot &slot);
 
     /**
      * @brief Adds a notification slot by type.
@@ -60,7 +61,7 @@ public:
      * @param slotType Indicates the notification slot type to be added.
      * @return Returns add notification slot result.
      */
-    ErrCode AddSlotByType(const NotificationConstant::SlotType &slotType);
+    InnerErrorCode AddSlotByType(const NotificationConstant::SlotType &slotType);
 
     /**
      * @brief Creates multiple notification slots.
@@ -68,7 +69,7 @@ public:
      * @param slots Indicates the notification slots to create.
      * @return Returns add notification slots result.
      */
-    ErrCode AddNotificationSlots(const std::vector<NotificationSlot> &slots);
+    InnerErrorCode AddNotificationSlots(const std::vector<NotificationSlot> &slots);
 
     /**
      * @brief Deletes a created notification slot based on the slot ID.
@@ -77,14 +78,14 @@ public:
      *                This parameter must be specified.
      * @return Returns remove notification slot result.
      */
-    ErrCode RemoveNotificationSlot(const NotificationConstant::SlotType &slotType);
+    InnerErrorCode RemoveNotificationSlot(const NotificationConstant::SlotType &slotType);
 
     /**
      * @brief Deletes all notification slots.
      *
      * @return Returns remove all slots result.
      */
-    ErrCode RemoveAllSlots();
+    InnerErrorCode RemoveAllSlots();
 
     /**
      * @brief Queries a created notification slot.
@@ -94,7 +95,7 @@ public:
      * @param slot Indicates the created NotificationSlot.
      * @return Returns the get notification slot result.
      */
-    ErrCode GetNotificationSlot(const NotificationConstant::SlotType &slotType, sptr<NotificationSlot> &slot);
+    InnerErrorCode GetNotificationSlot(const NotificationConstant::SlotType &slotType, sptr<NotificationSlot> &slot);
 
     /**
      * @brief Obtains all notification slots of this application.
@@ -102,7 +103,7 @@ public:
      * @param slots Indicates the created NotificationSlot.
      * @return Returns all notification slots of this application.
      */
-    ErrCode GetNotificationSlots(std::vector<sptr<NotificationSlot>> &slots);
+    InnerErrorCode GetNotificationSlots(std::vector<sptr<NotificationSlot>> &slots);
 
     /**
      * @brief Obtains number of slot.
@@ -111,7 +112,7 @@ public:
      * @param num Indicates number of slot.
      * @return Returns get slot number by bundle result.
      */
-    ErrCode GetNotificationSlotNumAsBundle(const NotificationBundleOption &bundleOption, uint64_t &num);
+    InnerErrorCode GetNotificationSlotNumAsBundle(const NotificationBundleOption &bundleOption, uint64_t &num);
 
     /**
      * @brief Obtains slotFlags of bundle.
@@ -120,7 +121,8 @@ public:
      * @param slotFlags Indicates slotFlags of bundle.
      * @return Returns get slotflags by bundle result.
      */
-    ErrCode GetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption, uint32_t &slotFlags);
+    InnerErrorCode GetNotificationSlotFlagsAsBundle(
+        const NotificationBundleOption &bundleOption, uint32_t &slotFlags);
 
     /**
      * @brief Obtains slotFlags of bundle.
@@ -128,7 +130,7 @@ public:
      * @param slotFlags Indicates slotFlags of bundle.
      * @return Returns get slotflags by bundle result.
      */
-    ErrCode GetNotificationSettings(uint32_t &slotFlags);
+    InnerErrorCode GetNotificationSettings(uint32_t &slotFlags);
     /**
      * @brief Set slotFlags of bundle.
      *
@@ -136,7 +138,7 @@ public:
      * @param slotFlags Indicates slotFlags of bundle.
      * @return Returns set slotflags by bundle result.
      */
-    ErrCode SetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption, uint32_t slotFlags);
+    InnerErrorCode SetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption, uint32_t slotFlags);
 
     /**
      * @brief Publishes a notification.
@@ -147,7 +149,7 @@ public:
      *                This parameter must be specified.
      * @return Returns publish notification result.
      */
-    ErrCode PublishNotification(const NotificationRequest &request, const std::string &instanceKey = "");
+    InnerErrorCode PublishNotification(const NotificationRequest &request, const std::string &instanceKey = "");
 
     /**
      * @brief Publishes a notification with a specified label.
@@ -159,7 +161,7 @@ public:
      *                This parameter must be specified.
      * @return Returns publish notification result.
      */
-    ErrCode PublishNotification(const std::string &label, const NotificationRequest &request,
+    InnerErrorCode PublishNotification(const std::string &label, const NotificationRequest &request,
         const std::string &instanceKey = "");
 
     /**
@@ -171,7 +173,7 @@ public:
      *                This parameter must be specified.
      * @return Returns publish notification result.
      */
-    ErrCode PublishNotificationForIndirectProxy(const NotificationRequest &request);
+    InnerErrorCode PublishNotificationForIndirectProxy(const NotificationRequest &request);
 
     /**
      * @brief Cancels a published notification.
@@ -181,7 +183,7 @@ public:
      *                       Otherwise, this method does not take effect.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelNotification(int32_t notificationId, const std::string &instanceKey = "");
+    InnerErrorCode CancelNotification(int32_t notificationId, const std::string &instanceKey = "");
 
     /**
      * @brief Cancels a published notification matching the specified label and notificationId.
@@ -190,7 +192,7 @@ public:
      * @param notificationId Indicates the ID of the notification to cancel.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelNotification(const std::string &label, int32_t notificationId,
+    InnerErrorCode CancelNotification(const std::string &label, int32_t notificationId,
         const std::string &instanceKey = "");
 
     /**
@@ -199,7 +201,7 @@ public:
      *
      * @return Returns cancel all notifications result.
      */
-    ErrCode CancelAllNotifications(const std::string &instanceKey = "");
+    InnerErrorCode CancelAllNotifications(const std::string &instanceKey = "");
 
     /**
      * @brief Cancels a published agent notification.
@@ -211,7 +213,7 @@ public:
      * @param userId Indicates the specific user.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundle(int32_t notificationId, const std::string &representativeBundle, int32_t userId);
+    InnerErrorCode CancelAsBundle(int32_t notificationId, const std::string &representativeBundle, int32_t userId);
 
     /**
      * @brief Cancels a published agent notification.
@@ -222,7 +224,7 @@ public:
      *                       Otherwise, this method does not take effect.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundle(const NotificationBundleOption &bundleOption, int32_t notificationId);
+    InnerErrorCode CancelAsBundle(const NotificationBundleOption &bundleOption, int32_t notificationId);
 
     /**
      * @brief Obtains the number of active notifications of the current application in the system.
@@ -230,7 +232,7 @@ public:
      * @param num Indicates the number of active notifications of the current application.
      * @return Returns get active notification nums result.
      */
-    ErrCode GetActiveNotificationNums(uint64_t &num);
+    InnerErrorCode GetActiveNotificationNums(uint64_t &num);
 
     /**
      * @brief Obtains active notifications of the current application in the system.
@@ -238,7 +240,7 @@ public:
      * @param  request Indicates active NotificationRequest objects of the current application.
      * @return Returns get active notifications result.
      */
-    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &request,
+    InnerErrorCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &request,
         const std::string &instanceKey = "");
 
     /**
@@ -250,7 +252,7 @@ public:
      * @param canPublish Indicates whether your application has permission to publish notifications.
      * @return Returns can publish notification as bundle result.
      */
-    ErrCode CanPublishNotificationAsBundle(const std::string &representativeBundle, bool &canPublish);
+    InnerErrorCode CanPublishNotificationAsBundle(const std::string &representativeBundle, bool &canPublish);
 
     /**
      * @brief Publishes a notification in the name of a specified application bundle.
@@ -263,7 +265,8 @@ public:
      *                             notifications for it by calling setNotificationAgent.
      * @return Returns publish notification as bundle result.
      */
-    ErrCode PublishNotificationAsBundle(const std::string &representativeBundle, const NotificationRequest &request);
+    InnerErrorCode PublishNotificationAsBundle(
+        const std::string &representativeBundle, const NotificationRequest &request);
 
     /**
      * @brief Sets the number of active notifications of the current application as the number to be displayed on the
@@ -271,7 +274,7 @@ public:
      *
      * @return Returns set notification badge num result.
      */
-    ErrCode SetNotificationBadgeNum();
+    InnerErrorCode SetNotificationBadgeNum();
 
     /**
      * @brief Sets the number to be displayed on the notification badge of the application.
@@ -281,7 +284,7 @@ public:
      *            If the value is greater than 99, 99+ will be displayed.
      * @return Returns set notification badge num result.
      */
-    ErrCode SetNotificationBadgeNum(int32_t num);
+    InnerErrorCode SetNotificationBadgeNum(int32_t num);
 
     /**
      * @brief Checks whether this application has permission to publish notifications. The caller must have
@@ -290,7 +293,7 @@ public:
      * @param  allowed True if this application has the permission; returns false otherwise
      * @return Returns is allowed notify result.
      */
-    ErrCode IsAllowedNotify(bool &allowed);
+    InnerErrorCode IsAllowedNotify(bool &allowed);
 
     /**
      * @brief Checks whether this application has permission to publish notifications.
@@ -298,7 +301,7 @@ public:
      * @param  allowed True if this application has the permission; returns false otherwise
      * @return Returns is allowed notify result.
      */
-    ErrCode IsAllowedNotifySelf(bool &allowed);
+    InnerErrorCode IsAllowedNotifySelf(bool &allowed);
 
     /**
      * @brief Checks whether this application can pop enable notification dialog.
@@ -306,7 +309,7 @@ public:
      * @param  canPop True if can pop enable notification dialog
      * @return Returns is canPop result.
      */
-    ErrCode CanPopEnableNotificationDialog(sptr<AnsDialogHostClient> &hostClient,
+    InnerErrorCode CanPopEnableNotificationDialog(sptr<AnsDialogHostClient> &hostClient,
         bool &canPop, std::string &bundleName);
 
     /**
@@ -314,7 +317,7 @@ public:
      *
      * @return Returns remove dialog result.
      */
-    ErrCode RemoveEnableNotificationDialog();
+    InnerErrorCode RemoveEnableNotificationDialog();
 
     /**
      * @brief Allows the current application to publish notifications on a specified device.
@@ -323,7 +326,7 @@ public:
      *                 only be null or an empty string, indicating the current device.
      * @return Returns set notifications enabled for default bundle result.
      */
-    ErrCode RequestEnableNotification(std::string &deviceId,
+    InnerErrorCode RequestEnableNotification(std::string &deviceId,
         sptr<AnsDialogHostClient> &hostClient,
         sptr<IRemoteObject> &callerToken);
 
@@ -334,7 +337,7 @@ public:
      * @param uid uid.
      * @return Returns set notifications enabled for the bundle result.
      */
-    ErrCode RequestEnableNotification(const std::string bundleName, const int32_t uid);
+    InnerErrorCode RequestEnableNotification(const std::string bundleName, const int32_t uid);
 
     /**
      * @brief Checks whether this application has permission to modify the Do Not Disturb (DND) notification policy.
@@ -342,7 +345,7 @@ public:
      * @param hasPermission True if this application is suspended; returns false otherwise.
      * @return Returns has notification policy access permission.
      */
-    ErrCode HasNotificationPolicyAccessPermission(bool &hasPermission);
+    InnerErrorCode HasNotificationPolicyAccessPermission(bool &hasPermission);
 
     /**
      * @brief Obtains the importance level of this application.
@@ -351,7 +354,7 @@ public:
                LEVEL_MIN, LEVEL_LOW, LEVEL_DEFAULT, LEVEL_HIGH, or LEVEL_UNDEFINED.
      * @return Returns get bundle importance result
      */
-    ErrCode GetBundleImportance(NotificationSlot::NotificationLevel &importance);
+    InnerErrorCode GetBundleImportance(NotificationSlot::NotificationLevel &importance);
 
     /**
      * @brief Subscribes to notifications from all applications. This method can be called only by applications
@@ -369,8 +372,8 @@ public:
      * @version version{2} system permissions {ohos.permission.NOTIFICATION_DATA_SUBSCRIBE}.
      * @return Returns subscribe notification result.
      */
-    ErrCode SubscribeNotificationV26(const std::shared_ptr<NotificationSubscriber> &subscriber);
-    ErrCode SubscribeNotificationV26(const std::shared_ptr<NotificationSubscriber> &subscriber,
+    InnerErrorCode SubscribeNotificationV26(const std::shared_ptr<NotificationSubscriber> &subscriber);
+    InnerErrorCode SubscribeNotificationV26(const std::shared_ptr<NotificationSubscriber> &subscriber,
         const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
     /**
@@ -388,7 +391,7 @@ public:
      *                   This parameter must be specified.
      * @return Returns subscribe notification result.
      */
-    ErrCode SubscribeNotification(const NotificationSubscriber &subscriber);
+    InnerErrorCode SubscribeNotification(const NotificationSubscriber &subscriber);
 
     /**
      * @brief Subscribes to notifications from all applications. This method can be called only by applications
@@ -404,7 +407,7 @@ public:
      *                   This parameter must be specified.
      * @return Returns subscribe notification result.
      */
-    ErrCode SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber);
+    InnerErrorCode SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber);
 
     /**
      * @brief Subscribes to notifications from the appliaction self.
@@ -418,7 +421,7 @@ public:
      *                   This parameter must be specified.
      * @return Returns subscribe notification result.
      */
-    ErrCode SubscribeNotificationSelf(const NotificationSubscriber &subscriber);
+    InnerErrorCode SubscribeNotificationSelf(const NotificationSubscriber &subscriber);
 
     /**
      * @brief Subscribes to notifications from the appliaction self.
@@ -431,7 +434,7 @@ public:
      *                   This parameter must be specified.
      * @return Returns subscribe notification result.
      */
-    ErrCode SubscribeNotificationSelf(const std::shared_ptr<NotificationSubscriber> &subscriber);
+    InnerErrorCode SubscribeNotificationSelf(const std::shared_ptr<NotificationSubscriber> &subscriber);
 
     /**
      * @brief Subscribes liveView notification. This method can be called only by applications
@@ -443,7 +446,7 @@ public:
      *                   This parameter must be specified.
      * @return Returns subscribe notification result.
      */
-    ErrCode SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber,
+    InnerErrorCode SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber,
         const bool isNative = true);
 
     /**
@@ -465,7 +468,7 @@ public:
      *                      user ID, or device name. This parameter is optional.
      * @return Returns subscribe notification result.
      */
-    ErrCode SubscribeNotification(
+    InnerErrorCode SubscribeNotification(
         const NotificationSubscriber &subscriber, const NotificationSubscribeInfo &subscribeInfo);
 
     /**
@@ -485,7 +488,7 @@ public:
      *                      user ID, or device name. This parameter is optional.
      * @return Returns subscribe notification result.
      */
-    ErrCode SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+    InnerErrorCode SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
         const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
     /**
@@ -504,7 +507,7 @@ public:
      *                   This parameter must be specified.
      * @return Returns unsubscribe notification result.
      */
-    ErrCode UnSubscribeNotification(NotificationSubscriber &subscriber);
+    InnerErrorCode UnSubscribeNotification(NotificationSubscriber &subscriber);
 
     /**
      * @brief Unsubscribes from all notifications. This method can be called only by applications with required
@@ -521,7 +524,7 @@ public:
      *                   This parameter must be specified.
      * @return Returns unsubscribe notification result.
      */
-    ErrCode UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber);
+    InnerErrorCode UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber);
 
     /**
      * @brief Unsubscribes from all notifications based on the filtering criteria. This method can be called
@@ -537,7 +540,8 @@ public:
      *                      user ID, or device name. This parameter is optional.
      * @return Returns unsubscribe notification result.
      */
-    ErrCode UnSubscribeNotification(NotificationSubscriber &subscriber, NotificationSubscribeInfo subscribeInfo);
+    InnerErrorCode UnSubscribeNotification(
+        NotificationSubscriber &subscriber, NotificationSubscribeInfo subscribeInfo);
 
     /**
      * @brief Unsubscribes from all notifications based on the filtering criteria. This method can be called
@@ -550,7 +554,7 @@ public:
      *                      user ID, or device name. This parameter is optional.
      * @return Returns unsubscribe notification result.
      */
-    ErrCode UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+    InnerErrorCode UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
         const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
     /**
@@ -562,7 +566,7 @@ public:
      * @param buttonOption Indicates which button has been clicked.
      * @return Returns trigger localLiveView result.
      */
-    ErrCode TriggerLocalLiveView(const NotificationBundleOption &bundleOption,
+    InnerErrorCode TriggerLocalLiveView(const NotificationBundleOption &bundleOption,
         const int32_t notificationId, const NotificationButtonOption &buttonOption);
 
     /**
@@ -573,7 +577,7 @@ public:
      * @param removeReason Indicates the reason of remove notification.
      * @return Returns remove notification result.
      */
-    ErrCode RemoveNotification(const std::string &key, int32_t removeReason);
+    InnerErrorCode RemoveNotification(const std::string &key, int32_t removeReason);
 
     /**
      * @brief Removes a specified removable notification of other applications.
@@ -585,7 +589,7 @@ public:
      * @param removeReason Indicates the reason of remove notification.
      * @return Returns remove notification result.
      */
-    ErrCode RemoveNotification(const NotificationBundleOption &bundleOption, const int32_t notificationId,
+    InnerErrorCode RemoveNotification(const NotificationBundleOption &bundleOption, const int32_t notificationId,
         const std::string &label, int32_t removeReason);
 
     /**
@@ -595,9 +599,9 @@ public:
      * @param bundleOption Indicates the bundle name and uid of the application whose notifications are to be removed.
      * @return Returns remove notification result.
      */
-    ErrCode RemoveAllNotifications(const NotificationBundleOption &bundleOption);
+    InnerErrorCode RemoveAllNotifications(const NotificationBundleOption &bundleOption);
 
-    ErrCode RemoveNotifications(const std::vector<std::string> hashcodes, int32_t removeReason);
+    InnerErrorCode RemoveNotifications(const std::vector<std::string> hashcodes, int32_t removeReason);
 
     /**
      * @brief Removes all removable notifications of a specified bundle.
@@ -606,7 +610,7 @@ public:
      * @param bundleOption Indicates the bundle name and uid of the application whose notifications are to be removed.
      * @return Returns remove notifications result.
      */
-    ErrCode RemoveNotificationsByBundle(const NotificationBundleOption &bundleOption);
+    InnerErrorCode RemoveNotificationsByBundle(const NotificationBundleOption &bundleOption);
 
     /**
      * @brief Removes all removable notifications in the system.
@@ -614,14 +618,14 @@ public:
      *
      * @return Returns remove notifications result.
      */
-    ErrCode RemoveNotifications();
+    InnerErrorCode RemoveNotifications();
 
     /**
      * @brief Removes Distributed notifications in the system.
      * @note Your application must have platform signature to use this method.
      * @return Returns remove notifications result.
      */
-    ErrCode RemoveDistributedNotifications(const std::vector<std::string>& hashcodes,
+    InnerErrorCode RemoveDistributedNotifications(const std::vector<std::string>& hashcodes,
         const NotificationConstant::SlotType& slotType,
         const NotificationConstant::DistributedDeleteType& deleteType,
         const int32_t removeReason, const std::string& deviceId = "");
@@ -633,7 +637,7 @@ public:
      * @param slots Indicates a list of notification slots.
      * @return Returns get notification slots for bundle result.
      */
-    ErrCode GetNotificationSlotsForBundle(
+    InnerErrorCode GetNotificationSlotsForBundle(
         const NotificationBundleOption &bundleOption, std::vector<sptr<NotificationSlot>> &slots);
 
     /**
@@ -644,7 +648,7 @@ public:
      * @param slot Indicates a notification slot.
      * @return Returns get notification slots for bundle result.
      */
-    ErrCode GetNotificationSlotForBundle(
+    InnerErrorCode GetNotificationSlotForBundle(
         const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType,
         sptr<NotificationSlot> &slot);
 
@@ -655,7 +659,7 @@ public:
      * @param slots Indicates a list of new notification slots.
      * @return Returns update notification slots for bundle result.
      */
-    ErrCode UpdateNotificationSlots(
+    InnerErrorCode UpdateNotificationSlots(
         const NotificationBundleOption &bundleOption, const std::vector<sptr<NotificationSlot>> &slots);
 
     /**
@@ -665,11 +669,11 @@ public:
      * @param notification Indicates all active notifications of this application.
      * @return Returns get all active notifications
      */
-    ErrCode GetAllActiveNotifications(std::vector<sptr<Notification>> &notification);
+    InnerErrorCode GetAllActiveNotifications(std::vector<sptr<Notification>> &notification);
 
-    ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+    InnerErrorCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
         const NotificationConstant::SlotType slotType);
-    ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+    InnerErrorCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
         const NotificationConstant::SlotType slotType, int32_t userId);
 
     /**
@@ -682,7 +686,7 @@ public:
      * @param notification Indicates the set of active notifications corresponding to the specified key.
      * @return Returns get all active notifications result.
      */
-    ErrCode GetAllActiveNotifications(
+    InnerErrorCode GetAllActiveNotifications(
         const std::vector<std::string> key, std::vector<sptr<Notification>> &notification);
 
     /**
@@ -692,7 +696,7 @@ public:
      * @param extraInfo
      * @return
      */
-    ErrCode GetActiveNotificationByFilter(
+    InnerErrorCode GetActiveNotificationByFilter(
         const LiveViewFilter &filter, sptr<NotificationRequest> &request);
 
     /**
@@ -703,7 +707,7 @@ public:
      * @param parameters Notification parameters to parameters.
      * @return Returns ERR_OK on success, error code on failure.
      */
-    ErrCode GetNotificationParameters(
+    InnerErrorCode GetNotificationParameters(
         int32_t notificationId, const std::string &label, sptr<NotificationParameters> &parameters);
 
     /**
@@ -715,7 +719,7 @@ public:
      * @param allowed True if the application has permissions; returns false otherwise.
      * @return Returns is allowed notify result.
      */
-    ErrCode IsAllowedNotify(const NotificationBundleOption &bundleOption, bool &allowed);
+    InnerErrorCode IsAllowedNotify(const NotificationBundleOption &bundleOption, bool &allowed);
 
     /**
      * @brief Sets whether to allow all applications to publish notifications on a specified device. The caller must
@@ -728,7 +732,7 @@ public:
      *                allowed.
      * @return Returns set notifications enabled for all bundles result.
      */
-    ErrCode SetNotificationsEnabledForAllBundles(const std::string &deviceId, bool enabled);
+    InnerErrorCode SetNotificationsEnabledForAllBundles(const std::string &deviceId, bool enabled);
 
     /**
      * @brief Sets whether to allow the current application to publish notifications on a specified device. The caller
@@ -741,7 +745,7 @@ public:
      *                notifications are not allowed.
      * @return Returns set notifications enabled for default bundle result.
      */
-    ErrCode SetNotificationsEnabledForDefaultBundle(const std::string &deviceId, bool enabled);
+    InnerErrorCode SetNotificationsEnabledForDefaultBundle(const std::string &deviceId, bool enabled);
 
     /**
      * @brief Sets whether to allow a specified application to publish notifications on a specified device. The caller
@@ -755,7 +759,7 @@ public:
      *                are not allowed.
      * @return Returns set notifications enabled for specified bundle result.
      */
-    ErrCode SetNotificationsEnabledForSpecifiedBundle(
+    InnerErrorCode SetNotificationsEnabledForSpecifiedBundle(
         const NotificationBundleOption &bundleOption, const std::string &deviceId, bool enabled);
 
     /**
@@ -765,7 +769,7 @@ public:
      * @param enabled Specifies whether to allow the given application to show badge.
      * @return Returns set result.
      */
-    ErrCode SetShowBadgeEnabledForBundle(const NotificationBundleOption &bundleOption, bool enabled);
+    InnerErrorCode SetShowBadgeEnabledForBundle(const NotificationBundleOption &bundleOption, bool enabled);
 
     /**
      * @brief Sets whether to allow a specified application to to show badge.
@@ -773,7 +777,8 @@ public:
      * @param bundleOptions Indicates the bundle name, uid and is show badge of the application.
      * @return Returns set result.
      */
-    ErrCode SetShowBadgeEnabledForBundles(const std::vector<std::pair<NotificationBundleOption, bool>> &bundleOptions);
+    InnerErrorCode SetShowBadgeEnabledForBundles(
+        const std::vector<std::pair<NotificationBundleOption, bool>> &bundleOptions);
 
     /**
      * @brief Obtains the flag that whether to allow a specified application to to show badge.
@@ -782,7 +787,7 @@ public:
      * @param enabled Specifies whether to allow the given application to show badge.
      * @return Returns get result.
      */
-    ErrCode GetShowBadgeEnabledForBundle(const NotificationBundleOption &bundleOption, bool &enabled);
+    InnerErrorCode GetShowBadgeEnabledForBundle(const NotificationBundleOption &bundleOption, bool &enabled);
 
     /**
      * @brief Obtains the flag that whether to allow applications to show badge.
@@ -791,7 +796,7 @@ public:
      * @param bundleEnable Allow applications to show badge.
      * @return Returns get result.
      */
-    ErrCode GetShowBadgeEnabledForBundles(const std::vector<NotificationBundleOption> &bundleOptions,
+    InnerErrorCode GetShowBadgeEnabledForBundles(const std::vector<NotificationBundleOption> &bundleOptions,
         std::map<sptr<NotificationBundleOption>, bool> &bundleEnable);
 
     /**
@@ -800,7 +805,7 @@ public:
      * @param enabled Specifies whether to allow the given application to show badge.
      * @return Returns get result.
      */
-    ErrCode GetShowBadgeEnabled(bool &enabled);
+    InnerErrorCode GetShowBadgeEnabled(bool &enabled);
 
     /**
      * @brief Cancels the notification of the specified group of this application.
@@ -808,7 +813,7 @@ public:
      * @param groupName the specified group name.
      * @return Returns cancel group result.
      */
-    ErrCode CancelGroup(const std::string &groupName, const std::string &instanceKey = "");
+    InnerErrorCode CancelGroup(const std::string &groupName, const std::string &instanceKey = "");
 
     /**
      * @brief Removes the notification of the specified group of the specified application.
@@ -817,7 +822,7 @@ public:
      * @param groupName Indicates the specified group name.
      * @return Returns remove group by bundle result.
      */
-    ErrCode RemoveGroupByBundle(const NotificationBundleOption &bundleOption, const std::string &groupName);
+    InnerErrorCode RemoveGroupByBundle(const NotificationBundleOption &bundleOption, const std::string &groupName);
 
     /**
      * @brief Sets the do not disturb time.
@@ -826,7 +831,7 @@ public:
      * @param doNotDisturbDate Indicates the do not disturb time to set.
      * @return Returns set do not disturb time result.
      */
-    ErrCode SetDoNotDisturbDate(const NotificationDoNotDisturbDate &doNotDisturbDate);
+    InnerErrorCode SetDoNotDisturbDate(const NotificationDoNotDisturbDate &doNotDisturbDate);
 
     /**
      * @brief Obtains the do not disturb time.
@@ -835,7 +840,7 @@ public:
      * @param doNotDisturbDate Indicates the do not disturb time to get.
      * @return Returns set do not disturb time result.
      */
-    ErrCode GetDoNotDisturbDate(NotificationDoNotDisturbDate &doNotDisturbDate);
+    InnerErrorCode GetDoNotDisturbDate(NotificationDoNotDisturbDate &doNotDisturbDate);
 
     /**
      * @brief Add the do not disturb profiles.
@@ -844,8 +849,8 @@ public:
      * @param doNotDisturbProfiles Indicates the do not disturb profiles to add.
      * @return Returns add do not disturb profiles result.
      */
-    ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
-    ErrCode AddDoNotDisturbProfiles(
+    InnerErrorCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+    InnerErrorCode AddDoNotDisturbProfiles(
         const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, const int32_t userId);
 
     /**
@@ -855,8 +860,8 @@ public:
      * @param doNotDisturbProfiles Indicates the do not disturb profiles to remove.
      * @return Returns remove do not disturb profiles result.
      */
-    ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
-    ErrCode RemoveDoNotDisturbProfiles(
+    InnerErrorCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+    InnerErrorCode RemoveDoNotDisturbProfiles(
         const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles, const int32_t userId);
 
     /**
@@ -865,7 +870,7 @@ public:
      * @param doesSupport Specifies whether to support do not disturb mode.
      * @return Returns check result.
      */
-    ErrCode DoesSupportDoNotDisturbMode(bool &doesSupport);
+    InnerErrorCode DoesSupportDoNotDisturbMode(bool &doesSupport);
 
     /**
      * @brief Is coming call need silent in do not disturb mode.
@@ -873,8 +878,9 @@ public:
      * @param phoneNumber the calling format number.
      * @return Returns silent in do not disturb mode.
      */
-    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType);
-    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType, const int32_t userId);
+    InnerErrorCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType);
+    InnerErrorCode IsNeedSilentInDoNotDisturbMode(
+        const std::string &phoneNumber, int32_t callerType, const int32_t userId);
 
     /**
      * @brief Checks if the device supports distributed notification.
@@ -882,7 +888,7 @@ public:
      * @param enabled True if the device supports distributed notification; false otherwise.
      * @return Returns is distributed enabled result.
      */
-    ErrCode IsDistributedEnabled(bool &enabled);
+    InnerErrorCode IsDistributedEnabled(bool &enabled);
 
     /**
      * @brief Sets whether the device supports distributed notifications.
@@ -892,7 +898,7 @@ public:
      *               the value false indicates that the device is forbidden to support distributed notifications.
      * @return Returns enable distributed result.
      */
-    ErrCode EnableDistributed(const bool enabled);
+    InnerErrorCode EnableDistributed(const bool enabled);
 
     /**
      * @brief Sets whether an application supports distributed notifications.
@@ -904,7 +910,7 @@ public:
      *                notifications.
      * @return Returns enable distributed by bundle result.
      */
-    ErrCode EnableDistributedByBundle(const NotificationBundleOption &bundleOption, const bool enabled);
+    InnerErrorCode EnableDistributedByBundle(const NotificationBundleOption &bundleOption, const bool enabled);
 
     /**
      * @brief Sets whether this application supports distributed notifications.
@@ -915,7 +921,7 @@ public:
      *                notifications.
      * @return Returns enable distributed self result.
      */
-    ErrCode EnableDistributedSelf(const bool enabled);
+    InnerErrorCode EnableDistributedSelf(const bool enabled);
 
     /**
      * @brief Checks whether an application supports distributed notifications.
@@ -924,7 +930,7 @@ public:
      * @param enabled True if the application supports distributed notification; false otherwise.
      * @return Returns is distributed enabled by bundle result.
      */
-    ErrCode IsDistributedEnableByBundle(const NotificationBundleOption &bundleOption, bool &enabled);
+    InnerErrorCode IsDistributedEnableByBundle(const NotificationBundleOption &bundleOption, bool &enabled);
 
     /**
      * @brief Obtains the device remind type.
@@ -933,7 +939,7 @@ public:
      * @param remindType Indicates the device remind type to get.
      * @return Returns get device reminder type result.
      */
-    ErrCode GetDeviceRemindType(NotificationConstant::RemindType &remindType);
+    InnerErrorCode GetDeviceRemindType(NotificationConstant::RemindType &remindType);
 
     /**
      * @brief Publishes a continuous task notification.
@@ -942,7 +948,7 @@ public:
      *                This parameter must be specified.
      * @return Returns publish continuous task notification result.
      */
-    ErrCode PublishContinuousTaskNotification(const NotificationRequest &request);
+    InnerErrorCode PublishContinuousTaskNotification(const NotificationRequest &request);
 
     /**
      * @brief Cancels a published continuous task notification matching the specified label and notificationId.
@@ -951,7 +957,7 @@ public:
      * @param notificationId Indicates the ID of the continuous task notification to cancel.
      * @return Returns cancel continuous task notification result.
      */
-    ErrCode CancelContinuousTaskNotification(const std::string &label, int32_t notificationId);
+    InnerErrorCode CancelContinuousTaskNotification(const std::string &label, int32_t notificationId);
 
     /**
      * @brief Obtains whether the template is supported by the system.
@@ -959,7 +965,7 @@ public:
      * @param support whether is it a system supported template.
      * @return Returns check result.
      */
-    ErrCode IsSupportTemplate(const std::string &templateName, bool &support);
+    InnerErrorCode IsSupportTemplate(const std::string &templateName, bool &support);
 
     /**
      * @brief Resets ans manager proxy when OnRemoteDied called.
@@ -977,7 +983,7 @@ public:
      * @param allowed True if the application has permissions; returns false otherwise.
      * @return Returns get allowed result.
      */
-    ErrCode IsAllowedNotify(const int32_t &userId, bool &allowed);
+    InnerErrorCode IsAllowedNotify(const int32_t &userId, bool &allowed);
 
     /**
      * @brief Sets whether to allow all applications to publish notifications on a specified user.
@@ -989,7 +995,7 @@ public:
      *                are not allowed.
      * @return Returns set notifications enabled for all bundles result.
      */
-    ErrCode SetNotificationsEnabledForAllBundles(const int32_t &userId, bool enabled);
+    InnerErrorCode SetNotificationsEnabledForAllBundles(const int32_t &userId, bool enabled);
 
     /**
      * @brief Removes notifications under specified user.
@@ -998,7 +1004,7 @@ public:
      * @param userId Indicates the ID of user whose notifications are to be removed.
      * @return Returns remove notification result.
      */
-    ErrCode RemoveNotifications(const int32_t &userId);
+    InnerErrorCode RemoveNotifications(const int32_t &userId);
 
     /**
      * @brief Sets the do not disturb time on a specified user.
@@ -1008,7 +1014,7 @@ public:
      * @param doNotDisturbDate Indicates the do not disturb time to set.
      * @return Returns set do not disturb time result.
      */
-    ErrCode SetDoNotDisturbDate(const int32_t &userId, const NotificationDoNotDisturbDate &doNotDisturbDate);
+    InnerErrorCode SetDoNotDisturbDate(const int32_t &userId, const NotificationDoNotDisturbDate &doNotDisturbDate);
 
     /**
      * @brief Obtains the do not disturb time on a specified user.
@@ -1018,7 +1024,7 @@ public:
      * @param doNotDisturbDate Indicates the do not disturb time to get.
      * @return Returns set do not disturb time result.
      */
-    ErrCode GetDoNotDisturbDate(const int32_t &userId, NotificationDoNotDisturbDate &doNotDisturbDate);
+    InnerErrorCode GetDoNotDisturbDate(const int32_t &userId, NotificationDoNotDisturbDate &doNotDisturbDate);
 
     /**
      * Set whether the application slot is enabled.
@@ -1029,7 +1035,7 @@ public:
      * @param isForceControl Indicates whether the slot is affected by the notification switch.
      * @return Returns get slot number by bundle result.
      */
-    ErrCode SetEnabledForBundleSlot(const NotificationBundleOption &bundleOption,
+    InnerErrorCode SetEnabledForBundleSlot(const NotificationBundleOption &bundleOption,
         const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl);
 
     /**
@@ -1040,7 +1046,7 @@ public:
      * @param enable the type of slot enabled to get.
      * @return Returns get slot number by bundle result.
      */
-    ErrCode GetEnabledForBundleSlot(
+    InnerErrorCode GetEnabledForBundleSlot(
         const NotificationBundleOption &bundleOption, const NotificationConstant::SlotType &slotType, bool &enabled);
 
     /**
@@ -1050,7 +1056,7 @@ public:
      * @param enable the type of slot enabled to get.
      * @return Returns get enabled result.
      */
-    ErrCode GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled);
+    InnerErrorCode GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled);
 
 #ifdef ANM_SUPPORT_DUMP
     /**
@@ -1063,7 +1069,7 @@ public:
      * @param dumpInfo Indicates the container containing datas.
      * @return Returns check result.
      */
-    ErrCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId, int32_t recvUserId,
+    InnerErrorCode ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId, int32_t recvUserId,
         std::vector<std::string> &dumpInfo);
 #endif
     /**
@@ -1073,7 +1079,7 @@ public:
      * @param enabled Allow or disallow sync notifications.
      * @return Returns set enabled result.
      */
-    ErrCode SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled);
+    InnerErrorCode SetSyncNotificationEnabledWithoutApp(const int32_t userId, const bool enabled);
 
     /**
      * @brief Obtains whether to sync notifications to devices that do not have the app installed.
@@ -1082,7 +1088,7 @@ public:
      * @param enabled Allow or disallow sync notifications.
      * @return Returns get enabled result.
      */
-    ErrCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled);
+    InnerErrorCode GetSyncNotificationEnabledWithoutApp(const int32_t userId, bool &enabled);
 
     /**
      * @brief Set badge number.
@@ -1090,7 +1096,7 @@ public:
      * @param badgeNumber The badge number.
      * @return Returns set badge number result.
      */
-    ErrCode SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey = "");
+    InnerErrorCode SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey = "");
 
     /**
      * @brief Set badge number by bundle.
@@ -1099,7 +1105,7 @@ public:
      * @param badgeNumber The badge number.
      * @return Returns set badge number by bundle result.
      */
-    ErrCode SetBadgeNumberByBundle(const NotificationBundleOption &bundleOption, int32_t badgeNumber);
+    InnerErrorCode SetBadgeNumberByBundle(const NotificationBundleOption &bundleOption, int32_t badgeNumber);
 
     /**
      * @brief Set badge number for dh by bundle.
@@ -1108,7 +1114,7 @@ public:
      * @param badgeNumber The badge number.
      * @return Returns set badge number by bundle result.
      */
-    ErrCode SetBadgeNumberForDhByBundle(const NotificationBundleOption &bundleOption, int32_t badgeNumber);
+    InnerErrorCode SetBadgeNumberForDhByBundle(const NotificationBundleOption &bundleOption, int32_t badgeNumber);
 
     /**
      * @brief Obtains allow notification application list.
@@ -1116,8 +1122,9 @@ public:
      * @param bundleOption Indicates the bundle bundleOption.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
-    ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
+    InnerErrorCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
+    InnerErrorCode GetAllNotificationEnabledBundles(
+        std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
 
     /**
      * @brief Register Push Callback.
@@ -1126,7 +1133,7 @@ public:
      * @param notificationCheckRequest Filter conditions for push check
      * @return Returns register PushCallback result.
      */
-    ErrCode RegisterPushCallback(
+    InnerErrorCode RegisterPushCallback(
         const sptr<IRemoteObject> &pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest);
 
     /**
@@ -1134,7 +1141,7 @@ public:
      *
      * @return Returns unregister push Callback result.
      */
-    ErrCode UnregisterPushCallback();
+    InnerErrorCode UnregisterPushCallback();
 
     /**
      * @brief Set agent relationship.
@@ -1143,7 +1150,7 @@ public:
      * @param value Indicates key-value pair of agent relationship.
      * @return Returns set result.
      */
-    ErrCode SetAdditionConfig(const std::string &key, const std::string &value);
+    InnerErrorCode SetAdditionConfig(const std::string &key, const std::string &value);
 
     /**
      * @brief Update inner config.
@@ -1153,7 +1160,7 @@ public:
      * @param configValue Indicates the config value.
      * @return Returns update result.
      */
-    ErrCode UpdateInnerConfig(const std::string &configKey, const std::string &configValue);
+    InnerErrorCode UpdateInnerConfig(const std::string &configKey, const std::string &configValue);
 
     /**
      * @brief Set priority config of bundle for intelligent identification.
@@ -1162,7 +1169,7 @@ public:
      * @param value Indicates priority config of bundle.
      * @return Returns set result.
      */
-    ErrCode SetBundlePriorityConfig(const NotificationBundleOption &bundleOption, const std::string &value);
+    InnerErrorCode SetBundlePriorityConfig(const NotificationBundleOption &bundleOption, const std::string &value);
 
     /**
      * @brief Get priority config of bundle for intelligent identification.
@@ -1171,7 +1178,7 @@ public:
      * @param value Indicates priority config of bundle.
      * @return Returns get result.
      */
-    ErrCode GetBundlePriorityConfig(const NotificationBundleOption &bundleOption, std::string &value);
+    InnerErrorCode GetBundlePriorityConfig(const NotificationBundleOption &bundleOption, std::string &value);
 
     /**
      * @brief set priority notification switch.
@@ -1179,7 +1186,7 @@ public:
      * @param enabled Whether to allow sending priority notification.
      * @return Returns set result.
      */
-    ErrCode SetPriorityEnabled(const bool enabled);
+    InnerErrorCode SetPriorityEnabled(const bool enabled);
 
     /**
      * @brief set priority notification switch with bundle info.
@@ -1188,7 +1195,7 @@ public:
      * @param enableStatus Whether to allow sending priority notification by bundle.
      * @return Returns set result.
      */
-    ErrCode SetPriorityEnabledByBundle(
+    InnerErrorCode SetPriorityEnabledByBundle(
         const NotificationBundleOption &bundleOption, const NotificationConstant::PriorityEnableStatus enableStatus);
 
     /**
@@ -1197,7 +1204,7 @@ public:
      * @param enabled Whether to allow sending priority notification.
      * @return Returns configuring Whether to allow sending priority notification.
      */
-    ErrCode IsPriorityEnabled(bool &enabled);
+    InnerErrorCode IsPriorityEnabled(bool &enabled);
 
     /**
      * @brief Query switch for sending priority notification by bundle.
@@ -1206,7 +1213,7 @@ public:
      * @param enableStatus Whether to allow sending priority notification by bundle.
      * @return Returns configuring Whether to allow sending priority notification by bundle.
      */
-    ErrCode IsPriorityEnabledByBundle(
+    InnerErrorCode IsPriorityEnabledByBundle(
         const NotificationBundleOption &bundleOption, NotificationConstant::PriorityEnableStatus &enableStatus);
 
     /**
@@ -1215,7 +1222,7 @@ public:
      * @param priorityEnable indicates the bundle name, uid and priority enable status of the application.
      * @return Returns configuring Whether to allow sending priority notification by bundles.
      */
-    ErrCode SetPriorityEnabledByBundles(const std::map<sptr<NotificationBundleOption>, bool> &priorityEnable);
+    InnerErrorCode SetPriorityEnabledByBundles(const std::map<sptr<NotificationBundleOption>, bool> &priorityEnable);
 
     /**
      * @brief Query switch for sending priority notification by bundles.
@@ -1224,7 +1231,7 @@ public:
      * @param priorityEnable indicates whether to allow sending priority notification by bundles.
      * @return Returns configuring Whether to allow sending priority notification by bundles.
      */
-    ErrCode GetPriorityEnabledByBundles(const std::vector<NotificationBundleOption> &bundleOptions,
+    InnerErrorCode GetPriorityEnabledByBundles(const std::vector<NotificationBundleOption> &bundleOptions,
         std::map<sptr<NotificationBundleOption>, bool> &priorityEnable);
 
     /**
@@ -1233,7 +1240,7 @@ public:
      * @param enabled Whether the intelligent priority notification service is enabled.
      * @return Returns result checking whether the intelligent priority notification service is enabled.
      */
-    ErrCode IsPriorityIntelligentEnabled(bool &enabled);
+    InnerErrorCode IsPriorityIntelligentEnabled(bool &enabled);
 
     /**
      * @brief Sets the enabling status of the intelligent priority notification.
@@ -1241,7 +1248,7 @@ public:
      * @param enabled Whether the intelligent priority notification service is enabled.
      * @return Returns result setting the enabling status of the intelligent priority notification.
      */
-    ErrCode SetPriorityIntelligentEnabled(const bool enabled);
+    InnerErrorCode SetPriorityIntelligentEnabled(const bool enabled);
 
     /**
      * @brief Gets the priority strategy of bundles.
@@ -1250,7 +1257,7 @@ public:
      * @param strategies Indicates the priority strategy of bundles.
      * @return Returns result getting the priority strategy of bundles.
      */
-    ErrCode GetPriorityStrategyByBundles(const std::vector<NotificationBundleOption> &bundleOptions,
+    InnerErrorCode GetPriorityStrategyByBundles(const std::vector<NotificationBundleOption> &bundleOptions,
         std::map<sptr<NotificationBundleOption>, int64_t> &strategies);
 
     /**
@@ -1259,7 +1266,7 @@ public:
      * @param strategies Indicates the priority strategy of bundles.
      * @return Returns result setting the priority strategy of bundles.
      */
-    ErrCode SetPriorityStrategyByBundles(const std::map<sptr<NotificationBundleOption>, int64_t> &strategies);
+    InnerErrorCode SetPriorityStrategyByBundles(const std::map<sptr<NotificationBundleOption>, int64_t> &strategies);
 
     /**
      * @brief Update priority type of notification and notify subscriber.
@@ -1268,11 +1275,11 @@ public:
      *                This parameter must be specified.
      * @return Returns update priority type of notification result.
      */
-    ErrCode TriggerUpdatePriorityType(const NotificationRequest &request);
+    InnerErrorCode TriggerUpdatePriorityType(const NotificationRequest &request);
 
-    ErrCode SetNotificationSwitch(const std::string &switchName, bool switchState, int32_t userId);
+    InnerErrorCode SetNotificationSwitch(const std::string &switchName, bool switchState, int32_t userId);
 
-    ErrCode GetNotificationSwitch(
+    InnerErrorCode GetNotificationSwitch(
         const std::string &switchName, int32_t userId, NotificationConstant::SWITCH_STATE &switchState);
 
     /**
@@ -1287,7 +1294,7 @@ public:
      * @param notificationClassification Indicates the AI extension result containing aggregation type.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode TriggerUpdateAiExtNotification(const sptr<NotificationRequest> &request,
+    InnerErrorCode TriggerUpdateAiExtNotification(const sptr<NotificationRequest> &request,
         const sptr<NotificationClassification> &notificationClassification);
 
     /**
@@ -1302,7 +1309,7 @@ public:
      * @param isNotification Indicates notification switch or liveview swtich, default is notification switch.
      * @return Returns set notifications enabled for specified bundle result.
      */
-    ErrCode SetDistributedEnabledByBundle(
+    InnerErrorCode SetDistributedEnabledByBundle(
         const NotificationBundleOption &bundleOption, const std::string &deviceType, const bool enabled,
         const bool isNotification = true);
 
@@ -1313,7 +1320,7 @@ public:
      * @param isNotification Indicates notification switch or liveview swtich, default is notification switch.
      * @return Returns the bundle list for cross device collaboration.
      */
-    ErrCode GetDistributedBundleListByType(const bool isNotification,
+    InnerErrorCode GetDistributedBundleListByType(const bool isNotification,
         std::vector<DistributedBundleOption> &enableList);
 
     /**
@@ -1323,7 +1330,7 @@ public:
      * @param bundleOption Indicates the bundle name and uid of the application.
      * @return Returns the detail bundle info for cross device collaboration.
      */
-    ErrCode GetDistributedBundleInfo(const std::vector<NotificationBundleOption>& bundleOption,
+    InnerErrorCode GetDistributedBundleInfo(const std::vector<NotificationBundleOption>& bundleOption,
         std::vector<DistributedNotificationBundleInfo>& bundleInfoList);
 
     /**
@@ -1334,7 +1341,7 @@ public:
      * @param deviceType Indicates the type of the device running the application.
      * @return Returns set distributed enabled for specified bundle result.
      */
-    ErrCode SetDistributedBundleOption(
+    InnerErrorCode SetDistributedBundleOption(
         const std::vector<DistributedBundleOption> &bundles, const std::string &deviceType);
 
     /**
@@ -1348,7 +1355,8 @@ public:
      *                are not allowed.
      * @return Returns set notifications enabled for specified bundle result.
      */
-    ErrCode IsDistributedEnabledByBundle(const NotificationBundleOption &bundleOption, const std::string &deviceType,
+    InnerErrorCode IsDistributedEnabledByBundle(
+        const NotificationBundleOption &bundleOption, const std::string &deviceType,
         bool isNotification, int32_t &enabled);
 
     /**
@@ -1361,7 +1369,7 @@ public:
      *                are not allowed.
      * @return Returns set notifications enabled for specified bundle result.
      */
-    ErrCode SetSilentReminderEnabled(const NotificationBundleOption &bundleOption, const bool enabled);
+    InnerErrorCode SetSilentReminderEnabled(const NotificationBundleOption &bundleOption, const bool enabled);
 
     /**
      * @brief get whether to allow a specified application to publish notifications cross
@@ -1373,7 +1381,7 @@ public:
      *                are not allowed.
      * @return Returns set notifications enabled for specified bundle result.
      */
-    ErrCode IsSilentReminderEnabled(const NotificationBundleOption &bundleOption, int32_t &enableStatus);
+    InnerErrorCode IsSilentReminderEnabled(const NotificationBundleOption &bundleOption, int32_t &enableStatus);
 
     /**
      * @brief Configuring Whether to Synchronize Common Notifications to Target Devices.
@@ -1382,7 +1390,7 @@ public:
      * @param enabled Whether to Synchronize Common Notifications to Target Devices.
      * @return Returns configuring Whether to Synchronize Common Notifications to Target Devices result.
      */
-    ErrCode SetDistributedEnabled(const std::string &deviceType, const bool &enabled);
+    InnerErrorCode SetDistributedEnabled(const std::string &deviceType, const bool &enabled);
 
     /**
      * @brief Querying Whether to Synchronize Common Devices to Target Devices.
@@ -1391,7 +1399,7 @@ public:
      * @param enabled Whether to Synchronize Common Notifications to Target Devices.
      * @return Returns Whether to Synchronize Common Notifications to Target Devices result.
      */
-    ErrCode IsDistributedEnabled(const std::string &deviceType, bool &enabled);
+    InnerErrorCode IsDistributedEnabled(const std::string &deviceType, bool &enabled);
 
     /**
      * @brief Obtains the set of supported distributed abilities.
@@ -1399,7 +1407,7 @@ public:
      * @param abilityId The set of supported distributed abilities.
      * @return Returns result in Obtains the set of supported distributed abilities.
      */
-    ErrCode GetDistributedAbility(int32_t &abilityId);
+    InnerErrorCode GetDistributedAbility(int32_t &abilityId);
 
     /**
      * @brief Get the target device's authorization status.
@@ -1410,7 +1418,7 @@ public:
      * @param isAuth Return The authorization status.
      * @return Returns get result.
      */
-    ErrCode GetDistributedAuthStatus(
+    InnerErrorCode GetDistributedAuthStatus(
         const std::string &deviceType, const std::string &deviceId, int32_t userId, bool &isAuth);
 
     /**
@@ -1422,7 +1430,7 @@ public:
      * @param isAuth The authorization status.
      * @return Returns set result.
      */
-    ErrCode SetDistributedAuthStatus(
+    InnerErrorCode SetDistributedAuthStatus(
         const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth);
 
     /**
@@ -1431,7 +1439,7 @@ public:
      * @param deviceType Type of the target device whose status you want to set.
      * @return Returns set result.
      */
-    ErrCode UpdateDistributedDeviceList(const std::string &deviceType);
+    InnerErrorCode UpdateDistributedDeviceList(const std::string &deviceType);
 
     /**
      * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
@@ -1442,7 +1450,7 @@ public:
      *                false indicates that notifications are not allowed.
      * @return Returns set notifications enabled for specified bundle result.
      */
-    ErrCode IsSmartReminderEnabled(const std::string &deviceType, bool &enabled);
+    InnerErrorCode IsSmartReminderEnabled(const std::string &deviceType, bool &enabled);
 
     /**
      * @brief Set Enable smartphone to collaborate with other devices for intelligent reminders
@@ -1453,7 +1461,7 @@ public:
      *                false indicates that notifications are not allowed.
      * @return Returns set notifications enabled for specified bundle result.
      */
-    ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled);
+    InnerErrorCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled);
 
     /**
      * @brief Set the channel switch for collaborative reminders.
@@ -1464,7 +1472,7 @@ public:
      * @param enabled Indicates slot switch status.
      * @return Returns set channel switch result.
      */
-    ErrCode SetDistributedEnabledBySlot(
+    InnerErrorCode SetDistributedEnabledBySlot(
         const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled);
 
     /**
@@ -1476,7 +1484,7 @@ public:
      * @param enabled Indicates slot switch status.
      * @return Returns channel switch result.
      */
-    ErrCode IsDistributedEnabledBySlot(
+    InnerErrorCode IsDistributedEnabledBySlot(
         const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled);
 
     /**
@@ -1486,7 +1494,7 @@ public:
      * @param id Indicates the unique notification ID in the application.
      * @return Returns cancel result.
      */
-    ErrCode CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id);
+    InnerErrorCode CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id);
 
     /**
      * @brief Set the status of the target device.
@@ -1495,7 +1503,7 @@ public:
      * @param status The status.
      * @return Returns set result.
      */
-    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+    InnerErrorCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
         const std::string deviceId = std::string());
 
     /**
@@ -1506,27 +1514,28 @@ public:
      * @param controlFlag The control flag.
      * @return Returns set result.
      */
-    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status, const uint32_t controlFlag,
+    InnerErrorCode SetTargetDeviceStatus(const std::string &deviceType,
+        const uint32_t status, const uint32_t controlFlag,
         const std::string deviceId = std::string(), int32_t userId = 0);
 
-    ErrCode SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
+    InnerErrorCode SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
             int operatorType, const std::vector<std::string>& bundleList, const std::vector<std::string>& labelList);
 
-    ErrCode SetTargetDeviceSwitch(const std::string& deviceType, const std::string& deviceId,
+    InnerErrorCode SetTargetDeviceSwitch(const std::string& deviceType, const std::string& deviceId,
             bool notificaitonEnable, bool liveViewEnable);
 
-    ErrCode GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
+    InnerErrorCode GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
             std::vector<std::string>& bundleList, std::vector<std::string>& labelList);
 
-    ErrCode SetDeviceDistributedBundleList(DistributedBundleChangeType type,
+    InnerErrorCode SetDeviceDistributedBundleList(DistributedBundleChangeType type,
         const std::vector<NotificationDistributedBundle>& bundles);
 
-    ErrCode SetTargetDeviceAbility(const std::string& deviceType, const int32_t ability);
+    InnerErrorCode SetTargetDeviceAbility(const std::string& deviceType, const int32_t ability);
 
-    ErrCode GetLocalDistributedBundleList(const std::string& deviceType,
+    InnerErrorCode GetLocalDistributedBundleList(const std::string& deviceType,
         std::vector<NotificationDistributedBundle>& bundles);
 
-    ErrCode GetMutilDeviceStatus(const std::string &deviceType, const uint32_t status,
+    InnerErrorCode GetMutilDeviceStatus(const std::string &deviceType, const uint32_t status,
         std::string& deviceId, int32_t& userId);
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
@@ -1536,7 +1545,7 @@ public:
      * @param swingCallback swingCbFunc.
      * @return Returns register swingCbFunc result.
      */
-    ErrCode RegisterSwingCallback(const std::function<void(bool, int)> swingCbFunc);
+    InnerErrorCode RegisterSwingCallback(const std::function<void(bool, int)> swingCbFunc);
 #endif
 
     /**
@@ -1546,8 +1555,9 @@ public:
      * @param status Indicates the NotificationDoNotDisturbProfile objects.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile);
-    ErrCode GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile, const int32_t userId);
+    InnerErrorCode GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile);
+    InnerErrorCode GetDoNotDisturbProfile(
+        int64_t id, sptr<NotificationDoNotDisturbProfile> &profile, const int32_t userId);
 
     /**
      * @brief Whether reminders are allowed.
@@ -1556,8 +1566,8 @@ public:
      * @param isAllowUseReminder is allow use reminder
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder);
-    ErrCode AllowUseReminder(const std::string& bundleName, const int32_t userId, bool& isAllowUseReminder);
+    InnerErrorCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder);
+    InnerErrorCode AllowUseReminder(const std::string& bundleName, const int32_t userId, bool& isAllowUseReminder);
 
     /**
      * @brief Get the status of the target device.
@@ -1566,7 +1576,7 @@ public:
      * @param status The status.
      * @return Returns set result.
      */
-    ErrCode GetTargetDeviceStatus(const std::string &deviceType, int32_t& status);
+    InnerErrorCode GetTargetDeviceStatus(const std::string &deviceType, int32_t& status);
 
     /**
      * @brief Ans service died, OnRemoteDied called.
@@ -1579,7 +1589,7 @@ public:
      * @param uid uid.
      * @return Returns Update result.
      */
-    ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused);
+    InnerErrorCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused);
 
     /**
      * @brief Set switch and bundle list of disable notification feature.
@@ -1587,7 +1597,7 @@ public:
      * @param notificationDisable Switch and bundle list of disable notification feature.
      * @return Returns set result.
      */
-    ErrCode DisableNotificationFeature(const NotificationDisable &notificationDisable);
+    InnerErrorCode DisableNotificationFeature(const NotificationDisable &notificationDisable);
 
     /**
      * @brief Obtains allow liveview application list.
@@ -1595,8 +1605,9 @@ public:
      * @param bundleOption Indicates the bundle bundleOption.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
-    ErrCode GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
+    InnerErrorCode GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
+    InnerErrorCode GetAllLiveViewEnabledBundles(
+        std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
 
     /**
      * @brief Obtains allow distributed application list.
@@ -1605,7 +1616,7 @@ public:
      * @param bundleOption Indicates the bundle bundleOption.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetAllDistribuedEnabledBundles(const std::string& deviceType,
+    InnerErrorCode GetAllDistribuedEnabledBundles(const std::string& deviceType,
         std::vector<NotificationBundleOption> &bundleOption);
 
     /**
@@ -1614,7 +1625,7 @@ public:
      * @param hashCode Unique ID of the notification.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+    InnerErrorCode DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
         const sptr<IAnsOperationCallback> &callback);
 
     /**
@@ -1624,7 +1635,7 @@ public:
      * @param result The result of the distribute operation.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode ReplyDistributeOperation(const std::string& hashCode, const int32_t result);
+    InnerErrorCode ReplyDistributeOperation(const std::string& hashCode, const int32_t result);
 
     /**
      * @brief Get notificationRequest by hashCode.
@@ -1633,7 +1644,7 @@ public:
      * @param notificationRequest The request of of the notification.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetNotificationRequestByHashCode(
+    InnerErrorCode GetNotificationRequestByHashCode(
         const std::string& hashCode, sptr<NotificationRequest>& notificationRequest);
 
     /**
@@ -1642,8 +1653,8 @@ public:
      * @param type generate hashCode.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode SetHashCodeRule(const uint32_t type);
-    ErrCode SetHashCodeRule(const uint32_t type, const int32_t userId);
+    InnerErrorCode SetHashCodeRule(const uint32_t type);
+    InnerErrorCode SetHashCodeRule(const uint32_t type, const int32_t userId);
 
     /**
      * @brief get distributed device list.
@@ -1651,7 +1662,7 @@ public:
      * @param deviceTypes Indicates device types.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetDistributedDevicelist(std::vector<std::string> &deviceTypes);
+    InnerErrorCode GetDistributedDevicelist(std::vector<std::string> &deviceTypes);
 
     /**
      * Set whether the application slot is enabled.
@@ -1662,7 +1673,7 @@ public:
      * @param isForceControl Indicates whether the slot is affected by the notification switch.
      * @return Returns get slot number by bundle result.
      */
-    ErrCode SetDefaultSlotForBundle(const NotificationBundleOption& bundleOption,
+    InnerErrorCode SetDefaultSlotForBundle(const NotificationBundleOption& bundleOption,
         const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl);
 
     /**
@@ -1674,7 +1685,7 @@ public:
      * @param value Indicates key-value pair of live view.
      * @return Returns set result.
      */
-    ErrCode SetCheckConfig(int32_t response, const std::string& requestId, const std::string& key,
+    InnerErrorCode SetCheckConfig(int32_t response, const std::string& requestId, const std::string& key,
         const std::string& value);
 
     /**
@@ -1683,7 +1694,7 @@ public:
      * @param bundleList Indicates bundle name.
      * @return Returns set result.
      */
-    ErrCode GetLiveViewConfig(const std::vector<std::string>& bundleList);
+    InnerErrorCode GetLiveViewConfig(const std::vector<std::string>& bundleList);
 
     /**
      * @brief Set the notification extension subscription state.
@@ -1691,7 +1702,7 @@ public:
      * @param ringtoneInfo Custom ringtone information.
      * @return Returns set result.
      */
-    ErrCode SetRingtoneInfoByBundle(const NotificationBundleOption& bundle,
+    InnerErrorCode SetRingtoneInfoByBundle(const NotificationBundleOption& bundle,
         const NotificationRingtoneInfo &ringtoneInfo);
 
     /**
@@ -1700,7 +1711,8 @@ public:
      * @param ringtoneInfo Custom ringtone information.
      * @return Returns get result.
      */
-    ErrCode GetRingtoneInfoByBundle(const NotificationBundleOption &bundle, NotificationRingtoneInfo &ringtoneInfo);
+    InnerErrorCode GetRingtoneInfoByBundle(
+        const NotificationBundleOption &bundle, NotificationRingtoneInfo &ringtoneInfo);
 
     /**
      * @brief Background unaware proxy.
@@ -1709,7 +1721,7 @@ public:
      * @param isPorxy Proxy or Cancel proxy
      * @return Returns request result.
      */
-    ErrCode ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy);
+    InnerErrorCode ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy);
 
     /**
      * @brief Obtains reminder info of application list.
@@ -1718,7 +1730,7 @@ public:
      * @param reminderInfo Indicates the bundles reminderInfo.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetReminderInfoByBundles(
+    InnerErrorCode GetReminderInfoByBundles(
         const std::vector<NotificationBundleOption> &bundles, std::vector<NotificationReminderInfo> &reminderInfo);
 
     /**
@@ -1727,7 +1739,7 @@ public:
      * @param reminderInfo Indicates the bundles reminderInfo.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode SetReminderInfoByBundles(const std::vector<NotificationReminderInfo> &reminderInfo);
+    InnerErrorCode SetReminderInfoByBundles(const std::vector<NotificationReminderInfo> &reminderInfo);
 
     /**
      * @brief Set geofence switch.
@@ -1735,7 +1747,7 @@ public:
      * @param enabled Set enable or not.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode SetGeofenceEnabled(bool enabled);
+    InnerErrorCode SetGeofenceEnabled(bool enabled);
 
     /**
      * @brief Checks if the geofence is enabled.
@@ -1743,7 +1755,7 @@ public:
      * @param enabled whether the geofence is enabled.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode IsGeofenceEnabled(bool &enabled);
+    InnerErrorCode IsGeofenceEnabled(bool &enabled);
 
     /**
      * @brief Clear delayed release notification.
@@ -1752,7 +1764,8 @@ public:
      * @param userIds Indicates the specific users.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode ClearDelayNotification(const std::vector<std::string> &triggerKeys, const std::vector<int32_t> &userIds);
+    InnerErrorCode ClearDelayNotification(
+        const std::vector<std::string> &triggerKeys, const std::vector<int32_t> &userIds);
 
     /**
      * @brief Publish delayed release notification.
@@ -1761,7 +1774,7 @@ public:
      * @param userId Indicates the specific user.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode PublishDelayedNotification(const std::string &triggerKey, int32_t userId);
+    InnerErrorCode PublishDelayedNotification(const std::string &triggerKey, int32_t userId);
 
     /**
      * @brief Subscribe the notification when the bluetooth addr is connected.
@@ -1769,28 +1782,29 @@ public:
      * @param infos The info to be subscribe.
      * @return Returns subscribe result.
      */
-    ErrCode NotificationExtensionSubscribe(const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
+    InnerErrorCode NotificationExtensionSubscribe(
+        const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
 
     /**
      * @brief Unsubscribe the notification.
      *
      * @return Returns unsubscribe result.
      */
-    ErrCode NotificationExtensionUnsubscribe();
+    InnerErrorCode NotificationExtensionUnsubscribe();
 
     /**
      * @brief Obtains the subscribe info for app.
      * @param infos The returned subscribe info.
      * @return Returns get result.
      */
-    ErrCode GetSubscribeInfo(std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
+    InnerErrorCode GetSubscribeInfo(std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
 
     /**
      * @brief Obtains whether the notification extension subscription is enabled.
      * @param enabled True if the subscription is enabled.
      * @return Returns get result.
      */
-    ErrCode IsUserGranted(bool& enabled);
+    InnerErrorCode IsUserGranted(bool& enabled);
 
     /**
      * @brief Obtains whether the notification extension subscription is enabled.
@@ -1798,7 +1812,7 @@ public:
      * @param enabled True if the subscription is enabled.
      * @return Returns get result.
      */
-    ErrCode GetUserGrantedState(const NotificationBundleOption& targetBundle, bool& enabled);
+    InnerErrorCode GetUserGrantedState(const NotificationBundleOption& targetBundle, bool& enabled);
 
     /**
      * @brief Set the notification extension subscription state.
@@ -1806,7 +1820,7 @@ public:
      * @param enabled True if the subscription is enabled.
      * @return Returns set result.
      */
-    ErrCode SetUserGrantedState(const NotificationBundleOption& targetBundle, bool enabled);
+    InnerErrorCode SetUserGrantedState(const NotificationBundleOption& targetBundle, bool enabled);
 
     /**
      * @brief Obtains the list of bundleOption which subscribed by targetBundle
@@ -1814,7 +1828,7 @@ public:
      * @param enabledBundles the list of subscribed bundle options.
      * @return Returns get result.
      */
-    ErrCode GetUserGrantedEnabledBundles(const NotificationBundleOption& targetBundle,
+    InnerErrorCode GetUserGrantedEnabledBundles(const NotificationBundleOption& targetBundle,
         std::vector<sptr<NotificationBundleOption>>& enabledBundles);
 
     /**
@@ -1822,7 +1836,7 @@ public:
      * @param bundles The returned list.
      * @return Returns get result.
      */
-    ErrCode GetUserGrantedEnabledBundlesForSelf(std::vector<sptr<NotificationBundleOption>>& bundles);
+    InnerErrorCode GetUserGrantedEnabledBundlesForSelf(std::vector<sptr<NotificationBundleOption>>& bundles);
 
     /**
      * @brief Set the bundleOptions of the extensionAbility to be subscribed or unsubscribed.
@@ -1831,7 +1845,7 @@ public:
      * @param enabled Set enabled or not.
      * @return Returns set result.
      */
-    ErrCode SetUserGrantedBundleState(const NotificationBundleOption& targetBundle,
+    InnerErrorCode SetUserGrantedBundleState(const NotificationBundleOption& targetBundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled);
 
     /**
@@ -1840,14 +1854,14 @@ public:
      * @param bundles Indicates the returned list of bundle options.
      * @return Returns ERR_OK on success; otherwise returns a specific error code.
      */
-    ErrCode GetAllSubscriptionBundles(std::vector<sptr<NotificationBundleOption>>& bundles);
+    InnerErrorCode GetAllSubscriptionBundles(std::vector<sptr<NotificationBundleOption>>& bundles);
 
     /**
      * @brief Checks whether the current app is allowed to open the subscribe settings UI.
      *
      * @return Returns ERR_OK if allowed; otherwise returns the specific error code.
      */
-    ErrCode CanOpenSubscribeSettings();
+    InnerErrorCode CanOpenSubscribeSettings();
 
     /**
      * @brief Obtains the badge number of the current application in the system.
@@ -1855,7 +1869,7 @@ public:
      * @param badgeNumber Indicates the badge number of the current application.
      * @return Returns get notification badge number result.
      */
-    ErrCode GetBadgeNumber(int32_t &badgeNumber);
+    InnerErrorCode GetBadgeNumber(int32_t &badgeNumber);
 
     /**
      * @brief Register Badge Query Callback.
@@ -1863,7 +1877,7 @@ public:
      * @param badgeQueryCallback BadgeQueryCallback.
      * @return Returns register Badge Query Callback result.
      */
-    ErrCode RegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback);
+    InnerErrorCode RegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback);
 
     /**
      * @brief Unregister Badge Query Callback.
@@ -1871,7 +1885,7 @@ public:
      * @param badgeQueryCallback BadgeQueryCallback.
      * @return Returns unregister Badge Query Callback result.
      */
-    ErrCode UnRegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback);
+    InnerErrorCode UnRegisterBadgeQueryCallback(const std::shared_ptr<IBadgeQueryCallback> &badgeQueryCallback);
 
     /**
      * @brief Is Do Not Disturb currently enabled
@@ -1880,7 +1894,7 @@ public:
      * @param enabled True if Do Not Disturb currently enabled
      * @return Returns get result.
      */
-    ErrCode IsDoNotDisturbEnabled(int32_t userId, bool& enabled);
+    InnerErrorCode IsDoNotDisturbEnabled(int32_t userId, bool& enabled);
 
     /**
      * @brief Check if the current app does not allow interruptions
@@ -1889,7 +1903,7 @@ public:
      * @param enabled True if current app does not allow interruptions
      * @return Returns get result.
      */
-    ErrCode IsNotifyAllowedInDoNotDisturb(int32_t userId, bool& isAllowed);
+    InnerErrorCode IsNotifyAllowedInDoNotDisturb(int32_t userId, bool& isAllowed);
 
     /**
      * @brief get notification switch state.
@@ -1898,7 +1912,7 @@ public:
      * @param state The application notification switch state.
      * @return Returns get notification switch state result.
      */
-    ErrCode GetNotificationSwitch(const NotificationBundleOption &bundleOption,
+    InnerErrorCode GetNotificationSwitch(const NotificationBundleOption &bundleOption,
         NotificationConstant::SWITCH_STATE &state);
 
     /**
@@ -1908,7 +1922,7 @@ public:
      * @param statistics The list of notificationStatistics.
      * @return Returns get result.
      */
-    ErrCode GetStatisticsByBundle(const std::vector<NotificationBundleOption> &bundleOptions,
+    InnerErrorCode GetStatisticsByBundle(const std::vector<NotificationBundleOption> &bundleOptions,
         std::vector<NotificationStatistics> &statistics);
 
     /**
@@ -1918,7 +1932,7 @@ public:
      * @param delayTime  The time interval in seconds to delay the reminder.
      * @return Returns set result.
      */
-    ErrCode SnoozeNotification(const std::string &hashCode, const int64_t delayTime);
+    InnerErrorCode SnoozeNotification(const std::string &hashCode, const int64_t delayTime);
 private:
     /**
      * @brief Gets Ans Manager proxy.
@@ -1939,9 +1953,9 @@ private:
      * @brief Checks whether the picture size exceeds the limit.
      *
      * @param request Indicates the specified request.
-     * @return Returns the ErrCode.
+     * @return Returns the uint32_t.
      */
-    ErrCode CheckImageSize(const NotificationRequest &request);
+    InnerErrorCode CheckImageSize(const NotificationRequest &request);
 
     /**
      * @brief Checks whether the notification doesn't support distribution.
@@ -1975,7 +1989,7 @@ private:
      *                       Otherwise, this method does not take effect.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelNotificationNoBlockIPC(int32_t notificationId, const std::string &instanceKey = "");
+    InnerErrorCode CancelNotificationNoBlockIPC(int32_t notificationId, const std::string &instanceKey = "");
 
     /**
      * @brief No blocking IPC to cancel a published notification matching the specified label and notificationId.
@@ -1984,7 +1998,7 @@ private:
      * @param notificationId Indicates the ID of the notification to cancel.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelNotificationNoBlockIPC(const std::string &label, int32_t notificationId,
+    InnerErrorCode CancelNotificationNoBlockIPC(const std::string &label, int32_t notificationId,
         const std::string &instanceKey = "");
 
     /**
@@ -1993,7 +2007,7 @@ private:
      *
      * @return Returns cancel all notifications result.
      */
-    ErrCode CancelAllNotificationsNoBlockIPC(const std::string &instanceKey = "");
+    InnerErrorCode CancelAllNotificationsNoBlockIPC(const std::string &instanceKey = "");
 
     /**
      * @brief No blocking IPC to cancel a published agent notification.
@@ -2005,7 +2019,8 @@ private:
      * @param userId Indicates the specific user.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundleNoBlockIPC(int32_t notificationId, const std::string &representativeBundle, int32_t userId);
+    InnerErrorCode CancelAsBundleNoBlockIPC(
+        int32_t notificationId, const std::string &representativeBundle, int32_t userId);
 
     /**
      * @brief No blocking IPC to cancel a published agent notification.
@@ -2016,7 +2031,7 @@ private:
      *                       Otherwise, this method does not take effect.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelAsBundleNoBlockIPC(const NotificationBundleOption &bundleOption, int32_t notificationId);
+    InnerErrorCode CancelAsBundleNoBlockIPC(const NotificationBundleOption &bundleOption, int32_t notificationId);
 
     /**
      * @brief No blocking IPC to obtain active notifications of the current application in the system.
@@ -2024,7 +2039,7 @@ private:
      * @param  request Indicates active NotificationRequest objects of the current application.
      * @return Returns get active notifications result.
      */
-    ErrCode GetActiveNotificationsNoBlockIPC(std::vector<sptr<NotificationRequest>> &request,
+    InnerErrorCode GetActiveNotificationsNoBlockIPC(std::vector<sptr<NotificationRequest>> &request,
         const std::string &instanceKey = "");
 
     /**
@@ -2034,7 +2049,7 @@ private:
      * @param notification Indicates all active notifications of this application.
      * @return Returns get all active notifications
      */
-    ErrCode GetAllActiveNotificationsNoBlockIPC(std::vector<sptr<Notification>> &notification);
+    InnerErrorCode GetAllActiveNotificationsNoBlockIPC(std::vector<sptr<Notification>> &notification);
 
     /**
      * @brief No blocking IPC to obtain the flag that whether to allow a specified application to show badge.
@@ -2043,7 +2058,8 @@ private:
      * @param enabled Specifies whether to allow the given application to show badge.
      * @return Returns get result.
      */
-    ErrCode GetShowBadgeEnabledForBundleNoBlockIPC(const NotificationBundleOption &bundleOption, bool &enabled);
+    InnerErrorCode GetShowBadgeEnabledForBundleNoBlockIPC(
+        const NotificationBundleOption &bundleOption, bool &enabled);
 
     /**
      * @brief No blocking IPC to obtain the flag that whether to allow the current application to show badge.
@@ -2051,7 +2067,7 @@ private:
      * @param enabled Specifies whether to allow the given application to show badge.
      * @return Returns get result.
      */
-    ErrCode GetShowBadgeEnabledNoBlockIPC(bool &enabled);
+    InnerErrorCode GetShowBadgeEnabledNoBlockIPC(bool &enabled);
 
     /**
      * @brief No blocking IPC to cancel a published agent notification.
@@ -2060,7 +2076,7 @@ private:
      * @param id Indicates the unique notification ID in the application.
      * @return Returns cancel result.
      */
-    ErrCode CancelAsBundleWithAgentNoBlockIPC(const NotificationBundleOption &bundleOption, const int32_t id);
+    InnerErrorCode CancelAsBundleWithAgentNoBlockIPC(const NotificationBundleOption &bundleOption, const int32_t id);
 
 private:
     std::mutex subscriberMutex_;

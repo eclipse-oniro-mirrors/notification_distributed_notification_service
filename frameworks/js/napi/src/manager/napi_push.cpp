@@ -15,6 +15,9 @@
 #include "napi_push.h"
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "common.h"
 #include "ipc_skeleton.h"
 #include "js_error_utils.h"
@@ -24,6 +27,7 @@
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 namespace {
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
@@ -44,7 +48,7 @@ napi_value NapiPush::RegisterPushCallback(napi_env env, napi_callback_info info)
 {
     NapiPush *me = CheckParamsAndGetThis<NapiPush>(env, info);
     if (me == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return nullptr;
     }
     return me->OnRegisterPushCallback(env, info);
@@ -54,7 +58,7 @@ napi_value NapiPush::UnregisterPushCallback(napi_env env, napi_callback_info inf
 {
     NapiPush *me = CheckParamsAndGetThis<NapiPush>(env, info);
     if (me == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return nullptr;
     }
     return me->OnUnregisterPushCallback(env, info);
@@ -82,19 +86,19 @@ napi_value NapiPush::OnRegisterPushCallback(napi_env env, const napi_callback_in
     std::string type = AppExecFwk::UnwrapStringFromJS(env, argv[INDEX_ZERO]);
     if (type != "checkNotification") {
         ANS_LOGE("The type is not checkNotification");
-        ThrowError(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return undefined;
     }
 
     sptr<NotificationCheckRequest> checkRequest = new NotificationCheckRequest();
     if (ParseCheckRequest(env, argv[INDEX_ONE], checkRequest) == nullptr) {
         ANS_LOGE("Failed to get check request info from param");
-        ThrowError(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return undefined;
     }
 
     if (!CheckCallerIsSystemApp()) {
-        ThrowError(env, ERROR_NOT_SYSTEM_APP);
+        Common::NapiThrow(env, ERR_ANS_INNER_NON_SYSTEM_APP);
         return undefined;
     }
 
@@ -102,16 +106,17 @@ napi_value NapiPush::OnRegisterPushCallback(napi_env env, const napi_callback_in
         jsPushCallBack_ = new (std::nothrow) OHOS::Notification::JSPushCallBack(env);
         if (jsPushCallBack_ == nullptr) {
             ANS_LOGE("null jsPushCallBack_");
-            ThrowError(env, ERROR_INTERNAL_ERROR);
+            Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
             return undefined;
         }
     }
     NotificationConstant::SlotType outSlotType = checkRequest->GetSlotType();
     jsPushCallBack_->SetJsPushCallBackObject(outSlotType, argv[INDEX_TWO]);
-    auto result = NotificationHelper::RegisterPushCallback(jsPushCallBack_->AsObject(), checkRequest);
-    if (result != ERR_OK) {
-        ANS_LOGE("result: %{public}d", result);
-        ThrowError(env, OHOS::Notification::ErrorToExternal(result));
+    InnerErrorCode svcResult = DelayedSingleton<AnsNotification>::GetInstance()->RegisterPushCallback(
+        jsPushCallBack_->AsObject(), checkRequest);
+    if (svcResult != ERR_ANS_INNER_OK) {
+        ANS_LOGE("result: %{public}d", svcResult);
+        Common::NapiThrow(env, svcResult);
     }
     return undefined;
 }
@@ -136,7 +141,7 @@ napi_value NapiPush::OnUnregisterPushCallback(napi_env env, const napi_callback_
     NAPI_CALL(env, napi_typeof(env, argv[INDEX_ZERO], &valueType));
     if (valueType != napi_string) {
         ANS_LOGE("Failed to parse type.");
-        ThrowError(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return undefined;
     }
     char str[STR_MAX_SIZE] = {0};
@@ -145,17 +150,17 @@ napi_value NapiPush::OnUnregisterPushCallback(napi_env env, const napi_callback_
     std::string type = str;
     if (type != "checkNotification") {
         ANS_LOGE("The type is not checkNotification");
-        ThrowError(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return undefined;
     }
 
     if (!CheckCallerIsSystemApp()) {
-        ThrowError(env, ERROR_NOT_SYSTEM_APP);
+        Common::NapiThrow(env, ERR_ANS_INNER_NON_SYSTEM_APP);
         return undefined;
     }
 
     if (jsPushCallBack_ == nullptr) {
-        ThrowError(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         ANS_LOGE("Never registered.");
         return undefined;
     }
@@ -163,12 +168,12 @@ napi_value NapiPush::OnUnregisterPushCallback(napi_env env, const napi_callback_
     if (argc == ARGC_TWO) {
         if (!jsPushCallBack_->IsEqualPushCallBackObject(argv[INDEX_ONE])) {
             ANS_LOGE("inconsistent with existing callback");
-            ThrowError(env, ERROR_PARAM_INVALID);
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
             return undefined;
         }
     }
 
-    NotificationHelper::UnregisterPushCallback();
+    DelayedSingleton<AnsNotification>::GetInstance()->UnregisterPushCallback();
     return undefined;
 }
 

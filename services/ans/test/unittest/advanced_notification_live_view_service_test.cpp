@@ -23,6 +23,7 @@
 #define private public
 #include "advanced_notification_service.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_result_data_synchronizer.h"
 #include "accesstoken_kit.h"
@@ -367,7 +368,7 @@ HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_100, Function | SmallTest | Lev
     advancedNotificationService_->currentUserId.clear();
     auto ret = advancedNotificationService_->OnSubscriberAdd(nullptr, 100);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -382,7 +383,7 @@ HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_200, Function | SmallTest | Lev
     advancedNotificationService_->currentUserId.clear();
     auto ret = advancedNotificationService_->OnSubscriberAdd(record, 100);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -464,7 +465,7 @@ HWTEST_F(AnsLiveViewServiceTest, UpdateInDelayNotificationList_100, Function | S
     sptr<NotificationBundleOption> bundle1 = new NotificationBundleOption("test", 1);
     auto record1 = advancedNotificationService_->MakeNotificationRecord(request1, bundle1);
     advancedNotificationService_->UpdateInDelayNotificationList(record1);
-    
+
     auto iter = advancedNotificationService_->delayNotificationList_.begin();
     ASSERT_EQ((*iter).first->request->GetPublishDelayTime(), 1000);
 }
@@ -613,7 +614,7 @@ HWTEST_F(AnsLiveViewServiceTest, StartPublishDelayedNotification_100, Function |
 
     auto ret = advancedNotificationService_->StartPublishDelayedNotification(record);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -845,16 +846,16 @@ HWTEST_F(AnsLiveViewServiceTest, IncrementalUpdateLiveview_00001, Function | Sma
     oldLiveViewContent->SetIsOnlyLocalUpdate(true);
     auto oldContent = std::make_shared<NotificationContent>(oldLiveViewContent);
     oldRequest->SetContent(oldContent);
-    
+
     auto newRequest = sptr<NotificationRequest>(new NotificationRequest(1));
     newRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto newLiveViewContent = std::make_shared<NotificationLiveViewContent>();
     newLiveViewContent->SetIsOnlyLocalUpdate(false);
     auto newContent = std::make_shared<NotificationContent>(newLiveViewContent);
     newRequest->SetContent(newContent);
-    
+
     newRequest->IncrementalUpdateLiveview(oldRequest);
-    
+
     auto updatedContent = newRequest->GetContent();
     ASSERT_NE(updatedContent, nullptr);
     auto updatedLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
@@ -878,7 +879,7 @@ HWTEST_F(AnsLiveViewServiceTest, IncrementalUpdateLiveview_00002, Function | Sma
         NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_REMOVE);
     auto oldContent = std::make_shared<NotificationContent>(oldLiveViewContent);
     oldRequest->SetContent(oldContent);
-    
+
     auto newRequest = sptr<NotificationRequest>(new NotificationRequest(1));
     newRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto newLiveViewContent = std::make_shared<NotificationLiveViewContent>();
@@ -886,9 +887,9 @@ HWTEST_F(AnsLiveViewServiceTest, IncrementalUpdateLiveview_00002, Function | Sma
         NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_INVAILD);
     auto newContent = std::make_shared<NotificationContent>(newLiveViewContent);
     newRequest->SetContent(newContent);
-    
+
     newRequest->IncrementalUpdateLiveview(oldRequest);
-    
+
     auto updatedContent = newRequest->GetContent();
     ASSERT_NE(updatedContent, nullptr);
     auto updatedLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
@@ -1027,12 +1028,12 @@ HWTEST_F(AnsLiveViewServiceTest, OnProcessDied_00001, Function | SmallTest | Lev
 {
     auto observer = std::make_shared<NotificationAppStateObserver>();
     ASSERT_NE(observer, nullptr);
-    
+
     ProcessData processData;
     processData.bundleName = "test.bundle";
     processData.pid = 12345;
     processData.processName = "testProcess";
-    
+
     observer->OnProcessDied(processData);
 }
 
@@ -1046,7 +1047,7 @@ HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_00001, Functio
 {
     auto service = AdvancedNotificationService::GetInstance();
     ASSERT_NE(service, nullptr);
-    
+
     int32_t pid = 12345;
     service->RemoveCommonLiveViewNotification(pid);
 }
@@ -1061,7 +1062,7 @@ HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_00002, Functio
 {
     auto service = AdvancedNotificationService::GetInstance();
     ASSERT_NE(service, nullptr);
-    
+
     int32_t pid = 1;
     service->RemoveCommonLiveViewNotification(pid);
     service->RemoveCommonLiveViewNotification(pid);
@@ -1129,7 +1130,7 @@ HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_0004, Function
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     record->request = nullptr;
     advancedNotificationService_->AddToNotificationList(record);
-    
+
     auto newRequest = sptr<NotificationRequest>(new NotificationRequest(1));
     newRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto newLiveViewContent = std::make_shared<NotificationLiveViewContent>();
@@ -1168,7 +1169,7 @@ HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_0005, Function
     ASSERT_NE(bundle, nullptr);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     advancedNotificationService_->AddToNotificationList(record);
-    
+
     auto newRequest = sptr<NotificationRequest>(new NotificationRequest(1));
     newRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto newLiveViewContent = std::make_shared<NotificationLiveViewContent>();
@@ -1207,7 +1208,7 @@ HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_0006, Function
     ASSERT_NE(bundle, nullptr);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     advancedNotificationService_->AddToNotificationList(record);
-    
+
     auto newRequest = sptr<NotificationRequest>(new NotificationRequest(1));
     newRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto newLiveViewContent = std::make_shared<NotificationLiveViewContent>();
@@ -1246,7 +1247,7 @@ HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_0007, Function
     ASSERT_NE(bundle, nullptr);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     advancedNotificationService_->AddToNotificationList(record);
-    
+
     auto newRequest = sptr<NotificationRequest>(new NotificationRequest(1));
     newRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto newLiveViewContent = std::make_shared<NotificationLiveViewContent>();
@@ -1267,7 +1268,7 @@ HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_0007, Function
 HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_0008, Function | SmallTest | Level1)
 {
     auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
-    
+
     sptr<NotificationRequest> request1 = new (std::nothrow) NotificationRequest();
     ASSERT_NE(request1, nullptr);
     request1->SetSlotType(slotType);
@@ -1283,7 +1284,7 @@ HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_0008, Function
     sptr<NotificationBundleOption> bundle1 = new NotificationBundleOption("test", 1);
     auto record1 = advancedNotificationService_->MakeNotificationRecord(request1, bundle1);
     advancedNotificationService_->AddToNotificationList(record1);
-    
+
     sptr<NotificationRequest> request2 = new (std::nothrow) NotificationRequest();
     request2->SetSlotType(slotType);
     request2->SetNotificationId(2);
@@ -1298,7 +1299,7 @@ HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_0008, Function
     sptr<NotificationBundleOption> bundle2 = new NotificationBundleOption("test", 1);
     auto record2 = advancedNotificationService_->MakeNotificationRecord(request2, bundle2);
     advancedNotificationService_->AddToNotificationList(record2);
-    
+
     auto newRequest = sptr<NotificationRequest>(new NotificationRequest(1));
     newRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto newLiveViewContent = std::make_shared<NotificationLiveViewContent>();
@@ -1319,7 +1320,7 @@ HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_0008, Function
 HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_0009, Function | SmallTest | Level1)
 {
     auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
-    
+
     sptr<NotificationRequest> request1 = new (std::nothrow) NotificationRequest();
     ASSERT_NE(request1, nullptr);
     request1->SetSlotType(slotType);
@@ -1336,7 +1337,7 @@ HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_0009, Function
     sptr<NotificationBundleOption> bundle1 = new NotificationBundleOption("test", 1);
     auto record1 = advancedNotificationService_->MakeNotificationRecord(request1, bundle1);
     advancedNotificationService_->AddToNotificationList(record1);
-    
+
     sptr<NotificationRequest> request2 = new (std::nothrow) NotificationRequest();
     request2->SetSlotType(slotType);
     request2->SetNotificationId(2);
@@ -1351,7 +1352,7 @@ HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_0009, Function
     sptr<NotificationBundleOption> bundle2 = new NotificationBundleOption("test", 1);
     auto record2 = advancedNotificationService_->MakeNotificationRecord(request2, bundle2);
     advancedNotificationService_->AddToNotificationList(record2);
-    
+
     auto newRequest = sptr<NotificationRequest>(new NotificationRequest(1));
     newRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto newLiveViewContent = std::make_shared<NotificationLiveViewContent>();
@@ -1386,7 +1387,7 @@ HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_00010, Functio
     sptr<NotificationBundleOption> bundle1 = new NotificationBundleOption("test", 1);
     auto record1 = advancedNotificationService_->MakeNotificationRecord(request1, bundle1);
     advancedNotificationService_->AddToNotificationList(record1);
-    
+
     sptr<NotificationRequest> request2 = new (std::nothrow) NotificationRequest();
     request2->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     request2->SetNotificationId(2);
@@ -1400,7 +1401,7 @@ HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_00010, Functio
     ASSERT_NE(bundle2, nullptr);
     auto record2 = advancedNotificationService_->MakeNotificationRecord(request2, bundle2);
     advancedNotificationService_->AddToNotificationList(record2);
-    
+
     auto newRequest = sptr<NotificationRequest>(new NotificationRequest(1));
     newRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto newLiveViewContent = std::make_shared<NotificationLiveViewContent>();

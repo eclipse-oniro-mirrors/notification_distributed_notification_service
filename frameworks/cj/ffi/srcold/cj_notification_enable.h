@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #ifndef OHOS_NOTIFICATION_ENABLE_H
 #define OHOS_NOTIFICATION_ENABLE_H
 
@@ -26,7 +25,7 @@ namespace CJSystemapi {
 constexpr int32_t SUBSCRIBE_USER_INIT = -1;
 
 struct IsEnableParams {
-    ::OHOS::Notification::NotificationBundleOption option;
+    OHOS::Notification::NotificationBundleOption option;
     bool hasBundleOption = false;
     int32_t userId = SUBSCRIBE_USER_INIT;
     bool hasUserId = false;

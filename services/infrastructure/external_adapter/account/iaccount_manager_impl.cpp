@@ -20,6 +20,7 @@
 #include "ipc_skeleton.h"
 #include "ans_log_wrapper.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "os_account_constants.h"
 #include "os_account_info.h"
 #include "os_account_manager.h"
@@ -54,7 +55,7 @@ ErrCode IAccountManagerImpl::GetCurrentCallingUserId(int32_t &userId)
     int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
     if (ret != ERR_OK) {
         ANS_LOGE("Get userId failed, callingUid = <%{public}d>, code is %{public}d", callingUid, ret);
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     ANS_LOGD("Get userId Success, callingUid = <%{public}d> userId = <%{public}d>", callingUid, userId);
     return ERR_OK;

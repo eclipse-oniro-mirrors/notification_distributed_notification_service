@@ -33,6 +33,7 @@
 #undef private
 #undef protected
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ipc_types.h"
 #include "mock_i_remote_object.h"
 #include "notification.h"
@@ -162,7 +163,7 @@ HWTEST_F(AnsNotificationUnitTest, GetAnsManagerProxy_0100, Function | MediumTest
 
 /*
  * @tc.name: AddSlotByType_0100
- * @tc.desc: test AddSlotByType ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test AddSlotByType ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -175,15 +176,15 @@ HWTEST_F(AnsNotificationUnitTest, AddSlotByType_0100, Function | MediumTest | Le
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CUSTOM;
-    ErrCode ret1 = ans_->AddSlotByType(slotType);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret3 = ans_->RemoveNotificationSlot(slotType);
-    EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->AddSlotByType(slotType);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret3 = ans_->RemoveNotificationSlot(slotType);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: RemoveAllSlots_0100
- * @tc.desc: test RemoveAllSlots ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test RemoveAllSlots ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -195,13 +196,13 @@ HWTEST_F(AnsNotificationUnitTest, RemoveAllSlots_0100, Function | MediumTest | L
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
-    ErrCode ret1 = ans_->RemoveAllSlots();
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->RemoveAllSlots();
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: GetNotificationSlot_0100
- * @tc.desc: test GetNotificationSlot ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test GetNotificationSlot ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -215,22 +216,22 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSlot_0100, Function | MediumTes
     ans_->GetAnsManagerProxy();
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CUSTOM;
     sptr<NotificationSlot> slot = new NotificationSlot();
-    ErrCode ret1 = ans_->GetNotificationSlot(slotType, slot);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->GetNotificationSlot(slotType, slot);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     std::vector<sptr<NotificationSlot>> slots;
     slots.emplace_back(slot);
-    ErrCode ret2 = ans_->GetNotificationSlots(slots);
-    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret2 = ans_->GetNotificationSlots(slots);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     std::vector<NotificationSlot> nslots;
     NotificationSlot notificationSlot;
     nslots.emplace_back(notificationSlot);
-    ErrCode ret3 = ans_->AddNotificationSlots(nslots);
-    EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret3 = ans_->AddNotificationSlots(nslots);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: GetNotificationSlotNumAsBundle_0100
- * @tc.desc: test GetNotificationSlotNumAsBundle ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test GetNotificationSlotNumAsBundle ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -246,8 +247,8 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotNumAsBundle_0100, Function 
     std::string bundleName = "bundleName";
     bundleOptions.SetBundleName(bundleName);
     uint64_t num = 10;
-    ErrCode ret1 = ans_->GetNotificationSlotNumAsBundle(bundleOptions, num);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->GetNotificationSlotNumAsBundle(bundleOptions, num);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -268,8 +269,8 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotFlagsAsBundle_0100, Functio
     std::string bundleName = "bundleName";
     bundleOptions.SetBundleName(bundleName);
     uint32_t num = 10;
-    ErrCode ret1 = ans_->GetNotificationSlotFlagsAsBundle(bundleOptions, num);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->GetNotificationSlotFlagsAsBundle(bundleOptions, num);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -289,8 +290,8 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotFlagsAsBundle_0200, Functio
     NotificationBundleOption bundleOptions;
     bundleOptions.SetBundleName("");
     uint32_t num = 10;
-    ErrCode ret1 = ans_->GetNotificationSlotFlagsAsBundle(bundleOptions, num);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret1 = ans_->GetNotificationSlotFlagsAsBundle(bundleOptions, num);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -304,8 +305,8 @@ HWTEST_F(AnsNotificationUnitTest, SetNotificationSlotFlagsAsBundle_0100, Functio
     NotificationBundleOption bundleOptions;
     bundleOptions.SetBundleName("bundleName");
     uint64_t num = 1;
-    ErrCode ret1 = ans_->SetNotificationSlotFlagsAsBundle(bundleOptions, num);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->SetNotificationSlotFlagsAsBundle(bundleOptions, num);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -325,8 +326,8 @@ HWTEST_F(AnsNotificationUnitTest, SetNotificationSlotFlagsAsBundle_0200, Functio
     NotificationBundleOption bundleOptions;
     bundleOptions.SetBundleName("");
     uint64_t num = 10;
-    ErrCode ret1 = ans_->SetNotificationSlotFlagsAsBundle(bundleOptions, num);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret1 = ans_->SetNotificationSlotFlagsAsBundle(bundleOptions, num);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -346,8 +347,8 @@ HWTEST_F(AnsNotificationUnitTest, CanPopEnableNotificationDialog_0100, Function 
     sptr<AnsDialogHostClient> client = nullptr;
     bool enable = true;
     std::string bundleName = "";
-    ErrCode ret1 = ans_->CanPopEnableNotificationDialog(client, enable, bundleName);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->CanPopEnableNotificationDialog(client, enable, bundleName);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -358,8 +359,8 @@ HWTEST_F(AnsNotificationUnitTest, CanPopEnableNotificationDialog_0100, Function 
  */
 HWTEST_F(AnsNotificationUnitTest, RemoveEnableNotificationDialog_0100, Function | MediumTest | Level1)
 {
-    ErrCode ret = ans_->RemoveEnableNotificationDialog();
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->RemoveEnableNotificationDialog();
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -377,8 +378,8 @@ HWTEST_F(AnsNotificationUnitTest, RemoveNotifications_0100, Function | MediumTes
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     std::vector<std::string> hashCodes = {"data1", "data2"};
-    ErrCode ret1 = ans_->RemoveNotifications(hashCodes, 1);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->RemoveNotifications(hashCodes, 1);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -398,9 +399,9 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotForBundle_0100, Function | 
     NotificationBundleOption bundleOptions;
     bundleOptions.SetBundleName("name");
     sptr<NotificationSlot> slot = new NotificationSlot();
-    ErrCode ret1 = ans_->GetNotificationSlotForBundle(bundleOptions,
+    InnerErrorCode ret1 = ans_->GetNotificationSlotForBundle(bundleOptions,
         NotificationConstant::SlotType::CONTENT_INFORMATION, slot);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -420,9 +421,9 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotForBundle_0200, Function | 
     NotificationBundleOption bundleOptions;
     bundleOptions.SetBundleName("");
     sptr<NotificationSlot> slot = new NotificationSlot();
-    ErrCode ret1 = ans_->GetNotificationSlotForBundle(bundleOptions,
+    InnerErrorCode ret1 = ans_->GetNotificationSlotForBundle(bundleOptions,
         NotificationConstant::SlotType::CONTENT_INFORMATION, slot);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -440,9 +441,9 @@ HWTEST_F(AnsNotificationUnitTest, GetEnabledForBundleSlotSelf_0100, Function | M
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     bool enable = true;
-    ErrCode ret1 = ans_->GetEnabledForBundleSlotSelf(
+    InnerErrorCode ret1 = ans_->GetEnabledForBundleSlotSelf(
         NotificationConstant::SlotType::CONTENT_INFORMATION, enable);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -461,8 +462,8 @@ HWTEST_F(AnsNotificationUnitTest, RegisterPushCallback_0100, Function | MediumTe
     ans_->GetAnsManagerProxy();
     sptr<AnsDialogHostClient> callback = new AnsDialogHostClient();
     sptr<NotificationCheckRequest> checkRequest = nullptr;
-    ErrCode ret1 = ans_->RegisterPushCallback(callback->AsObject(), checkRequest);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->RegisterPushCallback(callback->AsObject(), checkRequest);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -479,8 +480,8 @@ HWTEST_F(AnsNotificationUnitTest, UnregisterPushCallback_0100, Function | Medium
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
-    ErrCode ret1 = ans_->UnregisterPushCallback();
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->UnregisterPushCallback();
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -499,8 +500,8 @@ HWTEST_F(AnsNotificationUnitTest, SetAdditionConfig_0100, Function | MediumTest 
     ans_->GetAnsManagerProxy();
     std::string key = "key";
     std::string value = "value";
-    ErrCode ret1 = ans_->SetAdditionConfig(key, value);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->SetAdditionConfig(key, value);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -511,8 +512,8 @@ HWTEST_F(AnsNotificationUnitTest, SetAdditionConfig_0100, Function | MediumTest 
  */
 HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabled_0100, Function | MediumTest | Level1)
 {
-    ErrCode ret = ans_->SetPriorityEnabled(true);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->SetPriorityEnabled(true);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -525,8 +526,8 @@ HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundle_0100, Function | Me
 {
     NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::ENABLE;
     NotificationBundleOption bo;
-    ErrCode ret = ans_->SetPriorityEnabledByBundle(bo, enableStatus);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->SetPriorityEnabledByBundle(bo, enableStatus);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -541,8 +542,8 @@ HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundle_0200, Function | Me
     NotificationBundleOption bo;
     bo.SetBundleName("bundleName");
     bo.SetUid(1);
-    ErrCode ret = ans_->SetPriorityEnabledByBundle(bo, enableStatus);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->SetPriorityEnabledByBundle(bo, enableStatus);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -554,8 +555,8 @@ HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundle_0200, Function | Me
 HWTEST_F(AnsNotificationUnitTest, IsPriorityEnabled_0100, Function | MediumTest | Level1)
 {
     bool enabled = true;
-    ErrCode ret = ans_->IsPriorityEnabled(enabled);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->IsPriorityEnabled(enabled);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -568,8 +569,8 @@ HWTEST_F(AnsNotificationUnitTest, IsPriorityEnabledByBundle_0100, Function | Med
 {
     NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::DISABLE;
     NotificationBundleOption bo;
-    ErrCode ret = ans_->IsPriorityEnabledByBundle(bo, enableStatus);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->IsPriorityEnabledByBundle(bo, enableStatus);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -584,8 +585,8 @@ HWTEST_F(AnsNotificationUnitTest, IsPriorityEnabledByBundle_0200, Function | Med
     NotificationBundleOption bo;
     bo.SetBundleName("bundleName");
     bo.SetUid(1);
-    ErrCode ret = ans_->IsPriorityEnabledByBundle(bo, enableStatus);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->IsPriorityEnabledByBundle(bo, enableStatus);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -598,8 +599,8 @@ HWTEST_F(AnsNotificationUnitTest, TriggerUpdatePriorityType_0100, Function | Med
 {
     NotificationRequest request;
     request.SetInnerPriorityNotificationType(NotificationConstant::PriorityNotificationType::PAYMENT_DUE);
-    ErrCode ret = ans_->TriggerUpdatePriorityType(request);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->TriggerUpdatePriorityType(request);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -618,8 +619,8 @@ HWTEST_F(AnsNotificationUnitTest, CancelAsBundleWithAgent_0100, Function | Mediu
     ans_->GetAnsManagerProxy();
     int32_t id = 1;
     NotificationBundleOption bundleOption = NotificationBundleOption();
-    ErrCode ret1 = ans_->CancelAsBundleWithAgent(bundleOption, id);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->CancelAsBundleWithAgent(bundleOption, id);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -638,13 +639,13 @@ HWTEST_F(AnsNotificationUnitTest, SetTargetDeviceStatus_0100, Function | MediumT
     ans_->GetAnsManagerProxy();
     std::string deviceType = "device";
     const uint32_t status = 1;
-    ErrCode ret1 = ans_->SetTargetDeviceStatus(deviceType, status);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->SetTargetDeviceStatus(deviceType, status);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: PublishNotification_0100
- * @tc.desc: test PublishNotification ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test PublishNotification ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -661,22 +662,22 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotification_0100, Function | MediumTes
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
     request.SetContent(content);
-    ErrCode ret1 = ans_->PublishNotification(label, request);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->PublishNotification(label, request);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     int32_t notificationId = 10;
-    ErrCode ret3 = ans_->CancelNotification(label, notificationId);
-    EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret4 = ans_->CancelAllNotifications();
-    EXPECT_EQ(ret4, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret3 = ans_->CancelNotification(label, notificationId);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret4 = ans_->CancelAllNotifications();
+    EXPECT_EQ(ret4, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     std::string representativeBundle = "this is representativeBundle";
     int32_t userId = 5;
-    ErrCode ret5 = ans_->CancelAsBundle(notificationId, representativeBundle, userId);
-    EXPECT_EQ(ret5, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret5 = ans_->CancelAsBundle(notificationId, representativeBundle, userId);
+    EXPECT_EQ(ret5, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: GetActiveNotificationNums_0100
- * @tc.desc: test GetActiveNotificationNums ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test GetActiveNotificationNums ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -689,16 +690,16 @@ HWTEST_F(AnsNotificationUnitTest, GetActiveNotificationNums_0100, Function | Med
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     uint64_t num = 4;
-    ErrCode ret1 = ans_->GetActiveNotificationNums(num);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->GetActiveNotificationNums(num);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     std::vector<sptr<NotificationRequest>> request;
-    ErrCode ret2 = ans_->GetActiveNotifications(request);
-    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret2 = ans_->GetActiveNotifications(request);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: CanPublishNotificationAsBundle_0100
- * @tc.desc: test CanPublishNotificationAsBundle ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test CanPublishNotificationAsBundle ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -712,24 +713,24 @@ HWTEST_F(AnsNotificationUnitTest, CanPublishNotificationAsBundle_0100, Function 
     ans_->GetAnsManagerProxy();
     std::string representativeBundle = "this is representativeBundle";
     bool canPublish = true;
-    ErrCode ret1 = ans_->CanPublishNotificationAsBundle(representativeBundle, canPublish);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->CanPublishNotificationAsBundle(representativeBundle, canPublish);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     std::string representativeBundle0 = "";
-    ErrCode ret2 = ans_->CanPublishNotificationAsBundle(representativeBundle0, canPublish);
-    EXPECT_EQ(ret2, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret2 = ans_->CanPublishNotificationAsBundle(representativeBundle0, canPublish);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_INVALID_PARAM);
     NotificationRequest request;
-    ErrCode ret3 = ans_->PublishNotificationAsBundle(representativeBundle0, request);
-    EXPECT_EQ(ret3, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret3 = ans_->PublishNotificationAsBundle(representativeBundle0, request);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_INVALID_PARAM);
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
     request.SetContent(content);
-    ErrCode ret5 = ans_->PublishNotificationAsBundle(representativeBundle, request);
-    EXPECT_EQ(ret5, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret5 = ans_->PublishNotificationAsBundle(representativeBundle, request);
+    EXPECT_EQ(ret5, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: SetNotificationBadgeNum_0100
- * @tc.desc: test SetNotificationBadgeNum ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test SetNotificationBadgeNum ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -741,16 +742,16 @@ HWTEST_F(AnsNotificationUnitTest, SetNotificationBadgeNum_0100, Function | Mediu
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
-    ErrCode ret1 = ans_->SetNotificationBadgeNum();
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->SetNotificationBadgeNum();
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     int32_t num = 3;
-    ErrCode ret2 = ans_->SetNotificationBadgeNum(num);
-    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret2 = ans_->SetNotificationBadgeNum(num);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: IsAllowedNotify_0100
- * @tc.desc: test IsAllowedNotify ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test IsAllowedNotify ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -763,20 +764,20 @@ HWTEST_F(AnsNotificationUnitTest, IsAllowedNotify_0100, Function | MediumTest | 
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     bool allowed = true;
-    ErrCode ret1 = ans_->IsAllowedNotify(allowed);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret2 = ans_->IsAllowedNotifySelf(allowed);
-    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->IsAllowedNotify(allowed);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret2 = ans_->IsAllowedNotifySelf(allowed);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     NotificationBundleOption bundleOption;
     std::string bundleName = "this is bundleName";
     bundleOption.SetBundleName(bundleName);
-    ErrCode ret3 = ans_->IsAllowedNotify(bundleOption, allowed);
-    EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret3 = ans_->IsAllowedNotify(bundleOption, allowed);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: RequestEnableNotification_0100
- * @tc.desc: test RequestEnableNotification ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test RequestEnableNotification ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -788,16 +789,16 @@ HWTEST_F(AnsNotificationUnitTest, RequestEnableNotification_0100, Function | Med
     sptr<AnsDialogHostClient> client = nullptr;
     AnsDialogHostClient::CreateIfNullptr(client);
     client = AnsDialogHostClient::GetInstance();
-    ErrCode ret1 = ans_->RequestEnableNotification(deviceId, client, callerToken);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->RequestEnableNotification(deviceId, client, callerToken);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     bool hasPermission = true;
-    ErrCode ret3 = ans_->HasNotificationPolicyAccessPermission(hasPermission);
-    EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret3 = ans_->HasNotificationPolicyAccessPermission(hasPermission);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: GetBundleImportance_0100
- * @tc.desc: test GetBundleImportance ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test GetBundleImportance ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -810,13 +811,13 @@ HWTEST_F(AnsNotificationUnitTest, GetBundleImportance_0100, Function | MediumTes
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     NotificationSlot::NotificationLevel importance = NotificationSlot::NotificationLevel::LEVEL_NONE;
-    ErrCode ret1 = ans_->GetBundleImportance(importance);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->GetBundleImportance(importance);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: RemoveNotification_0100
- * @tc.desc: test RemoveNotification ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test RemoveNotification ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -830,29 +831,29 @@ HWTEST_F(AnsNotificationUnitTest, RemoveNotification_0100, Function | MediumTest
     ans_->GetAnsManagerProxy();
     std::string key = "";
     int32_t removeReason = 10;
-    ErrCode ret1 = ans_->RemoveNotification(key, removeReason);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret1 = ans_->RemoveNotification(key, removeReason);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
     std::string key1 = "this is key1";
-    ErrCode ret2 = ans_->RemoveNotification(key1, removeReason);
-    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret2 = ans_->RemoveNotification(key1, removeReason);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     NotificationBundleOption bundleOption;
     std::string bundleName = "this is bundleName";
     bundleOption.SetBundleName(bundleName);
     int32_t notificationId = 2;
     std::string label = "this is label";
-    ErrCode ret3 = ans_->RemoveNotification(bundleOption, notificationId, label, removeReason);
-    EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret4 = ans_->RemoveAllNotifications(bundleOption);
-    EXPECT_EQ(ret4, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret5 = ans_->RemoveNotificationsByBundle(bundleOption);
-    EXPECT_EQ(ret5, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret6 = ans_->RemoveNotifications();
-    EXPECT_EQ(ret6, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret3 = ans_->RemoveNotification(bundleOption, notificationId, label, removeReason);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret4 = ans_->RemoveAllNotifications(bundleOption);
+    EXPECT_EQ(ret4, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret5 = ans_->RemoveNotificationsByBundle(bundleOption);
+    EXPECT_EQ(ret5, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret6 = ans_->RemoveNotifications();
+    EXPECT_EQ(ret6, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: GetNotificationSlotsForBundle_0100
- * @tc.desc: test GetNotificationSlotsForBundle ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test GetNotificationSlotsForBundle ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -870,15 +871,15 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotsForBundle_0100, Function |
     sptr<NotificationSlot> slot = new NotificationSlot();
     std::vector<sptr<NotificationSlot>> slots;
     slots.emplace_back(slot);
-    ErrCode ret1 = ans_->GetNotificationSlotsForBundle(bundleOption, slots);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret2 = ans_->UpdateNotificationSlots(bundleOption, slots);
-    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->GetNotificationSlotsForBundle(bundleOption, slots);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret2 = ans_->UpdateNotificationSlots(bundleOption, slots);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: SetNotificationsEnabledForAllBundles_0100
- * @tc.desc: test SetNotificationsEnabledForAllBundles ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test SetNotificationsEnabledForAllBundles ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -892,26 +893,26 @@ HWTEST_F(AnsNotificationUnitTest, SetNotificationsEnabledForAllBundles_0100, Fun
     ans_->GetAnsManagerProxy();
     std::string deviceId = "this is deviceId";
     bool enabled = true;
-    ErrCode ret1 = ans_->SetNotificationsEnabledForAllBundles(deviceId, enabled);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret2 = ans_->SetNotificationsEnabledForDefaultBundle(deviceId, enabled);
-    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->SetNotificationsEnabledForAllBundles(deviceId, enabled);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret2 = ans_->SetNotificationsEnabledForDefaultBundle(deviceId, enabled);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     NotificationBundleOption bundleOption;
     std::string bundleName = "this is bundleName";
     bundleOption.SetBundleName(bundleName);
-    ErrCode ret3 = ans_->SetNotificationsEnabledForSpecifiedBundle(bundleOption, deviceId, enabled);
-    EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret4 = ans_->SetShowBadgeEnabledForBundle(bundleOption, enabled);
-    EXPECT_EQ(ret4, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret5 = ans_->GetShowBadgeEnabledForBundle(bundleOption, enabled);
-    EXPECT_EQ(ret5, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret6 = ans_->GetShowBadgeEnabled(enabled);
-    EXPECT_EQ(ret6, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret3 = ans_->SetNotificationsEnabledForSpecifiedBundle(bundleOption, deviceId, enabled);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret4 = ans_->SetShowBadgeEnabledForBundle(bundleOption, enabled);
+    EXPECT_EQ(ret4, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret5 = ans_->GetShowBadgeEnabledForBundle(bundleOption, enabled);
+    EXPECT_EQ(ret5, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret6 = ans_->GetShowBadgeEnabled(enabled);
+    EXPECT_EQ(ret6, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: CancelGroup_0100
- * @tc.desc: test CancelGroup ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test CancelGroup ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -924,18 +925,18 @@ HWTEST_F(AnsNotificationUnitTest, CancelGroup_0100, Function | MediumTest | Leve
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     std::string groupName = "this is groupName";
-    ErrCode ret1 = ans_->CancelGroup(groupName);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->CancelGroup(groupName);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     NotificationBundleOption bundleOption;
     std::string bundleName = "this is bundleName";
     bundleOption.SetBundleName(bundleName);
-    ErrCode ret2 = ans_->RemoveGroupByBundle(bundleOption, groupName);
-    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret2 = ans_->RemoveGroupByBundle(bundleOption, groupName);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: SetDoNotDisturbDate_0100
- * @tc.desc: test SetDoNotDisturbDate ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test SetDoNotDisturbDate ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -948,18 +949,18 @@ HWTEST_F(AnsNotificationUnitTest, SetDoNotDisturbDate_0100, Function | MediumTes
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     NotificationDoNotDisturbDate doNotDisturbDate;
-    ErrCode ret1 = ans_->SetDoNotDisturbDate(doNotDisturbDate);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret2 = ans_->GetDoNotDisturbDate(doNotDisturbDate);
-    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->SetDoNotDisturbDate(doNotDisturbDate);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret2 = ans_->GetDoNotDisturbDate(doNotDisturbDate);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     bool doesSupport = true;
-    ErrCode ret3 = ans_->DoesSupportDoNotDisturbMode(doesSupport);
-    EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret3 = ans_->DoesSupportDoNotDisturbMode(doesSupport);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: PublishContinuousTaskNotification_0100
- * @tc.desc: test PublishContinuousTaskNotification ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test PublishContinuousTaskNotification ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -975,17 +976,17 @@ HWTEST_F(AnsNotificationUnitTest, PublishContinuousTaskNotification_0100, Functi
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
     request.SetContent(content);
-    ErrCode ret1 = ans_->PublishContinuousTaskNotification(request);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->PublishContinuousTaskNotification(request);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     std::string label = "this is label";
     int32_t notificationId = 3;
-    ErrCode ret2 = ans_->CancelContinuousTaskNotification(label, notificationId);
-    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret2 = ans_->CancelContinuousTaskNotification(label, notificationId);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: IsDistributedEnabled_0100
- * @tc.desc: test IsDistributedEnabled ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test IsDistributedEnabled ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -998,22 +999,22 @@ HWTEST_F(AnsNotificationUnitTest, IsDistributedEnabled_0100, Function | MediumTe
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     bool enabled = true;
-    ErrCode ret1 = ans_->IsDistributedEnabled(enabled);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret2 = ans_->EnableDistributed(enabled);
-    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->IsDistributedEnabled(enabled);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret2 = ans_->EnableDistributed(enabled);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     NotificationBundleOption bundleOption;
-    ErrCode ret3 = ans_->EnableDistributedByBundle(bundleOption, enabled);
-    EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret4 = ans_->EnableDistributedSelf(enabled);
-    EXPECT_EQ(ret4, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret5 = ans_->IsDistributedEnableByBundle(bundleOption, enabled);
-    EXPECT_EQ(ret5, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret3 = ans_->EnableDistributedByBundle(bundleOption, enabled);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret4 = ans_->EnableDistributedSelf(enabled);
+    EXPECT_EQ(ret4, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret5 = ans_->IsDistributedEnableByBundle(bundleOption, enabled);
+    EXPECT_EQ(ret5, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: IsSupportTemplate_0100
- * @tc.desc: test IsSupportTemplate ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test IsSupportTemplate ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -1027,29 +1028,29 @@ HWTEST_F(AnsNotificationUnitTest, IsSupportTemplate_0100, Function | MediumTest 
     ans_->GetAnsManagerProxy();
     std::string templateName = "this is templateName";
     bool support = true;
-    ErrCode ret1 = ans_->IsSupportTemplate(templateName, support);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->IsSupportTemplate(templateName, support);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     int32_t userId = -1;
     bool allowed = true;
-    ErrCode ret2 = ans_->IsAllowedNotify(userId, allowed);
-    EXPECT_EQ(ret2, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret2 = ans_->IsAllowedNotify(userId, allowed);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_INVALID_PARAM);
     int32_t userId1 = 2;
-    ErrCode ret3 = ans_->IsAllowedNotify(userId1, allowed);
-    EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret3 = ans_->IsAllowedNotify(userId1, allowed);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     bool enabled = true;
-    ErrCode ret4 = ans_->SetNotificationsEnabledForAllBundles(userId, enabled);
-    EXPECT_EQ(ret4, ERR_ANS_INVALID_PARAM);
-    ErrCode ret5 = ans_->SetNotificationsEnabledForAllBundles(userId1, enabled);
-    EXPECT_EQ(ret5, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret6 = ans_->RemoveNotifications(userId);
-    EXPECT_EQ(ret6, ERR_ANS_INVALID_PARAM);
-    ErrCode ret7 = ans_->RemoveNotifications(userId1);
-    EXPECT_EQ(ret7, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret4 = ans_->SetNotificationsEnabledForAllBundles(userId, enabled);
+    EXPECT_EQ(ret4, ERR_ANS_INNER_INVALID_PARAM);
+    InnerErrorCode ret5 = ans_->SetNotificationsEnabledForAllBundles(userId1, enabled);
+    EXPECT_EQ(ret5, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret6 = ans_->RemoveNotifications(userId);
+    EXPECT_EQ(ret6, ERR_ANS_INNER_INVALID_PARAM);
+    InnerErrorCode ret7 = ans_->RemoveNotifications(userId1);
+    EXPECT_EQ(ret7, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: SetDoNotDisturbDate_0200
- * @tc.desc: test SetDoNotDisturbDate ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test SetDoNotDisturbDate ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -1063,20 +1064,20 @@ HWTEST_F(AnsNotificationUnitTest, SetDoNotDisturbDate_0200, Function | MediumTes
     ans_->GetAnsManagerProxy();
     int32_t userId = -1;
     NotificationDoNotDisturbDate doNotDisturbDate;
-    ErrCode ret1 = ans_->SetDoNotDisturbDate(userId, doNotDisturbDate);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret1 = ans_->SetDoNotDisturbDate(userId, doNotDisturbDate);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
     int32_t userId1 = 2;
-    ErrCode ret2 = ans_->SetDoNotDisturbDate(userId1, doNotDisturbDate);
-    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret3 = ans_->GetDoNotDisturbDate(userId, doNotDisturbDate);
-    EXPECT_EQ(ret3, ERR_ANS_INVALID_PARAM);
-    ErrCode ret4 = ans_->GetDoNotDisturbDate(userId1, doNotDisturbDate);
-    EXPECT_EQ(ret4, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret2 = ans_->SetDoNotDisturbDate(userId1, doNotDisturbDate);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret3 = ans_->GetDoNotDisturbDate(userId, doNotDisturbDate);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_INVALID_PARAM);
+    InnerErrorCode ret4 = ans_->GetDoNotDisturbDate(userId1, doNotDisturbDate);
+    EXPECT_EQ(ret4, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: SetEnabledForBundleSlot_0100
- * @tc.desc: test SetEnabledForBundleSlot ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test SetEnabledForBundleSlot ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -1094,15 +1095,15 @@ HWTEST_F(AnsNotificationUnitTest, SetEnabledForBundleSlot_0100, Function | Mediu
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CUSTOM;
     bool enabled = true;
     bool isForceControl = false;
-    ErrCode ret1 = ans_->SetEnabledForBundleSlot(bundleOption, slotType, enabled, isForceControl);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret2 = ans_->GetEnabledForBundleSlot(bundleOption, slotType, enabled);
-    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->SetEnabledForBundleSlot(bundleOption, slotType, enabled, isForceControl);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret2 = ans_->GetEnabledForBundleSlot(bundleOption, slotType, enabled);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 #ifdef ANM_SUPPORT_DUMP
 /*
  * @tc.name: ShellDump_0100
- * @tc.desc: test ShellDump ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test ShellDump ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -1118,14 +1119,14 @@ HWTEST_F(AnsNotificationUnitTest, ShellDump_0100, Function | MediumTest | Level1
     std::string bundle = "this is bundle";
     int32_t userId = 1;
     std::vector<std::string> dumpInfo;
-    ErrCode ret1 = ans_->ShellDump(cmd, bundle, userId, 0, dumpInfo);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->ShellDump(cmd, bundle, userId, 0, dumpInfo);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 #endif
 
 /*
  * @tc.name: SetSyncNotificationEnabledWithoutApp_0100
- * @tc.desc: test SetSyncNotificationEnabledWithoutApp ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test SetSyncNotificationEnabledWithoutApp ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -1139,15 +1140,15 @@ HWTEST_F(AnsNotificationUnitTest, SetSyncNotificationEnabledWithoutApp_0100, Fun
     ans_->GetAnsManagerProxy();
     int32_t userId = -1;
     bool enabled = true;
-    ErrCode ret1 = ans_->SetSyncNotificationEnabledWithoutApp(userId, enabled);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret1 = ans_->SetSyncNotificationEnabledWithoutApp(userId, enabled);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
     int32_t userId1 = 2;
-    ErrCode ret2 = ans_->SetSyncNotificationEnabledWithoutApp(userId1, enabled);
-    EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret3 = ans_->GetSyncNotificationEnabledWithoutApp(userId, enabled);
-    EXPECT_EQ(ret3, ERR_ANS_INVALID_PARAM);
-    ErrCode ret4 = ans_->GetSyncNotificationEnabledWithoutApp(userId1, enabled);
-    EXPECT_EQ(ret4, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret2 = ans_->SetSyncNotificationEnabledWithoutApp(userId1, enabled);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret3 = ans_->GetSyncNotificationEnabledWithoutApp(userId, enabled);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_INVALID_PARAM);
+    InnerErrorCode ret4 = ans_->GetSyncNotificationEnabledWithoutApp(userId1, enabled);
+    EXPECT_EQ(ret4, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1168,8 +1169,8 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0100, Function | MediumT
 
     auto subscriber = TestAnsSubscriber();
     NotificationSubscribeInfo info;
-    ErrCode ret1 = ans_->SubscribeNotification(subscriber, info);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->SubscribeNotification(subscriber, info);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1189,8 +1190,8 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0200, Function | MediumT
     EXPECT_EQ(res, false);
 
     auto subscriber = TestAnsSubscriber();
-    ErrCode ret1 = ans_->SubscribeNotification(subscriber);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->SubscribeNotification(subscriber);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1211,8 +1212,8 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0300, Function | MediumT
 
     auto subscriber = std::make_shared<TestAnsSubscriber>();
     sptr<NotificationSubscribeInfo> info = new (std::nothrow) NotificationSubscribeInfo();
-    ErrCode ret1 = ans_->SubscribeNotification(subscriber, info);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->SubscribeNotification(subscriber, info);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1231,21 +1232,21 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0400, Function | MediumT
     bool res = ans_->GetAnsManagerProxy();
     EXPECT_EQ(res, false);
 
-    ErrCode ret1 = ans_->SubscribeNotification(nullptr);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret1 = ans_->SubscribeNotification(nullptr);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
  * @tc.name: SubscribeNotificationSelf_0100
- * @tc.desc: test SubscribeNotificationSelf ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test SubscribeNotificationSelf ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
 HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationSelf_0100, Function | MediumTest | Level1)
 {
     auto subscriber = TestAnsSubscriber();
-    ErrCode ret = ans_->SubscribeNotificationSelf(subscriber);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->SubscribeNotificationSelf(subscriber);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1256,34 +1257,34 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationSelf_0100, Function | Med
  */
 HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationSelf_0400, Function | MediumTest | Level1)
 {
-    ErrCode ret = ans_->SubscribeNotificationSelf(nullptr);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->SubscribeNotificationSelf(nullptr);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
- 
+
 /*
  * @tc.name: SubscribeNotificationSelf_0500
- * @tc.desc: test SubscribeNotificationSelf ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test SubscribeNotificationSelf ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
 HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationSelf_0500, Function | MediumTest | Level1)
 {
     std::shared_ptr<TestAnsSubscriber> subscriberPtr = std::make_shared<TestAnsSubscriber>();
-    ErrCode ret = ans_->SubscribeNotificationSelf(subscriberPtr);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->SubscribeNotificationSelf(subscriberPtr);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: SubscribeLocalLiveViewNotification_0100
- * @tc.desc: test SubscribeLocalLiveViewNotification ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test SubscribeLocalLiveViewNotification ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
 HWTEST_F(AnsNotificationUnitTest, SubscribeLocalLiveViewNotification_0100, Function | MediumTest | Level1)
 {
     auto subscriber = TestLocalLiveViewSubscriber();
-    ErrCode ret = ans_->SubscribeLocalLiveViewNotification(subscriber, false);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->SubscribeLocalLiveViewNotification(subscriber, false);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1303,8 +1304,8 @@ HWTEST_F(AnsNotificationUnitTest, GetAllActiveNotifications_0100, Function | Med
     EXPECT_EQ(res, false);
 
     std::vector<sptr<Notification>> notification;
-    ErrCode ret1 = ans_->GetAllActiveNotifications(notification);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->GetAllActiveNotifications(notification);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1325,8 +1326,8 @@ HWTEST_F(AnsNotificationUnitTest, GetAllActiveNotifications_0200, Function | Med
 
     std::vector<std::string> key;
     std::vector<sptr<Notification>> notification;
-    ErrCode ret1 = ans_->GetAllActiveNotifications(key, notification);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->GetAllActiveNotifications(key, notification);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1346,8 +1347,8 @@ HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0100, Function | Mediu
     EXPECT_EQ(res, false);
 
     auto subscriber = TestAnsSubscriber();
-    ErrCode ret1 = ans_->UnSubscribeNotification(subscriber);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->UnSubscribeNotification(subscriber);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1368,8 +1369,8 @@ HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0200, Function | Mediu
 
     auto subscriber = TestAnsSubscriber();
     NotificationSubscribeInfo info;
-    ErrCode ret1 = ans_->UnSubscribeNotification(subscriber, info);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->UnSubscribeNotification(subscriber, info);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1389,8 +1390,8 @@ HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0300, Function | Mediu
     EXPECT_EQ(res, false);
 
     auto subscriber = std::make_shared<TestAnsSubscriber>();
-    ErrCode ret1 = ans_->UnSubscribeNotification(subscriber);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->UnSubscribeNotification(subscriber);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1411,8 +1412,8 @@ HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0400, Function | Mediu
 
     auto subscriber = std::make_shared<TestAnsSubscriber>();
     sptr<NotificationSubscribeInfo> info = new (std::nothrow) NotificationSubscribeInfo();
-    ErrCode ret1 = ans_->UnSubscribeNotification(subscriber, info);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->UnSubscribeNotification(subscriber, info);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1423,13 +1424,13 @@ HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0400, Function | Mediu
  */
 HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0700, Function | MediumTest | Level1)
 {
-    ErrCode ret = ans_->UnSubscribeNotification(nullptr, nullptr);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->UnSubscribeNotification(nullptr, nullptr);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
  * @tc.name: SetNotificationsEnabledForSpecifiedBundle_0100
- * @tc.desc: test SetNotificationsEnabledForSpecifiedBundle ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test SetNotificationsEnabledForSpecifiedBundle ErrCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -1440,13 +1441,13 @@ HWTEST_F(AnsNotificationUnitTest, SetNotificationsEnabledForSpecifiedBundle_0100
     NotificationBundleOption bundleOption;
     std::string bundleName = "";
     bundleOption.SetBundleName(bundleName);
-    ErrCode ret3 = ans_->SetNotificationsEnabledForSpecifiedBundle(bundleOption, deviceId, enabled);
-    EXPECT_EQ(ret3, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret3 = ans_->SetNotificationsEnabledForSpecifiedBundle(bundleOption, deviceId, enabled);
+    EXPECT_EQ(ret3, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
  * @tc.name: GetAllNotificationEnabledBundles_0100
- * @tc.desc: test GetAllNotificationEnabledBundles ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test GetAllNotificationEnabledBundles ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I92VGR
  */
@@ -1459,26 +1460,26 @@ HWTEST_F(AnsNotificationUnitTest, GetAllNotificationEnabledBundles_0100, Functio
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     std::vector<NotificationBundleOption> bundleOption;
-    ErrCode ret = ans_->GetAllNotificationEnabledBundles(bundleOption);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->GetAllNotificationEnabledBundles(bundleOption);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: CancelGroup_0200
- * @tc.desc: test CancelGroup ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test CancelGroup ErrCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
 HWTEST_F(AnsNotificationUnitTest, CancelGroup_0200, Function | MediumTest | Level1)
 {
     std::string groupName = "";
-    ErrCode ret1 = ans_->CancelGroup(groupName);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret1 = ans_->CancelGroup(groupName);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
  * @tc.name: SetSmartReminderEnabled_0100
- * @tc.desc: test SetSmartReminderEnabled with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.desc: test SetSmartReminderEnabled with parameters, expect errorCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, SetSmartReminderEnabled_0100, TestSize.Level1)
@@ -1490,13 +1491,13 @@ HWTEST_F(AnsNotificationUnitTest, SetSmartReminderEnabled_0100, TestSize.Level1)
     ASSERT_NE(nullptr, proxy);
     bool ret = ans_->GetAnsManagerProxy();
     EXPECT_EQ(ret, false);
-    ErrCode res = ans_->SetSmartReminderEnabled("testDeviceType", true);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode res = ans_->SetSmartReminderEnabled("testDeviceType", true);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /**
  * @tc.name: IsSmartReminderEnabled_0100
- * @tc.desc: test IsSmartReminderEnabled with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.desc: test IsSmartReminderEnabled with parameters, expect errorCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, IsSmartReminderEnabled_0100, TestSize.Level1)
@@ -1509,26 +1510,27 @@ HWTEST_F(AnsNotificationUnitTest, IsSmartReminderEnabled_0100, TestSize.Level1)
     bool ret = ans_->GetAnsManagerProxy();
     EXPECT_EQ(ret, false);
     bool enable = true;
-    ErrCode result = ans_->IsSmartReminderEnabled("testDeviceType1111", enable);
-    EXPECT_EQ(result, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode result = ans_->IsSmartReminderEnabled("testDeviceType1111", enable);
+    EXPECT_EQ(result, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: SetBadgeNumberByBundle_0100
- * @tc.desc: test SetBadgeNumberByBundle with empty bundleOption, expect ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test SetBadgeNumberByBundle with empty bundleOption, expect ErrCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, SetBadgeNumberByBundle_0100, TestSize.Level1)
 {
     NotificationBundleOption bundleOption;
     int32_t badgeNumber = 0;
-    ErrCode res = ans_->SetBadgeNumberByBundle(bundleOption, badgeNumber);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode res = ans_->SetBadgeNumberByBundle(bundleOption, badgeNumber);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
  * @tc.name: SetBadgeNumberByBundle_0200
- * @tc.desc: test SetBadgeNumberByBundle with invalid AnsManagerProxy, expect ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc : est SetBadgeNumberByBundle with invalid AnsManagerProxy, expect ErrCode
+ * @tc.desc : ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, SetBadgeNumberByBundle_0200, TestSize.Level1)
@@ -1545,13 +1547,13 @@ HWTEST_F(AnsNotificationUnitTest, SetBadgeNumberByBundle_0200, TestSize.Level1)
     std::string bundleName = "bundleName";
     bundleOption.SetBundleName(bundleName);
     int32_t badgeNumber = 0;
-    ErrCode res = ans_->SetBadgeNumberByBundle(bundleOption, badgeNumber);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode res = ans_->SetBadgeNumberByBundle(bundleOption, badgeNumber);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: SetDistributedEnabledByBundle_0100
- * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, SetDistributedEnabledByBundle_0100, TestSize.Level1)
@@ -1570,26 +1572,26 @@ HWTEST_F(AnsNotificationUnitTest, SetDistributedEnabledByBundle_0100, TestSize.L
     bundleOption.SetUid(1);
     std::string deviceType = "testDeviceType";
 
-    ErrCode res = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, true, true);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode res = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, true, true);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /**
  * @tc.name: SetDistributedEnabledByBundle_0200
- * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, SetDistributedEnabledByBundle_0200, TestSize.Level1)
 {
     NotificationBundleOption bundleOption;
     std::string deviceType = "testDeviceType";
-    ErrCode ret = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, true, true);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, true, true);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.name: SetDistributedEnabledByBundle_0300
- * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test SetDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, SetDistributedEnabledByBundle_0300, TestSize.Level1)
@@ -1598,35 +1600,35 @@ HWTEST_F(AnsNotificationUnitTest, SetDistributedEnabledByBundle_0300, TestSize.L
     bundleOption.SetBundleName("");
     bundleOption.SetUid(1);
     std::string deviceType = "testDeviceType";
-    ErrCode ret = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, true, true);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, true, true);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.name: UpdateDistributedDeviceList_0100
- * @tc.desc: test UpdateDistributedDeviceList with parameters, expect errorCode ERR_ANS_INVALID_PARAM
+ * @tc.desc: test UpdateDistributedDeviceList with parameters, expect errorCode ERR_ANS_INNER_INVALID_PARAM
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, UpdateDistributedDeviceList_0100, TestSize.Level1)
 {
-    ErrCode ret = ans_->UpdateDistributedDeviceList("");
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->UpdateDistributedDeviceList("");
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.name: UpdateDistributedDeviceList_0200
- * @tc.desc: test UpdateDistributedDeviceList with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.desc: test UpdateDistributedDeviceList with parameters, expect errorCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, UpdateDistributedDeviceList_0200, TestSize.Level1)
 {
-    ErrCode ret = ans_->UpdateDistributedDeviceList("testDeviceType");
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->UpdateDistributedDeviceList("testDeviceType");
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /**
  * @tc.name: IsDistributedEnabledByBundle_0100
- * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, IsDistributedEnabledByBundle_0100, TestSize.Level1)
@@ -1645,13 +1647,13 @@ HWTEST_F(AnsNotificationUnitTest, IsDistributedEnabledByBundle_0100, TestSize.Le
     bundleOption.SetUid(1);
     std::string deviceType = "testDeviceType1111";
     int32_t enable;
-    ErrCode result = ans_->IsDistributedEnabledByBundle(bundleOption, deviceType, true, enable);
-    EXPECT_EQ(result, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode result = ans_->IsDistributedEnabledByBundle(bundleOption, deviceType, true, enable);
+    EXPECT_EQ(result, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /**
  * @tc.name: IsDistributedEnabledByBundle_0200
- * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, IsDistributedEnabledByBundle_0200, TestSize.Level1)
@@ -1661,13 +1663,13 @@ HWTEST_F(AnsNotificationUnitTest, IsDistributedEnabledByBundle_0200, TestSize.Le
     std::string deviceType = "testDeviceType";
 
     int32_t enable;
-    ErrCode ret = ans_->IsDistributedEnabledByBundle(bundleOption, deviceType, true, enable);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->IsDistributedEnabledByBundle(bundleOption, deviceType, true, enable);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.name: IsDistributedEnabledByBundle_0300
- * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test IsDistributedEnabledByBundle with parameters, expect errorCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, IsDistributedEnabledByBundle_0300, TestSize.Level1)
@@ -1679,26 +1681,26 @@ HWTEST_F(AnsNotificationUnitTest, IsDistributedEnabledByBundle_0300, TestSize.Le
     std::string deviceType = "testDeviceType";
 
     int32_t enable;
-    ErrCode ret = ans_->IsDistributedEnabledByBundle(bundleOption, deviceType, true, enable);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->IsDistributedEnabledByBundle(bundleOption, deviceType, true, enable);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
  * @tc.name: AddDoNotDisturbProfiles_0100
- * @tc.desc: test AddDoNotDisturbProfiles ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test AddDoNotDisturbProfiles ErrCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, AddDoNotDisturbProfiles_0100, TestSize.Level1)
 {
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
     profiles.clear();
-    ErrCode ret1 = ans_->AddDoNotDisturbProfiles(profiles);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret1 = ans_->AddDoNotDisturbProfiles(profiles);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
  * @tc.name: AddDoNotDisturbProfiles_0200
- * @tc.desc: test AddDoNotDisturbProfiles ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test AddDoNotDisturbProfiles ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, AddDoNotDisturbProfiles_0200, TestSize.Level1)
@@ -1719,26 +1721,26 @@ HWTEST_F(AnsNotificationUnitTest, AddDoNotDisturbProfiles_0200, TestSize.Level1)
         new (std::nothrow) NotificationDoNotDisturbProfile(id, name, trustlist);
     profiles.emplace_back(disturbProfile);
 
-    ErrCode ret1 = ans_->AddDoNotDisturbProfiles(profiles);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->AddDoNotDisturbProfiles(profiles);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: RemoveDoNotDisturbProfiles_0100
- * @tc.desc: test RemoveDoNotDisturbProfiles ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test RemoveDoNotDisturbProfiles ErrCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, RemoveDoNotDisturbProfiles_0100, TestSize.Level1)
 {
     vector<sptr<NotificationDoNotDisturbProfile>> profiles;
     profiles.clear();
-    ErrCode ret1 = ans_->RemoveDoNotDisturbProfiles(profiles);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret1 = ans_->RemoveDoNotDisturbProfiles(profiles);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
  * @tc.name: RemoveDoNotDisturbProfiles_0200
- * @tc.desc: test RemoveDoNotDisturbProfiles ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test RemoveDoNotDisturbProfiles ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, RemoveDoNotDisturbProfiles_0200, TestSize.Level1)
@@ -1759,14 +1761,14 @@ HWTEST_F(AnsNotificationUnitTest, RemoveDoNotDisturbProfiles_0200, TestSize.Leve
         new (std::nothrow) NotificationDoNotDisturbProfile(id, name, trustlist);
     profiles.emplace_back(disturbProfile);
 
-    ErrCode ret1 = ans_->RemoveDoNotDisturbProfiles(profiles);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->RemoveDoNotDisturbProfiles(profiles);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 /*
  * @tc.name: RegisterSwingCallback_0100
- * @tc.desc: test RegisterSwingCallback with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.desc: test RegisterSwingCallback with parameters, expect errorCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, RegisterSwingCallback_0100, TestSize.Level1)
@@ -1780,8 +1782,8 @@ HWTEST_F(AnsNotificationUnitTest, RegisterSwingCallback_0100, TestSize.Level1)
     EXPECT_EQ(ret, false);
     std::function<void(bool, int)> swingCbFunc =
         std::bind(&AnsNotificationUnitTest::UpdateStatuts, this, std::placeholders::_1, std::placeholders::_2);
-    ErrCode res = ans_->RegisterSwingCallback(swingCbFunc);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode res = ans_->RegisterSwingCallback(swingCbFunc);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 #endif
 
@@ -1800,8 +1802,8 @@ HWTEST_F(AnsNotificationUnitTest, IsNeedSilentInDoNotDisturbMode_0100, Function 
     ans_->GetAnsManagerProxy();
     std::string phoneNumber = "11111111111";
     int32_t callerType = 0;
-    ErrCode ret = ans_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1820,8 +1822,8 @@ HWTEST_F(AnsNotificationUnitTest, DisableNotificationFeature_0100, Function | Me
     EXPECT_FALSE(ret);
 
     NotificationDisable notificationDisable;
-    ErrCode res = ans_->DisableNotificationFeature(notificationDisable);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode res = ans_->DisableNotificationFeature(notificationDisable);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1840,8 +1842,8 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0100, Func
     EXPECT_FALSE(ret);
 
     NotificationRequest request;
-    ErrCode res = ans_->PublishNotificationForIndirectProxy(request);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode res = ans_->PublishNotificationForIndirectProxy(request);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -1855,8 +1857,8 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0200, Func
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
     request.SetContent(content);
-    ErrCode res = ans_->PublishNotificationForIndirectProxy(request);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode res = ans_->PublishNotificationForIndirectProxy(request);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1867,8 +1869,8 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0200, Func
 HWTEST_F(AnsNotificationUnitTest, CancelAsBundle_0100, Function | MediumTest | Level1)
 {
     NotificationBundleOption ntfBundleOption;
-    ErrCode res = ans_->CancelAsBundle(ntfBundleOption, 0);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode res = ans_->CancelAsBundle(ntfBundleOption, 0);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1879,8 +1881,8 @@ HWTEST_F(AnsNotificationUnitTest, CancelAsBundle_0100, Function | MediumTest | L
 HWTEST_F(AnsNotificationUnitTest, GetDistributedDevicelist_0100, Function | MediumTest | Level1)
 {
     std::vector<std::string> deviceTypes;
-    ErrCode ret = ans_->GetDistributedDevicelist(deviceTypes);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->GetDistributedDevicelist(deviceTypes);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1892,8 +1894,8 @@ HWTEST_F(AnsNotificationUnitTest, NotificationExtensionSubscribe_0100, Function 
 {
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
     infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo());
-    ErrCode ret = ans_->NotificationExtensionSubscribe(infos);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->NotificationExtensionSubscribe(infos);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1903,8 +1905,8 @@ HWTEST_F(AnsNotificationUnitTest, NotificationExtensionSubscribe_0100, Function 
  */
 HWTEST_F(AnsNotificationUnitTest, NotificationExtensionUnsubscribe_0100, Function | MediumTest | Level1)
 {
-    ErrCode ret = ans_->NotificationExtensionUnsubscribe();
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->NotificationExtensionUnsubscribe();
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1915,8 +1917,8 @@ HWTEST_F(AnsNotificationUnitTest, NotificationExtensionUnsubscribe_0100, Functio
 HWTEST_F(AnsNotificationUnitTest, GetSubscribeInfo_0100, Function | MediumTest | Level1)
 {
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
-    ErrCode ret = ans_->GetSubscribeInfo(infos);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->GetSubscribeInfo(infos);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1933,13 +1935,13 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSettings_0100, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     uint32_t slotFlags = 0;
-    ErrCode result = ans_->GetNotificationSettings(slotFlags);
-    EXPECT_EQ(result, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode result = ans_->GetNotificationSettings(slotFlags);
+    EXPECT_EQ(result, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: CanOpenSubscribeSettings_0100
- * @tc.desc: test CanOpenSubscribeSettings ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test CanOpenSubscribeSettings ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, CanOpenSubscribeSettings_0100, Function | MediumTest | Level1)
@@ -1950,13 +1952,13 @@ HWTEST_F(AnsNotificationUnitTest, CanOpenSubscribeSettings_0100, Function | Medi
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
-    ErrCode ret = ans_->CanOpenSubscribeSettings();
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->CanOpenSubscribeSettings();
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: GetAllSubscriptionBundles_0100
- * @tc.desc: test GetAllSubscriptionBundles ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test GetAllSubscriptionBundles ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, GetAllSubscriptionBundles_0100, Function | MediumTest | Level1)
@@ -1968,13 +1970,13 @@ HWTEST_F(AnsNotificationUnitTest, GetAllSubscriptionBundles_0100, Function | Med
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     std::vector<sptr<NotificationBundleOption>> bundles;
-    ErrCode ret = ans_->GetAllSubscriptionBundles(bundles);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->GetAllSubscriptionBundles(bundles);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: IsUserGranted_0100
- * @tc.desc: test IsUserGranted ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test IsUserGranted ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, IsUserGranted_0100, Function | MediumTest | Level1)
@@ -1986,13 +1988,13 @@ HWTEST_F(AnsNotificationUnitTest, IsUserGranted_0100, Function | MediumTest | Le
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     bool isGranted = true;
-    ErrCode ret = ans_->IsUserGranted(isGranted);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->IsUserGranted(isGranted);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: GetUserGrantedState_0100
- * @tc.desc: test GetUserGrantedState ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test GetUserGrantedState ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, GetUserGrantedState_0100, Function | MediumTest | Level1)
@@ -2006,13 +2008,13 @@ HWTEST_F(AnsNotificationUnitTest, GetUserGrantedState_0100, Function | MediumTes
     NotificationBundleOption bundle;
     bundle.SetBundleName("testBundle");
     bool isGranted = true;
-    ErrCode ret = ans_->GetUserGrantedState(bundle, isGranted);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->GetUserGrantedState(bundle, isGranted);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: SetUserGrantedState_0100
- * @tc.desc: test SetUserGrantedState ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test SetUserGrantedState ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, SetUserGrantedState_0100, Function | MediumTest | Level1)
@@ -2025,13 +2027,13 @@ HWTEST_F(AnsNotificationUnitTest, SetUserGrantedState_0100, Function | MediumTes
     ans_->GetAnsManagerProxy();
     NotificationBundleOption bundle;
     bundle.SetBundleName("testBundle");
-    ErrCode ret = ans_->SetUserGrantedState(bundle, true);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->SetUserGrantedState(bundle, true);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: GetUserGrantedEnabledBundles_0100
- * @tc.desc: test GetUserGrantedEnabledBundles ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test GetUserGrantedEnabledBundles ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, GetUserGrantedEnabledBundles_0100, Function | MediumTest | Level1)
@@ -2045,13 +2047,13 @@ HWTEST_F(AnsNotificationUnitTest, GetUserGrantedEnabledBundles_0100, Function | 
     NotificationBundleOption bundle;
     bundle.SetBundleName("testBundle");
     std::vector<sptr<NotificationBundleOption>> bundles;
-    ErrCode ret = ans_->GetUserGrantedEnabledBundles(bundle, bundles);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->GetUserGrantedEnabledBundles(bundle, bundles);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: SetUserGrantedBundleState_0100
- * @tc.desc: test SetUserGrantedBundleState ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test SetUserGrantedBundleState ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, SetUserGrantedBundleState_0100, Function | MediumTest | Level1)
@@ -2068,13 +2070,13 @@ HWTEST_F(AnsNotificationUnitTest, SetUserGrantedBundleState_0100, Function | Med
     bundles.emplace_back(sptr<NotificationBundleOption>(bundle));
     NotificationBundleOption bundle2;
     bundle2.SetBundleName("targetBundle");
-    ErrCode ret = ans_->SetUserGrantedBundleState(bundle2, bundles, true);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->SetUserGrantedBundleState(bundle2, bundles, true);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
  * @tc.name: GetUserGrantedEnabledBundlesForSelf_0100
- * @tc.desc: test GetUserGrantedEnabledBundlesForSelf ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test GetUserGrantedEnabledBundlesForSelf ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, GetUserGrantedEnabledBundlesForSelf_0100, Function | MediumTest | Level1)
@@ -2087,8 +2089,8 @@ HWTEST_F(AnsNotificationUnitTest, GetUserGrantedEnabledBundlesForSelf_0100, Func
     ans_->GetAnsManagerProxy();
 
     std::vector<sptr<NotificationBundleOption>> bundles;
-    ErrCode ret = ans_->GetUserGrantedEnabledBundlesForSelf(bundles);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->GetUserGrantedEnabledBundlesForSelf(bundles);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -2101,7 +2103,7 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSettings_0200, Function | Mediu
     sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
     MockGetAnsManagerProxy(proxy);
     uint32_t slotFlags = 0;
-    ErrCode result = ans_->GetNotificationSettings(slotFlags);
+    InnerErrorCode result = ans_->GetNotificationSettings(slotFlags);
     EXPECT_EQ(result, ERR_OK);
 }
 
@@ -2116,7 +2118,7 @@ HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundle_0300, Function | Me
     NotificationBundleOption bo;
     bo.SetBundleName("bundleName");
     bo.SetUid(1);
-    ErrCode ret = ans_->SetPriorityEnabledByBundle(bo, enableStatus);
+    InnerErrorCode ret = ans_->SetPriorityEnabledByBundle(bo, enableStatus);
     EXPECT_EQ(ret, ERR_OK);
     ret = ans_->IsPriorityEnabledByBundle(bo, enableStatus);
     EXPECT_EQ(ret, ERR_OK);
@@ -2133,8 +2135,8 @@ HWTEST_F(AnsNotificationUnitTest, GetPriorityEnabledByBundles_0100, Function | M
 {
     std::vector<NotificationBundleOption> bundleOptions;
     std::map<sptr<NotificationBundleOption>, bool> switches;
-    ErrCode ret = ans_->GetPriorityEnabledByBundles(bundleOptions, switches);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->GetPriorityEnabledByBundles(bundleOptions, switches);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -2151,7 +2153,7 @@ HWTEST_F(AnsNotificationUnitTest, GetPriorityEnabledByBundles_0200, Function | M
     bo.SetBundleName("bundleName");
     bo.SetUid(2000);
     bundleOptions.emplace_back(bo);
-    ErrCode ret = ans_->GetPriorityEnabledByBundles(bundleOptions, switches);
+    InnerErrorCode ret = ans_->GetPriorityEnabledByBundles(bundleOptions, switches);
     EXPECT_EQ(ret, ERR_OK);
 }
 /*
@@ -2163,8 +2165,8 @@ HWTEST_F(AnsNotificationUnitTest, GetPriorityEnabledByBundles_0200, Function | M
 HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundles_0100, Function | MediumTest | Level1)
 {
     std::map<sptr<NotificationBundleOption>, bool> switches;
-    ErrCode ret = ans_->SetPriorityEnabledByBundles(switches);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->SetPriorityEnabledByBundles(switches);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -2178,7 +2180,7 @@ HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundles_0200, Function | M
     std::map<sptr<NotificationBundleOption>, bool> switches;
     sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption("bundleName", 2000);
     switches[bo] = true;
-    ErrCode ret = ans_->SetPriorityEnabledByBundles(switches);
+    InnerErrorCode ret = ans_->SetPriorityEnabledByBundles(switches);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -2191,7 +2193,7 @@ HWTEST_F(AnsNotificationUnitTest, SetPriorityEnabledByBundles_0200, Function | M
 HWTEST_F(AnsNotificationUnitTest, SetPriorityIntelligentEnabled_0100, Function | MediumTest | Level1)
 {
     bool enable = true;
-    ErrCode ret = ans_->SetPriorityIntelligentEnabled(enable);
+    InnerErrorCode ret = ans_->SetPriorityIntelligentEnabled(enable);
     EXPECT_EQ(ret, ERR_OK);
     ret = ans_->IsPriorityIntelligentEnabled(enable);
     EXPECT_EQ(ret, ERR_OK);
@@ -2207,11 +2209,11 @@ HWTEST_F(AnsNotificationUnitTest, SetPriorityIntelligentEnabled_0100, Function |
 HWTEST_F(AnsNotificationUnitTest, SetPriorityStrategyByBundles_0100, Function | MediumTest | Level1)
 {
     std::map<sptr<NotificationBundleOption>, int64_t> strategies;
-    ErrCode ret = ans_->SetPriorityStrategyByBundles(strategies);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->SetPriorityStrategyByBundles(strategies);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     std::vector<NotificationBundleOption> bundleOptions;
     ret = ans_->GetPriorityStrategyByBundles(bundleOptions, strategies);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -2225,7 +2227,7 @@ HWTEST_F(AnsNotificationUnitTest, SetPriorityStrategyByBundles_0200, Function | 
     std::map<sptr<NotificationBundleOption>, int64_t> strategies;
     sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption("bundleName", 2000);
     strategies[bo] = 24;
-    ErrCode ret = ans_->SetPriorityStrategyByBundles(strategies);
+    InnerErrorCode ret = ans_->SetPriorityStrategyByBundles(strategies);
     EXPECT_EQ(ret, ERR_OK);
     std::vector<NotificationBundleOption> bundleOptions;
     bundleOptions.emplace_back(*bo);
@@ -2243,18 +2245,18 @@ HWTEST_F(AnsNotificationUnitTest, TriggerUpdatePriorityType_0200, Function | Med
 {
     NotificationRequest request;
     request.SetInnerPriorityNotificationType(NotificationConstant::PriorityNotificationType::PAYMENT_DUE);
-    ErrCode ret = ans_->TriggerUpdatePriorityType(request);
+    InnerErrorCode ret = ans_->TriggerUpdatePriorityType(request);
     EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
  * @tc.name: UpdateDistributedDeviceList_0300
- * @tc.desc: test UpdateDistributedDeviceList with parameters, expect errorCode ERR_ANS_SERVICE_NOT_CONNECTED
+ * @tc.desc: test UpdateDistributedDeviceList with parameters, expect errorCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, UpdateDistributedDeviceList_0300, TestSize.Level1)
 {
-    ErrCode ret = ans_->UpdateDistributedDeviceList("testDeviceType");
+    InnerErrorCode ret = ans_->UpdateDistributedDeviceList("testDeviceType");
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -2272,8 +2274,8 @@ HWTEST_F(AnsNotificationUnitTest, AddNotificationSlots_0100, Function | MediumTe
         sptr<NotificationSlot> notificationSlot = new (std::nothrow) NotificationSlot(slotType);
         slots.push_back(*notificationSlot);
     }
-    ErrCode ret = ans_->AddNotificationSlots(slots);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->AddNotificationSlots(slots);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -2288,7 +2290,7 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotNumAsBundle_0200, Function 
     std::string bundleName = "bundleName";
     bundleOptions.SetBundleName(bundleName);
     uint64_t num;
-    ErrCode ret = ans_->GetNotificationSlotNumAsBundle(bundleOptions, num);
+    InnerErrorCode ret = ans_->GetNotificationSlotNumAsBundle(bundleOptions, num);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -2304,7 +2306,7 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotFlagsAsBundle_0300, Functio
     std::string bundleName = "bundleName";
     bundleOptions.SetBundleName(bundleName);
     uint32_t num = 10;
-    ErrCode ret = ans_->GetNotificationSlotFlagsAsBundle(bundleOptions, num);
+    InnerErrorCode ret = ans_->GetNotificationSlotFlagsAsBundle(bundleOptions, num);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -2319,13 +2321,13 @@ HWTEST_F(AnsNotificationUnitTest, SetNotificationSlotFlagsAsBundle_0300, Functio
     NotificationBundleOption bundleOptions;
     bundleOptions.SetBundleName("bundleName");
     uint64_t num = 1;
-    ErrCode ret = ans_->SetNotificationSlotFlagsAsBundle(bundleOptions, num);
+    InnerErrorCode ret = ans_->SetNotificationSlotFlagsAsBundle(bundleOptions, num);
     EXPECT_EQ(ret, ERR_OK);
 }
 
 /*
  * @tc.name: PublishNotification_0200
- * @tc.desc: test PublishNotification ErrCode ERR_ANS_INVALID_PARAM cause IsValidDelayTime fail.
+ * @tc.desc: test PublishNotification ErrCode ERR_ANS_INNER_INVALID_PARAM cause IsValidDelayTime fail.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -2337,13 +2339,13 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotification_0200, Function | MediumTes
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
     request.SetContent(content);
     request.SetPublishDelayTime(6);
-    ErrCode ret = ans_->PublishNotification(label, request, "instanceKey");
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->PublishNotification(label, request, "instanceKey");
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
  * @tc.name: PublishNotification_0300
- * @tc.desc: test PublishNotification ErrCode ERR_ANS_ICON_OVER_SIZE.
+ * @tc.desc: test PublishNotification ErrCode ERR_ANS_INNER_ICON_OVER_SIZE.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -2357,8 +2359,8 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotification_0300, Function | MediumTes
     MockPixelMapGetByteCount(256 * 1024);
     std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
     request.SetLittleIcon(pixelMap);
-    ErrCode ret = ans_->PublishNotification(label, request, "instanceKey");
-    EXPECT_EQ(ret, ERR_ANS_ICON_OVER_SIZE);
+    InnerErrorCode ret = ans_->PublishNotification(label, request, "instanceKey");
+    EXPECT_EQ(ret, ERR_ANS_INNER_ICON_OVER_SIZE);
 }
 
 /*
@@ -2376,13 +2378,14 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotification_0400, Function | MediumTes
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
     request.SetContent(content);
     request.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    ErrCode ret = ans_->PublishNotification(label, request, "instanceKey");
+    InnerErrorCode ret = ans_->PublishNotification(label, request, "instanceKey");
     EXPECT_EQ(ret, ERR_OK);
 }
 
 /*
  * @tc.name: PublishNotificationForIndirectProxy_0300
- * @tc.desc: test PublishNotificationForIndirectProxy ErrCode ERR_ANS_INVALID_PARAM cause CanPublishMediaContent fail.
+ * @tc.desc: test PublishNotificationForIndirectProxy ErrCode ERR_ANS_INNER_INVALID_PARAM
+ * cause CanPublishMediaContent fail.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0300, Function | MediumTest | Level1)
@@ -2397,13 +2400,14 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0300, Func
     mediaContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::MEDIA));
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(mediaContent);
     request.SetContent(content);
-    ErrCode res = ans_->PublishNotificationForIndirectProxy(request);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode res = ans_->PublishNotificationForIndirectProxy(request);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
  * @tc.name: PublishNotificationForIndirectProxy_0400
- * @tc.desc: test PublishNotificationForIndirectProxy ErrCode ERR_ANS_INVALID_PARAM cause CanPublishLiveViewContent fail
+ * @tc.desc: test PublishNotificationForIndirectProxy ErrCode ERR_ANS_INNER_INVALID_PARAM
+ * cause CanPublishLiveViewContent fail
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0400, Function | MediumTest | Level1)
@@ -2415,13 +2419,13 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0400, Func
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveContent);
     request.SetContent(content);
     request.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    ErrCode res = ans_->PublishNotificationForIndirectProxy(request);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode res = ans_->PublishNotificationForIndirectProxy(request);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
  * @tc.name: PublishNotificationForIndirectProxy_0500
- * @tc.desc: test PublishNotificationForIndirectProxy ErrCode ERR_ANS_ICON_OVER_SIZE
+ * @tc.desc: test PublishNotificationForIndirectProxy ErrCode ERR_ANS_INNER_ICON_OVER_SIZE
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0500, Function | MediumTest | Level1)
@@ -2433,8 +2437,8 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0500, Func
     MockPixelMapGetByteCount(256 * 1024);
     std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
     request.SetLittleIcon(pixelMap);
-    ErrCode res = ans_->PublishNotificationForIndirectProxy(request);
-    EXPECT_EQ(res, ERR_ANS_ICON_OVER_SIZE);
+    InnerErrorCode res = ans_->PublishNotificationForIndirectProxy(request);
+    EXPECT_EQ(res, ERR_ANS_INNER_ICON_OVER_SIZE);
 }
 
 /*
@@ -2450,7 +2454,7 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0600, Func
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
     request.SetContent(content);
     request.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    ErrCode res = ans_->PublishNotificationForIndirectProxy(request);
+    InnerErrorCode res = ans_->PublishNotificationForIndirectProxy(request);
     EXPECT_EQ(res, ERR_OK);
 }
 
@@ -2465,13 +2469,13 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0700, Func
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
     request.SetContent(content);
-    ErrCode res = ans_->PublishNotificationForIndirectProxy(request);
+    InnerErrorCode res = ans_->PublishNotificationForIndirectProxy(request);
     EXPECT_EQ(res, ERR_OK);
 }
 
 /*
  * @tc.name: PublishNotificationAsBundle_0100
- * @tc.desc: test PublishNotificationAsBundle ErrCode ERR_ANS_ICON_OVER_SIZE
+ * @tc.desc: test PublishNotificationAsBundle ErrCode ERR_ANS_INNER_ICON_OVER_SIZE
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, PublishNotificationAsBundle_0100, Function | MediumTest | Level1)
@@ -2484,8 +2488,8 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotificationAsBundle_0100, Function | M
     std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
     request.SetLittleIcon(pixelMap);
     std::string representativeBundle = "this is representativeBundle";
-    ErrCode res = ans_->PublishNotificationAsBundle(representativeBundle, request);
-    EXPECT_EQ(res, ERR_ANS_ICON_OVER_SIZE);
+    InnerErrorCode res = ans_->PublishNotificationAsBundle(representativeBundle, request);
+    EXPECT_EQ(res, ERR_ANS_INNER_ICON_OVER_SIZE);
 }
 
 /*
@@ -2502,7 +2506,7 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotificationAsBundle_0200, Function | M
     request.SetContent(content);
     request.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     std::string representativeBundle = "this is representativeBundle";
-    ErrCode res = ans_->PublishNotificationAsBundle(representativeBundle, request);
+    InnerErrorCode res = ans_->PublishNotificationAsBundle(representativeBundle, request);
     EXPECT_EQ(res, ERR_OK);
 }
 
@@ -2518,7 +2522,7 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotificationAsBundle_0300, Function | M
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
     request.SetContent(content);
     std::string representativeBundle = "this is representativeBundle";
-    ErrCode res = ans_->PublishNotificationAsBundle(representativeBundle, request);
+    InnerErrorCode res = ans_->PublishNotificationAsBundle(representativeBundle, request);
     EXPECT_EQ(res, ERR_OK);
 }
 
@@ -2532,7 +2536,7 @@ HWTEST_F(AnsNotificationUnitTest, CanPopEnableNotificationDialog_0200, Function 
     sptr<AnsDialogHostClient> client = nullptr;
     bool enable = true;
     std::string bundleName = "";
-    ErrCode ret = ans_->CanPopEnableNotificationDialog(client, enable, bundleName);
+    InnerErrorCode ret = ans_->CanPopEnableNotificationDialog(client, enable, bundleName);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -2544,7 +2548,7 @@ HWTEST_F(AnsNotificationUnitTest, CanPopEnableNotificationDialog_0200, Function 
  */
 HWTEST_F(AnsNotificationUnitTest, RemoveEnableNotificationDialog_0200, Function | MediumTest | Level1)
 {
-    ErrCode ret = ans_->RemoveEnableNotificationDialog();
+    InnerErrorCode ret = ans_->RemoveEnableNotificationDialog();
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -2559,8 +2563,8 @@ HWTEST_F(AnsNotificationUnitTest, RequestEnableNotification_0200, Function | Med
     std::string deviceId = "this is deviceId";
     sptr<IRemoteObject> callerToken = nullptr;
     sptr<AnsDialogHostClient> client = nullptr;
-    ErrCode ret = ans_->RequestEnableNotification(deviceId, client, callerToken);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->RequestEnableNotification(deviceId, client, callerToken);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -2576,7 +2580,7 @@ HWTEST_F(AnsNotificationUnitTest, RequestEnableNotification_0300, Function | Med
     sptr<AnsDialogHostClient> client = nullptr;
     AnsDialogHostClient::CreateIfNullptr(client);
     client = AnsDialogHostClient::GetInstance();
-    ErrCode ret = ans_->RequestEnableNotification(deviceId, client, callerToken);
+    InnerErrorCode ret = ans_->RequestEnableNotification(deviceId, client, callerToken);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -2590,20 +2594,20 @@ HWTEST_F(AnsNotificationUnitTest, RequestEnableNotification_0400, Function | Med
 {
     std::string bundleName = "bundleName";
     int32_t uid = 100;
-    ErrCode ret = ans_->RequestEnableNotification(bundleName, uid);
+    InnerErrorCode ret = ans_->RequestEnableNotification(bundleName, uid);
     EXPECT_EQ(ret, ERR_OK);
 }
 
 /*
  * @tc.name: GetBundleImportance_0200
- * @tc.desc: test GetBundleImportance ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.desc: test GetBundleImportance ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
 HWTEST_F(AnsNotificationUnitTest, GetBundleImportance_0200, Function | MediumTest | Level1)
 {
     NotificationSlot::NotificationLevel importance = NotificationSlot::NotificationLevel::LEVEL_NONE;
-    ErrCode ret = ans_->GetBundleImportance(importance);
+    InnerErrorCode ret = ans_->GetBundleImportance(importance);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -2617,8 +2621,8 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0500, Function | MediumT
 {
     auto subscriber = TestAnsSubscriber();
     subscriber.impl_ = nullptr;
-    ErrCode ret = ans_->SubscribeNotification(subscriber);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->SubscribeNotification(subscriber);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -2631,8 +2635,8 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationSelf_0200, Function | Med
 {
     auto subscriber = TestAnsSubscriber();
     subscriber.impl_ = nullptr;
-    ErrCode ret = ans_->SubscribeNotificationSelf(subscriber);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->SubscribeNotificationSelf(subscriber);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -2644,7 +2648,7 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationSelf_0200, Function | Med
 HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationSelf_0300, Function | MediumTest | Level1)
 {
     auto subscriber = TestAnsSubscriber();
-    ErrCode ret = ans_->SubscribeNotificationSelf(subscriber);
+    InnerErrorCode ret = ans_->SubscribeNotificationSelf(subscriber);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -2658,8 +2662,8 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeLocalLiveViewNotification_0200, Funct
 {
     auto subscriber = TestLocalLiveViewSubscriber();
     subscriber.impl_ = nullptr;
-    ErrCode ret = ans_->SubscribeLocalLiveViewNotification(subscriber, false);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->SubscribeLocalLiveViewNotification(subscriber, false);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -2673,8 +2677,8 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0600, Function | MediumT
     auto subscriber = TestAnsSubscriber();
     subscriber.impl_ = nullptr;
     auto info = NotificationSubscribeInfo();
-    ErrCode ret = ans_->SubscribeNotification(subscriber, info);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->SubscribeNotification(subscriber, info);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -2688,7 +2692,7 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0700, Function | MediumT
     auto subscriber = TestAnsSubscriber();
     auto info = NotificationSubscribeInfo();
     info.AddDeviceType("phone");
-    ErrCode ret = ans_->SubscribeNotification(subscriber, info);
+    InnerErrorCode ret = ans_->SubscribeNotification(subscriber, info);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -2704,7 +2708,7 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_1000, Function | MediumT
     auto info = NotificationSubscribeInfo();
     sptr<PictureOption> pictureOption = new PictureOption({"pic1", "pic2"});
     info.SetPictureOption(pictureOption);
-    ErrCode ret = ans_->SubscribeNotification(subscriber, info);
+    InnerErrorCode ret = ans_->SubscribeNotification(subscriber, info);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -2718,10 +2722,10 @@ HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0500, Function | Mediu
 {
     auto subscriber = TestAnsSubscriber();
     subscriber.impl_ = nullptr;
-    ErrCode ret = ans_->UnSubscribeNotification(subscriber);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->UnSubscribeNotification(subscriber);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
- 
+
 /*
  * @tc.name: UnSubscribeNotification_0600
  * @tc.desc: test UnSubscribeNotification normal.
@@ -2733,10 +2737,10 @@ HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0600, Function | Mediu
     auto subscriber = TestAnsSubscriber();
     subscriber.impl_ = nullptr;
     auto info = NotificationSubscribeInfo();
-    ErrCode ret = ans_->UnSubscribeNotification(subscriber, info);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->UnSubscribeNotification(subscriber, info);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
- 
+
 /*
  * @tc.name: SubscribeNotificationSelf_0600
  * @tc.desc: test SubscribeNotificationSelf normal.
@@ -2746,10 +2750,10 @@ HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0600, Function | Mediu
 HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationSelf_0600, Function | MediumTest | Level1)
 {
     std::shared_ptr<TestAnsSubscriber> subscriberPtr = std::make_shared<TestAnsSubscriber>();
-    ErrCode ret = ans_->SubscribeNotificationSelf(subscriberPtr);
+    InnerErrorCode ret = ans_->SubscribeNotificationSelf(subscriberPtr);
     EXPECT_EQ(ret, ERR_OK);
 }
- 
+
 /*
  * @tc.name: SubscribeNotification_0800
  * @tc.desc: test SubscribeNotification normal.
@@ -2761,12 +2765,12 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0800, Function | MediumT
     std::shared_ptr<TestAnsSubscriber> subscriberPtr = std::make_shared<TestAnsSubscriber>();
     sptr<NotificationSubscribeInfo> infoPtr = new (std::nothrow) NotificationSubscribeInfo();
     infoPtr->AddDeviceType("phone");
-    ErrCode ret1 = ans_->SubscribeNotification(subscriberPtr, infoPtr);
+    InnerErrorCode ret1 = ans_->SubscribeNotification(subscriberPtr, infoPtr);
     EXPECT_EQ(ret1, ERR_OK);
-    ErrCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, infoPtr);
+    InnerErrorCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, infoPtr);
     EXPECT_EQ(ret2, ERR_OK);
 }
- 
+
 /*
  * @tc.name: SubscribeNotification_0900
  * @tc.desc: test SubscribeNotification when subscribeInfo is nullptr.
@@ -2776,9 +2780,9 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0800, Function | MediumT
 HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0900, Function | MediumTest | Level1)
 {
     std::shared_ptr<TestAnsSubscriber> subscriberPtr = std::make_shared<TestAnsSubscriber>();
-    ErrCode ret1 = ans_->SubscribeNotification(subscriberPtr, nullptr);
+    InnerErrorCode ret1 = ans_->SubscribeNotification(subscriberPtr, nullptr);
     EXPECT_EQ(ret1, ERR_OK);
-    ErrCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, nullptr);
+    InnerErrorCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, nullptr);
     EXPECT_EQ(ret2, ERR_OK);
 }
 
@@ -2794,12 +2798,12 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_1100, Function | MediumT
     sptr<NotificationSubscribeInfo> infoPtr = new (std::nothrow) NotificationSubscribeInfo();
     sptr<PictureOption> pictureOption = new PictureOption({"pic1"});
     infoPtr->SetPictureOption(pictureOption);
-    ErrCode ret1 = ans_->SubscribeNotification(subscriberPtr, infoPtr);
+    InnerErrorCode ret1 = ans_->SubscribeNotification(subscriberPtr, infoPtr);
     EXPECT_EQ(ret1, ERR_OK);
-    ErrCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, infoPtr);
+    InnerErrorCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, infoPtr);
     EXPECT_EQ(ret2, ERR_OK);
 }
- 
+
 /*
  * @tc.name: UnSubscribeNotification_0800
  * @tc.desc: test UnSubscribeNotification when subscriber not in list.
@@ -2809,8 +2813,8 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_1100, Function | MediumT
 HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0800, Function | MediumTest | Level1)
 {
     std::shared_ptr<TestAnsSubscriber> subscriberPtr = std::make_shared<TestAnsSubscriber>();
-    ErrCode ret = ans_->UnSubscribeNotification(subscriberPtr, nullptr);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->UnSubscribeNotification(subscriberPtr, nullptr);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -2821,43 +2825,7 @@ HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0800, Function | Mediu
 HWTEST_F(AnsNotificationUnitTest, GetDistributedDevicelist_0200, Function | MediumTest | Level1)
 {
     std::vector<std::string> deviceTypes;
-    ErrCode ret = ans_->GetDistributedDevicelist(deviceTypes);
-    EXPECT_EQ(ret, ERR_OK);
-}
-
-/*
- * @tc.name: NotificationExtensionSubscribe_0200
- * @tc.desc: test NotificationExtensionSubscribe.
- * @tc.type: FUNC
- */
-HWTEST_F(AnsNotificationUnitTest, NotificationExtensionSubscribe_0200, Function | MediumTest | Level1)
-{
-    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
-    infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo());
-    ErrCode ret = ans_->NotificationExtensionSubscribe(infos);
-    EXPECT_EQ(ret, ERR_OK);
-}
-
-/*
-* @tc.name: NotificationExtensionUnsubscribe_0200
-* @tc.desc: test NotificationExtensionUnsubscribe.
-* @tc.type: FUNC
-*/
-HWTEST_F(AnsNotificationUnitTest, NotificationExtensionUnsubscribe_0200, Function | MediumTest | Level1)
-{
-    ErrCode ret = ans_->NotificationExtensionUnsubscribe();
-    EXPECT_EQ(ret, ERR_OK);
-}
-
-/*
-* @tc.name: GetSubscribeInfo_0200
-* @tc.desc: test GetSubscribeInfo.
-* @tc.type: FUNC
-*/
-HWTEST_F(AnsNotificationUnitTest, GetSubscribeInfo_0200, Function | MediumTest | Level1)
-{
-    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
-    ErrCode ret = ans_->GetSubscribeInfo(infos);
+    InnerErrorCode ret = ans_->GetDistributedDevicelist(deviceTypes);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -2877,8 +2845,8 @@ HWTEST_F(AnsNotificationUnitTest, GetReminderInfoByBundles_0100, Function | Medi
     ans_->GetAnsManagerProxy();
     std::vector<NotificationReminderInfo> reminders;
     std::vector<NotificationBundleOption> bundles;
-    ErrCode ret = ans_->GetReminderInfoByBundles(bundles, reminders);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->GetReminderInfoByBundles(bundles, reminders);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -2895,7 +2863,7 @@ HWTEST_F(AnsNotificationUnitTest, GetReminderInfoByBundles_0200, Function | Medi
     std::string bundleName = "test";
     bundle.SetBundleName(bundleName);
     bundles.emplace_back(bundle);
-    ErrCode ret = ans_->GetReminderInfoByBundles(bundles, reminders);
+    InnerErrorCode ret = ans_->GetReminderInfoByBundles(bundles, reminders);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -2914,8 +2882,8 @@ HWTEST_F(AnsNotificationUnitTest, SetReminderInfoByBundles_0100, Function | Medi
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
     std::vector<NotificationReminderInfo> reminders;
-    ErrCode ret = ans_->SetReminderInfoByBundles(reminders);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->SetReminderInfoByBundles(reminders);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -2929,7 +2897,7 @@ HWTEST_F(AnsNotificationUnitTest, SetReminderInfoByBundles_0200, Function | Medi
     std::vector<NotificationReminderInfo> reminders;
     NotificationReminderInfo reminder;
     reminders.emplace_back(reminder);
-    ErrCode ret = ans_->SetReminderInfoByBundles(reminders);
+    InnerErrorCode ret = ans_->SetReminderInfoByBundles(reminders);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -2940,20 +2908,20 @@ HWTEST_F(AnsNotificationUnitTest, SetReminderInfoByBundles_0200, Function | Medi
  */
 HWTEST_F(AnsNotificationUnitTest, CanOpenSubscribeSettings_0200, Function | MediumTest | Level1)
 {
-    ErrCode result = ans_->CanOpenSubscribeSettings();
+    InnerErrorCode result = ans_->CanOpenSubscribeSettings();
     EXPECT_EQ(result, ERR_OK);
 }
 
 /*
  * @tc.name: NotificationExtensionSubscribe_0300
- * @tc.desc: test NotificationExtensionSubscribe ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test NotificationExtensionSubscribe ErrCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, NotificationExtensionSubscribe_0300, Function | MediumTest | Level1)
 {
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
-    ErrCode result = ans_->NotificationExtensionSubscribe(infos);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode result = ans_->NotificationExtensionSubscribe(infos);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -2967,7 +2935,7 @@ HWTEST_F(AnsNotificationUnitTest, GetAllSubscriptionBundles_0200, Function | Med
     auto bundle = new (std::nothrow) NotificationBundleOption();
     bundle->SetBundleName("testBundle");
     bundles.emplace_back(sptr<NotificationBundleOption>(bundle));
-    ErrCode ret = ans_->GetAllSubscriptionBundles(bundles);
+    InnerErrorCode ret = ans_->GetAllSubscriptionBundles(bundles);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -2979,7 +2947,7 @@ HWTEST_F(AnsNotificationUnitTest, GetAllSubscriptionBundles_0200, Function | Med
 HWTEST_F(AnsNotificationUnitTest, IsUserGranted_0200, Function | MediumTest | Level1)
 {
     bool isGranted = true;
-    ErrCode ret = ans_->IsUserGranted(isGranted);
+    InnerErrorCode ret = ans_->IsUserGranted(isGranted);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -2993,21 +2961,21 @@ HWTEST_F(AnsNotificationUnitTest, GetUserGrantedState_0200, Function | MediumTes
     NotificationBundleOption bundle;
     bundle.SetBundleName("testBundle");
     bool isGranted = true;
-    ErrCode ret = ans_->GetUserGrantedState(bundle, isGranted);
+    InnerErrorCode ret = ans_->GetUserGrantedState(bundle, isGranted);
     EXPECT_EQ(ret, ERR_OK);
 }
 
 /*
  * @tc.name: GetUserGrantedState_0300
- * @tc.desc: test GetUserGrantedState ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test GetUserGrantedState ErrCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, GetUserGrantedState_0300, Function | MediumTest | Level1)
 {
     NotificationBundleOption bundle;
     bool isGranted = true;
-    ErrCode ret = ans_->GetUserGrantedState(bundle, isGranted);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->GetUserGrantedState(bundle, isGranted);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -3019,20 +2987,20 @@ HWTEST_F(AnsNotificationUnitTest, SetUserGrantedState_0200, Function | MediumTes
 {
     NotificationBundleOption bundle;
     bundle.SetBundleName("testBundle");
-    ErrCode ret = ans_->SetUserGrantedState(bundle, true);
+    InnerErrorCode ret = ans_->SetUserGrantedState(bundle, true);
     EXPECT_EQ(ret, ERR_OK);
 }
 
 /*
  * @tc.name: SetUserGrantedState_0300
- * @tc.desc: test SetUserGrantedState ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test SetUserGrantedState ErrCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, SetUserGrantedState_0300, Function | MediumTest | Level1)
 {
     NotificationBundleOption bundle;
-    ErrCode ret = ans_->SetUserGrantedState(bundle, true);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->SetUserGrantedState(bundle, true);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -3045,21 +3013,21 @@ HWTEST_F(AnsNotificationUnitTest, GetUserGrantedEnabledBundles_0200, Function | 
     NotificationBundleOption bundle;
     bundle.SetBundleName("testBundle");
     std::vector<sptr<NotificationBundleOption>> bundles;
-    ErrCode ret = ans_->GetUserGrantedEnabledBundles(bundle, bundles);
+    InnerErrorCode ret = ans_->GetUserGrantedEnabledBundles(bundle, bundles);
     EXPECT_EQ(ret, ERR_OK);
 }
 
 /*
  * @tc.name: GetUserGrantedEnabledBundles_0300
- * @tc.desc: test GetUserGrantedEnabledBundles ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test GetUserGrantedEnabledBundles ErrCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, GetUserGrantedEnabledBundles_0300, Function | MediumTest | Level1)
 {
     NotificationBundleOption bundle;
     std::vector<sptr<NotificationBundleOption>> bundles;
-    ErrCode ret = ans_->GetUserGrantedEnabledBundles(bundle, bundles);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->GetUserGrantedEnabledBundles(bundle, bundles);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -3075,24 +3043,24 @@ HWTEST_F(AnsNotificationUnitTest, SetUserGrantedBundleState_0200, Function | Med
     bundles.emplace_back(sptr<NotificationBundleOption>(bundle));
     NotificationBundleOption bundle2;
     bundle2.SetBundleName("targetBundle");
-    ErrCode ret = ans_->SetUserGrantedBundleState(bundle2, bundles, true);
+    InnerErrorCode ret = ans_->SetUserGrantedBundleState(bundle2, bundles, true);
     EXPECT_EQ(ret, ERR_OK);
 }
 
 /*
  * @tc.name: SetUserGrantedBundleState_0300
- * @tc.desc: test SetUserGrantedBundleState ErrCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test SetUserGrantedBundleState ErrCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, SetUserGrantedBundleState_0300, Function | MediumTest | Level1)
 {
     NotificationBundleOption bundle;
     std::vector<sptr<NotificationBundleOption>> bundles;
-    ErrCode ret = ans_->SetUserGrantedBundleState(bundle, bundles, true);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->SetUserGrantedBundleState(bundle, bundles, true);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
     bundle.SetBundleName("testBundle");
     ret = ans_->SetUserGrantedBundleState(bundle, bundles, true);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -3103,7 +3071,7 @@ HWTEST_F(AnsNotificationUnitTest, SetUserGrantedBundleState_0300, Function | Med
 HWTEST_F(AnsNotificationUnitTest, GetUserGrantedEnabledBundlesForSelf_0200, Function | MediumTest | Level1)
 {
     std::vector<sptr<NotificationBundleOption>> bundles;
-    ErrCode ret = ans_->GetUserGrantedEnabledBundlesForSelf(bundles);
+    InnerErrorCode ret = ans_->GetUserGrantedEnabledBundlesForSelf(bundles);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -3116,8 +3084,8 @@ HWTEST_F(AnsNotificationUnitTest, SetRingtoneInfoByBundle_0100, Function | Mediu
 {
     NotificationBundleOption bundle;
     NotificationRingtoneInfo ringtoneInfo;
-    ErrCode res = ans_->SetRingtoneInfoByBundle(bundle, ringtoneInfo);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode res = ans_->SetRingtoneInfoByBundle(bundle, ringtoneInfo);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -3130,7 +3098,7 @@ HWTEST_F(AnsNotificationUnitTest, SetRingtoneInfoByBundle_0200, Function | Mediu
     NotificationBundleOption bundle;
     bundle.SetBundleName("testBundle");
     NotificationRingtoneInfo ringtoneInfo;
-    ErrCode res = ans_->SetRingtoneInfoByBundle(bundle, ringtoneInfo);
+    InnerErrorCode res = ans_->SetRingtoneInfoByBundle(bundle, ringtoneInfo);
     EXPECT_EQ(res, ERR_OK);
 }
 
@@ -3143,8 +3111,8 @@ HWTEST_F(AnsNotificationUnitTest, GetRingtoneInfoByBundle_0100, Function | Mediu
 {
     NotificationBundleOption bundle;
     NotificationRingtoneInfo ringtoneInfo;
-    ErrCode res = ans_->GetRingtoneInfoByBundle(bundle, ringtoneInfo);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode res = ans_->GetRingtoneInfoByBundle(bundle, ringtoneInfo);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -3157,7 +3125,7 @@ HWTEST_F(AnsNotificationUnitTest, GetRingtoneInfoByBundle_0200, Function | Mediu
     NotificationBundleOption bundle;
     bundle.SetBundleName("testBundle");
     NotificationRingtoneInfo ringtoneInfo;
-    ErrCode res = ans_->GetRingtoneInfoByBundle(bundle, ringtoneInfo);
+    InnerErrorCode res = ans_->GetRingtoneInfoByBundle(bundle, ringtoneInfo);
     EXPECT_EQ(res, ERR_OK);
 }
 
@@ -3169,8 +3137,8 @@ HWTEST_F(AnsNotificationUnitTest, GetRingtoneInfoByBundle_0200, Function | Mediu
 HWTEST_F(AnsNotificationUnitTest, SetDeviceDistributedBundleList_0100, Function | MediumTest | Level1)
 {
     MockGetAnsManagerProxy(nullptr);
-    ErrCode res = ans_->SetDeviceDistributedBundleList(DistributedBundleChangeType::INIT_DEVICE_CONNECT, {});
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode res = ans_->SetDeviceDistributedBundleList(DistributedBundleChangeType::INIT_DEVICE_CONNECT, {});
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
     MockGetAnsManagerProxy(proxy);
     res = ans_->SetDeviceDistributedBundleList(DistributedBundleChangeType::INIT_DEVICE_CONNECT, {});
@@ -3185,8 +3153,8 @@ HWTEST_F(AnsNotificationUnitTest, SetDeviceDistributedBundleList_0100, Function 
 HWTEST_F(AnsNotificationUnitTest, SetTargetDeviceAbility_0100, Function | MediumTest | Level1)
 {
     MockGetAnsManagerProxy(nullptr);
-    ErrCode res = ans_->SetTargetDeviceAbility("tablet", 0);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode res = ans_->SetTargetDeviceAbility("tablet", 0);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
     MockGetAnsManagerProxy(proxy);
     res = ans_->SetTargetDeviceAbility("tablet", 0);
@@ -3202,8 +3170,8 @@ HWTEST_F(AnsNotificationUnitTest, GetLocalDistributedBundleList_0100, Function |
 {
     std::vector<NotificationDistributedBundle> bundles;
     MockGetAnsManagerProxy(nullptr);
-    ErrCode res = ans_->GetLocalDistributedBundleList("tablet", bundles);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode res = ans_->GetLocalDistributedBundleList("tablet", bundles);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
     MockGetAnsManagerProxy(proxy);
     res = ans_->GetLocalDistributedBundleList("tablet", bundles);
@@ -3212,15 +3180,15 @@ HWTEST_F(AnsNotificationUnitTest, GetLocalDistributedBundleList_0100, Function |
 
 /**
  * @tc.name: GetDistributedBundleListByType_0100
- * @tc.desc: test GetDistributedBundleListByType with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test GetDistributedBundleListByType with parameters, expect errorCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, GetDistributedBundleListByType_0100, TestSize.Level1)
 {
     MockGetAnsManagerProxy(nullptr);
     std::vector<DistributedBundleOption> bundleList;
-    ErrCode res = ans_->GetDistributedBundleListByType(true, bundleList);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode res = ans_->GetDistributedBundleListByType(true, bundleList);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
     MockGetAnsManagerProxy(proxy);
 
@@ -3230,45 +3198,27 @@ HWTEST_F(AnsNotificationUnitTest, GetDistributedBundleListByType_0100, TestSize.
 
 /**
  * @tc.name: GetDistributedBundleInfo_0100
- * @tc.desc: test GetDistributedBundleInfo with parameters, expect errorCode ERR_ANS_INVALID_PARAM.
+ * @tc.desc: test GetDistributedBundleInfo with parameters, expect errorCode ERR_ANS_INNER_INVALID_PARAM.
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, GetDistributedBundleInfo_0100, TestSize.Level1)
 {
     std::vector<NotificationBundleOption> bundleOption;
     std::vector<DistributedNotificationBundleInfo> bundleInfoList;
-    ErrCode res = ans_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
-    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode res = ans_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 
     NotificationBundleOption bundle = NotificationBundleOption("com.test.demo", 20020001);
     bundleOption.emplace_back(bundle);
     MockGetAnsManagerProxy(nullptr);
     std::vector<DistributedBundleOption> bundleList;
     res = ans_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
-    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
     sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
     MockGetAnsManagerProxy(proxy);
 
     res = ans_->GetDistributedBundleInfo(bundleOption, bundleInfoList);
     EXPECT_EQ(res, ERR_OK);
-}
-
-/*
- * @tc.name: SetAdditionConfig_0200
- * @tc.desc: test SetAdditionConfig.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsNotificationUnitTest, SetAdditionConfig_0200, Function | MediumTest | Level1)
-{
-    sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
-    ASSERT_NE(proxy, nullptr);
-    MockGetAnsManagerProxy(proxy);
-    std::string key = "key";
-    std::string value = "value";
-    ErrCode ret1 = ans_->SetAdditionConfig(key, value);
-    MockGetAnsManagerProxy(nullptr);
-    EXPECT_EQ(ret1, ERR_OK);
 }
 
 /*
@@ -3290,8 +3240,8 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationv26_0300, Function | Medi
 
     auto subscriber = std::make_shared<TestAnsSubscriber>();
     sptr<NotificationSubscribeInfo> info = new (std::nothrow) NotificationSubscribeInfo();
-    ErrCode ret1 = ans_->SubscribeNotificationV26(subscriber, info);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->SubscribeNotificationV26(subscriber, info);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -3311,8 +3261,8 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationv26_0400, Function | Medi
     bool res = ans_->GetAnsManagerProxy();
     EXPECT_EQ(res, false);
 
-    ErrCode ret1 = ans_->SubscribeNotificationV26(nullptr);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret1 = ans_->SubscribeNotificationV26(nullptr);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -3328,9 +3278,9 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationv26_0800, Function | Medi
     std::shared_ptr<TestAnsSubscriber> subscriberPtr = std::make_shared<TestAnsSubscriber>();
     sptr<NotificationSubscribeInfo> infoPtr = new (std::nothrow) NotificationSubscribeInfo();
     infoPtr->AddDeviceType("phone");
-    ErrCode ret1 = ans_->SubscribeNotificationV26(subscriberPtr, infoPtr);
+    InnerErrorCode ret1 = ans_->SubscribeNotificationV26(subscriberPtr, infoPtr);
     EXPECT_EQ(ret1, ERR_OK);
-    ErrCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, infoPtr);
+    InnerErrorCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, infoPtr);
     EXPECT_EQ(ret2, ERR_OK);
 }
 
@@ -3345,9 +3295,9 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationv26_0900, Function | Medi
     sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
     MockGetAnsManagerProxy(proxy);
     std::shared_ptr<TestAnsSubscriber> subscriberPtr = std::make_shared<TestAnsSubscriber>();
-    ErrCode ret1 = ans_->SubscribeNotificationV26(subscriberPtr, nullptr);
+    InnerErrorCode ret1 = ans_->SubscribeNotificationV26(subscriberPtr, nullptr);
     EXPECT_EQ(ret1, ERR_OK);
-    ErrCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, nullptr);
+    InnerErrorCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, nullptr);
     EXPECT_EQ(ret2, ERR_OK);
 }
 
@@ -3365,9 +3315,9 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationv26_1000, Function | Medi
     sptr<NotificationSubscribeInfo> infoPtr = new (std::nothrow) NotificationSubscribeInfo();
     sptr<PictureOption> pictureOption = new PictureOption({"pic1", "pic2", "pic3"});
     infoPtr->SetPictureOption(pictureOption);
-    ErrCode ret1 = ans_->SubscribeNotificationV26(subscriberPtr, infoPtr);
+    InnerErrorCode ret1 = ans_->SubscribeNotificationV26(subscriberPtr, infoPtr);
     EXPECT_EQ(ret1, ERR_OK);
-    ErrCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, infoPtr);
+    InnerErrorCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, infoPtr);
     EXPECT_EQ(ret2, ERR_OK);
 }
 
@@ -3383,8 +3333,8 @@ HWTEST_F(AnsNotificationUnitTest, SnoozeNotification_0100, Function | MediumTest
     MockGetAnsManagerProxy(proxy);
     std::string hashCode = "";
     int64_t delayTime = 10;
-    ErrCode ret1 = ans_->SnoozeNotification(hashCode, delayTime);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret1 = ans_->SnoozeNotification(hashCode, delayTime);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -3399,13 +3349,13 @@ HWTEST_F(AnsNotificationUnitTest, SnoozeNotification_0200, Function | MediumTest
     MockGetAnsManagerProxy(proxy);
     std::string hashCode = "test123";
     int64_t delayTime = 0;
-    ErrCode ret1 = ans_->SnoozeNotification(hashCode, delayTime);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret1 = ans_->SnoozeNotification(hashCode, delayTime);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
 
     hashCode = "test123";
     delayTime = 24 * 3600 + 100;
     ret1 = ans_->SnoozeNotification(hashCode, delayTime);
-    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -3427,8 +3377,8 @@ HWTEST_F(AnsNotificationUnitTest, SnoozeNotification_0300, Function | MediumTest
 
     std::string hashCode = "test123";
     int64_t delayTime = 10;
-    ErrCode ret1 = ans_->SnoozeNotification(hashCode, delayTime);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret1 = ans_->SnoozeNotification(hashCode, delayTime);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -3450,8 +3400,8 @@ HWTEST_F(AnsNotificationUnitTest, TriggerUpdateAiExtNotification_0100, Function 
 
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     sptr<NotificationClassification> classification = new (std::nothrow) NotificationClassification();
-    ErrCode ret = ans_->TriggerUpdateAiExtNotification(request, classification);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->TriggerUpdateAiExtNotification(request, classification);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -3466,7 +3416,7 @@ HWTEST_F(AnsNotificationUnitTest, TriggerUpdateAiExtNotification_0200, Function 
     MockGetAnsManagerProxy(proxy);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     sptr<NotificationClassification> classification = new (std::nothrow) NotificationClassification();
-    ErrCode ret = ans_->TriggerUpdateAiExtNotification(request, classification);
+    InnerErrorCode ret = ans_->TriggerUpdateAiExtNotification(request, classification);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -3487,8 +3437,8 @@ HWTEST_F(AnsNotificationUnitTest, SetNotificationSwitch_0100, Function | MediumT
     bool res = ans_->GetAnsManagerProxy();
     EXPECT_EQ(res, false);
 
-    ErrCode ret = ans_->SetNotificationSwitch("switchName", true, 100);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->SetNotificationSwitch("switchName", true, 100);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -3501,7 +3451,7 @@ HWTEST_F(AnsNotificationUnitTest, SetNotificationSwitch_0200, Function | MediumT
 {
     sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
     MockGetAnsManagerProxy(proxy);
-    ErrCode ret = ans_->SetNotificationSwitch("switchName", true, 100);
+    InnerErrorCode ret = ans_->SetNotificationSwitch("switchName", true, 100);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -3523,8 +3473,8 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSwitch_0100, Function | MediumT
     EXPECT_EQ(res, false);
 
     NotificationConstant::SWITCH_STATE switchState;
-    ErrCode ret = ans_->GetNotificationSwitch("switchName", 100, switchState);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->GetNotificationSwitch("switchName", 100, switchState);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -3538,7 +3488,7 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSwitch_0200, Function | MediumT
     sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
     MockGetAnsManagerProxy(proxy);
     NotificationConstant::SWITCH_STATE switchState;
-    ErrCode ret = ans_->GetNotificationSwitch("switchName", 100, switchState);
+    InnerErrorCode ret = ans_->GetNotificationSwitch("switchName", 100, switchState);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -3552,8 +3502,8 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSwitch_0300, Function | MediumT
 {
     NotificationBundleOption bundleOption;
     NotificationConstant::SWITCH_STATE state;
-    ErrCode ret = ans_->GetNotificationSwitch(bundleOption, state);
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    InnerErrorCode ret = ans_->GetNotificationSwitch(bundleOption, state);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -3576,8 +3526,8 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSwitch_0400, Function | MediumT
     NotificationBundleOption bundleOption;
     bundleOption.SetBundleName("bundleName");
     NotificationConstant::SWITCH_STATE state;
-    ErrCode ret = ans_->GetNotificationSwitch(bundleOption, state);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+    InnerErrorCode ret = ans_->GetNotificationSwitch(bundleOption, state);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -3593,7 +3543,7 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSwitch_0500, Function | MediumT
     NotificationBundleOption bundleOption;
     bundleOption.SetBundleName("bundleName");
     NotificationConstant::SWITCH_STATE state;
-    ErrCode ret = ans_->GetNotificationSwitch(bundleOption, state);
+    InnerErrorCode ret = ans_->GetNotificationSwitch(bundleOption, state);
     EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace Notification

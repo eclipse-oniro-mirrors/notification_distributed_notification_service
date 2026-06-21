@@ -17,6 +17,7 @@
 
 #include "access_token_helper.h"
 #include "ans_permission_def.h"
+#include "ans_service_errors.h"
 #include "ipc_skeleton.h"
 #include "notification_ai_extension_wrapper.h"
 #include "notification_preferences.h"
@@ -30,24 +31,24 @@ ErrCode AdvancedNotificationService::SetNotificationSwitch(const std::string &sw
     // Validate switchName parameter
     if (!NotificationConstant::NotificationSwitch::IsValidNotificationSwitch(switchName)) {
         ANS_LOGE("Set invalid switchName: %{public}s", switchName.c_str());
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Non-system app calling SetNotificationSwitch");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied for SetNotificationSwitch");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     // Validate userId parameter
     if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
         ANS_LOGE("Check user exists failed.");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
@@ -87,24 +88,24 @@ ErrCode AdvancedNotificationService::GetNotificationSwitch(
     // Validate switchName parameter
     if (!NotificationConstant::NotificationSwitch::IsValidNotificationSwitch(switchName)) {
         ANS_LOGE("Get invalid switchName: %{public}s", switchName.c_str());
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Non-system app calling GetNotificationSwitch");
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission denied for GetNotificationSwitch");
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
     // Validate userId parameter
     if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
         ANS_LOGE("Check user exists failed.");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
 
     ErrCode result = ERR_OK;
@@ -128,7 +129,7 @@ ErrCode AdvancedNotificationService::TriggerUpdateAiExtNotification(const sptr<N
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (request == nullptr) {
         ANS_LOGE("Invalid request");
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     auto result = SystemPermissionCheck();
@@ -147,7 +148,7 @@ ErrCode AdvancedNotificationService::TriggerUpdateAiExtNotification(const sptr<N
         auto cacheRequest = record->notification->GetNotificationRequestPoint();
         if (cacheRequest == nullptr) {
             ANS_LOGE("TriggerUpdatePriorityType fail, cache request not exist");
-            result = ERR_ANS_INVALID_PARAM;
+            result = ERR_ANS_INNER_INVALID_PARAM;
             return;
         }
         cacheRequest->SetInnerPriorityNotificationType(request->GetPriorityNotificationType());
@@ -162,7 +163,7 @@ ErrCode AdvancedNotificationService::TriggerUpdateAiExtNotification(const sptr<N
         // Notify subscribers about the updated notification
         NotificationSubscriberManager::GetInstance()->NotifySystemUpdate(notification, notificationClassification);
     }));
-    
+
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Trigger update AI extension notification.");
     ANS_LOGI("TriggerUpdateAiExtNotification key: %{public}s, result: %{public}d", request->GetKey().c_str(), result);
     return ERR_OK;

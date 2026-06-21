@@ -46,7 +46,7 @@ namespace OHOS {
 namespace NotificationManagerSts {
 void ThrowSystemCapErr(ani_env *env)
 {
-    NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERROR_SYSTEM_CAP_ERROR);
+    NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERR_ANS_INNER_DEVICE_NOT_SUPPORT);
 }
 
 static std::array kitManagerFunctions = {

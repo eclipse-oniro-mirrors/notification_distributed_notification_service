@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 #define private public
 #include "advanced_notification_service.h"
+#include "ans_service_errors.h"
 #include "notification_bundle_option.h"
 #include "notification_request.h"
 #include "notification_classification_mgr.h"
@@ -27,7 +28,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Notification {
-
 extern void MockIsSystemApp(bool isSystemApp);
 extern void MockIsVerfyPermisson(bool isVerify);
 
@@ -56,9 +56,9 @@ HWTEST_F(AdvancedNotificationCancelTest, CancelAll_SynchronizerNullptr_00001, Fu
 {
     auto service = GetService();
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
-    
+
     auto result = service->CancelAll("", nullptr);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -71,9 +71,9 @@ HWTEST_F(AdvancedNotificationCancelTest, CancelAsBundleWithAgent_NullBundleOptio
 {
     auto service = GetService();
     sptr<NotificationBundleOption> nullBundle = nullptr;
-    
+
     auto result = service->CancelAsBundleWithAgent(nullBundle, 1, nullptr);
-    EXPECT_EQ(result, ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -88,9 +88,9 @@ HWTEST_F(AdvancedNotificationCancelTest, RemoveNotification_CheckPermissionFaile
     MockIsSystemApp(false);
     auto service = GetService();
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
-    
+
     auto result = service->RemoveNotification(bundle, 1, "testLabel", NotificationConstant::CANCEL_REASON_DELETE);
-    EXPECT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -105,7 +105,7 @@ HWTEST_F(AdvancedNotificationCancelTest,
     auto service = GetService();
     service->notificationList_.clear();
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
-    
+
     service->RemoveAllNotificationsForDisable(bundle);
     EXPECT_EQ(service->notificationList_.size(), 0);
 }
@@ -121,9 +121,9 @@ HWTEST_F(AdvancedNotificationCancelTest, RemoveNotificationBySlot_NullBundleOpti
     auto service = GetService();
     sptr<NotificationBundleOption> nullBundle = nullptr;
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::SERVICE_REMINDER);
-    
+
     auto result = service->RemoveNotificationBySlot(nullBundle, slot, NotificationConstant::CANCEL_REASON_DELETE);
-    EXPECT_EQ(result, ERR_ANS_INVALID_BUNDLE);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
 /**
@@ -136,7 +136,7 @@ HWTEST_F(AdvancedNotificationCancelTest, IsDistributedNotification_NullRequest_0
 {
     auto service = GetService();
     sptr<NotificationRequest> nullRequest = nullptr;
-    
+
     auto result = service->IsDistributedNotification(nullRequest);
     EXPECT_FALSE(result);
 }
@@ -153,7 +153,7 @@ HWTEST_F(AdvancedNotificationCancelTest,
     auto service = GetService();
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetDistributedCollaborate(true);
-    
+
     auto result = service->IsDistributedNotification(request);
     EXPECT_TRUE(result);
 }
@@ -204,7 +204,8 @@ HWTEST_F(AdvancedNotificationCancelTest, IsReasonClickDelete_OtherReason_00001, 
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_CancelContinuousTask_00001, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_CancelContinuousTask_00001,
+    Function | SmallTest | Level1)
 {
     NotificationClassificationMgr::GetInstance().Clear();
     auto service = GetService();
@@ -229,7 +230,8 @@ HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_CancelContinuo
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveNotification_00001, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveNotification_00001,
+    Function | SmallTest | Level1)
 {
     NotificationClassificationMgr::GetInstance().Clear();
     auto service = GetService();
@@ -254,7 +256,8 @@ HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveNotifica
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveAllForDisable_00001, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveAllForDisable_00001,
+    Function | SmallTest | Level1)
 {
     NotificationClassificationMgr::GetInstance().Clear();
     auto service = GetService();
@@ -316,7 +319,8 @@ HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveByDevice
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveDistributedNotifications_00001, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationCancelTest,
+    ClassificationMgr_Remove_RemoveDistributedNotifications_00001, Function | SmallTest | Level1)
 {
     NotificationClassificationMgr::GetInstance().Clear();
     EXPECT_EQ(NotificationClassificationMgr::GetInstance().Size(), 0);
@@ -328,7 +332,8 @@ HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveDistribu
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveDistributedByBundle_00001, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationCancelTest,
+    ClassificationMgr_Remove_RemoveDistributedByBundle_00001, Function | SmallTest | Level1)
 {
     NotificationClassificationMgr::GetInstance().Clear();
     EXPECT_EQ(NotificationClassificationMgr::GetInstance().Size(), 0);
@@ -340,7 +345,8 @@ HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveDistribu
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveAllDistributed_00001, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_RemoveAllDistributed_00001,
+    Function | SmallTest | Level1)
 {
     NotificationClassificationMgr::GetInstance().Clear();
     EXPECT_EQ(NotificationClassificationMgr::GetInstance().Size(), 0);

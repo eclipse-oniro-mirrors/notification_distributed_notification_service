@@ -25,6 +25,7 @@
 #include "notification_preferences.h"
 #include "notification_analytics_util.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 
 namespace OHOS {
 namespace Notification {
@@ -50,7 +51,7 @@ inline std::string __attribute__((weak)) GetClientBundleName()
 inline int32_t CheckUserIdParams(const int userId)
 {
     if (userId != SUBSCRIBE_USER_INIT && !OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
-        return ERROR_USER_NOT_EXIST;
+        return ERR_ANS_INNER_USER_NOT_EXIST;
     }
     return ERR_OK;
 }
@@ -88,7 +89,7 @@ inline AnsStatus CheckPictureSize(const sptr<NotificationRequest> &request)
     }
 
     if (request->CheckImageOverSizeForPixelMap(request->GetLittleIcon(), MAX_ICON_SIZE)) {
-        return AnsStatus(ERR_ANS_ICON_OVER_SIZE, "Check little image size failed.",
+        return AnsStatus(ERR_ANS_INNER_ICON_OVER_SIZE, "Check little image size failed.",
             EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     }
 
@@ -100,7 +101,7 @@ inline AnsStatus CheckPictureSize(const sptr<NotificationRequest> &request)
     }
 
     if (request->CheckImageOverSizeForPixelMap(request->GetOverlayIcon(), MAX_ICON_SIZE)) {
-        return AnsStatus(ERR_ANS_ICON_OVER_SIZE, "Check overlay size failed.",
+        return AnsStatus(ERR_ANS_INNER_ICON_OVER_SIZE, "Check overlay size failed.",
             EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     }
 
@@ -153,12 +154,12 @@ inline ErrCode PermissionVerification()
 {
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) ||
         !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     return ERR_OK;
 }
@@ -166,15 +167,15 @@ inline ErrCode PermissionVerification()
 inline std::chrono::seconds getCurrentTimezoneOffset()
 {
     std::time_t nowTime = std::time(nullptr);
-    
+
     std::tm local_tm;
     std::tm utc_tm;
     localtime_r(&nowTime, &local_tm);
     gmtime_r(&nowTime, &utc_tm);
-    
+
     std::time_t local_epoch = std::mktime(&local_tm);
     std::time_t utc_epoch = std::mktime(&utc_tm);
-    
+
     return std::chrono::seconds(local_epoch - utc_epoch);
 }
 

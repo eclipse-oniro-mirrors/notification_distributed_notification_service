@@ -14,76 +14,75 @@
  */
 
 #include "ans_notification.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 
 namespace OHOS {
 namespace Notification {
-
-ErrCode AnsNotification::SetNotificationsEnabledForSpecifiedBundle(
+InnerErrorCode AnsNotification::SetNotificationsEnabledForSpecifiedBundle(
     const NotificationBundleOption &bundleOption, const std::string &deviceId, bool enabled)
 {
     if (bundleOption.GetBundleName() == "gg") {
-        return ERR_OK;
+        return ERR_ANS_INNER_OK;
     } else {
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 }
 
-ErrCode AnsNotification::GetTargetDeviceStatus(const std::string &deviceType, int32_t &status)
+InnerErrorCode AnsNotification::GetTargetDeviceStatus(const std::string &deviceType, int32_t &status)
 {
     if (deviceType == "phone") {
-        return ERR_OK;
+        return ERR_ANS_INNER_OK;
     } else {
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 }
 
-ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+InnerErrorCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
     const std::string deveiceId)
 {
     if (deviceType == "phone") {
-        return ERR_OK;
+        return ERR_ANS_INNER_OK;
     } else {
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 }
 
-ErrCode AnsNotification::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
+InnerErrorCode AnsNotification::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
 {
     if (deviceType == "phone") {
-        return ERR_OK;
+        return ERR_ANS_INNER_OK;
     } else {
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 }
 
-ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
+InnerErrorCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
     const std::string &deviceType, const bool enabled, const bool isNotification)
 {
     if (deviceType == "phone") {
-        return ERR_OK;
+        return ERR_ANS_INNER_OK;
     } else {
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 }
 
-ErrCode AnsNotification::SetDistributedBundleOption(
+InnerErrorCode AnsNotification::SetDistributedBundleOption(
     const std::vector<DistributedBundleOption> &bundles, const std::string &deviceType)
 {
     if (deviceType == "phone") {
-        return ERR_OK;
+        return ERR_ANS_INNER_OK;
     } else {
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 }
 
-ErrCode AnsNotification::SetDistributedEnabledBySlot(
+InnerErrorCode AnsNotification::SetDistributedEnabledBySlot(
     const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled)
 {
     if (deviceType == "phone") {
-        return ERR_OK;
+        return ERR_ANS_INNER_OK;
     } else {
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 }
 }  // namespace Notification

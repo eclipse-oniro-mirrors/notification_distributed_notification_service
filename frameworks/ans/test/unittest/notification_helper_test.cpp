@@ -1745,7 +1745,7 @@ HWTEST_F(NotificationHelperTest, IsDoNotDisturbEnabled_0100, Function | SmallTes
     int32_t uid = 100;
     bool isEnabled = true;
     ErrCode ret = notificationHelper.IsDoNotDisturbEnabled(uid, isEnabled);
-    EXPECT_EQ(ret, ERROR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -1759,7 +1759,7 @@ HWTEST_F(NotificationHelperTest, IsNotifyAllowedInDoNotDisturb_0100, Function | 
     int32_t uid = 100;
     bool isAllowed = true;
     ErrCode ret = notificationHelper.IsNotifyAllowedInDoNotDisturb(uid, isAllowed);
-    EXPECT_EQ(ret, ERROR_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**

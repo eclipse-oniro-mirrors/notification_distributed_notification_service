@@ -17,10 +17,14 @@
 #include <uv.h>
 #include "napi_base_context.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
+#include "ans_notification.h"
 #include "ws_common.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 const int OPEN_NOTIFICATION_SETTINGS_MAX_PARA = 1;
 static napi_env env_ = nullptr;
 static AsyncCallbackInfoOpenSettings* callbackInfo_ = nullptr;
@@ -34,14 +38,14 @@ napi_value NapiNotificationSettingResult(napi_env env, void *data)
     if (!asynccallbackinfo) {
         return result;
     }
-    uint32_t slotFlags = 0;
-    asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationSettings(slotFlags);
+    uint32_t slotFlags = 0;    asynccallbackinfo->info.errorCode =
+        DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSettings(slotFlags);
     if (asynccallbackinfo->info.errorCode != ERR_OK) {
         return result;
     }
     napi_create_object(env, &result);
     if (!Common::SetNotificationSettings(env, slotFlags, result)) {
-        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
     }
 
     return result;
@@ -71,14 +75,7 @@ void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
     if (asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->isWithResult) {
         result = NapiNotificationSettingResult(env, data);
     }
-    int32_t errorCode = ERR_OK;
-    if (asynccallbackinfo->info.errorCode == ERROR_SETTING_WINDOW_EXIST ||
-        asynccallbackinfo->info.errorCode == ERROR_SYSTEM_CAP_ERROR) {
-        errorCode = asynccallbackinfo->info.errorCode;
-    } else {
-        errorCode = asynccallbackinfo->info.errorCode ==
-            ERR_OK ? ERR_OK : OHOS::Notification::ErrorToExternal(asynccallbackinfo->info.errorCode);
-    }
+    int32_t errorCode = asynccallbackinfo->info.errorCode;
     if (asynccallbackinfo->info.isCallback) {
         Common::SetCallback(env, asynccallbackinfo->info.callback, errorCode, result, true);
     } else {
@@ -98,7 +95,7 @@ napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info)
     OpenSettingsParams params {};
     if (ParseOpenSettingsParameters(env, info, params) == nullptr) {
         Common::HistogramBoolReport("NotificationKit.APICall.openNotificationSettings", false);
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -126,10 +123,10 @@ napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info)
         auto* asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings*>(data);
         CreateExtension(asynccallbackinfo);
         ErrCode errCode = asynccallbackinfo->info.errorCode;
-        if (errCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
+        if (asynccallbackinfo->info.errorCode != ERR_ANS_INNER_DIALOG_POP_SUCCEEDED) {
             ANS_LOGE("errCode: %{public}d.", errCode);
             NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
-            if (errCode != ERROR_SETTING_WINDOW_EXIST) {
+            if (errCode != ERR_ANS_INNER_SETTING_WINDOW_EXIST) {
                 isExist.store(false);
             }
             Common::HistogramBoolReport("NotificationKit.APICall.openNotificationSettings", false);
@@ -137,7 +134,8 @@ napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info)
         }
         if (!Init(env, asynccallbackinfo, NapiAsyncCompleteCallbackOpenSettings)) {
             ANS_LOGE("error");
-            asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+
+            asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
             NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
             Common::HistogramBoolReport("NotificationKit.APICall.openNotificationSettings", false);
             return;
@@ -165,8 +163,8 @@ napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info)
     ANS_LOGD("start");
     OpenSettingsParams params {};
     if (ParseOpenSettingsParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
-        return Common::NapiRejectError(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
+        return Common::NapiRejectError(env, ERR_ANS_INNER_INVALID_PARAM);
     }
     AsyncCallbackInfoOpenSettings *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoOpenSettings {
             .env = env, .params = params};
@@ -188,17 +186,18 @@ napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info)
         auto* asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings*>(data);
         CreateExtension(asynccallbackinfo);
         ErrCode errCode = asynccallbackinfo->info.errorCode;
-        if (errCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
+        if (asynccallbackinfo->info.errorCode != ERR_ANS_INNER_DIALOG_POP_SUCCEEDED) {
             ANS_LOGE("errCode: %{public}d.", errCode);
             NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
-            if (errCode != ERROR_SETTING_WINDOW_EXIST) {
+            if (errCode != ERR_ANS_INNER_SETTING_WINDOW_EXIST) {
                 isExist.store(false);
             }
             return;
         }
         if (!Init(env, asynccallbackinfo, NapiAsyncCompleteCallbackOpenSettings)) {
             ANS_LOGE("error");
-            asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+
+            asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
             NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
             return;
         }
@@ -239,7 +238,7 @@ napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_
         } else {
             ANS_LOGE("Only support stage mode");
             std::string msg = "Incorrect parameter types.Only support stage mode.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
             return nullptr;
         }
     }
@@ -401,15 +400,16 @@ void CreateExtension(AsyncCallbackInfoOpenSettings* asynccallbackinfo)
         std::string bundleName {""};
         if (isExist.exchange(true)) {
             ANS_LOGE("SettingsUIExtension existed");
-            asynccallbackinfo->info.errorCode = ERROR_SETTING_WINDOW_EXIST;
+
+            asynccallbackinfo->info.errorCode = ERR_ANS_INNER_SETTING_WINDOW_EXIST;
             return;
         }
         bool success = CreateSettingsUIExtension(asynccallbackinfo->params.context, bundleName,
             asynccallbackinfo->isWithResult);
         if (success) {
-            asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_POP_SUCCEEDED;
+            asynccallbackinfo->info.errorCode = ERR_ANS_INNER_DIALOG_POP_SUCCEEDED;
         } else {
-            asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+            asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         }
     } else {
         ANS_LOGD("un stage mode");
@@ -422,7 +422,6 @@ SettingsModalExtensionCallback::SettingsModalExtensionCallback()
 
 SettingsModalExtensionCallback::~SettingsModalExtensionCallback()
 {}
-
 
 /*
  * when UIExtensionAbility use terminateSelfWithResult
@@ -460,7 +459,6 @@ void SettingsModalExtensionCallback::OnReleaseNew(int32_t releaseCode)
     ReleaseOrErrorHandle(releaseCode);
     ProcessStatusChanged(releaseCode);
 }
-
 
 /*
  * when UIExtensionComponent init or turn to background or destroy UIExtensionAbility occur error
@@ -504,7 +502,6 @@ void SettingsModalExtensionCallback::OnDestroy()
     ANS_LOGD("called");
     isExist.store(false);
 }
-
 
 void SettingsModalExtensionCallback::SetSessionId(int32_t sessionId)
 {

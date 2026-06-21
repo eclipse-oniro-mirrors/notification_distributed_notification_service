@@ -36,7 +36,7 @@ napi_value Common::GetNotificationFlagsStatus(const napi_env &env, const napi_va
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types. The type of FlagStatus must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         int32_t tempFlag = 0;
@@ -44,7 +44,7 @@ napi_value Common::GetNotificationFlagsStatus(const napi_env &env, const napi_va
         if (tempFlag < 0 || tempFlag > FLAG_STATUS_MAX_TYPE) {
             ANS_LOGE("Wrong argument type. The number is out of range.");
             std::string msg = "Incorrect parameter types. The FlagStatus value can only be 0, 1, or 2.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         flag = NotificationConstant::FlagStatus(tempFlag);
@@ -112,7 +112,7 @@ napi_value Common::GetNotificationFlags(const napi_env &env, const napi_value &v
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types. The type of notificationFlags must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
 
@@ -172,7 +172,7 @@ napi_value Common::GetNotificationGroupInfo(
         NAPI_CALL(env, napi_typeof(env, groupInfoObj, &valuetype));
         if (valuetype != napi_object) {
             std::string msg = "Incorrect parameter types. The type of groupInfo must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         std::shared_ptr<NotificationGroupInfo> groupInfo = std::make_shared<NotificationGroupInfo>();
@@ -182,7 +182,7 @@ napi_value Common::GetNotificationGroupInfo(
             NAPI_CALL(env, napi_typeof(env, groupInfoParamObj, &valuetype));
             if (valuetype != napi_boolean) {
                 std::string msg = "Incorrect parameter types. The type of isGroupIcon must be boolean.";
-                Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+                Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
                 return nullptr;
             }
             bool isGroupIcon = false;
@@ -195,7 +195,7 @@ napi_value Common::GetNotificationGroupInfo(
             NAPI_CALL(env, napi_typeof(env, groupInfoParamObj, &valuetype));
             if (valuetype != napi_string) {
                 std::string msg = "Incorrect parameter types. The type of groupTitle must be string.";
-                Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+                Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
                 return nullptr;
             }
             char groupTitle[STR_MAX_SIZE] = {0};

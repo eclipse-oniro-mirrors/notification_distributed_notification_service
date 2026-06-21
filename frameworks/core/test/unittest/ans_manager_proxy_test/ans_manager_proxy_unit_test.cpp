@@ -25,6 +25,7 @@
 #include "ans_const_define.h"
 #include "ans_dialog_host_client.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_result_data_synchronizer.h"
 #include "ans_subscriber_listener.h"
 #include "ians_manager.h"
@@ -330,7 +331,7 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishTest_0700, Function | MediumTest | Leve
     auto basicContent = std::make_shared<NotificationBasicContent>();
     basicContent->SetLockScreenPicture(MakeNewPixelMap(pictureWidth, pictureLength));
     auto result = request.CheckLockScreenPictureSizeForLiveView(basicContent);
-    EXPECT_EQ(ERR_ANS_PICTURE_OVER_SIZE, result);
+    EXPECT_EQ(ERR_ANS_INNER_PICTURE_OVER_SIZE, result);
 
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
     liveContent->SetLockScreenPicture(MakeNewPixelMap(1, 1));

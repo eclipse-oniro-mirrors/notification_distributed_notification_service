@@ -14,6 +14,7 @@
  */
 
 #include "os_account_manager.h"
+#include "ans_service_errors.h"
 
 namespace {
 int32_t g_mockId = 100; // default id when there is no os_account part
@@ -93,7 +94,7 @@ namespace AccountSA {
 ErrCode OsAccountManager::GetForegroundOsAccountLocalId(int32_t &id)
 {
     if (!g_mockQueryForgroundOsAccountRet) {
-        return ERR_INVALID_OPERATION;
+        return OHOS::Notification::ERR_ANS_INNER_INVALID_OPERATION;
     }
     id = g_mockId;
     return ERR_OK;
@@ -102,7 +103,7 @@ ErrCode OsAccountManager::GetForegroundOsAccountLocalId(int32_t &id)
 ErrCode OsAccountManager::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id)
 {
     id = g_mockIdForGetOsAccountLocalIdFromUid;
-    return g_mockGetOsAccountLocalIdFromUidRet ? ERR_OK : ERR_INVALID_OPERATION;
+    return g_mockGetOsAccountLocalIdFromUidRet ? ERR_OK : OHOS::Notification::ERR_ANS_INNER_INVALID_OPERATION;
 }
 
 ErrCode OsAccountManager::IsOsAccountExists(const int id, bool &isOsAccountExists)

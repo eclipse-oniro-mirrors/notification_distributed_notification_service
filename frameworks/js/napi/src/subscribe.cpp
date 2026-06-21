@@ -1700,7 +1700,7 @@ napi_value GetNotificationSubscriber(
     if (subscriberInfo.subscriber == nullptr) {
         ANS_LOGE("null subscriber");
         std::string msg = "Mandatory parameters are left unspecified. subscriber is null";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
@@ -1742,7 +1742,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnConsumed, 1, &result);
@@ -1758,7 +1758,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnCanceled, 1, &result);
@@ -1774,7 +1774,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnUpdate, 1, &result);
@@ -1790,7 +1790,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnConnected, 1, &result);
@@ -1806,7 +1806,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnDisConnect, 1, &result);
@@ -1822,7 +1822,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnDied, 1, &result);
@@ -1838,7 +1838,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnDisturbModeChanged, 1, &result);
@@ -1854,7 +1854,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnDisturbDateChanged, 1, &result);
@@ -1871,7 +1871,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnDoNotDisturbChanged, 1, &result);
@@ -1888,7 +1888,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnEnabledNotificationChanged, 1, &result);
@@ -1905,7 +1905,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnEnabledSilentReminderChanged, 1, &result);
@@ -1922,7 +1922,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnNotificationSwitchChanged, 1, &result);
@@ -1939,7 +1939,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnEnabledPriorityChanged, 1, &result);
@@ -1956,7 +1956,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnEnabledPriorityByBundleChanged, 1, &result);
@@ -1973,7 +1973,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnSystemUpdate, 1, &result);
@@ -1990,7 +1990,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnBadgeChanged, 1, &result);
@@ -2007,7 +2007,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, nOnBadgeEnabledChanged, 1, &result);
@@ -2024,7 +2024,7 @@ napi_value GetNotificationSubscriber(
         if (valuetype != napi_function) {
             ANS_LOGE("Wrong argument type. Function expected.");
             std::string msg = "Incorrect parameter types.The type of param must be function.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_create_reference(env, onBatchCancel, 1, &result);
@@ -2082,7 +2082,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < 1) {
         ANS_LOGE("Wrong number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -2093,7 +2093,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type for arg0. NotificationSubscriber object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be NotificationSubscriber.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
@@ -2347,7 +2347,7 @@ napi_value GetParamOperationInfo(const napi_env &env, const napi_value &content,
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type for arg1. object expected.");
         std::string msg = "Incorrect parameter type. The type of operationInfo must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
@@ -2361,7 +2361,7 @@ napi_value GetParamOperationInfo(const napi_env &env, const napi_value &content,
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
             std::string msg = "Incorrect parameter types. The type of actionName must be string.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         char str[STR_MAX_SIZE] = {0};
@@ -2376,7 +2376,7 @@ napi_value GetParamOperationInfo(const napi_env &env, const napi_value &content,
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
             std::string msg = "Incorrect parameter types. The type of userInput must be string.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         char str[LONG_STR_MAX_SIZE] = {0};
@@ -2400,7 +2400,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < DISTRIBUTE_JUMP_PARA) {
         ANS_LOGE("Wrong number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -2414,14 +2414,14 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     } else {
         ANS_LOGE("Wrong argument type for arg0. string expected.");
         std::string msg = "Incorrect parameter type. The type of hashcode must be string.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 
     if (hashCode.empty()) {
         ANS_LOGE("Wrong argument type for arg0. not empty expected.");
         std::string msg = "Incorrect parameter type. The type of hashcode must be not null.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
 

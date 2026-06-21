@@ -17,6 +17,7 @@
 #include "reminder/reminder_state_listener.h"
 
 #include "ans_log_wrapper.h"
+#include "ans_service_errors.h"
 #include "common.h"
 #include "napi_common.h"
 #include "reminder_request.h"
@@ -30,6 +31,7 @@
 
 namespace OHOS {
 namespace ReminderAgentNapi {
+using OHOS::Notification::AnsNotification;
 static const int32_t PUBLISH_PARAM_LEN = 2;
 static const int32_t CANCEL_PARAM_LEN = 2;
 static const int32_t CANCEL_ALL_PARAM_LEN = 1;
@@ -282,8 +284,8 @@ napi_value DealErrorReturn(const napi_env &env, const napi_ref &callbackIn, cons
         return nullptr;
     }
     if (callbackIn) {
-        NotificationNapi::Common::SetCallback(env, callbackIn, ERR_REMINDER_INVALID_PARAM,
-            result, false);
+        ReminderCommon::SetCallback(env, callbackIn, ERR_REMINDER_INVALID_PARAM, result);
+        return NotificationNapi::Common::NapiGetNull(env);
     }
     return NotificationNapi::Common::JSParaError(env, callbackIn);
 }
@@ -970,7 +972,7 @@ napi_value InnerGetAllValidReminders(napi_env env, napi_callback_info info, bool
 
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getAllValidReminders", NAPI_AUTO_LENGTH, &resourceName);
-    
+
     napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
             ANSR_LOGI("GetAllValid reminders napi_create_async_work start");
@@ -990,7 +992,7 @@ napi_value InnerGetAllValidReminders(napi_env env, napi_callback_info info, bool
                 } else {
                     GetAllValidRemindersInner(env, asynccallbackinfo->validReminders, asynccallbackinfo->result);
                 }
-                
+
                 ReminderCommon::ReturnCallbackPromise(
                     env, asynccallbackinfo->info, asynccallbackinfo->result, asynccallbackinfo->isThrow);
             }
@@ -1407,7 +1409,7 @@ napi_value GetExcludeDates(napi_env env, napi_callback_info info)
     // resource name
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getExcludeDates", NAPI_AUTO_LENGTH, &resourceName);
-    
+
     bool isCallback = asynccallbackinfo->info.isCallback;
 
     // create and queue async work
@@ -1431,7 +1433,7 @@ napi_value GetExcludeDates(napi_env env, napi_callback_info info)
                 } else {
                     GetExcludeDatesInner(env, asynccallbackinfo->excludeDates, asynccallbackinfo->result);
                 }
-                
+
                 ReminderCommon::ReturnCallbackPromise(
                     env, asynccallbackinfo->info, asynccallbackinfo->result, asynccallbackinfo->isThrow);
             }

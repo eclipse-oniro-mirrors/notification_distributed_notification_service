@@ -23,6 +23,7 @@
 #define private public
 #include "advanced_notification_service.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_result_data_synchronizer.h"
 #include "accesstoken_kit.h"
@@ -101,7 +102,7 @@ HWTEST_F(AnsSnoozeDelayTest, SnoozeNotification_00001, Function | SmallTest | Le
     std::string hashCode = "test123";
     int64_t delayTime = 10;
     ASSERT_EQ(advancedNotificationService_->SnoozeNotification(hashCode, delayTime),
-        (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+        (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -117,16 +118,16 @@ HWTEST_F(AnsSnoozeDelayTest, SnoozeNotification_00002, Function | SmallTest | Le
     std::string hashCode = "test123";
     int64_t delayTime = 10;
     ASSERT_EQ(advancedNotificationService_->SnoozeNotification(hashCode, delayTime),
-        (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+        (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 
     MockIsSystemApp(true);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     ASSERT_EQ(advancedNotificationService_->SnoozeNotification(hashCode, delayTime),
-        (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+        (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
-    ASSERT_EQ(advancedNotificationService_->SnoozeNotification(hashCode, delayTime), (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->SnoozeNotification(hashCode, delayTime), (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
@@ -142,7 +143,8 @@ HWTEST_F(AnsSnoozeDelayTest, SnoozeNotification_00003, Function | SmallTest | Le
 
     std::string hashCode = "test123";
     int64_t delayTime = 10;
-    ASSERT_EQ(advancedNotificationService_->SnoozeNotification(hashCode, delayTime), (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->SnoozeNotification(hashCode, delayTime),
+        (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
@@ -169,7 +171,7 @@ HWTEST_F(AnsSnoozeDelayTest, ExcuteSnoozeNotification_00001, Function | SmallTes
     advancedNotificationService_->notificationList_.push_back(record1);
     advancedNotificationService_->notificationList_.push_back(nullptr);
     ASSERT_EQ(advancedNotificationService_->ExcuteSnoozeNotification(hashCode, delayTime),
-        (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+        (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -195,7 +197,7 @@ HWTEST_F(AnsSnoozeDelayTest, ExcuteSnoozeNotification_00002, Function | SmallTes
     record1->notification = notification;
     advancedNotificationService_->notificationList_.push_back(record1);
     ASSERT_EQ(advancedNotificationService_->ExcuteSnoozeNotification(hashCode, delayTime),
-        (int)ERR_ANS_NOTIFICATION_SNOOZE_NOTALLOWED);
+        (int)ERR_ANS_INNER_NOTIFICATION_SNOOZE_NOTALLOWED);
 }
 
 /**
@@ -221,7 +223,7 @@ HWTEST_F(AnsSnoozeDelayTest, ExcuteSnoozeNotification_00003, Function | SmallTes
     record1->notification = notification;
     advancedNotificationService_->notificationList_.push_back(record1);
     ASSERT_EQ(advancedNotificationService_->ExcuteSnoozeNotification(hashCode, delayTime),
-        (int)ERR_ANS_NOTIFICATION_SNOOZE_NOTALLOWED);
+        (int)ERR_ANS_INNER_NOTIFICATION_SNOOZE_NOTALLOWED);
 }
 
 /**
@@ -250,7 +252,7 @@ HWTEST_F(AnsSnoozeDelayTest, ExcuteSnoozeNotification_00004, Function | SmallTes
     record1->bundleOption = bundleOption;
     advancedNotificationService_->notificationList_.push_back(record1);
     ASSERT_EQ(advancedNotificationService_->ExcuteSnoozeNotification(hashCode, delayTime),
-        (int)ERR_ANS_NOTIFICATION_SNOOZE_NOTALLOWED);
+        (int)ERR_ANS_INNER_NOTIFICATION_SNOOZE_NOTALLOWED);
 }
 
 /**
@@ -789,7 +791,7 @@ HWTEST_F(AnsSnoozeDelayTest, IsSetSnooze_00004, Function | SmallTest | Level1)
     record->notification = notification;
 
     ASSERT_EQ(advancedNotificationService_->AssignToNotificationList(record),
-        (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+        (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**

@@ -30,6 +30,7 @@
 #include "advanced_notification_service.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
 #include "ans_result_data_synchronizer.h"
@@ -264,7 +265,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00200,
  * @tc.number    : ANS_Publish_00300
  * @tc.name      : ANSPublish00300
  * @tc.desc      : When slotType is CUSTOM and not systemApp, the notification publish fails,
- * and the notification publish interface returns ERR_ANS_NON_SYSTEM_APP.
+ * and the notification publish interface returns ERR_ANS_INNER_NON_SYSTEM_APP.
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00300, Function | SmallTest | Level1)
 {
@@ -283,7 +284,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00300,
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
     EXPECT_NE(content, nullptr);
     req->SetContent(content);
-    ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_INNER_NON_SYSTEM_APP);
     SleepForFC();
 }
 
@@ -291,7 +292,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00300,
  * @tc.number    : ANS_Publish_00400
  * @tc.name      : ANSPublish00400
  * @tc.desc      : When the obtained bundleName is empty, the notification publish interface returns
- * ERR_ANS_INVALID_BUNDLE.
+ * ERR_ANS_INNER_INVALID_BUNDLE.
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00400, Function | SmallTest | Level1)
 {
@@ -311,7 +312,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00400,
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
     EXPECT_NE(content, nullptr);
     req->SetContent(content);
-    ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_INNER_INVALID_BUNDLE);
     MockIsNonBundleName(false);
     SleepForFC();
 }
@@ -553,7 +554,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01200,
     req->SetContent(content);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
-    ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_INNER_NON_SYSTEM_APP);
     SleepForFC();
 }
 
@@ -562,7 +563,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01200,
  * @tc.name      : ANSPublish01300
  * @tc.desc      : When a bundle is not allowed to publish a notification, the notification publishing interface
  returns
- * ERR_ANS_NOT_ALLOWED
+ * ERR_ANS_INNER_NOT_ALLOWED
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01300, Function | SmallTest | Level1)
 {
@@ -586,7 +587,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01300,
     IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
-    ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_NOT_ALLOWED);
+    ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_INNER_NOT_ALLOWED);
     SleepForFC();
 }
 
@@ -606,7 +607,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04600,
         (int)ERR_OK);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
-    ASSERT_EQ(advancedNotificationService_->Publish(std::string(), req), (int)ERR_ANS_NOT_ALLOWED);
+    ASSERT_EQ(advancedNotificationService_->Publish(std::string(), req), (int)ERR_ANS_INNER_NOT_ALLOWED);
 }
 
 /**
@@ -689,7 +690,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04800,
 {
     int32_t notificationId = 0;
     std::string label = "testLabel";
-    int32_t result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    InnerErrorCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     auto ret = advancedNotificationService_->Cancel(notificationId, label, "",
         iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
@@ -711,7 +712,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14800,
     int32_t notificationId = 0;
     std::string label = "testLabel";
     ASSERT_EQ((int)advancedNotificationService_->Cancel(
-        notificationId, label, ""), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+        notificationId, label, ""), (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -873,7 +874,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10100,
     req->SetLittleIcon(littleIcon);
     std::shared_ptr<PixelMap> bigIcon = MakePixelMap(ICON_SIZE, ICON_SIZE);
     req->SetBigIcon(bigIcon);
-    ASSERT_EQ(advancedNotificationService_->Publish("label", req), (int)ERR_ANS_PICTURE_OVER_SIZE);
+    ASSERT_EQ(advancedNotificationService_->Publish("label", req), (int)ERR_ANS_INNER_PICTURE_OVER_SIZE);
 }
 
 /**
@@ -907,7 +908,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10200,
     req->SetLittleIcon(littleIcon);
     std::shared_ptr<PixelMap> bigIcon = MakePixelMap(ICON_SIZE, ICON_SIZE);
     req->SetBigIcon(bigIcon);
-    ASSERT_EQ(advancedNotificationService_->Publish("label", req), (int)ERR_ANS_ICON_OVER_SIZE);
+    ASSERT_EQ(advancedNotificationService_->Publish("label", req), (int)ERR_ANS_INNER_ICON_OVER_SIZE);
 }
 
 /**
@@ -984,7 +985,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12000,
     // bundleName is empty
     ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(
         std::string(), new NotificationBundleOption(std::string(), -1), true),
-        (int)ERR_ANS_INVALID_PARAM);
+        (int)ERR_ANS_INNER_INVALID_PARAM);
 
     TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     sptr<NotificationRequest> req = new NotificationRequest();
@@ -1005,7 +1006,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12000,
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
-    ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_NOT_ALLOWED);
+    ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_INNER_NOT_ALLOWED);
     SleepForFC();
 }
 
@@ -1038,7 +1039,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12100,
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
-    ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED);
+    ASSERT_EQ(advancedNotificationService_->Publish(label, req),
+        (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_ENABLED);
     SleepForFC();
 }
 
@@ -1093,7 +1095,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12300,
     req->SetContent(content);
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
-    ASSERT_EQ(advancedNotificationService_->Publish(label, req), ERR_ANS_INVALID_UID);
+    ASSERT_EQ(advancedNotificationService_->Publish(label, req), ERR_ANS_INNER_INVALID_UID);
     SleepForFC();
 
     req->SetCreatorUid(1);
@@ -1124,7 +1126,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12400,
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
     EXPECT_NE(content, nullptr);
     req->SetContent(content);
-    EXPECT_NE(advancedNotificationService_->Publish(label, req), ERR_ANS_DLP_HAP);
+    EXPECT_NE(advancedNotificationService_->Publish(label, req), ERR_ANS_INNER_DLP_HAP);
     SleepForFC();
 
     ASSERT_EQ(advancedNotificationService_->Publish(label, req), ERR_OK);
@@ -1393,7 +1395,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_11100,
     EXPECT_NE(req, nullptr);
     req->SetSlotType(NotificationConstant::SlotType::OTHER);
     req->SetLabel("req's label");
-    ASSERT_EQ(advancedNotificationService_->PublishContinuousTaskNotification(req), (int)ERR_ANS_NOT_SYSTEM_SERVICE);
+    ASSERT_EQ(advancedNotificationService_->PublishContinuousTaskNotification(req),
+        (int)ERR_ANS_INNER_NOT_SYSTEM_SERVICE);
     SleepForFC();
 }
 
@@ -1431,13 +1434,14 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_11300,
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     ASSERT_EQ(
-        advancedNotificationService_->CancelContinuousTaskNotification(label, 1), (int)ERR_ANS_NOT_SYSTEM_SERVICE);
+        advancedNotificationService_->CancelContinuousTaskNotification(label, 1),
+        (int)ERR_ANS_INNER_NOT_SYSTEM_SERVICE);
 }
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_12600
  * @tc.name      : ANS_CancelAsBundle_0100
- * @tc.desc      : Test CancelAsBundle function when the result is ERR_ANS_NOTIFICATION_NOT_EXISTS
+ * @tc.desc      : Test CancelAsBundle function when the result is ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12600, Function | SmallTest | Level1)
@@ -1446,7 +1450,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12600,
     int32_t notificationId = 1;
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 1;
-    int result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    InnerErrorCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     auto ret = advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId,
         iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
@@ -1461,7 +1465,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12600,
 /**
  * @tc.number    : AdvancedNotificationServiceTest_112600
  * @tc.name      : ANS_CancelAsBundle_0100
- * @tc.desc      : Test CancelAsBundle function when the result is ERR_ANS_NOTIFICATION_NOT_EXISTS
+ * @tc.desc      : Test CancelAsBundle function when the result is ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_112600, Function | SmallTest | Level1)
@@ -1470,35 +1474,35 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_112600
     int32_t notificationId = 1;
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 1;
-    int result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    InnerErrorCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     ASSERT_EQ(advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId), result);
 }
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_12700
  * @tc.name      : ANS_CanPublishAsBundle_0100
- * @tc.desc      : Test CanPublishAsBundle function when the result is ERR_INVALID_OPERATION
+ * @tc.desc      : Test CanPublishAsBundle function when the result is ERR_ANS_INNER_INVALID_OPERATION
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12700, Function | SmallTest | Level1)
 {
     std::string representativeBundle = "RepresentativeBundle";
     bool canPublish = true;
-    int result = ERR_INVALID_OPERATION;
+    int result = ERR_ANS_INNER_INVALID_OPERATION;
     ASSERT_EQ(advancedNotificationService_->CanPublishAsBundle(representativeBundle, canPublish), result);
 }
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_12800
  * @tc.name      : ANS_PublishAsBundle_0100
- * @tc.desc      : Test PublishAsBundle function when the result is ERR_INVALID_OPERATION
+ * @tc.desc      : Test PublishAsBundle function when the result is ERR_ANS_INNER_INVALID_OPERATION
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12800, Function | SmallTest | Level1)
 {
     sptr<NotificationRequest> notification = nullptr;
     std::string representativeBundle = "RepresentativeBundle";
-    int result = ERR_INVALID_OPERATION;
+    int result = ERR_ANS_INNER_INVALID_OPERATION;
     ASSERT_EQ(advancedNotificationService_->PublishAsBundle(notification, representativeBundle), result);
 }
 
@@ -1518,7 +1522,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21500,
     sptr<NotificationBundleOption> bundleOption = nullptr;
 
     ASSERT_EQ(advancedNotificationService_->PublishPreparedNotification(req, bundleOption).GetErrCode(),
-        ERR_ANS_INVALID_PARAM);
+        ERR_ANS_INNER_INVALID_PARAM);
 
     GTEST_LOG_(INFO) << "PublishPreparedNotification_1000 test end";
 }
@@ -1935,13 +1939,13 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishPreparedNotificationInner_0100,
     AdvancedNotificationService::PublishNotificationParameter parameter;
     parameter.request = sptr<NotificationRequest>(new (std::nothrow) NotificationRequest());
     auto ret = advancedNotificationService.PublishPreparedNotificationInner(parameter);
-    EXPECT_EQ(ret.GetErrCode(), ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : Filter_0100
  * @tc.name      : Filter_0100
- * @tc.desc      : Test Filter method return ERR_ANS_INVALID_PARAM
+ * @tc.desc      : Test Filter method return ERR_ANS_INNER_INVALID_PARAM
  */
 HWTEST_F(AdvancedNotificationServiceTest, Filter_0100, Level1)
 {
@@ -1954,13 +1958,13 @@ HWTEST_F(AdvancedNotificationServiceTest, Filter_0100, Level1)
     advancedNotificationService.notificationSlotFilter_ = nullptr;
     bool isRecover = false;
     auto ret = advancedNotificationService.Filter(record, isRecover);
-    EXPECT_EQ(ret.GetErrCode(), ERR_ANS_INVALID_PARAM);
+    EXPECT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
  * @tc.number    : Filter_0200
  * @tc.name      : Filter_0200
- * @tc.desc      : Test Filter method return ERR_ANS_NOTIFICATION_NOT_EXISTS
+ * @tc.desc      : Test Filter method return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS
  */
 HWTEST_F(AdvancedNotificationServiceTest, Filter_0200, Level1)
 {
@@ -1979,7 +1983,7 @@ HWTEST_F(AdvancedNotificationServiceTest, Filter_0200, Level1)
     advancedNotificationService_->notificationSlotFilter_ = nullptr;
     bool isRecover = false;
     auto ret = advancedNotificationService_->Filter(record, isRecover);
-    EXPECT_EQ(ret.GetErrCode(), ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -2219,7 +2223,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RemoveFromNotificationList_0100, Level
 
     auto ret =
         advancedNotificationService_->RemoveFromNotificationList(key, notification, isCancel, removeReason);
-    EXPECT_EQ(ret, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(ret, ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -2244,7 +2248,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RemoveFromNotificationList_0200, Level
 
     auto ret =
         advancedNotificationService_->RemoveFromNotificationList(key, notification, isCancel, removeReason);
-    EXPECT_EQ(ret, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(ret, ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -2264,7 +2268,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RemoveFromNotificationListForDeleteAll
     advancedNotificationService_->triggerNotificationList_.push_back(record);
     auto ret =
         advancedNotificationService_->RemoveFromNotificationListForDeleteAll(key, userId, notification, removeAll);
-    EXPECT_EQ(ret, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(ret, ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -2287,7 +2291,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RemoveFromNotificationListForDeleteAll
 
     auto ret =
         advancedNotificationService_->RemoveFromNotificationListForDeleteAll(key, userId, notification, removeAll);
-    EXPECT_EQ(ret, ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(ret, ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -3131,7 +3135,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishNotificationBySa_00006, Functio
     MockIsSystemApp(false);
 
     ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(std::string(),
-        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), true), (int)ERR_ANS_NON_SYSTEM_APP);
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), true), (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 
     sptr<NotificationRequest> req = new NotificationRequest(1);
     EXPECT_NE(req, nullptr);
@@ -3148,7 +3152,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishNotificationBySa_00006, Functio
     req->SetContent(content);
 
     AnsStatus result = advancedNotificationService_->PublishNotificationBySa(req);
-    EXPECT_EQ(result.GetErrCode(), ERR_ANS_NOT_ALLOWED);
+    EXPECT_EQ(result.GetErrCode(), (int)ERR_ANS_INNER_NOT_ALLOWED);
     SleepForFC();
 }
 
@@ -3309,7 +3313,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishNotificationBySa_00011, Functio
     req->SetContent(content);
 
     AnsStatus result = advancedNotificationService_->PublishNotificationBySa(req);
-    EXPECT_EQ(result.GetErrCode(), ERR_ANS_NOT_ALLOWED);
+    EXPECT_EQ(result.GetErrCode(), (int)ERR_ANS_INNER_NOT_ALLOWED);
     SleepForFC();
 }
 

@@ -27,6 +27,7 @@ ohos_unittest("ans_manager_proxy_test") {
   ]
 
   sources = [
+    "${core_path}/common/src/ans_service_errors.cpp",
     "../mock/mock_message_parcel.cpp",
     "ans_manager_proxy_unit_test.cpp",
   ]

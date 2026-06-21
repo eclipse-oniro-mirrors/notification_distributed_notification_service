@@ -16,7 +16,7 @@
 #include "advanced_datashare_helper.h"
 
 #include "ans_const_define.h"
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -309,7 +309,7 @@ ErrCode AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phone
 {
     if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
         ANS_LOGE("Check user exists failed.");
-        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
     return QueryContactInner(uri, phoneNumber, policy, profileId, isSupportIntelligentScene, userId);
 }

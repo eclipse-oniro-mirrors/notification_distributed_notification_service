@@ -15,11 +15,15 @@
 
 #include "napi_local_live_view.h"
 #include "local_live_view_subscribe.h"
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "common.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 const int32_t TRIGGER_PARA = 3;
 
 napi_value NapiSubscriteLocalAcitvity(napi_env env, napi_callback_info info)
@@ -32,7 +36,7 @@ napi_value NapiSubscriteLocalAcitvity(napi_env env, napi_callback_info info)
             delete objectInfo;
             objectInfo = nullptr;
         }
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -63,9 +67,9 @@ napi_value NapiSubscriteLocalAcitvity(napi_env env, napi_callback_info info)
                 return;
             }
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribeLocalLiveView *>(data);
-
             asynccallbackinfo->info.errorCode =
-                NotificationHelper::SubscribeLocalLiveViewNotification(*(asynccallbackinfo->objectInfo), false);
+                DelayedSingleton<AnsNotification>::GetInstance()->SubscribeLocalLiveViewNotification(
+                    *(asynccallbackinfo->objectInfo), false);
         },
         [](napi_env env, napi_status status, void *data) {
             ANS_LOGD("NapiSubscribeLocalLiveView work complete.");
@@ -119,7 +123,7 @@ napi_value ParseTriggerParameters(const napi_env &env, const napi_callback_info 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc != TRIGGER_PARA) {
         ANS_LOGE("Wrong number of arguments");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -129,7 +133,7 @@ napi_value ParseTriggerParameters(const napi_env &env, const napi_callback_info 
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], asynccallbackinfo->bundleOption);
     if (retValue == nullptr) {
         ANS_LOGE("null retValue");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -138,7 +142,7 @@ napi_value ParseTriggerParameters(const napi_env &env, const napi_callback_info 
     if (valuetype != napi_number) {
         ANS_LOGE("Wrong argument type. Number expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     napi_get_value_int32(env, argv[PARAM1], &notificationId);
@@ -149,7 +153,7 @@ napi_value ParseTriggerParameters(const napi_env &env, const napi_callback_info 
     retValue = Common::GetButtonOption(env, argv[PARAM2], asynccallbackinfo->buttonOption);
     if (retValue == nullptr) {
         ANS_LOGE("null retValue");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
     return Common::NapiGetNull(env);
@@ -165,12 +169,12 @@ napi_value NapiTriggerLocalLiveView(napi_env env, napi_callback_info info)
             .env = env, .asyncWork = nullptr,
     };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, callback);
     }
 
     if (ParseTriggerParameters(env, info, asynccallbackinfo, callback) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         delete asynccallbackinfo;
         return Common::NapiGetUndefined(env);
     }
@@ -191,9 +195,8 @@ napi_value NapiTriggerLocalLiveView(napi_env env, napi_callback_info info)
                 return;
             }
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribeLocalLiveView *>(data);
-
             asynccallbackinfo->info.errorCode =
-                NotificationHelper::TriggerLocalLiveView(asynccallbackinfo->bundleOption,
+                DelayedSingleton<AnsNotification>::GetInstance()->TriggerLocalLiveView(asynccallbackinfo->bundleOption,
                     asynccallbackinfo->notificationId, asynccallbackinfo->buttonOption);
         },
         [](napi_env env, napi_status status, void *data) {

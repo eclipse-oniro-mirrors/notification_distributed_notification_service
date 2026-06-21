@@ -20,6 +20,7 @@
 
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "nativetoken_kit.h"
 #include "notification_bundle_option.h"
 #include "token_setproc.h"
@@ -84,7 +85,8 @@ constexpr char SETTING_HELP_MSG[] =
     "options list:\n"
     "  --help, -h                   help menu\n"
     "  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n"
-    "  --enable-notification -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n"
+    "  --enable-notification -e <bundleName:uid:enable> "
+    "set notification enabled for the bundle, eg: -e com.example:10100:1\n"
     "  --set-device-status -d <device:status> set device status, eg: -d device:1\n"
     "  --collaboration-switch -k <device:enable> set collaboration status, eg: -k wearable:1\n"
     "  --collaboration-switch-bundle -b <device:bundleName:bundleUid:status> set bundle collaboration switch status\n"
@@ -267,7 +269,7 @@ ErrCode NotificationShellCommand::RunDumpCmd(const std::string& cmd, const std::
         }
         return ret;
     }
-    return ERR_ANS_SERVICE_NOT_CONNECTED;
+    return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
 }
 
 void NotificationShellCommand::SetDumpCmdInfo(std::string &cmd, std::string &bundle, int32_t &userId,
@@ -346,7 +348,7 @@ ErrCode NotificationShellCommand::RunSetEnableCmd()
 {
     if (ans_ == nullptr) {
         resultReceiver_.append("error: object is null\n");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
     NotificationBundleOption bundleOption;
@@ -369,7 +371,7 @@ ErrCode NotificationShellCommand::RunSetEnableCmd()
         resultReceiver_.append("set notification enabled success\n");
     } else {
         resultReceiver_.append("set notification enabled failed\n");
-        std::string message = GetAnsErrMessage(ErrorToExternal(ret));
+        std::string message = GetInnerErrMessage(ret);
         resultReceiver_.append("failed reason is " + message + "\n");
     }
     return ret;
@@ -379,7 +381,7 @@ ErrCode NotificationShellCommand::RunGetDeviceStatusCmd()
 {
     if (ans_ == nullptr) {
         resultReceiver_.append("error: object is null\n");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
     std::string info = std::string(optarg);
@@ -396,7 +398,7 @@ ErrCode NotificationShellCommand::RunGetDeviceStatusCmd()
         resultReceiver_.append("\n");
     } else {
         resultReceiver_.append("Get device status failed\n");
-        std::string message = GetAnsErrMessage(ErrorToExternal(ret));
+        std::string message = GetInnerErrMessage(ret);
         resultReceiver_.append("failed reason is " + message + "\n");
     }
     return ret;
@@ -406,7 +408,7 @@ ErrCode NotificationShellCommand::RunSetDeviceStatusCmd()
 {
     if (ans_ == nullptr) {
         resultReceiver_.append("error: object is null\n");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
     std::string deviceType;
@@ -427,7 +429,7 @@ ErrCode NotificationShellCommand::RunSetDeviceStatusCmd()
         resultReceiver_.append("set device status success\n");
     } else {
         resultReceiver_.append("set device status failed\n");
-        std::string message = GetAnsErrMessage(ErrorToExternal(ret));
+        std::string message = GetInnerErrMessage(ret);
         resultReceiver_.append("failed reason is " + message + "\n");
     }
     return ret;
@@ -437,7 +439,7 @@ ErrCode NotificationShellCommand::RunSetSmartReminderEnabledCmd()
 {
     if (ans_ == nullptr) {
         resultReceiver_.append("error: object is null\n");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
     std::string deviceType;
@@ -457,7 +459,7 @@ ErrCode NotificationShellCommand::RunSetSmartReminderEnabledCmd()
         resultReceiver_.append("set collaboration switch success\n");
     } else {
         resultReceiver_.append("set collaboration switch failed\n");
-        std::string message = GetAnsErrMessage(ErrorToExternal(ret));
+        std::string message = GetInnerErrMessage(ret);
         resultReceiver_.append("failed reason is " + message + "\n");
     }
     return ret;
@@ -467,7 +469,7 @@ ErrCode NotificationShellCommand::RunSetDistributedEnabledByBundleCmd()
 {
     if (ans_ == nullptr) {
         resultReceiver_.append("error: object is null\n");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
     std::string deviceType;
@@ -497,7 +499,7 @@ ErrCode NotificationShellCommand::RunSetDistributedEnabledByBundleCmd()
         resultReceiver_.append("set bundle collaboration switch success\n");
     } else {
         resultReceiver_.append("set bundle collaboration switch failed\n");
-        std::string message = GetAnsErrMessage(ErrorToExternal(ret));
+        std::string message = GetInnerErrMessage(ret);
         resultReceiver_.append("failed reason is " + message + "\n");
     }
     return ret;
@@ -507,7 +509,7 @@ ErrCode NotificationShellCommand::RunSetDistributedEnabledBySlotCmd()
 {
     if (ans_ == nullptr) {
         resultReceiver_.append("error: object is null\n");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
     std::string deviceType;
@@ -538,7 +540,7 @@ ErrCode NotificationShellCommand::RunSetDistributedEnabledBySlotCmd()
         resultReceiver_.append("set slot collaboration switch success\n");
     } else {
         resultReceiver_.append("set slot collaboration switch failed\n");
-        std::string message = GetAnsErrMessage(ErrorToExternal(ret));
+        std::string message = GetInnerErrMessage(ret);
         resultReceiver_.append("failed reason is " + message + "\n");
     }
     return ret;

@@ -14,33 +14,22 @@
  */
 
 #include "napi_notification_switch.h"
+#include "ans_service_errors.h"
 
 #include "ans_inner_errors.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 namespace {
 constexpr size_t SET_NOTIFICATION_SWITCH_MIN_PARA = 3;
 constexpr size_t SET_NOTIFICATION_SWITCH_MAX_PARA = 3;
 constexpr size_t GET_NOTIFICATION_SWITCH_MIN_PARA = 2;
 constexpr size_t GET_NOTIFICATION_SWITCH_MAX_PARA = 2;
-
-void HandleErrorWithMesssage(napi_env env, CallbackPromiseInfo &info, int32_t errorCode, const std::string &errMsg)
-{
-    napi_value code = nullptr;
-    napi_create_int32(env, errorCode, &code);
-
-    napi_value message = nullptr;
-    napi_create_string_utf8(env, errMsg.c_str(), NAPI_AUTO_LENGTH, &message);
-
-    napi_value error = nullptr;
-    napi_create_error(env, nullptr, message, &error);
-    napi_set_named_property(env, error, "code", code);
-
-    napi_reject_deferred(env, info.deferred, error);
-}
 
 void CleanupAsyncCallback(napi_env env, AsyncCallbackNotificationClassificationSwitch *&asyncCallbackInfo)
 {
@@ -65,7 +54,7 @@ napi_value HandleAsyncWorkFailure(
         return Common::NapiGetUndefined(env);
     }
 
-    asyncCallbackInfo->info.errorCode = ERROR_INTERNAL_ERROR;
+    asyncCallbackInfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
     Common::CreateReturnValue(env, asyncCallbackInfo->info, Common::NapiGetNull(env));
     CleanupAsyncCallback(env, asyncCallbackInfo);
     return promise;
@@ -78,7 +67,7 @@ napi_value ParseSwitchNameParameter(const napi_env &env, napi_value value, std::
     if (valueType != napi_string) {
         ANS_LOGE("Wrong argument type. String expected.");
         std::string msg = "Incorrect parameter types.The type of switchName must be string.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
 
@@ -96,7 +85,7 @@ napi_value ParseSwitchStateParameter(const napi_env &env, napi_value value, bool
     if (valueType != napi_boolean) {
         ANS_LOGE("Wrong argument type. Bool expected.");
         std::string msg = "Incorrect parameter types.The type of switchState must be boolean.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
 
@@ -111,7 +100,7 @@ napi_value ParseUserIdParameter(const napi_env &env, napi_value value, int32_t &
     if (valueType != napi_number) {
         ANS_LOGE("Wrong argument type. Number expected.");
         std::string msg = "Incorrect parameter types.The type of userId must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
 
@@ -128,7 +117,7 @@ napi_value ParseSetNotificationSwitchParameters(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
     if (argc < SET_NOTIFICATION_SWITCH_MIN_PARA) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -150,7 +139,7 @@ napi_value ParseGetNotificationSwitchParameters(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
     if (argc < GET_NOTIFICATION_SWITCH_MIN_PARA) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -171,12 +160,7 @@ void AsyncCompleteCallbackNapiSetNotificationSwitch(napi_env env, napi_status st
     }
 
     auto *asyncCallbackInfo = static_cast<AsyncCallbackNotificationClassificationSwitch *>(data);
-    if (asyncCallbackInfo->info.errorCode == ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED) {
-        std::string errMsg = "Internal error. Database operation failed.";
-        HandleErrorWithMesssage(env, asyncCallbackInfo->info, ERROR_INTERNAL_ERROR, errMsg);
-    } else {
-        Common::CreateReturnValue(env, asyncCallbackInfo->info, Common::NapiGetNull(env));
-    }
+    Common::CreateReturnValue(env, asyncCallbackInfo->info, Common::NapiGetNull(env));
     CleanupAsyncCallback(env, asyncCallbackInfo);
 }
 
@@ -189,18 +173,13 @@ void AsyncCompleteCallbackNapiGetNotificationSwitch(napi_env env, napi_status st
     }
 
     auto *asyncCallbackInfo = static_cast<AsyncCallbackNotificationClassificationSwitch *>(data);
-    if (asyncCallbackInfo->info.errorCode == ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED) {
-        std::string errMsg = "Internal error. Database operation failed.";
-        HandleErrorWithMesssage(env, asyncCallbackInfo->info, ERROR_INTERNAL_ERROR, errMsg);
+    napi_value result = nullptr;
+    if (asyncCallbackInfo->info.errorCode != ERR_OK) {
+        result = Common::NapiGetNull(env);
     } else {
-        napi_value result = nullptr;
-        if (asyncCallbackInfo->info.errorCode != ERR_OK) {
-            result = Common::NapiGetNull(env);
-        } else {
-            napi_create_int32(env, static_cast<int32_t>(asyncCallbackInfo->params.enableStatus), &result);
-        }
-        Common::CreateReturnValue(env, asyncCallbackInfo->info, result);
+        napi_create_int32(env, static_cast<int32_t>(asyncCallbackInfo->params.enableStatus), &result);
     }
+    Common::CreateReturnValue(env, asyncCallbackInfo->info, result);
     CleanupAsyncCallback(env, asyncCallbackInfo);
 }
 }  // namespace
@@ -217,7 +196,7 @@ napi_value NapiSetNotificationSwitch(napi_env env, napi_callback_info info)
         .env = env, .asyncWork = nullptr, .params = params
     };
     if (asyncCallbackInfo == nullptr) {
-        Common::NapiThrow(env, ERROR_NO_MEMORY);
+        Common::NapiThrow(env, ERR_ANS_INNER_NO_MEMORY);
         return Common::JSParaError(env, nullptr);
     }
 
@@ -233,10 +212,10 @@ napi_value NapiSetNotificationSwitch(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiSetNotificationSwitch work execute.");
             auto *asyncCallbackInfo = static_cast<AsyncCallbackNotificationClassificationSwitch *>(data);
             if (asyncCallbackInfo != nullptr) {
-                asyncCallbackInfo->info.errorCode = NotificationHelper::SetNotificationSwitch(
-                    asyncCallbackInfo->params.switchName,
-                    asyncCallbackInfo->params.switchState,
-                    asyncCallbackInfo->params.userId);
+                asyncCallbackInfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationSwitch(
+                        asyncCallbackInfo->params.switchName, asyncCallbackInfo->params.switchState,
+                        asyncCallbackInfo->params.userId);
                 ANS_LOGI("SetNotificationSwitch result=%{public}d", asyncCallbackInfo->info.errorCode);
             }
         },
@@ -269,7 +248,7 @@ napi_value NapiGetNotificationSwitch(napi_env env, napi_callback_info info)
         .env = env, .asyncWork = nullptr, .params = params
     };
     if (asyncCallbackInfo == nullptr) {
-        Common::NapiThrow(env, ERROR_NO_MEMORY);
+        Common::NapiThrow(env, ERR_ANS_INNER_NO_MEMORY);
         return Common::JSParaError(env, nullptr);
     }
 
@@ -285,10 +264,10 @@ napi_value NapiGetNotificationSwitch(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiGetNotificationSwitch work execute.");
             auto *asyncCallbackInfo = static_cast<AsyncCallbackNotificationClassificationSwitch *>(data);
             if (asyncCallbackInfo != nullptr) {
-                asyncCallbackInfo->info.errorCode = NotificationHelper::GetNotificationSwitch(
-                    asyncCallbackInfo->params.switchName,
-                    asyncCallbackInfo->params.userId,
-                    asyncCallbackInfo->params.enableStatus);
+                asyncCallbackInfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSwitch(
+                        asyncCallbackInfo->params.switchName, asyncCallbackInfo->params.userId,
+                        asyncCallbackInfo->params.enableStatus);
                 ANS_LOGI("GetNotificationSwitch result=%{public}d, state=%{public}d",
                     asyncCallbackInfo->info.errorCode,
                     static_cast<int32_t>(asyncCallbackInfo->params.enableStatus));

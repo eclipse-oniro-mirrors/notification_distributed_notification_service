@@ -20,6 +20,7 @@
 #undef private
 
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "mock_dlfcn.h"
 
 using namespace testing::ext;
@@ -94,14 +95,14 @@ HWTEST_F(AllScenariosExtensionWrapperTest, CheckLiveViewRights_003, Function | S
 {
     g_mockDlfcn.dlopenSuccess = true;
     g_mockDlfcn.dlsymSuccessMap["CheckLiveViewRights"] = true;
-    g_mockDlfcn.checkLiveViewRightsResult = ERR_ANS_CUSTOM_EXTENSION_RIGHTS_CHECK_FAILED;
+    g_mockDlfcn.checkLiveViewRightsResult = ERR_ANS_INNER_CUSTOM_EXTENSION_RIGHTS_CHECK_FAILED;
 
     auto& wrapper = AllScenariosExtensionWrapper::GetInstance();
     wrapper.InitExtensionWrapper();
 
     sptr<NotificationRequest> request = new NotificationRequest();
     ErrCode result = wrapper.CheckLiveViewRights(request);
-    EXPECT_EQ(result, ERR_ANS_CUSTOM_EXTENSION_RIGHTS_CHECK_FAILED);
+    EXPECT_EQ(result, ERR_ANS_INNER_CUSTOM_EXTENSION_RIGHTS_CHECK_FAILED);
 }
 
 /**
@@ -129,6 +130,6 @@ HWTEST_F(AllScenariosExtensionWrapperTest, CheckLiveViewRights_004, Function | S
  */
 HWTEST_F(AllScenariosExtensionWrapperTest, ErrorToExternal_CustomExtension_001, Function | SmallTest | Level1)
 {
-    EXPECT_EQ(ErrorToExternal(ERR_ANS_CUSTOM_EXTENSION_EXISTS_CHECK_FAILED), ERROR_NO_RIGHT);
-    EXPECT_EQ(ErrorToExternal(ERR_ANS_CUSTOM_EXTENSION_RIGHTS_CHECK_FAILED), ERROR_NO_RIGHT);
+    EXPECT_EQ(InnerErrorToExternal(ERR_ANS_INNER_CUSTOM_EXTENSION_EXISTS_CHECK_FAILED), ERROR_NO_RIGHT);
+    EXPECT_EQ(InnerErrorToExternal(ERR_ANS_INNER_CUSTOM_EXTENSION_RIGHTS_CHECK_FAILED), ERROR_NO_RIGHT);
 }

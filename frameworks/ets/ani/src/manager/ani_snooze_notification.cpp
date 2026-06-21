@@ -19,11 +19,14 @@
 #include "sts_throw_erro.h"
 #include "sts_bundle_option.h"
 #include "sts_notification_manager.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
+using namespace OHOS::Notification;
+using OHOS::Notification::AnsNotification;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackSnooze* asyncCallbackInfo)
 {
     if (!asyncCallbackInfo) {
@@ -106,8 +109,9 @@ ani_object AniSetNotificationSnooze(ani_env *env, ani_string hashCode, ani_long 
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackSnooze*>(data);
             if (asyncCallbackInfo) {
-                asyncCallbackInfo->info.returnCode = Notification::NotificationHelper::SnoozeNotification(
-                    asyncCallbackInfo->hashCode, asyncCallbackInfo->delayTime);
+                asyncCallbackInfo->info.returnCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SnoozeNotification(
+                        asyncCallbackInfo->hashCode, asyncCallbackInfo->delayTime);
             }
         },
         HandleFunctionCallbackComplete, static_cast<void*>(asyncCallbackInfo), &(asyncCallbackInfo->asyncWork));

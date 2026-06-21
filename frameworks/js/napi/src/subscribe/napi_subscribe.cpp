@@ -15,6 +15,7 @@
 
 #include "napi_subscribe.h"
 
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "subscribe.h"
 #include "unsubscribe.h"
@@ -26,6 +27,7 @@
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 void NapiDistributeOperationExecuteCallback(napi_env env, void *data)
 {
     ANS_LOGD("called");
@@ -61,10 +63,13 @@ void NapiDistributeOperationExecuteCallback(napi_env env, void *data)
         operationInfo->SetBtnIndex(asyncCallbackInfo->operationInfo.btnIndex);
     } else {
         ANS_LOGE("invalid param, operationType: %{public}d", asyncCallbackInfo->operationInfo.operationType);
-        callback->OnOperationCallback(ERR_ANS_INVALID_PARAM);
+        callback->OnOperationCallback(ERR_ANS_INNER_INVALID_PARAM);
         return;
     }
-    int32_t result = NotificationHelper::DistributeOperation(operationInfo, callback);
+    int32_t result = static_cast<int32_t>(
+
+        DelayedSingleton<AnsNotification>::GetInstance()->DistributeOperation(
+            operationInfo, callback));
     if (result != ERR_OK ||
         operationInfo->GetOperationType() != OperationType::DISTRIBUTE_OPERATION_REPLY) {
         callback->OnOperationCallback(result);
@@ -108,7 +113,8 @@ void SubscribeNotificationAsyncWork(napi_env env, void *data)
                 new (std::nothrow) OHOS::Notification::NotificationSubscribeInfo();
             if (subscribeInfo == nullptr) {
                 ANS_LOGE("Invalid subscribeInfo!");
-                callbackinfo->info.errorCode = OHOS::Notification::ErrorCode::ERR_ANS_NO_MEMORY;
+
+                callbackinfo->info.errorCode = ERR_ANS_INNER_NO_MEMORY;
                 return;
             }
             subscribeInfo->AddAppNames(callbackinfo->subscriberInfo.bundleNames);
@@ -116,7 +122,7 @@ void SubscribeNotificationAsyncWork(napi_env env, void *data)
             subscribeInfo->AddDeviceType(callbackinfo->subscriberInfo.deviceType);
             subscribeInfo->SetSlotTypes(callbackinfo->subscriberInfo.slotTypes);
             subscribeInfo->SetFilterType(callbackinfo->subscriberInfo.filterType);
-if (callbackinfo->subscriberInfo.voiceContentOption.enabled) {
+            if (callbackinfo->subscriberInfo.voiceContentOption.enabled) {
                 sptr<OHOS::Notification::VoiceContentOption> voiceContentOption =
                     new (std::nothrow) OHOS::Notification::VoiceContentOption(true);
                 subscribeInfo->SetVoiceContentOption(voiceContentOption);
@@ -127,45 +133,16 @@ if (callbackinfo->subscriberInfo.voiceContentOption.enabled) {
                         callbackinfo->subscriberInfo.pictureOption.preparseLiveViewPicList);
                 subscribeInfo->SetPictureOption(pictureOption);
             }
+            callbackinfo->info.errorCode =
+                DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotificationV26(
+                    callbackinfo->objectInfo, subscribeInfo);
             subscribeInfo->SetEnableClassification(callbackinfo->subscriberInfo.enableClassification);
             subscribeInfo->SetNeedSilentReplayOnSubscribe(callbackinfo->subscriberInfo.needSilentReplayOnSubscribe);
-            callbackinfo->info.errorCode =
-                NotificationHelper::SubscribeNotificationV26(callbackinfo->objectInfo, subscribeInfo);
         } else {
             callbackinfo->info.errorCode =
-                NotificationHelper::SubscribeNotificationV26(callbackinfo->objectInfo);
+                DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotificationV26(callbackinfo->objectInfo);
         }
     }
-}
-
-void CreateReturnValue(const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result)
-{
-    ANS_LOGD("start, errorCode=%{public}d", info.errorCode);
-    int32_t errorCode = info.errorCode == ERR_OK ? ERR_OK : ErrorToExternal(info.errorCode);
-    if (info.errorCode == ERROR_USER_NOT_EXIST) {
-        errorCode = ERROR_USER_NOT_EXIST;
-    }
-    if (errorCode == ERR_OK) {
-        napi_resolve_deferred(env, info.deferred, result);
-    } else {
-        napi_value error = Common::NapiGetNull(env);
-        std::string errMsg = OHOS::Notification::GetAnsErrMessage(errorCode);
-        napi_value message = nullptr;
-        napi_create_string_utf8(env, errMsg.c_str(), NAPI_AUTO_LENGTH, &message);
-        if (errorCode == ERROR_USER_NOT_EXIST) {
-            errorCode = ERROR_INTERNAL_ERROR;
-        }
-        if (errorCode == ERROR_NO_MEMORY) {
-            errorCode = ERROR_INTERNAL_ERROR;
-        }
-        napi_value code = nullptr;
-        napi_create_int32(env, errorCode, &code);
-
-        napi_create_error(env, nullptr, message, &error);
-        napi_set_named_property(env, error, "code", code);
-        napi_reject_deferred(env, info.deferred, error);
-    }
-    ANS_LOGD("end");
 }
 
 void OnAsyncWork(napi_env env, napi_status status, void *data)
@@ -177,7 +154,7 @@ void OnAsyncWork(napi_env env, napi_status status, void *data)
     }
     auto callbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribe *>(data);
     if (callbackinfo) {
-        CreateReturnValue(env, callbackinfo->info, Common::NapiGetNull(env));
+        Common::CreateReturnValue(env, callbackinfo->info, Common::NapiGetNull(env));
         if (callbackinfo->info.callback != nullptr) {
             ANS_LOGD("Delete napiSubscribe callback reference.");
             napi_delete_reference(env, callbackinfo->info.callback);
@@ -207,15 +184,15 @@ napi_value NapiSubscribeNotification(napi_env env, napi_callback_info info)
     std::shared_ptr<SubscriberInstance> objectInfo = nullptr;
     NotificationSubscribeInfo subscriberInfo;
     if (ParseParameters(env, info, subscriberInfo, objectInfo) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
-        return Common::NapiRejectError(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
+        return Common::NapiRejectError(env, ERR_ANS_INNER_INVALID_PARAM);
     }
 
     AsyncCallbackInfoSubscribe *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoSubscribe {
         .env = env, .asyncWork = nullptr, .objectInfo = objectInfo, .subscriberInfo = subscriberInfo
     };
     if (!asynccallbackinfo) {
-        return Common::NapiRejectError(env, ERROR_INTERNAL_ERROR);
+        return Common::NapiRejectError(env, ERR_ANS_INNER_TASK_ERR);
     }
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
@@ -235,7 +212,7 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
     std::shared_ptr<SubscriberInstance> objectInfo = nullptr;
     NotificationSubscribeInfo subscriberInfo;
     if (ParseParameters(env, info, subscriberInfo, objectInfo, callback) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -243,7 +220,7 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
         .env = env, .asyncWork = nullptr, .objectInfo = objectInfo, .subscriberInfo = subscriberInfo
     };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -268,8 +245,9 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
                     sptr<OHOS::Notification::NotificationSubscribeInfo> subscribeInfo =
                         new (std::nothrow) OHOS::Notification::NotificationSubscribeInfo();
                     if (subscribeInfo == nullptr) {
-                        ANS_LOGE("Invalid subscribeInfo!");
-                        asynccallbackinfo->info.errorCode = OHOS::Notification::ErrorCode::ERR_ANS_NO_MEMORY;
+                    ANS_LOGE("Invalid subscribeInfo!");
+
+                    asynccallbackinfo->info.errorCode = ERR_ANS_INNER_NO_MEMORY;
                         return;
                     }
                     subscribeInfo->AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
@@ -292,10 +270,12 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
                         subscribeInfo->SetPictureOption(pictureOption);
                     }
                     asynccallbackinfo->info.errorCode =
-                        NotificationHelper::SubscribeNotification(asynccallbackinfo->objectInfo, subscribeInfo);
+                        DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotification(
+                            asynccallbackinfo->objectInfo, subscribeInfo);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        NotificationHelper::SubscribeNotification(asynccallbackinfo->objectInfo);
+                        DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotification(
+                            asynccallbackinfo->objectInfo);
                 }
             }
         },
@@ -340,7 +320,7 @@ napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info)
     std::shared_ptr<SubscriberInstance> objectInfo = nullptr;
     NotificationSubscribeInfo subscriberInfo;
     if (ParseParameters(env, info, subscriberInfo, objectInfo, callback) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -348,7 +328,7 @@ napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info)
         .env = env, .asyncWork = nullptr, .objectInfo = objectInfo, .subscriberInfo = subscriberInfo
     };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -369,7 +349,8 @@ napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribe *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::SubscribeNotificationSelf(asynccallbackinfo->objectInfo);
+                    DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotificationSelf(
+                        asynccallbackinfo->objectInfo);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -410,14 +391,14 @@ napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
     ANS_LOGD("called");
     ParametersInfoUnsubscribe paras;
     if (ParseParameters(env, info, paras) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
     AsyncCallbackInfoUnsubscribe *asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoUnsubscribe {.env = env, .asyncWork = nullptr, .objectInfo = paras.objectInfo};
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;
@@ -436,19 +417,21 @@ napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->objectInfo == nullptr) {
                     ANS_LOGE("invalid object info");
-                    asynccallbackinfo->info.errorCode = ERR_ANS_INVALID_PARAM;
+
+                    asynccallbackinfo->info.errorCode = ERR_ANS_INNER_INVALID_PARAM;
                     return;
                 }
 
                 bool ret = AddDeletingSubscriber(asynccallbackinfo->objectInfo);
                 if (ret) {
                     asynccallbackinfo->info.errorCode =
-                        NotificationHelper::UnSubscribeNotification(asynccallbackinfo->objectInfo);
+                        DelayedSingleton<AnsNotification>::GetInstance()->UnSubscribeNotification(
+                            asynccallbackinfo->objectInfo);
                     if (asynccallbackinfo->info.errorCode != ERR_OK) {
                         DelDeletingSubscriber(asynccallbackinfo->objectInfo);
                     }
                 } else {
-                    asynccallbackinfo->info.errorCode = ERR_ANS_SUBSCRIBER_IS_DELETING;
+                    asynccallbackinfo->info.errorCode = ERR_ANS_INNER_SUBSCRIBER_IS_DELETING;
                 }
             }
         },
@@ -503,7 +486,7 @@ napi_value NapiDistributeOperation(napi_env env, napi_callback_info info)
     napi_value thisVar = nullptr;
     OperationInfo operationInfo;
     if (ParseParameters(env, info, hashCode, thisVar, operationInfo) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -513,7 +496,7 @@ napi_value NapiDistributeOperation(napi_env env, napi_callback_info info)
     auto distributeOperationInfo = new (std::nothrow) AsyncOperationCallbackInfo {.env = env,
         .thisVar = thisVar, .deferred = deferred, .hashCode = hashCode, .operationInfo = operationInfo};
     if (distributeOperationInfo == nullptr) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::NapiGetNull(env);
     }
 

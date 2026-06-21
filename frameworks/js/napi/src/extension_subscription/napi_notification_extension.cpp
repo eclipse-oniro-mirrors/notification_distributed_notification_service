@@ -15,6 +15,7 @@
 
 #include "napi_notification_extension.h"
 #include <uv.h>
+#include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
@@ -23,6 +24,7 @@
 
 namespace OHOS {
 namespace NotificationNapi {
+using OHOS::Notification::AnsNotification;
 namespace {
 const int SUBSCRIBE_MAX_PARA = 1;
 const int NAPI_GET_USER_GRANTED_STATE_MAX_PARA = 1;
@@ -49,7 +51,7 @@ napi_value GetNotificationExtensionSubscriptionInfo(
     bool hasProperty {false};
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
-    
+
     // addr: string
     char str[STR_MAX_SIZE] = {0};
     size_t strLen = 0;
@@ -58,14 +60,14 @@ napi_value GetNotificationExtensionSubscriptionInfo(
     if (valuetype != napi_string) {
         ANS_LOGE("Wrong argument type. string expected.");
         std::string msg = "Incorrect parameter addr. The type of addr must be string.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
     if (strLen == 0) {
         ANS_LOGE("addr parameter is empty.");
         std::string msg = "Incorrect parameter addr. The addr must not be empty.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     info->SetAddr(str);
@@ -77,14 +79,14 @@ napi_value GetNotificationExtensionSubscriptionInfo(
     if (valuetype != napi_number) {
         ANS_LOGE("Wrong argument type. number expected.");
         std::string msg = "Incorrect parameter uid. The type of uid must be number.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     napi_get_value_int32(env, result, &type);
     NotificationConstant::SubscribeType outType = NotificationConstant::SubscribeType::BLUETOOTH;
     if (!AnsEnumUtil::SubscribeTypeJSToC(SubscribeType(type), outType)) {
         std::string msg = "Incorrect parameter types. SubscribeType name must be in enum.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     info->SetType(outType);
@@ -127,7 +129,7 @@ sptr<NotificationExtensionSubscriptionInfo> GetParameterArrayItem(
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     sptr<NotificationExtensionSubscriptionInfo> item =
@@ -136,14 +138,14 @@ sptr<NotificationExtensionSubscriptionInfo> GetParameterArrayItem(
         ANS_LOGE("Failed to create NotificationExtensionSubscriptionInfo.");
         std::string msg =
             "Parameter verification failed. Failed to create NotificationExtensionSubscriptionInfo ptr";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     auto retValue = GetNotificationExtensionSubscriptionInfo(
         env, nNotificationExtensionSubscriptionInfo, item);
     if (retValue == nullptr) {
         ANS_LOGE("null retValue");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -160,7 +162,7 @@ napi_value ParseParameters(const napi_env& env, const napi_callback_info& info,
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < SUBSCRIBE_MAX_PARA) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
     napi_valuetype valuetype = napi_undefined;
@@ -169,7 +171,7 @@ napi_value ParseParameters(const napi_env& env, const napi_callback_info& info,
     if (!isArray) {
         ANS_LOGE("Wrong argument type. Array expected.");
         std::string msg = "Incorrect parameter types.The type of param must be array.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     uint32_t length = 0;
@@ -177,7 +179,7 @@ napi_value ParseParameters(const napi_env& env, const napi_callback_info& info,
     if (length == 0) {
         ANS_LOGD("The array is empty.");
         std::string msg = "Mandatory parameters are left unspecified. The array is empty.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     for (size_t index = 0; index < length; index++) {
@@ -200,7 +202,7 @@ napi_value ParseParametersForGetUserGrantedState(const napi_env& env, const napi
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < NAPI_GET_USER_GRANTED_STATE_MAX_PARA) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -210,13 +212,13 @@ napi_value ParseParametersForGetUserGrantedState(const napi_env& env, const napi
     if (valuetype != napi_object) {
         ANS_LOGE("Argument type is incorrect. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.targetBundle);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -232,7 +234,7 @@ napi_value ParseParametersForSetUserGrantedState(const napi_env& env, const napi
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < NAPI_SET_USER_GRANTED_STATE_MAX_PARA) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -242,13 +244,13 @@ napi_value ParseParametersForSetUserGrantedState(const napi_env& env, const napi
     if (valuetype != napi_object) {
         ANS_LOGE("Argument type is incorrect. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.targetBundle);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -257,7 +259,7 @@ napi_value ParseParametersForSetUserGrantedState(const napi_env& env, const napi
     if (valuetype != napi_boolean) {
         ANS_LOGE("Wrong argument type. Bool expected.");
         std::string msg = "Incorrect parameter types.The type of param must be boolean.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     napi_get_value_bool(env, argv[PARAM1], &params.enabled);
@@ -285,13 +287,13 @@ napi_value ParseParametersForGetUserGrantedEnableBundle(const napi_env& env, con
     if (valuetype != napi_object) {
         ANS_LOGE("Argument type is incorrect. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.targetBundle);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -308,7 +310,7 @@ bool ParseEnabledBundlesForSetUserGrantedBundleState(
     if (!isArray) {
         ANS_LOGE("Wrong argument type. Array expected.");
         std::string msg = "Incorrect parameter types.The type of param must be array.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return false;
     }
     uint32_t length = 0;
@@ -316,7 +318,7 @@ bool ParseEnabledBundlesForSetUserGrantedBundleState(
     if (length == 0) {
         ANS_LOGD("The array is empty.");
         std::string msg = "Mandatory parameters are left unspecified. The array is empty.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return false;
     }
     napi_valuetype valuetype = napi_undefined;
@@ -327,20 +329,20 @@ bool ParseEnabledBundlesForSetUserGrantedBundleState(
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
             std::string msg = "Incorrect parameter types.The type of param must be object.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
             return false;
         }
         sptr<NotificationBundleOption> item = new (std::nothrow) NotificationBundleOption();
         if (item == nullptr) {
             ANS_LOGE("Failed to create NotificationBundleOption.");
             std::string msg = "Parameter verification failed. Failed to create NotificationBundleOption ptr";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
             return false;
         }
         auto retValue = Common::GetBundleOption(env, bundle, *item);
         if (retValue == nullptr) {
             ANS_LOGE("null retValue");
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
             return false;
         }
         params.bundles.emplace_back(item);
@@ -353,14 +355,14 @@ napi_value ParseParametersForSetUserGrantedBundleState(const napi_env& env, cons
     NotificationExtensionUserGrantedParams& params)
 {
     ANS_LOGD("called");
-    
+
     size_t argc = NAPI_SET_USER_GRANTED_BUNDLE_STATE_MAX_PARA;
     napi_value argv[NAPI_SET_USER_GRANTED_BUNDLE_STATE_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < NAPI_SET_USER_GRANTED_BUNDLE_STATE_MAX_PARA) {
         ANS_LOGE("Wrong number of arguments.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
 
@@ -370,13 +372,13 @@ napi_value ParseParametersForSetUserGrantedBundleState(const napi_env& env, cons
     if (valuetype != napi_object) {
         ANS_LOGE("Argument type is incorrect. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.targetBundle);
     if (retValue == nullptr) {
         ANS_LOGE("GetBundleOption failed.");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
 
@@ -390,7 +392,7 @@ napi_value ParseParametersForSetUserGrantedBundleState(const napi_env& env, cons
     if (valuetype != napi_boolean) {
         ANS_LOGE("Wrong argument type. Bool expected.");
         std::string msg = "Incorrect parameter types.The type of param must be boolean.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
     napi_get_value_bool(env, argv[PARAM2], &params.enabled);
@@ -475,7 +477,7 @@ void AsyncCompleteCallbackReturnSubscribeInfoArray(napi_env env, napi_status sta
         ANS_LOGI("count = %{public}d", count);
         result = arr;
         if ((count == 0) && (asynccallbackinfo->subscriptionInfo.size() > 0)) {
-            asynccallbackinfo->info.errorCode = ERROR;
+            asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
             result = Common::NapiGetNull(env);
         }
     }
@@ -524,7 +526,7 @@ void AsyncCompleteCallbackRetrunBundleOptionArray(napi_env env, napi_status stat
         ANS_LOGI("count = %{public}d", count);
         result = arr;
         if ((count == 0) && (asynccallbackinfo->params.bundles.size() > 0)) {
-            asynccallbackinfo->info.errorCode = ERROR;
+            asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
             result = Common::NapiGetNull(env);
         }
     }
@@ -572,7 +574,7 @@ void AsyncCompleteCallbackReturnGrantedBundleInfoArray(napi_env env, napi_status
         ANS_LOGI("count = %{public}d", count);
         result = arr;
         if ((count == 0) && (asynccallbackinfo->params.bundles.size() > 0)) {
-            asynccallbackinfo->info.errorCode = ERROR;
+            asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
             result = Common::NapiGetNull(env);
         }
     }
@@ -614,10 +616,11 @@ napi_value NapiNotificationSettingResult(napi_env env, void *data)
         return result;
     }
     bool enabled = false;
-    std::vector<sptr<NotificationBundleOption>> bundles;
-    asynccallbackinfo->info.errorCode = NotificationHelper::IsUserGranted(enabled);
+    std::vector<sptr<NotificationBundleOption>> bundles;    asynccallbackinfo->info.errorCode =
+        DelayedSingleton<AnsNotification>::GetInstance()->IsUserGranted(enabled);
     if (asynccallbackinfo->info.errorCode == ERR_OK && enabled) {
-        asynccallbackinfo->info.errorCode = NotificationHelper::GetUserGrantedEnabledBundlesForSelf(bundles);
+        asynccallbackinfo->info.errorCode =
+            DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedEnabledBundlesForSelf(bundles);
     }
     napi_create_object(env, &result);
     napi_value enableValue;
@@ -672,14 +675,7 @@ void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
     if (asynccallbackinfo->info.errorCode == ERR_OK && asynccallbackinfo->isWithResult) {
         result = NapiNotificationSettingResult(env, data);
     }
-    int32_t errorCode = ERR_OK;
-    if (asynccallbackinfo->info.errorCode == ERROR_SETTING_WINDOW_EXIST ||
-        asynccallbackinfo->info.errorCode == ERROR_SYSTEM_CAP_ERROR) {
-        errorCode = asynccallbackinfo->info.errorCode;
-    } else {
-        errorCode = asynccallbackinfo->info.errorCode ==
-            ERR_OK ? ERR_OK : OHOS::Notification::ErrorToExternal(asynccallbackinfo->info.errorCode);
-    }
+    int32_t errorCode = asynccallbackinfo->info.errorCode;
     if (asynccallbackinfo->info.isCallback) {
         Common::SetCallback(env, asynccallbackinfo->info.callback, errorCode, result, true);
     } else {
@@ -842,15 +838,16 @@ void CreateExtensionSub(AsyncCallbackInfoOpenSettings* asynccallbackinfo)
         std::string bundleName {""};
         if (subisExist.exchange(true)) {
             ANS_LOGE("SettingsUIExtension existed");
-            asynccallbackinfo->info.errorCode = ERROR_SETTING_WINDOW_EXIST;
+
+            asynccallbackinfo->info.errorCode = ERR_ANS_INNER_SETTING_WINDOW_EXIST;
             return;
         }
         bool success = CreateSettingsUIExtensionSub(asynccallbackinfo->params.context, bundleName,
             asynccallbackinfo->isWithResult);
         if (success) {
-            asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_POP_SUCCEEDED;
+            asynccallbackinfo->info.errorCode = ERR_ANS_INNER_DIALOG_POP_SUCCEEDED;
         } else {
-            asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+            asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         }
     } else {
         ANS_LOGD("un stage mode");
@@ -866,19 +863,19 @@ void ProcessExtensionSubCreation(napi_env env, void* data)
         return;
     }
     auto* asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings*>(data);
-    
+
     if (asynccallbackinfo->info.errorCode != ERR_OK) {
         NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
         Common::HistogramBoolReport("NotificationKit.APICall.openSubscriptionSettings", false);
         return;
     }
-    
+
     CreateExtensionSub(asynccallbackinfo);
     ErrCode errCode = asynccallbackinfo->info.errorCode;
-    if (errCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
+    if (asynccallbackinfo->info.errorCode != ERR_ANS_INNER_DIALOG_POP_SUCCEEDED) {
         ANS_LOGE("errCode: %{public}d.", errCode);
         NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
-        if (errCode != ERROR_SETTING_WINDOW_EXIST) {
+        if (errCode != ERR_ANS_INNER_SETTING_WINDOW_EXIST) {
             subisExist.store(false);
         }
         Common::HistogramBoolReport("NotificationKit.APICall.openSubscriptionSettings", false);
@@ -886,14 +883,14 @@ void ProcessExtensionSubCreation(napi_env env, void* data)
     }
     if (!InitSub(env, asynccallbackinfo, NapiAsyncCompleteCallbackOpenSettings)) {
         ANS_LOGE("init error");
-        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
         Common::HistogramBoolReport("NotificationKit.APICall.openSubscriptionSettings", false);
         return;
     }
     Common::HistogramBoolReport("NotificationKit.APICall.openSubscriptionSettings", true);
 }
-
 
 napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_info &info, OpenSettingsParams &params)
 {
@@ -925,7 +922,7 @@ napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_
         } else {
             ANS_LOGE("Only support stage mode");
             std::string msg = "Incorrect parameter types.Only support stage mode.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
             return nullptr;
         }
     }
@@ -939,7 +936,7 @@ napi_value NapiNotificationExtensionOpenSubscriptionSettings(napi_env env, napi_
     OpenSettingsParams params {};
     if (ParseOpenSettingsParameters(env, info, params) == nullptr) {
         Common::HistogramBoolReport("NotificationKit.APICall.openSubscriptionSettings", false);
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -961,7 +958,8 @@ napi_value NapiNotificationExtensionOpenSubscriptionSettings(napi_env env, napi_
         ANS_LOGD("openSubscribeSettings work execute.");
         AsyncCallbackInfoOpenSettings *asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings *>(data);
         if (asynccallbackinfo) {
-            asynccallbackinfo->info.errorCode = NotificationHelper::CanOpenSubscribeSettings();
+            asynccallbackinfo->info.errorCode =
+                DelayedSingleton<AnsNotification>::GetInstance()->CanOpenSubscribeSettings();
         }
     };
     auto jsCb = [](napi_env env, napi_status, void* data) {
@@ -980,8 +978,8 @@ napi_value NapiNotificationExtensionOpenSubscriptionSettingsWithResult(napi_env 
 
     OpenSettingsParams params {};
     if (ParseOpenSettingsParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
-        return Common::NapiRejectError(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
+        return Common::NapiRejectError(env, ERR_ANS_INNER_INVALID_PARAM);
     }
 
     AsyncCallbackInfoOpenSettings *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoOpenSettings {
@@ -1001,7 +999,8 @@ napi_value NapiNotificationExtensionOpenSubscriptionSettingsWithResult(napi_env 
         ANS_LOGD("openSubscribeSettingsWithResult work execute.");
         AsyncCallbackInfoOpenSettings *asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings *>(data);
         if (asynccallbackinfo) {
-            asynccallbackinfo->info.errorCode = NotificationHelper::CanOpenSubscribeSettings();
+            asynccallbackinfo->info.errorCode =
+                DelayedSingleton<AnsNotification>::GetInstance()->CanOpenSubscribeSettings();
         }
     };
     auto jsCb = [](napi_env env, napi_status, void* data) {
@@ -1021,12 +1020,12 @@ napi_value NapiNotificationExtensionSubscribe(napi_env env, napi_callback_info i
     AsyncCallbackInfoNotificationExtensionSubscription* asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoNotificationExtensionSubscription { .env = env, .asyncWork = nullptr };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
 
     if (ParseParameters(env, info, asynccallbackinfo->subscriptionInfo) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         delete asynccallbackinfo;
         asynccallbackinfo = nullptr;
         return Common::NapiGetUndefined(env);
@@ -1047,7 +1046,8 @@ napi_value NapiNotificationExtensionSubscribe(napi_env env, napi_callback_info i
                 static_cast<AsyncCallbackInfoNotificationExtensionSubscription *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::NotificationExtensionSubscribe(asynccallbackinfo->subscriptionInfo);
+                    DelayedSingleton<AnsNotification>::GetInstance()->NotificationExtensionSubscribe(
+                        asynccallbackinfo->subscriptionInfo);
                 ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
         },
@@ -1067,7 +1067,7 @@ napi_value NapiNotificationExtensionUnsubscribe(napi_env env, napi_callback_info
     AsyncCallbackInfoNotificationExtensionSubscription* asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoNotificationExtensionSubscription { .env = env, .asyncWork = nullptr };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -1085,7 +1085,7 @@ napi_value NapiNotificationExtensionUnsubscribe(napi_env env, napi_callback_info
                 static_cast<AsyncCallbackInfoNotificationExtensionSubscription *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::NotificationExtensionUnsubscribe();
+                    DelayedSingleton<AnsNotification>::GetInstance()->NotificationExtensionUnsubscribe();
                 ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
         },
@@ -1105,7 +1105,7 @@ napi_value NapiGetSubscribeInfo(napi_env env, napi_callback_info info)
     AsyncCallbackInfoNotificationExtensionSubscription* asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoNotificationExtensionSubscription { .env = env, .asyncWork = nullptr };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -1123,7 +1123,8 @@ napi_value NapiGetSubscribeInfo(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoNotificationExtensionSubscription *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::GetSubscribeInfo(asynccallbackinfo->subscriptionInfo);
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetSubscribeInfo(
+                        asynccallbackinfo->subscriptionInfo);
                 ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
         },
@@ -1143,7 +1144,7 @@ napi_value NapiGetAllSubscriptionBundles(napi_env env, napi_callback_info info)
     AsyncCallbackInfoNotificationExtensionUserGranted* asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoNotificationExtensionUserGranted { .env = env, .asyncWork = nullptr };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -1161,7 +1162,8 @@ napi_value NapiGetAllSubscriptionBundles(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoNotificationExtensionUserGranted *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::GetAllSubscriptionBundles(asynccallbackinfo->params.bundles);
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetAllSubscriptionBundles(
+                        asynccallbackinfo->params.bundles);
                 ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
         },
@@ -1181,7 +1183,7 @@ napi_value NapiIsUserGranted(napi_env env, napi_callback_info info)
     AsyncCallbackInfoNotificationExtensionUserGranted* asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoNotificationExtensionUserGranted { .env = env, .asyncWork = nullptr };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
     napi_value promise = nullptr;
@@ -1199,7 +1201,8 @@ napi_value NapiIsUserGranted(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoNotificationExtensionUserGranted *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::IsUserGranted(asynccallbackinfo->params.enabled);
+                    DelayedSingleton<AnsNotification>::GetInstance()->IsUserGranted(
+                        asynccallbackinfo->params.enabled);
                 ANS_LOGI("IsUserGranted async work: User grant check completed with errorCode=%{public}d",
                     asynccallbackinfo->info.errorCode);
             }
@@ -1220,12 +1223,12 @@ napi_value NapiGetUserGrantedState(napi_env env, napi_callback_info info)
     AsyncCallbackInfoNotificationExtensionUserGranted* asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoNotificationExtensionUserGranted { .env = env, .asyncWork = nullptr };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
 
     if (ParseParametersForGetUserGrantedState(env, info, asynccallbackinfo->params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         delete asynccallbackinfo;
         asynccallbackinfo = nullptr;
         return Common::NapiGetUndefined(env);
@@ -1245,8 +1248,9 @@ napi_value NapiGetUserGrantedState(napi_env env, napi_callback_info info)
             AsyncCallbackInfoNotificationExtensionUserGranted *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoNotificationExtensionUserGranted *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetUserGrantedState(
-                    asynccallbackinfo->params.targetBundle, asynccallbackinfo->params.enabled);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedState(
+                        asynccallbackinfo->params.targetBundle, asynccallbackinfo->params.enabled);
                 ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
         },
@@ -1266,12 +1270,12 @@ napi_value NapiSetUserGrantedState(napi_env env, napi_callback_info info)
     AsyncCallbackInfoNotificationExtensionUserGranted* asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoNotificationExtensionUserGranted { .env = env, .asyncWork = nullptr };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
 
     if (ParseParametersForSetUserGrantedState(env, info, asynccallbackinfo->params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         delete asynccallbackinfo;
         asynccallbackinfo = nullptr;
         return Common::NapiGetUndefined(env);
@@ -1291,8 +1295,9 @@ napi_value NapiSetUserGrantedState(napi_env env, napi_callback_info info)
             AsyncCallbackInfoNotificationExtensionUserGranted *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoNotificationExtensionUserGranted *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::SetUserGrantedState(
-                    asynccallbackinfo->params.targetBundle, asynccallbackinfo->params.enabled);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetUserGrantedState(
+                        asynccallbackinfo->params.targetBundle, asynccallbackinfo->params.enabled);
                 ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
         },
@@ -1310,13 +1315,13 @@ napi_value NapiGetUserGrantedEnabledBundles(napi_env env, napi_callback_info inf
     AsyncCallbackInfoNotificationExtensionUserGranted* asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoNotificationExtensionUserGranted { .env = env, .asyncWork = nullptr };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
 
     bool isForSelf = false;
     if (ParseParametersForGetUserGrantedEnableBundle(env, info, asynccallbackinfo->params, isForSelf) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         delete asynccallbackinfo;
         asynccallbackinfo = nullptr;
         return Common::NapiGetUndefined(env);
@@ -1334,7 +1339,8 @@ napi_value NapiGetUserGrantedEnabledBundles(napi_env env, napi_callback_info inf
                 static_cast<AsyncCallbackInfoNotificationExtensionUserGranted *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::GetUserGrantedEnabledBundlesForSelf(asynccallbackinfo->params.bundles);
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedEnabledBundlesForSelf(
+                        asynccallbackinfo->params.bundles);
                 ANS_LOGI("GetUserGrantedEnabledBundles errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
         },
@@ -1347,8 +1353,9 @@ napi_value NapiGetUserGrantedEnabledBundles(napi_env env, napi_callback_info inf
             AsyncCallbackInfoNotificationExtensionUserGranted *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoNotificationExtensionUserGranted *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::GetUserGrantedEnabledBundles(
-                    asynccallbackinfo->params.targetBundle, asynccallbackinfo->params.bundles);
+                asynccallbackinfo->info.errorCode =
+                    DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedEnabledBundles(
+                        asynccallbackinfo->params.targetBundle, asynccallbackinfo->params.bundles);
                 ANS_LOGI("GetUserGrantedEnabledBundles errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
         },
@@ -1369,12 +1376,12 @@ napi_value NapiSetUserGrantedBundleState(napi_env env, napi_callback_info info)
     AsyncCallbackInfoNotificationExtensionUserGranted* asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoNotificationExtensionUserGranted { .env = env, .asyncWork = nullptr };
     if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return Common::JSParaError(env, nullptr);
     }
 
     if (ParseParametersForSetUserGrantedBundleState(env, info, asynccallbackinfo->params) == nullptr) {
-        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
         delete asynccallbackinfo;
         asynccallbackinfo = nullptr;
         return Common::NapiGetUndefined(env);
@@ -1395,7 +1402,8 @@ napi_value NapiSetUserGrantedBundleState(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoNotificationExtensionUserGranted *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::SetUserGrantedBundleState(asynccallbackinfo->params.targetBundle,
+                    DelayedSingleton<AnsNotification>::GetInstance()->SetUserGrantedBundleState(
+                        asynccallbackinfo->params.targetBundle,
                         asynccallbackinfo->params.bundles, asynccallbackinfo->params.enabled);
                 ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
@@ -1466,7 +1474,6 @@ void SettingsSubModalExtensionCallback::OnDestroy()
     ANS_LOGD("called");
     subisExist.store(false);
 }
-
 
 void SettingsSubModalExtensionCallback::SetSessionId(int32_t sessionId)
 {

@@ -19,7 +19,7 @@
 #ifdef ALL_SCENARIO_COLLABORATION
 #include "distributed_extension_service.h"
 #endif
-#include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "notification_subscriber_manager.h"
 
 namespace OHOS {
@@ -131,7 +131,7 @@ ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, 
         if (DistributedExtensionService::GetInstance().TransDeviceIdToUdid(deviceId, udid) != ERR_OK) {
             ANS_LOGI("Get udid failed %{public}s %{public}s", deviceType.c_str(),
                 StringAnonymous(deviceStatusId).c_str());
-            return ERR_ANS_TASK_ERR;
+            return ERR_ANS_INNER_TASK_ERR;
         }
         deviceStatusId = udid;
     }
