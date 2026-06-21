@@ -677,4 +677,31 @@ HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_019, Level1)
     ReminderDataShareHelper::GetInstance().ResetTaskFlag(false);
     EXPECT_EQ(ReminderDataShareHelper::GetInstance().updateTask_, false);
 }
+
+/**
+ * @tc.name: ReminderDataShareHelper_020
+ * @tc.desc: test ReminderDataObserver::CheckWantAgent function
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_020, Level1)
+{
+    sptr<ReminderRequest> reminder = sptr<ReminderRequestCalendar>::MakeSptr();
+    auto wantAgent = std::move(reminder->wantAgentInfo_);
+    ReminderDataShareHelper::GetInstance().CheckWantAgent(reminder);
+    EXPECT_EQ(reminder->GetWantAgentInfo(), nullptr);
+    auto wantAgentInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
+    reminder->SetWantAgentInfo(wantAgentInfo);
+    wantAgentInfo->pkgName = ReminderCalendarShareTable::NAME;
+    ReminderDataShareHelper::GetInstance().CheckWantAgent(reminder);
+    EXPECT_EQ(wantAgentInfo->pkgName, ReminderCalendarShareTable::NAME);
+    EXPECT_EQ(wantAgentInfo->abilityName, "");
+    wantAgentInfo->pkgName = "com.example.app";
+    wantAgentInfo->abilityName = "TestAbility";
+    wantAgentInfo->uri = "test";
+    ReminderDataShareHelper::GetInstance().CheckWantAgent(reminder);
+    EXPECT_EQ(wantAgentInfo->pkgName, ReminderCalendarShareTable::NAME);
+    EXPECT_EQ(wantAgentInfo->abilityName, ReminderCalendarShareTable::MAIN_ABILITY);
+    EXPECT_EQ(wantAgentInfo->uri, "");
+}
 }

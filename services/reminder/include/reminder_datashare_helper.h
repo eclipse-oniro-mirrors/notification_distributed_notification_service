@@ -237,6 +237,12 @@ private:
         sptr<ReminderRequest>& reminder);
 
     /**
+     * @brief Check if the wantAgent in the reminder is ReminderCalendarShareTable::NAME.
+     * If not, modify it to ReminderCalendarShareTable::NAME and dot it.
+     */
+    void CheckWantAgent(sptr<ReminderRequest>& reminder);
+
+    /**
      * @brief Build query predicates conditions.
      *
      * Create predicates for querying valid alerts.

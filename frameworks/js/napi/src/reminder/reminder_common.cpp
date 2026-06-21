@@ -678,7 +678,7 @@ bool ReminderCommon::GetBool(const napi_env &env, const napi_value &value,
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL_BASE(env, napi_has_named_property(env, value, propertyName, &hasProperty), false);
     if (!hasProperty) {
-        ANSR_LOGE("Does not have argument type:%{public}s.", propertyName);
+        ANSR_LOGD("Does not have argument type:%{public}s.", propertyName);
         return false;
     }
     napi_get_named_property(env, value, propertyName, &result);

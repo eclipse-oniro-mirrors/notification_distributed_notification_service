@@ -47,6 +47,7 @@ public:
     static constexpr const char* NAME = "com.ohos.calendar";
     static constexpr const char* DATA_NAME = "com.ohos.calendardata";
     static constexpr const char* ENTRY = "ReminderCallbackExtAbility";
+    static constexpr const char* MAIN_ABILITY = "MainAbility";
 
     static constexpr const char* PARAM_CALLBACK_TYPE = "CallbackType";
 
