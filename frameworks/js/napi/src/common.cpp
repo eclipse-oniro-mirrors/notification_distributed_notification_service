@@ -1465,10 +1465,19 @@ napi_value Common::GetHashCodes(const napi_env &env, const napi_value &value, st
             ANS_LOGE("Wrong argument type. Object expected.");
             return nullptr;
         }
-        char str[STR_MAX_SIZE] = {0};
         size_t strLen = 0;
-        NAPI_CALL(env, napi_get_value_string_utf8(env, hashCode, str, STR_MAX_SIZE - 1, &strLen));
-        hashCodes.emplace_back(str);
+        NAPI_CALL(env, napi_get_value_string_utf8(env, hashCode, nullptr, 0, &strLen));
+        if (strLen >= LONG_STR_MAX_SIZE) {
+            ANS_LOGW("hashCode length exceeds limit, truncated.");
+            strLen = LONG_STR_MAX_SIZE - 1;
+        }
+        if (strLen != 0) {
+            std::string str(strLen, '\0');
+            NAPI_CALL(env, napi_get_value_string_utf8(env, hashCode, str.data(), strLen + 1, &strLen));
+            hashCodes.emplace_back(str);
+        } else {
+            hashCodes.emplace_back("");
+        }
     }
 
     return NapiGetNull(env);
