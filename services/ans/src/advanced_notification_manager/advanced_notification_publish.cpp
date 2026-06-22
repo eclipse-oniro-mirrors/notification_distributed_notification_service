@@ -628,7 +628,7 @@ ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<Notific
         request->SetExtendInfo(nullptr);
     }
 
-    if (!isSubsystem && request->GetGroupInfo() != nullptr) {
+    if (!isSystemApp && !isSubsystem && request->GetGroupInfo() != nullptr) {
         request->SetGroupInfo(nullptr);
     }
 

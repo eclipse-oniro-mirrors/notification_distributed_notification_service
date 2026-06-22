@@ -150,7 +150,7 @@ void AnsPublishServiceTest::RegisterPushCheck()
  * @tc.name: Publish_00001
  * @tc.desc: Test Publish
  * @tc.type: FUNC
- * @tc.require: issue Caller is no system app
+ * @tc.require: issue
  */
 HWTEST_F(AnsPublishServiceTest, Publish_00001, Function | SmallTest | Level1)
 {
