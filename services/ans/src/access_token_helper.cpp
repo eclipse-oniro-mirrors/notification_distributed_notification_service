@@ -85,7 +85,7 @@ bool __attribute__((weak)) AccessTokenHelper::CheckPermission(const std::string 
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     bool result = VerifyCallerPermission(tokenCaller, permission);
     if (!result) {
-        ANS_LOGE("CheckPermission failed %{public}s, %{public}d, %{public}d",
+        ANS_LOGE("chkPerm fail %{public}s,%{public}d,%{public}d",
             permission.c_str(), callingUid, callingPid);
     }
     return result;

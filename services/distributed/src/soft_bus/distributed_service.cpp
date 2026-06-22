@@ -418,7 +418,7 @@ bool DistributedService::OnConsumedSetFlags(const std::shared_ptr<Notification> 
     auto flagIter = flagsMap->find(deviceType);
     if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
         requestPoint->SetFlags(flagIter->second);
-        ANS_LOGI("SetFlags-final, key = %{public}s flags = %{public}d deviceType: %{public}s.",
+        ANS_LOGI("flagsFinal key=%{public}s flags=%{public}d dev=%{public}s",
             requestPoint->GetBaseKey("").c_str(),
             requestPoint->GetFlags()->GetReminderFlags(), deviceType.c_str());
     } else {

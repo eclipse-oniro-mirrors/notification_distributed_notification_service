@@ -1488,7 +1488,7 @@ ErrCode AdvancedNotificationService::SetHashCodeRuleInner(const uint32_t type, c
     } else {
         result = NotificationPreferences::GetInstance()->SetHashCodeRule(uid, type, userId);
     }
-    ANS_LOGI("SetHashCodeRule uid=%{public}d,type=%{public}d,result=%{public}d", uid, type, result);
+    ANS_LOGI("hashRule uid=%{public}d type=%{public}d ret=%{public}d", uid, type, result);
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
 

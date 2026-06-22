@@ -3584,8 +3584,8 @@ bool NotificationPreferencesDatabase::SetDistributedEnabledBySlot(const Notifica
         return false;
     }
 
-    ANS_LOGI("%{public}s, %{public}d, deviceType:%{public}s, enabled[%{public}d]",
-        __FUNCTION__, slotType, deviceType.c_str(), static_cast<int32_t>(enabled));
+    ANS_LOGI("%{public}d,devType:%{public}s, enable=%{public}d",
+        slotType, deviceType.c_str(), static_cast<int32_t>(enabled));
     std::string key = GenerateBundleLablel(slotType, deviceType, userId);
     int32_t result = PutDataToDB(key, static_cast<int32_t>(enabled), userId);
     return (result == NativeRdb::E_OK);
@@ -4147,7 +4147,7 @@ bool NotificationPreferencesDatabase::GetDisableNotificationInfo(NotificationDis
     std::string value;
     int32_t result = rdbDataManager_->QueryData(KEY_DISABLE_NOTIFICATION, value, ZERO_USER_ID);
     if (result != NativeRdb::E_OK) {
-        ANS_LOGE("query disableNotificationInfo failed");
+        ANS_LOGE("getDisableInfo rdbQueryFailed");
         return false;
     }
     notificationDisable.FromJson(value);
@@ -4164,7 +4164,7 @@ bool NotificationPreferencesDatabase::GetUserDisableNotificationInfo(
     std::string value;
     int32_t result = rdbDataManager_->QueryData(KEY_DISABLE_NOTIFICATION, value, userId);
     if (result != NativeRdb::E_OK) {
-        ANS_LOGE("query userDisableNotificationInfo failed");
+        ANS_LOGE("getUserDisableInfo rdbQueryFailed");
         return false;
     }
     notificationDisable.FromJson(value);
@@ -4180,7 +4180,7 @@ void NotificationPreferencesDatabase::GetDisableNotificationInfo(NotificationPre
     std::string value;
     int32_t result = rdbDataManager_->QueryData(KEY_DISABLE_NOTIFICATION, value, ZERO_USER_ID);
     if (result != NativeRdb::E_OK) {
-        ANS_LOGE("query disableNotificationInfo failed");
+        ANS_LOGE("getDisableInfo rdbQueryFailed");
         return;
     }
     info.AddDisableNotificationInfo(value);

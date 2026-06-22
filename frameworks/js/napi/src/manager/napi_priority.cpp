@@ -789,7 +789,7 @@ napi_value NapiGetPriorityStrategyByBundles(napi_env env, napi_callback_info inf
                 asynccallbackinfo->info.errorCode =
                     DelayedSingleton<AnsNotification>::GetInstance()->
                     GetPriorityStrategyByBundles(asynccallbackinfo->bundles, asynccallbackinfo->priorityStrategy);
-                ANS_LOGI("GetPriorityStrategyByBundles errorCode = %{public}u", asynccallbackinfo->info.errorCode);
+                ANS_LOGI("prioStrategyCb ret=%{public}u", asynccallbackinfo->info.errorCode);
             }
         },
         AsyncCompleteCallbackNapiGetPriorityStrategyByBundles,

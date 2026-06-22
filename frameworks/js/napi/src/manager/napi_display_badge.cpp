@@ -280,7 +280,7 @@ napi_value NapiSetBadgeNumber(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiSetBadgeNumber work excute.");
             AsyncCallbackSetBadgeNumber *asynccallbackinfo = static_cast<AsyncCallbackSetBadgeNumber *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("setBadge number:%{public}d", asynccallbackinfo->params.badgeNumber);
+                ANS_LOGI("setBadge n=%{public}d", asynccallbackinfo->params.badgeNumber);
                 std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode =
                     DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumber(

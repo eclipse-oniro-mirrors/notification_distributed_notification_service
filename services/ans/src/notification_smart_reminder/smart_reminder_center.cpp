@@ -281,7 +281,7 @@ void SmartReminderCenter::SetSyncDevice(const sptr<NotificationRequest> &request
     if (extendInfo == nullptr) {
         extendInfo = std::make_shared<AAFwk::WantParams>();
     }
-    ANS_LOGW("SetSyncDevice %{public}zu, %{public}u.", syncDevices.size(), deviceList);
+    ANS_LOGW("syncDev:%{public}zu,%{public}u", syncDevices.size(), deviceList);
     extendInfo->SetParam("collaboration_device_list", AAFwk::Integer::Box(deviceList));
     request->SetExtendInfo(extendInfo);
 }
@@ -466,8 +466,7 @@ void SmartReminderCenter::InitValidDevices(
     for (auto it = smartDevices.begin(); it != smartDevices.end(); ++it) {
         smartDevicesStr = smartDevicesStr + *it + StringUtils::SPLIT_CHAR;
     }
-    ANS_LOGI("sync device: %{public}s", syncDevicesStr.c_str());
-    ANS_LOGI("smart device: %{public}s", smartDevicesStr.c_str());
+    ANS_LOGI("syncDev:%{public}s smartDev:%{public}s", syncDevicesStr.c_str(), smartDevicesStr.c_str());
     return;
 }
 
@@ -932,7 +931,7 @@ void SmartReminderCenter::GetDeviceStatusByType(
         screenLocked = ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
         bitStatus.set(DistributedDeviceStatus::LOCK_FLAG, !screenLocked);
     }
-    ANS_LOGI("deviceType: %{public}s, bitStatus: %{public}s", deviceType.c_str(), bitStatus.to_string().c_str());
+    ANS_LOGI("devSt %{public}s:%{public}s", deviceType.c_str(), bitStatus.to_string().c_str());
 }
 
 bool SmartReminderCenter::CheckHealthWhiteList(const sptr<NotificationRequest> &request,

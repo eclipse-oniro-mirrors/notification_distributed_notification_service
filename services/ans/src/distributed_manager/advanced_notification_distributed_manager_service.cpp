@@ -102,8 +102,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
     ErrCode result = NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(slotType,
         deviceType, enableStatus);
     DistributedEnabledBySlotChangeStrategy(deviceType, slotType, enabled, result);
-    ANS_LOGI("SetDistributedEnabledBySlot %{public}d, deviceType: %{public}s, enabled: %{public}s, "
-        "SetDistributedEnabledBySlot result: %{public}d",
+    ANS_LOGI("distSlot slot=%{public}d dev=%{public}s en=%{public}s ret=%{public}d",
         slotType, deviceType.c_str(), std::to_string(enabled).c_str(), result);
     message.ErrorCode(result).Append("st:" + std::to_string(slotTypeInt) +
         ", device:" + deviceType + ", en:" + std::to_string(enabled));

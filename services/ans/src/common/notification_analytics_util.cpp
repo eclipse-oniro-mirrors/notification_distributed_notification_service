@@ -591,7 +591,7 @@ void NotificationAnalyticsUtil::AddLocalLiveViewSuccessNum(std::string bundle)
 void NotificationAnalyticsUtil::CreateLiveViewTimerExecute()
 {
     if (g_reportLiveViewFlag) {
-        ANS_LOGW("now has liveview message is reporting");
+        ANS_LOGW("liveviewReporting busy");
         return;
     }
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
@@ -810,7 +810,7 @@ void __attribute__((weak)) NotificationAnalyticsUtil::ReportModifyEvent(
     const HaMetaMessage& message, bool unFlowControl)
 {
     if (!unFlowControl && !ReportFlowControl(MODIFY_ERROR_EVENT_CODE)) {
-        ANS_LOGI("Publish event failed, reason:%{public}s", message.Build().c_str());
+        ANS_LOGI("evtFail %{public}s", message.Build().c_str());
         return;
     }
     EventFwk::Want want;
@@ -855,7 +855,7 @@ void NotificationAnalyticsUtil::ReportPublishSuccessEvent(const sptr<Notificatio
     }
     ReportLiveViewNumber(request, ANS_CUSTOMIZE_CODE);
     if (!IsAllowedBundle(request)) {
-        ANS_LOGW("This Bundle not allowed.");
+        ANS_LOGW("bundleNotAllowed");
         return;
     }
  
@@ -1143,7 +1143,7 @@ void NotificationAnalyticsUtil::AddListCache(EventFwk::Want& want, int32_t event
     std::lock_guard<ffrt::mutex> lock(reportCacheMutex_);
     int32_t size = static_cast<int32_t>(reportCacheList.size());
     if (size >= REPORT_CACHE_MAX_SIZE) {
-        ANS_LOGW("list size is max");
+        ANS_LOGW("reportCacheFull");
         return;
     }
 
