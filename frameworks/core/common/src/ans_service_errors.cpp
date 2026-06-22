@@ -54,7 +54,7 @@ static const std::vector<ServiceErrorConvertEntry> SERVICE_ERROR_CONVERT_TABLE =
         "Marshalling or unmarshalling error"},
     {DEAD_OBJECT,                           DEAD_OBJECT,                     ERROR_IPC_ERROR,
         "Marshalling or unmarshalling error"},
-    {ERR_ANS_INNER_NO_MEMORY,              ERR_ANS_NO_MEMORY,               ERROR_NO_MEMORY,
+    {ERR_ANS_INNER_NO_MEMORY,              ERR_ANS_NO_MEMORY,               ERROR_INTERNAL_ERROR,
         "Memory operation failed"},
     {ERR_ANS_INNER_TASK_ERR,               ERR_ANS_TASK_ERR,                ERROR_INTERNAL_ERROR,
         "Internal error. Possible cause: 1.IPC communication failed. 2.Memory operation error"},
@@ -106,8 +106,6 @@ static const std::vector<ServiceErrorConvertEntry> SERVICE_ERROR_CONVERT_TABLE =
         "Repeat create or end"},
     {ERR_ANS_INNER_END_NOTIFICATION,       ERR_ANS_END_NOTIFICATION,        ERROR_REPEAT_SET,
         "Repeat create or end"},
-    {ERR_ANS_INNER_DIALOG_POP_SUCCEEDED,   ERR_ANS_DIALOG_POP_SUCCEEDED,    ERROR_INTERNAL_ERROR,
-        "Internal error. Possible cause: 1.IPC communication failed. 2.Memory operation error"},
 
     // ===== Slot/channel =====
     {ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED,
@@ -145,7 +143,7 @@ static const std::vector<ServiceErrorConvertEntry> SERVICE_ERROR_CONVERT_TABLE =
         "No permission"},
     {ERR_ANS_INNER_GET_ACTIVE_USER_FAILED,     ERR_ANS_GET_ACTIVE_USER_FAILED,     ERROR_USER_NOT_EXIST,
         "The user does not exist"},
-    {ERR_ANS_INNER_USER_NOT_EXIST,             ERR_ANS_USER_NOT_EXIST,              ERROR_USER_NOT_EXIST,
+    {ERR_ANS_INNER_USER_NOT_EXIST,             ERR_ANS_USER_NOT_EXIST,              ERROR_INTERNAL_ERROR,
         "The user does not exist"},
 
     // ===== Distributed =====
@@ -169,7 +167,7 @@ static const std::vector<ServiceErrorConvertEntry> SERVICE_ERROR_CONVERT_TABLE =
     {ERR_ANS_INNER_AWARNESS_SUGGESTIONS_CLOSED, ERR_ANS_AWARNESS_SUGGESTIONS_CLOSED,
         ERROR_AWARNESS_SUGGESTIONS_CLOSED,
         "The \"Awareness & suggestions\" switch of the location-based service is off"},
-    {ERR_ANS_INNER_CHECK_WEAK_NETWORK,            ERR_ANS_CHECK_WEAK_NETWORK,            ERROR_NETWORK_UNREACHABLE,
+    {ERR_ANS_INNER_CHECK_WEAK_NETWORK,            ERR_ANS_CHECK_WEAK_NETWORK,            ERROR_INTERNAL_ERROR,
         "Network unreachable"},
 
     // ===== Push =====
@@ -183,6 +181,8 @@ static const std::vector<ServiceErrorConvertEntry> SERVICE_ERROR_CONVERT_TABLE =
     // ===== Dialog =====
     {ERR_ANS_INNER_DIALOG_IS_POPPING,             ERR_ANS_DIALOG_IS_POPPING,             ERROR_DIALOG_IS_POPPING,
         "Dialog is popping"},
+    {ERR_ANS_INNER_DIALOG_POP_SUCCEEDED,          ERR_ANS_DIALOG_POP_SUCCEEDED,          ERROR_INTERNAL_ERROR,
+        "Internal error. Possible cause: 1.IPC communication failed. 2.Memory operation error"},
     {ERR_ANS_INNER_SETTING_WINDOW_EXIST,          ERR_ANS_DIALOG_POP_SUCCEEDED,          ERROR_SETTING_WINDOW_EXIST,
         "The notification settings window is already displayed"},
 

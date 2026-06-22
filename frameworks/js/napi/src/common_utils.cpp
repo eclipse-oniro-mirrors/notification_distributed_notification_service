@@ -201,11 +201,27 @@ void Common::PaddingCallbackPromiseInfo(
 
 void Common::ReturnCallbackPromise(const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result)
 {
-    ANS_LOGD("start, errorCode=%{public}u", info.errorCode);
+    ANS_LOGD("start, errorCode=%{public}d", info.errorCode);
     if (info.isCallback) {
-        SetCallback(env, info.callback, info.errorCode, result, false);
+        napi_value undefined = nullptr;
+        napi_get_undefined(env, &undefined);
+        napi_value callback = nullptr;
+        napi_get_reference_value(env, info.callback, &callback);
+        if (callback == nullptr) {
+            ANS_LOGE("callback is nullptr.");
+            return;
+        }
+        napi_value results[ARGS_TWO] = {nullptr};
+        results[PARAM0] = CreateErrorValueLegacy(env, info.errorCode, false);
+        results[PARAM1] = result;
+        napi_value resultout = nullptr;
+        napi_call_function(env, undefined, callback, ARGS_TWO, &results[PARAM0], &resultout);
     } else {
-        SetPromise(env, info.deferred, info.errorCode, result, false);
+        if (info.errorCode == ERR_OK) {
+            napi_resolve_deferred(env, info.deferred, result);
+        } else {
+            napi_reject_deferred(env, info.deferred, CreateErrorValueLegacy(env, info.errorCode, false));
+        }
     }
     ANS_LOGD("end");
 }
