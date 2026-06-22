@@ -436,12 +436,12 @@ public:
      *             use 'SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)'.
      * @param subscriber Indicates the {NotificationSubscriber} to receive notifications.
      *                   This parameter must be specified.
+     * @param subscribeInfo Indicates the {NotificationSubscribeInfo} object. This parameter can be null.
      * @version version{2} system permissions {ohos.permission.NOTIFICATION_DATA_SUBSCRIBE}.
      * @return Returns unsubscribe notification result.
      */
-    static ErrCode SubscribeNotificationV26(const std::shared_ptr<NotificationSubscriber> &subscriber);
     static ErrCode SubscribeNotificationV26(const std::shared_ptr<NotificationSubscriber> &subscriber,
-        const sptr<NotificationSubscribeInfo> &subscribeInfo);
+        const sptr<NotificationSubscribeInfo> &subscribeInfo = nullptr);
 
     /**
      * @brief Subscribes to notifications from all applications. This method can be called only by applications

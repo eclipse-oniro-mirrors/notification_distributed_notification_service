@@ -726,8 +726,6 @@ public:
     ErrCode SubscribeNotification(const sptr<IAnsSubscriber> &subscriber,
         const sptr<NotificationSubscribeInfo> &info, uint32_t subscribedFlags) override;
 
-    ErrCode SubscribeNotification(const sptr<IAnsSubscriber> &subscriber, uint32_t subscribedFlags) override;
-
     /**
      * @brief Subscribes notifications self.
      *
