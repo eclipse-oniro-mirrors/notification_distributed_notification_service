@@ -17,7 +17,8 @@
 #include "pixelmap_cache_manager.h"
 #include "subscriber_image_util.h"
 #include "ans_log_wrapper.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
 #include "sts_sorting_map.h"
@@ -866,19 +867,21 @@ bool SubscriberInstanceManager::SubscribeNotificationWithInfo(ani_env *env, ani_
             return false;
         }
     }
-    ErrCode status = ERR_OK;
+    OHOS::Notification::InnerErrorCode status = OHOS::Notification::ERR_ANS_INNER_OK;
     if (info == nullptr) {
-        status = NotificationHelper::SubscribeNotificationV26(stsSubscriber);
+        status = DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->SubscribeNotificationV26(
+            stsSubscriber);
     } else {
-        status = NotificationHelper::SubscribeNotificationV26(stsSubscriber, SubscribeInfo);
+        status = DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->SubscribeNotificationV26(
+            stsSubscriber, SubscribeInfo);
     }
-    if (status != ERR_OK) {
+    if (status != OHOS::Notification::ERR_ANS_INNER_OK) {
         ANS_LOGE("SubscribeNotification faild. status %{public}d", status);
-        if (status == ERR_ANS_GET_ACTIVE_USER_FAILED) {
-            OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
-        } else if (status == ERR_ANS_NO_MEMORY) {
+        if (status == OHOS::Notification::ERR_ANS_INNER_GET_ACTIVE_USER_FAILED) {
+            OHOS::NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+        } else if (status == OHOS::Notification::ERR_ANS_INNER_NO_MEMORY) {
             std::string msg = OHOS::NotificationSts::FindAnsErrMsg(static_cast<int32_t>(status));
-            OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_TASK_ERR, msg);
+            OHOS::NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERR_ANS_INNER_TASK_ERR, msg);
         } else {
             OHOS::NotificationSts::ThrowErrorWithCode(env, static_cast<int32_t>(status));
         }
@@ -922,13 +925,15 @@ bool SubscriberInstanceManager::Subscribe(ani_env *env, ani_object subscriber, a
             return false;
         }
     }
-    ErrCode status = ERR_OK;
+    OHOS::Notification::InnerErrorCode status = OHOS::Notification::ERR_ANS_INNER_OK;
     if (!isInfoUndefine) {
-        status = NotificationHelper::SubscribeNotification(stsSubscriber, SubscribeInfo);
+        status = DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->SubscribeNotification(
+            stsSubscriber, SubscribeInfo);
     } else {
-        status = NotificationHelper::SubscribeNotification(stsSubscriber);
+        status = DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->SubscribeNotification(
+            stsSubscriber);
     }
-    if (status != ERR_OK) {
+    if (status != OHOS::Notification::ERR_ANS_INNER_OK) {
         ANS_LOGD("SubscribeNotification faild. status %{public}d", status);
         OHOS::NotificationSts::ThrowErrorWithCode(env, static_cast<int32_t>(status));
         return false;
@@ -952,10 +957,12 @@ bool SubscriberInstanceManager::UnSubscribe(ani_env *env, ani_object subscriber)
     }
     bool ret = AddDeletingSubscriber(stsSubscriber);
     if (ret) {
-        int32_t status = NotificationHelper::UnSubscribeNotification(stsSubscriber);
-        if (status != ERR_OK) {
+        OHOS::Notification::InnerErrorCode status =
+            DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->UnSubscribeNotification(
+                stsSubscriber);
+        if (status != OHOS::Notification::ERR_ANS_INNER_OK) {
             ANS_LOGD("UnSubscribe faild. status %{public}d", status);
-            OHOS::NotificationSts::ThrowErrorWithCode(env, status);
+            OHOS::NotificationSts::ThrowErrorWithCode(env, static_cast<int32_t>(status));
             DelDeletingSubscriber(stsSubscriber);
         }
     } else {
@@ -987,11 +994,12 @@ bool SubscriberInstanceManager::SubscribeSelf(ani_env *env, ani_object subscribe
             return false;
         }
     }
-    ErrCode status = ERR_OK;
-    status = NotificationHelper::SubscribeNotificationSelf(stsSubscriber);
-    if (status != ERR_OK) {
+    OHOS::Notification::InnerErrorCode status = OHOS::Notification::ERR_ANS_INNER_OK;
+    status = DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->SubscribeNotificationSelf(
+        stsSubscriber);
+    if (status != OHOS::Notification::ERR_ANS_INNER_OK) {
         ANS_LOGD("SubscribeNotificationSelf faild. status %{public}d", status);
-        OHOS::NotificationSts::ThrowErrorWithCode(env, status);
+        OHOS::NotificationSts::ThrowErrorWithCode(env, static_cast<int32_t>(status));
         return false;
     }
     return true;
