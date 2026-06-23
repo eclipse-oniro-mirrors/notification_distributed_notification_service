@@ -844,6 +844,25 @@ public:
     void SetDistributedEnabledForBundle(const NotificationPreferencesInfo::BundleInfo& bundleInfo);
     ErrCode GetAllNotificationEnabledBundlesInner(
         std::vector<NotificationBundleOption> &bundleOption, int32_t userId = -1);
+    bool BuildCloneSlotInfo(const NotificationCloneBundleInfo& cloneBundleInfo,
+        NotificationPreferencesInfo::BundleInfo& bundleInfo,
+        std::vector<sptr<NotificationSlot>>& slots);
+
+    /**
+     * @brief Start the ffrt cache cleanup timer if not already running.
+     *        Idempotent: does nothing if a task is already pending.
+     */
+    void StartCacheCleanupTimer();
+
+    /**
+     * @brief Execute cache cleanup and reschedule if cache is non-empty.
+     */
+    void ExecuteCacheCleanup();
+
+    /**
+     * @brief Stop the ffrt cache cleanup timer.
+     */
+    void StopCacheCleanupTimer();
 
 private:
     std::map<int32_t, int64_t> cloneTimestamp;
@@ -851,6 +870,12 @@ private:
     static std::shared_ptr<NotificationPreferences> instance_;
     NotificationPreferencesInfo preferencesInfo_ {};
     ffrt::mutex preferenceMutex_;
+
+    // ffrt cache cleanup scheduler
+    ffrt::mutex cleanupHandleMutex_;
+    ffrt::task_handle cleanupHandle_ {nullptr};
+    static constexpr int64_t CACHE_CLEANUP_INTERVAL_US = 5 * 60 * 1000 * 1000;  // 5 minutes
+
     std::shared_ptr<NotificationPreferencesDatabase> preferncesDB_ = nullptr;
     bool isCachedMirrorNotificationEnabledStatus_ = false;
     std::vector<std::string> mirrorNotificationEnabledStatus_ = {};

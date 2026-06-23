@@ -464,7 +464,7 @@ HWTEST_F(LRUCacheTest, MoveSemantics_PutRvalue_00001, Function | SmallTest | Lev
 
 /**
  * @tc.name: Peek_ExpiredAutoRemove_00001
- * @tc.desc: Test peeking expired entry removes it and increments expireCount
+ * @tc.desc: Test peeking expired entry returns value, then EvictExpired removes it
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -476,18 +476,24 @@ HWTEST_F(LRUCacheTest, Peek_ExpiredAutoRemove_00001, Function | SmallTest | Leve
     // Manually expire the entry by setting old timestamp
     cache.nodeTimestamps_["key1"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
 
+    // After refactoring: Peek no longer checks TTL, returns expired value
     TestValue result;
     bool found = cache.Peek("key1", result);
+    EXPECT_TRUE(found);
+    EXPECT_EQ(result.id, 1);
+    EXPECT_EQ(result.name, "value1");
+    EXPECT_EQ(cache.Size(), 1);
 
-    EXPECT_FALSE(found);
+    // Actively evict expired entries, then Peek returns false
+    size_t evicted = cache.EvictExpired();
+    EXPECT_EQ(evicted, 1);
+    EXPECT_FALSE(cache.Peek("key1", result));
     EXPECT_EQ(cache.Size(), 0);
-    auto stats = cache.GetStats();
-    EXPECT_EQ(stats.expires, 1);
 }
 
 /**
  * @tc.name: Contains_ExpiredAutoRemove_00001
- * @tc.desc: Test contains on expired entry removes it and increments expireCount
+ * @tc.desc: Test contains on expired entry returns true, then EvictExpired removes it
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -496,17 +502,23 @@ HWTEST_F(LRUCacheTest, Contains_ExpiredAutoRemove_00001, Function | SmallTest | 
     LRUCache<std::string, TestValue> cache;
     cache.Put("key1", TestValue(1, "value1"));
 
+    // Manually expire the entry by setting old timestamp
     cache.nodeTimestamps_["key1"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
 
+    // After refactoring: Contains no longer checks TTL, returns true for expired entry
+    EXPECT_TRUE(cache.Contains("key1"));
+    EXPECT_EQ(cache.Size(), 1);
+
+    // Actively evict expired entries, then Contains returns false
+    size_t evicted = cache.EvictExpired();
+    EXPECT_EQ(evicted, 1);
     EXPECT_FALSE(cache.Contains("key1"));
     EXPECT_EQ(cache.Size(), 0);
-    auto stats = cache.GetStats();
-    EXPECT_EQ(stats.expires, 1);
 }
 
 /**
  * @tc.name: Put_FullCache_EvictExpiredFirst_00001
- * @tc.desc: Test that when cache is full, Put evicts expired entries before LRU eviction
+ * @tc.desc: Test that EvictExpired clears expired entries before Put adds new ones
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -525,12 +537,17 @@ HWTEST_F(LRUCacheTest, Put_FullCache_EvictExpiredFirst_00001, Function | SmallTe
     // Expire key2 only
     cache.nodeTimestamps_["key2"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
 
-    // Put should evict expired key2 first, then there's room, no LRU eviction needed
+    // After refactoring: Put no longer evicts expired entries. Actively call EvictExpired first.
+    size_t evicted = cache.EvictExpired();
+    EXPECT_EQ(evicted, 1);
+    EXPECT_EQ(cache.Size(), 2);
+    EXPECT_FALSE(cache.Contains("key2"));
+
+    // Now Put can add new entry without LRU eviction
     cache.Put("key4", TestValue(4, "value4"));
 
     EXPECT_EQ(cache.Size(), 3);
     EXPECT_TRUE(cache.Contains("key1"));
-    EXPECT_FALSE(cache.Contains("key2"));
     EXPECT_TRUE(cache.Contains("key3"));
     EXPECT_TRUE(cache.Contains("key4"));
 }
@@ -565,7 +582,7 @@ HWTEST_F(LRUCacheTest, Put_FullCache_ExpiredThenLRU_00001, Function | SmallTest 
 
 /**
  * @tc.name: GetAllKeys_FiltersExpired_00001
- * @tc.desc: Test GetAllKeys filters out expired entries
+ * @tc.desc: Test GetAllKeys returns all entries, then EvictExpired filters out expired ones
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -575,10 +592,18 @@ HWTEST_F(LRUCacheTest, GetAllKeys_FiltersExpired_00001, Function | SmallTest | L
     cache.Put("key1", TestValue(1, "value1"));
     cache.Put("key2", TestValue(2, "value2"));
 
+    // Expire key2
     cache.nodeTimestamps_["key2"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
 
+    // After refactoring: GetAllKeys no longer filters expired entries, returns all keys
     auto keys = cache.GetAllKeys();
+    EXPECT_EQ(keys.size(), 2);
+    EXPECT_EQ(cache.Size(), 2);
 
+    // Actively evict expired entries, then GetAllKeys returns only non-expired keys
+    size_t evicted = cache.EvictExpired();
+    EXPECT_EQ(evicted, 1);
+    keys = cache.GetAllKeys();
     EXPECT_EQ(keys.size(), 1);
     EXPECT_EQ(keys[0], "key1");
     EXPECT_EQ(cache.Size(), 1);
@@ -586,7 +611,7 @@ HWTEST_F(LRUCacheTest, GetAllKeys_FiltersExpired_00001, Function | SmallTest | L
 
 /**
  * @tc.name: Put_FullCache_AllExpired_NoLRU_00001
- * @tc.desc: Test that when all entries are expired, Put only expires, no LRU needed
+ * @tc.desc: Test that EvictExpired clears all expired entries, then Put adds without LRU
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -603,11 +628,17 @@ HWTEST_F(LRUCacheTest, Put_FullCache_AllExpired_NoLRU_00001, Function | SmallTes
     cache.nodeTimestamps_["key1"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
     cache.nodeTimestamps_["key2"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
 
+    // After refactoring: Put no longer evicts expired entries. Actively call EvictExpired first.
+    size_t evicted = cache.EvictExpired();
+    EXPECT_EQ(evicted, 2);
+    EXPECT_EQ(cache.Size(), 0);
+    EXPECT_FALSE(cache.Contains("key1"));
+    EXPECT_FALSE(cache.Contains("key2"));
+
+    // Now Put can add new entry without LRU eviction
     cache.Put("key3", TestValue(3, "value3"));
 
     EXPECT_EQ(cache.Size(), 1);
-    EXPECT_FALSE(cache.Contains("key1"));
-    EXPECT_FALSE(cache.Contains("key2"));
     EXPECT_TRUE(cache.Contains("key3"));
 }
 
@@ -797,7 +828,7 @@ HWTEST_F(LRUCacheTest, CopyAssignment_SelfAssignment_00001, Function | SmallTest
 
 /**
  * @tc.name: Get_ExpiredEntry_00001
- * @tc.desc: Test Get removes expired entry and increments expireCount
+ * @tc.desc: Test Get returns expired entry, then EvictExpired removes it
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -806,22 +837,27 @@ HWTEST_F(LRUCacheTest, Get_ExpiredEntry_00001, Function | SmallTest | Level1)
     LRUCache<std::string, TestValue> cache;
     cache.Put("key1", TestValue(1, "value1"));
 
+    // Inject expired timestamp
     cache.nodeTimestamps_["key1"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
 
+    // After refactoring: Get no longer checks TTL, returns expired value
     TestValue result;
     bool found = cache.Get("key1", result);
+    EXPECT_TRUE(found);
+    EXPECT_EQ(result.id, 1);
+    EXPECT_EQ(result.name, "value1");
+    EXPECT_EQ(cache.Size(), 1);
 
-    EXPECT_FALSE(found);
+    // Actively evict expired entries, then Get returns false
+    size_t evicted = cache.EvictExpired();
+    EXPECT_EQ(evicted, 1);
+    EXPECT_FALSE(cache.Get("key1", result));
     EXPECT_EQ(cache.Size(), 0);
-    auto stats = cache.GetStats();
-    EXPECT_EQ(stats.expires, 1);
-    EXPECT_EQ(stats.misses, 1);
-    EXPECT_EQ(stats.hits, 0);
 }
 
 /**
  * @tc.name: Get_MissingTimestamp_00001
- * @tc.desc: Test Get handles entry without timestamp (corrupted state)
+ * @tc.desc: Test Get returns entry even without timestamp (no TTL check)
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -830,15 +866,16 @@ HWTEST_F(LRUCacheTest, Get_MissingTimestamp_00001, Function | SmallTest | Level1
     LRUCache<std::string, TestValue> cache;
     cache.Put("key1", TestValue(1, "value1"));
 
+    // Remove timestamp to simulate corrupted state
     cache.nodeTimestamps_.erase("key1");
 
+    // After refactoring: Get no longer checks timestamp, returns entry value
     TestValue result;
     bool found = cache.Get("key1", result);
-
-    EXPECT_FALSE(found);
-    EXPECT_EQ(cache.Size(), 0);
-    auto stats = cache.GetStats();
-    EXPECT_EQ(stats.misses, 1);
+    EXPECT_TRUE(found);
+    EXPECT_EQ(result.id, 1);
+    EXPECT_EQ(result.name, "value1");
+    EXPECT_EQ(cache.Size(), 1);
 }
 
 /**
@@ -860,7 +897,7 @@ HWTEST_F(LRUCacheTest, Peek_NonExisting_00001, Function | SmallTest | Level1)
 
 /**
  * @tc.name: Peek_MissingTimestamp_00001
- * @tc.desc: Test Peek handles entry without timestamp
+ * @tc.desc: Test Peek returns entry even without timestamp (no TTL check)
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -869,13 +906,16 @@ HWTEST_F(LRUCacheTest, Peek_MissingTimestamp_00001, Function | SmallTest | Level
     LRUCache<std::string, TestValue> cache;
     cache.Put("key1", TestValue(1, "value1"));
 
+    // Remove timestamp to simulate corrupted state
     cache.nodeTimestamps_.erase("key1");
 
+    // After refactoring: Peek no longer checks timestamp, returns entry value
     TestValue result;
     bool found = cache.Peek("key1", result);
-
-    EXPECT_FALSE(found);
-    EXPECT_EQ(cache.Size(), 0);
+    EXPECT_TRUE(found);
+    EXPECT_EQ(result.id, 1);
+    EXPECT_EQ(result.name, "value1");
+    EXPECT_EQ(cache.Size(), 1);
 }
 
 /**
@@ -1109,7 +1149,7 @@ HWTEST_F(LRUCacheTest, UpdateConfig_MaxSizeZero_NoEviction_00001, Function | Sma
 
 /**
  * @tc.name: Contains_MissingTimestamp_00001
- * @tc.desc: Test Contains handles entry without timestamp
+ * @tc.desc: Test Contains returns true even without timestamp (no TTL check)
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -1118,10 +1158,12 @@ HWTEST_F(LRUCacheTest, Contains_MissingTimestamp_00001, Function | SmallTest | L
     LRUCache<std::string, TestValue> cache;
     cache.Put("key1", TestValue(1, "value1"));
 
+    // Remove timestamp to simulate corrupted state
     cache.nodeTimestamps_.erase("key1");
 
-    EXPECT_FALSE(cache.Contains("key1"));
-    EXPECT_EQ(cache.Size(), 0);
+    // After refactoring: Contains no longer checks timestamp, returns true
+    EXPECT_TRUE(cache.Contains("key1"));
+    EXPECT_EQ(cache.Size(), 1);
 }
 
 /**
@@ -1171,7 +1213,7 @@ HWTEST_F(LRUCacheTest, Put_UpdateExisting_CopyVersion_00001, Function | SmallTes
 
 /**
  * @tc.name: RemoveInternal_ThroughPeek_00001
- * @tc.desc: Test internal removal through Peek on expired entry
+ * @tc.desc: Test Peek does not trigger RemoveInternal, EvictExpired triggers it
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -1181,25 +1223,33 @@ HWTEST_F(LRUCacheTest, RemoveInternal_ThroughPeek_00001, Function | SmallTest | 
     cache.Put("key1", TestValue(1, "value1"));
     cache.Put("key2", TestValue(2, "value2"));
 
+    // Expire key1
     cache.nodeTimestamps_["key1"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
 
+    // After refactoring: Peek does not trigger RemoveInternal, expired entry remains
     TestValue result;
     cache.Peek("key1", result);
+    EXPECT_EQ(cache.Size(), 2);
+    EXPECT_TRUE(cache.Contains("key1"));
+    EXPECT_TRUE(cache.Contains("key2"));
+    EXPECT_EQ(cache.lruList_.size(), 2);
 
+    // Actively evict expired entries triggers RemoveInternal
+    size_t evicted = cache.EvictExpired();
+    EXPECT_EQ(evicted, 1);
     EXPECT_EQ(cache.Size(), 1);
     EXPECT_FALSE(cache.Contains("key1"));
     EXPECT_TRUE(cache.Contains("key2"));
-
     EXPECT_EQ(cache.lruList_.size(), 1);
 }
 
 /**
- * @tc.name: MaybeEvictExpired_FullCache_00001
- * @tc.desc: Test automatic expired eviction during Get operation
+ * @tc.name: EvictExpired_DirectCall_00001
+ * @tc.desc: Test direct EvictExpired call removes expired entries from full cache
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(LRUCacheTest, MaybeEvictExpired_FullCache_00001, Function | SmallTest | Level1)
+HWTEST_F(LRUCacheTest, EvictExpired_DirectCall_00001, Function | SmallTest | Level1)
 {
     typename LRUCache<std::string, TestValue>::Config config;
     config.maxSize = 2;
@@ -1209,13 +1259,22 @@ HWTEST_F(LRUCacheTest, MaybeEvictExpired_FullCache_00001, Function | SmallTest |
     cache.Put("key1", TestValue(1, "value1"));
     cache.Put("key2", TestValue(2, "value2"));
 
+    // Expire key1
     cache.nodeTimestamps_["key1"] = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
 
+    // After refactoring: Get does not trigger cleanup, expired entry remains
     TestValue result;
     cache.Get("key2", result);
+    EXPECT_EQ(cache.Size(), 2);
+    EXPECT_TRUE(cache.Contains("key1"));
+    EXPECT_TRUE(cache.Contains("key2"));
 
+    // Directly call EvictExpired to clean up
+    size_t evicted = cache.EvictExpired();
+    EXPECT_EQ(evicted, 1);
     EXPECT_EQ(cache.Size(), 1);
     EXPECT_FALSE(cache.Contains("key1"));
+    EXPECT_TRUE(cache.Contains("key2"));
 }
 
 /**
@@ -1252,4 +1311,164 @@ HWTEST_F(LRUCacheTest, Clear_ResetsTimestamps_00001, Function | SmallTest | Leve
     EXPECT_EQ(cache.nodeTimestamps_.size(), 0);
     auto defaultTimePoint = LRUCache<std::string, TestValue>::TimePoint();
     EXPECT_EQ(cache.lastEvictionTime_, defaultTimePoint);
+}
+
+/**
+ * @tc.name: Get_DoesNotCheckTTL_00001
+ * @tc.desc: Test Get returns expired entry without TTL check (no passive eviction)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Get_DoesNotCheckTTL_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+
+    // Inject expired timestamp
+    cache.nodeTimestamps_["key1"] =
+        LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+
+    // After refactoring: Get does not check TTL, returns expired value
+    TestValue result;
+    bool found = cache.Get("key1", result);
+    EXPECT_TRUE(found);
+    EXPECT_EQ(result.id, 1);
+    EXPECT_EQ(result.name, "value1");
+
+    // Expired entry is not evicted by Get (no passive TTL check)
+    EXPECT_EQ(cache.Size(), 1);
+    EXPECT_TRUE(cache.Contains("key1"));
+}
+
+/**
+ * @tc.name: Put_DoesNotEvictExpired_00001
+ * @tc.desc: Test Put does not trigger passive eviction of expired entries
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Put_DoesNotEvictExpired_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+
+    // Inject expired timestamp on key1
+    cache.nodeTimestamps_["key1"] =
+        LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+
+    // Put a new entry; should not trigger passive eviction of expired key1
+    cache.Put("key2", TestValue(2, "value2"));
+
+    // Both expired and non-expired entries remain in cache (no passive eviction)
+    EXPECT_EQ(cache.Size(), 2);
+    EXPECT_TRUE(cache.Contains("key1"));
+    EXPECT_TRUE(cache.Contains("key2"));
+}
+
+/**
+ * @tc.name: Contains_DoesNotCheckTTL_00001
+ * @tc.desc: Test Contains returns true for expired entry without TTL check
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Contains_DoesNotCheckTTL_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+
+    // Inject expired timestamp
+    cache.nodeTimestamps_["key1"] =
+        LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+
+    // After refactoring: Contains does not check TTL, returns true for expired entry
+    EXPECT_TRUE(cache.Contains("key1"));
+
+    // Size remains unchanged (no passive eviction)
+    EXPECT_EQ(cache.Size(), 1);
+}
+
+/**
+ * @tc.name: GetAllKeys_DoesNotFilterExpired_00001
+ * @tc.desc: Test GetAllKeys returns all keys including expired ones (no TTL filtering)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, GetAllKeys_DoesNotFilterExpired_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+    cache.Put("key2", TestValue(2, "value2"));
+
+    // Expire key1
+    cache.nodeTimestamps_["key1"] =
+        LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+
+    // After refactoring: GetAllKeys does not filter expired entries, returns all keys
+    auto keys = cache.GetAllKeys();
+    EXPECT_EQ(keys.size(), 2);
+    EXPECT_TRUE(std::find(keys.begin(), keys.end(), "key1") != keys.end());
+    EXPECT_TRUE(std::find(keys.begin(), keys.end(), "key2") != keys.end());
+
+    // Cache size remains unchanged (no passive eviction)
+    EXPECT_EQ(cache.Size(), 2);
+}
+
+/**
+ * @tc.name: Peek_DoesNotCheckTTL_00001
+ * @tc.desc: Test Peek returns expired entry without TTL check (timestamp not refreshed)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Peek_DoesNotCheckTTL_00001, Function | SmallTest | Level1)
+{
+    LRUCache<std::string, TestValue> cache;
+    cache.Put("key1", TestValue(1, "value1"));
+
+    // Inject expired timestamp
+    auto expiredTime = LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+    cache.nodeTimestamps_["key1"] = expiredTime;
+
+    // After refactoring: Peek does not check TTL, returns expired value
+    TestValue result;
+    bool found = cache.Peek("key1", result);
+    EXPECT_TRUE(found);
+    EXPECT_EQ(result.id, 1);
+    EXPECT_EQ(result.name, "value1");
+
+    // Timestamp is not refreshed by Peek (Peek does not update access metadata)
+    EXPECT_EQ(cache.nodeTimestamps_["key1"], expiredTime);
+
+    // Size remains unchanged (no passive eviction)
+    EXPECT_EQ(cache.Size(), 1);
+}
+
+/**
+ * @tc.name: Get_Performance_NoTTLCheck_00001
+ * @tc.desc: Test Get hot path performance: 250 lookups on non-expired entries < 1ms (no TTL check)
+ * @tc.type: PERF
+ * @tc.require: issue
+ */
+HWTEST_F(LRUCacheTest, Get_Performance_NoTTLCheck_00001, Performance | MediumTest | Level2)
+{
+    LRUCache<std::string, TestValue> cache;
+    // Fill cache with 500 entries
+    for (int i = 0; i < 500; i++) {
+        cache.Put("key" + std::to_string(i), TestValue(i, "value"));
+    }
+    // Inject expired timestamps for first 250 entries
+    for (int i = 0; i < 250; i++) {
+        cache.nodeTimestamps_["key" + std::to_string(i)] =
+            LRUCache<std::string, TestValue>::Clock::now() - std::chrono::minutes(10);
+    }
+
+    // Measure Get performance on non-expired entries (key250 ~ key499)
+    auto start = std::chrono::steady_clock::now();
+    TestValue out;
+    for (int i = 250; i < 500; i++) {
+        cache.Get("key" + std::to_string(i), out);
+    }
+    auto end = std::chrono::steady_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+
+    // After refactoring: Get does not perform TTL checks, 250 lookups should be < 1ms
+    EXPECT_LT(duration.count(), 1000);
 }

@@ -4540,5 +4540,214 @@ HWTEST_F(NotificationPreferencesTest, GetAllNotificationSwitchInfo_00300, Functi
     NotificationPreferences::GetInstance()->GetAllNotificationSwitchInfo(userId, notificationSwitchInfos);
     EXPECT_GE(notificationSwitchInfos.size(), 0);
 }
+
+/**
+ * @tc.name: StartCacheCleanupTimer_Idempotent_00001
+ * @tc.desc: Test StartCacheCleanupTimer idempotency. Multiple calls should only submit one task;
+ *           the handle should remain unchanged on the second call.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, StartCacheCleanupTimer_Idempotent_00001, Function | SmallTest | Level1)
+{
+    auto prefs = NotificationPreferences::GetInstance();
+    // Ensure initial state is clean (no pending task)
+    prefs->StopCacheCleanupTimer();
+    EXPECT_EQ(static_cast<void*>(prefs->cleanupHandle_), nullptr);
+
+    // First call should submit the delayed ffrt task (handle becomes non-null)
+    prefs->StartCacheCleanupTimer();
+    EXPECT_NE(static_cast<void*>(prefs->cleanupHandle_), nullptr);
+    void* firstHandlePtr = static_cast<void*>(prefs->cleanupHandle_);
+
+    // Second call should be idempotent: handle unchanged, no new task submitted
+    prefs->StartCacheCleanupTimer();
+    EXPECT_EQ(static_cast<void*>(prefs->cleanupHandle_), firstHandlePtr);
+
+    // Stop should cancel the pending task and clear the handle
+    prefs->StopCacheCleanupTimer();
+    EXPECT_EQ(static_cast<void*>(prefs->cleanupHandle_), nullptr);
+}
+
+/**
+ * @tc.name: StopCacheCleanupTimer_CancelsTask_00001
+ * @tc.desc: Test StopCacheCleanupTimer cancels the pending task via ffrt::skip and clears the handle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, StopCacheCleanupTimer_CancelsTask_00001, Function | SmallTest | Level1)
+{
+    auto prefs = NotificationPreferences::GetInstance();
+    // Ensure initial state is clean (no pending task)
+    prefs->StopCacheCleanupTimer();
+    EXPECT_EQ(static_cast<void*>(prefs->cleanupHandle_), nullptr);
+
+    // Start should submit a delayed task (handle becomes non-null)
+    prefs->StartCacheCleanupTimer();
+    EXPECT_NE(static_cast<void*>(prefs->cleanupHandle_), nullptr);
+
+    // Stop should cancel the pending task via ffrt::skip and clear the handle
+    prefs->StopCacheCleanupTimer();
+    EXPECT_EQ(static_cast<void*>(prefs->cleanupHandle_), nullptr);
+}
+
+/**
+ * @tc.name: ClearNotification_StopsTimer_00001
+ * @tc.desc: Test ClearNotificationInRestoreFactorySettings stops the cache cleanup timer.
+ *           AddNotificationSlots should start the timer; clearing should stop it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, ClearNotification_StopsTimer_00001, Function | SmallTest | Level1)
+{
+    auto prefs = NotificationPreferences::GetInstance();
+    // Ensure initial state is clean (no pending task)
+    prefs->StopCacheCleanupTimer();
+    EXPECT_EQ(static_cast<void*>(prefs->cleanupHandle_), nullptr);
+
+    // AddNotificationSlots writes to cache and triggers StartCacheCleanupTimer (idempotent)
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
+    std::vector<sptr<NotificationSlot>> slots;
+    slots.push_back(slot);
+    EXPECT_EQ((int)prefs->AddNotificationSlots(bundleOption_, slots), (int)ERR_OK);
+    EXPECT_NE(static_cast<void*>(prefs->cleanupHandle_), nullptr);
+
+    // ClearNotificationInRestoreFactorySettings should call StopCacheCleanupTimer internally
+    EXPECT_EQ((int)prefs->ClearNotificationInRestoreFactorySettings(), (int)ERR_OK);
+    EXPECT_EQ(static_cast<void*>(prefs->cleanupHandle_), nullptr);
+}
+
+/**
+ * @tc.name: ExecuteCacheCleanup_EvictsExpired_Reschedules_00001
+ * @tc.desc: ExecuteCacheCleanup evicts expired entries and reschedules when cache is non-empty.
+ *           Covers branches: evicted > 0 (true), !cacheEmpty (true).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, ExecuteCacheCleanup_EvictsExpired_Reschedules_00001,
+    Function | SmallTest | Level1)
+{
+    auto prefs = NotificationPreferences::GetInstance();
+    prefs->StopCacheCleanupTimer();
+
+    // Add a non-expired entry so cache stays non-empty after eviction
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
+    std::vector<sptr<NotificationSlot>> slots;
+    slots.push_back(slot);
+    EXPECT_EQ((int)prefs->AddNotificationSlots(bundleOption_, slots), (int)ERR_OK);
+
+    // Inject an expired entry into the cache
+    auto& cache = prefs->preferencesInfo_.bundleCache_;
+    cache.nodeTimestamps_["com.test.app10001"] =
+        std::chrono::steady_clock::now() - std::chrono::minutes(10);
+
+    // Execute cleanup: should evict expired entry and reschedule (cache non-empty)
+    prefs->ExecuteCacheCleanup();
+
+    // Rescheduled: handle should be non-null
+    EXPECT_NE(static_cast<void*>(prefs->cleanupHandle_), nullptr);
+
+    prefs->StopCacheCleanupTimer();
+}
+
+/**
+ * @tc.name: ExecuteCacheCleanup_NoExpired_EmptyCache_Stops_00001
+ * @tc.desc: ExecuteCacheCleanup does not reschedule when cache is empty.
+ *           Covers branches: evicted > 0 (false), !cacheEmpty (false).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, ExecuteCacheCleanup_NoExpired_EmptyCache_Stops_00001,
+    Function | SmallTest | Level1)
+{
+    auto prefs = NotificationPreferences::GetInstance();
+    prefs->StopCacheCleanupTimer();
+    prefs->ClearNotificationInRestoreFactorySettings();
+
+    // Cache is empty, no expired entries
+    EXPECT_TRUE(prefs->preferencesInfo_.IsBundleCacheEmpty());
+
+    // Execute cleanup: should not reschedule (cache empty)
+    prefs->ExecuteCacheCleanup();
+
+    // Not rescheduled: handle should remain null
+    EXPECT_EQ(static_cast<void*>(prefs->cleanupHandle_), nullptr);
+}
+
+/**
+ * @tc.name: ExecuteCacheCleanup_NoExpired_NonEmptyCache_Reschedules_00001
+ * @tc.desc: ExecuteCacheCleanup reschedules when no entries evicted but cache is non-empty.
+ *           Covers branches: evicted > 0 (false), !cacheEmpty (true).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, ExecuteCacheCleanup_NoExpired_NonEmptyCache_Reschedules_00001,
+    Function | SmallTest | Level1)
+{
+    auto prefs = NotificationPreferences::GetInstance();
+    prefs->StopCacheCleanupTimer();
+
+    // Add a non-expired entry
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
+    std::vector<sptr<NotificationSlot>> slots;
+    slots.push_back(slot);
+    EXPECT_EQ((int)prefs->AddNotificationSlots(bundleOption_, slots), (int)ERR_OK);
+
+    // No expired entries in cache
+    EXPECT_FALSE(prefs->preferencesInfo_.IsBundleCacheEmpty());
+
+    // Execute cleanup: no eviction, but cache non-empty → reschedule
+    prefs->ExecuteCacheCleanup();
+
+    // Rescheduled: handle should be non-null
+    EXPECT_NE(static_cast<void*>(prefs->cleanupHandle_), nullptr);
+
+    prefs->StopCacheCleanupTimer();
+}
+
+/**
+ * @tc.name: BuildCloneSlotInfo_EmptySlots_00001
+ * @tc.desc: BuildCloneSlotInfo returns true with empty slots vector when no slot info provided.
+ *           Covers branch: loop body not entered (empty GetSlotInfo).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, BuildCloneSlotInfo_EmptySlots_00001,
+    Function | SmallTest | Level1)
+{
+    auto prefs = NotificationPreferences::GetInstance();
+    NotificationCloneBundleInfo cloneInfo;
+    cloneInfo.SetBundleName("com.test.clone");
+    cloneInfo.SetUid(10001);
+    // No AddSlotInfo called → GetSlotInfo() returns empty vector
+
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    std::vector<sptr<NotificationSlot>> slots;
+
+    EXPECT_TRUE(prefs->BuildCloneSlotInfo(cloneInfo, bundleInfo, slots));
+    EXPECT_TRUE(slots.empty());
+}
+
+/**
+ * @tc.name: BuildCloneSlotInfo_WithSlots_00001
+ * @tc.desc: BuildCloneSlotInfo builds slot objects from clone slot info.
+ *           Covers branches: loop body entered, slotInfo != nullptr (true).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, BuildCloneSlotInfo_WithSlots_00001,
+    Function | SmallTest | Level1)
+{
+    auto prefs = NotificationPreferences::GetInstance();
+    NotificationCloneBundleInfo cloneInfo;
+    cloneInfo.SetBundleName("com.test.clone");
+    cloneInfo.SetUid(10001);
+
+    NotificationCloneBundleInfo::SlotInfo slotInfo;
+    slotInfo.slotType_ = NotificationConstant::SlotType::OTHER;
+    slotInfo.enable_ = true;
+    slotInfo.isForceControl_ = false;
+    slotInfo.authorizedStatus_ = true;
+    cloneInfo.AddSlotInfo(slotInfo);
+
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    std::vector<sptr<NotificationSlot>> slots;
+
+    EXPECT_TRUE(prefs->BuildCloneSlotInfo(cloneInfo, bundleInfo, slots));
+    EXPECT_EQ(slots.size(), 1);
+    EXPECT_NE(slots[0], nullptr);
+}
 }  // namespace Notification
 }  // namespace OHOS

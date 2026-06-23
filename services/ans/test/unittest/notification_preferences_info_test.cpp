@@ -1024,5 +1024,60 @@ HWTEST_F(NotificationPreferencesInfoTest, GetCacheSize_InitialZero_00001, Functi
     std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
     EXPECT_EQ(preferencesInfo->GetCacheSize(), 0);
 }
+
+/**
+ * @tc.name: EvictExpiredBundleCache_00001
+ * @tc.desc: Test EvictExpiredBundleCache evicts expired entries from bundle cache.
+ *           Injects an expired timestamp via #define private public and verifies
+ *           that the forwarding method correctly delegates to bundleCache_.EvictExpired().
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, EvictExpiredBundleCache_00001, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo info;
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("com.test.app");
+    bundleInfo.SetBundleUid(10001);
+    info.SetBundleInfo(bundleInfo);
+
+    // Verify cache is not empty before eviction
+    EXPECT_FALSE(info.IsBundleCacheEmpty());
+
+    // Inject expired timestamp (10 minutes ago, exceeding default 5-minute TTL)
+    // Access bundleCache_.nodeTimestamps_ directly via #define private public
+    std::string bundleKey = "com.test.app10001";
+    info.bundleCache_.nodeTimestamps_[bundleKey] =
+        std::chrono::steady_clock::now() - std::chrono::minutes(10);
+
+    // Call EvictExpiredBundleCache - should evict the expired entry
+    size_t evicted = info.EvictExpiredBundleCache();
+    EXPECT_EQ(evicted, 1);
+
+    // After eviction, cache should be empty
+    EXPECT_TRUE(info.IsBundleCacheEmpty());
+}
+
+/**
+ * @tc.name: IsBundleCacheEmpty_00001
+ * @tc.desc: Test IsBundleCacheEmpty returns correct empty/non-empty status.
+ *           Verifies that the forwarding method correctly delegates to bundleCache_.Empty().
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, IsBundleCacheEmpty_00001, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo info;
+
+    // Empty info should have empty cache
+    EXPECT_TRUE(info.IsBundleCacheEmpty());
+
+    // After SetBundleInfo, cache should not be empty
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("com.test.app");
+    bundleInfo.SetBundleUid(10001);
+    info.SetBundleInfo(bundleInfo);
+    EXPECT_FALSE(info.IsBundleCacheEmpty());
+}
 }
 }

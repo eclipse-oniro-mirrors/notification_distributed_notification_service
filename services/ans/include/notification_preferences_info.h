@@ -401,6 +401,18 @@ public:
     size_t GetCacheSize() const;
     void GetCacheStats(size_t& hitCount, size_t& missCount) const;
 
+    /**
+     * @brief Evict expired entries from the bundle cache.
+     * @return Number of entries evicted.
+     */
+    size_t EvictExpiredBundleCache();
+
+    /**
+     * @brief Check if the bundle cache is empty.
+     * @return true if empty, false otherwise.
+     */
+    bool IsBundleCacheEmpty();
+
 private:
     std::string GenerateBundleKey(const std::string& bundleName, int32_t uid) const;
 

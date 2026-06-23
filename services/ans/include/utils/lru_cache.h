@@ -118,27 +118,10 @@ public:
      */
     bool Get(const K& key, V& value)
     {
-        MaybeEvictExpired();
         auto it = cache_.find(key);
         if (it == cache_.end()) {
             ++missCount_;
             return false;
-        }
-        if (config_.enableTTL) {
-            auto tsIt = nodeTimestamps_.find(key);
-            if (tsIt == nodeTimestamps_.end()) {
-                RemoveInternal(key);
-                ++missCount_;
-                return false;
-            }
-            auto age = Clock::now() - tsIt->second;
-            if (age > config_.ttl) {
-                RemoveInternal(key);
-                ++expireCount_;
-                ++missCount_;
-                return false;
-            }
-            tsIt->second = Clock::now();
         }
         Touch(it);
         value = it->second.value;
@@ -158,19 +141,6 @@ public:
         if (it == cache_.end()) {
             return false;
         }
-        if (config_.enableTTL) {
-            auto tsIt = nodeTimestamps_.find(key);
-            if (tsIt == nodeTimestamps_.end()) {
-                RemoveInternal(key);
-                return false;
-            }
-            auto age = Clock::now() - tsIt->second;
-            if (age > config_.ttl) {
-                RemoveInternal(key);
-                ++expireCount_;
-                return false;
-            }
-        }
         value = it->second.value;
         return true;
     }
@@ -189,7 +159,6 @@ public:
             nodeTimestamps_[key] = Clock::now();
             return;
         }
-        MaybeEvictExpired();
         if (config_.maxSize > 0 && cache_.size() >= config_.maxSize) {
             EvictLRU();
         }
@@ -212,7 +181,6 @@ public:
             nodeTimestamps_[key] = Clock::now();
             return;
         }
-        MaybeEvictExpired();
         if (config_.maxSize > 0 && cache_.size() >= config_.maxSize) {
             EvictLRU();
         }
@@ -250,28 +218,11 @@ public:
 
     /**
      * @brief Check if the cache contains a key.
-     * @return true if the key exists and is not expired, false otherwise.
+     * @return true if the key exists, false otherwise.
      */
     bool Contains(const K& key)
     {
-        auto it = cache_.find(key);
-        if (it == cache_.end()) {
-            return false;
-        }
-        if (config_.enableTTL) {
-            auto tsIt = nodeTimestamps_.find(key);
-            if (tsIt == nodeTimestamps_.end()) {
-                RemoveInternal(key);
-                return false;
-            }
-            auto age = Clock::now() - tsIt->second;
-            if (age > config_.ttl) {
-                RemoveInternal(key);
-                ++expireCount_;
-                return false;
-            }
-        }
-        return true;
+        return cache_.find(key) != cache_.end();
     }
 
     /**
@@ -376,7 +327,6 @@ public:
      */
     std::vector<K> GetAllKeys()
     {
-        MaybeEvictExpired();
         std::vector<K> keys;
         keys.reserve(cache_.size());
         for (const auto& entry : cache_) {
@@ -414,18 +364,6 @@ private:
         lruList_.erase(it->second.listIt);
         cache_.erase(it);
         nodeTimestamps_.erase(key);
-    }
-
-    void MaybeEvictExpired()
-    {
-        if (!config_.enableTTL || nodeTimestamps_.empty()) {
-            return;
-        }
-        auto now = Clock::now();
-        if (lastEvictionTime_ != TimePoint{} && (now - lastEvictionTime_) < config_.ttl) {
-            return;
-        }
-        EvictExpired();
     }
 
 private:
