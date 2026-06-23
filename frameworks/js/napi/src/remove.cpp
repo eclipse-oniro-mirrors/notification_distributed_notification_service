@@ -77,9 +77,16 @@ bool ParseHashcodeTypeParams(
         params.hashcodes = hashcodes;
     } else if (valueType == napi_string) {
         size_t strLen = 0;
-        char str[STR_MAX_SIZE] = {0};
-        NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, argv[PARAM0], str, STR_MAX_SIZE - 1, &strLen), false);
-        params.hashcode = str;
+        NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, argv[PARAM0], nullptr, 0, &strLen), false);
+        if (strLen >= LONG_STR_MAX_SIZE) {
+            ANS_LOGW("hashcode length exceeds limit, truncated.");
+            strLen = LONG_STR_MAX_SIZE - 1;
+        }
+        if (strLen != 0) {
+            std::string str(strLen, '\0');
+            NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, argv[PARAM0], str.data(), strLen + 1, &strLen), false);
+            params.hashcode = str;
+        }
     } else if (valueType == napi_number) {
         int64_t number = 0;
         NAPI_CALL_BASE(env, napi_get_value_int64(env, argv[PARAM0], &number), false);
