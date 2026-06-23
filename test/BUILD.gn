@@ -47,6 +47,7 @@ group("distributed_notification_service_unit_test") {
     "//base/notification/distributed_notification_service/frameworks/extension/test/unittest:unittest",
     "//base/notification/distributed_notification_service/tools:unittest",
     "//base/notification/distributed_notification_service/test/bechmarktest:benchmarktest",
+    "//base/notification/distributed_notification_service/test/unittest/ans_performance_test:unittest",
   ]
 }
 

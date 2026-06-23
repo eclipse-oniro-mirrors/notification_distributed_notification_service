@@ -1210,6 +1210,19 @@ ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(
     return GetAllNotificationEnabledBundlesInner(bundleOption, userId);
 }
 
+bool __attribute__((weak)) NotificationPreferences::GetEnabledForBundleSlots(
+    const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+    int32_t slotType,
+    std::map<sptr<NotificationBundleOption>, bool> &slotEnabled)
+{
+    ANS_LOGD("called");
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        return false;
+    }
+    return preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled);
+}
+
 ErrCode NotificationPreferences::ClearNotificationInRestoreFactorySettings()
 {
     ErrCode result = ERR_OK;

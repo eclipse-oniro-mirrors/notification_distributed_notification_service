@@ -1418,5 +1418,158 @@ HWTEST_F(AnsSlotServiceTest, UpdateVoiceUpdate_00003, Function | SmallTest | Lev
     ASSERT_EQ(ret, (int)ERR_OK);
 }
 
+/**
+ * @tc.name: GetEnabledForBundleSlots_00001
+ * @tc.desc: Test GetEnabledForBundleSlots normal scenario: permission OK + batch query returns correct results.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, GetEnabledForBundleSlots_00001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    const std::string bundleNameEnabled = "SlotsEnabledBundle_00001";
+    const int32_t bundleUidEnabled = 10001;
+    const std::string bundleNameDisabled = "SlotsDisabledBundle_00001";
+    const int32_t bundleUidDisabled = 10002;
+    const NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SERVICE_REMINDER;
+    const int32_t slotTypeInt = static_cast<int32_t>(slotType);
+
+    sptr<NotificationBundleOption> bundleEnabled =
+        new NotificationBundleOption(bundleNameEnabled, bundleUidEnabled);
+    sptr<NotificationSlot> slotEnabled = new NotificationSlot(slotType);
+    slotEnabled->SetEnable(true);
+    std::vector<sptr<NotificationSlot>> slotsEnabled;
+    slotsEnabled.push_back(slotEnabled);
+    ASSERT_EQ(NotificationPreferences::GetInstance()->AddNotificationSlots(bundleEnabled, slotsEnabled),
+        (int)ERR_OK);
+
+    sptr<NotificationBundleOption> bundleDisabled =
+        new NotificationBundleOption(bundleNameDisabled, bundleUidDisabled);
+    sptr<NotificationSlot> slotDisabled = new NotificationSlot(slotType);
+    slotDisabled->SetEnable(false);
+    std::vector<sptr<NotificationSlot>> slotsDisabled;
+    slotsDisabled.push_back(slotDisabled);
+    ASSERT_EQ(NotificationPreferences::GetInstance()->AddNotificationSlots(bundleDisabled, slotsDisabled),
+        (int)ERR_OK);
+
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(bundleEnabled);
+    bundleOptions.push_back(bundleDisabled);
+    std::map<sptr<NotificationBundleOption>, bool> slotEnabledMap;
+    auto ret = advancedNotificationService_->GetEnabledForBundleSlots(
+        bundleOptions, slotTypeInt, slotEnabledMap);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(slotEnabledMap.size(), 2u);
+
+    bool foundEnabled = false;
+    bool foundDisabled = false;
+    for (const auto &entry : slotEnabledMap) {
+        const NotificationBundleOption &opt = *entry.first;
+        int32_t entrySlotType = slotTypeInt;
+        if (opt.GetBundleName() == bundleNameEnabled && opt.GetUid() == bundleUidEnabled &&
+            entrySlotType == slotTypeInt) {
+            EXPECT_TRUE(entry.second);
+            foundEnabled = true;
+        } else if (opt.GetBundleName() == bundleNameDisabled && opt.GetUid() == bundleUidDisabled &&
+            entrySlotType == slotTypeInt) {
+            EXPECT_FALSE(entry.second);
+            foundDisabled = true;
+        }
+    }
+    EXPECT_TRUE(foundEnabled);
+    EXPECT_TRUE(foundDisabled);
+}
+
+/**
+ * @tc.name: GetEnabledForBundleSlots_00002
+ * @tc.desc: Test GetEnabledForBundleSlots permission denied: non-system app returns ERR_ANS_NON_SYSTEM_APP.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, GetEnabledForBundleSlots_00002, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(false);
+
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(new NotificationBundleOption("SlotsNonSystemApp_00002", 20001));
+    int32_t slotType = static_cast<int32_t>(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::map<sptr<NotificationBundleOption>, bool> slotEnabled;
+    auto ret = advancedNotificationService_->GetEnabledForBundleSlots(
+        bundleOptions, slotType, slotEnabled);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
+    EXPECT_EQ(slotEnabled.size(), 0u);
+}
+
+/**
+ * @tc.name: GetEnabledForBundleSlots_00003
+ * @tc.desc: Test GetEnabledForBundleSlots permission denied: missing NOTIFICATION_CONTROLLER
+ *           returns ERR_ANS_PERMISSION_DENIED.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, GetEnabledForBundleSlots_00003, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(new NotificationBundleOption("SlotsNoPermission_00003", 30001));
+    int32_t slotType = static_cast<int32_t>(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::map<sptr<NotificationBundleOption>, bool> slotEnabled;
+    auto ret = advancedNotificationService_->GetEnabledForBundleSlots(
+        bundleOptions, slotType, slotEnabled);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
+    EXPECT_EQ(slotEnabled.size(), 0u);
+}
+
+/**
+ * @tc.name: GetEnabledForBundleSlots_00004
+ * @tc.desc: Test GetEnabledForBundleSlots invalid param: empty bundleOptions returns ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, GetEnabledForBundleSlots_00004, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    int32_t slotType = static_cast<int32_t>(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::map<sptr<NotificationBundleOption>, bool> slotEnabled;
+    auto ret = advancedNotificationService_->GetEnabledForBundleSlots(
+        bundleOptions, slotType, slotEnabled);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
+    EXPECT_EQ(slotEnabled.size(), 0u);
+}
+
+/**
+ * @tc.name: GetEnabledForBundleSlots_00005
+ * @tc.desc: Test GetEnabledForBundleSlots with null bundle option in vector, skipped and returns ERR_OK.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, GetEnabledForBundleSlots_00005, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(nullptr);
+    int32_t slotType = static_cast<int32_t>(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::map<sptr<NotificationBundleOption>, bool> slotEnabled;
+    auto ret = advancedNotificationService_->GetEnabledForBundleSlots(
+        bundleOptions, slotType, slotEnabled);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(slotEnabled.size(), 0u);
+}
+
 }  // namespace Notification
 }  // namespace OHOS

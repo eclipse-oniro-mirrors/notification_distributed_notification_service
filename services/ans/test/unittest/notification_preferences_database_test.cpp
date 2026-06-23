@@ -3526,5 +3526,410 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationSwitchInfo_00200
     bool ret = preferncesDB_->GetAllNotificationSwitchInfo(userId, notificationSwitchInfos);
     EXPECT_TRUE(ret);
 }
+
+/**
+ * @tc.name      : GetEnabledForBundleSlots_00100
+ * @tc.number    : GetEnabledForBundleSlots_00100
+ * @tc.desc      : Test GetEnabledForBundleSlots with empty bundleOptions, return false.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetEnabledForBundleSlots_00100, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    int32_t slotType = static_cast<int32_t>(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::map<sptr<NotificationBundleOption>, bool> slotEnabled;
+    EXPECT_FALSE(preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled));
+    EXPECT_EQ(0u, slotEnabled.size());
+}
+
+/**
+ * @tc.name      : GetEnabledForBundleSlots_00200
+ * @tc.number    : GetEnabledForBundleSlots_00200
+ * @tc.desc      : Test GetEnabledForBundleSlots with null bundle option in vector, skipped and returns true.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetEnabledForBundleSlots_00200, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(nullptr);
+    int32_t slotType = static_cast<int32_t>(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::map<sptr<NotificationBundleOption>, bool> slotEnabled;
+    EXPECT_TRUE(preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled));
+    EXPECT_EQ(0u, slotEnabled.size());
+}
+
+/**
+ * @tc.name      : GetEnabledForBundleSlots_00300
+ * @tc.number    : GetEnabledForBundleSlots_00300
+ * @tc.desc      : Test GetEnabledForBundleSlots with null rdbDataManager, return false.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetEnabledForBundleSlots_00300, Function | SmallTest | Level1)
+{
+    preferncesDB_->rdbDataManager_ = nullptr;
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(new NotificationBundleOption("bundleNullRdb", 1001));
+    int32_t slotType = static_cast<int32_t>(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::map<sptr<NotificationBundleOption>, bool> slotEnabled;
+    EXPECT_FALSE(preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled));
+    EXPECT_EQ(0u, slotEnabled.size());
+}
+
+/**
+ * @tc.name      : GetEnabledForBundleSlots_00400
+ * @tc.number    : GetEnabledForBundleSlots_00400
+ * @tc.desc      : Test GetEnabledForBundleSlots end-to-end: slot enabled=true/false/missing(excluded).
+ *                 Verify ARCH-DEC-008: bundles whose slot is not created (DB key missing) are
+ *                 excluded from the output map. "1" -> true, "0" -> false.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetEnabledForBundleSlots_00400, Function | SmallTest | Level1)
+{
+    const std::string bundleNameEnabled = "slotEnabledBundle";
+    const int32_t bundleUidEnabled = 1001;
+    const std::string bundleNameDisabled = "slotDisabledBundle";
+    const int32_t bundleUidDisabled = 1002;
+    const std::string bundleNameMissing = "slotMissingBundle";
+    const int32_t bundleUidMissing = 1003;
+    const int32_t slotType = static_cast<int32_t>(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+
+    int32_t userId = 0;
+
+    const std::string KEY_SLOT_ENABLED_STR = "enabled";
+    std::string bundleKeyEnabled = bundleNameEnabled + std::to_string(bundleUidEnabled);
+    std::string keyEnabled = preferncesDB_->GenerateSlotKey(
+        bundleKeyEnabled, std::to_string(slotType), KEY_SLOT_ENABLED_STR);
+    std::string bundleKeyDisabled = bundleNameDisabled + std::to_string(bundleUidDisabled);
+    std::string keyDisabled = preferncesDB_->GenerateSlotKey(
+        bundleKeyDisabled, std::to_string(slotType), KEY_SLOT_ENABLED_STR);
+
+    EXPECT_EQ(NativeRdb::E_OK, preferncesDB_->SetKvToDb(keyEnabled, "1", userId));
+    EXPECT_EQ(NativeRdb::E_OK, preferncesDB_->SetKvToDb(keyDisabled, "0", userId));
+
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(new NotificationBundleOption(bundleNameEnabled, bundleUidEnabled));
+    bundleOptions.push_back(new NotificationBundleOption(bundleNameDisabled, bundleUidDisabled));
+    bundleOptions.push_back(new NotificationBundleOption(bundleNameMissing, bundleUidMissing));
+
+    std::map<sptr<NotificationBundleOption>, bool> slotEnabled;
+    EXPECT_TRUE(preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled));
+    EXPECT_EQ(2u, slotEnabled.size());
+
+    bool foundEnabled = false;
+    bool foundDisabled = false;
+    bool foundMissing = false;
+    for (const auto &entry : slotEnabled) {
+        const NotificationBundleOption &opt = *entry.first;
+        int32_t entrySlotType = slotType;
+        if (opt.GetBundleName() == bundleNameEnabled && opt.GetUid() == bundleUidEnabled &&
+            entrySlotType == slotType) {
+            EXPECT_TRUE(entry.second);
+            foundEnabled = true;
+        } else if (opt.GetBundleName() == bundleNameDisabled && opt.GetUid() == bundleUidDisabled &&
+            entrySlotType == slotType) {
+            EXPECT_FALSE(entry.second);
+            foundDisabled = true;
+        } else if (opt.GetBundleName() == bundleNameMissing && opt.GetUid() == bundleUidMissing) {
+            foundMissing = true;
+        }
+    }
+    EXPECT_TRUE(foundEnabled);
+    EXPECT_TRUE(foundDisabled);
+    EXPECT_FALSE(foundMissing);
+}
+
+/**
+ * @tc.name      : GetAllNotificationEnabledBundles_Optimization_00100
+ * @tc.number    : GetAllNotificationEnabledBundles_Optimization_00100
+ * @tc.desc      : Test getAllNotificationEnabledBundles optimization: enabledNotification=1/3 are included,
+ *                 0/2 are excluded. Verifies the OR composite query + string match optimization preserves
+ *                 the enabled-state filtering semantics (ARCH-DEC-003).
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_Optimization_00100,
+    Function | SmallTest | Level1)
+{
+    std::unordered_map<std::string, std::string> datas;
+    datas.insert({"ans_bundle_bundleOnUser1001_enabledNotification",
+        std::to_string(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON))});
+    datas.insert({"ans_bundle_bundleOnSystem1002_enabledNotification",
+        std::to_string(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON))});
+    datas.insert({"ans_bundle_bundleOffUser1003_enabledNotification",
+        std::to_string(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF))});
+    datas.insert({"ans_bundle_bundleOffSystem1004_enabledNotification",
+        std::to_string(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF))});
+
+    std::vector<NotificationBundleOption> bundleOption;
+    bool ret = preferncesDB_->HandleDataBaseMapInner(datas, bundleOption, DEFAULT_USER_ID);
+    ASSERT_TRUE(ret);
+    EXPECT_EQ(2u, bundleOption.size());
+    for (const auto &opt : bundleOption) {
+        EXPECT_NE("bundleOffUser", opt.GetBundleName());
+        EXPECT_NE("bundleOffSystem", opt.GetBundleName());
+    }
+}
+
+/**
+ * @tc.name      : GetAllNotificationEnabledBundles_Optimization_00200
+ * @tc.number    : GetAllNotificationEnabledBundles_Optimization_00200
+ * @tc.desc      : Test getAllNotificationEnabledBundles optimization does not regress: querying the
+ *                 real DB returns true on success (end-to-end smoke test for QueryEnabledBundles).
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_Optimization_00200,
+    Function | SmallTest | Level1)
+{
+    std::vector<NotificationBundleOption> bundleOption;
+    EXPECT_TRUE(preferncesDB_->GetAllNotificationEnabledBundles(bundleOption));
+}
+
+/**
+ * @tc.name      : HandleDataBaseMapInner_StringMatch_00100
+ * @tc.number    : HandleDataBaseMapInner_StringMatch_00100
+ * @tc.desc      : 测试 HandleDataBaseMapInner 从 _enabledNotification 键中解析 bundleName 和 uid
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, HandleDataBaseMapInner_StringMatch_00100,
+    Function | SmallTest | Level1)
+{
+    std::unordered_map<std::string, std::string> datas;
+    datas.insert({"ans_bundle_bundleMatch1001_enabledNotification",
+        std::to_string(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON))});
+
+    std::vector<NotificationBundleOption> bundleOption;
+    bool ret = preferncesDB_->HandleDataBaseMapInner(datas, bundleOption, DEFAULT_USER_ID);
+    ASSERT_TRUE(ret);
+    ASSERT_EQ(1u, bundleOption.size());
+    EXPECT_EQ("bundleMatch", bundleOption[0].GetBundleName());
+    EXPECT_EQ(1001, bundleOption[0].GetUid());
+}
+
+/**
+ * @tc.name      : HandleDataBaseMapInner_StringMatch_00200
+ * @tc.number    : HandleDataBaseMapInner_StringMatch_00200
+ * @tc.desc      : 测试 HandleDataBaseMapInner 跳过非 _enabledNotification 后缀的键
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, HandleDataBaseMapInner_StringMatch_00200,
+    Function | SmallTest | Level1)
+{
+    std::unordered_map<std::string, std::string> datas;
+    datas.insert({"ans_bundle_bundleNoEnable1001_name", "bundleNoEnable"});
+    datas.insert({"ans_bundle_bundleNoEnable1001_uid", "1001"});
+    datas.insert({"other_key_enabledNotification", "1"});
+
+    std::vector<NotificationBundleOption> bundleOption;
+    bool ret = preferncesDB_->HandleDataBaseMapInner(datas, bundleOption, DEFAULT_USER_ID);
+    ASSERT_TRUE(ret);
+    EXPECT_EQ(0u, bundleOption.size());
+}
+
+/**
+ * @tc.name      : HandleDataBaseMapInner_StringMatch_00300
+ * @tc.number    : HandleDataBaseMapInner_StringMatch_00300
+ * @tc.desc      : 测试 HandleDataBaseMapInner 边界保护：长度不超过 prefixLen + suffixLen 的键被跳过
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, HandleDataBaseMapInner_StringMatch_00300,
+    Function | SmallTest | Level1)
+{
+    std::unordered_map<std::string, std::string> datas;
+    datas.insert({"ans_bundle__enabledNotification",
+        std::to_string(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON))});
+
+    std::vector<NotificationBundleOption> bundleOption;
+    bool ret = preferncesDB_->HandleDataBaseMapInner(datas, bundleOption, DEFAULT_USER_ID);
+    ASSERT_TRUE(ret);
+    EXPECT_EQ(0u, bundleOption.size());
+}
+
+/**
+ * @tc.name      : HandleDataBaseMapInner_StringMatch_00400
+ * @tc.number    : HandleDataBaseMapInner_StringMatch_00400
+ * @tc.desc      : Test HandleDataBaseMapInner string matching: multiple _name entries with different
+ *                 enabledNotification states are filtered correctly (1/3 included, 0/2 excluded).
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, HandleDataBaseMapInner_StringMatch_00400,
+    Function | SmallTest | Level1)
+{
+    std::unordered_map<std::string, std::string> datas;
+    datas.insert({"ans_bundle_bundleOn11001_name", "bundleOn1"});
+    datas.insert({"ans_bundle_bundleOn11001_uid", "1001"});
+    datas.insert({"ans_bundle_bundleOn11001_enabledNotification",
+        std::to_string(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON))});
+    datas.insert({"ans_bundle_bundleOn31002_name", "bundleOn3"});
+    datas.insert({"ans_bundle_bundleOn31002_uid", "1002"});
+    datas.insert({"ans_bundle_bundleOn31002_enabledNotification",
+        std::to_string(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON))});
+    datas.insert({"ans_bundle_bundleOff01003_name", "bundleOff0"});
+    datas.insert({"ans_bundle_bundleOff01003_uid", "1003"});
+    datas.insert({"ans_bundle_bundleOff01003_enabledNotification",
+        std::to_string(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF))});
+    datas.insert({"ans_bundle_bundleOff21004_name", "bundleOff2"});
+    datas.insert({"ans_bundle_bundleOff21004_uid", "1004"});
+    datas.insert({"ans_bundle_bundleOff21004_enabledNotification",
+        std::to_string(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF))});
+
+    std::vector<NotificationBundleOption> bundleOption;
+    bool ret = preferncesDB_->HandleDataBaseMapInner(datas, bundleOption, DEFAULT_USER_ID);
+    ASSERT_TRUE(ret);
+    EXPECT_EQ(2u, bundleOption.size());
+}
+
+/**
+ * @tc.name      : ParseBundleNameAndUidFromKey_00100
+ * @tc.number    : ParseBundleNameAndUidFromKey_00100
+ * @tc.desc      : Test ParseBundleNameAndUidFromKey with valid _enabledNotification suffix.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00100,
+    Function | SmallTest | Level1)
+{
+    std::string bundleName;
+    int32_t uid = 0;
+    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
+        "ans_bundle_com.example.app1001_enabledNotification", "_enabledNotification",
+        bundleName, uid);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ("com.example.app", bundleName);
+    EXPECT_EQ(1001, uid);
+}
+
+/**
+ * @tc.name      : ParseBundleNameAndUidFromKey_00200
+ * @tc.number    : ParseBundleNameAndUidFromKey_00200
+ * @tc.desc      : Test ParseBundleNameAndUidFromKey with _name suffix (generic suffix support).
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00200,
+    Function | SmallTest | Level1)
+{
+    std::string bundleName;
+    int32_t uid = 0;
+    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
+        "ans_bundle_bundleTest2001_name", "_name", bundleName, uid);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ("bundleTest", bundleName);
+    EXPECT_EQ(2001, uid);
+}
+
+/**
+ * @tc.name      : ParseBundleNameAndUidFromKey_00300
+ * @tc.number    : ParseBundleNameAndUidFromKey_00300
+ * @tc.desc      : Test ParseBundleNameAndUidFromKey with _slot_type_5_enabled suffix.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00300,
+    Function | SmallTest | Level1)
+{
+    std::string bundleName;
+    int32_t uid = 0;
+    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
+        "ans_bundle_com.example.app3001_slot_type_5_enabled", "_slot_type_5_enabled",
+        bundleName, uid);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ("com.example.app", bundleName);
+    EXPECT_EQ(3001, uid);
+}
+
+/**
+ * @tc.name      : ParseBundleNameAndUidFromKey_00400
+ * @tc.number    : ParseBundleNameAndUidFromKey_00400
+ * @tc.desc      : Test ParseBundleNameAndUidFromKey with invalid prefix returns false.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00400,
+    Function | SmallTest | Level1)
+{
+    std::string bundleName;
+    int32_t uid = 0;
+    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
+        "other_prefix_bundle1001_enabledNotification", "_enabledNotification",
+        bundleName, uid);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name      : ParseBundleNameAndUidFromKey_00500
+ * @tc.number    : ParseBundleNameAndUidFromKey_00500
+ * @tc.desc      : Test ParseBundleNameAndUidFromKey with mismatched suffix returns false.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00500,
+    Function | SmallTest | Level1)
+{
+    std::string bundleName;
+    int32_t uid = 0;
+    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
+        "ans_bundle_bundleTest1001_name", "_enabledNotification", bundleName, uid);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name      : ParseBundleNameAndUidFromKey_00600
+ * @tc.number    : ParseBundleNameAndUidFromKey_00600
+ * @tc.desc      : Test ParseBundleNameAndUidFromKey with key length equal to prefix+suffix returns false.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00600,
+    Function | SmallTest | Level1)
+{
+    std::string bundleName;
+    int32_t uid = 0;
+    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
+        "ans_bundle__enabledNotification", "_enabledNotification", bundleName, uid);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name      : ParseBundleNameAndUidFromKey_00700
+ * @tc.number    : ParseBundleNameAndUidFromKey_00700
+ * @tc.desc      : Test ParseBundleNameAndUidFromKey with no digits in middle part returns false.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00700,
+    Function | SmallTest | Level1)
+{
+    std::string bundleName;
+    int32_t uid = 0;
+    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
+        "ans_bundle_noUidHere_enabledNotification", "_enabledNotification", bundleName, uid);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name      : ParseBundleNameAndUidFromKey_00800
+ * @tc.number    : ParseBundleNameAndUidFromKey_00800
+ * @tc.desc      : Test ParseBundleNameAndUidFromKey with all digits in middle part returns false.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00800,
+    Function | SmallTest | Level1)
+{
+    std::string bundleName;
+    int32_t uid = 0;
+    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
+        "ans_bundle_12345_enabledNotification", "_enabledNotification", bundleName, uid);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name      : ParseBundleNameAndUidFromKey_00900
+ * @tc.number    : ParseBundleNameAndUidFromKey_00900
+ * @tc.desc      : Test ParseBundleNameAndUidFromKey with bundle name containing underscores.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00900,
+    Function | SmallTest | Level1)
+{
+    std::string bundleName;
+    int32_t uid = 0;
+    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
+        "ans_bundle_com_example_app9001_enabledNotification", "_enabledNotification",
+        bundleName, uid);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ("com_example_app", bundleName);
+    EXPECT_EQ(9001, uid);
+}
+
+/**
+ * @tc.name      : ParseBundleNameAndUidFromKey_01000
+ * @tc.number    : ParseBundleNameAndUidFromKey_01000
+ * @tc.desc      : Test ParseBundleNameAndUidFromKey with large uid value.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_01000,
+    Function | SmallTest | Level1)
+{
+    std::string bundleName;
+    int32_t uid = 0;
+    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
+        "ans_bundle_bigUidApp1000000000_enabledNotification", "_enabledNotification",
+        bundleName, uid);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ("bigUidApp", bundleName);
+    EXPECT_EQ(1000000000, uid);
+}
 }  // namespace Notification
 }  // namespace OHOS

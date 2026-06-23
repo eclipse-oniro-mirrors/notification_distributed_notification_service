@@ -17,15 +17,25 @@
 
 #include "ans_inner_errors.h"
 #include "ans_service_errors.h"
+#include "notification_bundle_option.h"
+#include "notification_constant.h"
+#include <map>
+#include <vector>
 
 namespace {
     bool g_mockGetNotificationSlotRet = true;
+    bool g_mockGetEnabledForBundleSlotsRet = true;
     int32_t g_mockDeleteKvFromDbRet = 0;
 }
 
 void MockGetNotificationSlotRet(bool mockRet)
 {
     g_mockGetNotificationSlotRet = mockRet;
+}
+
+void MockGetEnabledForBundleSlotsRet(bool mockRet)
+{
+    g_mockGetEnabledForBundleSlotsRet = mockRet;
 }
 
 void MockDeleteKvFromDb(int32_t mockRet)
@@ -42,6 +52,14 @@ ErrCode NotificationPreferences::GetNotificationSlot(const sptr<NotificationBund
         return ERR_ANS_INNER_INVALID_PARAM;
     }
     return ERR_OK;
+}
+
+bool NotificationPreferences::GetEnabledForBundleSlots(
+    const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+    int32_t slotType,
+    std::map<sptr<NotificationBundleOption>, bool> &slotEnabled)
+{
+    return g_mockGetEnabledForBundleSlotsRet;
 }
 
 ErrCode NotificationPreferences::SetGeofenceEnabled(bool enabled)

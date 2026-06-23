@@ -20,6 +20,7 @@
 #include "singleton.h"
 #include "ffrt_inner.h"
 
+#include "notification_bundle_option.h"
 #include "notification_do_not_disturb_date.h"
 #include "notification_preferences_database.h"
 #include <memory>
@@ -303,6 +304,18 @@ public:
      */
     ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
     ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
+
+    /**
+     * @brief Batch query slot enabled state for multiple bundles.
+     *
+     * @param bundleOptions Indicates the bundle options to query.
+     * @param slotType Indicates the slot type.
+     * @param slotEnabled Indicates the output map from bundle option to enabled state.
+     * @return Return true on success, false on failure.
+     */
+    bool GetEnabledForBundleSlots(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        int32_t slotType,
+        std::map<sptr<NotificationBundleOption>, bool> &slotEnabled);
 
     /**
      * @brief Remove all proferences info from DB.

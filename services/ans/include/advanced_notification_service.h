@@ -1049,6 +1049,18 @@ public:
     ErrCode GetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
         int32_t slotTypeInt, bool &enabled) override;
 
+    /**
+     * @brief Batch queries the enabled state of the specified slot type for multiple bundles.
+     *
+     * @param bundleOptions Indicates the bundle options to query.
+     * @param slotType Indicates the slot type.
+     * @param slotEnabled Indicates the output map from bundle option to enabled state.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetEnabledForBundleSlots(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        int32_t slotType,
+        std::map<sptr<NotificationBundleOption>, bool> &slotEnabled) override;
+
     ErrCode GetEnabledForBundleSlotSelf(int32_t slotTypeInt, bool &enabled) override;
 
     // SystemEvent

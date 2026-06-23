@@ -129,6 +129,13 @@ public:
     /** @brief Query all key-value records. */
     int32_t QueryAllData(std::unordered_map<std::string, std::string> &values, const int32_t &userId = -1);
 
+    /** @brief Query records whose keys are in the given key list (batched IN query). */
+    int32_t QueryDataInKeys(const std::vector<std::string> &keys,
+        std::unordered_map<std::string, std::string> &values, const int32_t &userId = -1);
+
+    /** @brief Query bundle enabled-notification keys (filtered by VALUE IN ('1','3')). */
+    int32_t QueryEnabledBundles(std::unordered_map<std::string, std::string> &values, const int32_t &userId = -1);
+
     /** @brief Drop the per-user table for the given userId, if it exists. */
     int32_t DropUserTable(const int32_t userId);
 

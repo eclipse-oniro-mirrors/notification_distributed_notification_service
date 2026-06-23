@@ -1944,6 +1944,18 @@ public:
 
     static ErrCode GetNotificationSwitch(
         const std::string &switchName, int32_t userId, NotificationConstant::SWITCH_STATE &switchState);
+
+    /**
+     * @brief Batch query whether the notification slot is enabled for multiple bundles.
+     *
+     * @param bundleOptions Indicates the list of bundle name and uid of the applications.
+     * @param slotType Indicates the slot type.
+     * @param slotEnabled Indicates the output map from bundle option to enabled state.
+     * @return Returns get result.
+     */
+    static ErrCode GetEnabledForBundleSlots(const std::vector<NotificationBundleOption> &bundleOptions,
+        const NotificationConstant::SlotType &slotType,
+        std::map<sptr<NotificationBundleOption>, bool> &slotEnabled);
 };
 }  // namespace Notification
 }  // namespace OHOS

@@ -1078,10 +1078,9 @@ bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundlesInner(
         return false;
     }
     std::unordered_map<std::string, std::string> datas;
-    const std::string ANS_BUNDLE_BEGIN = "ans_bundle_";
-    int32_t errCode = rdbDataManager_->QueryDataBeginWithKey(ANS_BUNDLE_BEGIN, datas, userId);
+    int32_t errCode = rdbDataManager_->QueryEnabledBundles(datas, userId);
     if (errCode != NativeRdb::E_OK) {
-        ANS_LOGE("Query data begin with ans_bundle_ from db error");
+        ANS_LOGE("QueryEnabledBundles from db error");
         return false;
     }
     return HandleDataBaseMap(datas, bundleOption, userId);
@@ -1106,44 +1105,110 @@ bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(
     return GetAllNotificationEnabledBundlesInner(bundleOption, userId);
 }
 
+bool NotificationPreferencesDatabase::GetEnabledForBundleSlots(
+    const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+    int32_t slotType,
+    std::map<sptr<NotificationBundleOption>, bool> &slotEnabled)
+{
+    ANS_LOGD("called");
+    if (!CheckRdbStore()) {
+        return false;
+    }
+    if (bundleOptions.empty()) {
+        return false;
+    }
+
+    std::vector<std::string> keys;
+    keys.reserve(bundleOptions.size());
+    std::unordered_map<std::string, size_t> keyToIndex;
+    int32_t firstValidUid = -1;
+    for (size_t i = 0; i < bundleOptions.size(); ++i) {
+        if (bundleOptions[i] == nullptr) {
+            continue;
+        }
+        if (firstValidUid < 0) {
+            firstValidUid = bundleOptions[i]->GetUid();
+        }
+        std::string bundleKey = bundleOptions[i]->GetBundleName() + std::to_string(bundleOptions[i]->GetUid());
+        std::string slotKey = GenerateSlotKey(bundleKey, std::to_string(slotType), KEY_SLOT_ENABLED);
+        keys.push_back(slotKey);
+        keyToIndex[slotKey] = i;
+    }
+    if (keys.empty()) {
+        return true;
+    }
+
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(firstValidUid, userId);
+
+    std::unordered_map<std::string, std::string> results;
+    if (rdbDataManager_->QueryDataInKeys(keys, results, userId) != NativeRdb::E_OK) {
+        return false;
+    }
+
+    for (const auto &entry : results) {
+        auto it = keyToIndex.find(entry.first);
+        if (it == keyToIndex.end()) {
+            continue;
+        }
+        bool enabled = static_cast<bool>(StringToInt(entry.second));
+        slotEnabled[bundleOptions[it->second]] = enabled;
+    }
+    return true;
+}
+
+bool NotificationPreferencesDatabase::ParseBundleNameAndUidFromKey(
+    const std::string &key, const std::string &suffix, std::string &bundleName, int32_t &uid)
+{
+    const std::string prefix = KEY_ANS_BUNDLE + KEY_UNDER_LINE;
+    const size_t prefixLen = prefix.size();
+    const size_t suffixLen = suffix.size();
+    if (key.size() <= prefixLen + suffixLen ||
+        key.compare(0, prefixLen, prefix) != 0 ||
+        key.compare(key.size() - suffixLen, suffixLen, suffix) != 0) {
+        return false;
+    }
+    std::string middle = key.substr(prefixLen, key.size() - prefixLen - suffixLen);
+    size_t uidStart = middle.size();
+    while (uidStart > 0 && std::isdigit(static_cast<unsigned char>(middle[uidStart - 1]))) {
+        uidStart--;
+    }
+    if (uidStart == 0 || uidStart == middle.size()) {
+        return false;
+    }
+    bundleName = middle.substr(0, uidStart);
+    uid = StringToInt(middle.substr(uidStart));
+    return true;
+}
+
 bool NotificationPreferencesDatabase::HandleDataBaseMapInner(
     const std::unordered_map<std::string, std::string> &datas,
     std::vector<NotificationBundleOption> &bundleOption, const int32_t currentUserId)
 {
-    std::regex matchBundlenamePattern("^ans_bundle_(.*)_name$");
-    std::smatch match;
-    constexpr int MIDDLE_KEY = 1;
+    const std::string suffix = KEY_UNDER_LINE + KEY_BUNDLE_ENABLE_NOTIFICATION;
     for (const auto &dataMapItem : datas) {
         const std::string &key = dataMapItem.first;
         const std::string &value = dataMapItem.second;
-        if (!std::regex_match(key, match, matchBundlenamePattern)) {
+        std::string bundleName;
+        int32_t uid = 0;
+        if (!ParseBundleNameAndUidFromKey(key, suffix, bundleName, uid)) {
             continue;
         }
-        std::string matchKey = match[MIDDLE_KEY].str();
-        std::string matchUid = "ans_bundle_" + matchKey + "_uid";
-        std::string matchEnableNotification = "ans_bundle_" + matchKey + "_enabledNotification";
-        auto enableNotificationItem = datas.find(matchEnableNotification);
-        if (enableNotificationItem == datas.end()) {
-            continue;
-        }
+
         NotificationConstant::SWITCH_STATE state = static_cast<NotificationConstant::SWITCH_STATE>(
-            StringToInt(enableNotificationItem->second));
+            StringToInt(value));
         bool enabled = (state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
             state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
         if (enabled) {
-            auto uidItem = datas.find(matchUid);
-            if (uidItem == datas.end()) {
-                continue;
-            }
             int userid = -1;
             ErrCode result =
-                OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(StringToInt(uidItem->second), userid);
+                OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userid);
             if (result != ERR_OK) {
                 return false;
             }
             if (userid == currentUserId || (currentUserId == DEFAULT_USER_ID && userid == ZERO_USER_ID) ||
                 (currentUserId > DEFAULT_USER_ID && userid > ZERO_USER_ID && userid < DEFAULT_USER_ID)) {
-                NotificationBundleOption obj(value, StringToInt(uidItem->second));
+                NotificationBundleOption obj(bundleName, uid);
                 bundleOption.emplace_back(obj);
             }
         }

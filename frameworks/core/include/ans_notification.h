@@ -1933,6 +1933,18 @@ public:
      * @return Returns set result.
      */
     InnerErrorCode SnoozeNotification(const std::string &hashCode, const int64_t delayTime);
+
+    /**
+     * @brief Batch query whether the notification slot is enabled for multiple bundles.
+     *
+     * @param bundleOptions Indicates the list of bundle name and uid of the applications.
+     * @param slotType Indicates the slot type.
+     * @param slotEnabled Indicates the output map from bundle option to enabled state.
+     * @return Returns get result.
+     */
+    InnerErrorCode GetEnabledForBundleSlots(const std::vector<NotificationBundleOption> &bundleOptions,
+        const NotificationConstant::SlotType &slotType,
+        std::map<sptr<NotificationBundleOption>, bool> &slotEnabled);
 private:
     /**
      * @brief Gets Ans Manager proxy.

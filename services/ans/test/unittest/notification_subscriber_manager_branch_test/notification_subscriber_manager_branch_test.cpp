@@ -34,6 +34,7 @@
 extern void MockGetUserId(bool mockRet);
 extern void MockGetBundleName(bool mockRet);
 extern void MockGetNotificationSlotRet(bool mockRet);
+extern void MockGetEnabledForBundleSlotsRet(bool mockRet);
 extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
 extern void MockDeleteKvFromDb(int32_t mockRet);
 
@@ -1251,7 +1252,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
 /**
  * @tc.number  : AdvancedNotificationService_06300
  * @tc.name    : AdvancedNotificationService_06300
- * @tc.desc    : Test GetEnabledForBundleSlot function and result != ERR_OK
+ * @tc.desc    : Test GetEnabledForBundleSlot function and DB query failed
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06300, Function | SmallTest | Level1)
 {
@@ -1262,16 +1263,16 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     int32_t notificationId = 1;
     bundleOption->SetUid(notificationId);
-    MockGetNotificationSlotRet(false);
+    MockGetEnabledForBundleSlotsRet(false);
     AdvancedNotificationService advancedNotificationService;
     ASSERT_EQ(advancedNotificationService.GetEnabledForBundleSlot(bundleOption, slotType, enabled),
-        ERR_ANS_INNER_INVALID_PARAM);
+        ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 
 /**
  * @tc.number  : AdvancedNotificationService_06400
  * @tc.name    : AdvancedNotificationService_06400
- * @tc.desc    : Test GetEnabledForBundleSlot function and slot == nullptr
+ * @tc.desc    : Test GetEnabledForBundleSlot function and slot not found in DB
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06400, Function | SmallTest | Level1)
 {
@@ -1282,9 +1283,10 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     int32_t notificationId = 1;
     bundleOption->SetUid(notificationId);
-    MockGetNotificationSlotRet(true);
+    MockGetEnabledForBundleSlotsRet(true);
     AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.GetEnabledForBundleSlot(bundleOption, slotType, enabled), ERR_OK);
+    ASSERT_EQ(advancedNotificationService.GetEnabledForBundleSlot(bundleOption, slotType, enabled),
+        ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
 }
 
 /**

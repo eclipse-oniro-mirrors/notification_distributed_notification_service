@@ -2227,6 +2227,40 @@ InnerErrorCode AnsNotification::GetEnabledForBundleSlotSelf(
 
     return static_cast<InnerErrorCode>(proxy->GetEnabledForBundleSlotSelf(slotType, enabled));
 }
+
+InnerErrorCode AnsNotification::GetEnabledForBundleSlots(const std::vector<NotificationBundleOption> &bundleOptions,
+    const NotificationConstant::SlotType &slotType,
+    std::map<sptr<NotificationBundleOption>, bool> &slotEnabled)
+{
+    if (bundleOptions.empty()) {
+        ANS_LOGE("Invalid bundle options.");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
+    }
+
+    std::vector<sptr<NotificationBundleOption>> sptrBundleOptions;
+    sptrBundleOptions.reserve(bundleOptions.size());
+    for (const auto &option : bundleOptions) {
+        if (option.GetBundleName().empty()) {
+            ANS_LOGE("Invalid bundle name in batch.");
+            return ERR_ANS_INNER_INVALID_PARAM;
+        }
+        sptr<NotificationBundleOption> bo = new (std::nothrow) NotificationBundleOption(option);
+        if (bo == nullptr) {
+            ANS_LOGE("null bundleOption");
+            return ERR_ANS_INNER_NO_MEMORY;
+        }
+        sptrBundleOptions.emplace_back(std::move(bo));
+    }
+
+    return static_cast<InnerErrorCode>(proxy->GetEnabledForBundleSlots(
+        sptrBundleOptions, static_cast<int32_t>(slotType), slotEnabled));
+}
 #ifdef ANM_SUPPORT_DUMP
 InnerErrorCode AnsNotification::ShellDump(const std::string &cmd, const std::string &bundle, int32_t userId,
     int32_t recvUserId, std::vector<std::string> &dumpInfo)

@@ -16,6 +16,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_SLOT_H
 
 #include "common.h"
+#include "notification_bundle_option.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -202,6 +203,15 @@ struct AsyncCallbackInfoGetNotificationSettings {
     uint32_t slotFlags = 0;
 };
 
+struct AsyncCallbackInfoBatchGetSlotEnabled {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    std::vector<NotificationBundleOption> bundles;
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::OTHER;
+    CallbackPromiseInfo info;
+    std::map<sptr<NotificationBundleOption>, bool> slotEnabled;
+};
+
 napi_value NapiAddSlot(napi_env env, napi_callback_info info);
 napi_value NapiAddSlots(napi_env env, napi_callback_info info);
 napi_value NapiSetSlotByBundle(napi_env env, napi_callback_info info);
@@ -217,6 +227,7 @@ napi_value NapiIsEnableNotificationSlot(napi_env env, napi_callback_info info);
 napi_value NapiSetSlotFlagsByBundle(napi_env env, napi_callback_info info);
 napi_value NapiGetSlotFlagsByBundle(napi_env env, napi_callback_info info);
 napi_value NapiGetNotificationSettings(napi_env env, napi_callback_info info);
+napi_value NapiIsNotificationSlotEnabledByBundles(napi_env env, napi_callback_info info);
 
 napi_value ParseParametersByAddSlot(const napi_env &env, const napi_callback_info &info, ParametersInfoAddSlot &paras);
 napi_value ParseParametersByAddSlots(

@@ -16,6 +16,7 @@
 
 #include "ans_log_wrapper.h"
 #include "sts_common.h"
+#include "sts_notification_manager.h"
 
 namespace OHOS {
 namespace NotificationSts {
@@ -24,7 +25,7 @@ constexpr const char* BUNDLE_OPTION_CLASSNAME = "notification.NotificationCommon
 constexpr const char* GRANTED_BUNDLE_INFO_CLASSNAME = "notification.NotificationCommonDef.GrantedBundleInfoInner";
 }
 
-bool UnwrapBundleOption(ani_env *env, ani_object obj, Notification::NotificationBundleOption& option)
+bool UnwrapBundleOption(ani_env *env, ani_object obj, BundleOption& option)
 {
     ANS_LOGD("UnwrapBundleOption call");
     if (env == nullptr || obj == nullptr) {
@@ -161,7 +162,7 @@ bool SetAniArrayGrantedBundleInfo(
 }
 
 bool UnwrapArrayBundleOption(ani_env *env,
-    ani_ref arrayObj, std::vector<Notification::NotificationBundleOption>& options)
+    ani_ref arrayObj, std::vector<BundleOption>& options)
 {
     ANS_LOGD("UnwrapArrayBundleOption call");
     if (env == nullptr || arrayObj == nullptr) {
@@ -184,7 +185,7 @@ bool UnwrapArrayBundleOption(ani_env *env,
             ANS_LOGE("UnwrapArrayBundleOption: get bundleOptionRef failed, status = %{public}d", status);
             return false;
         }
-        Notification::NotificationBundleOption option;
+        BundleOption option;
         if (!UnwrapBundleOption(env, static_cast<ani_object>(optionRef), option)) {
             ANS_LOGE("UnwrapArrayBundleOption: get option status = %{public}d, index = %{public}d", status, i);
             return false;
@@ -344,7 +345,7 @@ bool UnwrapArrayDistributedBundleOption(ani_env *env, ani_object arrayObj,
             ANS_LOGE("get optionRef failed, status = %{public}d", status);
             return false;
         }
-        Notification::DistributedBundleOption option;
+        DistributedBundleOption option;
         if (!UnwrapDistributedBundleOption(env, static_cast<ani_object>(optionRef), option)) {
             ANS_LOGE("get option failed, index = %{public}d", i);
             return false;
@@ -356,7 +357,7 @@ bool UnwrapArrayDistributedBundleOption(ani_env *env, ani_object arrayObj,
 }
 
 ani_status PreGetBundleMapByAniMap(ani_env *env,
-    ani_ref &val, ani_ref &nextKey, ani_ref &nextVal, Notification::NotificationBundleOption &option)
+    ani_ref &val, ani_ref &nextKey, ani_ref &nextVal, BundleOption &option)
 {
     ani_status status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(nextKey), "value", &val);
     if (status != ANI_OK) {
@@ -377,7 +378,7 @@ ani_status PreGetBundleMapByAniMap(ani_env *env,
 
 template <typename T>
 ani_status GetBundleMapByAniMap(ani_env *env, ani_object &mapObj, NotificationConstant::TypePriorityParam type,
-    std::vector<std::pair<Notification::NotificationBundleOption, T>> &out)
+    std::vector<std::pair<BundleOption, T>> &out)
 {
     ani_status status = ANI_ERROR;
     ani_ref keys;
@@ -407,7 +408,7 @@ ani_status GetBundleMapByAniMap(ani_env *env, ani_object &mapObj, NotificationCo
         }
 
         ani_ref val;
-        Notification::NotificationBundleOption option;
+        BundleOption option;
         if (PreGetBundleMapByAniMap(env, val, nextKey, nextVal, option) != ANI_OK) {
             return ANI_ERROR;
         }
@@ -434,7 +435,7 @@ ani_status GetBundleMapByAniMap(ani_env *env, ani_object &mapObj, NotificationCo
 }
 
 bool WrapBundleOptionMap(ani_env *env, ani_object &outAniObj,
-    const std::map<sptr<Notification::NotificationBundleOption>, bool> &bundleMap)
+    const std::map<sptr<BundleOption>, bool> &bundleMap)
 {
     ANS_LOGD("WrapBundleOptionMap call");
     outAniObj = nullptr;
@@ -467,7 +468,7 @@ bool WrapBundleOptionMap(ani_env *env, ani_object &outAniObj,
 }
 
 bool WrapBundleOptionMap(ani_env *env, ani_object &outAniObj,
-    const std::map<sptr<Notification::NotificationBundleOption>, int64_t> &bundleMap)
+    const std::map<sptr<BundleOption>, int64_t> &bundleMap)
 {
     outAniObj = nullptr;
     outAniObj = CreateMapObject(env, "std.core.Map",
@@ -527,7 +528,7 @@ ani_status PreUnwrapBundleOptionMap(ani_env *env, ani_object &obj)
 }
 
 ani_status UnwrapBundleOptionMap(ani_env *env, ani_object obj,
-    std::vector<std::pair<Notification::NotificationBundleOption, bool>> &bundleMap)
+    std::vector<std::pair<BundleOption, bool>> &bundleMap)
 {
     ani_status status = PreUnwrapBundleOptionMap(env, obj);
     if (status != ANI_OK) {
@@ -540,7 +541,7 @@ ani_status UnwrapBundleOptionMap(ani_env *env, ani_object obj,
 }
 
 ani_status UnwrapBundleOptionMap(ani_env *env, ani_object obj,
-    std::vector<std::pair<Notification::NotificationBundleOption, int64_t>> &bundleMap)
+    std::vector<std::pair<BundleOption, int64_t>> &bundleMap)
 {
     ani_status status = PreUnwrapBundleOptionMap(env, obj);
     if (status != ANI_OK) {

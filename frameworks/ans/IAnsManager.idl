@@ -489,4 +489,9 @@ interface OHOS.Notification.IAnsManager {
     void SetNotificationSwitch([in] String switchName, [in] boolean switchState, [in] int userId);
  
     void GetNotificationSwitch([in] String switchName, [in] int userId, [out] int switchState);
+
+    [ipcoutcapacity 510] void GetEnabledForBundleSlots(
+        [in] sptr<NotificationBundleOption>[] bundleOptions,
+        [in] int slotType,
+        [out] OrderedMap<sptr<NotificationBundleOption>, boolean> slotEnabled);
 }
