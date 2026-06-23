@@ -51,7 +51,7 @@ napi_value HandleAsyncWorkFailure(
     napi_env env, AsyncCallbackNotificationClassificationSwitch *&asyncCallbackInfo, napi_value promise)
 {
     if (asyncCallbackInfo == nullptr) {
-        return Common::NapiGetUndefined(env);
+        return Common::NapiRejectError(env, ERR_ANS_INNER_TASK_ERR);
     }
 
     asyncCallbackInfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
@@ -189,15 +189,14 @@ napi_value NapiSetNotificationSwitch(napi_env env, napi_callback_info info)
     ANS_LOGD("enter");
     NotificationClassificationSwitchParams params {};
     if (ParseSetNotificationSwitchParameters(env, info, params) == nullptr) {
-        return Common::NapiGetUndefined(env);
+        return Common::NapiRejectError(env, ERR_ANS_INNER_INVALID_PARAM);
     }
 
     auto *asyncCallbackInfo = new (std::nothrow) AsyncCallbackNotificationClassificationSwitch {
         .env = env, .asyncWork = nullptr, .params = params
     };
     if (asyncCallbackInfo == nullptr) {
-        Common::NapiThrow(env, ERR_ANS_INNER_NO_MEMORY);
-        return Common::JSParaError(env, nullptr);
+        return Common::NapiRejectError(env, ERR_ANS_INNER_NO_MEMORY);
     }
 
     napi_value promise = nullptr;
@@ -241,15 +240,14 @@ napi_value NapiGetNotificationSwitch(napi_env env, napi_callback_info info)
     ANS_LOGD("enter");
     NotificationClassificationSwitchParams params {};
     if (ParseGetNotificationSwitchParameters(env, info, params) == nullptr) {
-        return Common::NapiGetUndefined(env);
+        return Common::NapiRejectError(env, ERR_ANS_INNER_INVALID_PARAM);
     }
 
     auto *asyncCallbackInfo = new (std::nothrow) AsyncCallbackNotificationClassificationSwitch {
         .env = env, .asyncWork = nullptr, .params = params
     };
     if (asyncCallbackInfo == nullptr) {
-        Common::NapiThrow(env, ERR_ANS_INNER_NO_MEMORY);
-        return Common::JSParaError(env, nullptr);
+        return Common::NapiRejectError(env, ERR_ANS_INNER_NO_MEMORY);
     }
 
     napi_value promise = nullptr;
