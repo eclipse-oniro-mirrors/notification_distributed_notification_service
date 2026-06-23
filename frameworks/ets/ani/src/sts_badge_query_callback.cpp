@@ -21,7 +21,8 @@
 #include "sts_bundle_option.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
-#include "notification_helper.h"
+#include "ans_notification.h"
+#include "singleton.h"
 #include "notification_bundle_option.h"
 #include "sts_convert_other.h"
 #include "ipc_skeleton.h"
@@ -287,12 +288,13 @@ void StsBadgeQueryCallBackManager::AniOnBadgeNumberQuery(ani_env *env, ani_fn_ob
         ANS_LOGE("Add badgeQuery callbackInfo failed");
         return;
     }
-    ErrCode status = ERR_OK;
-    status = NotificationHelper::RegisterBadgeQueryCallback(objectInfo);
-    if (status != ERR_OK) {
+    OHOS::Notification::InnerErrorCode status = OHOS::Notification::ERR_ANS_INNER_OK;
+    status = DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->RegisterBadgeQueryCallback(
+        objectInfo);
+    if (status != OHOS::Notification::ERR_ANS_INNER_OK) {
         ANS_LOGD("AniOnBadgeNumberQuery faild. UserId %{public}d status %{public}d",
             userId, status);
-        OHOS::NotificationSts::ThrowErrorWithCode(env, status);
+        OHOS::NotificationSts::ThrowErrorWithCode(env, static_cast<int32_t>(status));
         return;
     }
     ANS_LOGD("AniOnBadgeNumberQuery end");
@@ -324,12 +326,13 @@ void StsBadgeQueryCallBackManager::AniOffBadgeNumberQuery(ani_env *env)
         return;
     }
 
-    ErrCode status = ERR_OK;
-    status = NotificationHelper::UnRegisterBadgeQueryCallback(callback);
-    if (status != ERR_OK) {
+    OHOS::Notification::InnerErrorCode status = OHOS::Notification::ERR_ANS_INNER_OK;
+    status = DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->UnRegisterBadgeQueryCallback(
+        callback);
+    if (status != OHOS::Notification::ERR_ANS_INNER_OK) {
         ANS_LOGE("AniOffBadgeNumberQuery faild. UserId %{public}d status %{public}d",
             userId, status);
-        OHOS::NotificationSts::ThrowErrorWithCode(env, status);
+        OHOS::NotificationSts::ThrowErrorWithCode(env, static_cast<int32_t>(status));
     }
     callback->Clean(env);
     DelBadgeQueryCallBackInfo(userId);
