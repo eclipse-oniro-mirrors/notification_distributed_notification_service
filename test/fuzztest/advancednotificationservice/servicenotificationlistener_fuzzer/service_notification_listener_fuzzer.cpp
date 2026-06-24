@@ -18,8 +18,6 @@
 #include <thread>
 #include "advanced_notification_service.h"
 #include "ans_permission_def.h"
-#include "ans_subscriber_listener.h"
-#include "notification_subscriber.h"
 #include "mock_notification_request.h"
 #include "mock_notification_bundle_option.h"
 
@@ -30,7 +28,6 @@ namespace Notification {
         auto service = AdvancedNotificationService::GetInstance();
         service->InitPublishProcess();
 
-        auto subscriber = std::make_shared<NotificationSubscriber>();
         sptr<NotificationSubscribeInfo> subscribeInfo = nullptr;
         if (fuzzData->ConsumeBool()) {
             subscribeInfo = new NotificationSubscribeInfo();
