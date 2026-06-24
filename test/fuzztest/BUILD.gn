@@ -110,4 +110,9 @@ group("fuzztest") {
   if (distributed_notification_service_feature_all_scenario_collaboration) {
     deps += [ "notificationextension_fuzzer:NotificationExtensionFuzzTest" ]
   }
+
+  deps += [
+    "notification_common_fuzzer:NotificationCommonFuzzTest",
+    "notification_load_utils_fuzzer:NotificationLoadUtilsFuzzTest",
+  ]
 }
