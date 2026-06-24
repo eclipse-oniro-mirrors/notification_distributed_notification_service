@@ -948,7 +948,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000010
 {
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    EXPECT_EQ((int)advancedNotificationService_->SubscribeNotification(subscriber->GetImpl(),
+    EXPECT_EQ((int)advancedNotificationService_->SubscribeNotification(subscriber->GetImpl(), nullptr,
         subscriber->subscribedFlags_), (int)ERR_OK);
     ASSERT_EQ((int)advancedNotificationService_->SubscribeNotification(nullptr, info, subscriber->subscribedFlags_),
         (int)ERR_ANS_INNER_INVALID_PARAM);
