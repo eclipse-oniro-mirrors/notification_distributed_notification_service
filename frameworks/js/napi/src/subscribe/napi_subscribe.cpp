@@ -133,11 +133,11 @@ void SubscribeNotificationAsyncWork(napi_env env, void *data)
                         callbackinfo->subscriberInfo.pictureOption.preparseLiveViewPicList);
                 subscribeInfo->SetPictureOption(pictureOption);
             }
+            subscribeInfo->SetEnableClassification(callbackinfo->subscriberInfo.enableClassification);
+            subscribeInfo->SetNeedSilentReplayOnSubscribe(callbackinfo->subscriberInfo.needSilentReplayOnSubscribe);
             callbackinfo->info.errorCode =
                 DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotificationV26(
                     callbackinfo->objectInfo, subscribeInfo);
-            subscribeInfo->SetEnableClassification(callbackinfo->subscriberInfo.enableClassification);
-            subscribeInfo->SetNeedSilentReplayOnSubscribe(callbackinfo->subscriberInfo.needSilentReplayOnSubscribe);
         } else {
             callbackinfo->info.errorCode =
                 DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotificationV26(callbackinfo->objectInfo);
