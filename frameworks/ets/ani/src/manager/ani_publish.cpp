@@ -130,7 +130,7 @@ ani_object AniPublish(ani_env *env, ani_object obj, ani_object callback)
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
-    int32_t ret = NotificationSts::UnWarpNotificationRequest(env, obj, asyncCallbackInfo->notificationRequest);
+    InnerErrorCode ret = NotificationSts::UnWarpNotificationRequest(env, obj, asyncCallbackInfo->notificationRequest);
     if (ret != ERR_OK) {
         NotificationSts::HistogramBoolReport("NotificationKit.APICall.publish", false);
         NotificationSts::ThrowErrorWithCode(env, ret);
@@ -178,7 +178,7 @@ ani_object AniPublishWithId(ani_env *env, ani_object obj, ani_int userId, ani_ob
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
-    int32_t ret = NotificationSts::UnWarpNotificationRequest(env, obj, asyncCallbackInfo->notificationRequest);
+    InnerErrorCode ret = NotificationSts::UnWarpNotificationRequest(env, obj, asyncCallbackInfo->notificationRequest);
     if (ret != ERR_OK) {
         NotificationSts::HistogramBoolReport("NotificationKit.APICall.publish", false);
         NotificationSts::ThrowErrorWithCode(env, ret);
@@ -225,7 +225,8 @@ ani_object AniPublishAsBundle(ani_env *env, ani_object request, ani_string repre
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
-    int32_t ret = NotificationSts::UnWarpNotificationRequest(env, request, asyncCallbackInfo->notificationRequest);
+    InnerErrorCode ret = NotificationSts::UnWarpNotificationRequest(
+        env, request, asyncCallbackInfo->notificationRequest);
     if (ret != ERR_OK) {
         NotificationSts::ThrowErrorWithCode(env, ret);
         DeleteCallBackInfo(env, asyncCallbackInfo);
@@ -276,7 +277,8 @@ ani_object AniPublishAsBundleWithBundleOption(ani_env *env, ani_object represent
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
-    int32_t ret = NotificationSts::UnWarpNotificationRequest(env, request, asyncCallbackInfo->notificationRequest);
+    InnerErrorCode ret = NotificationSts::UnWarpNotificationRequest(
+        env, request, asyncCallbackInfo->notificationRequest);
     if (ret != ERR_OK) {
         NotificationSts::ThrowErrorWithCode(env, ret);
         DeleteCallBackInfo(env, asyncCallbackInfo);

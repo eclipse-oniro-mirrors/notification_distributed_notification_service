@@ -42,8 +42,7 @@ bool GetOpenSettingsInfo(ani_env *env, ani_object content, std::shared_ptr<OpenS
     if (ANI_OK != status || stageMode != ANI_TRUE) {
         ANS_LOGE("Only support stage mode");
         std::string msg = "Incorrect parameter types.Only support stage mode.";
-        ANS_LOGE("sts GetOpenSettingsInfo ERROR_PARAM_INVALID");
-        OHOS::NotificationSts::ThrowError(env, ERR_ANS_INNER_INVALID_PARAM, msg);
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return false;
     }
     info->context = OHOS::AbilityRuntime::GetStageModeContext(env, content);

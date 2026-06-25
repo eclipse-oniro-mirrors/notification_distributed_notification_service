@@ -339,106 +339,110 @@ void GetNotificationRequestByNumber(ani_env *env, ani_object obj,
     ANS_LOGD("GetNotificationRequestByNumber end");
 }
 
-int32_t GetNotificationNormalContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+InnerErrorCode GetNotificationNormalContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
 {
     ANS_LOGD("GetNotificationNormalContent start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
         ANS_LOGE("GetNotificationNormalContent failed, has nullptr");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref contentRef = {};
     if (ANI_OK != GetPropertyRef(env, obj, "normal", isUndefined, contentRef)
         || isUndefined == ANI_TRUE || contentRef == nullptr) {
         ANS_LOGE("GetNotificationNormalContent get ref failed");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     UnWarpNotificationNormalContent(env, static_cast<ani_object>(contentRef), normalContent);
     request->SetContent(std::make_shared<NotificationContent>(normalContent));
     ANS_LOGD("GetNotificationNormalContent end");
-    return ERR_OK;
+    return ERR_ANS_INNER_OK;
 }
 
-int32_t GetNotificationLongTextContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+InnerErrorCode GetNotificationLongTextContent(ani_env *env, ani_object obj,
+    std::shared_ptr<NotificationRequest> &request)
 {
     ANS_LOGD("GetNotificationLongTextContent start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
         ANS_LOGE("GetNotificationLongTextContent failed, has nullptr");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref contentRef = {};
     if (ANI_OK != GetPropertyRef(env, obj, "longText", isUndefined, contentRef)
         || isUndefined == ANI_TRUE || contentRef == nullptr) {
         ANS_LOGE("GetNotificationLongTextContent get ref failed");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     std::shared_ptr<NotificationLongTextContent> longTextContent
         = std::make_shared<NotificationLongTextContent>();
     UnWarpNotificationLongTextContent(env, static_cast<ani_object>(contentRef), longTextContent);
     request->SetContent(std::make_shared<NotificationContent>(longTextContent));
     ANS_LOGD("GetNotificationLongTextContent end");
-    return ERR_OK;
+    return ERR_ANS_INNER_OK;
 }
 
-int32_t GetNotificationPictureContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+InnerErrorCode GetNotificationPictureContent(ani_env *env, ani_object obj,
+    std::shared_ptr<NotificationRequest> &request)
 {
     ANS_LOGD("GetNotificationPictureContent start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
         ANS_LOGE("GetNotificationPictureContent failed, has nullptr");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref contentRef = {};
     if (ANI_OK != GetPropertyRef(env, obj, "picture", isUndefined, contentRef)
         || isUndefined == ANI_TRUE || contentRef == nullptr) {
         ANS_LOGE("GetNotificationPictureContent get ref failed");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     std::shared_ptr<NotificationPictureContent> pictureContent
         = std::make_shared<NotificationPictureContent>();
     UnWarpNotificationPictureContent(env, static_cast<ani_object>(contentRef), pictureContent);
     request->SetContent(std::make_shared<NotificationContent>(pictureContent));
     ANS_LOGD("GetNotificationPictureContent end");
-    return ERR_OK;
+    return ERR_ANS_INNER_OK;
 }
 
-int32_t GetNotificationMultiLineContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+InnerErrorCode GetNotificationMultiLineContent(ani_env *env, ani_object obj,
+    std::shared_ptr<NotificationRequest> &request)
 {
     ANS_LOGD("GetNotificationMultiLineContent start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
         ANS_LOGE("GetNotificationMultiLineContent failed, has nullptr");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref contentRef = {};
     if (ANI_OK != GetPropertyRef(env, obj, "multiLine", isUndefined, contentRef)
         || isUndefined == ANI_TRUE || contentRef == nullptr) {
         ANS_LOGE("GetNotificationMultiLineContent get ref failed");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     std::shared_ptr<NotificationMultiLineContent> multiLineContent
         = std::make_shared<NotificationMultiLineContent>();
     UnWarpNotificationMultiLineContent(env, static_cast<ani_object>(contentRef), multiLineContent);
     request->SetContent(std::make_shared<NotificationContent>(multiLineContent));
     ANS_LOGD("GetNotificationMultiLineContent end");
-    return ERR_OK;
+    return ERR_ANS_INNER_OK;
 }
 
-int32_t GetNotificationLocalLiveViewContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+InnerErrorCode GetNotificationLocalLiveViewContent(ani_env *env, ani_object obj,
+    std::shared_ptr<NotificationRequest> &request)
 {
     ANS_LOGD("GetNotificationLocalLiveViewContent start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
         ANS_LOGE("GetNotificationLocalLiveViewContent failed, has nullptr");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref contentRef = {};
     if (ANI_OK != GetPropertyRef(env, obj, "systemLiveView", isUndefined, contentRef)
         || isUndefined == ANI_TRUE || contentRef == nullptr) {
         ANS_LOGE("GetNotificationLocalLiveViewContent get ref failed");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     std::shared_ptr<NotificationLocalLiveViewContent> localLiveView
         = std::make_shared<NotificationLocalLiveViewContent>();
@@ -446,42 +450,43 @@ int32_t GetNotificationLocalLiveViewContent(ani_env *env, ani_object obj, std::s
     status = UnWarpNotificationLocalLiveViewContent(env, static_cast<ani_object>(contentRef), localLiveView);
     if (status != ANI_OK) {
         ANS_LOGE("UnWarpNotificationLocalLiveViewContent failed, status %{public}d", status);
-        return ERROR_PARAM_INVALID;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     request->SetContent(std::make_shared<NotificationContent>(localLiveView));
     ANS_LOGD("GetNotificationLocalLiveViewContent end");
-    return ERR_OK;
+    return ERR_ANS_INNER_OK;
 }
 
-int32_t GetNotificationLiveViewContent(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+InnerErrorCode GetNotificationLiveViewContent(ani_env *env, ani_object obj,
+    std::shared_ptr<NotificationRequest> &request)
 {
     ANS_LOGD("GetNotificationLiveViewContent start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
         ANS_LOGE("GetNotificationLiveViewContent failed, has nullptr");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref contentRef = {};
     if (ANI_OK != GetPropertyRef(env, obj, "liveView", isUndefined, contentRef)
         || isUndefined == ANI_TRUE || contentRef == nullptr) {
         ANS_LOGE("GetNotificationLiveViewContent get ref failed");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     std::shared_ptr<NotificationLiveViewContent> liveViewContent
         = std::make_shared<NotificationLiveViewContent>();
     UnWarpNotificationLiveViewContent(env, static_cast<ani_object>(contentRef), liveViewContent);
     request->SetContent(std::make_shared<NotificationContent>(liveViewContent));
     ANS_LOGD("GetNotificationLiveViewContent end");
-    return ERR_OK;
+    return ERR_ANS_INNER_OK;
 }
 
-int32_t GetNotificationContent(ani_env *env, ani_object obj, ContentType outType,
+InnerErrorCode GetNotificationContent(ani_env *env, ani_object obj, ContentType outType,
     std::shared_ptr<NotificationRequest> &request)
 {
     ANS_LOGD("GetNotificationContentWithType start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
         ANS_LOGE("GetNotificationContent failed, has nullptr");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     ANS_LOGD("GetNotificationContent ContentType = %{public}d", static_cast<int>(outType));
     switch (outType) {
@@ -503,16 +508,16 @@ int32_t GetNotificationContent(ani_env *env, ani_object obj, ContentType outType
             ANS_LOGD("ContentType not find. type %{public}d", static_cast<int32_t>(outType));
             break;
     }
-    return ERR_OK;
+    return ERR_ANS_INNER_OK;
 }
 
-int32_t GetNotificationContent(ani_env *env, ani_object obj,
+InnerErrorCode GetNotificationContent(ani_env *env, ani_object obj,
     std::shared_ptr<NotificationRequest> &request)
 {
     ANS_LOGD("GetNotificationContent start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
         ANS_LOGE("GetNotificationContent failed, has nullptr");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     ani_status status = ANI_OK;
     ani_boolean isUndefined = ANI_TRUE;
@@ -520,27 +525,27 @@ int32_t GetNotificationContent(ani_env *env, ani_object obj,
     if (ANI_OK != (status = GetPropertyRef(env, obj, "content", isUndefined, notificationContentRef))
         || isUndefined == ANI_TRUE) {
         ANS_LOGE("GetNotificationContent:get contentRef failed. status %{public}d", status);
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     ani_ref contentTypeRef;
     if (ANI_OK != (status = GetPropertyRef(env, static_cast<ani_object>(notificationContentRef),
         "notificationContentType", isUndefined, contentTypeRef))
         || isUndefined == ANI_TRUE || contentTypeRef == nullptr) {
         ANS_LOGE("GetNotificationContent:get notificationContentType failed. status %{public}d", status);
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     ContentType type;
     if (!ContentTypeEtsToC(env, static_cast<ani_enum_item>(contentTypeRef), type)) {
         ANS_LOGE("GetNotificationContent:ContentTypeEtsToC failed");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
-    int32_t ret = GetNotificationContent(env, static_cast<ani_object>(notificationContentRef), type, request);
+    InnerErrorCode ret = GetNotificationContent(env, static_cast<ani_object>(notificationContentRef), type, request);
     if (ret != ERR_OK) {
         ANS_LOGE("GetNotificationContent:GetNotificationContent failed");
         return ret;
     }
     ANS_LOGD("GetNotificationContent end");
-    return ERR_OK;
+    return ERR_ANS_INNER_OK;
 }
 
 void GetNotificationSlotType(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
@@ -894,10 +899,10 @@ void GetNotificationGroupInfo(ani_env *env, ani_object obj,
     request->SetGroupInfo(groupInfo);
 }
 
-int32_t GetNotificationRequestByCustom(ani_env *env, ani_object obj,
+InnerErrorCode GetNotificationRequestByCustom(ani_env *env, ani_object obj,
     std::shared_ptr<OHOS::Notification::NotificationRequest> &notificationRequest)
 {
-    int32_t status = GetNotificationContent(env, obj, notificationRequest);
+    InnerErrorCode status = GetNotificationContent(env, obj, notificationRequest);
     if (status != ERR_OK) {
         return status;
     }
@@ -918,22 +923,22 @@ int32_t GetNotificationRequestByCustom(ani_env *env, ani_object obj,
 
     if (!GetNotificationTrigger(env, obj, notificationRequest)) {
         ANS_LOGE("GetNotificationRequestByCustom: get notification trigger failed");
-        return ERROR_PARAM_INVALID;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     GetNotificationFlags(env, obj, notificationRequest);
     GetNotificationGroupInfo(env, obj, notificationRequest);
     return status;
 }
 
-int32_t UnWarpNotificationRequest(ani_env *env, ani_object obj,
+InnerErrorCode UnWarpNotificationRequest(ani_env *env, ani_object obj,
     std::shared_ptr<NotificationRequest> &notificationRequest)
 {
     ANS_LOGD("UnWarpNotificationRequest start");
     if (env == nullptr || obj == nullptr) {
         ANS_LOGE("UnWarpNotificationRequest has nullptr");
-        return ERROR_INTERNAL_ERROR;
+        return ERR_ANS_INNER_TASK_ERR;
     }
-    int32_t status = ERR_OK;
+    InnerErrorCode status = ERR_ANS_INNER_OK;
     GetNotificationRequestByNumber(env, obj, notificationRequest);
     GetNotificationRequestByString(env, obj, notificationRequest);
     GetNotificationRequestByBoolean(env, obj, notificationRequest);

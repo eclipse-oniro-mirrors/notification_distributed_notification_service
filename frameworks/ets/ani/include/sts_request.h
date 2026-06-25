@@ -16,6 +16,7 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_STS_REQUEST_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_STS_REQUEST_H
 #include "ani.h"
+#include "ans_service_errors.h"
 #include "notification.h"
 #include "notification_parameters.h"
 #include "notification_request.h"
@@ -37,7 +38,7 @@ bool WarpNotificationUnifiedGroupInfo(ani_env* env,
     const std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo, ani_object &groupInfoObject);
 bool WrapNotificationParameters(ani_env *env, const sptr<NotificationParameters> parameter, ani_object &parameterObj);
 
-int32_t UnWarpNotificationRequest(
+InnerErrorCode UnWarpNotificationRequest(
     ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &notificationRequest);
 bool WarpNotificationRequest(
     ani_env *env, const NotificationRequest *notificationRequest, ani_class &cls, ani_object &outAniObj);

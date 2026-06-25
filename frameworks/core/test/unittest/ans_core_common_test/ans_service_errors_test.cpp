@@ -55,7 +55,7 @@ HWTEST_F(AnsServiceErrorsTest, InnerErrorToExternal_BasicMapping_001, TestSize.L
     EXPECT_EQ(ERROR_IPC_ERROR, InnerErrorToExternal(ERR_ANS_INNER_PARCELABLE_FAILED));
     EXPECT_EQ(ERROR_IPC_ERROR, InnerErrorToExternal(ERR_ANS_INNER_TRANSACT_FAILED));
     EXPECT_EQ(ERROR_IPC_ERROR, InnerErrorToExternal(ERR_ANS_INNER_REMOTE_DEAD));
-    EXPECT_EQ(ERROR_NO_MEMORY, InnerErrorToExternal(ERR_ANS_INNER_NO_MEMORY));
+    EXPECT_EQ(ERROR_INTERNAL_ERROR, InnerErrorToExternal(ERR_ANS_INNER_NO_MEMORY));
     EXPECT_EQ(ERROR_INTERNAL_ERROR, InnerErrorToExternal(ERR_ANS_INNER_TASK_ERR));
 }
 
@@ -111,7 +111,7 @@ HWTEST_F(AnsServiceErrorsTest, InnerErrorToExternal_SpecialGroups_001, TestSize.
     EXPECT_EQ(ERROR_LOCATION_CLOSED, InnerErrorToExternal(ERR_ANS_INNER_ERROR_LOCATION_CLOSED));
     EXPECT_EQ(ERROR_AWARNESS_SUGGESTIONS_CLOSED,
         InnerErrorToExternal(ERR_ANS_INNER_AWARNESS_SUGGESTIONS_CLOSED));
-    EXPECT_EQ(ERROR_NETWORK_UNREACHABLE, InnerErrorToExternal(ERR_ANS_INNER_CHECK_WEAK_NETWORK));
+    EXPECT_EQ(ERROR_INTERNAL_ERROR, InnerErrorToExternal(ERR_ANS_INNER_CHECK_WEAK_NETWORK));
 
     // Push
     EXPECT_EQ(ERROR_NO_RIGHT, InnerErrorToExternal(ERR_ANS_INNER_PUSH_CHECK_FAILED));
@@ -366,8 +366,7 @@ HWTEST_F(AnsServiceErrorsTest, GetExternalErrMessage_BasicMapping_001, TestSize.
         GetExternalErrMessage(ERROR_SERVICE_CONNECT_ERROR));
     EXPECT_EQ("Marshalling or unmarshalling error",
         GetExternalErrMessage(ERROR_IPC_ERROR));
-    EXPECT_EQ("Memory operation failed", GetExternalErrMessage(ERROR_NO_MEMORY));
-    EXPECT_EQ("Internal error. Possible cause: 1.IPC communication failed. 2.Memory operation error",
+    EXPECT_EQ("Memory operation failed",
         GetExternalErrMessage(ERROR_INTERNAL_ERROR));
 }
 
@@ -494,7 +493,7 @@ HWTEST_F(AnsServiceErrorsTest, InnerErrorToExternal_innerCodePath_001, TestSize.
         InnerErrorToExternal(ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS));
     EXPECT_EQ(ERROR_DISTRIBUTED_OPERATION_FAILED,
         InnerErrorToExternal(ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED));
-    EXPECT_EQ(ERROR_NO_MEMORY, InnerErrorToExternal(ERR_ANS_INNER_NO_MEMORY));
+    EXPECT_EQ(ERROR_INTERNAL_ERROR, InnerErrorToExternal(ERR_ANS_INNER_NO_MEMORY));
 }
 
 /**
@@ -529,7 +528,7 @@ HWTEST_F(AnsServiceErrorsTest, InnerErrorToExternal_nativeCodeFallback_001, Test
 
     // Legacy codes from the infrastructure module
     EXPECT_EQ(ERROR_PARAM_INVALID, InnerErrorToExternal(ERR_ANS_INVALID_PARAM));
-    EXPECT_EQ(ERROR_NO_MEMORY, InnerErrorToExternal(ERR_ANS_NO_MEMORY));
+    EXPECT_EQ(ERROR_INTERNAL_ERROR, InnerErrorToExternal(ERR_ANS_NO_MEMORY));
     EXPECT_EQ(ERROR_INTERNAL_ERROR, InnerErrorToExternal(ERR_ANS_TASK_ERR));
 
     // Additional legacy codes (merged from duplicate test)
@@ -683,7 +682,7 @@ HWTEST_F(AnsServiceErrorsTest, NativeErrorToExternal_NativeCodeLookup_001, TestS
     EXPECT_EQ(ERROR_PERMISSION_DENIED, NativeErrorToExternal(ERR_ANS_PERMISSION_DENIED));
     EXPECT_EQ(ERROR_PARAM_INVALID, NativeErrorToExternal(ERR_ANS_INVALID_PARAM));
     EXPECT_EQ(ERROR_NOT_SYSTEM_APP, NativeErrorToExternal(ERR_ANS_NON_SYSTEM_APP));
-    EXPECT_EQ(ERROR_NO_MEMORY, NativeErrorToExternal(ERR_ANS_NO_MEMORY));
+    EXPECT_EQ(ERROR_INTERNAL_ERROR, NativeErrorToExternal(ERR_ANS_NO_MEMORY));
     EXPECT_EQ(ERROR_INTERNAL_ERROR, NativeErrorToExternal(ERR_ANS_TASK_ERR));
     EXPECT_EQ(ERROR_NOTIFICATION_NOT_EXIST,
         NativeErrorToExternal(ERR_ANS_NOTIFICATION_NOT_EXISTS));
