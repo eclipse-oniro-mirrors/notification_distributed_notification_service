@@ -1283,14 +1283,6 @@ bool AdvancedNotificationService::CheckApiCompatibility(const sptr<NotificationB
 
 void AdvancedNotificationService::OnUserRemoved(const int32_t &userId)
 {
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        std::string message = "not system app.";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 5)
-            .ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP);
-        ReportDeleteFailedEventPush(haMetaMessage, NotificationConstant::USER_REMOVED_REASON_DELETE, message);
-        ANS_LOGE("%{public}s", message.c_str());
-    }
     DeleteAllByUserInner(userId, NotificationConstant::USER_REMOVED_REASON_DELETE, true);
 }
 

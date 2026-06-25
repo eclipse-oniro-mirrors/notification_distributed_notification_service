@@ -722,6 +722,9 @@ void AdvancedNotificationService::ProcessExtensionSubscriptionInfos(
 {
     ANS_LOGD("ffrt enter!");
     for (auto &info : infos) {
+        if (info == nullptr) {
+            continue;
+        }
         if (supportHfp_ && NotificationBluetoothHelper::GetInstance().CheckHfpState(info->GetAddr())) {
             info->SetHfp(true);
         }

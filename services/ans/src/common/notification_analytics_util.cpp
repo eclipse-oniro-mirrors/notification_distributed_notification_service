@@ -912,10 +912,12 @@ std::string NotificationAnalyticsUtil::BuildAnsData(const sptr<NotificationReque
         static_cast<NotificationContent::Type>(request->GetNotificationType()), contentType);
     ansData["slotType"] = static_cast<int32_t>(slotType);
     ansData["contentType"] = std::to_string(static_cast<int32_t>(contentType));
-    ansData["reminderFlags"] = std::to_string(static_cast<int32_t>(request->GetFlags()->GetReminderFlags()));
-    uint32_t controlFlags = request->GetNotificationControlFlags();
     std::shared_ptr<NotificationFlags> tempFlags = request->GetFlags();
-    ansData["ControlFlags"] = SetControlFlags(tempFlags, controlFlags);
+    uint32_t controlFlags = request->GetNotificationControlFlags();
+    if (tempFlags) {
+        ansData["reminderFlags"] = std::to_string(static_cast<int32_t>(request->GetFlags()->GetReminderFlags()));
+        ansData["ControlFlags"] = SetControlFlags(tempFlags, controlFlags);
+    }
     ansData["class"] = request->GetClassification();
     ansData["deviceStatus"] = GetDeviceStatus(request);
     auto now = std::chrono::duration_cast<std::chrono::milliseconds>(

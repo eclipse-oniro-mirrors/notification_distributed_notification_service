@@ -233,6 +233,10 @@ napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_
         napi_status status = OHOS::AbilityRuntime::IsStageContext(env, argv[PARAM0], stageMode);
         if (status == napi_ok && stageMode) {
             auto context = OHOS::AbilityRuntime::GetStageModeContext(env, argv[PARAM0]);
+            if (context == nullptr) {
+                ANS_LOGE("Context is null");
+                return nullptr;
+            }
             sptr<IRemoteObject> callerToken = context->GetToken();
             params.context = context;
         } else {

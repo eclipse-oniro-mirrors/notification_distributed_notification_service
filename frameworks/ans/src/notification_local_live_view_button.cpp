@@ -218,6 +218,10 @@ bool NotificationLocalLiveViewButton::Marshalling(Parcel &parcel) const
     }
 
     for (auto it = buttonIconsResource_.begin(); it != buttonIconsResource_.end(); ++it) {
+        if ((*it) == nullptr) {
+            ANS_LOGE("Button icon resource is null");
+            return false;
+        }
         std::vector<std::string> iconsResource  = {};
         // Insertion cannot be changed, Marshalling and Unmarshalling need to match
         iconsResource.push_back((*it)->bundleName);

@@ -99,7 +99,7 @@ void JsNotificationSubscriberExtension::Init(const std::shared_ptr<AppExecFwk::A
     const sptr<IRemoteObject>& token)
 {
     NotificationSubscriberExtension::Init(record, application, handler, token);
-    if (Extension::abilityInfo_->srcEntrance.empty()) {
+    if (Extension::abilityInfo_ == nullptr || Extension::abilityInfo_->srcEntrance.empty()) {
         ANS_LOGE("srcEntrance of abilityInfo is empty");
         return;
     }
