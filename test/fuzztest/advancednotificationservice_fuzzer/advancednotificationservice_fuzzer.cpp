@@ -22,6 +22,9 @@
 #define private public
 #define protected public
 #include "advanced_notification_service.h"
+#include "notification_trigger.h"
+#include "notification_geofence.h"
+#include "notification_ringtone_info.h"
 #undef private
 #undef protected
 #include "advancednotificationservice_fuzzer.h"
@@ -32,8 +35,12 @@
 #include "mock_notification_bundle_option.h"
 #include "notification_request.h"
 #include "notification_preferences.h"
+#include "want_params.h"
 
 constexpr uint8_t SLOT_TYPE_NUM = 5;
+constexpr int32_t TEST_NOTIFICATION_COUNT = 5;
+constexpr int32_t TEST_CANCELED_NOTIFICATION_COUNT = 3;
+constexpr int32_t TEST_NOTIFICATION_RECORD_COUNT = 3;
 
 namespace OHOS {
 namespace Notification {
@@ -75,7 +82,7 @@ namespace Notification {
         service->TimeToString(fuzzData->ConsumeIntegralInRange<int64_t>(0, 10000));
         service->ShellDump(fuzzData->ConsumeRandomLengthString(), fuzzData->ConsumeRandomLengthString(),
             recvUserId, recvUserId, dumpInfo);
-        
+
         std::vector<std::u16string> args;
         args.push_back(Str8ToStr16("args"));
         std::string result = fuzzData->ConsumeRandomLengthString();
@@ -105,6 +112,34 @@ namespace Notification {
         int32_t userId = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
         service->OnUserRemoved(userId);
         service->OnUserStopped(userId);
+
+        // Prepare notification records for DeleteAllByUserStopped test
+        for (int i = 0; i < TEST_NOTIFICATION_RECORD_COUNT; i++) {
+            sptr<NotificationRequest> delRequest = new NotificationRequest(fuzzData->ConsumeIntegral<int32_t>());
+            delRequest->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+            delRequest->SetReceiverUserId(userId);
+            auto delContent = std::make_shared<NotificationContent>(std::make_shared<NotificationNormalContent>());
+            delRequest->SetContent(delContent);
+            sptr<NotificationBundleOption> delBundle = ObjectBuilder<NotificationBundleOption>::Build(fuzzData);
+            std::shared_ptr<NotificationRecord> delRecord = service->MakeNotificationRecord(delRequest, delBundle);
+            if (delRecord != nullptr) {
+                delRecord->slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+                service->notificationList_.push_back(delRecord);
+            }
+        }
+        // Test with zero user id notifications
+        sptr<NotificationRequest> zeroUserRequest = new NotificationRequest(fuzzData->ConsumeIntegral<int32_t>());
+        zeroUserRequest->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+        zeroUserRequest->SetReceiverUserId(0);
+        auto zeroUserContent = std::make_shared<NotificationContent>(std::make_shared<NotificationNormalContent>());
+        zeroUserRequest->SetContent(zeroUserContent);
+        sptr<NotificationBundleOption> zeroUserBundle = ObjectBuilder<NotificationBundleOption>::Build(fuzzData);
+        std::shared_ptr<NotificationRecord> zeroUserRecord =
+            service->MakeNotificationRecord(zeroUserRequest, zeroUserBundle);
+        if (zeroUserRecord != nullptr) {
+            zeroUserRecord->slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+            service->notificationList_.push_back(zeroUserRecord);
+        }
         service->DeleteAllByUserStopped(userId);
 
         std::string oldKey = fuzzData->ConsumeRandomLengthString();
@@ -215,6 +250,248 @@ namespace Notification {
         bool isAuth = fuzzData->ConsumeBool();
         service->GetDistributedAuthStatus(deviceType, deviceId, uid, isAuth);
         service->SetDistributedAuthStatus(deviceType, deviceId, uid, isAuth);
+
+        return true;
+    }
+
+    bool TestGeofenceTrigger(FuzzedDataProvider *fdp)
+    {
+        int32_t num = fdp->ConsumeIntegralInRange<int32_t>(1, 100);
+        int64_t timeNum = fdp->ConsumeIntegralInRange<int64_t>(1, 10000);
+        bool enabled = fdp->ConsumeBool();
+        std::string str = fdp->ConsumeRandomLengthString();
+        auto service = AdvancedNotificationService::GetInstance();
+
+        // create request with geofence trigger
+        sptr<NotificationRequest> request = new NotificationRequest();
+        request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+        request->SetNotificationId(num);
+
+        // create NotificationTrigger with geofence
+        auto trigger = std::make_shared<NotificationTrigger>();
+        trigger->SetTriggerType(NotificationConstant::TriggerType::TRIGGER_TYPE_FENCE);
+        trigger->SetConfigPath(NotificationConstant::ConfigPath::CONFIG_PATH_DEVICE_CONFIG);
+        trigger->SetDisplayTime(num);
+
+        // create NotificationGeofence
+        auto geofence = std::make_shared<NotificationGeofence>();
+        geofence->SetLatitude(static_cast<double>(fdp->ConsumeIntegralInRange<int32_t>(-90, 90)));
+        geofence->SetLongitude(static_cast<double>(fdp->ConsumeIntegralInRange<int32_t>(-180, 180)));
+        geofence->SetRadius(static_cast<double>(fdp->ConsumeIntegralInRange<int32_t>(0, 1000)));
+        trigger->SetGeofence(geofence);
+
+        request->SetNotificationTrigger(trigger);
+
+        // create bundle and record
+        sptr<NotificationBundleOption> bundle = new NotificationBundleOption(str, num);
+        auto record = service->MakeNotificationRecord(request, bundle);
+        // test SetGeofenceTriggerTimer
+        if (record != nullptr && record->request != nullptr) {
+            service->SetGeofenceTriggerTimer(record);
+            // test StartGeofenceTriggerTimer with various expired time points
+            int64_t expiredTimePoint = timeNum;
+            int32_t reason = NotificationConstant::TRIGGER_GEOFENCE_REASON_DELETE;
+            service->StartGeofenceTriggerTimer(record, expiredTimePoint, reason);
+
+            // test StartGeofenceTriggerTimer with different reasons
+            service->StartGeofenceTriggerTimer(record, expiredTimePoint + 1000,
+                NotificationConstant::TRIGGER_GEOFENCE_REASON_DELETE);
+
+            // test StartGeofenceTriggerTimer with larger expired time
+            service->StartGeofenceTriggerTimer(record, timeNum + 5000, reason);
+
+            // test with record having notification object
+            if (record->notification != nullptr) {
+                service->SetGeofenceTriggerTimer(record);
+            }
+        }
+
+        // test with nullptr trigger
+        sptr<NotificationRequest> nullTriggerRequest = new NotificationRequest();
+        nullTriggerRequest->SetNotificationTrigger(nullptr);
+        auto nullTriggerRecord = service->MakeNotificationRecord(nullTriggerRequest, bundle);
+        if (nullTriggerRecord != nullptr) {
+            service->SetGeofenceTriggerTimer(nullTriggerRecord);
+        }
+
+        // test with different trigger types
+        auto timerTrigger = std::make_shared<NotificationTrigger>();
+        timerTrigger->SetTriggerType(NotificationConstant::TriggerType::TRIGGER_TYPE_FENCE);
+        timerTrigger->SetDisplayTime(num);
+        sptr<NotificationRequest> timerRequest = new NotificationRequest();
+        timerRequest->SetNotificationTrigger(timerTrigger);
+        auto timerRecord = service->MakeNotificationRecord(timerRequest, bundle);
+        if (timerRecord != nullptr) {
+            service->SetGeofenceTriggerTimer(timerRecord);
+        }
+
+        return true;
+    }
+
+    bool TestDisableNotification(FuzzedDataProvider *fdp)
+    {
+        int32_t num = fdp->ConsumeIntegralInRange<int32_t>(1, 100);
+        bool enabled = fdp->ConsumeBool();
+        std::string str = fdp->ConsumeRandomLengthString();
+        auto service = AdvancedNotificationService::GetInstance();
+
+        // test IsDisableNotification with bundleName only
+        bool isDisabled = service->IsDisableNotification(str);
+        isDisabled = service->IsDisableNotification("com.test.bundle");
+
+        // test IsDisableNotification with bundleOption
+        sptr<NotificationBundleOption> bundle = new NotificationBundleOption(str, num);
+        bool isDisabledByBundle = service->IsDisableNotification(bundle);
+
+        // test IsDisableNotification with nullptr bundleOption
+        sptr<NotificationBundleOption> nullBundle = nullptr;
+        bool isDisabledByNull = service->IsDisableNotification(nullBundle);
+
+        // test IsDisableNotification with bundleName and userId
+        int32_t userId = fdp->ConsumeIntegralInRange<int32_t>(0, 100);
+        bool isDisabledByUser = service->IsDisableNotification(str, userId);
+        isDisabledByUser = service->IsDisableNotification(str, 0);
+        isDisabledByUser = service->IsDisableNotification(str, -1);
+
+        // test IsExistRestrictedModeTrustList
+        bool isInTrustList = service->IsExistRestrictedModeTrustList(str, userId);
+        isInTrustList = service->IsExistRestrictedModeTrustList("com.trust.bundle", userId);
+        isInTrustList = service->IsExistRestrictedModeTrustList(str, 0);
+        isInTrustList = service->IsExistRestrictedModeTrustList(str, -1);
+
+        // test ClearSlotTypeData with various source types
+        sptr<NotificationRequest> clearRequest = new NotificationRequest();
+        clearRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+        clearRequest->SetOwnerUid(num);
+        clearRequest->SetCreatorUid(num);
+        clearRequest->SetNotificationId(num);
+        auto liveContent = std::make_shared<NotificationLiveViewContent>();
+        clearRequest->SetContent(std::make_shared<NotificationContent>(liveContent));
+
+        // test ClearSlotTypeData with CLEAR_SLOT_FROM_AVSEESAION (1)
+        service->ClearSlotTypeData(clearRequest, num, 1);
+
+        // test ClearSlotTypeData with CLEAR_SLOT_FROM_RSS (2)
+        service->ClearSlotTypeData(clearRequest, num, 2);
+
+        // test ClearSlotTypeData with invalid source type
+        service->ClearSlotTypeData(clearRequest, num, 0);
+        service->ClearSlotTypeData(clearRequest, num, 3);
+        service->ClearSlotTypeData(clearRequest, num, -1);
+
+        // test ClearSlotTypeData with nullptr request
+        service->ClearSlotTypeData(nullptr, num, 1);
+
+        // test PublishExtensionServiceStateChange with various event codes
+        sptr<NotificationBundleOption> extBundle = new NotificationBundleOption(str, num);
+        std::vector<sptr<NotificationBundleOption>> enabledBundles;
+        enabledBundles.push_back(bundle);
+
+        // test with USER_GRANTED_STATE
+        service->PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_STATE,
+            extBundle, enabled, enabledBundles);
+
+        // test with USER_GRANTED_BUNDLE_STATE
+        service->PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_BUNDLE_STATE,
+            extBundle, enabled, enabledBundles);
+
+        // test with EXTENSION_ABILITY_ADDED
+        service->PublishExtensionServiceStateChange(NotificationConstant::EXTENSION_ABILITY_ADDED,
+            extBundle, enabled, enabledBundles);
+
+        // test with EXTENSION_ABILITY_REMOVED
+        service->PublishExtensionServiceStateChange(NotificationConstant::EXTENSION_ABILITY_REMOVED,
+            extBundle, enabled, enabledBundles);
+
+        // test with invalid event code
+        service->PublishExtensionServiceStateChange(
+            static_cast<NotificationConstant::EventCodeType>(0), extBundle, enabled, enabledBundles);
+        service->PublishExtensionServiceStateChange(
+            static_cast<NotificationConstant::EventCodeType>(5), extBundle, enabled, enabledBundles);
+
+        // test with nullptr bundleOption
+        service->PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_STATE,
+            nullBundle, enabled, enabledBundles);
+
+        // test with empty enabledBundles
+        std::vector<sptr<NotificationBundleOption>> emptyBundles;
+        service->PublishExtensionServiceStateChange(NotificationConstant::USER_GRANTED_BUNDLE_STATE,
+            extBundle, enabled, emptyBundles);
+
+        return true;
+    }
+
+    bool TestRingtone(FuzzedDataProvider *fdp)
+    {
+        int32_t num = fdp->ConsumeIntegralInRange<int32_t>(1, 100);
+        std::string str = fdp->ConsumeRandomLengthString();
+        std::string str2 = fdp->ConsumeRandomLengthString();
+        std::string str3 = fdp->ConsumeRandomLengthString();
+        auto service = AdvancedNotificationService::GetInstance();
+
+        // test ClearOverTimeRingToneInfo
+        service->ClearOverTimeRingToneInfo();
+
+        // test ClearRingtoneByApplication with empty vector
+        std::vector<NotificationRingtoneInfo> emptyRingtoneInfos;
+        int32_t userId = fdp->ConsumeIntegralInRange<int32_t>(0, 100);
+        service->ClearRingtoneByApplication(userId, emptyRingtoneInfos);
+
+        // test ClearRingtoneByApplication with ringtone infos
+        std::vector<NotificationRingtoneInfo> ringtoneInfos;
+
+        // create ringtone info with RINGTONE_TYPE_LOCAL
+        NotificationRingtoneInfo localRingtone;
+        localRingtone.SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+        localRingtone.SetRingtoneTitle(str);
+        localRingtone.SetRingtoneFileName(str2);
+        localRingtone.SetRingtoneUri(str3);
+        ringtoneInfos.push_back(localRingtone);
+
+        // create ringtone info with RINGTONE_TYPE_ONLINE
+        NotificationRingtoneInfo onlineRingtone;
+        onlineRingtone.SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE);
+        onlineRingtone.SetRingtoneTitle(fdp->ConsumeRandomLengthString());
+        onlineRingtone.SetRingtoneFileName(fdp->ConsumeRandomLengthString());
+        onlineRingtone.SetRingtoneUri(fdp->ConsumeRandomLengthString());
+        ringtoneInfos.push_back(onlineRingtone);
+
+        // create ringtone info with RINGTONE_TYPE_SYSTEM
+        NotificationRingtoneInfo systemRingtone;
+        systemRingtone.SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_SYSTEM);
+        systemRingtone.SetRingtoneTitle(fdp->ConsumeRandomLengthString());
+        systemRingtone.SetRingtoneFileName(fdp->ConsumeRandomLengthString());
+        systemRingtone.SetRingtoneUri(fdp->ConsumeRandomLengthString());
+        ringtoneInfos.push_back(systemRingtone);
+
+        // create ringtone info with RINGTONE_TYPE_BUTT
+        NotificationRingtoneInfo buttRingtone;
+        buttRingtone.SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT);
+        buttRingtone.SetRingtoneTitle(fdp->ConsumeRandomLengthString());
+        buttRingtone.SetRingtoneFileName(fdp->ConsumeRandomLengthString());
+        buttRingtone.SetRingtoneUri(fdp->ConsumeRandomLengthString());
+        ringtoneInfos.push_back(buttRingtone);
+
+        // test ClearRingtoneByApplication with ringtone infos
+        service->ClearRingtoneByApplication(userId, ringtoneInfos);
+
+        // test ClearRingtoneByApplication with userId = 0
+        service->ClearRingtoneByApplication(0, ringtoneInfos);
+
+        // test ClearRingtoneByApplication with userId = -1
+        service->ClearRingtoneByApplication(-1, ringtoneInfos);
+
+        // test ClearRingtoneByApplication with empty ringtoneUri
+        std::vector<NotificationRingtoneInfo> emptyUriRingtoneInfos;
+        NotificationRingtoneInfo emptyUriRingtone;
+        emptyUriRingtone.SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+        emptyUriRingtone.SetRingtoneUri("");
+        emptyUriRingtoneInfos.push_back(emptyUriRingtone);
+        service->ClearRingtoneByApplication(userId, emptyUriRingtoneInfos);
+
+        // test ClearOverTimeRingToneInfo multiple times
+        service->ClearOverTimeRingToneInfo();
+        service->ClearOverTimeRingToneInfo();
 
         return true;
     }
@@ -413,6 +690,9 @@ namespace Notification {
         service->ClearAllNotificationGroupInfo(localSwitch);
         service->IsDistributedEnabledBySlot(slotType, deviceType, enabled);
 
+        TestGeofenceTrigger(fuzzData);
+        TestDisableNotification(fuzzData);
+        TestRingtone(fuzzData);
         DoTestForAdvancedNotificationUtils(service, fuzzData);
         DoTestForAdvancedNotificationService(service, fuzzData);
         return true;
@@ -457,6 +737,313 @@ namespace Notification {
         service->OnDistributedUpdate(randomString, randomString, request);
         service->OnDistributedDelete(randomString, randomString, randomString, randomInt32);
 #endif
+
+        // test PrePublishRequest
+        sptr<NotificationRequest> prePubRequest = new NotificationRequest();
+        prePubRequest->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+        prePubRequest->SetCreatorUid(fuzzData->ConsumeIntegralInRange<int32_t>(1, 100));
+        prePubRequest->SetReceiverUserId(fuzzData->ConsumeIntegralInRange<int32_t>(0, 100));
+        prePubRequest->SetCreatorUserId(fuzzData->ConsumeIntegralInRange<int32_t>(0, 100));
+        prePubRequest->SetDeliveryTime(fuzzData->ConsumeIntegralInRange<int64_t>(0, 100000));
+        auto prePubContent = std::make_shared<NotificationContent>(std::make_shared<NotificationNormalContent>());
+        prePubRequest->SetContent(prePubContent);
+        service->PrePublishRequest(prePubRequest);
+
+        // test PrePublishRequest with negative creator uid
+        sptr<NotificationRequest> negUidRequest = new NotificationRequest();
+        negUidRequest->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+        negUidRequest->SetCreatorUid(-1);
+        negUidRequest->SetDeliveryTime(-1);
+        auto negUidContent = std::make_shared<NotificationContent>(std::make_shared<NotificationNormalContent>());
+        negUidRequest->SetContent(negUidContent);
+        service->PrePublishRequest(negUidRequest);
+
+        // test SendNotificationsOnCanceled
+        std::vector<sptr<Notification>> canceledNotifications;
+        for (int i = 0; i < TEST_CANCELED_NOTIFICATION_COUNT; i++) {
+            sptr<NotificationRequest> cancelReq = new NotificationRequest(fuzzData->ConsumeIntegral<int32_t>());
+            cancelReq->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+            auto cancelReqContent =
+                std::make_shared<NotificationContent>(std::make_shared<NotificationNormalContent>());
+            cancelReq->SetContent(cancelReqContent);
+            sptr<Notification> cancelNotification = new Notification(cancelReq);
+            canceledNotifications.push_back(cancelNotification);
+        }
+        sptr<NotificationSortingMap> sortingMap = new NotificationSortingMap();
+        int32_t deleteReason = fuzzData->ConsumeIntegralInRange<int32_t>(0, 10);
+        service->SendNotificationsOnCanceled(canceledNotifications, sortingMap, deleteReason);
+
+        // test SendNotificationsOnCanceled with empty notifications
+        std::vector<sptr<Notification>> emptyCanceledNotifications;
+        service->SendNotificationsOnCanceled(emptyCanceledNotifications, nullptr, deleteReason);
+
+        // test UpdateNotificationSwitchState
+        AppExecFwk::BundleInfo bundleInfo;
+        bundleInfo.applicationInfo.bundleName = randomString;
+        bundleInfo.uid = randomInt32;
+        bundleInfo.applicationInfo.allowEnableNotification = fuzzData->ConsumeBool();
+        service->UpdateNotificationSwitchState(bundleOption, bundleInfo);
+
+        // test InitNotificationStatistics
+        service->InitNotificationStatistics();
+
+        // test RecoverAncoApplicationUserId
+        int32_t ancoUserId = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
+        service->RecoverAncoApplicationUserId(ancoUserId);
+
+        // test ResetDistributedEnabled
+        service->ResetDistributedEnabled();
+
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+        // test GenerateCloneValidBundleOption with valid bundleOption
+        sptr<NotificationBundleOption> cloneBundleOption = ObjectBuilder<NotificationBundleOption>::Build(fuzzData);
+        cloneBundleOption->SetAppIndex(fuzzData->ConsumeIntegralInRange<int32_t>(0, 5));
+        cloneBundleOption->SetInstanceKey(fuzzData->ConsumeRandomLengthString());
+        sptr<NotificationBundleOption> validCloneBundle = service->GenerateCloneValidBundleOption(cloneBundleOption);
+
+        // test GenerateCloneValidBundleOption with nullptr
+        sptr<NotificationBundleOption> nullBundleOption = nullptr;
+        sptr<NotificationBundleOption> nullResult = service->GenerateCloneValidBundleOption(nullBundleOption);
+
+        // test GenerateCloneValidBundleOption with empty bundle name
+        sptr<NotificationBundleOption> emptyNameBundle = new NotificationBundleOption("", randomInt32);
+        sptr<NotificationBundleOption> emptyNameResult = service->GenerateCloneValidBundleOption(emptyNameBundle);
+#endif
+
+        // test FillRequestByKeys with various scenarios
+        sptr<NotificationRequest> oldRequest = new NotificationRequest();
+        oldRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+        auto liveContent = std::make_shared<NotificationLiveViewContent>();
+        auto extraInfo = std::make_shared<AAFwk::WantParams>();
+        liveContent->SetExtraInfo(extraInfo);
+        auto liveViewContent = std::make_shared<NotificationContent>(liveContent);
+        oldRequest->SetContent(liveViewContent);
+        std::vector<std::string> keys = {"key1", "key2", "invalid_key"};
+        sptr<NotificationRequest> newRequest;
+        service->FillRequestByKeys(oldRequest, keys, newRequest);
+
+        // test FillRequestByKeys with empty keys
+        std::vector<std::string> emptyKeys;
+        sptr<NotificationRequest> newRequest2;
+        service->FillRequestByKeys(oldRequest, emptyKeys, newRequest2);
+
+        // test FillRequestByKeys with non-existent keys
+        std::vector<std::string> nonExistKeys = {"non_exist_key1", "non_exist_key2"};
+        sptr<NotificationRequest> newRequest3;
+        service->FillRequestByKeys(oldRequest, nonExistKeys, newRequest3);
+
+        // test onBundleRemovedByUserId
+        int32_t userId = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
+        service->onBundleRemovedByUserId(bundleOption, userId);
+
+        // test IsAllowedGetNotificationByFilter with matching bundleOption
+        sptr<NotificationRequest> filterRequest = new NotificationRequest();
+        filterRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+        auto filterContent = std::make_shared<NotificationLiveViewContent>();
+        filterRequest->SetContent(std::make_shared<NotificationContent>(filterContent));
+        filterRequest->SetOwnerUid(randomInt32);
+        filterRequest->SetCreatorUid(randomInt32);
+        std::shared_ptr<NotificationRecord> filterRecord = service->MakeNotificationRecord(filterRequest, bundleOption);
+        if (filterRecord != nullptr && filterRecord->bundleOption != nullptr) {
+            sptr<NotificationBundleOption> matchingBundleOption = new NotificationBundleOption(
+                filterRecord->bundleOption->GetBundleName(), filterRecord->bundleOption->GetUid());
+            service->IsAllowedGetNotificationByFilter(filterRecord, matchingBundleOption);
+            // test with non-matching bundleOption
+            sptr<NotificationBundleOption> nonMatchingBundleOption = new NotificationBundleOption(
+                "non.matching.bundle", randomInt32 + 1000);
+            service->IsAllowedGetNotificationByFilter(filterRecord, nonMatchingBundleOption);
+        }
+
+        // test ExecBatchCancel with empty notifications
+        std::vector<sptr<Notification>> emptyNotifications;
+        int32_t reason = fuzzData->ConsumeIntegral<int32_t>();
+        service->ExecBatchCancel(emptyNotifications, reason);
+
+        // test ExecBatchCancel with notifications
+        std::vector<sptr<Notification>> notifications;
+        for (int i = 0; i < TEST_NOTIFICATION_COUNT; i++) {
+            sptr<NotificationRequest> req = new NotificationRequest(fuzzData->ConsumeIntegral<int32_t>());
+            req->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+            auto reqContent = std::make_shared<NotificationContent>(std::make_shared<NotificationNormalContent>());
+            req->SetContent(reqContent);
+            sptr<Notification> notification = new Notification(req);
+            notifications.push_back(notification);
+        }
+        service->ExecBatchCancel(notifications, reason);
+
+        // test RemoveDoNotDisturbProfileTrustList (single parameter version)
+        service->RemoveDoNotDisturbProfileTrustList(bundleOption);
+
+        // test RemoveDoNotDisturbProfileTrustList (two parameter version)
+        service->RemoveDoNotDisturbProfileTrustList(bundleOption, userId);
+
+        // test OnBundleDataUpdate
+        service->OnBundleDataUpdate(bundleOption);
+
+        // test GetTargetRecordList with empty result
+        std::vector<std::shared_ptr<NotificationRecord>> targetRecordList;
+        int32_t targetUid = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
+        int32_t targetPid = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
+        NotificationConstant::SlotType targetSlotType = NotificationConstant::SlotType::LIVE_VIEW;
+        NotificationContent::Type contentType = NotificationContent::Type::LIVE_VIEW;
+        service->GetTargetRecordList(targetUid, targetPid, targetSlotType, contentType, targetRecordList);
+
+        // test GetTargetRecordList with matching records
+        sptr<NotificationRequest> targetRequest = new NotificationRequest(fuzzData->ConsumeIntegral<int32_t>());
+        targetRequest->SetSlotType(targetSlotType);
+        targetRequest->SetCreatorUid(targetUid);
+        targetRequest->SetCreatorPid(targetPid);
+        auto targetLiveContent = std::make_shared<NotificationLiveViewContent>();
+        targetRequest->SetContent(std::make_shared<NotificationContent>(targetLiveContent));
+        sptr<NotificationBundleOption> targetBundle = ObjectBuilder<NotificationBundleOption>::Build(fuzzData);
+        std::shared_ptr<NotificationRecord> targetRecord = service->MakeNotificationRecord(targetRequest, targetBundle);
+        if (targetRecord != nullptr) {
+            targetRecord->slot = new NotificationSlot(targetSlotType);
+            service->notificationList_.push_back(targetRecord);
+            std::vector<std::shared_ptr<NotificationRecord>> matchRecordList;
+            service->GetTargetRecordList(targetUid, targetPid, targetSlotType, contentType, matchRecordList);
+        }
+
+        // test GetCommonTargetRecordList with empty result
+        std::vector<std::shared_ptr<NotificationRecord>> commonRecordList;
+        int32_t commonUid = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
+        NotificationConstant::SlotType commonSlotType = NotificationConstant::SlotType::LIVE_VIEW;
+        NotificationContent::Type commonContentType = NotificationContent::Type::LIVE_VIEW;
+        service->GetCommonTargetRecordList(commonUid, commonSlotType, commonContentType, commonRecordList);
+
+        // test GetCommonTargetRecordList with common live view records
+        sptr<NotificationRequest> commonRequest = new NotificationRequest(fuzzData->ConsumeIntegral<int32_t>());
+        commonRequest->SetSlotType(commonSlotType);
+        commonRequest->SetCreatorUid(commonUid);
+        auto commonLiveViewContent = std::make_shared<NotificationLiveViewContent>();
+        commonLiveViewContent->SetIsOnlyLocalUpdate(true);
+        commonRequest->SetContent(std::make_shared<NotificationContent>(commonLiveViewContent));
+        sptr<NotificationBundleOption> commonBundle = ObjectBuilder<NotificationBundleOption>::Build(fuzzData);
+        std::shared_ptr<NotificationRecord> commonRecord = service->MakeNotificationRecord(commonRequest, commonBundle);
+        if (commonRecord != nullptr) {
+            commonRecord->slot = new NotificationSlot(commonSlotType);
+            service->notificationList_.push_back(commonRecord);
+            std::vector<std::shared_ptr<NotificationRecord>> matchCommonRecordList;
+            service->GetCommonTargetRecordList(commonUid, commonSlotType, commonContentType, matchCommonRecordList);
+        }
+
+        // test PrepareContinuousTaskNotificationRequest
+        sptr<NotificationRequest> continuousRequest = new NotificationRequest();
+        continuousRequest->SetSlotType(NotificationConstant::SlotType::SERVICE_REMINDER);
+        continuousRequest->SetDeliveryTime(fuzzData->ConsumeIntegralInRange<int64_t>(0, 100000));
+        int32_t continuousUid = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
+        service->PrepareContinuousTaskNotificationRequest(continuousRequest, continuousUid);
+
+        // test PrepareContinuousTaskNotificationRequest with negative delivery time
+        sptr<NotificationRequest> negativeTimeRequest = new NotificationRequest();
+        negativeTimeRequest->SetSlotType(NotificationConstant::SlotType::SERVICE_REMINDER);
+        negativeTimeRequest->SetDeliveryTime(-1);
+        service->PrepareContinuousTaskNotificationRequest(negativeTimeRequest, continuousUid);
+
+        // test UpdateAncoBundleUserId
+        sptr<NotificationBundleOption> ancoBundleOption = ObjectBuilder<NotificationBundleOption>::Build(fuzzData);
+        service->UpdateAncoBundleUserId(ancoBundleOption);
+
+        // test UpdateCloneBundleInfoForRingtone
+        NotificationRingtoneInfo ringtoneInfo;
+        NotificationRingtoneInfo buttRingtoneInfo;
+        NotificationCloneBundleInfo cloneBundleInfoForRingtone;
+        cloneBundleInfoForRingtone.SetBundleName(randomString);
+        cloneBundleInfoForRingtone.SetUid(randomInt32);
+        int32_t ringtoneUserId = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
+        service->UpdateCloneBundleInfoForRingtone(ringtoneInfo, ringtoneUserId,
+            bundleOption, cloneBundleInfoForRingtone);
+
+        // test UpdateCloneBundleInfoForRingtone with RINGTONE_TYPE_BUTT
+        service->UpdateCloneBundleInfoForRingtone(buttRingtoneInfo, ringtoneUserId,
+            bundleOption, cloneBundleInfoForRingtone);
+
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+        // test UpdateCloneBundleInfoForExtensionSubscription
+        NotificationCloneBundleInfo extensionCloneBundleInfo;
+        extensionCloneBundleInfo.SetBundleName(randomString);
+        extensionCloneBundleInfo.SetUid(randomInt32);
+        extensionCloneBundleInfo.SetEnabledExtensionSubscription(
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+        sptr<NotificationBundleOption> extensionBundle = ObjectBuilder<NotificationBundleOption>::Build(fuzzData);
+        service->UpdateCloneBundleInfoForExtensionSubscription(ringtoneUserId,
+            extensionCloneBundleInfo, extensionBundle);
+
+        // test UpdateCloneBundleInfoForExtensionSubscription with SYSTEM_DEFAULT_OFF
+        extensionCloneBundleInfo.SetEnabledExtensionSubscription(
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+        service->UpdateCloneBundleInfoForExtensionSubscription(ringtoneUserId,
+            extensionCloneBundleInfo, extensionBundle);
+#endif
+
+        // test CheckRemovalWantAgent
+        sptr<NotificationRequest> removalRequest = new NotificationRequest();
+        service->CheckRemovalWantAgent(removalRequest);
+
+        // test CheckRemovalWantAgent with request having RemovalWantAgent
+        sptr<NotificationRequest> removalRequestWithAgent = new NotificationRequest();
+        service->CheckRemovalWantAgent(removalRequestWithAgent);
+
+        // test GetCommonLiveViewRecordList
+        std::vector<std::shared_ptr<NotificationRecord>> commonLiveViewRecordList;
+        int32_t testPid = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
+        service->GetCommonLiveViewRecordList(testPid, commonLiveViewRecordList);
+
+        // test GetCommonLiveViewRecordList with common live view records
+        sptr<NotificationRequest> commonLiveReq = new NotificationRequest(fuzzData->ConsumeIntegral<int32_t>());
+        commonLiveReq->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+        commonLiveReq->SetCreatorPid(testPid);
+        auto commonLiveViewContent2 = std::make_shared<NotificationLiveViewContent>();
+        commonLiveViewContent2->SetCreatePid(testPid);
+        commonLiveViewContent2->SetRemoveOnProcessExitState(
+            NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_REMOVE);
+        commonLiveReq->SetContent(std::make_shared<NotificationContent>(commonLiveViewContent2));
+        sptr<NotificationBundleOption> commonLiveBundle = ObjectBuilder<NotificationBundleOption>::Build(fuzzData);
+        std::shared_ptr<NotificationRecord> commonLiveRecord =
+            service->MakeNotificationRecord(commonLiveReq, commonLiveBundle);
+        if (commonLiveRecord != nullptr) {
+            commonLiveRecord->slot = new NotificationSlot(NotificationConstant::SlotType::LIVE_VIEW);
+            service->notificationList_.push_back(commonLiveRecord);
+            std::vector<std::shared_ptr<NotificationRecord>> matchedCommonLiveRecords;
+            service->GetCommonLiveViewRecordList(testPid, matchedCommonLiveRecords);
+        }
+
+        // test IsExistsPidInObservers
+        bool existsPid = service->IsExistsPidInObservers(testPid);
+        bool existsInvalidPid = service->IsExistsPidInObservers(-1);
+
+        // test RemoveAppObserver
+        service->RemoveAppObserver(testPid);
+        service->RemoveAppObserver(-1);
+
+        // test RemoveCommonLiveViewNotification
+        service->RemoveCommonLiveViewNotification(testPid);
+        service->RemoveCommonLiveViewNotification(-1);
+
+#ifdef ANM_SUPPORT_DUMP
+        // test Dump
+        std::vector<std::u16string> dumpArgs;
+        dumpArgs.push_back(Str8ToStr16("-h"));
+        int32_t dumpFd = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
+        service->Dump(dumpFd, dumpArgs);
+
+        // test Dump with empty args
+        std::vector<std::u16string> emptyDumpArgs;
+        service->Dump(dumpFd, emptyDumpArgs);
+
+        // test Dump with multiple args
+        std::vector<std::u16string> multiDumpArgs;
+        multiDumpArgs.push_back(Str8ToStr16("-A"));
+        multiDumpArgs.push_back(Str8ToStr16("test_bundle"));
+        service->Dump(dumpFd, multiDumpArgs);
+
+        // test GetDumpInfo with various argument sizes
+        std::string dumpResult;
+        service->GetDumpInfo(dumpArgs, dumpResult);
+        service->GetDumpInfo(emptyDumpArgs, dumpResult);
+        service->GetDumpInfo(multiDumpArgs, dumpResult);
+#endif
+
         return true;
     }
 

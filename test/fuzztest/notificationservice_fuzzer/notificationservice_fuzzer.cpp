@@ -217,9 +217,16 @@ namespace Notification {
         bool enabled = fdp->ConsumeBool();
         std::string str = fdp->ConsumeRandomLengthString();
         std::string str2 = fdp->ConsumeRandomLengthString();
+        std::string str3 = fdp->ConsumeRandomLengthString();
         int32_t num = fdp->ConsumeIntegralInRange<int32_t>(1, 100);
+        int32_t userId = fdp->ConsumeIntegralInRange<int32_t>(0, 100);
         AdvancedDatashareHelper::SetIsDataShareReady(enabled);
         AdvancedDatashareHelper advancedDatashareHelper;
+        
+        // test AdvancedDatashareHelper::Init
+        advancedDatashareHelper.Init();
+        advancedDatashareHelper.Init();
+        
         Uri enableUri(advancedDatashareHelper.GetFocusModeEnableUri(num));
         advancedDatashareHelper.Query(enableUri, str, str2);
         advancedDatashareHelper.QueryContact(enableUri, str, "6", "1", str2);
@@ -234,6 +241,150 @@ namespace Notification {
         advancedDatashareHelper.GetIntelligentUri();
         advancedDatashareHelper.GetContactResultSet(enableUri, str, "6", "1", str2);
         advancedDatashareHelper.SetIsDataShareReady(enabled);
+        
+        // test Init with dataShare ready enabled
+        AdvancedDatashareHelper::SetIsDataShareReady(true);
+        advancedDatashareHelper.Init();
+        
+        // test Init with dataShare ready disabled
+        AdvancedDatashareHelper::SetIsDataShareReady(false);
+        advancedDatashareHelper.Init();
+        
+        // test CreateIntelligentDataShareHelper without userId
+        std::string intelligentUri = advancedDatashareHelper.GetIntelligentUri();
+        auto intelligentHelper = advancedDatashareHelper.CreateIntelligentDataShareHelper(intelligentUri);
+        
+        // test CreateIntelligentDataShareHelper with userId
+        auto intelligentHelperWithUser =
+            advancedDatashareHelper.CreateIntelligentDataShareHelper(intelligentUri, userId);
+        
+        // test CreateIntelligentDataShareHelper with invalid userId
+        auto intelligentHelperInvalidUser =
+            advancedDatashareHelper.CreateIntelligentDataShareHelper(intelligentUri, -1);
+        
+        // test CreateIntelligentDataShareHelperInner with userId (private function)
+        auto innerHelper = advancedDatashareHelper.CreateIntelligentDataShareHelperInner(intelligentUri, userId);
+        
+        // test CreateIntelligentDataShareHelperInner with SUBSCRIBE_USER_INIT (-1)
+        auto innerHelperDefaultUser = advancedDatashareHelper.CreateIntelligentDataShareHelperInner(intelligentUri);
+        
+        // test AddDataShareItems (private function)
+        Uri dataShareUri(str);
+        advancedDatashareHelper.AddDataShareItems(dataShareUri, str2, str3);
+        
+        // test AddDataShareItems with same uri and key (update existing item)
+        advancedDatashareHelper.AddDataShareItems(dataShareUri, str2, fdp->ConsumeRandomLengthString());
+        
+        // test AddDataShareItems with different uri
+        Uri dataShareUri2(fdp->ConsumeRandomLengthString());
+        advancedDatashareHelper.AddDataShareItems(dataShareUri2, str2, str3);
+        
+        // test QueryContact with various parameters and policies
+        advancedDatashareHelper.QueryContact(enableUri, str, "4", "1", str2);
+        advancedDatashareHelper.QueryContact(enableUri, str, "5", "1", str2);
+        advancedDatashareHelper.QueryContact(enableUri, str, "6", "1", str2);
+        
+        // test QueryContact with userId parameter
+        advancedDatashareHelper.QueryContact(enableUri, str, "4", "1", str2, userId);
+        advancedDatashareHelper.QueryContact(enableUri, str, "5", "1", str2, userId);
+        advancedDatashareHelper.QueryContact(enableUri, str, "6", "1", str2, userId);
+        
+        // test QueryContact with invalid userId
+        advancedDatashareHelper.QueryContact(enableUri, str, "4", "1", str2, -1);
+        
+        // test QuerydataShareItems (private function)
+        std::string queryValue;
+        advancedDatashareHelper.QuerydataShareItems(dataShareUri, str2, queryValue);
+        
+        // test GetIntelligentData with userId
+        advancedDatashareHelper.GetIntelligentData(str, str2, userId);
+        
+        // test GetContactResultSet with userId
+        auto resultSet = advancedDatashareHelper.GetContactResultSet(enableUri, str, "6", "1", str2, userId);
+        
+        // test GetContactResultSet without userId (default version)
+        auto resultSetDefault = advancedDatashareHelper.GetContactResultSet(enableUri, str, "4", "1", str2);
+        
+        // test GetContactResultSet with invalid userId
+        auto resultSetInvalid = advancedDatashareHelper.GetContactResultSet(enableUri, str, "5", "1", str2, -1);
+        
+        // test GetContactResultSetInner (private function) with userId
+        auto resultSetInner = advancedDatashareHelper.GetContactResultSetInner(enableUri, str, "6", "1", str2, userId);
+        
+        // test GetContactResultSetInner (private function) with default userId
+        auto resultSetInnerDefault = advancedDatashareHelper.GetContactResultSetInner(enableUri, str, "4", "1", str2);
+        
+        // test dealWithContactResult (private function) with resultSet
+        if (resultSet != nullptr) {
+            advancedDatashareHelper.dealWithContactResult(resultSet, "4");
+            advancedDatashareHelper.dealWithContactResult(resultSet, "5");
+            advancedDatashareHelper.dealWithContactResult(resultSet, "6");
+            advancedDatashareHelper.dealWithContactResult(resultSet, "0");
+        }
+        
+        // test dealWithContactResult with nullptr
+        advancedDatashareHelper.dealWithContactResult(nullptr, "4");
+        
+        // test RegisterObserver (private function)
+        AdvancedDatashareHelper::SetIsDataShareReady(true);
+        advancedDatashareHelper.RegisterObserver(userId,
+            advancedDatashareHelper.GetFocusModeEnableUri(userId), { "focus_mode_enable" });
+        advancedDatashareHelper.RegisterObserver(userId,
+            advancedDatashareHelper.GetFocusModeProfileUri(userId), { "focus_mode_profile" });
+        advancedDatashareHelper.RegisterObserver(userId,
+            advancedDatashareHelper.GetIntelligentExperienceUri(userId), { "intelligent_experience" });
+        
+        // test RegisterObserver with multiple keys
+        std::vector<std::string> keys = { "key1", "key2", "key3" };
+        advancedDatashareHelper.RegisterObserver(userId,
+            advancedDatashareHelper.GetFocusModeCallPolicyUri(userId), keys);
+        
+        // test UnregisterObserver (private function)
+        advancedDatashareHelper.UnregisterObserver();
+        
+        // test OnUserSwitch
+        advancedDatashareHelper.OnUserSwitch(userId);
+        advancedDatashareHelper.OnUserSwitch(fdp->ConsumeIntegralInRange<int32_t>(0, 100));
+        
+        // test OnUserSwitch with same userId again (should return early due to existing observer)
+        advancedDatashareHelper.OnUserSwitch(userId);
+        
+        // test OnUserSwitch with dataShare not ready
+        AdvancedDatashareHelper::SetIsDataShareReady(false);
+        advancedDatashareHelper.OnUserSwitch(userId);
+        
+        // test UnregisterObserver again after re-register
+        AdvancedDatashareHelper::SetIsDataShareReady(true);
+        advancedDatashareHelper.OnUserSwitch(fdp->ConsumeIntegralInRange<int32_t>(100, 200));
+        advancedDatashareHelper.UnregisterObserver();
+        
+        // test IsPCModeEnabled and SetPCModeEnabled
+        bool currentPCMode = advancedDatashareHelper.IsPCModeEnabled();
+        advancedDatashareHelper.SetPCModeEnabled(enabled);
+        bool newPCMode = advancedDatashareHelper.IsPCModeEnabled();
+        advancedDatashareHelper.SetPCModeEnabled(!enabled);
+        bool toggledPCMode = advancedDatashareHelper.IsPCModeEnabled();
+        
+        // test SetPCModeEnabled with true
+        advancedDatashareHelper.SetPCModeEnabled(true);
+        bool pcModeTrue = advancedDatashareHelper.IsPCModeEnabled();
+        
+        // test SetPCModeEnabled with false
+        advancedDatashareHelper.SetPCModeEnabled(false);
+        bool pcModeFalse = advancedDatashareHelper.IsPCModeEnabled();
+        
+        // test GetPCModeUri with various userIds
+        std::string pcModeUri1 = advancedDatashareHelper.GetPCModeUri(userId);
+        std::string pcModeUri2 = advancedDatashareHelper.GetPCModeUri(num);
+        std::string pcModeUri3 = advancedDatashareHelper.GetPCModeUri(0);
+        std::string pcModeUri4 = advancedDatashareHelper.GetPCModeUri(100);
+        
+        // test IsPCModeEnabled with PC mode enabled during OnUserSwitch
+        advancedDatashareHelper.SetPCModeEnabled(true);
+        AdvancedDatashareHelper::SetIsDataShareReady(true);
+        advancedDatashareHelper.OnUserSwitch(userId);
+        bool pcModeAfterSwitch = advancedDatashareHelper.IsPCModeEnabled();
+        
         return true;
     }
 
