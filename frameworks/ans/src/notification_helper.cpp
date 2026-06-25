@@ -312,6 +312,13 @@ ErrCode NotificationHelper::SubscribeLocalLiveViewNotification(const Notificatio
     return InnerErrorToNative(result);
 }
 
+ErrCode NotificationHelper::SubscribeNotificationV26(const std::shared_ptr<NotificationSubscriber> &subscriber)
+{
+    InnerErrorCode result =
+        DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotificationV26(subscriber, nullptr);
+    return InnerErrorToNative(result);
+}
+
 ErrCode NotificationHelper::SubscribeNotificationV26(const std::shared_ptr<NotificationSubscriber> &subscriber,
     const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {

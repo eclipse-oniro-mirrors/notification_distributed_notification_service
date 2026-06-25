@@ -85,6 +85,12 @@ ErrCode AdvancedNotificationService::Subscribe(
     return errCode;
 }
 
+ErrCode AdvancedNotificationService::SubscribeNotification(const sptr<IAnsSubscriber> &subscriber,
+    uint32_t subscribedFlags)
+{
+    return SubscribeNotification(subscriber, nullptr, subscribedFlags);
+}
+
 ErrCode AdvancedNotificationService::SubscribeNotification(
     const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &info, uint32_t subscribedFlags)
 {

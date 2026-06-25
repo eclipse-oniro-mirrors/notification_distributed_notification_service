@@ -330,6 +330,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode SubscribeNotification(const sptr<IAnsSubscriber>& subscriber, uint32_t subscribedFlags) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode SubscribeNotification(const sptr<IAnsSubscriber>& subscriber, const sptr<NotificationSubscribeInfo>& info,
         uint32_t subscribedFlags) override
     {
