@@ -74,7 +74,6 @@ ohos_shared_library("reminder_innerkits") {
     "${frameworks_module_reminder_path}/src/reminder_request_client.cpp",
     "${frameworks_module_reminder_path}/src/reminder_request_factory.cpp",
     "${frameworks_module_reminder_path}/src/reminder_request_timer.cpp",
-    "${frameworks_module_reminder_path}/src/reminder_service_load_callback.cpp",
     "${frameworks_module_reminder_path}/src/reminder_state.cpp",
     "${frameworks_module_reminder_path}/src/reminder_state_callback_proxy_ext.cpp",
   ]

@@ -609,7 +609,7 @@ bool ReminderDataManager::GetSettingsData(const int32_t userId)
     constexpr const char* VIBRATE_ENABLE = "hw_vibrate_when_ringing";
     std::string uriStr = USER_SETINGS_DATA_URI + std::to_string(userId) + VIBRATE_ENABLE_URI;
     Uri enableUri(uriStr);
-    std::string enable;
+    std::string enable = "1";  // settingsdata default value
     bool ret = ReminderDataShareHelper::GetInstance().Query(enableUri, VIBRATE_ENABLE, enable);
     if (!ret) {
         ANSR_LOGE("Query vibrate enable failed.");

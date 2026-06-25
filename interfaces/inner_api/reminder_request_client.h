@@ -143,10 +143,6 @@ public:
      */
     ErrCode UnRegisterReminderState(const sptr<ReminderStateCallback>& object);
 
-    void LoadSystemAbilitySuccess(const sptr<IRemoteObject> &remoteObject);
-
-    void LoadSystemAbilityFail();
-
     void StartReminderAgentService();
 
 private:
