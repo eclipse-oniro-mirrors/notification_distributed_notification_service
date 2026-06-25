@@ -2087,7 +2087,6 @@ group("unittest") {
   deps = [
     ":access_token_helper_test",
     ":advanced_datashare_observer_unit_test",
-    ":advanced_notification_geofence_service_test",
     ":advanced_notification_ringtone_service_test",
     ":advanced_notification_service_branch_test",
     ":advanced_notification_service_unit_test",
@@ -2103,7 +2102,6 @@ group("unittest") {
     ":notification_preferences_database_two_test",
     ":notification_preferences_second_test",
     ":notification_preferences_test",
-    ":notification_publish_service_test",
     ":notification_rdb_data_mgr_test",
     ":notification_service_publish_test",
     ":notification_service_test",
