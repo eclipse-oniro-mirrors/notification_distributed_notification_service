@@ -31,17 +31,14 @@ ReminderRequest* ReminderRequestFactory::CreateReminderRequest(ReminderRequest::
     ReminderRequest* reminderRequest = nullptr;
     switch (reminderType) {
         case (ReminderRequest::ReminderType::TIMER): {
-            ANSR_LOGI("Create timer");
             reminderRequest = new (std::nothrow) ReminderRequestTimer();
             break;
         }
         case (ReminderRequest::ReminderType::ALARM): {
-            ANSR_LOGI("Create alarm");
             reminderRequest = new (std::nothrow) ReminderRequestAlarm();
             break;
         }
         case (ReminderRequest::ReminderType::CALENDAR): {
-            ANSR_LOGI("Create calendar");
             reminderRequest = new (std::nothrow) ReminderRequestCalendar();
             break;
         }

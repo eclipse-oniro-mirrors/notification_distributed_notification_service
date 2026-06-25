@@ -25,6 +25,9 @@
 #include "in_process_call_wrapper.h"
 #include "system_ability_definition.h"
 #include "reminder_bundle_manager_helper.h"
+#ifdef HAS_HISYSEVENT_PART
+#include "hisysevent.h"
+#endif
 
 namespace OHOS::Notification {
 static constexpr int64_t DURATION_PRELOAD_TIME = 10 * 60 * 60 * 1000;  // 10h, millisecond
@@ -87,6 +90,11 @@ bool ReminderDataShareHelper::RegisterObserver()
         ANSR_LOGE("RegisterObserver failed[%{public}d]", ret);
         observer_ = nullptr;
         helper->Release();
+#ifdef HAS_HISYSEVENT_PART
+        HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::RSS, "ABNORMAL_ERR",
+            HiviewDFX::HiSysEvent::EventType::STATISTIC, "MODULE_NAME", "ReminderDataShareHelper",
+            "FUNC_NAME", "RegisterObserver", "ERR_INFO", std::to_string(ret));
+#endif
         return false;
     }
     helper->Release();
@@ -416,6 +424,8 @@ sptr<ReminderRequest> ReminderDataShareHelper::CreateReminder(
     reminder->DeserializeButtonInfoFromJson(strValue);
     GetRdbValue<std::string>(result, ReminderCalendarShareTable::WANT_AGENT, strValue);
     reminder->DeserializeWantAgent(strValue, 0);
+    CheckWantAgent(reminder);
+
     GetRdbValue<std::string>(result, ReminderCalendarShareTable::IDENTIFIER, strValue);
     reminder->SetIdentifier(strValue);
     uint64_t endDateTime = 0;
@@ -528,6 +538,7 @@ void ReminderDataShareHelper::InitBaseInfo(const DataShare::DataShareObserver::C
     iter = info.find(ReminderCalendarShareTable::WANT_AGENT);
     if (iter != info.end()) {
         reminder->DeserializeWantAgent(std::get<std::string>(iter->second), 0);
+        CheckWantAgent(reminder);
     }
     iter = info.find(ReminderCalendarShareTable::IDENTIFIER);
     if (iter != info.end()) {
@@ -606,6 +617,25 @@ void ReminderDataShareHelper::BuildReminderV1(const DataShare::DataShareObserver
     if (iter != info.end()) {
         reminder->SetCustomRingUri(std::get<std::string>(iter->second));
     }
+}
+
+void ReminderDataShareHelper::CheckWantAgent(sptr<ReminderRequest>& reminder)
+{
+    std::shared_ptr<ReminderRequest::WantAgentInfo> wantAgent = reminder->GetWantAgentInfo();
+    if (wantAgent == nullptr) {
+        return;
+    }
+    if (wantAgent->pkgName == ReminderCalendarShareTable::NAME) {
+        return;
+    }
+    wantAgent->pkgName = ReminderCalendarShareTable::NAME;
+    wantAgent->abilityName = ReminderCalendarShareTable::MAIN_ABILITY;
+    wantAgent->uri = "";
+#ifdef HAS_HISYSEVENT_PART
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::RSS, "ABNORMAL_ERR",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC, "MODULE_NAME", "ReminderDataShareHelper",
+        "FUNC_NAME", "CheckWantAgent", "ERR_INFO", "WantAgent is not the target");
+#endif
 }
 
 ReminderDataShareHelper::ReminderDataShareHelper()
