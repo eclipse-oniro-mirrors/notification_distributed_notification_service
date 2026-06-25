@@ -1299,10 +1299,16 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutExtensionSubscriptionBundles_02
 /**
  * @tc.name      : GetAllNotificationEnabledBundles_00100
  * @tc.number    : GetAllNotificationEnabledBundles
- * @tc.desc      : Check func GetAllNotificationEnabledBundles, return true
+ * @tc.desc      : Check func GetAllNotificationEnabledBundles, return true after writing enabled data
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_00100, Function | SmallTest | Level1)
 {
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    ASSERT_TRUE(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON));
+
     std::vector<NotificationBundleOption> bundleOption;
     EXPECT_EQ(true, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption));
 }
@@ -1322,10 +1328,16 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_0
 /**
  * @tc.name      : GetAllNotificationEnabledBundles_00300
  * @tc.number    : GetAllNotificationEnabledBundles
- * @tc.desc      : Check func GetAllNotificationEnabledBundles, return true
+ * @tc.desc      : Check func GetAllNotificationEnabledBundles, return true after writing enabled data
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_00300, Function | SmallTest | Level1)
 {
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    ASSERT_TRUE(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON));
+
     std::vector<NotificationBundleOption> bundleOption;
     int32_t userId = 100;
     ASSERT_EQ(true, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption, userId));
@@ -3673,6 +3685,12 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_O
 HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_Optimization_00200,
     Function | SmallTest | Level1)
 {
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    ASSERT_TRUE(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON));
+
     std::vector<NotificationBundleOption> bundleOption;
     EXPECT_TRUE(preferncesDB_->GetAllNotificationEnabledBundles(bundleOption));
 }

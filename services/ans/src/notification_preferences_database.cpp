@@ -1083,6 +1083,10 @@ bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundlesInner(
         ANS_LOGE("QueryEnabledBundles from db error");
         return false;
     }
+    if (datas.empty()) {
+        ANS_LOGE("QueryEnabledBundles from db empty");
+        return false;
+    }
     return HandleDataBaseMap(datas, bundleOption, userId);
 }
 
