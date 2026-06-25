@@ -68,6 +68,7 @@ NotificationPreferences::NotificationPreferences()
 
 NotificationPreferences::~NotificationPreferences()
 {
+    StopCacheCleanupTimer();
     preferncesDB_ = nullptr;
 }
 
@@ -80,6 +81,55 @@ std::shared_ptr<NotificationPreferences> NotificationPreferences::GetInstance()
         }
     }
     return instance_;
+}
+
+void NotificationPreferences::StartCacheCleanupTimer()
+{
+    std::lock_guard<ffrt::mutex> lock(cleanupHandleMutex_);
+    if (cleanupHandle_ != nullptr) {
+        return;
+    }
+    cleanupHandle_ = ffrt::submit_h([this]() {
+        this->ExecuteCacheCleanup();
+    }, {}, {}, ffrt::task_attr().delay(CACHE_CLEANUP_INTERVAL_US).name("AnsCacheCleanup"));
+    if (cleanupHandle_ == nullptr) {
+        ANS_LOGE("Failed to submit cache cleanup task");
+        return;
+    }
+    ANS_LOGD("Cache cleanup timer started, interval=%{public}lld us",
+        static_cast<long long>(CACHE_CLEANUP_INTERVAL_US));
+}
+
+void NotificationPreferences::ExecuteCacheCleanup()
+{
+    size_t evicted = 0;
+    bool cacheEmpty = false;
+    {
+        std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+        evicted = preferencesInfo_.EvictExpiredBundleCache();
+        cacheEmpty = preferencesInfo_.IsBundleCacheEmpty();
+    }
+    if (evicted > 0) {
+        ANS_LOGI("Cache cleanup evicted %{public}zu expired entries", evicted);
+    }
+    {
+        std::lock_guard<ffrt::mutex> handleLock(cleanupHandleMutex_);
+        cleanupHandle_ = nullptr;
+    }
+    if (!cacheEmpty) {
+        StartCacheCleanupTimer();
+    } else {
+        ANS_LOGD("Cache is empty, stopping cleanup timer");
+    }
+}
+
+void NotificationPreferences::StopCacheCleanupTimer()
+{
+    std::lock_guard<ffrt::mutex> lock(cleanupHandleMutex_);
+    if (cleanupHandle_ != nullptr) {
+        ffrt::skip(cleanupHandle_);
+        cleanupHandle_ = nullptr;
+    }
 }
 
 ErrCode NotificationPreferences::AddNotificationSlots(
@@ -121,6 +171,7 @@ ErrCode NotificationPreferences::AddNotificationSlots(
 
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
     }
     return result;
 }
@@ -292,6 +343,7 @@ ErrCode NotificationPreferences::AddNotificationBundleProperty(const sptr<Notifi
     ErrCode result = ERR_OK;
     if (preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo)) {
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
     } else {
         result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
@@ -326,6 +378,7 @@ ErrCode NotificationPreferences::RemoveNotificationSlot(
 
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
     }
     ANS_LOGI("%{public}s_%{public}d, Remove slot successful.",
         bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
@@ -362,6 +415,7 @@ ErrCode NotificationPreferences::RemoveNotificationAllSlots(const sptr<Notificat
 
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
         message.ErrorCode(result).Append(" Remove all slot successful.");
         ANS_LOGD("%{public}s_%{public}d, Remove all successful.",
             bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
@@ -400,6 +454,7 @@ ErrCode NotificationPreferences::RemoveNotificationForBundle(const sptr<Notifica
 
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
     }
 
     return result;
@@ -435,6 +490,7 @@ ErrCode NotificationPreferences::UpdateNotificationSlots(
 
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
     }
 
     return result;
@@ -525,6 +581,7 @@ ErrCode NotificationPreferences::SetNotificationSlotFlagsForBundle(
     ErrCode result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_SLOTFLGS_TYPE, slotFlags);
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
     }
     return result;
 }
@@ -547,6 +604,7 @@ ErrCode NotificationPreferences::SetShowBadge(const sptr<NotificationBundleOptio
     ErrCode result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_SHOW_BADGE_TYPE, enable);
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
     }
     return result;
 }
@@ -572,6 +630,7 @@ ErrCode NotificationPreferences::SetImportance(
     ErrCode result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_IMPORTANCE_TYPE, importance);
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
     }
     return result;
 }
@@ -596,6 +655,7 @@ ErrCode NotificationPreferences::SetTotalBadgeNums(
     ErrCode result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_BADGE_TOTAL_NUM_TYPE, num);
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
     }
     return result;
 }
@@ -629,6 +689,7 @@ ErrCode NotificationPreferences::SetNotificationsEnabledForBundle(
         BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, static_cast<int32_t>(state));
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
 #ifdef DISTRIBUTED_FEATURE_MASTER
         if (state != NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF) {
             bool enable = (state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
@@ -673,6 +734,7 @@ ErrCode NotificationPreferences::SetNotificationsEnabled(const int32_t &userId, 
 
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
     }
     return result;
 }
@@ -696,6 +758,7 @@ ErrCode NotificationPreferences::SetHasPoppedDialog(const sptr<NotificationBundl
     result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_POPPED_DIALOG_TYPE, hasPopped);
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
     }
     return result;
 }
@@ -734,6 +797,7 @@ ErrCode NotificationPreferences::SetDoNotDisturbDate(const int32_t &userId,
 
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
     }
     return result;
 }
@@ -767,6 +831,7 @@ ErrCode NotificationPreferences::AddDoNotDisturbProfiles(
         return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     preferencesInfo_ = preferencesInfo;
+    StartCacheCleanupTimer();
     return ERR_OK;
 }
 
@@ -821,6 +886,7 @@ ErrCode NotificationPreferences::RemoveDoNotDisturbProfiles(
         return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     preferencesInfo_ = preferencesInfo;
+    StartCacheCleanupTimer();
     return ERR_OK;
 }
 
@@ -878,7 +944,30 @@ ErrCode NotificationPreferences::UpdateDoNotDisturbProfiles(int32_t userId, int6
         return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     preferencesInfo_ = preferencesInfo;
+    StartCacheCleanupTimer();
     return ERR_OK;
+}
+
+bool NotificationPreferences::BuildCloneSlotInfo(const NotificationCloneBundleInfo& cloneBundleInfo,
+    NotificationPreferencesInfo::BundleInfo& bundleInfo,
+    std::vector<sptr<NotificationSlot>>& slots)
+{
+    for (auto& cloneSlot : cloneBundleInfo.GetSlotInfo()) {
+        sptr<NotificationSlot> slotInfo = new (std::nothrow) NotificationSlot(cloneSlot.slotType_);
+        if (slotInfo == nullptr) {
+            return false;
+        }
+        uint32_t slotFlags = bundleInfo.GetSlotFlags();
+        auto configSlotReminderMode = DelayedSingleton<NotificationConfigParse>::GetInstance()->
+            GetConfigSlotReminderModeByType(slotInfo->GetType());
+        slotInfo->SetReminderMode(configSlotReminderMode & slotFlags);
+        slotInfo->SetEnable(cloneSlot.enable_);
+        slotInfo->SetForceControl(cloneSlot.isForceControl_);
+        slotInfo->SetAuthorizedStatus(cloneSlot.GetAuthStaus());
+        slots.push_back(slotInfo);
+        bundleInfo.SetSlot(slotInfo);
+    }
+    return true;
 }
 
 void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
@@ -917,30 +1006,20 @@ void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
 
     /* update slot info */
     std::vector<sptr<NotificationSlot>> slots;
-    for (auto& cloneSlot : cloneBundleInfo.GetSlotInfo()) {
-        sptr<NotificationSlot> slotInfo = new (std::nothrow) NotificationSlot(cloneSlot.slotType_);
-        if (slotInfo == nullptr) {
-            return;
-        }
-        uint32_t slotFlags = bundleInfo.GetSlotFlags();
-        auto configSlotReminderMode = DelayedSingleton<NotificationConfigParse>::GetInstance()->
-            GetConfigSlotReminderModeByType(slotInfo->GetType());
-        slotInfo->SetReminderMode(configSlotReminderMode & slotFlags);
-        slotInfo->SetEnable(cloneSlot.enable_);
-        slotInfo->SetForceControl(cloneSlot.isForceControl_);
-        slotInfo->SetAuthorizedStatus(cloneSlot.GetAuthStaus());
-        slots.push_back(slotInfo);
-        bundleInfo.SetSlot(slotInfo);
+    if (!BuildCloneSlotInfo(cloneBundleInfo, bundleInfo, slots)) {
+        return;
     }
 
     if (!preferncesDB_->UpdateBundleSlotToDisturbeDB(userId, cloneBundleInfo.GetBundleName(),
         cloneBundleInfo.GetUid(), slots)) {
         ANS_LOGW("Clone bundle slot failed %{public}s.", cloneBundleInfo.Dump().c_str());
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
         return;
     }
     preferencesInfo.SetBundleInfo(bundleInfo);
     preferencesInfo_ = preferencesInfo;
+    StartCacheCleanupTimer();
 }
 
 void NotificationPreferences::GetLocalDistributedBundles(const std::string& deviceType, int32_t userId,
@@ -969,6 +1048,7 @@ void NotificationPreferences::GetAllCloneBundlesInfo(int32_t dbUserId, int32_t u
     preferencesInfo.GetAllCloneBundlesInfo(dbUserId, userId, bundlesMap, cloneBundles);
     preferncesDB_->GetDistributedEnabledForClone(userId, cloneBundles);
     preferencesInfo_ = preferencesInfo;
+    StartCacheCleanupTimer();
 }
 
 void NotificationPreferences::GetAllAncoBundlesInfo(int32_t dbUserId, int32_t userId,
@@ -1214,6 +1294,7 @@ ErrCode NotificationPreferences::ClearNotificationInRestoreFactorySettings()
 {
     ErrCode result = ERR_OK;
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    StopCacheCleanupTimer();
     if (!preferncesDB_->RemoveAllDataFromDisturbeDB()) {
         result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
@@ -1273,6 +1354,7 @@ void NotificationPreferences::RemoveDoNotDisturbProfileTrustList(
         return;
     }
     preferencesInfo_ = preferencesInfo;
+    StartCacheCleanupTimer();
 }
 
 ErrCode NotificationPreferences::CheckSlotForCreateSlot(const sptr<NotificationBundleOption> &bundleOption,
@@ -2025,6 +2107,7 @@ ErrCode NotificationPreferences::SetRingtoneInfoByBundle(const sptr<Notification
         return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
     preferencesInfo_.SetBundleInfo(bundleInfo);
+    StartCacheCleanupTimer();
     ANS_LOGI("Set ringtone %{public}s %{public}d %{public}s", bundleOption->GetBundleName().c_str(),
         ringtoneInfo->GetRingtoneType(), ringtoneInfo->GetRingtoneUri().c_str());
     return ERR_OK;
@@ -2062,6 +2145,7 @@ ErrCode NotificationPreferences::GetRingtoneInfoByBundle(const sptr<Notification
         }
         bundleInfo.SetRingtoneInfo(savedRingtoneInfo);
         preferencesInfo_.SetBundleInfo(bundleInfo);
+        StartCacheCleanupTimer();
     }
 
     if (savedRingtoneInfo->GetRingtoneType() == NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT) {
@@ -2107,6 +2191,7 @@ void NotificationPreferences::RemoveRingtoneInfoByBundle(const sptr<Notification
     if (preferncesDB_->RemoveRingtoneInfoByBundle(bundleInfo)) {
         bundleInfo.RemoveRingtoneInfo();
         preferencesInfo_.SetBundleInfo(bundleInfo);
+        StartCacheCleanupTimer();
         ANS_LOGI("Remove ringtone info successfully for bundle: %{public}s", bundleInfo.GetBundleName().c_str());
         return;
     }
@@ -2776,6 +2861,7 @@ ErrCode NotificationPreferences::SetExtensionSubscriptionInfos(const sptr<Notifi
     if (preferncesDB_->PutExtensionSubscriptionInfos(bundleInfo)) {
         preferencesInfo.SetBundleInfo(bundleInfo);
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
         return ERR_OK;
     } else {
         return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -2818,6 +2904,7 @@ ErrCode NotificationPreferences::SetExtensionSubscriptionEnabled(
         BundleType::BUNDLE_EXTENSION_SUBSCRIPTION_ENABLED_TYPE, static_cast<int32_t>(state));
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
     }
     return result;
 }
@@ -2869,6 +2956,7 @@ ErrCode NotificationPreferences::SetExtensionSubscriptionBundles(
     if (preferncesDB_->PutExtensionSubscriptionBundles(bundleInfo)) {
         preferencesInfo.SetBundleInfo(bundleInfo);
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
         return ERR_OK;
     } else {
         return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -3024,6 +3112,7 @@ ErrCode NotificationPreferences::AddExtensionSubscriptionBundles(
     if (preferncesDB_->PutExtensionSubscriptionBundles(bundleInfo)) {
         preferencesInfo.SetBundleInfo(bundleInfo);
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
         return ERR_OK;
     } else {
         return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -3057,6 +3146,7 @@ ErrCode NotificationPreferences::RemoveExtensionSubscriptionBundles(
     if (preferncesDB_->PutExtensionSubscriptionBundles(bundleInfo)) {
         preferencesInfo.SetBundleInfo(bundleInfo);
         preferencesInfo_ = preferencesInfo;
+        StartCacheCleanupTimer();
         return ERR_OK;
     } else {
         return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;

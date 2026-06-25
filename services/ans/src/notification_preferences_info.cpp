@@ -867,5 +867,15 @@ void NotificationPreferencesInfo::GetCacheStats(size_t& hitCount, size_t& missCo
     missCount = stats.misses;
 }
 
+size_t NotificationPreferencesInfo::EvictExpiredBundleCache()
+{
+    return bundleCache_.EvictExpired();
+}
+
+bool NotificationPreferencesInfo::IsBundleCacheEmpty()
+{
+    return bundleCache_.Empty();
+}
+
 }  // namespace Notification
 }  // namespace OHOS
