@@ -1,0 +1,83 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "service_distributed_bundle_fuzzer.h"
+
+#include <fuzzer/FuzzedDataProvider.h>
+#include "advanced_notification_service.h"
+#include "ans_permission_def.h"
+#include "distributed_extension_service.h"
+#include "mock_notification_request.h"
+#include "mock_notification_bundle_option.h"
+
+namespace OHOS {
+namespace Notification {
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
+    {
+        auto service = AdvancedNotificationService::GetInstance();
+        service->InitPublishProcess();
+
+        sptr<NotificationBundleOption> bundleOption =
+            ObjectBuilder<NotificationBundleOption>::Build(fuzzData);
+        bool enabled = fuzzData->ConsumeBool();
+
+        service->EnableDistributedByBundle(bundleOption, enabled);
+        bool isEnabled = false;
+        service->IsDistributedEnableByBundle(bundleOption, isEnabled);
+        service->IsDistributedEnabled(isEnabled);
+        service->EnableDistributed(enabled);
+        service->EnableDistributedSelf(enabled);
+
+        sptr<NotificationRequest> request = ObjectBuilder<NotificationRequest>::Build(fuzzData);
+        std::string representativeBundle = fuzzData->ConsumeRandomLengthString();
+        service->PublishAsBundle(request, representativeBundle);
+        int32_t notificationId = fuzzData->ConsumeIntegral<int32_t>();
+        int32_t userId = fuzzData->ConsumeIntegral<int32_t>();
+        service->CancelAsBundle(notificationId, representativeBundle, userId);
+        service->CancelAsBundle(bundleOption, notificationId, userId);
+
+        service->SetSyncNotificationEnabledWithoutApp(userId, enabled);
+        service->GetSyncNotificationEnabledWithoutApp(userId, enabled);
+
+        DistributedExtensionService::GetInstance().HADotCallback(
+            fuzzData->ConsumeIntegral<int32_t>(),
+            fuzzData->ConsumeIntegral<int32_t>(),
+            fuzzData->ConsumeIntegral<uint32_t>(),
+            fuzzData->ConsumeRandomLengthString());
+        int32_t code = fuzzData->ConsumeIntegral<int32_t>();
+        int32_t errc = fuzzData->ConsumeIntegral<int32_t>();
+        std::string reason = fuzzData->ConsumeRandomLengthString();
+        DistributedExtensionService::GetInstance().SendReportCallback(code, errc, reason);
+
+        return true;
+    }
+}
+}
+
+/* Fuzzer entry point */
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+{
+    /* Run your code on data */
+    FuzzedDataProvider fdp(data, size);
+    std::vector<std::string> requestPermission = {
+        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_CONTROLLER,
+        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER,
+        OHOS::Notification::OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION
+    };
+    MockRandomToken(&fdp, requestPermission);
+    OHOS::Notification::DoSomethingInterestingWithMyAPI(&fdp);
+    constexpr int sleepMs = 1000;
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
+    return 0;
+}
