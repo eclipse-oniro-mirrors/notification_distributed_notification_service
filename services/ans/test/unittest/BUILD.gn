@@ -2086,7 +2086,6 @@ group("unittest") {
   testonly = true
   deps = [
     ":access_token_helper_test",
-    ":advanced_notification_geofence_service_test",
     ":advanced_notification_service_unit_test",
     ":bundle_manager_helper_branch_test",
     ":common_utils_test",
@@ -2098,7 +2097,6 @@ group("unittest") {
     ":notification_preferences_database_test",
     ":notification_preferences_database_two_test",
     ":notification_preferences_second_test",
-    ":notification_publish_service_test",
     ":notification_rdb_data_mgr_test",
     ":notification_service_publish_test",
     ":notification_service_test",
