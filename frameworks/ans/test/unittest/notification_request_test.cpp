@@ -32,6 +32,7 @@
 #undef protected
 #include "want_agent_helper.h"
 #include "string_wrapper.h"
+#include "int_wrapper.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -1520,6 +1521,81 @@ HWTEST_F(NotificationRequestTest, IsConsumedDevices_0001, Level1)
     EXPECT_FALSE(request.IsConsumedDevices(NotificationConstant::LITEWEARABLE_DEVICE_TYPE));
     EXPECT_FALSE(request.IsConsumedDevices(NotificationConstant::CURRENT_DEVICE_TYPE));
     EXPECT_FALSE(request.IsConsumedDevices(NotificationConstant::HEADSET_DEVICE_TYPE));
+}
+
+/**
+ * @tc.name:GetAtomicServiceInstallStatus_0100
+ * @tc.desc: Test GetAtomicServiceInstallStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, GetAtomicServiceInstallStatus_0100, Level1)
+{
+    NotificationRequest notificationRequest(1);
+    int32_t status = 100;
+    bool result = notificationRequest.GetAtomicServiceInstallStatus(status);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name:GetAtomicServiceInstallStatus_0200
+ * @tc.desc: Test GetAtomicServiceInstallStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, GetAtomicServiceInstallStatus_0200, Level1)
+{
+    NotificationRequest notificationRequest(1);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+    notificationRequest.SetIsAgentNotification(true);
+    int32_t status = 100;
+    bool result = notificationRequest.GetAtomicServiceInstallStatus(status);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name:GetAtomicServiceInstallStatus_0300
+ * @tc.desc: Test GetAtomicServiceInstallStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, GetAtomicServiceInstallStatus_0300, Level1)
+{
+    NotificationRequest notificationRequest(1);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+    notificationRequest.SetIsAgentNotification(true);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("autoServiceInstallStatus", AAFwk::Integer::Box(PKG_INSTALL_STATUS_UNINSTALL));
+    notificationRequest.SetExtendInfo(extendInfo);
+    int32_t status = 100;
+    bool result = notificationRequest.GetAtomicServiceInstallStatus(status);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(status, PKG_INSTALL_STATUS_UNINSTALL);
+}
+
+/**
+ * @tc.name:GetAtomicServiceInstallStatus_0400
+ * @tc.desc: Test GetAtomicServiceInstallStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, GetAtomicServiceInstallStatus_0400, Level1)
+{
+    NotificationRequest notificationRequest(1);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+    notificationRequest.SetIsAgentNotification(true);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("autoServiceInstallStatus", AAFwk::Integer::Box(PKG_INSTALL_STATUS_INSTALL));
+    notificationRequest.SetExtendInfo(extendInfo);
+    int32_t status = 100;
+    bool result = notificationRequest.GetAtomicServiceInstallStatus(status);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(status, PKG_INSTALL_STATUS_INSTALL);
 }
 
 /**

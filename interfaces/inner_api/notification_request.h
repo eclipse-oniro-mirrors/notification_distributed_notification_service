@@ -1583,6 +1583,8 @@ public:
 
     bool IsAtomicServiceNotification();
 
+    bool GetAtomicServiceInstallStatus(int32_t &installedStatus);
+
     void SetDistributedFlagBit(
         const NotificationConstant::ReminderFlag &bit,
         const bool status,

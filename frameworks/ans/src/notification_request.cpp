@@ -55,8 +55,6 @@ const std::size_t NotificationRequest::MAX_ACTION_BUTTONS {3};
 const std::size_t NotificationRequest::MAX_MESSAGE_USERS {1000};
 
 constexpr int32_t MAX_MAP_SIZE = 1000;
-constexpr int32_t PKG_INSTALL_STATUS_UNKMOWN = -1;
-constexpr int32_t PKG_INSTALL_STATUS_UNINSTALL = 0;
 
 const std::vector<std::string> NotificationConstant::PriorityNotificationType::VALID_PRIORITY_TYPE_LIST = {
     NotificationConstant::PriorityNotificationType::OTHER,
@@ -3793,6 +3791,21 @@ bool NotificationRequest::IsAtomicServiceNotification()
         return true;
     }
     return false;
+}
+
+bool NotificationRequest::GetAtomicServiceInstallStatus(int32_t &installedStatus)
+{
+    if (!IsCommonLiveView() || !IsAgentNotification()) {
+        ANS_LOGD("not commonLiveView or not agent");
+        return false;
+    }
+
+    if (extendInfo_ == nullptr) {
+        ANS_LOGD("extend info is null.");
+        return false;
+    }
+    installedStatus = extendInfo_->GetIntParam("autoServiceInstallStatus", PKG_INSTALL_STATUS_UNKMOWN);
+    return true;
 }
 
 void NotificationRequest::SetDistributedFlagBit(

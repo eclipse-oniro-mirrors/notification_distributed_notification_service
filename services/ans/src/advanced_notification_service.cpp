@@ -1886,6 +1886,32 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetFromNotifica
     return nullptr;
 }
 
+std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetFromNotificationListByAtomicServiceKey(
+    const sptr<NotificationRequest> &request)
+{
+    for (auto item : notificationList_) {
+        if (!item->isAtomicService || !item->request->IsCommonLiveView()) {
+            continue;
+        }
+        if (request->GetOwnerUserId() == INVALID_USER_ID) {
+            if (request->GetOwnerUid() == DEFAULT_UID) {
+                ANS_LOGE("invalid UID");
+                return nullptr;
+            }
+            int32_t ownerUserId = SUBSCRIBE_USER_INIT;
+            OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), ownerUserId);
+            request->SetOwnerUserId(ownerUserId);
+        }
+        if (item->request->GetOwnerBundleName() == request->GetOwnerBundleName() &&
+            item->request->GetNotificationId() == request->GetNotificationId() &&
+            item->request->GetOwnerUserId() == request->GetOwnerUserId() &&
+            item->request->GetLabel() == request->GetLabel()) {
+            return item;
+        }
+    }
+    return nullptr;
+}
+
 std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetFromNotificationList(
     const int32_t ownerUid, const int32_t notificationId)
 {

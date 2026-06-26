@@ -2170,6 +2170,8 @@ private:
         const int32_t &userId, sptr<Notification> &notification, bool removeAll = false);
     bool RemoveFromDelayedNotificationList(const std::string &key);
     std::shared_ptr<NotificationRecord> GetFromNotificationList(const std::string &key);
+    std::shared_ptr<NotificationRecord> GetFromNotificationListByAtomicServiceKey(
+        const sptr<NotificationRequest> &request);
     std::shared_ptr<NotificationRecord> GetFromNotificationList(const int32_t ownerUid, const int32_t notificationId);
     std::shared_ptr<NotificationRecord> GetFromDelayedNotificationList(
         const int32_t ownerUid, const int32_t notificationId);
@@ -2631,6 +2633,7 @@ private:
     ErrCode ExtractWantAgentInfo(
         const std::shared_ptr<NotificationRecord> record, sptr<NotificationParameters> &parameters);
     bool GrantSoundPermission(const sptr<NotificationRequest> request, sptr<NotificationBundleOption> bundleOption);
+    bool IsAtomicServiceCreateOrUpdateByUninstall(const sptr<NotificationRequest> &request);
     ErrCode ExcuteSnoozeNotification(const std::string &hashCode, const int64_t delayTime);
     bool SetSnoozeDelayTimeToDB(const int64_t delayTime, const std::shared_ptr<NotificationRecord> &record);
 #ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
