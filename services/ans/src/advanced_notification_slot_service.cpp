@@ -521,7 +521,8 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
     message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
             " slotFlags:" + std::to_string(slotFlags));
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()
+        && !AccessTokenHelper::VerifyShellToken(IPCSkeleton::GetCallingTokenID())) {
         ANS_LOGE("IsSystemApp is false.");
         message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).Append(" Not SystemApp");
         NotificationAnalyticsUtil::ReportModifyEvent(message);

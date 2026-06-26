@@ -165,7 +165,8 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
 {
     ANS_LOGD("called");
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()
+        && !AccessTokenHelper::VerifyShellToken(IPCSkeleton::GetCallingTokenID())) {
         return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 

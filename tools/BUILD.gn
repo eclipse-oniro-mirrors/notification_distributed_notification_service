@@ -15,7 +15,10 @@ import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 
 group("tools_shell") {
-  deps = [ "dump:anm_target" ]
+  deps = [ 
+    "dump:anm_target",
+    "ohos-notificationManager:ohos-notificationManager",
+  ]
 }
 
 group("unittest") {
