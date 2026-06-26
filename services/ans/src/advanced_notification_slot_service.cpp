@@ -1023,23 +1023,67 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
 
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
-        sptr<NotificationSlot> slot;
-        result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundle, slotType, slot);
-        if (result != ERR_OK) {
-            ANS_LOGE("Get slot failed %{public}d", result);
+        std::vector<sptr<NotificationBundleOption>> bundles = {bundle};
+        std::map<sptr<NotificationBundleOption>, bool> slotEnabled;
+        bool dbResult = NotificationPreferences::GetInstance()->GetEnabledForBundleSlots(
+            bundles, slotTypeInt, slotEnabled);
+        if (!dbResult) {
+            result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
             return;
         }
-        if (slot == nullptr) {
-            ANS_LOGW("null slot, default true");
-            enabled = true;
-            result = ERR_OK;
-            return;
+        auto it = slotEnabled.find(bundle);
+        if (it != slotEnabled.end()) {
+            enabled = it->second;
+        } else {
+            result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
         }
-        enabled = slot->GetEnable();
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get enabled for bundle slot.");
 
+    return result;
+}
+
+ErrCode AdvancedNotificationService::GetEnabledForBundleSlots(
+    const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+    int32_t slotType,
+    std::map<sptr<NotificationBundleOption>, bool> &slotEnabled)
+{
+    ANS_LOGD("GetEnabledForBundleSlots called");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_18, EventBranchId::BRANCH_0);
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("IsSystemApp is false.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP));
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
+    }
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission Denied.");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
+    }
+
+    if (bundleOptions.empty()) {
+        ANS_LOGE("Invalid bundle options.");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM).BranchId(BRANCH_2));
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+
+    ErrCode result = ERR_OK;
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
+        bool dbResult = NotificationPreferences::GetInstance()->GetEnabledForBundleSlots(
+            bundleOptions, slotType, slotEnabled);
+        if (!dbResult) {
+            result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+            return;
+        }
+        result = ERR_OK;
+    }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get enabled for bundle slots.");
+
+    message.ErrorCode(result).Message("GetEnabledForBundleSlots end").BranchId(BRANCH_3);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 

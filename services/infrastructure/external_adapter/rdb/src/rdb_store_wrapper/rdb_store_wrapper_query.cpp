@@ -21,9 +21,13 @@
 namespace OHOS::Notification::Infra {
 namespace {
 const std::string NOTIFICATION_KEY = "KEY";
+const std::string NOTIFICATION_VALUE = "VALUE";
 const int32_t NOTIFICATION_KEY_INDEX = 0;
 const int32_t NOTIFICATION_VALUE_INDEX = 1;
 const int64_t LAST_DAY_MS = 7 * 24 * 60 * 60 * 1000;
+const std::ptrdiff_t MAX_SIZE_PER_BATCH = 100;
+const std::string BUNDLE_KEY_PREFIX = "ans_bundle_";
+const std::string BUNDLE_KEY_SUFFIX_ENABLED_NOTIFICATION = "_enabledNotification";
 }
 
 template<typename Func>
@@ -194,6 +198,40 @@ int32_t NtfRdbStoreWrapper::QueryAllData(std::unordered_map<std::string, std::st
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
     return ret == NativeRdb::E_OK ? NativeRdb::E_OK : ret;
+}
+
+int32_t NtfRdbStoreWrapper::QueryDataInKeys(const std::vector<std::string> &keys,
+    std::unordered_map<std::string, std::string> &values, const int32_t &userId)
+{
+    ANS_LOGD("QueryDataInKeys start");
+    if (keys.empty()) {
+        ANS_LOGD("QueryDataInKeys keys is empty, short-circuit return E_OK");
+        return NativeRdb::E_OK;
+    }
+
+    const auto batchKeys = SplitKeysIntoBatches(keys, MAX_SIZE_PER_BATCH);
+    auto queryFunc = [this, &batchKeys, &values](const std::string& tableName) {
+        return this->QueryDataInKeysFromTable(batchKeys, tableName, values);
+    };
+    int32_t ret = QueryMultiTablesWithErrorHandling(userId, queryFunc, false);
+    if (ret == NativeRdb::E_EMPTY_VALUES_BUCKET && values.empty()) {
+        return NativeRdb::E_EMPTY_VALUES_BUCKET;
+    }
+    return ret == NativeRdb::E_ERROR ? ret : NativeRdb::E_OK;
+}
+
+int32_t NtfRdbStoreWrapper::QueryEnabledBundles(
+    std::unordered_map<std::string, std::string> &values, const int32_t &userId)
+{
+    ANS_LOGD("QueryEnabledBundles start");
+    auto queryFunc = [this, &values](const std::string& tableName) {
+        return this->QueryEnabledBundlesFromTable(tableName, values);
+    };
+    int32_t ret = QueryMultiTablesWithErrorHandling(userId, queryFunc, false);
+    if (ret == NativeRdb::E_EMPTY_VALUES_BUCKET && values.empty()) {
+        return NativeRdb::E_EMPTY_VALUES_BUCKET;
+    }
+    return ret == NativeRdb::E_ERROR ? ret : NativeRdb::E_OK;
 }
 
 int32_t NtfRdbStoreWrapper::ExecuteQuery(const std::string& tableName, NativeRdb::AbsRdbPredicates& predicates,
@@ -393,5 +431,65 @@ int32_t NtfRdbStoreWrapper::QueryAllData(
     }
 
     return ExtractMapValues(resultSet, tableName, datas, sceneId, branchId);
+}
+
+int32_t NtfRdbStoreWrapper::QueryDataInKeysFromTable(const std::vector<std::vector<std::string>> &batchKeys,
+    const std::string &tableName, std::unordered_map<std::string, std::string> &values)
+{
+    const int32_t sceneId = 10;
+    const int32_t branchId = 10; // EventSceneId::SCENE_10, EventBranchId::BRANCH_10
+    for (const auto &batch : batchKeys) {
+        if (batch.empty()) {
+            continue;
+        }
+        NativeRdb::AbsRdbPredicates predicates(tableName);
+        predicates.In(NOTIFICATION_KEY, batch);
+
+        std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = nullptr;
+        int32_t ret = ExecuteQuery(tableName, predicates, resultSet);
+        if (ret != NativeRdb::E_OK) {
+            return ret;
+        }
+        ret = CheckFirstRow(resultSet, tableName, batch.front(), sceneId, branchId);
+        if (ret == NativeRdb::E_SQLITE_CORRUPT) {
+            return ret;
+        }
+        if (ret == NativeRdb::E_OK) {
+            ret = ExtractMapValues(resultSet, tableName, values, sceneId, branchId);
+            if (ret != NativeRdb::E_OK) {
+                return ret;
+            }
+        }
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NtfRdbStoreWrapper::QueryEnabledBundlesFromTable(
+    const std::string &tableName, std::unordered_map<std::string, std::string> &values)
+{
+    NativeRdb::AbsRdbPredicates predicates(tableName);
+    predicates.SetWhereClause(NOTIFICATION_KEY + " LIKE ? AND " + NOTIFICATION_VALUE + " IN ('1','3')");
+    predicates.SetWhereArgs({
+        BUNDLE_KEY_PREFIX + "%" + BUNDLE_KEY_SUFFIX_ENABLED_NOTIFICATION
+    });
+
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = nullptr;
+    int32_t ret = ExecuteQuery(tableName, predicates, resultSet);
+    if (ret != NativeRdb::E_OK) {
+        return ret;
+    }
+    const int32_t sceneId = 10;
+    const int32_t branchId = 11; // EventSceneId::SCENE_10, EventBranchId::BRANCH_11
+    ret = CheckFirstRow(resultSet, tableName, BUNDLE_KEY_PREFIX, sceneId, branchId);
+    if (ret == NativeRdb::E_SQLITE_CORRUPT) {
+        return ret;
+    }
+    if (ret == NativeRdb::E_OK) {
+        ret = ExtractMapValues(resultSet, tableName, values, sceneId, branchId);
+        if (ret != NativeRdb::E_OK) {
+            return ret;
+        }
+    }
+    return NativeRdb::E_OK;
 }
 } // namespace OHOS::Notification::Infra

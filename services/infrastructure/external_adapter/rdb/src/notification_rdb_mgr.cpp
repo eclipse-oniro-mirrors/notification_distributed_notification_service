@@ -125,6 +125,18 @@ int32_t NotificationRdbMgr::QueryAllData(std::unordered_map<std::string, std::st
     return rdbStoreWrapper_->QueryAllData(values, userId);
 }
 
+int32_t NotificationRdbMgr::QueryDataInKeys(const std::vector<std::string> &keys,
+    std::unordered_map<std::string, std::string> &values, const int32_t &userId)
+{
+    return rdbStoreWrapper_->QueryDataInKeys(keys, values, userId);
+}
+
+int32_t NotificationRdbMgr::QueryEnabledBundles(std::unordered_map<std::string, std::string> &values,
+    const int32_t &userId)
+{
+    return rdbStoreWrapper_->QueryEnabledBundles(values, userId);
+}
+
 int32_t NotificationRdbMgr::DropUserTable(const int32_t userId)
 {
     return rdbStoreWrapper_->DropUserTable(userId);

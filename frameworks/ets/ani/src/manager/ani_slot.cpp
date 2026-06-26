@@ -95,6 +95,72 @@ bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackSlotInfo* asyncCal
     return true;
 }
 
+void DeleteSlotBundleCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackSlotBundleInfo* asyncCallbackInfo)
+{
+    ANS_LOGD("Delete AsyncCallbackSlotBundleInfo Without Promise");
+    if (!asyncCallbackInfo) {
+        return;
+    }
+    if (asyncCallbackInfo->info.callback != nullptr) {
+        ANS_LOGD("Delete callback reference");
+        ani_status status = env->GlobalReference_Delete(asyncCallbackInfo->info.callback);
+        if (status != ANI_OK) {
+            ANS_LOGW("GlobalReference_Delete failed, status: %{public}d", status);
+        }
+    }
+    if (asyncCallbackInfo->asyncWork != nullptr) {
+        ANS_LOGD("DeleteAsyncWork");
+        DeleteAsyncWork(env, asyncCallbackInfo->asyncWork);
+        asyncCallbackInfo->asyncWork = nullptr;
+    }
+    delete asyncCallbackInfo;
+    asyncCallbackInfo = nullptr;
+}
+
+void DeleteSlotBundleCallBackInfo(ani_env* env, AsyncCallbackSlotBundleInfo* asyncCallbackInfo)
+{
+    ANS_LOGD("Delete AsyncCallbackSlotBundleInfo");
+    if (!asyncCallbackInfo) {
+        return;
+    }
+    if (asyncCallbackInfo->info.resolve != nullptr) {
+        ANS_LOGD("Delete resolve reference");
+        ani_status status = env->GlobalReference_Delete(reinterpret_cast<ani_ref>(asyncCallbackInfo->info.resolve));
+        if (status != ANI_OK) {
+            ANS_LOGW("GlobalReference_Delete failed, status: %{public}d", status);
+        }
+    }
+    DeleteSlotBundleCallBackInfoWithoutPromise(env, asyncCallbackInfo);
+}
+
+bool SetSlotBundleCallbackObject(ani_env* env, ani_object callback, AsyncCallbackSlotBundleInfo* asyncCallbackInfo)
+{
+    if (!NotificationSts::IsUndefine(env, callback)) {
+        ani_ref globalRef;
+        if (env->GlobalReference_Create(static_cast<ani_ref>(callback), &globalRef) != ANI_OK) {
+            NotificationSts::ThrowInternerErrorWithLogE(env, "create callback ref failed");
+            return false;
+        }
+        asyncCallbackInfo->info.callback = globalRef;
+    }
+    return true;
+}
+
+bool CheckSlotBundleCompleteEnvironment(ani_env **envCurr, AsyncCallbackSlotBundleInfo* asyncCallbackInfo)
+{
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+        ANS_LOGE("GetEnv failed");
+        return false;
+    }
+    if (asyncCallbackInfo->info.returnCode != ERR_OK) {
+        ANS_LOGE("return ErrCode: %{public}d", asyncCallbackInfo->info.returnCode);
+        NotificationSts::CreateReturnData(*envCurr, asyncCallbackInfo->info);
+        DeleteSlotBundleCallBackInfoWithoutPromise(*envCurr, asyncCallbackInfo);
+        return false;
+    }
+    return true;
+}
+
 void HandleSlotFunctionCallbackComplete(ani_env* env, WorkStatus status, void* data)
 {
     auto asyncCallbackInfo = static_cast<AsyncCallbackSlotInfo*>(data);
@@ -1063,6 +1129,77 @@ ani_object AniGetNotificationSetting(ani_env *env, ani_object callback)
         return promise;
     }
     return nullptr;
+}
+
+void HandleSlotBundleCallbackComplete(ani_env* env, WorkStatus status, void* data)
+{
+    auto asyncCallbackInfo = static_cast<AsyncCallbackSlotBundleInfo*>(data);
+    if (!asyncCallbackInfo) {
+        return;
+    }
+    ani_env *envCurr = nullptr;
+    if (!CheckSlotBundleCompleteEnvironment(&envCurr, asyncCallbackInfo)) {
+        if (envCurr == nullptr) {
+            DeleteSlotBundleCallBackInfoWithoutPromise(env, asyncCallbackInfo);
+        }
+        return;
+    }
+    if (asyncCallbackInfo->functionType == IS_NOTIFICATION_SLOT_ENABLED_BY_BUNDLES) {
+        if (!NotificationSts::WrapBundleOptionMap(envCurr,
+            asyncCallbackInfo->info.result, asyncCallbackInfo->slotEnabled)) {
+            asyncCallbackInfo->info.returnCode = OHOS::Notification::ERR_ANS_INNER_TASK_ERR;
+        }
+    }
+    NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
+    DeleteSlotBundleCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
+}
+
+ani_object AniIsNotificationSlotEnabledByBundles(ani_env *env, ani_object bundlesObj,
+    ani_enum_item typeEnum, ani_object callback)
+{
+#ifdef ANS_FEATURE_SLOT_MANAGER
+    auto asyncCallbackInfo = new (std::nothrow)AsyncCallbackSlotBundleInfo{.asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
+    }
+    if (!NotificationSts::UnwrapArrayBundleOption(env,
+        static_cast<ani_ref>(bundlesObj), asyncCallbackInfo->bundles)) {
+        DeleteSlotBundleCallBackInfo(env, asyncCallbackInfo);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_INVALID_PARAM);
+    }
+    if (!NotificationSts::SlotTypeEtsToC(env, typeEnum, asyncCallbackInfo->slotType)) {
+        DeleteSlotBundleCallBackInfo(env, asyncCallbackInfo);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_INVALID_PARAM);
+    }
+    if (!SetSlotBundleCallbackObject(env, callback, asyncCallbackInfo)) {
+        DeleteSlotBundleCallBackInfo(env, asyncCallbackInfo);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
+    }
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    if (env->GetVM(&asyncCallbackInfo->vm) != ANI_OK) {
+        DeleteSlotBundleCallBackInfo(env, asyncCallbackInfo);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
+    }
+    asyncCallbackInfo->functionType = IS_NOTIFICATION_SLOT_ENABLED_BY_BUNDLES;
+    WorkStatus workStatus = CreateAsyncWork(env,
+        [](ani_env* env, void* data) {
+            auto info = static_cast<AsyncCallbackSlotBundleInfo*>(data);
+            if (info) {
+                info->info.returnCode = DelayedSingleton<AnsNotification>::GetInstance()->GetEnabledForBundleSlots(
+                    info->bundles, info->slotType, info->slotEnabled);
+            }
+        },
+        HandleSlotBundleCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
+    if (workStatus != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        DeleteSlotBundleCallBackInfo(env, asyncCallbackInfo);
+        return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
+    }
+    return asyncCallbackInfo->info.callback == nullptr ? promise : nullptr;
+#else
+    return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERROR_SYSTEM_CAP_ERROR);
+#endif
 }
 }
 }

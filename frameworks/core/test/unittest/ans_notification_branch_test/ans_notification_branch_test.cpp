@@ -647,6 +647,13 @@ public:
         return ERR_ANS_INNER_INVALID_PARAM;
     }
 
+    ErrCode GetEnabledForBundleSlots(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        int32_t slotType,
+        std::map<sptr<NotificationBundleOption>, bool> &slotEnabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode GetEnabledForBundleSlotSelf(int32_t slotTypeInt, bool &enabled) override
     {
         return ERR_ANS_INNER_INVALID_PARAM;

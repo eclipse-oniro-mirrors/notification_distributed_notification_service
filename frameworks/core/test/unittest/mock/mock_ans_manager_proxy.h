@@ -21,6 +21,7 @@
 #include <iremote_proxy.h>
 #include "ians_manager.h"
 #include "ibadge_query_callback.h"
+#include "notification_bundle_option.h"
 
 namespace OHOS {
 namespace Notification {
@@ -167,6 +168,8 @@ public:
         ErrCode(const sptr<NotificationBundleOption>& bundleOption, int32_t, bool, bool));
     MOCK_METHOD3(GetEnabledForBundleSlot, ErrCode(const sptr<NotificationBundleOption>&, int32_t, bool&));
     MOCK_METHOD2(GetEnabledForBundleSlotSelf, ErrCode(int32_t, bool&));
+    MOCK_METHOD3(GetEnabledForBundleSlots, ErrCode(const std::vector<sptr<NotificationBundleOption>> &,
+        int32_t, std::map<sptr<NotificationBundleOption>, bool> &));
 #ifdef ANM_SUPPORT_DUMP
     MOCK_METHOD5(ShellDump,
         ErrCode(const std::string&, const std::string&, int32_t, int32_t, std::vector<std::string>&));

@@ -273,6 +273,9 @@ export default namespace notificationManager {
 
     export native function nativeIsNotificationSlotEnabled(bundle: BundleOption, type: SlotType,
         callback?: AsyncCallback<boolean>): Promise<boolean>;
+    export native function nativeIsNotificationSlotEnabledByBundles(
+        bundles: Array<BundleOption>, type: SlotType,
+        callback?: AsyncCallback<Map<BundleOption, boolean>>): Promise<Map<BundleOption, boolean>>;
     export native function nativeSetNotificationEnableSlot(bundle: BundleOption, type: SlotType, enable: boolean,
         callback?: AsyncCallback<void>): Promise<void>;
     export native function nativeSetNotificationEnableSlotWithForce(enableSlotParameter: EnableSlotParameter,
@@ -1221,6 +1224,16 @@ export default namespace notificationManager {
             let error: BusinessError = err as BusinessError;
             throw error;
         }
+    }
+
+    export function isNotificationSlotEnabledByBundles(
+        bundles: Array<BundleOption>, type: SlotType): Promise<Map<BundleOption, boolean>> {
+        if (!bundles || bundles.length == 0) {
+            throw errorParamInvalid;
+        }
+        let result: Promise<Map<BundleOption, boolean>>;
+        result = nativeIsNotificationSlotEnabledByBundles(bundles, type, undefined);
+        return result;
     }
 
     export function getSlotsByBundle(bundle: BundleOption, callback: AsyncCallback<Array<NotificationSlot>>): void

@@ -1558,5 +1558,15 @@ ErrCode NotificationHelper::GetNotificationSwitch(
         DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSwitch(switchName, userId, switchState);
     return InnerErrorToNative(result);
 }
+
+ErrCode NotificationHelper::GetEnabledForBundleSlots(const std::vector<NotificationBundleOption> &bundleOptions,
+    const NotificationConstant::SlotType &slotType,
+    std::map<sptr<NotificationBundleOption>, bool> &slotEnabled)
+{
+    InnerErrorCode result =
+        DelayedSingleton<AnsNotification>::GetInstance()->GetEnabledForBundleSlots(
+            bundleOptions, slotType, slotEnabled);
+    return InnerErrorToNative(result);
+}
 }  // namespace Notification
 }  // namespace OHOS

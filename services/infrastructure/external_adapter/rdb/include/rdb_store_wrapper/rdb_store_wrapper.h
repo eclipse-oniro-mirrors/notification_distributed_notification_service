@@ -149,6 +149,13 @@ public:
     /** @brief Query all key-value records. */
     int32_t QueryAllData(std::unordered_map<std::string, std::string> &values, const int32_t &userId = -1);
 
+    /** @brief Query records whose keys are in the given key list (batched IN query). */
+    int32_t QueryDataInKeys(const std::vector<std::string> &keys,
+        std::unordered_map<std::string, std::string> &values, const int32_t &userId = -1);
+
+    /** @brief Query bundle enabled-notification keys filtered by VALUE IN ('1','3'). */
+    int32_t QueryEnabledBundles(std::unordered_map<std::string, std::string> &values, const int32_t &userId = -1);
+
     /** @brief Drop a per-user table and update the internal created-table cache. */
     int32_t DropUserTable(const int32_t userId);
 private:
@@ -192,6 +199,14 @@ private:
 
     /** @brief Query all key-value pairs from a specific table. */
     int32_t QueryAllData(const std::string tableName, std::unordered_map<std::string, std::string> &datas);
+
+    /** @brief Query records whose keys are in the given batched key list from a specific table. */
+    int32_t QueryDataInKeysFromTable(const std::vector<std::vector<std::string>> &batchKeys,
+        const std::string &tableName, std::unordered_map<std::string, std::string> &values);
+
+    /** @brief Query enabled-notification keys from a specific table. */
+    int32_t QueryEnabledBundlesFromTable(const std::string &tableName,
+        std::unordered_map<std::string, std::string> &values);
 
     /** @brief Split a key list into fixed-size batches for IN(...) predicates. */
     std::vector<std::vector<std::string>> SplitKeysIntoBatches(

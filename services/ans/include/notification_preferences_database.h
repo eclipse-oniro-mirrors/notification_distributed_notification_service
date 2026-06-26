@@ -17,10 +17,13 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_NOTIFICATION_PREFERENCES_DATABASE_H
 
 #include <functional>
+#include <map>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <vector>
 
+#include "notification_bundle_option.h"
 #include "notification_rdb_data_mgr.h"
 #include "notification_clone_priority_info.h"
 #include "notification_preferences_info.h"
@@ -427,6 +430,18 @@ public:
     bool GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
 
     /**
+     * @brief Batch query slot enabled state for multiple bundles.
+     *
+     * @param bundleOptions Indicates the bundle options to query.
+     * @param slotType Indicates the slot type.
+     * @param slotEnabled Indicates the output map from bundle option to enabled state.
+     * @return Return true on success, false on failure.
+     */
+    bool GetEnabledForBundleSlots(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        int32_t slotType,
+        std::map<sptr<NotificationBundleOption>, bool> &slotEnabled);
+
+    /**
      * @brief Delete all slots in the of bundle from disturbe DB.
      *
      * @param bundleKey Indicates to which a bundle.
@@ -643,6 +658,9 @@ private:
     bool HandleDataBaseMapInner(
         const std::unordered_map<std::string, std::string> &datas,
         std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
+
+    bool ParseBundleNameAndUidFromKey(const std::string &key, const std::string &suffix,
+        std::string &bundleName, int32_t &uid);
 
     void GetValueFromDisturbeDB(const std::string &key, const int &userId,
         std::function<void(std::string &)> function);

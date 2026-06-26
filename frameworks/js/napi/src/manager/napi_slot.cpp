@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 namespace OHOS {
 namespace NotificationNapi {
 using OHOS::Notification::AnsNotification;
+const int32_t GET_SLOT_ENABLED_BY_BUNDLES_MIN_PARA = 1;
 napi_value NapiAddSlot(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("called");
@@ -1070,6 +1071,124 @@ napi_value NapiGetNotificationSettings(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     return asynccallbackinfo->info.isCallback ? Common::NapiGetNull(env) : promise;
+}
+
+const int32_t BATCH_GET_SLOT_ENABLED_BY_BUNDLES_MIN_PARA = 2;
+
+napi_value ParseParametersForBatchGetSlotEnabled(const napi_env &env, const napi_callback_info &info,
+    AsyncCallbackInfoBatchGetSlotEnabled *asyncCallbackInfo)
+{
+    size_t argc = BATCH_GET_SLOT_ENABLED_BY_BUNDLES_MIN_PARA;
+    napi_value argv[BATCH_GET_SLOT_ENABLED_BY_BUNDLES_MIN_PARA] = { nullptr };
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
+    if (argc < BATCH_GET_SLOT_ENABLED_BY_BUNDLES_MIN_PARA) {
+        std::string msg = "Missing parameter.";
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
+        return nullptr;
+    }
+    bool isArray = false;
+    NAPI_CALL(env, napi_is_array(env, argv[PARAM0], &isArray));
+    if (!isArray) {
+        std::string msg = "Argument 0 must be an array.";
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
+        return nullptr;
+    }
+    uint32_t length = 0;
+    NAPI_CALL(env, napi_get_array_length(env, argv[PARAM0], &length));
+    for (uint32_t i = 0; i < length; ++i) {
+        napi_value item = nullptr;
+        NAPI_CALL(env, napi_get_element(env, argv[PARAM0], i, &item));
+        NotificationBundleOption option;
+        if (!Common::GetBundleOption(env, item, option)) {
+            std::string msg = "Invalid BundleOption in array.";
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
+            return nullptr;
+        }
+        asyncCallbackInfo->bundles.push_back(std::move(option));
+    }
+    napi_valuetype typeValType = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &typeValType));
+    if (typeValType != napi_number) {
+        std::string msg = "SlotType must be number.";
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
+        return nullptr;
+    }
+    int32_t slotType = 0;
+    NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM1], &slotType));
+    NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
+    if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), outType)) {
+        std::string msg = "Invalid SlotType.";
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
+        return nullptr;
+    }
+    asyncCallbackInfo->slotType = outType;
+    return Common::NapiGetNull(env);
+}
+
+void AsyncCompleteCallbackBatchGetSlotEnabled(napi_env env, napi_status status, void *data)
+{
+    AsyncCallbackInfoBatchGetSlotEnabled *asyncCallbackInfo =
+        static_cast<AsyncCallbackInfoBatchGetSlotEnabled *>(data);
+    if (!asyncCallbackInfo) {
+        return;
+    }
+    napi_value resultMap;
+    napi_create_map(env, &resultMap);
+    for (auto itr = asyncCallbackInfo->slotEnabled.begin(); itr != asyncCallbackInfo->slotEnabled.end(); ++itr) {
+        if (itr->first == nullptr) {
+            continue;
+        }
+        napi_value jsKey = nullptr;
+        napi_create_object(env, &jsKey);
+        napi_value bundleNameValue = nullptr;
+        napi_create_string_utf8(env, itr->first->GetBundleName().c_str(), NAPI_AUTO_LENGTH, &bundleNameValue);
+        napi_set_named_property(env, jsKey, "bundle", bundleNameValue);
+        napi_value uidValue = nullptr;
+        napi_create_int32(env, itr->first->GetUid(), &uidValue);
+        napi_set_named_property(env, jsKey, "uid", uidValue);
+        napi_value jsValue = nullptr;
+        napi_get_boolean(env, itr->second, &jsValue);
+        napi_map_set_property(env, resultMap, jsKey, jsValue);
+    }
+    if (asyncCallbackInfo->slotEnabled.empty()) {
+        resultMap = Common::NapiGetNull(env);
+    }
+    Common::CreateReturnValue(env, asyncCallbackInfo->info, resultMap);
+    napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
+    delete asyncCallbackInfo;
+}
+
+napi_value NapiIsNotificationSlotEnabledByBundles(napi_env env, napi_callback_info info)
+{
+    AsyncCallbackInfoBatchGetSlotEnabled *asyncCallbackInfo =
+        new (std::nothrow) AsyncCallbackInfoBatchGetSlotEnabled {.env = env, .asyncWork = nullptr};
+    if (!asyncCallbackInfo) {
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
+        return Common::NapiGetUndefined(env);
+    }
+    if (ParseParametersForBatchGetSlotEnabled(env, info, asyncCallbackInfo) == nullptr) {
+        delete asyncCallbackInfo;
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
+        return Common::NapiGetUndefined(env);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asyncCallbackInfo->info, promise);
+    asyncCallbackInfo->info.isCallback = false;
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "isNotificationSlotEnabledByBundles", NAPI_AUTO_LENGTH, &resourceName);
+    napi_create_async_work(env, nullptr, resourceName,
+        [](napi_env env, void *data) {
+            auto *info = static_cast<AsyncCallbackInfoBatchGetSlotEnabled *>(data);
+            if (info) {
+                info->info.errorCode = DelayedSingleton<AnsNotification>::GetInstance()->GetEnabledForBundleSlots(
+                    info->bundles, info->slotType, info->slotEnabled);
+            }
+        },
+        AsyncCompleteCallbackBatchGetSlotEnabled, static_cast<void *>(asyncCallbackInfo),
+        &asyncCallbackInfo->asyncWork);
+    napi_queue_async_work_with_qos(env, asyncCallbackInfo->asyncWork, napi_qos_user_initiated);
+    return promise;
 }
 
 }  // namespace NotificationNapi
