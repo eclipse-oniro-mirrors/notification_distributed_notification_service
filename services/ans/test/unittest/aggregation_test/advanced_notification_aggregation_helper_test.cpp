@@ -19,7 +19,6 @@
 #define private public
 #define protected public
 #include "advanced_notification_aggregation_helper.h"
-#include "notification_subscriber_manager.h"
 #undef protected
 #undef private
 
@@ -48,25 +47,23 @@ public:
 #ifdef ANS_FEATURE_AGGREGATION_NOTIFICATION
 /**
  * @tc.name: BuildAggregationCommand_0100
- * @tc.desc: Test BuildAggregationCommand when aggregationSubscriberCount <= 0,
+ * @tc.desc: Test BuildAggregationCommand when no aggregation subscriber is registered,
  *           command should remain empty and method returns early
  * @tc.type: FUNC
  * @tc.require: issue
  */
 HWTEST_F(AdvancedNotificationAggregationHelperTest, BuildAggregationCommand_0100, Function | SmallTest | Level1)
 {
-    // aggregationSubscriberCount_ is initialized to 0 by default,
-    // so GetAggregationSubscriberCount() returns 0 and count <= 0
-    // BuildAggregationCommand should return early without populating command
+    // Pass hasAggregationSubscriber=false to verify early return without populating command
     std::string cmdType = NotificationConstant::AggregationType::DEAL;
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     ASSERT_NE(request, nullptr);
     request->SetReceiverUserId(100);
     nlohmann::json command;
 
-    AdvancedNotificationAggregationHelper::GetInstance()->BuildAggregationCommand(cmdType, request, command);
+    AdvancedNotificationAggregationHelper::GetInstance()->BuildAggregationCommand(cmdType, request, command, false);
 
-    // When subscriber count <= 0, command should not contain cmdType key
+    // When no aggregation subscriber is registered, command should not contain cmdType key
     EXPECT_FALSE(command.contains(cmdType));
 }
 
@@ -79,9 +76,6 @@ HWTEST_F(AdvancedNotificationAggregationHelperTest, BuildAggregationCommand_0100
  */
 HWTEST_F(AdvancedNotificationAggregationHelperTest, BuildAggregationCommand_0200, Function | SmallTest | Level1)
 {
-    // Increment aggregation subscriber count so it becomes > 0
-    NotificationSubscriberManager::GetInstance()->IncrementAggregationSubscriberCount();
-
     // Set up active user ID mock to return userId 100
     MockQueryForgroundOsAccountId(true, 0);
 
@@ -99,7 +93,8 @@ HWTEST_F(AdvancedNotificationAggregationHelperTest, BuildAggregationCommand_0200
     request->SetReceiverUserId(100);
     nlohmann::json command;
 
-    AdvancedNotificationAggregationHelper::GetInstance()->BuildAggregationCommand(cmdType, request, command);
+    AdvancedNotificationAggregationHelper::GetInstance()->BuildAggregationCommand(
+        cmdType, request, command, true);
 
     // Command should contain cmdType key with dealSwitch and logisticsSwitch both true
     EXPECT_TRUE(command.contains(cmdType));
@@ -107,9 +102,6 @@ HWTEST_F(AdvancedNotificationAggregationHelperTest, BuildAggregationCommand_0200
     EXPECT_TRUE(command[cmdType].contains("logisticsSwitch"));
     EXPECT_EQ(command[cmdType]["dealSwitch"].get<bool>(), true);
     EXPECT_EQ(command[cmdType]["logisticsSwitch"].get<bool>(), true);
-
-    // Clean up: decrement subscriber count
-    NotificationSubscriberManager::GetInstance()->DecrementAggregationSubscriberCount();
 }
 
 /**
@@ -121,9 +113,6 @@ HWTEST_F(AdvancedNotificationAggregationHelperTest, BuildAggregationCommand_0200
  */
 HWTEST_F(AdvancedNotificationAggregationHelperTest, BuildAggregationCommand_0300, Function | SmallTest | Level1)
 {
-    // Increment aggregation subscriber count so it becomes > 0
-    NotificationSubscriberManager::GetInstance()->IncrementAggregationSubscriberCount();
-
     // Set up active user ID mock to return userId 100
     MockQueryForgroundOsAccountId(true, 0);
 
@@ -141,13 +130,11 @@ HWTEST_F(AdvancedNotificationAggregationHelperTest, BuildAggregationCommand_0300
     request->SetReceiverUserId(100);
     nlohmann::json command;
 
-    AdvancedNotificationAggregationHelper::GetInstance()->BuildAggregationCommand(cmdType, request, command);
+    AdvancedNotificationAggregationHelper::GetInstance()->BuildAggregationCommand(
+        cmdType, request, command, true);
 
     // When both switches are OFF, command should not contain cmdType key
     EXPECT_FALSE(command.contains(cmdType));
-
-    // Clean up: decrement subscriber count
-    NotificationSubscriberManager::GetInstance()->DecrementAggregationSubscriberCount();
 }
 
 /**
@@ -159,9 +146,6 @@ HWTEST_F(AdvancedNotificationAggregationHelperTest, BuildAggregationCommand_0300
  */
 HWTEST_F(AdvancedNotificationAggregationHelperTest, BuildAggregationCommand_0400, Function | SmallTest | Level1)
 {
-    // Increment aggregation subscriber count so it becomes > 0
-    NotificationSubscriberManager::GetInstance()->IncrementAggregationSubscriberCount();
-
     // Set up active user ID mock to return userId 100
     MockQueryForgroundOsAccountId(true, 0);
 
@@ -180,7 +164,8 @@ HWTEST_F(AdvancedNotificationAggregationHelperTest, BuildAggregationCommand_0400
     request->SetReceiverUserId(-1);
     nlohmann::json command;
 
-    AdvancedNotificationAggregationHelper::GetInstance()->BuildAggregationCommand(cmdType, request, command);
+    AdvancedNotificationAggregationHelper::GetInstance()->BuildAggregationCommand(
+        cmdType, request, command, true);
 
     // Command should contain cmdType key with dealSwitch=true, logisticsSwitch=false
     EXPECT_TRUE(command.contains(cmdType));
@@ -188,9 +173,6 @@ HWTEST_F(AdvancedNotificationAggregationHelperTest, BuildAggregationCommand_0400
     EXPECT_TRUE(command[cmdType].contains("logisticsSwitch"));
     EXPECT_EQ(command[cmdType]["dealSwitch"].get<bool>(), true);
     EXPECT_EQ(command[cmdType]["logisticsSwitch"].get<bool>(), false);
-
-    // Clean up: decrement subscriber count
-    NotificationSubscriberManager::GetInstance()->DecrementAggregationSubscriberCount();
 }
 #endif // ANS_FEATURE_AGGREGATION_NOTIFICATION
 

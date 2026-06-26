@@ -27,10 +27,12 @@ namespace Notification {
 class AdvancedNotificationAiExtensionManager : public DelayedSingleton<AdvancedNotificationAiExtensionManager> {
 public:
     int32_t UpdateNotification(const std::vector<sptr<NotificationRequest>> &requests,
-        std::vector<sptr<NotificationClassification>> &notificationClassification);
+        std::vector<sptr<NotificationClassification>> &notificationClassification,
+        bool hasAggregationSubscriber);
 
 private:
-    void BuildCommandForUpdate(const sptr<NotificationRequest> &request, nlohmann::json &command);
+    void BuildCommandForUpdate(
+        const sptr<NotificationRequest> &request, nlohmann::json &command, bool hasAggregationSubscriber);
     bool IsCollaborationNotification(const sptr<NotificationRequest> &request);
 
 private:

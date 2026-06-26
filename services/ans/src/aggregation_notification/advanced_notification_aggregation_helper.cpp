@@ -17,18 +17,16 @@
 #include "ans_log_wrapper.h"
 #include "notification_constant.h"
 #include "notification_preferences.h"
-#include "notification_subscriber_manager.h"
 #include "os_account_manager_helper.h"
 
 namespace OHOS {
 namespace Notification {
 #ifdef ANS_FEATURE_AGGREGATION_NOTIFICATION
 void AdvancedNotificationAggregationHelper::BuildAggregationCommand(std::string& cmdType,
-    const sptr<NotificationRequest> &request, nlohmann::json &command)
+    const sptr<NotificationRequest> &request, nlohmann::json &command, bool hasAggregationSubscriber)
 {
-    int32_t aggregationSubscriberCount = NotificationSubscriberManager::GetInstance()->GetAggregationSubscriberCount();
-    if (aggregationSubscriberCount <= 0) {
-        ANS_LOGI("Aggregation subscriber count == %{public}d", aggregationSubscriberCount);
+    if (!hasAggregationSubscriber) {
+        ANS_LOGI("No aggregation subscriber registered, skip aggregation command");
         return;
     }
     int32_t userId = request->GetReceiverUserId();
