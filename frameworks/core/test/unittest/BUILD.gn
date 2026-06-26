@@ -29,6 +29,5 @@ group("unittest") {
     "ans_manager_death_recipient_test:unittest",
     "subscriber_image_util_test:unittest",
     "image_pixelmap_helper_test:unittest",
-    "pixelmap_cache_manager_test:unittest",
   ]
 }

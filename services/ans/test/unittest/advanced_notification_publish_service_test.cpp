@@ -50,6 +50,7 @@
 #include "notification_classification_mgr.h"
 #include "all_scenarios_extension_wrapper.h"
 #include "notification_live_view_content.h"
+#include "smart_reminder_center.h"
 
 extern void MockIsOsAccountExists(bool exists);
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase);
@@ -114,6 +115,9 @@ void AnsPublishServiceTest::TearDown()
 {
     constexpr int sleepMs = 500;
     std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    SmartReminderCenter::DestroyInstance();
+#endif
     delete advancedNotificationService_;
     advancedNotificationService_ = nullptr;
     GTEST_LOG_(INFO) << "TearDown";
