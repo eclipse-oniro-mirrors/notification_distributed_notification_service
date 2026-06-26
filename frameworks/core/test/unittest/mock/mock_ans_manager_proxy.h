@@ -121,6 +121,7 @@ public:
     MOCK_METHOD1(GetShowBadgeEnabled, ErrCode(bool&));
     MOCK_METHOD2(Subscribe, ErrCode(const sptr<IAnsSubscriber>&, uint32_t));
     MOCK_METHOD3(Subscribe, ErrCode(const sptr<IAnsSubscriber>&, const sptr<NotificationSubscribeInfo>&, uint32_t));
+    MOCK_METHOD2(SubscribeNotification, ErrCode(const sptr<IAnsSubscriber>&, uint32_t));
     MOCK_METHOD3(SubscribeNotification, ErrCode(const sptr<IAnsSubscriber>&,
         const sptr<NotificationSubscribeInfo>&, uint32_t));
     MOCK_METHOD2(SubscribeSelf, ErrCode(const sptr<IAnsSubscriber>&, uint32_t));

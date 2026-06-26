@@ -732,6 +732,12 @@ InnerErrorCode AnsNotification::GetBundleImportance(NotificationSlot::Notificati
     return ret;
 }
 
+InnerErrorCode AnsNotification::SubscribeNotificationV26(const std::shared_ptr<NotificationSubscriber> &subscriber)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    return SubscribeNotificationV26(subscriber, nullptr);
+}
+
 InnerErrorCode AnsNotification::SubscribeNotificationV26(const std::shared_ptr<NotificationSubscriber> &subscriber,
     const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
@@ -761,6 +767,9 @@ InnerErrorCode AnsNotification::SubscribeNotificationV26(const std::shared_ptr<N
     }
     DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
 
+    if (subscribeInfo == nullptr) {
+        return static_cast<InnerErrorCode>(proxy->SubscribeNotification(listener, subscriber->GetSubscribedFlags()));
+    }
     return static_cast<InnerErrorCode>(
         proxy->SubscribeNotification(listener, subscribeInfo, subscriber->GetSubscribedFlags()));
 }
