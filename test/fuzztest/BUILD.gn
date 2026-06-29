@@ -36,6 +36,7 @@ group("fuzztest") {
     "getactivenotificationnums_fuzzer:GetActiveNotificationNumsFuzzTest",
     "getallactivenotifications_fuzzer:GetAllActiveNotificationsFuzzTest",
     "getbundleimportance_fuzzer:GetBundleImportanceFuzzTest",
+    "getenabledforbundleslots_fuzzer:GetEnabledForBundleSlotsFuzzTest",
     "getnotificationslot_fuzzer:GetNotificationSlotFuzzTest",
     "getnotificationslotnumasbundle_fuzzer:GetNotificationSlotNumAsBundleFuzzTest",
     "getnotificationslotsforbundle_fuzzer:GetNotificationSlotsForBundleFuzzTest",

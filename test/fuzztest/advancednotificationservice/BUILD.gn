@@ -47,6 +47,7 @@ group("fuzztest") {
     "servicegetdonotdisturbprofile_fuzzer:ServiceGetDoNotDisturbProfileFuzzTest",
     "servicegetdonotdisturbprofilebyuser_fuzzer:ServiceGetDoNotDisturbProfileByUserFuzzTest",
     "servicegetenabledforbundleslot_fuzzer:ServiceGetEnabledForBundleSlotFuzzTest",
+    "servicegetenabledforbundleslots_fuzzer:ServiceGetEnabledForBundleSlotsFuzzTest",
     "servicegetenabledforbundleslotself_fuzzer:ServiceGetEnabledForBundleSlotSelfFuzzTest",
     "servicegetnotificationrequestbyhashcode_fuzzer:ServiceGetNotificationRequestByHashCodeFuzzTest",
     "servicegetnotificationswitch_fuzzer:ServiceGetNotificationSwitchFuzzTest",
