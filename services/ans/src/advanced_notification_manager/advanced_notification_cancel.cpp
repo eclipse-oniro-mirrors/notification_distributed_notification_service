@@ -327,7 +327,8 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
 AnsStatus AdvancedNotificationService::ValidRightsForCancelAsBundle(int32_t notificationId, int32_t &reason)
 {
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()
+        && !AccessTokenHelper::VerifyShellToken(IPCSkeleton::GetCallingTokenID())) {
         std::string message = "not systemApp";
         ANS_LOGE("%{public}s", message.c_str());
         return AnsStatus::NonSystemApp(message, EventSceneId::SCENE_2, EventBranchId::BRANCH_1);
@@ -687,7 +688,8 @@ AnsStatus AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<No
     ANS_LOGD("called");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()
+        && !AccessTokenHelper::VerifyShellToken(IPCSkeleton::GetCallingTokenID())) {
         std::string message = "not system app.";
         ANS_LOGE("%{public}s", message.c_str());
         return AnsStatus::NonSystemApp(message, EventSceneId::SCENE_6, EventBranchId::BRANCH_1);
@@ -800,7 +802,8 @@ ErrCode AdvancedNotificationService::RemoveNotifications(
     ANS_LOGD("called");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()
+        && !AccessTokenHelper::VerifyShellToken(IPCSkeleton::GetCallingTokenID())) {
         return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
@@ -1027,7 +1030,8 @@ ErrCode AdvancedNotificationService::DeleteByBundle(const sptr<NotificationBundl
     ANS_LOGD("called");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()
+        && !AccessTokenHelper::VerifyShellToken(IPCSkeleton::GetCallingTokenID())) {
         ANS_LOGD("VerifyNativeToken is false.");
         return ERR_ANS_INNER_NON_SYSTEM_APP;
     }

@@ -268,7 +268,8 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundleImpl
             " st:" + std::to_string(static_cast<int32_t>(state)) +
             " dId:" + deviceId);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()
+        && !AccessTokenHelper::VerifyShellToken(IPCSkeleton::GetCallingTokenID())) {
         ANS_LOGE("IsSystemApp is false.");
         message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).BranchId(BRANCH_6);
         NotificationAnalyticsUtil::ReportModifyEvent(message);

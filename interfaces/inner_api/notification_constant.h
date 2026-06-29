@@ -513,6 +513,11 @@ public:
     static const int32_t SNOOZE_REASON_DELETE = 40;
 
     /**
+     * Indicates that notification is deleted by shell.
+     */
+    static const int32_t SHELL_REASON_DELETE = 41;
+
+    /**
      * Indicates that a notification is deleted for other reasons.
      */
     static const int32_t APP_CANCEL_REASON_OTHER = 100;
