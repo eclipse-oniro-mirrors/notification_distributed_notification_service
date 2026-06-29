@@ -41,6 +41,7 @@ template("advancednotificationservice_fuzztest_target") {
       "-flto",
       "-ffunction-sections",
       "-fdata-sections",
+      "-Wno-unused-variable",
     ]
     defines = []
     deps = []
