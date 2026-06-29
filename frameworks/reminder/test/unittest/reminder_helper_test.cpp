@@ -18,10 +18,12 @@
 #include "reminder_request.h"
 #include "reminder_request_adaptation.h"
 
+#include "singleton.h"
 #include "ans_inner_errors.h"
 #include "reminder_helper.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
+#include "reminder_request_client.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -233,6 +235,7 @@ HWTEST_F(ReminderHelperTest, UnRegisterReminderState_00001, Function | SmallTest
 {
     ReminderHelper reminderHelper;
     ErrCode ret = reminderHelper.UnRegisterReminderState(nullptr);
+    DelayedSingleton<ReminderRequestClient>::GetInstance()->LoadReminderService();
     EXPECT_EQ(ret, (int)ERR_OK);
 }
 }
