@@ -167,7 +167,6 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00100, Function | 
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     bool isSnooze = true;
     reminderRequest->UpdateNotificationRequest(notificationRequest, isSnooze, 0);
@@ -201,7 +200,6 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00300, Function | 
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-    
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     reminderRequest->wantAgentInfo_ = std::make_shared<ReminderRequest::WantAgentInfo>();
     bool isSnooze = true;
@@ -219,7 +217,6 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00400, Function | 
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-    
     reminderRequest->maxScreenWantAgentInfo_ = std::make_shared<ReminderRequest::MaxScreenAgentInfo>();
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     bool isSnooze = true;
@@ -237,7 +234,6 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00500, Function | 
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-    
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     bool isSnooze = true;
     reminderRequest->UpdateNotificationRequest(notificationRequest, isSnooze, 0);
@@ -270,7 +266,6 @@ HWTEST_F(ReminderRequestBranchTest, GetButtonInfo_00100, Function | SmallTest | 
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-    
     std::string title = "aa";
     ReminderRequest::ActionButtonType actionButtonType = ReminderRequest::ActionButtonType::CLOSE;
     ReminderRequest::ActionButtonInfo info;
@@ -293,7 +288,6 @@ HWTEST_F(ReminderRequestBranchTest, GetButtonInfo_00200, Function | SmallTest | 
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-    
     std::string title = "aa";
     std::string pkgName = "bb";
     std::string abilityName = "cc";
@@ -320,7 +314,6 @@ HWTEST_F(ReminderRequestBranchTest, AddActionButtons_00100, Function | SmallTest
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-    
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     std::string stringData = "aa";
     ReminderRequest::ActionButtonType buttonType = ReminderRequest::ActionButtonType::CLOSE;
@@ -345,7 +338,6 @@ HWTEST_F(ReminderRequestBranchTest, AddActionButtons_00200, Function | SmallTest
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-    
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     std::string title = "aa";
     ReminderRequest::ActionButtonType actionButtonType = ReminderRequest::ActionButtonType::SNOOZE;
@@ -370,7 +362,6 @@ HWTEST_F(ReminderRequestBranchTest, AddActionButtons_00300, Function | SmallTest
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-    
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     std::string title = "title";
     ReminderRequest::ActionButtonType actionButtonType_ = ReminderRequest::ActionButtonType::SNOOZE;
@@ -395,7 +386,6 @@ HWTEST_F(ReminderRequestBranchTest, AddActionButtons_00400, Function | SmallTest
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-    
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     std::string title = "aa";
     ReminderRequest::ActionButtonType actionButtonType = ReminderRequest::ActionButtonType::CUSTOM;
@@ -420,7 +410,6 @@ HWTEST_F(ReminderRequestBranchTest, AddActionButtons_00500, Function | SmallTest
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-    
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     std::string title = "aa";
     std::string pkgName = "bb";
@@ -449,7 +438,6 @@ HWTEST_F(ReminderRequestBranchTest, AddActionButtons_00600, Function | SmallTest
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-    
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     std::string title = "aa";
     ReminderRequest::ActionButtonType actionButtonType = ReminderRequest::ActionButtonType::INVALID;
@@ -474,7 +462,6 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationCommon_00100, Function | S
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-    
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     reminderRequest->reminderType_ = ReminderRequest::ReminderType::TIMER;
     reminderRequest->UpdateNotificationCommon(notificationRequest, false);
@@ -491,7 +478,6 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationCommon_00200, Function | S
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-    
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     reminderRequest->reminderType_ = ReminderRequest::ReminderType::ALARM;
     reminderRequest->UpdateNotificationCommon(notificationRequest, false);
@@ -508,7 +494,6 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationCommon_00300, Function | S
 {
     auto reminderRequest = std::make_shared<ReminderRequest>();
     EXPECT_NE(reminderRequest, nullptr);
-    
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     reminderRequest->reminderType_ = ReminderRequest::ReminderType::INVALID;
     reminderRequest->UpdateNotificationCommon(notificationRequest, false);
