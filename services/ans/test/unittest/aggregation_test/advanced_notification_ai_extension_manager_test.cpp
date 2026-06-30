@@ -19,7 +19,6 @@
 #define private public
 #define protected public
 #include "advanced_notification_ai_extension_manager.h"
-#include "notification_subscriber_manager.h"
 #include "notification_ai_extension_wrapper.h"
 #undef protected
 #undef private
@@ -154,7 +153,7 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, BuildCommandForUpdate_0100,
     command[manager->HAS_COMMAND] = false;
     command[manager->AI_STATUS] = 1;
 
-    manager->BuildCommandForUpdate(nullptr, command);
+    manager->BuildCommandForUpdate(nullptr, command, false);
 
     // Command should remain unchanged when request is nullptr
     EXPECT_EQ(command[manager->HAS_COMMAND].get<bool>(), false);
@@ -180,7 +179,7 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, BuildCommandForUpdate_0200,
     command[manager->HAS_COMMAND] = false;
     command[manager->AI_STATUS] = 1;
 
-    manager->BuildCommandForUpdate(request, command);
+    manager->BuildCommandForUpdate(request, command, false);
 
     // LIVE_VIEW slot type should skip command building, command should not contain aggregation key
     EXPECT_FALSE(command.contains(NotificationAiExtensionWrapper::UPDATE_AGGREGATION_TYPE));
@@ -210,7 +209,7 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, BuildCommandForUpdate_0300,
     command[manager->HAS_COMMAND] = false;
     command[manager->AI_STATUS] = 1;
 
-    manager->BuildCommandForUpdate(request, command);
+    manager->BuildCommandForUpdate(request, command, false);
 
     // Collaboration notification should skip command building
     EXPECT_FALSE(command.contains(NotificationAiExtensionWrapper::UPDATE_AGGREGATION_TYPE));
@@ -227,8 +226,6 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, BuildCommandForUpdate_0400,
     auto manager = DelayedSingleton<AdvancedNotificationAiExtensionManager>::GetInstance();
     ASSERT_NE(manager, nullptr);
 
-    // Set up aggregation subscriber count so BuildAggregationCommand can proceed
-    NotificationSubscriberManager::GetInstance()->IncrementAggregationSubscriberCount();
     MockQueryForgroundOsAccountId(true, 0);
 
     // Set switches to ON for userId 100
@@ -248,14 +245,11 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, BuildCommandForUpdate_0400,
     command[manager->HAS_COMMAND] = false;
     command[manager->AI_STATUS] = 1;
 
-    manager->BuildCommandForUpdate(request, command);
+    manager->BuildCommandForUpdate(request, command, true);
 
     // Normal request should trigger aggregation command building
     EXPECT_TRUE(command.contains(NotificationAiExtensionWrapper::UPDATE_AGGREGATION_TYPE));
     EXPECT_EQ(command[manager->HAS_COMMAND].get<bool>(), true);
-
-    // Clean up
-    NotificationSubscriberManager::GetInstance()->DecrementAggregationSubscriberCount();
 }
 
 /**
@@ -275,7 +269,7 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, UpdateNotification_0100, Fu
     std::vector<sptr<NotificationRequest>> requests;
     std::vector<sptr<NotificationClassification>> classifications;
 
-    int32_t result = manager->UpdateNotification(requests, classifications);
+    int32_t result = manager->UpdateNotification(requests, classifications, false);
     // When GetPriorityIntelligentEnabled with no results, result should be ERR_OK
     EXPECT_EQ(result, ERR_OK);
 }
@@ -303,7 +297,7 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, UpdateNotification_0200, Fu
     std::vector<sptr<NotificationRequest>> requests = {request};
     std::vector<sptr<NotificationClassification>> classifications;
 
-    int32_t result = manager->UpdateNotification(requests, classifications);
+    int32_t result = manager->UpdateNotification(requests, classifications, false);
     // When needUpdateCount == 0, should return ERR_OK without calling AI extension
     EXPECT_EQ(result, NotificationAiExtensionWrapper::ErrorCode::ERR_OK);
 }
@@ -326,7 +320,7 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, UpdateNotification_0300, Fu
     std::vector<sptr<NotificationRequest>> requests;
     std::vector<sptr<NotificationClassification>> classifications;
 
-    int32_t result = manager->UpdateNotification(requests, classifications);
+    int32_t result = manager->UpdateNotification(requests, classifications, false);
     // Empty requests vector means needUpdateCount == 0, should return ERR_OK
     EXPECT_EQ(result, NotificationAiExtensionWrapper::ErrorCode::ERR_OK);
 }
@@ -357,7 +351,7 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, UpdateNotification_0400, Fu
     std::vector<sptr<NotificationRequest>> requests = {request};
     std::vector<sptr<NotificationClassification>> classifications;
 
-    int32_t result = manager->UpdateNotification(requests, classifications);
+    int32_t result = manager->UpdateNotification(requests, classifications, false);
     // Collaboration notification should not need updating, needUpdateCount == 0
     EXPECT_EQ(result, NotificationAiExtensionWrapper::ErrorCode::ERR_OK);
 }
@@ -378,8 +372,6 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, UpdateNotification_0500, Fu
     NotificationPreferences::GetInstance()->PutPriorityIntelligentEnabled(
         NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
 
-    // Set up aggregation subscriber count so BuildAggregationCommand can proceed
-    NotificationSubscriberManager::GetInstance()->IncrementAggregationSubscriberCount();
     MockQueryForgroundOsAccountId(true, 0);
     NotificationPreferences::GetInstance()->SetNotificationSwitch(
         NotificationConstant::NotificationSwitch::DEAL,
@@ -400,15 +392,12 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, UpdateNotification_0500, Fu
     // Set updateNotification_ to nullptr to simulate AI extension call failure
     NOTIFICATION_AI_EXTENSION_WRAPPER->updateNotification_ = nullptr;
 
-    int32_t result = manager->UpdateNotification(requests, classifications);
+    int32_t result = manager->UpdateNotification(requests, classifications, true);
     // When AI extension wrapper fails, should return ERR_FAIL
     EXPECT_EQ(result, NotificationAiExtensionWrapper::ErrorCode::ERR_FAIL);
 
     // Restore AI extension wrapper
     NOTIFICATION_AI_EXTENSION_WRAPPER->InitExtensionWrapper();
-
-    // Clean up
-    NotificationSubscriberManager::GetInstance()->DecrementAggregationSubscriberCount();
 }
 }  // namespace Notification
 }  // namespace OHOS

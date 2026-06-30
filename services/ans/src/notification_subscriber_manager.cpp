@@ -588,9 +588,6 @@ void NotificationSubscriberManager::OnRemoteDied(const wptr<IRemoteObject> &obje
                 std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
                 subscriberRecordList_.remove(record);
             }
-            if (record->enableClassification) {
-                DecrementAggregationSubscriberCount();
-            }
             if (record->isSubscribeSelf) {
                 AdvancedNotificationService::GetInstance()->RemoveSystemLiveViewNotificationsOfSa(subscriberUid);
             }
@@ -710,9 +707,6 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
             std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
             subscriberRecordList_.push_back(record);
         }
-        if (subscribeInfo->GetEnableClassification()) {
-            IncrementAggregationSubscriberCount();
-        }
         if (subscribeInfo->GetNeedSilentReplayOnSubscribe() && onSubscriberAddCallback_ != nullptr) {
             onSubscriberAddCallback_(record);
         }
@@ -762,9 +756,6 @@ ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
         {
             std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
             subscriberRecordList_.remove(record);
-        }
-        if (record->enableClassification) {
-            DecrementAggregationSubscriberCount();
         }
         if (record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_DISCONNECTED) {
             record->subscriber->OnDisconnected();
@@ -827,7 +818,12 @@ void NotificationSubscriberManager::NotifyConsumedInner(const sptr<Notification>
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     std::vector<sptr<NotificationClassification>> notificationClassifications = {nullptr};
     std::vector<sptr<NotificationRequest>> requests = {notification->GetNotificationRequestPoint()};
-    AdvancedNotificationAiExtensionManager::GetInstance()->UpdateNotification(requests, notificationClassifications);
+    bool hasAggregationSubscriber = false;
+#ifdef ANS_FEATURE_AGGREGATION_NOTIFICATION
+    hasAggregationSubscriber = HasAggregationSubscriber();
+#endif
+    AdvancedNotificationAiExtensionManager::GetInstance()->UpdateNotification(
+        requests, notificationClassifications, hasAggregationSubscriber);
     NotificationClassificationMgr::GetInstance().AddOrUpdate(
         notification->GetKey(), notificationClassifications.at(0));
     std::string content;
@@ -1659,26 +1655,15 @@ ErrCode NotificationSubscriberManager::DistributeOperationTask(const sptr<Notifi
     return result;
 }
 
-void NotificationSubscriberManager::IncrementAggregationSubscriberCount()
+bool NotificationSubscriberManager::HasAggregationSubscriber()
 {
-    int32_t currentCount = aggregationSubscriberCount_.fetch_add(1, std::memory_order_relaxed);
-    ANS_LOGI("Increment aggregation subscriber count, current count: %{public}d", currentCount + 1);
-}
-
-void NotificationSubscriberManager::DecrementAggregationSubscriberCount()
-{
-    int32_t currentCount = aggregationSubscriberCount_.load(std::memory_order_relaxed);
-    if (currentCount > 0) {
-        aggregationSubscriberCount_.fetch_sub(1, std::memory_order_relaxed);
-        ANS_LOGI("Decrement aggregation subscriber count, current count: %{public}d", currentCount - 1);
-    } else {
-        ANS_LOGW("Aggregation subscriber count is already 0, cannot decrement");
+    std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
+    for (const auto &record : subscriberRecordList_) {
+        if (record != nullptr && record->enableClassification) {
+            return true;
+        }
     }
-}
-
-int32_t NotificationSubscriberManager::GetAggregationSubscriberCount() const
-{
-    return aggregationSubscriberCount_.load(std::memory_order_relaxed);
+    return false;
 }
 
 void NotificationSubscriberManager::NotifyNotificationSwitchChanged(

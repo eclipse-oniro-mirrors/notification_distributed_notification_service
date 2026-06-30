@@ -163,11 +163,11 @@ public:
     void NotifyNotificationSwitchChanged(const sptr<NotificationSwitchChangedCallbackData> &callbackData);
 
     /**
-     * @brief Gets the aggregation subscriber count.
+     * @brief Checks whether any active subscriber has aggregation classification enabled.
      * Used to determine whether to call the AI extension for classification.
-     * @return Returns the count of subscribers with aggregation capability.
+     * @return Returns true if at least one subscriber with aggregation capability is registered.
      */
-    int32_t GetAggregationSubscriberCount() const;
+    bool HasAggregationSubscriber();
 
     /**
      * @brief notify when the system properties of notification changed.
@@ -243,8 +243,6 @@ public:
 
     void NotifyRefreshPriorityConfig(const std::vector<sptr<NotificationRequest>> &requests);
 private:
-    void IncrementAggregationSubscriberCount();
-    void DecrementAggregationSubscriberCount();
     void NotifyNotificationSwitchChangedInner(const sptr<NotificationSwitchChangedCallbackData> &callbackData);
     void NotifyApplicationInfochangedInner(const sptr<NotificationApplicationChangeInfo>& applicationChangeInfo);
     std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const wptr<IRemoteObject> &object);
@@ -328,7 +326,6 @@ private:
     sptr<IRemoteObject::DeathRecipient> recipient_ {};
     std::shared_ptr<ffrt::queue> notificationSubQueue_ = nullptr;
     std::function<void(const std::shared_ptr<SubscriberRecord> &)> onSubscriberAddCallback_ = nullptr;
-    std::atomic<int32_t> aggregationSubscriberCount_ {0};
 
     DECLARE_DELAYED_SINGLETON(NotificationSubscriberManager);
     DISALLOW_COPY_AND_MOVE(NotificationSubscriberManager);

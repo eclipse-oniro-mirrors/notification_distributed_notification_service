@@ -2506,14 +2506,13 @@ HWTEST_F(NotificationSubscriberManagerTest, AddSubscriberInner_NeedSilentReplayO
 
 /**
  * @tc.name: AddSubscriberInner_EnableClassification_001
- * @tc.desc: Test AddSubscriberInner increments aggregationSubscriberCount when enableClassification=true
+ * @tc.desc: Test HasAggregationSubscriber is true when AddSubscriberInner enableClassification=true
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
 HWTEST_F(NotificationSubscriberManagerTest, AddSubscriberInner_EnableClassification_001, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
-    notificationSubscriberManager.aggregationSubscriberCount_ = 0;
 
     sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
     const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
@@ -2524,19 +2523,18 @@ HWTEST_F(NotificationSubscriberManagerTest, AddSubscriberInner_EnableClassificat
     ErrCode result = notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
 
     ASSERT_EQ(result, ERR_OK);
-    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 1);
+    EXPECT_TRUE(notificationSubscriberManager.HasAggregationSubscriber());
 }
 
 /**
  * @tc.name: AddSubscriberInner_EnableClassification_002
- * @tc.desc: Test AddSubscriberInner does NOT increment aggregationSubscriberCount when enableClassification=false
+ * @tc.desc: Test HasAggregationSubscriber stays false when enableClassification=false
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
 HWTEST_F(NotificationSubscriberManagerTest, AddSubscriberInner_EnableClassification_002, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
-    notificationSubscriberManager.aggregationSubscriberCount_ = 0;
 
     sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
     const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
@@ -2547,12 +2545,12 @@ HWTEST_F(NotificationSubscriberManagerTest, AddSubscriberInner_EnableClassificat
     ErrCode result = notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
 
     ASSERT_EQ(result, ERR_OK);
-    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 0);
+    EXPECT_FALSE(notificationSubscriberManager.HasAggregationSubscriber());
 }
 
 /**
  * @tc.name: OnRemoteDied_EnableClassificationTrue
- * @tc.desc: Test OnRemoteDied decrements aggregationSubscriberCount when enableClassification=true
+ * @tc.desc: Test HasAggregationSubscriber becomes false after OnRemoteDied when enableClassification=true
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -2566,18 +2564,18 @@ HWTEST_F(NotificationSubscriberManagerTest, OnRemoteDied_EnableClassificationTru
         notificationSubscriberManager.CreateSubscriberRecord(subscriber);
     record->subscriberUid = 456;
     record->enableClassification = true;
-    notificationSubscriberManager.aggregationSubscriberCount_ = 1;
     notificationSubscriberManager.subscriberRecordList_.push_back(record);
 
+    EXPECT_TRUE(notificationSubscriberManager.HasAggregationSubscriber());
     notificationSubscriberManager.OnRemoteDied(subscriber->AsObject());
 
     EXPECT_EQ(notificationSubscriberManager.subscriberRecordList_.size(), 0);
-    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 0);
+    EXPECT_FALSE(notificationSubscriberManager.HasAggregationSubscriber());
 }
 
 /**
  * @tc.name: OnRemoteDied_EnableClassificationFalse
- * @tc.desc: Test OnRemoteDied does NOT decrement aggregationSubscriberCount when enableClassification=false
+ * @tc.desc: Test HasAggregationSubscriber stays false after OnRemoteDied when enableClassification=false
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
@@ -2591,80 +2589,65 @@ HWTEST_F(NotificationSubscriberManagerTest, OnRemoteDied_EnableClassificationFal
         notificationSubscriberManager.CreateSubscriberRecord(subscriber);
     record->subscriberUid = 457;
     record->enableClassification = false;
-    notificationSubscriberManager.aggregationSubscriberCount_ = 1;
     notificationSubscriberManager.subscriberRecordList_.push_back(record);
 
+    EXPECT_FALSE(notificationSubscriberManager.HasAggregationSubscriber());
     notificationSubscriberManager.OnRemoteDied(subscriber->AsObject());
 
     EXPECT_EQ(notificationSubscriberManager.subscriberRecordList_.size(), 0);
-    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 1);
+    EXPECT_FALSE(notificationSubscriberManager.HasAggregationSubscriber());
 }
 
 /**
- * @tc.name: IncrementAggregationSubscriberCount_001
- * @tc.desc: Test IncrementAggregationSubscriberCount increments the count
+ * @tc.name: HasAggregationSubscriber_001
+ * @tc.desc: Test HasAggregationSubscriber reflects the subscriber record list state
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(NotificationSubscriberManagerTest, IncrementAggregationSubscriberCount_001, Level1)
+HWTEST_F(NotificationSubscriberManagerTest, HasAggregationSubscriber_001, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
-    notificationSubscriberManager.aggregationSubscriberCount_ = 0;
+    EXPECT_FALSE(notificationSubscriberManager.HasAggregationSubscriber());
 
-    notificationSubscriberManager.IncrementAggregationSubscriberCount();
-    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 1);
-
-    notificationSubscriberManager.IncrementAggregationSubscriberCount();
-    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 2);
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->SetSubscribedFlags(0);
+    subscribeInfo->SetEnableClassification(true);
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo), ERR_OK);
+    EXPECT_TRUE(notificationSubscriberManager.HasAggregationSubscriber());
 }
 
 /**
- * @tc.name: DecrementAggregationSubscriberCount_001
- * @tc.desc: Test DecrementAggregationSubscriberCount decrements the count when > 0
+ * @tc.name: HasAggregationSubscriber_ResubscribeFlip
+ * @tc.desc: Test HasAggregationSubscriber follows enableClassification transitions on re-subscribe
  * @tc.type: FUNC
  * @tc.require: issueNumber
  */
-HWTEST_F(NotificationSubscriberManagerTest, DecrementAggregationSubscriberCount_001, Level1)
+HWTEST_F(NotificationSubscriberManagerTest, HasAggregationSubscriber_ResubscribeFlip, Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
-    notificationSubscriberManager.aggregationSubscriberCount_ = 2;
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
 
-    notificationSubscriberManager.DecrementAggregationSubscriberCount();
-    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 1);
+    auto makeInfo = [](bool enable) {
+        const sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+        info->AddAppUserId(SUBSCRIBE_USER_ALL);
+        info->SetSubscribedFlags(0);
+        info->SetEnableClassification(enable);
+        return info;
+    };
 
-    notificationSubscriberManager.DecrementAggregationSubscriberCount();
-    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 0);
-}
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, makeInfo(true)), ERR_OK);
+    EXPECT_TRUE(notificationSubscriberManager.HasAggregationSubscriber());
 
-/**
- * @tc.name: DecrementAggregationSubscriberCount_002
- * @tc.desc: Test DecrementAggregationSubscriberCount does NOT decrement when count is 0
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(NotificationSubscriberManagerTest, DecrementAggregationSubscriberCount_002, Level1)
-{
-    NotificationSubscriberManager notificationSubscriberManager;
-    notificationSubscriberManager.aggregationSubscriberCount_ = 0;
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, makeInfo(false)), ERR_OK);
+    EXPECT_FALSE(notificationSubscriberManager.HasAggregationSubscriber());
 
-    notificationSubscriberManager.DecrementAggregationSubscriberCount();
-    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 0);
-}
+    ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, makeInfo(true)), ERR_OK);
+    EXPECT_TRUE(notificationSubscriberManager.HasAggregationSubscriber());
 
-/**
- * @tc.name: GetAggregationSubscriberCount_001
- * @tc.desc: Test GetAggregationSubscriberCount returns the current count
- * @tc.type: FUNC
- * @tc.require: issueNumber
- */
-HWTEST_F(NotificationSubscriberManagerTest, GetAggregationSubscriberCount_001, Level1)
-{
-    NotificationSubscriberManager notificationSubscriberManager;
-    notificationSubscriberManager.aggregationSubscriberCount_ = 0;
-    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 0);
-
-    notificationSubscriberManager.aggregationSubscriberCount_ = 5;
-    EXPECT_EQ(notificationSubscriberManager.GetAggregationSubscriberCount(), 5);
+    ASSERT_EQ(notificationSubscriberManager.RemoveSubscriberInner(subscriber, nullptr), ERR_OK);
+    EXPECT_FALSE(notificationSubscriberManager.HasAggregationSubscriber());
 }
 
 /**

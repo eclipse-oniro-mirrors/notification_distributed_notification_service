@@ -1552,7 +1552,7 @@ ErrCode AdvancedNotificationService::SyncAdditionConfig(
     }
 #endif
     }
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+#if defined(ANS_FEATURE_PRIORITY_NOTIFICATION) || defined(ANS_FEATURE_AGGREGATION_NOTIFICATION)
     if (key == PRIORITY_RULE_CONFIG_KEY) {
         int32_t syncResult = NOTIFICATION_AI_EXTENSION_WRAPPER->SyncRules(value);
         message.ErrorCode(syncResult);

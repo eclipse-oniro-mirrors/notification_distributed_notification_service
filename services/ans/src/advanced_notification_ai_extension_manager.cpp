@@ -25,7 +25,8 @@ namespace OHOS {
 namespace Notification {
 int32_t AdvancedNotificationAiExtensionManager::UpdateNotification(
     const std::vector<sptr<NotificationRequest>> &requests,
-    std::vector<sptr<NotificationClassification>> &notificationClassifications)
+    std::vector<sptr<NotificationClassification>> &notificationClassifications,
+    bool hasAggregationSubscriber)
 {
     NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
     ErrCode result = NotificationPreferences::GetInstance()->GetPriorityIntelligentEnabled(enableStatus);
@@ -44,7 +45,7 @@ int32_t AdvancedNotificationAiExtensionManager::UpdateNotification(
         nlohmann::json command = nlohmann::json::object();
         command[HAS_COMMAND] = false;
         command[AI_STATUS] = aiStatus;
-        BuildCommandForUpdate(request, command);
+        BuildCommandForUpdate(request, command, hasAggregationSubscriber);
         commands.push_back(command);
         if (command[HAS_COMMAND]) {
             needUpdateCount++;
@@ -63,7 +64,7 @@ int32_t AdvancedNotificationAiExtensionManager::UpdateNotification(
 }
 
 void AdvancedNotificationAiExtensionManager::BuildCommandForUpdate(
-    const sptr<NotificationRequest> &request, nlohmann::json &command)
+    const sptr<NotificationRequest> &request, nlohmann::json &command, bool hasAggregationSubscriber)
 {
     if (request == nullptr) {
         ANS_LOGE("BuildCommandForUpdate request is nullptr");
@@ -85,10 +86,12 @@ void AdvancedNotificationAiExtensionManager::BuildCommandForUpdate(
 #ifdef ANS_FEATURE_AGGREGATION_NOTIFICATION
     std::string aggregationCmd = NotificationAiExtensionWrapper::UPDATE_AGGREGATION_TYPE;
     AdvancedNotificationAggregationHelper::GetInstance()->BuildAggregationCommand(
-        aggregationCmd, request, command);
+        aggregationCmd, request, command, hasAggregationSubscriber);
     if (command.contains(NotificationAiExtensionWrapper::UPDATE_AGGREGATION_TYPE)) {
         command[HAS_COMMAND] = true;
     }
+#else
+    (void)hasAggregationSubscriber;
 #endif
 }
 

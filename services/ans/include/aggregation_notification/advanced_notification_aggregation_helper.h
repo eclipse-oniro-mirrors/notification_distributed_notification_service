@@ -23,8 +23,8 @@ namespace Notification {
 #ifdef ANS_FEATURE_AGGREGATION_NOTIFICATION
 class AdvancedNotificationAggregationHelper : public DelayedSingleton<AdvancedNotificationAggregationHelper> {
 public:
-    void BuildAggregationCommand(
-        std::string& cmdType, const sptr<NotificationRequest> &request, nlohmann::json &command);
+    void BuildAggregationCommand(std::string& cmdType, const sptr<NotificationRequest> &request,
+        nlohmann::json &command, bool hasAggregationSubscriber);
 };
 #endif // ANS_FEATURE_AGGREGATION_NOTIFICATION
 }  // namespace Notification
