@@ -173,6 +173,7 @@ ohos_shared_library("notification_manager_ani") {
     "resource_management:librawfile",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
+    "window_manager:libwmutil",
   ]
 
   if (distributed_notification_service_feature_api_metrics) {
@@ -332,6 +333,7 @@ ohos_shared_library("notificationextensionsubscription_ani") {
     "resource_management:global_resmgr",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
+    "window_manager:libwmutil",
   ]
 
   defines = []
