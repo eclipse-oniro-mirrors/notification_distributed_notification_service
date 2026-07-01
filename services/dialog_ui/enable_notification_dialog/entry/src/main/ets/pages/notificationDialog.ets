@@ -41,7 +41,7 @@ const permission: Record<string, Resource> = {
   'reason': $r('app.string.reason'),
 };
 const bottomPopoverTypes = ['default', 'phone'];
-const defaultUiMaterial = new uiMaterial.ImmersiveMaterial({style: 4});
+const defaultUiMaterial = new uiMaterial.ImmersiveMaterial({style: uiMaterial.ImmersiveStyle.ULTRA_THICK});
 
 let storage = LocalStorage.getShared();
 
