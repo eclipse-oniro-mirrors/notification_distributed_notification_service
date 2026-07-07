@@ -115,7 +115,7 @@ ErrCode AdvancedNotificationService::GetNotificationSwitch(
         result = NotificationPreferences::GetInstance()->GetNotificationSwitch(switchName, userId, switchState);
         if (result == ERR_OK) {
             state = static_cast<int32_t>(switchState);
-            ANS_LOGI("GetNotificationSwitch success: switchName=%{public}s, state=%{public}d, userId=%{public}d",
+            ANS_LOGI("GetNtfSwitch: name=%{public}s, sta=%{public}d, userId=%{public}d",
                 switchName.c_str(), state, userId);
         }
     }));
