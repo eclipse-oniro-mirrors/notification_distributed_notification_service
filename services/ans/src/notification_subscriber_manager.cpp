@@ -206,6 +206,7 @@ void NotificationSubscriberManager::NotifyConsumed(
     AdvancedNotificationPriorityHelper::GetInstance()->SetPriorityTypeToExtendInfo(
         notification->GetNotificationRequestPoint());
     MessageParcel parcel;
+    parcel.SetMaxCapacity(NotificationConstant::CAPACITY_520);
     if (!parcel.WriteParcelable(notification)) {
         ANS_LOGE("NotifyConsumed writeParcelable failed.");
         return;
@@ -258,6 +259,7 @@ void NotificationSubscriberManager::BatchNotifyConsumed(const std::vector<sptr<N
         AdvancedNotificationPriorityHelper::GetInstance()->SetPriorityTypeToExtendInfo(
             notification->GetNotificationRequestPoint());
         MessageParcel parcel;
+        parcel.SetMaxCapacity(NotificationConstant::CAPACITY_520);
         if (!parcel.WriteParcelable(notification)) {
             ANS_LOGE("BatchNotifyConsumed writeParcelable failed.");
             newNotifications.emplace_back(nullptr);
@@ -1081,6 +1083,7 @@ sptr<Notification> NotificationSubscriberManager::GenerateSubscribedNotification
     sptr<Notification> notificationStub = nullptr;
     if (!record->subscriber->AsObject()->IsProxyObject()) {
         MessageParcel data;
+        data.SetMaxCapacity(NotificationConstant::CAPACITY_520);
         if (!data.WriteParcelable(notification)) {
             ANS_LOGE("WriteParcelable failed.");
             return nullptr;
