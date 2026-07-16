@@ -2321,7 +2321,6 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
             bundle, cloneBundleInfo.GetHasPoppedDialog()) != ERR_OK) {
             ANS_LOGW("Set hasPoped failed.");
         }
-        UpdateCloneBundleInfoForDistributedEnable(cloneBundleInfo);
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
         UpdateCloneBundleInfoForExtensionSubscription(userId, cloneBundleInfo, bundle);
 #endif

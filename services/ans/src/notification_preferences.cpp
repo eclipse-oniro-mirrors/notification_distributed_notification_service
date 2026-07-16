@@ -1046,7 +1046,6 @@ void NotificationPreferences::GetAllCloneBundlesInfo(int32_t dbUserId, int32_t u
     }
     preferncesDB_->ParseBundleFromDistureDB(preferencesInfo, bundlesMap, dbUserId);
     preferencesInfo.GetAllCloneBundlesInfo(dbUserId, userId, bundlesMap, cloneBundles);
-    preferncesDB_->GetDistributedEnabledForClone(userId, cloneBundles);
     preferencesInfo_ = preferencesInfo;
     StartCacheCleanupTimer();
 }

@@ -2861,6 +2861,46 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveEnabledDbByBundleName_0100, 
     EXPECT_FALSE(notificationPreferencesDatabase->RemoveEnabledDbByBundleName(bundleName, uid));
 }
 
+/**
+ * @tc.name      : RemoveEnabledDbByBundleName_0200
+ * @tc.desc      : Remove enabled db by clone bundle uid should not delete the main bundle's
+ *                 distributed collaboration switch data (same bundle name, different uid).
+ * @tc.type      : FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, RemoveEnabledDbByBundleName_0200, TestSize.Level1)
+{
+    const std::string cloneBundleName = "com.test.clone.bundle";
+    const int32_t mainUid = 20020001;
+    const int32_t cloneUid = 20020002;
+    const std::string deviceType = NotificationConstant::PAD_DEVICE_TYPE;
+
+    NotificationPreferencesInfo::BundleInfo mainBundle;
+    mainBundle.SetBundleName(cloneBundleName);
+    mainBundle.SetBundleUid(mainUid);
+    NotificationPreferencesInfo::BundleInfo cloneBundle;
+    cloneBundle.SetBundleName(cloneBundleName);
+    cloneBundle.SetBundleUid(cloneUid);
+
+    ASSERT_TRUE(preferncesDB_->PutDistributedEnabledForBundle(deviceType, true, mainBundle,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF));
+    ASSERT_TRUE(preferncesDB_->PutDistributedEnabledForBundle(deviceType, true, cloneBundle,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF));
+
+    EXPECT_TRUE(preferncesDB_->RemoveEnabledDbByBundleName(cloneBundleName, cloneUid));
+
+    int32_t mainEnabled = -1;
+    ASSERT_TRUE(preferncesDB_->GetDistributedEnabledForBundle(deviceType, true, mainBundle, mainEnabled));
+    EXPECT_EQ(static_cast<NotificationConstant::SWITCH_STATE>(mainEnabled),
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+
+    int32_t cloneEnabled = -1;
+    ASSERT_TRUE(preferncesDB_->GetDistributedEnabledForBundle(deviceType, true, cloneBundle, cloneEnabled));
+    EXPECT_NE(static_cast<NotificationConstant::SWITCH_STATE>(cloneEnabled),
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+
+    preferncesDB_->RemoveEnabledDbByBundleName(cloneBundleName, mainUid);
+}
+
 HWTEST_F(NotificationPreferencesDatabaseTest, SetKvToDb_0100, TestSize.Level1)
 {
     std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
