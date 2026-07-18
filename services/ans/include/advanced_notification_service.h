@@ -2210,11 +2210,10 @@ private:
         std::shared_ptr<NotificationRecord> &outRecord);
     void FindNotificationRecordByKey(const std::string &key, std::shared_ptr<NotificationRecord> &outRecord);
     ErrCode RecoverGeofenceLiveViewFromDb(int32_t userId);
-    bool ProcessRecoveryEntry(const std::vector<NotificationRequestDb> &requestsdb, size_t index,
-        std::vector<std::string> &keys, int64_t startTime);
+    void ProcessRecoveryEntry(const std::vector<NotificationRequestDb> &requestsdb, size_t index,
+        std::vector<std::string> &keys);
     void StartRecoveryTimers(const NotificationRequestDb &requestObj,
         const std::shared_ptr<NotificationRecord> &record);
-    void CleanRemainingRecoveryEntries(const std::vector<NotificationRequestDb> &requestsdb, size_t startIndex);
     void RecoverLiveViewForUser(int32_t userId);
     ErrCode SetGeofenceTriggerTimer(const std::shared_ptr<NotificationRecord> &record);
     void CancelGeofenceTriggerTimer(const std::shared_ptr<NotificationRecord> &record);

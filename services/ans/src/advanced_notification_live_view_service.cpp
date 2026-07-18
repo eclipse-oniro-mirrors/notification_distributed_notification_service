@@ -45,7 +45,6 @@ const std::string PROGRESS_VALUE = "progressValue";
 constexpr int32_t BGTASK_UID = 1096;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 constexpr int32_t MAX_RESTART_ATTEMPTS = 2;
-constexpr int64_t RECOVER_TIMEOUT_MS = 30 * 1000;
 const std::string RECOVER_FAIL_COUNT_KEY = "ans_recover_fail_count";
 
 namespace {
@@ -85,13 +84,9 @@ void CleanLiveViewByPrefix(const std::string &prefix, int32_t userId)
     for (const auto &pair : records) {
         keys.push_back(pair.first);
     }
-    ret = NotificationPreferences::GetInstance()->DeleteBatchKvFromDb(keys, userId);
-    if (ret != ERR_OK) {
-        ANS_LOGE("Delete batch kv failed, prefix: %{public}s, userId: %{public}d", prefix.c_str(), userId);
-    } else {
-        ANS_LOGI("Deleted %{public}zu entries with prefix %{public}s for user %{public}d.",
-            keys.size(), prefix.c_str(), userId);
-    }
+    NotificationPreferences::GetInstance()->DeleteBatchKvFromDb(keys, userId);
+    ANS_LOGI("Cleaned %{public}zu entries with prefix %{public}s for user %{public}d.",
+        keys.size(), prefix.c_str(), userId);
 }
 
 void CleanUserLiveViewData(int32_t userId)
@@ -126,20 +121,6 @@ void PrepareUsersForRecovery(int32_t userId, std::vector<int32_t> &usersToRecove
 
 }
 
-void AdvancedNotificationService::CleanRemainingRecoveryEntries(
-    const std::vector<NotificationRequestDb> &requestsdb, size_t startIndex)
-{
-    ANS_LOGE("Clean up remaining %{public}zu entries from index %{public}zu.",
-        requestsdb.size() - startIndex, startIndex);
-    for (size_t i = startIndex; i < requestsdb.size(); i++) {
-        const auto &req = requestsdb[i].request;
-        if (req == nullptr) {
-            continue;
-        }
-        DoubleDeleteNotificationFromDb(req->GetKey(), req->GetSecureKey(), req->GetReceiverUserId());
-    }
-}
-
 void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
 {
     notificationSvrQueue_.Submit(std::bind([=]() {
@@ -166,7 +147,6 @@ void AdvancedNotificationService::RecoverLiveViewForUser(int32_t userId)
     std::vector<NotificationRequestDb> requestsdb;
     if (GetBatchNotificationRequestsFromDb(requestsdb, userId) != ERR_OK) {
         ANS_LOGE("Get liveView from db failed for user %{public}d.", userId);
-        SetRecoverFailCount(userId, 0);
         return;
     }
     if (requestsdb.empty()) {
@@ -174,12 +154,9 @@ void AdvancedNotificationService::RecoverLiveViewForUser(int32_t userId)
         return;
     }
     ANS_LOGI("User %{public}d: recover %{public}zu live views.", userId, requestsdb.size());
-    int64_t startTime = GetCurrentTime();
     std::vector<std::string> keys;
     for (size_t i = 0; i < requestsdb.size(); i++) {
-        if (ProcessRecoveryEntry(requestsdb, i, keys, startTime)) {
-            break;
-        }
+        ProcessRecoveryEntry(requestsdb, i, keys);
     }
     if (!keys.empty()) {
         OnRecoverLiveView(keys);
@@ -213,26 +190,19 @@ void AdvancedNotificationService::StartRecoveryTimers(const NotificationRequestD
     }
 }
 
-bool AdvancedNotificationService::ProcessRecoveryEntry(const std::vector<NotificationRequestDb> &requestsdb,
-    size_t index, std::vector<std::string> &keys, int64_t startTime)
+void AdvancedNotificationService::ProcessRecoveryEntry(const std::vector<NotificationRequestDb> &requestsdb,
+    size_t index, std::vector<std::string> &keys)
 {
-    int64_t elapsed = GetCurrentTime() - startTime;
-    if (elapsed >= RECOVER_TIMEOUT_MS) {
-        ANS_LOGE("Recover timeout after %{public}lldms at index %{public}zu, abort.",
-            static_cast<long long>(elapsed), index);
-        CleanRemainingRecoveryEntries(requestsdb, index);
-        return true;
-    }
     const auto &requestObj = requestsdb[index];
     if (requestObj.request == nullptr) {
-        return false;
+        return;
     }
     if (!IsCanRecoverCommon(requestObj.request)) {
         int32_t recoverUserId = requestObj.request->GetReceiverUserId();
         keys.emplace_back(requestObj.request->GetBaseKey(""));
         DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
             requestObj.request->GetSecureKey(), recoverUserId);
-        return false;
+        return;
     }
     auto record = std::make_shared<NotificationRecord>();
     record->isNeedFlowCtrl = false;
@@ -242,10 +212,10 @@ bool AdvancedNotificationService::ProcessRecoveryEntry(const std::vector<Notific
         NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, ansStatus.BuildMessage(true));
         DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
             requestObj.request->GetSecureKey(), requestObj.request->GetReceiverUserId());
-        return false;
+        return;
     }
     if (IsCanRecoverSnooze(record)) {
-        return false;
+        return;
     }
     if (record->bundleOption != nullptr && !record->bundleOption->GetBundleName().empty()) {
         ansStatus = Filter(record, true);
@@ -254,18 +224,17 @@ bool AdvancedNotificationService::ProcessRecoveryEntry(const std::vector<Notific
             NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, ansStatus.BuildMessage(true));
             DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
                 requestObj.request->GetSecureKey(), requestObj.request->GetReceiverUserId());
-            return false;
+            return;
         }
     }
     if (AssignToNotificationList(record) != ERR_OK) {
         ANS_LOGE("Add notification to record list failed.");
         DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
             requestObj.request->GetSecureKey(), requestObj.request->GetReceiverUserId());
-        return false;
+        return;
     }
     UpdateRecentNotification(record->notification, false, 0);
     StartRecoveryTimers(requestObj, record);
-    return false;
 }
 
 ErrCode AdvancedNotificationService::UpdateNotificationTimerInfo(const std::shared_ptr<NotificationRecord> &record)
