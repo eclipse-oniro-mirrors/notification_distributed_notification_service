@@ -33,6 +33,7 @@
 #include "advanced_notification_inline.h"
 #include "message_parcel.h"
 #include <cstdint>
+#include <cstdlib>
 #include <memory>
 #include "notification_analytics_util.h"
 #include "aes_gcm_helper.h"
@@ -43,84 +44,228 @@ const std::string LOCK_SCREEN_PICTURE_TAG = "lock_screen_picture";
 const std::string PROGRESS_VALUE = "progressValue";
 constexpr int32_t BGTASK_UID = 1096;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
+constexpr int32_t MAX_RESTART_ATTEMPTS = 2;
+constexpr int64_t RECOVER_TIMEOUT_MS = 30 * 1000;
+const std::string RECOVER_FAIL_COUNT_KEY = "ans_recover_fail_count";
+
+namespace {
+int32_t GetRecoverFailCount(int32_t userId)
+{
+    std::string value;
+    int32_t ret = NotificationPreferences::GetInstance()->GetKvFromDb(
+        RECOVER_FAIL_COUNT_KEY, value, userId);
+    if (ret != ERR_OK || value.empty()) {
+        return 0;
+    }
+    int32_t count = atoi(value.c_str());
+    if (count < 0) {
+        ANS_LOGE("Invalid recover fail count value: %{public}s", value.c_str());
+        return 0;
+    }
+    return count;
+}
+
+void SetRecoverFailCount(int32_t userId, int32_t count)
+{
+    int32_t ret = NotificationPreferences::GetInstance()->SetKvToDb(
+        RECOVER_FAIL_COUNT_KEY, std::to_string(count), userId);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Set recover fail count failed, userId: %{public}d, count: %{public}d", userId, count);
+    }
+}
+
+void CleanLiveViewByPrefix(const std::string &prefix, int32_t userId)
+{
+    std::unordered_map<std::string, std::string> records;
+    int32_t ret = NotificationPreferences::GetInstance()->GetBatchKvsFromDb(prefix, records, userId);
+    if (ret != ERR_OK || records.empty()) {
+        return;
+    }
+    std::vector<std::string> keys;
+    for (const auto &pair : records) {
+        keys.push_back(pair.first);
+    }
+    ret = NotificationPreferences::GetInstance()->DeleteBatchKvFromDb(keys, userId);
+    if (ret != ERR_OK) {
+        ANS_LOGE("Delete batch kv failed, prefix: %{public}s, userId: %{public}d", prefix.c_str(), userId);
+    } else {
+        ANS_LOGI("Deleted %{public}zu entries with prefix %{public}s for user %{public}d.",
+            keys.size(), prefix.c_str(), userId);
+    }
+}
+
+void CleanUserLiveViewData(int32_t userId)
+{
+    ANS_LOGE("Cleaning all live view data for user %{public}d.", userId);
+    CleanLiveViewByPrefix(REQUEST_STORAGE_KEY_PREFIX, userId);
+    CleanLiveViewByPrefix(REQUEST_STORAGE_SECURE_KEY_PREFIX, userId);
+    CleanLiveViewByPrefix(REQUEST_STORAGE_SECURE_TRIGGER_LIVE_VIEW_PREFIX, userId);
+}
+
+void PrepareUsersForRecovery(int32_t userId, std::vector<int32_t> &usersToRecover)
+{
+    std::vector<int32_t> userIds;
+    if (userId == -1) {
+        OsAccountManagerHelper::GetInstance().GetAllActiveOsAccount(userIds);
+    } else {
+        userIds.push_back(userId);
+    }
+    for (const auto &uid : userIds) {
+        int32_t failCount = GetRecoverFailCount(uid);
+        if (failCount >= MAX_RESTART_ATTEMPTS) {
+            ANS_LOGE("Skip user %{public}d recovery: fail count %{public}d >= %{public}d, cleaning data.",
+                uid, failCount, MAX_RESTART_ATTEMPTS);
+            CleanUserLiveViewData(uid);
+            SetRecoverFailCount(uid, 0);
+        } else {
+            SetRecoverFailCount(uid, failCount + 1);
+            usersToRecover.push_back(uid);
+        }
+    }
+}
+
+}
+
+void AdvancedNotificationService::CleanRemainingRecoveryEntries(
+    const std::vector<NotificationRequestDb> &requestsdb, size_t startIndex)
+{
+    ANS_LOGE("Clean up remaining %{public}zu entries from index %{public}zu.",
+        requestsdb.size() - startIndex, startIndex);
+    for (size_t i = startIndex; i < requestsdb.size(); i++) {
+        const auto &req = requestsdb[i].request;
+        if (req == nullptr) {
+            continue;
+        }
+        DoubleDeleteNotificationFromDb(req->GetKey(), req->GetSecureKey(), req->GetReceiverUserId());
+    }
+}
+
 void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
 {
     notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGI("Start recover live view. userId:%{public}d", userId);
-        if (RecoverGeofenceLiveViewFromDb(userId) != ERR_OK) {
-            ANS_LOGE("Recover delay live view from db failed.");
-        }
-        std::vector<NotificationRequestDb> requestsdb;
-        if (GetBatchNotificationRequestsFromDb(requestsdb, userId) != ERR_OK) {
-            ANS_LOGE("Get liveView from db failed.");
+
+        std::vector<int32_t> usersToRecover;
+        PrepareUsersForRecovery(userId, usersToRecover);
+        if (usersToRecover.empty()) {
+            ANS_LOGI("No users to recover, all skipped.");
             return;
         }
-        ANS_LOGI("The number of live views to recover: %{public}zu.", requestsdb.size());
-        std::vector<std::string> keys;
-        for (const auto &requestObj : requestsdb) {
-            if (!IsCanRecoverCommon(requestObj.request)) {
-                int32_t userId = requestObj.request->GetReceiverUserId();
-                keys.emplace_back(requestObj.request->GetBaseKey(""));
-                if (DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
-                    requestObj.request->GetSecureKey(), userId) != ERR_OK) {
-                    ANS_LOGE("Delete notification failed.");
-                }
-                continue;
-            }
-
-            auto record = std::make_shared<NotificationRecord>();
-            record->isNeedFlowCtrl = false;
-            AnsStatus ansStatus = FillNotificationRecord(requestObj, record);
-            if (!ansStatus.Ok()) {
-                ANS_LOGE("Fill notification record failed.");
-                NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, ansStatus.BuildMessage(true));
-                continue;
-            }
-            if (IsCanRecoverSnooze(record)) {
-                continue;
-            }
-            if (!record->bundleOption->GetBundleName().empty()) {
-                ansStatus = Filter(record, true);
-                if (!ansStatus.Ok()) {
-                    ANS_LOGE("Filter record failed.");
-                    NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, ansStatus.BuildMessage(true));
-                    continue;
-                }
-            }
-            if (AssignToNotificationList(record) != ERR_OK) {
-                ANS_LOGE("Add notification to record list failed.");
-                continue;
-            }
-            UpdateRecentNotification(record->notification, false, 0);
-            if (requestObj.request->IsCommonLiveView()) {
-                record->slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
-                CancelTimer(record->notification->GetFinishTimer());
-                CancelTimer(record->notification->GetUpdateTimer());
-                StartFinishTimer(record, requestObj.request->GetFinishDeadLine(),
-                    NotificationConstant::TRIGGER_EIGHT_HOUR_REASON_DELETE);
-                StartUpdateTimer(record, requestObj.request->GetUpdateDeadLine(),
-                    NotificationConstant::TRIGGER_FOUR_HOUR_REASON_DELETE);
-                auto triggerDeadLine = requestObj.request->GetGeofenceTriggerDeadLine();
-                if (triggerDeadLine != NotificationConstant::INVALID_DISPLAY_TIME) {
-                    CancelTimer(record->notification->GetGeofenceTriggerTimer());
-                    StartGeofenceTriggerTimer(record, triggerDeadLine,
-                        NotificationConstant::TRIGGER_GEOFENCE_REASON_DELETE);
-                }
-            } else {
-                StartAutoDeletedTimer(record);
-            }
-        }
-
-        if (!keys.empty()) {
-            OnRecoverLiveView(keys);
-        }
-        StartSnoozeTimer();
-        // publish notifications
-        for (const auto &subscriber : NotificationSubscriberManager::GetInstance()->GetSubscriberRecords()) {
-            OnSubscriberAdd(subscriber, userId);
+        for (const auto &uid : usersToRecover) {
+            RecoverLiveViewForUser(uid);
         }
         ANS_LOGI("End recover live view from db.");
     }));
+}
+
+void AdvancedNotificationService::RecoverLiveViewForUser(int32_t userId)
+{
+    if (RecoverGeofenceLiveViewFromDb(userId) != ERR_OK) {
+        ANS_LOGE("Recover geofence live view from db failed for user %{public}d.", userId);
+    }
+    std::vector<NotificationRequestDb> requestsdb;
+    if (GetBatchNotificationRequestsFromDb(requestsdb, userId) != ERR_OK) {
+        ANS_LOGE("Get liveView from db failed for user %{public}d.", userId);
+        SetRecoverFailCount(userId, 0);
+        return;
+    }
+    if (requestsdb.empty()) {
+        SetRecoverFailCount(userId, 0);
+        return;
+    }
+    ANS_LOGI("User %{public}d: recover %{public}zu live views.", userId, requestsdb.size());
+    int64_t startTime = GetCurrentTime();
+    std::vector<std::string> keys;
+    for (size_t i = 0; i < requestsdb.size(); i++) {
+        if (ProcessRecoveryEntry(requestsdb, i, keys, startTime)) {
+            break;
+        }
+    }
+    if (!keys.empty()) {
+        OnRecoverLiveView(keys);
+    }
+    StartSnoozeTimer();
+    for (const auto &subscriber : NotificationSubscriberManager::GetInstance()->GetSubscriberRecords()) {
+        OnSubscriberAdd(subscriber, userId);
+    }
+    SetRecoverFailCount(userId, 0);
+}
+
+void AdvancedNotificationService::StartRecoveryTimers(const NotificationRequestDb &requestObj,
+    const std::shared_ptr<NotificationRecord> &record)
+{
+    if (requestObj.request->IsCommonLiveView()) {
+        record->slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
+        CancelTimer(record->notification->GetFinishTimer());
+        CancelTimer(record->notification->GetUpdateTimer());
+        StartFinishTimer(record, requestObj.request->GetFinishDeadLine(),
+            NotificationConstant::TRIGGER_EIGHT_HOUR_REASON_DELETE);
+        StartUpdateTimer(record, requestObj.request->GetUpdateDeadLine(),
+            NotificationConstant::TRIGGER_FOUR_HOUR_REASON_DELETE);
+        auto triggerDeadLine = requestObj.request->GetGeofenceTriggerDeadLine();
+        if (triggerDeadLine != NotificationConstant::INVALID_DISPLAY_TIME) {
+            CancelTimer(record->notification->GetGeofenceTriggerTimer());
+            StartGeofenceTriggerTimer(record, triggerDeadLine,
+                NotificationConstant::TRIGGER_GEOFENCE_REASON_DELETE);
+        }
+    } else {
+        StartAutoDeletedTimer(record);
+    }
+}
+
+bool AdvancedNotificationService::ProcessRecoveryEntry(const std::vector<NotificationRequestDb> &requestsdb,
+    size_t index, std::vector<std::string> &keys, int64_t startTime)
+{
+    int64_t elapsed = GetCurrentTime() - startTime;
+    if (elapsed >= RECOVER_TIMEOUT_MS) {
+        ANS_LOGE("Recover timeout after %{public}lldms at index %{public}zu, abort.",
+            static_cast<long long>(elapsed), index);
+        CleanRemainingRecoveryEntries(requestsdb, index);
+        return true;
+    }
+    const auto &requestObj = requestsdb[index];
+    if (requestObj.request == nullptr) {
+        return false;
+    }
+    if (!IsCanRecoverCommon(requestObj.request)) {
+        int32_t recoverUserId = requestObj.request->GetReceiverUserId();
+        keys.emplace_back(requestObj.request->GetBaseKey(""));
+        DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
+            requestObj.request->GetSecureKey(), recoverUserId);
+        return false;
+    }
+    auto record = std::make_shared<NotificationRecord>();
+    record->isNeedFlowCtrl = false;
+    AnsStatus ansStatus = FillNotificationRecord(requestObj, record);
+    if (!ansStatus.Ok()) {
+        ANS_LOGE("Fill notification record failed.");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, ansStatus.BuildMessage(true));
+        DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
+            requestObj.request->GetSecureKey(), requestObj.request->GetReceiverUserId());
+        return false;
+    }
+    if (IsCanRecoverSnooze(record)) {
+        return false;
+    }
+    if (record->bundleOption != nullptr && !record->bundleOption->GetBundleName().empty()) {
+        ansStatus = Filter(record, true);
+        if (!ansStatus.Ok()) {
+            ANS_LOGE("Filter record failed.");
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, ansStatus.BuildMessage(true));
+            DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
+                requestObj.request->GetSecureKey(), requestObj.request->GetReceiverUserId());
+            return false;
+        }
+    }
+    if (AssignToNotificationList(record) != ERR_OK) {
+        ANS_LOGE("Add notification to record list failed.");
+        DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
+            requestObj.request->GetSecureKey(), requestObj.request->GetReceiverUserId());
+        return false;
+    }
+    UpdateRecentNotification(record->notification, false, 0);
+    StartRecoveryTimers(requestObj, record);
+    return false;
 }
 
 ErrCode AdvancedNotificationService::UpdateNotificationTimerInfo(const std::shared_ptr<NotificationRecord> &record)

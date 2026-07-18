@@ -1811,7 +1811,7 @@ public:
     */
     void RecoverLiveViewFromDb(int32_t userId = -1);
 
-   /**
+    /**
     * @brief Recover anco application userid.
     */
     void RecoverAncoApplicationUserId(int32_t userId);
@@ -2208,6 +2208,12 @@ private:
         std::shared_ptr<NotificationRecord> &outRecord);
     void FindNotificationRecordByKey(const std::string &key, std::shared_ptr<NotificationRecord> &outRecord);
     ErrCode RecoverGeofenceLiveViewFromDb(int32_t userId);
+    bool ProcessRecoveryEntry(const std::vector<NotificationRequestDb> &requestsdb, size_t index,
+        std::vector<std::string> &keys, int64_t startTime);
+    void StartRecoveryTimers(const NotificationRequestDb &requestObj,
+        const std::shared_ptr<NotificationRecord> &record);
+    void CleanRemainingRecoveryEntries(const std::vector<NotificationRequestDb> &requestsdb, size_t startIndex);
+    void RecoverLiveViewForUser(int32_t userId);
     ErrCode SetGeofenceTriggerTimer(const std::shared_ptr<NotificationRecord> &record);
     void CancelGeofenceTriggerTimer(const std::shared_ptr<NotificationRecord> &record);
     ErrCode StartGeofenceTriggerTimer(const std::shared_ptr<NotificationRecord> &record,
