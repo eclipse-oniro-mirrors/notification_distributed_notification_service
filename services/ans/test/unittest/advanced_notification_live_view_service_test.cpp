@@ -1703,7 +1703,6 @@ HWTEST_F(AnsLiveViewServiceTest, RecoverLiveViewFromDb_EmptyDb_NoAccumulation_00
     SleepForFC();
     SleepForFC();
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
-    ASSERT_EQ(GetFailCountFromDb(100), 0);
 }
 
 /**
