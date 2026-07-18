@@ -18,6 +18,7 @@
 #include "init_default_table_handler.h"
 #include "live_view_migration_handler.h"
 #include "priorityinfo_migration_handler.h"
+#include "rdb_helper.h"
 #include "rdb_store.h"
 
 namespace OHOS::Notification::Infra {
@@ -63,8 +64,17 @@ int32_t RdbStoreCallback::OnOpen(NativeRdb::RdbStore &rdbStore)
 
 int32_t RdbStoreCallback::onCorruption(std::string databaseFile)
 {
-    ANS_LOGD("RdbStoreCallback::onCorruption databaseFile: %{public}s", databaseFile.c_str());
-    return handlerManager_.ExecuteOnCorruption(databaseFile);
+    ANS_LOGE("RdbStoreCallback::onCorruption databaseFile: %{public}s", databaseFile.c_str());
+    int32_t result = handlerManager_.ExecuteOnCorruption(databaseFile);
+    if (!databaseFile.empty()) {
+        ANS_LOGE("Deleting corrupt database file: %{public}s", databaseFile.c_str());
+        int32_t deleteResult = NativeRdb::RdbHelper::DeleteRdbStore(databaseFile);
+        if (deleteResult != NativeRdb::E_OK) {
+            ANS_LOGE("Failed to delete corrupt database file, ret=%{public}d", deleteResult);
+            return deleteResult;
+        }
+    }
+    return result;
 }
 
 void RdbStoreCallback::InitializeHandlers(const NotificationRdbConfig& config, std::shared_ptr<NtfRdbHookMgr> hookMgr,

@@ -162,7 +162,15 @@ bool LiveViewMigrationHandler::ProcessRow(
 
         ANS_LOGD("Updated liveview row with key: %{public}s", resultKey.c_str());
     } else {
-        ANS_LOGE("UpdateRequestJsonObject failed.");
+        ANS_LOGE("Migration failed, deleting corrupt row. key=%{public}s", resultKey.c_str());
+        NativeRdb::RdbPredicates predicates(tableName);
+        predicates.EqualTo(NOTIFICATION_KEY, resultKey);
+        int32_t deletedRows = 0;
+        int32_t deleteRet = rdbStore.Delete(deletedRows, predicates);
+        if (deleteRet != NativeRdb::E_OK || deletedRows == 0) {
+            ANS_LOGE("Failed to delete corrupt row, ret=%{public}d, deleted=%{public}d, key=%{public}s",
+                deleteRet, deletedRows, resultKey.c_str());
+        }
     }
     return ret;
 }

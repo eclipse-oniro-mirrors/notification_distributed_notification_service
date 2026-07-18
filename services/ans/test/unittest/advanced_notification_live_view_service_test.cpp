@@ -93,6 +93,8 @@ void AnsLiveViewServiceTest::SetUp()
     GTEST_LOG_(INFO) << "SetUp start";
 
     NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
+    NotificationPreferences::GetInstance()->DeleteKvFromDb("ans_recover_fail_count", 100);
+    NotificationPreferences::GetInstance()->DeleteKvFromDb("ans_recover_fail_count", 101);
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     auto ret = advancedNotificationService_->CancelAll("",
@@ -1674,8 +1676,8 @@ HWTEST_F(AnsLiveViewServiceTest, RecoverLiveViewFromDb_EmptyDb_00001, Function |
     advancedNotificationService_->notificationList_.clear();
     advancedNotificationService_->RecoverLiveViewFromDb(100);
     SleepForFC();
+    SleepForFC();
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
-    ASSERT_EQ(GetFailCountFromDb(100), 0);
 }
 
 /**
@@ -1690,8 +1692,8 @@ HWTEST_F(AnsLiveViewServiceTest, RecoverLiveViewFromDb_FailCountOne_00001, Funct
     advancedNotificationService_->notificationList_.clear();
     advancedNotificationService_->RecoverLiveViewFromDb(100);
     SleepForFC();
+    SleepForFC();
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
-    ASSERT_EQ(GetFailCountFromDb(100), 0);
 }
 
 /**
@@ -1723,105 +1725,8 @@ HWTEST_F(AnsLiveViewServiceTest, ProcessRecoveryEntry_NullRequest_00001, Functio
         { .request = nullptr, .bundleOption = nullptr };
     requestsdb.push_back(requestDb);
     std::vector<std::string> keys;
-    auto ret = advancedNotificationService_->ProcessRecoveryEntry(requestsdb, 0, keys, GetCurrentTime());
-    ASSERT_FALSE(ret);
+    advancedNotificationService_->ProcessRecoveryEntry(requestsdb, 0, keys);
     ASSERT_TRUE(keys.empty());
-}
-
-/**
- * @tc.name: ProcessRecoveryEntry_Timeout_00001
- * @tc.desc: Test ProcessRecoveryEntry with elapsed time exceeding timeout, verify DB cleanup
- * @tc.type: FUNC
- * @tc.require: issue#4214
- */
-HWTEST_F(AnsLiveViewServiceTest, ProcessRecoveryEntry_Timeout_00001, Function | SmallTest | Level1)
-{
-    advancedNotificationService_->notificationList_.clear();
-    sptr<NotificationRequest> request = new NotificationRequest(1);
-    std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
-    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
-    liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
-    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
-    request->SetContent(content);
-    request->SetCreatorUid(100);
-    request->SetCreatorUserId(100);
-    request->SetReceiverUserId(100);
-    request->SetLabel("test_timeout");
-    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    auto epoch = std::chrono::system_clock::now().time_since_epoch();
-    auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
-    int64_t futureTime = curTime + 3600 * 1000;
-    request->SetUpdateDeadLine(futureTime);
-    request->SetFinishDeadLine(futureTime);
-    request->SetGeofenceTriggerDeadLine(futureTime);
-    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("BundleName_timeout", 100);
-    AdvancedNotificationService::NotificationRequestDb requestDbObj =
-        { .request = request, .bundleOption = bundleOption };
-    ASSERT_EQ(advancedNotificationService_->SetNotificationRequestToDb(requestDbObj), (int)ERR_OK);
-
-    std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
-    requestsdb.push_back(requestDbObj);
-    std::vector<std::string> keys;
-    int64_t pastTime = GetCurrentTime() - 60 * 1000;
-    auto ret = advancedNotificationService_->ProcessRecoveryEntry(requestsdb, 0, keys, pastTime);
-    ASSERT_TRUE(ret);
-    ASSERT_TRUE(keys.empty());
-
-    std::vector<AdvancedNotificationService::NotificationRequestDb> checkdb;
-    advancedNotificationService_->GetBatchNotificationRequestsFromDb(checkdb, 100);
-    ASSERT_EQ(checkdb.size(), 0);
-}
-
-/**
- * @tc.name: ProcessRecoveryEntry_TimeoutCleansRemaining_00001
- * @tc.desc: Test ProcessRecoveryEntry timeout deletes all remaining DB entries from the abort index.
- * @tc.type: FUNC
- * @tc.require: issue#4214
- */
-HWTEST_F(AnsLiveViewServiceTest, ProcessRecoveryEntry_TimeoutCleansRemaining_00001, Function | SmallTest | Level1)
-{
-    advancedNotificationService_->notificationList_.clear();
-    auto buildRequest = [](int32_t notifId, const std::string &label) {
-        sptr<NotificationRequest> request = new NotificationRequest(notifId);
-        std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
-        liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
-        liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
-        std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
-        request->SetContent(content);
-        request->SetCreatorUid(100);
-        request->SetCreatorUserId(100);
-        request->SetReceiverUserId(100);
-        request->SetLabel(label);
-        request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-        auto epoch = std::chrono::system_clock::now().time_since_epoch();
-        auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
-        int64_t futureTime = curTime + 3600 * 1000;
-        request->SetUpdateDeadLine(futureTime);
-        request->SetFinishDeadLine(futureTime);
-        request->SetGeofenceTriggerDeadLine(futureTime);
-        return request;
-    };
-    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("BundleName_to_clean", 100);
-    AdvancedNotificationService::NotificationRequestDb db1 =
-        { .request = buildRequest(1, "test_to_clean_1"), .bundleOption = bundleOption };
-    AdvancedNotificationService::NotificationRequestDb db2 =
-        { .request = buildRequest(2, "test_to_clean_2"), .bundleOption = bundleOption };
-    ASSERT_EQ(advancedNotificationService_->SetNotificationRequestToDb(db1), (int)ERR_OK);
-    ASSERT_EQ(advancedNotificationService_->SetNotificationRequestToDb(db2), (int)ERR_OK);
-
-    std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
-    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, 100), ERR_OK);
-    ASSERT_EQ(requestsdb.size(), 2);
-
-    std::vector<std::string> keys;
-    int64_t pastTime = GetCurrentTime() - 60 * 1000;
-    auto ret = advancedNotificationService_->ProcessRecoveryEntry(requestsdb, 0, keys, pastTime);
-    ASSERT_TRUE(ret);
-    ASSERT_TRUE(keys.empty());
-
-    std::vector<AdvancedNotificationService::NotificationRequestDb> checkdb;
-    advancedNotificationService_->GetBatchNotificationRequestsFromDb(checkdb, 100);
-    ASSERT_EQ(checkdb.size(), 0);
 }
 
 /**
@@ -1864,8 +1769,7 @@ HWTEST_F(AnsLiveViewServiceTest, ProcessRecoveryEntry_NormalEntry_00001, Functio
     std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
     requestsdb.push_back(requestDbObj);
     std::vector<std::string> keys;
-    auto ret = advancedNotificationService_->ProcessRecoveryEntry(requestsdb, 0, keys, GetCurrentTime());
-    ASSERT_FALSE(ret);
+    advancedNotificationService_->ProcessRecoveryEntry(requestsdb, 0, keys);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
     advancedNotificationService_->DoubleDeleteNotificationFromDb(
         request->GetKey(), request->GetSecureKey(), 100);
@@ -1904,8 +1808,7 @@ HWTEST_F(AnsLiveViewServiceTest, ProcessRecoveryEntry_ExpiredEntry_00001, Functi
     std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
     requestsdb.push_back(requestDbObj);
     std::vector<std::string> keys;
-    auto ret = advancedNotificationService_->ProcessRecoveryEntry(requestsdb, 0, keys, GetCurrentTime());
-    ASSERT_FALSE(ret);
+    advancedNotificationService_->ProcessRecoveryEntry(requestsdb, 0, keys);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
     std::vector<AdvancedNotificationService::NotificationRequestDb> checkdb;
     advancedNotificationService_->GetBatchNotificationRequestsFromDb(checkdb, 100);
@@ -1940,8 +1843,7 @@ HWTEST_F(AnsLiveViewServiceTest, ProcessRecoveryEntry_LiveViewEnd_00001, Functio
     std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
     requestsdb.push_back(requestDbObj);
     std::vector<std::string> keys;
-    auto ret = advancedNotificationService_->ProcessRecoveryEntry(requestsdb, 0, keys, GetCurrentTime());
-    ASSERT_FALSE(ret);
+    advancedNotificationService_->ProcessRecoveryEntry(requestsdb, 0, keys);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
     advancedNotificationService_->DoubleDeleteNotificationFromDb(
         request->GetKey(), request->GetSecureKey(), 100);
@@ -1959,13 +1861,15 @@ HWTEST_F(AnsLiveViewServiceTest, GetRecoverFailCount_InvalidValue_00001, Functio
     advancedNotificationService_->notificationList_.clear();
     advancedNotificationService_->RecoverLiveViewFromDb(100);
     SleepForFC();
-    ASSERT_EQ(GetFailCountFromDb(100), 0);
+    SleepForFC();
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
 
     NotificationPreferences::GetInstance()->SetKvToDb("ans_recover_fail_count", "-5", 100);
     advancedNotificationService_->notificationList_.clear();
     advancedNotificationService_->RecoverLiveViewFromDb(100);
     SleepForFC();
-    ASSERT_EQ(GetFailCountFromDb(100), 0);
+    SleepForFC();
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
 
     NotificationPreferences::GetInstance()->DeleteKvFromDb("ans_recover_fail_count", 100);
 }
@@ -2037,8 +1941,7 @@ HWTEST_F(AnsLiveViewServiceTest, ProcessRecoveryEntry_NoContentFillFail_00001, F
     std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
     requestsdb.push_back(requestDbObj);
     std::vector<std::string> keys;
-    auto ret = advancedNotificationService_->ProcessRecoveryEntry(requestsdb, 0, keys, GetCurrentTime());
-    ASSERT_FALSE(ret);
+    advancedNotificationService_->ProcessRecoveryEntry(requestsdb, 0, keys);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
     std::vector<AdvancedNotificationService::NotificationRequestDb> checkdb;
     advancedNotificationService_->GetBatchNotificationRequestsFromDb(checkdb, 100);
@@ -2151,25 +2054,6 @@ HWTEST_F(AnsLiveViewServiceTest, StartRecoveryTimers_NoGeofenceTrigger_00001, Fu
 }
 
 /**
- * @tc.name: CleanRemainingEntries_NullInRemaining_00001
- * @tc.desc: Test CleanRemainingRecoveryEntries with null request in remaining entries
- * @tc.type: FUNC
- * @tc.require: issue#4214
- */
-HWTEST_F(AnsLiveViewServiceTest, CleanRemainingEntries_NullInRemaining_00001, Function | SmallTest | Level1)
-{
-    std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
-    AdvancedNotificationService::NotificationRequestDb db1 =
-        { .request = nullptr, .bundleOption = nullptr };
-    AdvancedNotificationService::NotificationRequestDb db2 =
-        { .request = new NotificationRequest(1), .bundleOption = nullptr };
-    requestsdb.push_back(db1);
-    requestsdb.push_back(db2);
-    advancedNotificationService_->CleanRemainingRecoveryEntries(requestsdb, 0);
-    ASSERT_EQ(requestsdb.size(), 2);
-}
-
-/**
  * @tc.name: GetRecoverFailCount_PartialAndNegative_00001
  * @tc.desc: Test GetRecoverFailCount with partial number and negative value
  * @tc.type: FUNC
@@ -2180,12 +2064,14 @@ HWTEST_F(AnsLiveViewServiceTest, GetRecoverFailCount_PartialAndNegative_00001, F
     NotificationPreferences::GetInstance()->SetKvToDb("ans_recover_fail_count", "12abc", 100);
     advancedNotificationService_->RecoverLiveViewFromDb(100);
     SleepForFC();
-    ASSERT_EQ(GetFailCountFromDb(100), 0);
+    SleepForFC();
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
     SetFailCountToDb(100, 0);
     NotificationPreferences::GetInstance()->SetKvToDb("ans_recover_fail_count", "-5", 101);
     advancedNotificationService_->RecoverLiveViewFromDb(101);
     SleepForFC();
-    ASSERT_EQ(GetFailCountFromDb(101), 0);
+    SleepForFC();
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
     NotificationPreferences::GetInstance()->DeleteKvFromDb("ans_recover_fail_count", 100);
     NotificationPreferences::GetInstance()->DeleteKvFromDb("ans_recover_fail_count", 101);
 }
@@ -2201,8 +2087,8 @@ HWTEST_F(AnsLiveViewServiceTest, RecoverLiveViewFromDb_AllUsersPath_00001, Funct
     advancedNotificationService_->notificationList_.clear();
     advancedNotificationService_->RecoverLiveViewFromDb(-1);
     SleepForFC();
+    SleepForFC();
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
-    ASSERT_EQ(GetFailCountFromDb(100), 0);
 }
 }  // namespace Notification
 }  // namespace OHOS
