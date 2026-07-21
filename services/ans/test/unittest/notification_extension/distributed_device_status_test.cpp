@@ -80,6 +80,7 @@ HWTEST_F(DistributedDeviceStatusTest, DeviceData_00001, Function | SmallTest | L
         "pad", 1, 33, "udidNum", 100);
     ASSERT_EQ(result, 0);
 
+#ifdef ALL_SCENARIO_COLLABORATION
     DeviceTrigger::MockTransDeviceIdToUdid(true);
     result = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->SetDeviceStatus(
         "pad", 0, 65537, "netWorkId", 100);
@@ -92,6 +93,7 @@ HWTEST_F(DistributedDeviceStatusTest, DeviceData_00001, Function | SmallTest | L
     deviceStatus = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->GetMultiDeviceStatus(
         "pad", 1);
     ASSERT_EQ(deviceStatus.deviceType.empty(), false);
+#endif
 }
 }
 }

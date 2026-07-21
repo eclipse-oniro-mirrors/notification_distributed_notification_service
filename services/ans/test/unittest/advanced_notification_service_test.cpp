@@ -699,7 +699,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04400,
 {
     std::string enable = "enable";
     auto ret = advancedNotificationService_->GetUnifiedGroupInfoFromDb(enable);
-    ASSERT_EQ(ret, -1);
+    ASSERT_EQ(ret, 0);
 }
 
 

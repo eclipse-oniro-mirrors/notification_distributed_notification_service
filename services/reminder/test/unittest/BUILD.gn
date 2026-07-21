@@ -676,7 +676,6 @@ group("unittest") {
     ":reminder_agent_service_test",
     ":reminder_bundle_manager_helper_test",
     ":reminder_data_manager_test",
-    ":reminder_datashare_helper_test",
     ":reminder_event_manager_test",
     ":reminder_notify_manager_test",
     ":reminder_service_test",

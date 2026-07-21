@@ -215,6 +215,7 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, BuildCommandForUpdate_0300,
     EXPECT_FALSE(command.contains(NotificationAiExtensionWrapper::UPDATE_AGGREGATION_TYPE));
 }
 
+#ifdef ANS_FEATURE_AGGREGATION_NOTIFICATION
 /**
  * @tc.name: BuildCommandForUpdate_0400
  * @tc.desc: Test BuildCommandForUpdate with normal request, command should contain aggregation key
@@ -251,6 +252,7 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, BuildCommandForUpdate_0400,
     EXPECT_TRUE(command.contains(NotificationAiExtensionWrapper::UPDATE_AGGREGATION_TYPE));
     EXPECT_EQ(command[manager->HAS_COMMAND].get<bool>(), true);
 }
+#endif
 
 /**
  * @tc.name: UpdateNotification_0100
@@ -356,6 +358,7 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, UpdateNotification_0400, Fu
     EXPECT_EQ(result, NotificationAiExtensionWrapper::ErrorCode::ERR_OK);
 }
 
+#ifdef ANS_FEATURE_AGGREGATION_NOTIFICATION
 /**
  * @tc.name: UpdateNotification_0500
  * @tc.desc: Test UpdateNotification with normal request that needs updating,
@@ -399,5 +402,6 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, UpdateNotification_0500, Fu
     // Restore AI extension wrapper
     NOTIFICATION_AI_EXTENSION_WRAPPER->InitExtensionWrapper();
 }
+#endif
 }  // namespace Notification
 }  // namespace OHOS
