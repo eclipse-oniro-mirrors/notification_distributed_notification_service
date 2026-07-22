@@ -81,6 +81,8 @@ void NotificationIconButton::SetHidePanel(bool hidePanel)
 
 void NotificationIconButton::ClearButtonIconsResource()
 {
+    iconResource_.reset();
+    iconImage_.reset();
 }
 
 std::string NotificationIconButton::Dump()

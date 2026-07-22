@@ -24,6 +24,7 @@
 #include "ability_manager_client.h"
 #include "access_token_helper.h"
 #include "ans_const_define.h"
+#include "ans_common_utils.h"
 #include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_trace_wrapper.h"
@@ -1578,15 +1579,11 @@ ErrCode NotificationPreferences::GetTemplateSupported(const std::string& templat
         return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED;
     }
 
-    nlohmann::json jsonObj;
-    inFile >> jsonObj;
-    if (jsonObj.is_null() || !jsonObj.is_object()) {
-        ANS_LOGE("Invalid JSON object");
-        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED;
-    }
-    if (jsonObj.is_discarded()) {
-        ANS_LOGE("template json discarded error.");
-        inFile.close();
+    std::string fileContent((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
+    inFile.close();
+    nlohmann::json jsonObj = nlohmann::json::parse(fileContent, nullptr, false);
+    if (jsonObj.is_null() || !jsonObj.is_object() || jsonObj.is_discarded()) {
+        ANS_LOGE("Invalid template JSON object");
         return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED;
     }
 
@@ -1595,7 +1592,6 @@ ErrCode NotificationPreferences::GetTemplateSupported(const std::string& templat
     }
 
     jsonObj.clear();
-    inFile.close();
     return ERR_OK;
 }
 
@@ -1864,15 +1860,6 @@ ErrCode NotificationPreferences::GetNotificationSwitch(const std::string &switch
     return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
-int32_t StringToInt(const std::string &str)
-{
-    int32_t value = 0;
-    if (!str.empty()) {
-        value = atoi(str.c_str());
-    }
-    return value;
-}
-
 void NotificationPreferences::GetAllNotificationSwitchInfo(const int32_t userId,
     std::vector<NotificationCloneNotificationSwitchInfo> &notificationSwitchInfos)
 {
@@ -1899,7 +1886,7 @@ void NotificationPreferences::GetAllNotificationSwitchInfo(const int32_t userId,
         notificationSwitchInfo.SetSwitchName(switchName);
         notificationSwitchSet.insert(switchName);
         notificationSwitchInfo.SetSwitchState(
-            static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(iter.second)));
+            static_cast<NotificationConstant::SWITCH_STATE>(AnsCommonUtils::StringToInt(iter.second)));
         notificationSwitchInfos.push_back(notificationSwitchInfo);
     }
     // Clone default behavior to new device

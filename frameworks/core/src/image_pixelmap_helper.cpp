@@ -146,7 +146,11 @@ ErrCode ImagePixelmapHelper::CreatePixelMap()
     }
 
     OH_DecodingOptions *ops = nullptr;
-    OH_DecodingOptions_Create(&ops);
+    Image_ErrorCode createRet = OH_DecodingOptions_Create(&ops);
+    if (createRet != IMAGE_SUCCESS || ops == nullptr) {
+        ANS_LOGE("OH_DecodingOptions_Create failed, errCode: %{public}d.", createRet);
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     Image_Size desiredSize = {targetWidth, targetHeight};
     OH_DecodingOptions_SetDesiredSize(ops, &desiredSize);
     int32_t format = static_cast<int32_t>(Media::PixelFormat::ASTC_4x4);

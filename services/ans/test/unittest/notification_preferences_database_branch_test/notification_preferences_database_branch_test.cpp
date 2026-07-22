@@ -20,6 +20,7 @@
 #define private public
 #define protected public
 #include "notification_preferences_database.h"
+#include "ans_common_utils.h"
 #include "mock_notification_rdb_data_mgr.h"
 #undef private
 #undef protected
@@ -750,7 +751,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0440
 HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_04500, Function | SmallTest | Level1)
 {
     std::string str = "";
-    ASSERT_EQ(preferncesDB_->StringToInt(str), 0);
+    ASSERT_EQ(AnsCommonUtils::StringToInt(str), 0);
 }
 
 /**
@@ -761,7 +762,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0450
 HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_04600, Function | SmallTest | Level1)
 {
     std::string str = "";
-    ASSERT_EQ(preferncesDB_->StringToInt64(str), 0);
+    ASSERT_EQ(AnsCommonUtils::StringToInt64(str), 0);
 }
 
 /**
@@ -1167,6 +1168,50 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, UpdateCustomTimeDbData_00100
 {
     MockInit(false);
     EXPECT_FALSE(preferncesDB_->UpdateCustomTimeDbData(1));
+}
+
+/**
+ * @tc.name      : StringToInt_00100
+ * @tc.number    :
+ * @tc.desc      : test StringToInt function with empty string
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, StringToInt_00100, Function | SmallTest | Level1)
+{
+    std::string str = "";
+    ASSERT_EQ(AnsCommonUtils::StringToInt(str), 0);
+}
+
+/**
+ * @tc.name      : StringToInt_00200
+ * @tc.number    :
+ * @tc.desc      : test StringToInt function with valid string
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, StringToInt_00200, Function | SmallTest | Level1)
+{
+    std::string str = "123";
+    ASSERT_EQ(AnsCommonUtils::StringToInt(str), 123);
+}
+
+/**
+ * @tc.name      : StringToInt64_00100
+ * @tc.number    :
+ * @tc.desc      : test StringToInt64 function with empty string
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, StringToInt64_00100, Function | SmallTest | Level1)
+{
+    std::string str = "";
+    ASSERT_EQ(AnsCommonUtils::StringToInt64(str), 0);
+}
+
+/**
+ * @tc.name      : StringToInt64_00200
+ * @tc.number    :
+ * @tc.desc      : test StringToInt64 function with valid string
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, StringToInt64_00200, Function | SmallTest | Level1)
+{
+    std::string str = "123456789";
+    ASSERT_EQ(AnsCommonUtils::StringToInt64(str), 123456789);
 }
 }  // namespace Notification
 }  // namespace OHOS

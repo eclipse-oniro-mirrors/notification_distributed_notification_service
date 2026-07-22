@@ -230,5 +230,19 @@ HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest, IsSystemUser_001, Funct
     auto res = notificationLocalLiveViewSubscriberManager_->IsSystemUser(100);
     ASSERT_FALSE(res);
 }
+
+/**
+ * @tc.name: AddSubscriberInner_NullRecipient_001
+ * @tc.desc: Test AddSubscriberInner when recipient_ is nullptr (no crash)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest, AddSubscriberInner_NullRecipient_001,
+    Function | SmallTest | Level1)
+{
+    notificationLocalLiveViewSubscriberManager_->recipient_ = nullptr;
+    auto bundleOption = sptr<NotificationBundleOption>(new NotificationBundleOption("test", 1));
+    auto result = notificationLocalLiveViewSubscriberManager_->AddSubscriberInner(subscriber_, bundleOption, 0);
+    EXPECT_EQ(result, ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

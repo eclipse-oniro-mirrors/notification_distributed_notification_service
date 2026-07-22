@@ -412,6 +412,9 @@ AdvancedNotificationService::~AdvancedNotificationService()
 void AdvancedNotificationService::SelfClean(bool resetQueues)
 {
     if (resetQueues) {
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+        DistributedNotificationManager::GetInstance()->RegisterCallback({});
+#endif
         notificationSvrQueue_.Reset();
         NotificationSubscriberManager::GetInstance()->ResetFfrtQueue();
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
@@ -609,7 +612,8 @@ ErrCode AdvancedNotificationService::SetFinishTimer(const std::shared_ptr<Notifi
     int64_t finishTime = NotificationConstant::MAX_FINISH_TIME;
     int32_t reason = NotificationConstant::TRIGGER_EIGHT_HOUR_REASON_DELETE;
     int64_t autoDeletedTime = record->request->GetAutoDeletedTime();
-    if (autoDeletedTime != NotificationConstant::INVALID_AUTO_DELETE_TIME) {
+    if (autoDeletedTime != NotificationConstant::INVALID_AUTO_DELETE_TIME && autoDeletedTime > 0 &&
+        autoDeletedTime <= NotificationConstant::MAX_FINISH_TIME / NotificationConstant::SECOND_TO_MS) {
         finishTime = NotificationConstant::SECOND_TO_MS * autoDeletedTime;
         reason = NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE;
         record->request->SetAutoDeletedTime(NotificationConstant::INVALID_AUTO_DELETE_TIME);
@@ -2137,18 +2141,17 @@ void AdvancedNotificationService::ResetPushCallbackProxy(NotificationConstant::S
 {
     ANS_LOGD("called");
     std::lock_guard<ffrt::mutex> lock(pushMutex_);
-    if (pushCallBacks_.empty()) {
+    auto it = pushCallBacks_.find(slotType);
+    if (it == pushCallBacks_.end()) {
         ANS_LOGE("invalid proxy state");
         return;
     }
-    for (auto it = pushCallBacks_.begin(); it != pushCallBacks_.end(); it++) {
-        if (it->second->AsObject() == nullptr) {
-            ANS_LOGE("invalid proxy state");
-        } else {
-            it->second->AsObject()->RemoveDeathRecipient(pushRecipient_);
-        }
+    if (it->second->AsObject() == nullptr) {
+        ANS_LOGE("invalid proxy state");
+    } else if (pushRecipient_ != nullptr) {
+        it->second->AsObject()->RemoveDeathRecipient(pushRecipient_);
     }
-    pushCallBacks_.erase(slotType);
+    pushCallBacks_.erase(it);
 }
 
 ErrCode AdvancedNotificationService::RegisterPushCallbackTokenCheck()

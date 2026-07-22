@@ -82,6 +82,10 @@ NotificationDialogManager::NotificationDialogManager(AdvancedNotificationService
 NotificationDialogManager::~NotificationDialogManager()
 {
     ANS_LOGD("enter");
+    if (dialogEventSubscriber != nullptr) {
+        EventFwk::CommonEventManager::UnSubscribeCommonEvent(dialogEventSubscriber);
+        dialogEventSubscriber = nullptr;
+    }
 }
 
 bool NotificationDialogManager::Init()

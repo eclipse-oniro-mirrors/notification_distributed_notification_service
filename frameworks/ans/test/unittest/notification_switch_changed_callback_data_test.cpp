@@ -190,5 +190,35 @@ HWTEST_F(NotificationSwitchChangedCallbackDataTest, ReadFromParcel_00001, Functi
     EXPECT_EQ(newData->GetSwitchName(), switchName);
     EXPECT_EQ(newData->GetEnableStatus(), enableStatus);
 }
+
+/**
+ * @tc.name: ReadFromParcel_00002
+ * @tc.desc: Test ReadFromParcel returns false when enableStatus is out of range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSwitchChangedCallbackDataTest, ReadFromParcel_00002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteInt32(100);
+    parcel.WriteString("switch");
+    parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) + 1);
+    auto data = std::make_shared<NotificationSwitchChangedCallbackData>();
+    EXPECT_EQ(data->ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_00003
+ * @tc.desc: Test ReadFromParcel returns false when enableStatus is negative.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSwitchChangedCallbackDataTest, ReadFromParcel_00003, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteInt32(100);
+    parcel.WriteString("switch");
+    parcel.WriteInt32(-1);
+    auto data = std::make_shared<NotificationSwitchChangedCallbackData>();
+    EXPECT_EQ(data->ReadFromParcel(parcel), false);
+}
 }  // namespace Notification
 }  // namespace OHOS

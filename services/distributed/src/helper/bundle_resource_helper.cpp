@@ -57,14 +57,14 @@ void BundleResourceHelper::Connect()
     }
 
     bundleMgr_ = OHOS::iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
-    if (bundleMgr_ != nullptr) {
+    if (bundleMgr_ != nullptr && deathRecipient_ != nullptr) {
         bundleMgr_->AsObject()->AddDeathRecipient(deathRecipient_);
     }
 }
 
 void BundleResourceHelper::Disconnect()
 {
-    if (bundleMgr_ != nullptr) {
+    if (bundleMgr_ != nullptr && deathRecipient_ != nullptr) {
         bundleMgr_->AsObject()->RemoveDeathRecipient(deathRecipient_);
         bundleMgr_ = nullptr;
     }

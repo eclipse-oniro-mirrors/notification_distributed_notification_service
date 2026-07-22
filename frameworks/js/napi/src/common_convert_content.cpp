@@ -1269,7 +1269,7 @@ napi_value Common::GetConversationalMessageBasicInfo(const napi_env &env, const 
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, textResult, commonStr, COMMON_TEXT_SIZE - 1, &strLen));
     text = commonStr;
-    ANS_LOGD("conversationalMessage::text = %{public}s", commonStr);
+    ANS_LOGD("conversationalMessage::text = %{private}s", commonStr);
 
     // timestamp: number
     NAPI_CALL(env, napi_has_named_property(env, conversationalMessage, "timestamp", &hasProperty));

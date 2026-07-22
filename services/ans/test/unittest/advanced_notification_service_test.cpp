@@ -6931,5 +6931,34 @@ HWTEST_F(AdvancedNotificationServiceTest, ClassificationMgr_Remove_0300, Functio
     advancedNotificationService_->RemoveNotificationList(record);
     EXPECT_FALSE(NotificationClassificationMgr::GetInstance().Exists(key));
 }
+
+/**
+ * @tc.number    : ResetPushCallbackProxy_OnlyRemoveSpecifiedSlotType_001
+ * @tc.name      : ResetPushCallbackProxy_OnlyRemoveSpecifiedSlotType
+ * @tc.desc      : Test ResetPushCallbackProxy only removes the specified slotType, not all entries.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ResetPushCallbackProxy_OnlyRemoveSpecifiedSlotType_001,
+    Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ResetPushCallbackProxy_OnlyRemoveSpecifiedSlotType_001 test start";
+    EXPECT_NE(advancedNotificationService_, nullptr);
+    auto pushCallbackProxy = new (std::nothrow) MockPushCallBackStub();
+    EXPECT_NE(pushCallbackProxy, nullptr);
+    sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
+    sptr<IPushCallBack> pushCallBack = iface_cast<IPushCallBack>(pushCallback);
+
+    advancedNotificationService_->pushCallBacks_.insert_or_assign(
+        NotificationConstant::SlotType::SOCIAL_COMMUNICATION, pushCallBack);
+    advancedNotificationService_->pushCallBacks_.insert_or_assign(
+        NotificationConstant::SlotType::SERVICE_REMINDER, pushCallBack);
+    EXPECT_EQ(advancedNotificationService_->pushCallBacks_.size(), 2);
+
+    advancedNotificationService_->ResetPushCallbackProxy(
+        NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    EXPECT_EQ(advancedNotificationService_->pushCallBacks_.size(), 1);
+    EXPECT_EQ(advancedNotificationService_->pushCallBacks_.count(
+        NotificationConstant::SlotType::SERVICE_REMINDER), 1);
+    GTEST_LOG_(INFO) << "ResetPushCallbackProxy_OnlyRemoveSpecifiedSlotType_001 test end";
+}
 }  // namespace Notification
 }  // namespace OHOS

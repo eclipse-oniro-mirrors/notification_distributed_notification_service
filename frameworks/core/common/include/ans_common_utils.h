@@ -12,10 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef BASE_NOTIFICATION_ANS_STANDARD_CORE_IPC_COMMON_UTILS_H
-#define BASE_NOTIFICATION_ANS_STANDARD_CORE_IPC_COMMON_UTILS_H
+#ifndef BASE_NOTIFICATION_ANS_STANDARD_CORE_COMMON_UTILS_H
+#define BASE_NOTIFICATION_ANS_STANDARD_CORE_COMMON_UTILS_H
 
 #include <securec.h>
+#include <cerrno>
+#include <cstdlib>
+#include <limits>
+#include <string>
 
 #include "ans_log_wrapper.h"
 #include "ans_const_define.h"
@@ -25,7 +29,7 @@
 
 namespace OHOS {
 namespace Notification {
-class AnsIpcCommonUtils {
+class AnsCommonUtils {
 public:
     template<typename T>
     static bool WriteParcelableVector(const std::vector<std::shared_ptr<T>> &parcelableVector, Parcel &data)
@@ -61,8 +65,40 @@ public:
 
         return true;
     }
+
+    static int32_t StringToInt(const std::string &str)
+    {
+        if (str.empty()) {
+            return 0;
+        }
+        char *pEnd = nullptr;
+        errno = 0;
+        long result = std::strtol(str.c_str(), &pEnd, 10);
+        if (errno == ERANGE || pEnd == str.c_str() || *pEnd != '\0' ||
+            result < std::numeric_limits<int32_t>::min() ||
+            result > std::numeric_limits<int32_t>::max()) {
+            return 0;
+        }
+        return static_cast<int32_t>(result);
+    }
+
+    static int64_t StringToInt64(const std::string &str)
+    {
+        if (str.empty()) {
+            return 0;
+        }
+        char *pEnd = nullptr;
+        errno = 0;
+        long long result = std::strtoll(str.c_str(), &pEnd, 10);
+        if (errno == ERANGE || pEnd == str.c_str() || *pEnd != '\0' ||
+            result < std::numeric_limits<int64_t>::min() ||
+            result > std::numeric_limits<int64_t>::max()) {
+            return 0;
+        }
+        return static_cast<int64_t>(result);
+    }
 };
 }  // namespace Notification
 }  // namespace OHOS
 
-#endif  // BASE_NOTIFICATION_ANS_STANDARD_CORE_IPC_COMMON_UTILS_H
+#endif  // BASE_NOTIFICATION_ANS_STANDARD_CORE_COMMON_UTILS_H

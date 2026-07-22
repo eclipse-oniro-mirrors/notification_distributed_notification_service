@@ -194,6 +194,9 @@ void ExtensionWrapper::CheckIfSetlocalSwitch()
 
 void ExtensionWrapper::SetlocalSwitch(std::string &enable)
 {
+    if (setLocalSwitch_ == nullptr && extensionWrapperHandle_ != nullptr) {
+        setLocalSwitch_ = (SET_LOCAL_SWITCH)dlsym(extensionWrapperHandle_, "SetLocalSwitch");
+    }
     if (setLocalSwitch_ == nullptr) {
         return;
     }
@@ -228,6 +231,9 @@ ErrCode ExtensionWrapper::SyncAdditionConfig(const std::string& key, const std::
 
 void ExtensionWrapper::UpdateByCancel(const std::vector<sptr<Notification>>& notifications, int deleteReason)
 {
+    if (updateByCancel_ == nullptr && extensionWrapperHandle_ != nullptr) {
+        updateByCancel_ = (UPDATE_BY_CANCEL)dlsym(extensionWrapperHandle_, "UpdateByCancel");
+    }
     if (updateByCancel_ == nullptr) {
         return;
     }
@@ -237,6 +243,9 @@ void ExtensionWrapper::UpdateByCancel(const std::vector<sptr<Notification>>& not
 
 ErrCode ExtensionWrapper::GetUnifiedGroupInfo(const sptr<NotificationRequest> &request)
 {
+    if (getUnifiedGroupInfo_ == nullptr && extensionWrapperHandle_ != nullptr) {
+        getUnifiedGroupInfo_ = (GET_UNIFIED_GROUP_INFO)dlsym(extensionWrapperHandle_, "GetUnifiedGroupInfo");
+    }
     if (getUnifiedGroupInfo_ == nullptr) {
         return 0;
     }
@@ -342,6 +351,9 @@ __attribute__((no_sanitize("cfi"))) int32_t ExtensionWrapper::LocalControl(const
 
 void ExtensionWrapper::UpdateByBundle(const std::string bundleName, int deleteReason)
 {
+    if (updateByBundle_ == nullptr && extensionWrapperHandle_ != nullptr) {
+        updateByBundle_ = (UPDATE_BY_BUNDLE)dlsym(extensionWrapperHandle_, "UpdateByBundle");
+    }
     if (updateByBundle_ == nullptr) {
         return;
     }

@@ -71,6 +71,10 @@ void DistributedOperationCallback::UvWorkOnCallBack(uv_work_t *work, int32_t sta
     auto retStatus = napi_open_handle_scope(callBackPtr->env, &scope);
     if (retStatus != napi_ok || scope == nullptr) {
         ANS_LOGE("status: %{public}d", retStatus);
+        delete callBackPtr;
+        callBackPtr = nullptr;
+        delete work;
+        work = nullptr;
         return;
     }
 

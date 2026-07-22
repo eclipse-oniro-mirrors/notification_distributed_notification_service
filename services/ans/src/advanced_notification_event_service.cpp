@@ -264,7 +264,8 @@ std::uint64_t NotificationDataMgr::GetRemainPartitionSize(const std::string &par
 {
     struct statfs stat;
     if (statfs(partitionName.c_str(), &stat) != 0) {
-        return -1;
+        ANS_LOGE("statfs failed for %{public}s", partitionName.c_str());
+        return 0;
     }
     std::uint64_t blockSize = stat.f_bsize;
     std::uint64_t freeSize = stat.f_bfree * blockSize;

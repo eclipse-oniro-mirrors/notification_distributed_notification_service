@@ -1079,5 +1079,39 @@ HWTEST_F(NotificationPreferencesInfoTest, IsBundleCacheEmpty_00001, Function | S
     info.SetBundleInfo(bundleInfo);
     EXPECT_FALSE(info.IsBundleCacheEmpty());
 }
+
+/**
+ * @tc.name: GetAllDoNotDisturbProfiles_0200
+ * @tc.desc: test GetAllDoNotDisturbProfiles exact match: key "100" matches userId 100.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetAllDoNotDisturbProfiles_0200, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+
+    sptr<NotificationDoNotDisturbProfile> profile = new NotificationDoNotDisturbProfile();
+    preferencesInfo->doNotDisturbProfiles_["100"] = profile;
+
+    preferencesInfo->GetAllDoNotDisturbProfiles(100, profiles);
+    ASSERT_EQ(profiles.size(), 1);
+}
+
+/**
+ * @tc.name: GetAllDoNotDisturbProfiles_0300
+ * @tc.desc: test GetAllDoNotDisturbProfiles false-positive prevention: key "1000_x" does NOT match userId 100.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetAllDoNotDisturbProfiles_0300, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+
+    sptr<NotificationDoNotDisturbProfile> profile = new NotificationDoNotDisturbProfile();
+    preferencesInfo->doNotDisturbProfiles_["1000_x"] = profile;
+
+    preferencesInfo->GetAllDoNotDisturbProfiles(100, profiles);
+    ASSERT_EQ(profiles.size(), 0);
+}
 }
 }

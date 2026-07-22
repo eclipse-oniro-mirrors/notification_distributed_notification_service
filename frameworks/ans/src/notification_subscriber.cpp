@@ -86,13 +86,16 @@ const sptr<NotificationSubscriber::SubscriberImpl> NotificationSubscriber::GetIm
 NotificationSubscriber::SubscriberImpl::SubscriberImpl(NotificationSubscriber &subscriber) : subscriber_(subscriber)
 {
     recipient_ = new (std::nothrow) DeathRecipient(*this);
+    if (recipient_ == nullptr) {
+        ANS_LOGE("Failed to create DeathRecipient instance");
+    }
 };
 
 ErrCode NotificationSubscriber::SubscriberImpl::OnConnected()
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (proxy != nullptr) {
+    if (proxy != nullptr && recipient_ != nullptr) {
         proxy->AsObject()->AddDeathRecipient(recipient_);
         ANS_LOGD("%s, Add death recipient.", __func__);
     }
@@ -104,7 +107,7 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnDisconnected()
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (proxy != nullptr) {
+    if (proxy != nullptr && recipient_ != nullptr) {
         proxy->AsObject()->RemoveDeathRecipient(recipient_);
         ANS_LOGD("%s, Remove death recipient.", __func__);
     }

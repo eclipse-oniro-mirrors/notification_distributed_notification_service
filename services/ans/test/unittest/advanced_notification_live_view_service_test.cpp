@@ -2185,5 +2185,47 @@ HWTEST_F(AnsLiveViewServiceTest, SetLockScreenPictureToDb_NullContent_001, Funct
 
     ASSERT_EQ(advancedNotificationService_->SetLockScreenPictureToDb(request), (int)ERR_ANS_INNER_INVALID_PARAM);
 }
+
+/**
+ * @tc.name: SetFinishTimer_InvalidAutoDeletedTime_001
+ * @tc.desc: Test SetFinishTimer with autoDeletedTime <= 0 uses default MAX_FINISH_TIME
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, SetFinishTimer_InvalidAutoDeletedTime_001, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    record->request->SetAutoDeletedTime(-1);
+    ErrCode res = advancedNotificationService_->SetFinishTimer(record);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: SetFinishTimer_InvalidAutoDeletedTime_002
+ * @tc.desc: Test SetFinishTimer with autoDeletedTime = 0 uses default
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, SetFinishTimer_InvalidAutoDeletedTime_002, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    record->request->SetAutoDeletedTime(0);
+    ErrCode res = advancedNotificationService_->SetFinishTimer(record);
+    EXPECT_EQ(res, ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

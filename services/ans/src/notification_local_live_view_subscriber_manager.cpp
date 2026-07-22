@@ -55,6 +55,10 @@ NotificationLocalLiveViewSubscriberManager::NotificationLocalLiveViewSubscriberM
 NotificationLocalLiveViewSubscriberManager::~NotificationLocalLiveViewSubscriberManager()
 {
     ANS_LOGD("called");
+    if (notificationButtonQueue_ != nullptr) {
+        auto handler = notificationButtonQueue_->submit_h([] {});
+        notificationButtonQueue_->wait(handler);
+    }
     buttonRecordList_.clear();
 }
 
@@ -239,7 +243,9 @@ ErrCode NotificationLocalLiveViewSubscriberManager::AddSubscriberInner(
         }
         buttonRecordList_.push_back(record);
 
-        record->subscriber->AsObject()->AddDeathRecipient(recipient_);
+        if (recipient_ != nullptr) {
+            record->subscriber->AsObject()->AddDeathRecipient(recipient_);
+        }
 
         record->subscriber->OnConnected();
         ANS_LOGI("subscriber is connected.");
@@ -259,7 +265,9 @@ ErrCode NotificationLocalLiveViewSubscriberManager::RemoveSubscriberInner(
         return ERR_ANS_INNER_INVALID_PARAM;
     }
 
-    record->subscriber->AsObject()->RemoveDeathRecipient(recipient_);
+    if (recipient_ != nullptr) {
+        record->subscriber->AsObject()->RemoveDeathRecipient(recipient_);
+    }
 
     buttonRecordList_.remove(record);
 

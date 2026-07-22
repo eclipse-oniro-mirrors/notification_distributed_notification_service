@@ -385,5 +385,30 @@ HWTEST_F(NotificationIconButtonTest, FromJson_00007, Function | SmallTest | Leve
     auto button = NotificationIconButton::FromJson(jsonObject);
     EXPECT_EQ(button, nullptr);
 }
+
+/**
+ * @tc.name: ClearButtonIconsResource_00002
+ * @tc.desc: Test ClearButtonIconsResource clears previously set iconResource and iconImage.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationIconButtonTest, ClearButtonIconsResource_00002, Function | SmallTest | Level1)
+{
+    auto button = std::make_shared<NotificationIconButton>();
+    auto resource = std::make_shared<ResourceManager::Resource>();
+    resource->id = 1;
+    resource->bundleName = "bundleName";
+    resource->moduleName = "moduleName";
+    button->SetIconResource(resource);
+    EXPECT_NE(button->GetIconResource(), nullptr);
+
+    std::shared_ptr<Media::PixelMap> iconImage = std::make_shared<Media::PixelMap>();
+    button->SetIconImage(iconImage);
+    EXPECT_NE(button->GetIconImage(), nullptr);
+
+    button->ClearButtonIconsResource();
+    EXPECT_EQ(button->GetIconResource(), nullptr);
+    EXPECT_EQ(button->GetIconImage(), nullptr);
+}
 }
 }

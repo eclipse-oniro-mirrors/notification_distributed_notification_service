@@ -229,14 +229,14 @@ void __attribute__((weak)) BundleManagerHelper::Connect()
     }
 
     bundleMgr_ = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
-    if (bundleMgr_ != nullptr) {
+    if (bundleMgr_ != nullptr && deathRecipient_ != nullptr) {
         bundleMgr_->AsObject()->AddDeathRecipient(deathRecipient_);
     }
 }
 
 void __attribute__((weak)) BundleManagerHelper::Disconnect()
 {
-    if (bundleMgr_ != nullptr) {
+    if (bundleMgr_ != nullptr && deathRecipient_ != nullptr) {
         bundleMgr_->AsObject()->RemoveDeathRecipient(deathRecipient_);
         bundleMgr_ = nullptr;
     }

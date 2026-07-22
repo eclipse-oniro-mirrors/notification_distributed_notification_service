@@ -322,5 +322,19 @@ HWTEST_F(NotificationMultiLineContentTest, FromJson_00009, Function | SmallTest 
     EXPECT_NE(res, nullptr);
     EXPECT_EQ(res->GetAllLines().size(), 0);
 }
+
+/**
+ * @tc.name: Marshalling_00002
+ * @tc.desc: Test Marshalling when lineWantAgents_ size exceeds uint8_t max (255).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationMultiLineContentTest, Marshalling_00002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto rrc = std::make_shared<NotificationMultiLineContent>();
+    rrc->lineWantAgents_.resize(256);
+    EXPECT_EQ(rrc->Marshalling(parcel), false);
+}
 }
 }

@@ -172,8 +172,8 @@ public:
     std::string agentBundleName_ = "";
     int32_t typeCode_ = -1;
     uint32_t slotType_ = -1;
-    uint32_t sceneId_;
-    uint32_t branchId_;
+    uint32_t sceneId_ = 0;
+    uint32_t branchId_ = 0;
     uint32_t errorCode_ = ERR_OK;
     std::string message_;
     std::string path_;

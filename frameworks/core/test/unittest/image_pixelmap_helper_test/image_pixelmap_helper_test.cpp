@@ -2026,5 +2026,28 @@ HWTEST_F(ImagePixelmapHelperTest, CreatePixelMap_00020, Function | SmallTest | L
     EXPECT_EQ(helper.imageWidth_, 100u);
     EXPECT_EQ(helper.imageHeight_, 150u);
 }
+
+/**
+ * @tc.name: CreatePixelMap_00021
+ * @tc.desc: Test CreatePixelMap when OH_DecodingOptions_Create returns nullptr.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(ImagePixelmapHelperTest, CreatePixelMap_00021, Function | SmallTest | Level1)
+{
+    Notification::Mock::MockSetImageWidth(100);
+    Notification::Mock::MockSetImageHeight(100);
+    Notification::Mock::MockOHDecodingOptionsCreateReturnNull(true);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    ImagePixelmapHelper helper(request, "test.png");
+
+    helper.InitRawfileData();
+    helper.CreateImageSource();
+    ErrCode ret = helper.CreatePixelMap();
+
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
+    EXPECT_EQ(helper.pixelMap_, nullptr);
+}
 }  // namespace Notification
 }  // namespace OHOS
