@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 #include <iostream>
+#include <atomic>
+#include <memory>
 #include <thread>
 
 #define private public
@@ -40,6 +42,8 @@ using namespace testing;
 
 namespace OHOS {
 namespace Notification {
+
+
 class MockAnsSubscriberTest : public MockAnsSubscriber  {
 public:
     explicit MockAnsSubscriberTest(const sptr<IRemoteObject>& remote) : MockAnsSubscriber(remote) {};
@@ -420,14 +424,14 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumed_001, Level1)
     auto record = notificationSubscriberManager.CreateSubscriberRecord(subscriber);
     record->subscribedFlags_ = testAnsSubscriber->GetSubscribedFlags();
     notificationSubscriberManager.BatchNotifyConsumed(notifications, notificationMap, record);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 
     testAnsSubscriber->SetCallBack(false);
     notificationSubscriberManager.notificationSubQueue_ = nullptr;
     notificationSubscriberManager.BatchNotifyConsumed(notifications, notificationMap, record);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 }
@@ -450,7 +454,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumed_subscribedFlagFa
     auto record = notificationSubscriberManager.CreateSubscriberRecord(subscriber);
     record->subscribedFlags_ = testAnsSubscriber->GetSubscribedFlags();
     notificationSubscriberManager.BatchNotifyConsumed(notifications, notificationMap, record);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 }
@@ -494,7 +498,7 @@ HWTEST_F(NotificationSubscriberManagerTest, AddSubscriber_002, Level1)
 
     sptr<NotificationSortingMap> notificationMap(new NotificationSortingMap());
     notificationSubscriberManager.NotifyUpdated(notificationMap);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
 
@@ -520,7 +524,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyUpdate_SubscribedFlagsFalse, L
 
     sptr<NotificationSortingMap> notificationMap(new NotificationSortingMap());
     notificationSubscriberManager.NotifyUpdated(notificationMap);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 
@@ -626,7 +630,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumed_001, Level1)
     info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
     notificationSubscriberManager.NotifyConsumed(notification, notificationMap);
-    std::this_thread::sleep_for(std::chrono::milliseconds(400));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
 }
@@ -649,7 +653,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyBadgeEnabledChanged_001, Level
     sptr<EnabledNotificationCallbackData> callbackData(new EnabledNotificationCallbackData());
     callbackData->SetBundle(bundle);
     notificationSubscriberManager_->NotifyBadgeEnabledChanged(callbackData);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager_->WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
 }
@@ -669,7 +673,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyBadgeEnabledChanged_Subscribed
     sptr<EnabledNotificationCallbackData> callbackData(new EnabledNotificationCallbackData());
     callbackData->SetBundle(bundle);
     notificationSubscriberManager_->NotifyBadgeEnabledChanged(callbackData);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager_->WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 }
@@ -696,7 +700,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledWatchChanged_001, Level
         testAnsSubscriber->subscribedFlags_), (int)ERR_OK);
     uint32_t watchStatus = 1 << DistributedDeviceStatus::OWNER_FLAG;
     notificationSubscriberManager_->NotifyEnabledWatchChanged(watchStatus);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager_->WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
 }
@@ -833,7 +837,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyCanceledInner_001, Level1
     notificationSubscriberManager.subscriberRecordList_.push_back(nullptr);
 
     notificationSubscriberManager.BatchNotifyCanceledInner(notifications, notificationMap, 99);
-    std::this_thread::sleep_for(std::chrono::milliseconds(400));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
 }
@@ -887,7 +891,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyCanceledInner_SubscribedF
     notificationSubscriberManager.subscriberRecordList_.push_back(nullptr);
 
     notificationSubscriberManager.BatchNotifyCanceledInner(notifications, notificationMap, 99);
-    std::this_thread::sleep_for(std::chrono::milliseconds(400));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 }
@@ -901,6 +905,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyDoNotDisturbDateChangedInner_0
     //build notificationMap
     sptr<NotificationDoNotDisturbDate> date(new NotificationDoNotDisturbDate());
     std::string bundle = "com.example.test";
+    int32_t uid = 200200;
 
     //build subscriber
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
@@ -913,11 +918,13 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyDoNotDisturbDateChangedInner_0
 
     info->AddAppUserId(101);
     info->AddAppName(bundle);
+    info->SetSubscriberUid(uid);
+    info->SetIsSubscribeSelf(true);
     info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
-    notificationSubscriberManager.NotifyDoNotDisturbDateChangedInner(101, date, 200200);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.NotifyDoNotDisturbDateChangedInner(101, date, uid);
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
 }
@@ -927,6 +934,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyDoNotDisturbDateChangedInner_S
     //build notificationMap
     sptr<NotificationDoNotDisturbDate> date(new NotificationDoNotDisturbDate());
     std::string bundle = "com.example.test";
+    int32_t uid = 200200;
 
     //build subscriber
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
@@ -940,11 +948,13 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyDoNotDisturbDateChangedInner_S
 
     info->AddAppUserId(101);
     info->AddAppName(bundle);
+    info->SetSubscriberUid(uid);
+    info->SetIsSubscribeSelf(true);
     info->SetSubscribedFlags(testAnsSubscriber->GetSubscribedFlags());
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
-    notificationSubscriberManager.NotifyDoNotDisturbDateChangedInner(101, date, 200200);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.NotifyDoNotDisturbDateChangedInner(101, date, uid);
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 }
@@ -976,7 +986,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledNotificationChangedInne
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
     notificationSubscriberManager.NotifyEnabledNotificationChangedInner(callback);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
 }
@@ -1004,7 +1014,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledNotificationChangedInne
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
     notificationSubscriberManager.NotifyEnabledNotificationChangedInner(callback);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 }
@@ -1036,7 +1046,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledSilentReminderChangedIn
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
     notificationSubscriberManager.NotifyEnabledSilentReminderChangedInner(callback);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
 }
@@ -1068,7 +1078,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledSilentReminderChangedIn
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
     notificationSubscriberManager.NotifyEnabledSilentReminderChangedInner(callback);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
 }
@@ -1101,7 +1111,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledSilentReminderChangedIn
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
     notificationSubscriberManager.NotifyEnabledSilentReminderChangedInner(callback);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 }
@@ -1135,7 +1145,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledSilentReminderChanged_0
 
     // This should not crash even if no subscribers are registered
     notificationSubscriberManager.NotifyEnabledSilentReminderChanged(callback);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 }
@@ -1168,7 +1178,7 @@ HWTEST_F(NotificationSubscriberManagerTest, SetBadgeNumber_001, Level1)
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
     notificationSubscriberManager.SetBadgeNumber(badge);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
 }
@@ -1198,7 +1208,7 @@ HWTEST_F(NotificationSubscriberManagerTest, SetBadgeNumber_SubscribedFlagsFalse,
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
     notificationSubscriberManager.SetBadgeNumber(badge);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 }
@@ -1223,7 +1233,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyApplicationInfoNeedChanged_001
 
     sptr<NotificationApplicationChangeInfo> changeInfo = new (std::nothrow) NotificationApplicationChangeInfo();
     notificationSubscriberManager.NotifyApplicationInfoNeedChanged(changeInfo);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
 }
@@ -1245,7 +1255,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyApplicationInfoNeedChanged_Sub
 
     sptr<NotificationApplicationChangeInfo> changeInfo = new (std::nothrow) NotificationApplicationChangeInfo();
     notificationSubscriberManager.NotifyApplicationInfoNeedChanged(changeInfo);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 }
@@ -1271,7 +1281,7 @@ HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_001, Level1)
 
     sptr request = new (std::nothrow) NotificationRequest();
     notificationSubscriberManager.DistributeOperation(operationInfo, request);
-    std::this_thread::sleep_for(std::chrono::milliseconds(400));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
 }
@@ -1294,7 +1304,7 @@ HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_SubscribedFlagsF
 
     sptr request = new (std::nothrow) NotificationRequest();
     notificationSubscriberManager.DistributeOperation(operationInfo, request);
-    std::this_thread::sleep_for(std::chrono::milliseconds(400));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 }
@@ -2698,7 +2708,9 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifySystemUpdate_002, Level1)
     sptr<NotificationClassification> classification = new NotificationClassification("DEAL", "LOGISTICS");
 
     notificationSubscriberManager.NotifySystemUpdate(notification, classification);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
+    isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_TRUE(isCallback);
 }
 
 /**
@@ -2730,7 +2742,9 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifySystemUpdate_003, Level1)
     sptr<Notification> notification = new Notification(request);
 
     notificationSubscriberManager.NotifySystemUpdate(notification);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
+    isCallback = testAnsSubscriber->GetCallBack();
+    ASSERT_TRUE(isCallback);
 }
 
 /**
@@ -2758,7 +2772,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyNotificationSwitchChanged_001,
         new NotificationSwitchChangedCallbackData("DEAL", 100,
             NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     notificationSubscriberManager.NotifyNotificationSwitchChanged(callbackData);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
 }
@@ -2787,7 +2801,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyNotificationSwitchChanged_002,
         new NotificationSwitchChangedCallbackData("DEAL", 100,
             NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     notificationSubscriberManager.NotifyNotificationSwitchChanged(callbackData);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    notificationSubscriberManager.WaitForFfrtQueue();
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 }

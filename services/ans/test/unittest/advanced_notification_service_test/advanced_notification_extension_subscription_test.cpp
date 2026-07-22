@@ -71,7 +71,13 @@ void AdvancedNotificationExtensionSubscriptionTest::SetUp()
 
 void AdvancedNotificationExtensionSubscriptionTest::TearDown()
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    if (advancedNotificationService_ != nullptr) {
+        advancedNotificationService_->SelfClean(false);
+    }
+    auto pref = NotificationPreferences::GetInstance();
+    if (pref != nullptr) {
+        pref->StopCacheCleanupTimer();
+    }
     advancedNotificationService_ = nullptr;
 }
 
@@ -1689,7 +1695,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleInstall_0200
     advancedNotificationService_->cacheNotificationExtensionBundles_.clear();
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", NON_SYSTEM_APP_UID);
     advancedNotificationService_->HandleBundleInstall(bundle);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     EXPECT_TRUE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
 }
 
@@ -1706,7 +1712,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleInstall_0300
     MockIsVerfyPermisson(true);
     MockIsNeedHapModuleInfos(true);
     advancedNotificationService_->HandleBundleInstall(bundle);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     EXPECT_FALSE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
     MockIsVerfyPermisson(false);
     MockIsNeedHapModuleInfos(false);
@@ -1739,7 +1745,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleUpdate_0200,
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", NON_SYSTEM_APP_UID);
     advancedNotificationService_->cacheNotificationExtensionBundles_.emplace_back(bundle);
     advancedNotificationService_->HandleBundleUpdate(bundle);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     EXPECT_TRUE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
 }
 
@@ -1757,7 +1763,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleUpdate_0300,
     MockIsNeedHapModuleInfos(true);
     MockOsAccountManager::MockGetForegroundOsAccountLocalId(0);
     advancedNotificationService_->HandleBundleUpdate(bundle);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     EXPECT_FALSE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
     MockIsVerfyPermisson(false);
     MockIsNeedHapModuleInfos(false);
@@ -1777,7 +1783,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleUpdate_0400,
     MockIsNeedHapModuleInfos(true);
     advancedNotificationService_->cacheNotificationExtensionBundles_.emplace_back(bundle);
     advancedNotificationService_->HandleBundleUpdate(bundle);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     EXPECT_FALSE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
     MockIsVerfyPermisson(false);
     MockIsNeedHapModuleInfos(false);
@@ -1791,7 +1797,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleUpdate_0500,
     MockIsVerfyPermisson(true);
     MockIsNeedHapModuleInfos(true);
     advancedNotificationService_->HandleBundleUpdate(bundle);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     EXPECT_TRUE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
     MockIsVerfyPermisson(false);
     MockIsNeedHapModuleInfos(false);
@@ -1824,7 +1830,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleUninstall_02
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", NON_SYSTEM_APP_UID);
     advancedNotificationService_->cacheNotificationExtensionBundles_.emplace_back(bundle);
     advancedNotificationService_->HandleBundleUninstall(bundle);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     EXPECT_TRUE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
 }
 
@@ -1842,7 +1848,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleUninstall_03
     advancedNotificationService_->cacheNotificationExtensionBundles_.emplace_back(bundle1);
     advancedNotificationService_->cacheNotificationExtensionBundles_.emplace_back(bundle2);
     advancedNotificationService_->HandleBundleUninstall(bundle1);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     EXPECT_FALSE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
 }
 

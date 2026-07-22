@@ -1450,7 +1450,7 @@ HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAddWithSilentReplay_00001, Function
     auto record = NotificationSubscriberManager::GetInstance()->CreateSubscriberRecord(nullptr);
     advancedNotificationService_->notificationList_.clear();
     auto ret = advancedNotificationService_->OnSubscriberAddWithSilentReplay(record);
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(ret, ERR_OK);
 }
 
@@ -1475,7 +1475,7 @@ HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAddWithSilentReplay_00002, Function
 
     auto record = NotificationSubscriberManager::GetInstance()->CreateSubscriberRecord(nullptr);
     auto ret = advancedNotificationService_->OnSubscriberAddWithSilentReplay(record);
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(ret, ERR_OK);
 }
 

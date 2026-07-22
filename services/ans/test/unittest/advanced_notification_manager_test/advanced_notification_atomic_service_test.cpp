@@ -17,6 +17,7 @@
 #define private public
 #include "advanced_notification_service.h"
 #include "notification_bundle_option.h"
+#include "notification_preferences.h"
 #include "notification_request.h"
 
 using namespace testing::ext;
@@ -36,8 +37,7 @@ public:
     static void TearDownTestCase()
     {
         advancedNotificationService_->SelfClean();
-        constexpr int sleepMs = 500;
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
+        NotificationPreferences::GetInstance()->StopCacheCleanupTimer();
         NotificationSubscriberManager::DestroyInstance();
     }
     void SetUp() override

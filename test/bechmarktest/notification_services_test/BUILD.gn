@@ -47,6 +47,7 @@ ohos_benchmarktest("Benchmark_Notification_Servece_Test") {
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "bluetooth:btframework",
+    "cJSON:cjson",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
