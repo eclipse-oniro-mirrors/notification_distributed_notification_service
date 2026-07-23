@@ -158,22 +158,71 @@ HWTEST_F(RdbEventHandlerManagerTest, ExecuteOnCreate_300, TestSize.Level1)
 /**
  * @tc.name: ExecuteAllEvents_100
  * @tc.desc: Verify ExecuteOnUpgrade, ExecuteOnDowngrade, ExecuteOnOpen, and ExecuteOnCorruption all
- *           return 0 when handlers succeed for all RDB lifecycle events.
+ *           return 0 when handlers with unique names succeed for each RDB lifecycle event.
  * @tc.type: FUNC
  * @tc.require: issue
  */
 HWTEST_F(RdbEventHandlerManagerTest, ExecuteAllEvents_100, TestSize.Level1)
 {
     RdbEventHandlerManager mgr;
-    auto handler = std::make_shared<MockRdbEventHandler>("h", 0);
-    mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_UPGRADE, handler);
-    mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_DOWNGRADE, handler);
-    mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_OPEN, handler);
-    mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_CORRUPTION, handler);
+    auto handler1 = std::make_shared<MockRdbEventHandler>("h1", 0);
+    auto handler2 = std::make_shared<MockRdbEventHandler>("h2", 0);
+    auto handler3 = std::make_shared<MockRdbEventHandler>("h3", 0);
+    auto handler4 = std::make_shared<MockRdbEventHandler>("h4", 0);
+    EXPECT_TRUE(mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_UPGRADE, handler1));
+    EXPECT_TRUE(mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_DOWNGRADE, handler2));
+    EXPECT_TRUE(mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_OPEN, handler3));
+    EXPECT_TRUE(mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_CORRUPTION, handler4));
     MockRdbStore store;
     EXPECT_EQ(mgr.ExecuteOnUpgrade(store, 1, 2), 0);
     EXPECT_EQ(mgr.ExecuteOnDowngrade(store, 2, 1), 0);
     EXPECT_EQ(mgr.ExecuteOnOpen(store), 0);
     EXPECT_EQ(mgr.ExecuteOnCorruption("file.db"), 0);
+}
+
+/**
+ * @tc.name: RegisterHandler_400
+ * @tc.desc: Verify RegisterHandler returns true when registering handlers with different names for different event
+ *           types, covering the IsHandlerRegistered not-found branch that continues the search loop across a
+ *           non-empty eventHandlers_ map.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(RdbEventHandlerManagerTest, RegisterHandler_400, TestSize.Level1)
+{
+    RdbEventHandlerManager mgr;
+    auto handler1 = std::make_shared<MockRdbEventHandler>("h1", 0);
+    auto handler2 = std::make_shared<MockRdbEventHandler>("h2", 0);
+    EXPECT_TRUE(mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_CREATE, handler1));
+    EXPECT_TRUE(mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_UPGRADE, handler2));
+}
+
+/**
+ * @tc.name: UnregisterHandler_300
+ * @tc.desc: Verify UnregisterHandler returns false when unregistering a non-existent handler from a non-empty
+ *           registry, covering the not-found branch that continues the search loop across registered event lists.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(RdbEventHandlerManagerTest, UnregisterHandler_300, TestSize.Level1)
+{
+    RdbEventHandlerManager mgr;
+    auto handler = std::make_shared<MockRdbEventHandler>("h1", 0);
+    EXPECT_TRUE(mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_CREATE, handler));
+    EXPECT_FALSE(mgr.UnregisterHandler("not_exist"));
+}
+
+/**
+ * @tc.name: ExecuteOnCreate_400
+ * @tc.desc: Verify ExecuteOnCreate returns 0 when no handlers are registered for the ON_CREATE event type,
+ *           covering the event-not-found early-return path in ExecuteHandlerList.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(RdbEventHandlerManagerTest, ExecuteOnCreate_400, TestSize.Level1)
+{
+    RdbEventHandlerManager mgr;
+    MockRdbStore store;
+    EXPECT_EQ(mgr.ExecuteOnCreate(store), 0);
 }
 } // namespace
