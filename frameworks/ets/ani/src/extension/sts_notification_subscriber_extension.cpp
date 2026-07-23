@@ -285,3 +285,10 @@ NotificationSubscriberExtensionResult StsNotificationSubscriberExtension::CallOb
 }
 }
 }
+
+extern "C" __attribute__((visibility("default")))
+OHOS::Notification::NotificationSubscriberExtension* OHOS_STS_NotificationSubscriberExtension_Creation(
+    const std::unique_ptr<OHOS::AbilityRuntime::Runtime>& runtime)
+{
+    return OHOS::NotificationSts::StsNotificationSubscriberExtension::Create(runtime);
+}

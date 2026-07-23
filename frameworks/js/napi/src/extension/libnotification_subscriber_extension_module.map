@@ -13,16 +13,18 @@
 #
 # ROM size optimization: version_script for
 # libnotification_subscriber_extension_module.z.so.
-# Only the napi_module entry symbol is exported; all other symbols are
-# hidden to reduce .dynstr/.dynsym/.plt section sizes. Module registration
-# still works because the __attribute__((constructor)) in the extension
-# module loader runs via .init_array, which is independent of symbol
-# visibility.
+# Exports OHOS_EXTENSION_GetExtensionModule as the extension framework entry
+# point. vtable/typeinfo exported for CFI cross-dso virtual calls on
+# NotificationSubscriberExtensionModuleLoader [PR#4766].
+# No napi_module export needed — module registration works via
+# __attribute__((constructor)) which runs via .init_array.
 
 1.0 {
   global:
-    napi_module;
     OHOS_EXTENSION_GetExtensionModule;
+    *vtable*for*;
+    *typeinfo*for*;
+    *VTT*for*;
   local:
     *;
 };

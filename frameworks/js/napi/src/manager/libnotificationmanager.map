@@ -12,14 +12,17 @@
 # limitations under the License.
 #
 # ROM size optimization: version_script for libnotificationmanager.z.so.
-# Only the napi_module entry symbol is exported; all other symbols are
-# hidden to reduce .dynstr/.dynsym/.plt section sizes. Module registration
-# still works because the __attribute__((constructor)) in init_module.cpp
-# runs via .init_array, which is independent of symbol visibility.
+# No entry symbol export needed — module registration works via
+# __attribute__((constructor)) in init_module.cpp which runs via .init_array,
+# independent of symbol visibility. vtable/typeinfo exported for CFI
+# cross-dso virtual calls on IPC callback classes (JSBadgeQueryCallBack,
+# JSPushCallBack) defined in this .so [PR#4766].
 
 1.0 {
   global:
-    napi_module;
+    *vtable*for*;
+    *typeinfo*for*;
+    *VTT*for*;
   local:
     *;
 };
