@@ -69,6 +69,7 @@ group("fuzztest") {
     "serviceissmartreminderenabled_fuzzer:ServiceIsSmartReminderEnabledFuzzTest",
     "serviceissupporttemplate_fuzzer:ServiceIsSupportTemplateFuzzTest",
     "servicenotificationextensionsubscribe_fuzzer:ServiceNotificationExtensionSubscribeFuzzTest",
+    "servicenotificationextensionsubscribenotification_fuzzer:ServiceNotificationExtensionSubscribeNotificationFuzzTest",
     "servicenotificationextensionunsubscribe_fuzzer:ServiceNotificationExtensionUnsubscribeFuzzTest",
     "servicepublish_fuzzer:ServicePublishFuzzTest",
     "servicepublishasbundle_fuzzer:ServicePublishAsBundleFuzzTest",
