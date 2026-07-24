@@ -1747,15 +1747,21 @@ export default namespace notificationManager {
                     message: 'unknown error'
                 };
                 let p = callback(checkInfo);
-                try {
-                    result = p.awaitSync() as notificationManager.NotificationCheckResult;
-                } catch (error) {
-                    let err: BusinessError = error as BusinessError;
-                    result = {
-                        code: err.code as int,
-                        message: err.message
-                    };
-                }
+                waitForCompletion(	 
+                    async () => {	 
+                        await p.then(	 
+                            (e: Any): void => {	 
+                                result = e as notificationManager.NotificationCheckResult;	 
+                            }, (error: Error): void => {	 
+                                let err: BusinessError = error as BusinessError;	 
+                                result = {	 
+                                    code: err.code as int,	 
+                                    message: err.message 
+                                }; 
+                            } 
+                        ); 
+                    } 
+                )
                 return result;
             };
         let errCode = nativeOn('checkNotification', onFuncCallback, checkRequest);
