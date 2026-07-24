@@ -68,4 +68,21 @@ HWTEST_F(RdbStoreCallbackTest, AllEvents_100, TestSize.Level1)
     EXPECT_EQ(cb.OnOpen(store), NativeRdb::E_OK);
     EXPECT_EQ(cb.onCorruption("file.db"), NativeRdb::E_OK);
 }
+
+/**
+ * @tc.name: OnCorruption_EmptyFile
+ * @tc.desc: Verify onCorruption returns E_OK when databaseFile is empty (no deletion attempted).
+ * @tc.type: FUNC
+ * @tc.require: issue#4249
+ */
+HWTEST_F(RdbStoreCallbackTest, OnCorruption_EmptyFile, TestSize.Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    auto hookMgr = std::make_shared<NtfRdbHookMgr>(hooks);
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    RdbStoreCallback cb(config, hookMgr, eventHandlerTypes);
+    int32_t ret = cb.onCorruption("");
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+}
 } // namespace OHOS::Notification::Infra

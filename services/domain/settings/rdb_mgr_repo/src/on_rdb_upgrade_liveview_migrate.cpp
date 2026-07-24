@@ -40,13 +40,8 @@ static bool UpdateContentByJsonObject(nlohmann::json &jsonObject, const std::str
     }
 
     auto contentType = contentObj.at("contentType");
-    if (!contentType.is_number_integer()) {
-        ANS_LOGE("ContentType is not integer");
-        return false;
-    }
-
-    if (static_cast<NotificationContent::Type>(contentType.get<int32_t>()) !=
-        NotificationContent::Type::LIVE_VIEW) {
+    if (!contentType.is_number() ||
+        contentType.get<int64_t>() != static_cast<int64_t>(NotificationContent::Type::LIVE_VIEW)) {
         ANS_LOGE("ContentType is not live view");
         return false;
     }
