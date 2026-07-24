@@ -12,11 +12,17 @@
 # limitations under the License.
 
 # version_script for libnotification_manager_ani
-# Only exports the ANI_Constructor entry symbol [ROM-008]
+# Only exports the ANI_Constructor entry symbol [ROM-008].
+# vtable/typeinfo exported for CFI cross-dso virtual calls on IPC callback
+# classes (StsAnsDialogCallback, StsPushCallBack, StsBadgeQueryCallBack)
+# defined in this .so [PR#4766].
 
 1.0 {
   global:
     ANI_Constructor;
+    *vtable*for*;
+    *typeinfo*for*;
+    *VTT*for*;
   local:
     *;
 };

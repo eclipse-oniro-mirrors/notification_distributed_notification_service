@@ -12,11 +12,17 @@
 # limitations under the License.
 
 # version_script for libnotification_subscriber_extension_ani
-# Only exports the ANI_Constructor entry symbol [ROM-008]
+# This library is dlopen'd by NotificationSubscriberExtensionModuleLoader
+# which dlsym's OHOS_STS_NotificationSubscriberExtension_Creation to create
+# the STS extension instance. The vtable/typeinfo patterns are needed for
+# CFI cross-dso virtual calls on StsNotificationSubscriberExtension [PR#4766].
 
 1.0 {
   global:
-    ANI_Constructor;
+    OHOS_STS_NotificationSubscriberExtension_Creation;
+    *vtable*for*;
+    *typeinfo*for*;
+    *VTT*for*;
   local:
     *;
 };

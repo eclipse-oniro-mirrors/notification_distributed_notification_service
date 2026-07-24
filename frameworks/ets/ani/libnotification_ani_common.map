@@ -14,17 +14,12 @@
 # version_script for libnotification_ani_common
 # Exports STS common symbols so 4 ANI .so targets can link against them.
 # Pattern: *NotificationSts* covers namespace OHOS::NotificationSts
-#          *NotificationManagerSts* / *NotificationSubScribeSts* cover per-target namespaces
-#          *SubscriberInstanceManager* / *StsDistributedOperationCallback* are key classes
+#          which is the sole namespace in all common source files.
 #          vtable/typeinfo/VTT symbols are needed for C++ cross-.so inheritance [PR#4766]
 
 1.0 {
   global:
     *NotificationSts*;
-    *NotificationManagerSts*;
-    *NotificationSubScribeSts*;
-    *SubscriberInstanceManager*;
-    *StsDistributedOperationCallback*;
     *vtable*for*;
     *typeinfo*for*;
     *VTT*for*;

@@ -14,13 +14,11 @@
 # ROM size optimization: shared common library for NAPI modules.
 # All common source files reside in OHOS::NotificationNapi namespace,
 # so *NotificationNapi* covers all business symbols. RTTI patterns are
-# kept for safety even though -fno-rtti is enabled.
+# kept for safety even though -fno-rtti is enabled [PR#4766].
 
 1.0 {
   global:
     *NotificationNapi*;
-    *ReminderAgentNapi*;
-    *Common*;
     *vtable*for*;
     *typeinfo*for*;
     *VTT*for*;
