@@ -69,6 +69,7 @@ void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return;
     }
     napi_get_undefined(env, &result);
@@ -87,6 +88,7 @@ void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
     }
     napi_delete_async_work(env, asynccallbackinfo->asyncWork);
     delete asynccallbackinfo;
+    asynccallbackinfo = nullptr;
 }
 
 napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info)
@@ -145,15 +147,32 @@ napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info)
     };
 
     // Asynchronous function call
-    napi_create_async_work(env,
+    napi_status status = napi_create_async_work(env,
         nullptr,
         resourceName,
         createExtension,
         jsCb,
         static_cast<void*>(asynccallbackinfo),
         &asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("Create openNotificationSettings async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return promise;
+    }
 
-    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue openNotificationSettings async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return promise;
+    }
     ANS_LOGD("end");
     return promise;
 }
@@ -202,9 +221,26 @@ napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info)
             return;
         }
     };
-    napi_create_async_work(env, nullptr, resourceName, createExtension, jsCb,
+    napi_status status = napi_create_async_work(env, nullptr, resourceName, createExtension, jsCb,
         static_cast<void*>(asynccallbackinfo), &asynccallbackinfo->asyncWork);
-    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Create openNotificationSettingsWithResult async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return promise;
+    }
+    status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue openNotificationSettingsWithResult async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return promise;
+    }
     return promise;
 }
 

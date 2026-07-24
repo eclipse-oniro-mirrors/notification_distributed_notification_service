@@ -71,7 +71,21 @@ ExtensionServiceConnection::ExtensionServiceConnection(const ExtensionSubscriber
 }
 
 ExtensionServiceConnection::~ExtensionServiceConnection()
-{}
+{
+    auto timerClient = MiscServices::TimeServiceClient::GetInstance();
+    if (timerClient == nullptr) {
+        ANS_LOGE("null TimeServiceClient");
+        return;
+    }
+    if (timerIdFreeze_ != 0) {
+        timerClient->DestroyTimer(timerIdFreeze_);
+        timerIdFreeze_ = 0L;
+    }
+    if (timerIdDisconnect_ != 0) {
+        timerClient->DestroyTimer(timerIdDisconnect_);
+        timerIdDisconnect_ = 0L;
+    }
+}
 
 void ExtensionServiceConnection::Close()
 {
@@ -83,10 +97,14 @@ void ExtensionServiceConnection::Close()
         return;
     }
 
-    timerClient->DestroyTimer(timerIdFreeze_);
-    timerIdFreeze_ = 0L;
-    timerClient->DestroyTimer(timerIdDisconnect_);
-    timerIdDisconnect_ = 0L;
+    if (timerIdFreeze_ != 0) {
+        timerClient->DestroyTimer(timerIdFreeze_);
+        timerIdFreeze_ = 0L;
+    }
+    if (timerIdDisconnect_ != 0) {
+        timerClient->DestroyTimer(timerIdDisconnect_);
+        timerIdDisconnect_ = 0L;
+    }
     if (state_ == ExtensionServiceConnectionState::CREATED ||
         state_ == ExtensionServiceConnectionState::DISCONNECTED ||
         state_ == ExtensionServiceConnectionState::CONNECTING) {

@@ -117,7 +117,7 @@ napi_value NapiGetNotificationParameters(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getNotificationParameters", NAPI_AUTO_LENGTH, &resourceName);
 
-    napi_create_async_work(
+    napi_status status = napi_create_async_work(
         env,
         nullptr,
         resourceName,
@@ -133,8 +133,25 @@ napi_value NapiGetNotificationParameters(napi_env env, napi_callback_info info)
         AsyncCompleteCallbackNapiGetNotificationParameters,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("Create getNotificationParameters async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return promise;
+    }
 
-    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue getNotificationParameters async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return promise;
+    }
 
     return promise;
 }

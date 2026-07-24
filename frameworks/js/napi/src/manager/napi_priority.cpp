@@ -84,28 +84,22 @@ napi_value NapiSetPriorityEnabled(napi_env env, napi_callback_info info)
                 ANS_LOGD("errorCode = %{public}u", asynccallbackinfo->info.errorCode);
             }
         }, AsyncCompleteCallbackNapiSetPriorityEnabled, (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
-
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create setPriorityEnabled async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue setPriorityEnabled async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     return promise;
@@ -158,28 +152,22 @@ napi_value NapiSetPriorityEnabledByBundle(napi_env env, napi_callback_info info)
             }
             ANS_LOGD("NapiSetPriorityEnabledByBundle work complete end.");
         }, (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
-
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create setPriorityEnabledByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue setPriorityEnabledByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     return promise;
@@ -237,26 +225,21 @@ napi_value NapiIsPriorityEnabled(napi_env env, napi_callback_info info)
             }
         }, AsyncCompleteCallbackNapiIsPriorityEnabled, (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create isPriorityEnabled async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
-
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue isPriorityEnabled async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     return promise;
@@ -325,28 +308,22 @@ napi_value NapiIsPriorityEnabledByBundle(napi_env env, napi_callback_info info)
             }
         }, AsyncCompleteCallbackNapiIsPriorityEnabledByBundle,
         (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
-
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create isPriorityEnabledByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue isPriorityEnabledByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     return promise;
@@ -398,28 +375,22 @@ napi_value NapiSetBundlePriorityConfig(napi_env env, napi_callback_info info)
             }
             ANS_LOGD("NapiSetBundlePriorityConfig work complete end.");
         }, (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
-
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create setBundlePriorityConfig async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue setBundlePriorityConfig async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     return promise;
@@ -487,28 +458,22 @@ napi_value NapiGetBundlePriorityConfig(napi_env env, napi_callback_info info)
             }
         }, AsyncCompleteCallbackNapiGetBundlePriorityConfig,
         (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
-
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create getBundlePriorityConfig async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue getBundlePriorityConfig async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     return promise;
@@ -641,29 +606,23 @@ napi_value NapiGetPriorityEnabledByBundles(napi_env env, napi_callback_info info
         AsyncCompleteCallbackNapiGetPriorityEnabledByBundles,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
-
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create getPriorityEnabledByBundles async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue getPriorityEnabledByBundles async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     return promise;
@@ -813,26 +772,21 @@ napi_value NapiSetPriorityEnabledByBundles(napi_env env, napi_callback_info info
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create setPriorityEnabledByBundles async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
-
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue setPriorityEnabledByBundles async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     return promise;
@@ -867,26 +821,21 @@ napi_value NapiIsPriorityIntelligentEnabled(napi_env env, napi_callback_info inf
             }
         }, AsyncCompleteCallbackNapiIsPriorityEnabled, (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create isPriorityIntelligentEnabled async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
-
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue isPriorityIntelligentEnabled async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     return promise;
@@ -922,28 +871,22 @@ napi_value NapiSetPriorityIntelligentEnabled(napi_env env, napi_callback_info in
                 ANS_LOGI("SetPriorityIntelligentEnabled errorCode = %{public}u", asynccallbackinfo->info.errorCode);
             }
         }, AsyncCompleteCallbackNapiSetPriorityEnabled, (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
-
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create setPriorityIntelligentEnabled async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue setPriorityIntelligentEnabled async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     return promise;
@@ -1021,28 +964,22 @@ napi_value NapiGetPriorityStrategyByBundles(napi_env env, napi_callback_info inf
         },
         AsyncCompleteCallbackNapiGetPriorityStrategyByBundles,
         (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
-
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create getPriorityStrategyByBundles async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue getPriorityStrategyByBundles async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     return promise;
@@ -1086,28 +1023,22 @@ napi_value NapiSetPriorityStrategyByBundles(napi_env env, napi_callback_info inf
                 asynccallbackinfo = nullptr;
             }
         }, (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
-
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create setPriorityStrategyByBundles async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue setPriorityStrategyByBundles async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     return promise;

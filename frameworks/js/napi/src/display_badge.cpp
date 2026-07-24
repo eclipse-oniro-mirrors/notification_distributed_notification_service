@@ -15,6 +15,7 @@
 
 #include "display_badge.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -150,7 +151,7 @@ napi_value DisplayBadge(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "DisplayBadge", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
-    napi_create_async_work(env,
+    napi_status status = napi_create_async_work(env,
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
@@ -182,8 +183,33 @@ napi_value DisplayBadge(napi_env env, napi_callback_info info)
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("Create DisplayBadge async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
+    }
 
-    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue DisplayBadge async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
+    }
 
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("null isCallback");
@@ -237,7 +263,7 @@ napi_value IsBadgeDisplayed(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "IsBadgeDisplayed", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
-    napi_create_async_work(env,
+    napi_status status = napi_create_async_work(env,
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
@@ -262,8 +288,33 @@ napi_value IsBadgeDisplayed(napi_env env, napi_callback_info info)
         AsyncCompleteCallbackIsBadgeDisplayed,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("Create IsBadgeDisplayed async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
+    }
 
-    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue IsBadgeDisplayed async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
+    }
 
     if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("null isCallback");

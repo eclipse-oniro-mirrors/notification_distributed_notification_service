@@ -397,7 +397,7 @@ napi_value NapiOnBadgeNumberQuery(napi_env env, napi_callback_info info)
     Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "OnBadgeNumberQuery", NAPI_AUTO_LENGTH, &resourceName);
-    napi_create_async_work(env, nullptr, resourceName,
+    napi_status status = napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackBadgeNumberQuery *>(data);
             if (asynccallbackinfo) {
@@ -409,9 +409,26 @@ napi_value NapiOnBadgeNumberQuery(napi_env env, napi_callback_info info)
         AsyncCompleteCallbackNapiBadgeNumberQuery,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("Create OnBadgeNumberQuery async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return promise;
+    }
 
     napi_add_env_cleanup_hook(env, ClearEnvCallback, objectInfo.get());
-    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue OnBadgeNumberQuery async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return promise;
+    }
     return promise;
 }
 
@@ -489,7 +506,7 @@ napi_value NapiOffBadgeNumberQuery(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "OffBadgeNumberQuery", NAPI_AUTO_LENGTH, &resourceName);
 
-    napi_create_async_work(env, nullptr, resourceName,
+    napi_status status = napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackOffBadgeNumberQuery *>(data);
             if (asynccallbackinfo) {
@@ -500,7 +517,25 @@ napi_value NapiOffBadgeNumberQuery(napi_env env, napi_callback_info info)
         },
         AsyncCompleteCallbackNapiOffBadgeNumberQuery,
         (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
-    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Create OffBadgeNumberQuery async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return promise;
+    }
+
+    status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue OffBadgeNumberQuery async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return promise;
+    }
     return promise;
 }
 
@@ -579,8 +614,15 @@ ErrCode JSBadgeQueryCallBack::OnBadgeNumberQuery(const sptr<NotificationBundleOp
             return ERR_OK;
         }
         napi_acquire_threadsafe_function(tsfn_);
-        napi_call_threadsafe_function(tsfn_, (void*)dataWorker, napi_tsfn_nonblocking);
+        napi_status callStatus = napi_call_threadsafe_function(tsfn_, (void*)dataWorker, napi_tsfn_nonblocking);
         napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
+        if (callStatus != napi_ok) {
+            ANS_LOGE("napi_call_threadsafe_function failed, status = %{public}d", callStatus);
+            delete dataWorker;
+            dataWorker = nullptr;
+            badgeNumber = INVALID_BADGE_NUMBER_INTERNAL;
+            return ERR_OK;
+        }
     }
     if (future.wait_for(std::chrono::milliseconds(BADGEQUERY_TIMEOUT_MS)) != std::future_status::ready) {
         ANS_LOGE("Badge query timeout after 500 ms.");

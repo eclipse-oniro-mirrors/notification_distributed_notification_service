@@ -17,6 +17,7 @@
 
 #include "ans_const_define.h"
 #include "nlohmann/json.hpp"
+#include <memory>
 
 namespace OHOS {
 namespace Notification {
@@ -164,8 +165,8 @@ void NotificationDoNotDisturbProfile::FromJson(const std::string &jsonObj)
             if (bundleOption == nullptr) {
                 continue;
             }
+            std::unique_ptr<NotificationBundleOption> bundleOptionGuard(bundleOption);
             trustList_.push_back(*bundleOption);
-            delete bundleOption;
         }
     }
 }

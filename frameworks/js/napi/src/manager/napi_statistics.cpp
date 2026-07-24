@@ -162,7 +162,7 @@ napi_value NapiGetNotificationStatisticsByBundle(napi_env env, napi_callback_inf
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "GetNotificationStatisticsByBundle", NAPI_AUTO_LENGTH, &resourceName);
 
-    napi_create_async_work(env, nullptr, resourceName,
+    napi_status status = napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
             AsyncCallbackInfoStatistics *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoStatistics *>(data);
@@ -175,7 +175,25 @@ napi_value NapiGetNotificationStatisticsByBundle(napi_env env, napi_callback_inf
         AsyncCompleteCallbackNapiGetStatisticsByBundle,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
-    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Create GetNotificationStatisticsByBundle async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return promise;
+    }
+
+    status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue GetNotificationStatisticsByBundle async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return promise;
+    }
     return promise;
 }
 }

@@ -158,28 +158,31 @@ napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
         ANS_LOGE("Create removeGroupByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
-    bool isCallback = asynccallbackinfo->info.isCallback;
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
         ANS_LOGE("Queue removeGroupByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
-    if (isCallback) {
+    if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {

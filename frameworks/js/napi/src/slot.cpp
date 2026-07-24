@@ -17,6 +17,7 @@
 #include "common.h"
 #include "napi_common_util.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -772,27 +773,31 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create addSlot async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue addSlot async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     if (asynccallbackinfo->info.isCallback) {
@@ -855,27 +860,31 @@ napi_value AddSlots(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create addSlots async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue addSlots async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     if (asynccallbackinfo->info.isCallback) {
@@ -940,27 +949,31 @@ napi_value SetSlotByBundle(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create setSlotByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue setSlotByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     if (asynccallbackinfo->info.isCallback) {
@@ -1043,27 +1056,31 @@ napi_value GetSlot(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create getSlot async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue getSlot async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     if (asynccallbackinfo->info.isCallback) {
@@ -1127,27 +1144,31 @@ napi_value GetSlotNumByBundle(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create getSlotNumByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue getSlotNumByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     if (asynccallbackinfo->info.isCallback) {
@@ -1242,27 +1263,31 @@ napi_value GetSlots(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create getSlots async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue getSlots async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     if (asynccallbackinfo->info.isCallback) {
@@ -1362,27 +1387,31 @@ napi_value GetSlotsByBundle(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create getSlotsByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue getSlotsByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     if (asynccallbackinfo->info.isCallback) {
@@ -1443,27 +1472,31 @@ napi_value RemoveSlot(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create removeSlot async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue removeSlot async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     if (asynccallbackinfo->info.isCallback) {
@@ -1526,27 +1559,31 @@ napi_value RemoveAllSlots(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create removeAllSlots async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue removeAllSlots async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     if (asynccallbackinfo->info.isCallback) {
@@ -1701,27 +1738,31 @@ napi_value EnableNotificationSlot(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create enableNotificationSlot async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue enableNotificationSlot async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     if (asynccallbackinfo->info.isCallback) {
@@ -1843,27 +1884,31 @@ napi_value IsEnableNotificationSlot(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create isEnableNotificationSlot async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue isEnableNotificationSlot async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     if (asynccallbackinfo->info.isCallback) {
@@ -1931,27 +1976,31 @@ napi_value GetSlotFlagsByBundle(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create getSlotFlagsByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue getSlotFlagsByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     if (asynccallbackinfo->info.isCallback) {
@@ -2015,27 +2064,31 @@ napi_value SetSlotFlagsByBundle(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create setSlotFlagsByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue setSlotFlagsByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
     if (asynccallbackinfo->info.isCallback) {

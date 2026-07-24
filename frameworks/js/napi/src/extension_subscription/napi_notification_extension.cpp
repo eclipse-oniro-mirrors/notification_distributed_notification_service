@@ -537,6 +537,7 @@ void AsyncCompleteCallbackRetrunBundleOptionArray(napi_env env, napi_status stat
     }
     napi_delete_async_work(env, asynccallbackinfo->asyncWork);
     delete asynccallbackinfo;
+    asynccallbackinfo = nullptr;
 }
 
 void AsyncCompleteCallbackReturnGrantedBundleInfoArray(napi_env env, napi_status status, void *data)
@@ -585,6 +586,7 @@ void AsyncCompleteCallbackReturnGrantedBundleInfoArray(napi_env env, napi_status
     }
     napi_delete_async_work(env, asynccallbackinfo->asyncWork);
     delete asynccallbackinfo;
+    asynccallbackinfo = nullptr;
 }
 
 void AsyncCompleteCallbackReturnBoolean(napi_env env, napi_status status, void *data)
@@ -974,18 +976,19 @@ napi_value NapiNotificationExtensionOpenSubscriptionSettings(napi_env env, napi_
     napi_status status = napi_create_async_work(env, nullptr, resourceName, createExtension, jsCb,
         static_cast<void*>(asynccallbackinfo), &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create openSubscribeSettings async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue openSubscribeSettings async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
@@ -993,6 +996,7 @@ napi_value NapiNotificationExtensionOpenSubscriptionSettings(napi_env env, napi_
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     return promise;
@@ -1036,18 +1040,19 @@ napi_value NapiNotificationExtensionOpenSubscriptionSettingsWithResult(napi_env 
     napi_status status = napi_create_async_work(env, nullptr, resourceName, createExtension, jsCb,
         static_cast<void*>(asynccallbackinfo), &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create openSubscribeSettingsWithResult async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue openSubscribeSettingsWithResult async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
@@ -1055,6 +1060,7 @@ napi_value NapiNotificationExtensionOpenSubscriptionSettingsWithResult(napi_env 
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     return promise;
@@ -1102,19 +1108,20 @@ napi_value NapiNotificationExtensionSubscribe(napi_env env, napi_callback_info i
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create notificationExtensionSubscribe async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue notificationExtensionSubscribe async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
@@ -1122,6 +1129,7 @@ napi_value NapiNotificationExtensionSubscribe(napi_env env, napi_callback_info i
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
@@ -1181,19 +1189,20 @@ napi_value NapiNotificationExtensionSubscribeNotification(napi_env env, napi_cal
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create subscribeNotification async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue subscribeNotification async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
@@ -1201,6 +1210,7 @@ napi_value NapiNotificationExtensionSubscribeNotification(napi_env env, napi_cal
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
@@ -1240,19 +1250,20 @@ napi_value NapiNotificationExtensionUnsubscribe(napi_env env, napi_callback_info
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create notificationExtensionUnsubscribe async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue notificationExtensionUnsubscribe async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
@@ -1260,6 +1271,7 @@ napi_value NapiNotificationExtensionUnsubscribe(napi_env env, napi_callback_info
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
@@ -1300,19 +1312,20 @@ napi_value NapiGetSubscribeInfo(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create getSubscribeInfo async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue getSubscribeInfo async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
@@ -1320,6 +1333,7 @@ napi_value NapiGetSubscribeInfo(napi_env env, napi_callback_info info)
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
@@ -1360,19 +1374,20 @@ napi_value NapiGetAllSubscriptionBundles(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create getAllSubscriptionBundles async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue getAllSubscriptionBundles async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
@@ -1380,6 +1395,7 @@ napi_value NapiGetAllSubscriptionBundles(napi_env env, napi_callback_info info)
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
@@ -1421,19 +1437,20 @@ napi_value NapiIsUserGranted(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create isUserGranted async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue isUserGranted async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
@@ -1441,6 +1458,7 @@ napi_value NapiIsUserGranted(napi_env env, napi_callback_info info)
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
@@ -1489,19 +1507,20 @@ napi_value NapiGetUserGrantedState(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create getUserGrantedState async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue getUserGrantedState async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
@@ -1509,6 +1528,7 @@ napi_value NapiGetUserGrantedState(napi_env env, napi_callback_info info)
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
@@ -1557,19 +1577,20 @@ napi_value NapiSetUserGrantedState(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create setUserGrantedState async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue setUserGrantedState async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
@@ -1577,6 +1598,7 @@ napi_value NapiSetUserGrantedState(napi_env env, napi_callback_info info)
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
@@ -1621,6 +1643,17 @@ napi_value NapiGetUserGrantedEnabledBundles(napi_env env, napi_callback_info inf
         AsyncCompleteCallbackReturnGrantedBundleInfoArray,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
+        if (status != napi_ok) {
+            ANS_LOGE("Create getUserGrantedEnabledBundlesForSelf async work failed.");
+            asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+            Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+            if (asynccallbackinfo->info.callback != nullptr) {
+                napi_delete_reference(env, asynccallbackinfo->info.callback);
+            }
+            delete asynccallbackinfo;
+            asynccallbackinfo = nullptr;
+            return promise;
+        }
     } else {
         status = napi_create_async_work(env, nullptr, resourceName, [](napi_env env, void *data) {
             ANS_LOGD("getUserGrantedEnabledBundles work excute.");
@@ -1636,6 +1669,17 @@ napi_value NapiGetUserGrantedEnabledBundles(napi_env env, napi_callback_info inf
         AsyncCompleteCallbackRetrunBundleOptionArray,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
+        if (status != napi_ok) {
+            ANS_LOGE("Create getUserGrantedEnabledBundles async work failed.");
+            asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+            Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+            if (asynccallbackinfo->info.callback != nullptr) {
+                napi_delete_reference(env, asynccallbackinfo->info.callback);
+            }
+            delete asynccallbackinfo;
+            asynccallbackinfo = nullptr;
+            return promise;
+        }
     }
     if (status != napi_ok) {
         ANS_LOGE("Create async work failed.");
@@ -1650,7 +1694,7 @@ napi_value NapiGetUserGrantedEnabledBundles(napi_env env, napi_callback_info inf
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue getUserGrantedEnabledBundles async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
@@ -1658,6 +1702,7 @@ napi_value NapiGetUserGrantedEnabledBundles(napi_env env, napi_callback_info inf
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
@@ -1707,19 +1752,20 @@ napi_value NapiSetUserGrantedBundleState(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create setUserGrantedBundleState async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue setUserGrantedBundleState async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
         if (asynccallbackinfo->info.callback != nullptr) {
@@ -1727,6 +1773,7 @@ napi_value NapiSetUserGrantedBundleState(napi_env env, napi_callback_info info)
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
