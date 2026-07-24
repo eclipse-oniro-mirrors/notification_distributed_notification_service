@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+#include <chrono>
 #include <functional>
+#include <thread>
 
 #include "ans_inner_errors.h"
 #include "ans_manager_proxy.h"
@@ -610,7 +612,7 @@ void AnsInnerKitsModulePublishTest::CheckJsonConverter(const NotificationRequest
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Publish_08000::ConvertToJsonString string ==========>" << jsonString;
 
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Publish_08000::convert Json sleep start ==========>";
-    sleep(SLEEP_TIME);
+    service_->SelfClean(false);
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Publish_08000::convert Json sleep end ==========>";
 
     auto pRequest1 = NotificationJsonConverter::ConvertFromJson<NotificationRequest>(jsonObject);
@@ -1197,7 +1199,6 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_01000, Function
     g_unsubscribe_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber));
     WaitOnUnsubscribeResult();
-    sleep(SLEEP_TIME);
 }
 
 /**
@@ -1231,6 +1232,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_02000, Function
     req.SetContent(content);
     req.SetSlotType(NotificationConstant::SOCIAL_COMMUNICATION);
     req.SetNotificationId(CASE_ELEVEN);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     g_consumed_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
@@ -1368,7 +1370,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_GetActiveNotifications_
     EXPECT_EQ("Label1", requests[0]->GetLabel());
     EXPECT_EQ("Label2", requests[1]->GetLabel());
     EXPECT_EQ((int)ERR_OK, (int)NotificationHelper::RemoveNotifications(SUBSCRIBE_USER_SYSTEM_BEGIN));
-    sleep(SLEEP_TIME);
+    service_->SelfClean(false);
     EXPECT_EQ((int)ERR_OK, NotificationHelper::GetActiveNotificationNums(countAfter));
 }
 
@@ -1417,13 +1419,11 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_CancelGroup_10100, Func
     GTEST_LOG_(INFO) << "ANS_Interface_MT_CancelGroup_10100:: call CancelGroup : effective parameters";
     EXPECT_EQ(0, NotificationHelper::CancelGroup("group10100"));
 
-    sleep(SLEEP_TIME);
     g_onCanceledReceived = false;
 
     GTEST_LOG_(INFO) << "ANS_Interface_MT_CancelGroup_10100:: call CancelGroup : invalid parameters";
     EXPECT_EQ(0, NotificationHelper::CancelGroup("ngroup"));
 
-    sleep(SLEEP_TIME);
     g_onCanceledReceived = false;
 
     req.SetOwnerBundleName("mybundlename");
@@ -1438,13 +1438,11 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_CancelGroup_10100, Func
     GTEST_LOG_(INFO) << "ANS_Interface_MT_CancelGroup_10100:: call RemoveGroupByBundle : effective parameters";
     EXPECT_EQ(0, NotificationHelper::RemoveGroupByBundle(bo, "group10100"));
 
-    sleep(SLEEP_TIME);
     g_onCanceledReceived = false;
 
     GTEST_LOG_(INFO) << "ANS_Interface_MT_CancelGroup_10100:: call RemoveGroupByBundle : invalid parameters";
     EXPECT_EQ(0, NotificationHelper::RemoveGroupByBundle(bo, "ngroup"));
 
-    sleep(SLEEP_TIME);
     g_onCanceledReceived = false;
 
     g_unsubscribe_mtx.lock();
@@ -1689,6 +1687,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00100, Func
     req.SetContent(content);
     req.SetSlotType(NotificationConstant::CONTENT_INFORMATION);
     req.SetNotificationId(CASE_SIXTEEN);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     g_consumed_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
 
@@ -1696,7 +1695,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00100, Func
     NotificationBundleOption bo("bundleName", 1);
     EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(
         bo, NotificationConstant::CONTENT_INFORMATION, enable, false));
-    sleep(SLEEP_TIME);
+    service_->SelfClean(false);
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::CONTENT_INFORMATION, enable));
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Slot_Enalbe_00100::end:" << enable;
     EXPECT_EQ(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED, NotificationHelper::PublishNotification(req));
@@ -1731,6 +1730,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00200, Func
     req.SetContent(content);
     req.SetSlotType(NotificationConstant::SERVICE_REMINDER);
     req.SetNotificationId(CASE_SIXTEEN);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     g_consumed_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
 
@@ -1739,14 +1739,14 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00200, Func
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Slot_Enalbe_00200::end:" << enable;
     EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(
         bo, NotificationConstant::SERVICE_REMINDER, enable, false));
-    sleep(SLEEP_TIME);
+    service_->SelfClean(false);
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
     EXPECT_EQ((uint32_t)ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED, NotificationHelper::PublishNotification(req));
 
     enable = true;
     EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(
         bo, NotificationConstant::SERVICE_REMINDER, enable, false));
-    sleep(SLEEP_TIME);
+    service_->SelfClean(false);
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
 }
@@ -1806,6 +1806,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_09000, Function
     req.SetSlotType(NotificationConstant::OTHER);
     req.SetNotificationId(CASE_SEVENTEEN);
     req.SetRemovalWantAgent(wantAgent);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     g_consumed_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
@@ -1930,7 +1931,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_SetBadgeNumber_00200, F
     WaitOnSubscribeResult();
 
     EXPECT_EQ(NotificationHelper::SetBadgeNumber(BADGE_NUMBER), (int)ERR_OK);
-    sleep(SLEEP_TIME);
+    service_->SelfClean(false);
     EXPECT_EQ(g_onBadgeNumberReceived, true);
 
     EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber, info));

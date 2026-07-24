@@ -40,7 +40,6 @@ void MockRandomToken(FuzzedDataProvider *fdp, const std::vector<std::string> &pe
             atexit([] { \
                 auto _exit_svc = OHOS::Notification::AdvancedNotificationService::GetInstance(); \
                 if (_exit_svc != nullptr) { _exit_svc->SelfClean(true); } \
-                _exit(0); \
             }); \
             return true; \
         }(); \

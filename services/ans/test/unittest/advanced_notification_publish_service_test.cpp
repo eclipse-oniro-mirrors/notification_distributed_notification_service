@@ -117,8 +117,7 @@ void AnsPublishServiceTest::TearDown()
 {
     advancedNotificationService_->SelfClean();
     advancedNotificationService_->publishProcess_.clear();
-    constexpr int sleepMs = 500;
-    std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
+    NotificationPreferences::GetInstance()->StopCacheCleanupTimer();
     NotificationSubscriberManager::DestroyInstance();
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     DelayedSingleton<SmartReminderCenter>::GetInstance()->currentReminderMethods_.clear();
@@ -450,7 +449,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveDistributedNotifications_00003, Function |
     hashcodes.push_back(notification->GetKey());
     auto ret = advancedNotificationService_->RemoveDistributedNotifications(
         hashcodes, 99);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(ret, (int)ERR_OK);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 }
@@ -487,7 +486,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveDistributedNotifications_00004, Function |
     auto ret = advancedNotificationService_->RemoveDistributedNotifications(
         NotificationConstant::SlotType::LIVE_VIEW, 99,
         NotificationConstant::DistributedDeleteType::SLOT);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(ret, (int)ERR_OK);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 }
@@ -525,7 +524,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveDistributedNotifications_00005, Function |
     auto ret = advancedNotificationService_->RemoveDistributedNotifications(
         NotificationConstant::SlotType::LIVE_VIEW, 99,
         NotificationConstant::DistributedDeleteType::EXCLUDE_ONE_SLOT);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(ret, (int)ERR_OK);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 }
@@ -547,52 +546,52 @@ HWTEST_F(AnsPublishServiceTest, RemoveDistributedNotifications_00006, Function |
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 
     advancedNotificationService_->RemoveDistributedNotificationsByBundle(nullptr, false);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("com.test.demo", 20020001);
     advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, false);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 
     record->bundleOption = new NotificationBundleOption("com.test.demo1", 20020002);
     advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, false);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 
     record->bundleOption = new NotificationBundleOption("com.test.demo", 20020002);
     advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, false);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 
     record->bundleOption = new NotificationBundleOption("com.test.demo1", 20020001);
     advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, false);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 
     record->bundleOption = new NotificationBundleOption("com.test.demo", 20020001);
     advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, false);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 
     sptr<Notification> notificationNull(new (std::nothrow) Notification(nullptr));
     record->notification = notificationNull;
     advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, false);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 
     record->notification = notification;
     advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, false);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 
     request->SetDistributedCollaborate(true);
     advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, true);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 
     advancedNotificationService_->RemoveDistributedNotificationsByBundle(bundleOption, false);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
 }
 
@@ -626,7 +625,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveAllDistributedNotifications_00001, Functio
     std::vector<std::string> hashcodes;
     hashcodes.push_back(notification->GetKey());
     auto ret = advancedNotificationService_->RemoveAllDistributedNotifications(99);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(ret, (int)ERR_OK);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 }
@@ -3106,7 +3105,7 @@ HWTEST_F(AnsPublishServiceTest, ClearAllNotificationGroupInfo_00001, Function | 
     std::string localSwitch = "false";
     advancedNotificationService_->aggregateLocalSwitch_ = true;
     advancedNotificationService_->ClearAllNotificationGroupInfo(localSwitch);
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    advancedNotificationService_->SelfClean(false);
     ASSERT_EQ(advancedNotificationService_->aggregateLocalSwitch_, false);
 }
 

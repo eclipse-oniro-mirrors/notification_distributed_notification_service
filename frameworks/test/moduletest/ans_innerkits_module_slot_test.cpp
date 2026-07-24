@@ -99,7 +99,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00100, Fu
     slot.EnableBypassDnd(true);
     slot.EnableBadge(true);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    sleep(SLEEP_TIME);
+    service_->SelfClean(false);
 
     sptr<NotificationSlot> spSlot(new NotificationSlot());
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::SOCIAL_COMMUNICATION, spSlot));
@@ -145,7 +145,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00200, Fu
     slot.EnableBypassDnd(true);
     slot.EnableBadge(true);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    sleep(SLEEP_TIME);
+    service_->SelfClean(false);
     sptr<NotificationSlot> spSlot(new NotificationSlot());
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::SERVICE_REMINDER, spSlot));
 
@@ -191,7 +191,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00300, Fu
     slot.EnableBypassDnd(true);
     slot.EnableBadge(true);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    sleep(SLEEP_TIME);
+    service_->SelfClean(false);
     sptr<NotificationSlot> spSlot(new NotificationSlot());
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::CONTENT_INFORMATION, spSlot));
 
@@ -236,7 +236,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00400, Fu
     slot.EnableBypassDnd(true);
     slot.EnableBadge(true);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    sleep(SLEEP_TIME);
+    service_->SelfClean(false);
     sptr<NotificationSlot> spSlot(new NotificationSlot());
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::OTHER, spSlot));
 
@@ -283,7 +283,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00500, Fu
     slot.EnableBypassDnd(true);
     slot.EnableBadge(true);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    sleep(SLEEP_TIME);
+    service_->SelfClean(false);
     sptr<NotificationSlot> spSlot(new NotificationSlot());
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::OTHER, spSlot));
 
@@ -399,7 +399,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00
     slot.EnableBypassDnd(true);
     slot.EnableBadge(true);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    sleep(SLEEP_TIME);
+    service_->SelfClean(false);
     sptr<NotificationSlot> spSlot(new NotificationSlot());
     EXPECT_EQ(0, NotificationHelper::GetNotificationSlot(NotificationConstant::SOCIAL_COMMUNICATION, spSlot));
     EXPECT_NE(spSlot, nullptr);
@@ -409,7 +409,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00
     NotificationBundleOption bo("bundlename", 1);
     EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(
         bo, NotificationConstant::SOCIAL_COMMUNICATION, enable, false));
-    sleep(SLEEP_TIME);
+    service_->SelfClean(false);
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SOCIAL_COMMUNICATION, enable));
 }
 
@@ -425,7 +425,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00
     NotificationBundleOption bo("bundleName", 1);
     EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(
         bo, NotificationConstant::SOCIAL_COMMUNICATION, enable, false));
-    sleep(SLEEP_TIME);
+    service_->SelfClean(false);
     enable = false;
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SOCIAL_COMMUNICATION, enable));
     EXPECT_EQ(enable, true);
@@ -448,7 +448,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00
     NotificationBundleOption bo("bundleName", 1);
     EXPECT_EQ(0, NotificationHelper::SetEnabledForBundleSlot(
         bo, NotificationConstant::SERVICE_REMINDER, enable, false));
-    sleep(SLEEP_TIME);
+    service_->SelfClean(false);
     enable = true;
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SERVICE_REMINDER, enable));
     EXPECT_EQ(enable, false);

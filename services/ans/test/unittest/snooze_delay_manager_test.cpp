@@ -87,8 +87,7 @@ void AnsSnoozeDelayTest::TearDown()
     advancedNotificationService_->timerImpl_.StopTimer();
     advancedNotificationService_->timerImpl_.DestroyTimer();
     advancedNotificationService_->SelfClean();
-    constexpr int sleepMs = 500;
-    std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
+    NotificationPreferences::GetInstance()->StopCacheCleanupTimer();
     NotificationSubscriberManager::DestroyInstance();
     delete advancedNotificationService_;
     advancedNotificationService_ = nullptr;
