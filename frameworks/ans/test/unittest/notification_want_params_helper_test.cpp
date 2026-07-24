@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 
+#include "errors.h"
 #include "nativetoken_kit.h"
 #include "notification_want_params_helper.h"
 #include "string_wrapper.h"
@@ -271,6 +272,8 @@ HWTEST_F(NotificationWantParamsHelperTest, SerializeWantAgent_00002, Function | 
     std::string out = NotificationWantParamsHelper::SerializeWantAgent(agent);
 
     EXPECT_FALSE(out.empty());
+    EXPECT_TRUE(AbilityRuntime::WantAgent::WantAgentHelper::HasWantParamsEnvelope(out));
+    EXPECT_NE(out.find("com.ohos.launcher"), std::string::npos);
 }
 
 /**
@@ -300,6 +303,10 @@ HWTEST_F(NotificationWantParamsHelperTest, ParseWantAgent_00002, Function | Smal
     auto parsed = NotificationWantParamsHelper::ParseWantAgent(serialized);
 
     EXPECT_NE(parsed, nullptr);
+    ASSERT_NE(parsed, nullptr);
+    std::string bundleName;
+    EXPECT_EQ(AbilityRuntime::WantAgent::WantAgentHelper::GetBundleName(parsed, bundleName), ERR_OK);
+    EXPECT_EQ(bundleName, "com.ohos.launcher");
 }
 
 /**
@@ -317,6 +324,10 @@ HWTEST_F(NotificationWantParamsHelperTest, ParseWantAgent_00003, Function | Smal
     auto parsed = NotificationWantParamsHelper::ParseWantAgent(legacy);
 
     EXPECT_NE(parsed, nullptr);
+    ASSERT_NE(parsed, nullptr);
+    std::string bundleName;
+    EXPECT_EQ(AbilityRuntime::WantAgent::WantAgentHelper::GetBundleName(parsed, bundleName), ERR_OK);
+    EXPECT_EQ(bundleName, "com.ohos.launcher");
 }
 
 }  // namespace Notification
