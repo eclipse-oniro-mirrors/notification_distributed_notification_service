@@ -68,16 +68,15 @@ bool RdbEventHandlerManager::UnregisterHandler(const std::string &handlerName)
 
 int32_t RdbEventHandlerManager::ExecuteOnCreate(NativeRdb::RdbStore &rdbStore)
 {
-    const auto& handlers = GetEventHandlers(EventType::ON_CREATE);
-    return ExecuteHandlerList(handlers, "OnCreate", [&rdbStore](std::shared_ptr<IRdbEventHandler> handler) {
+    return ExecuteHandlerList(EventType::ON_CREATE, "OnCreate",
+        [&rdbStore](std::shared_ptr<IRdbEventHandler> handler) {
             return handler->OnCreate(rdbStore);
         });
 }
 
 int32_t RdbEventHandlerManager::ExecuteOnUpgrade(NativeRdb::RdbStore &rdbStore, int32_t oldVersion, int32_t newVersion)
 {
-    const auto& handlers = GetEventHandlers(EventType::ON_UPGRADE);
-    return ExecuteHandlerList(handlers, "OnUpgrade",
+    return ExecuteHandlerList(EventType::ON_UPGRADE, "OnUpgrade",
         [&rdbStore, oldVersion, newVersion](std::shared_ptr<IRdbEventHandler> handler) {
             return handler->OnUpgrade(rdbStore, oldVersion, newVersion);
         });
@@ -86,8 +85,7 @@ int32_t RdbEventHandlerManager::ExecuteOnUpgrade(NativeRdb::RdbStore &rdbStore, 
 int32_t RdbEventHandlerManager::ExecuteOnDowngrade(
     NativeRdb::RdbStore &rdbStore, int32_t currentVersion, int32_t targetVersion)
 {
-    const auto& handlers = GetEventHandlers(EventType::ON_DOWNGRADE);
-    return ExecuteHandlerList(handlers, "OnDowngrade",
+    return ExecuteHandlerList(EventType::ON_DOWNGRADE, "OnDowngrade",
         [&rdbStore, currentVersion, targetVersion](std::shared_ptr<IRdbEventHandler> handler) {
             return handler->OnDowngrade(rdbStore, currentVersion, targetVersion);
         });
@@ -95,8 +93,7 @@ int32_t RdbEventHandlerManager::ExecuteOnDowngrade(
 
 int32_t RdbEventHandlerManager::ExecuteOnOpen(NativeRdb::RdbStore &rdbStore)
 {
-    const auto& handlers = GetEventHandlers(EventType::ON_OPEN);
-    return ExecuteHandlerList(handlers, "OnOpen",
+    return ExecuteHandlerList(EventType::ON_OPEN, "OnOpen",
         [&rdbStore](std::shared_ptr<IRdbEventHandler> handler) {
             return handler->OnOpen(rdbStore);
         });
@@ -104,8 +101,7 @@ int32_t RdbEventHandlerManager::ExecuteOnOpen(NativeRdb::RdbStore &rdbStore)
 
 int32_t RdbEventHandlerManager::ExecuteOnCorruption(const std::string &databaseFile)
 {
-    const auto& handlers = GetEventHandlers(EventType::ON_CORRUPTION);
-    return ExecuteHandlerList(handlers, "OnCorruption",
+    return ExecuteHandlerList(EventType::ON_CORRUPTION, "OnCorruption",
         [&databaseFile](std::shared_ptr<IRdbEventHandler> handler) {
             return handler->OnCorruption(databaseFile);
         });
@@ -126,10 +122,16 @@ bool RdbEventHandlerManager::IsHandlerRegistered(const std::string &handlerName)
     return false;
 }
 
-int32_t RdbEventHandlerManager::ExecuteHandlerList(const std::vector<std::shared_ptr<IRdbEventHandler>> &eventList,
+int32_t RdbEventHandlerManager::ExecuteHandlerList(EventType eventType,
     const std::string &eventName, std::function<int32_t(std::shared_ptr<IRdbEventHandler>)> executeFunc) const
 {
     std::lock_guard<ffrt::mutex> lock(managersLock_);
+
+    auto it = eventHandlers_.find(eventType);
+    if (it == eventHandlers_.end()) {
+        return NativeRdb::E_OK;
+    }
+    const auto &eventList = it->second;
 
     ANS_LOGD("Executing %{public}zu handlers for event %{public}s", eventList.size(), eventName.c_str());
 
@@ -152,15 +154,5 @@ int32_t RdbEventHandlerManager::ExecuteHandlerList(const std::vector<std::shared
     }
 
     return NativeRdb::E_OK;
-}
-
-const std::vector<std::shared_ptr<IRdbEventHandler>> RdbEventHandlerManager::GetEventHandlers(
-    EventType eventType) const
-{
-    auto it = eventHandlers_.find(eventType);
-    if (it != eventHandlers_.end()) {
-        return it->second;
-    }
-    return {};
 }
 } // namespace OHOS::Notification::Infra

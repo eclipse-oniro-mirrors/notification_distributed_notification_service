@@ -89,11 +89,9 @@ private:
     bool IsHandlerRegistered(const std::string &handlerName) const;
 
     int32_t ExecuteHandlerList(
-        const std::vector<std::shared_ptr<IRdbEventHandler>> &eventList,
+        EventType eventType,
         const std::string &eventName,
         std::function<int32_t(std::shared_ptr<IRdbEventHandler>)> executeFunc) const;
-
-    const std::vector<std::shared_ptr<IRdbEventHandler>> GetEventHandlers(EventType eventType) const;
 
 private:
 
