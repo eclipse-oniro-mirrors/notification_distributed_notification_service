@@ -158,6 +158,8 @@ void AdvancedNotificationService::CheckExtensionServiceCondition(
     std::vector<sptr<NotificationBundleOption>> &unsubscribedBundles)
 {
     subscribedBundleInfos.clear();
+    SeparatePrioritySubscribers(bundles);
+
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_7);
     auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
     if (datashareHelper != nullptr && datashareHelper->IsPCModeEnabled()) {
@@ -190,15 +192,55 @@ void AdvancedNotificationService::CheckExtensionServiceCondition(
         return;
     }
 
-    std::vector<sptr<NotificationBundleOption>> enableBundles;
-    for (auto it = bundles.begin(); it != bundles.end(); ++it) {
-        if (NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(*it, enableBundles) == ERR_OK &&
-            !enableBundles.empty()) {
-            subscribedBundleInfos.emplace_back(*it, enableBundles);
+    ClassifyNormalSubscribers(bundles, subscribedBundleInfos);
+}
+
+void AdvancedNotificationService::SeparatePrioritySubscribers(
+    std::vector<sptr<NotificationBundleOption>> &bundles)
+{
+    for (auto it = bundles.begin(); it != bundles.end();) {
+        if (*it == nullptr) {
+            ANS_LOGW("nullptr bundle in SeparatePrioritySubscribers, removing");
+            it = bundles.erase(it);
+            continue;
+        }
+        if (IsSystemTypeSubscriber(*it)) {
+            ANS_LOGI("bundle %{public}s is priority subscriber, skip filter",
+                (*it)->GetBundleName().c_str());
+            it = bundles.erase(it);
         } else {
-            unsubscribedBundles.emplace_back(*it);
+            ++it;
         }
     }
+}
+
+void AdvancedNotificationService::ClassifyNormalSubscribers(
+    const std::vector<sptr<NotificationBundleOption>> &bundles,
+    std::vector<std::pair<sptr<NotificationBundleOption>,
+    std::vector<sptr<NotificationBundleOption>>>> &subscribedBundleInfos)
+{
+    std::vector<sptr<NotificationBundleOption>> enableBundles;
+    for (const auto &bundle : bundles) {
+        if (NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundle, enableBundles) == ERR_OK &&
+            !enableBundles.empty()) {
+            subscribedBundleInfos.emplace_back(bundle, enableBundles);
+        }
+    }
+}
+
+bool AdvancedNotificationService::IsSystemTypeSubscriber(const sptr<NotificationBundleOption> &bundle)
+{
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    auto infoResult = NotificationPreferences::GetInstance()->GetExtensionSubscriptionInfos(bundle, infos);
+    if (infoResult != ERR_OK || infos.empty()) {
+        return false;
+    }
+    for (const auto &info : infos) {
+        if (info != nullptr && info->GetType() == NotificationConstant::SubscribeType::SYSTEM) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void AdvancedNotificationService::FilterPermissionBundles(std::vector<sptr<NotificationBundleOption>> &bundles,
@@ -567,6 +609,13 @@ void AdvancedNotificationService::GetCachedNotificationExtensionBundles(
     } else {
         GetNotificationExtensionEnabledBundles(extensionBundles);
     }
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+    // Priority subscribers should not be affected by ordinary bundle lifecycle events
+    // (e.g. uninstall/grant change), otherwise a normal bundle uninstall could trigger
+    // CheckExtensionServiceCondition on the priority subscriber and cause unexpected
+    // unsubscribe. Filter them out from the result so they bypass the filter chain.
+    SeparatePrioritySubscribers(extensionBundles);
+#endif
 }
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 void AdvancedNotificationService::OnHfpDeviceConnectChanged(
@@ -598,11 +647,7 @@ void AdvancedNotificationService::OnBluetoothPairedStatusChanged(
 void AdvancedNotificationService::CheckBleAndHfpStateChange(bool filterHfpOnly)
 {
     std::vector<sptr<NotificationBundleOption>> bundles;
-    if (cacheNotificationExtensionBundles_.size() != 0) {
-        bundles = cacheNotificationExtensionBundles_;
-    } else {
-        GetNotificationExtensionEnabledBundles(bundles);
-    }
+    GetCachedNotificationExtensionBundles(bundles);
     EnsureBundlesCanSubscribeOrUnsubscribe(bundles);
 }
 
@@ -620,11 +665,7 @@ void AdvancedNotificationService::ProcessBluetoothStateChanged(const int status)
     ANS_LOGD("ProcessBluetoothStateChanged");
     if (status == OHOS::Bluetooth::BTStateID::STATE_TURN_ON) {
         std::vector<sptr<NotificationBundleOption>> bundles;
-        if (cacheNotificationExtensionBundles_.size() != 0) {
-            bundles = cacheNotificationExtensionBundles_;
-        } else {
-            GetNotificationExtensionEnabledBundles(bundles);
-        }
+        GetCachedNotificationExtensionBundles(bundles);
         if (bundles.size() == 0) {
             ANS_LOGD("No bundle match conditon");
             return;
@@ -824,12 +865,16 @@ ErrCode AdvancedNotificationService::NotificationExtensionSubscribeNotification(
             message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).Message("Not systemApp").BranchId(BRANCH_1));
         return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
-    ErrCode checkResult = CanOpenSubscribeSettings();
-    if (checkResult != ERR_OK) {
-        return checkResult;
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_SYSTEM_SUBSCRIBER)) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_2));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
     }
-
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    sptr<NotificationBundleOption> bundleOption;
+    ErrCode validateResult = ValidateExtensionBundleOption(bundleOption);
+    if (validateResult != ERR_OK) {
+        return validateResult;
+    }
 
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
@@ -1234,17 +1279,30 @@ ErrCode AdvancedNotificationService::CanOpenSubscribeSettings()
             message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
         return ERR_ANS_INNER_PERMISSION_DENIED;
     }
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    sptr<NotificationBundleOption> bundleOption;
+    ErrCode result = ValidateExtensionBundleOption(bundleOption);
+    if (result != ERR_OK) {
+        return result;
+    }
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::ValidateExtensionBundleOption(
+    sptr<NotificationBundleOption> &bundleOption)
+{
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
+    bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create NotificationBundleOption");
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM).BranchId(BRANCH_5));
         return ERR_ANS_INNER_INVALID_PARAM;
     }
-
     if (!BundleManagerHelper::GetInstance()->CheckBundleImplExtensionAbility(bundleOption)) {
         ANS_LOGE("App Not Implement NotificationSubscriberExtensionAbility.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_NOT_IMPL_EXTENSIONABILITY).Message(
-            "Not implement NotificationSubscriberExtensionAbility").BranchId(BRANCH_3));
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_NOT_IMPL_EXTENSIONABILITY)
+                .Message("Not implement NotificationSubscriberExtensionAbility")
+                .BranchId(BRANCH_3));
         return ERR_ANS_INNER_NOT_IMPL_EXTENSIONABILITY;
     }
     if (bundleOption->GetAppIndex() > 0) {

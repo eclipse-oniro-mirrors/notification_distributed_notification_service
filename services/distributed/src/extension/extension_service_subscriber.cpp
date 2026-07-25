@@ -124,10 +124,6 @@ void ExtensionServiceSubscriber::OnCanceled(const std::shared_ptr<Notification> 
             ANS_LOGE("null requestPoint");
             return;
         }
-        if (!HasConsumedHashCode(requestPoint->GetNotificationHashCode())) {
-            ANS_LOGW("notification not in consumed list, skip OnCanceled");
-            return;
-        }
         auto hashCodes = std::make_shared<std::vector<std::string>>();
         if (hashCodes == nullptr) {
             ANS_LOGE("null hashCodes");
@@ -166,7 +162,6 @@ void ExtensionServiceSubscriber::OnConsumed(const std::shared_ptr<Notification> 
             ANS_LOGE("null requestPoint");
             return;
         }
-        AddConsumedHashCode(request);
         ExtensionServiceConnectionService::GetInstance().NotifyOnReceiveMessage(
             extensionSubscriberInfo_, requestPoint);
     });
@@ -214,28 +209,6 @@ void ExtensionServiceSubscriber::OnApplicationInfoNeedChanged(
     const std::shared_ptr<NotificationApplicationChangeInfo>& applicationChangeInfo)
 {
     ANS_LOGD("ExtensionServiceSubscriber::OnApplicationInfoNeedChanged");
-}
-
-bool ExtensionServiceSubscriber::HasConsumedHashCode(const std::string &hashCode)
-{
-    std::lock_guard<ffrt::mutex> lock(hashCodeMutex_);
-    for (auto it = consumedHashCodeList_.begin(); it != consumedHashCodeList_.end(); ++it) {
-        if (*it == hashCode) {
-            consumedHashCodeList_.erase(it);
-            return true;
-        }
-    }
-    return false;
-}
-
-void ExtensionServiceSubscriber::AddConsumedHashCode(const std::shared_ptr<Notification> &notification)
-{
-    std::string hashCode = notification->GetNotificationRequestPoint()->GetNotificationHashCode();
-    std::lock_guard<ffrt::mutex> lock(hashCodeMutex_);
-    if (consumedHashCodeList_.size() >= MAX_CONSUMED_HASH_CODE_LIST_SIZE) {
-        consumedHashCodeList_.pop_front();
-    }
-    consumedHashCodeList_.push_back(hashCode);
 }
 }
 }

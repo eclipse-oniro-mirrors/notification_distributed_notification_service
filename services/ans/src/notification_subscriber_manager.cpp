@@ -821,6 +821,33 @@ int32_t NotificationSubscriberManager::GetVoiceContentInfo(const sptr<Notificati
     return voiceResult;
 }
 
+int64_t NotificationSubscriberManager::GetBundlePriorityStrategy(const sptr<Notification> &notification)
+{
+    bool hasPrioritySubscriber = false;
+    for (auto record : subscriberRecordList_) {
+        if (record->priorityStrategy_ != 0) {
+            hasPrioritySubscriber = true;
+            break;
+        }
+    }
+    if (!hasPrioritySubscriber) {
+        return 0;
+    }
+    auto request = notification->GetNotificationRequestPoint();
+    if (request == nullptr) {
+        return 0;
+    }
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    if (bundleOption == nullptr) {
+        return 0;
+    }
+    bundleOption->SetBundleName(notification->GetBundleName());
+    bundleOption->SetUid(request->GetOwnerUid());
+    int64_t bundlePriorityStrategy = 0;
+    NotificationPreferences::GetInstance()->GetPriorityStrategyByBundle(bundleOption, bundlePriorityStrategy);
+    return bundlePriorityStrategy;
+}
+
 void NotificationSubscriberManager::NotifyConsumedInner(const sptr<Notification> &notification,
     const sptr<NotificationSortingMap> &notificationMap)
 {
@@ -842,6 +869,7 @@ void NotificationSubscriberManager::NotifyConsumedInner(const sptr<Notification>
     std::string content;
     std::set<std::string> voiceFlag;
     GetVoiceContentInfo(notification, voiceFlag, content);
+    int64_t bundlePriorityStrategy = GetBundlePriorityStrategy(notification);
     for (auto record : subscriberRecordList_) {
         ANS_LOGD(
             "%{public}s record->userId = <%{public}d> BundleName  = "
@@ -849,7 +877,7 @@ void NotificationSubscriberManager::NotifyConsumedInner(const sptr<Notification>
             __FUNCTION__, record->userId, notification->GetBundleName().c_str(),
             record->deviceType.c_str(), record->priorityStrategy_);
         if (record->priorityStrategy_ != 0) {
-            NotifyPriorityRecordOnConsumed(record, notification, notificationMap);
+            NotifyPriorityRecordOnConsumed(record, notification, notificationMap, bundlePriorityStrategy);
             continue;
         }
         NotifyRecordOnConsumed(record, notification, notificationMap, content, voiceFlag, notificationClassifications);
@@ -858,9 +886,11 @@ void NotificationSubscriberManager::NotifyConsumedInner(const sptr<Notification>
 }
 
 void NotificationSubscriberManager::NotifyPriorityRecordOnConsumed(const std::shared_ptr<SubscriberRecord> &record,
-    const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
+    const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
+    int64_t bundlePriorityStrategy)
 {
-    bool shouldNotify = record->priorityStrategy_ == 0 || IsSubscribedByPriority(record, notification);
+    bool shouldNotify = record->priorityStrategy_ == 0 ||
+        IsSubscribedByPriority(record, notification, bundlePriorityStrategy);
     if (!shouldNotify) {
         ANS_LOGD("%{public}d should not notify", record->priorityStrategy_);
         return;
@@ -870,6 +900,7 @@ void NotificationSubscriberManager::NotifyPriorityRecordOnConsumed(const std::sh
         ANS_LOGW("notificationStub null");
         return;
     }
+    AddConsumedHashCodes({notification});
     if (notificationMap != nullptr) {
         record->subscriber->OnConsumed(notificationStub, notificationMap);
     } else {
@@ -1010,6 +1041,7 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(
     if (!currNotifications.empty()) {
         ANS_LOGD("OnConsumedList currNotifications size = <%{public}zu>", currNotifications.size());
         if (record->subscriber != nullptr) {
+            AddConsumedHashCodes(currNotifications);
             if (notificationMap != nullptr) {
                 record->subscriber->OnConsumedList(currNotifications, notificationMap);
             } else {
@@ -1062,8 +1094,25 @@ void NotificationSubscriberManager::NotifyCanceledInner(
         NotificationConstant::EVENT_NOTIFICATION_REMOVED, bundleOptions, requests);
 #endif
     NotifyVoiceNotificationCanceled(notification->GetNotificationRequestPoint());
+    NotifyConsumedSubscribers(notification, notificationMap, deleteReason);
+    RemoveConsumedHashCodes({notification});
+}
+
+void NotificationSubscriberManager::NotifyConsumedSubscribers(
+    const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
+{
+    if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+        ANS_LOGE("null notification or request");
+        return;
+    }
+    std::string hashCode = notification->GetNotificationRequestPoint()->GetNotificationHashCode();
+    bool isConsumed = HasConsumedHashCode(hashCode);
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);
+        if (!isConsumed) {
+            continue;
+        }
+
         if (IsSubscribedBysubscriber(record, notification) && IsSubscribedByDeviceType(record, notification, true) &&
             (record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CANCELED)) {
             auto notificationStub = GenerateSubscribedNotification(record, notification);
@@ -1213,20 +1262,6 @@ bool NotificationSubscriberManager::IsSubscribedByDeviceType(const std::shared_p
 #endif
 }
 
-bool NotificationSubscriberManager::CheckAllPriorityByBundle(
-    const sptr<Notification> &notification, const sptr<NotificationRequest> &request)
-{
-    std::string bundleName = notification->GetBundleName();
-    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
-    if (bundleOption == nullptr) {
-        return false;
-    }
-    bundleOption->SetBundleName(bundleName);
-    bundleOption->SetUid(request->GetCreatorUid());
-    int64_t priorityStrategy = 0;
-    NotificationPreferences::GetInstance()->GetPriorityStrategyByBundle(bundleOption, priorityStrategy);
-    return priorityStrategy == NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY;
-}
 int32_t NotificationSubscriberManager::MatchPriorityTypeToBits(int32_t priorityType)
 {
     static const std::map<int32_t, int32_t> typeToBits = {
@@ -1251,22 +1286,31 @@ int32_t NotificationSubscriberManager::MatchPriorityTypeToBits(int32_t priorityT
 }
 
 bool NotificationSubscriberManager::IsSubscribedByPriority(
-    const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification)
+    const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification,
+    int64_t bundlePriorityStrategy)
 {
     if (notification == nullptr) {
+        return false;
+    }
+    if (notification->GetRecvUserId() != record->userId) {
+        ANS_LOGD("userId not match, notification userId = %{public}d, record userId = %{public}d",
+            notification->GetRecvUserId(), record->userId);
         return false;
     }
     auto request = notification->GetNotificationRequestPoint();
     if (request == nullptr) {
         return false;
     }
+    if (request->GetDistributedCollaborate()) {
+        ANS_LOGD("Distributed collaborate notification");
+        return false;
+    }
     int32_t strategy = record->priorityStrategy_;
     ANS_LOGD("IsSubscribedByPriority in, strategy=%{public}d, bundleName=%{public}s",
         strategy, notification->GetBundleName().c_str());
-    if ((strategy & NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY) != 0) {
-        if (CheckAllPriorityByBundle(notification, request)) {
-            return true;
-        }
+    if ((strategy & NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY) != 0 &&
+        bundlePriorityStrategy == NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY) {
+        return true;
     }
 
     auto extendInfo = request->GetExtendInfo();
@@ -1396,6 +1440,11 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
                 if (notificationStub == nullptr) {
                     continue;
                 }
+                std::string hashCode = notification->GetNotificationRequestPoint()->GetNotificationHashCode();
+                bool isConsumed = HasConsumedHashCode(hashCode);
+                if (!isConsumed) {
+                    continue;
+                }
                 currNotifications.emplace_back(notificationStub);
             }
         }
@@ -1411,6 +1460,8 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
             }
         }
     }
+
+    RemoveConsumedHashCodes(notifications);
 }
 
 void NotificationSubscriberManager::NotifyUpdatedInner(const sptr<NotificationSortingMap> &notificationMap)
@@ -1834,6 +1885,48 @@ void NotificationSubscriberManager::NotifyNotificationSwitchChangedInner(
     int32_t userId = callbackData->GetUserId();
     NotifySubscribers(userId, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_NOTIFICATION_SWITCH_CHANGED,
         &IAnsSubscriber::OnNotificationSwitchChanged, callbackData);
+}
+
+void NotificationSubscriberManager::AddConsumedHashCodes(const std::vector<sptr<Notification>> &notifications)
+{
+    std::lock_guard<ffrt::mutex> lock(consumedHashCodesMutex_);
+    for (auto notification : notifications) {
+        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+            continue;
+        }
+        std::string hashCode = notification->GetNotificationRequestPoint()->GetNotificationHashCode();
+        if (hashCode.empty()) {
+            continue;
+        }
+        if (std::find(consumedHashCodes_.begin(), consumedHashCodes_.end(), hashCode) != consumedHashCodes_.end()) {
+            continue;
+        }
+        if (consumedHashCodes_.size() >= MAX_CONSUMED_HASH_CODE_LIST_SIZE) {
+            consumedHashCodes_.pop_front();
+        }
+        consumedHashCodes_.push_back(hashCode);
+    }
+}
+
+bool NotificationSubscriberManager::HasConsumedHashCode(const std::string &hashCode)
+{
+    std::lock_guard<ffrt::mutex> lock(consumedHashCodesMutex_);
+    return std::find(consumedHashCodes_.begin(), consumedHashCodes_.end(), hashCode) != consumedHashCodes_.end();
+}
+
+void NotificationSubscriberManager::RemoveConsumedHashCodes(const std::vector<sptr<Notification>> &notifications)
+{
+    std::lock_guard<ffrt::mutex> lock(consumedHashCodesMutex_);
+    for (auto notification : notifications) {
+        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+            continue;
+        }
+        std::string hashCode = notification->GetNotificationRequestPoint()->GetNotificationHashCode();
+        auto it = std::find(consumedHashCodes_.begin(), consumedHashCodes_.end(), hashCode);
+        if (it != consumedHashCodes_.end()) {
+            consumedHashCodes_.erase(it);
+        }
+    }
 }
 }  // namespace Notification
 }  // namespace OHOS
