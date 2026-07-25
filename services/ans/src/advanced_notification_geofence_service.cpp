@@ -329,17 +329,17 @@ ErrCode AdvancedNotificationService::ParseGeofenceNotificationFromDb(const std::
 
     auto jsonObject = nlohmann::json::parse(value);
     auto requestPtr = NotificationJsonConverter::ConvertFromJson<NotificationRequest>(jsonObject);
-    requestDb.request = sptr<NotificationRequest>::MakeSptr(*requestPtr);
-    if (requestDb.request == nullptr) {
+    if (requestPtr == nullptr) {
         ANS_LOGE("Parse json string to notification request failed.");
         return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     }
+    requestDb.request = sptr<NotificationRequest>::MakeSptr(*requestPtr);
     auto bundleOptionPtr = NotificationJsonConverter::ConvertFromJson<NotificationBundleOption>(jsonObject);
-    requestDb.bundleOption = sptr<NotificationBundleOption>::MakeSptr(*bundleOptionPtr);
-    if (requestDb.bundleOption == nullptr) {
+    if (bundleOptionPtr == nullptr) {
         ANS_LOGE("Parse json string to bundle option failed.");
         return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     }
+    requestDb.bundleOption = sptr<NotificationBundleOption>::MakeSptr(*bundleOptionPtr);
     if (jsonObject.find("isUpdateByOwner") != jsonObject.end() && jsonObject.at("isUpdateByOwner").is_boolean()) {
         requestDb.isUpdateByOwner = jsonObject.at("isUpdateByOwner").get<bool>();
     }
