@@ -106,7 +106,7 @@ HWTEST_F(NotificationExtensionSubscriptionInfoTest, SetHfp_00001, Function | Sma
 HWTEST_F(NotificationExtensionSubscriptionInfoTest, Dump_00001, Function | SmallTest | Level1)
 {
     auto subscriptionInfo = std::make_shared<NotificationExtensionSubscriptionInfo>();
-    std::string ret = "NotificationExtensionSubscriptionInfo{ addr = , type = 0 }";
+    std::string ret = "NotificationExtensionSubscriptionInfo{ addr = , type = 0, priorityStrategy = 0 }";
     ASSERT_NE(subscriptionInfo, nullptr);
 
     EXPECT_EQ(subscriptionInfo->Dump(), ret);
@@ -187,6 +187,52 @@ HWTEST_F(NotificationExtensionSubscriptionInfoTest, FromJson_00003, Function | S
     EXPECT_TRUE(jsonObject.is_object());
     sptr<NotificationExtensionSubscriptionInfo> ret = NotificationExtensionSubscriptionInfo::FromJson(jsonObject);
     EXPECT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: FromJson_00004
+ * @tc.desc: Test FromJson parameters with priorityStrategy not number.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationExtensionSubscriptionInfoTest, FromJson_00004, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject =
+        nlohmann::json{{"addr", "addr1"},
+                       {"isHfp", true},
+                       {"type", static_cast<int32_t>(NotificationConstant::SubscribeType::SYSTEM)},
+                       {"priorityStrategy", "priorityStrategy"}};
+    sptr<NotificationExtensionSubscriptionInfo> subscriptionInfo =
+        NotificationExtensionSubscriptionInfo::FromJson(jsonObject);
+    ASSERT_NE(subscriptionInfo, nullptr);
+    EXPECT_EQ(subscriptionInfo->GetPriorityStrategy(), 0);
+    EXPECT_EQ(subscriptionInfo->GetType(), NotificationConstant::SubscribeType::SYSTEM);
+}
+
+/**
+ * @tc.name: FromJson_00005
+ * @tc.desc: Test FromJson parameters with priorityStrategy is number.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationExtensionSubscriptionInfoTest, FromJson_00005, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"addr", "addr1"},
+        {"isHfp", true},
+        {"type",
+         static_cast<int32_t>(NotificationConstant::SubscribeType::SYSTEM)},
+        {"priorityStrategy",
+         static_cast<int32_t>(NotificationConstant::PriorityStrategyStatus::
+                                  STATUS_ALL_PRIORITY)}};
+    sptr<NotificationExtensionSubscriptionInfo> subscriptionInfo =
+        NotificationExtensionSubscriptionInfo::FromJson(jsonObject);
+    ASSERT_NE(subscriptionInfo, nullptr);
+    EXPECT_EQ(
+        subscriptionInfo->GetPriorityStrategy(),
+        static_cast<int32_t>(
+            NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY));
+    EXPECT_EQ(subscriptionInfo->GetType(), NotificationConstant::SubscribeType::SYSTEM);
 }
 
 /**

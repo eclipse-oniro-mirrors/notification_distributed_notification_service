@@ -178,7 +178,7 @@ HWTEST_F(NotificationSubscribeInfoTest, Dump_00001, Function | SmallTest | Level
             "deviceType = " + deviceType +
             "userId = " + std::to_string(userId) +
             "slotTypes = []needNotify = 0filterType = 0needResponse = 0isSubscribeSelf = 0voiceContentOption = null" +
-            "pictureOption = nullenableClassification = 0needSilentReplayOnSubscribe = 0 }";
+            "pictureOption = nullenableClassification = 0needSilentReplayOnSubscribe = 0priorityStrategy = 0 }";
     EXPECT_EQ(res, rrc->Dump());
 }
 
@@ -885,5 +885,23 @@ HWTEST_F(NotificationSubscribeInfoTest, EnableClassification_Integration_00001, 
     delete result;
 }
 
+/**
+ * @tc.name: PriorityStrategy_Marshalling_00001
+ * @tc.desc: Test full integration with priorityStrategy.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, PriorityStrategy_Marshalling_00001, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    subscribeInfo.SetPriorityStrategy(0);
+    Parcel parcel;
+    EXPECT_EQ(subscribeInfo.Marshalling(parcel), true);
+    parcel.RewindRead(0);
+    NotificationSubscribeInfo *result = NotificationSubscribeInfo::Unmarshalling(parcel);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetPriorityStrategy(), 0);
+    delete result;
+}
 }
 }
