@@ -139,7 +139,8 @@ export function shouldMoveToDisplayCenter(comW: number, comH: number,
     let foldStatus = display.getFoldStatus();
     let disPlayValidHeight = 0;
     let chargeCrossAxis = false;
-    if (foldStatus === display.FoldStatus.FOLD_STATUS_EXPANDED) {
+    if (foldStatus === display.FoldStatus.FOLD_STATUS_EXPANDED ||
+      foldStatus === display.FoldStatus.FOLD_STATUS_UNKNOWN) {
       disPlayValidHeight = dis.height - Constants.PC_DOCK_HEIGHT; 
     } else {
       disPlayValidHeight = (dis.availableHeight !== undefined && dis.availableHeight <= dis.height) ?
