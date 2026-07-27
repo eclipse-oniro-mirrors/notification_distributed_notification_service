@@ -2025,7 +2025,6 @@ public:
     ErrCode SetUserGrantedBundleState(const sptr<NotificationBundleOption>& targetBundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled) override;
 
-    ErrCode ValidateExtensionBundleOption(sptr<NotificationBundleOption> &bundleOption);
     ErrCode CanOpenSubscribeSettings() override;
 
     void SendDialogClickHiSysEvent(const sptr<NotificationBundleOption> &bundleOption,
@@ -2574,11 +2573,6 @@ private:
         std::vector<std::pair<sptr<NotificationBundleOption>,
         std::vector<sptr<NotificationBundleOption>>>> &subscribedBundleInfos,
         std::vector<sptr<NotificationBundleOption>> &unsubscribedBundles);
-    void SeparatePrioritySubscribers(std::vector<sptr<NotificationBundleOption>> &bundles);
-    void ClassifyNormalSubscribers(const std::vector<sptr<NotificationBundleOption>> &bundles,
-        std::vector<std::pair<sptr<NotificationBundleOption>,
-        std::vector<sptr<NotificationBundleOption>>>> &subscribedBundleInfos);
-    bool IsSystemTypeSubscriber(const sptr<NotificationBundleOption> &bundle);
     bool CheckBluetoothConnectionInInfos(
         const sptr<NotificationBundleOption> &bundleOption,
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos, bool &updateHfp);

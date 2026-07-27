@@ -474,7 +474,7 @@ void AsyncCompleteCallbackNapiGetActiveNotification(napi_env env, napi_status st
 {
     ANS_LOGD("called");
     auto asynccallbackinfo = static_cast<AsyncGetActiveNotificationInfo *>(data);
-    if (!data) {
+    if (!data || !asynccallbackinfo) {
         ANS_LOGE("Invalid async callback data.");
         return;
     }
@@ -527,7 +527,7 @@ bool ParseHashCodeParameter(napi_env env, napi_callback_info info, std::string &
     }
     char str[LONG_STR_MAX_SIZE] = {0};
     size_t strLen = 0;
-    napi_get_value_string_utf8(env, argv[PARAM0], str, LONG_STR_MAX_SIZE - 1, &strLen);
+    napi_get_value_string_utf8(env, argv[PARAM0], str, STR_MAX_SIZE - 1, &strLen);
     hashCode = str;
     return true;
 }

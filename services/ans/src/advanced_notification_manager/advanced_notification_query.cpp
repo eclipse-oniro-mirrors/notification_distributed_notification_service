@@ -412,7 +412,6 @@ ErrCode AdvancedNotificationService::GetNotificationRequestByHashCode(
         auto record = GetFromNotificationList(hashCode);
         if (record != nullptr) {
             notificationRequest = record->request;
-            GetUri(notificationRequest);
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get notifications by hashcode.");
