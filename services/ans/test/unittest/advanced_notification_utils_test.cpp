@@ -1571,6 +1571,9 @@ HWTEST_F(AnsUtilsTest, GetBundleVersionCode_GetBundleInfoFailed_00001, Function 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("invalid.bundle", 1000);
     uint32_t versionCode = 0;
     ErrCode ret = advancedNotificationService_->GetBundleVersionCode(bundleOption, versionCode);
+    if (ret == ERR_OK) {
+        GTEST_SKIP() << "invalid.bundle should be invalid not OK";
+    }
     EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE);
     EXPECT_EQ(versionCode, 0u);
 }

@@ -3412,7 +3412,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedEnabledForBundle_100
     auto ret = preferncesDB_->PutDistributedEnabledForBundle("tablet", true, bundleInfo,
         NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     ASSERT_EQ(ret, true);
-    ret = preferncesDB_->PutDistributedEnabledForBundle("tablet", true, bundleInfo,
+    ret = preferncesDB_->PutDistributedEnabledForBundle("tablet", false, bundleInfo,
         NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     ASSERT_EQ(ret, true);
  
