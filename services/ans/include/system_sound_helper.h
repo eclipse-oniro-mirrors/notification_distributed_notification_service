@@ -28,6 +28,7 @@ namespace OHOS {
 namespace Notification {
 class SystemSoundHelper final {
 public:
+    SystemSoundHelper();
     static std::shared_ptr<SystemSoundHelper> GetInstance();
     void RemoveCustomizedTone(const std::string uri);
 
@@ -35,9 +36,12 @@ public:
 
     void RemoveCustomizedTones(std::vector<NotificationRingtoneInfo> ringtoneInfos);
 
+    void ResetQueue();
+
 private:
     static ffrt::mutex instanceMutex_;
     static std::shared_ptr<SystemSoundHelper> instance_;
+    std::shared_ptr<ffrt::queue> soundHelperQueue_ = nullptr;
 };
 }  // namespace Notification
 }  // namespace OHOS

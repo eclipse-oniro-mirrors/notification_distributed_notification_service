@@ -72,10 +72,46 @@ ohos_unittest("screen_manager_dynamic_wrapper_test") {
   part_name = "${component_name}"
 }
 
+ohos_unittest("system_sound_helper_test") {
+  module_out_path = "${component_name}/distributed_notification_service/unittest"
+
+  sources = [
+    "${services_path}/ans/src/common/system_sound_helper.cpp",
+    "${services_path}/ans/src/utils/notification_load_utils.cpp",
+    "system_sound_helper_test.cpp",
+  ]
+
+  include_dirs = [
+    ".",
+    "${services_path}/ans/include",
+    "${services_path}/ans/include/utils",
+  ]
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+
+  defines = []
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":system_sound_dynamic_wrapper_test",
-    ":screen_manager_dynamic_wrapper_test"
+    ":screen_manager_dynamic_wrapper_test",
+    ":system_sound_helper_test"
   ]
 }

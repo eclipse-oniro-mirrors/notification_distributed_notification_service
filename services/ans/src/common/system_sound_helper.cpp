@@ -35,6 +35,8 @@ using REMOVE_TONE_LIST_FUNC = bool (*)(std::vector<std::string>);
 ffrt::mutex SystemSoundHelper::instanceMutex_;
 std::shared_ptr<SystemSoundHelper> SystemSoundHelper::instance_;
 
+SystemSoundHelper::SystemSoundHelper() : soundHelperQueue_(std::make_shared<ffrt::queue>("SoundHelper")) {}
+
 std::shared_ptr<SystemSoundHelper> SystemSoundHelper::GetInstance()
 {
     if (instance_ == nullptr) {
@@ -74,7 +76,11 @@ void SystemSoundHelper::RemoveCustomizedTone(const std::string uri)
             }
         }
     };
-    ffrt::submit(retryTask, ffrt::task_attr().delay(TASK_DELAY));
+    if (soundHelperQueue_ == nullptr) {
+        ANS_LOGW("soundHelperQueue_ is null");
+        return;
+    }
+    soundHelperQueue_->submit(retryTask, ffrt::task_attr().delay(TASK_DELAY).name("RemoveTone"));
 }
 
 void SystemSoundHelper::RemoveCustomizedTone(sptr<NotificationRingtoneInfo> ringtoneInfo)
@@ -131,7 +137,22 @@ void SystemSoundHelper::RemoveCustomizedTones(std::vector<NotificationRingtoneIn
             removeToneListFunc(uris);
         }
     };
-    ffrt::submit(retryTask, ffrt::task_attr().delay(TASK_DELAY));
+    if (soundHelperQueue_ == nullptr) {
+        ANS_LOGW("soundHelperQueue_ is null");
+        return;
+    }
+    soundHelperQueue_->submit(retryTask, ffrt::task_attr().delay(TASK_DELAY).name("RemoveTones"));
+}
+
+void SystemSoundHelper::ResetQueue()
+{
+    if (soundHelperQueue_ == nullptr) {
+        ANS_LOGW("soundHelperQueue_ is null");
+        return;
+    }
+    auto handler = soundHelperQueue_->submit_h([] {});
+    soundHelperQueue_->wait(handler);
+    soundHelperQueue_.reset();
 }
 }  // namespace Notification
 }  // namespace OHOS

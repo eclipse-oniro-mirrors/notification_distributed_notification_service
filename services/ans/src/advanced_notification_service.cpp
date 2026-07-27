@@ -56,6 +56,7 @@
 #include "os_account_manager_helper.h"
 #include "permission_filter.h"
 #include "push_callback_proxy.h"
+#include "system_sound_helper.h"
 #include "trigger_info.h"
 #include "want_agent_helper.h"
 #include "notification_timer_info.h"
@@ -418,6 +419,7 @@ void AdvancedNotificationService::SelfClean(bool resetQueues)
 #endif
         NotificationLocalLiveViewSubscriberManager::GetInstance()->ResetFfrtQueue();
         NotificationPreferences::GetInstance()->StopCacheCleanupTimer();
+        SystemSoundHelper::GetInstance()->ResetQueue();
     } else {
         notificationSvrQueue_.SyncSubmit(std::function<void()>([] {}));
         NotificationSubscriberManager::GetInstance()->WaitForFfrtQueue();
