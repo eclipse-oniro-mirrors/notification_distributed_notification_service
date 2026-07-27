@@ -48,9 +48,15 @@ public:
         const std::shared_ptr<NotificationApplicationChangeInfo>& applicationChangeInfo) override;
     ErrCode OnOperationResponse(const std::shared_ptr<NotificationOperationInfo> &operationInfo) override;
 
+    void AddConsumedHashCode(const std::shared_ptr<Notification> &notification);
+    bool HasConsumedHashCode(const std::string &hashCode);
+
 private:
+    static constexpr size_t MAX_CONSUMED_HASH_CODE_LIST_SIZE = 1000;
     std::shared_ptr<ExtensionSubscriberInfo> extensionSubscriberInfo_;
     std::shared_ptr<ffrt::queue> messageQueue_ = nullptr;
+    std::list<std::string> consumedHashCodeList_;
+    ffrt::mutex hashCodeMutex_;
 };
 }
 }

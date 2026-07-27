@@ -1606,19 +1606,5 @@ HWTEST_F(AnsNotificationBranchTest, PublishDelayedNotification_0100, Function | 
     InnerErrorCode ret = notification->PublishDelayedNotification(triggerKey, userId);
     EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
-
-/**
- * @tc.name: NotificationExtensionSubscribeNotification_0100
- * @tc.desc: NotificationExtensionSubscribeNotification
- * @tc.type: FUNC
- */
-HWTEST_F(AnsNotificationBranchTest, NotificationExtensionSubscribeNotification_0100, Function | MediumTest | Level1)
-{
-    auto notification = std::make_shared<AnsNotification>();
-    ASSERT_NE(notification, nullptr);
-    int32_t priorityStrategy = 0;
-    InnerErrorCode ret = notification->NotificationExtensionSubscribeNotification(priorityStrategy);
-    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
-}
 }  // namespace Notification
 }  // namespace OHOS

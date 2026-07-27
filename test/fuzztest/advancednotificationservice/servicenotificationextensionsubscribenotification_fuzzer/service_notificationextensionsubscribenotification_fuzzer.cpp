@@ -25,7 +25,7 @@ namespace Notification {
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
 {
     auto service = AdvancedNotificationService::GetInstance();
-    int32_t priorityStrategy = fuzzData->ConsumeIntegralInRange<int32_t>(0, 255);
+    int32_t priorityStrategy = fuzzData->ConsumeIntegral<int32_t>();
     service->NotificationExtensionSubscribeNotification(priorityStrategy);
     return true;
 }
@@ -38,9 +38,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     FuzzedDataProvider fdp(data, size);
-    std::vector<std::string> requestPermission= {
-        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_SYSTEM_SUBSCRIBER
-    };
+    std::vector<std::string> requestPermission;
+    if (fdp.ConsumeBool()) {
+        requestPermission.emplace_back(OHOS::Notification::OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION);
+    }
     MockRandomToken(&fdp, requestPermission);
     OHOS::Notification::DoSomethingInterestingWithMyAPI(&fdp);
     ENSURE_ANS_SERVICE_CLEANED_AT_EXIT();
