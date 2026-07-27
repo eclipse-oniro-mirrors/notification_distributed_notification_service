@@ -154,6 +154,91 @@ HWTEST_F(AnsSnoozeDelayTest, SnoozeNotification_00003, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: SnoozeNotification_00004
+ * @tc.desc: Test SnoozeNotification with invalid delayTime (zero)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, SnoozeNotification_00004, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    std::string hashCode = "test123";
+    int64_t delayTime = 0;
+    ASSERT_EQ(advancedNotificationService_->SnoozeNotification(hashCode, delayTime),
+        (int)ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SnoozeNotification_00005
+ * @tc.desc: Test SnoozeNotification with invalid delayTime (negative)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, SnoozeNotification_00005, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    std::string hashCode = "test123";
+    int64_t delayTime = -1;
+    ASSERT_EQ(advancedNotificationService_->SnoozeNotification(hashCode, delayTime),
+        (int)ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SnoozeNotification_00006
+ * @tc.desc: Test SnoozeNotification with delayTime exceeding MAX_DELAY_TIME_S
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, SnoozeNotification_00006, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    std::string hashCode = "test123";
+    int64_t delayTime = NotificationConstant::MAX_DELAY_TIME_S + 1;
+    ASSERT_EQ(advancedNotificationService_->SnoozeNotification(hashCode, delayTime),
+        (int)ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SnoozeNotification_00007
+ * @tc.desc: Test SnoozeNotification with INT64_MAX delayTime to prevent multiplication overflow
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, SnoozeNotification_00007, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    std::string hashCode = "test123";
+    int64_t delayTime = INT64_MAX;
+    ASSERT_EQ(advancedNotificationService_->SnoozeNotification(hashCode, delayTime),
+        (int)ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SnoozeNotification_00008
+ * @tc.desc: Test SnoozeNotification with boundary valid delayTime (MAX_DELAY_TIME_S)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, SnoozeNotification_00008, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    std::string hashCode = "test123";
+    int64_t delayTime = NotificationConstant::MAX_DELAY_TIME_S;
+    ASSERT_EQ(advancedNotificationService_->SnoozeNotification(hashCode, delayTime),
+        (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
  * @tc.name: ExcuteSnoozeNotification_00001
  * @tc.desc: Test ExcuteSnoozeNotification
  * @tc.type: FUNC
