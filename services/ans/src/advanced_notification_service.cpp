@@ -235,8 +235,8 @@ AnsStatus AdvancedNotificationService::PrepareNotificationRequest(const sptr<Not
                 return AnsStatus(ERR_ANS_INNER_INVALID_BUNDLE, "ERR_ANS_INNER_INVALID_BUNDLE");
             }
             request->SetAgentBundle(agentBundle);
+            request->SetOwnerBundleName(sourceBundleName);
         }
-        request->SetOwnerBundleName(sourceBundleName);
     }
 
     int32_t uid = IPCSkeleton::GetCallingUid();
