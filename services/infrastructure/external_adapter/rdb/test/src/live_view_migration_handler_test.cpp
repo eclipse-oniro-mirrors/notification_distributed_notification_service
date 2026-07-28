@@ -311,4 +311,62 @@ HWTEST_F(LiveViewMigrationHandlerTest, GetHandlerName_100, Function | SmallTest 
     std::string name = handler.GetHandlerName();
     EXPECT_EQ(name, "LiveViewMigrationHandler");
 }
+
+/**
+ * @tc.name: OnUpgrade_MigrationFail_DeletesCorruptRow
+ * @tc.desc: Verify OnUpgrade deletes corrupt row when migration callback returns false.
+ * @tc.type: FUNC
+ * @tc.require: issue#4249
+ */
+HWTEST_F(LiveViewMigrationHandlerTest, OnUpgrade_MigrationFail_DeletesCorruptRow, Function | SmallTest | Level1)
+{
+    NtfRdbHook hooks;
+    hooks.OnRdbUpgradeLiveviewMigrate = [](const std::string &oldValue, std::string &newValue) {
+        return false;
+    };
+    auto hookMgr = std::make_shared<NtfRdbHookMgr>(hooks);
+    LiveViewMigrationHandler handler(hookMgr);
+    MockRdbStore rdbStore;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes(
+        {"testKey", "testValue"},
+        {NativeRdb::E_OK, NativeRdb::E_OK}
+    );
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    SetMockQueryResults({mockResultSet});
+    SetMockDeleteErrCodes({NativeRdb::E_OK});
+    int32_t ret = handler.OnUpgrade(rdbStore, 1, 2);
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name: OnUpgrade_MigrationFail_DeleteAlsoFails
+ * @tc.desc: Verify OnUpgrade handles delete failure gracefully when corrupt row deletion fails.
+ * @tc.type: FUNC
+ * @tc.require: issue#4249
+ */
+HWTEST_F(LiveViewMigrationHandlerTest, OnUpgrade_MigrationFail_DeleteAlsoFails, Function | SmallTest | Level1)
+{
+    NtfRdbHook hooks;
+    hooks.OnRdbUpgradeLiveviewMigrate = [](const std::string &oldValue, std::string &newValue) {
+        return false;
+    };
+    auto hookMgr = std::make_shared<NtfRdbHookMgr>(hooks);
+    LiveViewMigrationHandler handler(hookMgr);
+    MockRdbStore rdbStore;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes(
+        {"testKey", "testValue"},
+        {NativeRdb::E_OK, NativeRdb::E_OK}
+    );
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    SetMockQueryResults({mockResultSet});
+    SetMockDeleteErrCodes({NativeRdb::E_ERROR});
+    int32_t ret = handler.OnUpgrade(rdbStore, 1, 2);
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+}
 } // namespace OHOS::Notification::Infra
