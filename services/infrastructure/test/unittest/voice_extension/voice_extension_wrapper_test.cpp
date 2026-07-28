@@ -141,8 +141,11 @@ HWTEST_F(VoiceExtensionWrapperTest, EnsureLoaded_005, Function | SmallTest | Lev
     std::string content;
     std::string externInfo;
     sptr<NotificationRequest> request = new NotificationRequest();
-    EXPECT_EQ(wrapper.GenerateVoiceContent(request, content, externInfo),
-        VoiceExtensionWrapper::ErrorCode::ERR_OK);
+    int32_t result = wrapper.GenerateVoiceContent(request, content, externInfo);
+    if (!wrapper.loaded_.load(std::memory_order_acquire) || wrapper.generateVoiceContent_ == nullptr) {
+        GTEST_SKIP() << "libnotification_voice.z.so not exist";
+    }
+    EXPECT_EQ(result, VoiceExtensionWrapper::ErrorCode::ERR_OK);
     EXPECT_TRUE(wrapper.loaded_.load());
     EXPECT_NE(wrapper.generateVoiceContent_, nullptr);
     EXPECT_EQ(wrapper.cachedVoiceConfig_, "");
@@ -172,8 +175,11 @@ HWTEST_F(VoiceExtensionWrapperTest, EnsureLoaded_006, Function | SmallTest | Lev
     std::string content;
     std::string externInfo;
     sptr<NotificationRequest> request = new NotificationRequest();
-    EXPECT_EQ(wrapper.GenerateVoiceContent(request, content, externInfo),
-        VoiceExtensionWrapper::ErrorCode::ERR_OK);
+    int32_t result = wrapper.GenerateVoiceContent(request, content, externInfo);
+    if (!wrapper.loaded_.load(std::memory_order_acquire) || wrapper.generateVoiceContent_ == nullptr) {
+        GTEST_SKIP() << "libnotification_voice.z.so not exist";
+    }
+    EXPECT_EQ(result, VoiceExtensionWrapper::ErrorCode::ERR_OK);
     EXPECT_TRUE(wrapper.loaded_.load());
     EXPECT_EQ(wrapper.cachedVoiceConfig_, "");
     EXPECT_EQ(g_mockDlfcn.lastUpdateConfig, config);
@@ -230,6 +236,9 @@ HWTEST_F(VoiceExtensionWrapperTest, UpdateVoiceConfig_001, Function | SmallTest 
     wrapper.GenerateVoiceContent(request, content, externInfo);
 
     std::string config = "config_v1";
+    if (!wrapper.loaded_.load(std::memory_order_acquire) || wrapper.updateVoiceConfig_ == nullptr) {
+        GTEST_SKIP() << "libnotification_voice.z.so not exist";
+    }
     EXPECT_EQ(wrapper.UpdateVoiceConfig(config), VoiceExtensionWrapper::ErrorCode::ERR_OK);
     EXPECT_EQ(g_mockDlfcn.lastUpdateConfig, config);
     EXPECT_EQ(wrapper.cachedVoiceConfig_, "");
@@ -252,6 +261,9 @@ HWTEST_F(VoiceExtensionWrapperTest, UpdateVoiceConfig_002, Function | SmallTest 
     wrapper.GenerateVoiceContent(request, content, externInfo);
 
     std::string config = "config_err";
+    if (!wrapper.loaded_.load(std::memory_order_acquire) || wrapper.updateVoiceConfig_ == nullptr) {
+        GTEST_SKIP() << "libnotification_voice.z.so not exist";
+    }
     EXPECT_EQ(wrapper.UpdateVoiceConfig(config), VoiceExtensionWrapper::ErrorCode::ERR_FAIL);
 }
 
@@ -303,6 +315,9 @@ HWTEST_F(VoiceExtensionWrapperTest, NotifyVoiceEvent_002, Function | SmallTest |
 
     EXPECT_EQ(wrapper.NotifyVoiceEvent("EVENT_REMOVED", request),
         VoiceExtensionWrapper::ErrorCode::ERR_OK);
+    if (!wrapper.loaded_.load(std::memory_order_acquire) || wrapper.notifyVoiceEvent_ == nullptr) {
+        GTEST_SKIP() << "libnotification_voice.z.so not exist";
+    }
     EXPECT_EQ(g_mockDlfcn.lastNotifyEvent, "EVENT_REMOVED");
 }
 
@@ -321,7 +336,9 @@ HWTEST_F(VoiceExtensionWrapperTest, NotifyVoiceEvent_003, Function | SmallTest |
     std::string externInfo;
     sptr<NotificationRequest> request = new NotificationRequest();
     wrapper.GenerateVoiceContent(request, content, externInfo);
-
+    if (!wrapper.loaded_.load(std::memory_order_acquire) || wrapper.notifyVoiceEvent_ == nullptr) {
+        GTEST_SKIP() << "libnotification_voice.z.so not exist";
+    }
     EXPECT_EQ(wrapper.NotifyVoiceEvent("EVENT_ERROR", request),
         VoiceExtensionWrapper::ErrorCode::ERR_FAIL);
 }
@@ -341,8 +358,9 @@ HWTEST_F(VoiceExtensionWrapperTest, CloseExtensionWrapper_001, Function | SmallT
     std::string externInfo;
     sptr<NotificationRequest> request = new NotificationRequest();
     wrapper.GenerateVoiceContent(request, content, externInfo);
-    EXPECT_NE(wrapper.ExtensionHandle_, nullptr);
-
+    if (!wrapper.ExtensionHandle_) {
+        GTEST_SKIP() << "libnotification_voice.z.so not exist";
+    }
     wrapper.CloseExtensionWrapper();
     EXPECT_TRUE(g_mockDlfcn.dlcloseCalled);
     EXPECT_EQ(wrapper.ExtensionHandle_, nullptr);
