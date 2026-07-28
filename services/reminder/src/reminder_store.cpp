@@ -45,8 +45,11 @@ constexpr int32_t REMINDER_RDB_VERSION_V9 = 9;
 constexpr int32_t REMINDER_RDB_VERSION_V10 = 10;
 constexpr int32_t REMINDER_RDB_VERSION_V11 = 11;
 constexpr int32_t REMINDER_RDB_VERSION_V12 = 12;
-constexpr int32_t REMINDER_RDB_VERSION = 13;
+constexpr int32_t REMINDER_RDB_VERSION_V13 = 13;
+constexpr int32_t REMINDER_RDB_VERSION = 14;
+constexpr int32_t MAX_RECOVER_FILE_COUNT = 2;
 constexpr int64_t DURATION_PRELOAD_TIME = 10 * 60 * 60 * 1000;  // 10h, millisecond
+constexpr const char* RECOVER_FAIL_COUNT_KEY = "recover_fail_count";
 }
 
 const int32_t ReminderStore::STATE_OK = 0;
@@ -61,56 +64,39 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnCreate(NativeRdb::RdbStore& 
     if (ret != ERR_OK) {
         return ret;
     }
-    return CreateStateTable(store);
+    ret = CreateStateTable(store);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    return CreateConfigTable(store);
 }
 
 int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
     NativeRdb::RdbStore& store, int32_t oldVersion, int32_t newVersion)
 {
-    if (oldVersion < newVersion && newVersion == REMINDER_RDB_VERSION) {
-        switch (oldVersion) {
-            case REMINDER_RDB_VERSION_V1:
-                AddRdbColum(store, ReminderTable::TABLE_NAME, "groupId", "TEXT", "''");
-                [[fallthrough]];
-            case REMINDER_RDB_VERSION_V2:
-                AddRdbColum(store, ReminderTable::TABLE_NAME, "custom_ring_uri", "TEXT", "''");
-                AddRdbColum(store, ReminderTable::TABLE_NAME, "snooze_slot_id", "INT", "3");
-                [[fallthrough]];
-            case REMINDER_RDB_VERSION_V3:
-                AddRdbColum(store, ReminderTable::TABLE_NAME, "creator_bundle_name", "TEXT", "''");
-                [[fallthrough]];
-            case REMINDER_RDB_VERSION_V4:
-                CreateTable(store);
-                CopyData(store);
-                [[fallthrough]];
-            case REMINDER_RDB_VERSION_V5:
-                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::CREATOR_UID, "INT", "-1");
-                [[fallthrough]];
-            case REMINDER_RDB_VERSION_V6:
-                AddRdbColum(store, ReminderCalendarTable::TABLE_NAME,
-                    ReminderCalendarTable::CALENDAR_LAST_DATE_TIME, "BIGINT", "0");
-                [[fallthrough]];
-            case REMINDER_RDB_VERSION_V7:
-                UpgradeV7(store);
-                [[fallthrough]];
-            case REMINDER_RDB_VERSION_V8:
-                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::RING_CHANNEL, "INT", "0");
-                [[fallthrough]];
-            case REMINDER_RDB_VERSION_V9:
-                UpgradeV9(store);
-                [[fallthrough]];
-            case REMINDER_RDB_VERSION_V10:
-                CreateStateTable(store);
-                [[fallthrough]];
-            case REMINDER_RDB_VERSION_V11:
-                UpgradeV11(store);
-                [[fallthrough]];
-            case REMINDER_RDB_VERSION_V12:
-                UpgradeV12(store);
-                [[fallthrough]];
-            default:
-                break;
-        }
+    if (oldVersion <= 0) {
+        return STATE_FAIL;
+    }
+    if (!(oldVersion < newVersion && newVersion == REMINDER_RDB_VERSION)) {
+        return NativeRdb::E_OK;
+    }
+    std::vector<std::function<void(NativeRdb::RdbStore&)>> upgradeList;
+    upgradeList.reserve(REMINDER_RDB_VERSION);
+    upgradeList.push_back(std::bind(&ReminderStoreDataCallBack::UpgradeV1, this, std::placeholders::_1));
+    upgradeList.push_back(std::bind(&ReminderStoreDataCallBack::UpgradeV2, this, std::placeholders::_1));
+    upgradeList.push_back(std::bind(&ReminderStoreDataCallBack::UpgradeV3, this, std::placeholders::_1));
+    upgradeList.push_back(std::bind(&ReminderStoreDataCallBack::UpgradeV4, this, std::placeholders::_1));
+    upgradeList.push_back(std::bind(&ReminderStoreDataCallBack::UpgradeV5, this, std::placeholders::_1));
+    upgradeList.push_back(std::bind(&ReminderStoreDataCallBack::UpgradeV6, this, std::placeholders::_1));
+    upgradeList.push_back(std::bind(&ReminderStoreDataCallBack::UpgradeV7, this, std::placeholders::_1));
+    upgradeList.push_back(std::bind(&ReminderStoreDataCallBack::UpgradeV8, this, std::placeholders::_1));
+    upgradeList.push_back(std::bind(&ReminderStoreDataCallBack::UpgradeV9, this, std::placeholders::_1));
+    upgradeList.push_back(std::bind(&ReminderStoreDataCallBack::UpgradeV10, this, std::placeholders::_1));
+    upgradeList.push_back(std::bind(&ReminderStoreDataCallBack::UpgradeV11, this, std::placeholders::_1));
+    upgradeList.push_back(std::bind(&ReminderStoreDataCallBack::UpgradeV12, this, std::placeholders::_1));
+    upgradeList.push_back(std::bind(&ReminderStoreDataCallBack::UpgradeV13, this, std::placeholders::_1));
+    for (int32_t version = oldVersion; version < newVersion; ++version) {
+        upgradeList[version - 1](store);
     }
     store.SetVersion(newVersion);
     return NativeRdb::E_OK;
@@ -133,6 +119,39 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnDowngrade(
     return NativeRdb::E_OK;
 }
 
+inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV1(NativeRdb::RdbStore& store)
+{
+    AddRdbColum(store, ReminderTable::TABLE_NAME, "groupId", "TEXT", "''");
+}
+
+inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV2(NativeRdb::RdbStore& store)
+{
+    AddRdbColum(store, ReminderTable::TABLE_NAME, "custom_ring_uri", "TEXT", "''");
+    AddRdbColum(store, ReminderTable::TABLE_NAME, "snooze_slot_id", "INT", "3");
+}
+
+inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV3(NativeRdb::RdbStore& store)
+{
+    AddRdbColum(store, ReminderTable::TABLE_NAME, "creator_bundle_name", "TEXT", "''");
+}
+
+inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV4(NativeRdb::RdbStore& store)
+{
+    CreateTable(store);
+    CopyData(store);
+}
+
+inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV5(NativeRdb::RdbStore& store)
+{
+    AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::CREATOR_UID, "INT", "-1");
+}
+
+inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV6(NativeRdb::RdbStore& store)
+{
+    AddRdbColum(store, ReminderCalendarTable::TABLE_NAME, ReminderCalendarTable::CALENDAR_LAST_DATE_TIME,
+        "BIGINT", "0");
+}
+
 inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV7(NativeRdb::RdbStore& store)
 {
     AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::TITLE_RESOURCE_ID, "INT", "0");
@@ -141,10 +160,20 @@ inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV7(NativeRdb::RdbSt
     AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::EXPIRED_CONTENT_RESOURCE_ID, "INT", "0");
 }
 
+inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV8(NativeRdb::RdbStore& store)
+{
+    AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::RING_CHANNEL, "INT", "0");
+}
+
 inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV9(NativeRdb::RdbStore& store)
 {
     AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::FORCE_DISTRIBUTED, "TEXT", "false");
     AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::NOT_DISTRIBUTED, "TEXT", "false");
+}
+
+inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV10(NativeRdb::RdbStore& store)
+{
+    CreateStateTable(store);
 }
 
 inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV11(NativeRdb::RdbStore& store)
@@ -158,6 +187,11 @@ inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV12(NativeRdb::RdbS
 {
     AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::TIME_ZONE_TYPE, "INT", "0");
     AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::NOTIFICATION_REQUEST_PROXY, "TEXT", "''");
+}
+
+inline void ReminderStore::ReminderStoreDataCallBack::UpgradeV13(NativeRdb::RdbStore& store)
+{
+    CreateConfigTable(store);
 }
 
 int32_t ReminderStore::ReminderStoreDataCallBack::CreateTable(NativeRdb::RdbStore& store)
@@ -204,6 +238,18 @@ int32_t ReminderStore::ReminderStoreDataCallBack::CreateStateTable(NativeRdb::Rd
     int32_t ret = store.ExecuteSql(createSql);
     if (ret != NativeRdb::E_OK) {
         ANSR_LOGE("Create reminder_state table failed:%{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t ReminderStore::ReminderStoreDataCallBack::CreateConfigTable(NativeRdb::RdbStore& store)
+{
+    std::string createSql;
+    createSql.append("CREATE TABLE IF NOT EXISTS ").append(ReminderConfigTable::TABLE_NAME)
+        .append(" (").append(ReminderConfigTable::GetCreateColumns()).append(")");
+    int32_t ret = store.ExecuteSql(createSql);
+    if (ret != NativeRdb::E_OK) {
+        ANSR_LOGE("Create reminder_config table failed:%{public}d", ret);
     }
     return ret;
 }
@@ -495,6 +541,21 @@ __attribute__((no_sanitize("cfi"))) std::vector<sptr<ReminderRequest>> ReminderS
 
 __attribute__((no_sanitize("cfi"))) std::vector<sptr<ReminderRequest>> ReminderStore::GetHalfHourReminders()
 {
+    int32_t recoverFailCount = 0;
+    int32_t ret = GetConfigValue(RECOVER_FAIL_COUNT_KEY, recoverFailCount);
+    if (ret != STATE_OK) {
+        recoverFailCount = 0;
+    }
+    
+    if (recoverFailCount >= MAX_RECOVER_FILE_COUNT) {
+        ANSR_LOGE("Data anomaly detected, recover_fail_count=%{public}d, deleting all reminder data", recoverFailCount);
+        DeleteAllData();
+        SetConfigValue(RECOVER_FAIL_COUNT_KEY, 0);
+        return std::vector<sptr<ReminderRequest>>();
+    }
+    SetConfigValue(RECOVER_FAIL_COUNT_KEY, recoverFailCount + 1);
+    ANSR_LOGI("Increment recover_fail_count: %{public}d", recoverFailCount + 1);
+    
     int64_t nowTime = GetCurrentTime();
     std::string sql = "SELECT * FROM " +
         ReminderBaseTable::TABLE_NAME + " WHERE (" +
@@ -511,8 +572,10 @@ __attribute__((no_sanitize("cfi"))) std::vector<sptr<ReminderRequest>> ReminderS
         std::to_string(nowTime + DURATION_PRELOAD_TIME) + " AND " + ReminderCalendarTable::CALENDAR_END_DATE_TIME +
         " = " + ReminderCalendarTable::CALENDAR_DATE_TIME + ")) ORDER BY " +
         ReminderBaseTable::TRIGGER_TIME + " ASC";
-    ANSR_LOGD("GetHalfHourReminders sql =%{public}s", sql.c_str());
-    return GetReminders(sql);
+    auto reminders = GetReminders(sql);
+    SetConfigValue(RECOVER_FAIL_COUNT_KEY, recoverFailCount);
+    ANSR_LOGI("Decrement recover_fail_count: %{public}d", recoverFailCount);
+    return reminders;
 }
 
 void ReminderStore::GetUInt8Val(const std::shared_ptr<NativeRdb::ResultSet>& resultSet,
@@ -665,6 +728,52 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const std::str
     ret = rdbStore_->ExecuteSql(sql);
     if (ret != NativeRdb::E_OK) {
         ANSR_LOGE("Delete from %{public}s failed", ReminderCalendarTable::TABLE_NAME.c_str());
+        rdbStore_->RollBack();
+        return STATE_FAIL;
+    }
+    rdbStore_->Commit();
+    return STATE_OK;
+}
+
+int32_t ReminderStore::DeleteAllData()
+{
+    if (rdbStore_ == nullptr) {
+        ANSR_LOGE("Rdb store is not initialized.");
+        return STATE_FAIL;
+    }
+    rdbStore_->BeginTransaction();
+    // delete reminder_calendar
+    std::string sql = "DELETE FROM " + ReminderCalendarTable::TABLE_NAME;
+    int32_t ret = rdbStore_->ExecuteSql(sql);
+    if (ret != NativeRdb::E_OK) {
+        ANSR_LOGE("Delete from %{public}s failed", ReminderCalendarTable::TABLE_NAME.c_str());
+        rdbStore_->RollBack();
+        return STATE_FAIL;
+    }
+
+    // delete reminder_alarm
+    sql = "DELETE FROM " + ReminderAlarmTable::TABLE_NAME;
+    ret = rdbStore_->ExecuteSql(sql);
+    if (ret != NativeRdb::E_OK) {
+        ANSR_LOGE("Delete from %{public}s failed", ReminderAlarmTable::TABLE_NAME.c_str());
+        rdbStore_->RollBack();
+        return STATE_FAIL;
+    }
+
+    // delete reminder_timer
+    sql = "DELETE FROM " + ReminderTimerTable::TABLE_NAME;
+    ret = rdbStore_->ExecuteSql(sql);
+    if (ret != NativeRdb::E_OK) {
+        ANSR_LOGE("Delete from %{public}s failed", ReminderTimerTable::TABLE_NAME.c_str());
+        rdbStore_->RollBack();
+        return STATE_FAIL;
+    }
+
+    // delete reminder_base
+    sql = "DELETE FROM " + ReminderBaseTable::TABLE_NAME;
+    ret = rdbStore_->ExecuteSql(sql);
+    if (ret != NativeRdb::E_OK) {
+        ANSR_LOGE("Delete from %{public}s failed", ReminderBaseTable::TABLE_NAME.c_str());
         rdbStore_->RollBack();
         return STATE_FAIL;
     }
@@ -1008,6 +1117,90 @@ std::vector<ReminderState> ReminderStore::QueryState(const int32_t uid)
         states.push_back(state);
     }
     return states;
+}
+
+int32_t ReminderStore::GetConfigValue(const std::string& key, int32_t& value)
+{
+    if (rdbStore_ == nullptr) {
+        ANSR_LOGE("Rdb store is not initialized.");
+        return STATE_FAIL;
+    }
+    std::string querySql("SELECT ");
+    querySql.append(ReminderConfigTable::VALUE).append(" FROM ").append(ReminderConfigTable::TABLE_NAME)
+        .append(" WHERE ").append(ReminderConfigTable::KEY).append(" = '").append(key).append("'");
+    std::vector<std::string> whereArgs;
+    auto resultSet = rdbStore_->QuerySql(querySql, whereArgs);
+    if (resultSet == nullptr) {
+        ANSR_LOGW("Query config value failed, key=%{public}s", key.c_str());
+        return STATE_FAIL;
+    }
+    int32_t resultNum = 0;
+    resultSet->GetRowCount(resultNum);
+    if (resultNum == 0) {
+        ANSR_LOGD("Config key not found: %{public}s", key.c_str());
+        resultSet->Close();
+        return STATE_FAIL;
+    }
+    if (resultSet->GoToNextRow() != NativeRdb::E_OK) {
+        ANSR_LOGE("Failed to get config value for key=%{public}s", key.c_str());
+        resultSet->Close();
+        return STATE_FAIL;
+    }
+    std::string valueStr;
+    int32_t columnIndex = -1;
+    resultSet->GetColumnIndex(ReminderConfigTable::VALUE, columnIndex);
+    if (columnIndex == -1) {
+        ANSR_LOGE("Column value not found");
+        resultSet->Close();
+        return STATE_FAIL;
+    }
+    resultSet->GetString(columnIndex, valueStr);
+    value = ReminderRequest::StringToInt(valueStr);
+    resultSet->Close();
+    return STATE_OK;
+}
+
+int32_t ReminderStore::SetConfigValue(const std::string& key, int32_t value)
+{
+    if (rdbStore_ == nullptr) {
+        ANSR_LOGE("Rdb store is not initialized.");
+        return STATE_FAIL;
+    }
+    std::string querySql("SELECT * FROM ");
+    querySql.append(ReminderConfigTable::TABLE_NAME).append(" WHERE ").append(ReminderConfigTable::KEY)
+        .append(" = '").append(key).append("'");
+    std::vector<std::string> whereArgs;
+    auto resultSet = rdbStore_->QuerySql(querySql, whereArgs);
+    if (resultSet == nullptr) {
+        ANSR_LOGE("Query config failed");
+        return STATE_FAIL;
+    }
+    int32_t resultNum = 0;
+    resultSet->GetRowCount(resultNum);
+    resultSet->Close();
+    
+    NativeRdb::ValuesBucket values;
+    values.PutString(ReminderConfigTable::KEY, key);
+    values.PutString(ReminderConfigTable::VALUE, std::to_string(value));
+    
+    int32_t ret = STATE_FAIL;
+    if (resultNum == 0) {
+        int64_t rowId = STATE_FAIL;
+        ret = rdbStore_->Insert(rowId, ReminderConfigTable::TABLE_NAME, values);
+        if (ret != NativeRdb::E_OK) {
+            ANSR_LOGE("Insert config failed, key=%{public}s, value=%{public}d", key.c_str(), value);
+            return STATE_FAIL;
+        }
+    } else {
+        int32_t rowId = STATE_FAIL;
+        std::string condition = std::string(ReminderConfigTable::KEY) + " = '" + key + "'";
+        ret = rdbStore_->Update(rowId, ReminderConfigTable::TABLE_NAME, values, condition, whereArgs);
+        if (ret != NativeRdb::E_OK) {
+            ANSR_LOGE("Update config failed, key=%{public}s, value=%{public}d", key.c_str(), value);
+            return STATE_FAIL;
+        }
+    }
+    return STATE_OK;
 }
 }  // namespace Notification
 }  // namespace OHOS

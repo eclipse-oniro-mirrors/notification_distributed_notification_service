@@ -27,10 +27,10 @@
 #include "system_ability_definition.h"
 #include "want_agent_helper.h"
 #include "nlohmann/json.hpp"
-#include "want_params_wrapper.h"
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
 #include "int_wrapper.h"
+#include "notification_want_params_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -686,10 +686,7 @@ void ReminderRequest::RecoverWantAgentByJson(const std::string& wantAgentInfo, c
             GetJsonValue<std::string>(root, "uri", wai->uri);
             std::string parameters;
             GetJsonValue<std::string>(root, "parameters", parameters);
-            auto result = AAFwk::WantParamWrapper::Parse(parameters);
-            if (result != nullptr) {
-                result->GetValue(wai->parameters);
-            }
+            wai->parameters = NotificationWantParamsHelper::ParseWantParamsWithBrackets(parameters);
             SetWantAgentInfo(wai);
             break;
         }
@@ -2022,8 +2019,7 @@ void ReminderRequest::SerializeWantAgent(std::string& wantInfoStr, std::string& 
         pkgName = wantAgentInfo_->pkgName;
         abilityName = wantAgentInfo_->abilityName;
         uri = wantAgentInfo_->uri;
-        AAFwk::WantParamWrapper wrapper(wantAgentInfo_->parameters);
-        parameters = wrapper.ToString();
+        parameters = NotificationWantParamsHelper::SerializeWantParams(wantAgentInfo_->parameters);
     }
     nlohmann::json wantInfo;
     wantInfo["pkgName"] = pkgName;
