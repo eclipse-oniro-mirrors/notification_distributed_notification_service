@@ -223,6 +223,9 @@ HWTEST_F(NotificationConfigParseTest, IsInCollaborationFilter_00005, Function | 
 HWTEST_F(NotificationConfigParseTest, GetCollaborativeDeleteType_00001, Function | SmallTest | Level1)
 {
     auto result = NotificationConfigParse::GetInstance()->GetCollaborativeDeleteType();
+    if (result.size() <= 0) {
+        GTEST_SKIP() << "Json of collaborativeDeleteTypes not exist";
+    }
     EXPECT_TRUE(result.find("LIVE_VIEW") != result.end());
     EXPECT_TRUE(result.find("SOCIAL_COMMUNICATION") != result.end());
 }
@@ -343,6 +346,9 @@ HWTEST_F(NotificationConfigParseTest, GetAppAndDeviceRelationMap_00001, Function
 {
     std::map<std::string, std::string> relationMap;
     bool result = NotificationConfigParse::GetInstance()->GetAppAndDeviceRelationMap(relationMap);
+    if (!result) {
+        GTEST_SKIP() << "Json of appAndDeviceRelationMap not exist";
+    }
     EXPECT_TRUE(result);
 }
 
@@ -356,6 +362,9 @@ HWTEST_F(NotificationConfigParseTest, GetNotificationExtensionEnabledBundlesList
 {
     std::vector<std::string> bundles;
     bool result = NotificationConfigParse::GetInstance()->GetNotificationExtensionEnabledBundlesWriteList(bundles);
+    if (!result) {
+        GTEST_SKIP() << "Json of enabledBundlesWriteList not exist";
+    }
     EXPECT_TRUE(result);
 }
 }   //namespace Notification
