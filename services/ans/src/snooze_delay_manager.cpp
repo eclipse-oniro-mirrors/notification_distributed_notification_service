@@ -53,6 +53,13 @@ ErrCode AdvancedNotificationService::SnoozeNotification(const std::string &hashC
             message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).BranchId(BRANCH_1));
         return ERR_ANS_INNER_PERMISSION_DENIED;
     }
+    if (delayTime <= 0 || delayTime > NotificationConstant::MAX_DELAY_TIME_S) {
+        ANS_LOGE("Invalid delayTime.");
+        message.Message("Invalid delayTime.");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM).BranchId(BRANCH_2));
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
 
     ErrCode result = ERR_OK;
     int64_t triggerTime = GetCurrentTime() + delayTime * NotificationConstant::SECOND_TO_MS;
