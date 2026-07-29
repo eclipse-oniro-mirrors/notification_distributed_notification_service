@@ -385,5 +385,31 @@ HWTEST_F(BundleManagerHelperBranchTest, GetSandboxDataDir_00001, Function | Smal
     result = bundleManagerHelper.GetSandboxDataDir(bundleName, appIndex, sandboxDataDir);
     EXPECT_TRUE(result);
 }
+
+/**
+ * @tc.number    : CheckBundleImplExtensionAbility_00001
+ * @tc.name      : CheckBundleImplExtensionAbility_00001
+ * @tc.desc      : Test CheckBundleImplExtensionAbility returns false when GetBundleInfoV9 fails
+ */
+HWTEST_F(BundleManagerHelperBranchTest, CheckBundleImplExtensionAbility_00001, Function | SmallTest | Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    MockGetSystemAbilityManager(true);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundle", 1);
+    EXPECT_FALSE(bundleManagerHelper.CheckBundleImplExtensionAbility(bundleOption));
+}
+
+/**
+ * @tc.number    : CheckBundleImplExtensionAbility_00002
+ * @tc.name      : CheckBundleImplExtensionAbility_00002
+ * @tc.desc      : Test CheckBundleImplExtensionAbility returns false when bundleMgr_ is nullptr
+ */
+HWTEST_F(BundleManagerHelperBranchTest, CheckBundleImplExtensionAbility_00002, Function | SmallTest | Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    MockGetSystemAbilityManager(false);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundle", 1);
+    EXPECT_FALSE(bundleManagerHelper.CheckBundleImplExtensionAbility(bundleOption));
+}
 }  // namespace Notification
 }  // namespace OHOS

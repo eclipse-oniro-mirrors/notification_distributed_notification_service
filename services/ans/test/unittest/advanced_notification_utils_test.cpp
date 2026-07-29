@@ -998,6 +998,224 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00004, Function | SmallTest | Level
     EXPECT_EQ(result, ERR_OK);
     EXPECT_EQ(state, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
 }
+
+/**
+ * @tc.name: UpdateCloneBundleInfo_00005
+ * @tc.desc: Test UpdateCloneBundleInfoForExtensionSubscription restores priority subscription
+ *           when extensionSubscriptionInfos contains SYSTEM type
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00005, Function | SmallTest | Level1)
+{
+    MockIsNeedHapModuleInfos(true);
+    MockIsVerfyPermisson(true);
+    NotificationCloneBundleInfo cloneBundleInfo;
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    auto systemType = NotificationConstant::SubscribeType::SYSTEM;
+    infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo("addr", systemType));
+    cloneBundleInfo.SetExtensionSubscriptionInfos(infos);
+    cloneBundleInfo.SetEnabledExtensionSubscription(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    cloneBundleInfo.SetBundleName("UpdateCloneBundleInfo_00005");
+    cloneBundleInfo.SetUid(1);
+    cloneBundleInfo.SetIsShowBadge(true);
+    cloneBundleInfo.SetEnableNotification(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    cloneBundleInfo.SetSlotFlags(63);
+    NotificationCloneBundleInfo::SlotInfo slotInfo;
+    slotInfo.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    slotInfo.enable_ = true;
+    cloneBundleInfo.AddSlotInfo(slotInfo);
+    advancedNotificationService_->UpdateCloneBundleInfo(cloneBundleInfo, 0);
+    SleepForFC();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("UpdateCloneBundleInfo_00005", 1);
+    EXPECT_TRUE(advancedNotificationService_->IsSystemTypeSubscriber(bundle));
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> resultInfos;
+    auto ret = NotificationPreferences::GetInstance()->GetExtensionSubscriptionInfos(bundle, resultInfos);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_FALSE(resultInfos.empty());
+    bool hasSystemType = false;
+    for (const auto &info : resultInfos) {
+        if (info != nullptr && info->GetType() == NotificationConstant::SubscribeType::SYSTEM) {
+            hasSystemType = true;
+        }
+    }
+    EXPECT_TRUE(hasSystemType);
+}
+
+/**
+ * @tc.name: UpdateCloneBundleInfo_00006
+ * @tc.desc: Test RestoreClonePriorityStrategy restores priority strategy from SYSTEM type info
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00006, Function | SmallTest | Level1)
+{
+    MockIsNeedHapModuleInfos(true);
+    MockIsVerfyPermisson(true);
+    NotificationCloneBundleInfo cloneBundleInfo;
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    sptr<NotificationExtensionSubscriptionInfo> systemInfo =
+        new (std::nothrow) NotificationExtensionSubscriptionInfo(
+            "addr", NotificationConstant::SubscribeType::SYSTEM);
+    systemInfo->SetPriorityStrategy(
+        static_cast<int32_t>(NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY));
+    infos.emplace_back(systemInfo);
+    cloneBundleInfo.SetExtensionSubscriptionInfos(infos);
+    cloneBundleInfo.SetEnabledExtensionSubscription(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    cloneBundleInfo.SetBundleName("UpdateCloneBundleInfo_00006");
+    cloneBundleInfo.SetUid(1);
+    cloneBundleInfo.SetIsShowBadge(true);
+    cloneBundleInfo.SetEnableNotification(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    cloneBundleInfo.SetSlotFlags(63);
+    advancedNotificationService_->UpdateCloneBundleInfo(cloneBundleInfo, 0);
+    SleepForFC();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("UpdateCloneBundleInfo_00006", 1);
+    int32_t resultStrategy = 0;
+    auto strategyRet = NotificationPreferences::GetInstance()->GetExtensionSubscriptionNotificationStrategy(
+        bundle, resultStrategy);
+    EXPECT_EQ(strategyRet, ERR_OK);
+    EXPECT_EQ(resultStrategy,
+        static_cast<int32_t>(NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY));
+}
+
+/**
+ * @tc.name: UpdateCloneBundleInfo_00007
+ * @tc.desc: Test RestoreClonePriorityStrategy skips nullptr info in infos
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00007, Function | SmallTest | Level1)
+{
+    MockIsNeedHapModuleInfos(true);
+    MockIsVerfyPermisson(true);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("RestoreClone_007", 1);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    infos.emplace_back(nullptr);
+    sptr<NotificationExtensionSubscriptionInfo> systemInfo =
+        new (std::nothrow) NotificationExtensionSubscriptionInfo(
+            "addr", NotificationConstant::SubscribeType::SYSTEM);
+    systemInfo->SetPriorityStrategy(
+        static_cast<int32_t>(NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY));
+    infos.emplace_back(systemInfo);
+    advancedNotificationService_->RestoreClonePriorityStrategy(bundle, infos);
+    int32_t resultStrategy = 0;
+    auto strategyRet = NotificationPreferences::GetInstance()->GetExtensionSubscriptionNotificationStrategy(
+        bundle, resultStrategy);
+    EXPECT_EQ(strategyRet, ERR_OK);
+    EXPECT_EQ(resultStrategy,
+        static_cast<int32_t>(NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY));
+}
+
+/**
+ * @tc.name: UpdateCloneBundleInfo_00008
+ * @tc.desc: Test UpdateCloneBundleInfoForExtensionSubscription returns early when
+ *           CheckBundleImplExtensionAbility returns false
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00008, Function | SmallTest | Level1)
+{
+    MockIsNeedHapModuleInfos(false);
+    MockIsVerfyPermisson(true);
+    NotificationCloneBundleInfo cloneBundleInfo;
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    auto systemType = NotificationConstant::SubscribeType::SYSTEM;
+    infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo("addr", systemType));
+    cloneBundleInfo.SetExtensionSubscriptionInfos(infos);
+    cloneBundleInfo.SetEnabledExtensionSubscription(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    cloneBundleInfo.SetBundleName("UpdateCloneBundleInfo_00008");
+    cloneBundleInfo.SetUid(1);
+    cloneBundleInfo.SetIsShowBadge(true);
+    cloneBundleInfo.SetEnableNotification(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    cloneBundleInfo.SetSlotFlags(63);
+    advancedNotificationService_->UpdateCloneBundleInfo(cloneBundleInfo, 0);
+    SleepForFC();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("UpdateCloneBundleInfo_00008", 1);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> resultInfos;
+    NotificationPreferences::GetInstance()->GetExtensionSubscriptionInfos(bundle, resultInfos);
+    EXPECT_TRUE(resultInfos.empty());
+}
+
+/**
+ * @tc.name: UpdateCloneBundleInfo_00009
+ * @tc.desc: Test UpdateCloneBundleInfoForExtensionSubscription with invalid grant bundles
+ *           (GenerateCloneValidBundleOption returns nullptr due to empty bundleName)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00009, Function | SmallTest | Level1)
+{
+    MockIsNeedHapModuleInfos(true);
+    MockIsVerfyPermisson(true);
+    NotificationCloneBundleInfo cloneBundleInfo;
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    auto systemType = NotificationConstant::SubscribeType::SYSTEM;
+    infos.emplace_back(new (std::nothrow) NotificationExtensionSubscriptionInfo("addr", systemType));
+    std::vector<sptr<NotificationBundleOption>> extensionBundles = {
+        new NotificationBundleOption("", 0)
+    };
+    cloneBundleInfo.SetExtensionSubscriptionBundles(extensionBundles);
+    cloneBundleInfo.SetExtensionSubscriptionInfos(infos);
+    cloneBundleInfo.SetEnabledExtensionSubscription(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    cloneBundleInfo.SetBundleName("UpdateCloneBundleInfo_00009");
+    cloneBundleInfo.SetUid(1);
+    cloneBundleInfo.SetIsShowBadge(true);
+    cloneBundleInfo.SetEnableNotification(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    cloneBundleInfo.SetSlotFlags(63);
+    advancedNotificationService_->UpdateCloneBundleInfo(cloneBundleInfo, 0);
+    SleepForFC();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("UpdateCloneBundleInfo_00009", 1);
+    std::vector<sptr<NotificationBundleOption>> resultBundles;
+    NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundle, resultBundles);
+    EXPECT_TRUE(resultBundles.empty());
+}
+
+/**
+ * @tc.name: RestoreClonePriorityStrategy_00001
+ * @tc.desc: Test RestoreClonePriorityStrategy with non-SYSTEM type info, priorityStrategy stays 0
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, RestoreClonePriorityStrategy_00001, Function | SmallTest | Level1)
+{
+    MockIsNeedHapModuleInfos(true);
+    MockIsVerfyPermisson(true);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("RestoreClone_001", 1);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    infos.emplace_back(new NotificationExtensionSubscriptionInfo(
+        "addr", NotificationConstant::SubscribeType::BLUETOOTH));
+    advancedNotificationService_->RestoreClonePriorityStrategy(bundle, infos);
+    int32_t resultStrategy = -1;
+    auto ret = NotificationPreferences::GetInstance()->GetExtensionSubscriptionNotificationStrategy(
+        bundle, resultStrategy);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(resultStrategy, 0);
+}
+
+/**
+ * @tc.name: RestoreClonePriorityStrategy_00002
+ * @tc.desc: Test RestoreClonePriorityStrategy with empty bundleName, SetExtensionSubscriptionNotification fails
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, RestoreClonePriorityStrategy_00002, Function | SmallTest | Level1)
+{
+    MockIsNeedHapModuleInfos(true);
+    MockIsVerfyPermisson(true);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("", 1);
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    sptr<NotificationExtensionSubscriptionInfo> systemInfo =
+        new NotificationExtensionSubscriptionInfo(
+            "addr", NotificationConstant::SubscribeType::SYSTEM);
+    systemInfo->SetPriorityStrategy(
+        static_cast<int32_t>(NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY));
+    infos.emplace_back(systemInfo);
+    advancedNotificationService_->RestoreClonePriorityStrategy(bundle, infos);
+    int32_t resultStrategy = -1;
+    auto ret = NotificationPreferences::GetInstance()->GetExtensionSubscriptionNotificationStrategy(
+        bundle, resultStrategy);
+    EXPECT_NE(ret, ERR_OK);
+}
 #endif
 /**
  * @tc.name: ExecBatchCancel_00001
