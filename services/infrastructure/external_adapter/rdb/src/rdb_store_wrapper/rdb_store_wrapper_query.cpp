@@ -28,6 +28,12 @@ const int64_t LAST_DAY_MS = 7 * 24 * 60 * 60 * 1000;
 const std::ptrdiff_t MAX_SIZE_PER_BATCH = 100;
 const std::string BUNDLE_KEY_PREFIX = "ans_bundle_";
 const std::string BUNDLE_KEY_SUFFIX_ENABLED_NOTIFICATION = "_enabledNotification";
+const std::string BUNDLE_KEY_SUFFIX_NAME = "_name";
+const std::string BUNDLE_KEY_SUFFIX_UID = "_uid";
+// Slot keys contain "_slot_type_" (e.g. ans_bundle_<bk>_slot_type_0_name); excluded because
+// KEY_BUNDLE_NAME and KEY_SLOT_NAME share the value "name", so a bare "%_name" LIKE would
+// otherwise pull in slot _name keys.
+const std::string SLOT_KEY_MARKER = "_slot_type_";
 }
 
 template<typename Func>
@@ -468,8 +474,19 @@ int32_t NtfRdbStoreWrapper::QueryEnabledBundlesFromTable(
     const std::string &tableName, std::unordered_map<std::string, std::string> &values)
 {
     NativeRdb::AbsRdbPredicates predicates(tableName);
-    predicates.SetWhereClause(NOTIFICATION_KEY + " LIKE ? AND " + NOTIFICATION_VALUE + " IN ('1','3')");
+    // One query returns the bundle-level _name/_uid/_enabledNotification entries so that
+    // bundleName and uid can be resolved from persisted values instead of splitting the
+    // ambiguous bundleKey (bundleName+uid have no separator in the key). The VALUE IN ('1','3')
+    // filter is applied only to _enabledNotification; slot keys are excluded via the
+    // "_slot_type_" marker so slot _name keys do not pollute the bundle _name entries.
+    predicates.SetWhereClause(NOTIFICATION_KEY + " LIKE ? AND " + NOTIFICATION_KEY + " NOT LIKE ? AND (" +
+        NOTIFICATION_KEY + " LIKE ? OR " + NOTIFICATION_KEY + " LIKE ? OR (" +
+        NOTIFICATION_KEY + " LIKE ? AND " + NOTIFICATION_VALUE + " IN ('1','3')))");
     predicates.SetWhereArgs({
+        BUNDLE_KEY_PREFIX + "%",
+        "%" + SLOT_KEY_MARKER + "%",
+        "%" + BUNDLE_KEY_SUFFIX_NAME,
+        "%" + BUNDLE_KEY_SUFFIX_UID,
         BUNDLE_KEY_PREFIX + "%" + BUNDLE_KEY_SUFFIX_ENABLED_NOTIFICATION
     });
 

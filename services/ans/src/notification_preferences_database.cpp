@@ -1161,43 +1161,31 @@ bool NotificationPreferencesDatabase::GetEnabledForBundleSlots(
     return true;
 }
 
-bool NotificationPreferencesDatabase::ParseBundleNameAndUidFromKey(
-    const std::string &key, const std::string &suffix, std::string &bundleName, int32_t &uid)
-{
-    const std::string prefix = KEY_ANS_BUNDLE + KEY_UNDER_LINE;
-    const size_t prefixLen = prefix.size();
-    const size_t suffixLen = suffix.size();
-    if (key.size() <= prefixLen + suffixLen ||
-        key.compare(0, prefixLen, prefix) != 0 ||
-        key.compare(key.size() - suffixLen, suffixLen, suffix) != 0) {
-        return false;
-    }
-    std::string middle = key.substr(prefixLen, key.size() - prefixLen - suffixLen);
-    size_t uidStart = middle.size();
-    while (uidStart > 0 && std::isdigit(static_cast<unsigned char>(middle[uidStart - 1]))) {
-        uidStart--;
-    }
-    if (uidStart == 0 || uidStart == middle.size()) {
-        return false;
-    }
-    bundleName = middle.substr(0, uidStart);
-    uid = StringToInt(middle.substr(uidStart));
-    return true;
-}
-
 bool NotificationPreferencesDatabase::HandleDataBaseMapInner(
     const std::unordered_map<std::string, std::string> &datas,
     std::vector<NotificationBundleOption> &bundleOption, const int32_t currentUserId)
 {
     const std::string suffix = KEY_UNDER_LINE + KEY_BUNDLE_ENABLE_NOTIFICATION;
+    const std::string nameSuffix = KEY_UNDER_LINE + KEY_BUNDLE_NAME;
+    const std::string uidSuffix = KEY_UNDER_LINE + KEY_BUNDLE_UID;
+    // bundleName/uid are resolved from the persisted _name/_uid values (the enabled key
+    // concatenates bundleName+uid with no separator, which is ambiguous when the bundle
+    // name ends with digits). If either entry is missing the record is anomalous and skipped.
     for (const auto &dataMapItem : datas) {
         const std::string &key = dataMapItem.first;
         const std::string &value = dataMapItem.second;
-        std::string bundleName;
-        int32_t uid = 0;
-        if (!ParseBundleNameAndUidFromKey(key, suffix, bundleName, uid)) {
+        if (key.size() <= suffix.size() ||
+            key.compare(key.size() - suffix.size(), suffix.size(), suffix) != 0) {
             continue;
         }
+        std::string bundleKeyPrefix = key.substr(0, key.size() - suffix.size());
+        auto nameIt = datas.find(bundleKeyPrefix + nameSuffix);
+        auto uidIt = datas.find(bundleKeyPrefix + uidSuffix);
+        if (nameIt == datas.end() || uidIt == datas.end()) {
+            continue;
+        }
+        std::string bundleName = nameIt->second;
+        int32_t uid = StringToInt(uidIt->second);
 
         NotificationConstant::SWITCH_STATE state = static_cast<NotificationConstant::SWITCH_STATE>(
             StringToInt(value));
