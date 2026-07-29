@@ -3755,12 +3755,20 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_O
     Function | SmallTest | Level1)
 {
     std::unordered_map<std::string, std::string> datas;
+    datas.insert({"ans_bundle_bundleOnUser1001_name", "bundleOnUser"});
+    datas.insert({"ans_bundle_bundleOnUser1001_uid", "1001"});
     datas.insert({"ans_bundle_bundleOnUser1001_enabledNotification",
         std::to_string(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON))});
+    datas.insert({"ans_bundle_bundleOnSystem1002_name", "bundleOnSystem"});
+    datas.insert({"ans_bundle_bundleOnSystem1002_uid", "1002"});
     datas.insert({"ans_bundle_bundleOnSystem1002_enabledNotification",
         std::to_string(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON))});
+    datas.insert({"ans_bundle_bundleOffUser1003_name", "bundleOffUser"});
+    datas.insert({"ans_bundle_bundleOffUser1003_uid", "1003"});
     datas.insert({"ans_bundle_bundleOffUser1003_enabledNotification",
         std::to_string(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF))});
+    datas.insert({"ans_bundle_bundleOffSystem1004_name", "bundleOffSystem"});
+    datas.insert({"ans_bundle_bundleOffSystem1004_uid", "1004"});
     datas.insert({"ans_bundle_bundleOffSystem1004_enabledNotification",
         std::to_string(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF))});
 
@@ -3796,12 +3804,14 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_O
 /**
  * @tc.name      : HandleDataBaseMapInner_StringMatch_00100
  * @tc.number    : HandleDataBaseMapInner_StringMatch_00100
- * @tc.desc      : 测试 HandleDataBaseMapInner 从 _enabledNotification 键中解析 bundleName 和 uid
+ * @tc.desc      : 测试 HandleDataBaseMapInner 从 _name/_uid 值解析 bundleName 和 uid
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, HandleDataBaseMapInner_StringMatch_00100,
     Function | SmallTest | Level1)
 {
     std::unordered_map<std::string, std::string> datas;
+    datas.insert({"ans_bundle_bundleMatch1001_name", "bundleMatch"});
+    datas.insert({"ans_bundle_bundleMatch1001_uid", "1001"});
     datas.insert({"ans_bundle_bundleMatch1001_enabledNotification",
         std::to_string(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON))});
 
@@ -3884,168 +3894,29 @@ HWTEST_F(NotificationPreferencesDatabaseTest, HandleDataBaseMapInner_StringMatch
 }
 
 /**
- * @tc.name      : ParseBundleNameAndUidFromKey_00100
- * @tc.number    : ParseBundleNameAndUidFromKey_00100
- * @tc.desc      : Test ParseBundleNameAndUidFromKey with valid _enabledNotification suffix.
+ * @tc.name      : HandleDataBaseMapInner_DigitEndingBundleName_00100
+ * @tc.number    : HandleDataBaseMapInner_DigitEndingBundleName_00100
+ * @tc.desc      : Test HandleDataBaseMapInner resolves bundleName/uid from persisted _name/_uid
+ *                 entries when the bundle name ends with digits (the enabled key concatenates
+ *                 bundleName+uid with no separator, so splitting by trailing digits mis-parses).
  */
-HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00100,
+HWTEST_F(NotificationPreferencesDatabaseTest, HandleDataBaseMapInner_DigitEndingBundleName_00100,
     Function | SmallTest | Level1)
 {
-    std::string bundleName;
-    int32_t uid = 0;
-    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
-        "ans_bundle_com.example.app1001_enabledNotification", "_enabledNotification",
-        bundleName, uid);
-    EXPECT_TRUE(ret);
-    EXPECT_EQ("com.example.app", bundleName);
-    EXPECT_EQ(1001, uid);
+    std::unordered_map<std::string, std::string> datas;
+    // bundleName "com.example.app12345" + uid 1001 -> key middle "com.example.app123451001"
+    datas.insert({"ans_bundle_com.example.app123451001_name", "com.example.app12345"});
+    datas.insert({"ans_bundle_com.example.app123451001_uid", "1001"});
+    datas.insert({"ans_bundle_com.example.app123451001_enabledNotification",
+        std::to_string(static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON))});
+
+    std::vector<NotificationBundleOption> bundleOption;
+    bool ret = preferncesDB_->HandleDataBaseMapInner(datas, bundleOption, DEFAULT_USER_ID);
+    ASSERT_TRUE(ret);
+    ASSERT_EQ(1u, bundleOption.size());
+    EXPECT_EQ("com.example.app12345", bundleOption[0].GetBundleName());
+    EXPECT_EQ(1001, bundleOption[0].GetUid());
 }
 
-/**
- * @tc.name      : ParseBundleNameAndUidFromKey_00200
- * @tc.number    : ParseBundleNameAndUidFromKey_00200
- * @tc.desc      : Test ParseBundleNameAndUidFromKey with _name suffix (generic suffix support).
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00200,
-    Function | SmallTest | Level1)
-{
-    std::string bundleName;
-    int32_t uid = 0;
-    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
-        "ans_bundle_bundleTest2001_name", "_name", bundleName, uid);
-    EXPECT_TRUE(ret);
-    EXPECT_EQ("bundleTest", bundleName);
-    EXPECT_EQ(2001, uid);
-}
-
-/**
- * @tc.name      : ParseBundleNameAndUidFromKey_00300
- * @tc.number    : ParseBundleNameAndUidFromKey_00300
- * @tc.desc      : Test ParseBundleNameAndUidFromKey with _slot_type_5_enabled suffix.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00300,
-    Function | SmallTest | Level1)
-{
-    std::string bundleName;
-    int32_t uid = 0;
-    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
-        "ans_bundle_com.example.app3001_slot_type_5_enabled", "_slot_type_5_enabled",
-        bundleName, uid);
-    EXPECT_TRUE(ret);
-    EXPECT_EQ("com.example.app", bundleName);
-    EXPECT_EQ(3001, uid);
-}
-
-/**
- * @tc.name      : ParseBundleNameAndUidFromKey_00400
- * @tc.number    : ParseBundleNameAndUidFromKey_00400
- * @tc.desc      : Test ParseBundleNameAndUidFromKey with invalid prefix returns false.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00400,
-    Function | SmallTest | Level1)
-{
-    std::string bundleName;
-    int32_t uid = 0;
-    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
-        "other_prefix_bundle1001_enabledNotification", "_enabledNotification",
-        bundleName, uid);
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name      : ParseBundleNameAndUidFromKey_00500
- * @tc.number    : ParseBundleNameAndUidFromKey_00500
- * @tc.desc      : Test ParseBundleNameAndUidFromKey with mismatched suffix returns false.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00500,
-    Function | SmallTest | Level1)
-{
-    std::string bundleName;
-    int32_t uid = 0;
-    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
-        "ans_bundle_bundleTest1001_name", "_enabledNotification", bundleName, uid);
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name      : ParseBundleNameAndUidFromKey_00600
- * @tc.number    : ParseBundleNameAndUidFromKey_00600
- * @tc.desc      : Test ParseBundleNameAndUidFromKey with key length equal to prefix+suffix returns false.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00600,
-    Function | SmallTest | Level1)
-{
-    std::string bundleName;
-    int32_t uid = 0;
-    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
-        "ans_bundle__enabledNotification", "_enabledNotification", bundleName, uid);
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name      : ParseBundleNameAndUidFromKey_00700
- * @tc.number    : ParseBundleNameAndUidFromKey_00700
- * @tc.desc      : Test ParseBundleNameAndUidFromKey with no digits in middle part returns false.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00700,
-    Function | SmallTest | Level1)
-{
-    std::string bundleName;
-    int32_t uid = 0;
-    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
-        "ans_bundle_noUidHere_enabledNotification", "_enabledNotification", bundleName, uid);
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name      : ParseBundleNameAndUidFromKey_00800
- * @tc.number    : ParseBundleNameAndUidFromKey_00800
- * @tc.desc      : Test ParseBundleNameAndUidFromKey with all digits in middle part returns false.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00800,
-    Function | SmallTest | Level1)
-{
-    std::string bundleName;
-    int32_t uid = 0;
-    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
-        "ans_bundle_12345_enabledNotification", "_enabledNotification", bundleName, uid);
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name      : ParseBundleNameAndUidFromKey_00900
- * @tc.number    : ParseBundleNameAndUidFromKey_00900
- * @tc.desc      : Test ParseBundleNameAndUidFromKey with bundle name containing underscores.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_00900,
-    Function | SmallTest | Level1)
-{
-    std::string bundleName;
-    int32_t uid = 0;
-    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
-        "ans_bundle_com_example_app9001_enabledNotification", "_enabledNotification",
-        bundleName, uid);
-    EXPECT_TRUE(ret);
-    EXPECT_EQ("com_example_app", bundleName);
-    EXPECT_EQ(9001, uid);
-}
-
-/**
- * @tc.name      : ParseBundleNameAndUidFromKey_01000
- * @tc.number    : ParseBundleNameAndUidFromKey_01000
- * @tc.desc      : Test ParseBundleNameAndUidFromKey with large uid value.
- */
-HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleNameAndUidFromKey_01000,
-    Function | SmallTest | Level1)
-{
-    std::string bundleName;
-    int32_t uid = 0;
-    bool ret = preferncesDB_->ParseBundleNameAndUidFromKey(
-        "ans_bundle_bigUidApp1000000000_enabledNotification", "_enabledNotification",
-        bundleName, uid);
-    EXPECT_TRUE(ret);
-    EXPECT_EQ("bigUidApp", bundleName);
-    EXPECT_EQ(1000000000, uid);
-}
 }  // namespace Notification
 }  // namespace OHOS
