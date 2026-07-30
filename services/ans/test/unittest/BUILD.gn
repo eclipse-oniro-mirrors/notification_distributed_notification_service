@@ -610,9 +610,15 @@ ohos_unittest("permission_filter_test") {
     "/${services_path}/ans/include/utils",
     "/${services_path}/ans/include/notification_extension",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
+    "${frameworks_path}/test/moduletest/mock/include",
   ]
 
   sources = [
+    "${frameworks_path}/test/moduletest/mock/mock_ans_rdb_mgr_builder.cpp",
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
@@ -1376,11 +1382,16 @@ ohos_unittest("notification_service_test") {
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
+    "${frameworks_path}/test/moduletest/mock/include",
   ]
 
   defines = []
 
   sources = [
+    "${frameworks_path}/test/moduletest/mock/mock_ans_rdb_mgr_builder.cpp",
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_service_test.cpp",
     "mock/blob.cpp",
@@ -1484,11 +1495,16 @@ ohos_unittest("notification_live_view_service_test") {
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
+    "${frameworks_path}/test/moduletest/mock/include",
   ]
 
   defines = []
 
   sources = [
+    "${frameworks_path}/test/moduletest/mock/mock_ans_rdb_mgr_builder.cpp",
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_live_view_service_test.cpp",
     "mock/blob.cpp",
@@ -2024,11 +2040,16 @@ ohos_unittest("notification_slot_service_test") {
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
+    "${frameworks_path}/test/moduletest/mock/include",
   ]
 
   defines = []
 
   sources = [
+    "${frameworks_path}/test/moduletest/mock/mock_ans_rdb_mgr_builder.cpp",
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_slot_service_test.cpp",
     "mock/blob.cpp",
@@ -2132,11 +2153,16 @@ ohos_unittest("notification_utils_test") {
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
+    "${frameworks_path}/test/moduletest/mock/include",
   ]
 
   defines = []
 
   sources = [
+    "${frameworks_path}/test/moduletest/mock/mock_ans_rdb_mgr_builder.cpp",
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_utils_test.cpp",
     "mock/blob.cpp",
@@ -2240,11 +2266,16 @@ ohos_unittest("snooze_delay_manager_test") {
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
+    "${frameworks_path}/test/moduletest/mock/include",
   ]
 
   defines = []
 
   sources = [
+    "${frameworks_path}/test/moduletest/mock/mock_ans_rdb_mgr_builder.cpp",
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
@@ -2890,11 +2921,17 @@ ohos_unittest("notification_service_publish_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
+    "${frameworks_path}/test/moduletest/mock/include",
   ]
 
   defines = []
 
   sources = [
+    "${frameworks_path}/test/moduletest/mock/mock_ans_rdb_mgr_builder.cpp",
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_service_test/advanced_notification_service_publish_test.cpp",
     "mock/blob.cpp",
@@ -3029,12 +3066,17 @@ ohos_unittest("notification_preferences_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
+    "${frameworks_path}/test/moduletest/mock/include",
   ]
 
   use_exceptions = true
   defines = []
 
   sources = [
+    "${frameworks_path}/test/moduletest/mock/mock_ans_rdb_mgr_builder.cpp",
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_service_ability_test.cpp",
     "mock/blob.cpp",
@@ -3380,11 +3422,17 @@ ohos_unittest("advanced_notification_ringtone_service_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
+    "${frameworks_path}/test/moduletest/mock/include",
   ]
 
   defines = []
 
   sources = [
+    "${frameworks_path}/test/moduletest/mock/mock_ans_rdb_mgr_builder.cpp",
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_ringtone_service_test.cpp",
     "mock/blob.cpp",
@@ -3473,11 +3521,17 @@ ohos_unittest("advanced_notification_geofence_service_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
+    "${frameworks_path}/test/moduletest/mock/include",
   ]
 
   defines = []
 
   sources = [
+    "${frameworks_path}/test/moduletest/mock/mock_ans_rdb_mgr_builder.cpp",
     "advanced_notification_geofence_service_test.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
