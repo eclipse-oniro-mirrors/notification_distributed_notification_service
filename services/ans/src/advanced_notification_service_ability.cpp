@@ -17,7 +17,6 @@
 #include "notification_extension_wrapper.h"
 #include "system_event_observer.h"
 #include "common_event_manager.h"
-#include "common_event_support.h"
 #ifdef ALL_SCENARIO_COLLABORATION
 #include "distributed_device_manager.h"
 #include "distributed_extension_service.h"
@@ -29,7 +28,6 @@
 #include "advanced_datashare_helper.h"
 #include "notification_ai_extension_wrapper.h"
 #include "advanced_notification_inline.h"
-#include "time_service_client.h"
 
 namespace OHOS {
 namespace Notification {
@@ -40,8 +38,6 @@ REGISTER_SYSTEM_ABILITY_BY_ID(AdvancedNotificationServiceAbility, ADVANCED_NOTIF
 const std::string EXTENSION_BACKUP = "backup";
 const std::string EXTENSION_RESTORE = "restore";
 const int32_t ALL_CONNECT_SA_ID = 70633;
-static int64_t g_saStartTime;
-static int64_t g_saStartBootTime;
 
 AdvancedNotificationServiceAbility::AdvancedNotificationServiceAbility(const int32_t systemAbilityId, bool runOnCreate)
     : SystemAbility(systemAbilityId, runOnCreate), service_(nullptr)
@@ -57,9 +53,7 @@ void AdvancedNotificationServiceAbility::OnStart()
     if (service_ != nullptr) {
         return;
     }
-    g_saStartTime = GetCurrentTime();
-    sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
-    g_saStartBootTime = timer->GetBootTimeMs();
+    SystemEventObserver::InitSaStartTime();
     service_ = AdvancedNotificationService::GetInstance();
     service_->CreateDialogManager();
     
@@ -96,12 +90,6 @@ bool AdvancedNotificationServiceAbility::SubscribeCommonEvent()
     }
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent("usual.event.DATA_SHARE_READY");
-#ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
-    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
-    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED);
-    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
-    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED);
-#endif
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscriber_ = std::make_shared<SystemEventSubscriber>(
         subscribeInfo, std::bind(&AdvancedNotificationServiceAbility::OnReceiveEvent, this, std::placeholders::_1));
@@ -179,33 +167,6 @@ void AdvancedNotificationServiceAbility::OnReceiveEvent(const EventFwk::CommonEv
         EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
 #endif
     }
-#ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
-    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_TIME_CHANGED ||
-        action == EventFwk::CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED) {
-        int64_t current = GetCurrentTime();
-        sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
-        int64_t bootTimeMs = timer->GetBootTimeMs();
-        int64_t realTime = g_saStartTime + (bootTimeMs - g_saStartBootTime);
-        int64_t diffTime = current - realTime;
-        g_saStartTime = current;
-        g_saStartBootTime = bootTimeMs;
-        NotificationPreferences::GetInstance()->UpdateCustomTimeData(diffTime);
-        NotificationAnalyticsUtil::UpdateCleanExperDataTimer();
-        return;
-    }
-    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
-        AppExecFwk::ElementName ele = data.GetWant().GetElement();
-        std::string bundleName = ele.GetBundleName();
-        int32_t uid = data.GetWant().GetIntParam(AppExecFwk::Constants::UID, -1);
-        int32_t userId = data.GetWant().GetIntParam(AppExecFwk::Constants::USER_ID, -1);
-
-        NotificationPreferences::GetInstance()->DeleteStatisticsByBundle(userId, bundleName, uid);
-        return;
-    }
-    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED) {
-        NotificationPreferences::GetInstance()->DropStatisticsTable(data.GetCode());
-    }
-#endif
 }
 
 void AdvancedNotificationServiceAbility::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)

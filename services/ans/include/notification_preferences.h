@@ -63,6 +63,9 @@ public:
     
     ErrCode PutNotificationStatistics(const int32_t userId, const sptr<NotificationBundleOption> &bundleOption);
 
+    /** @brief Resolve the statistics table user id (ZERO_USERID for Anco apps, real userId otherwise). */
+    static int32_t ResolveStatisticsTableUserId(const NotificationBundleOption &bundle);
+
     ErrCode CleanExperData(const int32_t userId);
 
     ErrCode DeleteStatisticsByBundle(const int32_t userId, const std::string &bundleName, int32_t packageId);

@@ -48,6 +48,10 @@ if (is_build_source_set_ntf) {
 
     cflags = notification_size_opt_cflags
 
+    include_dirs = [
+      "${component_path}/interfaces/inner_api",
+    ]
+
     sources = [
       "src/notification_rdb_constant.cpp",
       "src/notification_rdb_hook_mgr.cpp",
@@ -71,7 +75,9 @@ if (is_build_source_set_ntf) {
     public_configs = [ ":ans_base_rdb_config_public" ]
 
     external_deps = [
+      "ability_base:zuri",
       "c_utils:utils",
+      "ipc:ipc_single",
       "ffrt:libffrt",
       "hilog:libhilog",
       "relational_store:native_rdb",
@@ -92,6 +98,10 @@ if (is_build_source_set_ntf) {
     }
     branch_protector_ret = "pac_ret"
 
+    include_dirs = [
+      "${component_path}/interfaces/inner_api",
+    ]
+
     sources = [
       "src/notification_rdb_constant.cpp",
       "src/notification_rdb_hook_mgr.cpp",
@@ -115,7 +125,9 @@ if (is_build_source_set_ntf) {
     public_configs = [ ":ans_base_rdb_config_public" ]
 
     external_deps = [
+      "ability_base:zuri",
       "c_utils:utils",
+      "ipc:ipc_single",
       "ffrt:libffrt",
       "hilog:libhilog",
       "relational_store:native_rdb",

@@ -53,6 +53,17 @@ constexpr static const char* KEY_PRIORITY_NOTIFICATION_SWITCH_FOR_BUNDLE_V2 = "p
 constexpr static const char* KEY_PRIORITY_NOTIFICATION_STRATEGY_FOR_BUNDLE = "priorityStrategyForBundle";
 const static std::string KEY_UNDER_LINE = "_";
 }
+
+int32_t NotificationPreferences::ResolveStatisticsTableUserId(const NotificationBundleOption &bundle)
+{
+    int32_t userId = INVALID_USER_ID;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundle.GetUid(), userId);
+    if (userId < 0) {
+        return INVALID_USER_ID;
+    }
+    bool isAncoApp = BundleManagerHelper::GetInstance()->IsAncoApp(bundle.GetBundleName(), bundle.GetUid());
+    return isAncoApp ? ZERO_USERID : userId;
+}
 ffrt::mutex NotificationPreferences::instanceMutex_;
 std::shared_ptr<NotificationPreferences> NotificationPreferences::instance_;
 
@@ -217,13 +228,14 @@ ErrCode NotificationPreferences::DeleteStatisticsByBundle(const int32_t userId,
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     ErrCode result = ERR_OK;
 
-    if (!preferncesDB_->DeleteStatisticsByBundle(userId, bundleName, packageId)) {
+    bool retUserId = preferncesDB_->DeleteStatisticsByBundle(userId, bundleName, packageId);
+    bool retZero = preferncesDB_->DeleteStatisticsByBundle(ZERO_USERID, bundleName, packageId);
+    if (!retUserId && !retZero) {
+        ANS_LOGI("DeleteStatisticsByBundle fail, uid: %{public}d", packageId);
         result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
         return result;
     }
-
     preferencesInfo_.RemoveNotificationStatisticsByBundle(packageId);
-    ANS_LOGI("NotificationPreferences::DeleteStatisticsByBundle.result: %{public}d", result);
     return result;
 }
 
@@ -242,7 +254,8 @@ ErrCode NotificationPreferences::QueryStatisticsByBundle(const sptr<Notification
         return result;
     }
 
-    if (!preferncesDB_->QueryStatisticsByBundle(bundle->GetUid(), recentCount, lastTime)) {
+    int32_t tableUserId = ResolveStatisticsTableUserId(*bundle);
+    if (!preferncesDB_->QueryStatisticsByBundle(bundle->GetUid(), tableUserId, recentCount, lastTime)) {
         ANS_LOGE("NotificationPreferences::QueryStatisticsByBundle failed.");
         result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
         return result;
@@ -290,7 +303,9 @@ void NotificationPreferences::UpdateStatisticsAll()
     for (auto &statistics : statisticsVec) {
         int32_t recentCount = 0;
         int64_t lastTime = 0;
-        if (!preferncesDB_->QueryStatisticsByBundle(statistics.GetBundleOption().GetUid(), recentCount, lastTime)) {
+        int32_t tableUserId = ResolveStatisticsTableUserId(statistics.GetBundleOption());
+        if (!preferncesDB_->QueryStatisticsByBundle(statistics.GetBundleOption().GetUid(),
+            tableUserId, recentCount, lastTime)) {
             ANS_LOGE("NotificationPreferences::QueryStatisticsByBundle failed.");
             return;
         }
