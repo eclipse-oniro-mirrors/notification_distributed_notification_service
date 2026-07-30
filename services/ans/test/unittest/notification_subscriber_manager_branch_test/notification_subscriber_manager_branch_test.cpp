@@ -24,6 +24,8 @@
 #include "ans_result_data_synchronizer.h"
 #include "advanced_notification_service.h"
 #include "notification_content.h"
+#include "notification_live_view_content.h"
+#include "notification_local_live_view_content.h"
 #include "notification_subscriber_manager.h"
 #include "notification_request.h"
 #undef private
@@ -72,6 +74,610 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, NotifyRefreshPriority_00100, F
     notificationSubscriberManager->NotifyRefreshPriorityIntelligent(true, requests);
     notificationSubscriberManager->NotifyRefreshPriorityStrategy(requests, strategies);
     notificationSubscriberManager->NotifyRefreshPriorityConfig(requests);
+}
+
+/**
+ * @tc.number    : MatchPriorityTypeToBits_00100
+ * @tc.name      : MatchPriorityTypeToBits_00100
+ * @tc.desc      : test MatchPriorityTypeToBits with PARAM_IN
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityTypeToBits_00100, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto result = manager->MatchPriorityTypeToBits(
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::PARAM_IN));
+    EXPECT_EQ(result, NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT |
+        NotificationConstant::PriorityStrategyStatus::STATUS_APPLICATION_DEFINED);
+}
+
+/**
+ * @tc.number    : MatchPriorityTypeToBits_00200
+ * @tc.name      : MatchPriorityTypeToBits_00200
+ * @tc.desc      : test MatchPriorityTypeToBits with KEYWORD
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityTypeToBits_00200, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto result = manager->MatchPriorityTypeToBits(
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::KEYWORD));
+    EXPECT_EQ(result, NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT |
+        NotificationConstant::PriorityStrategyStatus::STATUS_USER_DEFINED);
+}
+
+/**
+ * @tc.number    : MatchPriorityTypeToBits_00300
+ * @tc.name      : MatchPriorityTypeToBits_00300
+ * @tc.desc      : test MatchPriorityTypeToBits with AI
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityTypeToBits_00300, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto result = manager->MatchPriorityTypeToBits(
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::AI));
+    EXPECT_EQ(result, NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT |
+        NotificationConstant::PriorityStrategyStatus::STATUS_INTELLIGENT);
+}
+
+/**
+ * @tc.number    : MatchPriorityTypeToBits_00400
+ * @tc.name      : MatchPriorityTypeToBits_00400
+ * @tc.desc      : test MatchPriorityTypeToBits with PUSH_RULE
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityTypeToBits_00400, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto result = manager->MatchPriorityTypeToBits(
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::PUSH_RULE));
+    EXPECT_EQ(result, NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT |
+        NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_RULE);
+}
+
+/**
+ * @tc.number    : MatchPriorityTypeToBits_00500
+ * @tc.name      : MatchPriorityTypeToBits_00500
+ * @tc.desc      : test MatchPriorityTypeToBits with invalid type returns 0
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityTypeToBits_00500, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto result = manager->MatchPriorityTypeToBits(static_cast<int32_t>(99));
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.number    : MatchPriorityStrategy_00100
+ * @tc.name      : MatchPriorityStrategy_00100
+ * @tc.desc      : test MatchPriorityStrategy STATUS_SYSTEM_DEFAULT matches PARAM_IN
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityStrategy_00100, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto result = manager->MatchPriorityStrategy(
+        NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT,
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::PARAM_IN));
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number    : MatchPriorityStrategy_00200
+ * @tc.name      : MatchPriorityStrategy_00200
+ * @tc.desc      : test MatchPriorityStrategy STATUS_INTELLIGENT matches AI
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityStrategy_00200, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto result = manager->MatchPriorityStrategy(
+        NotificationConstant::PriorityStrategyStatus::STATUS_INTELLIGENT,
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::AI));
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number    : MatchPriorityStrategy_00300
+ * @tc.name      : MatchPriorityStrategy_00300
+ * @tc.desc      : test MatchPriorityStrategy STATUS_INTELLIGENT does not match KEYWORD
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityStrategy_00300, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto result = manager->MatchPriorityStrategy(
+        NotificationConstant::PriorityStrategyStatus::STATUS_INTELLIGENT,
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::KEYWORD));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number    : MatchPriorityStrategy_00400
+ * @tc.name      : MatchPriorityStrategy_00400
+ * @tc.desc      : test MatchPriorityStrategy with strategy 0 returns false
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityStrategy_00400, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto result = manager->MatchPriorityStrategy(0,
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::AI));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number    : MatchPriorityStrategy_00500
+ * @tc.name      : MatchPriorityStrategy_00500
+ * @tc.desc      : test MatchPriorityStrategy combined strategy matches AI
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityStrategy_00500, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    int32_t combinedStrategy = NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT |
+        NotificationConstant::PriorityStrategyStatus::STATUS_INTELLIGENT;
+    auto result = manager->MatchPriorityStrategy(combinedStrategy,
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::AI));
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number    : IsSubscribedByPriority_00100
+ * @tc.name      : IsSubscribedByPriority_00100
+ * @tc.desc      : test IsSubscribedByPriority with null notification returns false
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_00100, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->priorityStrategy_ = NotificationConstant::PriorityStrategyStatus::STATUS_INTELLIGENT;
+    sptr<Notification> notification = nullptr;
+    int64_t bundlePriorityStrategy = 0;
+    auto result = manager->IsSubscribedByPriority(record, notification, bundlePriorityStrategy);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number    : IsSubscribedByPriority_00200
+ * @tc.name      : IsSubscribedByPriority_00200
+ * @tc.desc      : test IsSubscribedByPriority with no extendInfo returns false
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_00200, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->priorityStrategy_ = NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT;
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetNotificationId(0);
+    req->SetCreatorBundleName("testBundle");
+    sptr<Notification> notification = new Notification(req);
+    int64_t bundlePriorityStrategy = 0;
+    auto result = manager->IsSubscribedByPriority(record, notification, bundlePriorityStrategy);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number    : IsSubscribedByPriority_00300
+ * @tc.name      : IsSubscribedByPriority_00300
+ * @tc.desc      : test IsSubscribedByPriority with null request returns false
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_00300, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->priorityStrategy_ = NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY;
+    sptr<Notification> notification = new Notification();
+    int64_t bundlePriorityStrategy = 0;
+    auto result = manager->IsSubscribedByPriority(record, notification, bundlePriorityStrategy);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number    : IsSubscribedByPriority_00400
+ * @tc.name      : IsSubscribedByPriority_00400
+ * @tc.desc      : test IsSubscribedByPriority with strategy 0 returns false
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_00400, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->priorityStrategy_ = 0;
+    sptr<NotificationRequest> req = new NotificationRequest();
+    sptr<Notification> notification = new Notification(req);
+    int64_t bundlePriorityStrategy = 0;
+    auto result = manager->IsSubscribedByPriority(record, notification, bundlePriorityStrategy);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number    : GetBundlePriorityStrategy_00100
+ * @tc.name      : GetBundlePriorityStrategy_00100
+ * @tc.desc      : test GetBundlePriorityStrategy returns 0 with no priority subscribers
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, GetBundlePriorityStrategy_00100,
+    Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    sptr<Notification> notification = new Notification(req);
+    auto result = manager->GetBundlePriorityStrategy(notification);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.number    : MatchPriorityStrategy_00600
+ * @tc.name      : MatchPriorityStrategy_00600
+ * @tc.desc      : test MatchPriorityStrategy STATUS_SYSTEM_RULE matches PUSH_RULE
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityStrategy_00600, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto result = manager->MatchPriorityStrategy(
+        NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_RULE,
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::PUSH_RULE));
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number    : MatchPriorityStrategy_00700
+ * @tc.name      : MatchPriorityStrategy_00700
+ * @tc.desc      : test MatchPriorityStrategy STATUS_USER_DEFINED matches KEYWORD
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityStrategy_00700, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto result = manager->MatchPriorityStrategy(
+        NotificationConstant::PriorityStrategyStatus::STATUS_USER_DEFINED,
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::KEYWORD));
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number    : MatchPriorityStrategy_00800
+ * @tc.name      : MatchPriorityStrategy_00800
+ * @tc.desc      : test MatchPriorityStrategy STATUS_APPLICATION_DEFINED matches PARAM_IN
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityStrategy_00800, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto result = manager->MatchPriorityStrategy(
+        NotificationConstant::PriorityStrategyStatus::STATUS_APPLICATION_DEFINED,
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::PARAM_IN));
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number    : MatchPriorityStrategy_00900
+ * @tc.name      : MatchPriorityStrategy_00900
+ * @tc.desc      : test MatchPriorityStrategy STATUS_SYSTEM_DEFAULT matches KEYWORD
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityStrategy_00900, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto result = manager->MatchPriorityStrategy(
+        NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT,
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::KEYWORD));
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number    : MatchPriorityStrategy_01000
+ * @tc.name      : MatchPriorityStrategy_01000
+ * @tc.desc      : test MatchPriorityStrategy STATUS_SYSTEM_DEFAULT matches AI
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityStrategy_01000, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto result = manager->MatchPriorityStrategy(
+        NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT,
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::AI));
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number    : MatchPriorityStrategy_01100
+ * @tc.name      : MatchPriorityStrategy_01100
+ * @tc.desc      : test MatchPriorityStrategy STATUS_SYSTEM_DEFAULT matches PUSH_RULE
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityStrategy_01100, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto result = manager->MatchPriorityStrategy(
+        NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT,
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::PUSH_RULE));
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number    : MatchPriorityTypeToBits_00600
+ * @tc.name      : MatchPriorityTypeToBits_00600
+ * @tc.desc      : test MatchPriorityTypeToBits with invalid type returns 0
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityTypeToBits_00600, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto result = manager->MatchPriorityTypeToBits(static_cast<int32_t>(-1));
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.number    : AddConsumedHashCodes_00100
+ * @tc.name      : AddConsumedHashCodes_00100
+ * @tc.desc      : test AddConsumedHashCodes adds hashCode and HasConsumedHashCode returns true
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AddConsumedHashCodes_00100, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    sptr<Notification> notification = new Notification(req);
+    manager->AddConsumedHashCodes({notification});
+    EXPECT_TRUE(manager->HasConsumedHashCode(req->GetNotificationHashCode()));
+}
+
+/**
+ * @tc.number    : AddConsumedHashCodes_00200
+ * @tc.name      : AddConsumedHashCodes_00200
+ * @tc.desc      : test AddConsumedHashCodes with nullptr notification skipped
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AddConsumedHashCodes_00200, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<Notification> nullNotification = nullptr;
+    manager->AddConsumedHashCodes({nullNotification});
+    EXPECT_TRUE(manager->consumedHashCodes_.empty());
+}
+
+/**
+ * @tc.number    : AddConsumedHashCodes_00300
+ * @tc.name      : AddConsumedHashCodes_00300
+ * @tc.desc      : test AddConsumedHashCodes deduplicates same hashCode
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AddConsumedHashCodes_00300, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    sptr<Notification> notification = new Notification(req);
+    manager->AddConsumedHashCodes({notification, notification});
+    EXPECT_EQ(manager->consumedHashCodes_.size(), 1);
+}
+
+/**
+ * @tc.number    : AddConsumedHashCodes_00400
+ * @tc.name      : AddConsumedHashCodes_00400
+ * @tc.desc      : test AddConsumedHashCodes with multiple different notifications
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AddConsumedHashCodes_00400, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req1 = new NotificationRequest();
+    req1->SetNotificationId(1);
+    req1->SetCreatorBundleName("bundle1");
+    req1->SetCreatorUid(100);
+    req1->SetOwnerBundleName("owner1");
+    sptr<NotificationRequest> req2 = new NotificationRequest();
+    req2->SetNotificationId(2);
+    req2->SetCreatorBundleName("bundle2");
+    req2->SetCreatorUid(200);
+    req2->SetOwnerBundleName("owner2");
+    sptr<Notification> notification1 = new Notification(req1);
+    sptr<Notification> notification2 = new Notification(req2);
+    manager->AddConsumedHashCodes({notification1, notification2});
+    EXPECT_EQ(manager->consumedHashCodes_.size(), 2);
+    EXPECT_TRUE(manager->HasConsumedHashCode(req1->GetNotificationHashCode()));
+    EXPECT_TRUE(manager->HasConsumedHashCode(req2->GetNotificationHashCode()));
+}
+
+/**
+ * @tc.number    : HasConsumedHashCode_00100
+ * @tc.name      : HasConsumedHashCode_00100
+ * @tc.desc      : test HasConsumedHashCode returns false when hashCode not in set
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, HasConsumedHashCode_00100, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    EXPECT_FALSE(manager->HasConsumedHashCode("nonexistent_hash"));
+}
+
+/**
+ * @tc.number    : RemoveConsumedHashCodes_00100
+ * @tc.name      : RemoveConsumedHashCodes_00100
+ * @tc.desc      : test RemoveConsumedHashCodes removes hashCode and HasConsumedHashCode returns false
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, RemoveConsumedHashCodes_00100, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    sptr<Notification> notification = new Notification(req);
+    manager->AddConsumedHashCodes({notification});
+    EXPECT_TRUE(manager->HasConsumedHashCode(req->GetNotificationHashCode()));
+    manager->RemoveConsumedHashCodes({notification});
+    EXPECT_FALSE(manager->HasConsumedHashCode(req->GetNotificationHashCode()));
+}
+
+/**
+ * @tc.number    : RemoveConsumedHashCodes_00200
+ * @tc.name      : RemoveConsumedHashCodes_00200
+ * @tc.desc      : test RemoveConsumedHashCodes with nullptr notification skipped
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, RemoveConsumedHashCodes_00200, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    sptr<Notification> notification = new Notification(req);
+    manager->AddConsumedHashCodes({notification});
+    EXPECT_EQ(manager->consumedHashCodes_.size(), 1);
+    sptr<Notification> nullNotification = nullptr;
+    manager->RemoveConsumedHashCodes({nullNotification});
+    EXPECT_EQ(manager->consumedHashCodes_.size(), 1);
+}
+
+/**
+ * @tc.number    : RemoveConsumedHashCodes_00300
+ * @tc.name      : RemoveConsumedHashCodes_00300
+ * @tc.desc      : test RemoveConsumedHashCodes removes only specified hashCode, others remain
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, RemoveConsumedHashCodes_00300, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req1 = new NotificationRequest();
+    req1->SetNotificationId(1);
+    req1->SetCreatorBundleName("bundle1");
+    req1->SetCreatorUid(100);
+    req1->SetOwnerBundleName("owner1");
+    sptr<NotificationRequest> req2 = new NotificationRequest();
+    req2->SetNotificationId(2);
+    req2->SetCreatorBundleName("bundle2");
+    req2->SetCreatorUid(200);
+    req2->SetOwnerBundleName("owner2");
+    sptr<Notification> notification1 = new Notification(req1);
+    sptr<Notification> notification2 = new Notification(req2);
+    manager->AddConsumedHashCodes({notification1, notification2});
+    EXPECT_EQ(manager->consumedHashCodes_.size(), 2);
+    manager->RemoveConsumedHashCodes({notification1});
+    EXPECT_EQ(manager->consumedHashCodes_.size(), 1);
+    EXPECT_FALSE(manager->HasConsumedHashCode(req1->GetNotificationHashCode()));
+    EXPECT_TRUE(manager->HasConsumedHashCode(req2->GetNotificationHashCode()));
+}
+
+/**
+ * @tc.number    : ConsumedHashCodesCapacity_00100
+ * @tc.name      : ConsumedHashCodesCapacity_00100
+ * @tc.desc      : test consumedHashCodes list capacity limit evicts oldest entry via pop_front
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ConsumedHashCodesCapacity_00100, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    std::string firstHashCode;
+    for (int32_t i = 0; i <= static_cast<int32_t>(NotificationSubscriberManager::MAX_CONSUMED_HASH_CODE_LIST_SIZE);
+         i++) {
+        sptr<NotificationRequest> req = new NotificationRequest();
+        req->SetNotificationId(i);
+        req->SetCreatorBundleName("bundle" + std::to_string(i));
+        req->SetCreatorUid(i + 100);
+        req->SetOwnerBundleName("owner" + std::to_string(i));
+        sptr<Notification> notification = new Notification(req);
+        if (i == 0) {
+            firstHashCode = req->GetNotificationHashCode();
+        }
+        manager->AddConsumedHashCodes({notification});
+    }
+    EXPECT_EQ(manager->consumedHashCodes_.size(),
+        NotificationSubscriberManager::MAX_CONSUMED_HASH_CODE_LIST_SIZE);
+    EXPECT_FALSE(manager->HasConsumedHashCode(firstHashCode));
+    EXPECT_EQ(manager->consumedHashCodes_.front(), "1_bundle1_101_owner1");
+}
+
+/**
+ * @tc.number    : ShouldNotifyPrioritySubscribers_00100
+ * @tc.name      : ShouldNotifyPrioritySubscribers_00100
+ * @tc.desc      : test ShouldNotifyPrioritySubscribers returns false when notification is nullptr
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldNotifyPrioritySubscribers_00100, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    EXPECT_FALSE(manager->ShouldNotifyPrioritySubscribers(record, nullptr));
+}
+
+/**
+ * @tc.number    : ShouldNotifyPrioritySubscribers_00200
+ * @tc.name      : ShouldNotifyPrioritySubscribers_00200
+ * @tc.desc      : test ShouldNotifyPrioritySubscribers returns false when request is nullptr
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldNotifyPrioritySubscribers_00200, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = nullptr;
+    sptr<Notification> notification = new Notification(req);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    EXPECT_FALSE(manager->ShouldNotifyPrioritySubscribers(record, notification));
+}
+
+/**
+ * @tc.number    : ShouldNotifyPrioritySubscribers_00300
+ * @tc.name      : ShouldNotifyPrioritySubscribers_00300
+ * @tc.desc      : test ShouldNotifyPrioritySubscribers returns false when userId does not match
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldNotifyPrioritySubscribers_00300, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(200);
+    sptr<Notification> notification = new Notification(req);
+    manager->AddConsumedHashCodes({notification});
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    EXPECT_FALSE(manager->ShouldNotifyPrioritySubscribers(record, notification));
+}
+
+/**
+ * @tc.number    : ShouldNotifyPrioritySubscribers_00400
+ * @tc.name      : ShouldNotifyPrioritySubscribers_00400
+ * @tc.desc      : test ShouldNotifyPrioritySubscribers returns false when distributed collaborate
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldNotifyPrioritySubscribers_00400, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(100);
+    req->SetDistributedCollaborate(true);
+    sptr<Notification> notification = new Notification(req);
+    manager->AddConsumedHashCodes({notification});
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    EXPECT_FALSE(manager->ShouldNotifyPrioritySubscribers(record, notification));
+}
+
+/**
+ * @tc.number    : ShouldNotifyPrioritySubscribers_00500
+ * @tc.name      : ShouldNotifyPrioritySubscribers_00500
+ * @tc.desc      : test ShouldNotifyPrioritySubscribers returns false when not consumed
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldNotifyPrioritySubscribers_00500, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(100);
+    sptr<Notification> notification = new Notification(req);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    EXPECT_FALSE(manager->ShouldNotifyPrioritySubscribers(record, notification));
+}
+
+/**
+ * @tc.number    : ShouldNotifyPrioritySubscribers_00600
+ * @tc.name      : ShouldNotifyPrioritySubscribers_00600
+ * @tc.desc      : test ShouldNotifyPrioritySubscribers returns true when all conditions satisfied
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldNotifyPrioritySubscribers_00600, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(100);
+    sptr<Notification> notification = new Notification(req);
+    manager->AddConsumedHashCodes({notification});
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    EXPECT_TRUE(manager->ShouldNotifyPrioritySubscribers(record, notification));
 }
 
 /**
@@ -1576,6 +2182,200 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_07
     requestDb.request->notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
     auto result = advancedNotificationService.SetTriggerNotificationRequestToDb(requestDb);
     EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.number    : ClearLiveViewContent_00100
+ * @tc.name      : ClearLiveViewContent
+ * @tc.desc      : test ClearLiveViewContent with nullptr notification
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ClearLiveViewContent_00100, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<Notification> notification = nullptr;
+    manager->ClearLiveViewContent(notification);
+    EXPECT_EQ(notification, nullptr);
+}
+
+/**
+ * @tc.number    : ClearLiveViewContent_00200
+ * @tc.name      : ClearLiveViewContent
+ * @tc.desc      : test ClearLiveViewContent with CommonLiveView notification clears picture map
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ClearLiveViewContent_00200, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    PictureMap pictureMap;
+    pictureMap["key"] = { std::make_shared<Media::PixelMap>() };
+    liveViewContent->SetPicture(pictureMap);
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    req->SetContent(content);
+    sptr<Notification> notification = new Notification(req);
+    auto beforeContent = notification->GetNotificationRequest().GetContent();
+    auto beforeLiveView = std::static_pointer_cast<NotificationLiveViewContent>(
+        beforeContent->GetNotificationContent());
+    EXPECT_FALSE(beforeLiveView->GetPicture().empty());
+    manager->ClearLiveViewContent(notification);
+    auto afterContent = notification->GetNotificationRequest().GetContent();
+    auto afterLiveView = std::static_pointer_cast<NotificationLiveViewContent>(
+        afterContent->GetNotificationContent());
+    EXPECT_TRUE(afterLiveView->GetPicture().empty());
+}
+
+/**
+ * @tc.number    : ClearLiveViewContent_00300
+ * @tc.name      : ClearLiveViewContent
+ * @tc.desc      : test ClearLiveViewContent with SystemLiveView notification clears button and capsule icon
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ClearLiveViewContent_00300, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto localLiveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+    auto icon = std::make_shared<Media::PixelMap>();
+    NotificationCapsule capsule;
+    capsule.SetIcon(icon);
+    localLiveViewContent->SetCapsule(capsule);
+    EXPECT_NE(localLiveViewContent->GetCapsule().GetIcon(), nullptr);
+    auto content = std::make_shared<NotificationContent>(localLiveViewContent);
+    req->SetContent(content);
+    sptr<Notification> notification = new Notification(req);
+    manager->ClearLiveViewContent(notification);
+    auto afterContent = notification->GetNotificationRequest().GetContent();
+    auto afterLocalLiveView = std::static_pointer_cast<NotificationLocalLiveViewContent>(
+        afterContent->GetNotificationContent());
+    EXPECT_EQ(afterLocalLiveView->GetCapsule().GetIcon(), nullptr);
+    EXPECT_TRUE(afterLocalLiveView->GetButton().GetAllButtonIcons().empty());
+}
+
+/**
+ * @tc.number    : GetBundlePriorityStrategy_00200
+ * @tc.name      : GetBundlePriorityStrategy
+ * @tc.desc      : test GetBundlePriorityStrategy with priority subscriber but null request
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, GetBundlePriorityStrategy_00200, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->priorityStrategy_ = NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY;
+    manager->subscriberRecordList_.push_back(record);
+    sptr<Notification> notification = new Notification();
+    auto result = manager->GetBundlePriorityStrategy(notification);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.number    : IsSubscribedByPriority_00500
+ * @tc.name      : IsSubscribedByPriority
+ * @tc.desc      : test IsSubscribedByPriority returns false when userId does not match
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_00500, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->priorityStrategy_ = NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY;
+    record->userId = 100;
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetReceiverUserId(200);
+    sptr<Notification> notification = new Notification(req);
+    int64_t bundlePriorityStrategy = 0;
+    auto result = manager->IsSubscribedByPriority(record, notification, bundlePriorityStrategy);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number    : IsSubscribedByPriority_00600
+ * @tc.name      : IsSubscribedByPriority
+ * @tc.desc      : test IsSubscribedByPriority returns false when distributed collaborate
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_00600, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->priorityStrategy_ = NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY;
+    record->userId = 100;
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetReceiverUserId(100);
+    req->SetDistributedCollaborate(true);
+    sptr<Notification> notification = new Notification(req);
+    int64_t bundlePriorityStrategy = 0;
+    auto result = manager->IsSubscribedByPriority(record, notification, bundlePriorityStrategy);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number    : IsSubscribedByPriority_00700
+ * @tc.name      : IsSubscribedByPriority
+ * @tc.desc      : test IsSubscribedByPriority returns true when STATUS_ALL_PRIORITY matches bundlePriorityStrategy
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_00700, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->priorityStrategy_ = NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY;
+    record->userId = 100;
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetReceiverUserId(100);
+    sptr<Notification> notification = new Notification(req);
+    int64_t bundlePriorityStrategy = NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY;
+    auto result = manager->IsSubscribedByPriority(record, notification, bundlePriorityStrategy);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number    : NotifyConsumedSubscribers_00100
+ * @tc.name      : NotifyConsumedSubscribers
+ * @tc.desc      : test NotifyConsumedSubscribers with null notification returns early
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, NotifyConsumedSubscribers_00100, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<Notification> notification = nullptr;
+    sptr<NotificationSortingMap> notificationMap = nullptr;
+    manager->NotifyConsumedSubscribers(notification, notificationMap, 0);
+    EXPECT_EQ(notification, nullptr);
+}
+
+/**
+ * @tc.number    : NotifyConsumedSubscribers_00200
+ * @tc.name      : NotifyConsumedSubscribers
+ * @tc.desc      : test NotifyConsumedSubscribers with null request returns early
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, NotifyConsumedSubscribers_00200, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<Notification> notification = new Notification();
+    sptr<NotificationSortingMap> notificationMap = nullptr;
+    manager->NotifyConsumedSubscribers(notification, notificationMap, 0);
+    EXPECT_NE(notification, nullptr);
+}
+
+/**
+ * @tc.number    : NotifyConsumedSubscribers_00300
+ * @tc.name      : NotifyConsumedSubscribers
+ * @tc.desc      : test NotifyConsumedSubscribers skips priority subscriber when ShouldNotifyPrioritySubscribers false
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, NotifyConsumedSubscribers_00300, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(100);
+    sptr<Notification> notification = new Notification(req);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->priorityStrategy_ = NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY;
+    record->userId = 100;
+    manager->subscriberRecordList_.push_back(record);
+    sptr<NotificationSortingMap> notificationMap = nullptr;
+    manager->NotifyConsumedSubscribers(notification, notificationMap, 0);
+    EXPECT_FALSE(manager->HasConsumedHashCode(
+        notification->GetNotificationRequestPoint()->GetNotificationHashCode()));
 }
 }  // namespace Notification
 }  // namespace OHOS

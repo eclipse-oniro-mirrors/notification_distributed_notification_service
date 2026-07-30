@@ -468,7 +468,9 @@ bool __attribute__((weak)) BundleManagerHelper::CheckBundleImplExtensionAbility(
         return false;
     }
     if (!AccessTokenHelper::VerifyCallerPermission(
-        bundleInfo.applicationInfo.accessTokenId, OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
+        bundleInfo.applicationInfo.accessTokenId, OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION) &&
+        !AccessTokenHelper::VerifyCallerPermission(
+            bundleInfo.applicationInfo.accessTokenId, OHOS_PERMISSION_NOTIFICATION_SYSTEM_SUBSCRIBER)) {
         return false;
     }
     

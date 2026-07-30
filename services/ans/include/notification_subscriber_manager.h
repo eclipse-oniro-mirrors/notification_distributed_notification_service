@@ -20,6 +20,7 @@
 #include <list>
 #include <memory>
 #include <mutex>
+#include <set>
 
 #include "errors.h"
 #include "event_handler.h"
@@ -264,7 +265,8 @@ private:
     void NotifyConsumedInner(
         const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap);
     void NotifyPriorityRecordOnConsumed(const std::shared_ptr<SubscriberRecord> &record,
-        const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap);
+        const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
+        int64_t bundlePriorityStrategy);
     void NotifyRecordOnConsumed(const std::shared_ptr<SubscriberRecord> &record,
         const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
         const std::string &content, const std::set<std::string> &voiceFlag,
@@ -276,6 +278,7 @@ private:
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
     void BatchNotifyCanceledInner(const std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
+    void ClearLiveViewContent(sptr<Notification> &notification);
     void NotifyUpdatedInner(const sptr<NotificationSortingMap> &notificationMap);
     void NotifyDoNotDisturbDateChangedInner(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date,
         int32_t uid);
@@ -294,9 +297,8 @@ private:
     bool IsSubscribedByDeviceType(const std::shared_ptr<SubscriberRecord> &record,
         const sptr<Notification> &notification, bool checkConsumedDevice);
     bool IsSubscribedByPriority(const std::shared_ptr<SubscriberRecord> &record,
-        const sptr<Notification> &notification);
-    bool CheckAllPriorityByBundle(const sptr<Notification> &notification,
-        const sptr<NotificationRequest> &request);
+        const sptr<Notification> &notification, int64_t bundlePriorityStrategy);
+    int64_t GetBundlePriorityStrategy(const sptr<Notification> &notification);
     bool MatchPriorityStrategy(int32_t strategy, int32_t priorityType);
     int32_t MatchPriorityTypeToBits(int32_t priorityType);
     sptr<Notification> GenerateSubscribedNotification(const std::shared_ptr<SubscriberRecord> &record,
@@ -330,6 +332,13 @@ private:
     void SendCommonEvent(
         const uint32_t eventType, const std::map<sptr<NotificationBundleOption>, T> &params, int32_t code);
     void NotifyVoiceNotificationCanceled(const sptr<NotificationRequest>& request);
+    void NotifyConsumedSubscribers(const sptr<Notification> &notification,
+        const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
+    bool ShouldNotifyPrioritySubscribers(const std::shared_ptr<SubscriberRecord> &record,
+        const sptr<Notification> &notification);
+    void AddConsumedHashCodes(const std::vector<sptr<Notification>> &notifications);
+    bool HasConsumedHashCode(const std::string &hashCode);
+    void RemoveConsumedHashCodes(const std::vector<sptr<Notification>> &notifications);
 
 private:
     ffrt::mutex subscriberRecordListMutex_;
@@ -340,6 +349,9 @@ private:
     sptr<IRemoteObject::DeathRecipient> recipient_ {};
     std::shared_ptr<ffrt::queue> notificationSubQueue_ = nullptr;
     std::function<void(const std::shared_ptr<SubscriberRecord> &)> onSubscriberAddCallback_ = nullptr;
+    static constexpr size_t MAX_CONSUMED_HASH_CODE_LIST_SIZE = 1000;
+    std::list<std::string> consumedHashCodes_;
+    ffrt::mutex consumedHashCodesMutex_;
 
     DECLARE_DELAYED_SINGLETON(NotificationSubscriberManager);
     DISALLOW_COPY_AND_MOVE(NotificationSubscriberManager);
