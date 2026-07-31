@@ -1673,11 +1673,37 @@ HWTEST_F(AnsLiveViewServiceTest, RecoverLiveViewFromDb_LiveViewEnd_00001, Functi
  */
 HWTEST_F(AnsLiveViewServiceTest, RecoverLiveViewFromDb_EmptyDb_00001, Function | SmallTest | Level1)
 {
+    SetFailCountToDb(100, 0);
     advancedNotificationService_->notificationList_.clear();
     advancedNotificationService_->RecoverLiveViewFromDb(100);
     SleepForFC();
     SleepForFC();
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+    ASSERT_EQ(GetFailCountFromDb(100), 0);
+}
+
+/**
+ * @tc.name: RecoverLiveViewFromDb_EmptyDb_NoAccumulation_00001
+ * @tc.desc: Test RecoverLiveViewFromDb with empty DB twice, fail_count should not accumulate to trigger cleanup
+ * @tc.type: FUNC
+ * @tc.require: issue#4214
+ */
+HWTEST_F(AnsLiveViewServiceTest, RecoverLiveViewFromDb_EmptyDb_NoAccumulation_00001, Function | SmallTest | Level1)
+{
+    SetFailCountToDb(100, 0);
+    advancedNotificationService_->notificationList_.clear();
+
+    advancedNotificationService_->RecoverLiveViewFromDb(100);
+    SleepForFC();
+    SleepForFC();
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+    ASSERT_EQ(GetFailCountFromDb(100), 0);
+
+    advancedNotificationService_->RecoverLiveViewFromDb(100);
+    SleepForFC();
+    SleepForFC();
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+    ASSERT_EQ(GetFailCountFromDb(100), 0);
 }
 
 /**
