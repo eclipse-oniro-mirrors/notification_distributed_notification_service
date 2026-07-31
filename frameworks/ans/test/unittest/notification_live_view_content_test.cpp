@@ -409,5 +409,37 @@ HWTEST_F(NotificationLiveViewContentTest, ConvertPictureFromJson_00003, Function
     liveViewContent.ConvertPictureFromJson(jsonObject);
     EXPECT_EQ(liveViewContent.GetPicture().size(), 0);
 }
+
+/**
+ * @tc.name: ReadFromParcel_InvalidStatus_00001
+ * @tc.desc: Test ReadFromParcel returns false when liveViewStatus is out of range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationLiveViewContentTest, ReadFromParcel_InvalidStatus_00001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLiveViewContent>();
+    Parcel parcel;
+    parcel.WriteString("title");
+    parcel.WriteString("text");
+    parcel.WriteString("additionalText");
+    parcel.WriteInt32(static_cast<int32_t>(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BUTT));
+    EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_InvalidStatus_00002
+ * @tc.desc: Test ReadFromParcel returns false when liveViewStatus is negative.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationLiveViewContentTest, ReadFromParcel_InvalidStatus_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLiveViewContent>();
+    Parcel parcel;
+    parcel.WriteString("title");
+    parcel.WriteString("text");
+    parcel.WriteString("additionalText");
+    parcel.WriteInt32(-1);
+    EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
+}
 }
 }

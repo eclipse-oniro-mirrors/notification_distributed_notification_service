@@ -329,5 +329,21 @@ HWTEST_F(NotificationCloneNotificationSwitchInfoTest, Dump_00002, Function | Sma
     std::string expected = "NotificationCloneNotificationSwitchInfo{switchName=INVALID, switchState=2}";
     EXPECT_EQ(dumpStr, expected);
 }
+
+/**
+ * @tc.name: FromJson_00007
+ * @tc.desc: Test FromJson with out-of-range switchState value (5, exceeds SYSTEM_DEFAULT_ON=3).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationCloneNotificationSwitchInfoTest, FromJson_00007, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = {
+        {"switchName", "DEAL"},
+        {"switchState", 5}
+    };
+    auto info = std::make_shared<NotificationCloneNotificationSwitchInfo>();
+    EXPECT_FALSE(info->FromJson(jsonObject));
+}
 }  // namespace Notification
 }  // namespace OHOS

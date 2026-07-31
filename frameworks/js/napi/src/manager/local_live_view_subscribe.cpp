@@ -81,6 +81,10 @@ void UvQueueWorkOnResponse(uv_work_t *work, int status)
     auto retStatus = napi_open_handle_scope(dataWorkerData->env, &scope);
     if (retStatus != napi_ok || scope == nullptr) {
         ANS_LOGE("status: %{public}d", retStatus);
+        delete dataWorkerData;
+        dataWorkerData = nullptr;
+        delete work;
+        work = nullptr;
         return;
     }
 

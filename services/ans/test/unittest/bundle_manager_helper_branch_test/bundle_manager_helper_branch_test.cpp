@@ -411,5 +411,18 @@ HWTEST_F(BundleManagerHelperBranchTest, CheckBundleImplExtensionAbility_00002, F
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundle", 1);
     EXPECT_FALSE(bundleManagerHelper.CheckBundleImplExtensionAbility(bundleOption));
 }
+
+/**
+ * @tc.name: Disconnect_NullDeathRecipient_00001
+ * @tc.desc: Test Disconnect when deathRecipient_ is nullptr (no crash)
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerHelperBranchTest, Disconnect_NullDeathRecipient_00001, Function | SmallTest | Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    bundleManagerHelper.deathRecipient_ = nullptr;
+    bundleManagerHelper.Disconnect();
+    EXPECT_EQ(bundleManagerHelper.deathRecipient_, nullptr);
+}
 }  // namespace Notification
 }  // namespace OHOS

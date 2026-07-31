@@ -16,7 +16,9 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#define private public
 #include "bundle_resource_helper.h"
+#undef private
 
 using namespace testing::ext;
 
@@ -44,6 +46,19 @@ HWTEST_F(DistributedBundleHelperTest, DistributedServiceTest_00100, Function | S
     int32_t uid = 100010;
     int32_t index = DelayedSingleton<BundleResourceHelper>::GetInstance()->GetAppIndexByUid(uid);
     ASSERT_EQ(0, index);
+}
+
+/**
+ * @tc.name      : Disconnect_NullDeathRecipient_00100
+ * @tc.number    : Disconnect_NullDeathRecipient_00100
+ * @tc.desc      : Test Disconnect when deathRecipient_ is nullptr (no crash)
+ */
+HWTEST_F(DistributedBundleHelperTest, Disconnect_NullDeathRecipient_00100, Function | SmallTest | Level1)
+{
+    auto helper = DelayedSingleton<BundleResourceHelper>::GetInstance();
+    helper->deathRecipient_ = nullptr;
+    helper->Disconnect();
+    EXPECT_EQ(helper->deathRecipient_, nullptr);
 }
 } // namespace Notification
 } // namespace OHOS

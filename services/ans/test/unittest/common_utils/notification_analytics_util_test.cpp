@@ -1689,5 +1689,17 @@ HWTEST_F(NotificationAnalyticsUtilTest, ExecuteSlotReportList_StartTimerFailed_0
     EXPECT_NO_THROW(NotificationAnalyticsUtil::ExecuteSlotReportList());
     EXPECT_FALSE(IsDestroyTimerCalled());
 }
+
+/**
+ * @tc.name: HaMetaMessage_DefaultValues_001
+ * @tc.desc: Test default-constructed HaMetaMessage has sceneId_ == 0 and branchId_ == 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, HaMetaMessage_DefaultValues_001, Function | SmallTest | Level1)
+{
+    HaMetaMessage message;
+    ASSERT_EQ(message.sceneId_, 0u);
+    ASSERT_EQ(message.branchId_, 0u);
+}
 }
 }

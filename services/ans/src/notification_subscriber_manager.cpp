@@ -730,7 +730,9 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
             NotificationSubscriberManager::GetInstance()->NotifyEnabledWatchChanged(watchState);
         }
 
-        record->subscriber->AsObject()->AddDeathRecipient(recipient_);
+        if (recipient_ != nullptr) {
+            record->subscriber->AsObject()->AddDeathRecipient(recipient_);
+        }
         if (subscribeInfo->GetSubscribedFlags() & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONNECTED) {
             record->subscriber->OnConnected();
         }
@@ -765,7 +767,9 @@ ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
     RemoveRecordInfo(record, subscribeInfo);
 
     if (!record->subscribedAll && record->bundleList_.empty() && record->uidList_.empty()) {
-        record->subscriber->AsObject()->RemoveDeathRecipient(recipient_);
+        if (recipient_ != nullptr) {
+            record->subscriber->AsObject()->RemoveDeathRecipient(recipient_);
+        }
         {
             std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
             subscriberRecordList_.remove(record);
@@ -811,8 +815,8 @@ int32_t NotificationSubscriberManager::GetVoiceContentInfo(const sptr<Notificati
     }
     std::string externInfo;
     int32_t voiceResult = VOICE_EXTENSION_WRAPPER.GenerateVoiceContent(request, content, externInfo);
-    ANS_LOGI("Get voice content %{public}zu, %{public}s, %{public}d, %{public}s %{public}s.", flagsMap->size(),
-        deviceList.c_str(), voiceResult, content.c_str(), externInfo.c_str());
+    ANS_LOGI("Get voice content %{public}zu, %{public}s, %{public}d, %{public}s.", flagsMap->size(),
+        deviceList.c_str(), voiceResult, externInfo.c_str());
     if (voiceResult != ERR_OK) {
         content.clear();
         voiceFlag.clear();

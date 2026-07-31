@@ -16,7 +16,7 @@
 #include "notification_live_view_content.h"
 #include <string>
 #include "ans_image_util.h"
-#include "ans_ipc_common_utils.h"
+#include "ans_common_utils.h"
 #include "ans_log_wrapper.h"
 #include "notification_want_params_helper.h"
 #include "want_params_wrapper.h"
@@ -358,7 +358,12 @@ bool NotificationLiveViewContent::ReadFromParcel(Parcel &parcel)
         return false;
     }
 
-    liveViewStatus_ = static_cast<NotificationLiveViewContent::LiveViewStatus>(parcel.ReadInt32());
+    int32_t status = parcel.ReadInt32();
+    if (status < 0 || status >= static_cast<int32_t>(LiveViewStatus::LIVE_VIEW_BUTT)) {
+        ANS_LOGE("Invalid liveViewStatus value: %{public}d", status);
+        return false;
+    }
+    liveViewStatus_ = static_cast<NotificationLiveViewContent::LiveViewStatus>(status);
     version_ = parcel.ReadUint32();
 
     bool valid = parcel.ReadBool();
@@ -380,7 +385,7 @@ bool NotificationLiveViewContent::ReadFromParcel(Parcel &parcel)
     for (uint64_t i = 0; i < len; i++) {
         auto key = parcel.ReadString();
         std::vector<std::shared_ptr<Media::PixelMap>> pixelMapVec;
-        if (!AnsIpcCommonUtils::ReadParcelableVector(pixelMapVec, parcel)) {
+        if (!AnsCommonUtils::ReadParcelableVector(pixelMapVec, parcel)) {
             ANS_LOGE("Failed to read extraInfo vector string.");
             return false;
         }
@@ -409,7 +414,7 @@ bool NotificationLiveViewContent::MarshallingPictureMap(Parcel &parcel) const
             return false;
         }
         
-        if (!AnsIpcCommonUtils::WriteParcelableVector(picture.second, parcel)) {
+        if (!AnsCommonUtils::WriteParcelableVector(picture.second, parcel)) {
             ANS_LOGE("Failed to write picture vector of key %{public}s.", picture.first.c_str());
             return false;
         }

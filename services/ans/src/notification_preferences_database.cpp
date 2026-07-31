@@ -20,6 +20,7 @@
 #include <sstream>
 
 #include "ans_const_define.h"
+#include "ans_common_utils.h"
 #include "os_account_manager_helper.h"
 #include "ans_log_wrapper.h"
 #include "ans_trace_wrapper.h"
@@ -1155,7 +1156,7 @@ bool NotificationPreferencesDatabase::GetEnabledForBundleSlots(
         if (it == keyToIndex.end()) {
             continue;
         }
-        bool enabled = static_cast<bool>(StringToInt(entry.second));
+        bool enabled = static_cast<bool>(AnsCommonUtils::StringToInt(entry.second));
         slotEnabled[bundleOptions[it->second]] = enabled;
     }
     return true;
@@ -1185,10 +1186,15 @@ bool NotificationPreferencesDatabase::HandleDataBaseMapInner(
             continue;
         }
         std::string bundleName = nameIt->second;
-        int32_t uid = StringToInt(uidIt->second);
+        int32_t uid = AnsCommonUtils::StringToInt(uidIt->second);
 
-        NotificationConstant::SWITCH_STATE state = static_cast<NotificationConstant::SWITCH_STATE>(
-            StringToInt(value));
+        int32_t switchValue = AnsCommonUtils::StringToInt(value);
+        if (switchValue < static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) ||
+            switchValue > static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+            ANS_LOGE("Invalid switch state: %{public}d", switchValue);
+            continue;
+        }
+        NotificationConstant::SWITCH_STATE state = static_cast<NotificationConstant::SWITCH_STATE>(switchValue);
         bool enabled = (state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
             state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
         if (enabled) {
@@ -1534,7 +1540,7 @@ void NotificationPreferencesDatabase::ParseAncoBundleFromDistureDB(
                 ParseBundleUid(bundleInfo, valueStr);
             }
             if (typeStr.compare(KEY_BUNDLE_USERID) == 0) {
-                bundleInfo.SetBundleUserId(StringToInt(valueStr));
+                bundleInfo.SetBundleUserId(AnsCommonUtils::StringToInt(valueStr));
             }
         }
         bundleList.push_back(bundleInfo);
@@ -1586,7 +1592,7 @@ void NotificationPreferencesDatabase::ParsePriorityInfosFromDisturbeDB(
         if (type == NotificationClonePriorityInfo::CLONE_PRIORITY_TYPE::PRIORITY_CONFIG) {
             priorityInfo.SetPriorityConfig(item.second);
         } else {
-            priorityInfo.SetSwitchState(StringToInt(item.second));
+            priorityInfo.SetSwitchState(AnsCommonUtils::StringToInt(item.second));
         }
         cloneInfos.emplace_back(priorityInfo);
     }
@@ -1597,7 +1603,13 @@ void NotificationPreferencesDatabase::ParseSlotFromDisturbeDB(NotificationPrefer
 {
     std::string slotKey = entry.first;
     std::string typeStr = SubUniqueIdentifyFromString(GenerateSlotKey(bundleKey) + KEY_UNDER_LINE, slotKey);
-    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(StringToInt(typeStr));
+    int32_t slotValue = AnsCommonUtils::StringToInt(typeStr);
+    if (slotValue < static_cast<int32_t>(NotificationConstant::SlotType::SOCIAL_COMMUNICATION) ||
+        slotValue >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid slot type: %{public}d", slotValue);
+        return;
+    }
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotValue);
     sptr<NotificationSlot> slot = nullptr;
     if (!bundleInfo.GetSlot(slotType, slot)) {
         slot = new (std::nothrow) NotificationSlot(slotType);
@@ -1615,7 +1627,7 @@ void NotificationPreferencesDatabase::ParseSilentReminderFromDisturbeDB(
     NotificationPreferencesInfo::SilentReminderInfo &silentReminderInfo,
     const std::pair<std::string, std::string> &entry)
 {
-    bool enable = static_cast<bool>(StringToInt(entry.second));
+    bool enable = static_cast<bool>(AnsCommonUtils::StringToInt(entry.second));
     silentReminderInfo.enableStatus =
         enable ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON
         : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
@@ -1650,7 +1662,7 @@ void NotificationPreferencesDatabase::ParseBundlePropertyFromDisturbeDB(
         return ParseBundleUid(bundleInfo, valueStr);
     }
     if (typeStr.compare(KEY_BUNDLE_USERID) == 0) {
-        bundleInfo.SetBundleUserId(StringToInt(valueStr));
+        bundleInfo.SetBundleUserId(AnsCommonUtils::StringToInt(valueStr));
         return;
     }
     if (typeStr.compare(KEY_BUNDLE_SLOTFLGS_TYPE) == 0) {
@@ -1744,7 +1756,7 @@ std::string NotificationPreferencesDatabase::FindLastString(
 {
     std::string keyStr;
     size_t pos = findString.size();
-    if (pos != std::string::npos) {
+    if (pos <= inputString.size()) {
         keyStr = inputString.substr(pos);
     }
     return keyStr;
@@ -1768,32 +1780,14 @@ void NotificationPreferencesDatabase::StringToVector(const std::string &str, std
     size_t pos = str.find(KEY_UNDER_LINE, start);
     while (pos != std::string::npos) {
         if (pos > start) {
-            data.push_back(StringToInt64(str.substr(start, pos - start)));
+            data.push_back(AnsCommonUtils::StringToInt64(str.substr(start, pos - start)));
         }
         start = pos + KEY_UNDER_LINE.size();
         pos = str.find(KEY_UNDER_LINE, start);
     }
     if (start < str.size()) {
-        data.push_back(StringToInt64(str.substr(start)));
+        data.push_back(AnsCommonUtils::StringToInt64(str.substr(start)));
     }
-}
-
-int32_t NotificationPreferencesDatabase::StringToInt(const std::string &str) const
-{
-    int32_t value = 0;
-    if (!str.empty()) {
-        value = atoi(str.c_str());
-    }
-    return value;
-}
-
-int64_t NotificationPreferencesDatabase::StringToInt64(const std::string &str) const
-{
-    int64_t value = 0;
-    if (!str.empty()) {
-        value = atoll(str.c_str());
-    }
-    return value;
 }
 
 bool NotificationPreferencesDatabase::IsSlotKey(const std::string &bundleKey, const std::string &key) const
@@ -1883,7 +1877,7 @@ int32_t NotificationPreferencesDatabase::GetUidFromGenerate(const std::string &g
     if (pos == std::string::npos) {
         return INVALID_USER_ID;
     }
-    return StringToInt(localGenerateKey.substr(pos + 1));
+    return AnsCommonUtils::StringToInt(localGenerateKey.substr(pos + 1));
 }
 
 std::string NotificationPreferencesDatabase::SubUniqueIdentifyFromString(
@@ -1910,42 +1904,48 @@ void NotificationPreferencesDatabase::ParseBundleImportance(
     NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
 {
     ANS_LOGD("SetBundleImportance bundle importance is %{public}s.", value.c_str());
-    bundleInfo.SetImportance(static_cast<NotificationSlot::NotificationLevel>(StringToInt(value)));
+    bundleInfo.SetImportance(static_cast<NotificationSlot::NotificationLevel>(AnsCommonUtils::StringToInt(value)));
 }
 
 void NotificationPreferencesDatabase::ParseBundleShowBadgeEnable(
     NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
 {
     ANS_LOGD("SetBundleShowBadge bundle show badge is %{public}s.", value.c_str());
-    bundleInfo.SetIsShowBadge(static_cast<bool>(StringToInt(value)));
+    bundleInfo.SetIsShowBadge(static_cast<bool>(AnsCommonUtils::StringToInt(value)));
 }
 
 void NotificationPreferencesDatabase::ParseBundleBadgeNum(
     NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
 {
     ANS_LOGD("SetBundleBadgeNum bundle badge num is %{public}s.", value.c_str());
-    bundleInfo.SetBadgeTotalNum(StringToInt(value));
+    bundleInfo.SetBadgeTotalNum(AnsCommonUtils::StringToInt(value));
 }
 
 void NotificationPreferencesDatabase::ParseBundleEnableNotification(
     NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
 {
     ANS_LOGD("SetBundleEnableNotification bundle enable is %{public}s.", value.c_str());
-    bundleInfo.SetEnableNotification(static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(value)));
+    int32_t switchValue = AnsCommonUtils::StringToInt(value);
+    if (switchValue < static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) ||
+        switchValue > static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+        ANS_LOGE("Invalid switch state: %{public}d", switchValue);
+    } else {
+        bundleInfo.SetEnableNotification(static_cast<NotificationConstant::SWITCH_STATE>(switchValue));
+    }
 }
 
 void NotificationPreferencesDatabase::ParseBundlePoppedDialog(
     NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
 {
     ANS_LOGD("SetBundlePoppedDialog bundle has popped dialog is %{public}s.", value.c_str());
-    bundleInfo.SetHasPoppedDialog(static_cast<bool>(StringToInt(value)));
+    bundleInfo.SetHasPoppedDialog(static_cast<bool>(AnsCommonUtils::StringToInt(value)));
 }
 
 void NotificationPreferencesDatabase::ParseBundleUid(
     NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
 {
     ANS_LOGD("SetBundleUid uuid is %{public}s.", value.c_str());
-    bundleInfo.SetBundleUid(StringToInt(value));
+    bundleInfo.SetBundleUid(AnsCommonUtils::StringToInt(value));
 }
 
 void NotificationPreferencesDatabase::ParseSlotDescription(sptr<NotificationSlot> &slot, const std::string &value) const
@@ -1958,21 +1958,22 @@ void NotificationPreferencesDatabase::ParseSlotDescription(sptr<NotificationSlot
 void NotificationPreferencesDatabase::ParseSlotLevel(sptr<NotificationSlot> &slot, const std::string &value) const
 {
     ANS_LOGD("ParseSlotLevel slot level is %{public}s.", value.c_str());
-    NotificationSlot::NotificationLevel level = static_cast<NotificationSlot::NotificationLevel>(StringToInt(value));
+    NotificationSlot::NotificationLevel level =
+        static_cast<NotificationSlot::NotificationLevel>(AnsCommonUtils::StringToInt(value));
     slot->SetLevel(level);
 }
 
 void NotificationPreferencesDatabase::ParseSlotShowBadge(sptr<NotificationSlot> &slot, const std::string &value) const
 {
     ANS_LOGD("ParseSlotShowBadge slot show badge is %{public}s.", value.c_str());
-    bool showBadge = static_cast<bool>(StringToInt(value));
+    bool showBadge = static_cast<bool>(AnsCommonUtils::StringToInt(value));
     slot->EnableBadge(showBadge);
 }
 
 void NotificationPreferencesDatabase::ParseSlotFlags(sptr<NotificationSlot> &slot, const std::string &value) const
 {
     ANS_LOGD("ParseSlotFlags slot show flags is %{public}s.", value.c_str());
-    uint32_t slotFlags = static_cast<uint32_t>(StringToInt(value));
+    uint32_t slotFlags = static_cast<uint32_t>(AnsCommonUtils::StringToInt(value));
     slot->SetSlotFlags(slotFlags);
 }
 
@@ -1980,13 +1981,13 @@ void NotificationPreferencesDatabase::ParseBundleSlotFlags(NotificationPreferenc
     const std::string &value) const
 {
     ANS_LOGD("ParseBundleSlotFlags slot show flags is %{public}s.", value.c_str());
-    bundleInfo.SetSlotFlags(StringToInt(value));
+    bundleInfo.SetSlotFlags(AnsCommonUtils::StringToInt(value));
 }
 
 void NotificationPreferencesDatabase::ParseSlotEnableLight(sptr<NotificationSlot> &slot, const std::string &value) const
 {
     ANS_LOGD("ParseSlotEnableLight slot enable light is %{public}s.", value.c_str());
-    bool enableLight = static_cast<bool>(StringToInt(value));
+    bool enableLight = static_cast<bool>(AnsCommonUtils::StringToInt(value));
     slot->SetEnableLight(enableLight);
 }
 
@@ -1994,7 +1995,7 @@ void NotificationPreferencesDatabase::ParseSlotEnableVrbration(
     sptr<NotificationSlot> &slot, const std::string &value) const
 {
     ANS_LOGD("ParseSlotEnableVrbration slot enable vir is %{public}s.", value.c_str());
-    bool enableVrbration = static_cast<bool>(StringToInt(value));
+    bool enableVrbration = static_cast<bool>(AnsCommonUtils::StringToInt(value));
     slot->SetEnableVibration(enableVrbration);
 }
 
@@ -2002,7 +2003,7 @@ void NotificationPreferencesDatabase::ParseSlotLedLightColor(
     sptr<NotificationSlot> &slot, const std::string &value) const
 {
     ANS_LOGD("ParseSlotLedLightColor slot led is %{public}s.", value.c_str());
-    int32_t ledLightColor = static_cast<int32_t>(StringToInt(value));
+    int32_t ledLightColor = static_cast<int32_t>(AnsCommonUtils::StringToInt(value));
     slot->SetLedLightColor(ledLightColor);
 }
 
@@ -2011,7 +2012,7 @@ void NotificationPreferencesDatabase::ParseSlotLockscreenVisibleness(
 {
     ANS_LOGD("ParseSlotLockscreenVisibleness slot visible is %{public}s.", value.c_str());
     NotificationConstant::VisiblenessType visible =
-        static_cast<NotificationConstant::VisiblenessType>(StringToInt(value));
+        static_cast<NotificationConstant::VisiblenessType>(AnsCommonUtils::StringToInt(value));
     slot->SetLockscreenVisibleness(visible);
 }
 
@@ -2036,7 +2037,7 @@ void NotificationPreferencesDatabase::ParseSlotEnableBypassDnd(
     sptr<NotificationSlot> &slot, const std::string &value) const
 {
     ANS_LOGD("ParseSlotEnableBypassDnd slot by pass dnd is %{public}s.", value.c_str());
-    bool enable = static_cast<bool>(StringToInt(value));
+    bool enable = static_cast<bool>(AnsCommonUtils::StringToInt(value));
     slot->EnableBypassDnd(enable);
 }
 
@@ -2044,7 +2045,7 @@ void NotificationPreferencesDatabase::ParseSlotEnabled(
     sptr<NotificationSlot> &slot, const std::string &value) const
 {
     ANS_LOGD("ParseSlotEnabled slot enabled is %{public}s.", value.c_str());
-    bool enabled = static_cast<bool>(StringToInt(value));
+    bool enabled = static_cast<bool>(AnsCommonUtils::StringToInt(value));
     slot->SetEnable(enabled);
 }
 
@@ -2052,7 +2053,7 @@ void NotificationPreferencesDatabase::ParseSlotAuthorizedStatus(
     sptr<NotificationSlot> &slot, const std::string &value) const
 {
     ANS_LOGD("ParseSlotAuthorizedStatus slot status is %{public}s.", value.c_str());
-    int32_t status = static_cast<int32_t>(StringToInt(value));
+    int32_t status = static_cast<int32_t>(AnsCommonUtils::StringToInt(value));
     slot->SetAuthorizedStatus(status);
 }
 
@@ -2060,7 +2061,7 @@ void NotificationPreferencesDatabase::ParseSlotAuthHitnCnt(
     sptr<NotificationSlot> &slot, const std::string &value) const
 {
     ANS_LOGD("ParseSlotAuthHitnCnt slot count is %{public}s.", value.c_str());
-    int32_t count = static_cast<int32_t>(StringToInt(value));
+    int32_t count = static_cast<int32_t>(AnsCommonUtils::StringToInt(value));
     slot->SetAuthHintCnt(count);
 }
 
@@ -2068,7 +2069,7 @@ void NotificationPreferencesDatabase::ParseSlotReminderMode(
     sptr<NotificationSlot> &slot, const std::string &value) const
 {
     ANS_LOGD("ParseSlotReminderMode slot reminder mode is %{public}s.", value.c_str());
-    int32_t reminderMode = static_cast<int32_t>(StringToInt(value));
+    int32_t reminderMode = static_cast<int32_t>(AnsCommonUtils::StringToInt(value));
     slot->SetReminderMode(reminderMode);
 }
 
@@ -2083,7 +2084,14 @@ void NotificationPreferencesDatabase::ParseBundleExtensionSubscriptionEnabled(
     NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
 {
     ANS_LOGD("ParseBundleExtensionSubscriptionEnabled bundle enabled is %{public}s.", value.c_str());
-    bundleInfo.SetExtensionSubscriptionEnabled(static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(value)));
+    int32_t switchValue = AnsCommonUtils::StringToInt(value);
+    if (switchValue < static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) ||
+        switchValue > static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+        ANS_LOGE("Invalid switch state: %{public}d", switchValue);
+    } else {
+        bundleInfo.SetExtensionSubscriptionEnabled(
+            static_cast<NotificationConstant::SWITCH_STATE>(switchValue));
+    }
 }
 
 void NotificationPreferencesDatabase::ParseBundleExtensionSubscriptionBundles(
@@ -2122,8 +2130,14 @@ void NotificationPreferencesDatabase::GetDoNotDisturbType(NotificationPreference
             } else if (status == NativeRdb::E_OK) {
                 if (!value.empty()) {
                     if (disturbDate != nullptr) {
-                        disturbDate->SetDoNotDisturbType(
-                            (NotificationConstant::DoNotDisturbType)StringToInt(value));
+                        int32_t dndValue = AnsCommonUtils::StringToInt(value);
+                        if (dndValue < static_cast<int32_t>(NotificationConstant::DoNotDisturbType::NONE) ||
+                            dndValue > static_cast<int32_t>(NotificationConstant::DoNotDisturbType::CLEARLY)) {
+                            ANS_LOGE("Invalid do not disturb type: %{public}d", dndValue);
+                        } else {
+                            disturbDate->SetDoNotDisturbType(
+                                static_cast<NotificationConstant::DoNotDisturbType>(dndValue));
+                        }
                     }
                 }
             } else {
@@ -2151,7 +2165,7 @@ void NotificationPreferencesDatabase::GetDoNotDisturbBeginDate(NotificationPrefe
             } else if (status == NativeRdb::E_OK) {
                 if (!value.empty()) {
                     if (disturbDate != nullptr) {
-                        disturbDate->SetBeginDate(StringToInt64(value));
+                        disturbDate->SetBeginDate(AnsCommonUtils::StringToInt64(value));
                     }
                 }
             } else {
@@ -2179,7 +2193,7 @@ void NotificationPreferencesDatabase::GetDoNotDisturbEndDate(NotificationPrefere
             } else if (status == NativeRdb::E_OK) {
                 if (!value.empty()) {
                     if (disturbDate != nullptr) {
-                        disturbDate->SetEndDate(StringToInt64(value));
+                        disturbDate->SetEndDate(AnsCommonUtils::StringToInt64(value));
                     }
                 }
             } else {
@@ -2204,7 +2218,7 @@ void NotificationPreferencesDatabase::GetEnableAllNotification(NotificationPrefe
                 PutNotificationsEnabled(userId, enable);
             } else if (status == NativeRdb::E_OK) {
                 if (!value.empty()) {
-                    info.SetEnabledAllNotification(userId, static_cast<bool>(StringToInt(value)));
+                    info.SetEnabledAllNotification(userId, static_cast<bool>(AnsCommonUtils::StringToInt(value)));
                 }
             } else {
                 ANS_LOGW("Parse enable all notification failed, use default value.");
@@ -2638,7 +2652,7 @@ bool NotificationPreferencesDatabase::PutDistributedBundleOption(
 
         auto ite = existSwitchMap.find(key);
         if (ite != existSwitchMap.end()) {
-            bool iteResult = static_cast<bool>(StringToInt(ite->second));
+            bool iteResult = static_cast<bool>(AnsCommonUtils::StringToInt(ite->second));
             if (iteResult == bundleOption->isEnable()) {
                 continue;
             }
@@ -2750,7 +2764,13 @@ bool NotificationPreferencesDatabase::GetPriorityEnabled(NotificationConstant::S
             }
             case NativeRdb::E_OK: {
                 result = true;
-                enabled = static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(value));
+                int32_t switchValue = AnsCommonUtils::StringToInt(value);
+                if (switchValue < static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) ||
+                    switchValue > static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+                    ANS_LOGE("Invalid switch state: %{public}d", switchValue);
+                } else {
+                    enabled = static_cast<NotificationConstant::SWITCH_STATE>(switchValue);
+                }
                 break;
             }
             default:
@@ -2779,7 +2799,7 @@ bool NotificationPreferencesDatabase::GetPriorityEnabledForBundle(
                 break;
             }
             case NativeRdb::E_OK: {
-                int32_t enableStatusInt = StringToInt(value);
+                int32_t enableStatusInt = AnsCommonUtils::StringToInt(value);
                 result = true;
                 enableStatus = static_cast<NotificationConstant::PriorityEnableStatus>(enableStatusInt);
                 break;
@@ -2870,7 +2890,13 @@ bool NotificationPreferencesDatabase::GetNotificationSwitch(const std::string &s
             }
             case NativeRdb::E_OK: {
                 result = true;
-                state = static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(value));
+                int32_t switchValue = AnsCommonUtils::StringToInt(value);
+                if (switchValue < static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) ||
+                    switchValue > static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+                    ANS_LOGE("Invalid switch state: %{public}d", switchValue);
+                } else {
+                    state = static_cast<NotificationConstant::SWITCH_STATE>(switchValue);
+                }
                 break;
             }
             default:
@@ -2938,7 +2964,13 @@ bool NotificationPreferencesDatabase::GetPriorityIntelligentEnabled(Notification
             }
             case NativeRdb::E_OK: {
                 result = true;
-                enabled = static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(value));
+                int32_t switchValue = AnsCommonUtils::StringToInt(value);
+                if (switchValue < static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) ||
+                    switchValue > static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+                    ANS_LOGE("Invalid switch state: %{public}d", switchValue);
+                } else {
+                    enabled = static_cast<NotificationConstant::SWITCH_STATE>(switchValue);
+                }
                 break;
             }
             default:
@@ -2987,7 +3019,13 @@ bool NotificationPreferencesDatabase::GetPriorityEnabledByBundleV2(
             }
             case NativeRdb::E_OK: {
                 result = true;
-                priorityStatus = static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(value));
+                int32_t switchValue = AnsCommonUtils::StringToInt(value);
+                if (switchValue < static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) ||
+                    switchValue > static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+                    ANS_LOGE("Invalid switch state: %{public}d", switchValue);
+                } else {
+                    priorityStatus = static_cast<NotificationConstant::SWITCH_STATE>(switchValue);
+                }
                 break;
             }
             default:
@@ -3036,7 +3074,7 @@ bool NotificationPreferencesDatabase::GetPriorityStrategyByBundle(
             }
             case NativeRdb::E_OK: {
                 result = true;
-                strategy = StringToInt64(value);
+                strategy = AnsCommonUtils::StringToInt64(value);
                 break;
             }
             default:
@@ -3091,7 +3129,13 @@ bool NotificationPreferencesDatabase::GetDistributedEnabled(
             }
             case NativeRdb::E_OK: {
                 result = true;
-                enabled = static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(value));
+                int32_t switchValue = AnsCommonUtils::StringToInt(value);
+                if (switchValue < static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) ||
+                    switchValue > static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+                    ANS_LOGE("Invalid switch state: %{public}d", switchValue);
+                } else {
+                    enabled = static_cast<NotificationConstant::SWITCH_STATE>(switchValue);
+                }
                 break;
             }
             default:
@@ -3124,7 +3168,7 @@ bool NotificationPreferencesDatabase::GetDistributedAuthStatus(
             }
             case NativeRdb::E_OK: {
                 result = true;
-                isAuth = StringToInt(value) != 0;
+                isAuth = AnsCommonUtils::StringToInt(value) != 0;
                 break;
             }
             default:
@@ -3220,7 +3264,7 @@ bool NotificationPreferencesDatabase::GetLiveViewConfigVersion(int32_t& version)
             }
             case NativeRdb::E_OK: {
                 result = true;
-                version = StringToInt(value);
+                version = AnsCommonUtils::StringToInt(value);
                 break;
             }
             default:
@@ -3306,7 +3350,7 @@ bool NotificationPreferencesDatabase::IsSilentReminderEnabled(
             case NativeRdb::E_OK: {
                 result = true;
                 NotificationConstant::SWITCH_STATE enableStatus =
-                    StringToInt(value) ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
+                    AnsCommonUtils::StringToInt(value) ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
                     NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
                 silentReminderInfo.enableStatus = enableStatus;
                 break;
@@ -3408,7 +3452,7 @@ bool NotificationPreferencesDatabase::GetDistributedEnabledForBundle(const std::
             }
             case NativeRdb::E_OK: {
                 result = true;
-                enabled = StringToInt(value);
+                enabled = AnsCommonUtils::StringToInt(value);
                 break;
             }
             default:
@@ -3476,7 +3520,7 @@ bool NotificationPreferencesDatabase::IsSmartReminderEnabled(const std::string d
             }
             case NativeRdb::E_OK: {
                 result = true;
-                enabled = static_cast<bool>(StringToInt(value));
+                enabled = static_cast<bool>(AnsCommonUtils::StringToInt(value));
                 break;
             }
             default:
@@ -3705,7 +3749,13 @@ bool NotificationPreferencesDatabase::IsDistributedEnabledBySlot(const Notificat
             }
             case NativeRdb::E_OK: {
                 result = true;
-                enabled = static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(value));
+                int32_t switchValue = AnsCommonUtils::StringToInt(value);
+                if (switchValue < static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) ||
+                    switchValue > static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+                    ANS_LOGE("Invalid switch state: %{public}d", switchValue);
+                } else {
+                    enabled = static_cast<NotificationConstant::SWITCH_STATE>(switchValue);
+                }
                 break;
             }
             default:
@@ -4195,7 +4245,7 @@ bool NotificationPreferencesDatabase::GetCloneTimeStamp(const int32_t userId, in
                 break;
             }
             case NativeRdb::E_OK: {
-                timestamp = StringToInt64(value);
+                timestamp = AnsCommonUtils::StringToInt64(value);
                 result = true;
                 break;
             }
@@ -4337,7 +4387,7 @@ bool NotificationPreferencesDatabase::GetAllDistribuedEnabledBundles(int32_t use
     }
 
     for (auto& Item : values) {
-        if (!static_cast<bool>(StringToInt(Item.second))) {
+        if (!static_cast<bool>(AnsCommonUtils::StringToInt(Item.second))) {
             continue;
         }
         std::vector<std::string> result;
@@ -4345,7 +4395,7 @@ bool NotificationPreferencesDatabase::GetAllDistribuedEnabledBundles(int32_t use
         if (result.size() != DISTRIBUTED_KEY_NUM && result.back() != deviceType) {
             continue;
         }
-        int32_t uid = StringToInt(result[DISTRIBUTED_KEY_UID_INDEX]);
+        int32_t uid = AnsCommonUtils::StringToInt(result[DISTRIBUTED_KEY_UID_INDEX]);
         NotificationBundleOption bundleInfo(result[DISTRIBUTED_KEY_BUNDLE_INDEX], uid);
         bundleOption.push_back(bundleInfo);
         result.clear();
@@ -4457,7 +4507,7 @@ bool NotificationPreferencesDatabase::GetSubscriberExistFlag(const std::string& 
             }
             case NativeRdb::E_OK: {
                 result = true;
-                existFlag = static_cast<bool>(StringToInt(value));
+                existFlag = static_cast<bool>(AnsCommonUtils::StringToInt(value));
                 break;
             }
             default:
@@ -4506,7 +4556,7 @@ uint32_t NotificationPreferencesDatabase::GetHashCodeRuleInner(const int32_t uid
                 break;
             }
             case NativeRdb::E_OK: {
-                result = StringToInt(value);
+                result = AnsCommonUtils::StringToInt(value);
                 break;
             }
             default:

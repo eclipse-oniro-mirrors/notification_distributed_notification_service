@@ -1923,6 +1923,11 @@ napi_value Common::GetRingtoneInfo(
         return nullptr;
     }
     napi_get_value_int32(env, result, &ringtoneType);
+    if (ringtoneType < static_cast<int32_t>(NotificationConstant::RingtoneType::RINGTONE_TYPE_SYSTEM) ||
+        ringtoneType >= static_cast<int32_t>(NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT)) {
+        ANS_LOGE("Invalid ringtoneType: %{public}d", ringtoneType);
+        return nullptr;
+    }
     ringtoneInfo.SetRingtoneType(static_cast<NotificationConstant::RingtoneType>(ringtoneType));
 
     return GetRingtoneStringInfo(env, value, ringtoneInfo);

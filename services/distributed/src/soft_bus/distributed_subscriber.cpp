@@ -76,7 +76,6 @@ void DistribuedSubscriber::OnConsumed(const std::shared_ptr<Notification> &reque
     if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         ANS_LOGI("No need consumed notification %{public}d %{public}s.",
             localDevice_.deviceType_, StringAnonymous(localDevice_.deviceId_).c_str());
-        ANS_LOGI("Dans OnConsumed %{public}s.", request->Dump().c_str());
         return;
     }
     if (peerDevice_.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {

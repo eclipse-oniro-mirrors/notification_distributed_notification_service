@@ -938,6 +938,11 @@ uint64_t AdvancedNotificationService::StartDelayPublishTimer(
     }
 
     uint64_t timerId = timer->CreateTimer(notificationTimerInfo);
+    if (timerId == NotificationConstant::INVALID_TIMER_ID) {
+        ANS_LOGE("Failed to create timer.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(NotificationConstant::INVALID_TIMER_ID));
+        return NotificationConstant::INVALID_TIMER_ID;
+    }
     int64_t delayPublishPoint = GetCurrentTime() + delayTime * NotificationConstant::SECOND_TO_MS;
     timer->StartTimer(timerId, delayPublishPoint);
     return timerId;
@@ -1085,14 +1090,18 @@ AnsStatus AdvancedNotificationService::UpdateRecordByOwner(
 void AdvancedNotificationService::StartFinishTimerForUpdate(
     const std::shared_ptr<NotificationRecord> &record, uint64_t process)
 {
+    ErrCode result = ERR_OK;
     if (process == NotificationConstant::FINISH_PER) {
         record->finish_status = UploadStatus::FINISH;
-        StartFinishTimer(record, GetCurrentTime() + NotificationConstant::THIRTY_MINUTES,
+        result = StartFinishTimer(record, GetCurrentTime() + NotificationConstant::THIRTY_MINUTES,
             NotificationConstant::TRIGGER_FIFTEEN_MINUTES_REASON_DELETE);
     } else {
         record->finish_status = UploadStatus::CONTINUOUS_UPDATE_TIME_OUT;
-        StartFinishTimer(record, GetCurrentTime() + NotificationConstant::FIFTEEN_MINUTES,
+        result = StartFinishTimer(record, GetCurrentTime() + NotificationConstant::FIFTEEN_MINUTES,
             NotificationConstant::TRIGGER_THIRTY_MINUTES_REASON_DELETE);
+    }
+    if (result != ERR_OK) {
+        ANS_LOGE("StartFinishTimer failed, result: %{public}d", result);
     }
 }
 

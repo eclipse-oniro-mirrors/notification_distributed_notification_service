@@ -255,6 +255,10 @@ ErrCode AdvancedNotificationService::GetSlotByBundle(
     sptr<NotificationSlot> &slot)
 {
     ANS_LOGD("called");
+    if (slotTypeInt < 0 || slotTypeInt >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid slotType: %{public}d", slotTypeInt);
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -381,6 +385,10 @@ ErrCode AdvancedNotificationService::RemoveAllSlots()
 ErrCode AdvancedNotificationService::AddSlotByType(int32_t slotTypeInt)
 {
     ANS_LOGD("called");
+    if (slotTypeInt < 0 || slotTypeInt >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid slotType: %{public}d", slotTypeInt);
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
 
     if (!AccessTokenHelper::IsSystemApp() && slotType == NotificationConstant::SlotType::EMERGENCY_INFORMATION) {
@@ -419,6 +427,10 @@ ErrCode AdvancedNotificationService::AddSlotByType(int32_t slotTypeInt)
 
 ErrCode AdvancedNotificationService::GetEnabledForBundleSlotSelf(int32_t slotTypeInt, bool &enabled)
 {
+    if (slotTypeInt < 0 || slotTypeInt >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid slotType: %{public}d", slotTypeInt);
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     ANS_LOGD("slotType: %{public}d", slotType);
 
@@ -817,6 +829,10 @@ void AdvancedNotificationService::HandleFlagsWithRequest(const sptr<Notification
 ErrCode AdvancedNotificationService::GetSlotByType(int32_t slotTypeInt, sptr<NotificationSlot> &slot)
 {
     ANS_LOGD("called");
+    if (slotTypeInt < 0 || slotTypeInt >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid slotType: %{public}d", slotTypeInt);
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
@@ -847,6 +863,10 @@ ErrCode AdvancedNotificationService::RemoveSlotByType(int32_t slotTypeInt)
 {
     ANS_LOGD("called");
 
+    if (slotTypeInt < 0 || slotTypeInt >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid slotType: %{public}d", slotTypeInt);
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
@@ -986,6 +1006,10 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
     int32_t slotTypeInt, bool enabled, bool isForceControl)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (slotTypeInt < 0 || slotTypeInt >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid slotType: %{public}d", slotTypeInt);
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     ANS_LOGD("slotType: %{public}d, enabled: %{public}d, isForceControl: %{public}d",
         slotType, enabled, isForceControl);
@@ -1023,6 +1047,10 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
 ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
     const sptr<NotificationBundleOption> &bundleOption, int32_t slotTypeInt, bool &enabled)
 {
+    if (slotTypeInt < 0 || slotTypeInt >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid slotType: %{public}d", slotTypeInt);
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     ANS_LOGD("slotType: %{public}d", slotType);
 
@@ -1117,6 +1145,10 @@ ErrCode AdvancedNotificationService::SetDefaultSlotForBundle(const sptr<Notifica
     int32_t slotTypeInt, bool enabled, bool isForceControl)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (slotTypeInt < 0 || slotTypeInt >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid slotType: %{public}d", slotTypeInt);
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     ANS_LOGD("slotType: %{public}d, enabled: %{public}d, isForceControl: %{public}d",
         slotType, enabled, isForceControl);

@@ -66,6 +66,11 @@ bool NotificationCloneNotificationSwitchInfo::FromJson(const nlohmann::json &jso
     // Parse switch state
     if (jsonObject.contains(SWITCH_STATE) && jsonObject[SWITCH_STATE].is_number()) {
         int32_t switchStateValue = jsonObject.at(SWITCH_STATE).get<int32_t>();
+        if (switchStateValue < static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) ||
+            switchStateValue > static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+            ANS_LOGE("Invalid switchState value: %{public}d", switchStateValue);
+            return false;
+        }
         switchState_ = static_cast<NotificationConstant::SWITCH_STATE>(switchStateValue);
     }
 

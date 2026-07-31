@@ -31,7 +31,6 @@
 #undef protected
 
 extern void MockIsOsAccountExists(bool mockRet);
-extern int32_t StringToInt(const std::string &str);
 
 using namespace testing::ext;
 namespace OHOS {

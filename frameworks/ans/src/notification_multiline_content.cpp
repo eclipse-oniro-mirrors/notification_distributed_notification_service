@@ -185,7 +185,11 @@ bool NotificationMultiLineContent::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    std::uint8_t lineWantAgentsLength = lineWantAgents_.size();
+    if (lineWantAgents_.size() > std::numeric_limits<std::uint8_t>::max()) {
+        ANS_LOGE("lineWantAgents size exceeds uint8_t max");
+        return false;
+    }
+    std::uint8_t lineWantAgentsLength = static_cast<std::uint8_t>(lineWantAgents_.size());
     if (!parcel.WriteUint8(lineWantAgentsLength)) {
         ANS_LOGE("Failed to write lineWantAgentsLength");
         return false;

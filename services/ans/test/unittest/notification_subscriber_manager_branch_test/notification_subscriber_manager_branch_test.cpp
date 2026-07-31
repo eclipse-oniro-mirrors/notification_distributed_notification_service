@@ -2377,5 +2377,18 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, NotifyConsumedSubscribers_0030
     EXPECT_FALSE(manager->HasConsumedHashCode(
         notification->GetNotificationRequestPoint()->GetNotificationHashCode()));
 }
+
+/**
+ * @tc.name: RemoveSubscriberInner_NullRecipient_00001
+ * @tc.desc: Test RemoveSubscriberInner when recipient_ is nullptr (no crash)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, RemoveSubscriberInner_NullRecipient_00001,
+    Function | SmallTest | Level1)
+{
+    NotificationSubscriberManager::GetInstance()->recipient_ = nullptr;
+    NotificationSubscriberManager::GetInstance()->RemoveSubscriberInner(nullptr, nullptr);
+    EXPECT_EQ(NotificationSubscriberManager::GetInstance()->recipient_, nullptr);
+}
 }  // namespace Notification
 }  // namespace OHOS

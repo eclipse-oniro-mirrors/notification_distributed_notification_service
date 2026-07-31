@@ -542,9 +542,9 @@ void NotificationPreferencesInfo::GetAllDoNotDisturbProfiles(
 {
     for (const auto &doNotDisturbProfile : doNotDisturbProfiles_) {
         std::string key = doNotDisturbProfile.first;
-        ANS_LOGI("GetAllDoNotDisturbProfiles key: %{public}s.", key.c_str());
-        auto result = key.find(std::to_string(userId));
-        if (result != std::string::npos) {
+        std::string userIdStr = std::to_string(userId);
+        if (key == userIdStr || key.find(userIdStr + KEY_UNDER_LINE) == 0 ||
+            key.find(KEY_UNDER_LINE + userIdStr) != std::string::npos) {
             auto profile = doNotDisturbProfile.second;
             profiles.emplace_back(profile);
         }

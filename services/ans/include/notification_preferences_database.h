@@ -676,8 +676,6 @@ private:
     std::string SubUniqueIdentifyFromString(const std::string &findString, const std::string &keyStr) const;
     std::string VectorToString(const std::vector<int64_t> &data) const;
     void StringToVector(const std::string &str, std::vector<int64_t> &data) const;
-    int32_t StringToInt(const std::string &str) const;
-    int64_t StringToInt64(const std::string &str) const;
     void StringSplit(const std::string content, char delim, std::vector<std::string>& result) const;
     bool IsSlotKey(const std::string &bundleKey, const std::string &key) const;
     bool IsSilentReminderKey(const std::string &bundleKey, const std::string &key) const;

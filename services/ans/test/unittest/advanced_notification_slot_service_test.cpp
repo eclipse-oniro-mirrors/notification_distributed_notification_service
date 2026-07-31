@@ -821,7 +821,7 @@ HWTEST_F(AnsSlotServiceTest, GetSlotByBundle_00003, Function | SmallTest | Level
     sptr<NotificationSlot> slotOut;
     NotificationConstant::SlotType slotTypeTemp = NotificationConstant::SlotType::ILLEGAL_TYPE;
     ret = advancedNotificationService_->GetSlotByBundle(bundle, slotTypeTemp, slotOut);
-    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
     ASSERT_EQ(slotOut, nullptr);
 
     advancedNotificationService_->notificationSvrQueue_.Reset();
@@ -1641,5 +1641,64 @@ HWTEST_F(AnsSlotServiceTest, GetEnabledForBundleSlots_00007, Function | SmallTes
     EXPECT_TRUE(foundValid);
 }
 
+/**
+ * @tc.name: AddSlotByType_InvalidSlotType_001
+ * @tc.desc: Test AddSlotByType with invalid slotTypeInt (-1) returns ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, AddSlotByType_InvalidSlotType_001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    auto ret = advancedNotificationService_->AddSlotByType(-1);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: AddSlotByType_InvalidSlotType_002
+ * @tc.desc: Test AddSlotByType with ILLEGAL_TYPE returns ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, AddSlotByType_InvalidSlotType_002, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    auto ret = advancedNotificationService_->AddSlotByType(
+        static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE));
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetEnabledForBundleSlotSelf_InvalidSlotType_001
+ * @tc.desc: Test GetEnabledForBundleSlotSelf with invalid slotTypeInt (-1) returns ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, GetEnabledForBundleSlotSelf_InvalidSlotType_001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    bool enabled = false;
+    auto ret = advancedNotificationService_->GetEnabledForBundleSlotSelf(-1, enabled);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetEnabledForBundleSlotSelf_InvalidSlotType_002
+ * @tc.desc: Test GetEnabledForBundleSlotSelf with ILLEGAL_TYPE returns ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, GetEnabledForBundleSlotSelf_InvalidSlotType_002, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    bool enabled = false;
+    auto ret = advancedNotificationService_->GetEnabledForBundleSlotSelf(
+        static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE), enabled);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -111,6 +111,11 @@ bool NotificationSwitchChangedCallbackData::ReadFromParcel(Parcel &parcel)
         ANS_LOGE("Failed to read enableStatus");
         return false;
     }
+    if (enableStatus < static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) ||
+        enableStatus > static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+        ANS_LOGE("Invalid enableStatus value: %{public}d", enableStatus);
+        return false;
+    }
     enableStatus_ = static_cast<NotificationConstant::SWITCH_STATE>(enableStatus);
     return true;
 }
