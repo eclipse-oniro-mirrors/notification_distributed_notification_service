@@ -147,6 +147,7 @@ void AdvancedNotificationService::RecoverLiveViewForUser(int32_t userId)
     std::vector<NotificationRequestDb> requestsdb;
     if (GetBatchNotificationRequestsFromDb(requestsdb, userId) != ERR_OK) {
         ANS_LOGE("Get liveView from db failed for user %{public}d.", userId);
+        SetRecoverFailCount(userId, 0);
         return;
     }
     if (requestsdb.empty()) {
