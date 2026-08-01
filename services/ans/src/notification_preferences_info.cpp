@@ -247,6 +247,10 @@ sptr<NotificationRingtoneInfo> NotificationPreferencesInfo::BundleInfo::GetRingt
 
 void NotificationPreferencesInfo::BundleInfo::RemoveRingtoneInfo()
 {
+    if (ringtoneInfo_ == nullptr) {
+        ANS_LOGE("ringtoneInfo_ is null.");
+        return;
+    }
     ringtoneInfo_->ResetRingtone();
 }
 
@@ -259,6 +263,10 @@ std::string NotificationPreferencesInfo::BundleInfo::GetExtensionSubscriptionInf
 {
     auto jsonObject = nlohmann::json::array();
     for (const auto& item : extensionSubscriptionInfos_) {
+        if (item == nullptr) {
+            ANS_LOGE("null extensionSubscriptionInfo item.");
+            continue;
+        }
         sptr<NotificationExtensionSubscriptionInfo> itemcopy =
             new (std::nothrow) NotificationExtensionSubscriptionInfo(*item);
         if (itemcopy == nullptr) {

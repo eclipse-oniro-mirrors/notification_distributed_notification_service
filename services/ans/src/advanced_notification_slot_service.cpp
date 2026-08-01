@@ -600,6 +600,10 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
 AnsStatus AdvancedNotificationService::AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record,
     const sptr<NotificationBundleOption> &bundleOption)
 {
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Invalid bundleOption.");
+        return AnsStatus(ERR_ANS_INNER_INVALID_BUNDLE, "bundleoption null");
+    }
     sptr<NotificationSlot> slot;
     NotificationConstant::SlotType slotType = record->request->GetSlotType();
     ErrCode result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slot);
@@ -678,6 +682,10 @@ ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
 void AdvancedNotificationService::GenerateSlotReminderMode(const sptr<NotificationSlot> &slot,
     const sptr<NotificationBundleOption> &bundle, bool isSpecifiedSlot, uint32_t defaultSlotFlags)
 {
+    if (slot == nullptr) {
+        ANS_LOGE("Invalid slot.");
+        return;
+    }
     uint32_t slotFlags = defaultSlotFlags;
     auto ret = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundle, slotFlags);
     if (ret != ERR_OK) {

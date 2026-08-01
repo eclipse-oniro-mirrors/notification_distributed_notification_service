@@ -2390,5 +2390,43 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, RemoveSubscriberInner_NullReci
     NotificationSubscriberManager::GetInstance()->RemoveSubscriberInner(nullptr, nullptr);
     EXPECT_EQ(NotificationSubscriberManager::GetInstance()->recipient_, nullptr);
 }
+
+/**
+ * @tc.number    : IsSubscribedBysubscriber_NullRequest_00100
+ * @tc.name      : IsSubscribedBysubscriber with null GetNotificationRequestPoint
+ * @tc.desc      : Test IsSubscribedBysubscriber returns false when notification request is nullptr.
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedBysubscriber_NullRequest_00100,
+    Function | SmallTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriberManager> notificationSubscriberManager =
+        std::make_shared<NotificationSubscriberManager>();
+    ASSERT_NE(nullptr, notificationSubscriberManager);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    ASSERT_NE(nullptr, record);
+    sptr<Notification> notification = new Notification();
+    ASSERT_NE(nullptr, notification);
+    bool result = notificationSubscriberManager->IsSubscribedBysubscriber(record, notification);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number    : NotifyCanceledInner_NullRequest_00100
+ * @tc.name      : NotifyCanceledInner with null GetNotificationRequestPoint
+ * @tc.desc      : Test NotifyCanceledInner does not crash when notification request is nullptr.
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, NotifyCanceledInner_NullRequest_00100,
+    Function | SmallTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriberManager> notificationSubscriberManager =
+        std::make_shared<NotificationSubscriberManager>();
+    ASSERT_NE(nullptr, notificationSubscriberManager);
+    sptr<Notification> notification = new Notification();
+    ASSERT_NE(nullptr, notification);
+    sptr<NotificationSortingMap> notificationMap = nullptr;
+    int32_t deleteReason = 1;
+    notificationSubscriberManager->NotifyCanceledInner(notification, notificationMap, deleteReason);
+    EXPECT_NE(notification, nullptr);
+}
 }  // namespace Notification
 }  // namespace OHOS

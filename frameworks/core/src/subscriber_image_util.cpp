@@ -42,6 +42,10 @@ void SubscriberImageUtil::ProcessPictureOption(
         return;
     }
     auto content = request->GetContent();
+    if (content == nullptr) {
+        ANS_LOGE("Invalid content.");
+        return;
+    }
     auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
         content->GetNotificationContent());
     if (liveViewContent == nullptr || liveViewContent->GetExtraInfo() == nullptr) {

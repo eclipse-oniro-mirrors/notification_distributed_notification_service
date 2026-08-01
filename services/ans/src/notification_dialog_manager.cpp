@@ -108,6 +108,10 @@ ErrCode NotificationDialogManager::RequestEnableNotificationDailog(
     const bool innerLake,
     const bool easyAbroad)
 {
+    if (bundle == nullptr) {
+        ANS_LOGE("Invalid bundle parameter.");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     if (!AddDialogInfoIfNotExist(bundle, callback)) {
         ANS_LOGE("Dialog already exists. bundle = %{public}s",
             bundle->GetBundleName().c_str());

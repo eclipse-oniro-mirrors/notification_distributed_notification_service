@@ -224,14 +224,20 @@ void SystemEventObserver::OnReceiveEventInner(const EventFwk::CommonEventData &d
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) == 0) {
         OnBundleAddEventInner(data);
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
-        AdvancedNotificationService::GetInstance()->HandleBundleInstall(bundleOption);
+        auto service = AdvancedNotificationService::GetInstance();
+        if (service != nullptr) {
+            service->HandleBundleInstall(bundleOption);
+        }
 #endif
         return;
     }
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) == 0) {
         OnBundleUpdateEventInner(data);
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
-        AdvancedNotificationService::GetInstance()->HandleBundleUpdate(bundleOption);
+        auto service = AdvancedNotificationService::GetInstance();
+        if (service != nullptr) {
+            service->HandleBundleUpdate(bundleOption);
+        }
 #endif
     }
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) == 0) {

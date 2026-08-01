@@ -3301,10 +3301,22 @@ void NotificationRequest::IncrementalUpdateLiveview(const sptr<NotificationReque
     }
     
     auto content = notificationContent_->GetNotificationContent();
+    if (content == nullptr) {
+        ANS_LOGE("Invalid content.");
+        return;
+    }
     auto newLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    if (newLiveViewContent == nullptr) {
+        ANS_LOGE("Invalid new live view content.");
+        return;
+    }
     auto newExtraInfo = newLiveViewContent->GetExtraInfo();
     auto oldContent = oldRequest->GetContent()->GetNotificationContent();
     auto oldLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(oldContent);
+    if (oldLiveViewContent == nullptr) {
+        ANS_LOGE("Invalid old live view content.");
+        return;
+    }
     auto oldExtraInfo = oldLiveViewContent->GetExtraInfo();
     if (newExtraInfo == nullptr) {
         newLiveViewContent->SetExtraInfo(oldExtraInfo);

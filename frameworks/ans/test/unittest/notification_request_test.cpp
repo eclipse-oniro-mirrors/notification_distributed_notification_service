@@ -2049,5 +2049,63 @@ HWTEST_F(NotificationRequestTest, ReadFromParcel_ContentTypeSync_0500, Level1)
     EXPECT_EQ(notificationRequest.GetNotificationType(), NotificationContent::Type::NONE);
     EXPECT_EQ(notificationRequest.GetContent(), nullptr);
 }
+
+/**
+ * @tc.name: IncrementalUpdateLiveview_NullContent_0001
+ * @tc.desc: Test IncrementalUpdateLiveview with null content
+ * @tc.type: FUNC
+ * @tc.require: issue4281
+ */
+HWTEST_F(NotificationRequestTest, IncrementalUpdateLiveview_NullContent_0001, Function | SmallTest | Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    sptr<NotificationRequest> oldRequest = new NotificationRequest(myNotificationId);
+    auto oldLiveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto oldContent = std::make_shared<NotificationContent>(oldLiveViewContent);
+    oldRequest->SetContent(oldContent);
+    notificationRequest.notificationContent_ = nullptr;
+    notificationRequest.notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+    notificationRequest.IncrementalUpdateLiveview(oldRequest);
+    EXPECT_EQ(notificationRequest.GetContent(), nullptr);
+}
+
+/**
+ * @tc.name: IncrementalUpdateLiveview_NullInnerContent_0001
+ * @tc.desc: Test IncrementalUpdateLiveview with null GetNotificationContent
+ * @tc.type: FUNC
+ * @tc.require: issue4281
+ */
+HWTEST_F(NotificationRequestTest, IncrementalUpdateLiveview_NullInnerContent_0001, Function | SmallTest | Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    sptr<NotificationRequest> oldRequest = new NotificationRequest(myNotificationId);
+    auto oldLiveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto oldContent = std::make_shared<NotificationContent>(oldLiveViewContent);
+    oldRequest->SetContent(oldContent);
+    auto emptyContent = std::make_shared<NotificationContent>();
+    notificationRequest.notificationContent_ = emptyContent;
+    notificationRequest.notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+    notificationRequest.IncrementalUpdateLiveview(oldRequest);
+    EXPECT_NE(notificationRequest.GetContent(), nullptr);
+}
+
+/**
+ * @tc.name: IncrementalUpdateLiveview_NullOldRequest_0001
+ * @tc.desc: Test IncrementalUpdateLiveview with null oldRequest
+ * @tc.type: FUNC
+ * @tc.require: issue4281
+ */
+HWTEST_F(NotificationRequestTest, IncrementalUpdateLiveview_NullOldRequest_0001, Function | SmallTest | Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    notificationRequest.SetContent(content);
+    notificationRequest.IncrementalUpdateLiveview(nullptr);
+    EXPECT_NE(notificationRequest.GetContent(), nullptr);
+}
 } // namespace Notification
 } // namespace OHOS

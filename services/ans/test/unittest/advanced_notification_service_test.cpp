@@ -58,6 +58,7 @@
 #endif
 #include "ans_dialog_host_client.h"
 #include "mock_badgequery_callback_stub.h"
+#include "nlohmann/json.hpp"
 #include "advanced_notification_inline.h"
 #include "int_wrapper.h"
 #include "notification_classification_mgr.h"
@@ -6959,6 +6960,159 @@ HWTEST_F(AdvancedNotificationServiceTest, ResetPushCallbackProxy_OnlyRemoveSpeci
     EXPECT_EQ(advancedNotificationService_->pushCallBacks_.count(
         NotificationConstant::SlotType::SERVICE_REMINDER), 1);
     GTEST_LOG_(INFO) << "ResetPushCallbackProxy_OnlyRemoveSpecifiedSlotType_001 test end";
+}
+
+/**
+ * @tc.number    : IsNeedPushCheck_LiveViewNullContent_0001
+ * @tc.name      : IsNeedPushCheck with IsCommonLiveView true but GetContent null
+ * @tc.desc      : Test IsNeedPushCheck returns false when content is nullptr for live view.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheck_LiveViewNullContent_0001, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsNeedPushCheck_LiveViewNullContent_0001 test start";
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    ASSERT_EQ(advancedNotificationService_->IsNeedPushCheck(request), false);
+    GTEST_LOG_(INFO) << "IsNeedPushCheck_LiveViewNullContent_0001 test end";
+}
+
+/**
+ * @tc.number    : IsNeedPushCheck_CheckRequestsMissing_0001
+ * @tc.name      : IsNeedPushCheck with pushCallBacks registered but checkRequests missing
+ * @tc.desc      : Test IsNeedPushCheck returns false when checkRequests_ does not have the slotType.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsNeedPushCheck_CheckRequestsMissing_0001, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "IsNeedPushCheck_CheckRequestsMissing_0001 test start";
+    auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
+    ASSERT_NE(pushCallbackProxy, nullptr);
+    sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
+    sptr<IPushCallBack> pushCallBack = iface_cast<IPushCallBack>(pushCallback);
+
+    advancedNotificationService_->pushCallBacks_.clear();
+    advancedNotificationService_->checkRequests_.clear();
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CUSTOM;
+    advancedNotificationService_->pushCallBacks_.insert_or_assign(slotType, pushCallBack);
+
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(slotType);
+    ASSERT_EQ(advancedNotificationService_->IsNeedPushCheck(request), false);
+    advancedNotificationService_->pushCallBacks_.clear();
+    advancedNotificationService_->checkRequests_.clear();
+    GTEST_LOG_(INFO) << "IsNeedPushCheck_CheckRequestsMissing_0001 test end";
+}
+
+/**
+ * @tc.number    : PushCheck_NullCheckRequest_0001
+ * @tc.name      : PushCheck with pushCallBacks registered but checkRequests missing
+ * @tc.desc      : Test PushCheck returns ERR_ANS_INNER_PUSH_CHECK_UNREGISTERED when checkRequest is null.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, PushCheck_NullCheckRequest_0001, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "PushCheck_NullCheckRequest_0001 test start";
+    auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
+    ASSERT_NE(pushCallbackProxy, nullptr);
+    sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
+    sptr<IPushCallBack> pushCallBack = iface_cast<IPushCallBack>(pushCallback);
+
+    advancedNotificationService_->pushCallBacks_.clear();
+    advancedNotificationService_->checkRequests_.clear();
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CUSTOM;
+    advancedNotificationService_->pushCallBacks_.insert_or_assign(slotType, pushCallBack);
+    advancedNotificationService_->checkRequests_.insert_or_assign(slotType, nullptr);
+
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(slotType);
+    ASSERT_EQ(advancedNotificationService_->PushCheck(request).GetErrCode(),
+        (int)ERR_ANS_INNER_PUSH_CHECK_UNREGISTERED);
+    advancedNotificationService_->pushCallBacks_.clear();
+    advancedNotificationService_->checkRequests_.clear();
+    GTEST_LOG_(INFO) << "PushCheck_NullCheckRequest_0001 test end";
+}
+
+/**
+ * @tc.number    : RegisterPushCallback_CheckRequestsMissing_0001
+ * @tc.name      : RegisterPushCallback with pushCallBacks registered but checkRequests missing
+ * @tc.desc      : Test RegisterPushCallback returns ERR_ANS_INNER_TASK_ERR when checkRequests_ is inconsistent.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, RegisterPushCallback_CheckRequestsMissing_0001, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "RegisterPushCallback_CheckRequestsMissing_0001 test start";
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+
+    auto pushCallbackProxy = new (std::nothrow)MockPushCallBackStub();
+    ASSERT_NE(pushCallbackProxy, nullptr);
+    sptr<IRemoteObject> pushCallback = pushCallbackProxy->AsObject();
+    sptr<NotificationCheckRequest> checkRequest = new (std::nothrow)NotificationCheckRequest();
+    ASSERT_NE(checkRequest, nullptr);
+    checkRequest->SetSlotType(NotificationConstant::SlotType::CUSTOM);
+    checkRequest->SetContentType(NotificationContent::Type::BASIC_TEXT);
+
+    advancedNotificationService_->pushCallBacks_.clear();
+    advancedNotificationService_->checkRequests_.clear();
+    sptr<IPushCallBack> pushCallBack = iface_cast<IPushCallBack>(pushCallback);
+    advancedNotificationService_->pushCallBacks_.insert_or_assign(checkRequest->GetSlotType(), pushCallBack);
+
+    ASSERT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest),
+        (int)ERR_ANS_INNER_TASK_ERR);
+    advancedNotificationService_->pushCallBacks_.clear();
+    advancedNotificationService_->checkRequests_.clear();
+    GTEST_LOG_(INFO) << "RegisterPushCallback_CheckRequestsMissing_0001 test end";
+}
+
+/**
+ * @tc.number    : FillExtraInfoToJson_NullContent_0001
+ * @tc.name      : FillExtraInfoToJson with null content
+ * @tc.desc      : Test FillExtraInfoToJson returns early when request content is nullptr.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, FillExtraInfoToJson_NullContent_0001, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "FillExtraInfoToJson_NullContent_0001 test start";
+    sptr<NotificationRequest> request = new NotificationRequest();
+    sptr<NotificationCheckRequest> checkRequest = new (std::nothrow)NotificationCheckRequest();
+    nlohmann::json jsonObject;
+    advancedNotificationService_->FillExtraInfoToJson(request, checkRequest, jsonObject);
+    ASSERT_TRUE(jsonObject.empty());
+    GTEST_LOG_(INFO) << "FillExtraInfoToJson_NullContent_0001 test end";
+}
+
+/**
+ * @tc.number    : FillExtraInfoToJson_NullInnerContent_0001
+ * @tc.name      : FillExtraInfoToJson with content but null inner content
+ * @tc.desc      : Test FillExtraInfoToJson returns early when inner content is nullptr.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, FillExtraInfoToJson_NullInnerContent_0001, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "FillExtraInfoToJson_NullInnerContent_0001 test start";
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    sptr<NotificationCheckRequest> checkRequest = new (std::nothrow)NotificationCheckRequest();
+    nlohmann::json jsonObject;
+    advancedNotificationService_->FillExtraInfoToJson(request, checkRequest, jsonObject);
+    EXPECT_TRUE(jsonObject.empty());
+    GTEST_LOG_(INFO) << "FillExtraInfoToJson_NullInnerContent_0001 test end";
+}
+
+/**
+ * @tc.number    : FillNotificationRecord_NullBundleOption_0001
+ * @tc.name      : FillNotificationRecord with null bundleOption
+ * @tc.desc      : Test FillNotificationRecord does not crash when bundleOption is nullptr.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, FillNotificationRecord_NullBundleOption_0001, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "FillNotificationRecord_NullBundleOption_0001 test start";
+    AdvancedNotificationService::NotificationRequestDb requestDb;
+    requestDb.request = new NotificationRequest();
+    requestDb.bundleOption = nullptr;
+    auto record = std::make_shared<NotificationRecord>();
+    ASSERT_NE(record, nullptr);
+    auto ansStatus = advancedNotificationService_->FillNotificationRecord(requestDb, record);
+    ASSERT_TRUE(ansStatus.Ok());
+    GTEST_LOG_(INFO) << "FillNotificationRecord_NullBundleOption_0001 test end";
 }
 }  // namespace Notification
 }  // namespace OHOS

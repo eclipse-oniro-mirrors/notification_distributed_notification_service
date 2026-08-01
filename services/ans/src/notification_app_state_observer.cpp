@@ -24,6 +24,10 @@ void NotificationAppStateObserver::OnProcessDied(const AppExecFwk::ProcessData &
     ANS_LOGD("appObserver OnProcessDied, bundleName=%{public}s, pid=%{public}d, processName=%{public}s.",
         (processData.bundleName).c_str(), processData.pid, (processData.processName).c_str());
     auto notificationService = AdvancedNotificationService::GetInstance();
+    if (notificationService == nullptr) {
+        ANS_LOGE("AdvancedNotificationService instance is null.");
+        return;
+    }
     notificationService->RemoveCommonLiveViewNotification(processData.pid);
 }
 

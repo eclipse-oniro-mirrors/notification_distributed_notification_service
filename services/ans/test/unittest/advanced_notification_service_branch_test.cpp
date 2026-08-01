@@ -3324,5 +3324,44 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287072, Function | SmallTest | Level1)
     auto ret = advancedNotificationService_->SetGeofenceTriggerTimer(record);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.number    : CloseAlert_NullRecord_0001
+ * @tc.name      : CloseAlert with null record
+ * @tc.desc      : Test CloseAlert returns early when record is nullptr.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_CloseAlert_NullRecord, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->CloseAlert(nullptr);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.number    : CloseAlert_NullNotification_0001
+ * @tc.name      : CloseAlert with null notification member
+ * @tc.desc      : Test CloseAlert returns early when record->notification is nullptr.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_CloseAlert_NullNotification, Function | SmallTest | Level1)
+{
+    auto record = std::make_shared<NotificationRecord>();
+    record->notification = nullptr;
+    record->request = new NotificationRequest();
+    advancedNotificationService_->CloseAlert(record);
+    EXPECT_EQ(record->notification, nullptr);
+}
+
+/**
+ * @tc.number    : CloseAlert_NullRequest_0001
+ * @tc.name      : CloseAlert with null request member
+ * @tc.desc      : Test CloseAlert returns early when record->request is nullptr.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_CloseAlert_NullRequest, Function | SmallTest | Level1)
+{
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = nullptr;
+    record->notification = new Notification(new NotificationRequest());
+    advancedNotificationService_->CloseAlert(record);
+    EXPECT_EQ(record->request, nullptr);
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -259,6 +259,10 @@ napi_value Common::SetObjectUint32Property(const napi_env &env, napi_value& obje
 napi_value Common::SetResourceObject(napi_env env, const std::shared_ptr<ResourceManager::Resource> &resource,
     napi_value &object)
 {
+    if (resource == nullptr) {
+        ANS_LOGE("null resource");
+        return NapiGetBoolean(env, false);
+    }
     if (SetObjectStringProperty(env, object, "bundleName", resource->bundleName) == nullptr) {
         ANS_LOGE("Failed to set property bundleName");
         return NapiGetBoolean(env, false);

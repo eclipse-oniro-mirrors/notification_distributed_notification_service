@@ -59,8 +59,16 @@ void AdvancedNotificationServiceAbility::OnStart()
     }
     g_saStartTime = GetCurrentTime();
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
+    if (timer == nullptr) {
+        ANS_LOGE("Failed to get TimeServiceClient.");
+        return;
+    }
     g_saStartBootTime = timer->GetBootTimeMs();
     service_ = AdvancedNotificationService::GetInstance();
+    if (service_ == nullptr) {
+        ANS_LOGE("Failed to create AdvancedNotificationService instance.");
+        return;
+    }
     service_->CreateDialogManager();
     
     if (!Publish(service_)) {

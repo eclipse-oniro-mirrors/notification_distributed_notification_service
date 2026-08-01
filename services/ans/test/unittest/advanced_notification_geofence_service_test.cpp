@@ -826,5 +826,137 @@ HWTEST_F(AnsGeofenceServiceTest, GeneratePublishNotificationParameter_00001, Fun
     EXPECT_EQ(parameter.request, request);
     EXPECT_EQ(parameter.bundleOption, bundleOption);
 }
+
+/**
+ * @tc.number    : UpdateTriggerRecord_NullOldRecord_00001
+ * @tc.name      : UpdateTriggerRecord with null oldRecord
+ * @tc.desc      : Test UpdateTriggerRecord returns early when oldRecord is nullptr.
+ */
+HWTEST_F(AnsGeofenceServiceTest, UpdateTriggerRecord_NullOldRecord_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+    auto newRecord = std::make_shared<NotificationRecord>();
+    advancedNotificationService_->UpdateTriggerRecord(nullptr, newRecord);
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : UpdateTriggerRecord_NullEntries_00001
+ * @tc.name      : UpdateTriggerRecord with null entries in list
+ * @tc.desc      : Test UpdateTriggerRecord skips null entries without crash.
+ */
+HWTEST_F(AnsGeofenceServiceTest, UpdateTriggerRecord_NullEntries_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullptr);
+    auto nullMemberRecord = std::make_shared<NotificationRecord>();
+    nullMemberRecord->request = nullptr;
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullMemberRecord);
+    auto newRecord = std::make_shared<NotificationRecord>();
+    newRecord->request = new NotificationRequest();
+    advancedNotificationService_->triggerNotificationList_.push_back(newRecord);
+    auto oldRecord = std::make_shared<NotificationRecord>();
+    oldRecord->request = new NotificationRequest();
+    advancedNotificationService_->UpdateTriggerRecord(oldRecord, newRecord);
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 3);
+}
+
+/**
+ * @tc.number    : DeleteAllByUserStopped_NullEntries_00001
+ * @tc.name      : DeleteAllByUserStoppedFromTriggerNotificationList with null entries
+ * @tc.desc      : Test DeleteAllByUserStoppedFromTriggerNotificationList skips null entries.
+ */
+HWTEST_F(AnsGeofenceServiceTest, DeleteAllByUserStopped_NullEntries_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullptr);
+    auto nullNotifRecord = std::make_shared<NotificationRecord>();
+    nullNotifRecord->notification = nullptr;
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullNotifRecord);
+    advancedNotificationService_->DeleteAllByUserStoppedFromTriggerNotificationList("testKey", 0);
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 2);
+}
+
+/**
+ * @tc.number    : ExecuteRemoveNotification_NullEntries_00001
+ * @tc.name      : ExecuteRemoveNotificationFromTriggerNotificationList with null entries
+ * @tc.desc      : Test ExecuteRemoveNotificationFromTriggerNotificationList skips null entries.
+ */
+HWTEST_F(AnsGeofenceServiceTest, ExecuteRemoveNotification_NullEntries_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullptr);
+    auto nullMemberRecord = std::make_shared<NotificationRecord>();
+    nullMemberRecord->bundleOption = nullptr;
+    nullMemberRecord->notification = nullptr;
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullMemberRecord);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", TEST_VALID_ID);
+    advancedNotificationService_->ExecuteRemoveNotificationFromTriggerNotificationList(bundle, 1, "label");
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 2);
+}
+
+/**
+ * @tc.number    : RemoveGroupByBundle_NullEntries_00001
+ * @tc.name      : RemoveGroupByBundleFromTriggerNotificationList with null entries
+ * @tc.desc      : Test RemoveGroupByBundleFromTriggerNotificationList skips null entries.
+ */
+HWTEST_F(AnsGeofenceServiceTest, RemoveGroupByBundle_NullEntries_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullptr);
+    auto nullMemberRecord = std::make_shared<NotificationRecord>();
+    nullMemberRecord->bundleOption = nullptr;
+    nullMemberRecord->request = nullptr;
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullMemberRecord);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", TEST_VALID_ID);
+    advancedNotificationService_->RemoveGroupByBundleFromTriggerNotificationList(bundle, "testGroup");
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 2);
+}
+
+/**
+ * @tc.number    : ExecuteCancelGroupCancel_NullEntries_00001
+ * @tc.name      : ExecuteCancelGroupCancelFromTriggerNotificationList with null entries
+ * @tc.desc      : Test ExecuteCancelGroupCancelFromTriggerNotificationList skips null entries.
+ */
+HWTEST_F(AnsGeofenceServiceTest, ExecuteCancelGroupCancel_NullEntries_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullptr);
+    auto nullMemberRecord = std::make_shared<NotificationRecord>();
+    nullMemberRecord->bundleOption = nullptr;
+    nullMemberRecord->notification = nullptr;
+    nullMemberRecord->request = nullptr;
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullMemberRecord);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundle", TEST_VALID_ID);
+    advancedNotificationService_->ExecuteCancelGroupCancelFromTriggerNotificationList(bundleOption, "testGroup");
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 2);
+}
+
+/**
+ * @tc.number    : RemoveFromTriggerNotificationList_OptionNullEntries_00001
+ * @tc.name      : RemoveFromTriggerNotificationList with bundleOption and null entries
+ * @tc.desc      : Test RemoveFromTriggerNotificationList(bundleOption, key) skips null entries.
+ */
+HWTEST_F(AnsGeofenceServiceTest, RemoveFromTriggerNotificationList_OptionNullEntries_00001,
+    Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullptr);
+    auto nullMemberRecord = std::make_shared<NotificationRecord>();
+    nullMemberRecord->bundleOption = nullptr;
+    nullMemberRecord->notification = nullptr;
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullMemberRecord);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundle", TEST_VALID_ID);
+    NotificationKey notificationKey{1, "testLabel"};
+    advancedNotificationService_->RemoveFromTriggerNotificationList(bundleOption, notificationKey);
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 2);
+}
 }  // namespace Notification
 }  // namespace OHOS

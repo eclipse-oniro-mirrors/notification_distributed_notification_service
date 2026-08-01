@@ -1069,6 +1069,11 @@ AnsStatus AdvancedNotificationService::UpdateRecordByOwner(
         record->request->SetContent(content);
     } else {
         record->request->SetTemplate(downloadTemplate);
+        if (downloadTemplate == nullptr) {
+            ANS_LOGE("downloadTemplate is null.");
+            StartFinishTimerForUpdate(record, process);
+            return AnsStatus();
+        }
         auto data = downloadTemplate->GetTemplateData();
         if (data != nullptr && data->HasParam(PROGRESS_VALUE)) {
             process = data->GetIntParam(PROGRESS_VALUE, 0);

@@ -4748,5 +4748,37 @@ HWTEST_F(NotificationPreferencesTest, BuildCloneSlotInfo_WithSlots_00001,
     EXPECT_EQ(slots.size(), 1);
     EXPECT_NE(slots[0], nullptr);
 }
+
+/**
+ * @tc.number    : DelCloneProfileInfo_NullInfo_0001
+ * @tc.name      : DelCloneProfileInfo with null info
+ * @tc.desc      : Test DelCloneProfileInfo returns false when info is nullptr.
+ */
+HWTEST_F(NotificationPreferencesTest, DelCloneProfileInfo_NullInfo_0001, Function | SmallTest | Level1)
+{
+    auto prefs = NotificationPreferences::GetInstance();
+    ASSERT_NE(prefs, nullptr);
+    bool result = prefs->DelCloneProfileInfo(0, nullptr);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number    : SetSmartReminderEnabled_NullDB_0001
+ * @tc.name      : SetSmartReminderEnabled with null preferncesDB_
+ * @tc.desc      : Test SetSmartReminderEnabled returns error when preferncesDB_ is nullptr.
+ */
+HWTEST_F(NotificationPreferencesTest, SetSmartReminderEnabled_NullDB_0001, Function | SmallTest | Level1)
+{
+    auto prefs = NotificationPreferences::GetInstance();
+    ASSERT_NE(prefs, nullptr);
+    auto originalDB = prefs->preferncesDB_;
+    prefs->preferncesDB_ = nullptr;
+    auto result = prefs->SetSmartReminderEnabled("phone", true);
+    EXPECT_EQ(result, (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    bool enabled = false;
+    result = prefs->IsSmartReminderEnabled("phone", enabled);
+    EXPECT_EQ(result, (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    prefs->preferncesDB_ = originalDB;
+}
 }  // namespace Notification
 }  // namespace OHOS
