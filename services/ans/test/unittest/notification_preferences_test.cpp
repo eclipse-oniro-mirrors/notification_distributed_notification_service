@@ -4780,5 +4780,22 @@ HWTEST_F(NotificationPreferencesTest, SetSmartReminderEnabled_NullDB_0001, Funct
     EXPECT_EQ(result, (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
     prefs->preferncesDB_ = originalDB;
 }
+
+/**
+ * @tc.number    : RemoveNotificationForBundle_NullDB_0001
+ * @tc.name      : RemoveNotificationForBundle with null preferncesDB_
+ * @tc.desc      : Test RemoveNotificationForBundle returns DB error when preferncesDB_ is nullptr.
+ */
+HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_NullDB_0001, Function | SmallTest | Level1)
+{
+    auto prefs = NotificationPreferences::GetInstance();
+    ASSERT_NE(prefs, nullptr);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundle", 100);
+    auto originalDB = prefs->preferncesDB_;
+    prefs->preferncesDB_ = nullptr;
+    auto result = prefs->RemoveNotificationForBundle(bundleOption);
+    EXPECT_EQ(result, (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    prefs->preferncesDB_ = originalDB;
+}
 }  // namespace Notification
 }  // namespace OHOS

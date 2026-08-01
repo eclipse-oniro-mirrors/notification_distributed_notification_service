@@ -432,6 +432,10 @@ ErrCode NotificationPreferences::RemoveNotificationForBundle(const sptr<Notifica
         return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("preferncesDB_ is null.");
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
 
     ErrCode result = ERR_OK;
@@ -2158,6 +2162,10 @@ ErrCode NotificationPreferences::GetRingtoneInfoByBundle(const sptr<Notification
         if (savedRingtoneInfo == nullptr) {
             ANS_LOGE("Failed to create NotificationRingtoneInfo.");
             return ERR_ANS_INNER_NO_MEMORY;
+        }
+        if (preferncesDB_ == nullptr) {
+            ANS_LOGE("preferncesDB_ is null.");
+            return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
         }
         if (!preferncesDB_->GetRingtoneInfoByBundle(bundleInfo, savedRingtoneInfo)) {
             savedRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
