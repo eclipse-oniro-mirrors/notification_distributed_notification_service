@@ -2185,8 +2185,6 @@ private:
     std::shared_ptr<NotificationRecord> GetFromNotificationList(const std::string &key);
     std::shared_ptr<NotificationRecord> GetFromNotificationListByAtomicServiceKey(
         const sptr<NotificationRequest> &request);
-    std::shared_ptr<NotificationRecord> GetSharedNotificationRecordFromList(
-        const sptr<NotificationRequest> &request);
     std::shared_ptr<NotificationRecord> GetFromNotificationList(const int32_t ownerUid, const int32_t notificationId);
     std::shared_ptr<NotificationRecord> GetFromDelayedNotificationList(
         const int32_t ownerUid, const int32_t notificationId);
