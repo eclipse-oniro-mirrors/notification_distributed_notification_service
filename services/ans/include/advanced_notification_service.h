@@ -2038,6 +2038,8 @@ public:
      */
     void RemoveCommonLiveViewNotification(const int32_t pid);
     void SnoozeNotificationConsumed(const std::shared_ptr<NotificationRecord> &record);
+    void PrepareSnoozeDeviceFlags(const sptr<NotificationRequest> &request,
+        const std::shared_ptr<NotificationFlags> &currentFlags);
     bool IsCanRecoverSnooze(const std::shared_ptr<NotificationRecord> &record);
     void DeleteSnoozeNotificationFromDB(const std::shared_ptr<NotificationRecord> &record);
     bool SetEncryptToDB(const NotificationRequestDb &requestDb);
