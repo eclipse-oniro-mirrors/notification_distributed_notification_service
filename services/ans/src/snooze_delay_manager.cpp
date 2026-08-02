@@ -146,6 +146,21 @@ bool AdvancedNotificationService::SetSnoozeDelayTimeToDB(const int64_t delayTime
     return true;
 }
 
+void AdvancedNotificationService::PrepareSnoozeDeviceFlags(const sptr<NotificationRequest> &request,
+    const std::shared_ptr<NotificationFlags> &currentFlags)
+{
+    auto deviceFlags = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
+    if (auto src = request->GetDeviceFlags()) {
+        for (const auto &[type, flag] : *src) {
+            if (flag != nullptr) {
+                deviceFlags->emplace(type, std::make_shared<NotificationFlags>(flag->GetReminderFlags()));
+            }
+        }
+    }
+    (*deviceFlags)[NotificationConstant::CURRENT_DEVICE_TYPE] = currentFlags;
+    request->SetDeviceFlags(deviceFlags);
+}
+
 void AdvancedNotificationService::SnoozeNotificationConsumed(const std::shared_ptr<NotificationRecord> &record)
 {
     if (record == nullptr || record->request == nullptr) {
@@ -160,11 +175,8 @@ void AdvancedNotificationService::SnoozeNotificationConsumed(const std::shared_p
     ANS_COND_DO_ERR(recordNew->request == nullptr, return, "NotificationRequest malloc error.");
     std::shared_ptr<NotificationFlags> flags = record->request->GetFlags() == nullptr ?
         nullptr : std::make_shared<NotificationFlags>(record->request->GetFlags()->GetReminderFlags());
-    auto notificationFlagsOfDevices =
-        std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
     recordNew->request->SetFlags(flags);
-    (*notificationFlagsOfDevices)[NotificationConstant::CURRENT_DEVICE_TYPE] = flags;
-    recordNew->request->SetDeviceFlags(notificationFlagsOfDevices);
+    PrepareSnoozeDeviceFlags(recordNew->request, flags);
     recordNew->request->SetBadgeNumber(0);
     recordNew->notification = new (std::nothrow) Notification(recordNew->request);
     ANS_COND_DO_ERR(recordNew->notification == nullptr, return, "Notification malloc error.");
