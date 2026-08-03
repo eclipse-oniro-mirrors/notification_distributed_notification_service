@@ -23,6 +23,7 @@
 #include "ans_manager_proxy.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
+#include "mock_ans_rdb_mgr_builder.h"
 #include "notification_helper.h"
 #include "remote_native_token.h"
 #include "system_ability_definition.h"
@@ -66,6 +67,7 @@ void AnsInnerKitsModuleSlotTest::TearDownTestCase()
     if (service_ != nullptr) {
         service_->SelfClean();
     }
+    OHOS::Notification::Domain::DestroyTestRdb();
 }
 
 void AnsInnerKitsModuleSlotTest::SetUp()

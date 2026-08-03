@@ -22,7 +22,7 @@
 #include "notification_rdb_hook.h"
 
 namespace OHOS::Notification::Domain {
-std::shared_ptr<Infra::NotificationRdbMgr> GetAnsNotificationRdbMgrInstance()
+std::shared_ptr<Infra::NotificationRdbMgr> __attribute__((weak)) GetAnsNotificationRdbMgrInstance()
 {
     static Infra::NotificationRdbConfig config;
     static Infra::NtfRdbHook hooks = {

@@ -28,6 +28,11 @@ ohos_moduletest("ans_module_test") {
     "${services_path}/test/moduletest/mock/include",
     "${services_path}/ans/include/utils",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
+    "${frameworks_path}/test/moduletest/mock/include",
   ]
 
   sources = [
@@ -37,6 +42,7 @@ ohos_moduletest("ans_module_test") {
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
+    "${frameworks_path}/test/moduletest/mock/mock_ans_rdb_mgr_builder.cpp",
     "mock/mock_bundle_manager.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_event_handler.cpp",
