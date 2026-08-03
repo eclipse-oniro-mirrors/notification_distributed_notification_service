@@ -77,6 +77,7 @@ void AdvancedNotificationAiExtensionManager::BuildCommandForUpdate(
 
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
     std::string priorityCmd = NotificationAiExtensionWrapper::UPDATE_PRIORITY_TYPE;
+    request->SetInnerPriorityNotificationType(NotificationConstant::PriorityNotificationType::OTHER);
     AdvancedNotificationPriorityHelper::GetInstance()->BuildPriorityCommand(
         priorityCmd, request, command);
     if (command.contains(NotificationAiExtensionWrapper::UPDATE_PRIORITY_TYPE)) {
